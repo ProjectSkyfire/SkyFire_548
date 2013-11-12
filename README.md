@@ -23,7 +23,7 @@ For further information on the SkyFire project, please visit our project website
 
 ## Status
 
-[Build status] (https://travis-ci.org/ProjectSkyfire/SkyFireEMU/builds)
+[Build status](https://travis-ci.org/ProjectSkyfire/SkyFireEMU/builds)
 
 ## Requirements
 
@@ -73,6 +73,6 @@ Read file [THANKS](https://github.com/ProjectSkyfire/SkyFireEMU/tree/master/doc/
 
 Forum [http://www.projectskyfire.org](http://www.projectskyfire.org)
 
-Database [http://www.projectskyfire.org/index.php?/files/] (http://www.projectskyfire.org/index.php?/files/)
+Database [http://www.projectskyfire.org/index.php?/files/](http://www.projectskyfire.org/index.php?/files/)
 
 Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
