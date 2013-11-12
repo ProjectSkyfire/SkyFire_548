@@ -1,3 +1,4 @@
+# Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
 # Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
@@ -14,6 +15,12 @@ file(GLOB_RECURSE sources_authentication Authentication/*.cpp Authentication/*.h
 file(GLOB_RECURSE sources_realms Realms/*.cpp Realms/*.h)
 file(GLOB_RECURSE sources_server Server/*.cpp Server/*.h)
 file(GLOB sources_localdir *.cpp *.h)
+
+source_group(CMake FILES CMakeLists.txt)
+source_group(Authentication FILES ${sources_authentication})
+source_group(Realms FILES ${sources_realms})
+source_group(Server FILES ${sources_server})
+source_group(localdir FILES ${sources_localdir})
 
 if (USE_COREPCH)
   set(authserver_PCH_HDR PrecompiledHeaders/authPCH.h)

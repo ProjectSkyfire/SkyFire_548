@@ -1,3 +1,4 @@
+# Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
 # Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
@@ -14,6 +15,36 @@ if (USE_SCRIPTPCH)
   set(scripts_STAT_PCH_HDR PrecompiledHeaders/ScriptPCH.h)
   set(scripts_STAT_PCH_SRC PrecompiledHeaders/ScriptPCH.cpp)
 endif ()
+
+file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
+file(GLOB_RECURSE sources_EasternKingdoms EasternKingdoms/*.cpp EasternKingdoms/*.h)
+file(GLOB_RECURSE sources_Kalimdor Kalimdor/*.cpp Kalimdor/*.h)
+file(GLOB_RECURSE sources_Outland Outland/*.cpp Outland/*.h)
+file(GLOB_RECURSE sources_Northrend Northrend/*.cpp Northrend/*.h)
+file(GLOB_RECURSE sources_Maelstrom Maelstrom/*.cpp Maelstrom/*.h)
+file(GLOB_RECURSE sources_Custom Custom/*.cpp Custom/*.h)
+file(GLOB_RECURSE sources_Commands Commands/*.cpp Commands/*.h)
+file(GLOB_RECURSE sources_Examples Examples/*.cpp Examples/*.h)
+file(GLOB_RECURSE sources_Events Events/*.cpp Events/*.h)
+file(GLOB_RECURSE sources_Pet Pet/*.cpp Pet/*.h)
+file(GLOB_RECURSE sources_OutdoorPvP OutdoorPvP/*.cpp OutdoorPvP/*.h)
+file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
+file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
+
+source_group(CMake FILES CMakeLists.txt)
+source_group(PrecompiledHeaders FILES ${sources_PrecompiledHeaders})
+source_group(EasternKingdoms FILES ${sources_EasternKingdoms})
+source_group(Kalimdor FILES ${sources_Kalimdor})
+source_group(Outland FILES ${sources_Outland})
+source_group(Northrend FILES ${sources_Northrend})
+source_group(Maelstrom FILES ${sources_Maelstrom})
+source_group(OutdoorPvP FILES ${sources_OutdoorPvP})
+source_group(Commands FILES ${sources_Commands})
+source_group(Examples FILES ${sources_Examples})
+source_group(Events FILES ${sources_Events})
+source_group(Pet FILES ${sources_Pet})
+source_group(Spells FILES ${sources_Spells})
+source_group(World FILES ${sources_World})
 
 message(STATUS "SCRIPT PREPARATIONS")
 include(Spells/CMakeLists.txt)
