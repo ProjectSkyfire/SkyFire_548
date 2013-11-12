@@ -95,7 +95,7 @@ float CONF_float_to_int16_limit = 2048.0f;   // Max accuracy = val/65536
 float CONF_flat_height_delta_limit = 0.005f; // If max - min less this value - surface is flat
 float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - liquid surface is flat
 
-uint32 CONF_TargetBuild = 17345;              // 5.4.0 17345
+uint32 CONF_TargetBuild = 17538;              // 5.4.1 17538
 
 // List MPQ for extract maps from
 char const* CONF_mpq_list[]=
@@ -114,7 +114,7 @@ char const* CONF_mpq_list[]=
     "wow-update-base-17266.MPQ",
     "wow-update-base-17325.MPQ",
     "wow-update-base-17345.MPQ",
-	"wow-update-base-17538.MPQ",
+    "wow-update-base-17538.MPQ",
     "world.MPQ",
     "misc.MPQ",
     "expansion1.MPQ",
