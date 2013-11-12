@@ -1,19 +1,21 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2013 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2013 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "PathCommon.h"
@@ -202,10 +204,7 @@ namespace MMAP
         minX = INT_MIN;
         minY = INT_MIN;
 
-        float bmin[3] = { 0, 0, 0 };
-        float bmax[3] = { 0, 0, 0 };
-        float lmin[3] = { 0, 0, 0 };
-        float lmax[3] = { 0, 0, 0 };
+        float bmin[3], bmax[3], lmin[3], lmax[3];
         MeshData meshData;
 
         // make sure we process maps which don't have tiles
@@ -246,20 +245,11 @@ namespace MMAP
         printf("Building mesh from file\n");
         int tileX, tileY, mapId;
         if (fread(&mapId, sizeof(int), 1, file) != 1)
-        {
-            fclose(file);
             return;
-        }
         if (fread(&tileX, sizeof(int), 1, file) != 1)
-        {
-            fclose(file);
             return;
-        }
         if (fread(&tileY, sizeof(int), 1, file) != 1)
-        {
-            fclose(file);
             return;
-        }
 
         dtNavMesh* navMesh = NULL;
         buildNavMesh(mapId, navMesh);
@@ -272,45 +262,25 @@ namespace MMAP
 
         uint32 verticesCount, indicesCount;
         if (fread(&verticesCount, sizeof(uint32), 1, file) != 1)
-        {
-            fclose(file);
             return;
-        }
-
         if (fread(&indicesCount, sizeof(uint32), 1, file) != 1)
-        {
-            fclose(file);
             return;
-        }
 
         float* verts = new float[verticesCount];
         int* inds = new int[indicesCount];
 
         if (fread(verts, sizeof(float), verticesCount, file) != verticesCount)
-        {
-            fclose(file);
-            delete[] verts;
-            delete[] inds;
             return;
-        }
-
         if (fread(inds, sizeof(int), indicesCount, file) != indicesCount)
-        {
-            fclose(file);
-            delete[] verts;
-            delete[] inds;
             return;
-        }
 
         MeshData data;
 
         for (uint32 i = 0; i < verticesCount; ++i)
             data.solidVerts.append(verts[i]);
-        delete[] verts;
 
         for (uint32 i = 0; i < indicesCount; ++i)
             data.solidTris.append(inds[i]);
-        delete[] inds;
 
         TerrainBuilder::cleanVertices(data.solidVerts, data.solidTris);
         // get bounds of current tile
@@ -571,7 +541,19 @@ namespace MMAP
 
         // merge per tile poly and detail meshes
         rcPolyMesh** pmmerge = new rcPolyMesh*[TILES_PER_MAP * TILES_PER_MAP];
+        if (!pmmerge)
+        {
+            printf("%s alloc pmmerge FIALED!\n", tileString);
+            return;
+        }
+
         rcPolyMeshDetail** dmmerge = new rcPolyMeshDetail*[TILES_PER_MAP * TILES_PER_MAP];
+        if (!dmmerge)
+        {
+            printf("%s alloc dmmerge FIALED!\n", tileString);
+            return;
+        }
+
         int nmerge = 0;
         // build all tiles
         for (int y = 0; y < TILES_PER_MAP; ++y)
@@ -666,9 +648,12 @@ namespace MMAP
                 rcFreeContourSet(tile.cset);
                 tile.cset = NULL;
 
-                pmmerge[nmerge] = tile.pmesh;
-                dmmerge[nmerge] = tile.dmesh;
-                nmerge++;
+                if (tile.pmesh)
+                {
+                    pmmerge[nmerge] = tile.pmesh;
+                    dmmerge[nmerge] = tile.dmesh;
+                    nmerge++;
+                }
             }
         }
 
@@ -676,9 +661,6 @@ namespace MMAP
         if (!iv.polyMesh)
         {
             printf("%s alloc iv.polyMesh FIALED!\n", tileString);
-            delete[] pmmerge;
-            delete[] dmmerge;
-            delete[] tiles;
             return;
         }
         rcMergePolyMeshes(m_rcContext, pmmerge, nmerge, *iv.polyMesh);
@@ -687,9 +669,6 @@ namespace MMAP
         if (!iv.polyMeshDetail)
         {
             printf("%s alloc m_dmesh FIALED!\n", tileString);
-            delete[] pmmerge;
-            delete[] dmmerge;
-            delete[] tiles;
             return;
         }
         rcMergePolyMeshDetails(m_rcContext, dmmerge, nmerge, *iv.polyMeshDetail);
@@ -697,6 +676,7 @@ namespace MMAP
         // free things up
         delete[] pmmerge;
         delete[] dmmerge;
+
         delete[] tiles;
 
         // set polygons as walkable
@@ -738,8 +718,8 @@ namespace MMAP
         params.cs = config.cs;
         params.ch = config.ch;
         params.tileLayer = 0;
-        params.buildBvTree = true;
-
+        params.buildBvTree = true; 
+ 
         // will hold final navmesh
         unsigned char* navData = NULL;
         int navDataSize = 0;
@@ -870,10 +850,11 @@ namespace MMAP
         if (m_skipContinents)
             switch (mapID)
             {
-                case 0:
-                case 1:
-                case 530:
-                case 571:
+                case 0:    // Eastern Kingdoms
+                case 1:    // Kalimdor
+                case 530:  // Outland
+                case 571:  // Northrend
+                case 870:  // Pandaria
                     return true;
                 default:
                     break;
@@ -892,6 +873,13 @@ namespace MMAP
                 case 597:   // CraigTest.wdt
                 case 605:   // development_nonweighted.wdt
                 case 606:   // QA_DVD.wdt
+                case 627:   // unused.wdt
+                case 930:   // (UNUSED) Scenario: Alcaz Island
+                case 995:   // The Depths [UNUSED]
+                case 1014:  // (UNUSED) Peak of Serenity Scenario
+                case 1028:  // (UNUSED) Scenario: Mogu Ruins
+                case 1029:  // (UNUSED) Scenario: Mogu Crypt
+                case 1049:  // (UNUSED) Scenario: Black Ox Temple
                     return true;
                 default:
                     if (isTransportMap(mapID))
@@ -903,12 +891,21 @@ namespace MMAP
             switch (mapID)
             {
                 case 30:    // AV
-                case 37:    // ?
+                case 37:    // AC
                 case 489:   // WSG
                 case 529:   // AB
                 case 566:   // EotS
                 case 607:   // SotA
                 case 628:   // IoC
+                case 726:   // TP
+                case 727:   // SM
+                case 728:   // BfG
+                case 761:   // BfG2
+                case 968:   // EotS2
+                case 998:   // VOP
+                case 1010:  // CTF3
+                case 1101:  // DOTA
+                case 1105:  // GR
                     return true;
                 default:
                     break;
@@ -923,34 +920,55 @@ namespace MMAP
         switch (mapID)
         {
             // transport maps
-            case 582:
-            case 584:
-            case 586:
-            case 587:
-            case 588:
-            case 589:
-            case 590:
-            case 591:
-            case 592:
-            case 593:
-            case 594:
-            case 596:
-            case 610:
-            case 612:
-            case 613:
-            case 614:
-            case 620:
-            case 621:
-            case 622:
-            case 623:
-            case 641:
-            case 642:
-            case 647:
-            case 672:
-            case 673:
-            case 712:
-            case 713:
-            case 718:
+            case 582:  // Transport: Rut'theran to Auberdine
+            case 584:  // Transport: Menethil to Theramore
+            case 586:  // Transport: Exodar to Auberdine
+            case 587:  // Transport: Feathermoon Ferry
+            case 588:  // Transport: Menethil to Auberdine
+            case 589:  // Transport: Orgrimmar to Grom'Gol
+            case 590:  // Transport: Grom'Gol to Undercity
+            case 591:  // Transport: Undercity to Orgrimmar
+            case 592:  // Transport: Borean Tundra Test
+            case 593:  // Transport: Booty Bay to Ratchet
+            case 594:  // Transport: Howling Fjord Sister Mercy (Quest)
+            case 596:  // Transport: Naglfar
+            case 610:  // Transport: Tirisfal to Vengeance Landing
+            case 612:  // Transport: Menethil to Valgarde
+            case 613:  // Transport: Orgrimmar to Warsong Hold
+            case 614:  // Transport: Stormwind to Valiance Keep
+            case 620:  // Transport: Moa'ki to Unu'pe
+            case 621:  // Transport: Moa'ki to Kamagua
+            case 622:  // Transport: Orgrim's Hammer
+            case 623:  // Transport: The Skybreaker
+            case 641:  // Transport: Alliance Airship BG
+            case 642:  // Transport: HordeAirshipBG
+            case 647:  // Transport: Orgrimmar to Thunder Bluff
+            case 662:  // Transport: Alliance Vashj'ir Ship
+            case 672:  // Transport: The Skybreaker (Icecrown Citadel Raid)
+            case 673:  // Transport: Orgrim's Hammer (Icecrown Citadel Raid)
+            case 674:  // Transport: Ship to Vashj'ir
+            case 712:  // Transport: The Skybreaker (IC Dungeon)
+            case 713:  // Transport: Orgrim's Hammer (IC Dungeon)
+            case 718:  // Transport: The Mighty Wind (Icecrown Citadel Raid)
+            case 738:  // Ship to Vashj'ir (Orgrimmar -> Vashj'ir)
+            case 739:  // Vashj'ir Sub - Horde
+            case 740:  // Vashj'ir Sub - Alliance
+            case 741:  // Twilight Highlands Horde Transport
+            case 742:  // Vashj'ir Sub - Horde - Circling Abyssal Maw
+            case 743:  // Vashj'ir Sub - Alliance circling Abyssal Maw
+            case 746:  // Uldum Phase Oasis
+            case 747:  // Transport: Deepholm Gunship
+            case 748:  // Transport: Onyxia/Nefarian Elevator
+            case 749:  // Transport: Gilneas Moving Gunship
+            case 750:  // Transport: Gilneas Static Gunship
+            case 762:  // Twilight Highlands Zeppelin 1
+            case 763:  // Twilight Highlands Zeppelin 2
+            case 765:  // Krazzworks Attack Zeppelin
+            case 766:  // Transport: Gilneas Moving Gunship 02
+            case 767:  // Transport: Gilneas Moving Gunship 03
+            case 1113:  // Transport: DarkmoonCarousel
+            case 1132:  // Transport218599 - The Skybag (Brawl'gar Arena)
+            case 1133:  // Transport218600 - Zandalari Ship (Mogu Island)
                 return true;
             default:
                 return false;

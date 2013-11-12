@@ -1,20 +1,23 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2013 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2013 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-
+ 
 #include "MPQManager.h"
 #include "WDT.h"
 #include "ContinentBuilder.h"
@@ -27,59 +30,45 @@
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
 
-#include <stdio.h>
-
 #include <set>
 
 MPQManager* MPQHandler;
 CacheClass* Cache;
 
-void ExtractMMaps(std::set<uint32>& mapIds, uint32 threads)
+void ExtractMMaps(std::set<uint32>& mapIds, uint32 threads, bool debug)
 {
     DBC* dbc = MPQHandler->GetDBC("Map");
-    printf("Map.dbc contains %u rows.\n", dbc->Records.size());
     for (std::vector<Record*>::iterator itr = dbc->Records.begin(); itr != dbc->Records.end(); ++itr)
     {
         uint32 mapId = (*itr)->Values[0];
 
         // Skip this map if a list of specific maps was provided and this one is not contained in it.
         if (!mapIds.empty() && mapIds.find(mapId) == mapIds.end())
-        {
-            if (Constants::Debug)
-                printf("Map %u will not be built.\n", mapId);
             continue;
-        }
 
         std::string name = (*itr)->GetString(1);
         WDT wdt("World\\maps\\" + name + "\\" + name + ".wdt");
-        if (!wdt.IsValid)
-        {
-            printf("Could not find WDT data for map %u (%s)\n", mapId, name.c_str());
+        if (!wdt.IsValid || wdt.IsGlobalModel)
             continue;
-        }
         printf("Building %s MapId %u\n", name.c_str(), mapId);
         ContinentBuilder builder(name, mapId, &wdt, threads);
-        builder.Build();
+        builder.Build(debug);
     }
 }
 
 void ExtractDBCs()
 {
     printf("Extracting DBCs\n");
-    // Create the file system structure
+    // Create the filesystem structure
     std::string baseDBCPath = "dbc/";
     Utils::CreateDir(baseDBCPath);
 
-    std::set<std::string> DBCFiles;
-    const size_t extLen = strlen(".dbc");
     // Populate list of DBC files
-    // We get the DBC names by going over the (guaranteed to exist) default locale files
-    // Then we look in other locale files in case that they are available.
+    std::set<std::string> DBCFiles;
     for (std::vector<std::string>::iterator itr = MPQHandler->LocaleFiles[MPQHandler->BaseLocale]->Files.begin(); itr != MPQHandler->LocaleFiles[MPQHandler->BaseLocale]->Files.end(); ++itr)
-        if (itr->rfind(".dbc") == itr->length() - extLen) // Check if the extension is ".dbc"
+        if (itr->rfind(".dbc") == itr->length() - strlen(".dbc"))
             DBCFiles.insert(*itr);
 
-    const size_t folderLen = strlen("DBFilesClient\\");
     // Iterate over all available locales
     for (std::set<uint32>::iterator itr = MPQHandler->AvailableLocales.begin(); itr != MPQHandler->AvailableLocales.end(); ++itr)
     {
@@ -93,10 +82,10 @@ void ExtractDBCs()
 
         std::string component = "component.wow-" + std::string(MPQManager::Languages[*itr]) + ".txt";
         // Extract the component file
-        Utils::SaveToDisk(MPQHandler->GetFileFrom(component, MPQHandler->LocaleFiles[*itr]), path + component);
+        Utils::SaveToDisk(MPQHandler->GetFile(component), path + component);
         // Extract the DBC files for the given locale
         for (std::set<std::string>::iterator itr2 = DBCFiles.begin(); itr2 != DBCFiles.end(); ++itr2)
-            Utils::SaveToDisk(MPQHandler->GetFileFrom(*itr2, MPQHandler->LocaleFiles[*itr]), path + (itr2->c_str() + folderLen));
+            Utils::SaveToDisk(MPQHandler->GetFileFrom(*itr2, MPQHandler->LocaleFiles[*itr]), path + (itr2->c_str() + strlen("DBFilesClient\\")));
     }
     printf("DBC extraction finished!\n");
 }
@@ -224,18 +213,16 @@ void ExtractGameobjectModels()
             fwrite(&model.Header.CountGroups, sizeof(uint32), 1, output);
             fwrite(&model.Header.WmoId, sizeof(uint32), 1, output);
 
-            const char grp[] = { 'G' , 'R' , 'P', ' ' };
             for (std::vector<WorldModelGroup>::iterator itr2 = model.Groups.begin(); itr2 != model.Groups.end(); ++itr2)
             {
-                const WMOGroupHeader& header = itr2->Header;
-                fwrite(&header.Flags, sizeof(uint32), 1, output);
-                fwrite(&header.WmoId, sizeof(uint32), 1, output);
-                fwrite(&header.BoundingBox[0], sizeof(uint32), 1, output);
-                fwrite(&header.BoundingBox[1], sizeof(uint32), 1, output);
+                fwrite(&itr2->Header.Flags, sizeof(uint32), 1, output);
+                fwrite(&itr2->Header.WmoId, sizeof(uint32), 1, output);
+                fwrite(&itr2->Header.BoundingBox[0], sizeof(uint32), 1, output);
+                fwrite(&itr2->Header.BoundingBox[1], sizeof(uint32), 1, output);
                 uint32 LiquidFlags = itr2->HasLiquidData ? 1 : 0;
                 fwrite(&LiquidFlags, sizeof(uint32), 1, output);
 
-                fwrite(grp, sizeof(char), sizeof(grp), output);
+                fwrite("GRP ", sizeof(char), 4, output);
                 uint32 k = 0;
                 uint32 mobaBatch = itr2->MOBALength / 12;
                 uint32* MobaEx = new uint32[mobaBatch*4];
@@ -249,7 +236,7 @@ void ExtractGameobjectModels()
                 fwrite(MobaEx, 4, k, output);
                 delete[] MobaEx;
 
-                //@TODO: Finish this.
+                // Note: still not finished
             }
 
             fclose(output);
@@ -275,7 +262,7 @@ bool HandleArgs(int argc, char** argv, uint32& threads, std::set<uint32>& mapLis
                 return false;
 
             threads = atoi(param);
-            printf("Using %u threads\n", threads);
+            printf("Using %i threads\n", threads);
         }
         else if (strcmp(argv[i], "--maps") == 0)
         {
@@ -290,8 +277,6 @@ bool HandleArgs(int argc, char** argv, uint32& threads, std::set<uint32>& mapLis
                 mapList.insert(atoi(token));
                 token = strtok(NULL, ",");
             }
-            
-            free(copy);
 
             printf("Extracting only provided list of maps (%u).\n", uint32(mapList.size()));
         }
@@ -345,8 +330,6 @@ void PrintUsage()
 void LoadTile(dtNavMesh*& navMesh, const char* tile)
 {
     FILE* f = fopen(tile, "rb");
-    if (!f)
-        return;
     MmapTileHeader header;
 
     if (fread(&header, sizeof(MmapTileHeader), 1, f) != 1)
@@ -363,19 +346,18 @@ void LoadTile(dtNavMesh*& navMesh, const char* tile)
 
 int main(int argc, char* argv[])
 {
-    _setmaxstdio(2048);
-    uint32 threads = 4, extractFlags = 0;
-    std::set<uint32> mapIds;
-
-    if (!HandleArgs(argc, argv, threads, mapIds, Constants::Debug, extractFlags))
+    if (!system("pause"))
     {
-        PrintUsage();
+        printf("main: Error in system call to pause\n");
         return -1;
     }
 
-    if (extractFlags == 0)
+    uint32 threads = 4, extractFlags = 0;
+    std::set<uint32> mapIds;
+    bool debug = false;
+
+    if (!HandleArgs(argc, argv, threads, mapIds, debug, extractFlags))
     {
-        printf("You must provide valid extract flags.\n");
         PrintUsage();
         return -1;
     }
@@ -388,44 +370,44 @@ int main(int argc, char* argv[])
         ExtractDBCs();
 
     if (extractFlags & Constants::EXTRACT_FLAG_MMAPS)
-        ExtractMMaps(mapIds, threads);
+        ExtractMMaps(mapIds, threads, debug);
 
     if (extractFlags & Constants::EXTRACT_FLAG_GOB_MODELS)
         ExtractGameobjectModels();
 
     if (extractFlags & Constants::EXTRACT_FLAG_TEST)
     {
-        float start[] = { 16226.200195f, 16257.000000f, 13.202200f };
-        float end[] = { 16245.725586f, 16382.465820f, 47.384956f };
+        float start[] = { 0.0f, 0.0f, 0.0f };
+        float end[] = { 0.0f, 0.0f, 0.0f };
 
         //
         float m_spos[3];
-        m_spos[0] = -start[1];
+        m_spos[0] = -1.0f * start[1];
         m_spos[1] = start[2];
-        m_spos[2] = -start[0];
+        m_spos[2] = -1.0f * start[0];
 
         //
         float m_epos[3];
-        m_epos[0] = -end[1];
+        m_epos[0] = -1.0f * end[1];
         m_epos[1] = end[2];
-        m_epos[2] = -end[0];
+        m_epos[2] = -1.0f * end[0];
 
         //
         dtQueryFilter m_filter;
-        m_filter.setIncludeFlags(Constants::POLY_AREA_ROAD | Constants::POLY_AREA_TERRAIN);
-        m_filter.setExcludeFlags(Constants::POLY_AREA_WATER);
+        m_filter.setIncludeFlags(0xffff) ;
+        m_filter.setExcludeFlags(0);
 
         //
         float m_polyPickExt[3];
-        m_polyPickExt[0] = 2.5f;
-        m_polyPickExt[1] = 2.5f;
-        m_polyPickExt[2] = 2.5f;
+        m_polyPickExt[0] = 2;
+        m_polyPickExt[1] = 4;
+        m_polyPickExt[2] = 2;
 
         //
         dtPolyRef m_startRef;
         dtPolyRef m_endRef;
 
-        FILE* mmap = fopen("mmaps/001.mmap", "rb");
+        FILE* mmap = fopen(".mmap", "rb");
         dtNavMeshParams params;
         int count = fread(&params, sizeof(dtNavMeshParams), 1, mmap);
         fclose(mmap);
@@ -439,16 +421,13 @@ int main(int argc, char* argv[])
         dtNavMeshQuery* navMeshQuery = new dtNavMeshQuery();
 
         navMesh->init(&params);
-        for (int i = 0; i <= 32; ++i)
-        {
-            for (int j = 0; j <= 32; ++j)
-            {
-                char buff[100];
-                sprintf(buff, "mmaps/001%02i%02i.mmtile", i, j);
-                LoadTile(navMesh, buff);
-            }
-        }
-        
+        LoadTile(navMesh, ".mmtile");
+        LoadTile(navMesh, ".mmtile");
+        LoadTile(navMesh, ".mmtile");
+        LoadTile(navMesh, ".mmtile");
+        LoadTile(navMesh, ".mmtile");
+        LoadTile(navMesh, ".mmtile");
+
         navMeshQuery->init(navMesh, 2048);
 
         float nearestPt[3];
@@ -462,24 +441,7 @@ int main(int argc, char* argv[])
             return 0;
         }
 
-        int hops;
-        dtPolyRef* hopBuffer = new dtPolyRef[8192];
-        dtStatus status = navMeshQuery->findPath(m_startRef, m_endRef, m_spos, m_epos, &m_filter, hopBuffer, &hops, 8192);
-        
-        int resultHopCount;
-        float* straightPath = new float[2048*3];
-        unsigned char* pathFlags = new unsigned char[2048];
-        dtPolyRef* pathRefs = new dtPolyRef[2048];
-
-        status = navMeshQuery->findStraightPath(m_spos, m_epos, hopBuffer, hops, straightPath, pathFlags, pathRefs, &resultHopCount, 2048);
-        std::vector<Vector3> FinalPath;
-        FinalPath.reserve(resultHopCount);
-        for (uint32 i = 0; i < resultHopCount; ++i)
-        {
-            Vector3 finalV = Utils::ToWoWCoords(Vector3(straightPath[i * 3 + 0], straightPath[i * 3 + 1], straightPath[i * 3 + 2]));
-            FinalPath.push_back(finalV);
-            printf("Point %f %f %f\n", finalV.x, finalV.y, finalV.z);
-        }
+        printf("Found!");
     }
 
     return 0;

@@ -1,18 +1,21 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2013 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2013 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef UTILS_H
@@ -30,7 +33,6 @@
 #include <ace/Stack_Trace.h>
 
 struct WorldModelDefinition;
-class DoodadDefinition;
 class DoodadInstance;
 
 #define ASSERT(assertion) { if (!(assertion)) { ACE_Stack_Trace st; fprintf(stderr, "\n%s:%i in %s ASSERTION FAILED:\n  %s\n%s\n", __FILE__, __LINE__, __FUNCTION__, #assertion, st.c_str()); *((volatile int*)NULL) = 0; } }
@@ -43,20 +45,9 @@ struct Vector3
     float y;
     float z;
 
-    Vector3 operator +(Vector3 const& other) const
+    Vector3 operator +(Vector3 const& other)
     {
         return Vector3(x + other.x, y + other.y, z + other.z);
-    }
-
-    Vector3 operator -(Vector3 const& other) const
-    {
-        return Vector3(x - other.x, y - other.y, z - other.z);
-    }
-
-    template<typename T>
-    Vector3 operator *(T s) const
-    {
-        return Vector3(x * s, y * s, z * s);
     }
 
     static Vector3 Read(FILE* file);
@@ -371,9 +362,10 @@ public:
     static void Reverse(char word[]);
     static std::string ReadString(FILE* file);
     static uint32 Size(FILE* file);
-    static Vector3 ToRecast(const Vector3& val );
-    static std::string GetAdtPath(const std::string& world, int x, int y);
-    static std::string FixModelPath(const std::string& path);
+    static Vector3 ToRecast( Vector3 val );
+    static std::string GetAdtPath(std::string world, int x, int y);
+    static std::string FixModelPath(std::string path);
+    static G3D::Matrix4 GetTransformation(IDefinition def);
     /// They say its better to declare template functions in the header files.
     template <typename T>
     static std::string ToString(T val)
@@ -382,9 +374,13 @@ public:
         ss << val;
         return ss.str();
     }
+    static G3D::Matrix4 RotationX(float angle);
+    static G3D::Matrix4 RotationY(float angle);
+    static G3D::Matrix4 RotationZ(float angle);
     static float ToRadians(float degrees);
-    static std::string GetPathBase(const std::string& path);
-    static Vector3 GetLiquidVert(const IDefinition& def, Vector3 basePosition, float height, int /*x*/, int /*y*/, bool translate = true);
+    static Vector3 VectorTransform(Vector3 vec, G3D::Matrix4 matrix);
+    static std::string GetPathBase(std::string path);
+    static Vector3 GetLiquidVert(G3D::Matrix4 transformation, Vector3 basePosition, float height, int x, int y);
     static float Distance(float x, float y);
     template<typename T>
     static bool IsAllZero(T* arr, uint32 size)
@@ -395,13 +391,11 @@ public:
         return true;
     }
     static std::string Replace( std::string str, const std::string& oldStr, const std::string& newStr );
+    static G3D::Matrix4 GetWmoDoodadTransformation( DoodadInstance inst, WorldModelDefinition root );
     static void CreateDir( const std::string& Path );
-    static void SaveToDisk(FILE* stream, const std::string& path);
-    static Vector3 ToWoWCoords(const Vector3& vec );
+    static void SaveToDisk(FILE* stream, std::string path);
+    static Vector3 ToWoWCoords( Vector3 vec );
     static std::string GetExtension( std::string path );
     static char* GetPlainName(const char* FileName);
-    static Vector3 TransformDoodadVertex(const IDefinition& def, Vector3& vec, bool translate = true);
-    static Vector3 VectorTransform(const Vector3& vec, const G3D::Matrix4& matrix, bool normal = false );
-    static Vector3 TransformWmoDoodad(const DoodadInstance& inst, const WorldModelDefinition& root, Vector3& vec, bool translate = true );
 };
 #endif

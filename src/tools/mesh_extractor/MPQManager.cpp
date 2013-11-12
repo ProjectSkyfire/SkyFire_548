@@ -1,20 +1,23 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2013 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2013 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-
+ 
 #include "MPQManager.h"
 #include "MPQ.h"
 #include "DBC.h"
@@ -40,7 +43,7 @@ void MPQManager::Initialize()
     for (uint32 i = 0; i < size; ++i)
     {
         MPQArchive* arc = new MPQArchive(std::string("Data/" + std::string(Files[i])).c_str());
-        Archives.push_front(arc); // MPQ files have to be transversed in reverse order to properly account for patched files
+        Archives.push_front(arc);
         printf("Opened %s\n", Files[i]);
     }
 }
@@ -74,14 +77,14 @@ void MPQManager::InitializeDBC()
     Archives.push_front(_baseLocale);
     if (BaseLocale == -1)
     {
-        printf("No locale data detected. Please make sure that the executable is in the same folder as your WoW installation.\n");
+        printf("No locale data detected\n");
         ASSERT(false);
     }
     else
         printf("Using default locale: %s\n", Languages[BaseLocale]);
 }
 
-FILE* MPQManager::GetFile(const std::string& path )
+FILE* MPQManager::GetFile( std::string path )
 {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex, NULL);
     MPQFile file(path.c_str());
@@ -90,13 +93,13 @@ FILE* MPQManager::GetFile(const std::string& path )
     return file.GetFileStream();
 }
 
-DBC* MPQManager::GetDBC(const std::string& name )
+DBC* MPQManager::GetDBC( std::string name )
 {
     std::string path = "DBFilesClient\\" + name + ".dbc";
     return new DBC(GetFile(path));
 }
 
-FILE* MPQManager::GetFileFrom(const std::string& path, MPQArchive* file )
+FILE* MPQManager::GetFileFrom( std::string path, MPQArchive* file )
 {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex, NULL);
     mpq_archive* mpq_a = file->mpq_a;
@@ -120,13 +123,6 @@ FILE* MPQManager::GetFileFrom(const std::string& path, MPQArchive* file )
 
     // Pack the return into a FILE stream
     FILE* ret = tmpfile();
-    if (!ret)
-    {
-        printf("Could not create temporary file. Please run as Administrator or root\n");
-        exit(1);
-    }
     fwrite(buffer, sizeof(uint8), size, ret);
-    fseek(ret, 0, SEEK_SET);
-    delete[] buffer;
     return ret;
 }
