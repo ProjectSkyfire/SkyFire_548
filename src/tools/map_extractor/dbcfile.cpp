@@ -1,19 +1,21 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2013 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2013 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #define _CRT_SECURE_NO_DEPRECATE
@@ -32,34 +34,54 @@ bool DBCFile::open()
 
     DWORD readBytes = 0;
     SFileReadFile(_file, header, 4, &readBytes, NULL);
-    if (readBytes != 4)                                         // Number of records
+    if (readBytes != 4)
+	{                                         // Number of records
         return false;
+		printf("Error at 1", _file);
+	}
 
     if (header[0] != 'W' || header[1] != 'D' || header[2] != 'B' || header[3] != 'C')
+	{
         return false;
-
+		printf("Error at 2", _file);
+	}
     SFileReadFile(_file, &na, 4, &readBytes, NULL);
-    if (readBytes != 4)                                         // Number of records
+    if (readBytes != 4)
+	{                                         // Number of records
         return false;
+		printf("Error at 3", _file);
+	}
 
     SFileReadFile(_file, &nb, 4, &readBytes, NULL);
-    if (readBytes != 4)                                         // Number of fields
+    if (readBytes != 4)
+	{                                         // Number of records
         return false;
+		printf("Error at 4", _file);
+	}
 
     SFileReadFile(_file, &es, 4, &readBytes, NULL);
-    if (readBytes != 4)                                         // Size of a record
+    if (readBytes != 4)
+	{                                         // Number of records
         return false;
+		printf("Error at 5", _file);
+	}
 
     SFileReadFile(_file, &ss, 4, &readBytes, NULL);
-    if (readBytes != 4)                                         // String size
+    if (readBytes != 4)
+	{                                         // Number of records
         return false;
+		printf("Error at 6", _file);
+	}
 
     _recordSize = es;
     _recordCount = na;
     _fieldCount = nb;
     _stringSize = ss;
     if (_fieldCount * 4 != _recordSize)
+    {                                         // Number of records
         return false;
+		printf("Error at 7", _file);
+	}
 
     _data = new unsigned char[_recordSize * _recordCount + _stringSize];
     _stringTable = _data + _recordSize*_recordCount;
@@ -67,7 +89,10 @@ bool DBCFile::open()
     size_t data_size = _recordSize * _recordCount + _stringSize;
     SFileReadFile(_file, _data, data_size, &readBytes, NULL);
     if (readBytes != data_size)
+	{                                         // Number of records
         return false;
+		printf("Error at 8");
+	}
 
     return true;
 }
@@ -106,4 +131,3 @@ DBCFile::Iterator DBCFile::end()
     assert(_data);
     return Iterator(*this, _stringTable);
 }
-
