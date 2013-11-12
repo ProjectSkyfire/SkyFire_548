@@ -40,9 +40,10 @@ For further information on the SkyFire project, please visit our project website
 ## Install
 
 Detailed installation guides are available in the wiki for
-[Windows] (http://wiki.projectskyfire.org/index.php?title=Installation_Windows),
-[Linux] (http://wiki.projectskyfire.org/index.php?title=Installation_Linux) and
-[Mac OSX] (http://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
+
+[Windows](http://wiki.projectskyfire.org/index.php?title=Installation_Windows),
+[Linux](http://wiki.projectskyfire.org/index.php?title=Installation_Linux) and
+[Mac OSX](http://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
 
 
 ## Reporting issues
