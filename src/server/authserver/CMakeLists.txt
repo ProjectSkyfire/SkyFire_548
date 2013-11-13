@@ -11,15 +11,17 @@
 
 ########### authserver ###############
 
-file(GLOB_RECURSE sources_authentication Authentication/*.cpp Authentication/*.h)
-file(GLOB_RECURSE sources_realms Realms/*.cpp Realms/*.h)
-file(GLOB_RECURSE sources_server Server/*.cpp Server/*.h)
+file(GLOB_RECURSE sources_Authentication Authentication/*.cpp Authentication/*.h)
+file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
+file(GLOB_RECURSE sources_Realms Realms/*.cpp Realms/*.h)
+file(GLOB_RECURSE sources_Server Server/*.cpp Server/*.h)
 file(GLOB sources_localdir *.cpp *.h)
 
 source_group(CMake FILES CMakeLists.txt)
-source_group(Authentication FILES ${sources_authentication})
-source_group(Realms FILES ${sources_realms})
-source_group(Server FILES ${sources_server})
+source_group(Authentication FILES ${sources_Authentication})
+source_group(PrecompiledHeaders FILES ${sources_PrecompiledHeaders})
+source_group(Realms FILES ${sources_Realms})
+source_group(Server FILES ${sources_Server})
 source_group(localdir FILES ${sources_localdir})
 
 if (USE_COREPCH)
