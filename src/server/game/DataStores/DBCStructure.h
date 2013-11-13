@@ -1888,7 +1888,7 @@ struct SpellCategoriesEntry
 {
     //uint32    Id;                                         // 0        m_ID
     //uint32 spellId;                                       // 1  - Pandaria
-    //uint32 unk0;                                          // 2  - Pandaria always  after spellId
+    //uint32 unk0;                                          // 2  - Pandaria always after spellId
     uint32    Category;                                     // 3        m_category
     uint32    DmgClass;                                     // 4        m_defenseType
     uint32    Dispel;                                       // 5        m_dispelType
@@ -2016,7 +2016,7 @@ struct SpellPowerEntry
 {
     //uint32    Id;                                         // 0        m_ID
     //uint32  spellId;                                      // 1  - Pandaria
-    //uint32  unk0;                                         // 2  - Pandaria always  after 
+    //uint32  unk0;                                         // 2  - Pandaria always after spellId
     uint32    powerType;                                    // 3       m_powerType
     uint32    manaCost;                                     // 4       m_manaCost
     uint32    manaCostPerlevel;                             // 5       m_manaCostPerLevel
@@ -2077,7 +2077,7 @@ struct SpellTargetRestrictionsEntry
 {
     uint32    Id;                                           // 0        m_ID
     //uint32  spellId;                                      // 1  - Pandaria
-    //uint32  unk0;                                         // 2  - Pandaria always  after 
+    //uint32  unk0;                                         // 2  - Pandaria always after spellId
     //float  unk0;                                          // 3  
     //uint32  unk0;                                         // 4  - Pandaria always  after spellId
     uint32    MaxAffectedTargets;                           // 5        m_maxTargets
