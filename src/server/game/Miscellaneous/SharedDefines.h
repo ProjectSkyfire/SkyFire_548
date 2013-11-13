@@ -29,7 +29,26 @@ enum SpellEffIndex
 {
     EFFECT_0 = 0,
     EFFECT_1 = 1,
-    EFFECT_2 = 2
+    EFFECT_2 = 2,
+    EFFECT_3 = 3,
+    EFFECT_4 = 4,
+    EFFECT_5 = 5,
+    EFFECT_6 = 6,
+    EFFECT_7 = 7,
+    EFFECT_8 = 8,
+    EFFECT_9 = 9,
+    EFFECT_10 = 10,
+    EFFECT_11 = 11,
+    EFFECT_12 = 12,
+    EFFECT_13 = 13,
+    EFFECT_14 = 14,
+    EFFECT_15 = 15,
+    EFFECT_16 = 16,
+    EFFECT_17 = 17,
+    EFFECT_18 = 18,
+    EFFECT_19 = 19,
+    EFFECT_20 = 20,
+    EFFECT_21 = 21
 };
 
 // used in script definitions

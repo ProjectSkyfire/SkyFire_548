@@ -357,7 +357,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         return;
     }
 
+    // Pandaria - Blizzard got rid of this ??!!
     // prevent character creating Expansion class without Expansion account
+    /*
     if (classEntry->expansion > Expansion())
     {
         data << uint8(CHAR_CREATE_EXPANSION_CLASS);
@@ -365,6 +367,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         SendPacket(&data);
         return;
     }
+    */
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RACEMASK))
     {

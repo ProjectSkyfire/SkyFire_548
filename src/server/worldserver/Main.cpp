@@ -72,6 +72,7 @@ void usage(const char* prog)
 /// Launch the Trinity server
 extern int main(int argc, char** argv)
 {
+    system("pause");
     ///- Command line parsing to get the configuration file name
     char const* cfg_file = _TRINITY_CORE_CONFIG;
     int c = 1;

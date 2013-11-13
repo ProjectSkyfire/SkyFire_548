@@ -150,6 +150,14 @@ struct KeyChainEntry
     uint8       Key[KEYCHAIN_SIZE];
 };
 
+// SpellReagents.db2
+struct SpellReagentsEntry
+{
+    //uint32    Id;                                          // 0         m_ID
+    int32     Reagent[MAX_SPELL_REAGENTS];                   // 1  - 10   m_reagent
+    uint32    ReagentCount[MAX_SPELL_REAGENTS];              // 11 - 20   m_reagentCount
+};
+
 // GCC has alternative #pragma pack(N) syntax and old gcc version does not support pack(push, N), also any gcc version does not support it at some platform
 #if defined(__GNUC__)
 #pragma pack()

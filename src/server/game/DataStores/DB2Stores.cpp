@@ -21,12 +21,14 @@
 #include "Common.h"
 #include "Log.h"
 #include "World.h"
+#include "DBCStores.h"
 
 DB2Storage<ItemEntry> sItemStore(Itemfmt, &DB2Utilities::HasItemEntry, &DB2Utilities::WriteItemDbReply);
 DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
 DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DB2Storage<ItemSparseEntry> sItemSparseStore(ItemSparsefmt, &DB2Utilities::HasItemSparseEntry, &DB2Utilities::WriteItemSparseDbReply);
 DB2Storage<KeyChainEntry> sKeyChainStore(KeyChainfmt);
+DB2Storage<SpellReagentsEntry> sSpellReagentsStore(SpellReagentsfmt);
 
 typedef std::list<std::string> DB2StoreProblemList;
 
@@ -100,6 +102,7 @@ void LoadDB2Stores(std::string const& dataPath)
     LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore, db2Path, "ItemExtendedCost.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sKeyChainStore, db2Path, "KeyChain.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sSpellReagentsStore, db2Path,"SpellReagents.db2");
 
     // error checks
     if (bad_db2_files.size() >= DB2FilesCount)

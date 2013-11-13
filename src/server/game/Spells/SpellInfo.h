@@ -23,6 +23,7 @@
 #include "DBCStructure.h"
 #include "Object.h"
 #include "SpellAuraDefines.h"
+#include "DB2Structure.h"
 
 class Unit;
 class Player;
@@ -251,7 +252,7 @@ public:
     uint32    ChainTarget;
     uint32    ItemType;
     uint32    TriggerSpell;
-    flag96    SpellClassMask;
+    flag128    SpellClassMask;
     std::list<Condition*>* ImplicitTargetConditions;
     // SpellScalingEntry
     float     ScalingMultiplier;
@@ -313,6 +314,8 @@ public:
     uint32 AttributesEx8;
     uint32 AttributesEx9;
     uint32 AttributesEx10;
+    uint32 AttributesEx11;
+    uint32 AttributesEx12;
     uint32 AttributesCu;
     uint32 Stances;
     uint32 StancesNot;
@@ -347,7 +350,7 @@ public:
     uint32 ManaCost;
     uint32 ManaCostPerlevel;
     uint32 ManaPerSecond;
-    uint32 ManaCostPercentage;
+    float ManaCostPercentage;
     uint32 RuneCostID;
     SpellRangeEntry const* RangeEntry;
     float  Speed;
@@ -367,7 +370,7 @@ public:
     uint32 MaxTargetLevel;
     uint32 MaxAffectedTargets;
     uint32 SpellFamilyName;
-    flag96 SpellFamilyFlags;
+    flag128 SpellFamilyFlags;
     uint32 DmgClass;
     uint32 PreventionType;
     int32  AreaGroupId;

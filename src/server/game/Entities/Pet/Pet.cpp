@@ -1217,8 +1217,8 @@ void Pet::_LoadAuras(uint32 timediff)
             if (!caster_guid)
                 caster_guid = GetGUID();
             uint32 spellid = fields[1].GetUInt32();
-            uint8 effmask = fields[2].GetUInt8();
-            uint8 recalculatemask = fields[3].GetUInt8();
+            uint32 effMask = fields[2].GetUInt32();
+            uint32 recalculatemask = fields[3].GetUInt32();
             uint8 stackcount = fields[4].GetUInt8();
             damage[0] = fields[5].GetInt32();
             damage[1] = fields[6].GetInt32();
@@ -1255,7 +1255,7 @@ void Pet::_LoadAuras(uint32 timediff)
             else
                 remaincharges = 0;
 
-            if (Aura* aura = Aura::TryCreate(spellInfo, effmask, this, NULL, &baseDamage[0], NULL, caster_guid))
+            if (Aura* aura = Aura::TryCreate(spellInfo, effMask, this, NULL, &baseDamage[0], NULL, caster_guid))
             {
                 if (!aura->CanBeSaved())
                 {
@@ -1264,7 +1264,7 @@ void Pet::_LoadAuras(uint32 timediff)
                 }
                 aura->SetLoadedState(maxduration, remaintime, remaincharges, stackcount, recalculatemask, &damage[0]);
                 aura->ApplyForTargets();
-                TC_LOG_INFO("entities.pet", "Added aura spellid %u, effectmask %u", spellInfo->Id, effmask);
+                TC_LOG_INFO("entities.pet", "Added aura spellid %u, effectmask %u", spellInfo->Id, effMask);
             }
         }
         while (result->NextRow());
@@ -1287,7 +1287,7 @@ void Pet::_SaveAuras(SQLTransaction& trans)
 
         int32 damage[MAX_SPELL_EFFECTS];
         int32 baseDamage[MAX_SPELL_EFFECTS];
-        uint8 effMask = 0;
+        uint32 effMask = 0;
         uint8 recalculateMask = 0;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
@@ -1392,26 +1392,7 @@ bool Pet::addSpell(uint32 spellId, ActiveStates active /*= ACT_DECIDE*/, PetSpel
     else
         newspell.active = active;
 
-    // talent: unlearn all other talent ranks (high and low)
-    if (TalentSpellPos const* talentPos = GetTalentSpellPos(spellId))
-    {
-        if (TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
-        {
-            for (uint8 i = 0; i < MAX_TALENT_RANK; ++i)
-            {
-                // skip learning spell and no rank spell case
-                uint32 rankSpellId = talentInfo->RankID[i];
-                if (!rankSpellId || rankSpellId == spellId)
-                    continue;
-
-                // skip unknown ranks
-                if (!HasSpell(rankSpellId))
-                    continue;
-                removeSpell(rankSpellId, false, false);
-            }
-        }
-    }
-    else if (spellInfo->IsRanked())
+    if (spellInfo->IsRanked())
     {
         for (PetSpellMap::const_iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
         {
@@ -1614,7 +1595,7 @@ void Pet::InitPetCreateSpells()
 }
 
 bool Pet::resetTalents()
-{
+{/*
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return false;
@@ -1649,10 +1630,6 @@ bool Pet::resetTalents()
         if (!talentInfo)
             continue;
 
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
-
-        if (!talentTabInfo)
-            continue;
 
         // unlearn only talents for pets family talent type
         if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
@@ -1686,7 +1663,7 @@ bool Pet::resetTalents()
     SetFreeTalentPoints(talentPointsForLevel);
 
     if (!m_loading)
-        player->PetSpellInitialize();
+        player->PetSpellInitialize();*/
     return true;
 }
 
