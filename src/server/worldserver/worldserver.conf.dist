@@ -1,5 +1,5 @@
 ################################################
-# Trinity Core World Server configuration file #
+#   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
 
@@ -62,7 +62,7 @@ RealmID = 1
 #    DataDir
 #        Description: Data directory setting.
 #        Important:   DataDir needs to be quoted, as the string might contain space characters.
-#        Example:     "@prefix@/share/trinitycore"
+#        Example:     "@prefix@/share/skyfire"
 #        Default:     "."
 
 DataDir = "."
@@ -87,13 +87,13 @@ LogsDir = ""
 #                                                                 section my.ini)
 #                     ".;/path/to/unix_socket;username;password;database" - (use Unix sockets on
 #                                                                           Unix/Linux)
-#        Default:     "127.0.0.1;3306;trinity;trinity;auth"       - (LoginDatabaseInfo)
-#                     "127.0.0.1;3306;trinity;trinity;world"      - (WorldDatabaseInfo)
-#                     "127.0.0.1;3306;trinity;trinity;characters" - (CharacterDatabaseInfo)
+#        Default:     "127.0.0.1;3306;skyfire;skyfire;auth"       - (LoginDatabaseInfo)
+#                     "127.0.0.1;3306;skyfire;skyfire;world"      - (WorldDatabaseInfo)
+#                     "127.0.0.1;3306;skyfire;skyfire;characters" - (CharacterDatabaseInfo)
 
-LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
-WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
-CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
+LoginDatabaseInfo     = "127.0.0.1;3306;skyfire;skyfire;auth"
+WorldDatabaseInfo     = "127.0.0.1;3306;skyfire;skyfire;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;skyfire;skyfire;characters"
 
 #
 #    LoginDatabase.WorkerThreads
@@ -1051,10 +1051,10 @@ BeepAtStart = 1
 #    Motd
 #        Description: Message of the Day, displayed at login.
 #                     Use '@' for a newline and be sure to escape special characters.
-#        Example:     "Welcome to John\'s Server@This server runs on Trinity Core."
-#        Default:     "Welcome to a Trinity Core server."
+#        Example:     "Welcome to John\'s Server@This server runs on SkyFire Core."
+#        Default:     "Welcome to a SkyFire server."
 
-Motd = "Welcome to a Trinity Core server."
+Motd = "Welcome to a SkyFire server."
 
 #
 #    Server.LoginInfo

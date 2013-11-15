@@ -1,5 +1,5 @@
 ###############################################
-# Trinity Core Auth Server configuration file #
+#   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
 
@@ -135,9 +135,9 @@ WrongPass.BanType = 0
 #                                                                 section my.ini)
 #                     ".;/path/to/unix_socket;username;password;database" - (use Unix sockets on
 #                                                                           Unix/Linux)
-#        Default:     "127.0.0.1;3306;trinity;trinity;auth"
+#        Default:     "127.0.0.1;3306;skyfire;skyfire;auth"
 
-LoginDatabaseInfo = "127.0.0.1;3306;trinity;trinity;auth"
+LoginDatabaseInfo = "127.0.0.1;3306;skyfire;skyfire;auth"
 
 #
 #    LoginDatabase.WorkerThreads

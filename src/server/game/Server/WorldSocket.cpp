@@ -777,17 +777,13 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 int WorldSocket::HandleSendAuthSession()
 {
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
-    BigNumber seed1;
-    seed1.SetRand(16 * 8);
-    packet.append(seed1.AsByteArray(16).get(), 16);               // new encryption seeds
-
-    BigNumber seed2;
-    seed2.SetRand(16 * 8);
-    packet.append(seed2.AsByteArray(16).get(), 16);               // new encryption seeds
-
-    packet << m_Seed;
+    packet << uint32(1);
     packet << uint8(1);
+    for (int i = 0; i < 8; i++)
+        packet << uint32(0);
+    packet << m_Seed;
     return SendPacket(packet);
+
 }
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)

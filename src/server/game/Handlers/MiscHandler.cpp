@@ -941,8 +941,9 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
 
-    uint32 type, timestamp, decompressedSize;
-    recvData >> type >> timestamp >> decompressedSize;
+    uint32 timestamp, type, decompressedSize;
+    recvData >> timestamp >> decompressedSize;
+    recvData.WriteBits(type, 3);
 
     TC_LOG_DEBUG("network", "UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
 
@@ -1001,9 +1002,9 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "RAD: type %u", type);
 
-    if (type >= NUM_ACCOUNT_DATA_TYPES)
+    if (type > NUM_ACCOUNT_DATA_TYPES)
         return;
-
+    
     AccountData* adata = GetAccountData(AccountDataType(type));
 
     uint32 size = adata->Data.size();
@@ -1022,11 +1023,32 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     dest.resize(destSize);
 
     WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8+4+4+4+destSize);
-    data << uint64(_player ? _player->GetGUID() : 0);       // player guid
-    data << uint32(type);                                   // type (0-7)
-    data << uint32(adata->Time);                            // unix time
+
+    ObjectGuid guid;
+
     data << uint32(size);                                   // decompressed length
-    data.append(dest);                                      // compressed data
+    data << uint32(destSize);
+    data.append(dest);  
+    data << uint32(adata->Time);                            // unix time
+    data.WriteBit(guid[7]);
+    data.WriteBits(type, 3);                                 // type (0-7)
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[2]);
+
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+
     SendPacket(&data);
 }
 

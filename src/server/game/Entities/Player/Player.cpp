@@ -23078,10 +23078,14 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendEquipmentSetList();
 
-    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
-    data.AppendPackedTime(sWorld->GetGameTime());
+    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 20);
+
     data << float(0.01666667f);                             // game speed
-    data << uint32(0);                                      // added in 3.1.2
+    data << uint32(1);
+    data.AppendPackedTime(sWorld->GetGameTime());
+    data.AppendPackedTime(sWorld->GetGameTime());
+    data << uint32(1);  
+
     GetSession()->SendPacket(&data);
 
     GetReputationMgr().SendForceReactions();                // SMSG_SET_FORCED_REACTIONS
