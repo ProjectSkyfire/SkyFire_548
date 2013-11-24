@@ -4184,26 +4184,27 @@ MovementStatusElements const MoveSetWalkSpeed[] =
     MSEEnd,
 };
 
+// 5.4.1 17538
 MovementStatusElements const MoveSetRunSpeed[] =
 {
-    MSEHasGuidByte6,
-    MSEHasGuidByte1,
-    MSEHasGuidByte5,
-    MSEHasGuidByte2,
-    MSEHasGuidByte7,
-    MSEHasGuidByte0,
     MSEHasGuidByte3,
+    MSEHasGuidByte6,
+    MSEHasGuidByte7,
+    MSEHasGuidByte1,
     MSEHasGuidByte4,
+    MSEHasGuidByte0,
+    MSEHasGuidByte2,
+    MSEHasGuidByte5,
+    MSEGuidByte7,
     MSEGuidByte5,
+    MSEExtraElement,
+    MSEGuidByte6,
+    MSEGuidByte2,
+    MSEGuidByte0,
     MSEGuidByte3,
     MSEGuidByte1,
     MSEGuidByte4,
     MSECounter,
-    MSEExtraElement,
-    MSEGuidByte6,
-    MSEGuidByte0,
-    MSEGuidByte7,
-    MSEGuidByte2,
     MSEEnd,
 };
 
@@ -5369,8 +5370,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return SplineMoveSetPitchRate;
         case SMSG_MOVE_SET_WALK_SPEED:
             return MoveSetWalkSpeed;
+        */
         case SMSG_MOVE_SET_RUN_SPEED:
             return MoveSetRunSpeed;
+        /*
         case SMSG_MOVE_SET_RUN_BACK_SPEED:
             return MoveSetRunBackSpeed;
         case SMSG_MOVE_SET_SWIM_SPEED:
