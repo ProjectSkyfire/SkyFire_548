@@ -872,7 +872,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
 {
     Id = spellEntry->Id;
 
-    SpellMiscEntry const* spellMisc = sSpellMiscStore.LookupEntry(Id);
+    SpellMiscEntry const* spellMisc = sSpellMiscStore.LookupEntry(spellEntry->SpellMiscId);
 
     Attributes = spellMisc ? spellMisc->Attributes : 0;
     AttributesEx = spellMisc ? spellMisc->AttributesEx: 0;
