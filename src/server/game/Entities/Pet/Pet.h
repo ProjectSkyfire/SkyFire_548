@@ -53,7 +53,7 @@ class Pet : public Guardian
         bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
         bool isTemporarySummoned() const { return m_duration > 0; }
 
-        bool IsPermanentPetFor(Player* owner) const;        // pet have tab in character windows and set UNIT_FIELD_PETNUMBER
+        bool IsPermanentPetFor(Player* owner) const;        // pet have tab in character windows and set UNIT_FIELD_PET_NUMBER
 
         bool Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 pet_number);
         bool CreateBaseAtCreature(Creature* creature);
@@ -131,8 +131,8 @@ class Pet : public Guardian
         void InitTalentForLevel();
 
         uint8 GetMaxTalentPointsForLevel(uint8 level);
-        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
-        void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_BYTES_1, 1, points); }
+        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_DISPLAY_POWER, 1); }
+        void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_DISPLAY_POWER, 1, points); }
 
         uint32  m_usedTalentCount;
 

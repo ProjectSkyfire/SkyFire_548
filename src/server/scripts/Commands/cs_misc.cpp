@@ -102,7 +102,7 @@ public:
     {
         if (!*args)
         {
-            if (handler->GetSession()->GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+            if (handler->GetSession()->GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
                 handler->GetSession()->SendNotification(LANG_DEV_ON);
             else
                 handler->GetSession()->SendNotification(LANG_DEV_OFF);
@@ -113,14 +113,14 @@ public:
 
         if (argstr == "on")
         {
-            handler->GetSession()->GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER);
+            handler->GetSession()->GetPlayer()->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER);
             handler->GetSession()->SendNotification(LANG_DEV_ON);
             return true;
         }
 
         if (argstr == "off")
         {
-            handler->GetSession()->GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER);
+            handler->GetSession()->GetPlayer()->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER);
             handler->GetSession()->SendNotification(LANG_DEV_OFF);
             return true;
         }
@@ -1017,8 +1017,8 @@ public:
             return false;
         }
 
-        uint32 currFields = playerTarget->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
-        playerTarget->SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, uint32((currFields | val)));
+        uint32 currFields = playerTarget->GetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + offset);
+        playerTarget->SetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + offset, uint32((currFields | val)));
 
         handler->SendSysMessage(LANG_EXPLORE_AREA);
         return true;
@@ -1048,8 +1048,8 @@ public:
             return false;
         }
 
-        uint32 currFields = playerTarget->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
-        playerTarget->SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, uint32((currFields ^ val)));
+        uint32 currFields = playerTarget->GetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + offset);
+        playerTarget->SetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + offset, uint32((currFields ^ val)));
 
         handler->SendSysMessage(LANG_UNEXPLORE_AREA);
         return true;

@@ -2746,12 +2746,12 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                             duration = 0;
                             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                                 if (AuraEffect const* eff = m_spellAura->GetEffect(i))
-                                    if (int32 amplitude = eff->GetAmplitude())  // amplitude is hastened by UNIT_MOD_CAST_SPEED
+                                    if (int32 amplitude = eff->GetAmplitude())  // amplitude is hastened by UNIT_FIELD_MOD_CASTING_SPEED
                                         duration = std::max(std::max(origDuration / amplitude, 1) * amplitude, duration);
 
                             // if there is no periodic effect
                             if (!duration)
-                                duration = int32(origDuration * m_originalCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+                                duration = int32(origDuration * m_originalCaster->GetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED));
                         }
                     }
 
@@ -3661,7 +3661,7 @@ void Spell::finish(bool ok)
         if (Unit* charm = m_caster->GetCharm())
             if (charm->GetTypeId() == TYPEID_UNIT
                 && charm->ToCreature()->HasUnitTypeMask(UNIT_MASK_PUPPET)
-                && charm->GetUInt32Value(UNIT_CREATED_BY_SPELL) == m_spellInfo->Id)
+                && charm->GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL) == m_spellInfo->Id)
                 ((Puppet*)charm)->UnSummon();
     }
 
@@ -3674,7 +3674,7 @@ void Spell::finish(bool ok)
     if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsSummon())
     {
         // Unsummon statue
-        uint32 spell = m_caster->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+        uint32 spell = m_caster->GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL);
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell);
         if (spellInfo && spellInfo->SpellIconID == 2056)
         {
@@ -4289,7 +4289,7 @@ void Spell::SendChannelUpdate(uint32 time)
     if (time == 0)
     {
         m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
-        m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
+        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, 0);
     }
 
     WorldPacket data(MSG_CHANNEL_UPDATE, 8+4);
@@ -4335,7 +4335,7 @@ void Spell::SendChannelStart(uint32 duration)
     if (channelTarget)
         m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, channelTarget);
 
-    m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
+    m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, m_spellInfo->Id);
 }
 
 void Spell::SendResurrectRequest(Player* target)
@@ -4789,7 +4789,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE))
     {
         //can cast triggered (by aura only?) spells while have this flag
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && m_caster->ToPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY))
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && m_caster->ToPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_ALLOW_ONLY_ABILITY))
             return SPELL_FAILED_SPELL_IN_PROGRESS;
 
         if (m_caster->ToPlayer()->HasSpellCooldown(m_spellInfo->Id))
@@ -4801,7 +4801,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
+    if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
     {
         m_customError = SPELL_CUSTOM_ERROR_GM_ONLY;
         return SPELL_FAILED_CUSTOM_ERROR;
@@ -7283,7 +7283,7 @@ void Spell::TriggerGlobalCooldown()
             m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, gcd, this);
 
         // Apply haste rating
-        gcd = int32(float(gcd) * m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+        gcd = int32(float(gcd) * m_caster->GetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED));
         if (gcd < MIN_GCD)
             gcd = MIN_GCD;
         else if (gcd > MAX_GCD)

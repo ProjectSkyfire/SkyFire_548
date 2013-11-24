@@ -77,7 +77,7 @@ public:
         if (!handler->extractPlayerTarget((char*)args, &target))
             return false;
 
-        target->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
+        target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);
         target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
         target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
 
@@ -101,13 +101,13 @@ public:
 
         player->setFactionForRace(player->getRace());
 
-        player->SetUInt32Value(UNIT_FIELD_BYTES_0, ((player->getRace()) | (player->getClass() << 8) | (player->getGender() << 16) | (powerType << 24)));
+        player->SetUInt32Value(UNIT_FIELD_SEX, ((player->getRace()) | (player->getClass() << 8) | (player->getGender() << 16) | (powerType << 24)));
 
         // reset only if player not in some form;
         if (player->GetShapeshiftForm() == FORM_NONE)
             player->InitDisplayIds();
 
-        player->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP);
+        player->SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, UNIT_BYTE2_FLAG_PVP);
 
         player->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
@@ -139,7 +139,7 @@ public:
         target->InitTaxiNodesForLevel();
         target->InitGlyphsForLevel();
         target->InitTalentForLevel();
-        target->SetUInt32Value(PLAYER_XP, 0);
+        target->SetUInt32Value(PLAYER_FIELD_XP, 0);
 
         target->_ApplyAllLevelScaleItemMods(true);
 

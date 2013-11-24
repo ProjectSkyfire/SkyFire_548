@@ -165,7 +165,7 @@ enum SpellFacingFlags
 #define BASE_MAXDAMAGE 2.0f
 #define BASE_ATTACK_TIME 2000
 
-// byte value (UNIT_FIELD_BYTES_1, 0)
+// byte value (UNIT_FIELD_DISPLAY_POWER, 0)
 enum UnitStandStateType
 {
     UNIT_STAND_STATE_STAND             = 0,
@@ -180,7 +180,7 @@ enum UnitStandStateType
     UNIT_STAND_STATE_SUBMERGED         = 9
 };
 
-// byte flag value (UNIT_FIELD_BYTES_1, 2)
+// byte flag value (UNIT_FIELD_DISPLAY_POWER, 2)
 enum UnitStandFlags
 {
     UNIT_STAND_FLAGS_UNK1         = 0x01,
@@ -191,7 +191,7 @@ enum UnitStandFlags
     UNIT_STAND_FLAGS_ALL          = 0xFF
 };
 
-// byte flags value (UNIT_FIELD_BYTES_1, 3)
+// byte flags value (UNIT_FIELD_DISPLAY_POWER, 3)
 enum UnitBytes1_Flags
 {
     UNIT_BYTE1_FLAG_ALWAYS_STAND    = 0x01,
@@ -200,7 +200,7 @@ enum UnitBytes1_Flags
     UNIT_BYTE1_FLAG_ALL             = 0xFF
 };
 
-// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2
+// high byte (3 from 0..3) of UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID
 enum ShapeshiftForm
 {
     FORM_NONE               = 0x00,
@@ -236,7 +236,7 @@ enum ShapeshiftForm
     FORM_SPIRITOFREDEMPTION = 0x20
 };
 
-// low byte (0 from 0..3) of UNIT_FIELD_BYTES_2
+// low byte (0 from 0..3) of UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID
 enum SheathState
 {
     SHEATH_STATE_UNARMED  = 0,                              // non prepared weapon
@@ -246,7 +246,7 @@ enum SheathState
 
 #define MAX_SHEATH_STATE    3
 
-// byte (1 from 0..3) of UNIT_FIELD_BYTES_2
+// byte (1 from 0..3) of UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID
 enum UnitPVPStateFlags
 {
     UNIT_BYTE2_FLAG_PVP         = 0x01,
@@ -259,7 +259,7 @@ enum UnitPVPStateFlags
     UNIT_BYTE2_FLAG_UNK7        = 0x80
 };
 
-// byte (2 from 0..3) of UNIT_FIELD_BYTES_2
+// byte (2 from 0..3) of UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID
 enum UnitRename
 {
     UNIT_CAN_BE_RENAMED     = 0x01,
@@ -643,7 +643,7 @@ enum UnitFlags
     MAX_UNIT_FLAGS = 33
 };
 
-// Value masks for UNIT_FIELD_FLAGS_2
+// Value masks for UNIT_FIELD_FLAGS2
 enum UnitFlags2
 {
     UNIT_FLAG2_FEIGN_DEATH                  = 0x00000001,
@@ -1310,7 +1310,7 @@ class Unit : public WorldObject
         bool haveOffhandWeapon() const;
         bool CanDualWield() const { return m_canDualWield; }
         void SetCanDualWield(bool value) { m_canDualWield = value; }
-        float GetCombatReach() const { return m_floatValues[UNIT_FIELD_COMBATREACH]; }
+        float GetCombatReach() const { return m_floatValues[UNIT_FIELD_COMBAT_REACH]; }
         float GetMeleeReach() const;
         bool IsWithinCombatRange(const Unit* obj, float dist2compare) const;
         bool IsWithinMeleeRange(const Unit* obj, float dist = MELEE_RANGE) const;
@@ -1353,14 +1353,14 @@ class Unit : public WorldObject
         uint8 getLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
         uint8 getLevelForTarget(WorldObject const* /*target*/) const { return getLevel(); }
         void SetLevel(uint8 lvl);
-        uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
+        uint8 getRace() const { return GetByteValue(UNIT_FIELD_SEX, 0); }
         uint32 getRaceMask() const { return 1 << (getRace()-1); }
-        uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, 1); }
+        uint8 getClass() const { return GetByteValue(UNIT_FIELD_SEX, 1); }
         uint32 getClassMask() const { return 1 << (getClass()-1); }
-        uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, 2); }
+        uint8 getGender() const { return GetByteValue(UNIT_FIELD_SEX, 2); }
 
-        float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0+stat)); }
-        void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0+stat, val); }
+        float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STATS+stat)); }
+        void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STATS+stat, val); }
         uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL); }
         void SetArmor(int32 val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
 
@@ -1369,7 +1369,7 @@ class Unit : public WorldObject
         void SetResistance(SpellSchools school, int32 val) { SetStatInt32Value(UNIT_FIELD_RESISTANCES+school, val); }
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
-        uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+        uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAX_HEALTH); }
 
         bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
         bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
@@ -1386,7 +1386,7 @@ class Unit : public WorldObject
         int32 ModifyHealth(int32 val);
         int32 GetHealthGain(int32 dVal);
 
-        Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
+        Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_SEX, 3)); }
         void setPowerType(Powers power);
         int32 GetPower(Powers power) const;
         int32 GetMinPower(Powers power) const { return power == POWER_ECLIPSE ? -100 : 0; }
@@ -1399,16 +1399,16 @@ class Unit : public WorldObject
         int32 ModifyPowerPct(Powers power, float pct, bool apply = true);
 
         uint32 GetAttackTime(WeaponAttackType att) const;
-        void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_BASEATTACKTIME+att, val*m_modAttackSpeedPct[att]); }
+        void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_ATTACK_ROUND_BASE_TIME+att, val*m_modAttackSpeedPct[att]); }
         void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply);
         void ApplyCastTimePercentMod(float val, bool apply);
 
-        SheathState GetSheath() const { return SheathState(GetByteValue(UNIT_FIELD_BYTES_2, 0)); }
-        virtual void SetSheath(SheathState sheathed) { SetByteValue(UNIT_FIELD_BYTES_2, 0, sheathed); }
+        SheathState GetSheath() const { return SheathState(GetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 0)); }
+        virtual void SetSheath(SheathState sheathed) { SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 0, sheathed); }
 
         // faction template id
-        uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
-        void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
+        uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTION_TEMPLATE); }
+        void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTION_TEMPLATE, faction); }
         FactionTemplateEntry const* GetFactionTemplateEntry() const;
 
         ReputationRank GetReactionTo(Unit const* target) const;
@@ -1422,21 +1422,21 @@ class Unit : public WorldObject
         bool IsInRaidWith(Unit const* unit) const;
         void GetPartyMembers(std::list<Unit*> &units);
         bool IsContestedGuard() const;
-        bool IsPvP() const { return HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP); }
+        bool IsPvP() const { return HasByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, UNIT_BYTE2_FLAG_PVP); }
         void SetPvP(bool state);
         uint32 GetCreatureType() const;
         uint32 GetCreatureTypeMask() const;
 
-        uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, 0); }
+        uint8 getStandState() const { return GetByteValue(UNIT_FIELD_DISPLAY_POWER, 0); }
         bool IsSitState() const;
         bool IsStandState() const;
         void SetStandState(uint8 state);
 
-        void  SetStandFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_BYTES_1, 2, flags); }
-        void  RemoveStandFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, 2, flags); }
+        void  SetStandFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_DISPLAY_POWER, 2, flags); }
+        void  RemoveStandFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_DISPLAY_POWER, 2, flags); }
 
         bool IsMounted() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT); }
-        uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
+        uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID); }
         void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Dismount();
         MountCapabilityEntry const* GetMountCapability(uint32 mountType) const;
@@ -1500,22 +1500,22 @@ class Unit : public WorldObject
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackType attType) const;
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance) const;
 
-        bool IsVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
-        bool IsTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
-        bool IsQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
-        bool IsGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
-        bool IsTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
-        bool IsGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
-        bool IsBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
-        bool IsBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
-        bool IsInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
-        bool IsSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
-        bool IsSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
-        bool IsTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
-        bool IsAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
-        bool IsArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
+        bool IsVendor()       const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
+        bool IsTrainer()      const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
+        bool IsQuestGiver()   const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
+        bool IsGossip()       const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
+        bool IsTaxi()         const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
+        bool IsGuildMaster()  const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
+        bool IsBattleMaster() const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
+        bool IsBanker()       const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
+        bool IsInnkeeper()    const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
+        bool IsSpiritHealer() const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
+        bool IsSpiritGuide()  const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
+        bool IsTabardDesigner()const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
+        bool IsAuctioner()    const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
+        bool IsArmorer()      const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
         bool IsServiceProvider() const;
-        bool IsSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
+        bool IsSpiritService() const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
 
         bool IsInFlight()  const { return HasUnitState(UNIT_STATE_IN_FLIGHT); }
 
@@ -1632,14 +1632,14 @@ class Unit : public WorldObject
         DeathState getDeathState() const { return m_deathState; }
         virtual void setDeathState(DeathState s);           // overwrited in Creature/Player/Pet
 
-        uint64 GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONEDBY); }
+        uint64 GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONED_BY); }
         void SetOwnerGUID(uint64 owner);
-        uint64 GetCreatorGUID() const { return GetUInt64Value(UNIT_FIELD_CREATEDBY); }
-        void SetCreatorGUID(uint64 creator) { SetUInt64Value(UNIT_FIELD_CREATEDBY, creator); }
+        uint64 GetCreatorGUID() const { return GetUInt64Value(UNIT_FIELD_CREATED_BY); }
+        void SetCreatorGUID(uint64 creator) { SetUInt64Value(UNIT_FIELD_CREATED_BY, creator); }
         uint64 GetMinionGUID() const { return GetUInt64Value(UNIT_FIELD_SUMMON); }
         void SetMinionGUID(uint64 guid) { SetUInt64Value(UNIT_FIELD_SUMMON, guid); }
-        uint64 GetCharmerGUID() const { return GetUInt64Value(UNIT_FIELD_CHARMEDBY); }
-        void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMEDBY, owner); }
+        uint64 GetCharmerGUID() const { return GetUInt64Value(UNIT_FIELD_CHARMED_BY); }
+        void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMED_BY, owner); }
         uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
         void SetPetGUID(uint64 guid) { m_SummonSlot[SUMMON_SLOT_PET] = guid; }
         uint64 GetPetGUID() const { return m_SummonSlot[SUMMON_SLOT_PET]; }
@@ -1824,8 +1824,8 @@ class Unit : public WorldObject
         uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
         uint32 GetPowerIndex(uint32 powerType) const;
         int32 GetCreatePowers(Powers power) const;
-        float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
-        float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
+        float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STAT_POS_BUFF+stat); }
+        float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STAT_NEG_BUFF+stat); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
 
         void SetCurrentCastedSpell(Spell* pSpell);
@@ -1850,7 +1850,7 @@ class Unit : public WorldObject
         uint64 m_SummonSlot[MAX_SUMMON_SLOT];
         uint64 m_ObjectSlot[MAX_GAMEOBJECT_SLOT];
 
-        ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_BYTES_2, 3)); }
+        ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 3)); }
         void SetShapeshiftForm(ShapeshiftForm form);
 
         bool IsInFeralForm() const;
@@ -1926,11 +1926,11 @@ class Unit : public WorldObject
         void AddInterruptMask(uint32 mask) { m_interruptMask |= mask; }
         void UpdateInterruptMask();
 
-        uint32 GetDisplayId() const { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
+        uint32 GetDisplayId() const { return GetUInt32Value(UNIT_FIELD_DISPLAY_ID); }
         virtual void SetDisplayId(uint32 modelId);
-        uint32 GetNativeDisplayId() const { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
+        uint32 GetNativeDisplayId() const { return GetUInt32Value(UNIT_FIELD_NATIVE_DISPLAY_ID); }
         void RestoreDisplayId();
-        void SetNativeDisplayId(uint32 modelId) { SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, modelId); }
+        void SetNativeDisplayId(uint32 modelId) { SetUInt32Value(UNIT_FIELD_NATIVE_DISPLAY_ID, modelId); }
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() const { return m_transform;}
 

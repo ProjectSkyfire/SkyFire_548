@@ -235,7 +235,7 @@ public:
         {
             player->GiveLevel(newLevel);
             player->InitTalentForLevel();
-            player->SetUInt32Value(PLAYER_XP, 0);
+            player->SetUInt32Value(PLAYER_FIELD_XP, 0);
 
             if (handler->needReportToTarget(player))
             {
@@ -281,7 +281,7 @@ public:
                 if (name.empty())
                     continue;
 
-                char const* activeStr = target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->bit_index
+                char const* activeStr = target->GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE) == titleInfo->bit_index
                 ? handler->GetTrinityString(LANG_ACTIVE)
                 : "";
 

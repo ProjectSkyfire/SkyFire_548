@@ -31,26 +31,25 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     }
 
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
-    packet.WriteBit(queued);
-    packet.WriteBit(code == AUTH_OK);
-
+    
     packet << uint8(code);                             // Auth response ?
 
+    packet.WriteBit(queued);
     if (queued)
-    {
         packet.WriteBit(1);                             // Unknown
-    }
+
+    packet.WriteBit(code == AUTH_OK);
 
     if (code == AUTH_OK)
     {
         packet.WriteBit(0);
         packet.WriteBits(0, 21);
         packet.WriteBits(0, 21);
-        packet.WriteBits(result->GetRowCount(), 23);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
         packet.WriteBits(result2->GetRowCount(), 23);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBits(result->GetRowCount(), 23);
     }
     TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
     packet.FlushBits();
@@ -58,30 +57,29 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     if (code == AUTH_OK)
     {
         packet << uint32(0);
-        packet << uint32(0);
+        packet << uint32(Expansion());
         packet << uint8(Expansion());
+        
+        do
+        {
+            Field* fields = result2->Fetch();
+            
+            packet << fields[1].GetUInt8();
+            packet << fields[0].GetUInt8();
+        } 
+        while (result2->NextRow());   
+        
+        packet << uint8(Expansion());
+        packet << uint32(0);
 
         do
         {
             Field* fields = result->Fetch();
-
-            packet << fields[1].GetUInt8();
-            packet << fields[0].GetUInt8();
-        } 
-        while (result->NextRow());        
-
-        packet << uint8(Expansion());
-        packet << uint32(0);
-
-        do
-        {
-            Field* fields = result2->Fetch();
-
+            
             packet << fields[0].GetUInt8();
             packet << fields[1].GetUInt8();
         } 
-        while (result2->NextRow());
-
+        while (result->NextRow());     
 
         packet << uint32(0);
         packet << uint32(0);

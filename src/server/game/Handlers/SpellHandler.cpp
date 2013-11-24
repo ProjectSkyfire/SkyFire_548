@@ -217,7 +217,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     }
 
     // Verify that the bag is an actual bag or wrapped item that can be used "normally"
-    if (!(proto->Flags & ITEM_PROTO_FLAG_OPENABLE) && !item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
+    if (!(proto->Flags & ITEM_PROTO_FLAG_OPENABLE) && !item->HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_WRAPPED))
     {
         pUser->SendEquipError(EQUIP_ERR_CLIENT_LOCKED_OUT, item, NULL);
         TC_LOG_ERROR("network", "Possible hacking attempt: Player %s [guid: %u] tried to open item [guid: %u, entry: %u] which is not openable!",
@@ -246,7 +246,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         }
     }
 
-    if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))// wrapped?
+    if (item->HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_WRAPPED))// wrapped?
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_GIFT_BY_ITEM);
 
@@ -260,9 +260,9 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             uint32 entry = fields[0].GetUInt32();
             uint32 flags = fields[1].GetUInt32();
 
-            item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, 0);
+            item->SetUInt64Value(ITEM_FIELD_GIFT_CREATOR, 0);
             item->SetEntry(entry);
-            item->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
+            item->SetUInt32Value(ITEM_FIELD_DYNAMIC_FLAGS, flags);
             item->SetState(ITEM_CHANGED, pUser);
         }
         else
@@ -572,13 +572,13 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recvData*/)
     if (_player->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
         return; // silent return, client should display error by itself and not send this opcode
 
-    if (_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
+    if (_player->GetUInt32Value(PLAYER_FIELD_SELF_RES_SPELL))
     {
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_player->GetUInt32Value(PLAYER_FIELD_SELF_RES_SPELL));
         if (spellInfo)
             _player->CastSpell(_player, spellInfo, false, 0);
 
-        _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+        _player->SetUInt32Value(PLAYER_FIELD_SELF_RES_SPELL, 0);
     }
 }
 
@@ -635,11 +635,11 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         if (uint32 guildId = player->GetGuildId())
             guild = sGuildMgr->GetGuildById(guildId);
 
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 0));   // skin
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 1));   // face
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 2));   // hair
-        data << uint8(player->GetByteValue(PLAYER_BYTES, 3));   // haircolor
-        data << uint8(player->GetByteValue(PLAYER_BYTES_2, 0)); // facialhair
+        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 0));   // skin
+        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 1));   // face
+        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 2));   // hair
+        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 3));   // haircolor
+        data << uint8(player->GetByteValue(PLAYER_FIELD_REST_STATE, 0)); // facialhair
         data << uint64(guild ? guild->GetGUID() : 0);
 
         static EquipmentSlots const itemSlots[] =
@@ -661,9 +661,9 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         // Display items in visible slots
         for (EquipmentSlots const* itr = &itemSlots[0]; *itr != EQUIPMENT_SLOT_END; ++itr)
         {
-            if (*itr == EQUIPMENT_SLOT_HEAD && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+            if (*itr == EQUIPMENT_SLOT_HEAD && player->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
                 data << uint32(0);
-            else if (*itr == EQUIPMENT_SLOT_BACK && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+            else if (*itr == EQUIPMENT_SLOT_BACK && player->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
                 data << uint32(0);
             else if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
                 data << uint32(item->GetTemplate()->DisplayInfoID);

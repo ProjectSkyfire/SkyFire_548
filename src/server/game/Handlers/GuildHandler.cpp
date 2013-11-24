@@ -746,7 +746,7 @@ void WorldSession::HandleAutoDeclineGuildInvites(WorldPacket& recvPacket)
     uint8 enable;
     recvPacket >> enable;
 
-    GetPlayer()->ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_AUTO_DECLINE_GUILD, enable);
+    GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_AUTO_DECLINE_GUILD, enable);
 }
 
 void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)

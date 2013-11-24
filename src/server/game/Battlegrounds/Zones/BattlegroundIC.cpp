@@ -111,8 +111,8 @@ void BattlegroundIC::PostUpdateImpl(uint32 diff)
             GetBGObject(BG_IC_GO_DOODAD_ND_HUMAN_GATE_CLOSEDFX_DOOR01)->RemoveFromWorld();
             GetBGObject(BG_IC_GO_DOODAD_ND_WINTERORC_WALL_GATEFX_DOOR01)->RemoveFromWorld();
 
-            GetBGObject(BG_IC_GO_ALLIANCE_GATE_3)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Alliance door
-            GetBGObject(BG_IC_GO_HORDE_GATE_1)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Horde door
+            GetBGObject(BG_IC_GO_ALLIANCE_GATE_3)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED); // Alliance door
+            GetBGObject(BG_IC_GO_HORDE_GATE_1)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED); // Horde door
 
             doorsClosed = true;
         } else closeFortressDoorsTimer -= diff;
@@ -210,7 +210,7 @@ void BattlegroundIC::PostUpdateImpl(uint32 diff)
                 DelObject(nodePoint[i].gameobject_type);
                 AddObject(nodePoint[i].gameobject_type, nodePoint[i].gameobject_entry, cords[0], cords[1], cords[2], cords[3], 0, 0, 0, 0, RESPAWN_ONE_DAY);
 
-                GetBGObject(nodePoint[i].gameobject_type)->SetUInt32Value(GAMEOBJECT_FACTION, nodePoint[i].faction == TEAM_ALLIANCE ? BG_IC_Factions[1] : BG_IC_Factions[0]);
+                GetBGObject(nodePoint[i].gameobject_type)->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, nodePoint[i].faction == TEAM_ALLIANCE ? BG_IC_Factions[1] : BG_IC_Factions[0]);
 
                 UpdateNodeWorldState(&nodePoint[i]);
                 HandleCapturedNodes(&nodePoint[i], false);
@@ -242,10 +242,10 @@ void BattlegroundIC::PostUpdateImpl(uint32 diff)
 void BattlegroundIC::StartingEventCloseDoors()
 {
     // Show Full Gate Displays
-    GetBGObject(BG_IC_GO_ALLIANCE_GATE_1)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Alliance door
-    GetBGObject(BG_IC_GO_ALLIANCE_GATE_2)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Alliance door
-    GetBGObject(BG_IC_GO_HORDE_GATE_2)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Horde door
-    GetBGObject(BG_IC_GO_HORDE_GATE_3)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Horde door
+    GetBGObject(BG_IC_GO_ALLIANCE_GATE_1)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED); // Alliance door
+    GetBGObject(BG_IC_GO_ALLIANCE_GATE_2)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED); // Alliance door
+    GetBGObject(BG_IC_GO_HORDE_GATE_2)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED); // Horde door
+    GetBGObject(BG_IC_GO_HORDE_GATE_3)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED); // Horde door
 }
 
 void BattlegroundIC::StartingEventOpenDoors()
@@ -527,7 +527,7 @@ void BattlegroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* target
                 Battleground::EndBattleground(WINNER_NONE);
             }
 
-            GetBGObject(nodePoint[i].gameobject_type)->SetUInt32Value(GAMEOBJECT_FACTION, nodePoint[i].faction == TEAM_ALLIANCE ? BG_IC_Factions[1] : BG_IC_Factions[0]);
+            GetBGObject(nodePoint[i].gameobject_type)->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, nodePoint[i].faction == TEAM_ALLIANCE ? BG_IC_Factions[1] : BG_IC_Factions[0]);
 
             if (nodePoint[i].nodeType == NODE_TYPE_WORKSHOP)
             {
@@ -782,7 +782,7 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
                     if (GameObject* seaforiumBombs = GetBGObject(BG_IC_GO_SEAFORIUM_BOMBS_1+i))
                     {
                         seaforiumBombs->SetRespawnTime(10);
-                        seaforiumBombs->SetUInt32Value(GAMEOBJECT_FACTION, BG_IC_Factions[(nodePoint->faction == TEAM_ALLIANCE ? 0 : 1)]);
+                        seaforiumBombs->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, BG_IC_Factions[(nodePoint->faction == TEAM_ALLIANCE ? 0 : 1)]);
                     }
                 }
                 break;

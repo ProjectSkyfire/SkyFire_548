@@ -678,9 +678,9 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
                 ASSERT(false);
             }
             m_spawnedByDefault = false;                     // all object with owner is despawned after delay
-            SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner);
+            SetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY, owner);
         }
-        uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
+        uint64 GetOwnerGUID() const { return GetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY); }
         Unit* GetOwner() const;
 
         void SetSpellId(uint32 id)
@@ -718,14 +718,14 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void Refresh();
         void Delete();
         void getFishLoot(Loot* loot, Player* loot_owner);
-        GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
-        void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
-        GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
+        GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 1)); }
+        void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 1, type); }
+        GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0)); }
         void SetGoState(GOState state);
-        uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
+        uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 2); }
         void SetGoArtKit(uint8 artkit);
-        uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
-        void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
+        uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3); }
+        void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3, animprogress); }
         static void SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid = 0);
 
         void SetPhaseMask(uint32 newPhaseMask, bool update);
@@ -804,9 +804,9 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void SetDestructibleState(GameObjectDestructibleState state, Player* eventInvoker = NULL, bool setHealth = false);
         GameObjectDestructibleState GetDestructibleState() const
         {
-            if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+            if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DESTROYED))
                 return GO_DESTRUCTIBLE_DESTROYED;
-            if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED))
+            if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED))
                 return GO_DESTRUCTIBLE_DAMAGED;
             return GO_DESTRUCTIBLE_INTACT;
         }
@@ -819,7 +819,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         std::string GetAIName() const;
         void SetDisplayId(uint32 displayid);
-        uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
+        uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_FIELD_DISPLAY_ID); }
 
         GameObjectModel* m_model;
         void GetRespawnPosition(float &x, float &y, float &z, float* ori = NULL) const;

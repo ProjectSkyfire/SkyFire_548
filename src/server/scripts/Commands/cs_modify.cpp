@@ -311,8 +311,8 @@ public:
         {
             uint32 factionid = target->getFaction();
             uint32 flag      = target->GetUInt32Value(UNIT_FIELD_FLAGS);
-            uint32 npcflag   = target->GetUInt32Value(UNIT_NPC_FLAGS);
-            uint32 dyflag    = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+            uint32 npcflag   = target->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
+            uint32 dyflag    = target->GetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS);
             handler->PSendSysMessage(LANG_CURRENT_FACTION, target->GetGUIDLow(), factionid, flag, npcflag, dyflag);
             return true;
         }
@@ -330,7 +330,7 @@ public:
 
         uint32 npcflag;
         if (!pnpcflag)
-            npcflag = target->GetUInt32Value(UNIT_NPC_FLAGS);
+            npcflag = target->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
         else
             npcflag = atoi(pnpcflag);
 
@@ -338,7 +338,7 @@ public:
 
         uint32  dyflag;
         if (!pdyflag)
-            dyflag = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+            dyflag = target->GetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS);
         else
             dyflag = atoi(pdyflag);
 
@@ -353,8 +353,8 @@ public:
 
         target->setFaction(factionid);
         target->SetUInt32Value(UNIT_FIELD_FLAGS, flag);
-        target->SetUInt32Value(UNIT_NPC_FLAGS, npcflag);
-        target->SetUInt32Value(UNIT_DYNAMIC_FLAGS, dyflag);
+        target->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, npcflag);
+        target->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, dyflag);
 
         return true;
     }
@@ -1296,7 +1296,7 @@ public:
             return false;
 
         uint32 anim_id = atoi((char*)args);
-        handler->GetSession()->GetPlayer()->SetUInt32Value(UNIT_NPC_EMOTESTATE, anim_id);
+        handler->GetSession()->GetPlayer()->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, anim_id);
 
         return true;
     }
@@ -1346,8 +1346,8 @@ public:
         }
 
         // Set gender
-        target->SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
-        target->SetByteValue(PLAYER_BYTES_3, 0, gender);
+        target->SetByteValue(UNIT_FIELD_SEX, 2, gender);
+        target->SetByteValue(PLAYER_FIELD_PVP_INFO, 0, gender);
 
         // Change display ID
         target->InitDisplayIds();

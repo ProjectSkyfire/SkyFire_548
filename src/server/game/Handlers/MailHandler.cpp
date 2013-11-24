@@ -266,13 +266,13 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
             return;
         }
 
-        if (item->GetTemplate()->Flags & ITEM_PROTO_FLAG_CONJURED || item->GetUInt32Value(ITEM_FIELD_DURATION))
+        if (item->GetTemplate()->Flags & ITEM_PROTO_FLAG_CONJURED || item->GetUInt32Value(ITEM_FIELD_EXPIRATION))
         {
             player->SendMailResult(0, MAIL_SEND, MAIL_ERR_EQUIP_ERROR, EQUIP_ERR_MAIL_BOUND_ITEM);
             return;
         }
 
-        if (COD && item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
+        if (COD && item->HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_WRAPPED))
         {
             player->SendMailResult(0, MAIL_SEND, MAIL_ERR_CANT_SEND_WRAPPED_COD);
             return;
@@ -702,7 +702,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
             // charges
             data << uint32((item ? item->GetSpellCharges() : 0));
             // durability
-            data << uint32((item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0));
+            data << uint32((item ? item->GetUInt32Value(ITEM_FIELD_MAX_DURABILITY) : 0));
             // durability
             data << uint32((item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0));
             // unknown wotlk
@@ -765,7 +765,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
         bodyItem->SetText(m->body);
 
     bodyItem->SetUInt32Value(ITEM_FIELD_CREATOR, m->sender);
-    bodyItem->SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_MAIL_TEXT_MASK);
+    bodyItem->SetFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_MAIL_TEXT_MASK);
 
     TC_LOG_INFO("network", "HandleMailCreateTextItem mailid=%u", mailId);
 

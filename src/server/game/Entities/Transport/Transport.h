@@ -57,8 +57,8 @@ class Transport : public GameObject, public TransportBase
             TransportBase::CalculatePassengerOffset(x, y, z, o, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
         }
 
-        uint32 GetPeriod() const { return GetUInt32Value(GAMEOBJECT_LEVEL); }
-        void SetPeriod(uint32 period) { SetUInt32Value(GAMEOBJECT_LEVEL, period); }
+        uint32 GetPeriod() const { return GetUInt32Value(GAMEOBJECT_FIELD_LEVEL); }
+        void SetPeriod(uint32 period) { SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, period); }
         uint32 GetTimer() const { return GetGOValue()->Transport.PathProgress; }
 
         KeyFrameVec const& GetKeyFrames() const { return _transportInfo->keyFrames; }

@@ -475,8 +475,8 @@ public:
         {
             if (((Pet*)creature)->getPetType() == HUNTER_PET)
             {
-                creature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr->GetXPForLevel(lvl)/4);
-                creature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+                creature->SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, sObjectMgr->GetXPForLevel(lvl)/4);
+                creature->SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);
             }
             ((Pet*)creature)->GivePetLevel(lvl);
         }
@@ -631,7 +631,7 @@ public:
             return false;
         }
 
-        creature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
+        creature->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, npcFlags);
 
         PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_NPCFLAG);
 
@@ -712,7 +712,7 @@ public:
         CreatureTemplate const* cInfo = target->GetCreatureTemplate();
 
         uint32 faction = target->getFaction();
-        uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
+        uint32 npcflags = target->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
         uint32 mechanicImmuneMask = cInfo->MechanicImmuneMask;
         uint32 displayid = target->GetDisplayId();
         uint32 nativeid = target->GetNativeDisplayId();
@@ -734,7 +734,7 @@ public:
             if (target->GetUInt32Value(UNIT_FIELD_FLAGS) & unitFlags[i].Value)
                 handler->PSendSysMessage("%s (0x%X)", unitFlags[i].Name, unitFlags[i].Value);
 
-        handler->PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS_2), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
+        handler->PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS2), target->GetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS), target->getFaction());
         handler->PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
         handler->PSendSysMessage(LANG_NPCINFO_LOOT,  cInfo->lootid, cInfo->pickpocketLootId, cInfo->SkinLootId);
         handler->PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
@@ -902,7 +902,7 @@ public:
             return false;
         }
 
-        target->SetUInt32Value(UNIT_NPC_EMOTESTATE, emote);
+        target->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, emote);
 
         return true;
     }
@@ -1609,7 +1609,7 @@ public:
 
         creature->SetName(args);
         uint32 idname = sObjectMgr->AddCreatureTemplate(creature->GetName());
-        creature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
+        creature->SetUInt32Value(OBJECT_FIELD_ENTRY_ID, idname);
 
         creature->SaveToDB();
         */
@@ -1654,8 +1654,8 @@ public:
             return true;
         }
 
-        uint32 idname = sObjectMgr->AddCreatureSubName(creature->GetName(), args, creature->GetUInt32Value(UNIT_FIELD_DISPLAYID));
-        creature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
+        uint32 idname = sObjectMgr->AddCreatureSubName(creature->GetName(), args, creature->GetUInt32Value(UNIT_FIELD_DISPLAY_ID));
+        creature->SetUInt32Value(OBJECT_FIELD_ENTRY_ID, idname);
 
         creature->SaveToDB();
         */

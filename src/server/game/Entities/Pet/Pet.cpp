@@ -192,7 +192,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
 
     setPetType(petType);
     setFaction(owner->getFaction());
-    SetUInt32Value(UNIT_CREATED_BY_SPELL, summonSpellId);
+    SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, summonSpellId);
 
     CreatureTemplate const* cinfo = GetCreatureTemplate();
     if (cinfo->type == CREATURE_TYPE_CRITTER)
@@ -206,7 +206,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     SetDisplayId(fields[3].GetUInt32());
     SetNativeDisplayId(fields[3].GetUInt32());
     uint32 petlevel = fields[4].GetUInt16();
-    SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+    SetUInt32Value(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
     SetName(fields[8].GetString());
 
     switch (getPetType())
@@ -214,14 +214,14 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         case SUMMON_PET:
             petlevel = owner->getLevel();
 
-            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x800); // class = mage
+            SetUInt32Value(UNIT_FIELD_SEX, 0x800); // class = mage
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet dismiss, cancel)
             break;
         case HUNTER_PET:
-            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100); // class = warrior, gender = none, power = focus
+            SetUInt32Value(UNIT_FIELD_SEX, 0x02020100); // class = warrior, gender = none, power = focus
             SetSheath(SHEATH_STATE_MELEE);
-            SetByteFlag(UNIT_FIELD_BYTES_2, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
+            SetByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
 
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet abandon, cancel)
@@ -237,7 +237,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     SetCreatorGUID(owner->GetGUID());
 
     InitStatsForLevel(petlevel);
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, fields[5].GetUInt32());
 
     SynchronizeLevelWithOwner();
 
@@ -444,11 +444,11 @@ void Pet::SavePetToDB(PetSaveMode mode)
             << ownerLowGUID << ','
             << GetNativeDisplayId() << ','
             << uint32(getLevel()) << ','
-            << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ','
+            << GetUInt32Value(UNIT_FIELD_PET_EXPERIENCE) << ','
             << uint32(GetReactState()) << ','
             << uint32(mode) << ", '"
             << name.c_str() << "', "
-            << uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1) << ','
+            << uint32(HasByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1) << ','
             << curhealth << ','
             << curmana << ", '";
 
@@ -460,7 +460,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
 
         ss  << "', "
             << time(NULL) << ','
-            << GetUInt32Value(UNIT_CREATED_BY_SPELL) << ','
+            << GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL) << ','
             << uint32(getPetType()) << ')';
 
         trans->Append(ss.str().c_str());
@@ -509,7 +509,7 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
         if (getPetType() == HUNTER_PET)
         {
             // pet corpse non lootable and non skinnable
-            SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+            SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
@@ -674,8 +674,8 @@ void Pet::GivePetXP(uint32 xp)
     if (petlevel >= maxlevel)
        return;
 
-    uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
-    uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
+    uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE);
+    uint32 curXP = GetUInt32Value(UNIT_FIELD_PET_EXPERIENCE);
     uint32 newXP = curXP + xp;
 
     // Check how much XP the pet should receive, and hand off have any left from previous levelups
@@ -687,10 +687,10 @@ void Pet::GivePetXP(uint32 xp)
 
         GivePetLevel(petlevel);
 
-        nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+        nextLvlXP = GetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE);
     }
     // Not affected by special conditions - give it new XP
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, petlevel < maxlevel ? newXP : 0);
+    SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, petlevel < maxlevel ? newXP : 0);
 }
 
 void Pet::GivePetLevel(uint8 level)
@@ -700,8 +700,8 @@ void Pet::GivePetLevel(uint8 level)
 
     if (getPetType()==HUNTER_PET)
     {
-        SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-        SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(level)*PET_XP_FACTOR));
+        SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);
+        SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, uint32(sObjectMgr->GetXPForLevel(level)*PET_XP_FACTOR));
     }
 
     InitStatsForLevel(level);
@@ -765,15 +765,15 @@ bool Pet::CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map, uint32 phas
 
     setPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(getLevel()+1)*PET_XP_FACTOR));
-    SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+    SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);
+    SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, uint32(sObjectMgr->GetXPForLevel(getLevel()+1)*PET_XP_FACTOR));
+    SetUInt32Value(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
     if (cinfo->type == CREATURE_TYPE_BEAST)
     {
-        SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
+        SetUInt32Value(UNIT_FIELD_SEX, 0x02020100);
         SetSheath(SHEATH_STATE_MELEE);
-        SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
+        SetByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
     }
 
     return true;
@@ -819,8 +819,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
     SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
 
-    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-    SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);
+    SetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED, 1.0f);
+    SetFloatValue(UNIT_FIELD_MOD_SPELL_HASTE, 1.0f);
 
     //scale
     CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
@@ -891,7 +891,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         case HUNTER_PET:
         {
-            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
+            SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
             //these formula may not be correct; however, it is designed to be close to what it should be
             //this makes dps 0.5 of pets level
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));

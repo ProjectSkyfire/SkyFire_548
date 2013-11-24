@@ -117,7 +117,16 @@ void WorldSession::HandleSwapItem(WorldPacket& recvData)
     //TC_LOG_DEBUG("network", "WORLD: CMSG_SWAP_ITEM");
     uint8 dstbag, dstslot, srcbag, srcslot;
 
+    recvData.read_skip<uint8>();
+    recvData.read_skip<uint8>();
+
+    uint32 count = recvData.ReadBits(2);
+
+    if (count != 2)
+        return;
+
     recvData >> dstbag >> dstslot >> srcbag >> srcslot;
+
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u", srcbag, srcslot, dstbag, dstslot);
 
     uint16 src = ((srcbag << 8) | srcslot);
@@ -359,7 +368,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
         // prevent selling item for sellprice when the item is still refundable
         // this probably happens when right clicking a refundable item, the client sends both
         // CMSG_SELL_ITEM and CMSG_REFUND_ITEM (unverified)
-        if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
+        if (pItem->HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_REFUNDABLE))
             return; // Therefore, no feedback to client
 
         // special case at auto sell (sell all)
@@ -444,7 +453,7 @@ void WorldSession::HandleBuybackItem(WorldPacket& recvData)
     Item* pItem = _player->GetItemFromBuyBackSlot(slot);
     if (pItem)
     {
-        uint32 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
+        uint32 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE + slot - BUYBACK_SLOT_START);
         if (!_player->HasEnoughMoney(uint64(price)))
         {
             _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, creature, pItem->GetEntry(), 0);
@@ -963,7 +972,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR))        // HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
+    if (item->GetUInt64Value(ITEM_FIELD_GIFT_CREATOR))        // HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAGS_WRAPPED);
     {
         _player->SendEquipError(EQUIP_ERR_CANT_WRAP_WRAPPED, item, NULL);
         return;
@@ -1000,7 +1009,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
     stmt->setUInt32(0, GUID_LOPART(item->GetOwnerGUID()));
     stmt->setUInt32(1, item->GetGUIDLow());
     stmt->setUInt32(2, item->GetEntry());
-    stmt->setUInt32(3, item->GetUInt32Value(ITEM_FIELD_FLAGS));
+    stmt->setUInt32(3, item->GetUInt32Value(ITEM_FIELD_DYNAMIC_FLAGS));
     trans->Append(stmt);
 
     item->SetEntry(gift->GetEntry());
@@ -1014,8 +1023,8 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
         case 17307: item->SetEntry(17308); break;
         case 21830: item->SetEntry(21831); break;
     }
-    item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
-    item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED);
+    item->SetUInt64Value(ITEM_FIELD_GIFT_CREATOR, _player->GetGUID());
+    item->SetUInt32Value(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_WRAPPED);
     item->SetState(ITEM_CHANGED, _player);
 
     if (item->GetState() == ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_instance`

@@ -182,7 +182,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 
     // in friendly area
-    else if (GetPlayer()->IsPvP() && !GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
+    else if (GetPlayer()->IsPvP() && !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
         GetPlayer()->UpdatePvP(false, false);
 
     // resummon pet
@@ -249,7 +249,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
             plMover->CastSpell(plMover, 2479, true);
 
         // in friendly area
-        else if (plMover->IsPvP() && !plMover->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
+        else if (plMover->IsPvP() && !plMover->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
             plMover->UpdatePvP(false, false);
     }
 
@@ -456,7 +456,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
     };
 
     switch (opcode)
-    {
+    {/*
         case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:        move_type = MOVE_WALK;        break;
         case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:         move_type = MOVE_RUN;         break;
         case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK:    move_type = MOVE_RUN_BACK;    break;
@@ -465,7 +465,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
         case CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK:         move_type = MOVE_TURN_RATE;   break;
         case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:      move_type = MOVE_FLIGHT;      break;
         case CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK: move_type = MOVE_FLIGHT_BACK; break;
-        case CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK:        move_type = MOVE_PITCH_RATE;  break;
+        case CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK:        move_type = MOVE_PITCH_RATE;  break;*/
         default:
             TC_LOG_ERROR("network", "WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
             return;

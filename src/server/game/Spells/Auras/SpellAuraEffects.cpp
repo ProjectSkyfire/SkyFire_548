@@ -478,7 +478,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     if (!(m_spellInfo->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION) || G3D::fuzzyEq(m_spellInfo->Effects[m_effIndex].BonusMultiplier, 0.0f))
         amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
     else if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-        amount = int32(caster->GetFloatValue(PLAYER_MASTERY) * m_spellInfo->Effects[m_effIndex].BonusMultiplier);
+        amount = int32(caster->GetFloatValue(PLAYER_FIELD_MASTERY) * m_spellInfo->Effects[m_effIndex].BonusMultiplier);
 
     // check item enchant aura cast
     if (!amount && caster)
@@ -644,7 +644,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
                     caster->ModSpellCastTime(m_spellInfo, m_amplitude);
             }
             else if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED));
         }
     }
 
@@ -1414,8 +1414,8 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
     if (apply)
     {
         // apply glow vision
-        if (target->GetTypeId() == TYPEID_PLAYER)
-            target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+        //if (target->GetTypeId() == TYPEID_PLAYER)
+        //    target->SetByteFlag(PLAYER_FIELD_LIFETIME_MAX_RANK2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
         target->m_invisibility.AddFlag(type);
         target->m_invisibility.AddValue(type, GetAmount());
@@ -1426,8 +1426,8 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
         {
             // if not have different invisibility auras.
             // remove glow vision
-            if (target->GetTypeId() == TYPEID_PLAYER)
-                target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+           // if (target->GetTypeId() == TYPEID_PLAYER)
+           //     target->RemoveByteFlag(PLAYER_FIELD_LIFETIME_MAX_RANK2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
             target->m_invisibility.DelFlag(type);
         }
@@ -1498,8 +1498,8 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         target->m_stealth.AddValue(type, GetAmount());
 
         target->SetStandFlags(UNIT_STAND_FLAGS_CREEP);
-        if (target->GetTypeId() == TYPEID_PLAYER)
-            target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
+        //if (target->GetTypeId() == TYPEID_PLAYER)
+        //    target->SetByteFlag(PLAYER_FIELD_LIFETIME_MAX_RANK2, 3, PLAYER_FIELD_BYTE2_STEALTH);
     }
     else
     {
@@ -1510,8 +1510,8 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
             target->m_stealth.DelFlag(type);
 
             target->RemoveStandFlags(UNIT_STAND_FLAGS_CREEP);
-            if (target->GetTypeId() == TYPEID_PLAYER)
-                target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
+            //if (target->GetTypeId() == TYPEID_PLAYER)
+             //   target->RemoveByteFlag(PLAYER_FIELD_LIFETIME_MAX_RANK2, 3, PLAYER_FIELD_BYTE2_STEALTH);
         }
     }
 
@@ -1584,7 +1584,7 @@ void AuraEffect::HandleAuraGhost(AuraApplication const* aurApp, uint8 mode, bool
 
     if (apply)
     {
-        target->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
+        target->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
         target->m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
         target->m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
     }
@@ -1593,7 +1593,7 @@ void AuraEffect::HandleAuraGhost(AuraApplication const* aurApp, uint8 mode, bool
         if (target->HasAuraType(SPELL_AURA_GHOST))
             return;
 
-        target->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
+        target->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
         target->m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
         target->m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
     }
@@ -2056,7 +2056,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
 
                     // Dragonmaw Illusion (set mount model also)
                     if (GetId() == 42016 && target->GetMountID() && !target->GetAuraEffectsByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED).empty())
-                        target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 16314);
+                        target->SetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID, 16314);
                 }
             }
         }
@@ -2098,7 +2098,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     uint32 displayID = ObjectMgr::ChooseDisplayId(ci);
                     sObjectMgr->GetCreatureModelRandomGender(&displayID);
 
-                    target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayID);
+                    target->SetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID, displayID);
                 }
             }
         }
@@ -2133,12 +2133,12 @@ void AuraEffect::HandleAuraCloneCaster(AuraApplication const* aurApp, uint8 mode
         // What must be cloned? at least display and scale
         target->SetDisplayId(caster->GetDisplayId());
         //target->SetObjectScale(caster->GetObjectScale()); // we need retail info about how scaling is handled (aura maybe?)
-        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE);
+        target->SetFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_MIRROR_IMAGE);
     }
     else
     {
         target->SetDisplayId(target->GetNativeDisplayId());
-        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE);
+        target->RemoveFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_MIRROR_IMAGE);
     }
 }
 
@@ -2192,8 +2192,8 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
             return;
 
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);            // blizz like 2.0.x
-        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);    // blizz like 2.0.x
-        target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);         // blizz like 2.0.x
+        target->SetFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_FEIGN_DEATH);    // blizz like 2.0.x
+        target->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);         // blizz like 2.0.x
         target->AddUnitState(UNIT_STATE_DIED);
 
         if (Creature* creature = target->ToCreature())
@@ -2207,8 +2207,8 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
         */
 
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);         // blizz like 2.0.x
-        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH); // blizz like 2.0.x
-        target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);      // blizz like 2.0.x
+        target->RemoveFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_FEIGN_DEATH); // blizz like 2.0.x
+        target->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);      // blizz like 2.0.x
         target->ClearUnitState(UNIT_STATE_DIED);
 
         if (Creature* creature = target->ToCreature())
@@ -2261,13 +2261,13 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const* aurApp, uint8 mode, 
         attType=BASE_ATTACK;
         break;
     case SPELL_AURA_MOD_DISARM_OFFHAND:
-        field=UNIT_FIELD_FLAGS_2;
+        field=UNIT_FIELD_FLAGS2;
         flag=UNIT_FLAG2_DISARM_OFFHAND;
         slot=EQUIPMENT_SLOT_OFFHAND;
         attType=OFF_ATTACK;
         break;
     case SPELL_AURA_MOD_DISARM_RANGED:
-        field=UNIT_FIELD_FLAGS_2;
+        field=UNIT_FIELD_FLAGS2;
         flag=UNIT_FLAG2_DISARM_RANGED;
         slot=EQUIPMENT_SLOT_RANGED;
         attType=RANGED_ATTACK;
@@ -2390,13 +2390,13 @@ void AuraEffect::HandleAuraAllowOnlyAbility(AuraApplication const* aurApp, uint8
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
         if (apply)
-            target->SetFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY);
+            target->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_ALLOW_ONLY_ABILITY);
         else
         {
             // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
             if (target->HasAuraType(SPELL_AURA_ALLOW_ONLY_ABILITY))
                 return;
-            target->RemoveFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY);
+            target->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_ALLOW_ONLY_ABILITY);
         }
     }
 }
@@ -2416,9 +2416,9 @@ void AuraEffect::HandleAuraTrackCreatures(AuraApplication const* aurApp, uint8 m
         return;
 
     if (apply)
-        target->SetFlag(PLAYER_TRACK_CREATURES, uint32(1) << (GetMiscValue() - 1));
+        target->SetFlag(PLAYER_FIELD_TRACK_CREATURE_MASK, uint32(1) << (GetMiscValue() - 1));
     else
-        target->RemoveFlag(PLAYER_TRACK_CREATURES, uint32(1) << (GetMiscValue() - 1));
+        target->RemoveFlag(PLAYER_FIELD_TRACK_CREATURE_MASK, uint32(1) << (GetMiscValue() - 1));
 }
 
 void AuraEffect::HandleAuraTrackResources(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -2432,9 +2432,9 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const* aurApp, uint8 m
         return;
 
     if (apply)
-        target->SetFlag(PLAYER_TRACK_RESOURCES, uint32(1) << (GetMiscValue() - 1));
+        target->SetFlag(PLAYER_FIELD_TRACK_RESOURCE_MASK, uint32(1) << (GetMiscValue() - 1));
     else
-        target->RemoveFlag(PLAYER_TRACK_RESOURCES, uint32(1) << (GetMiscValue() - 1));
+        target->RemoveFlag(PLAYER_FIELD_TRACK_RESOURCE_MASK, uint32(1) << (GetMiscValue() - 1));
 }
 
 void AuraEffect::HandleAuraTrackStealthed(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -2453,7 +2453,7 @@ void AuraEffect::HandleAuraTrackStealthed(AuraApplication const* aurApp, uint8 m
         if (target->HasAuraType(GetAuraType()))
             return;
     }
-    target->ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_TRACK_STEALTHED, apply);
+    target->ApplyModFlag(PLAYER_FIELD_LIFETIME_MAX_RANK, PLAYER_FIELD_BYTE_TRACK_STEALTHED, apply);
 }
 
 void AuraEffect::HandleAuraModStalked(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -2465,12 +2465,12 @@ void AuraEffect::HandleAuraModStalked(AuraApplication const* aurApp, uint8 mode,
 
     // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
     if (apply)
-        target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
+        target->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
     else
     {
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
         if (!target->HasAuraType(GetAuraType()))
-            target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
+            target->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -2485,13 +2485,13 @@ void AuraEffect::HandleAuraUntrackable(AuraApplication const* aurApp, uint8 mode
     Unit* target = aurApp->GetTarget();
 
     if (apply)
-        target->SetByteFlag(UNIT_FIELD_BYTES_1, 2, UNIT_STAND_FLAGS_UNTRACKABLE);
+        target->SetByteFlag(UNIT_FIELD_DISPLAY_POWER, 2, UNIT_STAND_FLAGS_UNTRACKABLE);
     else
     {
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
         if (target->HasAuraType(GetAuraType()))
             return;
-        target->RemoveByteFlag(UNIT_FIELD_BYTES_1, 2, UNIT_STAND_FLAGS_UNTRACKABLE);
+        target->RemoveByteFlag(UNIT_FIELD_DISPLAY_POWER, 2, UNIT_STAND_FLAGS_UNTRACKABLE);
     }
 }
 
@@ -2691,13 +2691,13 @@ void AuraEffect::HandleForceMoveForward(AuraApplication const* aurApp, uint8 mod
     Unit* target = aurApp->GetTarget();
 
     if (apply)
-        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVEMENT);
+        target->SetFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_FORCE_MOVEMENT);
     else
     {
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
         if (target->HasAuraType(GetAuraType()))
             return;
-        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVEMENT);
+        target->RemoveFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_FORCE_MOVEMENT);
     }
 }
 
@@ -3014,7 +3014,7 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
 
             // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
             if (apply && target->HasAuraEffect(42016, 0) && target->GetMountID())
-                target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 16314);
+                target->SetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID, 16314);
         }
     }
 }
@@ -4395,7 +4395,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
         target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetAmount()), apply);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
-            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
+            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PERCENT, float (GetAmount()), apply);
     }
     else
     {
@@ -4490,10 +4490,10 @@ void AuraEffect::HandleNoReagentUseAura(AuraApplication const* aurApp, uint8 mod
         for (Unit::AuraEffectList::const_iterator i = noReagent.begin(); i != noReagent.end(); ++i)
             mask |= (*i)->m_spellInfo->Effects[(*i)->m_effIndex].SpellClassMask;
 
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1  , mask[0]);
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+1, mask[1]);
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+2, mask[2]);
-    target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+3, mask[3]);
+    target->SetUInt32Value(PLAYER_FIELD_NO_REAGENT_COST_MASK  , mask[0]);
+    target->SetUInt32Value(PLAYER_FIELD_NO_REAGENT_COST_MASK+1, mask[1]);
+    target->SetUInt32Value(PLAYER_FIELD_NO_REAGENT_COST_MASK+2, mask[2]);
+    target->SetUInt32Value(PLAYER_FIELD_NO_REAGENT_COST_MASK+3, mask[3]);
 }
 
 void AuraEffect::HandleAuraRetainComboPoints(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4845,7 +4845,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             uint32 displayID = ObjectMgr::ChooseDisplayId(creatureInfo);
                             sObjectMgr->GetCreatureModelRandomGender(&displayID);
 
-                            target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayID);
+                            target->SetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID, displayID);
                         }
                     }
                     break;
@@ -4996,7 +4996,7 @@ void AuraEffect::HandleAuraEmpathy(AuraApplication const* aurApp, uint8 mode, bo
     }
 
     if (target->GetCreatureType() == CREATURE_TYPE_BEAST)
-        target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
+        target->ApplyModUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 
 void AuraEffect::HandleAuraModFaction(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5028,13 +5028,13 @@ void AuraEffect::HandleComprehendLanguage(AuraApplication const* aurApp, uint8 m
     Unit* target = aurApp->GetTarget();
 
     if (apply)
-        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_COMPREHEND_LANG);
+        target->SetFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_COMPREHEND_LANG);
     else
     {
         if (target->HasAuraType(GetAuraType()))
             return;
 
-        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_COMPREHEND_LANG);
+        target->RemoveFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_COMPREHEND_LANG);
     }
 }
 
@@ -5139,8 +5139,8 @@ void AuraEffect::HandleAuraModFakeInebriation(AuraApplication const* aurApp, uin
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            int32 oldval = target->ToPlayer()->GetInt32Value(PLAYER_FAKE_INEBRIATION);
-            target->ToPlayer()->SetInt32Value(PLAYER_FAKE_INEBRIATION, oldval + GetAmount());
+            int32 oldval = target->ToPlayer()->GetInt32Value(PLAYER_FIELD_FAKE_INEBRIATION);
+            target->ToPlayer()->SetInt32Value(PLAYER_FIELD_FAKE_INEBRIATION, oldval + GetAmount());
         }
     }
     else
@@ -5151,8 +5151,8 @@ void AuraEffect::HandleAuraModFakeInebriation(AuraApplication const* aurApp, uin
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            int32 oldval = target->ToPlayer()->GetInt32Value(PLAYER_FAKE_INEBRIATION);
-            target->ToPlayer()->SetInt32Value(PLAYER_FAKE_INEBRIATION, oldval - GetAmount());
+            int32 oldval = target->ToPlayer()->GetInt32Value(PLAYER_FIELD_FAKE_INEBRIATION);
+            target->ToPlayer()->SetInt32Value(PLAYER_FIELD_FAKE_INEBRIATION, oldval - GetAmount());
 
             if (removeDetect)
                 removeDetect = !target->ToPlayer()->GetDrunkValue();
@@ -5180,7 +5180,7 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
 
     if (apply)
     {
-        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, overrideId);
+        //target->SetUInt16Value(PLAYER_FIELD_LIFETIME_MAX_RANK2, 0, overrideId);
         if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
             for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
                 if (uint32 spellId = overrideSpells->spellId[i])
@@ -5188,7 +5188,7 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
     }
     else
     {
-        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, 0);
+        //target->SetUInt16Value(PLAYER_FIELD_LIFETIME_MAX_RANK2, 0, 0);
         if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
             for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
                 if (uint32 spellId = overrideSpells->spellId[i])
@@ -5237,9 +5237,9 @@ void AuraEffect::HandlePreventResurrection(AuraApplication const* aurApp, uint8 
         return;
 
     if (apply)
-        aurApp->GetTarget()->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+        aurApp->GetTarget()->RemoveByteFlag(PLAYER_FIELD_LIFETIME_MAX_RANK, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
     else if (!aurApp->GetTarget()->GetBaseMap()->Instanceable())
-        aurApp->GetTarget()->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+        aurApp->GetTarget()->SetByteFlag(PLAYER_FIELD_LIFETIME_MAX_RANK, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
 }
 
 void AuraEffect::HandleMastery(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const

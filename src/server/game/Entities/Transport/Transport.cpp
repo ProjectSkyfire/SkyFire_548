@@ -83,9 +83,9 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     _triggeredDepartureEvent = false;
 
     m_goValue.Transport.PathProgress = 0;
-    SetFloatValue(OBJECT_FIELD_SCALE_X, goinfo->size);
-    SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
-    SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
+    SetFloatValue(OBJECT_FIELD_SCALE, goinfo->size);
+    SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, goinfo->faction);
+    SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, goinfo->flags);
     SetPeriod(tInfo->pathTime);
     SetEntry(goinfo->entry);
     SetDisplayId(goinfo->displayId);

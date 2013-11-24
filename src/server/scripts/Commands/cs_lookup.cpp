@@ -1087,7 +1087,7 @@ public:
 
                 char const* knownStr = target && target->HasTitle(titleInfo) ? handler->GetTrinityString(LANG_KNOWN) : "";
 
-                char const* activeStr = target && target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->bit_index
+                char const* activeStr = target && target->GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE) == titleInfo->bit_index
                     ? handler->GetTrinityString(LANG_ACTIVE)
                     : "";
 

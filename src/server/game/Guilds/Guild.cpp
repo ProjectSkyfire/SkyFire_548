@@ -597,7 +597,7 @@ bool Guild::BankTab::SetItem(SQLTransaction& trans, uint8 slotId, Item* item)
         stmt->setUInt32(3, item->GetGUIDLow());
         CharacterDatabase.ExecuteOrAppend(trans, stmt);
 
-        item->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
+        item->SetUInt64Value(ITEM_FIELD_CONTAINED_IN, 0);
         item->SetUInt64Value(ITEM_FIELD_OWNER, 0);
         item->FSetState(ITEM_NEW);
         item->SaveToDB(trans);                                 // Not in inventory and can be saved standalone

@@ -304,6 +304,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     uint32 nameLength = recvData.ReadBits(7);    
     std::string name = recvData.ReadString(nameLength);
     uint8 unk = recvData.ReadBit();
+
     if (unk)
         recvData.read_skip<uint32>();
 
@@ -728,17 +729,14 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-
-    // uint8 unk = recvData.ReadBit();
-
     guid[1] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[0]);
@@ -828,14 +826,14 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 
     recvData >> unk;
 
-    playerGuid[5] = recvData.ReadBit();
-    playerGuid[2] = recvData.ReadBit();
     playerGuid[6] = recvData.ReadBit();
     playerGuid[7] = recvData.ReadBit();
-    playerGuid[4] = recvData.ReadBit();
-    playerGuid[0] = recvData.ReadBit();
-    playerGuid[3] = recvData.ReadBit();
     playerGuid[1] = recvData.ReadBit();
+    playerGuid[5] = recvData.ReadBit();
+    playerGuid[2] = recvData.ReadBit();
+    playerGuid[4] = recvData.ReadBit();
+    playerGuid[3] = recvData.ReadBit();
+    playerGuid[0] = recvData.ReadBit();
 
     recvData.ReadByteSeq(playerGuid[7]);
     recvData.ReadByteSeq(playerGuid[6]);
@@ -902,10 +900,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetPositionZ();
-    data << pCurrChar->GetMapId();
     data << pCurrChar->GetPositionY();
-    data << pCurrChar->GetPositionX();
+    data << pCurrChar->GetMapId();
     data << pCurrChar->GetOrientation();
+    data << pCurrChar->GetPositionX();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -945,18 +943,21 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // Send MOTD
     {
         data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
-        data << (uint32)0;
+        data.WriteBits(0, 4);
 
         uint32 linecount=0;
         std::string str_motd = sWorld->GetMotd();
         std::string::size_type pos, nextpos;
+        ByteBuffer stringBuffer;
 
         pos = 0;
         while ((nextpos= str_motd.find('@', pos)) != std::string::npos)
         {
             if (nextpos != pos)
             {
-                data << str_motd.substr(pos, nextpos-pos);
+                std::string string = str_motd.substr(pos, nextpos-pos);
+                data.WriteBits(strlen(string.c_str()), 7);
+                stringBuffer.WriteString(string);
                 ++linecount;
             }
             pos = nextpos+1;
@@ -964,11 +965,16 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
         if (pos<str_motd.length())
         {
-            data << str_motd.substr(pos);
+            std::string string = str_motd.substr(pos);
+            data.WriteBits(strlen(string.c_str()), 7);
+            stringBuffer.WriteString(string);
             ++linecount;
         }
 
-        data.put(0, linecount);
+
+        data.PutBits(0, linecount, 4);
+        data.FlushBits();
+        data.append(stringBuffer);
 
         SendPacket(&data);
         TC_LOG_DEBUG("network", "WORLD: Sent motd (SMSG_MOTD)");
@@ -1103,10 +1109,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->LoadPet();
 
     // Set FFA PvP for non GM in non-rest mode
-    if (sWorld->IsFFAPvPRealm() && !pCurrChar->IsGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-        pCurrChar->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    if (sWorld->IsFFAPvPRealm() && !pCurrChar->IsGameMaster() && !pCurrChar->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+        pCurrChar->SetByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 
-    if (pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
+    if (pCurrChar->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
         pCurrChar->SetContestedPvP();
 
     // Apply at_login requests
@@ -1242,14 +1248,14 @@ void WorldSession::HandleShowingHelmOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_SHOWING_HELM for %s", _player->GetName().c_str());
     recvData.read_skip<uint8>(); // unknown, bool?
-    _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
+    _player->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
 }
 
 void WorldSession::HandleShowingCloakOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_SHOWING_CLOAK for %s", _player->GetName().c_str());
     recvData.read_skip<uint8>(); // unknown, bool?
-    _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
+    _player->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
 }
 
 void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
@@ -1529,11 +1535,11 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     _player->ModifyMoney(-int64(cost));                     // it isn't free
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_AT_BARBER, cost);
 
-    _player->SetByteValue(PLAYER_BYTES, 2, uint8(bs_hair->hair_id));
-    _player->SetByteValue(PLAYER_BYTES, 3, uint8(Color));
-    _player->SetByteValue(PLAYER_BYTES_2, 0, uint8(bs_facialHair->hair_id));
+    _player->SetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 2, uint8(bs_hair->hair_id));
+    _player->SetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 3, uint8(Color));
+    _player->SetByteValue(PLAYER_FIELD_REST_STATE, 0, uint8(bs_facialHair->hair_id));
     if (bs_skinColor)
-        _player->SetByteValue(PLAYER_BYTES, 0, uint8(bs_skinColor->hair_id));
+        _player->SetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 0, uint8(bs_skinColor->hair_id));
 
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_VISIT_BARBER_SHOP, 1);
 
@@ -2432,7 +2438,7 @@ void WorldSession::HandleReorderCharacters(WorldPacket& recvData)
 void WorldSession::HandleOpeningCinematic(WorldPacket& /*recvData*/)
 {
     // Only players that has not yet gained any experience can use this
-    if (_player->GetUInt32Value(PLAYER_XP))
+    if (_player->GetUInt32Value(PLAYER_FIELD_XP))
         return;
 
     if (ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(_player->getClass()))

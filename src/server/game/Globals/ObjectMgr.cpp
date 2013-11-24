@@ -3376,11 +3376,11 @@ void ObjectMgr::LoadPlayerInfo()
             _playerXPperLevel[level] = 0;
 
         //                                                 0    1
-        QueryResult result  = WorldDatabase.Query("SELECT lvl, xp_for_next_level FROM player_xp_for_level");
+        QueryResult result  = WorldDatabase.Query("SELECT lvl, xp_for_next_level FROM PLAYER_FIELD_XP_for_level");
 
         if (!result)
         {
-            TC_LOG_ERROR("server.loading", ">> Loaded 0 xp for level definitions. DB table `player_xp_for_level` is empty.");
+            TC_LOG_ERROR("server.loading", ">> Loaded 0 xp for level definitions. DB table `PLAYER_FIELD_XP_for_level` is empty.");
             exit(1);
         }
 
@@ -3396,10 +3396,10 @@ void ObjectMgr::LoadPlayerInfo()
             if (current_level >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
             {
                 if (current_level > STRONG_MAX_LEVEL)        // hardcoded level maximum
-                    TC_LOG_ERROR("sql.sql", "Wrong (> %u) level %u in `player_xp_for_level` table, ignoring.", STRONG_MAX_LEVEL, current_level);
+                    TC_LOG_ERROR("sql.sql", "Wrong (> %u) level %u in `PLAYER_FIELD_XP_for_level` table, ignoring.", STRONG_MAX_LEVEL, current_level);
                 else
                 {
-                    TC_LOG_INFO("misc", "Unused (> MaxPlayerLevel in worldserver.conf) level %u in `player_xp_for_levels` table, ignoring.", current_level);
+                    TC_LOG_INFO("misc", "Unused (> MaxPlayerLevel in worldserver.conf) level %u in `PLAYER_FIELD_XP_for_levels` table, ignoring.", current_level);
                     ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
                 }
                 continue;

@@ -189,11 +189,11 @@ class Object
         uint32 GetGUIDMid() const { return GUID_ENPART(GetUInt64Value(0)); }
         uint32 GetGUIDHigh() const { return GUID_HIPART(GetUInt64Value(0)); }
         const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
-        uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
-        void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY, entry); }
+        uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY_ID); }
+        void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY_ID, entry); }
 
-        float GetObjectScale() const { return GetFloatValue(OBJECT_FIELD_SCALE_X); }
-        virtual void SetObjectScale(float scale) { SetFloatValue(OBJECT_FIELD_SCALE_X, scale); }
+        float GetObjectScale() const { return GetFloatValue(OBJECT_FIELD_SCALE); }
+        virtual void SetObjectScale(float scale) { SetFloatValue(OBJECT_FIELD_SCALE, scale); }
 
         TypeID GetTypeId() const { return m_objectTypeId; }
         bool isType(uint16 mask) const { return (mask & m_objectType); }

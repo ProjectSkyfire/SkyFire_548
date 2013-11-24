@@ -556,7 +556,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                     player->GetSession()->SendPacket(&status);
 
                     // Correctly display EnemyUnitFrame
-                    player->SetByteValue(PLAYER_BYTES_3, 3, player->GetBGTeam());
+                    player->SetByteValue(PLAYER_FIELD_PVP_INFO, 3, player->GetBGTeam());
 
                     player->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
                     player->ResetAllPowers();
@@ -1183,7 +1183,7 @@ void Battleground::StartBattleground()
 void Battleground::AddPlayer(Player* player)
 {
     // remove afk from player
-    if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
+    if (player->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         player->ToggleAFK();
 
     // score struct must be created in inherited class
@@ -1735,10 +1735,10 @@ bool Battleground::AddSpiritGuide(uint32 type, float x, float y, float z, float 
         /// @todo Fix display here
         // creature->SetVisibleAura(0, SPELL_SPIRIT_HEAL_CHANNEL);
         // casting visual effect
-        creature->SetUInt32Value(UNIT_CHANNEL_SPELL, SPELL_SPIRIT_HEAL_CHANNEL);
+        creature->SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, SPELL_SPIRIT_HEAL_CHANNEL);
         // correct cast speed
-        creature->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-        creature->SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);
+        creature->SetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED, 1.0f);
+        creature->SetFloatValue(UNIT_FIELD_MOD_SPELL_HASTE, 1.0f);
         //creature->CastSpell(creature, SPELL_SPIRIT_HEAL_CHANNEL, true);
         return true;
     }
@@ -1949,7 +1949,7 @@ uint32 Battleground::GetAlivePlayersCountByTeam(uint32 Team) const
         if (itr->second.Team == Team)
         {
             Player* player = ObjectAccessor::FindPlayer(itr->first);
-            if (player && player->IsAlive() && !player->HasByteFlag(UNIT_FIELD_BYTES_2, 3, FORM_SPIRITOFREDEMPTION))
+            if (player && player->IsAlive() && !player->HasByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 3, FORM_SPIRITOFREDEMPTION))
                 ++count;
         }
     }

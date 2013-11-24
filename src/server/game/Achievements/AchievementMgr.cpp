@@ -2534,7 +2534,7 @@ bool AchievementMgr<T>::RequirementsSatisfied(AchievementCriteriaEntry const* ac
                 uint32 playerIndexOffset = uint32(exploreFlag) / 32;
                 uint32 mask = 1 << (uint32(exploreFlag) % 32);
 
-                if (referencePlayer->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + playerIndexOffset) & mask)
+                if (referencePlayer->GetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + playerIndexOffset) & mask)
                 {
                     matchFound = true;
                     break;

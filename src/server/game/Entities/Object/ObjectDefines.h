@@ -68,7 +68,7 @@ inline bool IS_GROUP_GUID(uint64 guid);
 inline bool IS_AREATRIGGER_GUID(uint64 guid);
 
 // l - OBJECT_FIELD_GUID
-// e - OBJECT_FIELD_ENTRY for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PETNUMBER for pets
+// e - OBJECT_FIELD_ENTRY_ID for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PET_NUMBER for pets
 // h - OBJECT_FIELD_GUID + 1
 inline uint64 MAKE_NEW_GUID(uint32 l, uint32 e, uint32 h);
 

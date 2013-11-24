@@ -296,10 +296,10 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
     m_creatureInfo = cinfo;                                 // map mode related always
 
     // equal to player Race field, but creature does not have race
-    SetByteValue(UNIT_FIELD_BYTES_0, 0, 0);
+    SetByteValue(UNIT_FIELD_SEX, 0, 0);
 
     // known valid are: CLASS_WARRIOR, CLASS_PALADIN, CLASS_ROGUE, CLASS_MAGE
-    SetByteValue(UNIT_FIELD_BYTES_0, 1, uint8(cinfo->unit_class));
+    SetByteValue(UNIT_FIELD_SEX, 1, uint8(cinfo->unit_class));
 
     // Cancel load if no model defined
     if (!(cinfo->GetFirstValidModelId()))
@@ -318,7 +318,7 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
 
     SetDisplayId(displayID);
     SetNativeDisplayId(displayID);
-    SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+    SetByteValue(UNIT_FIELD_SEX, 2, minfo->gender);
 
     // Load creature equipment
     if (!data || data->equipmentId == 0)
@@ -331,18 +331,18 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
 
     SetName(normalInfo->Name);                              // at normal entry always
 
-    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-    SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);
+    SetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED, 1.0f);
+    SetFloatValue(UNIT_FIELD_MOD_SPELL_HASTE, 1.0f);
 
     SetSpeed(MOVE_WALK,     cinfo->speed_walk);
     SetSpeed(MOVE_RUN,      cinfo->speed_run);
     SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
     SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
 
-    // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
+    // Will set UNIT_FIELD_BOUNDING_RADIUS and UNIT_FIELD_COMBAT_REACH
     SetObjectScale(cinfo->scale);
 
-    SetFloatValue(UNIT_FIELD_HOVERHEIGHT, cinfo->HoverHeight);
+    SetFloatValue(UNIT_FIELD_HOVER_HEIGHT, cinfo->HoverHeight);
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -378,18 +378,18 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
     ObjectMgr::ChooseCreatureFlags(cInfo, npcflag, unit_flags, dynamicflags, data);
 
     if (cInfo->flags_extra & CREATURE_FLAG_EXTRA_WORLDEVENT)
-        SetUInt32Value(UNIT_NPC_FLAGS, npcflag | sGameEventMgr->GetNPCFlag(this));
+        SetUInt32Value(UNIT_FIELD_NPC_FLAGS, npcflag | sGameEventMgr->GetNPCFlag(this));
     else
-        SetUInt32Value(UNIT_NPC_FLAGS, npcflag);
+        SetUInt32Value(UNIT_FIELD_NPC_FLAGS, npcflag);
 
     SetAttackTime(BASE_ATTACK,  cInfo->baseattacktime);
     SetAttackTime(OFF_ATTACK,   cInfo->baseattacktime);
     SetAttackTime(RANGED_ATTACK, cInfo->rangeattacktime);
 
     SetUInt32Value(UNIT_FIELD_FLAGS, unit_flags);
-    SetUInt32Value(UNIT_FIELD_FLAGS_2, cInfo->unit_flags2);
+    SetUInt32Value(UNIT_FIELD_FLAGS2, cInfo->unit_flags2);
 
-    SetUInt32Value(UNIT_DYNAMIC_FLAGS, dynamicflags);
+    SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, dynamicflags);
 
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
@@ -511,7 +511,7 @@ void Creature::Update(uint32 diff)
             else if (m_corpseRemoveTime <= time(NULL))
             {
                 RemoveCorpse(false);
-                TC_LOG_DEBUG("entities.unit", "Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
+                TC_LOG_DEBUG("entities.unit", "Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY_ID));
             }
             break;
         }
@@ -787,7 +787,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
     if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
     {
-        z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+        z += GetFloatValue(UNIT_FIELD_HOVER_HEIGHT);
 
         //! Relocate again with updated Z coord
         Relocate(x, y, z, ang);
@@ -799,7 +799,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     {
         SetDisplayId(displayID);
         SetNativeDisplayId(displayID);
-        SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+        SetByteValue(UNIT_FIELD_SEX, 2, minfo->gender);
     }
 
     LastUsedScriptID = GetCreatureTemplate()->ScriptID;
@@ -890,7 +890,7 @@ void Creature::SetLootRecipient(Unit* unit)
     {
         m_lootRecipient = 0;
         m_lootRecipientGroup = 0;
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE|UNIT_DYNFLAG_TAPPED);
+        RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE|UNIT_DYNFLAG_TAPPED);
         return;
     }
 
@@ -905,7 +905,7 @@ void Creature::SetLootRecipient(Unit* unit)
     if (Group* group = player->GetGroup())
         m_lootRecipientGroup = group->GetLowGUID();
 
-    SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+    SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
 }
 
 // return true if this creature is tapped by the player or by a member of his group.
@@ -944,9 +944,9 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     CreatureData& data = sObjectMgr->NewOrExistCreatureData(m_DBTableGuid);
 
     uint32 displayId = GetNativeDisplayId();
-    uint32 npcflag = GetUInt32Value(UNIT_NPC_FLAGS);
+    uint32 npcflag = GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
     uint32 unit_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
-    uint32 dynamicflags = GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+    uint32 dynamicflags = GetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS);
 
     // check if it's a custom model and if not, use 0 for displayId
     CreatureTemplate const* cinfo = GetCreatureTemplate();
@@ -1086,8 +1086,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg);
     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg);
 
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, cinfo->minrangedmg);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, cinfo->maxrangedmg);
+    SetFloatValue(UNIT_FIELD_MIN_RANGED_DAMAGE, cinfo->minrangedmg);
+    SetFloatValue(UNIT_FIELD_MAX_RANGED_DAMAGE, cinfo->maxrangedmg);
 
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->attackpower);
 
@@ -1270,7 +1270,7 @@ void Creature::LoadEquipment(int8 id, bool force /*= true*/)
         if (force)
         {
             for (uint8 i = 0; i < MAX_EQUIPMENT_ITEMS; ++i)
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, 0);
+                SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID + i, 0);
             m_equipmentId = 0;
         }
         return;
@@ -1282,7 +1282,7 @@ void Creature::LoadEquipment(int8 id, bool force /*= true*/)
 
     m_equipmentId = id;
     for (uint8 i = 0; i < 3; ++i)
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, einfo->ItemEntry[i]);
+        SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID + i, einfo->ItemEntry[i]);
 }
 
 bool Creature::hasQuest(uint32 quest_id) const
@@ -1448,7 +1448,7 @@ void Creature::setDeathState(DeathState s)
             SaveRespawnTime();
 
         SetTarget(0);                // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
-        SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+        SetUInt32Value(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
         setActive(false);
 
@@ -1483,7 +1483,7 @@ void Creature::setDeathState(DeathState s)
         UpdateMovementFlags();
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
-        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+        SetUInt32Value(UNIT_FIELD_NPC_FLAGS, cinfo->npcflag);
         ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
         LoadCreaturesAddon(true);
@@ -1533,7 +1533,7 @@ void Creature::Respawn(bool force)
         {
             SetDisplayId(displayID);
             SetNativeDisplayId(displayID);
-            SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+            SetByteValue(UNIT_FIELD_SEX, 2, minfo->gender);
         }
 
         GetMotionMaster()->InitDefault();
@@ -1922,7 +1922,7 @@ bool Creature::_IsTargetAcceptable(const Unit* target) const
     if (target->HasUnitState(UNIT_STATE_DIED))
     {
         // guards can detect fake death
-        if (IsGuard() && target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH))
+        if (IsGuard() && target->HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_FEIGN_DEATH))
             return true;
         else
             return false;
@@ -2007,18 +2007,18 @@ bool Creature::LoadCreaturesAddon(bool reload)
         // 2 StandFlags
         // 3 StandMiscFlags
 
-        SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
-        //SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
-        SetByteValue(UNIT_FIELD_BYTES_1, 2, uint8((cainfo->bytes1 >> 16) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
+        SetByteValue(UNIT_FIELD_DISPLAY_POWER, 0, uint8(cainfo->bytes1 & 0xFF));
+        //SetByteValue(UNIT_FIELD_DISPLAY_POWER, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
+        SetByteValue(UNIT_FIELD_DISPLAY_POWER, 1, 0);
+        SetByteValue(UNIT_FIELD_DISPLAY_POWER, 2, uint8((cainfo->bytes1 >> 16) & 0xFF));
+        SetByteValue(UNIT_FIELD_DISPLAY_POWER, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
 
-        //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
+        //! Suspected correlation between UNIT_FIELD_DISPLAY_POWER, offset 3, value 0x2:
         //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)
         //! Check using InhabitType as movement flags are assigned dynamically
         //! basing on whether the creature is in air or not
         //! Set MovementFlag_Hover. Otherwise do nothing.
-        if (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER && !(GetCreatureTemplate()->InhabitType & INHABIT_AIR))
+        if (GetByteValue(UNIT_FIELD_DISPLAY_POWER, 3) & UNIT_BYTE1_FLAG_HOVER && !(GetCreatureTemplate()->InhabitType & INHABIT_AIR))
             AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
     }
 
@@ -2029,16 +2029,16 @@ bool Creature::LoadCreaturesAddon(bool reload)
         // 2 UnitRename         Pet only, so always 0 for default creature
         // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
-        SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes2 & 0xFF));
-        //SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
-        //SetByteValue(UNIT_FIELD_BYTES_2, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
-        //SetByteValue(UNIT_FIELD_BYTES_2, 3, uint8((cainfo->bytes2 >> 24) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
+        SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 0, uint8(cainfo->bytes2 & 0xFF));
+        //SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
+        //SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
+        SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 2, 0);
+        //SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 3, uint8((cainfo->bytes2 >> 24) & 0xFF));
+        SetByteValue(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 3, 0);
     }
 
     if (cainfo->emote != 0)
-        SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
+        SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, cainfo->emote);
 
     //Load Path
     if (cainfo->path_id != 0)
@@ -2536,8 +2536,8 @@ void Creature::SetObjectScale(float scale)
 
     if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(GetDisplayId()))
     {
-        SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, minfo->bounding_radius * scale);
-        SetFloatValue(UNIT_FIELD_COMBATREACH, minfo->combat_reach * scale);
+        SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, minfo->bounding_radius * scale);
+        SetFloatValue(UNIT_FIELD_COMBAT_REACH, minfo->combat_reach * scale);
     }
 }
 
@@ -2547,8 +2547,8 @@ void Creature::SetDisplayId(uint32 modelId)
 
     if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(modelId))
     {
-        SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, minfo->bounding_radius * GetObjectScale());
-        SetFloatValue(UNIT_FIELD_COMBATREACH, minfo->combat_reach * GetObjectScale());
+        SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, minfo->bounding_radius * GetObjectScale());
+        SetFloatValue(UNIT_FIELD_COMBAT_REACH, minfo->combat_reach * GetObjectScale());
     }
 }
 

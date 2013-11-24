@@ -378,8 +378,8 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia
 
         for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
-            if (corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
-                bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+            if (corpse->GetUInt32Value(CORPSE_FIELD_ITEMS + i))
+                bones->SetUInt32Value(CORPSE_FIELD_ITEMS + i, 0);
         }
 
         // add bones in grid store if grid loaded where corpse placed

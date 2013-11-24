@@ -523,11 +523,11 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK16                  = 0x00010000,       // pre-3.0.3 PLAYER_FLAGS_SANCTUARY flag for player entered sanctuary
     PLAYER_FLAGS_TAXI_BENCHMARK         = 0x00020000,       // taxi benchmark mode (on/off) (2.0.1)
     PLAYER_FLAGS_PVP_TIMER              = 0x00040000,       // 3.0.2, pvp timer active (after you disable pvp manually)
-    PLAYER_FLAGS_UBER                  = 0x00080000,
+    PLAYER_FLAGS_UBER                   = 0x00080000,
     PLAYER_FLAGS_UNK20                  = 0x00100000,
     PLAYER_FLAGS_UNK21                  = 0x00200000,
     PLAYER_FLAGS_COMMENTATOR2           = 0x00400000,
-    PLAYER_ALLOW_ONLY_ABILITY           = 0x00800000,       // used by bladestorm and killing spree, allowed only spells with SPELL_ATTR0_REQ_AMMO, SPELL_EFFECT_ATTACK, checked only for active player
+    PLAYER_FLAGS_ALLOW_ONLY_ABILITY     = 0x00800000,       // used by bladestorm and killing spree, allowed only spells with SPELL_ATTR0_REQ_AMMO, SPELL_EFFECT_ATTACK, checked only for active player
     PLAYER_FLAGS_UNK24                  = 0x01000000,       // disabled all melee ability on tab include autoattack
     PLAYER_FLAGS_NO_XP_GAIN             = 0x02000000,
     PLAYER_FLAGS_UNK26                  = 0x04000000,
@@ -541,7 +541,7 @@ enum PlayerFlags
 #define KNOWN_TITLES_SIZE   4
 #define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE * 64)        // 4 uint64 fields
 
-// used in PLAYER_FIELD_BYTES values
+// used in PLAYER_FIELD_LIFETIME_MAX_RANK values
 enum PlayerFieldByteFlags
 {
     PLAYER_FIELD_BYTE_TRACK_STEALTHED   = 0x00000002,
@@ -549,7 +549,7 @@ enum PlayerFieldByteFlags
     PLAYER_FIELD_BYTE_NO_RELEASE_WINDOW = 0x00000010        // Display no "release spirit" window at all
 };
 
-// used in PLAYER_FIELD_BYTES2 values
+// used in UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID values
 enum PlayerFieldByte2Flags
 {
     PLAYER_FIELD_BYTE2_NONE                 = 0x00,
@@ -784,7 +784,7 @@ enum InstanceResetWarningType
     RAID_INSTANCE_EXPIRED           = 5
 };
 
-// PLAYER_FIELD_ARENA_TEAM_INFO_1_1 offsets
+// PLAYER_FIELD_PVP_INFO offsets
 enum ArenaTeamInfoType
 {
     ARENA_TEAM_ID                = 0,
@@ -1227,8 +1227,8 @@ class Player : public Unit, public GridObject<Player>
         void SetObjectScale(float scale)
         {
             Unit::SetObjectScale(scale);
-            SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, scale * DEFAULT_WORLD_OBJECT_SIZE);
-            SetFloatValue(UNIT_FIELD_COMBATREACH, scale * DEFAULT_COMBAT_REACH);
+            SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, scale * DEFAULT_WORLD_OBJECT_SIZE);
+            SetFloatValue(UNIT_FIELD_COMBAT_REACH, scale * DEFAULT_COMBAT_REACH);
         }
 
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
@@ -1260,8 +1260,8 @@ class Player : public Unit, public GridObject<Player>
 
         void ToggleAFK();
         void ToggleDND();
-        bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
-        bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
+        bool isAFK() const { return HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
+        bool isDND() const { return HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_DND); }
         uint8 GetChatTag() const;
         std::string autoReplyMsg;
 
@@ -1369,8 +1369,8 @@ class Player : public Unit, public GridObject<Player>
         static bool IsBankPos(uint8 bag, uint8 slot);
         bool IsValidPos(uint16 pos, bool explicit_pos) { return IsValidPos(pos >> 8, pos & 255, explicit_pos); }
         bool IsValidPos(uint8 bag, uint8 slot, bool explicit_pos);
-        uint8 GetBankBagSlotCount() const { return GetByteValue(PLAYER_BYTES_2, 2); }
-        void SetBankBagSlotCount(uint8 count) { SetByteValue(PLAYER_BYTES_2, 2, count); }
+        uint8 GetBankBagSlotCount() const { return 0;/*GetByteValue(PLAYER_FIELD_REST_STATE, 2);*/ }
+        void SetBankBagSlotCount(uint8 count) { /*SetByteValue(PLAYER_FIELD_REST_STATE, 2, count);*/ }
         bool HasItemCount(uint32 item, uint32 count = 1, bool inBankAlso = false) const;
         bool HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item const* ignoreItem = NULL) const;
         bool CanNoReagentCast(SpellInfo const* spellInfo) const;
@@ -1803,9 +1803,9 @@ class Player : public Unit, public GridObject<Player>
         void ActivateSpec(uint8 spec);
 
         void InitGlyphsForLevel();
-        void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot, slottype); }
+        void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS + slot, slottype); }
 
-        uint32 GetGlyphSlot(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot); }
+        uint32 GetGlyphSlot(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS + slot); }
         void SetGlyph(uint8 slot, uint32 glyph);
         uint32 GetGlyph(uint8 spec, uint8 slot) const { return _talentMgr->SpecInfo[spec].Glyphs[slot]; }
 
@@ -1813,8 +1813,8 @@ class Player : public Unit, public GridObject<Player>
         PlayerTalentMap* GetTalentMap(uint8 spec) { return _talentMgr->SpecInfo[spec].Talents; }
         ActionButtonList const& GetActionButtons() const { return m_actionButtons; }
 
-        uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS); }
-        void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS, profs); }
+        uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_FIELD_CHARACTER_POINTS); }
+        void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_FIELD_CHARACTER_POINTS, profs); }
         void InitPrimaryProfessions();
 
         PlayerSpellMap const& GetSpellMap() const { return m_spells; }
@@ -1915,10 +1915,10 @@ class Player : public Unit, public GridObject<Player>
         void SendUpdateToOutOfRangeGroupMembers();
 
         void SetInGuild(uint32 guildId);
-        void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_GUILDRANK, rankId); }
-        uint8 GetRank() const { return uint8(GetUInt32Value(PLAYER_GUILDRANK)); }
-        void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_GUILDLEVEL, level); }
-        uint32 GetGuildLevel() { return GetUInt32Value(PLAYER_GUILDLEVEL); }
+        void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_FIELD_GUILD_RANK_ID, rankId); }
+        uint8 GetRank() const { return uint8(GetUInt32Value(PLAYER_FIELD_GUILD_RANK_ID)); }
+        void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_FIELD_GUILD_LEVEL, level); }
+        uint32 GetGuildLevel() { return GetUInt32Value(PLAYER_FIELD_GUILD_LEVEL); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() const { return GetUInt32Value(OBJECT_FIELD_DATA); /* return only lower part */ }
         Guild* GetGuild();
@@ -1932,8 +1932,8 @@ class Player : public Unit, public GridObject<Player>
         void SetArenaTeamInfoField(uint8 slot, ArenaTeamInfoType type, uint32 value);
         static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
         static void LeaveAllArenaTeams(uint64 guid);
-        uint32 GetArenaTeamId(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID); }
-        uint32 GetArenaPersonalRating(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING); }
+        uint32 GetArenaTeamId(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_PVP_INFO + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID); }
+        uint32 GetArenaPersonalRating(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_PVP_INFO + (slot * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING); }
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         uint32 GetRBGPersonalRating() const { return 0; }
@@ -2138,7 +2138,7 @@ class Player : public Unit, public GridObject<Player>
         inline SpellCooldowns GetSpellCooldowns() const { return m_spellCooldowns; }
 
         void SetDrunkValue(uint8 newDrunkValue, uint32 itemId = 0);
-        uint8 GetDrunkValue() const { return GetByteValue(PLAYER_BYTES_3, 1); }
+        uint8 GetDrunkValue() const { return GetByteValue(PLAYER_FIELD_ARENA_FACTION, 1); }
         static DrunkenState GetDrunkenstateByValue(uint8 value);
 
         uint32 GetDeathTimer() const { return m_deathTimer; }
@@ -2146,7 +2146,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateCorpseReclaimDelay();
         void SendCorpseReclaimDelay(bool load = false);
 
-        uint32 GetBlockPercent() const { return GetUInt32Value(PLAYER_SHIELD_BLOCK); }
+        uint32 GetBlockPercent() const { return GetUInt32Value(PLAYER_FIELD_SHIELD_BLOCK); }
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value);
         bool CanBlock() const { return m_canBlock; }
@@ -2517,9 +2517,9 @@ class Player : public Unit, public GridObject<Player>
         std::string GetCoordsMapAreaAndZoneString();
 
         // Void Storage
-        bool IsVoidStorageUnlocked() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
-        void UnlockVoidStorage() { SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
-        void LockVoidStorage() { RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
+        bool IsVoidStorageUnlocked() const { return HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
+        void UnlockVoidStorage() { SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
+        void LockVoidStorage() { RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
         uint8 GetNextVoidStorageFreeSlot() const;
         uint8 GetNumOfVoidStorageFreeSlots() const;
         uint8 AddVoidStorageItem(const VoidStorageItem& item);

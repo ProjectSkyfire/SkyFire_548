@@ -161,7 +161,7 @@ class WorldSocket : public WorldHandler
         /// Called by ProcessIncoming() on CMSG_PING.
         int HandlePing(WorldPacket& recvPacket);
 
-        /// Called by CMSG_VERIFY_CONNECTIVITY_RESPONSE
+        /// Called by MSG_VERIFY_CONNECTIVITY_RESPONSE
         int HandleSendAuthSession();
 
     private:
@@ -194,6 +194,7 @@ class WorldSocket : public WorldHandler
 
         /// Fragment of the received header.
         ACE_Message_Block m_Header;
+        ACE_Message_Block m_WorldHeader;
 
         /// Mutex for protecting output related data.
         LockType m_OutBufferLock;

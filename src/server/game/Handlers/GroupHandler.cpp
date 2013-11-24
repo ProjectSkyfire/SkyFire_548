@@ -949,13 +949,13 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
         if (!player->IsAlive())
         {
-            if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+            if (player->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
                 playerStatus |= MEMBER_STATUS_GHOST;
             else
                 playerStatus |= MEMBER_STATUS_DEAD;
         }
 
-        if (player->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+        if (player->HasByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, UNIT_BYTE2_FLAG_FFA_PVP))
             playerStatus |= MEMBER_STATUS_PVP_FFA;
 
         if (player->isAFK())
@@ -1212,13 +1212,13 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
 
     if (!player->IsAlive())
     {
-        if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        if (player->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
             playerStatus |= MEMBER_STATUS_GHOST;
         else
             playerStatus |= MEMBER_STATUS_DEAD;
     }
 
-    if (player->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+    if (player->HasByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, UNIT_BYTE2_FLAG_FFA_PVP))
         playerStatus |= MEMBER_STATUS_PVP_FFA;
 
     if (player->isAFK())

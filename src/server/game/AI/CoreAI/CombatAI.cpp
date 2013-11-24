@@ -307,8 +307,8 @@ void VehicleAI::OnCharmed(bool apply)
     if (m_IsVehicleInUse && !apply && !conditions.empty())//was used and has conditions
     {
         m_DoDismiss = true;//needs reset
-        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
-        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
+        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
     }
     else if (apply)
         m_DoDismiss = false;//in use again

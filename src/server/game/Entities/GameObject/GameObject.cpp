@@ -216,15 +216,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+0, rotation0);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+1, rotation1);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+0, rotation0);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+1, rotation1);
 
-    UpdateRotationFields(rotation2, rotation3);              // GAMEOBJECT_FACING, GAMEOBJECT_ROTATION, GAMEOBJECT_PARENTROTATION+2/3
+    UpdateRotationFields(rotation2, rotation3);              // GAMEOBJECT_FACING, GAMEOBJECT_ROTATION, GAMEOBJECT_FIELD_PARENT_ROTATION+2/3
 
     SetObjectScale(goinfo->size);
 
-    SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
-    SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
+    SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, goinfo->faction);
+    SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, goinfo->flags);
 
     SetEntry(goinfo->entry);
 
@@ -234,7 +234,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetDisplayId(goinfo->displayId);
 
     m_model = GameObjectModel::Create(*this);
-    // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
+    // GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, index at 0, 1, 2 and 3
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoState(go_state);
     SetGoArtKit(artKit);
@@ -249,10 +249,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
             m_goValue.Building.Health = goinfo->building.intactNumHits + goinfo->building.damagedNumHits;
             m_goValue.Building.MaxHealth = m_goValue.Building.Health;
             SetGoAnimProgress(255);
-            SetUInt32Value(GAMEOBJECT_PARENTROTATION, m_goInfo->building.destructibleData);
+            SetUInt32Value(GAMEOBJECT_FIELD_PARENT_ROTATION, m_goInfo->building.destructibleData);
             break;
         case GAMEOBJECT_TYPE_TRANSPORT:
-            SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.pause);
+            SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, goinfo->transport.pause);
             SetGoState(goinfo->transport.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
             SetGoAnimProgress(animprogress);
             m_goValue.Transport.PathProgress = 0;
@@ -359,7 +359,7 @@ void GameObject::Update(uint32 diff)
                         if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                         {
                             SetGoState(GO_STATE_ACTIVE);
-                            SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
+                            SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NODESPAWN);
 
                             UpdateData udata(caster->GetMapId());
                             WorldPacket packet;
@@ -555,7 +555,7 @@ void GameObject::Update(uint32 diff)
                 case GAMEOBJECT_TYPE_GOOBER:
                     if (m_cooldownTime < time(NULL))
                     {
-                        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                        RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
 
                         SetLootState(GO_JUST_DEACTIVATED);
                         m_cooldownTime = 0;
@@ -622,7 +622,7 @@ void GameObject::Update(uint32 diff)
             {
                 SendObjectDeSpawnAnim(GetGUID());
                 //reset flags
-                SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
+                SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, GetGOInfo()->flags);
             }
 
             if (!m_respawnDelayTime)
@@ -673,7 +673,7 @@ void GameObject::Delete()
     SendObjectDeSpawnAnim(GetGUID());
 
     SetGoState(GO_STATE_READY);
-    SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
+    SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, GetGOInfo()->flags);
 
     uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<GameObject>(GetDBTableGUIDLow()) : 0;
     if (poolid)
@@ -729,10 +729,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
-    data.rotation0 = GetFloatValue(GAMEOBJECT_PARENTROTATION+0);
-    data.rotation1 = GetFloatValue(GAMEOBJECT_PARENTROTATION+1);
-    data.rotation2 = GetFloatValue(GAMEOBJECT_PARENTROTATION+2);
-    data.rotation3 = GetFloatValue(GAMEOBJECT_PARENTROTATION+3);
+    data.rotation0 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+0);
+    data.rotation1 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+1);
+    data.rotation2 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+2);
+    data.rotation3 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+3);
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
@@ -758,10 +758,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     stmt->setFloat(index++, GetPositionY());
     stmt->setFloat(index++, GetPositionZ());
     stmt->setFloat(index++, GetOrientation());
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+1));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+2));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+3));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+1));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+2));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+3));
     stmt->setInt32(index++, int32(m_respawnDelayTime));
     stmt->setUInt8(index++, GetGoAnimProgress());
     stmt->setUInt8(index++, uint8(GetGoState()));
@@ -809,7 +809,7 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
 
         if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction())
         {
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
+            SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NODESPAWN);
             m_respawnDelayTime = 0;
             m_respawnTime = 0;
         }
@@ -1088,7 +1088,7 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = f
 
 void GameObject::SetGoArtKit(uint8 kit)
 {
-    SetByteValue(GAMEOBJECT_BYTES_1, 2, kit);
+    SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 2, kit);
     GameObjectData* data = const_cast<GameObjectData*>(sObjectMgr->GetGOData(m_DBTableGuid));
     if (data)
         data->artKit = kit;
@@ -1112,9 +1112,9 @@ void GameObject::SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid)
 void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false */)
 {
     if (activate)
-        SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+        SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
     else
-        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+        RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
 
     if (GetGoState() == GO_STATE_READY)                      //if closed -> open
         SetGoState(alternative ? GO_STATE_ACTIVE_ALTERNATIVE : GO_STATE_ACTIVE);
@@ -1306,7 +1306,7 @@ void GameObject::Use(Unit* user)
             if (uint32 trapEntry = info->goober.linkedTrapId)
                 TriggeringLinkedGameObject(trapEntry, user);
 
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+            SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
             SetLootState(GO_ACTIVATED, user);
 
             // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
@@ -1840,8 +1840,8 @@ void GameObject::UpdateRotationFields(float rotation2 /*=0.0f*/, float rotation3
         rotation3 = (float)f_rot2;
     }
 
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+2, rotation2);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+3, rotation3);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+2, rotation2);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+3, rotation3);
 }
 
 void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, uint32 spellId /*= 0*/)
@@ -1901,7 +1901,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
     switch (state)
     {
         case GO_DESTRUCTIBLE_INTACT:
-            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_DESTROYED);
+            RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_DESTROYED);
             SetDisplayId(m_goInfo->displayId);
             if (setHealth)
             {
@@ -1918,8 +1918,8 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
                 if (Battleground* bg = eventInvoker->GetBattleground())
                     bg->EventPlayerDamagedGO(eventInvoker, this, m_goInfo->building.damagedEvent);
 
-            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+            RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DESTROYED);
+            SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED);
 
             uint32 modelId = m_goInfo->building.damagedDisplayId;
             if (DestructibleModelDataEntry const* modelData = sDestructibleModelDataStore.LookupEntry(m_goInfo->building.destructibleData))
@@ -1951,8 +1951,8 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
                 }
             }
 
-            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+            RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED);
+            SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DESTROYED);
 
             uint32 modelId = m_goInfo->building.destroyedDisplayId;
             if (DestructibleModelDataEntry const* modelData = sDestructibleModelDataStore.LookupEntry(m_goInfo->building.destructibleData))
@@ -1971,7 +1971,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
         case GO_DESTRUCTIBLE_REBUILDING:
         {
             EventInform(m_goInfo->building.rebuildingEvent);
-            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_DESTROYED);
+            RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_DESTROYED);
 
             uint32 modelId = m_goInfo->displayId;
             if (DestructibleModelDataEntry const* modelData = sDestructibleModelDataStore.LookupEntry(m_goInfo->building.destructibleData))
@@ -2009,7 +2009,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
 void GameObject::SetGoState(GOState state)
 {
-    SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
+    SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0, state);
     sScriptMgr->OnGameObjectStateChanged(this, state);
     if (m_model)
     {
@@ -2027,7 +2027,7 @@ void GameObject::SetGoState(GOState state)
 
 void GameObject::SetDisplayId(uint32 displayid)
 {
-    SetUInt32Value(GAMEOBJECT_DISPLAYID, displayid);
+    SetUInt32Value(GAMEOBJECT_FIELD_DISPLAY_ID, displayid);
     UpdateModel();
 }
 
@@ -2138,11 +2138,11 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     {
         if (_fieldNotifyFlags & flags[index] ||
             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag)) ||
-            (index == GAMEOBJECT_FLAGS && forcedFlags))
+            (index == GAMEOBJECT_FIELD_FLAGS && forcedFlags))
         {
             updateMask.SetBit(index);
 
-            if (index == GAMEOBJECT_DYNAMIC)
+            if (index == OBJECT_FIELD_DYNAMIC_FLAGS)
             {
                 uint16 dynFlags = 0;
                 int16 pathProgress = -1;
@@ -2160,7 +2160,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
                             dynFlags |= GO_DYNFLAG_LO_SPARKLE;
                         break;
                     case GAMEOBJECT_TYPE_MO_TRANSPORT:
-                        pathProgress = int16(float(m_goValue.Transport.PathProgress) / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
+                        pathProgress = int16(float(m_goValue.Transport.PathProgress) / float(GetUInt32Value(GAMEOBJECT_FIELD_LEVEL)) * 65535.0f);
                         break;
                     default:
                         break;
@@ -2169,9 +2169,9 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
                 fieldBuffer << uint16(dynFlags);
                 fieldBuffer << int16(pathProgress);
             }
-            else if (index == GAMEOBJECT_FLAGS)
+            else if (index == GAMEOBJECT_FIELD_FLAGS)
             {
-                uint32 flags = m_uint32Values[GAMEOBJECT_FLAGS];
+                uint32 flags = m_uint32Values[GAMEOBJECT_FIELD_FLAGS];
                 if (GetGoType() == GAMEOBJECT_TYPE_CHEST)
                     if (GetGOInfo()->chest.groupLootRules && !IsLootAllowedFor(target))
                         flags |= GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE;
@@ -2186,6 +2186,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     *data << uint8(updateMask.GetBlockCount());
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
+    *data << uint8(0);
 }
 
 void GameObject::GetRespawnPosition(float &x, float &y, float &z, float* ori /* = NULL*/) const

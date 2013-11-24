@@ -192,7 +192,7 @@ bool BattlefieldWG::SetupBattlefield()
         if (GameObject* go = SpawnGameObject(WGPortalDefenderData[i].entry, WGPortalDefenderData[i].x, WGPortalDefenderData[i].y, WGPortalDefenderData[i].z, WGPortalDefenderData[i].o))
         {
             DefenderPortalList.insert(go->GetGUID());
-            go->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
+            go->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, WintergraspFaction[GetDefenderTeam()]);
         }
     }
 
@@ -222,9 +222,9 @@ void BattlefieldWG::OnBattleStart()
     if (GameObject* relic = SpawnGameObject(GO_WINTERGRASP_TITAN_S_RELIC, 5440.0f, 2840.8f, 430.43f, 0))
     {
         // Update faction of relic, only attacker can click on
-        relic->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetAttackerTeam()]);
+        relic->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, WintergraspFaction[GetAttackerTeam()]);
         // Set in use (not allow to click on before last door is broken)
-        relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+        relic->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
         m_titansRelicGUID = relic->GetGUID();
     }
     else
@@ -360,7 +360,7 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
     // Update portal defender faction
     for (GuidSet::const_iterator itr = DefenderPortalList.begin(); itr != DefenderPortalList.end(); ++itr)
         if (GameObject* portal = GetGameObject(*itr))
-            portal->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
+            portal->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, WintergraspFaction[GetDefenderTeam()]);
 
     // Saving data
     for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)

@@ -276,6 +276,8 @@ class WorldSession
         //void SendTestCreatureQueryOpcode(uint32 entry, uint64 guid, uint32 testvalue);
         void SendNameQueryOpcode(ObjectGuid guid);
 
+        void SendRealmNameQueryOpcode(uint32 realmId);
+
         void SendTrainerList(uint64 guid);
         void SendTrainerList(uint64 guid, std::string const& strTitle);
         void SendListInventory(uint64 guid);
@@ -493,6 +495,7 @@ class WorldSession
         void HandleGameobjectReportUse(WorldPacket& recvPacket);
 
         void HandleNameQueryOpcode(WorldPacket& recvPacket);
+        void HandleRealmNameQueryOpcode(WorldPacket& recvPacket);
 
         void HandleQueryTimeOpcode(WorldPacket& recvPacket);
 

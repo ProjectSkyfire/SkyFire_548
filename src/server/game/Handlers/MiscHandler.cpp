@@ -63,7 +63,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)
 
     recvData.read_skip<uint8>();
 
-    if (GetPlayer()->IsAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (GetPlayer()->IsAlive() || GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
     if (GetPlayer()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
@@ -373,11 +373,11 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
     if (uint64 lguid = GetPlayer()->GetLootGUID())
         DoLootRelease(lguid);
 
-    bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->IsInCombat()) ||
+    bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->IsInCombat()) ||
                          GetPlayer()->IsInFlight() || HasPermission(rbac::RBAC_PERM_INSTANT_LOGOUT);
 
     /// TODO: Possibly add RBAC permission to log out in combat
-    bool canLogoutInCombat = GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+    bool canLogoutInCombat = GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     uint32 reason = 0;
     if (GetPlayer()->IsInCombat() && !canLogoutInCombat)
@@ -389,7 +389,8 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
 
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
     data << uint32(reason);
-    data << uint8(instantLogout);
+    data.WriteBit(instantLogout);
+    data.FlushBits();
     SendPacket(&data);
 
     if (reason)
@@ -457,16 +458,16 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvData)
     {
         bool newPvPStatus;
         recvData >> newPvPStatus;
-        GetPlayer()->ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
-        GetPlayer()->ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
+        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
+        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
     }
     else
     {
-        GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
-        GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
+        GetPlayer()->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+        GetPlayer()->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
     }
 
-    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
+    if (GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
     {
         if (!GetPlayer()->IsPvP() || GetPlayer()->pvpInfo.EndTimer)
             GetPlayer()->UpdatePvP(true, true);
@@ -497,7 +498,7 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
-    if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
     GetPlayer()->RepopAtGraveyard();
 }
@@ -744,7 +745,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recvData)
         return;
 
     // body not released yet
-    if (!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (!GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
     Corpse* corpse = GetPlayer()->GetCorpse();
@@ -897,12 +898,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
     if (sObjectMgr->IsTavernAreaTrigger(triggerId))
     {
         // set resting flag we are in the inn
-        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         player->InnEnter(time(NULL), atEntry->mapid, atEntry->x, atEntry->y, atEntry->z);
         player->SetRestType(REST_TYPE_IN_TAVERN);
 
         if (sWorld->IsFFAPvPRealm())
-            player->RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+            player->RemoveByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 
         return;
     }
@@ -943,7 +944,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 
     uint32 timestamp, type, decompressedSize;
     recvData >> timestamp >> decompressedSize;
-    recvData.WriteBits(type, 3);
+    type = recvData.ReadBits(3);
 
     TC_LOG_DEBUG("network", "UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
 
@@ -1089,38 +1090,29 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     uint32 time;
     recvData >> time;
-
+    
     guid[5] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[5]);
 
     //TODO!
 
     /*
-        uint64 guid;
-        uint32 time_skipped;
-        recvData >> guid;
-        recvData >> time_skipped;
-        TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_TIME_SKIPPED");
-
-        //// @todo
-        must be need use in Trinity
-        We substract server Lags to move time (AntiLags)
-        for exmaple
         GetPlayer()->ModifyLastMoveTime(-int32(time_skipped));
     */
 }
@@ -1196,7 +1188,7 @@ void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
         return;
     }
 
-    GetPlayer()->SetByteValue(PLAYER_FIELD_BYTES, 2, actionBar);
+    GetPlayer()->SetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2, actionBar);
 }
 
 void WorldSession::HandlePlayedTime(WorldPacket& recvData)
@@ -1288,8 +1280,8 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
     data.WriteBit(playerGuid[7]);
     data.WriteBit(playerGuid[1]);
     data << uint8(0);                                               // rank
-    data << uint16(player->GetUInt16Value(PLAYER_FIELD_KILLS, 1));  // yesterday kills
-    data << uint16(player->GetUInt16Value(PLAYER_FIELD_KILLS, 0));  // today kills
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // yesterday kills
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // today kills
     data.WriteByteSeq(playerGuid[2]);
     data.WriteByteSeq(playerGuid[0]);
     data.WriteByteSeq(playerGuid[6]);
@@ -1453,7 +1445,8 @@ void WorldSession::HandleRealmSplitOpcode(WorldPacket& recvData)
     // 0x0 realm normal
     // 0x1 realm split
     // 0x2 realm split pending
-    data << split_date;
+    data.WriteBits(split_date.size(), 7);
+    data.WriteString(split_date);
     SendPacket(&data);
     //TC_LOG_DEBUG("response sent %u", unk);
 }
@@ -1467,11 +1460,11 @@ void WorldSession::HandleFarSightOpcode(WorldPacket& recvData)
 
     if (apply)
     {
-        TC_LOG_DEBUG("network", "Added FarSight " UI64FMTD " to player %u", _player->GetUInt64Value(PLAYER_FARSIGHT), _player->GetGUIDLow());
+        TC_LOG_DEBUG("network", "Added FarSight " UI64FMTD " to player %u", _player->GetUInt64Value(PLAYER_FIELD_FARSIGHT_OBJECT), _player->GetGUIDLow());
         if (WorldObject* target = _player->GetViewpoint())
             _player->SetSeer(target);
         else
-            TC_LOG_ERROR("network", "Player %s (GUID: %u) requests non-existing seer " UI64FMTD, _player->GetName().c_str(), GUID_LOPART(_player->GetGUID()), _player->GetUInt64Value(PLAYER_FARSIGHT));
+            TC_LOG_ERROR("network", "Player %s (GUID: %u) requests non-existing seer " UI64FMTD, _player->GetName().c_str(), GUID_LOPART(_player->GetGUID()), _player->GetUInt64Value(PLAYER_FIELD_FARSIGHT_OBJECT));
     }
     else
     {
@@ -1498,7 +1491,7 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket& recvData)
     else
         title = 0;
 
-    GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
+    GetPlayer()->SetUInt32Value(PLAYER_FIELD_PLAYER_TITLE, title);
 }
 
 void WorldSession::HandleTimeSyncResp(WorldPacket& recvData)
@@ -1705,7 +1698,7 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
     uint8 mode;
     recvData >> mode;
 
-    mode ? _player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
+    mode ? _player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
 
     TC_LOG_DEBUG("network", "Client used \"/timetest %d\" command", mode);
 }
@@ -2030,14 +2023,14 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
     TC_LOG_ERROR("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
 
     // If create object failed for current player then client will be stuck on loading screen
-    if (_player->GetGUID() == guid)
-    {
-        LogoutPlayer(true);
-        return;
-    }
+    //if (_player->GetGUID() == guid)
+    //{
+    //    LogoutPlayer(true);
+    //    return;
+    //}
 
     // Pretend we've never seen this object
-    _player->m_clientGUIDs.erase(guid);
+    //_player->m_clientGUIDs.erase(guid);
 }
 
 void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)

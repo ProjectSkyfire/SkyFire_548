@@ -537,9 +537,10 @@ void WorldSession::LogoutPlayer(bool save)
             for (int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; ++j)
             {
                 eslot = j - BUYBACK_SLOT_START;
-                _player->SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + (eslot * 2), 0);
-                _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0);
-                _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, 0);
+                _player->SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOTS + (eslot * 2), 0);
+                _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE + eslot, 0);
+
+                _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP + eslot, 0);
             }
             _player->SaveToDB();
         }
@@ -682,20 +683,20 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     if (position == 0)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_OK);
         packet.WriteBit(0); // has queue info
         packet.WriteBit(0); // has account info
         packet.FlushBits();
-        packet << uint8(AUTH_OK);
         SendPacket(&packet);
     }
     else
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 6);
+        packet << uint8(AUTH_WAIT_QUEUE);
         packet.WriteBit(1); // has queue info
         packet.WriteBit(0); // unk queue bool
         packet.WriteBit(0); // has account info
         packet.FlushBits();
-        packet << uint8(AUTH_WAIT_QUEUE);
         packet << uint32(position);
         SendPacket(&packet);
     }
@@ -774,12 +775,15 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
 void WorldSession::SendAccountDataTimes(uint32 mask)
 {
     WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + NUM_ACCOUNT_DATA_TYPES * 4);
-    data << uint32(time(NULL));                             // Server time
-    data << uint8(1);
-    data << uint32(mask);                                   // type mask
+    data << uint32(time(NULL)); // Server time
+    data << uint32(mask);
+
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
-        if (mask & (1 << i))
-            data << uint32(GetAccountData(AccountDataType(i))->Time);// also unix time
+        data << uint32(GetAccountData(AccountDataType(i))->Time); // also unix time
+
+    data.WriteBit(1);
+    data.FlushBits();
+
     SendPacket(&data);
 }
 
@@ -854,8 +858,8 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
         for (uint32 i = 0; i < addonsCount; ++i)
         {
             std::string addonName;
-            uint8 enabled;
-            uint32 crc, unk1;
+            uint8 usingPubKey;
+            uint32 crc, urlFile;
 
             // check next addon data format correctness
             if (addonInfo.rpos() + 1 > addonInfo.size())
@@ -863,11 +867,11 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 
             addonInfo >> addonName;
 
-            addonInfo >> enabled >> crc >> unk1;
+            addonInfo >> usingPubKey >> crc >> urlFile;
 
-            TC_LOG_INFO("misc", "ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk1);
+            TC_LOG_INFO("misc", "ADDON: Name: %s, UsePubKey: 0x%x, CRC: 0x%x, UrlFile: %i", addonName.c_str(), usingPubKey, crc, urlFile);
 
-            AddonInfo addon(addonName, enabled, crc, 2, true);
+            AddonInfo addon(addonName, true, crc, 2, usingPubKey);
 
             SavedAddon const* savedAddon = AddonMgr::GetAddonInfo(addonName);
             if (savedAddon)
@@ -918,43 +922,70 @@ void WorldSession::SendAddonsInfo()
         0x0D, 0x36, 0xEA, 0x01, 0xE0, 0xAA, 0x91, 0x20, 0x54, 0xF0, 0x72, 0xD8, 0x1E, 0xC7, 0x89, 0xD2
     };
 
-    WorldPacket data(SMSG_ADDON_INFO, 4);
+    uint8 pubKeyOrder[256] = 
+    {
+         0xB5, 0xCD, 0x2C, 0x5D, 0xEC, 0x15, 0x5B, 0xDD, 0x85, 0x98, 0xE2, 0xAC, 0xA8, 0x92, 0x53, 0x71,
+         0x64, 0x32, 0xBF, 0xF1, 0x8E, 0x60, 0x11, 0xF4, 0x9B, 0xA0, 0x24, 0xC4, 0x2D, 0xA5, 0x20, 0x0F,
+         0x62, 0x14, 0x89, 0x58, 0x88, 0x16, 0xE7, 0xE0, 0xBC, 0x9E, 0xC0, 0xD9, 0xFD, 0x51, 0xD2, 0x7A,
+         0xDC, 0x4D, 0x23, 0xB4, 0x84, 0x49, 0xDF, 0x99, 0xF2, 0xBE, 0x4A, 0x22, 0x50, 0x90, 0x30, 0xFC,
+         0xA1, 0x0D, 0x26, 0xEF, 0x61, 0x09, 0xA6, 0x2B, 0x28, 0x04, 0x29, 0x25, 0x03, 0xAD, 0xD3, 0xC2,
+         0xBA, 0xC1, 0x6F, 0x5C, 0xF9, 0x69, 0x35, 0x6A, 0x74, 0x6B, 0x4C, 0xCC, 0xCA, 0x76, 0xE8, 0x9F,
+         0x31, 0xE4, 0xCB, 0x3C, 0xB3, 0x63, 0x1F, 0x65, 0x00, 0xA4, 0x59, 0x8D, 0xEA, 0x95, 0x75, 0xC6,
+         0x10, 0x52, 0x87, 0x94, 0x5E, 0x39, 0xE6, 0xEE, 0x33, 0x6D, 0x42, 0xF0, 0x67, 0xBB, 0x77, 0x6C,
+         0xAB, 0xC3, 0x5A, 0x82, 0x38, 0xF6, 0x27, 0xB9, 0x2F, 0xB8, 0x08, 0x0B, 0x5F, 0xD5, 0x8B, 0xB2,
+         0xB7, 0xB6, 0xF3, 0x43, 0xDA, 0xE5, 0x3D, 0xF8, 0xF5, 0x1B, 0xD6, 0xAE, 0x1C, 0x2A, 0xA2, 0x70,
+         0xD8, 0xD1, 0x78, 0x56, 0x40, 0x79, 0x1D, 0x83, 0x81, 0x06, 0xB0, 0x13, 0xE1, 0x3E, 0xE9, 0xC7,
+         0x1A, 0x3B, 0x7B, 0x91, 0x37, 0x4E, 0x7D, 0x45, 0x1E, 0x7E, 0xCF, 0x18, 0x93, 0x47, 0x73, 0x0E,
+         0x19, 0x2E, 0x9D, 0xD7, 0xFA, 0xC5, 0xED, 0x8C, 0xCE, 0x55, 0xDB, 0xD4, 0xE3, 0x0A, 0xFB, 0xDE,
+         0x3A, 0xFE, 0x01, 0x17, 0x9A, 0xA9, 0x8A, 0x54, 0x97, 0x07, 0x46, 0x44, 0x21, 0x02, 0xD0, 0x3F,
+         0x36, 0x86, 0xA7, 0x7F, 0xBD, 0xB1, 0x7C, 0x4B, 0x41, 0xAF, 0x4F, 0xEB, 0x34, 0xC9, 0x66, 0x05,
+         0x68, 0x96, 0xA3, 0xC8, 0x9C, 0x48, 0x6E, 0xF7, 0x8F, 0x72, 0x57, 0xFF, 0x12, 0x0C, 0xAA, 0x80
+    };
+
+    WorldPacket data(SMSG_ADDON_INFO, 1000);
+    
+    AddonMgr::BannedAddonList const* bannedAddons = AddonMgr::GetBannedAddons();
+    data.WriteBits((uint32)bannedAddons->size(), 18);
+    data.WriteBits((uint32)m_addonsList.size(), 23);
 
     for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
     {
-        data << uint8(itr->State);
+        data.WriteBit(itr->Enabled);
+        data.WriteBit(!itr->UsePublicKeyOrCRC); // If client doesnt have it, send it
+        data.WriteBit(0); // Has URL
+    }
 
-        uint8 crcpub = itr->UsePublicKeyOrCRC;
-        data << uint8(crcpub);
-        if (crcpub)
+    data.FlushBits();
+
+    for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
+    {
+        if (!itr->UsePublicKeyOrCRC)
         {
-            uint8 usepk = (itr->CRC != STANDARD_ADDON_CRC); // If addon is Standard addon CRC
-            data << uint8(usepk);
-            if (usepk)                                      // if CRC is wrong, add public key (client need it)
-            {
-                TC_LOG_INFO("misc", "ADDON: CRC (0x%x) for addon %s is wrong (does not match expected 0x%x), sending pubkey",
-                    itr->CRC, itr->Name.c_str(), STANDARD_ADDON_CRC);
+            size_t pos = data.wpos();
+            for (int i = 0; i < 256; i++)
+                data << uint8(0);
 
-                data.append(addonPublicKey, sizeof(addonPublicKey));
-            }
-
-            data << uint32(0);                              /// @todo Find out the meaning of this.
+            for (int i = 0; i < 256; i++)
+                data.put(pos + pubKeyOrder[i], addonPublicKey[i]);
         }
 
-        data << uint8(0);       // uses URL
-        //if (usesURL)
-        //    data << uint8(0); // URL
+        if (itr->Enabled)
+        {
+            data << uint8(itr->Enabled);
+            data << uint32(0);
+        }
+
+        data << uint8(itr->State);
     }
 
     m_addonsList.clear();
 
-    AddonMgr::BannedAddonList const* bannedAddons = AddonMgr::GetBannedAddons();
-    data << uint32(bannedAddons->size());
     for (AddonMgr::BannedAddonList::const_iterator itr = bannedAddons->begin(); itr != bannedAddons->end(); ++itr)
     {
+        for (int32 i = 0; i < 8; i++)
+            data << uint32(0);
+
         data << uint32(itr->Id);
-        data.append(itr->NameMD5, sizeof(itr->NameMD5));
-        data.append(itr->VersionMD5, sizeof(itr->VersionMD5));
         data << uint32(itr->Timestamp);
         data << uint32(1);  // IsBanned
     }

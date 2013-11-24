@@ -54,9 +54,9 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
         Unit* GetCaster() const { return _caster; }
         void BindToCaster();
         void UnbindFromCaster();
-        uint32 GetSpellId() const {  return GetUInt32Value(DYNAMICOBJECT_SPELLID); }
-        uint64 GetCasterGUID() const { return GetUInt64Value(DYNAMICOBJECT_CASTER); }
-        float GetRadius() const { return GetFloatValue(DYNAMICOBJECT_RADIUS); }
+        uint32 GetSpellId() const {  return GetUInt32Value(DYNAMICOBJECT_FIELD_SPELL_ID); }
+        uint64 GetCasterGUID() const { return GetUInt64Value(DYNAMICOBJECT_FIELD_CASTER); }
+        float GetRadius() const { return GetFloatValue(DYNAMICOBJECT_FIELD_RADIUS); }
 
         void Say(int32 textId, uint32 language, uint64 targetGuid) { MonsterSay(textId, language, targetGuid); }
         void Yell(int32 textId, uint32 language, uint64 targetGuid) { MonsterYell(textId, language, targetGuid); }

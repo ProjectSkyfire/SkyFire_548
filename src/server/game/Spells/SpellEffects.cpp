@@ -1912,7 +1912,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     if (gameObjTarget)
         SendLoot(guid, LOOT_SKINNING);
     else if (itemTarget)
-        itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_UNLOCKED);
+        itemTarget->SetFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_UNLOCKED);
 
     // not allow use skill grow at item base open
     if (!m_CastItem && skillId != SKILL_NONE)
@@ -1969,9 +1969,9 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
         if (m_CastItem->GetEnchantmentId(EnchantmentSlot(j)))
             pNewItem->SetEnchantment(EnchantmentSlot(j), m_CastItem->GetEnchantmentId(EnchantmentSlot(j)), m_CastItem->GetEnchantmentDuration(EnchantmentSlot(j)), m_CastItem->GetEnchantmentCharges(EnchantmentSlot(j)));
 
-    if (m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) < m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
+    if (m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) < m_CastItem->GetUInt32Value(ITEM_FIELD_MAX_DURABILITY))
     {
-        double lossPercent = 1 - m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) / double(m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
+        double lossPercent = 1 - m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) / double(m_CastItem->GetUInt32Value(ITEM_FIELD_MAX_DURABILITY));
         player->DurabilityLoss(pNewItem, lossPercent);
     }
 
@@ -2164,7 +2164,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         return;
 
                     summon->SelectLevel(summon->GetCreatureTemplate());       // some summoned creaters have different from 1 DB data for level/hp
-                    summon->SetUInt32Value(UNIT_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);
+                    summon->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);
 
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
 
@@ -2194,7 +2194,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         {
                             summon->SetOwnerGUID(m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
-                            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+                            summon->SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, m_spellInfo->Id);
                         }
 
                         ExecuteLogEffectSummonObject(effIndex, summon);
@@ -2855,7 +2855,7 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
             pet->SetReactState(REACT_DEFENSIVE);
     }
 
-    pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    pet->SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, m_spellInfo->Id);
 
     // generate new name for summon pet
     std::string new_name=sObjectMgr->GeneratePetName(petentry);
@@ -3985,8 +3985,8 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
         return;
     }
 
-    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction());
-    pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1);
+    pGameObj->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, m_caster->getFaction());
+    pGameObj->SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_caster->getLevel()+1);
     int32 duration = m_spellInfo->GetDuration();
     pGameObj->SetRespawnTime(duration > 0 ? duration/IN_MILLISECONDS : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
@@ -4021,8 +4021,8 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     duel2->isMounted  = (GetSpellInfo()->Id == 62875); // Mounted Duel
     target->duel      = duel2;
 
-    caster->SetUInt64Value(PLAYER_DUEL_ARBITER, pGameObj->GetGUID());
-    target->SetUInt64Value(PLAYER_DUEL_ARBITER, pGameObj->GetGUID());
+    caster->SetUInt64Value(PLAYER_FIELD_DUEL_ARBITER, pGameObj->GetGUID());
+    target->SetUInt64Value(PLAYER_FIELD_DUEL_ARBITER, pGameObj->GetGUID());
 
     sScriptMgr->OnPlayerDuelRequest(target, caster);
 }
@@ -4341,7 +4341,7 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         return;
     }
 
-    //pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
+    //pGameObj->SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_caster->getLevel());
     int32 duration = m_spellInfo->GetDuration();
     go->SetRespawnTime(duration > 0 ? duration/IN_MILLISECONDS : 0);
     go->SetSpellId(m_spellInfo->Id);
@@ -4791,7 +4791,7 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
 
     player->GetMap()->CreatureRelocation(pet, x, y, z, player->GetOrientation());
 
-    pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+    pet->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->setDeathState(ALIVE);
     pet->ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
@@ -4816,7 +4816,7 @@ void Spell::EffectDestroyAllTotems(SpellEffIndex /*effIndex*/)
         Creature* totem = m_caster->GetMap()->GetCreature(m_caster->m_SummonSlot[slot]);
         if (totem && totem->IsTotem())
         {
-            uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            uint32 spell_id = totem->GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL);
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
             if (spellInfo)
             {
@@ -4994,7 +4994,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
 
     pGameObj->SetOwnerGUID(m_caster->GetGUID());
 
-    //pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
+    //pGameObj->SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_caster->getLevel());
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     ExecuteLogEffectSummonObject(effIndex, pGameObj);
@@ -5012,7 +5012,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
             m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
         {
             linkedGO->SetRespawnTime(duration > 0 ? duration/IN_MILLISECONDS : 0);
-            //linkedGO->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
+            //linkedGO->SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_caster->getLevel());
             linkedGO->SetSpellId(m_spellInfo->Id);
             linkedGO->SetOwnerGUID(m_caster->GetGUID());
 
@@ -5431,7 +5431,7 @@ void Spell::EffectGameObjectDamage(SpellEffIndex /*effIndex*/)
         return;
 
     FactionTemplateEntry const* casterFaction = caster->GetFactionTemplateEntry();
-    FactionTemplateEntry const* targetFaction = sFactionTemplateStore.LookupEntry(gameObjTarget->GetUInt32Value(GAMEOBJECT_FACTION));
+    FactionTemplateEntry const* targetFaction = sFactionTemplateStore.LookupEntry(gameObjTarget->GetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE));
     // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
     if ((casterFaction && targetFaction && !casterFaction->IsFriendlyTo(*targetFaction)) || !targetFaction)
         gameObjTarget->ModifyHealth(-damage, caster, GetSpellInfo()->Id);
@@ -5511,10 +5511,10 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
 
         if (summon->GetEntry() == 27893)
         {
-            if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
+            if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_FIELD_VISIBLE_ITEMS + 16))
             {
                 summon->SetDisplayId(11686);
-                summon->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
+                summon->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID, weapon);
             }
             else
                 summon->SetDisplayId(1126);
@@ -5535,7 +5535,7 @@ void Spell::EffectRenamePet(SpellEffIndex /*effIndex*/)
         !unitTarget->ToCreature()->IsPet() || ((Pet*)unitTarget)->getPetType() != HUNTER_PET)
         return;
 
-    unitTarget->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
+    unitTarget->SetByteFlag(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 2, UNIT_CAN_BE_RENAMED);
 }
 
 void Spell::EffectPlayMusic(SpellEffIndex effIndex)

@@ -627,7 +627,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             {
                 if (IsUnit(*itr))
                 {
-                    (*itr)->ToUnit()->SetUInt32Value(UNIT_NPC_EMOTESTATE, e.action.emote.emote);
+                    (*itr)->ToUnit()->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, e.action.emote.emote);
                     TC_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_SET_EMOTE_STATE. Unit %u set emotestate to %u",
                         (*itr)->GetGUIDLow(), e.action.emote.emote);
                 }
@@ -654,8 +654,8 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     }
                     else
                     {
-                        (*itr)->ToUnit()->SetFlag(UNIT_FIELD_FLAGS_2, e.action.unitFlag.flag);
-                        TC_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_SET_UNIT_FLAG. Unit %u added flag %u to UNIT_FIELD_FLAGS_2",
+                        (*itr)->ToUnit()->SetFlag(UNIT_FIELD_FLAGS2, e.action.unitFlag.flag);
+                        TC_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_SET_UNIT_FLAG. Unit %u added flag %u to UNIT_FIELD_FLAGS2",
                         (*itr)->GetGUIDLow(), e.action.unitFlag.flag);
                     }
                 }
@@ -682,8 +682,8 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     }
                     else
                     {
-                        (*itr)->ToUnit()->RemoveFlag(UNIT_FIELD_FLAGS_2, e.action.unitFlag.flag);
-                        TC_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_REMOVE_UNIT_FLAG. Unit %u removed flag %u to UNIT_FIELD_FLAGS_2",
+                        (*itr)->ToUnit()->RemoveFlag(UNIT_FIELD_FLAGS2, e.action.unitFlag.flag);
+                        TC_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_REMOVE_UNIT_FLAG. Unit %u removed flag %u to UNIT_FIELD_FLAGS2",
                         (*itr)->GetGUIDLow(), e.action.unitFlag.flag);
                     }
                 }
@@ -1482,11 +1482,11 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                         slot[2] = e.action.equip.slot3;
                     }
                     if (!e.action.equip.mask || (e.action.equip.mask & 1))
-                        npc->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, slot[0]);
+                        npc->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID + 0, slot[0]);
                     if (!e.action.equip.mask || (e.action.equip.mask & 2))
-                        npc->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, slot[1]);
+                        npc->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID + 1, slot[1]);
                     if (!e.action.equip.mask || (e.action.equip.mask & 4))
-                        npc->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, slot[2]);
+                        npc->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID + 2, slot[2]);
                 }
             }
 
@@ -1624,7 +1624,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->SetUInt32Value(UNIT_NPC_FLAGS, e.action.unitFlag.flag);
+                    (*itr)->ToUnit()->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, e.action.unitFlag.flag);
 
             delete targets;
             break;
@@ -1637,7 +1637,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->SetFlag(UNIT_NPC_FLAGS, e.action.unitFlag.flag);
+                    (*itr)->ToUnit()->SetFlag(UNIT_FIELD_NPC_FLAGS, e.action.unitFlag.flag);
 
             delete targets;
             break;
@@ -1650,7 +1650,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->RemoveFlag(UNIT_NPC_FLAGS, e.action.unitFlag.flag);
+                    (*itr)->ToUnit()->RemoveFlag(UNIT_FIELD_NPC_FLAGS, e.action.unitFlag.flag);
 
             delete targets;
             break;
@@ -1825,19 +1825,19 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             delete targets;
             break;
         }
-        case SMART_ACTION_SET_UNIT_FIELD_BYTES_1:
+        case SMART_ACTION_SET_UNIT_FIELD_DISPLAY_POWER:
         {
             ObjectList* targets = GetTargets(e, unit);
             if (!targets)
                 break;
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->SetByteFlag(UNIT_FIELD_BYTES_1, e.action.setunitByte.type, e.action.setunitByte.byte1);
+                    (*itr)->ToUnit()->SetByteFlag(UNIT_FIELD_DISPLAY_POWER, e.action.setunitByte.type, e.action.setunitByte.byte1);
 
             delete targets;
             break;
         }
-        case SMART_ACTION_REMOVE_UNIT_FIELD_BYTES_1:
+        case SMART_ACTION_REMOVE_UNIT_FIELD_DISPLAY_POWER:
         {
             ObjectList* targets = GetTargets(e, unit);
             if (!targets)
@@ -1845,7 +1845,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->RemoveByteFlag(UNIT_FIELD_BYTES_1, e.action.delunitByte.type, e.action.delunitByte.byte1);
+                    (*itr)->ToUnit()->RemoveByteFlag(UNIT_FIELD_DISPLAY_POWER, e.action.delunitByte.type, e.action.delunitByte.byte1);
 
             delete targets;
             break;
@@ -1884,7 +1884,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->SetUInt32Value(UNIT_DYNAMIC_FLAGS, e.action.unitFlag.flag);
+                    (*itr)->ToUnit()->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, e.action.unitFlag.flag);
 
             delete targets;
             break;
@@ -1897,7 +1897,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->SetFlag(UNIT_DYNAMIC_FLAGS, e.action.unitFlag.flag);
+                    (*itr)->ToUnit()->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, e.action.unitFlag.flag);
 
             delete targets;
             break;
@@ -1910,7 +1910,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->RemoveFlag(UNIT_DYNAMIC_FLAGS, e.action.unitFlag.flag);
+                    (*itr)->ToUnit()->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, e.action.unitFlag.flag);
 
             delete targets;
             break;
@@ -2075,7 +2075,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsGameObject(*itr))
-                    (*itr)->ToGameObject()->SetUInt32Value(GAMEOBJECT_FLAGS, e.action.goFlag.flag);
+                    (*itr)->ToGameObject()->SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, e.action.goFlag.flag);
 
             delete targets;
             break;
@@ -2088,7 +2088,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsGameObject(*itr))
-                    (*itr)->ToGameObject()->SetFlag(GAMEOBJECT_FLAGS, e.action.goFlag.flag);
+                    (*itr)->ToGameObject()->SetFlag(GAMEOBJECT_FIELD_FLAGS, e.action.goFlag.flag);
 
             delete targets;
             break;
@@ -2101,7 +2101,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsGameObject(*itr))
-                    (*itr)->ToGameObject()->RemoveFlag(GAMEOBJECT_FLAGS, e.action.goFlag.flag);
+                    (*itr)->ToGameObject()->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, e.action.goFlag.flag);
 
             delete targets;
             break;
