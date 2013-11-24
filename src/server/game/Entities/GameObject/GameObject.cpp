@@ -2130,7 +2130,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     updateMask.SetCount(m_valuesCount);
 
     uint32* flags = GameObjectUpdateFieldFlags;
-    uint32 visibleFlag = UF_FLAG_PUBLIC;
+    uint32 visibleFlag = UF_FLAG_PUBLIC | UF_FLAG_VIEWER_DEPENDENT;
     if (GetOwnerGUID() == target->GetGUID())
         visibleFlag |= UF_FLAG_OWNER;
 

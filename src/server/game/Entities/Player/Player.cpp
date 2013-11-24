@@ -3314,7 +3314,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE+i, 0.0f);
 
     SetFloatValue(PLAYER_FIELD_PARRY_PERCENTAGE, 0.0f);
-    SetFloatValue(PLAYER_FLAGS_ALLOW_ONLY_ABILITY, 0.0f);
+    SetFloatValue(PLAYER_FIELD_PLAYER_FLAGS, 0.0f);
 
     // Static 30% damage blocked
     SetUInt32Value(PLAYER_FIELD_SHIELD_BLOCK, 30);
@@ -20058,7 +20058,7 @@ void Player::_SaveStats(SQLTransaction& trans)
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         stmt->setUInt32(index++, GetResistance(SpellSchools(i)));
 
-    stmt->setFloat(index++, GetFloatValue(PLAYER_FLAGS_ALLOW_ONLY_ABILITY));
+    stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_PLAYER_FLAGS));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_DODGE_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_PARRY_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_CRIT_PERCENTAGE));
@@ -20081,7 +20081,7 @@ void Player::outDebugValues() const
     TC_LOG_DEBUG("entities.unit", "AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f", GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
     TC_LOG_DEBUG("entities.unit", "INTELLECT is: \t\t%f\t\tSPIRIT is: \t\t%f", GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
     TC_LOG_DEBUG("entities.unit", "STAMINA is: \t\t%f", GetStat(STAT_STAMINA));
-    TC_LOG_DEBUG("entities.unit", "Armor is: \t\t%u\t\tBlock is: \t\t%f", GetArmor(), GetFloatValue(PLAYER_FLAGS_ALLOW_ONLY_ABILITY));
+    TC_LOG_DEBUG("entities.unit", "Armor is: \t\t%u\t\tBlock is: \t\t%f", GetArmor(), GetFloatValue(PLAYER_FIELD_PLAYER_FLAGS));
     TC_LOG_DEBUG("entities.unit", "HolyRes is: \t\t%u\t\tFireRes is: \t\t%u", GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
     TC_LOG_DEBUG("entities.unit", "NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u", GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
     TC_LOG_DEBUG("entities.unit", "ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u", GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));

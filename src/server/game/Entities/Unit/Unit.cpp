@@ -2567,7 +2567,7 @@ float Unit::GetUnitBlockChance() const
         {
             Item* tmpitem = player->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if (tmpitem && !tmpitem->IsBroken())
-                return GetFloatValue(PLAYER_FLAGS_ALLOW_ONLY_ABILITY);
+                return GetFloatValue(PLAYER_FIELD_PLAYER_FLAGS);
         }
         // is player but has no block ability or no not broken shield equipped
         return 0.0f;
@@ -16219,7 +16219,7 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     uint32 valCount = m_valuesCount;
 
     uint32* flags = UnitUpdateFieldFlags;
-    uint32 visibleFlag = UF_FLAG_PUBLIC;
+    uint32 visibleFlag = UF_FLAG_PUBLIC | UF_FLAG_VIEWER_DEPENDENT;
 
     if (target == this)
         visibleFlag |= UF_FLAG_PRIVATE;
