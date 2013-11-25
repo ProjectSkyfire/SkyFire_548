@@ -836,8 +836,8 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
 
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {
-        if (_fieldNotifyFlags & flags[index] ||
-             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag)))
+        if ((_fieldNotifyFlags & flags[index] ||
+             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag))) && !(flags[index] & UF_FLAG_TEMP_DISABLED))
         {
             updateMask.SetBit(index);
             fieldBuffer << m_uint32Values[index];
