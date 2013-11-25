@@ -2019,9 +2019,9 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             case RACE_GOBLIN:
                 stmt->setUInt16(1, 792);
                 break;
-            //case RACE_PANDAREN_NEUTRAL:
-            //    stmt->setUInt16(1, 905);
-            //    break;
+            case RACE_PANDAREN_NEUTRAL:
+                stmt->setUInt16(1, 905);
+                break;
             }
 
             trans->Append(stmt);
