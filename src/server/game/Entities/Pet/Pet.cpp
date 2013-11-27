@@ -213,16 +213,16 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     {
         case SUMMON_PET:
             petlevel = owner->getLevel();
-
-            SetUInt32Value(UNIT_FIELD_SEX, 0x800); // class = mage
+            SetClass(CLASS_MAGE);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-                                                            // this enables popup window (pet dismiss, cancel)
+            // this enables popup window (pet dismiss, cancel)
             break;
         case HUNTER_PET:
-            SetUInt32Value(UNIT_FIELD_SEX, 0x02020100); // class = warrior, gender = none, power = focus
             SetSheath(SHEATH_STATE_MELEE);
+            SetClass(CLASS_WARRIOR);
+            SetGender(GENDER_NONE);
+            SetFieldPowerType(POWER_FOCUS);
             SetByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
-
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet abandon, cancel)
             setPowerType(POWER_FOCUS);
@@ -771,7 +771,9 @@ bool Pet::CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map, uint32 phas
 
     if (cinfo->type == CREATURE_TYPE_BEAST)
     {
-        SetUInt32Value(UNIT_FIELD_SEX, 0x02020100);
+        SetClass(CLASS_WARRIOR);
+        SetGender(GENDER_NONE);
+        SetFieldPowerType(POWER_FOCUS);
         SetSheath(SHEATH_STATE_MELEE);
         SetByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
     }

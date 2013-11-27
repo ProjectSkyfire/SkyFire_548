@@ -101,8 +101,11 @@ public:
 
         player->setFactionForRace(player->getRace());
 
-        player->SetUInt32Value(UNIT_FIELD_SEX, ((player->getRace()) | (player->getClass() << 8) | (player->getGender() << 24)));
-        player->SetUInt32Value(UNIT_FIELD_DISPLAY_POWER, powerType);
+        player->SetRace(player->getRace());
+        player->SetClass(player->getClass());
+        player->SetGender(player->getGender());
+
+        player->SetFieldPowerType(powerType);
 
         // reset only if player not in some form;
         if (player->GetShapeshiftForm() == FORM_NONE)

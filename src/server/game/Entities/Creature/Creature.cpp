@@ -296,10 +296,10 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
     m_creatureInfo = cinfo;                                 // map mode related always
 
     // equal to player Race field, but creature does not have race
-    SetByteValue(UNIT_FIELD_SEX, 0, 0);
+    SetRace(0);
 
     // known valid are: CLASS_WARRIOR, CLASS_PALADIN, CLASS_ROGUE, CLASS_MAGE
-    SetByteValue(UNIT_FIELD_SEX, 1, uint8(cinfo->unit_class));
+    SetClass(uint8(cinfo->unit_class));
 
     // Cancel load if no model defined
     if (!(cinfo->GetFirstValidModelId()))
@@ -318,7 +318,7 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
 
     SetDisplayId(displayID);
     SetNativeDisplayId(displayID);
-    SetByteValue(UNIT_FIELD_SEX, 3, minfo->gender);
+    SetGender(minfo->gender);
 
     // Load creature equipment
     if (!data || data->equipmentId == 0)
@@ -799,7 +799,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     {
         SetDisplayId(displayID);
         SetNativeDisplayId(displayID);
-        SetByteValue(UNIT_FIELD_SEX, 3, minfo->gender);
+        SetGender(minfo->gender);
     }
 
     LastUsedScriptID = GetCreatureTemplate()->ScriptID;
@@ -1533,7 +1533,7 @@ void Creature::Respawn(bool force)
         {
             SetDisplayId(displayID);
             SetNativeDisplayId(displayID);
-            SetByteValue(UNIT_FIELD_SEX, 3, minfo->gender);
+            SetGender(minfo->gender);
         }
 
         GetMotionMaster()->InitDefault();

@@ -7205,7 +7205,7 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit* victim, uint32 /*damage*/, Au
 
 void Unit::setPowerType(Powers new_powertype)
 {
-    SetUInt32Value(UNIT_FIELD_DISPLAY_POWER, new_powertype);
+    SetFieldPowerType(new_powertype);
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
@@ -14036,7 +14036,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                     if (cinfo && cinfo->type == CREATURE_TYPE_DEMON)
                     {
                         // to prevent client crash
-                        SetByteValue(UNIT_FIELD_SEX, 1, (uint8)CLASS_MAGE);
+                        SetClass(CLASS_MAGE);
 
                         // just to enable stat window
                         if (GetCharmInfo())
@@ -14141,7 +14141,7 @@ void Unit::RemoveCharmedBy(Unit* charmer)
                     CreatureTemplate const* cinfo = ToCreature()->GetCreatureTemplate();
                     if (cinfo && cinfo->type == CREATURE_TYPE_DEMON)
                     {
-                        SetByteValue(UNIT_FIELD_SEX, 1, uint8(cinfo->unit_class));
+                        SetClass(uint8(cinfo->unit_class));
                         if (GetCharmInfo())
                             GetCharmInfo()->SetPetNumber(0, true);
                         else

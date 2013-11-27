@@ -977,7 +977,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     SetMap(sMapMgr->CreateMap(info->mapId, this));
 
-    uint8 powertype = cEntry->powerType;
+    uint8 powerType = cEntry->powerType;
 
     SetObjectScale(1.0f);
 
@@ -990,12 +990,13 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         return false;
     }
 
-    uint32 RaceClassGender = (createInfo->Race) | (createInfo->Class << 8) | (createInfo->Gender << 24);
-
-    SetUInt32Value(UNIT_FIELD_SEX, RaceClassGender);
-    SetUInt32Value(UNIT_FIELD_DISPLAY_POWER, powertype);
+    SetRace(createInfo->Race);
+    SetClass(createInfo->Class);
+    SetGender(createInfo->Gender);
+    SetFieldPowerType(powerType);
 
     InitDisplayIds();
+
     if (sWorld->getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_PVP || sWorld->getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_RPPVP)
     {
         SetByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 1, UNIT_BYTE2_FLAG_PVP);
@@ -5222,7 +5223,7 @@ void Player::CreateCorpse()
         return;
     }
 
-    _uf = GetUInt32Value(UNIT_FIELD_SEX);
+    _uf = getRace();
     _pb = GetUInt32Value(PLAYER_FIELD_HAIR_COLOR_ID);
     _pb2 = GetUInt32Value(PLAYER_FIELD_REST_STATE);
 
@@ -17033,12 +17034,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         return false;
     }
 
-    // overwrite some data fields
-    uint32 bytes0 = 0;
-    bytes0 |= fields[3].GetUInt8();                         // race
-    bytes0 |= fields[4].GetUInt8() << 8;                    // class
-    bytes0 |= gender << 24;                                 // gender
-    SetUInt32Value(UNIT_FIELD_SEX, bytes0);
+    SetRace(fields[3].GetUInt8());
+    SetClass(fields[4].GetUInt8());
+    SetGender(gender);
 
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
     SetUInt32Value(PLAYER_FIELD_XP, fields[7].GetUInt32());
@@ -27100,7 +27098,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         case SUMMON_PET:
             // this enables pet details window (Shift+P)
             pet->GetCharmInfo()->SetPetNumber(pet_number, true);
-            pet->SetUInt32Value(UNIT_FIELD_SEX, 2048);
+            pet->SetClass(CLASS_MAGE);
             pet->SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);
             pet->SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, 1000);
             pet->SetFullHealth();

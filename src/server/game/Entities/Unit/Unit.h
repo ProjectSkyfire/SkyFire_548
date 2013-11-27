@@ -1353,11 +1353,16 @@ class Unit : public WorldObject
         uint8 getLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
         uint8 getLevelForTarget(WorldObject const* /*target*/) const { return getLevel(); }
         void SetLevel(uint8 lvl);
+
         uint8 getRace() const { return GetByteValue(UNIT_FIELD_SEX, 0); }
         uint32 getRaceMask() const { return 1 << (getRace()-1); }
         uint8 getClass() const { return GetByteValue(UNIT_FIELD_SEX, 1); }
         uint32 getClassMask() const { return 1 << (getClass()-1); }
         uint8 getGender() const { return GetByteValue(UNIT_FIELD_SEX, 3); }
+
+        void SetRace(uint8 race) { SetByteValue(UNIT_FIELD_SEX, 0, race); }
+        void SetClass(uint8 newClass) { SetByteValue(UNIT_FIELD_SEX, 1, newClass); }
+        void SetGender(uint8 gender) { SetByteValue(UNIT_FIELD_SEX, 3, gender); }
 
         float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STATS+stat)); }
         void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STATS+stat, val); }
@@ -1387,6 +1392,8 @@ class Unit : public WorldObject
         int32 GetHealthGain(int32 dVal);
 
         Powers getPowerType() const { return Powers(GetUInt32Value(UNIT_FIELD_DISPLAY_POWER)); }
+        void SetFieldPowerType(uint32 powerType) { SetUInt32Value(UNIT_FIELD_DISPLAY_POWER, powerType); }
+
         void setPowerType(Powers power);
         int32 GetPower(Powers power) const;
         int32 GetMinPower(Powers power) const { return power == POWER_ECLIPSE ? -100 : 0; }
