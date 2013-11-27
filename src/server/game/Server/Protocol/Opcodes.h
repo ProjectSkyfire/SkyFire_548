@@ -29,7 +29,7 @@
 enum Opcodes
 {
     MAX_OPCODE                                              = 0x1FFF,
-    NUM_OPCODE_HANDLERS                                     = (MAX_OPCODE+1),
+    NUM_OPCODE_HANDLERS                                     = 0x7FFF,
     UNKNOWN_OPCODE                                          = (0xFFFF+1),
     NULL_OPCODE                                             = 0x0,
     COMPRESSED_OPCODE_MASK                                  = 0x8000,
@@ -1459,7 +1459,7 @@ inline std::string GetOpcodeNameForLogging(Opcodes id)
 
     if (id < UNKNOWN_OPCODE)
     {
-        if (OpcodeHandler const* handler = opcodeTable[uint32(id) & 0x7FFF])
+        if (OpcodeHandler const* handler = opcodeTable[uint32(id) & NUM_OPCODE_HANDLERS])
         {
             ss << handler->Name;
             if (opcode & COMPRESSED_OPCODE_MASK)
