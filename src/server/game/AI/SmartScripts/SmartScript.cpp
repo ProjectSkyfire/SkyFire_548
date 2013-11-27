@@ -1825,19 +1825,19 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             delete targets;
             break;
         }
-        case SMART_ACTION_SET_UNIT_FIELD_DISPLAY_POWER:
+        case SMART_ACTION_SET_UNIT_FIELD_ANIM_TIER:
         {
             ObjectList* targets = GetTargets(e, unit);
             if (!targets)
                 break;
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->SetByteFlag(UNIT_FIELD_DISPLAY_POWER, e.action.setunitByte.type, e.action.setunitByte.byte1);
+                    (*itr)->ToUnit()->SetByteFlag(UNIT_FIELD_ANIM_TIER, e.action.setunitByte.type, e.action.setunitByte.byte1);
 
             delete targets;
             break;
         }
-        case SMART_ACTION_REMOVE_UNIT_FIELD_DISPLAY_POWER:
+        case SMART_ACTION_REMOVE_UNIT_FIELD_ANIM_TIER:
         {
             ObjectList* targets = GetTargets(e, unit);
             if (!targets)
@@ -1845,7 +1845,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
-                    (*itr)->ToUnit()->RemoveByteFlag(UNIT_FIELD_DISPLAY_POWER, e.action.delunitByte.type, e.action.delunitByte.byte1);
+                    (*itr)->ToUnit()->RemoveByteFlag(UNIT_FIELD_ANIM_TIER, e.action.delunitByte.type, e.action.delunitByte.byte1);
 
             delete targets;
             break;

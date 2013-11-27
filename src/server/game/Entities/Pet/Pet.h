@@ -131,8 +131,8 @@ class Pet : public Guardian
         void InitTalentForLevel();
 
         uint8 GetMaxTalentPointsForLevel(uint8 level);
-        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_DISPLAY_POWER, 1); }
-        void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_DISPLAY_POWER, 1, points); }
+        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_ANIM_TIER, 1); }
+        void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_ANIM_TIER, 1, points); }
 
         uint32  m_usedTalentCount;
 

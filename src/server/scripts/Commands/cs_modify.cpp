@@ -1346,7 +1346,7 @@ public:
         }
 
         // Set gender
-        target->SetByteValue(UNIT_FIELD_SEX, 2, gender);
+        target->SetByteValue(UNIT_FIELD_SEX, 3, gender);
         target->SetByteValue(PLAYER_FIELD_PVP_INFO, 0, gender);
 
         // Change display ID

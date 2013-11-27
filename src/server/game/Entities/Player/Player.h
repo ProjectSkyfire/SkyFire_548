@@ -549,7 +549,7 @@ enum PlayerFieldByteFlags
     PLAYER_FIELD_BYTE_NO_RELEASE_WINDOW = 0x00000010        // Display no "release spirit" window at all
 };
 
-// used in UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID values
+// used in UNIT_FIELD_SHAPESHIFT_FORM values
 enum PlayerFieldByte2Flags
 {
     PLAYER_FIELD_BYTE2_NONE                 = 0x00,
