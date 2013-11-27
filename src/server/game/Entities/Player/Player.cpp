@@ -6538,30 +6538,78 @@ int16 Player::GetSkillTempBonusValue(uint32 skill) const
 
 void Player::SendActionButtons(uint32 state) const
 {
-    WorldPacket data(SMSG_ACTION_BUTTONS, 1+(MAX_ACTION_BUTTONS*4));
-    /*
-        state can be 0, 1, 2
-        0 - Sends initial action buttons, client does not validate if we have the spell or not
-        1 - Used used after spec swaps, client validates if a spell is known.
-        2 - Clears the action bars client sided. This is sent during spec swap before unlearning and before sending the new buttons
-    */
-    if (state != 2)
+    WorldPacket data(SMSG_ACTION_BUTTONS, 1+(MAX_ACTION_BUTTONS*8));
+
+    uint8 buttons [MAX_ACTION_BUTTONS][8];
+    ActionButtonPACKET* buttonsTab = (ActionButtonPACKET*)buttons;
+    memset(buttons, 0, MAX_ACTION_BUTTONS*8);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
     {
-        for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+        ActionButton const* ab = ((Player*)this)->GetActionButton(i);
+        if (!ab)
         {
-            ActionButtonList::const_iterator itr = m_actionButtons.find(button);
-            if (itr != m_actionButtons.end() && itr->second.uState != ACTIONBUTTON_DELETED)
-                data << uint32(itr->second.packedData);
-            else
-                data << uint32(0);
+            buttonsTab[i].id = 0;
+            buttonsTab[i].unk = 0;
+            continue;
         }
+
+        buttonsTab[i].id = ab->GetAction();
+        buttonsTab[i].unk = uint32(ab->GetType());
     }
-    else
-        data.resize(MAX_ACTION_BUTTONS * 4);    // insert crap, client doesnt even parse this for state == 2
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][0]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][1]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][3]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][4]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][6]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][7]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][2]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][5]);
+
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][5]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][2]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][0]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][1]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][3]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][6]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][4]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][0]);
 
     data << uint8(state);
     GetSession()->SendPacket(&data);
-    TC_LOG_INFO("network", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
+    sLog->outInfo(LOG_FILTER_NETWORKIO, "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
 }
 
 bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
