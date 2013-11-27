@@ -1105,7 +1105,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
 	
     ActionButtonPACKET* button = (ActionButtonPACKET*)&guid;
 
-    TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "CMSG_SET_ACTION_BUTTON slotId: %u actionId: %u", slotId, button->id);
+    TC_LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON slotId: %u actionId: %u", slotId, button->id);
 
     if (!button->id)
         GetPlayer()->removeActionButton(slotId);
