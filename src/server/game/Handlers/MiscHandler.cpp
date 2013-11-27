@@ -1079,15 +1079,38 @@ int32 WorldSession::HandleEnableNagleAlgorithm()
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
 {
-    uint8 button;
-    uint32 packetData;
-    recvData >> button >> packetData;
-    TC_LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON Button: %u Data: %u", button, packetData);
+    ObjectGuid guid;
+    uint8 slotId;
 
-    if (!packetData)
-        GetPlayer()->removeActionButton(button);
+    recvData >> slotId;
+
+    guid[4] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
+
+	
+    ActionButtonPACKET* button = (ActionButtonPACKET*)&guid;
+
+    TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "CMSG_SET_ACTION_BUTTON slotId: %u actionId: %u", slotId, button->id);
+
+    if (!button->id)
+        GetPlayer()->removeActionButton(slotId);
     else
-        GetPlayer()->addActionButton(button, ACTION_BUTTON_ACTION(packetData), ACTION_BUTTON_TYPE(packetData));
+        GetPlayer()->addActionButton(slotId, button->id, button->unk);
 }
 
 void WorldSession::HandleCompleteCinematic(WorldPacket& /*recvData*/)
