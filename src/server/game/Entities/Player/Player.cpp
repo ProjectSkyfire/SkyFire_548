@@ -6605,11 +6605,11 @@ void Player::SendActionButtons(uint32 state) const
         data.WriteByteSeq(buttons[i][4]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][0]);
+        data.WriteByteSeq(buttons[i][7]);
 
     data << uint8(state);
     GetSession()->SendPacket(&data);
-    sLog->outInfo(LOG_FILTER_NETWORKIO, "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
+    TC_LOG_INFO("misc", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
 }
 
 bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)

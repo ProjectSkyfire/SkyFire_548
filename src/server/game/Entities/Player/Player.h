@@ -60,8 +60,14 @@ class PhaseMgr;
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           128
-#define PLAYER_MAX_DAILY_QUESTS     25
+#define PLAYER_MAX_DAILY_QUESTS     750
 #define PLAYER_EXPLORED_ZONES_SIZE  156
+
+struct ActionButtonPACKET
+{
+    uint32 id;
+    uint32 unk; // default 1 (maybe)
+};
 
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
@@ -350,7 +356,7 @@ struct ActionButton
     }
 };
 
-#define  MAX_ACTION_BUTTONS 144                             //checked in 3.2.0
+#define  MAX_ACTION_BUTTONS 132                             //checked in 3.2.0
 
 typedef std::map<uint8, ActionButton> ActionButtonList;
 
