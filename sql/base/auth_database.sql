@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 5.6.9-rc, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.11, for Win32 (x86)
 --
--- Host: localhost    Database: auth_4x
+-- Host: localhost    Database: auth
 -- ------------------------------------------------------
--- Server version   5.6.9-rc
+-- Server version	5.6.11
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES UTF8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -160,13 +160,13 @@ LOCK TABLES `ip2nation` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `ip2nationCountries`
+-- Table structure for table `ip2nationcountries`
 --
 
-DROP TABLE IF EXISTS `ip2nationCountries`;
+DROP TABLE IF EXISTS `ip2nationcountries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ip2nationCountries` (
+CREATE TABLE `ip2nationcountries` (
   `code` varchar(4) NOT NULL DEFAULT '',
   `iso_code_2` varchar(2) NOT NULL DEFAULT '',
   `iso_code_3` varchar(3) DEFAULT '',
@@ -180,12 +180,12 @@ CREATE TABLE `ip2nationCountries` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `ip2nationCountries`
+-- Dumping data for table `ip2nationcountries`
 --
 
-LOCK TABLES `ip2nationCountries` WRITE;
-/*!40000 ALTER TABLE `ip2nationCountries` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ip2nationCountries` ENABLE KEYS */;
+LOCK TABLES `ip2nationcountries` WRITE;
+/*!40000 ALTER TABLE `ip2nationcountries` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ip2nationcountries` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -346,6 +346,56 @@ INSERT INTO `rbac_permissions` VALUES (1,'Instant logout'),(2,'Skip Queue'),(3,'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `realm_classes`
+--
+
+DROP TABLE IF EXISTS `realm_classes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `realm_classes` (
+  `realmId` int(11) NOT NULL,
+  `class` tinyint(4) NOT NULL COMMENT 'Class Id',
+  `expansion` tinyint(4) NOT NULL COMMENT 'Expansion for class activation',
+  PRIMARY KEY (`realmId`,`class`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `realm_classes`
+--
+
+LOCK TABLES `realm_classes` WRITE;
+/*!40000 ALTER TABLE `realm_classes` DISABLE KEYS */;
+INSERT INTO `realm_classes` VALUES (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,2),(1,7,0),(1,8,0),(1,9,0),(1,10,4),(1,11,0);
+/*!40000 ALTER TABLE `realm_classes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `realm_races`
+--
+
+DROP TABLE IF EXISTS `realm_races`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `realm_races` (
+  `realmId` int(11) NOT NULL,
+  `race` tinyint(4) NOT NULL COMMENT 'Race Id',
+  `expansion` tinyint(4) NOT NULL COMMENT 'Expansion for race activation',
+  PRIMARY KEY (`realmId`,`race`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `realm_races`
+--
+
+LOCK TABLES `realm_races` WRITE;
+/*!40000 ALTER TABLE `realm_races` DISABLE KEYS */;
+INSERT INTO `realm_races` VALUES (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,3),(1,10,1),(1,11,1),(1,22,3),(1,24,4),(1,25,4),(1,26,4);
+/*!40000 ALTER TABLE `realm_races` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `realmcharacters`
 --
 
@@ -440,4 +490,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-09-10 23:18:53
+-- Dump completed on 2013-11-28  9:33:52
