@@ -1183,7 +1183,7 @@ enum Opcodes
     SMSG_QUEST_CONFIRM_ACCEPT                                = 0x0,
     SMSG_QUEST_FORCE_REMOVE                                  = 0x0,
     SMSG_QUEST_POI_QUERY_RESPONSE                            = 0x0,
-    SMSG_QUEST_QUERY_RESPONSE                                = 0x0,
+    SMSG_QUEST_QUERY_RESPONSE                                = 0x0B5C, // 5.4.1 17538
     SMSG_RAID_GROUP_ONLY                                     = 0x0,
     SMSG_RAID_INSTANCE_INFO                                  = 0x0,
     SMSG_RAID_INSTANCE_MESSAGE                               = 0x0,
