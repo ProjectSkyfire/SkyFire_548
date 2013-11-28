@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 5.6.9-rc, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.11, for Win32 (x86)
 --
--- Host: localhost    Database: characters_4x
+-- Host: localhost    Database: mop_char
 -- ------------------------------------------------------
--- Server version	5.6.9-rc
+-- Server version	5.6.11
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES UTF8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -221,12 +221,12 @@ DROP TABLE IF EXISTS `banned_addons`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `banned_addons` (
-  `Id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `Id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Name` varchar(255) NOT NULL,
   `Version` varchar(255) NOT NULL DEFAULT '',
   `Timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `idx_name_ver` (`Name`, `Version`)
+  UNIQUE KEY `idx_name_ver` (`Name`,`Version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -486,8 +486,8 @@ CREATE TABLE `character_aura` (
   `caster_guid` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Full Global Unique Identifier',
   `item_guid` bigint(20) unsigned NOT NULL DEFAULT '0',
   `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `effect_mask` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `recalculate_mask` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `effect_mask` int(10) unsigned NOT NULL DEFAULT '0',
+  `recalculate_mask` int(10) unsigned DEFAULT '0',
   `stackcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `amount0` int(11) NOT NULL DEFAULT '0',
   `amount1` int(11) NOT NULL DEFAULT '0',
@@ -2078,7 +2078,7 @@ LOCK TABLES `guild_member_withdraw` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `guild_news_log`
+-- Table structure for table `guild_newslog`
 --
 
 DROP TABLE IF EXISTS `guild_newslog`;
@@ -2454,8 +2454,8 @@ CREATE TABLE `pet_aura` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Full Global Unique Identifier',
   `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `effect_mask` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `recalculate_mask` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `effect_mask` int(10) unsigned NOT NULL DEFAULT '0',
+  `recalculate_mask` int(10) unsigned DEFAULT '0',
   `stackcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `amount0` mediumint(8) NOT NULL,
   `amount1` mediumint(8) NOT NULL,
@@ -2683,4 +2683,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-04 16:22:06
+-- Dump completed on 2013-11-28  9:37:12
