@@ -96,6 +96,9 @@ enum MovementStatusElements
     MSESplineElevation,
 
     MSECounter,
+    MSECounterCount,
+    MSEHasUnkTime,
+    MSEUnkTime,
 
     // Special
     MSEZeroBit,         // writes bit value 1 or skips read bit

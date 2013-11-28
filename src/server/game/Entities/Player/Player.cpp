@@ -27220,6 +27220,8 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
     bool hasFallData = false;
     bool hasFallDirection = false;
     bool hasSplineElevation = false;
+    bool hasUnkTime = false;
+    uint32 counterCount = 0u;
 
     ObjectGuid guid;
     ObjectGuid tguid;
@@ -27317,7 +27319,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 break;
             case MSEMovementFlags2:
                 if (hasMovementFlags2)
-                    mi->flags2 = data.ReadBits(12);
+                    mi->flags2 = data.ReadBits(13);
                 break;
             case MSETimestamp:
                 if (hasTimestamp)
@@ -27396,8 +27398,19 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasSplineElevation)
                     data >> mi->splineElevation;
                 break;
+            case MSECounterCount:
+                counterCount = data.ReadBits(22);
+                break;
             case MSECounter:
-                data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
+                for (int i = 0; i < counterCount; i++)
+                    data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
+                break;
+            case MSEHasUnkTime:
+                hasUnkTime = !data.ReadBit();
+                break;
+            case MSEUnkTime:
+                if (hasUnkTime)
+                    data.read_skip<uint32>();
                 break;
             case MSEZeroBit:
             case MSEOneBit:
@@ -27438,6 +27451,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
         in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD.
         It will freeze clients that receive this player's movement info.
     */
+
     REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_ROOT),
         MOVEMENTFLAG_ROOT);
 

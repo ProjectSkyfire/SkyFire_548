@@ -15462,7 +15462,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             break;
         case MSEMovementFlags2:
             if (hasMovementFlags2)
-                data.WriteBits(GetExtraUnitMovementFlags(), 12);
+                data.WriteBits(GetExtraUnitMovementFlags(), 13);
             break;
         case MSETimestamp:
             if (hasTimestamp)
@@ -15540,6 +15540,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         case MSESplineElevation:
             if (hasSplineElevation)
                 data << mi.splineElevation;
+            break;
+        case MSECounterCount:
+            data.WriteBits(0, 22);
             break;
         case MSECounter:
             data << m_movementCounter++;
