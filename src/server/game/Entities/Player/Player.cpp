@@ -23151,8 +23151,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // Homebind
     WorldPacket data(SMSG_BINDPOINTUPDATE, 5*4);
-    data << m_homebindX << m_homebindY << m_homebindZ;
+    data << m_homebindZ;
+    data << m_homebindX;
     data << (uint32) m_homebindMapId;
+    data << m_homebindY;
     data << (uint32) m_homebindAreaId;
     GetSession()->SendPacket(&data);
 
