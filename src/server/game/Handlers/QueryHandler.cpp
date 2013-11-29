@@ -237,9 +237,9 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         }
         TC_LOG_DEBUG("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
 
-        data.WriteBit(1);                                    // has data
+        data.WriteBit(1);                                    // Has data
         data.WriteBits(0, 11);
-        data.WriteBits(8, 22);                              // questitems
+        data.WriteBits(MAX_CREATURE_QUEST_ITEMS, 22);        // Quest items
         data.WriteBits(ci->IconName.length() + 1, 6);
         data.WriteBit(ci->RacialLeader);
 
@@ -248,10 +248,10 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
             if (i == 0)
                 data.WriteBits(Name.length() + 1, 11);
             else
-                data.WriteBits(0, 11);                          // name2, ..., name8
+                data.WriteBits(0, 11);                       // Name2, ..., name8
         }
 
-        data.WriteBits(SubName.length() == 0 ? 0 : SubName.length() + 1, 11);
+        data.WriteBits(SubName.length() ? SubName.length() + 1 : 0, 11);
 
         data.FlushBits();
 
@@ -260,26 +260,26 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         data << uint32(ci->type);                           // CreatureType.dbc
 
         if (SubName != "")
-            data << SubName;                                    // Subname
+            data << SubName;                                // Subname
 
         data << uint32(ci->Modelid1);                       // Modelid1
         data << uint32(ci->Modelid4);                       // Modelid4
 
         for (uint32 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
-            data << uint32(ci->questItems[i]);              // itemId[6], quest drop
+            data << uint32(ci->questItems[i]);              // ItemId[6], quest drop
 
         data << Name;
 
         if (ci->IconName != "")
-            data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
+            data << ci->IconName;                           // "Directions" for guard, string for Icons 2.3.0
 
-        data << uint32(ci->type_flags2);                    // unknown meaning
-        data << uint32(ci->type_flags);                     // flags
-        data << float(ci->ModHealth);                       // dmg/hp modifier
+        data << uint32(ci->type_flags2);                    // Flags2
+        data << uint32(ci->type_flags);                     // Flags
+        data << float(ci->ModHealth);                       // Hp modifier
         data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)
-        data << uint32(ci->KillCredit[0]);                  // new in 3.1, kill credit
-        data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
-        data << float(ci->ModMana);                         // dmg/mana modifier
+        data << uint32(ci->KillCredit[0]);                  // New in 3.1, kill credit
+        data << uint32(ci->KillCredit[1]);                  // New in 3.1, kill credit
+        data << float(ci->ModMana);                         // Mana modifier
         data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
         data << uint32(ci->Modelid2);                       // Modelid2
         data << uint32(ci->Modelid3);                       // Modelid3
