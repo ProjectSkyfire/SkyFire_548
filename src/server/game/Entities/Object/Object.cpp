@@ -382,7 +382,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(0);//flags & UPDATEFLAG_VEHICLE);
     data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION);
     data->WriteBit(0);
-    data->WriteBit(GetTypeId() == TYPEID_GAMEOBJECT);
+    data->WriteBit(flags & UPDATEFLAG_ROTATION);
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -512,13 +512,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetTransOffsetX());
     }
 
-    if (GetTypeId() == TYPEID_GAMEOBJECT)
-    {
-            float z = (float)sin(ToGameObject()->GetOrientation() / 1.9999945);
-            long com = (long)(z / atan(pow(2.f, -20)));
-
-            *data << long(ToGameObject()->GetOrientation() < M_PI ? com : ((0x100000 - com) << 1) + com);
-    }
+    if (flags & UPDATEFLAG_ROTATION)
+        *data << uint64(ToGameObject()->GetRotation());
 
 /*
     Unit const* self = NULL;
@@ -773,9 +768,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         if (hasTransportTime2)
             *data << uint32(self->m_movementInfo.transport.time2);
     }
-
-    if (flags & UPDATEFLAG_ROTATION)
-        *data << uint64(ToGameObject()->GetRotation());
 
     if (flags & UPDATEFLAG_UNK5)
     {

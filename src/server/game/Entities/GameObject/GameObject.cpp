@@ -238,6 +238,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoState(go_state);
     SetGoArtKit(artKit);
+        
+    SetGoHealth(0xFF);
 
     switch (goinfo->type)
     {
@@ -1088,7 +1090,7 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = f
 
 void GameObject::SetGoArtKit(uint8 kit)
 {
-    SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 2, kit);
+    SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 1, kit);
     GameObjectData* data = const_cast<GameObjectData*>(sObjectMgr->GetGOData(m_DBTableGuid));
     if (data)
         data->artKit = kit;
@@ -2009,7 +2011,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
 void GameObject::SetGoState(GOState state)
 {
-    SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0, state);
+    SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0, state);
     sScriptMgr->OnGameObjectStateChanged(this, state);
     if (m_model)
     {
@@ -2138,7 +2140,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     {
         if ((_fieldNotifyFlags & flags[index] ||
             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag)) ||
-            (index == GAMEOBJECT_FIELD_FLAGS && forcedFlags)) && !(flags[index] & UF_FLAG_TEMP_DISABLED))
+            (index == GAMEOBJECT_FIELD_FLAGS && forcedFlags)))
         {
             updateMask.SetBit(index);
 
@@ -2165,7 +2167,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
                     default:
                         break;
                 }
-
+                
                 fieldBuffer << uint16(dynFlags);
                 fieldBuffer << int16(pathProgress);
             }
