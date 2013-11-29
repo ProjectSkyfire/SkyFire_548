@@ -2167,7 +2167,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
                     default:
                         break;
                 }
-                
+
                 fieldBuffer << uint16(dynFlags);
                 fieldBuffer << int16(pathProgress);
             }
