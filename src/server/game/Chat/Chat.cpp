@@ -689,7 +689,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     data->WriteBit(1);
     data->WriteBit(1);
     data->WriteBit(1);
-    data->WriteBits(0, 8); 
+    data->WriteBits(0, 8);
     data->WriteBit(0);
 
     data->WriteBit(source[6]);
@@ -733,7 +733,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     data->WriteByteSeq(source[2]);
 
     *data << uint8(language);
-        
+
     data->WriteByteSeq(target[7]);
     data->WriteByteSeq(target[4]);
     data->WriteByteSeq(target[0]);

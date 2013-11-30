@@ -636,7 +636,7 @@ enum Opcodes
     MSG_MOVE_TOGGLE_FALL_LOGGING                             = 0x0,
     MSG_MOVE_TOGGLE_LOGGING                                  = 0x0,
     MSG_MOVE_UPDATE_MOUSE                                    = 0x0,
-    MSG_MOVE_WORLDPORT_ACK                                   = 0x0,
+    MSG_MOVE_WORLDPORT_ACK                                   = 0x12CC, // 5.4.1 17538 - GUESSED !
     MSG_NOTIFY_PARTY_SQUELCH                                 = 0x0,
     MSG_PARTY_ASSIGNMENT                                     = 0x0,
     MSG_PETITION_DECLINE                                     = 0x0,
