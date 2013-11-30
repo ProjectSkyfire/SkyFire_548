@@ -1833,7 +1833,7 @@ struct SpellEntry
     uint32 SpellEquippedItemsId;                            // 16       SpellEquippedItems.dbc
     uint32 SpellInterruptsId;                               // 17       SpellInterrupts.dbc
     uint32 SpellLevelsId;                                   // 18       SpellLevels.dbc
-    uint32 SpellPowerId;                                    // 19       SpellPower.dbc
+    uint32 SpellReagentsId;                                 // 19       SpellReagents.dbc
     uint32 SpellShapeshiftId;                               // 20       SpellShapeshift.dbc
     uint32 SpellTargetRestrictionsId;                       // 21       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 22       SpellTotems.dbc

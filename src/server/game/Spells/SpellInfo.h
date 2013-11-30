@@ -386,7 +386,6 @@ public:
     uint32 SpellEquippedItemsId;
     uint32 SpellInterruptsId;
     uint32 SpellLevelsId;
-    uint32 SpellPowerId;
     uint32 SpellReagentsId;
     uint32 SpellShapeshiftId;
     uint32 SpellTargetRestrictionsId;
