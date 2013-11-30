@@ -1795,8 +1795,8 @@ void SpellMgr::LoadSpellProcEvents()
 
     mSpellProcEventMap.clear();                             // need for reload case
 
-    //                                                0      1           2                3                 4                 5                 6          7       8        9             10
-    QueryResult result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
+    //                                                0      1           2                3                 4                 5                6                7          8        9       10            11
+    QueryResult result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3 procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
     if (!result)
     {
         TC_LOG_INFO("server.loading", ">> Loaded 0 spell proc event conditions. DB table `spell_proc_event` is empty.");
@@ -1807,9 +1807,10 @@ void SpellMgr::LoadSpellProcEvents()
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = result->Fetch();   
+        int i = 0;
 
-        int32 spellId = fields[0].GetInt32();
+        int32 spellId = fields[i++].GetInt32();
 
         bool allRanks = false;
         if (spellId < 0)
@@ -1839,16 +1840,17 @@ void SpellMgr::LoadSpellProcEvents()
 
         SpellProcEventEntry spellProcEvent;
 
-        spellProcEvent.schoolMask         = fields[1].GetInt8();
-        spellProcEvent.spellFamilyName    = fields[2].GetUInt16();
-        spellProcEvent.spellFamilyMask[0] = fields[3].GetUInt32();
-        spellProcEvent.spellFamilyMask[1] = fields[4].GetUInt32();
-        spellProcEvent.spellFamilyMask[2] = fields[5].GetUInt32();
-        spellProcEvent.procFlags          = fields[6].GetUInt32();
-        spellProcEvent.procEx             = fields[7].GetUInt32();
-        spellProcEvent.ppmRate            = fields[8].GetFloat();
-        spellProcEvent.customChance       = fields[9].GetFloat();
-        spellProcEvent.cooldown           = fields[10].GetUInt32();
+        spellProcEvent.schoolMask         = fields[i++].GetInt8();
+        spellProcEvent.spellFamilyName    = fields[i++].GetUInt16();
+        spellProcEvent.spellFamilyMask[0] = fields[i++].GetUInt32();
+        spellProcEvent.spellFamilyMask[1] = fields[i++].GetUInt32();
+        spellProcEvent.spellFamilyMask[2] = fields[i++].GetUInt32();
+        spellProcEvent.spellFamilyMask[3] = fields[i++].GetUInt32();
+        spellProcEvent.procFlags          = fields[i++].GetUInt32();
+        spellProcEvent.procEx             = fields[i++].GetUInt32();
+        spellProcEvent.ppmRate            = fields[i++].GetFloat();
+        spellProcEvent.customChance       = fields[i++].GetFloat();
+        spellProcEvent.cooldown           = fields[i++].GetUInt32();
 
         while (spellInfo)
         {
