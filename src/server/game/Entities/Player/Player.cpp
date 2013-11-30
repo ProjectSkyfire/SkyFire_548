@@ -4007,7 +4007,7 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     if (learning && IsInWorld())
     {
         WorldPacket data(SMSG_LEARNED_SPELL, 8);
-        uint32 spellCount;
+        uint32 spellCount = 1;
 
         data.WriteBit(0);
         data.WriteBits(spellCount, 22);
