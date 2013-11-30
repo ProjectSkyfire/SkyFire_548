@@ -15556,6 +15556,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         case MSEExtraElement:
             extras->WriteNextElement(data);
             break;
+        case MSEUintCount:
+            data << uint32(0);
+            break;
         default:
             ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
             break;
