@@ -185,35 +185,45 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
+    bool bit724;
+    uint8 playerLen = 0, guildLen = 0;
+    uint8 unkLen2, unkLen3;
     std::string player_name, guild_name;
 
-    recvData >> level_min;                                 // maximal player level, default 0
-    recvData >> level_max;                                 // minimal player level, default 100 (MAX_LEVEL)
-    recvData >> player_name;                               // player name, case sensitive...
+    recvData >> level_max;                                  // minimal player level, default 100 (MAX_LEVEL)
+    recvData >> racemask;                                   // race mask
+    recvData >> classmask;                                  // class mask
+    recvData >> level_min;                                  // maximal player level, default 0
 
-    recvData >> guild_name;                                // guild name, case sensitive...
+    str_count = recvData.ReadBits(3);
+    unkLen2 = recvData.ReadBits(8);
+    recvData.ReadBit();
+    zones_count = recvData.ReadBits(4);                     // zones count, client limit = 10 (2.0.10)
 
-    recvData >> racemask;                                  // race mask
-    recvData >> classmask;                                 // class mask
-    recvData >> zones_count;                               // zones count, client limit = 10 (2.0.10)
+    if (zones_count > 10)                                   // can't be received from real client or broken packet
+        return;
 
-    if (zones_count > 10)
-        return;                                             // can't be received from real client or broken packet
-
-    for (uint32 i = 0; i < zones_count; ++i)
-    {
-        uint32 temp;
-        recvData >> temp;                                  // zone id, 0 if zone is unknown...
-        zoneids[i] = temp;
-        TC_LOG_DEBUG("network", "Zone %u: %u", i, zoneids[i]);
-    }
-
-    recvData >> str_count;                                 // user entered strings count, client limit=4 (checked on 2.0.10)
+    recvData.ReadBit();
+    guildLen = recvData.ReadBits(7);
+    recvData.ReadBit();
+    bit724 = recvData.ReadBit();
+    unkLen3 = recvData.ReadBits(8);
+    recvData.ReadBit();
+    recvData.ReadBit();
+    playerLen = recvData.ReadBits(6);
 
     if (str_count > 4)
         return;                                             // can't be received from real client or broken packet
 
-    TC_LOG_DEBUG("network", "Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
+    uint8* unkLens;
+    unkLens = new uint8[str_count];
+    std::string* unkStrings;
+    unkStrings = new std::string[str_count];
+
+    for (uint8 i = 0; i < str_count; i++)
+        unkLens[i] = recvData.ReadBits(7);
+
+    recvData.FlushBits();
 
     std::wstring str[4];                                    // 4 is client limit
     for (uint32 i = 0; i < str_count; ++i)
@@ -229,6 +239,35 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         TC_LOG_DEBUG("network", "String %u: %s", i, temp.c_str());
     }
 
+    if (unkLen3 > 0)
+        std::string unkString = recvData.ReadString(unkLen3);
+
+    if (guildLen > 0)
+        guild_name = recvData.ReadString(guildLen);         // guild name, case sensitive...
+
+    if (unkLen2 > 0)
+        std::string unkString = recvData.ReadString(unkLen2);
+
+    if (playerLen > 0)
+        player_name = recvData.ReadString(playerLen);       // player name, case sensitive...
+
+
+    for (uint32 i = 0; i < zones_count; ++i)
+    {
+        uint32 temp;
+        recvData >> temp;                                  // zone id, 0 if zone is unknown...
+        zoneids[i] = temp;
+        TC_LOG_DEBUG("network", "Zone %u: %u", i, zoneids[i]);
+    }
+    
+    if (bit724)
+    {
+        uint32 un1, un2;
+        recvData >> un1;         
+        recvData >> un2;         
+    }
+    TC_LOG_DEBUG("network", "Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
+
     std::wstring wplayer_name;
     std::wstring wguild_name;
     if (!(Utf8toWStr(player_name, wplayer_name) && Utf8toWStr(guild_name, wguild_name)))
@@ -242,13 +281,17 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         level_max = STRONG_MAX_LEVEL;
 
     uint32 team = _player->GetTeam();
-
+    uint32 security = GetSecurity();
+    //bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     uint32 gmLevelInWhoList  = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
-    uint32 displaycount = 0;
+    uint8 displaycount = 0;
 
-    WorldPacket data(SMSG_WHO, 50);                       // guess size
-    data << uint32(matchcount);                           // placeholder, count of players matching criteria
-    data << uint32(displaycount);                         // placeholder, count of players displayed
+    ByteBuffer bitsData;
+    ByteBuffer bytesData;
+    WorldPacket data(SMSG_WHO);
+    size_t pos = data.wpos();
+
+    bitsData.WriteBits(displaycount, 6);
 
     TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
@@ -348,21 +391,116 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         if ((matchcount++) >= sWorld->getIntConfig(CONFIG_MAX_WHO))
             continue;
 
-        data << pname;                                    // player name
-        data << gname;                                    // guild name
-        data << uint32(lvl);                              // player level
-        data << uint32(class_);                           // player class
-        data << uint32(race);                             // player race
-        data << uint8(gender);                            // player gender
-        data << uint32(pzoneid);                          // player zone id
+        ObjectGuid playerGuid = itr->second->GetGUID();
+        ObjectGuid unkGuid = NULL;
+        ObjectGuid guildGuid = itr->second->GetGuild() ? itr->second->GetGuild()->GetGUID() : NULL;
+
+        bitsData.WriteBit(guildGuid[5]); //guid2
+        bitsData.WriteBit(playerGuid[4]); //guid1
+        bitsData.WriteBit(unkGuid[1]); //guid34
+        bitsData.WriteBits(gname.size(), 7); 
+        bitsData.WriteBits(pname.size(), 6);
+        bitsData.WriteBit(playerGuid[2]);
+        bitsData.WriteBit(unkGuid[2]); //guid34
+        bitsData.WriteBit(unkGuid[5]); //guid34
+        bitsData.WriteBit(guildGuid[3]);
+        bitsData.WriteBit(guildGuid[1]);
+        bitsData.WriteBit(guildGuid[0]);
+        bitsData.WriteBit(unkGuid[4]);
+        bitsData.WriteBit(0);
+        bitsData.WriteBit(playerGuid[6]);
+        bitsData.WriteBit(unkGuid[0]);
+        bitsData.WriteBit(unkGuid[3]);
+        bitsData.WriteBit(guildGuid[4]);
+        bitsData.WriteBit(unkGuid[6]);
+
+        if (DeclinedName const* names = itr->second->GetDeclinedNames())
+        {
+            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+                bitsData.WriteBits(names->name[i].size(), 7);
+        }
+        else
+        {
+            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+                bitsData.WriteBits(0, 7);
+        }
+        bitsData.WriteBit(unkGuid[7]);
+        bitsData.WriteBit(guildGuid[6]);
+        bitsData.WriteBit(playerGuid[3]);
+        bitsData.WriteBit(guildGuid[2]);
+        bitsData.WriteBit(guildGuid[7]);
+        bitsData.WriteBit(playerGuid[7]);
+        bitsData.WriteBit(playerGuid[1]);
+        bitsData.WriteBit(playerGuid[5]);
+        bitsData.WriteBit(0);
+        bitsData.WriteBit(playerGuid[0]);
+
+        bytesData << uint8(race);
+        bytesData.WriteByteSeq(unkGuid[3]);
+        bytesData.WriteByteSeq(unkGuid[1]);
+        bytesData.WriteByteSeq(playerGuid[5]);
+        bytesData.WriteByteSeq(guildGuid[3]);
+        bytesData.WriteByteSeq(guildGuid[6]);
+        bytesData.WriteByteSeq(playerGuid[6]);
+        bytesData << uint8(race);
+        bytesData << uint32(38297239);
+        bytesData.WriteByteSeq(playerGuid[1]);
+
+        if (pname.size() > 0)
+            bytesData.append(pname.c_str(), pname.size());
+
+        bytesData.WriteByteSeq(unkGuid[5]);
+        bytesData.WriteByteSeq(unkGuid[0]);
+        bytesData.WriteByteSeq(guildGuid[4]);
+        bytesData << uint8(class_);
+        bytesData.WriteByteSeq(unkGuid[6]);
+        bytesData << uint32(pzoneid);
+        bytesData.WriteByteSeq(playerGuid[0]);
+        bytesData << uint32(50659372);
+        bytesData.WriteByteSeq(guildGuid[1]);
+        bytesData.WriteByteSeq(playerGuid[4]);
+        bytesData << uint8(lvl);
+        bytesData.WriteByteSeq(unkGuid[4]);
+        bytesData.WriteByteSeq(guildGuid[2]);
+        
+        if (gname.size() > 0)
+            bytesData.append(gname.c_str(), gname.size());
+        
+        bytesData.WriteByteSeq(guildGuid[7]);
+        bytesData.WriteByteSeq(guildGuid[0]);
+        bytesData.WriteByteSeq(playerGuid[2]);
+        bytesData.WriteByteSeq(playerGuid[7]);
+        bytesData << uint32(50659372);
+        bytesData.WriteByteSeq(guildGuid[5]);
+        bytesData.WriteByteSeq(unkGuid[7]);
+        bytesData.WriteByteSeq(playerGuid[3]);
+
+        if (DeclinedName const* names = itr->second->GetDeclinedNames())
+            for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+                if (names->name[i].size() > 0)
+                    bytesData.append(names->name[i].c_str(), names->name[i].size());
+
+
+        bytesData.WriteByteSeq(unkGuid[2]);
 
         ++displaycount;
     }
 
-    data.put(0, displaycount);                            // insert right count, count displayed
-    data.put(4, matchcount);                              // insert right count, count of matches
+    if (displaycount != 0)
+    {
+        bitsData.FlushBits();
+        uint8 firstByte = bitsData.contents()[0];
+        data << uint8(displaycount << 2 | firstByte & 0x3);
+        for (size_t i = 1; i < bitsData.size(); i++)
+            data << uint8(bitsData.contents()[i]);
+
+        data.append(bytesData);
+    }
+    else
+        data.WriteBits(0, 6);
 
     SendPacket(&data);
+
     TC_LOG_DEBUG("network", "WORLD: Send SMSG_WHO Message");
 }
 
