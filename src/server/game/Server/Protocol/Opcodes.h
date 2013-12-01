@@ -43,7 +43,7 @@ enum Opcodes
     CMSG_ADD_IGNORE                                          = 0x0,
     CMSG_ADD_VOICE_IGNORE                                    = 0x0,
     CMSG_ALTER_APPEARANCE                                    = 0x0,
-    CMSG_AREATRIGGER                                         = 0x0,
+    CMSG_AREATRIGGER                                         = 0x1376, // 5.4.1 17538
     CMSG_AREA_SPIRIT_HEALER_QUERY                            = 0x0,
     CMSG_AREA_SPIRIT_HEALER_QUEUE                            = 0x0,
     CMSG_ARENA_TEAM_ACCEPT                                   = 0x0,
@@ -477,7 +477,7 @@ enum Opcodes
     CMSG_RESET_FACTION_CHEAT                                 = 0x0,
     CMSG_RESET_INSTANCES                                     = 0x0,
     CMSG_RESURRECT_RESPONSE                                  = 0x0,
-    CMSG_RETURN_TO_GRAVEYARD                                 = 0x0,
+    CMSG_RETURN_TO_GRAVEYARD                                 = 0xA65, // 5.4.1 17538
     CMSG_ROLE_POLL_BEGIN                                     = 0x0,
     CMSG_SAVE_CUF_PROFILES                                   = 0x0,
     CMSG_SAVE_PLAYER                                         = 0x0,
@@ -509,7 +509,7 @@ enum Opcodes
     CMSG_SET_PET_SLOT                                        = 0x0,
     CMSG_SET_PLAYER_DECLINED_NAMES                           = 0x0,
     CMSG_SET_PREFERED_CEMETERY                               = 0x0,
-    CMSG_SET_PRIMARY_TALENT_TREE                             = 0x0,
+    CMSG_SET_PRIMARY_TALENT_TREE                             = 0x17DF, // 5.4.1 17538
     CMSG_SET_RELATIVE_POSITION                               = 0x0,
     CMSG_SET_SAVED_INSTANCE_EXTEND                           = 0x0,
     CMSG_SET_SELECTION                                       = 0x07CD, // 5.4.1 17538
