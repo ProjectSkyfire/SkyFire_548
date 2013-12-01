@@ -2536,6 +2536,9 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
+        if (getClass() == CLASS_MONK)
+            Regenerate(POWER_CHI);
+
         m_regenTimerCount -= 2000;
     }
 
@@ -2616,6 +2619,12 @@ void Player::Regenerate(Powers power)
         break;
         case POWER_RUNES:
             break;
+        case POWER_CHI:                                  // Regenerate chi (monk)
+            {
+                float ChiRate = sWorld->getRate(RATE_POWER_CHI);
+                addvalue = 20 * ChiRate;
+                break;
+            } 
         case POWER_HEALTH:
             return;
         default:

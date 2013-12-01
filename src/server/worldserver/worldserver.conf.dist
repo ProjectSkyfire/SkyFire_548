@@ -1674,6 +1674,7 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #    Rate.RunicPower.Income
 #    Rate.RunicPower.Loss
 #    Rate.Focus
+#    Rate.Chi
 #    Rate.Energy
 #    Rate.Loyalty
 #        Description: Multiplier to configure health, mana, incoming rage, loss of rage, focus
@@ -1685,6 +1686,7 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #                     1 - (Rate.RunicPower.Income)
 #                     1 - (Rate.RunicPower.Loss)
 #                     1 - (Rate.Focus)
+#                     1 - (Rate.Chi)
 #                     1 - (Rate.Energy)
 #                     1 - (Rate.Loyalty)
 
@@ -1695,6 +1697,7 @@ Rate.Rage.Loss         = 1
 Rate.RunicPower.Income = 1
 Rate.RunicPower.Loss   = 1
 Rate.Focus             = 1
+Rate.Chi               = 1
 Rate.Energy            = 1
 Rate.Loyalty           = 1
 
