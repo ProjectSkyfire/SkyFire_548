@@ -131,8 +131,8 @@ namespace Trinity
                 case CONTENT_81_85:
                     nBaseExp = 1878;
                     break;
-				case CONTENT_86_90:
-					nBaseExp = 7194;
+                case CONTENT_86_90:
+                    nBaseExp = 7194;
                     break;
                 default:
                     TC_LOG_ERROR("misc", "BaseGain: Unsupported content level %u", content);
