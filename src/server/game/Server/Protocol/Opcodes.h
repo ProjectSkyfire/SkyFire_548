@@ -217,7 +217,7 @@ enum Opcodes
     CMSG_GM_NUKE                                             = 0x0,
     CMSG_GM_REPORT_LAG                                       = 0x0,
     CMSG_GM_SET_SECURITY_GROUP                               = 0x0,
-    CMSG_GOSSIP_HELLO                                        = 0x0,
+    CMSG_GOSSIP_HELLO                                        = 0x025C, //5.4.1 17538
     CMSG_GOSSIP_SELECT_OPTION                                = 0x0,
     CMSG_GRANT_LEVEL                                         = 0x0,
     CMSG_GROUP_ASSISTANT_LEADER                              = 0x0,
