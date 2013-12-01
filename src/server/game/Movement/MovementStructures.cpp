@@ -4439,24 +4439,24 @@ MovementStatusElements const MoveSetTurnRate[] =
 
 MovementStatusElements const MoveSetFlightSpeed[] =
 {
-    MSEHasGuidByte0,
-    MSEHasGuidByte5,
-    MSEHasGuidByte1,
-    MSEHasGuidByte6,
     MSEHasGuidByte3,
+    MSEHasGuidByte0,
     MSEHasGuidByte2,
-    MSEHasGuidByte7,
     MSEHasGuidByte4,
-    MSEGuidByte0,
-    MSEGuidByte1,
-    MSEGuidByte7,
-    MSEGuidByte5,
-    MSEExtraElement,
-    MSECounter,
+    MSEHasGuidByte6,
+    MSEHasGuidByte1,
+    MSEHasGuidByte5,
+    MSEHasGuidByte7,
     MSEGuidByte2,
+    MSEGuidByte7,
+    MSEGuidByte1,
+    MSEExtraElement,
+    MSEGuidByte0,
+    MSEGuidByte4,
+    MSEGuidByte5,
+    MSEUintCount,
     MSEGuidByte6,
     MSEGuidByte3,
-    MSEGuidByte4,
     MSEEnd,
 };
 
@@ -4869,21 +4869,21 @@ MovementStatusElements const SplineMoveUnroot[] =
 
 MovementStatusElements const MoveSetCanFly[] =
 {
-    MSEHasGuidByte1,
     MSEHasGuidByte6,
-    MSEHasGuidByte5,
-    MSEHasGuidByte0,
-    MSEHasGuidByte7,
-    MSEHasGuidByte4,
     MSEHasGuidByte2,
+    MSEHasGuidByte4,
+    MSEHasGuidByte1,
+    MSEHasGuidByte0,
+    MSEHasGuidByte5,
+    MSEHasGuidByte7,
     MSEHasGuidByte3,
-    MSEGuidByte6,
-    MSEGuidByte3,
-    MSECounter,
-    MSEGuidByte2,
-    MSEGuidByte1,
-    MSEGuidByte4,
     MSEGuidByte7,
+    MSEGuidByte6,
+    MSEGuidByte4,
+    MSEUintCount,
+    MSEGuidByte2,
+    MSEGuidByte3,
+    MSEGuidByte1,
     MSEGuidByte0,
     MSEGuidByte5,
     MSEEnd,
@@ -4891,23 +4891,23 @@ MovementStatusElements const MoveSetCanFly[] =
 
 MovementStatusElements const MoveUnsetCanFly[] =
 {
-    MSEHasGuidByte1,
-    MSEHasGuidByte4,
-    MSEHasGuidByte2,
-    MSEHasGuidByte5,
-    MSEHasGuidByte0,
-    MSEHasGuidByte3,
-    MSEHasGuidByte6,
     MSEHasGuidByte7,
-    MSEGuidByte4,
-    MSEGuidByte6,
-    MSECounter,
-    MSEGuidByte1,
+    MSEHasGuidByte6,
+    MSEHasGuidByte5,
+    MSEHasGuidByte1,
+    MSEHasGuidByte2,
+    MSEHasGuidByte4,
+    MSEHasGuidByte3,
+    MSEHasGuidByte0,
     MSEGuidByte0,
-    MSEGuidByte2,
+    MSEGuidByte6,
     MSEGuidByte3,
-    MSEGuidByte5,
     MSEGuidByte7,
+    MSEGuidByte2,
+    MSEGuidByte1,
+    MSEGuidByte5,
+    MSECounter,
+    MSEGuidByte4,
     MSEEnd,
 };
 
@@ -5557,8 +5557,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveUnroot;
         case SMSG_MOVE_SET_CAN_FLY:
             return MoveSetCanFly;
-        //case SMSG_MOVE_UNSET_CAN_FLY:
-        //    return MoveUnsetCanFly;
+        case SMSG_MOVE_UNSET_CAN_FLY:
+            return MoveUnsetCanFly;
         //case SMSG_MOVE_SET_HOVER:
         //    return MoveSetHover;
         //case SMSG_MOVE_UNSET_HOVER:

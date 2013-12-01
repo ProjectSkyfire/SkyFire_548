@@ -97,6 +97,7 @@ enum MovementStatusElements
 
     MSECounter,
     MSECounterCount,
+    MSEUintCount,
     MSEHasUnkTime,
     MSEUnkTime,
 

@@ -630,14 +630,13 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
 //Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
 void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit* speaker, const char* addonPrefix /*= NULL*/)
 {
-    uint32 messageLength = (message ? strlen(message) : 0) + 1;
-
-    data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
+    /*
     *data << uint8(type);
     if ((type != CHAT_MSG_CHANNEL && type != CHAT_MSG_WHISPER) || language == LANG_ADDON)
         *data << uint32(language);
     else
         *data << uint32(LANG_UNIVERSAL);
+    */
 
     switch (type)
     {
@@ -668,27 +667,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
         case CHAT_MSG_RAID_BOSS_EMOTE:
         case CHAT_MSG_BATTLENET:
         {
-            *data << uint64(speaker->GetGUID());
-            *data << uint32(0);                             // 2.1.0
-            *data << uint32(speaker->GetName().size() + 1);
-            *data << speaker->GetName();
-            *data << uint64(0); // listener_guid
-            //if (listener_guid && !IS_PLAYER_GUID(listener_guid))
-            //{
-            //    *data << uint32(1);                         // string listener_name_length
-            //    *data << uint8(0);                          // string listener_name
-            //}
-            *data << uint32(messageLength);
-            *data << message;
-            *data << uint8(0);
-
-            if (type == CHAT_MSG_RAID_BOSS_WHISPER || type == CHAT_MSG_RAID_BOSS_EMOTE)
-            {
-                *data << float(0.0f);                       // Added in 4.2.0, unk
-                *data << uint8(0);                          // Added in 4.2.0, unk
-            }
-
-            return;
+            break;
         }
         default:
             if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
@@ -696,9 +675,82 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
             break;
     }
 
+    data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
+
+    ObjectGuid source(speaker ? speaker->GetGUID() : 0);
+    ObjectGuid target(target_guid);
+
+    data->WriteBit(0);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBits(0, 8);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBits(0, 8);
+    data->WriteBit(0);
+
+    data->WriteBit(source[6]);
+    data->WriteBit(source[1]);
+    data->WriteBit(source[3]);
+    data->WriteBit(source[5]);
+    data->WriteBit(source[4]);
+    data->WriteBit(source[2]);
+    data->WriteBit(source[7]);
+    data->WriteBit(source[0]);
+
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBits(strlen(message), 12);
+    data->WriteBit(0);
+
+    data->WriteBit(target[4]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[6]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[5]);
+    data->WriteBit(target[0]);
+    data->WriteBit(target[7]);
+
+    data->WriteBit(0);
+    data->WriteBits(8, 9);
+
+    data->FlushBits();
+
+    data->WriteByteSeq(source[7]);
+    data->WriteByteSeq(source[4]);
+    data->WriteByteSeq(source[1]);
+    data->WriteByteSeq(source[3]);
+    data->WriteByteSeq(source[0]);
+    data->WriteByteSeq(source[6]);
+    data->WriteByteSeq(source[5]);
+    data->WriteByteSeq(source[2]);
+
+    *data << uint8(language);
+
+    data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[4]);
+    data->WriteByteSeq(target[0]);
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[3]);
+    data->WriteByteSeq(target[2]);
+    data->WriteByteSeq(target[5]);
+    data->WriteByteSeq(target[1]);
+
+    data->WriteString(message);
+    *data << uint8(type);
+    *data << uint32(0);
+
     *data << uint64(target_guid);                           // there 0 for BG messages
     *data << uint32(0);                                     // can be chat msg group or something
 
+    /*
     if (type == CHAT_MSG_CHANNEL)
     {
         ASSERT(channelName);
@@ -719,6 +771,7 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
         *data << uint8(session->GetPlayer()->GetChatTag());
     else
         *data << uint8(0);
+    */
 }
 
 Player* ChatHandler::getSelectedPlayer()

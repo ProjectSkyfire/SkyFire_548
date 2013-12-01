@@ -2303,15 +2303,16 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 // send transfer packets
                 WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
                 data.WriteBit(0);       // unknown
-                if (m_transport)
-                {
-                    data.WriteBit(1);   // has transport
-                    data << GetMapId() << m_transport->GetEntry();
-                }
-                else
-                    data.WriteBit(0);   // has transport
+                data.WriteBit(m_transport != NULL);
 
                 data << uint32(mapid);
+
+                if (m_transport)
+                {
+                    data << GetMapId();
+                    data << m_transport->GetEntry();
+                }
+
                 GetSession()->SendPacket(&data);
             }
 

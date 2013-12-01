@@ -15556,6 +15556,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         case MSEExtraElement:
             extras->WriteNextElement(data);
             break;
+        case MSEUintCount:
+            data << uint32(0);
+            break;
         default:
             ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
             break;
@@ -15583,54 +15586,58 @@ void Unit::SendTeleportPacket(Position& pos)
     if (GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data2(MSG_MOVE_TELEPORT, 38);
-        data2.WriteBit(guid[6]);
-        data2.WriteBit(guid[0]);
-        data2.WriteBit(guid[3]);
-        data2.WriteBit(guid[2]);
-        data2.WriteBit(0); // unknown
-        data2.WriteBit(uint64(transGuid));
-        data2.WriteBit(guid[1]);
-        if (transGuid)
-        {
-            data2.WriteBit(transGuid[1]);
-            data2.WriteBit(transGuid[3]);
-            data2.WriteBit(transGuid[2]);
-            data2.WriteBit(transGuid[5]);
-            data2.WriteBit(transGuid[0]);
-            data2.WriteBit(transGuid[7]);
-            data2.WriteBit(transGuid[6]);
-            data2.WriteBit(transGuid[4]);
-        }
-        data2.WriteBit(guid[4]);
         data2.WriteBit(guid[7]);
-        data2.WriteBit(guid[5]);
-        data2.FlushBits();
-
+        data2.WriteBit(0); // bit33
+        data2.WriteBit(guid[2]);
+        data2.WriteBit(guid[0]);
+        data2.WriteBit(uint64(transGuid));
+ 
         if (transGuid)
         {
-            data2.WriteByteSeq(transGuid[6]);
-            data2.WriteByteSeq(transGuid[5]);
-            data2.WriteByteSeq(transGuid[1]);
+            data2.WriteBit(transGuid[4]);
+            data2.WriteBit(transGuid[3]);
+            data2.WriteBit(transGuid[5]);
+            data2.WriteBit(transGuid[7]);
+            data2.WriteBit(transGuid[0]);
+            data2.WriteBit(transGuid[2]);
+            data2.WriteBit(transGuid[6]);
+            data2.WriteBit(transGuid[1]);
+        }
+ 
+        data2.WriteBit(guid[5]);
+        data2.WriteBit(guid[1]);
+        data2.WriteBit(guid[3]);
+        data2.WriteBit(guid[6]);
+        data2.WriteBit(guid[4]);
+ 
+        data2.FlushBits();
+ 
+        data2.WriteByteSeq(guid[0]);
+ 
+        if (transGuid)
+        {
             data2.WriteByteSeq(transGuid[7]);
+            data2.WriteByteSeq(transGuid[6]);
             data2.WriteByteSeq(transGuid[0]);
             data2.WriteByteSeq(transGuid[2]);
-            data2.WriteByteSeq(transGuid[4]);
             data2.WriteByteSeq(transGuid[3]);
+            data2.WriteByteSeq(transGuid[1]);
+            data2.WriteByteSeq(transGuid[5]);
+            data2.WriteByteSeq(transGuid[4]);
         }
-
-        data2 << uint32(0); // counter
+ 
+        data2.WriteByteSeq(guid[6]);
         data2.WriteByteSeq(guid[1]);
-        data2.WriteByteSeq(guid[2]);
-        data2.WriteByteSeq(guid[3]);
+        data2 << uint32(0); // counter
+        data2.WriteByteSeq(guid[7]);
         data2.WriteByteSeq(guid[5]);
         data2 << float(GetPositionX());
         data2.WriteByteSeq(guid[4]);
-        data2 << float(GetOrientation());
-        data2.WriteByteSeq(guid[7]);
-        data2 << float(GetPositionZMinusOffset());
-        data2.WriteByteSeq(guid[0]);
-        data2.WriteByteSeq(guid[6]);
+        data2.WriteByteSeq(guid[3]);
+        data2.WriteByteSeq(guid[2]);
         data2 << float(GetPositionY());
+        data2 << float(GetOrientation());
+        data2 << float(GetPositionZMinusOffset());
         ToPlayer()->SendDirectMessage(&data2); // Send the MSG_MOVE_TELEPORT packet to self.
     }
 
