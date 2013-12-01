@@ -978,7 +978,7 @@ enum Opcodes
     SMSG_ITEM_TIME_UPDATE                                    = 0x0,
     SMSG_JOINED_BATTLEGROUND_QUEUE                           = 0x0,
     SMSG_KICK_REASON                                         = 0x0,
-    SMSG_LEARNED_DANCE_MOVES                                 = 0x0,
+    SMSG_LEARNED_DANCE_MOVES                                 = 0x041F, // 5.4.1 17538
     SMSG_LEARNED_SPELL                                       = 0x118E, // 5.4.1 17538
     SMSG_LEVELUP_INFO                                        = 0x0,
     SMSG_LFG_BOOT_PROPOSAL_UPDATE                            = 0x0,
@@ -1042,7 +1042,7 @@ enum Opcodes
     SMSG_MISSILE_CANCEL                                      = 0x0,
     SMSG_MODIFY_COOLDOWN                                     = 0x0,
     SMSG_MONEY_NOTIFY                                        = 0x0,
-    SMSG_MONSTER_MOVE                                        = 0x0,
+    SMSG_MONSTER_MOVE                                        = 0x0216, // 5.4.1 17538
     SMSG_MONSTER_MOVE_TRANSPORT                              = 0x0,
     SMSG_MOTD                                                = 0x04AC, // 5.4.1 17538
     SMSG_MOUNTRESULT                                         = 0x10BC, // 5.4.1 17538
