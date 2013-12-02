@@ -144,7 +144,7 @@ public:
 
             if (goConsole)
                 if (GameObject* go = GameObject::GetGameObject(*me, goConsole))
-                    go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                    go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
         }
 
         void DoWaveSpawnForCreature(Creature* creature)
@@ -279,7 +279,7 @@ public:
 
                         if (goConsole)
                             if (GameObject* go = GameObject::GetGameObject(*me, goConsole))
-                                go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                                go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
 
                         ++Phase;
                         break;
@@ -349,7 +349,7 @@ public:
         {
             CAST_AI(npc_manaforge_control_console::npc_manaforge_control_consoleAI, manaforge->AI())->someplayer = player->GetGUID();
             CAST_AI(npc_manaforge_control_console::npc_manaforge_control_consoleAI, manaforge->AI())->goConsole = go->GetGUID();
-            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+            go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
         }
         return true;
     }

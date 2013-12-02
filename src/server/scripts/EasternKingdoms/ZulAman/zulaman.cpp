@@ -89,7 +89,7 @@ class npc_voljin_zulaman : public CreatureScript
             {
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
                 if (_instance->GetData(DATA_ZULAMAN_STATE) == NOT_STARTED)
-                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
             void Reset() OVERRIDE
@@ -105,9 +105,9 @@ class npc_voljin_zulaman : public CreatureScript
                 if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
                 {
                     _events.Reset();
-                    me->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    me->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+                    me->SetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID, 0);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
                     _events.ScheduleEvent(EVENT_INTRO_MOVEPOINT_1, 1000);
                     Talk(SAY_INTRO_1, player->GetGUID());
                     me->SetWalk(true);
@@ -145,17 +145,17 @@ class npc_voljin_zulaman : public CreatureScript
                         case EVENT_BANGING_THE_GONG:
                             DoCast(me, SPELL_BANGING_THE_GONG);
                             if (GameObject* strangeGong = ObjectAccessor::GetGameObject(*me, _instance->GetData64(DATA_STRANGE_GONG)))
-                                strangeGong->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                            me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, uint32(ITEM_VIRTUAL_ITEM));
+                                strangeGong->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID, uint32(ITEM_VIRTUAL_ITEM));
                             break;
                         case EVENT_START_DOOR_OPENING_1:
                             me->RemoveAura(SPELL_BANGING_THE_GONG);
                             _events.ScheduleEvent(EVENT_START_DOOR_OPENING_2, 500);
                             break;
                         case EVENT_START_DOOR_OPENING_2:
-                            me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, uint32(0));
+                            me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID, uint32(0));
                             if (GameObject* strangeGong = ObjectAccessor::GetGameObject(*me, _instance->GetData64(DATA_STRANGE_GONG)))
-                                strangeGong->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                                strangeGong->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                             _events.ScheduleEvent(EVENT_START_DOOR_OPENING_3, 500);
                             break;
                         case EVENT_START_DOOR_OPENING_3:

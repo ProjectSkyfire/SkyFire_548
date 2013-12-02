@@ -351,7 +351,7 @@ public:
         {
             creature->setFaction(113);
             creature->SetFullHealth();
-            creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+            creature->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             creature->AI()->Talk(SAY_OOX_START);
 

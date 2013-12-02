@@ -231,7 +231,7 @@ public:
                 combatStarted = true;
                 events.ScheduleEvent(EVENT_START_ATTACK_AKAMA, 500);
                 events.ScheduleEvent(EVENT_SET_CHANNELERS_SPAWNERS, 1000);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                 if (Creature* Akama = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AKAMA_SHADE)))
                     me->AddThreat(Akama, 10000000.0f);
             }
@@ -292,7 +292,7 @@ public:
                                 for (std::list<Creature*>::const_iterator itr = SpawnerList.begin(); itr != SpawnerList.end(); ++itr)
                                     Spawners.push_back((*itr)->GetGUID());
 
-                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STUN);
+                            me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_STUN);
                             break;
                         }
                         default:
@@ -428,7 +428,7 @@ public:
         void Reset() OVERRIDE
         {
             me->setFaction(FACTION_FRIENDLY);
-            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             DoCast(me, SPELL_STEALTH);
             StartChannel  = false;
             StartCombat   = false;
@@ -478,7 +478,7 @@ public:
                             if (instance)
                             {
                                 instance->SetBossState(DATA_SHADE_OF_AKAMA, IN_PROGRESS);
-                                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                                 me->RemoveAura(SPELL_STEALTH);
                                 me->SetWalk(true);
                                 me->GetMotionMaster()->MovePoint(0, AkamaWP[0].x, AkamaWP[0].y, AkamaWP[0].z, false);

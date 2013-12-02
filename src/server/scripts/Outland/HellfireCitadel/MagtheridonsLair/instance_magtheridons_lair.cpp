@@ -106,7 +106,7 @@ class instance_magtheridons_lair : public InstanceMapScript
                 switch (go->GetEntry())
                 {
                 case 181713:
-                    go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                    go->SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, 0);
                     break;
                 case 183847:
                     DoorGUID = go->GetGUID();

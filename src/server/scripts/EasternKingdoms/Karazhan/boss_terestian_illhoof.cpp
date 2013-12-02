@@ -334,7 +334,7 @@ public:
                 PortalGUID[PortalsCount] = summoned->GetGUID();
                 ++PortalsCount;
 
-                if (summoned->GetUInt32Value(UNIT_CREATED_BY_SPELL) == SPELL_FIENDISH_PORTAL_1)
+                if (summoned->GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL) == SPELL_FIENDISH_PORTAL_1)
                 {
                     Talk(SAY_SUMMON);
                     SummonedPortals = true;

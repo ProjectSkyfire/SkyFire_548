@@ -979,7 +979,7 @@ public:
                 if (Creature* spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, SpawnLocation[i], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, desptimer))
                 {
                     if (spawn->GetEntry() == 15423)
-                        spawn->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15427+rand()%4);
+                        spawn->SetUInt32Value(UNIT_FIELD_DISPLAY_ID, 15427+rand()%4);
                     if (i >= 30) WaveCount = 1;
                     if (i >= 33) WaveCount = 2;
                     if (i >= 45) WaveCount = 3;
@@ -1105,25 +1105,25 @@ public:
 
                 if (Merithra)
                 {
-                    Merithra->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-                    Merithra->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                    Merithra->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15420);
+                    Merithra->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, 0);
+                    Merithra->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
+                    Merithra->SetUInt32Value(UNIT_FIELD_DISPLAY_ID, 15420);
                     Merithra->setFaction(35);
                 }
 
                 if (Caelestrasz)
                 {
-                    Caelestrasz->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-                    Caelestrasz->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                    Caelestrasz->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15419);
+                    Caelestrasz->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, 0);
+                    Caelestrasz->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
+                    Caelestrasz->SetUInt32Value(UNIT_FIELD_DISPLAY_ID, 15419);
                     Caelestrasz->setFaction(35);
                 }
 
                 if (Arygos)
                 {
-                    Arygos->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-                    Arygos->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                    Arygos->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15418);
+                    Arygos->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, 0);
+                    Arygos->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
+                    Arygos->SetUInt32Value(UNIT_FIELD_DISPLAY_ID, 15418);
                     Arygos->setFaction(35);
                 }
 

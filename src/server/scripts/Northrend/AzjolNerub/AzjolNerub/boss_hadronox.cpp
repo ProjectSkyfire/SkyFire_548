@@ -74,8 +74,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 9.0f);
-            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 9.0f);
+            me->SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, 9.0f);
+            me->SetFloatValue(UNIT_FIELD_COMBAT_REACH, 9.0f);
 
             uiAcidTimer = urand(10*IN_MILLISECONDS, 14*IN_MILLISECONDS);
             uiLeechTimer = urand(3*IN_MILLISECONDS, 9*IN_MILLISECONDS);

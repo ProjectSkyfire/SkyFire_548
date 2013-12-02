@@ -177,7 +177,7 @@ public:
         void UseStatue(GameObject* go)
         {
             go->SummonGameObject(GO_ATALAI_LIGHT1, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, 0, 0, 0, 0, 0);
-            go->SetUInt32Value(GAMEOBJECT_FLAGS, 4);
+            go->SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, 4);
         }
 
          /*

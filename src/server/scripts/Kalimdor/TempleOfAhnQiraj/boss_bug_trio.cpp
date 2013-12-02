@@ -87,7 +87,7 @@ public:
             {
                 if (instance->GetData(DATA_BUG_TRIO_DEATH) < 2)
                                                                 // Unlootable if death
-                    me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                    me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
                 instance->SetData(DATA_BUG_TRIO_DEATH, 1);
             }
@@ -179,7 +179,7 @@ public:
                 instance->SetData(DATA_VEM_DEATH, 0);
                 if (instance->GetData(DATA_BUG_TRIO_DEATH) < 2)
                                                                 // Unlootable if death
-                    me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                    me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                 instance->SetData(DATA_BUG_TRIO_DEATH, 1);
             }
         }
@@ -271,7 +271,7 @@ public:
             {
                 if (instance->GetData(DATA_BUG_TRIO_DEATH) < 2)
                                                                 // Unlootable if death
-                    me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                    me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                 instance->SetData(DATA_BUG_TRIO_DEATH, 1);
             }
 
