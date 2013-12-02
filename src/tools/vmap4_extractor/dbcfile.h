@@ -156,7 +156,7 @@ class DBCFile
         size_t _recordCount;
         size_t _fieldCount;
         size_t _stringSize;
-        unsigned char *_data;
+        unsigned char* _data;
         unsigned char* _stringTable;
 };
 
