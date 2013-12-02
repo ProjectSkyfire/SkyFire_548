@@ -111,15 +111,7 @@ namespace Movement
         move_spline.Initialize(args);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
-        data.append(unit->GetPackGUID());
-        if (unit->GetTransGUID())
-        {
-            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-            data.appendPackGUID(unit->GetTransGUID());
-            data << int8(unit->GetTransSeat());
-        }
-
-        PacketBuilder::WriteMonsterMove(move_spline, data);
+        PacketBuilder::WriteMonsterMove(move_spline, data, unit);
         unit->SendMessageToSet(&data, true);
 
         return move_spline.Duration();
@@ -139,15 +131,8 @@ namespace Movement
         move_spline.Initialize(args);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
-        data.append(unit->GetPackGUID());
-        if (unit->GetTransGUID())
-        {
-            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-            data.appendPackGUID(unit->GetTransGUID());
-            data << int8(unit->GetTransSeat());
-        }
 
-        PacketBuilder::WriteStopMovement(loc, args.splineId, data);
+        PacketBuilder::WriteStopMovement(loc, args.splineId, data, unit);
         unit->SendMessageToSet(&data, true);
     }
 
