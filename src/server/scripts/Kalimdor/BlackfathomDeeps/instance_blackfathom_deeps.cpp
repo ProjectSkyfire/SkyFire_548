@@ -127,12 +127,12 @@ public:
                 case GO_SHRINE_OF_GELIHAST:
                     shrineOfGelihastGUID = go->GetGUID();
                     if (encounter[0] != DONE)
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case GO_ALTAR_OF_THE_DEEPS:
                     altarOfTheDeepsGUID = go->GetGUID();
                     if (encounter[3] != DONE)
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case GO_AKU_MAI_DOOR:
                     if (encounter[2] == DONE)
@@ -150,14 +150,14 @@ public:
                     encounter[0] = data;
                     if (data == DONE)
                         if (GameObject* go = instance->GetGameObject(shrineOfGelihastGUID))
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case TYPE_AKU_MAI:
                     encounter[3] = data;
                     if (data == DONE)
                         if (GameObject* go = instance->GetGameObject(altarOfTheDeepsGUID))
                         {
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                             go->SummonCreature(NPC_MORRIDUNE, SpawnsLocation[4], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000);
                         }
                     break;

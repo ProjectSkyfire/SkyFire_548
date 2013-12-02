@@ -339,7 +339,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                     _instance->SetBossState(DATA_VAULT_OF_LIGHTS, IN_PROGRESS);
                     _currentPoint = 0;
                     events.Reset();
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     me->SetWalk(true);
                     Talk(BRANN_SAY_DOOR_INTRO);
                     events.ScheduleEvent(EVENT_BRANN_UNLOCK_DOOR, 7500);
@@ -363,7 +363,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                         break;
                     }
                     case ACTION_ANRAPHET_DIED:
-                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         events.ScheduleEvent(EVENT_BRANN_MOVE_INTRO, 1000);
                         break;
                 }
@@ -410,7 +410,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                             break;
                         case EVENT_BRANN_SAY_GET_IT:
                             Talk(BRANN_SAY_GET_IT);
-                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                             break;
                         case EVENT_BRANN_SET_ORIENTATION_4:
                             me->SetFacingTo(3.141593f);

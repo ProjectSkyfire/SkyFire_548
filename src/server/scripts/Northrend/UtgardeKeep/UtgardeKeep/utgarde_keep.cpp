@@ -75,7 +75,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
                 if (_forgeId)
                     _instance->SetData(DATA_FORGE_1 + _forgeId - 1, IN_PROGRESS);
 
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
             }
 
             void UpdateAI(uint32 /*diff*/) OVERRIDE
@@ -240,7 +240,7 @@ class npc_enslaved_proto_drake : public CreatureScript
             {
                 if (type == WAYPOINT_MOTION_TYPE && id == POINT_LAST)
                 {
-                    me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                    me->RemoveByteFlag(UNIT_FIELD_ANIM_TIER, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                 }
             }
 
@@ -249,7 +249,7 @@ class npc_enslaved_proto_drake : public CreatureScript
                 if (type == TYPE_PROTODRAKE_AT && data == DATA_PROTODRAKE_MOVE && !_setData && me->GetDistance(protodrakeCheckPos) < 5.0f)
                 {
                     _setData = true;
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                    me->SetByteFlag(UNIT_FIELD_ANIM_TIER, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePath(PATH_PROTODRAKE, false);
                 }
             }

@@ -215,9 +215,9 @@ public:
                 case 184275:
                     m_uiSideEntranceDoor = go->GetGUID();
                     if (m_auiEncounter[4] == DONE)
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+                        go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_LOCKED);
                     else
-                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+                        go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_LOCKED);
                     break;
                 case 185119: DustCoveredChest = go->GetGUID(); break;
             }

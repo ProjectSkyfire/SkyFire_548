@@ -597,7 +597,7 @@ class boss_flame_leviathan_seat : public CreatureScript
                     }
                     if (Creature* device = me->GetVehicleKit()->GetPassenger(SEAT_DEVICE)->ToCreature())
                     {
-                        device->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                        device->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                         device->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     }
 
@@ -610,7 +610,7 @@ class boss_flame_leviathan_seat : public CreatureScript
 
                     if (Unit* device = vehicle->GetPassenger(SEAT_DEVICE))
                     {
-                        device->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                        device->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                         device->SetUInt32Value(UNIT_FIELD_FLAGS, 0); // unselectable
                     }
                 }
@@ -720,7 +720,7 @@ class boss_flame_leviathan_overload_device : public CreatureScript
 
                 if (me->GetVehicle())
                 {
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
                     if (Unit* player = me->GetVehicle()->GetPassenger(SEAT_PLAYER))
@@ -1237,7 +1237,7 @@ public:
     //            if (player)
     //                player->CLOSE_GOSSIP_MENU();
     //            if (Creature* Lorekeeper = creature->FindNearestCreature(NPC_LOREKEEPER, 1000, true)) //lore keeper of lorgannon
-    //                Lorekeeper->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    //                Lorekeeper->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     //            break;
     //    }
     //    return true;

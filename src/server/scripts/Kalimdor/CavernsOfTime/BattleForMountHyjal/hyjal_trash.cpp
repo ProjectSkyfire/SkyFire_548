@@ -405,7 +405,7 @@ void hyjal_trashAI::JustDied(Unit* /*killer*/)
         instance->SetData(DATA_TRASH, 0);//signal trash is dead
 
     if ((instance->GetData(DATA_RAIDDAMAGE) < MINRAIDDAMAGE && !me->isWorldBoss()) || (damageTaken < me->GetMaxHealth()/4 && me->isWorldBoss()))
-        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);//no loot
+        me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);//no loot
 }
 
 class npc_giant_infernal : public CreatureScript
@@ -486,7 +486,7 @@ public:
                 {
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    me->SetDisplayId(me->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+                    me->SetDisplayId(me->GetUInt32Value(UNIT_FIELD_NATIVE_DISPLAY_ID));
                     CanMove = true;
                     if (instance)
                     {
@@ -688,7 +688,7 @@ public:
             }
             if (waypointId == LastOverronPos && IsOverrun)
             {
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_ATTACK_UNARMED);
+                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_ATTACK_UNARMED);
                 if ((faction == 0 && LastOverronPos == 17) || (faction == 1 && LastOverronPos == 21))
                 {
                     me->setDeathState(DEAD);

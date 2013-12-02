@@ -175,11 +175,11 @@ public:
                 case GO_SLADRAN_ALTAR:
                     sladRanAltarGUID = go->GetGUID();
                     // Make sure that they start out as unusuable
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     if (m_auiEncounter[0] == DONE)
                     {
                         if (sladRanStatueState == GO_STATE_ACTIVE)
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         else
                         {
                             ++phase;
@@ -190,11 +190,11 @@ public:
                 case GO_MOORABI_ALTAR:
                     moorabiAltarGUID = go->GetGUID();
                     // Make sure that they start out as unusuable
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     if (m_auiEncounter[0] == DONE)
                     {
                         if (moorabiStatueState == GO_STATE_ACTIVE)
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         else
                         {
                             ++phase;
@@ -205,11 +205,11 @@ public:
                 case GO_DRAKKARI_COLOSSUS_ALTAR:
                     drakkariColossusAltarGUID = go->GetGUID();
                     // Make sure that they start out as unusuable
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     if (m_auiEncounter[0] == DONE)
                     {
                         if (drakkariColossusStatueState == GO_STATE_ACTIVE)
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         else
                         {
                             ++phase;
@@ -283,7 +283,7 @@ public:
                 {
                   GameObject* go = instance->GetGameObject(sladRanAltarGUID);
                   if (go)
-                      go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                      go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                 }
                 break;
             case DATA_MOORABI_EVENT:
@@ -292,7 +292,7 @@ public:
                 {
                   GameObject* go = instance->GetGameObject(moorabiAltarGUID);
                   if (go)
-                      go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                      go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                   if (isHeroic)
                       HandleGameObject(eckTheFerociousDoorGUID, true);
                 }
@@ -303,7 +303,7 @@ public:
                 {
                   GameObject* go = instance->GetGameObject(drakkariColossusAltarGUID);
                   if (go)
-                      go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                      go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                 }
                 break;
             case DATA_GAL_DARAH_EVENT:
@@ -547,7 +547,7 @@ public:
         InstanceScript* instance = go->GetInstanceScript();
         uint64 statueGUID = 0;
 
-        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+        go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
         go->SetGoState(GO_STATE_ACTIVE);
 
         if (instance)
@@ -568,7 +568,7 @@ public:
             if (!instance->GetData64(DATA_STATUE_ACTIVATE))
             {
                 instance->SetData64(DATA_STATUE_ACTIVATE, statueGUID);
-                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                 go->SetGoState(GO_STATE_ACTIVE);
             }
             return true;

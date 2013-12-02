@@ -70,7 +70,7 @@ public:
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
-                        platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                        platform->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DESTROYED);
                 }
                 else if (state == DONE)
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
@@ -172,7 +172,7 @@ public:
                 if (Creature* alexstraszaBunny = instance->GetCreature(alexstraszaBunnyGUID))
                 {
                     alexstraszaBunny->CastSpell(alexstraszaBunny, SPELL_IRIS_OPENED);
-                    instance->GetGameObject(irisGUID)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                    instance->GetGameObject(irisGUID)->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
                 }
 
                 if (Creature* malygos = instance->GetCreature(malygosGUID))

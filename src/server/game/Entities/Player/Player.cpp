@@ -2536,6 +2536,9 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
+        if (getClass() == CLASS_MONK)
+            Regenerate(POWER_CHI);
+
         m_regenTimerCount -= 2000;
     }
 
@@ -2616,6 +2619,12 @@ void Player::Regenerate(Powers power)
         break;
         case POWER_RUNES:
             break;
+        case POWER_CHI:                                  // Regenerate chi (monk)
+            {
+                float ChiRate = sWorld->getRate(RATE_POWER_CHI);
+                addvalue = 20 * ChiRate;
+                break;
+            } 
         case POWER_HEALTH:
             return;
         default:
@@ -6136,7 +6145,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     // levels sync. with spell requirement for skill levels to learn
     // bonus abilities in sSkillLineAbilityStore
     // Used only to avoid scan DBC at each skill grow
-    static uint32 bonusSkillLevels[] = { 75, 150, 225, 300, 375, 450, 525 };
+    static uint32 bonusSkillLevels[] = { 75, 150, 225, 300, 375, 450, 525, 600 };
     static const size_t bonusSkillLevelsSize = sizeof(bonusSkillLevels) / sizeof(uint32);
 
     TC_LOG_DEBUG("entities.player.skills", "UpdateSkillPro(SkillId %d, Chance %3.1f%%)", skillId, chance / 10.0f);

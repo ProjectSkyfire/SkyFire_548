@@ -105,7 +105,7 @@ public:
                         DoCast(me, SPELL_EXPLODE_CART, true);
                         DoCast(me, SPELL_SUMMON_CART, true);
                         if (GameObject* cart = me->FindNearestGameObject(188160, 3))
-                            cart->SetUInt32Value(GAMEOBJECT_FACTION, 14);
+                            cart->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, 14);
                         phaseTimer = 3000;
                         phase = 2;
                         break;
@@ -136,7 +136,7 @@ public:
                         if (Unit* worm = me->FindNearestCreature(26250, 3))
                         {
                             me->Kill(worm);
-                            worm->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                            worm->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                         }
                         phaseTimer = 2000;
                         phase = 7;
@@ -1179,7 +1179,7 @@ public:
                         break;
 
                     case 16:
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                         phaseTimer = 20000;
                         ++phase;
                         break;
@@ -2345,8 +2345,8 @@ public:
     {
         npc_hidden_cultistAI(Creature* creature) : ScriptedAI(creature)
         {
-           uiEmoteState = creature->GetUInt32Value(UNIT_NPC_EMOTESTATE);
-           uiNpcFlags = creature->GetUInt32Value(UNIT_NPC_FLAGS);
+           uiEmoteState = creature->GetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE);
+           uiNpcFlags = creature->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
         }
 
         uint32 uiEmoteState;
@@ -2360,10 +2360,10 @@ public:
         void Reset() OVERRIDE
         {
             if (uiEmoteState)
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, uiEmoteState);
+                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, uiEmoteState);
 
             if (uiNpcFlags)
-                me->SetUInt32Value(UNIT_NPC_FLAGS, uiNpcFlags);
+                me->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, uiNpcFlags);
 
             uiEventTimer = 0;
             uiEventPhase = 0;
@@ -2378,7 +2378,7 @@ public:
         void DoAction(int32 /*iParam*/) OVERRIDE
         {
             me->StopMoving();
-            me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            me->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, 0);
             if (Player* player = ObjectAccessor::GetPlayer(*me, uiPlayerGUID))
                 me->SetFacingToObject(player);
             uiEventTimer = 3000;
@@ -2407,7 +2407,7 @@ public:
                         switch (me->GetEntry())
                         {
                             case NPC_SALTY_JOHN_THORPE:
-                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
                                 Talk(SAY_HIDDEN_CULTIST_1);
                                 uiEventTimer = 5000;
                                 uiEventPhase = 2;

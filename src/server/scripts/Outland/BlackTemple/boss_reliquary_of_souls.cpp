@@ -172,7 +172,7 @@ public:
             Phase = 0;
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+            me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
             me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
         }
 
@@ -274,13 +274,13 @@ public:
                 switch (Counter)
                 {
                 case 0:
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);  // I R ANNNGRRRY!
+                    me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_READY2H);  // I R ANNNGRRRY!
                     DoStartNoMovement(me);
                     Timer = 3000;
                     break;
                 case 1:
                     Timer = 2800;
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_SUBMERGE);  // Release the cube
+                    me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_SUBMERGE);  // Release the cube
                     DoCast(me, SPELL_SUBMERGE);
                     DoStartNoMovement(me);
                     break;
@@ -288,7 +288,7 @@ public:
                     Timer = 5000;
                     if (Creature* Summon = DoSpawnCreature(23417+Phase, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
                     {
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);  // Ribs: open
+                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);  // Ribs: open
                         Summon->AI()->AttackStart(SelectTarget(SELECT_TARGET_TOPAGGRO, 0));
                         EssenceGUID = Summon->GetGUID();
                         DoStartNoMovement(me);
@@ -317,7 +317,7 @@ public:
                     Timer = 1500;
                     if (Essence->IsWithinDistInMap(me, 10))
                     {
-                        Essence->SetUInt32Value(UNIT_NPC_EMOTESTATE, 374); //rotate and disappear
+                        Essence->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 374); //rotate and disappear
                         Timer = 2000;
                         me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
                     }
@@ -340,7 +340,7 @@ public:
                         Essence->AI()->Talk(DESI_SAY_AFTER);
                     }
                     Essence->DespawnOrUnsummon();
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                    me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
                     EssenceGUID = 0;
                     SoulCount = 0;
                     SoulDeathCount = 0;

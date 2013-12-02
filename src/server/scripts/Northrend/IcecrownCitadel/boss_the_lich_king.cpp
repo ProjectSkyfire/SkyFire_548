@@ -500,7 +500,7 @@ class boss_the_lich_king : public CreatureScript
                 _JustDied();
                 DoCastAOE(SPELL_PLAY_MOVIE, false);
                 me->SetDisableGravity(false);
-                me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                me->RemoveByteFlag(UNIT_FIELD_ANIM_TIER, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                 me->GetMotionMaster()->MoveFall();
                 if (Creature* frostmourne = me->FindNearestCreature(NPC_FROSTMOURNE_TRIGGER, 50.0f))
                     frostmourne->DespawnOrUnsummon();
@@ -1071,7 +1071,7 @@ class boss_the_lich_king : public CreatureScript
                             sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
                             // set flight
                             me->SetDisableGravity(true);
-                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                            me->SetByteFlag(UNIT_FIELD_ANIM_TIER, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                             me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
                             break;
                         case EVENT_OUTRO_TALK_7:
@@ -1156,7 +1156,7 @@ class npc_tirion_fordring_tft : public CreatureScript
             {
                 _events.Reset();
                 if (_instance->GetBossState(DATA_THE_LICH_KING) == DONE)
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
             void MovementInform(uint32 type, uint32 id) OVERRIDE
@@ -1167,7 +1167,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                 switch (id)
                 {
                     case POINT_TIRION_INTRO:
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                         if (Creature* theLichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
                             theLichKing->AI()->DoAction(ACTION_START_ENCOUNTER);
                         break;
@@ -1208,7 +1208,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                 if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
                 {
                     _events.SetPhase(PHASE_INTRO);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     me->SetWalk(true);
                     me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
                 }
@@ -1216,12 +1216,12 @@ class npc_tirion_fordring_tft : public CreatureScript
 
             void JustReachedHome() OVERRIDE
             {
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
 
                 if (_instance->GetBossState(DATA_THE_LICH_KING) == DONE)
                     return;
 
-                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE

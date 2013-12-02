@@ -155,7 +155,7 @@ public:
         {
             if (spell->Id == SPELL_INFERNAL_RELAY)
             {
-                me->SetDisplayId(me->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+                me->SetDisplayId(me->GetUInt32Value(UNIT_FIELD_NATIVE_DISPLAY_ID));
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 HellfireTimer = 4000;
                 CleanupTimer = 170000;
@@ -431,8 +431,8 @@ public:
                     me->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, cinfo->mindmg);
                     me->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, cinfo->maxdmg);
                     //Sigh, updating only works on main attack, do it manually ....
-                    me->SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, cinfo->mindmg);
-                    me->SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, cinfo->maxdmg);
+                    me->SetFloatValue(UNIT_FIELD_MIN_OFF_HAND_DAMAGE, cinfo->mindmg);
+                    me->SetFloatValue(UNIT_FIELD_MAX_OFF_HAND_DAMAGE, cinfo->maxdmg);
 
                     me->SetAttackTime(OFF_ATTACK, (me->GetAttackTime(BASE_ATTACK)*150)/100);
                 }

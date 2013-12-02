@@ -163,19 +163,19 @@ public:
             {
                 case GO_FROSTMOURNE:
                     _frostmourneGUID = go->GetGUID();
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                     HandleGameObject(0, false, go);
                     if (GetData(DATA_INTRO_EVENT) == DONE)
                         go->SetPhaseMask(2, true);
                     break;
                 case GO_ENTRANCE_DOOR:
                     _entranceDoorGUID = go->GetGUID();
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                     HandleGameObject(0, true, go);
                     break;
                 case GO_FROSTWORN_DOOR:
                     _frostwornDoorGUID = go->GetGUID();
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                     if (GetBossState(DATA_MARWYN_EVENT) == DONE)
                         HandleGameObject(0, true, go);
                     else
@@ -183,7 +183,7 @@ public:
                     break;
                 case GO_ARTHAS_DOOR:
                     _arthasDoorGUID = go->GetGUID();
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                     if (GetBossState(DATA_FROSWORN_EVENT) == DONE)
                         HandleGameObject(0, true, go);
                     else
@@ -191,7 +191,7 @@ public:
                     break;
                 case GO_CAVE:
                     _caveGUID = go->GetGUID();
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                     break;
             }
         }

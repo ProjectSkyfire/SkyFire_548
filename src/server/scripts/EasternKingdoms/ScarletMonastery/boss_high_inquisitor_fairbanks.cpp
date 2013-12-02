@@ -68,13 +68,13 @@ public:
             Dispel_Timer = 20000;
             PowerWordShield = false;
             me->SetStandState(UNIT_STAND_STATE_DEAD);
-            me->SetUInt32Value(UNIT_FIELD_BYTES_1, 7);
+            me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 7);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             me->SetStandState(UNIT_STAND_STATE_STAND);
-            me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+            me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

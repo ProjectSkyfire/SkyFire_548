@@ -671,8 +671,8 @@ class npc_boombot : public CreatureScript
                 // HACK/workaround:
                 // these values aren't confirmed - lack of data - and the values in DB are incorrect
                 // these values are needed for correct damage of Boom spell
-                me->SetFloatValue(UNIT_FIELD_MINDAMAGE, 15000.0f);
-                me->SetFloatValue(UNIT_FIELD_MAXDAMAGE, 18000.0f);
+                me->SetFloatValue(UNIT_FIELD_MIN_DAMAGE, 15000.0f);
+                me->SetFloatValue(UNIT_FIELD_MAX_DAMAGE, 18000.0f);
 
                 /// @todo proper waypoints?
                 if (Creature* pXT002 = me->GetCreature(*me, _instance->GetData64(BOSS_XT002)))
@@ -1003,7 +1003,7 @@ class spell_xt002_submerged : public SpellScriptLoader
                     return;
 
                 target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                target->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_SUBMERGED);
+                target->SetByteValue(UNIT_FIELD_ANIM_TIER, 0, UNIT_STAND_STATE_SUBMERGED);
             }
 
             void Register() OVERRIDE
@@ -1034,7 +1034,7 @@ class spell_xt002_stand : public SpellScriptLoader
                     return;
 
                 target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                target->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND);
+                target->SetByteValue(UNIT_FIELD_ANIM_TIER, 0, UNIT_STAND_STATE_STAND);
             }
 
             void Register() OVERRIDE

@@ -525,7 +525,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                         if (GameObject* teleporter = GameObject::GetGameObject(*me, instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
                         {
                             instance->HandleGameObject(0, false, teleporter);
-                            teleporter->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                            teleporter->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
                         }
 
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -622,7 +622,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         for (std::list<Creature*>::iterator itr = _guardList.begin(); itr != _guardList.end(); ++x, ++itr)
                             (*itr)->AI()->SetData(0, x);
 
-                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         Talk(SAY_INTRO_HORDE_1);
                         _events.SetPhase(PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_3, 18500, 0, PHASE_INTRO_H);
@@ -687,7 +687,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                             {
                                 deathbringer->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
                                 deathbringer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                deathbringer->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                                deathbringer->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
                             }
                             _events.ScheduleEvent(EVENT_OUTRO_HORDE_5, 1000);    // move
                             _events.ScheduleEvent(EVENT_OUTRO_HORDE_6, 4000);    // say
@@ -832,7 +832,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         for (std::list<Creature*>::iterator itr = _guardList.begin(); itr != _guardList.end(); ++x, ++itr)
                             (*itr)->AI()->SetData(0, x);
 
-                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         Talk(SAY_INTRO_ALLIANCE_1);
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_4, 2500+17500+9500, 0, PHASE_INTRO_A);
                         _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);

@@ -130,15 +130,14 @@ int Master::Run()
     TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
     TC_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");
 
-    TC_LOG_INFO("server.worldserver", " ______                       __");
-    TC_LOG_INFO("server.worldserver", "/\\__  _\\       __          __/\\ \\__");
-    TC_LOG_INFO("server.worldserver", "\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");
-    TC_LOG_INFO("server.worldserver", "   \\ \\ \\/\\`'__\\/\\ \\ /' _ `\\/\\ \\ \\ \\/ /\\ \\/\\ \\");
-    TC_LOG_INFO("server.worldserver", "    \\ \\ \\ \\ \\/ \\ \\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\ \\_\\ \\");
-    TC_LOG_INFO("server.worldserver", "     \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_\\ \\__\\\\/`____ \\");
-    TC_LOG_INFO("server.worldserver", "      \\/_/\\/_/   \\/_/\\/_/\\/_/\\/_/\\/__/ `/___/> \\");
-    TC_LOG_INFO("server.worldserver", "                                 C O R E  /\\___/");
-    TC_LOG_INFO("server.worldserver", "http://TrinityCore.org                    \\/__/\n");
+    TC_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
+    TC_LOG_INFO("server.authserver", "  /\\  ___\\/\\ \\/ / /\\ \\_\\ \\/\\  ___/\\ \\/\\  == \\/\\  ___\\ ");
+    TC_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
+    TC_LOG_INFO("server.authserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
+    TC_LOG_INFO("server.authserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
+    TC_LOG_INFO("server.authserver", "  Project SkyFireEmu 2013(c) Open-sourced Game Emulation ");
+    TC_LOG_INFO("server.authserver", "           <http://www.projectskyfire.org/> \n");
+
 
     /// worldserver PID file creation
     std::string pidFile = sConfigMgr->GetStringDefault("PidFile", "");

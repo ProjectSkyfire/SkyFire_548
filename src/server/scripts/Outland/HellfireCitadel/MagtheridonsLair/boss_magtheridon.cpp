@@ -208,8 +208,8 @@ class boss_magtheridon : public CreatureScript
             boss_magtheridonAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = creature->GetInstanceScript();
-                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 10);
-                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
+                me->SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, 10);
+                me->SetFloatValue(UNIT_FIELD_COMBAT_REACH, 10);
             }
 
             CubeMap Cube;

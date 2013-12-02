@@ -595,7 +595,7 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
             CAST_AI(npc_escort::npc_escortAI, (creature->AI()))->Start(false, true, player->GetGUID());
-            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             instance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_IN_PROGRESS);
         }
         return true;
@@ -1107,7 +1107,7 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
             CAST_AI(npc_escort::npc_escortAI, (creature->AI()))->Start(false, true, player->GetGUID());
-            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             instance->SetData(DATA_TOBIAS, ENCOUNTER_STATE_IN_PROGRESS);
         }
         return true;

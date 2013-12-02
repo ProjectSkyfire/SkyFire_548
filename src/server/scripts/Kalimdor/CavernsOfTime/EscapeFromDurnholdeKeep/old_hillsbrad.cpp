@@ -302,10 +302,10 @@ public:
                     break;
                 case 9:
                     Talk(SAY_TH_ARMORY);
-                    me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, THRALL_WEAPON_ITEM);
+                    me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID, THRALL_WEAPON_ITEM);
                     //me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, THRALL_WEAPON_INFO);
                     //me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+1, 781);
-                    me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID+1, THRALL_SHIELD_ITEM);
+                    me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID+1, THRALL_SHIELD_ITEM);
                     //me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+2, THRALL_SHIELD_INFO);
                     //me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+3, 1038);
                     break;
@@ -340,7 +340,7 @@ public:
                     break;
                 case 30:
                     SetEscortPaused(true);
-                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     SetRun(false);
                     break;
                 case 31:
@@ -364,7 +364,7 @@ public:
                     me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
                     //make horsie run off
                     SetEscortPaused(true);
-                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     instance->SetData(TYPE_THRALL_PART2, DONE);
                     SetRun();
                     break;
@@ -469,8 +469,8 @@ public:
             {
                 DoUnmount();
                 HadMount = false;
-                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 0);
-                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID+1, 0);
+                me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID, 0);
+                me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID+1, 0);
                 me->SetDisplayId(THRALL_MODEL_UNEQUIPPED);
             }
             if (HasEscortState(STATE_ESCORT_ESCORTING))
@@ -480,7 +480,7 @@ public:
         }
         void StartWP()
         {
-            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             SetEscortPaused(false);
         }
         void DoMount()

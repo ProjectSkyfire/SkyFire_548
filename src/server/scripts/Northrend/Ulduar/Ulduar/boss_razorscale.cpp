@@ -313,7 +313,7 @@ class go_razorscale_harpoon : public GameObjectScript
         {
             InstanceScript* instance = go->GetInstanceScript();
             if (ObjectAccessor::GetCreature(*go, instance ? instance->GetData64(BOSS_RAZORSCALE) : 0))
-                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
             return false;
         }
 };
@@ -639,7 +639,7 @@ class npc_expedition_commander : public CreatureScript
                         break;
                     case ACTION_COMMANDER_RESET:
                         summons.clear();
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         break;
                 }
             }
@@ -681,9 +681,9 @@ class npc_expedition_commander : public CreatureScript
                             break;
                         case 4:
                             for (uint8 n = 0; n < RAID_MODE(2, 4); n++)
-                                Engineer[n]->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
+                                Engineer[n]->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
                             for (uint8 n = 0; n < 4; ++n)
-                                Defender[n]->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
+                                Defender[n]->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                             Talk(SAY_AGGRO_2);
                             AttackStartTimer = 16000;
                             Phase = 5;
