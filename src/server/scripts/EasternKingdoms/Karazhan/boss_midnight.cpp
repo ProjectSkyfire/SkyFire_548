@@ -278,7 +278,7 @@ void boss_attumen::boss_attumenAI::UpdateAI(uint32 diff)
         RandomYellTimer = urand(30000, 60000);
     } else RandomYellTimer -= diff;
 
-    if (me->GetUInt32Value(UNIT_FIELD_DISPLAYID) == MOUNTED_DISPLAYID)
+    if (me->GetUInt32Value(UNIT_FIELD_DISPLAY_ID) == MOUNTED_DISPLAYID)
     {
         if (ChargeTimer <= diff)
         {

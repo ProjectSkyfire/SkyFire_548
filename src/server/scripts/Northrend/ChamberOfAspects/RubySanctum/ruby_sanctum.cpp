@@ -63,7 +63,7 @@ class npc_xerestrasza : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                me->RemoveFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
+                me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
             }
 
             void DoAction(int32 action) OVERRIDE
@@ -122,7 +122,7 @@ class npc_xerestrasza : public CreatureScript
                             Talk(SAY_XERESTRASZA_EVENT_6);
                             break;
                         case EVENT_XERESTRASZA_EVENT_7:
-                            me->SetFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
+                            me->SetFlag(UNIT_FIELD_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
                             Talk(SAY_XERESTRASZA_EVENT_7);
                             me->setActive(false);
                             break;

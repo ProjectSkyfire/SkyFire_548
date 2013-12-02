@@ -2536,6 +2536,9 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
+        if (getClass() == CLASS_MONK)
+            Regenerate(POWER_CHI);
+
         m_regenTimerCount -= 2000;
     }
 
@@ -2616,6 +2619,12 @@ void Player::Regenerate(Powers power)
         break;
         case POWER_RUNES:
             break;
+        case POWER_CHI:                                  // Regenerate chi (monk)
+            {
+                float ChiRate = sWorld->getRate(RATE_POWER_CHI);
+                addvalue = 20 * ChiRate;
+                break;
+            } 
         case POWER_HEALTH:
             return;
         default:
@@ -27411,7 +27420,8 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 counterCount = data.ReadBits(22);
                 break;
             case MSECounter:
-                data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
+                for (int i = 0; i < counterCount; i++)
+                    data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
                 break;
             case MSEHasUnkTime:
                 hasUnkTime = !data.ReadBit();

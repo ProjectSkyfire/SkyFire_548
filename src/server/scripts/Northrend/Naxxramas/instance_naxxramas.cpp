@@ -354,7 +354,7 @@ class instance_naxxramas : public InstanceMapScript
                     if (GameObject* horsemenChest = instance->GetGameObject(HorsemenChestGUID))
                     {
                         horsemenChest->SetRespawnTime(horsemenChest->GetRespawnDelay());
-                        horsemenChest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        horsemenChest->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
                 }
 

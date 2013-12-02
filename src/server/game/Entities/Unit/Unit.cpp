@@ -11696,6 +11696,7 @@ int32 Unit::GetCreatePowers(Powers power) const
             return 3;
         case POWER_HEALTH:
             return 0;
+        case POWER_CHI:         return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_MONK ? 1000 : 0;
         default:
             break;
     }

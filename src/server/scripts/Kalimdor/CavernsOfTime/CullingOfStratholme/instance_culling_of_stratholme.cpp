@@ -138,7 +138,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     case GO_MALGANIS_CHEST_H:
                         _malGanisChestGUID = go->GetGUID();
                         if (_encounterState[3] == DONE)
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                            go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                         break;
                 }
             }
@@ -170,7 +170,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                             case DONE:
                                 HandleGameObject(_exitGateGUID, true);
                                 if (GameObject* go = instance->GetGameObject(_malGanisChestGUID))
-                                    go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                                    go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                                 break;
                         }
                         break;

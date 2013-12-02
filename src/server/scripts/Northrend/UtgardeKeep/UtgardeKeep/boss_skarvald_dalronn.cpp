@@ -136,7 +136,7 @@ class boss_skarvald_the_constructor : public CreatureScript
                         {
                             Talk(YELL_SKARVALD_SKA_DIEDFIRST);
 
-                            me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                            me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
                             //DoCast(me, SPELL_SUMMON_SKARVALD_GHOST, true);
                             if (Creature* temp = me->SummonCreature(NPC_SKARVALD_GHOST, *me, TEMPSUMMON_CORPSE_DESPAWN, 5000))
@@ -283,7 +283,7 @@ class boss_dalronn_the_controller : public CreatureScript
                         {
                             Talk(YELL_DALRONN_DAL_DIEDFIRST);
 
-                            me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                            me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
                             //DoCast(me, SPELL_SUMMON_DALRONN_GHOST, true);
                             if (Creature* temp = me->SummonCreature(NPC_DALRONN_GHOST, *me, TEMPSUMMON_CORPSE_DESPAWN, 5000))

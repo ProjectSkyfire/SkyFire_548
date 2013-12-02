@@ -348,7 +348,7 @@ class spell_anhuur_activate_beacons : public SpellScriptLoader
             void Activate(SpellEffIndex index)
             {
                 PreventHitDefaultEffect(index);
-                GetHitGObj()->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                GetHitGObj()->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
             }
 
             void Register() OVERRIDE

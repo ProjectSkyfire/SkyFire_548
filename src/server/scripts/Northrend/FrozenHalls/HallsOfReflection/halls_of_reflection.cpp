@@ -319,12 +319,12 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                 case 0:
                     player->CLOSE_GOSSIP_MENU();
                     _events.ScheduleEvent(EVENT_START_INTRO, 1000);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                     break;
                 case 1:
                     player->CLOSE_GOSSIP_MENU();
                     _events.ScheduleEvent(EVENT_SKIP_INTRO, 1000);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                     break;
             }
         }
@@ -336,7 +336,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
             _utherGUID = 0;
             _lichkingGUID = 0;
 
-            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
+            me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             _events.ScheduleEvent(EVENT_WALK_INTRO1, 3000);
         }
@@ -365,7 +365,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                         Talk(SAY_JAINA_INTRO_2);
                     else
                         Talk(SAY_SYLVANAS_INTRO_2);
-                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                     break;
                 case EVENT_START_INTRO:
                     me->GetMotionMaster()->MovePoint(0, MoveThronePos);
@@ -560,7 +560,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                     }
                     if (Creature* uther = ObjectAccessor::GetCreature(*me, _utherGUID))
                     {
-                        uther->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_COWER);
+                        uther->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_COWER);
                         if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                             uther->AI()->Talk(SAY_UTHER_INTRO_A2_9);
                         else
@@ -770,7 +770,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
             {
                 case 0:
                     player->CLOSE_GOSSIP_MENU();
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
+                    me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                     _events.ScheduleEvent(EVENT_ESCAPE_7, 0);
                     break;
             }
@@ -855,7 +855,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         _events.ScheduleEvent(EVENT_ESCAPE_6, 5000);
                         break;
                     case EVENT_ESCAPE_6:
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
+                        me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                         break;
                     case EVENT_ESCAPE_7:
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
@@ -921,7 +921,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             if (GameObject* icewall = walltarget->FindNearestGameObject(GO_ICE_WALL, 50.00f))
                             {
                                 _icewallGUID = icewall->GetGUID();
-                                icewall->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                                icewall->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                                 _instance->HandleGameObject(0, false, icewall);
                                 if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                                     Talk(SAY_JAINA_ESCAPE_2);
@@ -995,7 +995,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             {
                                 _icewallGUID = icewall->GetGUID();
                                 _instance->HandleGameObject(0, false, icewall);
-                                icewall->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                                icewall->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
                                 if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                                 {
                                     if (_icewall == 1)

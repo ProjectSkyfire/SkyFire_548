@@ -174,7 +174,7 @@ public:
             player->KilledMonsterCredit(NPC_THERAMORE_GUARD, 0);
             creature->AI()->Talk(SAY_QUEST1);
             creature->CastSpell(creature, SPELL_DOCTORED_LEAFLET, false);
-            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             CAST_AI(npc_theramore_guard::npc_theramore_guardAI, creature->AI())->YellTimer = 4000;
             CAST_AI(npc_theramore_guard::npc_theramore_guardAI, creature->AI())->bYellTimer = true;
         }
@@ -204,7 +204,7 @@ public:
         void UpdateAI(uint32 Diff) OVERRIDE
         {
             if (!me->HasAura(SPELL_PROPAGANDIZED))
-                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
             if (bYellTimer && YellTimer <= Diff)
             {
