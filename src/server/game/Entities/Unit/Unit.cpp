@@ -2105,25 +2105,91 @@ float Unit::CalculateLevelPenalty(SpellInfo const* spellProto) const
 void Unit::SendMeleeAttackStart(Unit* victim)
 {
     WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
-    data << uint64(GetGUID());
-    data << uint64(victim->GetGUID());
+ 
+    ObjectGuid attackerGuid = GetGUID();
+    ObjectGuid victimGuid = victim->GetGUID();
+
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(victimGuid[3]);
+    data.WriteBit(victimGuid[2]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(attackerGuid[1]);
+    data.WriteBit(attackerGuid[4]);
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(victimGuid[4]);
+    data.WriteBit(attackerGuid[5]);
+    data.WriteBit(victimGuid[1]);
+    data.WriteBit(victimGuid[5]);
+    data.WriteBit(attackerGuid[6]);
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(victimGuid[6]);
+    data.WriteBit(attackerGuid[2]);
+
+    data.WriteByteSeq(attackerGuid[4]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data.WriteByteSeq(attackerGuid[2]);
+    data.WriteByteSeq(attackerGuid[7]);
+    data.WriteByteSeq(victimGuid[1]);
+    data.WriteByteSeq(attackerGuid[0]);
+    data.WriteByteSeq(attackerGuid[3]);
+    data.WriteByteSeq(victimGuid[2]);
+    data.WriteByteSeq(attackerGuid[5]);
+    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(victimGuid[3]);
+    data.WriteByteSeq(attackerGuid[1]);
+    data.WriteByteSeq(victimGuid[6]);
+    data.WriteByteSeq(victimGuid[5]);
+    data.WriteByteSeq(victimGuid[7]);
+
     SendMessageToSet(&data, true);
-    TC_LOG_DEBUG("entities.unit", "WORLD: Sent SMSG_ATTACKSTART");
 }
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    WorldPacket data(SMSG_ATTACKSTOP, (8+8+4));
-    data.append(GetPackGUID());
-    data.append(victim ? victim->GetPackGUID() : 0);
-    data << uint32(0);                                     //! Can also take the value 0x01, which seems related to updating rotation
-    SendMessageToSet(&data, true);
-    TC_LOG_DEBUG("entities.unit", "WORLD: Sent SMSG_ATTACKSTOP");
+    WorldPacket data(SMSG_ATTACKSTOP);
 
-    if (victim)
-        TC_LOG_INFO("entities.unit", "%s %u stopped attacking %s %u", (GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), GetGUIDLow(), (victim->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), victim->GetGUIDLow());
-    else
-        TC_LOG_INFO("entities.unit", "%s %u stopped attacking", (GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), GetGUIDLow());
+    ObjectGuid attackerGuid = GetGUID();
+    ObjectGuid victimGuid = victim ? victim->GetGUID() : NULL;
+
+    data.WriteBit(victimGuid[3]);
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(attackerGuid[1]);
+    data.WriteBit(victimGuid[1]);
+    data.WriteBit(victimGuid[2]);
+    data.WriteBit(victimGuid[6]);
+    data.WriteBit(victimGuid[5]);
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(attackerGuid[6]);
+    data.WriteBit(victimGuid[4]);
+    data.WriteBit(0);                   
+    data.WriteBit(attackerGuid[5]);
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[2]);
+    data.WriteBit(attackerGuid[4]);
+    
+    data.WriteByteSeq(victimGuid[5]);
+    data.WriteByteSeq(attackerGuid[0]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data.WriteByteSeq(victimGuid[1]);
+    data.WriteByteSeq(victimGuid[3]);
+    data.WriteByteSeq(victimGuid[6]);
+    data.WriteByteSeq(victimGuid[7]);
+    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(attackerGuid[4]);
+    data.WriteByteSeq(attackerGuid[1]);
+    data.WriteByteSeq(attackerGuid[7]);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(attackerGuid[3]);
+    data.WriteByteSeq(attackerGuid[5]);
+    data.WriteByteSeq(victimGuid[2]);
+    data.WriteByteSeq(attackerGuid[2]);
+    
+
+    SendMessageToSet(&data, true);
 }
 
 bool Unit::isSpellBlocked(Unit* victim, SpellInfo const* spellProto, WeaponAttackType /*attackType*/)
@@ -4823,7 +4889,9 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
+    ObjectGuid guid = GetGUID();
     uint32 count = 1;
+    uint32 counter = 0;
     size_t maxsize = 4+5+5+4+4+1+4+4+4+4+4+1+4+4+4+4+4*12;
     WorldPacket data(SMSG_ATTACKERSTATEUPDATE, maxsize);    // we guess size
     data << uint32(damageInfo->HitInfo);
@@ -4882,6 +4950,45 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
         }
         data << uint32(0);
     }
+
+    if (damageInfo->HitInfo & (HITINFO_BLOCK | HITINFO_UNK12))
+        data << float(0);
+
+    if (damageInfo->HitInfo & HITINFO_UNK26)
+    {
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[1]);
+        data.FlushBits();
+
+        data.WriteBits(counter, 21);
+
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[4]);
+
+        for (uint32 i = 0; i < counter; ++i)
+        {
+            data << uint32(0);
+            data << uint32(0);
+        }
+
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[6]);
+    }
+
 
     SendMessageToSet(&data, true);
 }

@@ -679,9 +679,9 @@ enum Opcodes
     SMSG_ARENA_TEAM_QUERY_RESPONSE                           = 0x0,
     SMSG_ARENA_TEAM_ROSTER                                   = 0x0,
     SMSG_ARENA_TEAM_STATS                                    = 0x0,
-    SMSG_ATTACKERSTATEUPDATE                                 = 0x0,
-    SMSG_ATTACKSTART                                         = 0x0,
-    SMSG_ATTACKSTOP                                          = 0x0,
+    SMSG_ATTACKERSTATEUPDATE                                 = 0x182B, // 5.4.1 17538
+    SMSG_ATTACKSTART                                         = 0x012F, // 5.4.1 17538 
+    SMSG_ATTACKSTOP                                          = 0x0D3C, // 5.4.1 17538
     SMSG_ATTACKSWING_BADFACING                               = 0x0,
     SMSG_ATTACKSWING_CANT_ATTACK                             = 0x0,
     SMSG_ATTACKSWING_DEADTARGET                              = 0x0,
@@ -1376,7 +1376,7 @@ enum Opcodes
     SMSG_WORLD_SERVER_INFO                                   = 0x0427, // 5.4.1 17538
     SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
     SMSG_XP_GAIN_ABORTED                                     = 0x0,
-    SMSG_ZONE_UNDER_ATTACK                                   = 0x0,
+    SMSG_ZONE_UNDER_ATTACK                                   = 0x148D, // 5.4.1 17538
 };
 
 /// Player state
