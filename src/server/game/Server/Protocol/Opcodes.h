@@ -75,7 +75,7 @@ enum Opcodes
     CMSG_AUTOSTORE_GROUND_ITEM                               = 0x0,
     CMSG_AUTOSTORE_LOOT_ITEM                                 = 0x0,
     CMSG_AUTO_DECLINE_GUILD_INVITES                          = 0x0,
-    CMSG_BANKER_ACTIVATE                                     = 0x0,
+    CMSG_BANKER_ACTIVATE                                     = 0x07FD, // 5.4.1 17538
     CMSG_BATTLEFIELD_JOIN                                    = 0x0,
     CMSG_BATTLEFIELD_LEAVE                                   = 0x0,
     CMSG_BATTLEFIELD_LIST                                    = 0x0,
@@ -1241,7 +1241,7 @@ enum Opcodes
     SMSG_SET_PROFICIENCY                                     = 0x05B6, // 5.4.1 17538
     SMSG_SET_PROJECTILE_POSITION                             = 0x0,
     SMSG_SHOWTAXINODES                                       = 0x0,
-    SMSG_SHOW_BANK                                           = 0x0,
+    SMSG_SHOW_BANK                                           = 0x008E, // 5.4.1 17538
     SMSG_SHOW_RATINGS                                        = 0x0,
     SMSG_SOCKET_GEMS_RESULT                                  = 0x0,
     SMSG_SOR_START_EXPERIENCE_INCOMPLETE                     = 0x0,
