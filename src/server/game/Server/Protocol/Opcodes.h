@@ -342,7 +342,7 @@ enum Opcodes
     CMSG_MESSAGECHAT_CHANNEL                                 = 0x0,
     CMSG_MESSAGECHAT_DND                                     = 0x0,
     CMSG_MESSAGECHAT_EMOTE                                   = 0x0,
-    CMSG_MESSAGECHAT_GUILD                                   = 0x0,
+    CMSG_MESSAGECHAT_GUILD                                   = 0x0459, // 5.4.1 17538
     CMSG_MESSAGECHAT_OFFICER                                 = 0x0,
     CMSG_MESSAGECHAT_PARTY                                   = 0x0,
     CMSG_MESSAGECHAT_RAID                                    = 0x0,
