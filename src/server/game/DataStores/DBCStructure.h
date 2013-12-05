@@ -1477,8 +1477,8 @@ struct MapEntry
     uint32  MapID;                                          // 0
     //char*       internalname;                             // 1 unused
     uint32  map_type;                                       // 2
-    //uint32 unk_330;                                       // 3
-    //uint32 unk4;                                          // 4 4.0.1
+    //uint32 flags;                                         // 3
+    //uint32 isPvp;                                         // 4  
     char* name;                                             // 5        m_MapName_lang
     uint32  linked_zone;                                    // 6        m_areaTableID
     //char*     hordeIntro;                                 // 7        m_MapDescription0_lang
@@ -1499,10 +1499,11 @@ struct MapEntry
 
     bool IsDungeon() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID; }
     bool IsNonRaidDungeon() const { return map_type == MAP_INSTANCE; }
-    bool Instanceable() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID || map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
+    bool Instanceable() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID || map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA || map_type == MAP_SCENARIO; }
     bool IsRaid() const { return map_type == MAP_RAID; }
     bool IsBattleground() const { return map_type == MAP_BATTLEGROUND; }
     bool IsBattleArena() const { return map_type == MAP_ARENA; }
+    bool IsScenario() const { return map_type == MAP_SCENARIO; }
     bool IsBattlegroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
     bool IsWorldMap() const { return map_type == MAP_COMMON; }
 
@@ -1518,7 +1519,7 @@ struct MapEntry
 
     bool IsContinent() const
     {
-        return MapID == 0 || MapID == 1 || MapID == 530 || MapID == 571;
+        return MapID == 0 || MapID == 1 || MapID == 530 || MapID == 571 || MapID == 860 || MapID == 870;
     }
 };
 
