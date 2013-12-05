@@ -285,7 +285,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_HEARTH_AND_RESURRECT,                    STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleHearthAndResurrect        );
     DEFINE_OPCODE_HANDLER(CMSG_IGNORE_TRADE,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleIgnoreTradeOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_INITIATE_TRADE,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleInitiateTradeOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                                 STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode             );
+    DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                                 STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT_HONOR_STATS,                     STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode   );
     DEFINE_OPCODE_HANDLER(CMSG_INSTANCE_LOCK_WARNING_RESPONSE,          STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND,                             STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefund                );

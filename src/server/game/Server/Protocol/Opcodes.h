@@ -281,7 +281,7 @@ enum Opcodes
     CMSG_HEARTH_AND_RESURRECT                                = 0x0,
     CMSG_IGNORE_TRADE                                        = 0x0,
     CMSG_INITIATE_TRADE                                      = 0x0,
-    CMSG_INSPECT                                             = 0x0,
+    CMSG_INSPECT                                             = 0x0255, // 5.4.1 17538
     CMSG_INSPECT_HONOR_STATS                                 = 0x0,
     CMSG_INSTANCE_LOCK_WARNING_RESPONSE                      = 0x0,
     CMSG_ITEM_REFUND                                         = 0x0,
