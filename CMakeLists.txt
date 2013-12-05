@@ -66,10 +66,6 @@ if( UNIX )
   find_package(BZip2)
 endif()
 
-if(NOT WITHOUT_GIT)
-  find_package(Git)
-endif()
-
 # Find revision ID and hash of the sourcetree
 include(cmake/genrev.cmake)
 
