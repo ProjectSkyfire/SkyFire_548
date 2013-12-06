@@ -788,7 +788,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-	guid[0] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
