@@ -69,7 +69,6 @@ public:
             { "speed",        rbac::RBAC_PERM_COMMAND_MODIFY_SPEED,        false, NULL,           "", modifyspeedCommandTable },
             { "spell",        rbac::RBAC_PERM_COMMAND_MODIFY_SPELL,        false, &HandleModifySpellCommand,         "", NULL },
             { "standstate",   rbac::RBAC_PERM_COMMAND_MODIFY_STANDSTATE,   false, &HandleModifyStandStateCommand,    "", NULL },
-            { "talentpoints", rbac::RBAC_PERM_COMMAND_MODIFY_TALENTPOINTS, false, &HandleModifyTalentCommand,        "", NULL },
             { NULL,           0,                                     false, NULL,                              "", NULL }
         };
         static ChatCommand commandTable[] =
@@ -413,52 +412,6 @@ public:
         target->GetSession()->SendPacket(&data);
 
         return true;
-    }
-
-    //Edit Player TP
-    static bool HandleModifyTalentCommand (ChatHandler* handler, const char* args)
-    {
-        if (!*args)
-            return false;
-
-        int tp = atoi((char*)args);
-        if (tp < 0)
-            return false;
-
-        Unit* target = handler->getSelectedUnit();
-        if (!target)
-        {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            // check online security
-            if (handler->HasLowerSecurity(target->ToPlayer(), 0))
-                return false;
-            target->ToPlayer()->SetFreeTalentPoints(tp);
-            target->ToPlayer()->SendTalentsInfoData(false);
-            return true;
-        }
-        else if (target->ToCreature()->IsPet())
-        {
-            Unit* owner = target->GetOwner();
-            if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet*)target)->IsPermanentPetFor(owner->ToPlayer()))
-            {
-                // check online security
-                if (handler->HasLowerSecurity(owner->ToPlayer(), 0))
-                    return false;
-                ((Pet*)target)->SetFreeTalentPoints(tp);
-                owner->ToPlayer()->SendTalentsInfoData(true);
-                return true;
-            }
-        }
-
-        handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
-        handler->SetSentErrorMessage(true);
-        return false;
     }
 
     //Edit Player Aspeed

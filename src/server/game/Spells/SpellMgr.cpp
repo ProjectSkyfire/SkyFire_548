@@ -1499,7 +1499,7 @@ void SpellMgr::LoadSpellLearnSpells()
             }
         }
     }
-
+    /*
     uint32 mastery_count = 0;
     for (uint32 i = 0; i < sTalentTabStore.GetNumRows(); ++i)
     {
@@ -1560,8 +1560,8 @@ void SpellMgr::LoadSpellLearnSpells()
             }
         }
     }
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u spell learn spells, %u found in Spell.dbc and %u from TalentTab.dbc in %u ms", count, dbc_count, mastery_count, GetMSTimeDiffToNow(oldMSTime));
+    */
+    TC_LOG_INFO("server.loading", ">> Loaded %u spell learn spells, %u found in Spell.dbc and %u from TalentTab.dbc in %u ms", count, dbc_count, 0, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void SpellMgr::LoadSpellTargetPositions()

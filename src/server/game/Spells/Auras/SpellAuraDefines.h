@@ -427,7 +427,17 @@ enum AuraType
     SPELL_AURA_368                                          = 368,  // Not used in 4.3.4
     SPELL_AURA_ENABLE_POWER_BAR_TIMER                       = 369,
     SPELL_AURA_SET_FAIR_FAR_CLIP                            = 370,  // Overrides client's View Distance setting to max("Fair", current_setting)
-    TOTAL_AURAS                                             = 371   // 4.3.4
+    // Pandaria
+    SPELL_AURA_371                                          = 371,
+    SPELL_AURA_372                                          = 372,
+    SPELL_AURA_373                                          = 373,  // SPELL_AURA_ALLOW_ONLY_ABILITY2 ??
+    SPELL_AURA_MODIFY_FALL_DAMAGE_PCT                       = 374,
+    // 375 unusued
+    SPELL_AURA_MOD_CURRENCY_GAIN2                           = 376,
+    SPELL_AURA_CAST_WHILE_WALKING2                          = 377,
+    // 378 unusued
+    // Will do more later
+    TOTAL_AURAS                                             = 438   // 4.3.4
 };
 
 enum AuraObjectType
