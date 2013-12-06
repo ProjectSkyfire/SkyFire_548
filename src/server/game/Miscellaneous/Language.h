@@ -1223,7 +1223,22 @@ enum TrinityStrings
     LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
 
-    // NOT RESERVED IDS                   12000-1999999999
+    // NOT RESERVED IDS                   12015-1999999999
+    LANG_BG_TP_START_TWO_MINUTES        = 12000,
+    LANG_BG_TP_START_ONE_MINUTE         = 12001,
+    LANG_BG_TP_START_HALF_MINUTE        = 12002,
+    LANG_BG_TP_HAS_BEGUN                = 12003,
+    LANG_BG_TP_CAPTURED_HF              = 12004,
+    LANG_BG_TP_CAPTURED_AF              = 12005,
+    LANG_BG_TP_DROPPED_HF               = 12006,
+    LANG_BG_TP_DROPPED_AF               = 12007,
+    LANG_BG_TP_RETURNED_AF              = 12008,
+    LANG_BG_TP_RETURNED_HF              = 12009,
+    LANG_BG_TP_PICKEDUP_HF              = 12010,
+    LANG_BG_TP_PICKEDUP_AF              = 12011,
+    LANG_BG_TP_F_PLACED                 = 12012,
+    LANG_BG_TP_ALLIANCE_FLAG_RESPAWNED  = 12013,
+    LANG_BG_TP_HORDE_FLAG_RESPAWNED     = 12014,
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2000010000-2147483647 (max index)
 };
