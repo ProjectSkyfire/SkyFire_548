@@ -4157,7 +4157,7 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
 
             player->CastSpell(m_caster, newGlyphProperties->SpellId, true);
             player->SetGlyph(m_glyphIndex, newGlyph);
-            player->SendTalentsInfoData(false);
+            player->SendTalentsInfoData();
         }
     }
     else if (uint32 oldGlyph = player->GetGlyph(player->GetActiveSpec(), m_glyphIndex)) // Removing the glyph, get the old one
@@ -4166,7 +4166,7 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
         {
             player->RemoveAurasDueToSpell(oldGlyphProperties->SpellId);
             player->SetGlyph(m_glyphIndex, 0);
-            player->SendTalentsInfoData(false);
+            player->SendTalentsInfoData();
         }
     }
 }

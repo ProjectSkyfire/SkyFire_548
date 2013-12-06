@@ -781,6 +781,25 @@ struct ChrPowerTypesEntry
    uint32 power;                                               // 2
 };
 
+
+struct ChrSpecializationEntry
+{
+    uint32  Id;                                             // 0
+    //char* unkName;                                        // 1
+    uint32 classId;                                         // 2
+    uint32 MasterySpellId;                                  // 3
+    // uint32 unk                                           // 4 - prolly MasterySpellId[1] - always 0
+    uint32 TabPage;                                         // 5
+    uint32 PetTabPage;                                      // 6
+    uint32 RoleMask;                                        // 7
+    // uint32 iconId                                        // 8
+    // uint32 unk1                                          // 9
+    // uint32 unk2                                          // 10
+    // char* name                                           // 11
+    // char* definition                                     // 12
+    // char* unkName2                                       // 13
+};
+
 /* not used
 struct CinematicCameraEntry
 {
@@ -1569,12 +1588,6 @@ struct NameGenEntry
     uint32 gender;
 };
 
-struct NumTalentsAtLevelEntry
-{
-    //uint32 Level;                                         // 0 index
-    float Talents;                                         // 1 talent count
-};
-
 #define MAX_OVERRIDE_SPELL 10
 
 struct OverrideSpellDataEntry
@@ -1721,6 +1734,14 @@ struct SoundEntriesEntry
     //unk                                                   // 31       4.0.0
     //unk                                                   // 32       4.0.0
     //unk                                                   // 33       4.0.0
+};
+
+struct SpecializationSpellsEntry
+{
+    uint32 Id;                  // 0
+    uint32 SpecializationId;    // 1
+    uint32 SpellId;             // 2
+    uint32 RemovesSpellId;      // 3
 };
 
 // SpellEffect.dbc
@@ -1901,6 +1922,8 @@ typedef std::set<uint32> SpellCategorySet;
 typedef std::map<uint32, SpellCategorySet > SpellCategoryStore;
 typedef std::set<uint32> PetFamilySpellsSet;
 typedef std::map<uint32, PetFamilySpellsSet > PetFamilySpellsStore;
+typedef UNORDERED_MAP<uint32, std::list<SkillLineAbilityEntry const*> > SpellsPerClassStore;
+typedef UNORDERED_MAP<uint32, uint32> ClassBySkillIdStore;
 typedef UNORDERED_MAP<uint32, uint32> SpellEffectScallingByEffectId;
 
 struct SpellCastTimesEntry
@@ -2150,9 +2173,9 @@ struct SummonPropertiesEntry
     uint32  Flags;                                          // 5
 };
 
-#define MAX_TALENT_RANK 5
-#define MAX_PET_TALENT_RANK 3                               // use in calculations, expected <= MAX_TALENT_RANK
-#define MAX_TALENT_TABS 3
+#define MAX_TALENT_RANK 1 // REMOVE ME !!!
+#define MAX_PET_TALENT_RANK 1                               // use in calculations, expected <= MAX_TALENT_RANK
+#define MAX_TALENT_TABS 4
 
 struct TalentEntry
 {
@@ -2167,30 +2190,6 @@ struct TalentEntry
     uint32    playerClass;                                  // 8
     //uint32 replacesSpell                                  // 9
     //char* description                                     // 10
-};
-
-#define MAX_MASTERY_SPELLS 2
-
-struct TalentTabEntry
-{
-    uint32  TalentTabID;                                    // 0
-    //char* name;                                           // 1        m_name_lang
-    //unit32  spellicon;                                    // 2        m_spellIconID
-    uint32  ClassMask;                                      // 3        m_classMask
-    uint32  petTalentMask;                                  // 4        m_petTalentMask
-    uint32  tabpage;                                        // 5        m_orderIndex
-    //char* internalname;                                   // 6        m_backgroundFile
-    //char* description;                                    // 7
-    //uint32 rolesMask;                                     // 8 4.0.0
-    uint32 MasterySpellId[MAX_MASTERY_SPELLS];              // 9-10 passive mastery bonus spells?
-};
-
-struct TalentTreePrimarySpellsEntry
-{
-    //uint32 Id;                                            // 0 index
-    uint32 TalentTree;                                      // 1 entry from TalentTab.dbc
-    uint32 SpellId;                                         // 2 spell id to learn
-    //uint32 Flags;                                         // 3 some kind of flags
 };
 
 struct TaxiNodesEntry

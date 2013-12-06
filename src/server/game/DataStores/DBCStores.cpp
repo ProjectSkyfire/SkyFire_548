@@ -74,6 +74,7 @@ DBCStorage <ChatChannelsEntry> sChatChannelsStore(ChatChannelsEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
 DBCStorage <ChrPowerTypesEntry> sChrPowerTypesStore(ChrClassesXPowerTypesfmt);
+DBCStorage <ChrSpecializationEntry> sChrSpecializationStore(ChrSpecializationfmt);
 DBCStorage <CinematicSequencesEntry> sCinematicSequencesStore(CinematicSequencesEntryfmt);
 DBCStorage <CreatureDisplayInfoEntry> sCreatureDisplayInfoStore(CreatureDisplayInfofmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
@@ -163,7 +164,6 @@ DBCStorage <MountTypeEntry> sMountTypeStore(MountTypefmt);
 
 DBCStorage <NameGenEntry> sNameGenStore(NameGenfmt);
 NameGenVectorArraysMap sGenNameVectoArraysMap;
-DBCStorage <NumTalentsAtLevelEntry> sNumTalentsAtLevelStore(NumTalentsAtLevelfmt);
 
 DBCStorage <OverrideSpellDataEntry> sOverrideSpellDataStore(OverrideSpellDatafmt);
 
@@ -181,6 +181,7 @@ DBCStorage <SkillLineAbilityEntry> sSkillLineAbilityStore(SkillLineAbilityfmt);
 
 DBCStorage <SoundEntriesEntry> sSoundEntriesStore(SoundEntriesfmt);
 
+DBCStorage <SpecializationSpellsEntry> sSpecializationSpellsStore(SpecializationSpellsfmt);
 DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
 DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore(SpellItemEnchantmentConditionfmt);
 DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
@@ -189,6 +190,8 @@ DBCStorage <SpellEffectScalingEntry> sSpellEffectScalingStore(SpellEffectScaling
 
 SpellCategoryStore sSpellsByCategoryStore;
 PetFamilySpellsStore sPetFamilySpellsStore;
+SpellsPerClassStore sSpellsPerClassStore;
+ClassBySkillIdStore sClassBySkillIdStore;
 SpellEffectScallingByEffectId sSpellEffectScallingByEffectId;
 
 DBCStorage <SpellScalingEntry> sSpellScalingStore(SpellScalingEntryfmt);
@@ -219,13 +222,11 @@ DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <SummonPropertiesEntry> sSummonPropertiesStore(SummonPropertiesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 TalentSpellPosMap sTalentSpellPosMap;
-DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
-DBCStorage <TalentTreePrimarySpellsEntry> sTalentTreePrimarySpellsStore(TalentTreePrimarySpellsfmt);
-typedef std::map<uint32, std::vector<uint32> > TalentTreePrimarySpellsMap;
-TalentTreePrimarySpellsMap sTalentTreePrimarySpellsMap;
+typedef std::map<uint32, std::vector<uint32> > SpecializationSpellsMap;
+SpecializationSpellsMap sSpecializationSpellsMap;
 
 // store absolute bit position for first rank for talent inspect
-static uint32 sTalentTabPages[MAX_CLASSES][3];
+static uint32 sSpecializationClassStore[MAX_CLASSES][4];
 
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
 TaxiMask sTaxiNodesMask;
@@ -486,9 +487,6 @@ void LoadDBCStores(const std::string& dataPath)
             sGenNameVectoArraysMap[entry->race].stringVectorArray[entry->gender].push_back(std::string(entry->name));
     sNameGenStore.Clear();
 
-    // No londer exisitng
-    //LoadDBC(availableDbcLocales, bad_dbc_files, sNumTalentsAtLevelStore,      dbcPath, "NumTalentsAtLevel.dbc");//15595
-
     LoadDBC(availableDbcLocales, bad_dbc_files, sMovieStore,                  dbcPath, "Movie.dbc");//15595
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sOverrideSpellDataStore,      dbcPath, "OverrideSpellData.dbc");//15595
@@ -562,6 +560,60 @@ void LoadDBCStores(const std::string& dataPath)
         sSpellEffectScallingByEffectId.insert(std::make_pair(spellEffectScaling->SpellEffectId, j));
     }
 
+    std::map<std::string, uint32> classIdByName;
+    for (uint32 j = 0; j < sChrClassesStore.GetNumRows(); j++)
+    {
+        ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(j);
+        if (!classEntry)
+            continue;
+
+        classIdByName.insert(std::make_pair(std::string(classEntry->name), j));
+    }
+
+    for (uint32 j = 0; j < sSkillLineStore.GetNumRows(); j++)
+    {
+        SkillLineEntry const* skillEntry = sSkillLineStore.LookupEntry(j);
+        if (!skillEntry)
+            continue;
+
+        if (skillEntry->categoryId != SKILL_CATEGORY_CLASS)
+            continue;
+
+        std::map<std::string, uint32> ::const_iterator iter = classIdByName.find(std::string(skillEntry->name));
+        if (iter == classIdByName.end())
+            continue;
+
+        sClassBySkillIdStore.insert(std::make_pair(j, iter->second));
+    }
+
+    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const* skillAbility = sSkillLineAbilityStore.LookupEntry(j);
+        if (!skillAbility)
+            continue;
+
+        if (skillAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+            continue;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillAbility->spellId);
+        if (!spellInfo)
+            continue;
+
+        SpellLevelsEntry const* spellLevels = sSpellLevelsStore.LookupEntry(spellInfo->SpellLevelsId);
+        if (!spellLevels || !spellLevels->spellLevel)
+            continue;
+
+        uint32 classId = GetClassBySkillId(skillAbility->skillId);
+
+        if (!classId)
+            continue;
+
+        if (sSpellsPerClassStore.find(classId) == sSpellsPerClassStore.end())
+            sSpellsPerClassStore.insert(make_pair(classId, std::list<SkillLineAbilityEntry const*>()));
+
+        sSpellsPerClassStore[classId].push_back(skillAbility);
+    }
+
     // Must be done when sSkillLineAbilityStore, sSpellStore, sSpellLevelsStore and sCreatureFamilyStore are all loaded
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
     {
@@ -575,9 +627,6 @@ void LoadDBCStores(const std::string& dataPath)
 
         SpellLevelsEntry const* levels = sSpellLevelsStore.LookupEntry(spellInfo->SpellLevelsId);
         if (spellInfo->SpellLevelsId && (!levels || levels->spellLevel))
-            continue;
-
-        if (!spellInfo)
             continue;
 
         if (SpellMiscEntry const* spellMisc = sSpellMiscStore.LookupEntry(spellInfo->SpellMiscId))
@@ -644,35 +693,30 @@ void LoadDBCStores(const std::string& dataPath)
                 sTalentSpellPosMap[talentInfo->SpellId] = TalentSpellPos(i, j);
     }
 
-    // No londer exisitng
-    //LoadDBC(availableDbcLocales, bad_dbc_files, sTalentTabStore,              dbcPath, "TalentTab.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sChrSpecializationStore,              dbcPath, "ChrSpecialization.dbc");
 
     // prepare fast data access to bit pos of talent ranks for use at inspecting
     {
         // now have all max ranks (and then bit amount used for store talent ranks in inspect)
-        for (uint32 talentTabId = 1; talentTabId < sTalentTabStore.GetNumRows(); ++talentTabId)
+        for (uint32 j = 0; j < sChrSpecializationStore.GetNumRows(); j++)
         {
-            TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentTabId);
-            if (!talentTabInfo)
+            ChrSpecializationEntry const* specializationInfo = sChrSpecializationStore.LookupEntry(j);
+            if (!specializationInfo)
                 continue;
 
             // prevent memory corruption; otherwise cls will become 12 below
-            if ((talentTabInfo->ClassMask & CLASSMASK_ALL_PLAYABLE) == 0)
+            if (!specializationInfo->classId || specializationInfo->classId >= MAX_CLASSES)
                 continue;
 
-            // store class talent tab pages
-            for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
-                if (talentTabInfo->ClassMask & (1 << (cls - 1)))
-                    sTalentTabPages[cls][talentTabInfo->tabpage] = talentTabId;
+
+            sSpecializationClassStore[specializationInfo->classId][specializationInfo->TabPage] = j;
         }
     }
 
-    // No londer exisitng
-    //LoadDBC(availableDbcLocales, bad_dbc_files, sTalentTreePrimarySpellsStore, dbcPath, "TalentTreePrimarySpells.dbc");
-    for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
-        if (TalentTreePrimarySpellsEntry const* talentSpell = sTalentTreePrimarySpellsStore.LookupEntry(i))
-            sTalentTreePrimarySpellsMap[talentSpell->TalentTree].push_back(talentSpell->SpellId);
-    sTalentTreePrimarySpellsStore.Clear();
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpecializationSpellsStore, dbcPath, "SpecializationSpells.dbc");
+    for (uint32 j = 0; j < sSpecializationSpellsStore.GetNumRows(); j++)
+        if (SpecializationSpellsEntry const* specializationSpells = sSpecializationSpellsStore.LookupEntry(j))
+            sSpecializationSpellsMap[specializationSpells->SpecializationId].push_back(specializationSpells->SpellId);
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiNodesStore,              dbcPath, "TaxiNodes.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiPathStore,               dbcPath, "TaxiPath.dbc");//15595
@@ -1033,6 +1077,73 @@ void Map2ZoneCoordinates(float& x, float& y, uint32 zone)
     std::swap(x, y);                                         // client have map coords swapped
 }
 
+uint32 GetClassBySkillId(uint32 skillId)
+{
+    ClassBySkillIdStore::const_iterator iter = sClassBySkillIdStore.find(skillId);
+    if (iter != sClassBySkillIdStore.end())
+        return iter->second;
+    return 0;
+}
+
+uint32 GetSkillIdByClass(uint32 classId)
+{
+    for (ClassBySkillIdStore::const_iterator iter = sClassBySkillIdStore.begin(); iter != sClassBySkillIdStore.end(); iter++)
+        if (iter->second == classId)
+            return iter->first;
+    return 0;
+}
+
+std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 specializationId, uint32 minLevel, uint32 maxLevel)
+{
+    std::list<uint32> spellList;
+
+    if (classId != 0)
+    {
+        SpellsPerClassStore::const_iterator classIter = sSpellsPerClassStore.find(classId);
+        if (classIter != sSpellsPerClassStore.end())
+        {
+            const std::list<SkillLineAbilityEntry const*>& learnSpellList = classIter->second;
+            for (std::list<SkillLineAbilityEntry const*>::const_iterator iter = learnSpellList.begin(); iter != learnSpellList.end(); iter++)
+            {
+                SkillLineAbilityEntry const* skillLine = *iter;
+                if (!skillLine)
+                    continue;
+
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(skillLine->spellId);
+                if (!spellInfo)
+                    continue;
+
+                if (skillLine->racemask && !(skillLine->racemask & raceMask))
+                    continue;
+
+                if (spellInfo->SpellLevel <= minLevel || spellInfo->SpellLevel > maxLevel)
+                    continue;
+
+                spellList.push_back(spellInfo->Id);
+            }
+        }
+    }
+
+    if (!specializationId)
+        return spellList;
+
+    SpecializationSpellsMap::const_iterator specIter = sSpecializationSpellsMap.find(specializationId);
+    if (specIter != sSpecializationSpellsMap.end())
+    {
+        const std::vector<uint32>& learnSpellList = specIter->second;
+        for (int i = 0; i < learnSpellList.size(); i++)
+        {
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(learnSpellList[i]);
+
+            if (spellInfo->SpellLevel <= minLevel || spellInfo->SpellLevel > maxLevel)
+                continue;
+            
+            spellList.push_back(spellInfo->Id);
+        }
+    }
+    return spellList;
+}
+
 MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)
 {
     MapDifficultyMap::const_iterator itr = sMapDifficultyMap.find(MAKE_PAIR32(mapId, difficulty));
@@ -1097,18 +1208,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundB
     return NULL;
 }
 
-uint32 const* GetTalentTabPages(uint8 cls)
+uint32 const* GetClassSpecializations(uint8 classId)
 {
-    return sTalentTabPages[cls];
-}
-
-std::vector<uint32> const* GetTalentTreePrimarySpells(uint32 talentTree)
-{
-    TalentTreePrimarySpellsMap::const_iterator itr = sTalentTreePrimarySpellsMap.find(talentTree);
-    if (itr == sTalentTreePrimarySpellsMap.end())
-        return NULL;
-
-    return &itr->second;
+    return sSpecializationClassStore[classId];
 }
 
 uint32 GetLiquidFlags(uint32 liquidType)
