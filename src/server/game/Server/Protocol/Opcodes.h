@@ -132,7 +132,7 @@ enum Opcodes
     CMSG_CHANNEL_DISPLAY_LIST                                = 0x0,
     CMSG_CHANNEL_INVITE                                      = 0x0,
     CMSG_CHANNEL_KICK                                        = 0x0,
-    CMSG_CHANNEL_LIST                                        = 0x0,
+    CMSG_CHANNEL_LIST                                        = 0x1178, // 5.4.1 17538
     CMSG_CHANNEL_MODERATE                                    = 0x0,
     CMSG_CHANNEL_MODERATOR                                   = 0x0,
     CMSG_CHANNEL_MUTE                                        = 0x0,
@@ -218,7 +218,7 @@ enum Opcodes
     CMSG_GM_REPORT_LAG                                       = 0x0,
     CMSG_GM_SET_SECURITY_GROUP                               = 0x0,
     CMSG_GOSSIP_HELLO                                        = 0x025C, //5.4.1 17538
-    CMSG_GOSSIP_SELECT_OPTION                                = 0x0,
+    CMSG_GOSSIP_SELECT_OPTION                                = 0x03EE, //5.4.1 17538
     CMSG_GRANT_LEVEL                                         = 0x0,
     CMSG_GROUP_ASSISTANT_LEADER                              = 0x0,
     CMSG_GROUP_CANCEL                                        = 0x0,
@@ -281,7 +281,7 @@ enum Opcodes
     CMSG_HEARTH_AND_RESURRECT                                = 0x0,
     CMSG_IGNORE_TRADE                                        = 0x0,
     CMSG_INITIATE_TRADE                                      = 0x0,
-    CMSG_INSPECT                                             = 0x0,
+    CMSG_INSPECT                                             = 0x0255, // 5.4.1 17538
     CMSG_INSPECT_HONOR_STATS                                 = 0x0,
     CMSG_INSTANCE_LOCK_WARNING_RESPONSE                      = 0x0,
     CMSG_ITEM_REFUND                                         = 0x0,
@@ -703,7 +703,7 @@ enum Opcodes
     SMSG_AVAILABLE_VOICE_CHANNEL                             = 0x0,
     SMSG_AVERAGE_ITEM_LEVEL_INFORM                           = 0x0,
     SMSG_BARBER_SHOP_RESULT                                  = 0x0,
-    SMSG_BATTLEFIELD_LIST                                    = 0x0,
+    SMSG_BATTLEFIELD_LIST                                    = 0x09B7, // 5.4.1 17538
     SMSG_BATTLEFIELD_MGR_EJECTED                             = 0x0,
     SMSG_BATTLEFIELD_MGR_EJECT_PENDING                       = 0x0,
     SMSG_BATTLEFIELD_MGR_ENTERED                             = 0x0,
@@ -944,7 +944,7 @@ enum Opcodes
     SMSG_GUILD_XP                                            = 0x0,
     SMSG_GUILD_XP_GAIN                                       = 0x0,
     SMSG_GUILD_XP_UPDATE                                     = 0x0,
-    SMSG_HEALTH_UPDATE                                       = 0x0,
+    SMSG_HEALTH_UPDATE                                       = 0x0C36, // 5.4.1 17538
     SMSG_HIGHEST_THREAT_UPDATE                               = 0x0,
     SMSG_HOTFIX_INFO                                         = 0x0C27, // 5.4.1 17538
     SMSG_HOTFIX_NOTIFY                                       = 0x0,

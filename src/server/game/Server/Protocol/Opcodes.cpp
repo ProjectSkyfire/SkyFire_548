@@ -148,7 +148,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_DISPLAY_LIST,                    STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelDisplayListQuery   );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_INVITE,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelInvite             );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_KICK,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelKick               );
-    DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_LIST,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelList               );
+    DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_LIST,                            STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelList               );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_MODERATE,                        STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_MODERATOR,                       STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelModerator          );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_MUTE,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelMute               );
@@ -285,7 +285,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_HEARTH_AND_RESURRECT,                    STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleHearthAndResurrect        );
     DEFINE_OPCODE_HANDLER(CMSG_IGNORE_TRADE,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleIgnoreTradeOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_INITIATE_TRADE,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleInitiateTradeOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                                 STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode             );
+    DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                                 STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT_HONOR_STATS,                     STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode   );
     DEFINE_OPCODE_HANDLER(CMSG_INSTANCE_LOCK_WARNING_RESPONSE,          STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND,                             STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefund                );
@@ -1120,7 +1120,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_RAID_MARKERS_CHANGED,                    STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_RAID_READY_CHECK_THROTTLED_ERROR,        STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_RAID_SUMMON_FAILED,                      STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_RANDOMIZE_CHAR_NAME,                     STATUS_UNHANDLED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_RANDOMIZE_CHAR_NAME,                     STATUS_NEVER,   PROCESS_THREADUNSAFE, &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_RATED_BG_RATING,                         STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_RATED_BG_STATS,                          STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_READ_ITEM_FAILED,                        STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
