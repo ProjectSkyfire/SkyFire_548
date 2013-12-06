@@ -310,7 +310,7 @@ enum HitInfo
     HITINFO_CRITICALHIT         = 0x00000200,               // critical hit
     // 0x00000400
     // 0x00000800
-    // 0x00001000
+    HITINFO_UNK12               = 0x00001000,
     HITINFO_BLOCK               = 0x00002000,               // blocked damage
     // 0x00004000                                           // Hides worldtext for 0 damage
     // 0x00008000                                           // Related to blood visual
@@ -321,7 +321,10 @@ enum HitInfo
     // 0x00100000
     HITINFO_SWINGNOHITSOUND     = 0x00200000,               // unused?
     // 0x00400000
-    HITINFO_RAGE_GAIN           = 0x00800000
+    HITINFO_RAGE_GAIN           = 0x00800000,
+	HITINFO_FAKE_DAMAGE         = 0x01000000, // enables damage animation even if no damage done, set only if no damage
+    HITINFO_UNK25               = 0x02000000,
+    HITINFO_UNK26               = 0x04000000,
 };
 
 //i would like to remove this: (it is defined in item.h

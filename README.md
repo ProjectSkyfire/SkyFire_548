@@ -1,4 +1,4 @@
-# ![logo](http://www.projectskyfire.org/public/style_images/9_1_s2QNl.png) Project SkyFire
+# ![logo](http://www.projectskyfire.org/public/style_images/9_1_s2QNl.png) [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire_5xx.png)](https://travis-ci.org/ProjectSkyfire/SkyFire_5xx)
 
 
 ## Introduction

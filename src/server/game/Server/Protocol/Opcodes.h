@@ -75,7 +75,7 @@ enum Opcodes
     CMSG_AUTOSTORE_GROUND_ITEM                               = 0x0,
     CMSG_AUTOSTORE_LOOT_ITEM                                 = 0x0,
     CMSG_AUTO_DECLINE_GUILD_INVITES                          = 0x0,
-    CMSG_BANKER_ACTIVATE                                     = 0x0,
+    CMSG_BANKER_ACTIVATE                                     = 0x07FD, // 5.4.1 17538
     CMSG_BATTLEFIELD_JOIN                                    = 0x0,
     CMSG_BATTLEFIELD_LEAVE                                   = 0x0,
     CMSG_BATTLEFIELD_LIST                                    = 0x0,
@@ -96,7 +96,7 @@ enum Opcodes
     CMSG_BUG                                                 = 0x0,
     CMSG_BUSY_TRADE                                          = 0x0,
     CMSG_BUYBACK_ITEM                                        = 0x0,
-    CMSG_BUY_BANK_SLOT                                       = 0x0,
+    CMSG_BUY_BANK_SLOT                                       = 0x064D, // 5.4.1 17538
     CMSG_BUY_ITEM                                            = 0x0,
     CMSG_CALENDAR_ADD_EVENT                                  = 0x0,
     CMSG_CALENDAR_ARENA_TEAM                                 = 0x0,
@@ -281,7 +281,7 @@ enum Opcodes
     CMSG_HEARTH_AND_RESURRECT                                = 0x0,
     CMSG_IGNORE_TRADE                                        = 0x0,
     CMSG_INITIATE_TRADE                                      = 0x0,
-    CMSG_INSPECT                                             = 0x0,
+    CMSG_INSPECT                                             = 0x0255, // 5.4.1 17538
     CMSG_INSPECT_HONOR_STATS                                 = 0x0,
     CMSG_INSTANCE_LOCK_WARNING_RESPONSE                      = 0x0,
     CMSG_ITEM_REFUND                                         = 0x0,
@@ -342,7 +342,7 @@ enum Opcodes
     CMSG_MESSAGECHAT_CHANNEL                                 = 0x0,
     CMSG_MESSAGECHAT_DND                                     = 0x0,
     CMSG_MESSAGECHAT_EMOTE                                   = 0x0,
-    CMSG_MESSAGECHAT_GUILD                                   = 0x0,
+    CMSG_MESSAGECHAT_GUILD                                   = 0x0459, // 5.4.1 17538
     CMSG_MESSAGECHAT_OFFICER                                 = 0x0,
     CMSG_MESSAGECHAT_PARTY                                   = 0x0,
     CMSG_MESSAGECHAT_RAID                                    = 0x0,
@@ -679,9 +679,9 @@ enum Opcodes
     SMSG_ARENA_TEAM_QUERY_RESPONSE                           = 0x0,
     SMSG_ARENA_TEAM_ROSTER                                   = 0x0,
     SMSG_ARENA_TEAM_STATS                                    = 0x0,
-    SMSG_ATTACKERSTATEUPDATE                                 = 0x0,
-    SMSG_ATTACKSTART                                         = 0x0,
-    SMSG_ATTACKSTOP                                          = 0x0,
+    SMSG_ATTACKERSTATEUPDATE                                 = 0x182B, // 5.4.1 17538
+    SMSG_ATTACKSTART                                         = 0x012F, // 5.4.1 17538 
+    SMSG_ATTACKSTOP                                          = 0x0D3C, // 5.4.1 17538
     SMSG_ATTACKSWING_BADFACING                               = 0x0,
     SMSG_ATTACKSWING_CANT_ATTACK                             = 0x0,
     SMSG_ATTACKSWING_DEADTARGET                              = 0x0,
@@ -1241,7 +1241,7 @@ enum Opcodes
     SMSG_SET_PROFICIENCY                                     = 0x05B6, // 5.4.1 17538
     SMSG_SET_PROJECTILE_POSITION                             = 0x0,
     SMSG_SHOWTAXINODES                                       = 0x0,
-    SMSG_SHOW_BANK                                           = 0x0,
+    SMSG_SHOW_BANK                                           = 0x008E, // 5.4.1 17538
     SMSG_SHOW_RATINGS                                        = 0x0,
     SMSG_SOCKET_GEMS_RESULT                                  = 0x0,
     SMSG_SOR_START_EXPERIENCE_INCOMPLETE                     = 0x0,
@@ -1376,7 +1376,7 @@ enum Opcodes
     SMSG_WORLD_SERVER_INFO                                   = 0x0427, // 5.4.1 17538
     SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
     SMSG_XP_GAIN_ABORTED                                     = 0x0,
-    SMSG_ZONE_UNDER_ATTACK                                   = 0x0,
+    SMSG_ZONE_UNDER_ATTACK                                   = 0x148D, // 5.4.1 17538
 };
 
 /// Player state
