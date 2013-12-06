@@ -114,7 +114,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_BUG,                                     STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleBugOpcode                 );
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE,                              STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem               );
-    DEFINE_OPCODE_HANDLER(CMSG_BUY_BANK_SLOT,                           STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleBuyBankSlotOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_BUY_BANK_SLOT,                           STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleBuyBankSlotOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_BUY_ITEM,                                STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_ADD_EVENT,                      STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarAddEvent          );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_ARENA_TEAM,                     STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarArenaTeam         );
@@ -148,7 +148,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_DISPLAY_LIST,                    STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelDisplayListQuery   );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_INVITE,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelInvite             );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_KICK,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelKick               );
-    DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_LIST,                            STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelList               );
+    DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_LIST,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelList               );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_MODERATE,                        STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_MODERATOR,                       STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelModerator          );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_MUTE,                            STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleChannelMute               );
