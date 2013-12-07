@@ -514,8 +514,8 @@ void Player::UpdateMastery()
     float value = GetTotalAuraModifier(SPELL_AURA_MASTERY);
     value += GetRatingBonusValue(CR_MASTERY);
     SetFloatValue(PLAYER_FIELD_MASTERY, value);
-
-    TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec()));
+    /*
+    TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(GetTalentSpecialization(GetActiveSpec()));
     if (!talentTab)
         return;
 
@@ -538,7 +538,7 @@ void Player::UpdateMastery()
                 aura->GetEffect(j)->ChangeAmount(int32(value * aura->GetSpellInfo()->Effects[j].BonusMultiplier));
             }
         }
-    }
+    }*/
 }
 
 const float m_diminishing_k[MAX_CLASSES] =

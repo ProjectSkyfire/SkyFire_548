@@ -96,7 +96,7 @@ enum Opcodes
     CMSG_BUG                                                 = 0x0,
     CMSG_BUSY_TRADE                                          = 0x0,
     CMSG_BUYBACK_ITEM                                        = 0x0,
-    CMSG_BUY_BANK_SLOT                                       = 0x0,
+    CMSG_BUY_BANK_SLOT                                       = 0x064D, // 5.4.1 17538
     CMSG_BUY_ITEM                                            = 0x0,
     CMSG_CALENDAR_ADD_EVENT                                  = 0x0,
     CMSG_CALENDAR_ARENA_TEAM                                 = 0x0,

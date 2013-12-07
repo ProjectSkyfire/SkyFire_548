@@ -27,52 +27,53 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+void WorldSession::HandeSetTalentSpecialization(WorldPacket& recvData)
+{
+    uint32 specializationTabId;
+    recvData >> specializationTabId;
+
+    if (specializationTabId > MAX_TALENT_TABS)
+        return;
+
+    if (_player->GetTalentSpecialization(_player->GetActiveSpec()))
+        return;
+
+    uint32 specializationId = GetClassSpecializations(_player->getClass())[specializationTabId];
+
+    _player->SetTalentSpecialization(_player->GetActiveSpec(), specializationId);
+    _player->SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, specializationId);
+    _player->SendTalentsInfoData();
+
+    std::list<uint32> learnList = GetSpellsForLevels(0, _player->getRaceMask(), _player->GetTalentSpecialization(_player->GetActiveSpec()), 0, _player->getLevel());
+    for (std::list<uint32>::const_iterator iter = learnList.begin(); iter != learnList.end(); iter++)
+    {
+        if (!_player->HasSpell(*iter))
+            _player->learnSpell(*iter, true);
+    }
+
+    _player->SaveToDB();
+}
+
 void WorldSession::HandleLearnTalentOpcode(WorldPacket& recvData)
 {
-    uint32 talentId, requestedRank;
-    recvData >> talentId >> requestedRank;
+    uint32 talentCount = recvData.ReadBits(23);
+    uint16 talentId;
+    bool anythingLearned = false;
 
-    if (_player->LearnTalent(talentId, requestedRank))
-        _player->SendTalentsInfoData(false);
+    for (int i = 0; i < talentCount; i++)
+    {
+        recvData >> talentId;
+        if (_player->LearnTalent(talentId))
+            anythingLearned = true;
+    }
+
+    if (anythingLearned)
+        _player->SendTalentsInfoData();
 }
 
 void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
-
-    int32 tabPage;
-    uint32 talentsCount;
-    recvPacket >> tabPage;    // talent tree
-
-    // prevent cheating (selecting new tree with points already in another)
-    if (tabPage >= 0)   // -1 if player already has specialization
-    {
-        if (TalentTabEntry const* talentTabEntry = sTalentTabStore.LookupEntry(_player->GetPrimaryTalentTree(_player->GetActiveSpec())))
-        {
-            if (talentTabEntry->tabpage != uint32(tabPage))
-            {
-                recvPacket.rfinish();
-                return;
-            }
-        }
-    }
-
-    recvPacket >> talentsCount;
-
-    uint32 talentId, talentRank;
-
-    for (uint32 i = 0; i < talentsCount; ++i)
-    {
-        recvPacket >> talentId >> talentRank;
-
-        if (!_player->LearnTalent(talentId, talentRank))
-        {
-            recvPacket.rfinish();
-            break;
-        }
-    }
-
-    _player->SendTalentsInfoData(false);
 }
 
 void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
@@ -101,7 +102,7 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
         return;
     }
 
-    _player->SendTalentsInfoData(false);
+    _player->SendTalentsInfoData();
     unit->CastSpell(_player, 14867, true);                  //spell: "Untalent Visual Effect"
 }
 
