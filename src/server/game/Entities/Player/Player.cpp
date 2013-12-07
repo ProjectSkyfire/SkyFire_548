@@ -24862,6 +24862,8 @@ void Player::InitGlyphsForLevel()
         slotMask |= 0x01 | 0x02 | 0x40;
     if (level >= 50)
         slotMask |= 0x04 | 0x08 | 0x80;
+    if (level >= 75)
+        slotMask |= 0x10 | 0x20 | 0x100;
 
     SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_ENABLED, slotMask);
 }
