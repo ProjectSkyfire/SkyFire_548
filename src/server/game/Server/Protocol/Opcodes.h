@@ -314,7 +314,7 @@ enum Opcodes
     CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
     CMSG_LIST_INVENTORY                                      = 0x0,
     CMSG_LOAD_SCREEN                                         = 0x1148, // 5.4.1 17538
-    CMSG_LOGOUT_CANCEL                                       = 0x0,
+    CMSG_LOGOUT_CANCEL                                       = 0x0A7E, // 5.4.1 17538
     CMSG_LOGOUT_REQUEST                                      = 0x03EC, // 5.4.1 17538
     CMSG_LOG_DISCONNECT                                      = 0x14FA, // 5.4.1 17538
     CMSG_LOOT                                                = 0x0,
