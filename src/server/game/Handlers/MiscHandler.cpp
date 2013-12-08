@@ -91,15 +91,38 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_GOSSIP_SELECT_OPTION");
 
+    ObjectGuid guid;
     uint32 gossipListId;
     uint32 menuId;
-    uint64 guid;
+    uint8 boxTextLength = 0;
     std::string code = "";
 
-    recvData >> guid >> menuId >> gossipListId;
+    recvData >> gossipListId >> menuId;
+
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+
+    boxTextLength = recvData.ReadBits(8);
+
+    guid[5] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[1]);
 
     if (_player->PlayerTalkClass->IsGossipOptionCoded(gossipListId))
-        recvData >> code;
+        code = recvData.ReadString(boxTextLength);
+
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[4]);
 
     Creature* unit = NULL;
     GameObject* go = NULL;
