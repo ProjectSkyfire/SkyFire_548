@@ -60,7 +60,7 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket& recvData)
     uint16 talentId;
     bool anythingLearned = false;
 
-    for (int i = 0; i < talentCount; i++)
+    for (int i = 0; i != talentCount; i++)
     {
         recvData >> talentId;
         if (_player->LearnTalent(talentId))
