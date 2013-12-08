@@ -123,7 +123,7 @@ enum Opcodes
     CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
     CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
-    CMSG_CANCEL_TRADE                                        = 0x12CC,
+    CMSG_CANCEL_TRADE                                        = 0x12CC, // 5.4.1 17538
     CMSG_CAST_SPELL                                          = 0x0,
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
@@ -178,6 +178,7 @@ enum Opcodes
     CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
     CMSG_CREATURE_QUERY                                      = 0x1647, // 5.4.1 17538
     CMSG_DANCE_QUERY                                         = 0x0,
+    CMSG_DB_QUERY_BULK                                       = 0x01E4, // 5.4.1 17538
     CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
     CMSG_DEL_FRIEND                                          = 0x0,
     CMSG_DEL_IGNORE                                          = 0x0,
