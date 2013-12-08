@@ -1131,7 +1131,7 @@ std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 spe
     if (specIter != sSpecializationSpellsMap.end())
     {
         const std::vector<uint32>& learnSpellList = specIter->second;
-        for (int i = 0; i < learnSpellList.size(); i++)
+        for (int i = 0; i != learnSpellList.size(); i++)
         {
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(learnSpellList[i]);
 

@@ -318,7 +318,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_SET_GUILD_POST,                 STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderSetGuildPost   );
     DEFINE_OPCODE_HANDLER(CMSG_LIST_INVENTORY,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleListInventoryOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_LOAD_SCREEN,                             STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLoadScreenOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_CANCEL,                           STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode        );
+    DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_CANCEL,                           STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_REQUEST,                          STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutRequestOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_LOG_DISCONNECT,                          STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            );
     DEFINE_OPCODE_HANDLER(CMSG_LOOT,                                    STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleLootOpcode                );
