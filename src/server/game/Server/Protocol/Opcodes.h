@@ -123,7 +123,7 @@ enum Opcodes
     CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
     CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
-    CMSG_CANCEL_TRADE                                        = 0x0,
+    CMSG_CANCEL_TRADE                                        = 0x12CC,
     CMSG_CAST_SPELL                                          = 0x0,
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
@@ -636,7 +636,7 @@ enum Opcodes
     MSG_MOVE_TOGGLE_FALL_LOGGING                             = 0x0,
     MSG_MOVE_TOGGLE_LOGGING                                  = 0x0,
     MSG_MOVE_UPDATE_MOUSE                                    = 0x0,
-    MSG_MOVE_WORLDPORT_ACK                                   = 0x12CC, // 5.4.1 17538 - GUESSED !
+    MSG_MOVE_WORLDPORT_ACK                                   = 0x00E0, // 5.4.1 17538 - GUESSED !
     MSG_NOTIFY_PARTY_SQUELCH                                 = 0x0,
     MSG_PARTY_ASSIGNMENT                                     = 0x0,
     MSG_PETITION_DECLINE                                     = 0x0,

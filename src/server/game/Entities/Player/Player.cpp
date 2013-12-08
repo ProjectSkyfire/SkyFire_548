@@ -21203,8 +21203,8 @@ void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 {
-    WorldPacket data(SMSG_SET_PROFICIENCY, 1 + 4);
-    data << uint8(itemClass) << uint32(itemSubclassMask);
+    WorldPacket data(SMSG_SET_PROFICIENCY, 4 + 1);
+    data << uint32(itemSubclassMask) << uint8(itemClass);
     GetSession()->SendPacket(&data);
 }
 
