@@ -39,8 +39,8 @@ enum Opcodes
     CMSG_ACTIVATETAXI                                        = 0x0,
     CMSG_ACTIVATETAXIEXPRESS                                 = 0x0,
     CMSG_ADDON_REGISTERED_PREFIXES                           = 0x0,
-    CMSG_ADD_FRIEND                                          = 0x0,
-    CMSG_ADD_IGNORE                                          = 0x0,
+    CMSG_ADD_FRIEND                                          = 0x0112, // 5.4.1 17538
+    CMSG_ADD_IGNORE                                          = 0x0922, // 5.4.1 17538
     CMSG_ADD_VOICE_IGNORE                                    = 0x0,
     CMSG_ALTER_APPEARANCE                                    = 0x0,
     CMSG_AREATRIGGER                                         = 0x1376, // 5.4.1 17538
@@ -124,7 +124,7 @@ enum Opcodes
     CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
     CMSG_CANCEL_TRADE                                        = 0x12CC, // 5.4.1 17538
-    CMSG_CAST_SPELL                                          = 0x0,
+    CMSG_CAST_SPELL                                          = 0x127D, // 5.4.1 17538
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
     CMSG_CHANNEL_ANNOUNCEMENTS                               = 0x0,
