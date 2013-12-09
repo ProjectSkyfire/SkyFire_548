@@ -21203,8 +21203,8 @@ void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 {
-    WorldPacket data(SMSG_SET_PROFICIENCY, 1 + 4);
-    data << uint8(itemClass) << uint32(itemSubclassMask);
+    WorldPacket data(SMSG_SET_PROFICIENCY, 4 + 1);
+    data << uint32(itemSubclassMask) << uint8(itemClass);
     GetSession()->SendPacket(&data);
 }
 
@@ -27348,7 +27348,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 counterCount = data.ReadBits(22);
                 break;
             case MSECounter:
-                for (int i = 0; i < counterCount; i++)
+                for (int i = 0; i != counterCount; i++)
                     data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
                 break;
             case MSEHasUnkTime:

@@ -1163,6 +1163,9 @@ public:
                         case MAP_ARENA:
                             ss << handler->GetTrinityString(LANG_ARENA);
                             break;
+                        case MAP_SCENARIO:
+                            ss << handler->GetTrinityString(LANG_SCENARIO);
+                            break;
                     }
 
                     handler->SendSysMessage(ss.str().c_str());

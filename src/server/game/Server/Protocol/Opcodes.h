@@ -123,7 +123,7 @@ enum Opcodes
     CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
     CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
-    CMSG_CANCEL_TRADE                                        = 0x0,
+    CMSG_CANCEL_TRADE                                        = 0x12CC, // 5.4.1 17538
     CMSG_CAST_SPELL                                          = 0x0,
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
@@ -178,6 +178,7 @@ enum Opcodes
     CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
     CMSG_CREATURE_QUERY                                      = 0x1647, // 5.4.1 17538
     CMSG_DANCE_QUERY                                         = 0x0,
+    CMSG_DB_QUERY_BULK                                       = 0x01E4, // 5.4.1 17538
     CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
     CMSG_DEL_FRIEND                                          = 0x0,
     CMSG_DEL_IGNORE                                          = 0x0,
@@ -314,7 +315,7 @@ enum Opcodes
     CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
     CMSG_LIST_INVENTORY                                      = 0x0,
     CMSG_LOAD_SCREEN                                         = 0x1148, // 5.4.1 17538
-    CMSG_LOGOUT_CANCEL                                       = 0x0,
+    CMSG_LOGOUT_CANCEL                                       = 0x0A7E, // 5.4.1 17538
     CMSG_LOGOUT_REQUEST                                      = 0x03EC, // 5.4.1 17538
     CMSG_LOG_DISCONNECT                                      = 0x14FA, // 5.4.1 17538
     CMSG_LOOT                                                = 0x0,
@@ -636,7 +637,7 @@ enum Opcodes
     MSG_MOVE_TOGGLE_FALL_LOGGING                             = 0x0,
     MSG_MOVE_TOGGLE_LOGGING                                  = 0x0,
     MSG_MOVE_UPDATE_MOUSE                                    = 0x0,
-    MSG_MOVE_WORLDPORT_ACK                                   = 0x12CC, // 5.4.1 17538 - GUESSED !
+    MSG_MOVE_WORLDPORT_ACK                                   = 0x00E0, // 5.4.1 17538 - GUESSED !
     MSG_NOTIFY_PARTY_SQUELCH                                 = 0x0,
     MSG_PARTY_ASSIGNMENT                                     = 0x0,
     MSG_PETITION_DECLINE                                     = 0x0,

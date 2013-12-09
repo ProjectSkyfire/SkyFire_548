@@ -91,15 +91,38 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_GOSSIP_SELECT_OPTION");
 
+    ObjectGuid guid;
     uint32 gossipListId;
     uint32 menuId;
-    uint64 guid;
+    uint8 boxTextLength = 0;
     std::string code = "";
 
-    recvData >> guid >> menuId >> gossipListId;
+    recvData >> gossipListId >> menuId;
+
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+
+    boxTextLength = recvData.ReadBits(8);
+
+    guid[5] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[1]);
 
     if (_player->PlayerTalkClass->IsGossipOptionCoded(gossipListId))
-        recvData >> code;
+        code = recvData.ReadString(boxTextLength);
+
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[4]);
 
     Creature* unit = NULL;
     GameObject* go = NULL;
@@ -392,27 +415,27 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
             continue;
 
         ObjectGuid playerGuid = itr->second->GetGUID();
-        ObjectGuid unkGuid = NULL;
+        ObjectGuid accountId = NULL;
         ObjectGuid guildGuid = itr->second->GetGuild() ? itr->second->GetGuild()->GetGUID() : NULL;
 
-        bitsData.WriteBit(guildGuid[5]); //guid2
-        bitsData.WriteBit(playerGuid[4]); //guid1
-        bitsData.WriteBit(unkGuid[1]); //guid34
+        bitsData.WriteBit(playerGuid[5]); //guid2
+        bitsData.WriteBit(guildGuid[4]); //guid1
+        bitsData.WriteBit(accountId[1]); //guid34
         bitsData.WriteBits(gname.size(), 7); 
         bitsData.WriteBits(pname.size(), 6);
-        bitsData.WriteBit(playerGuid[2]);
-        bitsData.WriteBit(unkGuid[2]); //guid34
-        bitsData.WriteBit(unkGuid[5]); //guid34
-        bitsData.WriteBit(guildGuid[3]);
-        bitsData.WriteBit(guildGuid[1]);
-        bitsData.WriteBit(guildGuid[0]);
-        bitsData.WriteBit(unkGuid[4]);
-        bitsData.WriteBit(0);
-        bitsData.WriteBit(playerGuid[6]);
-        bitsData.WriteBit(unkGuid[0]);
-        bitsData.WriteBit(unkGuid[3]);
+        bitsData.WriteBit(accountId[2]);
+        bitsData.WriteBit(guildGuid[2]); //guid34
+        bitsData.WriteBit(guildGuid[5]); //guid34
+        bitsData.WriteBit(playerGuid[3]);
+        bitsData.WriteBit(playerGuid[1]);
+        bitsData.WriteBit(playerGuid[0]);
         bitsData.WriteBit(guildGuid[4]);
-        bitsData.WriteBit(unkGuid[6]);
+        bitsData.WriteBit(0);
+        bitsData.WriteBit(accountId[6]);
+        bitsData.WriteBit(guildGuid[0]);
+        bitsData.WriteBit(guildGuid[3]);
+        bitsData.WriteBit(playerGuid[4]);
+        bitsData.WriteBit(guildGuid[6]);
 
         if (DeclinedName const* names = itr->second->GetDeclinedNames())
         {
@@ -424,56 +447,56 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
                 bitsData.WriteBits(0, 7);
         }
-        bitsData.WriteBit(unkGuid[7]);
-        bitsData.WriteBit(guildGuid[6]);
-        bitsData.WriteBit(playerGuid[3]);
-        bitsData.WriteBit(guildGuid[2]);
         bitsData.WriteBit(guildGuid[7]);
+        bitsData.WriteBit(playerGuid[6]);
+        bitsData.WriteBit(accountId[3]);
+        bitsData.WriteBit(playerGuid[2]);
         bitsData.WriteBit(playerGuid[7]);
-        bitsData.WriteBit(playerGuid[1]);
-        bitsData.WriteBit(playerGuid[5]);
+        bitsData.WriteBit(accountId[7]);
+        bitsData.WriteBit(accountId[1]);
+        bitsData.WriteBit(accountId[5]);
         bitsData.WriteBit(0);
-        bitsData.WriteBit(playerGuid[0]);
+        bitsData.WriteBit(accountId[0]);
 
-        bytesData << uint8(race);
-        bytesData.WriteByteSeq(unkGuid[3]);
-        bytesData.WriteByteSeq(unkGuid[1]);
-        bytesData.WriteByteSeq(playerGuid[5]);
+        bytesData << uint8(gender);
         bytesData.WriteByteSeq(guildGuid[3]);
-        bytesData.WriteByteSeq(guildGuid[6]);
+        bytesData.WriteByteSeq(guildGuid[1]);
+        bytesData.WriteByteSeq(accountId[5]);
+        bytesData.WriteByteSeq(playerGuid[3]);
         bytesData.WriteByteSeq(playerGuid[6]);
+        bytesData.WriteByteSeq(accountId[6]);
         bytesData << uint8(race);
         bytesData << uint32(38297239);
-        bytesData.WriteByteSeq(playerGuid[1]);
+        bytesData.WriteByteSeq(accountId[1]);
 
         if (pname.size() > 0)
             bytesData.append(pname.c_str(), pname.size());
 
-        bytesData.WriteByteSeq(unkGuid[5]);
-        bytesData.WriteByteSeq(unkGuid[0]);
-        bytesData.WriteByteSeq(guildGuid[4]);
-        bytesData << uint8(class_);
-        bytesData.WriteByteSeq(unkGuid[6]);
-        bytesData << uint32(pzoneid);
-        bytesData.WriteByteSeq(playerGuid[0]);
-        bytesData << uint32(50659372);
-        bytesData.WriteByteSeq(guildGuid[1]);
+        bytesData.WriteByteSeq(guildGuid[5]);
+        bytesData.WriteByteSeq(guildGuid[0]);
         bytesData.WriteByteSeq(playerGuid[4]);
+        bytesData << uint8(class_);
+        bytesData.WriteByteSeq(guildGuid[6]);
+        bytesData << uint32(pzoneid);
+        bytesData.WriteByteSeq(accountId[0]);
+        bytesData << uint32(0);
+        bytesData.WriteByteSeq(playerGuid[1]);
+        bytesData.WriteByteSeq(accountId[4]);
         bytesData << uint8(lvl);
-        bytesData.WriteByteSeq(unkGuid[4]);
-        bytesData.WriteByteSeq(guildGuid[2]);
+        bytesData.WriteByteSeq(guildGuid[4]);
+        bytesData.WriteByteSeq(playerGuid[2]);
         
         if (gname.size() > 0)
             bytesData.append(gname.c_str(), gname.size());
         
-        bytesData.WriteByteSeq(guildGuid[7]);
-        bytesData.WriteByteSeq(guildGuid[0]);
-        bytesData.WriteByteSeq(playerGuid[2]);
         bytesData.WriteByteSeq(playerGuid[7]);
+        bytesData.WriteByteSeq(playerGuid[0]);
+        bytesData.WriteByteSeq(accountId[2]);
+        bytesData.WriteByteSeq(accountId[7]);
         bytesData << uint32(50659372);
-        bytesData.WriteByteSeq(guildGuid[5]);
-        bytesData.WriteByteSeq(unkGuid[7]);
-        bytesData.WriteByteSeq(playerGuid[3]);
+        bytesData.WriteByteSeq(playerGuid[5]);
+        bytesData.WriteByteSeq(guildGuid[7]);
+        bytesData.WriteByteSeq(accountId[3]);
 
         if (DeclinedName const* names = itr->second->GetDeclinedNames())
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
@@ -481,7 +504,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
                     bytesData.append(names->name[i].c_str(), names->name[i].size());
 
 
-        bytesData.WriteByteSeq(unkGuid[2]);
+        bytesData.WriteByteSeq(guildGuid[2]);
 
         ++displaycount;
     }
@@ -966,7 +989,10 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
 {
     uint32 triggerId;
+    uint8 unk1, unk2;
     recvData >> triggerId;
+    unk1 = recvData.ReadBit();
+    unk2 = recvData.ReadBit();
 
     TC_LOG_DEBUG("network", "CMSG_AREATRIGGER. Trigger ID: %u", triggerId);
 
