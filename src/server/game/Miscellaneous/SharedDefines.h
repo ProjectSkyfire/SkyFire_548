@@ -2937,11 +2937,13 @@ enum LockType
     LOCKTYPE_OPEN_ATTACKING        = 14,
     LOCKTYPE_GAHZRIDIAN            = 15,
     LOCKTYPE_BLASTING              = 16,
-    LOCKTYPE_SLOW_OPEN             = 17,
-    LOCKTYPE_SLOW_CLOSE            = 18,
+    LOCKTYPE_PVP_OPEN              = 17,
+    LOCKTYPE_PVP_CLOSE             = 18,
     LOCKTYPE_FISHING               = 19,
     LOCKTYPE_INSCRIPTION           = 20,
-    LOCKTYPE_OPEN_FROM_VEHICLE     = 21
+    LOCKTYPE_OPEN_FROM_VEHICLE     = 21,
+    LOCKTYPE_ARCHAEOLOGY           = 22,
+    LOCKTYPE_PVP_QUICK_OPEN        = 23
 };
 
 enum TrainerType                                            // this is important type for npcs!
