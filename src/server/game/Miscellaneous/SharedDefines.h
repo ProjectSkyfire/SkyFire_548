@@ -787,6 +787,7 @@ enum Language
     LANG_PANDAREN_NEUTRAL  = 42,
     LANG_PANDAREN_ALLIANCE = 43,
     LANG_PANDAREN_HORDE    = 44,
+    LANG_RIKKITUN          = 168,
     LANG_ADDON             = 0xFFFFFFFF                        // used by addons, in 2.4.0 not exist, replaced by messagetype?
 };
 
