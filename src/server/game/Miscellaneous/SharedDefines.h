@@ -2065,7 +2065,7 @@ enum Emote
     EMOTE_STATE_STUN                    = 64,
     EMOTE_STATE_DEAD                    = 65,
     EMOTE_ONESHOT_SALUTE                = 66,
-    EMOTE_STATE_KNEEL_DONST_WORK        = 68,
+    EMOTE_STATE_KNEEL_DONT_WORK         = 68,
     EMOTE_STATE_USE_STANDING            = 69,
     EMOTE_ONESHOT_WAVE_NO_SHEATHE       = 70,
     EMOTE_ONESHOT_CHEER_NO_SHEATHE      = 71,
