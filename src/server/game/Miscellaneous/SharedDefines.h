@@ -3426,6 +3426,7 @@ inline SkillType SkillByLockType(LockType locktype)
         case LOCKTYPE_MINING:      return SKILL_MINING;
         case LOCKTYPE_FISHING:     return SKILL_FISHING;
         case LOCKTYPE_INSCRIPTION: return SKILL_INSCRIPTION;
+        case LOCKTYPE_ARCHAEOLOGY: return SKILL_ARCHAEOLOGY;
         default: break;
     }
     return SKILL_NONE;
