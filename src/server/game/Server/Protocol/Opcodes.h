@@ -183,7 +183,7 @@ enum Opcodes
     CMSG_DEL_FRIEND                                          = 0x0,
     CMSG_DEL_IGNORE                                          = 0x0,
     CMSG_DEL_VOICE_IGNORE                                    = 0x0,
-    CMSG_DESTROY_ITEM                                        = 0x0,
+    CMSG_DESTROY_ITEM                                        = 0x16CF, // 5.4.1 17538
     CMSG_DISMISS_CONTROLLED_VEHICLE                          = 0x1261, // 5.4.1 17538
     CMSG_DISMISS_CRITTER                                     = 0x0,
     CMSG_DUEL_ACCEPTED                                       = 0x0,
