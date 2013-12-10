@@ -787,6 +787,7 @@ enum Language
     LANG_PANDAREN_NEUTRAL  = 42,
     LANG_PANDAREN_ALLIANCE = 43,
     LANG_PANDAREN_HORDE    = 44,
+    LANG_RIKKITUN          = 168,
     LANG_ADDON             = 0xFFFFFFFF                        // used by addons, in 2.4.0 not exist, replaced by messagetype?
 };
 
@@ -2064,7 +2065,7 @@ enum Emote
     EMOTE_STATE_STUN                    = 64,
     EMOTE_STATE_DEAD                    = 65,
     EMOTE_ONESHOT_SALUTE                = 66,
-    EMOTE_STATE_KNEEL                   = 68,
+    EMOTE_STATE_KNEEL_DONT_WORK         = 68,
     EMOTE_STATE_USE_STANDING            = 69,
     EMOTE_ONESHOT_WAVE_NO_SHEATHE       = 70,
     EMOTE_ONESHOT_CHEER_NO_SHEATHE      = 71,
@@ -2174,7 +2175,7 @@ enum Emote
     EMOTE_STATE_WALK_BACKWARDS          = 456,
     EMOTE_ONESHOT_FLYTALK               = 457,
     EMOTE_ONESHOT_FLYATTACK1H           = 458,
-    EMOTE_STATE_CUSTOM_SPELL_08         = 459,
+    EMOTE_STATE_CUSTOMSPELL08           = 459,
     EMOTE_ONESHOT_FLY_DRAGON_SPIT       = 460,
     EMOTE_STATE_SIT_CHAIR_LOW           = 461,
     EMOTE_ONESHOT_STUN                  = 462,
@@ -2198,10 +2199,52 @@ enum Emote
     EMOTE_STATE_READ                    = 483,
     EMOTE_ONESHOT_FLYEMOTETALK          = 485,
     EMOTE_STATE_READ_ALLOWMOVEMENT      = 492,
+    EMOTE_STATE_CUSTOM_SPELL_06         = 498,
+    EMOTE_STATE_CUSTOM_SPELL_07         = 499,
+    EMOTE_STATE_CUSTOM_SPELL_08         = 500,
+    EMOTE_STATE_CUSTOM_SPELL_09         = 501,
+    EMOTE_STATE_CUSTOM_SPELL_10         = 502,
     EMOTE_STATE_READY1H_ALLOW_MOVEMENT  = 505,
     EMOTE_STATE_READY2H_ALLOW_MOVEMENT  = 506,
+    EMOTE_ONESHOT_MONKOFFENSE_ATTACKUNARMED = 507,
+    EMOTE_ONESHOT_MONKOFFENSE_SPECIALUNARMED = 508,
+    EMOTE_ONESHOT_MONKOFFENSE_PARRYUNARMED = 509,
+    EMOTE_STATE_MONKOFFENSE_READYUNARMED = 510,
+    EMOTE_ONESHOT_PALMSTRIKE            = 511,
+    EMOTE_STATE_CRANE                   = 512,
     EMOTE_ONESHOT_OPEN                  = 517,
-    EMOTE_STATE_READ_CHRISTMAS          = 518
+    EMOTE_STATE_READ_CHRISTMAS          = 518,
+    EMOTE_ONESHOT_FLYATTACK2HL          = 526,
+    EMOTE_ONESHOT_FLYATTACKTHROWN       = 527,
+    EMOTE_STATE_FLYREADYSPELLDIRECTED   = 528,
+    EMOTE_STATE_FLY_READY_1H            = 531,
+    EMOTE_STATE_MEDITATE                = 533,
+    EMOTE_STATE_FLY_READY_2HL           = 534,
+    EMOTE_ONESHOT_TOGROUND              = 535,
+    EMOTE_ONESHOT_TOFLY                 = 536,
+    EMOTE_STATE_ATTACKTHROWN            = 537,
+    EMOTE_STATE_SPELL_CHANNEL_DIRECTED_NOSOUND = 538,
+    EMOTE_ONESHOT_WORK                  = 539,
+    EMOTE_STATE_READYUNARMED_NOSOUND    = 540,
+    EMOTE_ONESHOT_MONKOFFENSE_ATTACKUNARMEDOFF = 543,
+    EMOTE_RECLINED_MOUNT_PASSENGER      = 546,
+    EMOTE_ONESHOT_QUESTION2             = 547,
+    EMOTE_ONESHOT_SPELL_CHANNEL_DIRECTED_NOSOUND = 549,
+    EMOTE_STATE_KNEEL                   = 550,
+    EMOTE_ONESHOT_FLYATTACKUNARMED      = 551,
+    EMOTE_ONESHOT_FLYCOMBATWOUND        = 552,
+    EMOTE_ONESHOT_MOUNTSELFSPECIAL      = 553,
+    EMOTE_ONESHOT_ATTACKUNARMED_NOSOUND = 554,
+    EMOTE_STATE_WOUNDCRITICAL_DONT_WORK = 555,
+    EMOTE_ONESHOT_ATTACK1H_NOSOUND      = 556,
+    EMOTE_STATE_MOUNT_SELF_IDLE         = 557,
+    EMOTE_ONESHOT_WALK                  = 558,
+    EMOTE_STATE_OPENED                  = 559,
+    EMOTE_ONESHOT_YELL_DONOTUSE         = 560,
+    EMOTE_ONESHOT_BREATHOFFIRE          = 565,
+    EMOTE_STATE_ATTACK1H                = 567,
+    EMOTE_STATE_USESTANDIN              = 572,
+    EMOTE_ONESHOT_LAUGH_NOSOUND         = 574
 };
 
 // AnimationData.dbc
@@ -2894,11 +2937,13 @@ enum LockType
     LOCKTYPE_OPEN_ATTACKING        = 14,
     LOCKTYPE_GAHZRIDIAN            = 15,
     LOCKTYPE_BLASTING              = 16,
-    LOCKTYPE_SLOW_OPEN             = 17,
-    LOCKTYPE_SLOW_CLOSE            = 18,
+    LOCKTYPE_PVP_OPEN              = 17,
+    LOCKTYPE_PVP_CLOSE             = 18,
     LOCKTYPE_FISHING               = 19,
     LOCKTYPE_INSCRIPTION           = 20,
-    LOCKTYPE_OPEN_FROM_VEHICLE     = 21
+    LOCKTYPE_OPEN_FROM_VEHICLE     = 21,
+    LOCKTYPE_ARCHAEOLOGY           = 22,
+    LOCKTYPE_PVP_QUICK_OPEN        = 23
 };
 
 enum TrainerType                                            // this is important type for npcs!
@@ -2926,7 +2971,9 @@ enum CreatureType
     CREATURE_TYPE_NOT_SPECIFIED    = 10,
     CREATURE_TYPE_TOTEM            = 11,
     CREATURE_TYPE_NON_COMBAT_PET   = 12,
-    CREATURE_TYPE_GAS_CLOUD        = 13
+    CREATURE_TYPE_GAS_CLOUD        = 13,
+    CREATURE_TYPE_WILD_PET         = 14,
+    CREATURE_TYPE_ABERRATION       = 15
 };
 
 uint32 const CREATURE_TYPEMASK_DEMON_OR_UNDEAD = (1 << (CREATURE_TYPE_DEMON-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
@@ -3091,8 +3138,8 @@ enum HolidayIds
 // values based at QuestInfo.dbc
 enum QuestTypes
 {
-    QUEST_TYPE_ELITE               = 1,
-    QUEST_TYPE_LIFE                = 21,
+    QUEST_TYPE_GROUP               = 1,
+    QUEST_TYPE_CLASS               = 21,
     QUEST_TYPE_PVP                 = 41,
     QUEST_TYPE_RAID                = 62,
     QUEST_TYPE_DUNGEON             = 81,
@@ -3101,19 +3148,21 @@ enum QuestTypes
     QUEST_TYPE_ESCORT              = 84,
     QUEST_TYPE_HEROIC              = 85,
     QUEST_TYPE_RAID_10             = 88,
-    QUEST_TYPE_RAID_25             = 89
+    QUEST_TYPE_RAID_25             = 89,
+    QUEST_TYPE_SCENARIO            = 98,
+    QUEST_TYPE_ACCOUNT             = 102,
 };
 
 // values based at QuestSort.dbc
 enum QuestSort
 {
     QUEST_SORT_EPIC                = 1,
-    QUEST_SORT_WAILING_CAVERNS_OLD = 21,
+    QUEST_SORT_HALLOWS_END         = 21,
     QUEST_SORT_SEASONAL            = 22,
-    QUEST_SORT_UNDERCITY_OLD       = 23,
+    QUEST_SORT_CATACLYSM           = 23,
     QUEST_SORT_HERBALISM           = 24,
     QUEST_SORT_BATTLEGROUNDS       = 25,
-    QUEST_SORT_ULDAMN_OLD          = 41,
+    QUEST_SORT_DAY_OF_THE_DEAD     = 41,
     QUEST_SORT_WARLOCK             = 61,
     QUEST_SORT_WARRIOR             = 81,
     QUEST_SORT_SHAMAN              = 82,
@@ -3126,7 +3175,7 @@ enum QuestSort
     QUEST_SORT_LEATHERWORKING      = 182,
     QUEST_SORT_ENGINEERING         = 201,
     QUEST_SORT_TREASURE_MAP        = 221,
-    QUEST_SORT_SUNKEN_TEMPLE_OLD   = 241,
+    QUEST_SORT_TOURNAMENT          = 241,
     QUEST_SORT_HUNTER              = 261,
     QUEST_SORT_PRIEST              = 262,
     QUEST_SORT_DRUID               = 263,
@@ -3152,7 +3201,16 @@ enum QuestSort
     QUEST_SORT_CHILDRENS_WEEK      = 378,
     QUEST_SORT_FIRELANDS_INVASION  = 379,
     QUEST_SORT_ZANDALARI           = 380,
-    QUEST_SORT_ELEMENTAL_BONDS     = 381
+    QUEST_SORT_ELEMENTAL_BONDS     = 381,
+    QUEST_SORT_PANDAREN_BREWMASTER = 391,
+    QUEST_SORT_SCENRAIO            = 392,
+    QUEST_SORT_BATTLE_PETS         = 394,
+    QUEST_SORT_MONK                = 395,
+    QUEST_SORT_LANDFALL            = 396,
+    QUEST_SORT_PANDAREN_CAMPAIGN   = 397,
+    QUEST_SORT_RIDING              = 398,
+    QUEST_SORT_BRAWLERS_GUILD      = 399,
+    QUEST_SORT_PROVING_GROUNDS     = 400
 };
 
 inline uint8 ClassByQuestSort(int32 QuestSort)
@@ -3169,6 +3227,7 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
         case QUEST_SORT_PRIEST:         return CLASS_PRIEST;
         case QUEST_SORT_DRUID:          return CLASS_DRUID;
         case QUEST_SORT_DEATH_KNIGHT:   return CLASS_DEATH_KNIGHT;
+        case QUEST_SORT_MONK:           return CLASS_MONK;
     }
     return 0;
 }
@@ -3367,6 +3426,7 @@ inline SkillType SkillByLockType(LockType locktype)
         case LOCKTYPE_MINING:      return SKILL_MINING;
         case LOCKTYPE_FISHING:     return SKILL_FISHING;
         case LOCKTYPE_INSCRIPTION: return SKILL_INSCRIPTION;
+        case LOCKTYPE_ARCHAEOLOGY: return SKILL_ARCHAEOLOGY;
         default: break;
     }
     return SKILL_NONE;
