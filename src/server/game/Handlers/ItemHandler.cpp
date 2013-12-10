@@ -248,9 +248,11 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recvData)
 void WorldSession::HandleDestroyItemOpcode(WorldPacket& recvData)
 {
     //TC_LOG_DEBUG("network", "WORLD: CMSG_DESTROY_ITEM");
-    uint8 bag, slot, count, data1, data2, data3;
+    int32 count;
+    int8 bag, slot;
 
-    recvData >> bag >> slot >> count >> data1 >> data2 >> data3;
+    recvData >> count;
+    recvData >> bag >> slot;
     //TC_LOG_DEBUG("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
 
     uint16 pos = (bag << 8) | slot;
