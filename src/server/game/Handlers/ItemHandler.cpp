@@ -33,18 +33,31 @@
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
 {
     //TC_LOG_DEBUG("network", "WORLD: CMSG_SPLIT_ITEM");
-    uint8 srcbag, srcslot, dstbag, dstslot, unknownBits;
+    uint8 srcbag, srcslot, dstbag, dstslot, unknownBitCounter;
     uint32 count;
 
     recvData >> count;
     recvData >> dstbag >> srcbag >> dstslot >> srcslot;
 
-    unknownBits = recvData.ReadBits(2);
+    unknownBitCounter = recvData.ReadBits(2);
 
-    for (uint8 i = 0; i < unknownBits; i++)
+    uint8 unknownBits[3][2];
+
+    for (uint8 i = 0; i < unknownBitCounter; i++)
     {
-        recvData.ReadBit();
-        recvData.ReadBit();
+        unknownBits[i][0] = recvData.ReadBit();
+        unknownBits[i][1] = recvData.ReadBit();
+    }
+
+    uint8 unknownBytes[3][2];
+
+    for (uint8 i = 0; i < unknownBitCounter; i++)
+    {
+        if (unknownBits[i][0])
+            recvData >> unknownBytes[i][0];
+
+        if (unknownBits[i][1])
+            recvData >> unknownBytes[i][1];
     }
 
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u, count = %u", srcbag, srcslot, dstbag, dstslot, count);
