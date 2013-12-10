@@ -124,7 +124,7 @@ enum Opcodes
     CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
     CMSG_CANCEL_TRADE                                        = 0x12CC, // 5.4.1 17538
-    CMSG_CAST_SPELL                                          = 0x0,
+    CMSG_CAST_SPELL                                          = 0x12D7, // 5.4.1 17538
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
     CMSG_CHANNEL_ANNOUNCEMENTS                               = 0x0,
@@ -158,6 +158,7 @@ enum Opcodes
     CMSG_CHAR_RENAME                                         = 0x0,
     CMSG_CHAT_FILTERED                                       = 0x0,
     CMSG_CHAT_IGNORED                                        = 0x0,
+    CMSG_CLICK_TO_MOVE                                       = 0x1368, // 5.4.1 17538
     CMSG_CLEAR_CHANNEL_WATCH                                 = 0x0,
     CMSG_CLEAR_RAID_MARKER                                   = 0x0,
     CMSG_CLEAR_TRADE_ITEM                                    = 0x0,
