@@ -39,8 +39,8 @@ enum Opcodes
     CMSG_ACTIVATETAXI                                        = 0x0,
     CMSG_ACTIVATETAXIEXPRESS                                 = 0x0,
     CMSG_ADDON_REGISTERED_PREFIXES                           = 0x0,
-    CMSG_ADD_FRIEND                                          = 0x0,
-    CMSG_ADD_IGNORE                                          = 0x0,
+    CMSG_ADD_FRIEND                                          = 0x0112, // 5.4.1 17538
+    CMSG_ADD_IGNORE                                          = 0x0922, // 5.4.1 17538
     CMSG_ADD_VOICE_IGNORE                                    = 0x0,
     CMSG_ALTER_APPEARANCE                                    = 0x0,
     CMSG_AREATRIGGER                                         = 0x1376, // 5.4.1 17538
@@ -124,7 +124,7 @@ enum Opcodes
     CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
     CMSG_CANCEL_TRADE                                        = 0x12CC, // 5.4.1 17538
-    CMSG_CAST_SPELL                                          = 0x0,
+    CMSG_CAST_SPELL                                          = 0x12D7, // 5.4.1 17538
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
     CMSG_CHANNEL_ANNOUNCEMENTS                               = 0x0,
@@ -158,6 +158,7 @@ enum Opcodes
     CMSG_CHAR_RENAME                                         = 0x0,
     CMSG_CHAT_FILTERED                                       = 0x0,
     CMSG_CHAT_IGNORED                                        = 0x0,
+    CMSG_CLICK_TO_MOVE                                       = 0x1368, // 5.4.1 17538
     CMSG_CLEAR_CHANNEL_WATCH                                 = 0x0,
     CMSG_CLEAR_RAID_MARKER                                   = 0x0,
     CMSG_CLEAR_TRADE_ITEM                                    = 0x0,
@@ -183,7 +184,7 @@ enum Opcodes
     CMSG_DEL_FRIEND                                          = 0x0,
     CMSG_DEL_IGNORE                                          = 0x0,
     CMSG_DEL_VOICE_IGNORE                                    = 0x0,
-    CMSG_DESTROY_ITEM                                        = 0x0,
+    CMSG_DESTROY_ITEM                                        = 0x16CF, // 5.4.1 17538
     CMSG_DISMISS_CONTROLLED_VEHICLE                          = 0x1261, // 5.4.1 17538
     CMSG_DISMISS_CRITTER                                     = 0x0,
     CMSG_DUEL_ACCEPTED                                       = 0x0,
