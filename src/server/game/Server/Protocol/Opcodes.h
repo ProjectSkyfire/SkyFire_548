@@ -117,7 +117,7 @@ enum Opcodes
     CMSG_CALENDAR_UPDATE_EVENT                               = 0x0,
     CMSG_CANCEL_AURA                                         = 0x0,
     CMSG_CANCEL_AUTO_REPEAT_SPELL                            = 0x0,
-    CMSG_CANCEL_CAST                                         = 0x0,
+    CMSG_CANCEL_CAST                                         = 0x134F, // 5.4.1 17538
     CMSG_CANCEL_CHANNELLING                                  = 0x0,
     CMSG_CANCEL_GROWTH_AURA                                  = 0x0,
     CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
