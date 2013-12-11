@@ -1264,7 +1264,7 @@ enum Opcodes
     SMSG_SPELL_DELAYED                                       = 0x0,
     SMSG_SPELL_FAILED_OTHER                                  = 0x0,
     SMSG_SPELL_FAILURE                                       = 0x0,
-    SMSG_SPELL_GO                                            = 0x0165, // 5.4.1 17538
+    SMSG_SPELL_GO                                            = 0x14EC, // 5.4.1 17538
     SMSG_SPELL_START                                         = 0x0CCC, // 5.4.1 17538
     SMSG_SPELL_UPDATE_CHAIN_TARGETS                          = 0x0,
     SMSG_SPIRIT_HEALER_CONFIRM                               = 0x0,
