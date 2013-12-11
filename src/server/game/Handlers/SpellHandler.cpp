@@ -327,14 +327,174 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
-    uint32 spellId, glyphIndex;
-    uint8  castCount, castFlags;
+    ObjectGuid guid1, guid2, targetGuid, guid4;
+    uint32 castFlags = 0, glyphIndex = 0, spellId;
+    uint8 castCount;
 
-    recvPacket >> castCount;
-    recvPacket >> spellId;
-    recvPacket >> glyphIndex;
-    recvPacket >> castFlags;
+    bool hasUnkBit24  = !recvPacket.ReadBit();
+    bool hasUnkString = !recvPacket.ReadBit();
+    bool hasGuid2     = recvPacket.ReadBit();
+    bool hasSpellId   = !recvPacket.ReadBit();
+    bool hasCastCount = !recvPacket.ReadBit();
+    bool hasCastFlags = !recvPacket.ReadBit();
+    bool hasUnkFloat  = !recvPacket.ReadBit();
+    recvPacket.ReadBit(); // fake? Something to do with GUID4?
+    uint8 unkCounter  = recvPacket.ReadBits(2);
+    bool hasMovement  = recvPacket.ReadBit();
+    recvPacket.ReadBit(); // fake? Something to do with Target GUID?
+    bool hasUnkBit28  = !recvPacket.ReadBit();
+    bool hasGuid1     = recvPacket.ReadBit();
+    bool hasUnkFloat2 = !recvPacket.ReadBit();
 
+    for (uint8 i = 0; i < unkCounter; i++)
+        recvPacket.ReadBits(2);
+
+    uint8 unkStrLength;
+
+    if (hasUnkString)
+        unkStrLength = recvPacket.ReadBits(7);
+
+    if (hasGuid1)
+    {
+        guid1[3] = recvPacket.ReadBit();
+        guid1[5] = recvPacket.ReadBit();
+        guid1[1] = recvPacket.ReadBit();
+        guid1[7] = recvPacket.ReadBit();
+        guid1[0] = recvPacket.ReadBit();
+        guid1[6] = recvPacket.ReadBit();
+        guid1[2] = recvPacket.ReadBit();
+        guid1[4] = recvPacket.ReadBit();
+    }
+
+    if (hasMovement) {}
+        // Not yet implemented
+
+    if (hasGuid2)
+    {
+        guid2[2] = recvPacket.ReadBit();
+        guid2[6] = recvPacket.ReadBit();
+        guid2[4] = recvPacket.ReadBit();
+        guid2[7] = recvPacket.ReadBit();
+        guid2[0] = recvPacket.ReadBit();
+        guid2[1] = recvPacket.ReadBit();
+        guid2[3] = recvPacket.ReadBit();
+        guid2[5] = recvPacket.ReadBit();
+    }
+
+    targetGuid[0] = recvPacket.ReadBit();
+    targetGuid[4] = recvPacket.ReadBit();
+    targetGuid[3] = recvPacket.ReadBit();
+    targetGuid[1] = recvPacket.ReadBit();
+    targetGuid[6] = recvPacket.ReadBit();
+    targetGuid[5] = recvPacket.ReadBit();
+    targetGuid[7] = recvPacket.ReadBit();
+    targetGuid[2] = recvPacket.ReadBit();
+
+    guid4[3] = recvPacket.ReadBit();
+    guid4[4] = recvPacket.ReadBit();
+    guid4[2] = recvPacket.ReadBit();
+    guid4[0] = recvPacket.ReadBit();
+    guid4[7] = recvPacket.ReadBit();
+    guid4[6] = recvPacket.ReadBit();
+    guid4[5] = recvPacket.ReadBit();
+    guid4[1] = recvPacket.ReadBit();
+
+    if (hasUnkBit28)
+        recvPacket.ReadBits(5);
+
+    if (hasCastFlags)
+        castFlags = recvPacket.ReadBits(20);
+
+    recvPacket.FlushBits();
+
+    for (uint8 i = 0; i < unkCounter; i++)
+    {
+        uint8 unkByte1, unkByte2;
+        recvPacket >> unkByte1 >> unkByte2;
+    }
+
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[4]);
+
+    if (hasMovement) {}
+        // Not yet implemented
+
+    if (hasGuid1)
+    {
+        float guid1PosX, guid1PosY, guid1PosZ;
+
+        recvPacket >> guid1PosZ;
+        recvPacket.ReadByteSeq(guid1[1]);
+        recvPacket.ReadByteSeq(guid1[3]);
+        recvPacket.ReadByteSeq(guid1[7]);
+        recvPacket.ReadByteSeq(guid1[6]);
+        recvPacket.ReadByteSeq(guid1[0]);
+        recvPacket.ReadByteSeq(guid1[2]);
+        recvPacket >> guid1PosY;
+        recvPacket.ReadByteSeq(guid1[5]);
+        recvPacket >> guid1PosX;
+        recvPacket.ReadByteSeq(guid1[4]);
+    }
+
+    if (hasGuid2)
+    {
+        float guid2PosX, guid2PosY, guid2PosZ;
+
+        recvPacket >> guid2PosX;
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket >> guid2PosZ;
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket >> guid2PosY;
+        recvPacket.ReadByteSeq(guid2[1]);
+    }
+
+    recvPacket.ReadByteSeq(targetGuid[7]);
+    recvPacket.ReadByteSeq(targetGuid[3]);
+    recvPacket.ReadByteSeq(targetGuid[2]);
+    recvPacket.ReadByteSeq(targetGuid[0]);
+    recvPacket.ReadByteSeq(targetGuid[4]);
+    recvPacket.ReadByteSeq(targetGuid[6]);
+    recvPacket.ReadByteSeq(targetGuid[5]);
+    recvPacket.ReadByteSeq(targetGuid[1]);
+
+    if (hasUnkBit24)
+    {
+        uint32 unkInt;
+        recvPacket >> unkInt; // maybe glyphIndex?
+    }
+
+    if (hasUnkFloat)
+    {
+        uint32 unkFloat;
+        recvPacket >> unkFloat;
+    }
+
+    if (hasSpellId)
+        recvPacket >> spellId;
+
+    if (hasUnkString)
+        recvPacket.ReadString(unkStrLength);
+
+    if (hasUnkFloat2)
+    {
+        uint32 unkFloat;
+        recvPacket >> unkFloat;
+    }
+
+    if (hasCastCount)
+        recvPacket >> castCount;
+    
     TC_LOG_DEBUG("network", "WORLD: got cast spell packet, castCount: %u, spellId: %u, castFlags: %u, data length = %u", castCount, spellId, castFlags, (uint32)recvPacket.size());
 
     // ignore for remote control state (for player case)
