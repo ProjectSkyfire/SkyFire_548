@@ -414,13 +414,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
-    recvPacket.ReadByteSeq(guid4[4]);
+    recvPacket.ReadByteSeq(guid4[3]);
+    recvPacket.ReadByteSeq(guid4[5]);
+    recvPacket.ReadByteSeq(guid4[6]);
+    recvPacket.ReadByteSeq(guid4[0]);
+    recvPacket.ReadByteSeq(guid4[7]);
+    recvPacket.ReadByteSeq(guid4[2]);
+    recvPacket.ReadByteSeq(guid4[1]);
 
     if (hasMovement) {}
         // Not yet implemented
@@ -447,16 +447,16 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         float guid2PosX, guid2PosY, guid2PosZ;
 
         recvPacket >> guid2PosX;
-        recvPacket.ReadByteSeq(guid2[1]);
-        recvPacket.ReadByteSeq(guid2[1]);
-        recvPacket.ReadByteSeq(guid2[1]);
-        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[5]);
+        recvPacket.ReadByteSeq(guid2[7]);
+        recvPacket.ReadByteSeq(guid2[0]);
+        recvPacket.ReadByteSeq(guid2[4]);
         recvPacket >> guid2PosZ;
+        recvPacket.ReadByteSeq(guid2[2]);
         recvPacket.ReadByteSeq(guid2[1]);
-        recvPacket.ReadByteSeq(guid2[1]);
-        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[3]);
         recvPacket >> guid2PosY;
-        recvPacket.ReadByteSeq(guid2[1]);
+        recvPacket.ReadByteSeq(guid2[6]);
     }
 
     recvPacket.ReadByteSeq(targetGuid[7]);
