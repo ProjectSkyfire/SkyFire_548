@@ -76,17 +76,23 @@ void WorldSession::HandleAttackStopOpcode(WorldPacket & /*recvData*/)
 void WorldSession::HandleSetSheathedOpcode(WorldPacket& recvData)
 {
     uint32 sheathed;
+    bool hasData = false;
+
     recvData >> sheathed;
+    hasData = recvData.ReadBit();
 
     //TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u value1:%u", GetPlayer()->GetGUIDLow(), sheathed);
 
-    if (sheathed >= MAX_SHEATH_STATE)
+    if (hasData)
     {
-        TC_LOG_ERROR("network", "Unknown sheath state %u ??", sheathed);
-        return;
-    }
+        if (sheathed >= MAX_SHEATH_STATE)
+        {
+            TC_LOG_ERROR("network", "Unknown sheath state %u ??", sheathed);
+            return;
+        }
 
-    GetPlayer()->SetSheath(SheathState(sheathed));
+        GetPlayer()->SetSheath(SheathState(sheathed));
+    }
 }
 
 void WorldSession::SendAttackStop(Unit const* enemy)

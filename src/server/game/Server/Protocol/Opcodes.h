@@ -492,7 +492,7 @@ enum Opcodes
     CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID                = 0x0,
     CMSG_SERVERTIME                                          = 0x0,
     CMSG_SETDEATHBINDPOINT                                   = 0x0,
-    CMSG_SETSHEATHED                                         = 0x0,
+    CMSG_SETSHEATHED                                         = 0x06E6, // 5.4.1 17538
     CMSG_SET_ACTIONBAR_TOGGLES                               = 0x0,
     CMSG_SET_ACTION_BUTTON                                   = 0x014C, // 5.4.1 17538
     CMSG_SET_ACTIVE_MOVER                                    = 0x1A4D, // 5.4.1 17538
