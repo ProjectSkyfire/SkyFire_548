@@ -96,6 +96,7 @@ class SpellCastTargets
 {
     public:
         SpellCastTargets();
+        SpellCastTargets(Unit* caster, uint32 targetMask, uint64 targetGuid, uint64 itemTargetGuid, uint64 srcTransportGuid, uint64 destTransportGuid, Position srcPos, Position destPos, float elevation, float missileSpeed, std::string targetString);
         ~SpellCastTargets();
 
         void Read(ByteBuffer& data, Unit* caster);
@@ -160,6 +161,8 @@ class SpellCastTargets
 
         void Update(Unit* caster);
         void OutDebug() const;
+
+        std::string const& GetTargetString() { return m_strTarget; }
 
     private:
         uint32 m_targetMask;
@@ -415,7 +418,6 @@ class Spell
         void setState(uint32 state) { m_spellState = state; }
 
         void DoCreateItem(uint32 i, uint32 itemtype);
-        void WriteSpellGoTargets(WorldPacket* data);
 
         bool CheckEffectTarget(Unit const* target, uint32 eff) const;
         bool CanAutoCast(Unit* target);
