@@ -4361,9 +4361,9 @@ void Spell::SendSpellGo()
     {
         if (ihit->missCondition != SPELL_MISS_NONE)
         {
-            data.WriteBits(uint8(ihit->missCondition), 4);
+            data.WriteBits(ihit->missCondition, 4);
             if (ihit->missCondition == SPELL_MISS_REFLECT)
-                data.WriteBits(uint8(ihit->reflectResult), 4);
+                data.WriteBits(ihit->reflectResult, 4);
 
             ++missTypeCount;
         }
