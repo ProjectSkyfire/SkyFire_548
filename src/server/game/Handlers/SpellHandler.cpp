@@ -368,7 +368,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     uint32 unkMovementLoopCounter = 0;
 
     Unit* caster = mover;
-    bool hasCastFlags = !recvPacket.ReadBit();
+    bool hasGlyphIndex = !recvPacket.ReadBit();
     bool hasTargetString = !recvPacket.ReadBit();
     bool hasSrcLocation = recvPacket.ReadBit();
     bool hasSpellId = !recvPacket.ReadBit();
@@ -379,7 +379,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     uint32 researchDataCount = recvPacket.ReadBits(2);
     bool hasMovement = recvPacket.ReadBit();
     recvPacket.ReadBit();
-    bool hasUnkBits = !recvPacket.ReadBit();
+    bool hasCastFlags = !recvPacket.ReadBit();
     bool hasDestLocation = recvPacket.ReadBit();
     bool hasMissileSpeed = !recvPacket.ReadBit();
     for (uint32 i = 0; i < researchDataCount; ++i)
@@ -478,8 +478,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     itemTargetGuid[5] = recvPacket.ReadBit();
     itemTargetGuid[1] = recvPacket.ReadBit();
 
-    if (hasUnkBits)
-        recvPacket.ReadBits(5);
+    if (hasCastFlags)
+        castFlags = recvPacket.ReadBits(5);
 
     if (hasTargetMask)
         targetMask = recvPacket.ReadBits(20);
@@ -629,8 +629,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     recvPacket.ReadByteSeq(targetGuid[5]);
     recvPacket.ReadByteSeq(targetGuid[1]);
 
-    if (hasCastFlags)
-        recvPacket >> castFlags;
+    if (hasGlyphIndex)
+        recvPacket >> glyphIndex;
 
     if (hasMissileSpeed)
         recvPacket >> missileSpeed;
