@@ -4762,21 +4762,69 @@ void Unit::RemoveAllGameObjects()
 
 void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
 {
-    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
-    data.append(log->target->GetPackGUID());
-    data.append(log->attacker->GetPackGUID());
-    data << uint32(log->SpellID);
-    data << uint32(log->damage);                            // damage amount
+    ObjectGuid attackerGuid = log->attacker->GetGUID();
+    ObjectGuid targetGuid = log->target->GetGUID();
     int32 overkill = log->damage - log->target->GetHealth();
-    data << uint32(overkill > 0 ? overkill : 0);            // overkill
-    data << uint8 (log->schoolMask);                        // damage school
-    data << uint32(log->absorb);                            // AbsorbedDamage
-    data << uint32(log->resist);                            // resist
-    data << uint8 (log->physicalLog);                       // if 1, then client show spell name (example: %s's ranged shot hit %s for %u school or %s suffers %u school damage from %s's spell_name
-    data << uint8 (log->unused);                            // unused
-    data << uint32(log->blocked);                           // blocked
+
+    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
+    data.WriteBit(targetGuid[1]);
+    data.WriteBit(targetGuid[6]);
+    data.WriteBit(targetGuid[0]);
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(0); // Unk Bit 1
+    data.WriteBit(attackerGuid[4]);
+    data.WriteBit(targetGuid[3]);
+    data.WriteBit(0); // Unk Bit 2
+    data.WriteBit(targetGuid[2]);
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[2]);
+    data.WriteBit(0); // HasPowerData
+    data.WriteBit(targetGuid[7]);
+
+    //if (hasPowerData)
+    //{
+    //}
+
+    data.WriteBit(attackerGuid[1]);
+    data.WriteBit(attackerGuid[5]);
+    data.WriteBit(0);
+    data.WriteBit(targetGuid[5]);
+    data.WriteBit(targetGuid[4]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(attackerGuid[6]);
+
+    data.FlushBits();
+
+    data.WriteByteSeq(targetGuid[7]);
+    data << uint32(log->damage);
+
+    //if (hasPowerData)
+    //{
+    //}
+
+    data.WriteByteSeq(targetGuid[4]);
+    data.WriteByteSeq(targetGuid[6]);
+    data << uint32(log->resist);
+    data.WriteByteSeq(attackerGuid[4]);
+    data.WriteByteSeq(targetGuid[2]);
+    data << uint32(log->blocked);
+    data << uint32(log->SpellID);
+    data.WriteByteSeq(targetGuid[1]);
+    data.WriteByteSeq(attackerGuid[3]);
+    data << uint8 (log->schoolMask);
+    data.WriteByteSeq(attackerGuid[7]);
     data << uint32(log->HitInfo);
-    data << uint8 (0);                                      // flag to use extend data
+    data.WriteByteSeq(targetGuid[0]);
+    data.WriteByteSeq(attackerGuid[0]);
+    data.WriteByteSeq(targetGuid[5]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data << uint32(log->absorb);
+    data.WriteByteSeq(targetGuid[3]);
+    data.WriteByteSeq(attackerGuid[5]);
+    data << uint32(overkill > 0 ? overkill : 0);
+    data.WriteByteSeq(attackerGuid[2]);
+    data.WriteByteSeq(attackerGuid[1]);
+
     SendMessageToSet(&data, true);
 }
 

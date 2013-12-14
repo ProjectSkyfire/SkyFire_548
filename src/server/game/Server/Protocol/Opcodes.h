@@ -698,8 +698,7 @@ enum Opcodes
     SMSG_AUCTION_REMOVED_NOTIFICATION                        = 0x0,
     SMSG_AURACASTLOG                                         = 0x0,
     SMSG_AURA_POINTS_DEPLETED                                = 0x0,
-    SMSG_AURA_UPDATE                                         = 0x0,
-    SMSG_AURA_UPDATE_ALL                                     = 0x0,
+    SMSG_AURA_UPDATE                                         = 0x0165, // 5.4.1 17538
     SMSG_AUTH_CHALLENGE                                      = 0x0C5D, // 5.4.1 17538
     SMSG_AUTH_RESPONSE                                       = 0x0D05, // 5.4.1 17538
     SMSG_AVAILABLE_VOICE_CHANNEL                             = 0x0,
@@ -1256,7 +1255,7 @@ enum Opcodes
     SMSG_SPELLINTERRUPTLOG                                   = 0x0,
     SMSG_SPELLLOGEXECUTE                                     = 0x0,
     SMSG_SPELLLOGMISS                                        = 0x0,
-    SMSG_SPELLNONMELEEDAMAGELOG                              = 0x0,
+    SMSG_SPELLNONMELEEDAMAGELOG                              = 0x09E0, // 5.4.1 17538
     SMSG_SPELLORDAMAGE_IMMUNE                                = 0x0,
     SMSG_SPELLSTEALLOG                                       = 0x0,
     SMSG_SPELL_CATEGORY_COOLDOWN                             = 0x0,
