@@ -115,8 +115,28 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recvData)
 
 void WorldSession::SendShowBank(ObjectGuid guid)
 {
-    WorldPacket data(SMSG_SHOW_BANK, 8);
-    data << guid;
+    ObjectGuid pGuid = ObjectGuid(guid);
+
+    WorldPacket data(SMSG_SHOW_BANK, 1 + 8);
+
+    data.WriteBit(pGuid[6]);
+    data.WriteBit(pGuid[0]);
+    data.WriteBit(pGuid[4]);
+    data.WriteBit(pGuid[3]);
+    data.WriteBit(pGuid[2]);
+    data.WriteBit(pGuid[1]);
+    data.WriteBit(pGuid[7]);
+    data.WriteBit(pGuid[5]);
+
+    data.WriteByteSeq(pGuid[7]);
+    data.WriteByteSeq(pGuid[2]);
+    data.WriteByteSeq(pGuid[0]);
+    data.WriteByteSeq(pGuid[1]);
+    data.WriteByteSeq(pGuid[6]);
+    data.WriteByteSeq(pGuid[5]);
+    data.WriteByteSeq(pGuid[3]);
+    data.WriteByteSeq(pGuid[4]);
+
     SendPacket(&data);
 }
 
