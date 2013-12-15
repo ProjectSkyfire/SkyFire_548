@@ -316,7 +316,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_POST_REQUEST,                   STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderPostRequest    );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_REMOVE_RECRUIT,                 STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderRemoveRecruit  );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_SET_GUILD_POST,                 STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderSetGuildPost   );
-    DEFINE_OPCODE_HANDLER(CMSG_LIST_INVENTORY,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleListInventoryOpcode       );
+    DEFINE_OPCODE_HANDLER(CMSG_LIST_INVENTORY,                          STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleListInventoryOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_LOAD_SCREEN,                             STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLoadScreenOpcode          );
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_CANCEL,                           STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_REQUEST,                          STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutRequestOpcode       );
@@ -943,7 +943,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED,        STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_LF_GUILD_POST_UPDATED,                   STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_LF_GUILD_RECRUIT_LIST_UPDATED,           STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_LIST_INVENTORY,                          STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_LIST_INVENTORY,                          STATUS_NEVER,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_LOAD_CUF_PROFILES,                       STATUS_UNHANDLED,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_LOGIN_SETTIMESPEED,                      STATUS_NEVER,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_LOGIN_VERIFY_WORLD,                      STATUS_NEVER,   PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

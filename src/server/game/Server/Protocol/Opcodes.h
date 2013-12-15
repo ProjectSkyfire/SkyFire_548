@@ -97,7 +97,7 @@ enum Opcodes
     CMSG_BUSY_TRADE                                          = 0x0,
     CMSG_BUYBACK_ITEM                                        = 0x0,
     CMSG_BUY_BANK_SLOT                                       = 0x064D, // 5.4.1 17538
-    CMSG_BUY_ITEM                                            = 0x0,
+    CMSG_BUY_ITEM                                            = 0x0B66, // 5.4.1 17538
     CMSG_CALENDAR_ADD_EVENT                                  = 0x0,
     CMSG_CALENDAR_ARENA_TEAM                                 = 0x0,
     CMSG_CALENDAR_COMPLAIN                                   = 0x0,
@@ -314,7 +314,7 @@ enum Opcodes
     CMSG_LF_GUILD_POST_REQUEST                               = 0x0,
     CMSG_LF_GUILD_REMOVE_RECRUIT                             = 0x0,
     CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
-    CMSG_LIST_INVENTORY                                      = 0x0,
+    CMSG_LIST_INVENTORY                                      = 0x0346, // 5.4.1 17538
     CMSG_LOAD_SCREEN                                         = 0x1148, // 5.4.1 17538
     CMSG_LOGOUT_CANCEL                                       = 0x0A7E, // 5.4.1 17538
     CMSG_LOGOUT_REQUEST                                      = 0x03EC, // 5.4.1 17538
@@ -486,7 +486,7 @@ enum Opcodes
     CMSG_SEARCH_LFG_JOIN                                     = 0x0,
     CMSG_SEARCH_LFG_LEAVE                                    = 0x0,
     CMSG_SELF_RES                                            = 0x0,
-    CMSG_SELL_ITEM                                           = 0x0,
+    CMSG_SELL_ITEM                                           = 0x0B7D, // 5.4.1 17538
     CMSG_SEND_MAIL                                           = 0x0,
     CMSG_SEND_SOR_REQUEST_VIA_ADDRESS                        = 0x0,
     CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID                = 0x0,
