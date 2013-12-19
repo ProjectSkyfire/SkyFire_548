@@ -574,12 +574,48 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket& recvData)
 void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUY_ITEM");
-    uint64 vendorguid, bagGuid;
-    uint32 item, slot, count;
-    uint8 itemType; // 1 = item, 2 = currency
-    uint8 bagSlot;
 
-    recvData >> vendorguid >> itemType >> item >> slot >> count >> bagGuid >> bagSlot;
+    ObjectGuid vendorguid, bagGuid;
+    uint32 item, slot, count, bagSlot;
+    uint8 itemType; // 1 = item, 2 = currency
+
+    recvData >> bagSlot >> count >> item >> slot;
+
+    vendorguid[4] = recvData.ReadBit();
+    bagGuid[5] = recvData.ReadBit();
+    vendorguid[5] = recvData.ReadBit();
+    bagGuid[6] = recvData.ReadBit();
+    vendorguid[6] = recvData.ReadBit();
+    vendorguid[1] = recvData.ReadBit();
+    vendorguid[3] = recvData.ReadBit();
+    vendorguid[7] = recvData.ReadBit();
+    itemType = recvData.ReadBits(2);
+    vendorguid[0] = recvData.ReadBit();
+    bagGuid[7] = recvData.ReadBit();
+    bagGuid[4] = recvData.ReadBit();
+    vendorguid[2] = recvData.ReadBit();
+    bagGuid[1] = recvData.ReadBit();
+    bagGuid[2] = recvData.ReadBit();
+    bagGuid[3] = recvData.ReadBit();
+    bagGuid[0] = recvData.ReadBit();
+    recvData.FlushBits();
+
+    recvData.ReadByteSeq(bagGuid[5]);
+    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(bagGuid[1]);
+    recvData.ReadByteSeq(bagGuid[6]);
+    recvData.ReadByteSeq(vendorguid[3]);
+    recvData.ReadByteSeq(bagGuid[2]);
+    recvData.ReadByteSeq(vendorguid[0]);
+    recvData.ReadByteSeq(bagGuid[0]);
+    recvData.ReadByteSeq(vendorguid[5]);
+    recvData.ReadByteSeq(vendorguid[2]);
+    recvData.ReadByteSeq(bagGuid[4]);
+    recvData.ReadByteSeq(bagGuid[7]);
+    recvData.ReadByteSeq(vendorguid[4]);
+    recvData.ReadByteSeq(vendorguid[6]);
+    recvData.ReadByteSeq(bagGuid[3]);
+    recvData.ReadByteSeq(vendorguid[7]);
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)
