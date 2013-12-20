@@ -1327,7 +1327,7 @@ enum Opcodes
     SMSG_TRADE_STATUS_EXTENDED                               = 0x0,
     SMSG_TRAINER_BUY_FAILED                                  = 0x0,
     SMSG_TRAINER_BUY_SUCCEEDED                               = 0x0,
-    SMSG_TRAINER_LIST                                        = 0x0,
+    SMSG_TRAINER_LIST                                        = 0x0DE1, // 5.4.1 17538 need confirm
     SMSG_TRANSFER_ABORTED                                    = 0x0,
     SMSG_TRANSFER_PENDING                                    = 0x0917, // 5.4.1 17538
     SMSG_TRIGGER_CINEMATIC                                   = 0x0198, // 5.4.1 17538
