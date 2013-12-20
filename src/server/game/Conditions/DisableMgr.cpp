@@ -140,6 +140,10 @@ void LoadDisables()
                             flags -= RAID_STATUSFLAG_10MAN_HEROIC;
                         if (flags & RAID_STATUSFLAG_25MAN_HEROIC && !GetMapDifficultyData(entry, RAID_DIFFICULTY_25MAN_HEROIC))
                             flags -= RAID_STATUSFLAG_25MAN_HEROIC;
+                        if (flags & RAID_STATUSFLAG_10MAN_FLEX && !GetMapDifficultyData(entry, RAID_DIFFICULTY_10MAN_FLEX))
+                            flags -= RAID_STATUSFLAG_10MAN_FLEX;
+                        if (flags & RAID_STATUSFLAG_25MAN_LFR && !GetMapDifficultyData(entry, RAID_DIFFICULTY_25MAN_LFR))
+                            flags -= RAID_STATUSFLAG_25MAN_LFR;
                         if (!flags)
                             isFlagInvalid = true;
                         break;
@@ -362,6 +366,10 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                             return disabledModes & RAID_STATUSFLAG_10MAN_HEROIC;
                         case RAID_DIFFICULTY_25MAN_HEROIC:
                             return disabledModes & RAID_STATUSFLAG_25MAN_HEROIC;
+                        case RAID_DIFFICULTY_10MAN_FLEX:
+                            return disabledModes & RAID_STATUSFLAG_10MAN_FLEX;
+                        case RAID_DIFFICULTY_25MAN_LFR:
+                            return disabledModes & RAID_STATUSFLAG_25MAN_LFR;
                     }
                 }
                 else if (mapEntry->map_type == MAP_COMMON)
