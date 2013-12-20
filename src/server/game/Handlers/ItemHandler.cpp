@@ -493,10 +493,29 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
 void WorldSession::HandleBuybackItem(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUYBACK_ITEM");
-    uint64 vendorguid;
+
+    ObjectGuid vendorguid;
     uint32 slot;
 
-    recvData >> vendorguid >> slot;
+    recvData >> slot;
+
+    vendorguid[7] = recvData.ReadBit();
+    vendorguid[1] = recvData.ReadBit();
+    vendorguid[2] = recvData.ReadBit();
+    vendorguid[6] = recvData.ReadBit();
+    vendorguid[4] = recvData.ReadBit();
+    vendorguid[3] = recvData.ReadBit();
+    vendorguid[0] = recvData.ReadBit();
+    vendorguid[5] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(vendorguid[7]);
+    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(vendorguid[6]);
+    recvData.ReadByteSeq(vendorguid[5]);
+    recvData.ReadByteSeq(vendorguid[3]);
+    recvData.ReadByteSeq(vendorguid[2]);
+    recvData.ReadByteSeq(vendorguid[4]);
+    recvData.ReadByteSeq(vendorguid[0]);
 
     Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
