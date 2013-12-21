@@ -5375,68 +5375,68 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
 {
     switch (opcode)
     {
-        case MSG_MOVE_FALL_LAND:
-            return MovementFallLand;
-        case MSG_MOVE_HEARTBEAT:
-            return MovementHeartBeat;
-        case MSG_MOVE_JUMP:
-            return MovementJump;
-        case MSG_MOVE_SET_FACING:
-            return MovementSetFacing;
-        case MSG_MOVE_SET_PITCH:
-            return MovementSetPitch;
-        case MSG_MOVE_START_ASCEND:
-            return MovementStartAscend;
-        case MSG_MOVE_START_BACKWARD:
-            return MovementStartBackward;
-        case MSG_MOVE_START_DESCEND:
-            return MovementStartDescend;
-        case MSG_MOVE_START_FORWARD:
-            return MovementStartForward;
-        case MSG_MOVE_START_PITCH_DOWN:
-            return MovementStartPitchDown;
-        case MSG_MOVE_START_PITCH_UP:
-            return MovementStartPitchUp;
-        case MSG_MOVE_START_STRAFE_LEFT:
-            return MovementStartStrafeLeft;
-        case MSG_MOVE_START_STRAFE_RIGHT:
-            return MovementStartStrafeRight;
-        case MSG_MOVE_START_SWIM:
-            return MovementStartSwim;
-        case MSG_MOVE_START_TURN_LEFT:
-            return MovementStartTurnLeft;
-        case MSG_MOVE_START_TURN_RIGHT:
-            return MovementStartTurnRight;
-        case MSG_MOVE_STOP:
-            return MovementStop;
-        case MSG_MOVE_STOP_ASCEND:
-            return MovementStopAscend;
-        case MSG_MOVE_STOP_PITCH:
-            return MovementStopPitch;
-        case MSG_MOVE_STOP_STRAFE:
-            return MovementStopStrafe;
-        case MSG_MOVE_STOP_SWIM:
-            return MovementStopSwim;
-        case MSG_MOVE_STOP_TURN:
-            return MovementStopTurn;
-        case SMSG_PLAYER_MOVE:
-            return PlayerMove;
-        case CMSG_MOVE_CHNG_TRANSPORT:
-            return MoveChngTransport;
-        case CMSG_MOVE_SPLINE_DONE:
-            return MoveSplineDone;
+        //case MSG_MOVE_FALL_LAND:
+        //    return MovementFallLand;
+        //case MSG_MOVE_HEARTBEAT:
+        //    return MovementHeartBeat;
+        //case MSG_MOVE_JUMP:
+        //    return MovementJump;
+        //case MSG_MOVE_SET_FACING:
+        //    return MovementSetFacing;
+        //case MSG_MOVE_SET_PITCH:
+        //    return MovementSetPitch;
+        //case MSG_MOVE_START_ASCEND:
+        //   return MovementStartAscend;
+        //case MSG_MOVE_START_BACKWARD:
+        //   return MovementStartBackward;
+        //case MSG_MOVE_START_DESCEND:
+        //    return MovementStartDescend;
+        //case MSG_MOVE_START_FORWARD:
+        //    return MovementStartForward;
+        //case MSG_MOVE_START_PITCH_DOWN:
+        //    return MovementStartPitchDown;
+        //case MSG_MOVE_START_PITCH_UP:
+        //    return MovementStartPitchUp;
+        //case MSG_MOVE_START_STRAFE_LEFT:
+        //    return MovementStartStrafeLeft;
+        //case MSG_MOVE_START_STRAFE_RIGHT:
+        //    return MovementStartStrafeRight;
+        //case MSG_MOVE_START_SWIM:
+        //    return MovementStartSwim;
+        //case MSG_MOVE_START_TURN_LEFT:
+        //    return MovementStartTurnLeft;
+        //case MSG_MOVE_START_TURN_RIGHT:
+        //    return MovementStartTurnRight;
+        //case MSG_MOVE_STOP:
+        //    return MovementStop;
+        //case MSG_MOVE_STOP_ASCEND:
+        //    return MovementStopAscend;
+        //case MSG_MOVE_STOP_PITCH:
+        //    return MovementStopPitch;
+        //case MSG_MOVE_STOP_STRAFE:
+        //    return MovementStopStrafe;
+        //case MSG_MOVE_STOP_SWIM:
+        //    return MovementStopSwim;
+        //case MSG_MOVE_STOP_TURN:
+        //    return MovementStopTurn;
+        //case SMSG_PLAYER_MOVE:
+        //    return PlayerMove;
+        //case CMSG_MOVE_CHNG_TRANSPORT:
+        //    return MoveChngTransport;
+        //case CMSG_MOVE_SPLINE_DONE:
+        //    return MoveSplineDone;
         //case CMSG_MOVE_NOT_ACTIVE_MOVER:
         //    return MoveNotActiveMover;
-        case CMSG_DISMISS_CONTROLLED_VEHICLE:
-            return DismissControlledVehicle;
+        //case CMSG_DISMISS_CONTROLLED_VEHICLE:
+        //    return DismissControlledVehicle;
         //case SMSG_MOVE_UPDATE_TELEPORT:
         //    return MoveUpdateTeleport;
         //case CMSG_FORCE_MOVE_ROOT_ACK:
         //    return ForceMoveRootAck;
         //case CMSG_FORCE_MOVE_UNROOT_ACK:
         //    return ForceMoveUnrootAck;
-        case CMSG_MOVE_FALL_RESET:
-            return MovementFallReset;
+        //case CMSG_MOVE_FALL_RESET:
+        //    return MovementFallReset;
         //case CMSG_MOVE_FEATHER_FALL_ACK:
         //    return MovementFeatherFallAck;
         //case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:
@@ -5471,10 +5471,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MovementUpdateCollisionHeight;
         //case CMSG_MOVE_WATER_WALK_ACK:
         //    return MovementWaterWalkAck;
-        case MSG_MOVE_SET_RUN_MODE:
-            return MovementSetRunMode;
-        case MSG_MOVE_SET_WALK_MODE:
-            return MovementSetWalkMode;
+        //case MSG_MOVE_SET_RUN_MODE:
+        //    return MovementSetRunMode;
+        //case MSG_MOVE_SET_WALK_MODE:
+        //    return MovementSetWalkMode;
         //case SMSG_MOVE_UPDATE_FLIGHT_SPEED:
         //    return MovementUpdateFlightSpeed;
         //case SMSG_MOVE_UPDATE_RUN_SPEED:
@@ -5505,20 +5505,20 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveSetFlightBackSpeed;
         //case SMSG_SPLINE_MOVE_SET_PITCH_RATE:
         //    return SplineMoveSetPitchRate;
-        case SMSG_MOVE_SET_WALK_SPEED:
-            return MoveSetWalkSpeed;
-        case SMSG_MOVE_SET_RUN_SPEED:
-            return MoveSetRunSpeed;
+        //case SMSG_MOVE_SET_WALK_SPEED:
+        //    return MoveSetWalkSpeed;
+        //case SMSG_MOVE_SET_RUN_SPEED:
+        //    return MoveSetRunSpeed;
         //case SMSG_MOVE_SET_RUN_BACK_SPEED:
         //    return MoveSetRunBackSpeed;
-        case SMSG_MOVE_SET_SWIM_SPEED:
-            return MoveSetSwimSpeed;
+        //case SMSG_MOVE_SET_SWIM_SPEED:
+        //    return MoveSetSwimSpeed;
         //case SMSG_MOVE_SET_SWIM_BACK_SPEED:
         //    return MoveSetSwimBackSpeed;
         //case SMSG_MOVE_SET_TURN_RATE:
         //    return MoveSetTurnRate;
-        case SMSG_MOVE_SET_FLIGHT_SPEED:
-            return MoveSetFlightSpeed;
+        //case SMSG_MOVE_SET_FLIGHT_SPEED:
+        //   return MoveSetFlightSpeed;
         //case SMSG_MOVE_SET_FLIGHT_BACK_SPEED:
         //    return MoveSetFlightBackSpeed;
         //case SMSG_MOVE_SET_PITCH_RATE:
@@ -5555,10 +5555,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveRoot;
         //case SMSG_SPLINE_MOVE_UNROOT:
         //    return SplineMoveUnroot;
-        case SMSG_MOVE_SET_CAN_FLY:
-            return MoveSetCanFly;
-        case SMSG_MOVE_UNSET_CAN_FLY:
-            return MoveUnsetCanFly;
+        //case SMSG_MOVE_SET_CAN_FLY:
+        //    return MoveSetCanFly;
+        //case SMSG_MOVE_UNSET_CAN_FLY:
+        //    return MoveUnsetCanFly;
         //case SMSG_MOVE_SET_HOVER:
         //    return MoveSetHover;
         //case SMSG_MOVE_UNSET_HOVER:
