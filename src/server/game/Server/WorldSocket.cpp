@@ -1170,7 +1170,7 @@ void WorldSocket::SendAuthResponseError(uint8 code)
 {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(code);
-        packet.WriteBit(0); // has queue info
         packet.WriteBit(0); // has account info
+        packet.WriteBit(0); // has queue info
         SendPacket(packet);
 }
