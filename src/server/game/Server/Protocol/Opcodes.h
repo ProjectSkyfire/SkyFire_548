@@ -200,7 +200,7 @@ enum Opcodes
     CMSG_FORCE_MOVE_ROOT_ACK                                 = 0x0,
     CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x0,
     CMSG_GAMEOBJECT_QUERY                                    = 0x1677, // 5.4.1 17538
-    CMSG_GAMEOBJ_REPORT_USE                                  = 0x0,
+    CMSG_GAMEOBJ_REPORT_USE                                  = 0x02E5, // 5.4.1 17538
     CMSG_GAMEOBJ_USE                                         = 0x0,
     CMSG_GAMESPEED_SET                                       = 0x0,
     CMSG_GAMETIME_SET                                        = 0x0,
@@ -434,7 +434,7 @@ enum Opcodes
     CMSG_QUESTGIVER_CANCEL                                   = 0x0,
     CMSG_QUESTGIVER_CHOOSE_REWARD                            = 0x0,
     CMSG_QUESTGIVER_COMPLETE_QUEST                           = 0x0,
-    CMSG_QUESTGIVER_HELLO                                    = 0x0,
+    CMSG_QUESTGIVER_HELLO                                    = 0x02EE, // 5.4.1 17538
     CMSG_QUESTGIVER_QUERY_QUEST                              = 0x0,
     CMSG_QUESTGIVER_QUEST_AUTOLAUNCH                         = 0x0,
     CMSG_QUESTGIVER_REQUEST_REWARD                           = 0x0,
