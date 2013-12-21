@@ -65,7 +65,7 @@ enum Opcodes
     CMSG_AUCTION_PLACE_BID                                   = 0x0,
     CMSG_AUCTION_REMOVE_ITEM                                 = 0x0,
     CMSG_AUCTION_SELL_ITEM                                   = 0x0,
-    CMSG_AUTH_SESSION                                        = 0x0,
+    CMSG_AUTH_SESSION                                        = 0x196E, // 5.4.2 17688
     CMSG_AUTOBANK_ITEM                                       = 0x0,
     CMSG_AUTOEQUIP_GROUND_ITEM                               = 0x0,
     CMSG_AUTOEQUIP_ITEM                                      = 0x0,
@@ -152,7 +152,7 @@ enum Opcodes
     CMSG_CHAR_CREATE                                         = 0x0,
     CMSG_CHAR_CUSTOMIZE                                      = 0x0,
     CMSG_CHAR_DELETE                                         = 0x0,
-    CMSG_CHAR_ENUM                                           = 0x0,
+    CMSG_CHAR_ENUM                                           = 0x047C, //5.4.2 17688
     CMSG_CHAR_FACTION_CHANGE                                 = 0x0,
     CMSG_CHAR_RACE_CHANGE                                    = 0x0,
     CMSG_CHAR_RENAME                                         = 0x0,
@@ -318,7 +318,7 @@ enum Opcodes
     CMSG_LOAD_SCREEN                                         = 0x0,
     CMSG_LOGOUT_CANCEL                                       = 0x0,
     CMSG_LOGOUT_REQUEST                                      = 0x0,
-    CMSG_LOG_DISCONNECT                                      = 0x0,
+    CMSG_LOG_DISCONNECT                                      = 0x19EA, // 5.4.2 17688
     CMSG_LOOT                                                = 0x0,
     CMSG_LOOT_CURRENCY                                       = 0x0,
     CMSG_LOOT_MASTER_GIVE                                    = 0x0,
@@ -412,7 +412,7 @@ enum Opcodes
     CMSG_PET_SET_ACTION                                      = 0x0,
     CMSG_PET_SPELL_AUTOCAST                                  = 0x0,
     CMSG_PET_STOP_ATTACK                                     = 0x0,
-    CMSG_PING                                                = 0x0,
+    CMSG_PING                                                = 0x18E2, // 5.4.2 17688
     CMSG_PLAYED_TIME                                         = 0x0,
     CMSG_PLAYER_DIFFICULTY_CHANGE                            = 0x0,
     CMSG_PLAYER_LOGIN                                        = 0x0,
@@ -447,7 +447,7 @@ enum Opcodes
     CMSG_QUEST_POI_QUERY                                     = 0x0,
     CMSG_QUEST_QUERY                                         = 0x0,
     CMSG_RANDOMIZE_CHAR_NAME                                 = 0x0,
-    CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x0,
+    CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x047F, // 5.4.2 17688
     CMSG_READ_ITEM                                           = 0x0,
     CMSG_REALM_SPLIT                                         = 0x0,
     CMSG_REALM_NAME_QUERY                                    = 0x0,
@@ -700,7 +700,7 @@ enum Opcodes
     SMSG_AURA_POINTS_DEPLETED                                = 0x0,
     SMSG_AURA_UPDATE                                         = 0x0,
     SMSG_AUTH_CHALLENGE                                      = 0x0C42, // 5.4.2 17688
-    SMSG_AUTH_RESPONSE                                       = 0x0,
+    SMSG_AUTH_RESPONSE                                       = 0x03A8, // 5.4.2 17688
     SMSG_AVAILABLE_VOICE_CHANNEL                             = 0x0,
     SMSG_AVERAGE_ITEM_LEVEL_INFORM                           = 0x0,
     SMSG_BARBER_SHOP_RESULT                                  = 0x0,
@@ -766,7 +766,7 @@ enum Opcodes
     SMSG_CHAR_CREATE                                         = 0x0,
     SMSG_CHAR_CUSTOMIZE                                      = 0x0,
     SMSG_CHAR_DELETE                                         = 0x0,
-    SMSG_CHAR_ENUM                                           = 0x0,
+    SMSG_CHAR_ENUM                                           = 0x08B9, // 5.4.2 17688
     SMSG_CHAR_FACTION_CHANGE                                 = 0x0,
     SMSG_CHAR_RENAME                                         = 0x0,
     SMSG_CHAT_IGNORED_ACCOUNT_MUTED                          = 0x0,
