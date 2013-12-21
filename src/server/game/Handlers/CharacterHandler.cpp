@@ -232,6 +232,8 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         charCount = uint32(result->GetRowCount());
         bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
+
+        bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(charCount, 16);
 
         do
@@ -251,14 +253,13 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         } while (result->NextRow()); 
 
         bitBuffer.WriteBit(1);
-        bitBuffer.WriteBits(0, 21);
         bitBuffer.FlushBits();
     }
     else
     {		
+        bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(0, 16);
         bitBuffer.WriteBit(1);
-        bitBuffer.WriteBits(0, 21);
         bitBuffer.FlushBits();
     }
 
