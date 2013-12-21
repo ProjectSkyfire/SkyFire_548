@@ -854,8 +854,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
 int WorldSocket::HandleSendAuthSession()
 {
-    WorldPacket packet(SMSG_AUTH_CHALLENGE, 39);
-    packet << uint16(0);
+    WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
     packet << uint8(1);
 
     for (int i = 0; i < 8; i++)

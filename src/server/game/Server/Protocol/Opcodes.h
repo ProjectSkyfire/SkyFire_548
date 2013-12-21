@@ -699,7 +699,7 @@ enum Opcodes
     SMSG_AURACASTLOG                                         = 0x0,
     SMSG_AURA_POINTS_DEPLETED                                = 0x0,
     SMSG_AURA_UPDATE                                         = 0x0,
-    SMSG_AUTH_CHALLENGE                                      = 0x0,
+    SMSG_AUTH_CHALLENGE                                      = 0x0C42, // 5.4.2 17688
     SMSG_AUTH_RESPONSE                                       = 0x0,
     SMSG_AVAILABLE_VOICE_CHANNEL                             = 0x0,
     SMSG_AVERAGE_ITEM_LEVEL_INFORM                           = 0x0,
