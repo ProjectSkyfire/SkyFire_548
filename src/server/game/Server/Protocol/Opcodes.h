@@ -1010,7 +1010,7 @@ enum Opcodes
     SMSG_LIST_INVENTORY                                      = 0x0,
     SMSG_LOAD_CUF_PROFILES                                   = 0x0,
     SMSG_LOGIN_SETTIMESPEED                                  = 0x0,
-    SMSG_LOGIN_VERIFY_WORLD                                  = 0x0,
+    SMSG_LOGIN_VERIFY_WORLD                                  = 0x0E04, // 5.4.2 17688
     SMSG_LOGOUT_CANCEL_ACK                                   = 0x0,
     SMSG_LOGOUT_COMPLETE                                     = 0x0,
     SMSG_LOGOUT_RESPONSE                                     = 0x0,
