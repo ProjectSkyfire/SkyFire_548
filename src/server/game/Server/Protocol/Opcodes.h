@@ -1045,7 +1045,7 @@ enum Opcodes
     SMSG_MONEY_NOTIFY                                        = 0x0,
     SMSG_MONSTER_MOVE                                        = 0x0,
     SMSG_MONSTER_MOVE_TRANSPORT                              = 0x0,
-    SMSG_MOTD                                                = 0x0,
+    SMSG_MOTD                                                = 0x08BB, // 5.4.2 17688
     SMSG_MOUNTRESULT                                         = 0x0,
     SMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
     SMSG_MOVE_COLLISION_DISABLE                              = 0x0,
@@ -1345,7 +1345,7 @@ enum Opcodes
     SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT                      = 0x0,
     SMSG_UPDATE_INSTANCE_OWNERSHIP                           = 0x0,
     SMSG_UPDATE_LAST_INSTANCE                                = 0x0,
-    SMSG_UPDATE_OBJECT                                       = 0x0,
+    SMSG_UPDATE_OBJECT                                       = 0x1C89, // 5.4.2 17688
     SMSG_UPDATE_SERVER_PLAYER_POSITION                       = 0x0,
     SMSG_UPDATE_WORLD_STATE                                  = 0x0,
     SMSG_USERLIST_ADD                                        = 0x0,
