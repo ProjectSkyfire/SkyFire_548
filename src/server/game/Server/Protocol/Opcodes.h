@@ -415,7 +415,7 @@ enum Opcodes
     CMSG_PING                                                = 0x18E2, // 5.4.2 17688
     CMSG_PLAYED_TIME                                         = 0x0,
     CMSG_PLAYER_DIFFICULTY_CHANGE                            = 0x0,
-    CMSG_PLAYER_LOGIN                                        = 0x0,
+    CMSG_PLAYER_LOGIN                                        = 0x0754, // 5.4.2 17688
     CMSG_PLAYER_LOGOUT                                       = 0x0,
     CMSG_PLAYER_VEHICLE_ENTER                                = 0x0,
     CMSG_PLAY_DANCE                                          = 0x0,
