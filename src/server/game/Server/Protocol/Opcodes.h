@@ -446,7 +446,7 @@ enum Opcodes
     CMSG_QUEST_NPC_QUERY                                     = 0x0,
     CMSG_QUEST_POI_QUERY                                     = 0x0,
     CMSG_QUEST_QUERY                                         = 0x0,
-    CMSG_RANDOMIZE_CHAR_NAME                                 = 0x0,
+    CMSG_RANDOMIZE_CHAR_NAME                                 = 0x0DD1, // 5.4.2 17688
     CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x047F, // 5.4.2 17688
     CMSG_READ_ITEM                                           = 0x0,
     CMSG_REALM_SPLIT                                         = 0x0,
@@ -1191,7 +1191,7 @@ enum Opcodes
     SMSG_RAID_MARKERS_CHANGED                                = 0x0,
     SMSG_RAID_READY_CHECK_THROTTLED_ERROR                    = 0x0,
     SMSG_RAID_SUMMON_FAILED                                  = 0x0,
-    SMSG_RANDOMIZE_CHAR_NAME                                 = 0x0,
+    SMSG_RANDOMIZE_CHAR_NAME                                 = 0x0D24, // 5.4.2 17688
     SMSG_RATED_BG_RATING                                     = 0x0,
     SMSG_RATED_BG_STATS                                      = 0x0,
     SMSG_READ_ITEM_FAILED                                    = 0x0,

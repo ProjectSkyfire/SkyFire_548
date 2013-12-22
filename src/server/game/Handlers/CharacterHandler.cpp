@@ -2386,9 +2386,10 @@ void WorldSession::HandleRandomizeCharNameOpcode(WorldPacket& recvData)
     }
 
     std::string const* name = GetRandomCharacterName(race, gender);
-    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, 10);
+    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, 1 + name->size());
     data.WriteBit(0); // unk
-    data.WriteBits(name->size(), 7);
+    data.WriteBits(name->size(), 6);
+    data.FlushBits();
     data.WriteString(*name);
     SendPacket(&data);
 }
