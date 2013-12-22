@@ -61,7 +61,7 @@ typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           128
 #define PLAYER_MAX_DAILY_QUESTS     750
-#define PLAYER_EXPLORED_ZONES_SIZE  156
+#define PLAYER_EXPLORED_ZONES_SIZE  200
 
 struct ActionButtonPACKET
 {
