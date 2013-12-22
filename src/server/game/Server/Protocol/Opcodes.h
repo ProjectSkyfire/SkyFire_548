@@ -387,7 +387,7 @@ enum Opcodes
     CMSG_NEW_SPELL_SLOT                                      = 0x0,
     CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
     CMSG_NPC_TEXT_QUERY                                      = 0x0,
-    CMSG_OBJECT_UPDATE_FAILED                                = 0x0,
+    CMSG_OBJECT_UPDATE_FAILED                                = 0x0A95, // 5.4.2 17688
     CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
     CMSG_OFFER_PETITION                                      = 0x0,
     CMSG_OPENING_CINEMATIC                                   = 0x0,
