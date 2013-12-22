@@ -179,7 +179,7 @@ enum Opcodes
     CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
     CMSG_CREATURE_QUERY                                      = 0x0,
     CMSG_DANCE_QUERY                                         = 0x0,
-    CMSG_DB_QUERY_BULK                                       = 0x0,
+    CMSG_DB_QUERY_BULK                                       = 0x0676, // 5.4.2 17688
     CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
     CMSG_DEL_FRIEND                                          = 0x0,
     CMSG_DEL_IGNORE                                          = 0x0,
@@ -315,7 +315,7 @@ enum Opcodes
     CMSG_LF_GUILD_REMOVE_RECRUIT                             = 0x0,
     CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
     CMSG_LIST_INVENTORY                                      = 0x0,
-    CMSG_LOAD_SCREEN                                         = 0x0,
+    CMSG_LOAD_SCREEN                                         = 0x0650, // 5.4.2 17688
     CMSG_LOGOUT_CANCEL                                       = 0x0,
     CMSG_LOGOUT_REQUEST                                      = 0x0,
     CMSG_LOG_DISCONNECT                                      = 0x19EA, // 5.4.2 17688
@@ -570,7 +570,7 @@ enum Opcodes
     CMSG_UPDATE_PROJECTILE_POSITION                          = 0x0,
     CMSG_USED_FOLLOW                                         = 0x0,
     CMSG_USE_ITEM                                            = 0x0,
-    CMSG_VIOLENCE_LEVEL                                      = 0x0,
+    CMSG_VIOLENCE_LEVEL                                      = 0x0448, //5.4.2 17688
     CMSG_VOICE_SESSION_ENABLE                                = 0x0,
     CMSG_VOID_STORAGE_QUERY                                  = 0x0,
     CMSG_VOID_STORAGE_TRANSFER                               = 0x0,
