@@ -435,7 +435,7 @@ enum Opcodes
     CMSG_QUESTGIVER_CHOOSE_REWARD                            = 0x0,
     CMSG_QUESTGIVER_COMPLETE_QUEST                           = 0x0,
     CMSG_QUESTGIVER_HELLO                                    = 0x02EE, // 5.4.1 17538
-    CMSG_QUESTGIVER_QUERY_QUEST                              = 0x0,
+    CMSG_QUESTGIVER_QUERY_QUEST                              = 0x034E, // 5.4.1 17538
     CMSG_QUESTGIVER_QUEST_AUTOLAUNCH                         = 0x0,
     CMSG_QUESTGIVER_REQUEST_REWARD                           = 0x0,
     CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY                    = 0x0,
