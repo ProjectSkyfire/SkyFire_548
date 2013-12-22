@@ -732,12 +732,12 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 
     guid[7] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[7]);
