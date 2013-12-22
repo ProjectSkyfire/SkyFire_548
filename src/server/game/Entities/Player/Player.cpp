@@ -1984,7 +1984,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
 
     // Packet content flags
     bitBuffer->WriteBit(guid[0]);
-    bitBuffer->WriteBit(guildGuid[1]);
+    bitBuffer->WriteBit(guildGuid[4]);
     bitBuffer->WriteBit(guid[7]);
     bitBuffer->WriteBit(guildGuid[3]);
     bitBuffer->WriteBit(guildGuid[7]);
