@@ -299,12 +299,12 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
     uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
 
-    recvData >> hairStyle >> gender >> race_ >> hairColor >> class_;
-    recvData >> facialHair >> outfitId >> skin >> face;
+    recvData >> hairStyle >> gender >> skin >> hairColor;
+    recvData >> facialHair >> class_ >> race_ >> face >> outfitId;
 
-    uint32 nameLength = recvData.ReadBits(7);    
-    std::string name = recvData.ReadString(nameLength);
     uint8 unk = recvData.ReadBit();
+    uint32 nameLength = recvData.ReadBits(6);
+    std::string name = recvData.ReadString(nameLength);
 
     if (unk)
         recvData.read_skip<uint32>();
