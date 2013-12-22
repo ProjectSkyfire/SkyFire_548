@@ -819,7 +819,7 @@ enum Opcodes
     SMSG_DEATH_RELEASE_LOC                                   = 0x0,
     SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
     SMSG_DEFENSE_MESSAGE                                     = 0x0,
-    SMSG_DESTROY_OBJECT                                      = 0x0,
+    SMSG_DESTROY_OBJECT                                      = 0x0A75,
     SMSG_DESTRUCTIBLE_BUILDING_DAMAGE                        = 0x0,
     SMSG_DIFFERENT_INSTANCE_FROM_PARTY                       = 0x0,
     SMSG_DISENCHANT_CREDIT                                   = 0x0,
