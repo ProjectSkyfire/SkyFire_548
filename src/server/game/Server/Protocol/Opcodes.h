@@ -151,8 +151,8 @@ enum Opcodes
     CMSG_CHANNEL_VOICE_ON                                    = 0x0,
     CMSG_CHAR_CREATE                                         = 0x077B, // 5.4.2 17688
     CMSG_CHAR_CUSTOMIZE                                      = 0x0,
-    CMSG_CHAR_DELETE                                         = 0x0,
-    CMSG_CHAR_ENUM                                           = 0x047C, //5.4.2 17688
+    CMSG_CHAR_DELETE                                         = 0x067A, // 5.4.2 17688
+    CMSG_CHAR_ENUM                                           = 0x047C, // 5.4.2 17688
     CMSG_CHAR_FACTION_CHANGE                                 = 0x0,
     CMSG_CHAR_RACE_CHANGE                                    = 0x0,
     CMSG_CHAR_RENAME                                         = 0x0,
@@ -765,7 +765,7 @@ enum Opcodes
     SMSG_CHARACTER_LOGIN_FAILED                              = 0x0,
     SMSG_CHAR_CREATE                                         = 0x0FAD, // 5.4.2 17688
     SMSG_CHAR_CUSTOMIZE                                      = 0x0,
-    SMSG_CHAR_DELETE                                         = 0x0,
+    SMSG_CHAR_DELETE                                         = 0x0A1E, // 5.4.2 17688
     SMSG_CHAR_ENUM                                           = 0x08B9, // 5.4.2 17688
     SMSG_CHAR_FACTION_CHANGE                                 = 0x0,
     SMSG_CHAR_RENAME                                         = 0x0,
