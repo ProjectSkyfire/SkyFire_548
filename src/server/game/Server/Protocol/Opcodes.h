@@ -950,7 +950,7 @@ enum Opcodes
     SMSG_HOTFIX_INFO                                         = 0x0,
     SMSG_HOTFIX_NOTIFY                                       = 0x0,
     SMSG_INITIALIZE_FACTIONS                                 = 0x0,
-    SMSG_INITIAL_SPELLS                                      = 0x0,
+    SMSG_INITIAL_SPELLS                                      = 0x0623, // 5.4.2 17688
     SMSG_INIT_CURRENCY                                       = 0x0,
     SMSG_INIT_WORLD_STATES                                   = 0x0,
     SMSG_INSPECT                                             = 0x0,
