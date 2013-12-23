@@ -317,7 +317,7 @@ enum Opcodes
     CMSG_LIST_INVENTORY                                      = 0x0,
     CMSG_LOAD_SCREEN                                         = 0x0650, // 5.4.2 17688
     CMSG_LOGOUT_CANCEL                                       = 0x0,
-    CMSG_LOGOUT_REQUEST                                      = 0x0,
+    CMSG_LOGOUT_REQUEST                                      = 0x0183, // 5.4.2 17688
     CMSG_LOG_DISCONNECT                                      = 0x19EA, // 5.4.2 17688
     CMSG_LOOT                                                = 0x0,
     CMSG_LOOT_CURRENCY                                       = 0x0,
@@ -1012,8 +1012,8 @@ enum Opcodes
     SMSG_LOGIN_SETTIMESPEED                                  = 0x0,
     SMSG_LOGIN_VERIFY_WORLD                                  = 0x0E04, // 5.4.2 17688
     SMSG_LOGOUT_CANCEL_ACK                                   = 0x0,
-    SMSG_LOGOUT_COMPLETE                                     = 0x0,
-    SMSG_LOGOUT_RESPONSE                                     = 0x0,
+    SMSG_LOGOUT_COMPLETE                                     = 0x0C6D, // 5.4.2 17688
+    SMSG_LOGOUT_RESPONSE                                     = 0x104A, // 5.4.2 17688
     SMSG_LOG_XPGAIN                                          = 0x0,
     SMSG_LOOT_ALL_PASSED                                     = 0x0,
     SMSG_LOOT_CLEAR_MONEY                                    = 0x0,
