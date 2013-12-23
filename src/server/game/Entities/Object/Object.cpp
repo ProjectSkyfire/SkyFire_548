@@ -361,17 +361,21 @@ uint16 Object::GetUInt16Value(uint16 index, uint8 offset) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-    data->WriteBit(0);//flags & UPDATEFLAG_VEHICLE);
+   bool IsAreaTrigger = false;
+    bool IsSceneObject = false;
+    
+
+    data->WriteBit(flags & UPDATEFLAG_VEHICLE);
     data->WriteBit(flags & UPDATEFLAG_SELF);
     data->WriteBit(0);
+    data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
+	data->WriteBit(0);
     data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);//flags & UPDATEFLAG_HAS_TARGET);
+    data->WriteBit(flags & UPDATEFLAG_HAS_TARGET);
     data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);
+    data->WriteBit(IsAreaTrigger);
     data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);
+    data->WriteBit(IsSceneObject);
     data->WriteBit(0);
     data->WriteBit(0);
     data->WriteBits(0, 22);
@@ -381,7 +385,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(flags & UPDATEFLAG_ROTATION);
     data->WriteBit(0);
     data->WriteBit(0);
-    data->WriteBit(0);//flags & UPDATEFLAG_ANIMKITS);
+    data->WriteBit(flags & UPDATEFLAG_ANIMKITS);
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -410,7 +414,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(0);
         data->WriteBit(guid[0]);
         data->WriteBit(0);
-        data->WriteBit(0);
+        data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
     }
     
     /*if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
