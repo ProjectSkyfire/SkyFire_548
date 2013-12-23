@@ -75,7 +75,7 @@ enum Opcodes
     CMSG_AUTOSTORE_GROUND_ITEM                               = 0x0,
     CMSG_AUTOSTORE_LOOT_ITEM                                 = 0x0,
     CMSG_AUTO_DECLINE_GUILD_INVITES                          = 0x0,
-    CMSG_BANKER_ACTIVATE                                     = 0x0,
+    CMSG_BANKER_ACTIVATE                                     = 0x02E0, // 5.4.2 17688
     CMSG_BATTLEFIELD_JOIN                                    = 0x0,
     CMSG_BATTLEFIELD_LEAVE                                   = 0x0,
     CMSG_BATTLEFIELD_LIST                                    = 0x0,
@@ -219,7 +219,7 @@ enum Opcodes
     CMSG_GM_NUKE                                             = 0x0,
     CMSG_GM_REPORT_LAG                                       = 0x0,
     CMSG_GM_SET_SECURITY_GROUP                               = 0x0,
-    CMSG_GOSSIP_HELLO                                        = 0x0,
+    CMSG_GOSSIP_HELLO                                        = 0x02EF, // 5.4.2 17688
     CMSG_GOSSIP_SELECT_OPTION                                = 0x0,
     CMSG_GRANT_LEVEL                                         = 0x0,
     CMSG_GROUP_ASSISTANT_LEADER                              = 0x0,
@@ -514,7 +514,7 @@ enum Opcodes
     CMSG_SET_PRIMARY_TALENT_TREE                             = 0x0,
     CMSG_SET_RELATIVE_POSITION                               = 0x0,
     CMSG_SET_SAVED_INSTANCE_EXTEND                           = 0x0,
-    CMSG_SET_SELECTION                                       = 0x0,
+    CMSG_SET_SELECTION                                       = 0x0AC5, // 5.4.2 17688
     CMSG_SET_SKILL_CHEAT                                     = 0x0,
     CMSG_SET_TAXI_BENCHMARK_MODE                             = 0x0,
     CMSG_SET_TITLE                                           = 0x0,
