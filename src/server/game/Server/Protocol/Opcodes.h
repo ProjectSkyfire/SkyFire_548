@@ -387,7 +387,7 @@ enum Opcodes
     CMSG_NEW_SPELL_SLOT                                      = 0x0,
     CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
     CMSG_NPC_TEXT_QUERY                                      = 0x0,
-    CMSG_OBJECT_UPDATE_FAILED                                = 0x0,
+    CMSG_OBJECT_UPDATE_FAILED                                = 0x0A95, // 5.4.2 17688
     CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
     CMSG_OFFER_PETITION                                      = 0x0,
     CMSG_OPENING_CINEMATIC                                   = 0x0,
@@ -819,7 +819,7 @@ enum Opcodes
     SMSG_DEATH_RELEASE_LOC                                   = 0x0,
     SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
     SMSG_DEFENSE_MESSAGE                                     = 0x0,
-    SMSG_DESTROY_OBJECT                                      = 0x0,
+    SMSG_DESTROY_OBJECT                                      = 0x0A75,
     SMSG_DESTRUCTIBLE_BUILDING_DAMAGE                        = 0x0,
     SMSG_DIFFERENT_INSTANCE_FROM_PARTY                       = 0x0,
     SMSG_DISENCHANT_CREDIT                                   = 0x0,
