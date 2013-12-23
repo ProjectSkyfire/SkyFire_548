@@ -658,7 +658,7 @@ enum Opcodes
     MSG_TABARDVENDOR_ACTIVATE                                = 0x0,
     MSG_TALENT_WIPE_CONFIRM                                  = 0x0,
     MSG_VERIFY_CONNECTIVITY                                  = 0x4F57,
-    SMSG_ACCOUNT_DATA_TIMES                                  = 0x0,
+    SMSG_ACCOUNT_DATA_TIMES                                  = 0x0899, // 5.4.2 17688
     SMSG_ACCOUNT_INFO_RESPONSE                               = 0x0,
     SMSG_ACCOUNT_RESTRICTED_WARNING                          = 0x0,
     SMSG_ACHIEVEMENT_DELETED                                 = 0x0,
