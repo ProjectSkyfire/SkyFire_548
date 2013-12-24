@@ -178,9 +178,9 @@ void WorldSession::SendRealmNameQueryOpcode(uint32 realmId)
         Field* fields = result->Fetch();
         realmName = fields[0].GetString();
 
-        data.WriteBits(realmName.length(), 7);
         data.WriteBit(1);
-        data.WriteBits(realmName.length(), 7);
+        data.WriteBits(realmName.length(), 8);
+        data.WriteBits(realmName.length(), 8);
         data.FlushBits();
 
         data.WriteString(realmName);

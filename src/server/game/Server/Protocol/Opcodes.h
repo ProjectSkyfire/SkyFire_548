@@ -450,7 +450,7 @@ enum Opcodes
     CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x047F, // 5.4.2 17688
     CMSG_READ_ITEM                                           = 0x0,
     CMSG_REALM_SPLIT                                         = 0x0,
-    CMSG_REALM_NAME_QUERY                                    = 0x0,
+    CMSG_REALM_NAME_QUERY                                    = 0x0472, // 5.4.2 17688
     CMSG_RECLAIM_CORPSE                                      = 0x0,
     CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
     CMSG_REFORGE_ITEM                                        = 0x0,
@@ -1197,7 +1197,7 @@ enum Opcodes
     SMSG_READ_ITEM_FAILED                                    = 0x0,
     SMSG_READ_ITEM_OK                                        = 0x0,
     SMSG_REALM_SPLIT                                         = 0x0,
-    SMSG_REALM_NAME_QUERY_RESPONSE                           = 0x0,
+    SMSG_REALM_NAME_QUERY_RESPONSE                           = 0x0867, // 5.4.2 17688
     SMSG_REAL_GROUP_UPDATE                                   = 0x0,
     SMSG_RECEIVED_MAIL                                       = 0x0,
     SMSG_REDIRECT_CLIENT                                     = 0x0,
