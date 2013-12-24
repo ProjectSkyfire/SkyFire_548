@@ -383,7 +383,7 @@ enum Opcodes
     CMSG_MOVE_TIME_SKIPPED                                   = 0x0,
     CMSG_MOVE_TOGGLE_COLLISION_ACK                           = 0x0,
     CMSG_MOVE_WATER_WALK_ACK                                 = 0x0,
-    CMSG_NAME_QUERY                                          = 0x05F4,
+    CMSG_NAME_QUERY                                          = 0x05F4, // 5.4.2 17688
     CMSG_NEW_SPELL_SLOT                                      = 0x0,
     CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
     CMSG_NPC_TEXT_QUERY                                      = 0x0,
@@ -1093,7 +1093,7 @@ enum Opcodes
     SMSG_MOVE_UPDATE_WALK_SPEED                              = 0x0,
     SMSG_MOVE_WATER_WALK                                     = 0x0,
     SMSG_MULTIPLE_PACKETS                                    = 0x0,
-    SMSG_NAME_QUERY_RESPONSE                                 = 0x0,
+    SMSG_NAME_QUERY_RESPONSE                                 = 0x0E48, // 5.4.2 17688
     SMSG_NEW_TAXI_PATH                                       = 0x0,
     SMSG_NEW_WORLD                                           = 0x0,
     SMSG_NEW_WORLD_ABORT                                     = 0x0,

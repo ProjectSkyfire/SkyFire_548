@@ -39,38 +39,36 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, 500);
 
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[0]);
     data.WriteBit(guid[4]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[5]);
     data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[0]);
 
-    data.FlushBits();
-
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[1]);
     
     data << uint8(!nameData);
 
     if (nameData)
     {
-        data << uint8(nameData->m_gender);
         data << uint8(nameData->m_class);
-        data << uint8(nameData->m_level);
+        data << uint8(nameData->m_gender);
         data << uint32(sConfigMgr->GetIntDefault("RealmID", 0)); // RealmID
         data << uint8(nameData->m_race);
         data << uint32(50397209); // const player time
+        data << uint8(nameData->m_level);
     }
 
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
 
     if (!nameData)
     {
@@ -78,47 +76,47 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
         return;
     }
 
-    data.WriteBit(guid[5]);
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.WriteBit(0);
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.WriteBit(guid[1]);
     data.WriteBit(0);
 
     DeclinedName const* names = (player ? player->GetDeclinedNames() : NULL);
     for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
         data.WriteBits(names ? names->name[i].size() : 0, 7);
 
-    data.WriteBit(guid[2]);
+    data.WriteBit(0);
+    data.WriteBit(guid[0]);
     data.WriteBit(0);
     data.WriteBit(guid[4]);
     data.WriteBit(0);
-    data.WriteBits(nameData->m_name.size(), 6);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
     data.WriteBit(0);
-
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.WriteBit(guid[1]);
+    data.WriteBits(nameData->m_name.size(), 6);
+    data.WriteBit(guid[2]);
+    data.WriteBit(0);
+    data.WriteBit(guid[5]);
+    data.WriteBit(0);
     data.FlushBits();
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
     
     if (names)
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
             data.WriteString(names->name[i]);
 
+    data.WriteString(nameData->m_name);
+
     data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[2]);
 
-    data.WriteString(nameData->m_name); // played name
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
     SendPacket(&data);
 }
 
@@ -126,34 +124,33 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    uint8 bit16, bit24;
+    uint8 bit20, bit28;
     uint32 unk, unk1;
 
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    bit16 = recvData.ReadBit();
+    bit20 = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
-    bit24 = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    bit28 = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
 
-
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[3]);
 
-    if (bit16)
+    if (bit28)
         recvData >> unk;
 
-    if (bit24)
+    if (bit20)
         recvData >> unk1;
 
     // This is disable by default to prevent lots of console spam
