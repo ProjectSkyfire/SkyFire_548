@@ -214,7 +214,6 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
     recvData >> entry;
 
     WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 500);
-    data << uint32(entry);                              // creature entry  
 
     CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(entry);
     if (ci)
@@ -235,51 +234,51 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         TC_LOG_DEBUG("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
 
         data.WriteBit(1);                                    // Has data
+        data.WriteBit(ci->RacialLeader);
+        data.WriteBits(ci->IconName.length() + 1, 6);
         data.WriteBits(0, 11);
         data.WriteBits(MAX_CREATURE_QUEST_ITEMS, 22);        // Quest items
-        data.WriteBits(ci->IconName.length() + 1, 6);
-        data.WriteBit(ci->RacialLeader);
 
         for (int i = 0; i < 8; i++)
         {
-            if (i == 0)
+            if (i == 1)
                 data.WriteBits(Name.length() + 1, 11);
             else
                 data.WriteBits(0, 11);                       // Name2, ..., name8
         }
 
         data.WriteBits(SubName.length() ? SubName.length() + 1 : 0, 11);
-
         data.FlushBits();
 
-        data << uint32(ci->family);                         // CreatureFamily.dbc
-        data << uint32(ci->expansion);                      // Expansion Required
+        data << uint32(ci->Modelid3);                       // Modelid3
+        data << uint32(ci->KillCredit[1]);                  // New in 3.1, kill credit
         data << uint32(ci->type);                           // CreatureType.dbc
-
-        if (SubName != "")
-            data << SubName;                                // Subname
-
-        data << uint32(ci->Modelid1);                       // Modelid1
+        data << Name;
+        data << float(ci->ModMana);                         // Mana modifier
+        data << uint32(ci->type_flags2);                    // Flags2
+        data << uint32(ci->type_flags);                     // Flags
+        data << uint32(ci->family);                         // CreatureFamily.dbc
+        data << uint32(ci->KillCredit[0]);                  // New in 3.1, kill credit
         data << uint32(ci->Modelid4);                       // Modelid4
 
         for (uint32 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
             data << uint32(ci->questItems[i]);              // ItemId[6], quest drop
 
-        data << Name;
+        data << float(ci->ModHealth);                       // Hp modifier
+        data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
+        data << uint32(ci->expansion);                      // Expansion Required
 
         if (ci->IconName != "")
             data << ci->IconName;                           // "Directions" for guard, string for Icons 2.3.0
 
-        data << uint32(ci->type_flags2);                    // Flags2
-        data << uint32(ci->type_flags);                     // Flags
-        data << float(ci->ModHealth);                       // Hp modifier
-        data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)
-        data << uint32(ci->KillCredit[0]);                  // New in 3.1, kill credit
-        data << uint32(ci->KillCredit[1]);                  // New in 3.1, kill credit
-        data << float(ci->ModMana);                         // Mana modifier
-        data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
         data << uint32(ci->Modelid2);                       // Modelid2
-        data << uint32(ci->Modelid3);                       // Modelid3
+        data << uint32(ci->Modelid1);                       // Modelid1
+        data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)    
+
+        if (SubName != "")
+            data << SubName;                                // Subname
+
+        data << uint32(entry);                              // creature entry
 
         SendPacket(&data);
         TC_LOG_DEBUG("network", "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");

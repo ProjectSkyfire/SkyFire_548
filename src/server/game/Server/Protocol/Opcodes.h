@@ -177,7 +177,7 @@ enum Opcodes
     CMSG_CONNECT_TO_FAILED                                   = 0x0,
     CMSG_CONTACT_LIST                                        = 0x0,
     CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
-    CMSG_CREATURE_QUERY                                      = 0x0C4A,
+    CMSG_CREATURE_QUERY                                      = 0x0C4A, // 5.4.2 17688
     CMSG_DANCE_QUERY                                         = 0x0,
     CMSG_DB_QUERY_BULK                                       = 0x0676, // 5.4.2 17688
     CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
@@ -805,7 +805,7 @@ enum Opcodes
     SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE                  = 0x0,
     SMSG_CORPSE_NOT_IN_INSTANCE                              = 0x0,
     SMSG_CORPSE_RECLAIM_DELAY                                = 0x0,
-    SMSG_CREATURE_QUERY_RESPONSE                             = 0x0,
+    SMSG_CREATURE_QUERY_RESPONSE                             = 0x0E85, // 5.4.2 17688
     SMSG_CRITERIA_DELETED                                    = 0x0,
     SMSG_CRITERIA_UPDATE                                     = 0x0,
     SMSG_CROSSED_INEBRIATION_THRESHOLD                       = 0x0,
