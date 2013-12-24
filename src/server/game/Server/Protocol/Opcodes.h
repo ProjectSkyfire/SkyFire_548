@@ -616,7 +616,7 @@ enum Opcodes
     MSG_MOVE_START_ASCEND                                    = 0x0688,
     MSG_MOVE_START_BACKWARD                                  = 0x02B6,
     MSG_MOVE_START_DESCEND                                   = 0x062A,
-    MSG_MOVE_START_FORWARD                                   = 0x112B,
+    MSG_MOVE_START_FORWARD                                   = 0x112B, // 5.4.2 17688
     MSG_MOVE_START_PITCH_DOWN                                = 0x062B,
     MSG_MOVE_START_PITCH_UP                                  = 0x00B6,
     MSG_MOVE_START_STRAFE_LEFT                               = 0x0626,
