@@ -3410,11 +3410,11 @@ void Player::SendInitialSpells()
     uint16 spellCount = 0;
 
     WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+4*m_spells.size()+2+m_spellCooldowns.size()*(2+2+2+4+4)));
-    data.WriteBit(0);
 
     size_t bitPos = data.bitwpos();
 
     data.WriteBits(0, 22); // spell count placeholder
+    data.WriteBit(0);
     data.FlushBits();
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
