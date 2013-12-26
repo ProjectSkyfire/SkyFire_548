@@ -596,9 +596,9 @@ enum Opcodes
     MSG_LIST_STABLED_PETS                                    = 0x0,
     MSG_MINIMAP_PING                                         = 0x0,
     MSG_MOVE_CHARM_TELEPORT_CHEAT                            = 0x0,
-    MSG_MOVE_FALL_LAND                                       = 0x00BC,
+    MSG_MOVE_FALL_LAND                                       = 0x00BC, // 5.4.2 17688
     MSG_MOVE_HEARTBEAT                                       = 0x04AD, // 5.4.2 17688
-    MSG_MOVE_JUMP                                            = 0x042F,
+    MSG_MOVE_JUMP                                            = 0x042F, // 5.4.2 17688
     MSG_MOVE_SET_ALL_SPEED_CHEAT                             = 0x0,
     MSG_MOVE_SET_COLLISION_HEIGHT                            = 0x0,
     MSG_MOVE_SET_FACING                                      = 0x04AF,
