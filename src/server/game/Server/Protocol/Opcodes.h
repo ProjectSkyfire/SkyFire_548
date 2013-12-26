@@ -283,7 +283,7 @@ enum Opcodes
     CMSG_HEARTH_AND_RESURRECT                                = 0x0,
     CMSG_IGNORE_TRADE                                        = 0x0,
     CMSG_INITIATE_TRADE                                      = 0x0,
-    CMSG_INSPECT                                             = 0x0,
+    CMSG_INSPECT                                             = 0x0206, // 5.4.2 17688
     CMSG_INSPECT_HONOR_STATS                                 = 0x0,
     CMSG_INSTANCE_LOCK_WARNING_RESPONSE                      = 0x0,
     CMSG_ITEM_REFUND                                         = 0x0,
@@ -293,7 +293,7 @@ enum Opcodes
     CMSG_KEEP_ALIVE                                          = 0x0,
     CMSG_LEARN_PREVIEW_TALENTS                               = 0x0,
     CMSG_LEARN_PREVIEW_TALENTS_PET                           = 0x0,
-    CMSG_LEARN_TALENT                                        = 0x026C,
+    CMSG_LEARN_TALENT                                        = 0x026C, // 5.4.2 17688
     CMSG_LEAVE_CHANNEL                                       = 0x0,
     CMSG_LFG_GET_STATUS                                      = 0x0,
     CMSG_LFG_JOIN                                            = 0x0,
@@ -344,13 +344,13 @@ enum Opcodes
     CMSG_MESSAGECHAT_CHANNEL                                 = 0x0,
     CMSG_MESSAGECHAT_DND                                     = 0x0,
     CMSG_MESSAGECHAT_EMOTE                                   = 0x0,
-    CMSG_MESSAGECHAT_GUILD                                   = 0x0,
+    CMSG_MESSAGECHAT_GUILD                                   = 0x0243, // 5.4.2 17688
     CMSG_MESSAGECHAT_OFFICER                                 = 0x0,
     CMSG_MESSAGECHAT_PARTY                                   = 0x0,
     CMSG_MESSAGECHAT_RAID                                    = 0x0,
     CMSG_MESSAGECHAT_RAID_WARNING                            = 0x0,
-    CMSG_MESSAGECHAT_SAY                                     = 0x0866,
-    CMSG_MESSAGECHAT_WHISPER                                 = 0x0D8C,
+    CMSG_MESSAGECHAT_SAY                                     = 0x0866, // 5.4.2 17688
+    CMSG_MESSAGECHAT_WHISPER                                 = 0x0D8C, // 5.4.2 17688
     CMSG_MESSAGECHAT_YELL                                    = 0x03AB,
     CMSG_MINIGAME_MOVE                                       = 0x0,
     CMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
@@ -494,7 +494,7 @@ enum Opcodes
     CMSG_SETDEATHBINDPOINT                                   = 0x0,
     CMSG_SETSHEATHED                                         = 0x0,
     CMSG_SET_ACTIONBAR_TOGGLES                               = 0x0,
-    CMSG_SET_ACTION_BUTTON                                   = 0x0D5E,
+    CMSG_SET_ACTION_BUTTON                                   = 0x0D5E, // 5.4.2 17688
     CMSG_SET_ACTIVE_MOVER                                    = 0x0,
     CMSG_SET_ACTIVE_VOICE_CHANNEL                            = 0x0,
     CMSG_SET_ALLOW_LOW_LEVEL_RAID1                           = 0x0,
@@ -1035,7 +1035,7 @@ enum Opcodes
     SMSG_MEETINGSTONE_IN_PROGRESS                            = 0x0,
     SMSG_MEETINGSTONE_MEMBER_ADDED                           = 0x0,
     SMSG_MEETINGSTONE_SETQUEUE                               = 0x0,
-    SMSG_MESSAGECHAT                                         = 0x0,
+    SMSG_MESSAGECHAT                                         = 0x0A5B, // 5.4.2 17688
     SMSG_MESSAGE_BOX                                         = 0x0,
     SMSG_MINIGAME_SETUP                                      = 0x0,
     SMSG_MINIGAME_STATE                                      = 0x0,
