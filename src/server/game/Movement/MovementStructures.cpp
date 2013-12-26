@@ -4367,27 +4367,27 @@ MovementStatusElements const MoveSetRunBackSpeed[] =
     MSEEnd,
 };
 
-// 5.4.1 17538
+// 5.4.2 17688
 MovementStatusElements const MoveSetSwimSpeed[] =
 {
-    MSEHasGuidByte6,
-    MSEHasGuidByte3,
-    MSEHasGuidByte1,
-    MSEHasGuidByte2,
-    MSEHasGuidByte0,
-    MSEHasGuidByte4,
-    MSEHasGuidByte7,
     MSEHasGuidByte5,
-    MSEGuidByte2,
+    MSEHasGuidByte1,
+    MSEHasGuidByte4,
+    MSEHasGuidByte3,
+    MSEHasGuidByte0,
+    MSEHasGuidByte7,
+    MSEHasGuidByte2,
+    MSEHasGuidByte6,
+    MSEGuidByte7,
     MSEExtraElement,
-    MSEGuidByte1,
+    MSEGuidByte5,
+    MSEGuidByte2,
     MSEGuidByte6,
+    MSEGuidByte1,
+    MSEGuidByte4,
     MSECounter,
     MSEGuidByte3,
-    MSEGuidByte4,
     MSEGuidByte0,
-    MSEGuidByte7,
-    MSEGuidByte5,
     MSEEnd,
 };
 
@@ -4437,26 +4437,27 @@ MovementStatusElements const MoveSetTurnRate[] =
     MSEEnd,
 };
 
+//5.4.2 17688
 MovementStatusElements const MoveSetFlightSpeed[] =
 {
-    MSEHasGuidByte3,
-    MSEHasGuidByte0,
-    MSEHasGuidByte2,
-    MSEHasGuidByte4,
-    MSEHasGuidByte6,
     MSEHasGuidByte1,
     MSEHasGuidByte5,
+    MSEHasGuidByte3,
+    MSEHasGuidByte0,
+    MSEHasGuidByte6,
     MSEHasGuidByte7,
-    MSEGuidByte2,
-    MSEGuidByte7,
-    MSEGuidByte1,
-    MSEExtraElement,
-    MSEGuidByte0,
+    MSEHasGuidByte4,
+    MSEHasGuidByte2,
     MSEGuidByte4,
     MSEGuidByte5,
+    MSEGuidByte1,
+    MSEGuidByte3,
+    MSEGuidByte2,
     MSEUintCount,
     MSEGuidByte6,
-    MSEGuidByte3,
+    MSEGuidByte0,
+    MSEExtraElement,
+    MSEGuidByte7,
     MSEEnd,
 };
 
@@ -4867,47 +4868,48 @@ MovementStatusElements const SplineMoveUnroot[] =
     MSEEnd,
 };
 
+// 5.4.2 17688 
 MovementStatusElements const MoveSetCanFly[] =
 {
-    MSEHasGuidByte6,
     MSEHasGuidByte2,
     MSEHasGuidByte4,
-    MSEHasGuidByte1,
-    MSEHasGuidByte0,
-    MSEHasGuidByte5,
     MSEHasGuidByte7,
+    MSEHasGuidByte0,
+    MSEHasGuidByte6,
     MSEHasGuidByte3,
-    MSEGuidByte7,
-    MSEGuidByte6,
-    MSEGuidByte4,
-    MSEUintCount,
-    MSEGuidByte2,
-    MSEGuidByte3,
+    MSEHasGuidByte5,
+    MSEHasGuidByte1,
     MSEGuidByte1,
+    MSEGuidByte6,
     MSEGuidByte0,
+    MSEGuidByte3,
     MSEGuidByte5,
+    MSEGuidByte7,
+    MSEUintCount,
+    MSEGuidByte4,
     MSEEnd,
 };
 
+// 5.4.2 17688
 MovementStatusElements const MoveUnsetCanFly[] =
 {
-    MSEHasGuidByte7,
-    MSEHasGuidByte6,
-    MSEHasGuidByte5,
-    MSEHasGuidByte1,
     MSEHasGuidByte2,
+    MSEHasGuidByte6,
+    MSEHasGuidByte1,
+    MSEHasGuidByte7,
     MSEHasGuidByte4,
+    MSEHasGuidByte5,
     MSEHasGuidByte3,
     MSEHasGuidByte0,
-    MSEGuidByte0,
+    MSEGuidByte2,
+    MSEGuidByte4,
+    MSEGuidByte5,
+    MSEGuidByte1,
+    MSEGuidByte7,
     MSEGuidByte6,
     MSEGuidByte3,
-    MSEGuidByte7,
-    MSEGuidByte2,
-    MSEGuidByte1,
-    MSEGuidByte5,
+    MSEGuidByte0,
     MSECounter,
-    MSEGuidByte4,
     MSEEnd,
 };
 
