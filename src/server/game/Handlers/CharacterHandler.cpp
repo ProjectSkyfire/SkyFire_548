@@ -232,6 +232,8 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         charCount = uint32(result->GetRowCount());
         bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
+
+        bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(charCount, 16);
 
         do
@@ -251,14 +253,13 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         } while (result->NextRow()); 
 
         bitBuffer.WriteBit(1);
-        bitBuffer.WriteBits(0, 21);
         bitBuffer.FlushBits();
     }
     else
     {		
+        bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(0, 16);
         bitBuffer.WriteBit(1);
-        bitBuffer.WriteBits(0, 21);
         bitBuffer.FlushBits();
     }
 
@@ -298,12 +299,12 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
     uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
 
-    recvData >> hairStyle >> gender >> race_ >> hairColor >> class_;
-    recvData >> facialHair >> outfitId >> skin >> face;
+    recvData >> hairStyle >> gender >> skin >> hairColor;
+    recvData >> facialHair >> class_ >> race_ >> face >> outfitId;
 
-    uint32 nameLength = recvData.ReadBits(7);    
-    std::string name = recvData.ReadString(nameLength);
     uint8 unk = recvData.ReadBit();
+    uint32 nameLength = recvData.ReadBits(6);
+    std::string name = recvData.ReadString(nameLength);
 
     if (unk)
         recvData.read_skip<uint32>();
@@ -729,23 +730,23 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[1] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
 
     TC_LOG_DEBUG("network", "Character (Guid: %u) deleted", GUID_LOPART(guid));
 
@@ -806,7 +807,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
     Player::DeleteFromDB(guid, accountId);
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
-    data << uint8(CHAR_DELETE_SUCCESS);
+    data << uint8(CHAR_DELETE_SUCCESS + 1);         // value different! Looks like all values have been offset by 1, needs more investigation.
     SendPacket(&data);
 }
 
@@ -826,23 +827,23 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 
     recvData >> unk;
 
-    playerGuid[6] = recvData.ReadBit();
     playerGuid[7] = recvData.ReadBit();
-    playerGuid[1] = recvData.ReadBit();
-    playerGuid[5] = recvData.ReadBit();
     playerGuid[2] = recvData.ReadBit();
+    playerGuid[5] = recvData.ReadBit();
     playerGuid[4] = recvData.ReadBit();
     playerGuid[3] = recvData.ReadBit();
     playerGuid[0] = recvData.ReadBit();
+    playerGuid[6] = recvData.ReadBit();
+    playerGuid[1] = recvData.ReadBit();
 
     recvData.ReadByteSeq(playerGuid[7]);
-    recvData.ReadByteSeq(playerGuid[6]);
-    recvData.ReadByteSeq(playerGuid[0]);
     recvData.ReadByteSeq(playerGuid[1]);
-    recvData.ReadByteSeq(playerGuid[4]);
-    recvData.ReadByteSeq(playerGuid[3]);
-    recvData.ReadByteSeq(playerGuid[2]);
     recvData.ReadByteSeq(playerGuid[5]);
+    recvData.ReadByteSeq(playerGuid[0]);
+    recvData.ReadByteSeq(playerGuid[3]);
+    recvData.ReadByteSeq(playerGuid[6]);
+    recvData.ReadByteSeq(playerGuid[2]);
+    recvData.ReadByteSeq(playerGuid[4]);
 
     //WorldObject* player = ObjectAccessor::GetWorldObject(*GetPlayer(), playerGuid);
     TC_LOG_DEBUG("network", "Character (Guid: %u) logging in", GUID_LOPART(playerGuid));
@@ -899,11 +900,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
-    data << pCurrChar->GetPositionZ();
-    data << pCurrChar->GetPositionY();
     data << pCurrChar->GetMapId();
-    data << pCurrChar->GetOrientation();
     data << pCurrChar->GetPositionX();
+    data << pCurrChar->GetOrientation();
+    data << pCurrChar->GetPositionY();
+    data << pCurrChar->GetPositionZ();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -2385,9 +2386,10 @@ void WorldSession::HandleRandomizeCharNameOpcode(WorldPacket& recvData)
     }
 
     std::string const* name = GetRandomCharacterName(race, gender);
-    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, 10);
+    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, 1 + name->size());
     data.WriteBit(0); // unk
-    data.WriteBits(name->size(), 7);
+    data.WriteBits(name->size(), 6);
+    data.FlushBits();
     data.WriteString(*name);
     SendPacket(&data);
 }
