@@ -1199,16 +1199,11 @@ bool LoadLocaleMPQFile(int locale)
     }
 
     char const* prefix = NULL;
-    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+    for (int i = 0; i < sizeof(CONF_mpq_dbc_list) / sizeof(char*); i++)
     {
-        // Do not attempt to read older MPQ patch archives past this build, they were merged with base
-        // and trying to read them together with new base will not end well
-        if (CONF_TargetBuild >= NEW_BASE_SET_BUILD && Builds[i] < NEW_BASE_SET_BUILD)
-           continue;
-
         memset(buff, 0, sizeof(buff));
         prefix = "";
-        _stprintf(buff, _T("%s/Data/%s/wow-update-%s-%u.MPQ"), input_path, LocalesT[locale], LocalesT[locale], Builds[i]);
+        _stprintf(buff, _T("%s/Data/%s"), input_path, CONF_mpq_dbc_list[i]);
 
 
         if (!SFileOpenPatchArchive(LocaleMpq, buff, prefix, 0))
@@ -1221,11 +1216,16 @@ bool LoadLocaleMPQFile(int locale)
             _tprintf(_T("Loaded %s\n"), buff);
     }
 
-    for (int i = 0; i < sizeof(CONF_mpq_dbc_list) / sizeof(char*); i++)
+    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
     {
+        // Do not attempt to read older MPQ patch archives past this build, they were merged with base
+        // and trying to read them together with new base will not end well
+        if (CONF_TargetBuild >= NEW_BASE_SET_BUILD && Builds[i] < NEW_BASE_SET_BUILD)
+           continue;
+
         memset(buff, 0, sizeof(buff));
         prefix = "";
-        _stprintf(buff, _T("%s/Data/%s"), input_path, CONF_mpq_dbc_list[i]);
+        _stprintf(buff, _T("%s/Data/%s/wow-update-%s-%u.MPQ"), input_path, LocalesT[locale], LocalesT[locale], Builds[i]);
 
 
         if (!SFileOpenPatchArchive(LocaleMpq, buff, prefix, 0))
