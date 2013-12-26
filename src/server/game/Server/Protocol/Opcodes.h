@@ -199,7 +199,7 @@ enum Opcodes
     CMSG_FAR_SIGHT                                           = 0x0,
     CMSG_FORCE_MOVE_ROOT_ACK                                 = 0x0,
     CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x0,
-    CMSG_GAMEOBJECT_QUERY                                    = 0x08BC,
+    CMSG_GAMEOBJECT_QUERY                                    = 0x08BC, // 5.4.2 17688
     CMSG_GAMEOBJ_REPORT_USE                                  = 0x0,
     CMSG_GAMEOBJ_USE                                         = 0x0,
     CMSG_GAMESPEED_SET                                       = 0x0,
@@ -864,7 +864,7 @@ enum Opcodes
     SMSG_GAMEOBJECT_CUSTOM_ANIM                              = 0x0,
     SMSG_GAMEOBJECT_DESPAWN_ANIM                             = 0x0,
     SMSG_GAMEOBJECT_PAGETEXT                                 = 0x0,
-    SMSG_GAMEOBJECT_QUERY_RESPONSE                           = 0x0,
+    SMSG_GAMEOBJECT_QUERY_RESPONSE                           = 0x08F3, // 5.4.2 17688
     SMSG_GAMEOBJECT_RESET_STATE                              = 0x0,
     SMSG_GAMESPEED_SET                                       = 0x0,
     SMSG_GAMETIME_SET                                        = 0x0,
