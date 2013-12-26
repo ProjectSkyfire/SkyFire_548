@@ -4297,50 +4297,50 @@ MovementStatusElements const SplineMoveSetPitchRate[] =
     MSEEnd,
 };
 
+// 5.4.2 17688
 MovementStatusElements const MoveSetWalkSpeed[] =
 {
-    MSEHasGuidByte0,
-    MSEHasGuidByte4,
-    MSEHasGuidByte5,
     MSEHasGuidByte2,
-    MSEHasGuidByte3,
-    MSEHasGuidByte1,
     MSEHasGuidByte6,
+    MSEHasGuidByte1,
+    MSEHasGuidByte0,
+    MSEHasGuidByte3,
+    MSEHasGuidByte5,
+    MSEHasGuidByte4,
     MSEHasGuidByte7,
-    MSEGuidByte6,
-    MSEGuidByte1,
+    MSEGuidByte7,
     MSEGuidByte5,
     MSEExtraElement,
     MSEGuidByte2,
-    MSECounter,
-    MSEGuidByte4,
-    MSEGuidByte0,
-    MSEGuidByte7,
     MSEGuidByte3,
+    MSEGuidByte1,
+    MSEGuidByte0,
+    MSEGuidByte6,
+    MSECounter,
     MSEEnd,
 };
 
-// 5.4.1 17538
+// 5.4.2 17688
 MovementStatusElements const MoveSetRunSpeed[] =
 {
     MSEHasGuidByte3,
-    MSEHasGuidByte6,
+    MSEHasGuidByte4,
+    MSEHasGuidByte5,
     MSEHasGuidByte7,
     MSEHasGuidByte1,
-    MSEHasGuidByte4,
-    MSEHasGuidByte0,
     MSEHasGuidByte2,
-    MSEHasGuidByte5,
-    MSEGuidByte7,
+    MSEHasGuidByte6,
+    MSEHasGuidByte0,
     MSEGuidByte5,
-    MSEExtraElement,
-    MSEGuidByte6,
-    MSEGuidByte2,
-    MSEGuidByte0,
     MSEGuidByte3,
-    MSEGuidByte1,
-    MSEGuidByte4,
+    MSEExtraElement,
+    MSEGuidByte2,
+    MSEGuidByte7,
     MSECounter,
+    MSEGuidByte1,
+    MSEGuidByte6,
+    MSEGuidByte0,
+    MSEGuidByte4,
     MSEEnd,
 };
 
