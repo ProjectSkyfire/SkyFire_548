@@ -943,8 +943,8 @@ MovementStatusElements const MovementStartTurnRight[] =
 
 MovementStatusElements const MovementStop[] = // 5.4.2 17688
 {
-    MSEPositionY,              // 40
     MSEPositionZ,              // 44
+    MSEPositionY,              // 40
     MSEPositionX,              // 36
     MSEZeroBit,                // 148
     MSEHasGuidByte1,           // 17
