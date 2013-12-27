@@ -21,67 +21,72 @@
 
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {   
-    QueryResult result = LoginDatabase.PQuery("SELECT class, expansion FROM realm_classes WHERE realmId = %u", realmID);
-    QueryResult result2 = LoginDatabase.PQuery("SELECT race, expansion FROM realm_races WHERE realmId = %u", realmID);
+    QueryResult classResult = LoginDatabase.PQuery("SELECT class, expansion FROM realm_classes WHERE realmId = %u", realmID);
+    QueryResult raceResult = LoginDatabase.PQuery("SELECT race, expansion FROM realm_races WHERE realmId = %u", realmID);
 
-    if (!result || !result2)
+    if (!classResult || !raceResult)
     {
         TC_LOG_ERROR("network", "Unable to retrieve class or race data.");
         return;
     }
 
+    TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
     
     packet << uint8(code);                             // Auth response ?
-
-    packet.WriteBit(queued);
-    if (queued)
-        packet.WriteBit(1);                             // Unknown
-
     packet.WriteBit(code == AUTH_OK);
 
     if (code == AUTH_OK)
     {
+        packet.WriteBits(0, 21);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBits(classResult->GetRowCount(), 23);
+        packet.WriteBits(raceResult->GetRowCount(), 23);
+        packet.WriteBit(0);
         packet.WriteBit(0);
         packet.WriteBits(0, 21);
-        packet.WriteBits(0, 21);
-        packet.WriteBits(result2->GetRowCount(), 23);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBits(result->GetRowCount(), 23);
     }
-    TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
+
+    packet.WriteBit(queued);
+
+    if (queued)
+        packet.WriteBit(1);                             // Unknown
+
     packet.FlushBits();
+
+    if (queued)
+        packet << uint32(0);                            // Unknown
 
     if (code == AUTH_OK)
     {
         packet << uint32(0);
-        packet << uint32(Expansion());
+        packet << uint8(Expansion());
         packet << uint8(Expansion());
         
         do
         {
-            Field* fields = result2->Fetch();
+            Field* fields = raceResult->Fetch();
             
-            packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
+            packet << fields[1].GetUInt8();
         } 
-        while (result2->NextRow());   
+        while (raceResult->NextRow());
         
-        packet << uint8(Expansion());
+        packet << uint32(0);
+        packet << uint32(0);
         packet << uint32(0);
 
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = classResult->Fetch();
             
             packet << fields[0].GetUInt8();
             packet << fields[1].GetUInt8();
         } 
-        while (result->NextRow());     
+        while (classResult->NextRow());
 
-        packet << uint32(0);
         packet << uint32(0);
     }
 

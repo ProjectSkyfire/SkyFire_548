@@ -776,10 +776,11 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
 {
     WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + NUM_ACCOUNT_DATA_TYPES * 4);
     data << uint32(time(NULL)); // Server time
-    data << uint32(mask);
 
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         data << uint32(GetAccountData(AccountDataType(i))->Time); // also unix time
+
+    data << uint32(mask);
 
     data.WriteBit(1);
     data.FlushBits();
