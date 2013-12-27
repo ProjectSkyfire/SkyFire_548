@@ -123,7 +123,8 @@ char const* Locales[] =
     "frFR", "koKR",
     "zhCN", "zhTW",
     "enCN", "enTW",
-    "esMX", "ruRU"
+    "esMX", "ruRU",
+    "itIT"
 };
 
 TCHAR const* LocalesT[] =
@@ -134,9 +135,10 @@ TCHAR const* LocalesT[] =
     _T("zhCN"), _T("zhTW"),
     _T("enCN"), _T("enTW"),
     _T("esMX"), _T("ruRU"),
+    _T("itIT"),
 };
 
-#define LOCALES_COUNT 12
+#define LOCALES_COUNT 13
 
 void CreateDir(std::string const& path)
 {
