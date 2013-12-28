@@ -314,7 +314,7 @@ enum Opcodes
     CMSG_LF_GUILD_POST_REQUEST                               = 0x0,
     CMSG_LF_GUILD_REMOVE_RECRUIT                             = 0x0,
     CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
-    CMSG_LIST_INVENTORY                                      = 0x0,
+    CMSG_LIST_INVENTORY                                      = 0x08C5, // 5.4.2 17688
     CMSG_LOAD_SCREEN                                         = 0x0650, // 5.4.2 17688
     CMSG_LOGOUT_CANCEL                                       = 0x0,
     CMSG_LOGOUT_REQUEST                                      = 0x0183, // 5.4.2 17688
@@ -554,7 +554,7 @@ enum Opcodes
     CMSG_TOGGLE_PVP                                          = 0x0,
     CMSG_TOTEM_DESTROYED                                     = 0x0,
     CMSG_TRAINER_BUY_SPELL                                   = 0x0,
-    CMSG_TRAINER_LIST                                        = 0x0,
+    CMSG_TRAINER_LIST                                        = 0x0CEA, // 5.4.2 17688
     CMSG_TRANSMOGRIFY_ITEMS                                  = 0x0,
     CMSG_TRIGGER_CINEMATIC_CHEAT                             = 0x0,
     CMSG_TURN_IN_PETITION                                    = 0x0,
