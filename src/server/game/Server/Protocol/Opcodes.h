@@ -630,7 +630,7 @@ enum Opcodes
     MSG_MOVE_STOP_STRAFE                                     = 0x027C, // 5.4.2 17688
     MSG_MOVE_STOP_SWIM                                       = 0x027F, // 5.4.2 17688
     MSG_MOVE_STOP_TURN                                       = 0x0488, // 5.4.2 17688
-    MSG_MOVE_TELEPORT                                        = 0x0,
+    MSG_MOVE_TELEPORT                                        = 0x0EC5, // 5.4.2 17688
     MSG_MOVE_TELEPORT_ACK                                    = 0x0,
     MSG_MOVE_TELEPORT_CHEAT                                  = 0x0,
     MSG_MOVE_TIME_SKIPPED                                    = 0x0,
