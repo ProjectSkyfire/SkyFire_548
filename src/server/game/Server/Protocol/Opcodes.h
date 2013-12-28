@@ -68,7 +68,7 @@ enum Opcodes
     CMSG_AUTH_SESSION                                        = 0x196E, // 5.4.2 17688
     CMSG_AUTOBANK_ITEM                                       = 0x0,
     CMSG_AUTOEQUIP_GROUND_ITEM                               = 0x0,
-    CMSG_AUTOEQUIP_ITEM                                      = 0x0,
+    CMSG_AUTOEQUIP_ITEM                                      = 0x00D0, // 5.4.2 17688
     CMSG_AUTOEQUIP_ITEM_SLOT                                 = 0x0,
     CMSG_AUTOSTORE_BAG_ITEM                                  = 0x0,
     CMSG_AUTOSTORE_BANK_ITEM                                 = 0x0,
@@ -539,7 +539,7 @@ enum Opcodes
     CMSG_SUMMON_RESPONSE                                     = 0x0,
     CMSG_SUSPEND_TOKEN                                       = 0x0,
     CMSG_SWAP_INV_ITEM                                       = 0x00B9, // 5.4.2 17688
-    CMSG_SWAP_ITEM                                           = 0x0, // 0x00D0
+    CMSG_SWAP_ITEM                                           = 0x012B, // 5.4.2 17688
     CMSG_SYNC_DANCE                                          = 0x0,
     CMSG_TAXICLEARALLNODES                                   = 0x0,
     CMSG_TAXIENABLEALLNODES                                  = 0x0,
