@@ -150,6 +150,16 @@ struct KeyChainEntry
     uint8       Key[KEYCHAIN_SIZE];
 };
 
+// SceneScript.db2
+struct SceneScriptEntry
+{
+    uint32 m_ID;                                             // 0         m_ID
+    LocalizedString* m_name;                                 // 1         m_name
+    LocalizedString* m_script;                               // 2         m_script
+    uint32 m_prevScriptPartID;                               // 3         m_prevScriptPartID - Prev Script Part Id From Chain
+    uint32 m_nextScriptPartID;                               // 4         m_nextScriptPartID - Next Script Part Id From Chain
+};
+
 // SpellReagents.db2
 struct SpellReagentsEntry
 {
