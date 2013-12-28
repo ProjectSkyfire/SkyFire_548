@@ -68,7 +68,7 @@ enum Opcodes
     CMSG_AUTH_SESSION                                        = 0x196E, // 5.4.2 17688
     CMSG_AUTOBANK_ITEM                                       = 0x0,
     CMSG_AUTOEQUIP_GROUND_ITEM                               = 0x0,
-    CMSG_AUTOEQUIP_ITEM                                      = 0x0,
+    CMSG_AUTOEQUIP_ITEM                                      = 0x00D0, // 5.4.2 17688
     CMSG_AUTOEQUIP_ITEM_SLOT                                 = 0x0,
     CMSG_AUTOSTORE_BAG_ITEM                                  = 0x0,
     CMSG_AUTOSTORE_BANK_ITEM                                 = 0x0,
@@ -314,7 +314,7 @@ enum Opcodes
     CMSG_LF_GUILD_POST_REQUEST                               = 0x0,
     CMSG_LF_GUILD_REMOVE_RECRUIT                             = 0x0,
     CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
-    CMSG_LIST_INVENTORY                                      = 0x0,
+    CMSG_LIST_INVENTORY                                      = 0x08C5, // 5.4.2 17688
     CMSG_LOAD_SCREEN                                         = 0x0650, // 5.4.2 17688
     CMSG_LOGOUT_CANCEL                                       = 0x0,
     CMSG_LOGOUT_REQUEST                                      = 0x0183, // 5.4.2 17688
@@ -539,7 +539,7 @@ enum Opcodes
     CMSG_SUMMON_RESPONSE                                     = 0x0,
     CMSG_SUSPEND_TOKEN                                       = 0x0,
     CMSG_SWAP_INV_ITEM                                       = 0x00B9, // 5.4.2 17688
-    CMSG_SWAP_ITEM                                           = 0x0, // 0x00D0
+    CMSG_SWAP_ITEM                                           = 0x012B, // 5.4.2 17688
     CMSG_SYNC_DANCE                                          = 0x0,
     CMSG_TAXICLEARALLNODES                                   = 0x0,
     CMSG_TAXIENABLEALLNODES                                  = 0x0,
@@ -554,7 +554,7 @@ enum Opcodes
     CMSG_TOGGLE_PVP                                          = 0x0,
     CMSG_TOTEM_DESTROYED                                     = 0x0,
     CMSG_TRAINER_BUY_SPELL                                   = 0x0,
-    CMSG_TRAINER_LIST                                        = 0x0,
+    CMSG_TRAINER_LIST                                        = 0x0CEA, // 5.4.2 17688
     CMSG_TRANSMOGRIFY_ITEMS                                  = 0x0,
     CMSG_TRIGGER_CINEMATIC_CHEAT                             = 0x0,
     CMSG_TURN_IN_PETITION                                    = 0x0,
@@ -630,7 +630,7 @@ enum Opcodes
     MSG_MOVE_STOP_STRAFE                                     = 0x027C, // 5.4.2 17688
     MSG_MOVE_STOP_SWIM                                       = 0x027F, // 5.4.2 17688
     MSG_MOVE_STOP_TURN                                       = 0x0488, // 5.4.2 17688
-    MSG_MOVE_TELEPORT                                        = 0x0,
+    MSG_MOVE_TELEPORT                                        = 0x0EC5, // 5.4.2 17688
     MSG_MOVE_TELEPORT_ACK                                    = 0x0,
     MSG_MOVE_TELEPORT_CHEAT                                  = 0x0,
     MSG_MOVE_TIME_SKIPPED                                    = 0x0,
@@ -783,7 +783,7 @@ enum Opcodes
     SMSG_CLEAR_COOLDOWNS                                     = 0x0,
     SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                           = 0x0,
     SMSG_CLEAR_TARGET                                        = 0x0,
-    SMSG_CLIENTCACHE_VERSION                                 = 0x0,
+    SMSG_CLIENTCACHE_VERSION                                 = 0x0A4C, // 5.4.2 17688
     SMSG_CLIENT_CONTROL_UPDATE                               = 0x0,
     SMSG_COMBAT_EVENT_FAILED                                 = 0x0,
     SMSG_COMBAT_LOG_MULTIPLE                                 = 0x0,
@@ -1095,7 +1095,7 @@ enum Opcodes
     SMSG_MULTIPLE_PACKETS                                    = 0x0,
     SMSG_NAME_QUERY_RESPONSE                                 = 0x0E48, // 5.4.2 17688
     SMSG_NEW_TAXI_PATH                                       = 0x0,
-    SMSG_NEW_WORLD                                           = 0x0,
+    SMSG_NEW_WORLD                                           = 0x0ABF, // 5.4.2 17688
     SMSG_NEW_WORLD_ABORT                                     = 0x0,
     SMSG_NOTIFICATION                                        = 0x0,
     SMSG_NOTIFY_DANCE                                        = 0x0,
@@ -1329,11 +1329,11 @@ enum Opcodes
     SMSG_TRAINER_BUY_SUCCEEDED                               = 0x0,
     SMSG_TRAINER_LIST                                        = 0x0,
     SMSG_TRANSFER_ABORTED                                    = 0x0,
-    SMSG_TRANSFER_PENDING                                    = 0x0,
+    SMSG_TRANSFER_PENDING                                    = 0x0819, // 5.4.2 17688
     SMSG_TRIGGER_CINEMATIC                                   = 0x1320, // 5.4.2 17688
     SMSG_TRIGGER_MOVIE                                       = 0x0,
     SMSG_TURN_IN_PETITION_RESULTS                            = 0x0,
-    SMSG_TUTORIAL_FLAGS                                      = 0x0,
+    SMSG_TUTORIAL_FLAGS                                      = 0x138D, // 5.4.2 17688
     SMSG_UNIT_HEALTH_FREQUENT                                = 0x0,
     SMSG_UNIT_SPELLCAST_START                                = 0x0,
     SMSG_UPDATE_ACCOUNT_DATA                                 = 0x0,

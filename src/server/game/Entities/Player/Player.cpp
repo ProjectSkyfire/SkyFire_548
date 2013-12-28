@@ -2327,11 +2327,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
+                data << float(m_teleport_dest.GetPositionZ());
+                data << uint32(mapid);
                 data << float(m_teleport_dest.GetPositionY());
                 data << float(m_teleport_dest.GetOrientation());
-                data << uint32(mapid);
                 data << float(m_teleport_dest.GetPositionX());
-                data << float(m_teleport_dest.GetPositionZ());
 
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
