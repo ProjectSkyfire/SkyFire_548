@@ -1095,7 +1095,7 @@ enum Opcodes
     SMSG_MULTIPLE_PACKETS                                    = 0x0,
     SMSG_NAME_QUERY_RESPONSE                                 = 0x0E48, // 5.4.2 17688
     SMSG_NEW_TAXI_PATH                                       = 0x0,
-    SMSG_NEW_WORLD                                           = 0x0,
+    SMSG_NEW_WORLD                                           = 0x0ABF, // 5.4.2 17688
     SMSG_NEW_WORLD_ABORT                                     = 0x0,
     SMSG_NOTIFICATION                                        = 0x0,
     SMSG_NOTIFY_DANCE                                        = 0x0,
