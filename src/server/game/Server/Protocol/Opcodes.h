@@ -783,7 +783,7 @@ enum Opcodes
     SMSG_CLEAR_COOLDOWNS                                     = 0x0,
     SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                           = 0x0,
     SMSG_CLEAR_TARGET                                        = 0x0,
-    SMSG_CLIENTCACHE_VERSION                                 = 0x0,
+    SMSG_CLIENTCACHE_VERSION                                 = 0x0A4C, // 5.4.2 17688
     SMSG_CLIENT_CONTROL_UPDATE                               = 0x0,
     SMSG_COMBAT_EVENT_FAILED                                 = 0x0,
     SMSG_COMBAT_LOG_MULTIPLE                                 = 0x0,
@@ -1333,7 +1333,7 @@ enum Opcodes
     SMSG_TRIGGER_CINEMATIC                                   = 0x1320, // 5.4.2 17688
     SMSG_TRIGGER_MOVIE                                       = 0x0,
     SMSG_TURN_IN_PETITION_RESULTS                            = 0x0,
-    SMSG_TUTORIAL_FLAGS                                      = 0x0,
+    SMSG_TUTORIAL_FLAGS                                      = 0x138D, // 5.4.2 17688
     SMSG_UNIT_HEALTH_FREQUENT                                = 0x0,
     SMSG_UNIT_SPELLCAST_START                                = 0x0,
     SMSG_UPDATE_ACCOUNT_DATA                                 = 0x0,
