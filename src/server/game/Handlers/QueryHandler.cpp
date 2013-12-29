@@ -32,7 +32,7 @@
 #include "MapManager.h"
 #include "Config.h"
 
-enum DBQueryType
+/*enum DBQueryType
 {
     BattlePetAbility           = 0xCBA43BD7,
     BattlePetAbilityEffect     = 0xDD8B690E,
@@ -71,7 +71,7 @@ enum DBQueryType
     SceneScriptPackage         = 0xE8CB5E09,
     SceneScriptPackageMember   = 0xE44DB71C,
     SpellReagents              = 0xAB66C99F
-};
+};*/
 
 void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 {
