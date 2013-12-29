@@ -59,6 +59,7 @@ enum Opcodes
     CMSG_ARENA_TEAM_ROSTER                                   = 0x0,
     CMSG_ATTACKSTOP                                          = 0x0AC4, // 5.4.2 17688
     CMSG_ATTACKSWING                                         = 0x0E4B, // 5.4.2 17688
+    CMSG_AUCTION_HELLO                                       = 0x02A5, // 5.4.2 17688
     CMSG_AUCTION_LIST_BIDDER_ITEMS                           = 0x0,
     CMSG_AUCTION_LIST_ITEMS                                  = 0x0,
     CMSG_AUCTION_LIST_OWNER_ITEMS                            = 0x0,
@@ -594,7 +595,6 @@ enum Opcodes
     CMSG_WORLD_TELEPORT                                      = 0x0,
     CMSG_WRAP_ITEM                                           = 0x0,
     CMSG_ZONEUPDATE                                          = 0x0,
-    MSG_AUCTION_HELLO                                        = 0x0,
     MSG_CHANNEL_START                                        = 0x0847, // 5.4.2 17688
     MSG_CHANNEL_UPDATE                                       = 0x1C04, // 5.4.2 17688
     MSG_CORPSE_QUERY                                         = 0x0,
@@ -697,6 +697,7 @@ enum Opcodes
     SMSG_ATTACKSWING_CANT_ATTACK                             = 0x0,
     SMSG_ATTACKSWING_DEADTARGET                              = 0x0,
     SMSG_ATTACKSWING_NOTINRANGE                              = 0x0,
+    SMSG_AUCTION_HELLO                                       = 0x0A5C, // 5.4.2 17688
     SMSG_AUCTION_BIDDER_LIST_RESULT                          = 0x0,
     SMSG_AUCTION_BIDDER_NOTIFICATION                         = 0x0,
     SMSG_AUCTION_COMMAND_RESULT                              = 0x0,
