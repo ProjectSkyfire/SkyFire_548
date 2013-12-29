@@ -28,11 +28,11 @@
 /// List of Opcodes
 enum Opcodes
 {
-    MAX_OPCODE                                              = 0x1FFF,
-    NUM_OPCODE_HANDLERS                                     = 0x7FFF,
-    UNKNOWN_OPCODE                                          = (0xFFFF+1),
-    NULL_OPCODE                                             = 0x0,
-    COMPRESSED_OPCODE_MASK                                  = 0x8000,
+    MAX_OPCODE                                               = 0x1FFF,
+    NUM_OPCODE_HANDLERS                                      = 0x7FFF,
+    UNKNOWN_OPCODE                                           = (0xFFFF+1),
+    NULL_OPCODE                                              = 0x0,
+    COMPRESSED_OPCODE_MASK                                   = 0x8000,
 
     CMSG_ACCEPT_LEVEL_GRANT                                  = 0x0,
     CMSG_ACCEPT_TRADE                                        = 0x0,
@@ -125,7 +125,7 @@ enum Opcodes
     CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
     CMSG_CANCEL_TRADE                                        = 0x0,
     CMSG_CAST_SPELL                                          = 0x0A57, // 5.4.2 17688
-	CMSG_CHALLANGES_INFO                                     = 0x0599, // 5.4.2 17688
+    CMSG_CHALLANGES_INFO                                     = 0x0599, // 5.4.2 17688
     CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
     CMSG_CHANNEL_ANNOUNCEMENTS                               = 0x0,
@@ -163,7 +163,7 @@ enum Opcodes
     CMSG_CLEAR_CHANNEL_WATCH                                 = 0x0,
     CMSG_CLEAR_RAID_MARKER                                   = 0x0,
     CMSG_CLEAR_TRADE_ITEM                                    = 0x0,
-	CMSG_CLOSE_BROWSER                                       = 0x0C7E, // 5.4.2 17688
+    CMSG_CLOSE_BROWSER                                       = 0x0C7E, // 5.4.2 17688
     CMSG_COMMENTATOR_ENABLE                                  = 0x0,
     CMSG_COMMENTATOR_ENTER_INSTANCE                          = 0x0,
     CMSG_COMMENTATOR_EXIT_INSTANCE                           = 0x0,
@@ -393,7 +393,7 @@ enum Opcodes
     CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
     CMSG_OFFER_PETITION                                      = 0x0,
     CMSG_OPENING_CINEMATIC                                   = 0x0,
-	CMSG_OPEN_BROWSER                                        = 0x04F4, // 5.4.2 17688
+    CMSG_OPEN_BROWSER                                        = 0x04F4, // 5.4.2 17688
     CMSG_OPEN_ITEM                                           = 0x0,
     CMSG_OPT_OUT_OF_LOOT                                     = 0x0,
     CMSG_PAGE_TEXT_QUERY                                     = 0x0,
@@ -406,8 +406,8 @@ enum Opcodes
     CMSG_PETITION_SIGN                                       = 0x0,
     CMSG_PET_ABANDON                                         = 0x0,
     CMSG_PET_ACTION                                          = 0x0,
-	CMSG_PET_BATTLE_QUEUE_JOIN                               = 0x0A3D, // 5.4.2 17688
-	CMSG_PET_BATTLE_QUEUE_LEAVE                              = 0x081F, // 5.4.2 17688
+    CMSG_PET_BATTLE_QUEUE_JOIN                               = 0x0A3D, // 5.4.2 17688
+    CMSG_PET_BATTLE_QUEUE_LEAVE                              = 0x081F, // 5.4.2 17688
     CMSG_PET_CANCEL_AURA                                     = 0x0,
     CMSG_PET_CAST_SPELL                                      = 0x0,
     CMSG_PET_LEARN_TALENT                                    = 0x0,
@@ -490,7 +490,7 @@ enum Opcodes
     CMSG_SAVE_PLAYER                                         = 0x0,
     CMSG_SEARCH_LFG_JOIN                                     = 0x0,
     CMSG_SEARCH_LFG_LEAVE                                    = 0x0,
-	CMSG_SELECT_LOOT_SPEC                                    = 0x00EF, // 5.4.2 17688
+    CMSG_SELECT_LOOT_SPEC                                    = 0x00EF, // 5.4.2 17688
     CMSG_SELF_RES                                            = 0x0,
     CMSG_SELL_ITEM                                           = 0x0EEB, // 5.4.2 17688
     CMSG_SEND_MAIL                                           = 0x0,
@@ -508,7 +508,7 @@ enum Opcodes
     CMSG_SET_CHANNEL_WATCH                                   = 0x0,
     CMSG_SET_CONTACT_NOTES                                   = 0x0,
     CMSG_SET_CURRENCY_FLAGS                                  = 0x0,
-	CMSG_SET_DUNGEON_DIFFICULTY                              = 0x06D3, // 5.4.2 17688
+    CMSG_SET_DUNGEON_DIFFICULTY                              = 0x06D3, // 5.4.2 17688
     CMSG_SET_EVERYONE_IS_ASSISTANT                           = 0x0,
     CMSG_SET_FACTION_ATWAR                                   = 0x0,
     CMSG_SET_FACTION_CHEAT                                   = 0x0,
@@ -530,7 +530,7 @@ enum Opcodes
     CMSG_SET_TRADE_ITEM                                      = 0x0,
     CMSG_SET_VEHICLE_REC_ID_ACK                              = 0x0,
     CMSG_SET_WATCHED_FACTION                                 = 0x0,
-	CMSG_SHOP_CATEGORY                                       = 0x0676, // 5.4.2 17688
+    CMSG_SHOP_CATEGORY                                       = 0x0676, // 5.4.2 17688
     CMSG_SHOWING_CLOAK                                       = 0x0,
     CMSG_SHOWING_HELM                                        = 0x0,
     CMSG_SOCKET_GEMS                                         = 0x0,
@@ -593,7 +593,6 @@ enum Opcodes
     CMSG_WORLD_TELEPORT                                      = 0x0,
     CMSG_WRAP_ITEM                                           = 0x0,
     CMSG_ZONEUPDATE                                          = 0x0,
-
     MSG_AUCTION_HELLO                                        = 0x0,
     MSG_CHANNEL_START                                        = 0x0847, // 5.4.2 17688
     MSG_CHANNEL_UPDATE                                       = 0x1C04, // 5.4.2 17688
@@ -667,7 +666,6 @@ enum Opcodes
     MSG_TABARDVENDOR_ACTIVATE                                = 0x0,
     MSG_TALENT_WIPE_CONFIRM                                  = 0x0,
     MSG_VERIFY_CONNECTIVITY                                  = 0x4F57, // 5.4.2 17688
-
     SMSG_ACCOUNT_DATA_TIMES                                  = 0x0899, // 5.4.2 17688
     SMSG_ACCOUNT_INFO_RESPONSE                               = 0x0,
     SMSG_ACCOUNT_RESTRICTED_WARNING                          = 0x0,
@@ -769,7 +767,7 @@ enum Opcodes
     SMSG_CANCEL_AUTO_REPEAT                                  = 0x0,
     SMSG_CANCEL_COMBAT                                       = 0x0,
     SMSG_CAST_FAILED                                         = 0x0,
-	SMSG_CHALLANGES_INFO                                     = 0x0A71, // 5.4.2 17688
+    SMSG_CHALLANGES_INFO                                     = 0x0A71, // 5.4.2 17688
     SMSG_CHANNEL_LIST                                        = 0x0,
     SMSG_CHANNEL_MEMBER_COUNT                                = 0x0,
     SMSG_CHANNEL_NOTIFY                                      = 0x0,
@@ -796,7 +794,7 @@ enum Opcodes
     SMSG_CLEAR_TARGET                                        = 0x0,
     SMSG_CLIENTCACHE_VERSION                                 = 0x0A4C, // 5.4.2 17688
     SMSG_CLIENT_CONTROL_UPDATE                               = 0x0,
-	SMSG_CLOSE_BROWSER                                       = 0x084F, // 5.4.2 17688
+    SMSG_CLOSE_BROWSER                                       = 0x084F, // 5.4.2 17688
     SMSG_COMBAT_EVENT_FAILED                                 = 0x0,
     SMSG_COMBAT_LOG_MULTIPLE                                 = 0x0,
     SMSG_COMMENTATOR_MAP_INFO                                = 0x0,
@@ -1116,7 +1114,7 @@ enum Opcodes
     SMSG_NPC_WONT_TALK                                       = 0x0,
     SMSG_OFFER_PETITION_ERROR                                = 0x0,
     SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA                = 0x0,
-	SMSG_OPEN_BROWSER                                        = 0x0C6B, // 5.4.2 17688
+    SMSG_OPEN_BROWSER                                        = 0x0C6B, // 5.4.2 17688
     SMSG_OPEN_CONTAINER                                      = 0x0,
     SMSG_OPEN_LFG_DUNGEON_FINDER                             = 0x0,
     SMSG_OVERRIDE_LIGHT                                      = 0x0,
@@ -1136,7 +1134,7 @@ enum Opcodes
     SMSG_PET_ACTION_FEEDBACK                                 = 0x0,
     SMSG_PET_ACTION_SOUND                                    = 0x0,
     SMSG_PET_ADDED                                           = 0x0,
-	SMSG_PET_BATTLE_QUEUE_STATUS                             = 0x000C, // 5.4.2 17688
+    SMSG_PET_BATTLE_QUEUE_STATUS                             = 0x000C, // 5.4.2 17688
     SMSG_PET_BROKEN                                          = 0x0,
     SMSG_PET_CAST_FAILED                                     = 0x0,
     SMSG_PET_DISMISS_SOUND                                   = 0x0,
@@ -1242,7 +1240,7 @@ enum Opcodes
     SMSG_SERVER_PERF                                         = 0x0,
     SMSG_SET_AI_ANIM_KIT                                     = 0x0,
     SMSG_SET_DF_FAST_LAUNCH_RESULT                           = 0x0,
-	SMSG_SET_DUNGEON_DIFFICULTY                              = 0x0C24, // 5.4.2 17688
+    SMSG_SET_DUNGEON_DIFFICULTY                              = 0x0C24, // 5.4.2 17688
     SMSG_SET_FACTION_ATWAR                                   = 0x0,
     SMSG_SET_FACTION_STANDING                                = 0x0,
     SMSG_SET_FACTION_VISIBLE                                 = 0x0,
@@ -1258,7 +1256,7 @@ enum Opcodes
     SMSG_SET_PROJECTILE_POSITION                             = 0x0,
     SMSG_SHOP_BUY                                            = 0x1042, // 5.4.2 17688
     SMSG_SHOP_BUY_ERROR                                      = 0x0000, // 5.4.2 17688
-	SMSG_SHOP_ITEM                                           = 0x089a, // 5.4.2 17688
+    SMSG_SHOP_ITEM                                           = 0x089a, // 5.4.2 17688
     SMSG_SHOWTAXINODES                                       = 0x0,
     SMSG_SHOW_BANK                                           = 0x0,
     SMSG_SHOW_RATINGS                                        = 0x0,
