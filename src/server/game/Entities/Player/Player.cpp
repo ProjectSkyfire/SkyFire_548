@@ -20591,72 +20591,67 @@ inline void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std:
 {
     ObjectGuid guid(GetGUID());
 
-    data->WriteBit(0);
     data->WriteBit(1);
+    data->WriteBit(0);                          // !hasText
     data->WriteBit(1);
-    data->WriteBits(0, 8);
+    data->WriteBits(0, 8);                      // skip GUID
     data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBits(0, 8); 
-    data->WriteBit(0);
-
-    data->WriteBit(guid[6]);
-    data->WriteBit(guid[1]);
-    data->WriteBit(guid[3]);
-    data->WriteBit(guid[5]);
-    data->WriteBit(guid[4]);
-    data->WriteBit(guid[2]);
-    data->WriteBit(guid[7]);
-    data->WriteBit(guid[0]);
-
+    data->WriteBit(1);                          // !realmId
     data->WriteBit(1);
     data->WriteBit(0);
+    data->WriteBit(0);                          // !hasLanguage
     data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
+    data->WriteBits(0, 8);                      // skip GUID
     data->WriteBits(text.size(), 12);
     data->WriteBit(0);
+    data->WriteBit(1);
 
-    data->WriteBit(guid[4]);
-    data->WriteBit(guid[1]);
-    data->WriteBit(guid[3]);
-    data->WriteBit(guid[6]);
-    data->WriteBit(guid[2]);
-    data->WriteBit(guid[5]);
-    data->WriteBit(guid[0]);
-    data->WriteBit(guid[7]);
+    data->WriteBit(guid[4]); // 28
+    data->WriteBit(guid[2]); // 26
+    data->WriteBit(guid[7]); // 31
+    data->WriteBit(guid[5]); // 29
+    data->WriteBit(guid[1]); // 25
+    data->WriteBit(guid[3]); // 27
+    data->WriteBit(guid[0]); // 24
+    data->WriteBit(guid[6]); // 30
 
+    data->WriteBit(1);
+    data->WriteBit(1);
     data->WriteBit(0);
-    data->WriteBits(8, 9);
+    data->WriteBit(1);
+    data->WriteBit(0);
 
+    data->WriteBit(guid[1]); // 41
+    data->WriteBit(guid[5]); // 45
+    data->WriteBit(guid[4]); // 44
+    data->WriteBit(guid[6]); // 46
+    data->WriteBit(guid[3]); // 43
+    data->WriteBit(guid[2]); // 42
+    data->WriteBit(guid[7]); // 47
+    data->WriteBit(guid[0]); // 40
     data->FlushBits();
 
+    data->WriteByteSeq(guid[2]);
     data->WriteByteSeq(guid[7]);
+    data->WriteByteSeq(guid[5]);
+    data->WriteByteSeq(guid[0]);
+    data->WriteByteSeq(guid[3]);
     data->WriteByteSeq(guid[4]);
     data->WriteByteSeq(guid[1]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(guid[0]);
     data->WriteByteSeq(guid[6]);
+
     data->WriteByteSeq(guid[5]);
+    data->WriteByteSeq(guid[7]);
+    data->WriteByteSeq(guid[3]);
+    data->WriteByteSeq(guid[1]);
+    data->WriteByteSeq(guid[6]);
     data->WriteByteSeq(guid[2]);
+    data->WriteByteSeq(guid[4]);
+    data->WriteByteSeq(guid[0]);
 
     *data << uint8(language);
-        
-    data->WriteByteSeq(guid[7]);
-    data->WriteByteSeq(guid[4]);
-    data->WriteByteSeq(guid[0]);
-    data->WriteByteSeq(guid[6]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(guid[2]);
-    data->WriteByteSeq(guid[5]);
-    data->WriteByteSeq(guid[1]);
-
     data->WriteString(text);
     *data << uint8(msgtype);
-    *data << uint32(0);
 }
 
 void Player::Say(const std::string& text, const uint32 language)
