@@ -28,11 +28,11 @@
 /// List of Opcodes
 enum Opcodes
 {
-    MAX_OPCODE                                               = 0x1FFF,
-    NUM_OPCODE_HANDLERS                                      = 0x7FFF,
-    UNKNOWN_OPCODE                                           = (0xFFFF+1),
-    NULL_OPCODE                                              = 0x0,
-    COMPRESSED_OPCODE_MASK                                   = 0x8000,
+    MAX_OPCODE                                              = 0x1FFF,
+    NUM_OPCODE_HANDLERS                                     = 0x7FFF,
+    UNKNOWN_OPCODE                                          = (0xFFFF+1),
+    NULL_OPCODE                                             = 0x0,
+    COMPRESSED_OPCODE_MASK                                  = 0x8000,
 
     CMSG_ACCEPT_LEVEL_GRANT                                  = 0x0,
     CMSG_ACCEPT_TRADE                                        = 0x0,
