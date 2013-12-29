@@ -672,7 +672,7 @@ enum Opcodes
     SMSG_ACCOUNT_RESTRICTED_WARNING                          = 0x0,
     SMSG_ACHIEVEMENT_DELETED                                 = 0x0,
     SMSG_ACHIEVEMENT_EARNED                                  = 0x0,
-    SMSG_ACTION_BUTTONS                                      = 0x0,
+    SMSG_ACTION_BUTTONS                                      = 0x0E2C, // 5.4.2 17688
     SMSG_ACTIVATETAXIREPLY                                   = 0x0,
     SMSG_ADDON_INFO                                          = 0x0,
     SMSG_ADD_RUNE_POWER                                      = 0x0,
