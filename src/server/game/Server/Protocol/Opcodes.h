@@ -223,7 +223,7 @@ enum Opcodes
     CMSG_GM_REPORT_LAG                                       = 0x0,
     CMSG_GM_SET_SECURITY_GROUP                               = 0x0,
     CMSG_GOSSIP_HELLO                                        = 0x02EF, // 5.4.2 17688
-    CMSG_GOSSIP_SELECT_OPTION                                = 0x0,
+    CMSG_GOSSIP_SELECT_OPTION                                = 0x0ECA, // 5.4.2 17688
     CMSG_GRANT_LEVEL                                         = 0x0,
     CMSG_GROUP_ASSISTANT_LEADER                              = 0x0,
     CMSG_GROUP_CANCEL                                        = 0x0,
@@ -662,7 +662,7 @@ enum Opcodes
     MSG_RANDOM_ROLL                                          = 0x0,
     MSG_SAVE_GUILD_EMBLEM                                    = 0x0,
     MSG_SET_DUNGEON_DIFFICULTY                               = 0x1885, // 5.4.2 17688
-    MSG_SET_RAID_DIFFICULTY                                  = 0x0,
+    MSG_SET_RAID_DIFFICULTY                                  = 0x1885, // 5.4.2 17688
     MSG_START_MOVE_FORWARD                                   = 0x0,
     MSG_TABARDVENDOR_ACTIVATE                                = 0x0,
     MSG_TALENT_WIPE_CONFIRM                                  = 0x0,
@@ -894,9 +894,9 @@ enum Opcodes
     SMSG_GM_PLAYER_INFO                                      = 0x0,
     SMSG_GM_TICKET_STATUS_UPDATE                             = 0x0,
     SMSG_GODMODE                                             = 0x0,
-    SMSG_GOSSIP_COMPLETE                                     = 0x0,
-    SMSG_GOSSIP_MESSAGE                                      = 0x0,
-    SMSG_GOSSIP_POI                                          = 0x0,
+    SMSG_GOSSIP_COMPLETE                                     = 0x0293, // 5.4.2 17688
+    SMSG_GOSSIP_MESSAGE                                      = 0x1736, // 5.4.2 17688
+    SMSG_GOSSIP_POI                                          = 0x1D8D, // 5.4.2 17688
     SMSG_GROUPACTION_THROTTLED                               = 0x0,
     SMSG_GROUP_CANCEL                                        = 0x0,
     SMSG_GROUP_DECLINE                                       = 0x0,
@@ -941,7 +941,7 @@ enum Opcodes
     SMSG_GUILD_PARTY_STATE_RESPONSE                          = 0x0,
     SMSG_GUILD_PERMISSIONS_QUERY_RESULTS                     = 0x0,
     SMSG_GUILD_QUERY_RESPONSE                                = 0x0,
-    SMSG_GUILD_RANK                                          = 0x0,
+    SMSG_GUILD_RANK                                          = 0x0, // 0x05AA Something about displaying all the ranks.
     SMSG_GUILD_RANKS_UPDATE                                  = 0x0,
     SMSG_GUILD_RECIPES                                       = 0x0,
     SMSG_GUILD_RENAMED                                       = 0x0,
@@ -1280,8 +1280,8 @@ enum Opcodes
     SMSG_SPELL_DELAYED                                       = 0x0,
     SMSG_SPELL_FAILED_OTHER                                  = 0x0,
     SMSG_SPELL_FAILURE                                       = 0x0,
-    SMSG_SPELL_GO                                            = 0x0,
-    SMSG_SPELL_START                                         = 0x0,
+    SMSG_SPELL_GO                                            = 0x061F, // 5.4.2 17688
+    SMSG_SPELL_START                                         = 0x003E, // 5.4.2 17688
     SMSG_SPELL_UPDATE_CHAIN_TARGETS                          = 0x0,
     SMSG_SPIRIT_HEALER_CONFIRM                               = 0x0,
     SMSG_SPLINE_MOVE_COLLISION_DISABLE                       = 0x0,
@@ -1328,7 +1328,7 @@ enum Opcodes
     SMSG_SUSPEND_TOKEN_RESPONSE                              = 0x0,
     SMSG_TALENTS_ERROR                                       = 0x0,
     SMSG_TALENTS_INFO                                        = 0x0,
-    SMSG_TALENTS_INVOLUNTARILY_RESET                         = 0x0,
+    SMSG_TALENTS_INVOLUNTARILY_RESET                         = 0x11CA, // 5.4.2 17688
     SMSG_TAXINODE_STATUS                                     = 0x0,
     SMSG_TEST_DROP_RATE_RESULT                               = 0x0,
     SMSG_TEXT_EMOTE                                          = 0x0,
@@ -1390,7 +1390,7 @@ enum Opcodes
     SMSG_WEEKLY_SPELL_USAGE                                  = 0x0,
     SMSG_WEEKLY_SPELL_USAGE_UPDATE                           = 0x0,
     SMSG_WHO                                                 = 0x0872, // 5.4.2 17688
-    SMSG_WHOIS                                               = 0x0,
+    SMSG_WHOIS                                               = 0x050E, // 5.4.2 17688
     SMSG_WORLD_SERVER_INFO                                   = 0x0,
     SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
     SMSG_XP_GAIN_ABORTED                                     = 0x0,
