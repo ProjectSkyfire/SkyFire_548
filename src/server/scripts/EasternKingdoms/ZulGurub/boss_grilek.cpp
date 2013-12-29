@@ -19,7 +19,7 @@
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "zulgurub.h"
+#include "instance_zulgurub.h"
 
 enum Yells
 {
