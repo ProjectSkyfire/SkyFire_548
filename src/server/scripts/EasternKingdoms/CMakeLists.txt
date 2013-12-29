@@ -100,7 +100,6 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ZulGurub/boss_wushoolay.cpp
   EasternKingdoms/ZulGurub/boss_zanzil.cpp
   EasternKingdoms/ZulGurub/instance_zulgurub.cpp
-  EasternKingdoms/ZulGurub/zulgurub.h
   EasternKingdoms/zone_wetlands.cpp
   EasternKingdoms/zone_arathi_highlands.cpp
   EasternKingdoms/Gnomeregan/instance_gnomeregan.cpp
