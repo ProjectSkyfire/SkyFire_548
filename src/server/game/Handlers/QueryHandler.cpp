@@ -32,6 +32,47 @@
 #include "MapManager.h"
 #include "Config.h"
 
+enum DBQueryType
+{
+    BattlePetAbility           = 0xCBA43BD7,
+    BattlePetAbilityEffect     = 0xDD8B690E,
+    BattlePetAbilityState      = 0x3C556E43,
+    BattlePetAbilityTurn       = 0xECD8ECDC,
+    BattlePetBreedQuality      = 0x1B5A4EA6,
+    BattlePetBreedState        = 0x6AFB3206,
+    DB_QUERY_BattlePetEffectProperties  = 0x63B4C4BA,
+    BattlePetNPCTeamMember     = 0xF2059DFA,
+    BattlePetSpecies           = 0x6C93F9B1,
+    BattlePetSpeciesState      = 0x15D87DD0,
+    BattlePetSpeciesXAbility   = 0x44237314,
+    BattlePetState             = 0x8F447330,
+    BattlePetVisual            = 0xC3ADEB43,
+    DB_QUERY_NPC_TEXT          = 0x021826BB,
+    Creature                   = 0xC9D6B6B3,
+    GameObjects                = 0x13C403A5,
+    DB_QUERY_ITEM_SPARSE       = 0x919BE54E,
+    DB_QUERY_ITEM              = 0x50238EC2,
+    ItemCurrencyCost           = 0x6FE05AE9,
+    ItemExtendedCost           = 0xBB858355,
+    ItemUpgrade                = 0x7006463B,
+    KeyChain                   = 0x6D8A2694,
+    Locale                     = 0x3F85ABB7,
+    Location                   = 0x394C3727,
+    MapChallengeMode           = 0x383B4C27,
+    MarketingPromotionsXLocale = 0xA1D3F1AD,
+    Path                       = 0x94F46395,
+    PathNode                   = 0x3B9E4CA2,
+    PathNodeProperty           = 0xFE21C024,
+    PathProperty               = 0x08E54F60,
+    QuestPackageItem           = 0xCC2F84F0,
+    RulesetItemUpgrade         = 0x6DB7086C,
+    RulesetRaidLootUpgrade     = 0xED1FBB4D,
+    SceneScript                = 0xD4B163CC,
+    SceneScriptPackage         = 0xE8CB5E09,
+    SceneScriptPackageMember   = 0xE44DB71C,
+    SpellReagents              = 0xAB66C99F
+};
+
 void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 {
     Player* player = ObjectAccessor::FindPlayer(guid);
@@ -532,6 +573,106 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
 }
+
+/*void WorldSession::HandleDbQueryOpcode(WorldPacket& p_ReceivedPacket)
+{
+    uint32 l_QueryType;
+    uint32 l_Count;
+
+    p_ReceivedPacket >> l_QueryType;
+
+    l_Count = p_ReceivedPacket.ReadBits(23);
+
+    std::vector<ObjectGuid> l_Guids;
+    std::vector<uint32>		l_requestedEntries;
+
+    for (uint32 l_I = 0 ; l_I < l_Count ; l_I++)
+    {
+        ObjectGuid l_Guid;
+
+        l_Guid[7] = p_ReceivedPacket.ReadBit();
+        l_Guid[5] = p_ReceivedPacket.ReadBit();
+        l_Guid[6] = p_ReceivedPacket.ReadBit();
+        l_Guid[2] = p_ReceivedPacket.ReadBit();
+        l_Guid[1] = p_ReceivedPacket.ReadBit();
+        l_Guid[3] = p_ReceivedPacket.ReadBit();
+        l_Guid[0] = p_ReceivedPacket.ReadBit();
+        l_Guid[4] = p_ReceivedPacket.ReadBit();
+
+        l_Guids.push_back(l_Guid);
+    }
+
+    for (uint32 l_I = 0 ; l_I < l_Count ; l_I++)
+    {
+        uint32	l_requestedEntry;
+
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][7]);
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][6]);
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][1]);
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][2]);
+        p_ReceivedPacket >> l_requestedEntry;
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][5]);
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][3]);
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][0]);
+        p_ReceivedPacket.ReadByteSeq(l_Guids[l_I][4]);
+
+        l_requestedEntries.push_back(l_requestedEntry);
+    }
+
+    if (!l_Count)
+        return;
+
+    for(uint32 l_I = 0 ; l_I < l_Count ; l_I++)
+    {
+        WorldPacket l_Data(SMSG_DB_REPLY);
+        l_Data << uint32(0x00);				/// Data size placeholder
+
+        switch (l_QueryType)
+        {
+        case DB_QUERY_NPC_TEXT:
+        {
+            SendNpcTextDBQueryResponse(this, l_Data, l_requestedEntries[l_I]);
+            break;
+        }
+        case DB_QUERY_ITEM_SPARSE:
+        {
+            if(!SendItemSparseDBQueryResponse(this, l_Data, l_requestedEntries[l_I])) continue; //dont send if no item
+            break; //to disable the sent of the opcode
+        }
+        case DB_QUERY_ITEM:
+        {
+            if(!SendItemDBQueryResponse(this, l_Data, l_requestedEntries[l_I])) continue; //dont send if no item
+            break; //to disable the sent of the opcode
+        }
+        case DB_QUERY_BattlePetEffectProperties:
+        {
+            l_Data << uint32(l_requestedEntries[l_I]);
+            l_Data << uint32(38);
+            l_Data << "Points";
+            l_Data << "Accuracy";
+            l_Data << uint32(43);
+            l_Data << uint32(0);
+            l_Data << uint32(0);
+            l_Data << uint32(0);
+            break; //to disable the sent of the opcode
+        }
+        default:
+        {
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "Received non handled db query type 0x%08.8X", l_QueryType);
+            continue; //to disable the sent of the opcode
+        }
+        }
+
+        l_Data << uint32(sObjectMgr->GetHotfixDate(l_requestedEntries[l_I], l_QueryType));
+        l_Data << uint32(l_QueryType);
+        l_Data << uint32(l_requestedEntries[l_I]);
+
+        l_Data.wpos(0);
+        l_Data << uint32(l_Data.size() - 16);
+
+        SendPacket(&l_Data);
+    }
+}*/
 
 /// Only _static_ data is sent in this packet !!!
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
