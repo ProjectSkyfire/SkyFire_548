@@ -1019,7 +1019,7 @@ enum Opcodes
     SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED                    = 0x0,
     SMSG_LF_GUILD_POST_UPDATED                               = 0x0,
     SMSG_LF_GUILD_RECRUIT_LIST_UPDATED                       = 0x0,
-    SMSG_LIST_INVENTORY                                      = 0x0,
+    SMSG_LIST_INVENTORY                                      = 0x0ADC, // 5.4.2 17688
     SMSG_LOAD_CUF_PROFILES                                   = 0x0,
     SMSG_LOGIN_SETTIMESPEED                                  = 0x0,
     SMSG_LOGIN_VERIFY_WORLD                                  = 0x0E04, // 5.4.2 17688
