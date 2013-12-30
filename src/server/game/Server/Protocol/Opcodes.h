@@ -59,6 +59,7 @@ enum Opcodes
     CMSG_ARENA_TEAM_ROSTER                                   = 0x0,
     CMSG_ATTACKSTOP                                          = 0x0AC4, // 5.4.2 17688
     CMSG_ATTACKSWING                                         = 0x0E4B, // 5.4.2 17688
+    CMSG_AUCTION_HELLO                                       = 0x02A5, // 5.4.2 17688
     CMSG_AUCTION_LIST_BIDDER_ITEMS                           = 0x0,
     CMSG_AUCTION_LIST_ITEMS                                  = 0x0,
     CMSG_AUCTION_LIST_OWNER_ITEMS                            = 0x0,
@@ -223,7 +224,7 @@ enum Opcodes
     CMSG_GM_REPORT_LAG                                       = 0x0,
     CMSG_GM_SET_SECURITY_GROUP                               = 0x0,
     CMSG_GOSSIP_HELLO                                        = 0x02EF, // 5.4.2 17688
-    CMSG_GOSSIP_SELECT_OPTION                                = 0x0,
+    CMSG_GOSSIP_SELECT_OPTION                                = 0x0ECA, // 5.4.2 17688
     CMSG_GRANT_LEVEL                                         = 0x0,
     CMSG_GROUP_ASSISTANT_LEADER                              = 0x0,
     CMSG_GROUP_CANCEL                                        = 0x0,
@@ -389,7 +390,7 @@ enum Opcodes
     CMSG_NAME_QUERY                                          = 0x05F4, // 5.4.2 17688
     CMSG_NEW_SPELL_SLOT                                      = 0x0,
     CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
-    CMSG_NPC_TEXT_QUERY                                      = 0x0,
+    CMSG_NPC_TEXT_QUERY                                      = 0x006C, // 5.4.2 17688
     CMSG_OBJECT_UPDATE_FAILED                                = 0x0A95, // 5.4.2 17688
     CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
     CMSG_OFFER_PETITION                                      = 0x0,
@@ -558,7 +559,7 @@ enum Opcodes
     CMSG_TELEPORT_TO_UNIT                                    = 0x0,
     CMSG_TEXT_EMOTE                                          = 0x0E0C, // 5.4.2 17688
     CMSG_TIME_ADJUSTMENT_RESPONSE                            = 0x0,
-    CMSG_TIME_SYNC_RESP                                      = 0x0,
+    CMSG_TIME_SYNC_RESP                                      = 0x06AB, // 5.4.2 17688
     CMSG_TIME_SYNC_RESP_FAILED                               = 0x0,
     CMSG_TOGGLE_PVP                                          = 0x0C4E, // 5.4.2 17688
     CMSG_TOTEM_DESTROYED                                     = 0x0,
@@ -594,7 +595,6 @@ enum Opcodes
     CMSG_WORLD_TELEPORT                                      = 0x0,
     CMSG_WRAP_ITEM                                           = 0x0,
     CMSG_ZONEUPDATE                                          = 0x0,
-    MSG_AUCTION_HELLO                                        = 0x0,
     MSG_CHANNEL_START                                        = 0x0847, // 5.4.2 17688
     MSG_CHANNEL_UPDATE                                       = 0x1C04, // 5.4.2 17688
     MSG_CORPSE_QUERY                                         = 0x0,
@@ -662,7 +662,7 @@ enum Opcodes
     MSG_RANDOM_ROLL                                          = 0x0,
     MSG_SAVE_GUILD_EMBLEM                                    = 0x0,
     MSG_SET_DUNGEON_DIFFICULTY                               = 0x1885, // 5.4.2 17688
-    MSG_SET_RAID_DIFFICULTY                                  = 0x0,
+    MSG_SET_RAID_DIFFICULTY                                  = 0x1885, // 5.4.2 17688
     MSG_START_MOVE_FORWARD                                   = 0x0,
     MSG_TABARDVENDOR_ACTIVATE                                = 0x0,
     MSG_TALENT_WIPE_CONFIRM                                  = 0x0,
@@ -697,6 +697,7 @@ enum Opcodes
     SMSG_ATTACKSWING_CANT_ATTACK                             = 0x0,
     SMSG_ATTACKSWING_DEADTARGET                              = 0x0,
     SMSG_ATTACKSWING_NOTINRANGE                              = 0x0,
+    SMSG_AUCTION_HELLO                                       = 0x0A5C, // 5.4.2 17688
     SMSG_AUCTION_BIDDER_LIST_RESULT                          = 0x0,
     SMSG_AUCTION_BIDDER_NOTIFICATION                         = 0x0,
     SMSG_AUCTION_COMMAND_RESULT                              = 0x0,
@@ -826,7 +827,7 @@ enum Opcodes
     SMSG_DAMAGE_CALC_LOG                                     = 0x0,
     SMSG_DAMAGE_DONE_OBSOLETE                                = 0x0,
     SMSG_DANCE_QUERY_RESPONSE                                = 0x0,
-    SMSG_DB_REPLY                                            = 0x0,
+    SMSG_DB_REPLY                                            = 0x089A, // 5.4.2 17688
     SMSG_DEATH_RELEASE_LOC                                   = 0x0,
     SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
     SMSG_DEFENSE_MESSAGE                                     = 0x0,
@@ -894,9 +895,9 @@ enum Opcodes
     SMSG_GM_PLAYER_INFO                                      = 0x0,
     SMSG_GM_TICKET_STATUS_UPDATE                             = 0x0,
     SMSG_GODMODE                                             = 0x0,
-    SMSG_GOSSIP_COMPLETE                                     = 0x0,
-    SMSG_GOSSIP_MESSAGE                                      = 0x0,
-    SMSG_GOSSIP_POI                                          = 0x0,
+    SMSG_GOSSIP_COMPLETE                                     = 0x0293, // 5.4.2 17688
+    SMSG_GOSSIP_MESSAGE                                      = 0x1736, // 5.4.2 17688
+    SMSG_GOSSIP_POI                                          = 0x1D8D, // 5.4.2 17688
     SMSG_GROUPACTION_THROTTLED                               = 0x0,
     SMSG_GROUP_CANCEL                                        = 0x0,
     SMSG_GROUP_DECLINE                                       = 0x0,
@@ -941,7 +942,7 @@ enum Opcodes
     SMSG_GUILD_PARTY_STATE_RESPONSE                          = 0x0,
     SMSG_GUILD_PERMISSIONS_QUERY_RESULTS                     = 0x0,
     SMSG_GUILD_QUERY_RESPONSE                                = 0x0,
-    SMSG_GUILD_RANK                                          = 0x0,
+    SMSG_GUILD_RANK                                          = 0x0, // 0x05AA Something about displaying all the ranks.
     SMSG_GUILD_RANKS_UPDATE                                  = 0x0,
     SMSG_GUILD_RECIPES                                       = 0x0,
     SMSG_GUILD_RENAMED                                       = 0x0,
@@ -1018,7 +1019,7 @@ enum Opcodes
     SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED                    = 0x0,
     SMSG_LF_GUILD_POST_UPDATED                               = 0x0,
     SMSG_LF_GUILD_RECRUIT_LIST_UPDATED                       = 0x0,
-    SMSG_LIST_INVENTORY                                      = 0x0,
+    SMSG_LIST_INVENTORY                                      = 0x0ADC, // 5.4.2 17688
     SMSG_LOAD_CUF_PROFILES                                   = 0x0,
     SMSG_LOGIN_SETTIMESPEED                                  = 0x0,
     SMSG_LOGIN_VERIFY_WORLD                                  = 0x0E04, // 5.4.2 17688
@@ -1111,7 +1112,7 @@ enum Opcodes
     SMSG_NOTIFICATION                                        = 0x0,
     SMSG_NOTIFY_DANCE                                        = 0x0,
     SMSG_NOTIFY_DEST_LOC_SPELL_CAST                          = 0x0,
-    SMSG_NPC_TEXT_UPDATE                                     = 0x0,
+    SMSG_NPC_TEXT_UPDATE                                     = 0x0877, // 5.4.2 17688
     SMSG_NPC_WONT_TALK                                       = 0x0,
     SMSG_OFFER_PETITION_ERROR                                = 0x0,
     SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA                = 0x0,
@@ -1280,8 +1281,8 @@ enum Opcodes
     SMSG_SPELL_DELAYED                                       = 0x0,
     SMSG_SPELL_FAILED_OTHER                                  = 0x0,
     SMSG_SPELL_FAILURE                                       = 0x0,
-    SMSG_SPELL_GO                                            = 0x0,
-    SMSG_SPELL_START                                         = 0x0,
+    SMSG_SPELL_GO                                            = 0x061F, // 5.4.2 17688
+    SMSG_SPELL_START                                         = 0x003E, // 5.4.2 17688
     SMSG_SPELL_UPDATE_CHAIN_TARGETS                          = 0x0,
     SMSG_SPIRIT_HEALER_CONFIRM                               = 0x0,
     SMSG_SPLINE_MOVE_COLLISION_DISABLE                       = 0x0,
@@ -1328,7 +1329,7 @@ enum Opcodes
     SMSG_SUSPEND_TOKEN_RESPONSE                              = 0x0,
     SMSG_TALENTS_ERROR                                       = 0x0,
     SMSG_TALENTS_INFO                                        = 0x0,
-    SMSG_TALENTS_INVOLUNTARILY_RESET                         = 0x0,
+    SMSG_TALENTS_INVOLUNTARILY_RESET                         = 0x11CA, // 5.4.2 17688
     SMSG_TAXINODE_STATUS                                     = 0x0,
     SMSG_TEST_DROP_RATE_RESULT                               = 0x0,
     SMSG_TEXT_EMOTE                                          = 0x0,
@@ -1390,7 +1391,7 @@ enum Opcodes
     SMSG_WEEKLY_SPELL_USAGE                                  = 0x0,
     SMSG_WEEKLY_SPELL_USAGE_UPDATE                           = 0x0,
     SMSG_WHO                                                 = 0x0872, // 5.4.2 17688
-    SMSG_WHOIS                                               = 0x0,
+    SMSG_WHOIS                                               = 0x050E, // 5.4.2 17688
     SMSG_WORLD_SERVER_INFO                                   = 0x0,
     SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
     SMSG_XP_GAIN_ABORTED                                     = 0x0,
