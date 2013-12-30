@@ -559,7 +559,7 @@ enum Opcodes
     CMSG_TELEPORT_TO_UNIT                                    = 0x0,
     CMSG_TEXT_EMOTE                                          = 0x0E0C, // 5.4.2 17688
     CMSG_TIME_ADJUSTMENT_RESPONSE                            = 0x0,
-    CMSG_TIME_SYNC_RESP                                      = 0x0,
+    CMSG_TIME_SYNC_RESP                                      = 0x06AB, // 5.4.2 17688
     CMSG_TIME_SYNC_RESP_FAILED                               = 0x0,
     CMSG_TOGGLE_PVP                                          = 0x0C4E, // 5.4.2 17688
     CMSG_TOTEM_DESTROYED                                     = 0x0,
