@@ -384,7 +384,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_NAME_QUERY,                              STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_REALM_NAME_QUERY,                        STATUS_LOGGEDIN, PROCESS_THREADSAFE, &WorldSession::HandleRealmNameQueryOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_NEXT_CINEMATIC_CAMERA,                   STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleNextCinematicCamera       );
-    DEFINE_OPCODE_HANDLER(CMSG_NPC_TEXT_QUERY,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleNpcTextQueryOpcode        );
+    DEFINE_OPCODE_HANDLER(CMSG_NPC_TEXT_QUERY,                          STATUS_LOGGEDIN,PROCESS_THREADUNSAFE, &WorldSession::HandleNpcTextQueryOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_FAILED,                    STATUS_LOGGEDIN,PROCESS_INPLACE,      &WorldSession::HandleObjectUpdateFailedOpcode  );
     DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_RESCUED,                   STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_OFFER_PETITION,                          STATUS_UNHANDLED,PROCESS_THREADUNSAFE, &WorldSession::HandleOfferPetitionOpcode       );
