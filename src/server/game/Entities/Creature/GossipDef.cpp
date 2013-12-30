@@ -170,16 +170,13 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
     std::string updatedQuestTitles[0x20];
     ObjectGuid guid = ObjectGuid(objectGUID);
 
-    WorldPacket data(SMSG_GOSSIP_MESSAGE, 100);
-    data.WriteBits(_gossipMenu.GetMenuItemCount(), 20);     // max count 0x10
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
+    WorldPacket data(SMSG_GOSSIP_MESSAGE, 150); //??? GUESSED 
+
     data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
-    data.WriteBits(_questMenu.GetMenuItemCount(), 19);      // max count 0x20
     data.WriteBit(guid[6]);
-    data.WriteBit(guid[4]);
     data.WriteBit(guid[0]);
+    data.WriteBits(_questMenu.GetMenuItemCount(), 19);      // max count 0x20
+    data.WriteBit(guid[4]);
 
     // Store this instead of checking the Singleton every loop iteration
     bool questLevelInTitle = sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
@@ -202,12 +199,17 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         if (title.length() % 2 != 0)
             title += " ";                                   // if quest title length is odd dividing by 2 will cause precision loss, add a space to the end
 
-        data.WriteBit(0);                                   // unknown bit
         data.WriteBits(title.length() / 2, 8);              // title length is divided by 2
+        data.WriteBit(0);                                   // unknown bit
         data.WriteBit(0);                                   // unknown bit
 
         updatedQuestTitles[i] = title;
     }
+
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+
+    data.WriteBits(_gossipMenu.GetMenuItemCount(), 20);     // max count 0x10
 
     for (GossipMenuItemContainer::const_iterator itr = _gossipMenu.GetMenuItems().begin(); itr != _gossipMenu.GetMenuItems().end(); ++itr)
     {
@@ -217,8 +219,24 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         data.WriteBits(item.Message.length(), 12);
     }
 
-    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+
     data.FlushBits();
+
+    data.WriteByteSeq(guid[2]);
+
+    for (GossipMenuItemContainer::const_iterator itr = _gossipMenu.GetMenuItems().begin(); itr != _gossipMenu.GetMenuItems().end(); ++itr)
+    {
+        GossipMenuItem const& item = itr->second;
+
+        data.WriteString(item.Message);                     // text for gossip item
+        data.WriteString(item.BoxMessage);                  // accept text (related to money) pop up box, 2.0.
+        data << int32(item.BoxMoney);                       // money required to open menu, 2.0.3
+        data << int8(item.IsCoded);                         // makes pop up box password
+        data << int8(item.MenuItemIcon);
+        data << int32(itr->first);
+    }
 
     for (uint8 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
     {
@@ -233,35 +251,22 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         data << int32(quest->GetSpecialFlags());
     }
 
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[7]);
 
     data << int32(_gossipMenu.GetMenuId());                 // new 2.4.0
 
-    for (GossipMenuItemContainer::const_iterator itr = _gossipMenu.GetMenuItems().begin(); itr != _gossipMenu.GetMenuItems().end(); ++itr)
-    {
-        GossipMenuItem const& item = itr->second;
-
-        data.WriteString(item.Message);                     // text for gossip item
-        data << int8(item.IsCoded);                         // makes pop up box password
-        data << int8(item.MenuItemIcon);
-        data << int32(item.BoxMoney);                       // money required to open menu, 2.0.3
-        data.WriteString(item.BoxMessage);                  // accept text (related to money) pop up box, 2.0.
-        data << int32(itr->first);
-    }
-
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-
-    data << int32(0);                                       // friend faction ID?
-
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[1]);
 
     data << int32(titleTextId);
 
-    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+
+    data << int32(0);                                       // friend faction ID?
+
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[0]);
 
     _session->SendPacket(&data);
 }
