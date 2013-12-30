@@ -827,7 +827,7 @@ enum Opcodes
     SMSG_DAMAGE_CALC_LOG                                     = 0x0,
     SMSG_DAMAGE_DONE_OBSOLETE                                = 0x0,
     SMSG_DANCE_QUERY_RESPONSE                                = 0x0,
-    SMSG_DB_REPLY                                            = 0x0,
+    SMSG_DB_REPLY                                            = 0x089A, // 5.4.2 17688
     SMSG_DEATH_RELEASE_LOC                                   = 0x0,
     SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
     SMSG_DEFENSE_MESSAGE                                     = 0x0,
@@ -1112,7 +1112,7 @@ enum Opcodes
     SMSG_NOTIFICATION                                        = 0x0,
     SMSG_NOTIFY_DANCE                                        = 0x0,
     SMSG_NOTIFY_DEST_LOC_SPELL_CAST                          = 0x0,
-    SMSG_NPC_TEXT_UPDATE                                     = 0x0,
+    SMSG_NPC_TEXT_UPDATE                                     = 0x0877, // 5.4.2 17688
     SMSG_NPC_WONT_TALK                                       = 0x0,
     SMSG_OFFER_PETITION_ERROR                                = 0x0,
     SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA                = 0x0,
