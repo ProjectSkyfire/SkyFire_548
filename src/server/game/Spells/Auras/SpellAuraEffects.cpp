@@ -429,6 +429,75 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleUnused,                                    //368 unused (4.3.4)
     &AuraEffect::HandleNULL,                                      //369 SPELL_AURA_ENABLE_POWER_BAR_TIMER
     &AuraEffect::HandleNULL,                                      //370 SPELL_AURA_SET_FAIR_FAR_CLIP
+
+    // Auras < 371 Need Recheck.
+    &AuraEffect::HandleNULL,                                      //371 SPELL_AURA_371
+    &AuraEffect::HandleNULL,                                      //372 SPELL_AURA_372 (used in spell 130041) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //373 SPELL_AURA_373
+    &AuraEffect::HandleNULL,                                      //374 SPELL_AURA_374
+    &AuraEffect::HandleUnused,                                    //375 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //376 SPELL_AURA_376
+    &AuraEffect::HandleNULL,                                      //377 SPELL_AURA_377
+    &AuraEffect::HandleUnused,                                    //378 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //379 SPELL_AURA_379
+    &AuraEffect::HandleUnused,                                    //380 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //381 SPELL_AURA_381 (used in spell 21741) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //382 SPELL_AURA_382
+    &AuraEffect::HandleNULL,                                      //383 SPELL_AURA_383
+    &AuraEffect::HandleUnused,                                    //384 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //385 SPELL_AURA_385
+    &AuraEffect::HandleNULL,                                      //386 SPELL_AURA_386 (used in spell 117915) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //387 SPELL_AURA_387 (used in spell 117923) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //388 SPELL_AURA_388 (used in spell 117983) (5.4.2)
+    &AuraEffect::HandleUnused,                                    //389 unused (5.4.2)
+    &AuraEffect::HandleUnused,                                    //390 unused (5.4.2)
+    &AuraEffect::HandleUnused,                                    //391 unused (5.4.2)
+    &AuraEffect::HandleUnused,                                    //392 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //393 SPELL_AURA_393
+    &AuraEffect::HandleNULL,                                      //394 SPELL_AURA_394
+    &AuraEffect::HandleNULL,                                      //395 SPELL_AURA_395
+    &AuraEffect::HandleNULL,                                      //396 SPELL_AURA_396
+    &AuraEffect::HandleNULL,                                      //397 SPELL_AURA_397
+    &AuraEffect::HandleNULL,                                      //398 SPELL_AURA_398
+    &AuraEffect::HandleUnused,                                    //399 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //400 SPELL_AURA_400 (used in spells 124353 & 124351) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //401 SPELL_AURA_401 (used in spell 125695) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //402 SPELL_AURA_402
+    &AuraEffect::HandleNULL,                                      //403 SPELL_AURA_403
+    &AuraEffect::HandleNULL,                                      //404 SPELL_AURA_404 (used in spell 115070) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //405 SPELL_AURA_405
+    &AuraEffect::HandleNULL,                                      //406 SPELL_AURA_406
+    &AuraEffect::HandleNULL,                                      //407 SPELL_AURA_407
+    &AuraEffect::HandleNULL,                                      //408 SPELL_AURA_408
+    &AuraEffect::HandleNULL,                                      //409 SPELL_AURA_409
+    &AuraEffect::HandleNULL,                                      //410 SPELL_AURA_410 (used in spell 57902) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //411 SPELL_AURA_411
+    &AuraEffect::HandleNULL,                                      //412 SPELL_AURA_412 (used in spell 111546 & 117957) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //413 SPELL_AURA_413
+    &AuraEffect::HandleNULL,                                      //414 SPELL_AURA_414
+    &AuraEffect::HandleNULL,                                      //415 SPELL_AURA_415 (used in spell 123316) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //416 SPELL_AURA_416
+    &AuraEffect::HandleNULL,                                      //417 SPELL_AURA_417 (used in spell 25956) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //418 SPELL_AURA_418
+    &AuraEffect::HandleNULL,                                      //419 SPELL_AURA_419
+    &AuraEffect::HandleNULL,                                      //420 SPELL_AURA_420
+    &AuraEffect::HandleNULL,                                      //421 SPELL_AURA_421
+    &AuraEffect::HandleNULL,                                      //422 SPELL_AURA_422 (used in spell 136577) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //423 SPELL_AURA_423 (used in spell 108294) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //424 SPELL_AURA_424
+    &AuraEffect::HandleUnused,                                    //425 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //426 SPELL_AURA_426 (used in spell 132633) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //427 SPELL_AURA_427 (used in spell 91318) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //428 SPELL_AURA_428
+    &AuraEffect::HandleNULL,                                      //429 SPELL_AURA_429
+    &AuraEffect::HandleNULL,                                      //430 SPELL_AURA_430
+    &AuraEffect::HandleNULL,                                      //431 SPELL_AURA_431 (used in spell 142869) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //432 SPELL_AURA_432 (used in spell 91318) (5.4.2)
+    &AuraEffect::HandleUnused,                                    //433 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //434 SPELL_AURA_434
+    &AuraEffect::HandleUnused,                                    //435 unused (5.4.2)
+    &AuraEffect::HandleNULL,                                      //436 SPELL_AURA_436 (used in spell 49977) (5.4.2)
+    &AuraEffect::HandleNULL,                                      //437 SPELL_AURA_437
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32 *baseAmount, Unit* caster):

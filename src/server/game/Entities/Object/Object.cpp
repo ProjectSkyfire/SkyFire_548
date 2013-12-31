@@ -417,21 +417,22 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
     }
     
-    /*if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
+    if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
-        data->WriteBit(transGuid[0]);
-        data->WriteBit(transGuid[7]);
-        data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid); // Has GO transport time 2
-        data->WriteBit(transGuid[1]);
         data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid); // Has GO transport time 3
-        data->WriteBit(transGuid[6]);
-        data->WriteBit(transGuid[5]);
+        data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid); // Has GO transport time 2
+
         data->WriteBit(transGuid[4]);
-        data->WriteBit(transGuid[3]);
         data->WriteBit(transGuid[2]);
-    }*/
+        data->WriteBit(transGuid[7]);
+        data->WriteBit(transGuid[6]);
+        data->WriteBit(transGuid[3]);
+        data->WriteBit(transGuid[0]);
+        data->WriteBit(transGuid[1]);
+        data->WriteBit(transGuid[5]);
+    }
 
     data->FlushBits();
 
@@ -483,39 +484,38 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(Position::NormalizeOrientation(self->GetOrientation()));
     }
 
-    /*if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
+    if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
         
+        *data << int8(self->GetTransSeat());
+
         if (self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time2);
 
         data->WriteBit(transGuid[4]);
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[7]);
         data->WriteBit(transGuid[3]);
 
-        *data << uint32(self->GetTransTime());
-        *data << float(self->GetTransOffsetY());
-        
-        data->WriteBit(transGuid[1]);
-
-        *data << float(self->GetTransOffsetZ());
-        *data << int8(self->GetTransSeat());
-        
         if (self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time3);
 
+        data->WriteBit(transGuid[7]);
         data->WriteBit(transGuid[6]);
-
-        *data << float(self->GetTransOffsetO());
-        
         data->WriteBit(transGuid[5]);
         data->WriteBit(transGuid[0]);
 
+        *data << float(self->GetTransOffsetZ());
         *data << float(self->GetTransOffsetX());
-    }*/
+        *data << uint32(self->GetTransTime());
+        *data << float(self->GetTransOffsetO());
+
+        data->WriteBit(transGuid[1]);
+
+        *data << float(self->GetTransOffsetY());
+
+        data->WriteBit(transGuid[2]);
+    }
 
     if (flags & UPDATEFLAG_ROTATION)
         *data << uint64(ToGameObject()->GetRotation());

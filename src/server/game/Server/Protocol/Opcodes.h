@@ -1258,7 +1258,7 @@ enum Opcodes
     SMSG_SET_PROJECTILE_POSITION                             = 0x0,
     SMSG_SHOP_BUY                                            = 0x1042, // 5.4.2 17688
     SMSG_SHOP_BUY_ERROR                                      = 0x0000, // 5.4.2 17688
-    SMSG_SHOP_ITEM                                           = 0x089a, // 5.4.2 17688
+    SMSG_SHOP_ITEM                                           = 0x0,
     SMSG_SHOWTAXINODES                                       = 0x0,
     SMSG_SHOW_BANK                                           = 0x0,
     SMSG_SHOW_RATINGS                                        = 0x0,
@@ -1345,7 +1345,7 @@ enum Opcodes
     SMSG_TRADE_STATUS_EXTENDED                               = 0x0,
     SMSG_TRAINER_BUY_FAILED                                  = 0x0,
     SMSG_TRAINER_BUY_SUCCEEDED                               = 0x0,
-    SMSG_TRAINER_LIST                                        = 0x0,
+    SMSG_TRAINER_LIST                                        = 0x026D, // 5.4.2 17688
     SMSG_TRANSFER_ABORTED                                    = 0x0,
     SMSG_TRANSFER_PENDING                                    = 0x0819, // 5.4.2 17688
     SMSG_TRIGGER_CINEMATIC                                   = 0x1320, // 5.4.2 17688
