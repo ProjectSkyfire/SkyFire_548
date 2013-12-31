@@ -436,8 +436,66 @@ enum AuraType
     SPELL_AURA_MOD_CURRENCY_GAIN2                           = 376,
     SPELL_AURA_CAST_WHILE_WALKING2                          = 377,
     // 378 unusued
-    // Will do more later
-    TOTAL_AURAS                                             = 438   // 4.3.4
+    SPELL_AURA_379                                          = 379,
+    // 380 unused
+    SPELL_AURA_381                                          = 381,
+    SPELL_AURA_382                                          = 382,
+    SPELL_AURA_383                                          = 383,
+    // 384 unused
+    SPELL_AURA_385                                          = 385,
+    SPELL_AURA_386                                          = 386,
+    SPELL_AURA_387                                          = 387,
+    SPELL_AURA_388                                          = 388,
+    // 389 unused
+    // 390 unused
+    // 391 unused
+    // 392 unused
+    SPELL_AURA_393                                          = 393,
+    SPELL_AURA_394                                          = 394,
+    SPELL_AURA_395                                          = 395,
+    SPELL_AURA_396                                          = 396,
+    SPELL_AURA_397                                          = 397,
+    SPELL_AURA_398                                          = 398,
+    // 399 unused
+    SPELL_AURA_400                                          = 400,
+    SPELL_AURA_401                                          = 401,
+    SPELL_AURA_402                                          = 402,
+    SPELL_AURA_403                                          = 403,
+    SPELL_AURA_404                                          = 404,
+    SPELL_AURA_405                                          = 405,
+    SPELL_AURA_406                                          = 406,
+    SPELL_AURA_407                                          = 407,
+    SPELL_AURA_408                                          = 408,
+    SPELL_AURA_409                                          = 409,
+    SPELL_AURA_410                                          = 410,
+    SPELL_AURA_411                                          = 411,
+    SPELL_AURA_412                                          = 412,
+    SPELL_AURA_413                                          = 413,
+    SPELL_AURA_414                                          = 414,
+    SPELL_AURA_415                                          = 415,
+    SPELL_AURA_416                                          = 416,
+    SPELL_AURA_417                                          = 417,
+    SPELL_AURA_418                                          = 418,
+    SPELL_AURA_419                                          = 419,
+    SPELL_AURA_420                                          = 420,
+    SPELL_AURA_421                                          = 421,
+    SPELL_AURA_422                                          = 422,
+    SPELL_AURA_423                                          = 423,
+    SPELL_AURA_424                                          = 424,
+    // 425 unused
+    SPELL_AURA_426                                          = 426,
+    SPELL_AURA_427                                          = 427,
+    SPELL_AURA_428                                          = 428,
+    SPELL_AURA_429                                          = 429,
+    SPELL_AURA_430                                          = 430,
+    SPELL_AURA_431                                          = 431,
+    SPELL_AURA_432                                          = 432,
+    // 433 unused
+    SPELL_AURA_434                                          = 434,
+    // 435 unused
+    SPELL_AURA_436                                          = 436,
+    SPELL_AURA_437                                          = 437,
+    TOTAL_AURAS                                             = 438   // 5.4.2
 };
 
 enum AuraObjectType
