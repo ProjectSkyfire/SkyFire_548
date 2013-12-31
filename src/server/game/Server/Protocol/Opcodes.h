@@ -1258,7 +1258,7 @@ enum Opcodes
     SMSG_SET_PROJECTILE_POSITION                             = 0x0,
     SMSG_SHOP_BUY                                            = 0x1042, // 5.4.2 17688
     SMSG_SHOP_BUY_ERROR                                      = 0x0000, // 5.4.2 17688
-    SMSG_SHOP_ITEM                                           = 0x089a, // 5.4.2 17688
+    SMSG_SHOP_ITEM                                           = 0x0,
     SMSG_SHOWTAXINODES                                       = 0x0,
     SMSG_SHOW_BANK                                           = 0x0,
     SMSG_SHOW_RATINGS                                        = 0x0,
