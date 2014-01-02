@@ -23586,22 +23586,15 @@ void Player::SendAurasForTarget(Unit* target)
     Unit::VisibleAuraMap const* visibleAuras = target->GetVisibleAuras();
 
     WorldPacket data(SMSG_AURA_UPDATE);
-    data.WriteBit(targetGuid[0]);
-    data.WriteBit(0); // HasPowerData
-    data.WriteBit(1); // Is AURA_UPDATE_ALL
-    data.WriteBit(targetGuid[6]);
-
-    //if (hasPowerData)
-    //{
-    //}
-
-    data.WriteBit(targetGuid[4]);
-    data.WriteBit(targetGuid[7]);
     data.WriteBit(targetGuid[3]);
-    data.WriteBits(uint32(visibleAuras->size()), 24); // Aura Count
-    data.WriteBit(targetGuid[1]);
+    data.WriteBit(targetGuid[6]);
+    data.WriteBit(targetGuid[0]);
+    data.WriteBit(targetGuid[7]);
     data.WriteBit(targetGuid[5]);
-    data.WriteBit(targetGuid[2]);
+    data.WriteBit(targetGuid[4]);
+    data.WriteBits(1, 24);                              // Aura Count
+    data.WriteBit(0);                                   // Is AURA_UPDATE_ALL
+    data.WriteBit(!remove);                             // HasData
 
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
     {
@@ -23611,23 +23604,6 @@ void Player::SendAurasForTarget(Unit* target)
         if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
             flags |= AFLAG_DURATION;
 
-        data.WriteBit(1); // HasData
-        data.WriteBit(!(flags & AFLAG_CASTER)); // HasCasterGuid
-        if (!(flags & AFLAG_CASTER))
-        {
-            ObjectGuid casterGuid = aura->GetCasterGUID();
-            data.WriteBit(casterGuid[2]);
-            data.WriteBit(casterGuid[3]);
-            data.WriteBit(casterGuid[4]);
-            data.WriteBit(casterGuid[0]);
-            data.WriteBit(casterGuid[1]);
-            data.WriteBit(casterGuid[6]);
-            data.WriteBit(casterGuid[7]);
-            data.WriteBit(casterGuid[5]);
-        }
-
-        data.WriteBits(0, 22); // Unk effect count
-
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
             uint8 effCount = 0;
@@ -23635,15 +23611,33 @@ void Player::SendAurasForTarget(Unit* target)
                 if (auraApp->HasEffect(i))
                     effCount++;
 
-            data.WriteBits(effCount, 22); // Effect Count
+            data.WriteBits(effCount, 22);               // Effect Count
         }
         else
-            data.WriteBits(0, 22); // Effect Count
+            data.WriteBits(0, 22);                      // Effect Count
 
-        data.WriteBit(flags & AFLAG_DURATION); // HasDuration
-        data.WriteBit(flags & AFLAG_DURATION); // HasMaxDuration
+        data.WriteBits(0, 22);                          // Unk effect count
+        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
+
+        if (!(flags & AFLAG_CASTER))
+        {
+            ObjectGuid casterGuid = aura->GetCasterGUID();
+            data.WriteBit(casterGuid[7]);
+            data.WriteBit(casterGuid[4]);
+            data.WriteBit(casterGuid[2]);
+            data.WriteBit(casterGuid[5]);
+            data.WriteBit(casterGuid[6]);
+            data.WriteBit(casterGuid[1]);
+            data.WriteBit(casterGuid[3]);
+            data.WriteBit(casterGuid[0]);
+        }
+
+        data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
+        data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
     }
 
+    data.WriteBit(targetGuid[1]);
+    data.WriteBit(targetGuid[2]);
     data.FlushBits();
 
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
@@ -23653,6 +23647,22 @@ void Player::SendAurasForTarget(Unit* target)
         uint32 flags = auraApp->GetFlags();
         if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
             flags |= AFLAG_DURATION;
+
+        if (!(flags & AFLAG_CASTER))
+        {
+            ObjectGuid casterGuid = aura->GetCasterGUID();
+            data.WriteByteSeq(casterGuid[0]);
+            data.WriteByteSeq(casterGuid[3]);
+            data.WriteByteSeq(casterGuid[7]);
+            data.WriteByteSeq(casterGuid[1]);
+            data.WriteByteSeq(casterGuid[2]);
+            data.WriteByteSeq(casterGuid[5]);
+            data.WriteByteSeq(casterGuid[4]);
+            data.WriteByteSeq(casterGuid[6]);
+        }
+
+        if (flags & AFLAG_DURATION)
+            data << uint32(aura->GetDuration());
 
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
@@ -23669,20 +23679,6 @@ void Player::SendAurasForTarget(Unit* target)
         }
 
         data << uint16(aura->GetCasterLevel());
-        if (!(flags & AFLAG_CASTER))
-        {
-            ObjectGuid casterGuid = aura->GetCasterGUID();
-            data.WriteByteSeq(casterGuid[0]);
-            data.WriteByteSeq(casterGuid[6]);
-            data.WriteByteSeq(casterGuid[1]);
-            data.WriteByteSeq(casterGuid[4]);
-            data.WriteByteSeq(casterGuid[5]);
-            data.WriteByteSeq(casterGuid[3]);
-            data.WriteByteSeq(casterGuid[2]);
-            data.WriteByteSeq(casterGuid[7]);
-        }
-
-        data << uint8(flags);
 
         if (flags & AFLAG_DURATION)
             data << uint32(aura->GetMaxDuration());
@@ -23690,26 +23686,20 @@ void Player::SendAurasForTarget(Unit* target)
         // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
         // stack amount has priority over charges (checked on retail with spell 50262)
         data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
-        data << uint32(auraApp->GetEffectMask());
-        
-        if (flags & AFLAG_DURATION)
-            data << uint32(aura->GetDuration());
 
         data << uint32(aura->GetId());
+        data << uint8(flags);
+        data << uint32(auraApp->GetEffectMask());
         data << uint8(auraApp->GetSlot());
     }
 
-    //if (hasPowerData)
-    //{
-    //}
-
-    data.WriteByteSeq(targetGuid[7]);
-    data.WriteByteSeq(targetGuid[4]);
-    data.WriteByteSeq(targetGuid[2]);
-    data.WriteByteSeq(targetGuid[0]);
-    data.WriteByteSeq(targetGuid[6]);
     data.WriteByteSeq(targetGuid[5]);
     data.WriteByteSeq(targetGuid[1]);
+    data.WriteByteSeq(targetGuid[2]);
+    data.WriteByteSeq(targetGuid[6]);
+    data.WriteByteSeq(targetGuid[0]);
+    data.WriteByteSeq(targetGuid[7]);
+    data.WriteByteSeq(targetGuid[4]);
     data.WriteByteSeq(targetGuid[3]);
 
     GetSession()->SendPacket(&data);
