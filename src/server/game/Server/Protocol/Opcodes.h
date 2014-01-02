@@ -963,7 +963,7 @@ enum Opcodes
     SMSG_HOTFIX_NOTIFY                                       = 0x0,
     SMSG_INITIALIZE_FACTIONS                                 = 0x0,
     SMSG_INITIAL_SPELLS                                      = 0x0623, // 5.4.2 17688
-    SMSG_INIT_CURRENCY                                       = 0x1595, // 5.4.2 17688
+    SMSG_INIT_CURRENCY                                       = 0x0,
     SMSG_INIT_WORLD_STATES                                   = 0x0,
     SMSG_INSPECT                                             = 0x0,
     SMSG_INSPECT_HONOR_STATS                                 = 0x0,
@@ -1141,7 +1141,7 @@ enum Opcodes
     SMSG_PET_CAST_FAILED                                     = 0x0,
     SMSG_PET_DISMISS_SOUND                                   = 0x0,
     SMSG_PET_GUIDS                                           = 0x0,
-    SMSG_PET_LEARNED_SPELL                                   = 0x1594, // 5.4.2 17688
+    SMSG_PET_LEARNED_SPELL                                   = 0x0,
     SMSG_PET_MODE                                            = 0x0,
     SMSG_PET_NAME_INVALID                                    = 0x0,
     SMSG_PET_NAME_QUERY_RESPONSE                             = 0x0,
@@ -1335,7 +1335,7 @@ enum Opcodes
     SMSG_TEXT_EMOTE                                          = 0x0,
     SMSG_THREAT_CLEAR                                        = 0x0,
     SMSG_THREAT_REMOVE                                       = 0x0,
-    SMSG_THREAT_UPDATE                                       = 0x1080, // 5.4.2 17688
+    SMSG_THREAT_UPDATE                                       = 0x0,
     SMSG_TIME_ADJUSTMENT                                     = 0x0,
     SMSG_TIME_SYNC_REQ                                       = 0x0F05, // 5.4.2 17688
     SMSG_TITLE_EARNED                                        = 0x0,
