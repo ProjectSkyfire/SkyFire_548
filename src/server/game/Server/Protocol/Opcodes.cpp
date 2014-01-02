@@ -585,7 +585,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_STRAFE_LEFT,                   STATUS_LOGGEDIN,     PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_STRAFE_RIGHT,                  STATUS_LOGGEDIN,     PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_SWIM,                          STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           );
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_START_TURN_LEFT,                     STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           );
+    DEFINE_OPCODE_HANDLER(MSG_MOVE_START_TURN_LEFT,                     STATUS_LOGGEDIN,     PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_TURN_RIGHT,                    STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_STOP,                                STATUS_LOGGEDIN,     PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(MSG_MOVE_STOP_ASCEND,                         STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           );
