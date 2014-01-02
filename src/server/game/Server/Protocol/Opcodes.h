@@ -457,7 +457,7 @@ enum Opcodes
     CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x047F, // 5.4.2 17688
     CMSG_READ_ITEM                                           = 0x0,
     CMSG_REALM_SPLIT                                         = 0x0,
-    CMSG_REALM_NAME_QUERY                                    = 0x0472, // 5.4.2 17688
+    CMSG_REALM_QUERY                                         = 0x0472, // 5.4.2 17688
     CMSG_RECLAIM_CORPSE                                      = 0x0,
     CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
     CMSG_REFORGE_ITEM                                        = 0x0,
