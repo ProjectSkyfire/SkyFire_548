@@ -5509,20 +5509,20 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveSetFlightBackSpeed;
         //case SMSG_SPLINE_MOVE_SET_PITCH_RATE:
         //    return SplineMoveSetPitchRate;
-        //case SMSG_MOVE_SET_WALK_SPEED:
-        //    return MoveSetWalkSpeed;
-        //case SMSG_MOVE_SET_RUN_SPEED:
-        //    return MoveSetRunSpeed;
+        case SMSG_MOVE_SET_WALK_SPEED:
+            return MoveSetWalkSpeed;
+        case SMSG_MOVE_SET_RUN_SPEED:
+            return MoveSetRunSpeed;
         //case SMSG_MOVE_SET_RUN_BACK_SPEED:
         //    return MoveSetRunBackSpeed;
-        //case SMSG_MOVE_SET_SWIM_SPEED:
-        //    return MoveSetSwimSpeed;
+        case SMSG_MOVE_SET_SWIM_SPEED:
+            return MoveSetSwimSpeed;
         //case SMSG_MOVE_SET_SWIM_BACK_SPEED:
         //    return MoveSetSwimBackSpeed;
         //case SMSG_MOVE_SET_TURN_RATE:
         //    return MoveSetTurnRate;
-        //case SMSG_MOVE_SET_FLIGHT_SPEED:
-        //   return MoveSetFlightSpeed;
+        case SMSG_MOVE_SET_FLIGHT_SPEED:
+           return MoveSetFlightSpeed;
         //case SMSG_MOVE_SET_FLIGHT_BACK_SPEED:
         //    return MoveSetFlightBackSpeed;
         //case SMSG_MOVE_SET_PITCH_RATE:
@@ -5559,10 +5559,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveRoot;
         //case SMSG_SPLINE_MOVE_UNROOT:
         //    return SplineMoveUnroot;
-        //case SMSG_MOVE_SET_CAN_FLY:
-        //    return MoveSetCanFly;
-        //case SMSG_MOVE_UNSET_CAN_FLY:
-        //    return MoveUnsetCanFly;
+        case SMSG_MOVE_SET_CAN_FLY:
+            return MoveSetCanFly;
+        case SMSG_MOVE_UNSET_CAN_FLY:
+            return MoveUnsetCanFly;
         //case SMSG_MOVE_SET_HOVER:
         //    return MoveSetHover;
         //case SMSG_MOVE_UNSET_HOVER:
