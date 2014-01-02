@@ -498,7 +498,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_SET_PRIMARY_TALENT_TREE,                 STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::HandeSetTalentSpecialization    );
     DEFINE_OPCODE_HANDLER(CMSG_SET_RELATIVE_POSITION,                   STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_SET_SAVED_INSTANCE_EXTEND,               STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetSavedInstanceExtend    );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_SELECTION,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::HandleSetSelectionOpcode        );
+    DEFINE_OPCODE_HANDLER(CMSG_SET_SELECTION,                           STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleSetSelectionOpcode        ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_SET_TAXI_BENCHMARK_MODE,                 STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetTaxiBenchmarkOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_SET_TITLE,                               STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetTitleOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_CURRENCY,                      STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
