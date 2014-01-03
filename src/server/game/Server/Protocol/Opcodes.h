@@ -183,7 +183,6 @@ enum Opcodes
     CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
     CMSG_CREATURE_QUERY                                      = 0x0C4A, // 5.4.2 17688
     CMSG_DANCE_QUERY                                         = 0x0,
-    CMSG_DB_QUERY_BULK                                       = 0x0,
     CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
     CMSG_DEL_FRIEND                                          = 0x1A60, // 5.4.2 17688
     CMSG_DEL_IGNORE                                          = 0x0,
