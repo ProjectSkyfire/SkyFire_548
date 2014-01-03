@@ -462,7 +462,7 @@ enum Opcodes
     CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
     CMSG_REFORGE_ITEM                                        = 0x0,
     CMSG_REORDER_CHARACTERS                                  = 0x0,
-    CMSG_REPAIR_ITEM                                         = 0x0,
+    CMSG_REPAIR_ITEM                                         = 0x0AED, // 5.4.2 17688
     CMSG_REPLACE_ACCOUNT_DATA                                = 0x0,
     CMSG_REPOP_REQUEST                                       = 0x0,
     CMSG_REPORT_PVP_AFK                                      = 0x0,
@@ -575,7 +575,7 @@ enum Opcodes
     CMSG_UNLEARN_SKILL                                       = 0x0,
     CMSG_UNLEARN_SPECIALIZATION                              = 0x0,
     CMSG_UNREGISTER_ALL_ADDON_PREFIXES                       = 0x0,
-    CMSG_UPDATE_ACCOUNT_DATA                                 = 0x104C, // 5.4.1 17538 not sure
+    CMSG_UPDATE_ACCOUNT_DATA                                 = 0x0,
     CMSG_UPDATE_MISSILE_TRAJECTORY                           = 0x0,
     CMSG_UPDATE_PROJECTILE_POSITION                          = 0x0,
     CMSG_USED_FOLLOW                                         = 0x0,
