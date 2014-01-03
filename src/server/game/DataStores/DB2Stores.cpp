@@ -101,6 +101,7 @@ void LoadDB2Stores(std::string const& dataPath)
     DB2StoreProblemList bad_db2_files;
     uint32 availableDb2Locales = 0xFF;
 
+    LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore, db2Path, "BroadcastText.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemStore, db2Path, "Item.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore, db2Path, "ItemCurrencyCost.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
@@ -126,7 +127,8 @@ void LoadDB2Stores(std::string const& dataPath)
     }
 
     // Check loaded DB2 files proper version
-    if (!sItemStore.LookupEntry(108438)             ||       // last item added in 5.4.2 (17688)
+    if (!sBroadcastTextStore.LookupEntry(77161)     ||       // last broadcast text added in 5.4.2 (17688)
+        !sItemStore.LookupEntry(108438)             ||       // last item added in 5.4.2 (17688)
         !sItemExtendedCostStore.LookupEntry(5268)   ||       // last item extended cost added in 5.4.2 (17688)
         !sSceneScriptStore.LookupEntry(11156))               // last scene script added in 5.4.2 (17688)        
     {
