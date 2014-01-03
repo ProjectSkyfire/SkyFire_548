@@ -320,7 +320,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_REMOVE_RECRUIT,                 STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderRemoveRecruit  );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_SET_GUILD_POST,                 STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderSetGuildPost   );
     DEFINE_OPCODE_HANDLER(CMSG_LIST_INVENTORY,                          STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleListInventoryOpcode       ); // 5.4.2 17688
-    DEFINE_OPCODE_HANDLER(CMSG_LOAD_SCREEN,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLoadScreenOpcode          );
+    DEFINE_OPCODE_HANDLER(CMSG_LOAD_SCREEN,                             STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleLoadScreenOpcode          ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_CANCEL,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_REQUEST,                          STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutRequestOpcode       ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_LOG_DISCONNECT,                          STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            );
