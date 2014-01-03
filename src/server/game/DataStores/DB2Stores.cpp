@@ -25,7 +25,7 @@
 #include "World.h"
 #include "DBCStores.h"
 
-DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt, &DB2Utilities::HasBroadcastTextEntry, /*&DB2Utilities::WriteBroadcastTextDbReply*/);
+DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
 DB2Storage<ItemEntry> sItemStore(Itemfmt, &DB2Utilities::HasItemEntry, &DB2Utilities::WriteItemDbReply);
 DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
 DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
