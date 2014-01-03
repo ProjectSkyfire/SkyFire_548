@@ -31,6 +31,23 @@
 #endif
 
 // Structures used to access raw DB2 data and required packing to portability
+struct BroadcastTextEntry
+{
+    uint32   ID;                                             // 0
+    //uint32   Unk0;                                         // 1
+    LocalizedString* text_0;                                 // 2
+    LocalizedString* text_1;                                 // 3
+    //uint32   Unk1;                                         // 4
+    //uint32   Unk2;                                         // 5
+    //uint32   Unk3;                                         // 6
+    //uint32   Unk4;                                         // 7
+    //uint32   Unk5;                                         // 8
+    //uint32   Unk6;                                         // 9
+    uint32   SoundID;                                        // 10
+    //uint32   Unk7;                                         // 11
+    //uint32   Unk8;                                         // 12
+};
+
 struct ItemEntry
 {
     uint32   ID;                                             // 0
