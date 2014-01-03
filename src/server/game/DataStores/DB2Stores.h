@@ -24,6 +24,7 @@
 #include "DB2Structure.h"
 #include <string>
 
+extern DB2Storage<BroadcastTextEntry> sBroadcastTextStore;
 extern DB2Storage<ItemEntry> sItemStore;
 extern DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore;
 extern DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore;

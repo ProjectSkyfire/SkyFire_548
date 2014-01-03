@@ -196,7 +196,6 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_CORPSE_MAP_POSITION_QUERY,               STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleCorpseMapPositionQuery    );
     DEFINE_OPCODE_HANDLER(CMSG_CREATURE_QUERY,                          STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleCreatureQueryOpcode       ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_DANCE_QUERY,                             STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(CMSG_DB_QUERY_BULK,                           STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_DEL_FRIEND,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleDelFriendOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_DEL_IGNORE,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleDelIgnoreOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_DEL_VOICE_IGNORE,                        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
@@ -453,7 +452,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_ACCOUNT_DATA,                    STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleRequestAccountData        );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_CATEGORY_COOLDOWNS,              STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::HandleRequestCategoryCooldowns  );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_CEMETERY_LIST,                   STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_HOTFIX,                          STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::HandleRequestHotfix             );
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_HOTFIX,                          STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleRequestHotfix             ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_INSPECT_RATED_BG_STATS,          STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PARTY_MEMBER_STATS,              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleRequestPartyMemberStatsOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PET_INFO,                        STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleRequestPetInfoOpcode      );
@@ -766,7 +765,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_CUSTOM_LOAD_SCREEN,                      STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_DAMAGE_CALC_LOG,                         STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_DANCE_QUERY_RESPONSE,                    STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_DB_REPLY,                                STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_DB_REPLY,                                STATUS_NEVER,        PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(SMSG_DEATH_RELEASE_LOC,                       STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_DEBUG_RUNE_REGEN,                        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_DEFENSE_MESSAGE,                         STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

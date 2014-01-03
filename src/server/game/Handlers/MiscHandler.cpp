@@ -2118,13 +2118,13 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
     ObjectGuid* guids = new ObjectGuid[count];
     for (uint32 i = 0; i < count; ++i)
     {
+        guids[i][3] = recvPacket.ReadBit();
+        guids[i][7] = recvPacket.ReadBit();
+        guids[i][5] = recvPacket.ReadBit();
+        guids[i][6] = recvPacket.ReadBit();
+        guids[i][2] = recvPacket.ReadBit();
         guids[i][0] = recvPacket.ReadBit();
         guids[i][4] = recvPacket.ReadBit();
-        guids[i][7] = recvPacket.ReadBit();
-        guids[i][2] = recvPacket.ReadBit();
-        guids[i][5] = recvPacket.ReadBit();
-        guids[i][3] = recvPacket.ReadBit();
-        guids[i][6] = recvPacket.ReadBit();
         guids[i][1] = recvPacket.ReadBit();
     }
 
@@ -2132,37 +2132,40 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
     for (uint32 i = 0; i < count; ++i)
     {
         recvPacket.ReadByteSeq(guids[i][5]);
+        recvPacket.ReadByteSeq(guids[i][1]);
+        recvPacket.ReadByteSeq(guids[i][4]);
         recvPacket.ReadByteSeq(guids[i][6]);
         recvPacket.ReadByteSeq(guids[i][7]);
-        recvPacket.ReadByteSeq(guids[i][0]);
-        recvPacket.ReadByteSeq(guids[i][1]);
-        recvPacket.ReadByteSeq(guids[i][3]);
-        recvPacket.ReadByteSeq(guids[i][4]);
-        recvPacket >> entry;
         recvPacket.ReadByteSeq(guids[i][2]);
+        recvPacket.ReadByteSeq(guids[i][0]);
+        recvPacket.ReadByteSeq(guids[i][3]);
+        recvPacket >> entry;
 
         if (!store->HasRecord(entry))
         {
             WorldPacket data(SMSG_DB_REPLY, 4 * 4);
             data << -int32(entry);
-            data << uint32(store->GetHash());
-            data << uint32(time(NULL));
             data << uint32(0);
+            data << uint32(time(NULL));
+            data << uint32(store->GetHash());
             SendPacket(&data);
+            TC_LOG_ERROR("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, (uint32)store->GetHash());
             continue;
         }
 
         WorldPacket data(SMSG_DB_REPLY);
         data << int32(entry);
-        data << uint32(store->GetHash());
         data << uint32(sObjectMgr->GetHotfixDate(entry, store->GetHash()));
-
+        
         size_t sizePos = data.wpos();
-        data << uint32(0);              // size of next block
+        data << uint32(sizePos);              // size of next block
+        data << uint32(store->GetHash());
+
         store->WriteRecord(entry, uint32(GetSessionDbcLocale()), data);
         data.put<uint32>(sizePos, data.wpos() - sizePos - 4);
 
         SendPacket(&data);
+        TC_LOG_ERROR("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, (uint32)store->GetHash());
     }
 
     delete[] guids;
