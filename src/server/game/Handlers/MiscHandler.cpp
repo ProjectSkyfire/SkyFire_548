@@ -2145,11 +2145,11 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
         {
             WorldPacket data(SMSG_DB_REPLY, 4 * 4);
             data << -int32(entry);
-            data << uint32(0);
             data << uint32(time(NULL));
+            data << uint32(0);
             data << uint32(store->GetHash());
             SendPacket(&data);
-            TC_LOG_ERROR("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, (uint32)store->GetHash());
+            TC_LOG_ERROR("network", "SMSG_DB_REPLY: hotfix entry: %u type: %u, has no Record.", entry, (uint32)store->GetHash());
             continue;
         }
 
