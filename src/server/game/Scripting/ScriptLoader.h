@@ -30,6 +30,7 @@ void AddKalimdorScripts();
 void AddOutlandScripts();
 void AddNorthrendScripts();
 void AddMaelstromScripts();
+void AddPandariaScripts();
 void AddEventScripts();
 void AddPetScripts();
 void AddBattlegroundScripts();

@@ -659,6 +659,8 @@ void AddSC_zangarmarsh();
 // Maelstrom
 void AddSC_kezan();
 
+// Pandaria
+
 // Events
 void AddSC_event_childrens_week();
 
@@ -697,6 +699,7 @@ void AddScripts()
     AddOutlandScripts();
     AddNorthrendScripts();
     AddMaelstromScripts();
+    AddPandariaScripts();
     AddEventScripts();
     AddPetScripts();
     AddBattlegroundScripts();
@@ -1372,6 +1375,13 @@ void AddMaelstromScripts()
 {
 #ifdef SCRIPTS
     AddSC_kezan();
+#endif
+}
+
+void AddPandariaScripts()
+{
+#ifdef SCRIPTS
+
 #endif
 }
 
