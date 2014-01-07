@@ -4038,8 +4038,8 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         WorldPacket data(SMSG_LEARNED_SPELL, 8);
         uint32 spellCount = 1;
 
-        data.WriteBit(0);
         data.WriteBits(spellCount, 22);
+        data.WriteBit(0);
 
         for (uint32 i = 0; i < spellCount; ++i)
             data << uint32(spell_id);

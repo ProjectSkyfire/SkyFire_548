@@ -991,7 +991,7 @@ enum Opcodes
     SMSG_JOINED_BATTLEGROUND_QUEUE                           = 0x0835, // 5.4.2 17688
     SMSG_KICK_REASON                                         = 0x0,
     SMSG_LEARNED_DANCE_MOVES                                 = 0x0,
-    SMSG_LEARNED_SPELL                                       = 0x0,
+    SMSG_LEARNED_SPELL                                       = 0x0C6E, // 5.4.2 17688
     SMSG_LEVELUP_INFO                                        = 0x0,
     SMSG_LFG_BOOT_PROPOSAL_UPDATE                            = 0x0,
     SMSG_LFG_DISABLED                                        = 0x0,
