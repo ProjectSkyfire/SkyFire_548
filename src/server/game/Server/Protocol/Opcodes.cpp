@@ -1254,7 +1254,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_TRAINER_LIST,                            STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TRANSFER_ABORTED,                        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TRANSFER_PENDING,                        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_TRIGGER_CINEMATIC,                       STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_TRIGGER_CINEMATIC,                       STATUS_NEVER,        PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(SMSG_TRIGGER_MOVIE,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TURN_IN_PETITION_RESULTS,                STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TUTORIAL_FLAGS,                          STATUS_NEVER,        PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               ); // 5.4.2 17688
