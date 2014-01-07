@@ -23235,11 +23235,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 20);
-    
     data << uint32(1);
     data << uint32(1);
-    data << float(0.01666667f);                             // game speed
     data.AppendPackedTime(sWorld->GetGameTime());
+    data << float(0.01666667f);                             // game speed
     data.AppendPackedTime(sWorld->GetGameTime());
 
     GetSession()->SendPacket(&data);
