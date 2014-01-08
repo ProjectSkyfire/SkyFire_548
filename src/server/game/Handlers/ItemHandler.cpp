@@ -149,7 +149,7 @@ void WorldSession::HandleSwapItem(WorldPacket& recvData)
     if (count != 2)
         return;
 
-    recvData >> dstbag >> dstslot >> srcbag >> srcslot;
+    recvData >> dstslot >> dstbag >> srcslot >> srcbag;
 
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u", srcbag, srcslot, dstbag, dstslot);
 
