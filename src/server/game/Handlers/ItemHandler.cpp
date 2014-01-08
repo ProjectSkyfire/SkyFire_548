@@ -37,8 +37,9 @@ void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
     uint8 srcbag, srcslot, dstbag, dstslot, unknownBitCounter;
     uint32 count;
 
+    recvData >> dstslot >> dstbag >> srcslot;
     recvData >> count;
-    recvData >> dstbag >> srcbag >> dstslot >> srcslot;
+    recvData >> srcbag;
 
     unknownBitCounter = recvData.ReadBits(2);
 

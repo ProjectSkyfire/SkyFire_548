@@ -537,7 +537,7 @@ enum Opcodes
     CMSG_SOCKET_GEMS                                         = 0x0,
     CMSG_SPELLCLICK                                          = 0x0,
     CMSG_SPIRIT_HEALER_ACTIVATE                              = 0x0,
-    CMSG_SPLIT_ITEM                                          = 0x0,
+    CMSG_SPLIT_ITEM                                          = 0x012E, // 5.4.2 17688
     CMSG_STANDSTATECHANGE                                    = 0x0,
     CMSG_START_QUEST                                         = 0x0,
     CMSG_STOP_DANCE                                          = 0x0,
