@@ -92,7 +92,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_SELL_ITEM,                       STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionSellItem           );
     DEFINE_OPCODE_HANDLER(CMSG_AUTH_SESSION,                            STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess            );
     DEFINE_OPCODE_HANDLER(CMSG_AUTOBANK_ITEM,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleAutoBankItemOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM,                          STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemOpcode       );
+    DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM,                          STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemOpcode       ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM_SLOT,                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemSlotOpcode   );
     DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BAG_ITEM,                      STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBagItemOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BANK_ITEM,                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBankItemOpcode   );
