@@ -254,7 +254,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
     data.WriteByteSeq(guid[7]);
 
-    data << int32(_gossipMenu.GetMenuId());                 // new 2.4.0
+    data << int32(0);                                       // friend faction ID?
 
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[1]);
@@ -263,7 +263,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
     data.WriteByteSeq(guid[5]);
 
-    data << int32(0);                                       // friend faction ID?
+    data << int32(_gossipMenu.GetMenuId());                 // new 2.4.0
 
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[4]);
