@@ -758,11 +758,11 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     bool hasCounter = !recvPacket.ReadBit();
     recvPacket.FlushBits();
 
-    if (hasCounter)
-        recvPacket >> counter;
-
     if (hasSpellId)
         recvPacket >> spellId;
+
+    if (hasCounter)
+        recvPacket >> counter;
 
     if (_player->IsNonMeleeSpellCasted(false))
         _player->InterruptNonMeleeSpells(false, spellId, false);
