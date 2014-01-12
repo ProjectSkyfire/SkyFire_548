@@ -464,71 +464,21 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     GossipText const* pGossip = sObjectMgr->GetGossipText(textID);
 
-    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 100);          // guess size
+    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 1 + 4 + 64);
+
+    data.WriteBit(1);                                   // has data
+    data.FlushBits();
 
     data << textID;
+    data << uint32(64);                                 // size (8 * 4) * 2
 
-    if (!pGossip)
-    {
-        for (uint32 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
-        {
-            data << float(0);
-            data << "Greetings $N";
-            data << "Greetings $N";
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-        }
-    }
-    else
-    {
-        std::string Text_0[MAX_LOCALES], Text_1[MAX_LOCALES];
-        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
-        {
-            Text_0[i]=pGossip->Options[i].Text_0;
-            Text_1[i]=pGossip->Options[i].Text_1;
-        }
+    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+        data << float(pGossip ? pGossip->Options[i].Probability : 0);
 
-        int loc_idx = GetSessionDbLocaleIndex();
-        if (loc_idx >= 0)
-        {
-            if (NpcTextLocale const* nl = sObjectMgr->GetNpcTextLocale(textID))
-            {
-                for (int i = 0; i < MAX_LOCALES; ++i)
-                {
-                    ObjectMgr::GetLocaleString(nl->Text_0[i], loc_idx, Text_0[i]);
-                    ObjectMgr::GetLocaleString(nl->Text_1[i], loc_idx, Text_1[i]);
-                }
-            }
-        }
+    data << textID;                                     // should be a broadcast id
 
-        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
-        {
-            data << pGossip->Options[i].Probability;
-
-            if (Text_0[i].empty())
-                data << Text_1[i];
-            else
-                data << Text_0[i];
-
-            if (Text_1[i].empty())
-                data << Text_0[i];
-            else
-                data << Text_1[i];
-
-            data << pGossip->Options[i].Language;
-
-            for (int j = 0; j < MAX_GOSSIP_TEXT_EMOTES; ++j)
-            {
-                data << pGossip->Options[i].Emotes[j]._Delay;
-                data << pGossip->Options[i].Emotes[j]._Emote;
-            }
-        }
-    }
+    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS - 1; i++)
+        data << uint32(0);
 
     SendPacket(&data);
 

@@ -1034,7 +1034,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_NOTIFICATION,                            STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_NOTIFY_DANCE,                            STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_NOTIFY_DEST_LOC_SPELL_CAST,              STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_NPC_TEXT_UPDATE,                         STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_NPC_TEXT_UPDATE,                         STATUS_NEVER,        PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(SMSG_OFFER_PETITION_ERROR,                    STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA,    STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_OPEN_CONTAINER,                          STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
