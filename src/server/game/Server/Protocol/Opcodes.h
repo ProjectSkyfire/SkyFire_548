@@ -1259,7 +1259,7 @@ enum Opcodes
     SMSG_SHOP_BUY_ERROR                                      = 0x0000, // 5.4.2 17688
     SMSG_SHOP_ITEM                                           = 0x0,
     SMSG_SHOWTAXINODES                                       = 0x0,
-    SMSG_SHOW_BANK                                           = 0x0,
+    SMSG_SHOW_BANK                                           = 0x0812, // 5.4.2 17688
     SMSG_SHOW_RATINGS                                        = 0x0,
     SMSG_SOCKET_GEMS_RESULT                                  = 0x0,
     SMSG_SOR_START_EXPERIENCE_INCOMPLETE                     = 0x0,
