@@ -233,10 +233,10 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
         data.WriteString(item.Message);                     // text for gossip item
         data.WriteString(item.BoxMessage);                  // accept text (related to money) pop up box, 2.0.
-        data << int32(item.BoxMoney);                       // money required to open menu, 2.0.3
+        data << int32(itr->first);
         data << int8(item.IsCoded);                         // makes pop up box password
         data << int8(item.MenuItemIcon);
-        data << int32(itr->first);
+        data << int32(item.BoxMoney);                       // money required to open menu, 2.0.3
     }
 
     for (uint8 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
