@@ -228,7 +228,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_GMTICKET_UPDATETEXT,                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketUpdateOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_GM_REPORT_LAG,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleReportLag                 );
     DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_HELLO,                            STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGossipHelloOpcode         ); // 5.4.2 17688
-    DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_SELECT_OPTION,                    STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGossipSelectOptionOpcode  );
+    DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_SELECT_OPTION,                    STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGossipSelectOptionOpcode  ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_GRANT_LEVEL,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGrantLevel                );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_ASSISTANT_LEADER,                  STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupAssistantLeaderOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_CHANGE_SUB_GROUP,                  STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupChangeSubGroupOpcode );
