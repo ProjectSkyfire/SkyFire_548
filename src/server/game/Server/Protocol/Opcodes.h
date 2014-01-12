@@ -419,7 +419,7 @@ enum Opcodes
     CMSG_PET_SPELL_AUTOCAST                                  = 0x0,
     CMSG_PET_STOP_ATTACK                                     = 0x0,
     CMSG_PING                                                = 0x18E2, // 5.4.2 17688
-    CMSG_PLAYED_TIME                                         = 0x0,
+    CMSG_PLAYED_TIME                                         = 0x0A12, // 5.4.2 17688
     CMSG_PLAYER_DIFFICULTY_CHANGE                            = 0x0,
     CMSG_PLAYER_LOGIN                                        = 0x0754, // 5.4.2 17688
     CMSG_PLAYER_LOGOUT                                       = 0x0,
@@ -1150,7 +1150,7 @@ enum Opcodes
     SMSG_PET_SPELLS                                          = 0x0,
     SMSG_PET_TAME_FAILURE                                    = 0x0,
     SMSG_PET_UPDATE_COMBO_POINTS                             = 0x0,
-    SMSG_PLAYED_TIME                                         = 0x0,
+    SMSG_PLAYED_TIME                                         = 0x0DAD, // 5.4.2 17688
     SMSG_PLAYERBINDERROR                                     = 0x0,
     SMSG_PLAYERBOUND                                         = 0x0,
     SMSG_PLAYER_DIFFICULTY_CHANGE                            = 0x0,
