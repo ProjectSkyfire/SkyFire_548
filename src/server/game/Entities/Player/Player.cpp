@@ -13408,43 +13408,80 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
 void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint32 itemid)
 {
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE (%u)", msg);
+
+    ObjectGuid pItemGuid = pItem ? pItem->GetGUID() : 0;
+    ObjectGuid pItemGuid2 = pItem2 ? pItem2->GetGUID() : 0;
+
     WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I ? 22 : 18));
-    data << uint8(msg);
 
     if (msg != EQUIP_ERR_OK)
     {
-        data << uint64(pItem ? pItem->GetGUID() : 0);
-        data << uint64(pItem2 ? pItem2->GetGUID() : 0);
-        data << uint8(0);                                   // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
+        data.WriteBit(pItemGuid[4]);
+        data.WriteBit(pItemGuid2[6]);
+        data.WriteBit(pItemGuid2[4]);
+        data.WriteBit(pItemGuid[2]);
+        data.WriteBit(pItemGuid2[0]);
+        data.WriteBit(pItemGuid[3]);
+        data.WriteBit(pItemGuid[0]);
+        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid[7]);
+        data.WriteBit(pItemGuid2[7]);
+        data.WriteBit(pItemGuid[1]);
+        data.WriteBit(pItemGuid[5]);
+        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid2[5]);
+        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid2[3]);
 
-        switch (msg)
+        data.WriteByteSeq(pItemGuid[2]);
+        data.WriteByteSeq(pItemGuid2[7]);
+        data.WriteByteSeq(pItemGuid[4]);
+        data.WriteByteSeq(pItemGuid[1]);
+
+        data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
+
+        data.WriteByteSeq(pItemGuid2[0]);
+        data.WriteByteSeq(pItemGuid2[4]);
+        data.WriteByteSeq(pItemGuid[0]);
+        data.WriteByteSeq(pItemGuid[7]);
+        data.WriteByteSeq(pItemGuid[5]);
+        data.WriteByteSeq(pItemGuid2[1]);
+
+        data << uint8(msg);
+
+        data.WriteByteSeq(pItemGuid2[2]);
+
+        if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS ||
+            msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS ||
+            msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS)
         {
-            case EQUIP_ERR_CANT_EQUIP_LEVEL_I:
-            case EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW:
-            {
-                ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
-                data << uint32(proto ? proto->RequiredLevel : 0);
-                break;
-            }
-            case EQUIP_ERR_NO_OUTPUT:    // no idea about this one...
-            {
-                data << uint64(0); // item guid
-                data << uint32(0); // slot
-                data << uint64(0); // container
-                break;
-            }
-            case EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS:
-            case EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS:
-            case EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS:
-            {
-                ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
-                data << uint32(proto ? proto->ItemLimitCategory : 0);
-                break;
-            }
-            default:
-                break;
+            ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
+            data << uint32(proto ? proto->ItemLimitCategory : 0);
+        }
+
+        data.WriteByteSeq(pItemGuid2[5]);
+        data.WriteByteSeq(pItemGuid2[6]);
+
+        if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I || msg == EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW)
+        {
+            ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
+            data << uint32(proto ? proto->RequiredLevel : 0);
+        }
+
+        if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
+            data << uint32(0);                  // slot
+
+        data.WriteByteSeq(pItemGuid[6]);
+        data.WriteByteSeq(pItemGuid2[3]);
+        data.WriteByteSeq(pItemGuid[3]);
+
+        if (msg == EQUIP_ERR_NO_OUTPUT)
+        {
+            data.WriteBits(0, 8);               // item guid
+            data.WriteBits(0, 8);               // container
         }
     }
+
     GetSession()->SendPacket(&data);
 }
 

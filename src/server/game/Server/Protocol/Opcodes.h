@@ -976,7 +976,7 @@ enum Opcodes
     SMSG_INVALIDATE_DANCE                                    = 0x0,
     SMSG_INVALIDATE_PLAYER                                   = 0x0,
     SMSG_INVALID_PROMOTION_CODE                              = 0x0,
-    SMSG_INVENTORY_CHANGE_FAILURE                            = 0x0,
+    SMSG_INVENTORY_CHANGE_FAILURE                            = 0x0860, // 5.4.2 17688
     SMSG_ITEM_ADD_PASSIVE                                    = 0x0,
     SMSG_ITEM_COOLDOWN                                       = 0x0,
     SMSG_ITEM_ENCHANT_TIME_UPDATE                            = 0x0,
