@@ -413,7 +413,7 @@ enum Opcodes
     CMSG_PET_CAST_SPELL                                      = 0x0,
     CMSG_PET_LEARN_TALENT                                    = 0x0,
     CMSG_PET_NAME_CACHE                                      = 0x0,
-    CMSG_PET_NAME_QUERY                                      = 0x0,
+    CMSG_PET_NAME_QUERY                                      = 0x0249, // 5.4.2 17688
     CMSG_PET_RENAME                                          = 0x0,
     CMSG_PET_SET_ACTION                                      = 0x0,
     CMSG_PET_SPELL_AUTOCAST                                  = 0x0,
@@ -1143,7 +1143,7 @@ enum Opcodes
     SMSG_PET_LEARNED_SPELL                                   = 0x0,
     SMSG_PET_MODE                                            = 0x0,
     SMSG_PET_NAME_INVALID                                    = 0x0,
-    SMSG_PET_NAME_QUERY_RESPONSE                             = 0x0,
+    SMSG_PET_NAME_QUERY_RESPONSE                             = 0x08BC, // 5.4.2 17688
     SMSG_PET_REMOVED_SPELL                                   = 0x0,
     SMSG_PET_RENAMEABLE                                      = 0x0,
     SMSG_PET_SLOT_UPDATED                                    = 0x0,

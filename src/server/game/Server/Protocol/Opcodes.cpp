@@ -404,7 +404,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_PET_CANCEL_AURA,                         STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetCancelAuraOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_PET_CAST_SPELL,                          STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetCastSpellOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_PET_LEARN_TALENT,                        STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetLearnTalent            );
-    DEFINE_OPCODE_HANDLER(CMSG_PET_NAME_QUERY,                          STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery              );
+    DEFINE_OPCODE_HANDLER(CMSG_PET_NAME_QUERY,                          STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery              ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(CMSG_PET_RENAME,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetRename                 );
     DEFINE_OPCODE_HANDLER(CMSG_PET_SET_ACTION,                          STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetSetAction              );
     DEFINE_OPCODE_HANDLER(CMSG_PET_SPELL_AUTOCAST,                      STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePetSpellAutocastOpcode    );
@@ -1063,7 +1063,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_PET_LEARNED_SPELL,                       STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_PET_MODE,                                STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_PET_NAME_INVALID,                        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_PET_NAME_QUERY_RESPONSE,                 STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_PET_NAME_QUERY_RESPONSE,                 STATUS_NEVER,        PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               ); // 5.4.2 17688
     DEFINE_OPCODE_HANDLER(SMSG_PET_REMOVED_SPELL,                       STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_PET_RENAMEABLE,                          STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_PET_SLOT_UPDATED,                        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
