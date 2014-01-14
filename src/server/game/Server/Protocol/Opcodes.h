@@ -1391,7 +1391,7 @@ enum Opcodes
     SMSG_WEEKLY_SPELL_USAGE_UPDATE                           = 0x0,
     SMSG_WHO                                                 = 0x0872, // 5.4.2 17688
     SMSG_WHOIS                                               = 0x050E, // 5.4.2 17688
-    SMSG_WORLD_SERVER_INFO                                   = 0x0,
+    SMSG_WORLD_SERVER_INFO                                   = 0x134B, // 5.4.2 17688
     SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
     SMSG_XP_GAIN_ABORTED                                     = 0x0,
     SMSG_ZONE_UNDER_ATTACK                                   = 0x0,
