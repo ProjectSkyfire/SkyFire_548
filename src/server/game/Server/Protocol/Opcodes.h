@@ -676,7 +676,7 @@ enum Opcodes
     SMSG_ADDON_INFO                                          = 0x0,
     SMSG_ADD_RUNE_POWER                                      = 0x0,
     SMSG_AI_REACTION                                         = 0x0,
-    SMSG_ALL_ACHIEVEMENT_DATA                                = 0x0,
+    SMSG_ALL_ACHIEVEMENT_DATA                                = 0x0E29, // 5.4.2 17688
     SMSG_AREA_SPIRIT_HEALER_TIME                             = 0x0,
     SMSG_AREA_TRIGGER_MESSAGE                                = 0x0,
     SMSG_AREA_TRIGGER_MOVEMENT_UPDATE                        = 0x0,
