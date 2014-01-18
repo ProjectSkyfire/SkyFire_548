@@ -292,7 +292,7 @@ enum Opcodes
     CMSG_ITEM_REFUND                                         = 0x0,
     CMSG_ITEM_REFUND_INFO                                    = 0x0,
     CMSG_ITEM_TEXT_QUERY                                     = 0x0,
-    CMSG_JOIN_CHANNEL                                        = 0x0,
+    CMSG_JOIN_CHANNEL                                        = 0x0847, // 5.4.2 17688
     CMSG_KEEP_ALIVE                                          = 0x0,
     CMSG_LEARN_PREVIEW_TALENTS                               = 0x0,
     CMSG_LEARN_PREVIEW_TALENTS_PET                           = 0x0,
@@ -594,8 +594,8 @@ enum Opcodes
     CMSG_WORLD_TELEPORT                                      = 0x0,
     CMSG_WRAP_ITEM                                           = 0x0,
     CMSG_ZONEUPDATE                                          = 0x0,
-    MSG_CHANNEL_START                                        = 0x0847, // 5.4.2 17688
-    MSG_CHANNEL_UPDATE                                       = 0x1C04, // 5.4.2 17688
+    MSG_CHANNEL_START                                        = 0x0,
+    MSG_CHANNEL_UPDATE                                       = 0x0,
     MSG_CORPSE_QUERY                                         = 0x0,
     MSG_GM_BIND_OTHER                                        = 0x0,
     MSG_GM_SHOWLABEL                                         = 0x0,
@@ -771,7 +771,7 @@ enum Opcodes
     SMSG_CHALLANGES_INFO                                     = 0x0A71, // 5.4.2 17688
     SMSG_CHANNEL_LIST                                        = 0x0,
     SMSG_CHANNEL_MEMBER_COUNT                                = 0x0,
-    SMSG_CHANNEL_NOTIFY                                      = 0x0,
+    SMSG_CHANNEL_NOTIFY                                      = 0x1C04, // 5.4.2 17688
     SMSG_CHARACTER_LOGIN_FAILED                              = 0x0,
     SMSG_CHAR_CREATE                                         = 0x0FAD, // 5.4.2 17688
     SMSG_CHAR_CUSTOMIZE                                      = 0x0,
