@@ -681,75 +681,72 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     ObjectGuid source(speaker ? speaker->GetGUID() : 0);
     ObjectGuid target(target_guid);
 
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBits(0, 8);
     data->WriteBit(1);
     data->WriteBit(0);
     data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
     data->WriteBits(0, 8);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(type == CHAT_MSG_CHANNEL ? 0 : 1);
+    data->WriteBits(0, 8);
+    data->WriteBits(strlen(message), 12);
+    data->WriteBit(0);
+    data->WriteBit(1);
+
+    data->WriteBit(target[4]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[7]);
+    data->WriteBit(target[5]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[0]);
+    data->WriteBit(target[6]);
+
+    data->WriteBit(1);
+    data->WriteBit(1);
+
+    if (type == CHAT_MSG_CHANNEL)
+        data->WriteBits(strlen(channelName), 7);
+
+    data->WriteBit(0);
+    data->WriteBit(1);
     data->WriteBit(0);
 
-    data->WriteBit(source[6]);
     data->WriteBit(source[1]);
-    data->WriteBit(source[3]);
     data->WriteBit(source[5]);
     data->WriteBit(source[4]);
+    data->WriteBit(source[6]);
+    data->WriteBit(source[3]);
     data->WriteBit(source[2]);
     data->WriteBit(source[7]);
     data->WriteBit(source[0]);
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBits(strlen(message), 12);
-    data->WriteBit(0);
-
-    data->WriteBit(target[4]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[6]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[5]);
-    data->WriteBit(target[0]);
-    data->WriteBit(target[7]);
-
-    data->WriteBit(0);
-    data->WriteBits(8, 9);
-
     data->FlushBits();
 
+    data->WriteByteSeq(source[2]);
     data->WriteByteSeq(source[7]);
+    data->WriteByteSeq(source[5]);
+    data->WriteByteSeq(source[0]);
+    data->WriteByteSeq(source[3]);
     data->WriteByteSeq(source[4]);
     data->WriteByteSeq(source[1]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[0]);
     data->WriteByteSeq(source[6]);
-    data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[2]);
 
-    *data << uint8(language);
-
+    data->WriteByteSeq(target[5]);
     data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[3]);
+    data->WriteByteSeq(target[1]);
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[2]);
     data->WriteByteSeq(target[4]);
     data->WriteByteSeq(target[0]);
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[3]);
-    data->WriteByteSeq(target[2]);
-    data->WriteByteSeq(target[5]);
-    data->WriteByteSeq(target[1]);
 
+    data->WriteString(type == CHAT_MSG_CHANNEL ? channelName : "");
+    *data << uint8(language);
     data->WriteString(message);
     *data << uint8(type);
-    *data << uint32(0);
-
-    *data << uint64(target_guid);                           // there 0 for BG messages
-    *data << uint32(0);                                     // can be chat msg group or something
 
     /*
     if (type == CHAT_MSG_CHANNEL)
