@@ -393,7 +393,7 @@ enum Opcodes
     CMSG_OBJECT_UPDATE_FAILED                                = 0x0A95, // 5.4.2 17688
     CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
     CMSG_OFFER_PETITION                                      = 0x0,
-    CMSG_OPENING_CINEMATIC                                   = 0x0,
+    CMSG_OPENING_CINEMATIC                                   = 0x1185, // 5.4.2 17688
     CMSG_OPEN_BROWSER                                        = 0x04F4, // 5.4.2 17688
     CMSG_OPEN_ITEM                                           = 0x0,
     CMSG_OPT_OUT_OF_LOOT                                     = 0x0,
