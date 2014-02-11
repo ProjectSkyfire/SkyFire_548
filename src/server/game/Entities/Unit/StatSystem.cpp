@@ -451,7 +451,7 @@ void Player::UpdateBlockPercentage()
 
         value = value < 0.0f ? 0.0f : value;
     }
-    SetStatFloatValue(PLAYER_FIELD_PLAYER_FLAGS, value);
+    SetStatFloatValue(PLAYER_FIELD_BLOCK_PERCENTAGE, value);
 }
 
 void Player::UpdateCritPercentage(WeaponAttackType attType)

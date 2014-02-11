@@ -2634,7 +2634,7 @@ float Unit::GetUnitBlockChance() const
         {
             Item* tmpitem = player->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if (tmpitem && !tmpitem->IsBroken())
-                return GetFloatValue(PLAYER_FIELD_PLAYER_FLAGS);
+                return GetFloatValue(PLAYER_FIELD_BLOCK_PERCENTAGE);
         }
         // is player but has no block ability or no not broken shield equipped
         return 0.0f;
