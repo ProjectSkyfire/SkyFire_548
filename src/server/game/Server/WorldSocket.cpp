@@ -785,13 +785,14 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return HandleAuthSession(*new_pct);
-            case CMSG_KEEP_ALIVE:
+           /* case CMSG_KEEP_ALIVE:
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return 0;
             case CMSG_LOG_DISCONNECT:
                 new_pct->rfinish(); // contains uint32 disconnectReason;
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return 0;
+            */
             // not an opcode, client sends string "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER" without opcode
             // first 4 bytes become the opcode (2 dropped)
             case MSG_VERIFY_CONNECTIVITY:
@@ -856,12 +857,12 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 int WorldSocket::HandleSendAuthSession()
 {
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
-    packet << uint8(1);
+    packet << m_Seed;
 
     for (int i = 0; i < 8; i++)
         packet << uint32(0);
 
-    packet << m_Seed;
+    packet << uint8(1);
     return SendPacket(packet);
 
 }
@@ -882,34 +883,34 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // TEMP! Digest fails to verify, incorrect?
     recvPacket.read_skip<uint32>();
-    recvPacket >> digest[0]; // 9
-    recvPacket >> digest[0]; // 6
-    recvPacket.read_skip<uint8>();
-    recvPacket >> digest[0]; // 2
-    recvPacket >> digest[0]; // 3
-    recvPacket.read_skip<uint8>();
-    recvPacket >> digest[0]; // 14
-    recvPacket >> digest[0]; // 16
-    recvPacket >> digest[0]; // 13
-    recvPacket >> digest[0]; // 4
     recvPacket.read_skip<uint32>();
+    recvPacket >> digest[4];
+    recvPacket >> digest[13];
+    recvPacket >> digest[3];
+    recvPacket >> digest[8];
     recvPacket.read_skip<uint32>();
-    recvPacket >> digest[0]; // 5
-    recvPacket >> digest[0]; // 11
+    recvPacket >> digest[12];
+    recvPacket >> digest[18];
+    recvPacket >> digest[15];
+    recvPacket >> digest[5];
     recvPacket.read_skip<uint64>();
-    recvPacket >> digest[0]; // 12
-    recvPacket >> digest[0]; // 0
-    recvPacket >> digest[0]; // 15
+    recvPacket >> digest[11];
     recvPacket.read_skip<uint32>();
-    recvPacket >> digest[0]; // 7
-    recvPacket >> digest[0]; // 17
-    recvPacket >> digest[0]; // 10
+    recvPacket >> digest[7];
+    recvPacket >> digest[19];
+    recvPacket >> digest[16];
+    recvPacket >> digest[14];
+    recvPacket >> digest[0];
+    recvPacket >> digest[9];
     recvPacket >> clientBuild;
-    recvPacket >> digest[0]; // 19
-    recvPacket >> digest[0]; // 1
-    recvPacket >> digest[0]; // 8
+    recvPacket >> digest[1];
+    recvPacket.read_skip<uint8>();
+    recvPacket >> digest[17];
+    recvPacket >> digest[10];
+    recvPacket >> digest[6];
+    recvPacket >> digest[2];
+    recvPacket.read_skip<uint8>();
     recvPacket >> clientSeed;
-    recvPacket >> digest[0]; // 18
     recvPacket >> addonSize;
 
     addonsData.resize(addonSize);
@@ -1170,8 +1171,8 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
 void WorldSocket::SendAuthResponseError(uint8 code)
 {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
-        packet << uint8(code);
         packet.WriteBit(0); // has account info
         packet.WriteBit(0); // has queue info
+        packet << uint8(code);
         SendPacket(packet);
 }
