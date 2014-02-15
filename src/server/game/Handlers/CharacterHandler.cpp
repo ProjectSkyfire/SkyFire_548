@@ -233,8 +233,9 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         charCount = uint32(result->GetRowCount());
         bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
-
-        bitBuffer.WriteBits(0, 21);
+        
+        bitBuffer.WriteBit(1);
+        bitBuffer.WriteBits(0, 21); // unk loop at the end - { uint32(); uint8; }
         bitBuffer.WriteBits(charCount, 16);
 
         do
@@ -253,14 +254,13 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
         } while (result->NextRow()); 
 
-        bitBuffer.WriteBit(1);
         bitBuffer.FlushBits();
     }
     else
     {		
+        bitBuffer.WriteBit(1);
         bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(0, 16);
-        bitBuffer.WriteBit(1);
         bitBuffer.FlushBits();
     }
 

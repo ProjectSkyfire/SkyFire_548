@@ -48,7 +48,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
     
     switch (recvData.GetOpcode())
     {
-        case CMSG_MESSAGECHAT_SAY:
+       /* case CMSG_MESSAGECHAT_SAY:
             type = CHAT_MSG_SAY;
             break;
         case CMSG_MESSAGECHAT_YELL:
@@ -60,7 +60,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_GUILD:
             type = CHAT_MSG_GUILD;
             break;
-    /*
+    
         case CMSG_MESSAGECHAT_CHANNEL:
             type = CHAT_MSG_CHANNEL;
             break;
