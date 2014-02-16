@@ -318,7 +318,7 @@ enum Opcodes
    CMSG_LF_GUILD_REMOVE_RECRUIT                             = 0x0,
    CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
    CMSG_LIST_INVENTORY                                      = 0x0,
-   CMSG_LOAD_SCREEN                                         = 0x0,
+   CMSG_LOAD_SCREEN                                         = 0x1691, // 5.4.7 17898
    CMSG_LOGOUT_CANCEL                                       = 0x0,
    CMSG_LOGOUT_REQUEST                                      = 0x0,
    CMSG_LOG_DISCONNECT                                      = 0x0,
@@ -418,10 +418,10 @@ enum Opcodes
    CMSG_PET_SET_ACTION                                      = 0x0,
    CMSG_PET_SPELL_AUTOCAST                                  = 0x0,
    CMSG_PET_STOP_ATTACK                                     = 0x0,
-   CMSG_PING                                                = 0x0,
+   CMSG_PING                                                = 0x1070, // 4.5.7 17898
    CMSG_PLAYED_TIME                                         = 0x0,
    CMSG_PLAYER_DIFFICULTY_CHANGE                            = 0x0,
-   CMSG_PLAYER_LOGIN                                        = 0x0,
+   CMSG_PLAYER_LOGIN                                        = 0x17D3, // 4.5.7 17898
    CMSG_PLAYER_LOGOUT                                       = 0x0,
    CMSG_PLAYER_VEHICLE_ENTER                                = 0x0,
    CMSG_PLAY_DANCE                                          = 0x0,
@@ -579,13 +579,13 @@ enum Opcodes
    CMSG_UPDATE_PROJECTILE_POSITION                          = 0x0,
    CMSG_USED_FOLLOW                                         = 0x0,
    CMSG_USE_ITEM                                            = 0x0,
-   CMSG_VIOLENCE_LEVEL                                      = 0x0,
+   CMSG_VIOLENCE_LEVEL                                      = 0x05A0, // 5.4.7 17898
    CMSG_VOICE_SESSION_ENABLE                                = 0x0,
    CMSG_VOID_STORAGE_QUERY                                  = 0x0,
    CMSG_VOID_STORAGE_TRANSFER                               = 0x0,
    CMSG_VOID_STORAGE_UNLOCK                                 = 0x0,
    CMSG_VOID_SWAP_ITEM                                      = 0x0,
-   CMSG_WARDEN_DATA                                         = 0x0,
+   CMSG_WARDEN_DATA                                         = 0x1681, // 5.4.7 17898
    CMSG_WARGAME_ACCEPT                                      = 0x0,
    CMSG_WARGAME_START                                       = 0x0,
    CMSG_WHO                                                 = 0x0,
@@ -1166,7 +1166,7 @@ enum Opcodes
    SMSG_PLAY_SPELL_VISUAL                                   = 0x0,
    SMSG_PLAY_SPELL_VISUAL_KIT                               = 0x0,
    SMSG_PLAY_TIME_WARNING                                   = 0x0,
-   SMSG_PONG                                                = 0x0,
+   SMSG_PONG                                                = 0x15B1, // 5.4.7 17898
    SMSG_POWER_UPDATE                                        = 0x0,
    SMSG_PRE_RESURRECT                                       = 0x0,
    SMSG_PROCRESIST                                          = 0x0,
@@ -1381,7 +1381,7 @@ enum Opcodes
    SMSG_VOID_TRANSFER_RESULT                                = 0x0,
    SMSG_WAIT_QUEUE_FINISH                                   = 0x0,
    SMSG_WAIT_QUEUE_UPDATE                                   = 0x0,
-   SMSG_WARDEN_DATA                                         = 0x0,
+   SMSG_WARDEN_DATA                                         = 0x14EB, // 5.4.7 17898
    SMSG_WARGAME_CHECK_ENTRY                                 = 0x0,
    SMSG_WARGAME_REQUEST_SENT                                = 0x0,
    SMSG_WEATHER                                             = 0x0,
