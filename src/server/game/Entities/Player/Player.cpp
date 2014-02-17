@@ -3458,11 +3458,11 @@ void Player::SendInitialSpells()
     uint16 spellCount = 0;
 
     WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+4*m_spells.size()+2+m_spellCooldowns.size()*(2+2+2+4+4)));
+    data.WriteBit(0);
 
     size_t bitPos = data.bitwpos();
-
     data.WriteBits(0, 22); // spell count placeholder
-    data.WriteBit(0);
+
     data.FlushBits();
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
@@ -4067,8 +4067,8 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         WorldPacket data(SMSG_LEARNED_SPELL, 8);
         uint32 spellCount = 1;
 
-        data.WriteBits(spellCount, 22);
         data.WriteBit(0);
+        data.WriteBits(spellCount, 22);
 
         for (uint32 i = 0; i < spellCount; ++i)
             data << uint32(spell_id);
@@ -6632,8 +6632,15 @@ void Player::SendActionButtons(uint32 state) const
         buttonsTab[i].unk = uint32(ab->GetType());
     }
 
+    // Bits
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][2]);
+        data.WriteBit(buttons[i][0]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][4]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][6]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][7]);
@@ -6642,44 +6649,38 @@ void Player::SendActionButtons(uint32 state) const
         data.WriteBit(buttons[i][3]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][0]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][6]);
+        data.WriteBit(buttons[i][2]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][1]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][4]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][5]);
 
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][7]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][0]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][6]);
-
+    // Data
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][5]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][1]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][2]);
+        data.WriteByteSeq(buttons[i][3]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][4]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][3]);
+        data.WriteByteSeq(buttons[i][6]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][1]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][7]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][2]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][0]);
 
     data << uint8(state);
     GetSession()->SendPacket(&data);
@@ -25958,6 +25959,8 @@ bool Player::CanSeeSpellClickOn(Creature const* c) const
 void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 {
     size_t* wpos = new size_t[GetSpecsCount()];
+
+    *data << uint8(GetActiveSpec());                        // talent group index (0 or 1)
     data->WriteBits(GetSpecsCount(), 19);
 
     for (int i = 0; i < GetSpecsCount(); i++)
@@ -25966,11 +25969,10 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         data->WriteBits(0, 23);
     }
 
+    data->FlushBits();
+
     for (int32 i = 0; i < GetSpecsCount(); i++)
     {
-        for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
-            *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
-
         uint32 const* talentTabIds = GetClassSpecializations(getClass());
 
         int32 talentCount = 0;
@@ -25993,9 +25995,10 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 
         data->PutBits(wpos[i], talentCount, 23);
         *data << uint32(GetTalentSpecialization(GetActiveSpec()));
-    }
 
-    *data << uint8(GetActiveSpec());                        // talent group index (0 or 1)
+        for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
+            *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
+    }
     delete[] wpos;
 }
 

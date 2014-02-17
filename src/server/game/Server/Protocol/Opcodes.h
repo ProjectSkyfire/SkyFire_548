@@ -296,7 +296,7 @@ enum Opcodes
    CMSG_KEEP_ALIVE                                          = 0x0,
    CMSG_LEARN_PREVIEW_TALENTS                               = 0x0,
    CMSG_LEARN_PREVIEW_TALENTS_PET                           = 0x0,
-   CMSG_LEARN_TALENT                                        = 0x0,
+   CMSG_LEARN_TALENT                                        = 0x1F5A, // 5.3.7 17898
    CMSG_LEAVE_CHANNEL                                       = 0x0,
    CMSG_LFG_GET_STATUS                                      = 0x0,
    CMSG_LFG_JOIN                                            = 0x0,
@@ -519,7 +519,7 @@ enum Opcodes
    CMSG_SET_PET_SLOT                                        = 0x0,
    CMSG_SET_PLAYER_DECLINED_NAMES                           = 0x0,
    CMSG_SET_PREFERED_CEMETERY                               = 0x0,
-   CMSG_SET_PRIMARY_TALENT_TREE                             = 0x0,
+   CMSG_SET_PRIMARY_TALENT_TREE                             = 0x04AA, // 5.4.7 17898
    CMSG_SET_RELATIVE_POSITION                               = 0x0,
    CMSG_SET_SAVED_INSTANCE_EXTEND                           = 0x0,
    CMSG_SET_SELECTION                                       = 0x0,
@@ -671,7 +671,7 @@ enum Opcodes
    SMSG_ACCOUNT_RESTRICTED_WARNING                          = 0x0,
    SMSG_ACHIEVEMENT_DELETED                                 = 0x0,
    SMSG_ACHIEVEMENT_EARNED                                  = 0x0,
-   SMSG_ACTION_BUTTONS                                      = 0x0,
+   SMSG_ACTION_BUTTONS                                      = 0x1768, // 5.4.7 17898
    SMSG_ACTIVATETAXIREPLY                                   = 0x0,
    SMSG_ADDON_INFO                                          = 0x0,
    SMSG_ADD_RUNE_POWER                                      = 0x0,
@@ -961,7 +961,7 @@ enum Opcodes
    SMSG_HOTFIX_INFO                                         = 0x0,
    SMSG_HOTFIX_NOTIFY                                       = 0x0,
    SMSG_INITIALIZE_FACTIONS                                 = 0x0,
-   SMSG_INITIAL_SPELLS                                      = 0x0,
+   SMSG_INITIAL_SPELLS                                      = 0x1B05, // 5.4.717898
    SMSG_INIT_CURRENCY                                       = 0x0,
    SMSG_INIT_WORLD_STATES                                   = 0x0,
    SMSG_INSPECT                                             = 0x0,
@@ -991,7 +991,7 @@ enum Opcodes
    SMSG_JOINED_BATTLEGROUND_QUEUE                           = 0x0,
    SMSG_KICK_REASON                                         = 0x0,
    SMSG_LEARNED_DANCE_MOVES                                 = 0x0,
-   SMSG_LEARNED_SPELL                                       = 0x0,
+   SMSG_LEARNED_SPELL                                       = 0x0C99, // 5.4.7 17898
    SMSG_LEVELUP_INFO                                        = 0x0,
    SMSG_LFG_BOOT_PROPOSAL_UPDATE                            = 0x0,
    SMSG_LFG_DISABLED                                        = 0x0,
@@ -1253,7 +1253,7 @@ enum Opcodes
    SMSG_SET_PHASE_SHIFT                                     = 0x0,
    SMSG_SET_PLAYER_DECLINED_NAMES_RESULT                    = 0x0,
    SMSG_SET_PLAY_HOVER_ANIM                                 = 0x0,
-   SMSG_SET_PROFICIENCY                                     = 0x0,
+   SMSG_SET_PROFICIENCY                                     = 0x1E3B, // 5.4.7 17898
    SMSG_SET_PROJECTILE_POSITION                             = 0x0,
    SMSG_SHOP_BUY                                            = 0x0,
    SMSG_SHOP_BUY_ERROR                                      = 0x0,
@@ -1327,7 +1327,7 @@ enum Opcodes
    SMSG_SUSPEND_COMMS                                       = 0x0,
    SMSG_SUSPEND_TOKEN_RESPONSE                              = 0x0,
    SMSG_TALENTS_ERROR                                       = 0x0,
-   SMSG_TALENTS_INFO                                        = 0x0,
+   SMSG_TALENTS_INFO                                        = 0x0C68, // 5.4.7 17898
    SMSG_TALENTS_INVOLUNTARILY_RESET                         = 0x0,
    SMSG_TAXINODE_STATUS                                     = 0x0,
    SMSG_TEST_DROP_RATE_RESULT                               = 0x0,

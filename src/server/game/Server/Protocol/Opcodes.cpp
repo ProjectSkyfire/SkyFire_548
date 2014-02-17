@@ -297,7 +297,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_KEEP_ALIVE,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess            );
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS,                   STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalents       );
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS_PET,               STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalentsPet    );
-    DEFINE_OPCODE_HANDLER(CMSG_LEARN_TALENT,                            STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLearnTalentOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_LEARN_TALENT,                            STATUS_LOGGEDIN,    PROCESS_THREADUNSAFE, &WorldSession::HandleLearnTalentOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_LEAVE_CHANNEL,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLeaveChannel              );
     DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS,                          STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus              );
     DEFINE_OPCODE_HANDLER(CMSG_LFG_JOIN,                                STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLfgJoinOpcode             );
@@ -494,7 +494,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_SET_PET_SLOT,                            STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_SET_PLAYER_DECLINED_NAMES,               STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetPlayerDeclinedNames    );
     DEFINE_OPCODE_HANDLER(CMSG_SET_PREFERED_CEMETERY,                   STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_PRIMARY_TALENT_TREE,                 STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::HandeSetTalentSpecialization    );
+    DEFINE_OPCODE_HANDLER(CMSG_SET_PRIMARY_TALENT_TREE,                 STATUS_LOGGEDIN,    PROCESS_INPLACE,      &WorldSession::HandeSetTalentSpecialization    );
     DEFINE_OPCODE_HANDLER(CMSG_SET_RELATIVE_POSITION,                   STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_SET_SAVED_INSTANCE_EXTEND,               STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetSavedInstanceExtend    );
     DEFINE_OPCODE_HANDLER(CMSG_SET_SELECTION,                           STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleSetSelectionOpcode        );
@@ -1164,7 +1164,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_SET_PHASE_SHIFT,                         STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,        STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_SET_PLAY_HOVER_ANIM,                     STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_SET_PROFICIENCY,                         STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_SET_PROFICIENCY,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_SET_PROJECTILE_POSITION,                 STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_SHOWTAXINODES,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_SHOW_BANK,                               STATUS_NEVER,        PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
@@ -1234,7 +1234,7 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(SMSG_SUSPEND_COMMS,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_SUSPEND_TOKEN_RESPONSE,                  STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TALENTS_ERROR,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    DEFINE_OPCODE_HANDLER(SMSG_TALENTS_INFO,                            STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    DEFINE_OPCODE_HANDLER(SMSG_TALENTS_INFO,                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TALENTS_INVOLUNTARILY_RESET,             STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TAXINODE_STATUS,                         STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     DEFINE_OPCODE_HANDLER(SMSG_TEST_DROP_RATE_RESULT,                   STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
