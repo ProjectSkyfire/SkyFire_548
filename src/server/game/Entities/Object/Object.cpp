@@ -365,62 +365,117 @@ uint16 Object::GetUInt16Value(uint16 index, uint8 offset) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-   bool IsAreaTrigger = false;
-    bool IsSceneObject = false;
-    
+    bool hasLiving = flags & UPDATEFLAG_LIVING;
+    bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
+    bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
 
-    data->WriteBit(flags & UPDATEFLAG_VEHICLE);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(hasGobjectRotation);
+    data->WriteBit(0);
+    data->WriteBit(hasLiving);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_SELF);
     data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
-	data->WriteBit(0);
     data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_HAS_TARGET);
-    data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);
-    data->WriteBit(IsAreaTrigger);
     data->WriteBit(0);
-    data->WriteBit(IsSceneObject);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(hasStacionaryPostion);
     data->WriteBit(0);
     data->WriteBit(0);
     data->WriteBits(0, 22);
-    data->WriteBit(flags & UPDATEFLAG_LIVING);
-    data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION);
-    data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_ROTATION);
     data->WriteBit(0);
     data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_ANIMKITS);
 
-    if (flags & UPDATEFLAG_LIVING)
+    if (hasLiving)
     {
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
 
-        data->WriteBit(guid[5]);
-        data->WriteBit(0);
-        data->WriteBit(1);
-        data->WriteBit(guid[6]);
+        
+        data->WriteBit(0); // HasTransport // OK !!!
+        data->WriteBit(1); // !ReadFloat
         data->WriteBit(0);
         data->WriteBits(0, 19);
-        data->WriteBit(guid[4]);
-        data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f)); //!G3D::fuzzyEq(self->GetOrientation(), 0.0f)
-        data->WriteBit(1);
-        data->WriteBit(1);
-        data->WriteBit(guid[2]);
-        data->WriteBit(guid[3]);
-        data->WriteBit(guid[7]);
-        data->WriteBits(0, 22);
-        data->WriteBit(1);
-        data->WriteBit(0);
-        data->WriteBit(1);
         data->WriteBit(guid[1]);
+        data->WriteBit(1); // !((1 == 0) == 0) read flags
         data->WriteBit(0);
-        data->WriteBit(0);
+        data->WriteBit(1); // !ReadFloat
+        data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f)); //!G3D::fuzzyEq(self->GetOrientation(), 0.0f)
+        data->WriteBit(0); // read uint32
+        data->WriteBit(1); // !((1 == 0) == 0) read flags
+        data->WriteBit(1); // skip uint32
+        data->WriteBit(guid[2]);
+        data->WriteBit(guid[6]);
+        data->WriteBit(0); // FallData
+        data->WriteBit(guid[5]);
+        data->WriteBit(guid[4]);
         data->WriteBit(guid[0]);
         data->WriteBit(0);
-        data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
+        data->WriteBits(0, 22);
+        data->WriteBit(guid[7]);
+        data->WriteBit(0); // splines
+        data->WriteBit(guid[3]);
+    }
+
+    data->FlushBits();
+
+    if (hasLiving)
+    {
+        Unit const* self = ToUnit();
+        ObjectGuid guid = GetGUID();
+        uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
+        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
+
+        if (GetTypeId() == TYPEID_UNIT)
+            movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
+            
+        *data << float(self->GetPositionZMinusOffset());
+        *data << float(self->GetPositionY());
+        *data << float(1.f);//self->GetSpeed(MOVE_FLIGHT);
+        data->WriteByteSeq(guid[6]);
+        *data << float(1.f);//self->GetSpeed(MOVE_FLIGHT_BACK);
+        *data << float(self->GetPositionX());
+        data->WriteByteSeq(guid[2]);
+        *data << float(1.f);//self->GetSpeed(MOVE_SWIM);
+        data->WriteByteSeq(guid[1]);
+        *data << float(1.f);//self->GetSpeed(MOVE_RUN_BACK);
+        *data << float(1.f);//self->GetSpeed(MOVE_SWIM_BACK);
+        data->WriteByteSeq(guid[5]);
+        *data << float(1.f);//self->GetSpeed(MOVE_TURN_RATE);
+        data->WriteByteSeq(guid[3]);
+        *data << float(1.f);//self->GetSpeed(MOVE_RUN);
+        data->WriteByteSeq(guid[7]);
+        *data << float(1.f);//self->GetSpeed(MOVE_WALK);
+        *data << float(1.f);//self->GetSpeed(MOVE_PITCH_RATE);
+        *data << uint32(0);
+        data->WriteByteSeq(guid[4]);
+        data->WriteByteSeq(guid[0]);
+        if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
+            *data << float(Position::NormalizeOrientation(self->GetOrientation()));     
     }
     
+    if (hasStacionaryPostion)
+    {
+        WorldObject const* self = static_cast<WorldObject const*>(this);
+        *data << float(Position::NormalizeOrientation(self->GetOrientation()));
+        *data << float(self->GetPositionX());
+        *data << float(self->GetPositionY());
+
+        if (Unit const* unit = ToUnit())
+            *data << float(unit->GetPositionZMinusOffset());
+        else
+            *data << float(self->GetPositionZ());
+    }
+
+    if (hasGobjectRotation)
+        *data << uint64(ToGameObject()->GetRotation());
+
+    /*
     if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
@@ -437,57 +492,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(transGuid[1]);
         data->WriteBit(transGuid[5]);
     }
-
-    data->FlushBits();
-
-    if (flags & UPDATEFLAG_LIVING)
-    {
-        Unit const* self = ToUnit();
-        ObjectGuid guid = GetGUID();
-        uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
-        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
-        if (GetTypeId() == TYPEID_UNIT)
-            movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
-
-        *data << float(self->GetPositionY());
-        data->WriteByteSeq(guid[7]);
-        data->WriteByteSeq(guid[1]);
-        *data << self->GetSpeed(MOVE_TURN_RATE);
-        *data << self->GetSpeed(MOVE_FLIGHT_BACK);
-        *data << self->GetSpeed(MOVE_RUN_BACK);
-        *data << uint32(0);
-        *data << float(self->GetPositionX());
-        data->WriteByteSeq(guid[2]);
-        *data << self->GetSpeed(MOVE_SWIM);
-        *data << self->GetSpeed(MOVE_SWIM_BACK);
-
-        if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
-            *data << float(Position::NormalizeOrientation(self->GetOrientation()));
-
-        *data << self->GetSpeed(MOVE_FLIGHT);
-        data->WriteByteSeq(guid[6]);
-        *data << self->GetSpeed(MOVE_RUN);
-        *data << self->GetSpeed(MOVE_PITCH_RATE);
-        data->WriteByteSeq(guid[0]);
-        data->WriteByteSeq(guid[5]);
-        data->WriteByteSeq(guid[4]);
-        *data << self->GetSpeed(MOVE_WALK);
-        *data << float(self->GetPositionZMinusOffset());
-        data->WriteByteSeq(guid[3]);
-    }
-
-    if (flags & UPDATEFLAG_STATIONARY_POSITION)
-    {
-        WorldObject const* self = static_cast<WorldObject const*>(this);
-        *data << float(self->GetPositionX());
-        if (Unit const* unit = ToUnit())
-            *data << float(unit->GetPositionZMinusOffset());
-        else
-            *data << float(self->GetPositionZ());
-        *data << float(self->GetPositionY());
-        *data << float(Position::NormalizeOrientation(self->GetOrientation()));
-    }
-
+    */
+    /*
     if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
@@ -520,10 +526,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         data->WriteBit(transGuid[2]);
     }
-
-    if (flags & UPDATEFLAG_ROTATION)
-        *data << uint64(ToGameObject()->GetRotation());
-
+    */
 /*
     Unit const* self = NULL;
     ObjectGuid guid = GetGUID();

@@ -901,11 +901,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
-    data << pCurrChar->GetMapId();
-    data << pCurrChar->GetPositionX();
     data << pCurrChar->GetOrientation();
-    data << pCurrChar->GetPositionY();
+    data << pCurrChar->GetMapId();
     data << pCurrChar->GetPositionZ();
+    data << pCurrChar->GetPositionX();
+    data << pCurrChar->GetPositionY();
     SendPacket(&data);
 
     // load player specific part before send times

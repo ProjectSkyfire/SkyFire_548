@@ -390,7 +390,7 @@ enum Opcodes
    CMSG_NEW_SPELL_SLOT                                      = 0x0,
    CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
    CMSG_NPC_TEXT_QUERY                                      = 0x0,
-   CMSG_OBJECT_UPDATE_FAILED                                = 0x0,
+   CMSG_OBJECT_UPDATE_FAILED                                = 0x882, // 5.4.7 17898
    CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
    CMSG_OFFER_PETITION                                      = 0x0,
    CMSG_OPENING_CINEMATIC                                   = 0x0,
@@ -1020,8 +1020,8 @@ enum Opcodes
    SMSG_LF_GUILD_RECRUIT_LIST_UPDATED                       = 0x0,
    SMSG_LIST_INVENTORY                                      = 0x0,
    SMSG_LOAD_CUF_PROFILES                                   = 0x0,
-   SMSG_LOGIN_SETTIMESPEED                                  = 0x0,
-   SMSG_LOGIN_VERIFY_WORLD                                  = 0x0,
+   SMSG_LOGIN_SETTIMESPEED                                  = 0x0F4A, // 5.4.7 17898
+   SMSG_LOGIN_VERIFY_WORLD                                  = 0x0603, // 5.4.7 17898
    SMSG_LOGOUT_CANCEL_ACK                                   = 0x0,
    SMSG_LOGOUT_COMPLETE                                     = 0x0,
    SMSG_LOGOUT_RESPONSE                                     = 0x0,
@@ -1362,7 +1362,7 @@ enum Opcodes
    SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT                      = 0x0,
    SMSG_UPDATE_INSTANCE_OWNERSHIP                           = 0x0,
    SMSG_UPDATE_LAST_INSTANCE                                = 0x0,
-   SMSG_UPDATE_OBJECT                                       = 0x0,
+   SMSG_UPDATE_OBJECT                                       = 0x1725, // 5.4.7 17898
    SMSG_UPDATE_SERVER_PLAYER_POSITION                       = 0x0,
    SMSG_UPDATE_WORLD_STATE                                  = 0x0,
    SMSG_USERLIST_ADD                                        = 0x0,
