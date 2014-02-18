@@ -386,7 +386,7 @@ enum Opcodes
    CMSG_MOVE_TIME_SKIPPED                                   = 0x0,
    CMSG_MOVE_TOGGLE_COLLISION_ACK                           = 0x0,
    CMSG_MOVE_WATER_WALK_ACK                                 = 0x0,
-   CMSG_NAME_QUERY                                          = 0x0,
+   CMSG_NAME_QUERY                                          = 0x0DB3, // 5.4.7 17898
    CMSG_NEW_SPELL_SLOT                                      = 0x0,
    CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
    CMSG_NPC_TEXT_QUERY                                      = 0x0,
@@ -456,7 +456,7 @@ enum Opcodes
    CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x13CB, // 5.4.7 17898 - Guessed
    CMSG_READ_ITEM                                           = 0x0,
    CMSG_REALM_SPLIT                                         = 0x0,
-   CMSG_REALM_NAME_QUERY                                    = 0x0,
+   CMSG_REALM_NAME_QUERY                                    = 0x1899, // 5.4.7 17898
    CMSG_RECLAIM_CORPSE                                      = 0x0,
    CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
    CMSG_REFORGE_ITEM                                        = 0x0,
@@ -1104,7 +1104,7 @@ enum Opcodes
    SMSG_MOVE_UPDATE_WALK_SPEED                              = 0x0,
    SMSG_MOVE_WATER_WALK                                     = 0x0,
    SMSG_MULTIPLE_PACKETS                                    = 0x0,
-   SMSG_NAME_QUERY_RESPONSE                                 = 0x0,
+   SMSG_NAME_QUERY_RESPONSE                                 = 0x1E5B, // 5.4.7 17898
    SMSG_NEW_TAXI_PATH                                       = 0x0,
    SMSG_NEW_WORLD                                           = 0x0,
    SMSG_NEW_WORLD_ABORT                                     = 0x0,
@@ -1210,7 +1210,7 @@ enum Opcodes
    SMSG_READ_ITEM_FAILED                                    = 0x0,
    SMSG_READ_ITEM_OK                                        = 0x0,
    SMSG_REALM_SPLIT                                         = 0x0,
-   SMSG_REALM_NAME_QUERY_RESPONSE                           = 0x0,
+   SMSG_REALM_NAME_QUERY_RESPONSE                           = 0x1652, // 5.4.7 17898
    SMSG_REAL_GROUP_UPDATE                                   = 0x0,
    SMSG_RECEIVED_MAIL                                       = 0x0,
    SMSG_REDIRECT_CLIENT                                     = 0x0,
