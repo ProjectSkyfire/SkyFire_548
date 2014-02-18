@@ -585,8 +585,30 @@ void WorldSession::LogoutPlayer(bool save)
 
         //! Send the 'logout complete' packet to the client
         //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
-        WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);
+        WorldPacket data(SMSG_LOGOUT_COMPLETE);
+        ObjectGuid guid = 0; // Autolog guid - 0 for logout
+
+        data.WriteBit(0); // Dafuck ? 1st bit twice read ??????
+
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[7]);
         SendPacket(&data);
+
         TC_LOG_DEBUG("network", "SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
 
         //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline

@@ -300,11 +300,11 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
     uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
 
-    recvData >> hairStyle >> gender >> skin >> hairColor;
-    recvData >> facialHair >> class_ >> race_ >> face >> outfitId;
+    recvData >> outfitId >> facialHair >> skin >> race_;
+    recvData >> hairStyle >> class_ >> face >> gender >> hairColor;
 
-    uint8 unk = recvData.ReadBit();
     uint32 nameLength = recvData.ReadBits(6);
+    uint8 unk = recvData.ReadBit();
     std::string name = recvData.ReadString(nameLength);
 
     if (unk)
@@ -731,23 +731,23 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[7] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[5]);
 
     TC_LOG_DEBUG("network", "Character (Guid: %u) deleted", GUID_LOPART(guid));
 

@@ -152,10 +152,10 @@ enum Opcodes
    CMSG_CHANNEL_UNSILENCE_VOICE                             = 0x0,
    CMSG_CHANNEL_VOICE_OFF                                   = 0x0,
    CMSG_CHANNEL_VOICE_ON                                    = 0x0,
-   CMSG_CHAR_CREATE                                         = 0x0,
+   CMSG_CHAR_CREATE                                         = 0x09B9, // 5.4.7 17898
    CMSG_CHAR_CUSTOMIZE                                      = 0x0,
-   CMSG_CHAR_DELETE                                         = 0x0,
-   CMSG_CHAR_ENUM                                           = 0x1282, // 5.4.7 17898 - Guessed
+   CMSG_CHAR_DELETE                                         = 0x113B, // 5.4.7 17898
+   CMSG_CHAR_ENUM                                           = 0x12C2, // 5.4.7 17898
    CMSG_CHAR_FACTION_CHANGE                                 = 0x0,
    CMSG_CHAR_RACE_CHANGE                                    = 0x0,
    CMSG_CHAR_RENAME                                         = 0x0,
@@ -296,7 +296,7 @@ enum Opcodes
    CMSG_KEEP_ALIVE                                          = 0x0,
    CMSG_LEARN_PREVIEW_TALENTS                               = 0x0,
    CMSG_LEARN_PREVIEW_TALENTS_PET                           = 0x0,
-   CMSG_LEARN_TALENT                                        = 0x1F5A, // 5.3.7 17898
+   CMSG_LEARN_TALENT                                        = 0x1F5A, // 5.4.7 17898
    CMSG_LEAVE_CHANNEL                                       = 0x0,
    CMSG_LFG_GET_STATUS                                      = 0x0,
    CMSG_LFG_JOIN                                            = 0x0,
@@ -320,7 +320,7 @@ enum Opcodes
    CMSG_LIST_INVENTORY                                      = 0x0,
    CMSG_LOAD_SCREEN                                         = 0x1691, // 5.4.7 17898
    CMSG_LOGOUT_CANCEL                                       = 0x0,
-   CMSG_LOGOUT_REQUEST                                      = 0x0,
+   CMSG_LOGOUT_REQUEST                                      = 0x0476, // 5.4.7 17898
    CMSG_LOG_DISCONNECT                                      = 0x0,
    CMSG_LOOT                                                = 0x0,
    CMSG_LOOT_CURRENCY                                       = 0x0,
@@ -773,9 +773,9 @@ enum Opcodes
    SMSG_CHANNEL_MEMBER_COUNT                                = 0x0,
    SMSG_CHANNEL_NOTIFY                                      = 0x0,
    SMSG_CHARACTER_LOGIN_FAILED                              = 0x0,
-   SMSG_CHAR_CREATE                                         = 0x0,
+   SMSG_CHAR_CREATE                                         = 0x1469, // 5.4.7 17898
    SMSG_CHAR_CUSTOMIZE                                      = 0x0,
-   SMSG_CHAR_DELETE                                         = 0x0,
+   SMSG_CHAR_DELETE                                         = 0x1529, // 5.4.7 17898
    SMSG_CHAR_ENUM                                           = 0x040A, // 5.4.7 17898
    SMSG_CHAR_FACTION_CHANGE                                 = 0x0,
    SMSG_CHAR_RENAME                                         = 0x0,
@@ -1023,8 +1023,8 @@ enum Opcodes
    SMSG_LOGIN_SETTIMESPEED                                  = 0x0F4A, // 5.4.7 17898
    SMSG_LOGIN_VERIFY_WORLD                                  = 0x0603, // 5.4.7 17898
    SMSG_LOGOUT_CANCEL_ACK                                   = 0x0,
-   SMSG_LOGOUT_COMPLETE                                     = 0x0,
-   SMSG_LOGOUT_RESPONSE                                     = 0x0,
+   SMSG_LOGOUT_COMPLETE                                     = 0x0429, // 5.4.7 17898
+   SMSG_LOGOUT_RESPONSE                                     = 0x0D2B, // 5.4.7 17898
    SMSG_LOG_XPGAIN                                          = 0x0,
    SMSG_LOOT_ALL_PASSED                                     = 0x0,
    SMSG_LOOT_CLEAR_MONEY                                    = 0x0,
