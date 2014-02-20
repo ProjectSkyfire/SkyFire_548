@@ -319,7 +319,7 @@ enum Opcodes
    CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
    CMSG_LIST_INVENTORY                                      = 0x0,
    CMSG_LOAD_SCREEN                                         = 0x1691, // 5.4.7 17898
-   CMSG_LOGOUT_CANCEL                                       = 0x0,
+   CMSG_LOGOUT_CANCEL                                       = 0x11D4, // 5.4.7 17898
    CMSG_LOGOUT_REQUEST                                      = 0x0476, // 5.4.7 17898
    CMSG_LOG_DISCONNECT                                      = 0x0,
    CMSG_LOOT                                                = 0x0,
@@ -347,14 +347,14 @@ enum Opcodes
    CMSG_MESSAGECHAT_CHANNEL                                 = 0x0,
    CMSG_MESSAGECHAT_DND                                     = 0x0,
    CMSG_MESSAGECHAT_EMOTE                                   = 0x0,
-   CMSG_MESSAGECHAT_GUILD                                   = 0x0,
+   CMSG_MESSAGECHAT_GUILD                                   = 0x070B, // 5.4.7 17898
    CMSG_MESSAGECHAT_OFFICER                                 = 0x0,
    CMSG_MESSAGECHAT_PARTY                                   = 0x0,
    CMSG_MESSAGECHAT_RAID                                    = 0x0,
    CMSG_MESSAGECHAT_RAID_WARNING                            = 0x0,
-   CMSG_MESSAGECHAT_SAY                                     = 0x0,
-   CMSG_MESSAGECHAT_WHISPER                                 = 0x0,
-   CMSG_MESSAGECHAT_YELL                                    = 0x0,
+   CMSG_MESSAGECHAT_SAY                                     = 0x0C41, // 5.4.7 17898
+   CMSG_MESSAGECHAT_WHISPER                                 = 0x0D60, // 5.4.7 17898
+   CMSG_MESSAGECHAT_YELL                                    = 0x0C43, // 5.4.7 17898
    CMSG_MINIGAME_MOVE                                       = 0x0,
    CMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
    CMSG_MOVE_CHARM_TELEPORT_CHEAT                           = 0x0,
@@ -558,7 +558,7 @@ enum Opcodes
    CMSG_TELEPORT_TO_UNIT                                    = 0x0,
    CMSG_TEXT_EMOTE                                          = 0x0,
    CMSG_TIME_ADJUSTMENT_RESPONSE                            = 0x0,
-   CMSG_TIME_SYNC_RESP                                      = 0x0,
+   CMSG_TIME_SYNC_RESP                                      = 0x0413, // 5.4.7 17898
    CMSG_TIME_SYNC_RESP_FAILED                               = 0x0,
    CMSG_TOGGLE_PVP                                          = 0x0,
    CMSG_TOTEM_DESTROYED                                     = 0x0,
@@ -568,7 +568,7 @@ enum Opcodes
    CMSG_TRIGGER_CINEMATIC_CHEAT                             = 0x0,
    CMSG_TURN_IN_PETITION                                    = 0x0,
    CMSG_TUTORIAL_CLEAR                                      = 0x0,
-   CMSG_TUTORIAL_FLAG                                       = 0x0,
+   CMSG_TUTORIAL_FLAG                                       = 0x07A4, // 5.4.7 17898
    CMSG_TUTORIAL_RESET                                      = 0x0,
    CMSG_UNACCEPT_TRADE                                      = 0x0,
    CMSG_UNLEARN_SKILL                                       = 0x0,
@@ -1022,7 +1022,7 @@ enum Opcodes
    SMSG_LOAD_CUF_PROFILES                                   = 0x0,
    SMSG_LOGIN_SETTIMESPEED                                  = 0x0F4A, // 5.4.7 17898
    SMSG_LOGIN_VERIFY_WORLD                                  = 0x0603, // 5.4.7 17898
-   SMSG_LOGOUT_CANCEL_ACK                                   = 0x0,
+   SMSG_LOGOUT_CANCEL_ACK                                   = 0x0E0A, // 5.4.7 17898
    SMSG_LOGOUT_COMPLETE                                     = 0x0429, // 5.4.7 17898
    SMSG_LOGOUT_RESPONSE                                     = 0x0D2B, // 5.4.7 17898
    SMSG_LOG_XPGAIN                                          = 0x0,
@@ -1046,7 +1046,7 @@ enum Opcodes
    SMSG_MEETINGSTONE_IN_PROGRESS                            = 0x0,
    SMSG_MEETINGSTONE_MEMBER_ADDED                           = 0x0,
    SMSG_MEETINGSTONE_SETQUEUE                               = 0x0,
-   SMSG_MESSAGECHAT                                         = 0x0,
+   SMSG_MESSAGECHAT                                         = 0x0E60, // 5.4.7 17898
    SMSG_MESSAGE_BOX                                         = 0x0,
    SMSG_MINIGAME_SETUP                                      = 0x0,
    SMSG_MINIGAME_STATE                                      = 0x0,
@@ -1056,7 +1056,7 @@ enum Opcodes
    SMSG_MONEY_NOTIFY                                        = 0x0,
    SMSG_MONSTER_MOVE                                        = 0x0,
    SMSG_MONSTER_MOVE_TRANSPORT                              = 0x0,
-   SMSG_MOTD                                                = 0x0,
+   SMSG_MOTD                                                = 0x0E20, // 5.4.7 17898
    SMSG_MOUNTRESULT                                         = 0x0,
    SMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
    SMSG_MOVE_COLLISION_DISABLE                              = 0x0,
@@ -1336,7 +1336,7 @@ enum Opcodes
    SMSG_THREAT_REMOVE                                       = 0x0,
    SMSG_THREAT_UPDATE                                       = 0x0,
    SMSG_TIME_ADJUSTMENT                                     = 0x0,
-   SMSG_TIME_SYNC_REQ                                       = 0x0,
+   SMSG_TIME_SYNC_REQ                                       = 0x12F1, // 5.4.7 17898
    SMSG_TITLE_EARNED                                        = 0x0,
    SMSG_TOGGLE_XP_GAIN                                      = 0x0,
    SMSG_TOTEM_CREATED                                       = 0x0,
@@ -1350,7 +1350,7 @@ enum Opcodes
    SMSG_TRIGGER_CINEMATIC                                   = 0x0,
    SMSG_TRIGGER_MOVIE                                       = 0x0,
    SMSG_TURN_IN_PETITION_RESULTS                            = 0x0,
-   SMSG_TUTORIAL_FLAGS                                      = 0x0,
+   SMSG_TUTORIAL_FLAGS                                      = 0x10A7, // 5.4.7 17898
    SMSG_UNIT_HEALTH_FREQUENT                                = 0x0,
    SMSG_UNIT_SPELLCAST_START                                = 0x0,
    SMSG_UPDATE_ACCOUNT_DATA                                 = 0x0,

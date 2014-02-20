@@ -20675,69 +20675,114 @@ void Player::StopCastingCharm()
 
 inline void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix /*= NULL*/) const
 {
-    ObjectGuid guid(GetGUID());
+    data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
+
+    ObjectGuid target = 0;
+    ObjectGuid source = GetGUID();
+    ObjectGuid unkGuid = 0;
+    ObjectGuid unkGuid2 = 0;
+
+    data->WriteBit(0);
+    data->WriteBit(0);
+
+    data->WriteBit(unkGuid2[4]);
+    data->WriteBit(unkGuid2[5]);
+    data->WriteBit(unkGuid2[1]);
+    data->WriteBit(unkGuid2[0]);
+    data->WriteBit(unkGuid2[2]);
+    data->WriteBit(unkGuid2[6]);
+    data->WriteBit(unkGuid2[7]);
+    data->WriteBit(unkGuid2[3]);
 
     data->WriteBit(1);
-    data->WriteBit(0);                          // !hasText
+    data->WriteBit(0); // Send Language
+
+    data->WriteBit(source[2]);
+    data->WriteBit(source[7]);
+    data->WriteBit(source[0]);
+    data->WriteBit(source[3]);
+    data->WriteBit(source[4]);
+    data->WriteBit(source[6]);
+    data->WriteBit(source[1]);
+    data->WriteBit(source[5]);
+
+    data->WriteBit(0); // Show in chat log - 1 for showing only in bubble
     data->WriteBit(1);
-    data->WriteBits(0, 8);                      // skip GUID
     data->WriteBit(1);
-    data->WriteBit(1);                          // !realmId
     data->WriteBit(1);
     data->WriteBit(0);
-    data->WriteBit(0);                          // !hasLanguage
+    data->WriteBit(0);
+
+    data->WriteBit(target[5]);
+    data->WriteBit(target[7]);
+    data->WriteBit(target[6]);
+    data->WriteBit(target[4]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[0]);
+
     data->WriteBit(1);
-    data->WriteBits(0, 8);                      // skip GUID
+    data->WriteBit(0);
+
+    data->WriteBit(unkGuid[5]);
+    data->WriteBit(unkGuid[2]);
+    data->WriteBit(unkGuid[6]);
+    data->WriteBit(unkGuid[1]);
+    data->WriteBit(unkGuid[7]);
+    data->WriteBit(unkGuid[3]);
+    data->WriteBit(unkGuid[0]);
+    data->WriteBit(unkGuid[4]);
+
+    data->WriteBit(1);
     data->WriteBits(text.size(), 12);
     data->WriteBit(0);
     data->WriteBit(1);
-
-    data->WriteBit(guid[4]); // 28
-    data->WriteBit(guid[2]); // 26
-    data->WriteBit(guid[7]); // 31
-    data->WriteBit(guid[5]); // 29
-    data->WriteBit(guid[1]); // 25
-    data->WriteBit(guid[3]); // 27
-    data->WriteBit(guid[0]); // 24
-    data->WriteBit(guid[6]); // 30
-
     data->WriteBit(1);
     data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(0);
 
-    data->WriteBit(guid[1]); // 41
-    data->WriteBit(guid[5]); // 45
-    data->WriteBit(guid[4]); // 44
-    data->WriteBit(guid[6]); // 46
-    data->WriteBit(guid[3]); // 43
-    data->WriteBit(guid[2]); // 42
-    data->WriteBit(guid[7]); // 47
-    data->WriteBit(guid[0]); // 40
     data->FlushBits();
 
-    data->WriteByteSeq(guid[2]);
-    data->WriteByteSeq(guid[7]);
-    data->WriteByteSeq(guid[5]);
-    data->WriteByteSeq(guid[0]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(guid[4]);
-    data->WriteByteSeq(guid[1]);
-    data->WriteByteSeq(guid[6]);
+    data->WriteByteSeq(unkGuid2[7]);
+    data->WriteByteSeq(unkGuid2[2]);
+    data->WriteByteSeq(unkGuid2[1]);
+    data->WriteByteSeq(unkGuid2[4]);
+    data->WriteByteSeq(unkGuid2[6]);
+    data->WriteByteSeq(unkGuid2[5]);
+    data->WriteByteSeq(unkGuid2[3]);
+    data->WriteByteSeq(unkGuid2[0]);
 
-    data->WriteByteSeq(guid[5]);
-    data->WriteByteSeq(guid[7]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(guid[1]);
-    data->WriteByteSeq(guid[6]);
-    data->WriteByteSeq(guid[2]);
-    data->WriteByteSeq(guid[4]);
-    data->WriteByteSeq(guid[0]);
+    data->WriteByteSeq(unkGuid[5]);
+    data->WriteByteSeq(unkGuid[3]);
+    data->WriteByteSeq(unkGuid[2]);
+    data->WriteByteSeq(unkGuid[4]);
+    data->WriteByteSeq(unkGuid[1]);
+    data->WriteByteSeq(unkGuid[0]);
+    data->WriteByteSeq(unkGuid[7]);
+    data->WriteByteSeq(unkGuid[6]);
 
-    *data << uint8(language);
-    data->WriteString(text);
     *data << uint8(msgtype);
+
+    data->WriteByteSeq(source[4]);
+    data->WriteByteSeq(source[2]);
+    data->WriteByteSeq(source[3]);
+    data->WriteByteSeq(source[0]);
+    data->WriteByteSeq(source[6]);
+    data->WriteByteSeq(source[7]);
+    data->WriteByteSeq(source[5]);
+    data->WriteByteSeq(source[1]);
+
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[1]);
+    data->WriteByteSeq(target[0]);
+    data->WriteByteSeq(target[2]);
+    data->WriteByteSeq(target[4]);
+    data->WriteByteSeq(target[5]);
+    data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[3]);
+
+    data->WriteString(text);
+    *data << uint8(language);
 }
 
 void Player::Say(const std::string& text, const uint32 language)

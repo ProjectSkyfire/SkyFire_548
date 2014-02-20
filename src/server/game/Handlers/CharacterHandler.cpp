@@ -962,7 +962,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
                 stringBuffer.WriteString(string);
                 ++linecount;
             }
-            pos = nextpos+1;
+            pos = nextpos + 1;
         }
 
         if (pos<str_motd.length())

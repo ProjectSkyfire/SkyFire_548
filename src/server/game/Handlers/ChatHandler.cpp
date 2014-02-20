@@ -48,7 +48,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
     
     switch (recvData.GetOpcode())
     {
-       /* case CMSG_MESSAGECHAT_SAY:
+        case CMSG_MESSAGECHAT_SAY:
             type = CHAT_MSG_SAY;
             break;
         case CMSG_MESSAGECHAT_YELL:
@@ -60,7 +60,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_GUILD:
             type = CHAT_MSG_GUILD;
             break;
-    
+    /*
         case CMSG_MESSAGECHAT_CHANNEL:
             type = CHAT_MSG_CHANNEL;
             break;
@@ -250,8 +250,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             msg = recvData.ReadString(textLength);
             break;
         case CHAT_MSG_WHISPER:
-            receiverLength = recvData.ReadBits(10);
-            textLength = recvData.ReadBits(9);
+            textLength = recvData.ReadBits(8);
+            receiverLength = recvData.ReadBits(9);
             to = recvData.ReadString(receiverLength);
             msg = recvData.ReadString(textLength);
             break;
