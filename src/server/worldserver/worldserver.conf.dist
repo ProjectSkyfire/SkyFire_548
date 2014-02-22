@@ -1117,7 +1117,7 @@ Account.PasswordChangeSecurity = 0
 #   RBAC.FreePermissionMode
 #        Description: Enables Free permission mode. Gives all RBAC permissions to everyone.
 #        Default:     0 - Disabled
-#                     1 - Enebaled (Everyone has all of the RBAC permissions)
+#                     1 - Enabled (Everyone has all of the RBAC permissions)
 #
 
 RBAC.FreePermissionMode = 0
