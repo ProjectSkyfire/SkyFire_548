@@ -1228,6 +1228,9 @@ void World::LoadConfigSettings(bool reload)
     // Accountpassword Secruity
     m_int_configs[CONFIG_ACC_PASSCHANGESEC] = sConfigMgr->GetIntDefault("Account.PasswordChangeSecurity", 0);
 
+    // Rbac Free Permission mode
+    m_int_configs[CONFIG_RBAC_FREE_PERMISSION_MODE] = sConfigMgr->GetIntDefault("RBAC.FreePermissionMode", 0);
+
     // Random Battleground Rewards
     m_int_configs[CONFIG_BG_REWARD_WINNER_HONOR_FIRST] = sConfigMgr->GetIntDefault("Battleground.RewardWinnerHonorFirst", 27000);
     m_int_configs[CONFIG_BG_REWARD_WINNER_CONQUEST_FIRST] = sConfigMgr->GetIntDefault("Battleground.RewardWinnerConquestFirst", 10000);

@@ -761,10 +761,7 @@ class RBACData
          * }
          * @endcode
          */
-        bool HasPermission(uint32 permission) const
-        {
-            return _globalPerms.find(permission) != _globalPerms.end();
-        }
+        bool HasPermission(uint32 permission) const;
 
         // Functions enabled to be used by command system
         /// Returns all the granted permissions (after computation)
