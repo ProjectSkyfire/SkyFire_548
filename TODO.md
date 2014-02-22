@@ -1,5 +1,4 @@
 ## To-do list (Try to keep the order by importance)
-* Basic player movement
 * Implement addons packets - To prevent ingame spam
 * Creature/Gameobject queries
 * Item swapping / equiping
@@ -46,3 +45,4 @@
 * Talents / Known spells
 * Char name / Realm queries
 * Messagechat
+* Basic player movement
