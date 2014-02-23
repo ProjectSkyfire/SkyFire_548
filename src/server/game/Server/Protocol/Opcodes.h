@@ -673,7 +673,7 @@ enum Opcodes
    SMSG_ACHIEVEMENT_EARNED                                  = 0x0,
    SMSG_ACTION_BUTTONS                                      = 0x1768, // 5.4.7 17930
    SMSG_ACTIVATETAXIREPLY                                   = 0x0,
-   SMSG_ADDON_INFO                                          = 0x0,
+   SMSG_ADDON_INFO                                          = 0x10E2, // 5.4.7 17930
    SMSG_ADD_RUNE_POWER                                      = 0x0,
    SMSG_AI_REACTION                                         = 0x0,
    SMSG_ALL_ACHIEVEMENT_DATA                                = 0x0,

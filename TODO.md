@@ -1,5 +1,4 @@
 ## To-do list (Try to keep the order by importance)
-* Implement addons packets - To prevent ingame spam
 * Creature/Gameobject queries
 * Item swapping / equiping
 * Teleporting / Move speed changes - SMSG movement
@@ -46,3 +45,4 @@
 * Char name / Realm queries
 * Messagechat
 * Basic player movement
+* Implement addons packets - To prevent ingame spam
