@@ -125,7 +125,7 @@ enum Opcodes
    CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
    CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
    CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
-   CMSG_CANCEL_TRADE                                        = 0x0,
+   CMSG_CANCEL_TRADE                                        = 0x1D32, // 5.4.7 17930
    CMSG_CAST_SPELL                                          = 0x0,
    CMSG_CHALLANGES_INFO                                     = 0x0,
    CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
@@ -321,7 +321,7 @@ enum Opcodes
    CMSG_LOAD_SCREEN                                         = 0x1691, // 5.4.7 17930
    CMSG_LOGOUT_CANCEL                                       = 0x11D4, // 5.4.7 17930
    CMSG_LOGOUT_REQUEST                                      = 0x0476, // 5.4.7 17930
-   CMSG_LOG_DISCONNECT                                      = 0x0,
+   CMSG_LOG_DISCONNECT                                      = 0x1A13, // 5.4.7 17930
    CMSG_LOOT                                                = 0x0,
    CMSG_LOOT_CURRENCY                                       = 0x0,
    CMSG_LOOT_MASTER_GIVE                                    = 0x0,
@@ -453,7 +453,7 @@ enum Opcodes
    CMSG_QUEST_POI_QUERY                                     = 0x0,
    CMSG_QUEST_QUERY                                         = 0x0,
    CMSG_RANDOMIZE_CHAR_NAME                                 = 0x0,
-   CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x13CB, // 5.4.7 17930 - Guessed
+   CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x13CB, // 5.4.7 17930
    CMSG_READ_ITEM                                           = 0x0,
    CMSG_REALM_SPLIT                                         = 0x0,
    CMSG_REALM_NAME_QUERY                                    = 0x1899, // 5.4.7 17930
@@ -639,14 +639,14 @@ enum Opcodes
    MSG_MOVE_STOP_SWIM                                       = 0x0578, // 5.4.7 17930
    MSG_MOVE_STOP_TURN                                       = 0x0530, // 5.4.7 17930
    MSG_MOVE_TELEPORT                                        = 0x00D5, // 5.4.7 17930
-   MSG_MOVE_TELEPORT_ACK                                    = 0x0,
+   MSG_MOVE_TELEPORT_ACK                                    = 0x0978, // 5.4.7 17930
    MSG_MOVE_TELEPORT_CHEAT                                  = 0x0,
    MSG_MOVE_TIME_SKIPPED                                    = 0x0,
    MSG_MOVE_TOGGLE_COLLISION_CHEAT                          = 0x0,
    MSG_MOVE_TOGGLE_FALL_LOGGING                             = 0x0,
    MSG_MOVE_TOGGLE_LOGGING                                  = 0x0,
    MSG_MOVE_UPDATE_MOUSE                                    = 0x0,
-   MSG_MOVE_WORLDPORT_ACK                                   = 0x0,
+   MSG_MOVE_WORLDPORT_ACK                                   = 0x18BB, // 5.4.7 17930
    MSG_NOTIFY_PARTY_SQUELCH                                 = 0x0,
    MSG_PARTY_ASSIGNMENT                                     = 0x0,
    MSG_PETITION_DECLINE                                     = 0x0,
@@ -793,7 +793,7 @@ enum Opcodes
    SMSG_CLEAR_COOLDOWNS                                     = 0x0,
    SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                           = 0x0,
    SMSG_CLEAR_TARGET                                        = 0x0,
-   SMSG_CLIENTCACHE_VERSION                                 = 0x0,
+   SMSG_CLIENTCACHE_VERSION                                 = 0x1E41, // 5.4.7 17930
    SMSG_CLIENT_CONTROL_UPDATE                               = 0x0,
    SMSG_CLOSE_BROWSER                                       = 0x0,
    SMSG_COMBAT_EVENT_FAILED                                 = 0x0,
@@ -830,7 +830,7 @@ enum Opcodes
    SMSG_DEATH_RELEASE_LOC                                   = 0x0,
    SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
    SMSG_DEFENSE_MESSAGE                                     = 0x0,
-   SMSG_DESTROY_OBJECT                                      = 0x0,
+   SMSG_DESTROY_OBJECT                                      = 0x1D69, // 5.4.7 17898
    SMSG_DESTRUCTIBLE_BUILDING_DAMAGE                        = 0x0,
    SMSG_DIFFERENT_INSTANCE_FROM_PARTY                       = 0x0,
    SMSG_DISENCHANT_CREDIT                                   = 0x0,
@@ -1106,7 +1106,7 @@ enum Opcodes
    SMSG_MULTIPLE_PACKETS                                    = 0x0,
    SMSG_NAME_QUERY_RESPONSE                                 = 0x1E5B, // 5.4.7 17930
    SMSG_NEW_TAXI_PATH                                       = 0x0,
-   SMSG_NEW_WORLD                                           = 0x0,
+   SMSG_NEW_WORLD                                           = 0x05AB, // 5.4.7 17930
    SMSG_NEW_WORLD_ABORT                                     = 0x0,
    SMSG_NOTIFICATION                                        = 0x0,
    SMSG_NOTIFY_DANCE                                        = 0x0,
@@ -1346,7 +1346,7 @@ enum Opcodes
    SMSG_TRAINER_BUY_SUCCEEDED                               = 0x0,
    SMSG_TRAINER_LIST                                        = 0x0,
    SMSG_TRANSFER_ABORTED                                    = 0x0,
-   SMSG_TRANSFER_PENDING                                    = 0x0,
+   SMSG_TRANSFER_PENDING                                    = 0x0440, // 5.4.7 17930
    SMSG_TRIGGER_CINEMATIC                                   = 0x0,
    SMSG_TRIGGER_MOVIE                                       = 0x0,
    SMSG_TURN_IN_PETITION_RESULTS                            = 0x0,
