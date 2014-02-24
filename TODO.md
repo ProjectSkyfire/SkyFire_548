@@ -3,7 +3,6 @@
 * Combat / Autoattack / Attacker stats ...
 * Spell casting / casting results
 * Auras
-* Creature movement
 * Fix gameobejct transparency (general bug - not structure related, wrong values in update fields)
 * Creature / Gameobject gossips (including vendors and trainers)
 * Glyphs
@@ -46,3 +45,4 @@
 * Implement addons packets - To prevent ingame spam
 * Teleporting / Move speed changes - SMSG movement
 * Creature/Gameobject queries
+* Creature movement

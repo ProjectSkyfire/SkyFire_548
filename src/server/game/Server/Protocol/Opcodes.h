@@ -522,7 +522,7 @@ enum Opcodes
    CMSG_SET_PRIMARY_TALENT_TREE                             = 0x04AA, // 5.4.7 17930
    CMSG_SET_RELATIVE_POSITION                               = 0x0,
    CMSG_SET_SAVED_INSTANCE_EXTEND                           = 0x0,
-   CMSG_SET_SELECTION                                       = 0x0,
+   CMSG_SET_SELECTION                                       = 0x10D5, // 5.4.7 17930
    CMSG_SET_SKILL_CHEAT                                     = 0x0,
    CMSG_SET_TAXI_BENCHMARK_MODE                             = 0x0,
    CMSG_SET_TITLE                                           = 0x0,
@@ -1054,8 +1054,8 @@ enum Opcodes
    SMSG_MISSILE_CANCEL                                      = 0x0,
    SMSG_MODIFY_COOLDOWN                                     = 0x0,
    SMSG_MONEY_NOTIFY                                        = 0x0,
-   SMSG_MONSTER_MOVE                                        = 0x0,
-   SMSG_MONSTER_MOVE_TRANSPORT                              = 0x0,
+   SMSG_MONSTER_MOVE                                        = 0x12D8, // 5.4.7 17930
+   SMSG_MONSTER_MOVE_TRANSPORT                              = 0x0, // Obsolute
    SMSG_MOTD                                                = 0x0E20, // 5.4.7 17930
    SMSG_MOUNTRESULT                                         = 0x0,
    SMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
