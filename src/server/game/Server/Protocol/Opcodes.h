@@ -181,7 +181,7 @@ enum Opcodes
    CMSG_CONNECT_TO_FAILED                                   = 0x0,
    CMSG_CONTACT_LIST                                        = 0x0,
    CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
-   CMSG_CREATURE_QUERY                                      = 0x0,
+   CMSG_CREATURE_QUERY                                      = 0x1E72, // 5.4.7 17930
    CMSG_DANCE_QUERY                                         = 0x0,
    CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
    CMSG_DEL_FRIEND                                          = 0x0,
@@ -202,7 +202,7 @@ enum Opcodes
    CMSG_FAR_SIGHT                                           = 0x0,
    CMSG_FORCE_MOVE_ROOT_ACK                                 = 0x0,
    CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x0,
-   CMSG_GAMEOBJECT_QUERY                                    = 0x0,
+   CMSG_GAMEOBJECT_QUERY                                    = 0x14EA, // 5.4.7 17930
    CMSG_GAMEOBJ_REPORT_USE                                  = 0x0,
    CMSG_GAMEOBJ_USE                                         = 0x0,
    CMSG_GAMESPEED_SET                                       = 0x0,
@@ -816,7 +816,7 @@ enum Opcodes
    SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE                  = 0x0,
    SMSG_CORPSE_NOT_IN_INSTANCE                              = 0x0,
    SMSG_CORPSE_RECLAIM_DELAY                                = 0x0,
-   SMSG_CREATURE_QUERY_RESPONSE                             = 0x0,
+   SMSG_CREATURE_QUERY_RESPONSE                             = 0x00E0, // 5.4.7 17930
    SMSG_CRITERIA_DELETED                                    = 0x0,
    SMSG_CRITERIA_UPDATE                                     = 0x0,
    SMSG_CROSSED_INEBRIATION_THRESHOLD                       = 0x0,
@@ -875,7 +875,7 @@ enum Opcodes
    SMSG_GAMEOBJECT_CUSTOM_ANIM                              = 0x0,
    SMSG_GAMEOBJECT_DESPAWN_ANIM                             = 0x0,
    SMSG_GAMEOBJECT_PAGETEXT                                 = 0x0,
-   SMSG_GAMEOBJECT_QUERY_RESPONSE                           = 0x0,
+   SMSG_GAMEOBJECT_QUERY_RESPONSE                           = 0x066A, // 5.4.7 17930
    SMSG_GAMEOBJECT_RESET_STATE                              = 0x0,
    SMSG_GAMESPEED_SET                                       = 0x0,
    SMSG_GAMETIME_SET                                        = 0x0,

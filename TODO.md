@@ -1,7 +1,5 @@
 ## To-do list (Try to keep the order by importance)
-* Creature/Gameobject queries
 * Item swapping / equiping
-* Teleporting / Move speed changes - SMSG movement
 * Combat / Autoattack / Attacker stats ...
 * Spell casting / casting results
 * Auras
@@ -46,3 +44,5 @@
 * Messagechat
 * Basic player movement
 * Implement addons packets - To prevent ingame spam
+* Teleporting / Move speed changes - SMSG movement
+* Creature/Gameobject queries
