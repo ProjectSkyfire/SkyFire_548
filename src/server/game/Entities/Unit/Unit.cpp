@@ -2110,39 +2110,39 @@ void Unit::SendMeleeAttackStart(Unit* victim)
     ObjectGuid attackerGuid = GetGUID();
     ObjectGuid victimGuid = victim->GetGUID();
 
-    data.WriteBit(attackerGuid[3]);
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(attackerGuid[0]);
-    data.WriteBit(attackerGuid[1]);
     data.WriteBit(attackerGuid[4]);
-    data.WriteBit(victimGuid[7]);
     data.WriteBit(victimGuid[4]);
-    data.WriteBit(attackerGuid[5]);
-    data.WriteBit(victimGuid[1]);
-    data.WriteBit(victimGuid[5]);
     data.WriteBit(attackerGuid[6]);
-    data.WriteBit(attackerGuid[7]);
-    data.WriteBit(victimGuid[0]);
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(attackerGuid[5]);
+    data.WriteBit(victimGuid[2]);
     data.WriteBit(victimGuid[6]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(victimGuid[5]);
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(victimGuid[3]);
     data.WriteBit(attackerGuid[2]);
+    data.WriteBit(victimGuid[1]);
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[1]);
 
-    data.WriteByteSeq(attackerGuid[4]);
-    data.WriteByteSeq(attackerGuid[6]);
-    data.WriteByteSeq(attackerGuid[2]);
-    data.WriteByteSeq(attackerGuid[7]);
-    data.WriteByteSeq(victimGuid[1]);
-    data.WriteByteSeq(attackerGuid[0]);
-    data.WriteByteSeq(attackerGuid[3]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(attackerGuid[5]);
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(victimGuid[3]);
-    data.WriteByteSeq(attackerGuid[1]);
-    data.WriteByteSeq(victimGuid[6]);
     data.WriteByteSeq(victimGuid[5]);
     data.WriteByteSeq(victimGuid[7]);
+    data.WriteByteSeq(attackerGuid[4]);
+    data.WriteByteSeq(attackerGuid[5]);
+    data.WriteByteSeq(attackerGuid[3]);
+    data.WriteByteSeq(victimGuid[1]);
+    data.WriteByteSeq(attackerGuid[1]);
+    data.WriteByteSeq(victimGuid[3]);
+    data.WriteByteSeq(attackerGuid[7]);
+    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(victimGuid[2]);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data.WriteByteSeq(attackerGuid[2]);
+    data.WriteByteSeq(victimGuid[6]);
+    data.WriteByteSeq(attackerGuid[0]);
 
     SendMessageToSet(&data, true);
 }
@@ -2154,41 +2154,41 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     ObjectGuid attackerGuid = GetGUID();
     ObjectGuid victimGuid = victim ? victim->GetGUID() : NULL;
 
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(victimGuid[0]);
-    data.WriteBit(attackerGuid[1]);
-    data.WriteBit(victimGuid[1]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(victimGuid[6]);
     data.WriteBit(victimGuid[5]);
-    data.WriteBit(attackerGuid[3]);
-    data.WriteBit(attackerGuid[0]);
-    data.WriteBit(attackerGuid[6]);
-    data.WriteBit(victimGuid[4]);
-    data.WriteBit(0);                   
-    data.WriteBit(attackerGuid[5]);
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[1]);
     data.WriteBit(attackerGuid[2]);
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[6]);
+    data.WriteBit(1);
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(victimGuid[2]);
+    data.WriteBit(victimGuid[3]);
+    data.WriteBit(victimGuid[6]);
+    data.WriteBit(victimGuid[4]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(victimGuid[1]);
     data.WriteBit(attackerGuid[4]);
-    
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(attackerGuid[0]);
-    data.WriteByteSeq(attackerGuid[6]);
-    data.WriteByteSeq(victimGuid[1]);
+    data.WriteBit(attackerGuid[5]);
+    data.FlushBits();
+
+    data.WriteByteSeq(attackerGuid[2]);
     data.WriteByteSeq(victimGuid[3]);
-    data.WriteByteSeq(victimGuid[6]);
-    data.WriteByteSeq(victimGuid[7]);
-    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(victimGuid[5]);
+    data.WriteByteSeq(victimGuid[2]);
     data.WriteByteSeq(attackerGuid[4]);
     data.WriteByteSeq(attackerGuid[1]);
-    data.WriteByteSeq(attackerGuid[7]);
-    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(attackerGuid[0]);
+    data.WriteByteSeq(victimGuid[1]);
     data.WriteByteSeq(attackerGuid[3]);
+    data.WriteByteSeq(attackerGuid[7]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(victimGuid[6]);
     data.WriteByteSeq(attackerGuid[5]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(attackerGuid[2]);
-    
+    data.WriteByteSeq(victimGuid[7]);
+    data.WriteByteSeq(victimGuid[0]);
 
     SendMessageToSet(&data, true);
 }
@@ -4943,6 +4943,11 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
     uint32 counter = 0;
     size_t maxsize = 4+5+5+4+4+1+4+4+4+4+4+1+4+4+4+4+4*12;
     WorldPacket data(SMSG_ATTACKERSTATEUPDATE, maxsize);    // we guess size
+
+    size_t size = data.wpos();
+    data << uint32(0); // Placeholder
+    size_t datapos = data.wpos();
+
     data << uint32(damageInfo->HitInfo);
     data.append(damageInfo->attacker->GetPackGUID());
     data.append(damageInfo->target->GetPackGUID());
@@ -4953,9 +4958,9 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 
     for (uint32 i = 0; i < count; ++i)
     {
-        data << uint32(damageInfo->damageSchoolMask);       // School of sub damage
-        data << float(damageInfo->damage);                  // sub damage
         data << uint32(damageInfo->damage);                 // Sub Damage
+        data << float(damageInfo->damage);                  // sub damage
+        data << uint32(damageInfo->damageSchoolMask);       // School of sub damage
     }
 
     if (damageInfo->HitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
@@ -4992,6 +4997,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
         data << float(0);
         data << float(0);
         data << float(0);
+
         for (uint8 i = 0; i < 2; ++i)
         {
             data << float(0);
@@ -5003,30 +5009,19 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
     if (damageInfo->HitInfo & (HITINFO_BLOCK | HITINFO_UNK12))
         data << float(0);
 
-    if (damageInfo->HitInfo & HITINFO_UNK26)
-    {
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
+    data.put(size, data.wpos() - datapos); // Blizz - Weird and Lazy people....
 
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[6]);
-        data.WriteBit(guid[7]);
-        data.WriteBit(guid[0]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[3]);
-        data.WriteBit(guid[1]);
+    bool hasUnkFlags = damageInfo->HitInfo & HITINFO_UNK26;
+    uint32 unkCounter  = 0;
+
+    data.WriteBit(hasUnkFlags);
+
+    if (hasUnkFlags)
+    {
+        data.WriteBits(unkCounter, 21);
         data.FlushBits();
 
-        data.WriteBits(counter, 21);
-
-        data.WriteByteSeq(guid[2]);
-        data.WriteByteSeq(guid[7]);
-        data.WriteByteSeq(guid[0]);
-        data.WriteByteSeq(guid[3]);
-        data.WriteByteSeq(guid[5]);
-        data.WriteByteSeq(guid[4]);
+        data << uint32(0);
 
         for (uint32 i = 0; i < counter; ++i)
         {
@@ -5034,10 +5029,9 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
             data << uint32(0);
         }
 
-        data.WriteByteSeq(guid[1]);
-        data.WriteByteSeq(guid[6]);
+        data << uint32(0);
+        data << uint32(0);
     }
-
 
     SendMessageToSet(&data, true);
 }

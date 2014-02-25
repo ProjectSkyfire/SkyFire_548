@@ -1,6 +1,4 @@
 ## To-do list (Try to keep the order by importance)
-* Item swapping / equiping
-* Combat / Autoattack / Attacker stats ...
 * Spell casting / casting results
 * Auras
 * Fix gameobejct transparency (general bug - not structure related, wrong values in update fields)
@@ -46,3 +44,5 @@
 * Teleporting / Move speed changes - SMSG movement
 * Creature/Gameobject queries
 * Creature movement
+* Combat / Autoattack / Attacker stats ...
+* Item swapping / equiping

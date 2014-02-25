@@ -181,7 +181,8 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recvData)
     //TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOEQUIP_ITEM");
     uint8 srcbag, srcslot;
 
-    recvData >> srcbag >> srcslot;
+    recvData >> srcslot >> srcbag;
+    recvData.rfinish();
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
     Item* pSrcItem  = _player->GetItemByPos(srcbag, srcslot);

@@ -57,8 +57,8 @@ enum Opcodes
    CMSG_ARENA_TEAM_QUERY                                    = 0x0,
    CMSG_ARENA_TEAM_REMOVE                                   = 0x0,
    CMSG_ARENA_TEAM_ROSTER                                   = 0x0,
-   CMSG_ATTACKSTOP                                          = 0x0,
-   CMSG_ATTACKSWING                                         = 0x0,
+   CMSG_ATTACKSTOP                                          = 0x1E13, // 5.4.7 17930 0x1777 
+   CMSG_ATTACKSWING                                         = 0x1513, // 5.4.7 17930
    CMSG_AUCTION_HELLO                                       = 0x0,
    CMSG_AUCTION_LIST_BIDDER_ITEMS                           = 0x0,
    CMSG_AUCTION_LIST_ITEMS                                  = 0x0,
@@ -70,7 +70,7 @@ enum Opcodes
    CMSG_AUTH_SESSION                                        = 0x1A51, // 5.4.7 17930
    CMSG_AUTOBANK_ITEM                                       = 0x0,
    CMSG_AUTOEQUIP_GROUND_ITEM                               = 0x0,
-   CMSG_AUTOEQUIP_ITEM                                      = 0x0,
+   CMSG_AUTOEQUIP_ITEM                                      = 0x166B, // 5.4.7 17930
    CMSG_AUTOEQUIP_ITEM_SLOT                                 = 0x0,
    CMSG_AUTOSTORE_BAG_ITEM                                  = 0x0,
    CMSG_AUTOSTORE_BANK_ITEM                                 = 0x0,
@@ -548,7 +548,7 @@ enum Opcodes
    CMSG_SUMMON_RESPONSE                                     = 0x0,
    CMSG_SUSPEND_TOKEN                                       = 0x0,
    CMSG_SWAP_INV_ITEM                                       = 0x0,
-   CMSG_SWAP_ITEM                                           = 0x0,
+   CMSG_SWAP_ITEM                                           = 0x150A, // 5.4.7 1930
    CMSG_SYNC_DANCE                                          = 0x0,
    CMSG_TAXICLEARALLNODES                                   = 0x0,
    CMSG_TAXIENABLEALLNODES                                  = 0x0,
@@ -689,9 +689,9 @@ enum Opcodes
    SMSG_ARENA_TEAM_QUERY_RESPONSE                           = 0x0,
    SMSG_ARENA_TEAM_ROSTER                                   = 0x0,
    SMSG_ARENA_TEAM_STATS                                    = 0x0,
-   SMSG_ATTACKERSTATEUPDATE                                 = 0x0,
-   SMSG_ATTACKSTART                                         = 0x0,
-   SMSG_ATTACKSTOP                                          = 0x0,
+   SMSG_ATTACKERSTATEUPDATE                                 = 0x0540, // 5.4.7 17930
+   SMSG_ATTACKSTART                                         = 0x0403, // 5.4.7 17930
+   SMSG_ATTACKSTOP                                          = 0x1448, // 5.4.7 17930
    SMSG_ATTACKSWING_BADFACING                               = 0x0,
    SMSG_ATTACKSWING_CANT_ATTACK                             = 0x0,
    SMSG_ATTACKSWING_DEADTARGET                              = 0x0,
@@ -766,7 +766,7 @@ enum Opcodes
    SMSG_CALENDAR_UPDATE_INVITE_LIST                         = 0x0,
    SMSG_CAMERA_SHAKE                                        = 0x0,
    SMSG_CANCEL_AUTO_REPEAT                                  = 0x0,
-   SMSG_CANCEL_COMBAT                                       = 0x0,
+   SMSG_CANCEL_COMBAT                                       = 0x1E7A, // 5.4.7 17930
    SMSG_CAST_FAILED                                         = 0x0,
    SMSG_CHALLANGES_INFO                                     = 0x0,
    SMSG_CHANNEL_LIST                                        = 0x0,
