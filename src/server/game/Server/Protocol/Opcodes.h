@@ -390,7 +390,7 @@ enum Opcodes
    CMSG_NEW_SPELL_SLOT                                      = 0x0,
    CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
    CMSG_NPC_TEXT_QUERY                                      = 0x0,
-   CMSG_OBJECT_UPDATE_FAILED                                = 0x882, // 5.4.7 17930
+   CMSG_OBJECT_UPDATE_FAILED                                = 0x0882, // 5.4.7 17930
    CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
    CMSG_OFFER_PETITION                                      = 0x0,
    CMSG_OPENING_CINEMATIC                                   = 0x0,
@@ -418,10 +418,10 @@ enum Opcodes
    CMSG_PET_SET_ACTION                                      = 0x0,
    CMSG_PET_SPELL_AUTOCAST                                  = 0x0,
    CMSG_PET_STOP_ATTACK                                     = 0x0,
-   CMSG_PING                                                = 0x1070, // 4.5.7 17930
+   CMSG_PING                                                = 0x1070, // 5.4.7 17930
    CMSG_PLAYED_TIME                                         = 0x0,
    CMSG_PLAYER_DIFFICULTY_CHANGE                            = 0x0,
-   CMSG_PLAYER_LOGIN                                        = 0x17D3, // 4.5.7 17930
+   CMSG_PLAYER_LOGIN                                        = 0x17D3, // 5.4.7 17930
    CMSG_PLAYER_LOGOUT                                       = 0x0,
    CMSG_PLAYER_VEHICLE_ENTER                                = 0x0,
    CMSG_PLAY_DANCE                                          = 0x0,
@@ -548,7 +548,7 @@ enum Opcodes
    CMSG_SUMMON_RESPONSE                                     = 0x0,
    CMSG_SUSPEND_TOKEN                                       = 0x0,
    CMSG_SWAP_INV_ITEM                                       = 0x0,
-   CMSG_SWAP_ITEM                                           = 0x150A, // 5.4.7 1930
+   CMSG_SWAP_ITEM                                           = 0x150A, // 5.4.7 17930
    CMSG_SYNC_DANCE                                          = 0x0,
    CMSG_TAXICLEARALLNODES                                   = 0x0,
    CMSG_TAXIENABLEALLNODES                                  = 0x0,
@@ -961,7 +961,7 @@ enum Opcodes
    SMSG_HOTFIX_INFO                                         = 0x0,
    SMSG_HOTFIX_NOTIFY                                       = 0x0,
    SMSG_INITIALIZE_FACTIONS                                 = 0x0,
-   SMSG_INITIAL_SPELLS                                      = 0x1B05, // 5.4.717930
+   SMSG_INITIAL_SPELLS                                      = 0x1B05, // 5.4.7 17930
    SMSG_INIT_CURRENCY                                       = 0x0,
    SMSG_INIT_WORLD_STATES                                   = 0x0,
    SMSG_INSPECT                                             = 0x0,
