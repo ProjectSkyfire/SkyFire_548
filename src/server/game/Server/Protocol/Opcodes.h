@@ -317,7 +317,7 @@ enum Opcodes
    CMSG_LF_GUILD_POST_REQUEST                               = 0x0,
    CMSG_LF_GUILD_REMOVE_RECRUIT                             = 0x0,
    CMSG_LF_GUILD_SET_GUILD_POST                             = 0x0,
-   CMSG_LIST_INVENTORY                                      = 0x0,
+   CMSG_LIST_INVENTORY                                      = 0x10DD, // 5.4.7 17930
    CMSG_LOAD_SCREEN                                         = 0x1691, // 5.4.7 17930
    CMSG_LOGOUT_CANCEL                                       = 0x11D4, // 5.4.7 17930
    CMSG_LOGOUT_REQUEST                                      = 0x0476, // 5.4.7 17930
@@ -1018,7 +1018,7 @@ enum Opcodes
    SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED                    = 0x0,
    SMSG_LF_GUILD_POST_UPDATED                               = 0x0,
    SMSG_LF_GUILD_RECRUIT_LIST_UPDATED                       = 0x0,
-   SMSG_LIST_INVENTORY                                      = 0x0,
+   SMSG_LIST_INVENTORY                                      = 0x0D2A, // 5.4.7 17930
    SMSG_LOAD_CUF_PROFILES                                   = 0x0,
    SMSG_LOGIN_SETTIMESPEED                                  = 0x0F4A, // 5.4.7 17930
    SMSG_LOGIN_VERIFY_WORLD                                  = 0x0603, // 5.4.7 17930
