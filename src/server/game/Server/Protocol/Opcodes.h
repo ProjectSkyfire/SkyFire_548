@@ -493,7 +493,7 @@ enum Opcodes
    CMSG_SEARCH_LFG_LEAVE                                    = 0x0,
    CMSG_SELECT_LOOT_SPEC                                    = 0x0,
    CMSG_SELF_RES                                            = 0x0,
-   CMSG_SELL_ITEM                                           = 0x0,
+   CMSG_SELL_ITEM                                           = 0x115F, // 5.4.7 17930
    CMSG_SEND_MAIL                                           = 0x0,
    CMSG_SEND_SOR_REQUEST_VIA_ADDRESS                        = 0x0,
    CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID                = 0x0,

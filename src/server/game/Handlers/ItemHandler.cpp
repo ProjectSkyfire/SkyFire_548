@@ -355,39 +355,39 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
 
     recvData >> count;
 
-    itemguid[2] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    itemguid[5] = recvData.ReadBit();
-    itemguid[3] = recvData.ReadBit();
     itemguid[7] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
-    vendorguid[2] = recvData.ReadBit();
     vendorguid[0] = recvData.ReadBit();
-    vendorguid[4] = recvData.ReadBit();
     vendorguid[3] = recvData.ReadBit();
-    itemguid[1] = recvData.ReadBit();
-    itemguid[0] = recvData.ReadBit();
+    itemguid[2] = recvData.ReadBit();
+    vendorguid[7] = recvData.ReadBit();
+    vendorguid[6] = recvData.ReadBit();
     vendorguid[5] = recvData.ReadBit();
+    vendorguid[2] = recvData.ReadBit();
     itemguid[4] = recvData.ReadBit();
     itemguid[6] = recvData.ReadBit();
+    itemguid[5] = recvData.ReadBit();
+    itemguid[2] = recvData.ReadBit();
+    vendorguid[1] = recvData.ReadBit();
+    vendorguid[4] = recvData.ReadBit();
+    itemguid[0] = recvData.ReadBit();
+    itemguid[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(itemguid[5]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(itemguid[3]);
-    recvData.ReadByteSeq(vendorguid[1]);
     recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(vendorguid[7]);
-    recvData.ReadByteSeq(itemguid[1]);
-    recvData.ReadByteSeq(itemguid[4]);
-    recvData.ReadByteSeq(itemguid[0]);
-    recvData.ReadByteSeq(itemguid[2]);
     recvData.ReadByteSeq(vendorguid[2]);
-    recvData.ReadByteSeq(itemguid[7]);
+    recvData.ReadByteSeq(itemguid[1]);
+    recvData.ReadByteSeq(vendorguid[0]);
+    recvData.ReadByteSeq(vendorguid[7]);
     recvData.ReadByteSeq(itemguid[6]);
+    recvData.ReadByteSeq(itemguid[0]);
+    recvData.ReadByteSeq(itemguid[7]);
+    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(vendorguid[5]);
+    recvData.ReadByteSeq(itemguid[5]);
+    recvData.ReadByteSeq(itemguid[3]);
+    recvData.ReadByteSeq(itemguid[4]);
+    recvData.ReadByteSeq(vendorguid[4]);
+    recvData.ReadByteSeq(vendorguid[3]);
+    recvData.ReadByteSeq(itemguid[2]);
 
     if (!itemguid)
         return;
