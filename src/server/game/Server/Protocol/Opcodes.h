@@ -389,7 +389,7 @@ enum Opcodes
    CMSG_NAME_QUERY                                          = 0x0DB3, // 5.4.7 17930
    CMSG_NEW_SPELL_SLOT                                      = 0x0,
    CMSG_NEXT_CINEMATIC_CAMERA                               = 0x0,
-   CMSG_NPC_TEXT_QUERY                                      = 0x0,
+   CMSG_NPC_TEXT_QUERY                                      = 0x12FA, // 5.4.7 17956
    CMSG_OBJECT_UPDATE_FAILED                                = 0x0882, // 5.4.7 17930
    CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
    CMSG_OFFER_PETITION                                      = 0x0,
