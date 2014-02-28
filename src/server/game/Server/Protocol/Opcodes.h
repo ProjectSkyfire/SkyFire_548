@@ -468,7 +468,7 @@ enum Opcodes
    CMSG_REQUEST_ACCOUNT_DATA                                = 0x0,
    CMSG_REQUEST_CATEGORY_COOLDOWNS                          = 0x0,
    CMSG_REQUEST_CEMETERY_LIST                               = 0x0,
-   CMSG_REQUEST_HOTFIX                                      = 0x0,
+   CMSG_REQUEST_HOTFIX                                      = 0x16C2, // 5.4.7 17956
    CMSG_REQUEST_INSPECT_RATED_BG_STATS                      = 0x0,
    CMSG_REQUEST_PARTY_MEMBER_STATS                          = 0x0,
    CMSG_REQUEST_PET_INFO                                    = 0x0,
