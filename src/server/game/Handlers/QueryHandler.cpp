@@ -475,10 +475,6 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     WorldPacket data(SMSG_NPC_TEXT_UPDATE, 1 + 4 + 64);
 
-    data.WriteBit(1);                                   // has data
-    data.FlushBits();
-
-    data << textID;
     data << uint32(64);                                 // size (8 * 4) * 2
 
     for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
@@ -488,6 +484,11 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS - 1; i++)
         data << uint32(0);
+
+    data << textID;
+
+    data.WriteBit(1);                                   // has data
+    data.FlushBits();
 
     SendPacket(&data);
 

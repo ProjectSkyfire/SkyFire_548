@@ -1111,7 +1111,7 @@ enum Opcodes
    SMSG_NOTIFICATION                                        = 0x0,
    SMSG_NOTIFY_DANCE                                        = 0x0,
    SMSG_NOTIFY_DEST_LOC_SPELL_CAST                          = 0x0,
-   SMSG_NPC_TEXT_UPDATE                                     = 0x0,
+   SMSG_NPC_TEXT_UPDATE                                     = 0x10E0, // 5.4.7 17956
    SMSG_NPC_WONT_TALK                                       = 0x0,
    SMSG_OFFER_PETITION_ERROR                                = 0x0,
    SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA                = 0x0,
