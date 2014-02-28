@@ -2191,10 +2191,10 @@ void WorldSession::SendBroadcastText(uint32 entry)
 
     WorldPacket data(SMSG_DB_REPLY);
     data << uint32(entry);
+    data << uint32(DB2_REPLY_BROADCAST);
     data << uint32(0);
     data << uint32(buffer.size());
     data.append(buffer);
-    data << uint32(DB2_REPLY_BROADCAST);
 
     SendPacket(&data);
 }
