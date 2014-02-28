@@ -895,7 +895,7 @@ enum Opcodes
    SMSG_GM_TICKET_STATUS_UPDATE                             = 0x0,
    SMSG_GODMODE                                             = 0x0,
    SMSG_GOSSIP_COMPLETE                                     = 0x0,
-   SMSG_GOSSIP_MESSAGE                                      = 0x0,
+   SMSG_GOSSIP_MESSAGE                                      = 0x0E52, // 5.4.7 17956
    SMSG_GOSSIP_POI                                          = 0x0,
    SMSG_GROUPACTION_THROTTLED                               = 0x0,
    SMSG_GROUP_CANCEL                                        = 0x0,
