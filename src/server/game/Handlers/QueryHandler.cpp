@@ -225,15 +225,17 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
 
     WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 500);
 
-    CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(entry);
-    data << uint32(entry);
-    data.WriteBit(ci != 0);                                    // Has data
+    CreatureTemplate const* info = sObjectMgr->GetCreatureTemplate(entry);
+    uint32 entryToSend = info ? entry : 0x80000000 | entry;
 
-    if (ci)
+    data << uint32(entryToSend);
+    data.WriteBit(info != 0);                                    // Has data
+
+    if (info)
     {
         std::string Name, SubName;
-        Name = ci->Name;
-        SubName = ci->SubName;
+        Name = info->Name;
+        SubName = info->SubName;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
@@ -244,10 +246,10 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
                 ObjectMgr::GetLocaleString(cl->SubName, loc_idx, SubName);
             }
         }
-        TC_LOG_DEBUG("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
+        TC_LOG_DEBUG("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", info->Name.c_str(), entry);
 
-        data.WriteBit(ci->RacialLeader);
-        data.WriteBits(ci->IconName.length() + 1, 6);
+        data.WriteBit(info->RacialLeader);
+        data.WriteBits(info->IconName.length() + 1, 6);
         
         for (int i = 0; i < 8; i++)
         {
@@ -263,34 +265,34 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         data.WriteBits(0, 11);
         data.FlushBits();
 
-        data << float(ci->ModMana);                         // Mana modifier
+        data << float(info->ModMana);                         // Mana modifier
         data << Name;
-        data << float(ci->ModHealth);                       // Hp modifier
-        data << uint32(ci->KillCredit[1]);                  // New in 3.1, kill credit
-        data << uint32(ci->Modelid2);                       // Modelid2
+        data << float(info->ModHealth);                       // Hp modifier
+        data << uint32(info->KillCredit[1]);                  // New in 3.1, kill credit
+        data << uint32(info->Modelid2);                       // Modelid2
 
         for (uint32 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
-            data << uint32(ci->questItems[i]);              // ItemId[6], quest drop
+            data << uint32(info->questItems[i]);              // ItemId[6], quest drop
 
-        data << uint32(ci->type);                           // CreatureType.dbc
+        data << uint32(info->type);                           // CreatureType.dbc
 
-        if (ci->IconName != "")
-            data << ci->IconName;                           // "Directions" for guard, string for Icons 2.3.0
+        if (info->IconName != "")
+            data << info->IconName;                           // "Directions" for guard, string for Icons 2.3.0
 
-        data << uint32(ci->type_flags2);                    // Flags2
-        data << uint32(ci->type_flags);                     // Flags
-        data << uint32(ci->KillCredit[0]);                  // New in 3.1, kill credit
-        data << uint32(ci->family);                         // CreatureFamily.dbc
-        data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
-        data << uint32(ci->expansion);                      // Expansion Required
-        data << uint32(ci->Modelid1);                       // Modelid1
-        data << uint32(ci->Modelid3);                       // Modelid3
-        data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)
+        data << uint32(info->type_flags2);                    // Flags2
+        data << uint32(info->type_flags);                     // Flags
+        data << uint32(info->KillCredit[0]);                  // New in 3.1, kill credit
+        data << uint32(info->family);                         // CreatureFamily.dbc
+        data << uint32(info->movementId);                     // CreatureMovementInfo.dbc
+        data << uint32(info->expansion);                      // Expansion Required
+        data << uint32(info->Modelid1);                       // Modelid1
+        data << uint32(info->Modelid3);                       // Modelid3
+        data << uint32(info->rank);                           // Creature Rank (elite, boss, etc)
 
         if (SubName != "")
             data << SubName;                                // Subname
 
-        data << uint32(ci->Modelid4);                       // Modelid4
+        data << uint32(info->Modelid4);                       // Modelid4
 
         TC_LOG_DEBUG("network", "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
@@ -325,8 +327,15 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[4]);
-
+    
     const GameObjectTemplate* info = sObjectMgr->GetGameObjectTemplate(entry);
+    uint32 entryToSend = info ? entry : 0x80000000 | entry;
+
+    WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
+    data << uint32(entryToSend);
+    size_t pos = data.wpos();
+    data << uint32(0);
+
     if (info)
     {
         std::string Name;
@@ -346,12 +355,8 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
                 ObjectMgr::GetLocaleString(gl->CastBarCaption, loc_idx, CastBarCaption);
             }
         }
-        TC_LOG_DEBUG("network", "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
-        WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
-        data << uint32(entry);
-        size_t pos = data.wpos();
-        data << uint32(0);
 
+        TC_LOG_DEBUG("network", "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
         data << uint32(info->type);
         data << uint32(info->displayId);
         data << Name;
@@ -370,27 +375,20 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
 
         data << int32(info->unkInt32);                      // 4.x, unknown
 
-        data.put(pos, uint32(data.wpos() - pos));
-
-        data.WriteBit(1);
-        data.FlushBits();
-
-        SendPacket(&data);
-
+        data.put(pos, uint32(data.wpos() - (pos + 4)));
         TC_LOG_DEBUG("network", "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
     else
     {
         TC_LOG_DEBUG("network", "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
             GUID_LOPART((uint64)guid), entry);
-        WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 4);
-        data << uint32(entry | 0x80000000);
-        data << uint32(0);
-        data.WriteBit(0);
-        data.FlushBits();
-        SendPacket(&data);
+
         TC_LOG_DEBUG("network", "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
+
+    data.WriteBit(info != NULL);
+    data.FlushBits();
+    SendPacket(&data);
 }
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
