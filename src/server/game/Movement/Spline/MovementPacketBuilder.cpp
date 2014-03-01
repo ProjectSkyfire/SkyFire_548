@@ -95,16 +95,16 @@ namespace Movement
         ObjectGuid guid = unit->GetGUID();
         ObjectGuid transport = unit->GetTransGUID();
 
-        data << float(0.f);
+        data << float(0.f); // Most likely transport Y
         data << uint32(getMSTime());
-        data << float(0.f);
-        data << float(0.f);
-        data << float(unit->GetPositionX());
-        data << float(unit->GetPositionY());
-        data << float(unit->GetPositionZ());
+        data << float(0.f); // Most likely transport Z
+        data << float(0.f); // Most likely transport X
+        data << float(pos.x);
+        data << float(pos.y);
+        data << float(pos.z);
 
         data.WriteBit(guid[3]);
-        data.WriteBit(!unit->movespline->splineflags.raw());
+        data.WriteBit(1);
         data.WriteBit(guid[6]);
 
         data.WriteBit(1);
@@ -115,12 +115,10 @@ namespace Movement
         data.WriteBit(guid[2]);
         data.WriteBit(guid[7]);
         data.WriteBit(guid[5]);
-
         data.WriteBit(1);
         data.WriteBit(guid[4]);
 
         data.WriteBits(0, 22); // WP count
-
         data.WriteBit(1);
         data.WriteBit(0);
 
@@ -143,7 +141,7 @@ namespace Movement
         data.WriteBit(guid[1]);
         data.WriteBit(0);
         data.WriteBit(0);
-        data.WriteBit(0);
+        data.WriteBit(1);
 
         data.FlushBits();
 
@@ -153,15 +151,10 @@ namespace Movement
         data.WriteByteSeq(transport[2]);
         data.WriteByteSeq(transport[0]);
         data.WriteByteSeq(transport[6]);
-        data.WriteByteSeq(transport[5]);
         data.WriteByteSeq(transport[4]);
+        data.WriteByteSeq(transport[5]);
         data.WriteByteSeq(transport[1]);
-
-        if (unit->movespline->splineflags.raw())
-            data << uint32(unit->movespline->splineflags.raw());
-
         data.WriteByteSeq(guid[7]);
-
         data.WriteByteSeq(guid[5]);
         data.WriteByteSeq(guid[1]);
         data.WriteByteSeq(guid[2]);
@@ -214,7 +207,7 @@ namespace Movement
         data << float(unit->GetPositionX());
         data << float(unit->GetPositionY());
         data << float(unit->GetPositionZ());
-
+        
         data.WriteBit(guid[3]);
         data.WriteBit(!move_spline.splineflags.raw());
         data.WriteBit(guid[6]);
