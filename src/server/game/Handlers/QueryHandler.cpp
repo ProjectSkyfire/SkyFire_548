@@ -246,11 +246,12 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
                 ObjectMgr::GetLocaleString(cl->SubName, loc_idx, SubName);
             }
         }
+
         TC_LOG_DEBUG("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", info->Name.c_str(), entry);
 
         data.WriteBit(info->RacialLeader);
         data.WriteBits(info->IconName.length() + 1, 6);
-        
+
         for (int i = 0; i < 8; i++)
         {
             if (i == 1)
@@ -258,7 +259,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
             else
                 data.WriteBits(0, 11);                       // Name2, ..., name8
         }
-        
+
         data.WriteBits(MAX_CREATURE_QUEST_ITEMS, 22);        // Quest items
         data.WriteBits(SubName.length() ? SubName.length() + 1 : 0, 11);
 
@@ -357,6 +358,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
         }
 
         TC_LOG_DEBUG("network", "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
+
         data << uint32(info->type);
         data << uint32(info->displayId);
         data << Name;
@@ -382,7 +384,6 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
     {
         TC_LOG_DEBUG("network", "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
             GUID_LOPART((uint64)guid), entry);
-
         TC_LOG_DEBUG("network", "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
 
