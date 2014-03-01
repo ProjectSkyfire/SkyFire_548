@@ -1,7 +1,6 @@
 ## To-do list (Try to keep the order by importance)
 * Spell casting / casting results
 * Auras
-* Fix gameobejct transparency (general bug - not structure related, wrong values in update fields)
 * Creature / Gameobject gossips (including vendors and trainers)
 * Glyphs
 * Groups (Paries / Raid)
@@ -10,6 +9,7 @@
 * Guilds
 * Reputations
 * XP Related Stuff
+* Loot
 * Quests
 * Update ingame damage / stats calculation, (including newest formulas from paper doll)
 * Properly finish living part of object update
@@ -46,3 +46,4 @@
 * Creature movement
 * Combat / Autoattack / Attacker stats ...
 * Item swapping / equiping
+* Gameobejct transparency (general bug - not structure related, wrong values in update fields)
