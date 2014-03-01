@@ -210,12 +210,8 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         if (questLevelInTitle)
             AddQuestLevelToTitle(title, quest->GetQuestLevel());
 
-        if (title.length() % 2 != 0)
-            title += " ";                                   // if quest title length is odd dividing by 2 will cause precision loss, add a space to the end
-
         data.WriteBit(0);                                   // unknown bit
-        data.WriteBits(title.length() / 2, 8);              // title length is divided by 2
-        data.WriteBit(0);                                   // unknown bit
+        data.WriteBits(title.length(), 9);
 
         updatedQuestTitles[i] = title;
     }
@@ -232,7 +228,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         data << int32(quest->GetQuestLevel());
         data << int32(item.QuestIcon);
         data << int32(quest->GetFlags());
-        data.WriteString(updatedQuestTitles[i]);            // max 0xFF?, length is stored in 8 bits, 5.4.1
+        data.WriteString(updatedQuestTitles[i]);
     }
 
     data.WriteByteSeq(guid[6]);
