@@ -992,7 +992,7 @@ enum Opcodes
    SMSG_KICK_REASON                                         = 0x0,
    SMSG_LEARNED_DANCE_MOVES                                 = 0x0,
    SMSG_LEARNED_SPELL                                       = 0x0C99, // 5.4.7 17956
-   SMSG_LEVELUP_INFO                                        = 0x0,
+   SMSG_LEVELUP_INFO                                        = 0x0E6A, // 5.4.7 17956
    SMSG_LFG_BOOT_PROPOSAL_UPDATE                            = 0x0,
    SMSG_LFG_DISABLED                                        = 0x0,
    SMSG_LFG_JOIN_RESULT                                     = 0x0,
