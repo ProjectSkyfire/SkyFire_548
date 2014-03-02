@@ -413,7 +413,7 @@ enum Opcodes
    CMSG_PET_CAST_SPELL                                      = 0x0,
    CMSG_PET_LEARN_TALENT                                    = 0x0,
    CMSG_PET_NAME_CACHE                                      = 0x0,
-   CMSG_PET_NAME_QUERY                                      = 0x0,
+   CMSG_PET_NAME_QUERY                                      = 0x16A3, // 5.4.7 17956
    CMSG_PET_RENAME                                          = 0x0,
    CMSG_PET_SET_ACTION                                      = 0x0,
    CMSG_PET_SPELL_AUTOCAST                                  = 0x0,
