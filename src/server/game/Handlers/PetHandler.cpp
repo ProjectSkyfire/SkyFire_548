@@ -464,17 +464,16 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
     if (!pet)
     {
         WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1));
-        data << uint64(petNumber);
         data.WriteBit(0);
         data.FlushBits();
+        data << uint64(petNumber);
+
         _player->GetSession()->SendPacket(&data);
         return;
     }
 
     WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 5 + pet->GetName().size() + 4));
-    data << uint64(petNumber);
     data.WriteBit(1);                               // has data
-    data.WriteBits(pet->GetName().size(), 8);
     data.WriteBit(0);                               // unknown
 
     bool declinedNames = pet->IsPet() && ((Pet*)pet)->GetDeclinedNames();
@@ -487,6 +486,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
             data.WriteBits(0, 7);
     }
 
+    data.WriteBits(pet->GetName().size(), 8);
     data.FlushBits();
 
     if (declinedNames)
@@ -495,6 +495,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
 
     data.WriteString(pet->GetName());
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
+    data << uint64(petNumber);
 
     _player->GetSession()->SendPacket(&data);
 }

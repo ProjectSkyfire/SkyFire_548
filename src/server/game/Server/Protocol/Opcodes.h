@@ -1143,7 +1143,7 @@ enum Opcodes
    SMSG_PET_LEARNED_SPELL                                   = 0x0,
    SMSG_PET_MODE                                            = 0x0,
    SMSG_PET_NAME_INVALID                                    = 0x0,
-   SMSG_PET_NAME_QUERY_RESPONSE                             = 0x0,
+   SMSG_PET_NAME_QUERY_RESPONSE                             = 0x1F08, // 5.4.7 17956
    SMSG_PET_REMOVED_SPELL                                   = 0x0,
    SMSG_PET_RENAMEABLE                                      = 0x0,
    SMSG_PET_SLOT_UPDATED                                    = 0x0,
