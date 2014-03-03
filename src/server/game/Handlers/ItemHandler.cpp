@@ -766,7 +766,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             if (int32 priceMod = _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES))
                 price -= CalculatePct(price, priceMod);
 
-            itemsData << int32(leftInStock);
+            itemsData << int32(-1);
             itemsData << uint32(vendorItem->Type);                  // 1 is items, 2 is currency
             itemsData << uint32(itemTemplate->BuyCount);
 
@@ -781,7 +781,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             itemsData << uint32(price);
             itemsData << uint32(vendorItem->item);
             itemsData << uint32(slot + 1);                          // client expects counting to start at 1
-            itemsData << int32(-1);
+            itemsData << int32(leftInStock);
             itemsData << uint32(0);
             itemsData << uint32(itemTemplate->DisplayInfoID);
 
@@ -798,7 +798,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             if (!vendorItem->ExtendedCost)
                 continue; // there's no price defined for currencies, only extendedcost is used
 
-            itemsData << int32(-1);                                 // left in stock
+            itemsData << int32(-1);
             itemsData << uint32(vendorItem->Type);                  // 1 is items, 2 is currency
             itemsData << uint32(0);                                 // buy count
 
@@ -808,7 +808,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             itemsData << uint32(0);                                 // price, only seen currency types that have Extended cost
             itemsData << uint32(vendorItem->item);
             itemsData << uint32(slot + 1);                          // client expects counting to start at 1
-            itemsData << int32(-1);
+            itemsData << int32(-1);                                 // left in stock
             itemsData << uint32(0);
             itemsData << uint32(0);                                 // displayId
 
