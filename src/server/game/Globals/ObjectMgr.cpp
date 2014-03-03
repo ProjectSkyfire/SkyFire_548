@@ -8016,7 +8016,7 @@ void ObjectMgr::AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, 
 
     TrainerSpellData& data = _cacheTrainerSpellStore[entry];
 
-    TrainerSpell trainerSpell = data.spellList[spell];
+    TrainerSpell& trainerSpell = data.spellList[spell];
     trainerSpell.spell         = spell;
     trainerSpell.spellCost     = spellCost;
     trainerSpell.reqSkill      = reqSkill;

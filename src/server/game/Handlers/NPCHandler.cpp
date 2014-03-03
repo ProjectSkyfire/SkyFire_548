@@ -201,13 +201,25 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         return;
     }
 
+    ObjectGuid oGuid = guid;
+
     WorldPacket data(SMSG_TRAINER_LIST, 8+4+4+trainer_spells->spellList.size()*38 + strTitle.size()+1);
-    data << guid;
-    data << uint32(trainer_spells->trainerType);
-    data << uint32(1); // different value for each trainer, also found in CMSG_TRAINER_BUY_SPELL
 
     size_t count_pos = data.wpos();
-    data << uint32(trainer_spells->spellList.size());
+    data.WriteBits(trainer_spells->spellList.size(), 19);
+
+    data.WriteBit(oGuid[3]);
+    data.WriteBit(oGuid[2]);
+    data.WriteBit(oGuid[0]);
+    data.WriteBit(oGuid[7]);
+    data.WriteBit(oGuid[1]);
+    data.WriteBit(oGuid[5]);
+    data.WriteBits(strTitle.size(), 11);
+    data.WriteBit(oGuid[6]);
+    data.WriteBit(oGuid[4]);
+    data.FlushBits();
+
+    data.WriteByteSeq(oGuid[3]);
 
     // reputation discount
     float fDiscountMod = _player->GetReputationPriceDiscount(unit);
@@ -219,7 +231,6 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         TrainerSpell const* tSpell = &itr->second;
 
         bool valid = true;
-        bool primary_prof_first_rank = false;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (!tSpell->learnedSpell[i])
@@ -229,60 +240,59 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
                 valid = false;
                 break;
             }
-            SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(tSpell->learnedSpell[i]);
-            if (learnedSpellInfo && learnedSpellInfo->IsPrimaryProfessionFirstRank())
-                primary_prof_first_rank = true;
         }
         if (!valid)
             continue;
 
         TrainerSpellState state = _player->GetTrainerSpellState(tSpell);
 
-        data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
         data << uint8(state == TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
+        data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
+        data << uint32(tSpell->reqSkill);
         data << uint32(floor(tSpell->spellCost * fDiscountMod));
 
-        data << uint8(tSpell->reqLevel);
-        data << uint32(tSpell->reqSkill);
-        data << uint32(tSpell->reqSkillValue);
-        //prev + req or req + 0
+        // spells required (3 max)
         uint8 maxReq = 0;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (!tSpell->learnedSpell[i])
                 continue;
-            if (uint32 prevSpellId = sSpellMgr->GetPrevSpellInChain(tSpell->learnedSpell[i]))
-            {
-                data << uint32(prevSpellId);
-                ++maxReq;
-            }
-            if (maxReq == 2)
-                break;
             SpellsRequiringSpellMapBounds spellsRequired = sSpellMgr->GetSpellsRequiredForSpellBounds(tSpell->learnedSpell[i]);
             for (SpellsRequiringSpellMap::const_iterator itr2 = spellsRequired.first; itr2 != spellsRequired.second && maxReq < 3; ++itr2)
             {
                 data << uint32(itr2->second);
                 ++maxReq;
             }
-            if (maxReq == 2)
+            if (maxReq == 3)
                 break;
         }
-        while (maxReq < 2)
+        while (maxReq < 3)
         {
             data << uint32(0);
             ++maxReq;
         }
 
-        data << uint32(primary_prof_first_rank && can_learn_primary_prof ? 1 : 0);
-        // primary prof. learn confirmation dialog
-        data << uint32(primary_prof_first_rank ? 1 : 0);    // must be equal prev. field to have learn button in enabled state
+        data << uint8(tSpell->reqLevel);
+        data << uint32(tSpell->reqSkillValue);
 
         ++count;
     }
 
-    data << strTitle;
+    data.WriteByteSeq(oGuid[1]);
+    data.WriteByteSeq(oGuid[6]);
+    data.WriteByteSeq(oGuid[0]);
 
-    data.put<uint32>(count_pos, count);
+    data.WriteString(strTitle);
+    data << uint32(trainer_spells->trainerType);
+
+    data.WriteByteSeq(oGuid[2]);
+    data.WriteByteSeq(oGuid[4]);
+    data.WriteByteSeq(oGuid[5]);
+    data.WriteByteSeq(oGuid[7]);
+
+    data << uint32(1); // different value for each trainer, also found in CMSG_TRAINER_BUY_SPELL
+
+    data.PutBits(count_pos, count, 19);
     SendPacket(&data);
 }
 
