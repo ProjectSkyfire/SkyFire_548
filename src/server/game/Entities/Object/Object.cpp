@@ -448,7 +448,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
 
     data->FlushBits();
-    
+
     if (hasLiving)
     {
         Unit const* self = ToUnit();
