@@ -204,9 +204,16 @@ namespace Movement
         data << uint32(getMSTime());
         data << float(0.f); // Most likely transport Z
         data << float(0.f); // Most likely transport X
-        data << float(unit->GetPositionX());
-        data << float(unit->GetPositionY());
-        data << float(unit->GetPositionZ());
+
+        if (!move_spline.isCyclic())
+        {
+            Vector3 dest = move_spline.FinalDestination();
+            data << float(dest.x);
+            data << float(dest.y);
+            data << float(dest.z);
+        }
+        else
+            data << Vector3::zero();
         
         data.WriteBit(guid[3]);
         data.WriteBit(!move_spline.splineflags.raw());
@@ -252,8 +259,9 @@ namespace Movement
 
         data.WriteBit(1);
         data.WriteBit(guid[4]);
-
-        int32 splineWpCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? 1 : move_spline.spline.getPointCount() - 3;
+        
+        int32 splineWpCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? 0 : move_spline.spline.getPointCount() - 3;
+        //int32 splineWpCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? 1 : move_spline.spline.getPointCount() - 3;
         data.WriteBits(splineWpCount, 22); // WP count
         data.WriteBit(1);
         data.WriteBit(0);
@@ -272,10 +280,11 @@ namespace Movement
         data.WriteBit(1); // Parabolic speed // esi+4Ch
         data.WriteBit(1);
 
-        data.WriteBits(!splineWpCount ? move_spline.spline.getPointCount() - 2 : 1, 20);
+        //data.WriteBits(!splineWpCount ? move_spline.spline.getPointCount() - 2 : 1, 20);
+        data.WriteBits(!splineWpCount ? move_spline.spline.getPointCount() - (move_spline.splineflags.cyclic ? 2 : 3) : 1, 20);
 
         data.WriteBit(guid[1]);
-        data.WriteBit(0);
+        data.WriteBit(0); // Send no block
         data.WriteBit(0);
         data.WriteBit(!move_spline.Duration());
 
@@ -311,7 +320,7 @@ namespace Movement
             data << uint32(move_spline.splineflags.raw());
 
         data.WriteByteSeq(guid[7]);
-
+        if ((move_spline.splineflags & MoveSplineFlag::UncompressedPath) == 0)
         WriteLinearPath(move_spline.spline, data);
 
         data.WriteByteSeq(guid[5]);

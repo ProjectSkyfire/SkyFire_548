@@ -369,6 +369,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
     bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
 
+    bool hasFallData;
+    bool hasFallDirection;
+    uint32 movementFlags;
+    uint32 movementFlagsExtra;
+
     data->WriteBit(0);
     data->WriteBit(0);
     data->WriteBit(0);
@@ -396,26 +401,46 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
 
+        hasFallDirection = self->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
+        hasFallData = hasFallDirection || self->m_movementInfo.jump.fallTime != 0;
+        movementFlags = self->GetUnitMovementFlags();
+        movementFlagsExtra = self->GetExtraUnitMovementFlags();
         
+        if (GetTypeId() == TYPEID_UNIT)
+            movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
+
         data->WriteBit(0); // HasTransport // OK !!!
         data->WriteBit(1); // !ReadFloat
         data->WriteBit(0);
         data->WriteBits(0, 19);
         data->WriteBit(guid[1]);
-        data->WriteBit(1); // !((1 == 0) == 0) read flags
+        data->WriteBit(!movementFlagsExtra);
         data->WriteBit(0);
         data->WriteBit(1); // !ReadFloat
+
+        if (movementFlagsExtra)
+           data->WriteBits(movementFlagsExtra, 13);
+
         data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f)); //!G3D::fuzzyEq(self->GetOrientation(), 0.0f)
+
         data->WriteBit(0); // read uint32
-        data->WriteBit(1); // !((1 == 0) == 0) read flags
+        data->WriteBit(!movementFlags);
         data->WriteBit(1); // skip uint32
         data->WriteBit(guid[2]);
         data->WriteBit(guid[6]);
-        data->WriteBit(0); // FallData
+        data->WriteBit(hasFallData);
         data->WriteBit(guid[5]);
         data->WriteBit(guid[4]);
         data->WriteBit(guid[0]);
+
+        if (movementFlags)
+            data->WriteBits(movementFlags, 30);
+
         data->WriteBit(0);
+
+        if (hasFallData)
+            data->WriteBit(hasFallDirection);
+
         data->WriteBits(0, 22);
         data->WriteBit(guid[7]);
         data->WriteBit(0); // splines
@@ -423,17 +448,25 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
 
     data->FlushBits();
-
+    
     if (hasLiving)
     {
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
-        uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
-        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
 
-        if (GetTypeId() == TYPEID_UNIT)
-            movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
+        if (hasFallData)
+        {
+            if (hasFallDirection)
+            {
+                *data << float(self->m_movementInfo.jump.sinAngle);
+                *data << float(self->m_movementInfo.jump.cosAngle);
+                *data << float(self->m_movementInfo.jump.xyspeed);
+            }
             
+            *data << float(self->m_movementInfo.jump.zspeed);
+            *data << uint32(self->m_movementInfo.jump.fallTime);
+        }
+
         *data << float(self->GetPositionZMinusOffset());
         *data << float(self->GetPositionY());
         *data << float(self->GetSpeed(MOVE_FLIGHT));
@@ -455,6 +488,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << uint32(0);
         data->WriteByteSeq(guid[4]);
         data->WriteByteSeq(guid[0]);
+
         if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
             *data << float(Position::NormalizeOrientation(self->GetOrientation()));     
     }
@@ -569,8 +603,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         hasTransportTime2 = self->m_movementInfo.transport.guid != 0 && self->m_movementInfo.transport.time2 != 0;
         hasTransportTime3 = false;
         hasPitch = self->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || self->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-        hasFallDirection = self->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
-        hasFallData = hasFallDirection || self->m_movementInfo.jump.fallTime != 0;
+
         hasSplineElevation = self->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
 
         if (GetTypeId() == TYPEID_UNIT)
