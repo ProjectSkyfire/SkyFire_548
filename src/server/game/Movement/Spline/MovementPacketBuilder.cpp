@@ -320,8 +320,9 @@ namespace Movement
             data << uint32(move_spline.splineflags.raw());
 
         data.WriteByteSeq(guid[7]);
-        if ((move_spline.splineflags & MoveSplineFlag::UncompressedPath) == 0)
-        WriteLinearPath(move_spline.spline, data);
+
+        if (!(move_spline.splineflags & MoveSplineFlag::UncompressedPath))
+            WriteLinearPath(move_spline.spline, data);
 
         data.WriteByteSeq(guid[5]);
         data.WriteByteSeq(guid[1]);
