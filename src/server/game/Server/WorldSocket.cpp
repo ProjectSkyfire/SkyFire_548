@@ -176,7 +176,7 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
     }*/
 
     if (m_Session)
-        TC_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pkt->GetOpcode()).c_str());
+        TC_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pkt->GetOpcode(), true).c_str());
 
     sScriptMgr->OnPacketSend(this, *pkt);
 
@@ -766,7 +766,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     if (sPacketLog->CanLogPacket())
         sPacketLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
 
-    std::string opcodeName = GetOpcodeNameForLogging(opcode);
+    std::string opcodeName = GetOpcodeNameForLogging(opcode, false);
     if (m_Session)
         TC_LOG_TRACE("network.opcode", "C->S: %s %s", m_Session->GetPlayerInfo().c_str(), opcodeName.c_str());
      
@@ -822,10 +822,10 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 if (opcode >= NUM_OPCODE_HANDLERS)
                     return 0;
 
-                OpcodeHandler const* handler = opcodeTable[opcode];
+                OpcodeHandler const* handler = clientOpcodeTable[opcode];
                 if (!handler || handler->Status == STATUS_UNHANDLED)
                 {
-                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode()).c_str(), m_Session->GetPlayerInfo().c_str());
+                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode(), false).c_str(), m_Session->GetPlayerInfo().c_str());
                     return 0;
                 }
 

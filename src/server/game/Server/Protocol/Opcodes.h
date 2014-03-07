@@ -117,16 +117,16 @@ enum Opcodes
    CMSG_CALENDAR_GUILD_FILTER                               = 0x0,
    CMSG_CALENDAR_REMOVE_EVENT                               = 0x0,
    CMSG_CALENDAR_UPDATE_EVENT                               = 0x0,
-   CMSG_CANCEL_AURA                                         = 0x0,
+   CMSG_CANCEL_AURA                                         = 0x16E1, // 5.4.7 17956
    CMSG_CANCEL_AUTO_REPEAT_SPELL                            = 0x0,
-   CMSG_CANCEL_CAST                                         = 0x0,
+   CMSG_CANCEL_CAST                                         = 0x12EB, // 5.4.7 17956
    CMSG_CANCEL_CHANNELLING                                  = 0x0,
    CMSG_CANCEL_GROWTH_AURA                                  = 0x0,
    CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
    CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
    CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
    CMSG_CANCEL_TRADE                                        = 0x1D32, // 5.4.7 17956
-   CMSG_CAST_SPELL                                          = 0x0,
+   CMSG_CAST_SPELL                                          = 0x1E5B, // 5.4.7 17956
    CMSG_CHALLANGES_INFO                                     = 0x0,
    CMSG_CHANGEPLAYER_DIFFICULTY                             = 0x0,
    CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE                  = 0x0,
@@ -707,7 +707,7 @@ enum Opcodes
    SMSG_AUCTION_REMOVED_NOTIFICATION                        = 0x0,
    SMSG_AURACASTLOG                                         = 0x0,
    SMSG_AURA_POINTS_DEPLETED                                = 0x0,
-   SMSG_AURA_UPDATE                                         = 0x0,
+   SMSG_AURA_UPDATE                                         = 0x1B8D, // 5.4.7 17956
    SMSG_AUTH_CHALLENGE                                      = 0x14B8, // 5.4.7 17956
    SMSG_AUTH_RESPONSE                                       = 0x15A0, // 5.4.7 17956
    SMSG_AVAILABLE_VOICE_CHANNEL                             = 0x0,
@@ -767,7 +767,7 @@ enum Opcodes
    SMSG_CAMERA_SHAKE                                        = 0x0,
    SMSG_CANCEL_AUTO_REPEAT                                  = 0x0,
    SMSG_CANCEL_COMBAT                                       = 0x1E7A, // 5.4.7 17956
-   SMSG_CAST_FAILED                                         = 0x0,
+   SMSG_CAST_FAILED                                         = 0x0560, // 5.4.7 17956
    SMSG_CHALLANGES_INFO                                     = 0x0,
    SMSG_CHANNEL_LIST                                        = 0x0,
    SMSG_CHANNEL_MEMBER_COUNT                                = 0x0,
@@ -812,7 +812,7 @@ enum Opcodes
    SMSG_CONTACT_LIST                                        = 0x0,
    SMSG_CONVERT_RUNE                                        = 0x0,
    SMSG_COOLDOWN_CHEAT                                      = 0x0,
-   SMSG_COOLDOWN_EVENT                                      = 0x0,
+   SMSG_COOLDOWN_EVENT                                      = 0x1C5B, // 5.4.7 17956
    SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE                  = 0x0,
    SMSG_CORPSE_NOT_IN_INSTANCE                              = 0x0,
    SMSG_CORPSE_RECLAIM_DELAY                                = 0x0,
@@ -1167,7 +1167,7 @@ enum Opcodes
    SMSG_PLAY_SPELL_VISUAL_KIT                               = 0x0,
    SMSG_PLAY_TIME_WARNING                                   = 0x0,
    SMSG_PONG                                                = 0x15B1, // 5.4.7 17956
-   SMSG_POWER_UPDATE                                        = 0x0,
+   SMSG_POWER_UPDATE                                        = 0x1441, // 5.4.7 17956
    SMSG_PRE_RESURRECT                                       = 0x0,
    SMSG_PROCRESIST                                          = 0x0,
    SMSG_PROPOSE_LEVEL_GRANT                                 = 0x0,
@@ -1270,18 +1270,18 @@ enum Opcodes
    SMSG_SPELLHEALLOG                                        = 0x0,
    SMSG_SPELLINSTAKILLLOG                                   = 0x0,
    SMSG_SPELLINTERRUPTLOG                                   = 0x0,
-   SMSG_SPELLLOGEXECUTE                                     = 0x0,
+   SMSG_SPELLLOGEXECUTE                                     = 0x19B4, // 5.4.7 17956
    SMSG_SPELLLOGMISS                                        = 0x0,
-   SMSG_SPELLNONMELEEDAMAGELOG                              = 0x0,
+   SMSG_SPELLNONMELEEDAMAGELOG                              = 0x0172, // 5.4.7 17956
    SMSG_SPELLORDAMAGE_IMMUNE                                = 0x0,
    SMSG_SPELLSTEALLOG                                       = 0x0,
-   SMSG_SPELL_CATEGORY_COOLDOWN                             = 0x0,
-   SMSG_SPELL_COOLDOWN                                      = 0x0,
+   SMSG_SPELL_CATEGORY_COOLDOWN                             = 0x053B, // 5.4.7 17956
+   SMSG_SPELL_COOLDOWN                                      = 0x1B14, // 5.4.7 17956
    SMSG_SPELL_DELAYED                                       = 0x0,
-   SMSG_SPELL_FAILED_OTHER                                  = 0x0,
-   SMSG_SPELL_FAILURE                                       = 0x0,
-   SMSG_SPELL_GO                                            = 0x0,
-   SMSG_SPELL_START                                         = 0x0,
+   SMSG_SPELL_FAILED_OTHER                                  = 0x1E7A, // 5.4.7 17956
+   SMSG_SPELL_FAILURE                                       = 0x0E03, // 5.4.7 17956
+   SMSG_SPELL_GO                                            = 0x0851, // 5.4.7 17956
+   SMSG_SPELL_START                                         = 0x0130, // 5.4.7 17956
    SMSG_SPELL_UPDATE_CHAIN_TARGETS                          = 0x0,
    SMSG_SPIRIT_HEALER_CONFIRM                               = 0x0,
    SMSG_SPLINE_MOVE_COLLISION_DISABLE                       = 0x0,
@@ -1410,9 +1410,9 @@ enum SessionStatus
 
 enum PacketProcessing
 {
-    PROCESS_INPLACE = 0,                                    //process packet whenever we receive it - mostly for non-handled or non-implemented packets
-    PROCESS_THREADUNSAFE,                                   //packet is not thread-safe - process it in World::UpdateSessions()
-    PROCESS_THREADSAFE                                      //packet is thread-safe - process it in Map::Update()
+    PROCESS_INPLACE = 0,                                    // Process packet whenever we receive it - mostly for non-handled or non-implemented packets
+    PROCESS_THREADUNSAFE,                                   // Packet is not thread-safe - process it in World::UpdateSessions()
+    PROCESS_THREADSAFE                                      // Packet is thread-safe - process it in Map::Update()
 };
 
 class WorldPacket;
@@ -1423,6 +1423,7 @@ typedef void(WorldSession::*pOpcodeHandler)(WorldPacket& recvPacket);
 struct OpcodeHandler
 {
     OpcodeHandler() {}
+
     OpcodeHandler(char const* _name, SessionStatus _status, PacketProcessing _processing, pOpcodeHandler _handler)
         : Handler(_handler), Name(_name), Status(_status), ProcessingPlace(_processing) {}
 
@@ -1446,7 +1447,8 @@ class OpcodeTable
                 delete _internalTable[i];
         }
 
-        void Initialize();
+        void InitializeClientTable();
+        void InitializeServerTable();
 
         OpcodeHandler const* operator[](uint32 index) const
         {
@@ -1455,7 +1457,7 @@ class OpcodeTable
 
     private:
         template<bool isInValidRange, bool isNonZero>
-        void ValidateAndSetOpcode(uint16 opcode, char const* name, SessionStatus status, PacketProcessing processing, pOpcodeHandler handler);
+        void ValidateAndSetOpcode(uint16 opcode, char const* name, SessionStatus status, PacketProcessing processing, pOpcodeHandler handler = 0);
 
         // Prevent copying this structure
         OpcodeTable(OpcodeTable const&);
@@ -1464,20 +1466,25 @@ class OpcodeTable
         OpcodeHandler* _internalTable[NUM_OPCODE_HANDLERS];
 };
 
-extern OpcodeTable opcodeTable;
 
-void InitOpcodes();
+extern OpcodeTable serverOpcodeTable;
+extern OpcodeTable clientOpcodeTable;
+
+void InitializeClientTable();
+void InitializeServerTable();
 
 /// Lookup opcode name for human understandable logging
-inline std::string GetOpcodeNameForLogging(Opcodes id)
+inline std::string GetOpcodeNameForLogging(Opcodes id, bool isServerOpcode)
 {
     uint32 opcode = uint32(id);
+    OpcodeTable& table = isServerOpcode ? serverOpcodeTable : clientOpcodeTable;
+
     std::ostringstream ss;
     ss << '[';
 
     if (id < UNKNOWN_OPCODE)
     {
-        if (OpcodeHandler const* handler = opcodeTable[uint32(id) & NUM_OPCODE_HANDLERS])
+        if (OpcodeHandler const* handler = table[uint32(id) & NUM_OPCODE_HANDLERS])
         {
             ss << handler->Name;
             if (opcode & COMPRESSED_OPCODE_MASK)

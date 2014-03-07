@@ -4768,63 +4768,54 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     int32 overkill = log->damage - log->target->GetHealth();
 
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
-    data.WriteBit(targetGuid[1]);
-    data.WriteBit(targetGuid[6]);
-    data.WriteBit(targetGuid[0]);
-    data.WriteBit(attackerGuid[3]);
-    data.WriteBit(0); // Unk Bit 1
-    data.WriteBit(attackerGuid[4]);
-    data.WriteBit(targetGuid[3]);
-    data.WriteBit(0); // Unk Bit 2
-    data.WriteBit(targetGuid[2]);
-    data.WriteBit(attackerGuid[7]);
-    data.WriteBit(attackerGuid[2]);
-    data.WriteBit(0); // HasPowerData
-    data.WriteBit(targetGuid[7]);
-
-    //if (hasPowerData)
-    //{
-    //}
-
-    data.WriteBit(attackerGuid[1]);
-    data.WriteBit(attackerGuid[5]);
-    data.WriteBit(0);
-    data.WriteBit(targetGuid[5]);
+    data << uint8 (log->schoolMask);
+    data << uint32(log->resist);
+    data << uint32(log->absorb);
+    data << uint32(log->SpellID);
+    data << uint32(log->blocked);
+    data << uint32(overkill > 0 ? overkill : 0);
+    data << uint32(log->damage);
+    data << uint32(log->HitInfo);
+    
     data.WriteBit(targetGuid[4]);
-    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(0); // No floats
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(targetGuid[3]);
+    data.WriteBit(attackerGuid[1]);
+    data.WriteBit(targetGuid[6]);
+    data.WriteBit(targetGuid[2]);
+    data.WriteBit(0); // HasPowerData
+    data.WriteBit(targetGuid[0]);
     data.WriteBit(attackerGuid[6]);
+    data.WriteBit(targetGuid[7]);
+    data.WriteBit(0); // Unk
+    data.WriteBit(targetGuid[5]);
+    data.WriteBit(targetGuid[1]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(attackerGuid[4]);
+    data.WriteBit(attackerGuid[2]);
+    data.WriteBit(0); // Unk
+    data.WriteBit(attackerGuid[5]);
 
     data.FlushBits();
-
+    
     data.WriteByteSeq(targetGuid[7]);
-    data << uint32(log->damage);
-
-    //if (hasPowerData)
-    //{
-    //}
-
-    data.WriteByteSeq(targetGuid[4]);
     data.WriteByteSeq(targetGuid[6]);
-    data << uint32(log->resist);
-    data.WriteByteSeq(attackerGuid[4]);
-    data.WriteByteSeq(targetGuid[2]);
-    data << uint32(log->blocked);
-    data << uint32(log->SpellID);
-    data.WriteByteSeq(targetGuid[1]);
-    data.WriteByteSeq(attackerGuid[3]);
-    data << uint8 (log->schoolMask);
-    data.WriteByteSeq(attackerGuid[7]);
-    data << uint32(log->HitInfo);
-    data.WriteByteSeq(targetGuid[0]);
-    data.WriteByteSeq(attackerGuid[0]);
-    data.WriteByteSeq(targetGuid[5]);
-    data.WriteByteSeq(attackerGuid[6]);
-    data << uint32(log->absorb);
-    data.WriteByteSeq(targetGuid[3]);
     data.WriteByteSeq(attackerGuid[5]);
-    data << uint32(overkill > 0 ? overkill : 0);
+    data.WriteByteSeq(targetGuid[2]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data.WriteByteSeq(targetGuid[1]);
+    data.WriteByteSeq(targetGuid[4]);
     data.WriteByteSeq(attackerGuid[2]);
     data.WriteByteSeq(attackerGuid[1]);
+    data.WriteByteSeq(attackerGuid[7]);
+    data.WriteByteSeq(targetGuid[5]);
+    data.WriteByteSeq(attackerGuid[3]);
+    data.WriteByteSeq(targetGuid[0]);
+    data.WriteByteSeq(attackerGuid[0]);
+    data.WriteByteSeq(targetGuid[3]);
+    data.WriteByteSeq(attackerGuid[4]);
 
     SendMessageToSet(&data, true);
 }
@@ -11753,11 +11744,30 @@ void Unit::SetPower(Powers power, int32 val)
 
     if (IsInWorld())
     {
+        ObjectGuid guid = GetGUID();
+
         WorldPacket data(SMSG_POWER_UPDATE, 8 + 4 + 1 + 4);
-        data.append(GetPackGUID());
-        data << uint32(1); //power count
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[4]);
+        data.WriteBits(1, 21); // 1 update
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[0]);
+
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[1]);
         data << uint8(powerIndex);
         data << int32(val);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[2]);
+
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
     }
 
@@ -15513,7 +15523,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
     {
-        TC_LOG_ERROR("network", "Unit::WriteMovementInfo: No movement sequence found for opcode %s", GetOpcodeNameForLogging(data.GetOpcode()).c_str());
+        TC_LOG_ERROR("network", "Unit::WriteMovementInfo: No movement sequence found for opcode %s", GetOpcodeNameForLogging(data.GetOpcode(), true).c_str());
         return;
     }
 

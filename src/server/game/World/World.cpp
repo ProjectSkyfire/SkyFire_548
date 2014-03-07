@@ -1879,7 +1879,8 @@ void World::SetInitialWorldSettings()
     LoadCharacterNameData();
 
     TC_LOG_INFO("misc", "Initializing Opcodes...");
-    opcodeTable.Initialize();
+    serverOpcodeTable.InitializeServerTable();
+    clientOpcodeTable.InitializeClientTable();
 
     TC_LOG_INFO("misc", "Loading hotfix info...");
     sObjectMgr->LoadHotfixData();
