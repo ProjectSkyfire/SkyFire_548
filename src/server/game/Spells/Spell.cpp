@@ -4335,8 +4335,8 @@ void Spell::SendSpellGo()
     data.WriteBit(targetGuid[3]);
     data.WriteBit(targetGuid[7]);
     data.WriteBit(targetGuid[1]);
-    data.WriteBit(targetGuid[6]);
     data.WriteBit(targetGuid[5]);
+    data.WriteBit(targetGuid[6]);
     data.WriteBit(targetGuid[0]);
 
     if (hasTargetString)
