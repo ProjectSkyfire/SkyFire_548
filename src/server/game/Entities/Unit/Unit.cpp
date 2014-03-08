@@ -4949,9 +4949,9 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 
     for (uint32 i = 0; i < count; ++i)
     {
-        data << uint32(damageInfo->damage);                 // Sub Damage
-        data << float(damageInfo->damage);                  // sub damage
         data << uint32(damageInfo->damageSchoolMask);       // School of sub damage
+        data << float(damageInfo->damage);                  // sub damage
+        data << uint32(damageInfo->damage);                 // Sub Damage
     }
 
     if (damageInfo->HitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
