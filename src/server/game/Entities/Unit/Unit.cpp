@@ -4776,7 +4776,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     data << uint32(overkill > 0 ? overkill : 0);
     data << uint32(log->damage);
     data << uint32(log->HitInfo);
-    
+
     data.WriteBit(targetGuid[4]);
     data.WriteBit(0); // No floats
     data.WriteBit(attackerGuid[7]);

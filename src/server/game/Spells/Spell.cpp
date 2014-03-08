@@ -4208,12 +4208,12 @@ void Spell::SendSpellStart()
         data << uint8(m_spellInfo->PowerType);
         data << int32(m_caster->GetPower((Powers)m_spellInfo->PowerType));
     }
+    
+    data << uint8(m_cast_count);
+    data << uint32(castFlags);
 
     if (hasPredictedType)
         data << uint8(0);
-
-    data << uint32(castFlags);
-    data << uint8(m_cast_count);
 
     data.WriteByteSeq(casterGuid[6]);
 
@@ -4337,7 +4337,7 @@ void Spell::SendSpellGo()
     data.WriteBit(targetGuid[1]);
     data.WriteBit(targetGuid[6]);
     data.WriteBit(targetGuid[5]);
-    data.WriteBit(targetGuid[6]);
+    data.WriteBit(targetGuid[0]);
 
     if (hasTargetString)
         data.WriteBits(uint32(m_targets.GetTargetString().length()), 7);
@@ -4438,7 +4438,6 @@ void Spell::SendSpellGo()
     size_t missTypeCountPos = data.bitwpos();
     data.WriteBits(0, 25); // Miss Type Count
     data.WriteBits(0, 13); // Unknown bits
-    
 
     uint32 missTypeCount = 0;
     for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
