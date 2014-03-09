@@ -13441,40 +13441,39 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 
     if (msg != EQUIP_ERR_OK)
     {
-        data.WriteBit(pItemGuid[4]);
-        data.WriteBit(pItemGuid2[6]);
-        data.WriteBit(pItemGuid2[4]);
-        data.WriteBit(pItemGuid[2]);
         data.WriteBit(pItemGuid2[0]);
-        data.WriteBit(pItemGuid[3]);
-        data.WriteBit(pItemGuid[0]);
-        data.WriteBit(pItemGuid[6]);
-        data.WriteBit(pItemGuid[7]);
-        data.WriteBit(pItemGuid2[7]);
-        data.WriteBit(pItemGuid[1]);
-        data.WriteBit(pItemGuid[5]);
-        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid2[4]);
         data.WriteBit(pItemGuid2[5]);
-        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid[7]);
         data.WriteBit(pItemGuid2[3]);
+        data.WriteBit(pItemGuid2[7]);
+        data.WriteBit(pItemGuid2[6]);
+        data.WriteBit(pItemGuid[4]);
+        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid[3]);
+        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid[1]);
+        data.WriteBit(pItemGuid[0]);
+        data.WriteBit(pItemGuid[5]);
+        data.WriteBit(pItemGuid[2]);
 
+        data.WriteByteSeq(pItemGuid[0]);
+        data.WriteByteSeq(pItemGuid[5]);
+        data.WriteByteSeq(pItemGuid2[3]);
+        data.WriteByteSeq(pItemGuid2[5]);
         data.WriteByteSeq(pItemGuid[2]);
-        data.WriteByteSeq(pItemGuid2[7]);
-        data.WriteByteSeq(pItemGuid[4]);
         data.WriteByteSeq(pItemGuid[1]);
+        data.WriteByteSeq(pItemGuid[7]);
 
         data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
 
-        data.WriteByteSeq(pItemGuid2[0]);
         data.WriteByteSeq(pItemGuid2[4]);
-        data.WriteByteSeq(pItemGuid[0]);
-        data.WriteByteSeq(pItemGuid[7]);
-        data.WriteByteSeq(pItemGuid[5]);
-        data.WriteByteSeq(pItemGuid2[1]);
+        data.WriteByteSeq(pItemGuid[6]);
 
         data << uint8(msg);
 
-        data.WriteByteSeq(pItemGuid2[2]);
+        data.WriteByteSeq(pItemGuid2[7]);
 
         if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS ||
             msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS ||
@@ -13484,8 +13483,15 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->ItemLimitCategory : 0);
         }
 
-        data.WriteByteSeq(pItemGuid2[5]);
-        data.WriteByteSeq(pItemGuid2[6]);
+        data.WriteByteSeq(pItemGuid2[2]);
+
+        if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
+            data << uint32(0);                  // slot
+
+        data.WriteByteSeq(pItemGuid[3]);
+        data.WriteByteSeq(pItemGuid2[0]);
+        data.WriteByteSeq(pItemGuid2[1]);
+        data.WriteByteSeq(pItemGuid[4]);
 
         if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I || msg == EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW)
         {
@@ -13493,12 +13499,7 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->RequiredLevel : 0);
         }
 
-        if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
-            data << uint32(0);                  // slot
-
-        data.WriteByteSeq(pItemGuid[6]);
-        data.WriteByteSeq(pItemGuid2[3]);
-        data.WriteByteSeq(pItemGuid[3]);
+        data.WriteByteSeq(pItemGuid2[6]);
 
         if (msg == EQUIP_ERR_NO_OUTPUT)
         {
