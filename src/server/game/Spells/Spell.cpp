@@ -4719,9 +4719,10 @@ void Spell::SendSpellGo()
 void Spell::SendLogExecute()
 {
     ObjectGuid guid = m_caster->GetGUID();
-    /*
+    
     // TODO: Finish me
     WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
+    /*
     data.WriteBit(0);
     data.WriteBit(guid[6]);
     data.WriteBits(0, 19); // Count
