@@ -4719,7 +4719,7 @@ void Spell::SendSpellGo()
 void Spell::SendLogExecute()
 {
     ObjectGuid guid = m_caster->GetGUID();
-
+    /*
     // TODO: Finish me
     WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
     data.WriteBit(0);
@@ -4742,8 +4742,8 @@ void Spell::SendLogExecute()
     data << uint32(m_spellInfo->Id);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[4]);
+    */
 
-/*
     data.append(m_caster->GetPackGUID());
 
     data << uint32(m_spellInfo->Id);
@@ -4770,7 +4770,7 @@ void Spell::SendLogExecute()
 
         delete m_effectExecuteData[i];
         m_effectExecuteData[i] = NULL;
-    }*/
+    }
     m_caster->SendMessageToSet(&data, true);
 }
 

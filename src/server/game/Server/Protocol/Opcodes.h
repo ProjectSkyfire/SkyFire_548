@@ -705,7 +705,7 @@ enum Opcodes
    SMSG_AUCTION_OWNER_LIST_RESULT                           = 0x0,
    SMSG_AUCTION_OWNER_NOTIFICATION                          = 0x0,
    SMSG_AUCTION_REMOVED_NOTIFICATION                        = 0x0,
-   SMSG_AURACASTLOG                                         = 0x0,
+   SMSG_AURACASTLOG                                         = 0x0919, // 5.4.7 17956
    SMSG_AURA_POINTS_DEPLETED                                = 0x0,
    SMSG_AURA_UPDATE                                         = 0x1B8D, // 5.4.7 17956
    SMSG_AUTH_CHALLENGE                                      = 0x14B8, // 5.4.7 17956
@@ -1125,7 +1125,7 @@ enum Opcodes
    SMSG_PARTY_MEMBER_STATS                                  = 0x0,
    SMSG_PARTY_MEMBER_STATS_FULL                             = 0x0,
    SMSG_PAUSE_MIRROR_TIMER                                  = 0x0,
-   SMSG_PERIODICAURALOG                                     = 0x0,
+   SMSG_PERIODICAURALOG                                     = 0x051B, // 5.4.7 17956
    SMSG_PETGODMODE                                          = 0x0,
    SMSG_PETITION_ALREADY_SIGNED                             = 0x0,
    SMSG_PETITION_QUERY_RESPONSE                             = 0x0,
