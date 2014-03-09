@@ -1018,7 +1018,6 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(itemGUID[0]);
     recvData.ReadByteSeq(itemGUID[4]);
 
-
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
     if (!unit)
     {
