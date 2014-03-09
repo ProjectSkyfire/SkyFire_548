@@ -461,7 +461,7 @@ enum Opcodes
    CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
    CMSG_REFORGE_ITEM                                        = 0x0,
    CMSG_REORDER_CHARACTERS                                  = 0x0,
-   CMSG_REPAIR_ITEM                                         = 0x0,
+   CMSG_REPAIR_ITEM                                         = 0x0577, // 5.4.7 17956
    CMSG_REPLACE_ACCOUNT_DATA                                = 0x0,
    CMSG_REPOP_REQUEST                                       = 0x0,
    CMSG_REPORT_PVP_AFK                                      = 0x0,
