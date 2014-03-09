@@ -578,7 +578,7 @@ enum Opcodes
    CMSG_UPDATE_MISSILE_TRAJECTORY                           = 0x0,
    CMSG_UPDATE_PROJECTILE_POSITION                          = 0x0,
    CMSG_USED_FOLLOW                                         = 0x0,
-   CMSG_USE_ITEM                                            = 0x0,
+   CMSG_USE_ITEM                                            = 0x15E3, // 5.4.7 17956
    CMSG_VIOLENCE_LEVEL                                      = 0x05A0, // 5.4.7 17956
    CMSG_VOICE_SESSION_ENABLE                                = 0x0,
    CMSG_VOID_STORAGE_QUERY                                  = 0x0,
