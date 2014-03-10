@@ -8586,9 +8586,9 @@ void Unit::SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 
     data.WriteBit(0);
     data.WriteBit(victimGuid[7]);
     data.WriteBit(casterGuid[4]);
-
-    data.WriteByteSeq(victimGuid[7]);
+    
     data.WriteByteSeq(casterGuid[5]);
+    data.WriteByteSeq(victimGuid[7]);
     data.WriteByteSeq(casterGuid[2]);
     data.WriteByteSeq(victimGuid[1]);
     data.WriteByteSeq(victimGuid[5]);
