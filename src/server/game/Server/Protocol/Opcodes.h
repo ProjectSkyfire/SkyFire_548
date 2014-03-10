@@ -1267,7 +1267,7 @@ enum Opcodes
    SMSG_SPELLDAMAGESHIELD                                   = 0x0,
    SMSG_SPELLDISPELLOG                                      = 0x0,
    SMSG_SPELLENERGIZELOG                                    = 0x0,
-   SMSG_SPELLHEALLOG                                        = 0x0,
+   SMSG_SPELLHEALLOG                                        = 0x1BBF, // 5.4.7 17956
    SMSG_SPELLINSTAKILLLOG                                   = 0x0,
    SMSG_SPELLINTERRUPTLOG                                   = 0x0,
    SMSG_SPELLLOGEXECUTE                                     = 0x19B4, // 5.4.7 17956
