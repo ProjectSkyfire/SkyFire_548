@@ -1,9 +1,6 @@
 ## To-do list (Try to keep the order by importance)
-* Spell casting / casting results
-* Auras
-* Creature / Gameobject gossips (including vendors and trainers)
 * Glyphs
-* Groups (Paries / Raid)
+* Groups (Parties / Raids)
 * Mounts / Pets
 * Bank
 * Guilds
@@ -31,6 +28,7 @@
 * Dungeon Finder
 * Guild Finder
 * Raid Finder
+* Implement char boost
 
 ## Finished Stuff
 * Auth
@@ -47,3 +45,6 @@
 * Combat / Autoattack / Attacker stats ...
 * Item swapping / equiping
 * Gameobejct transparency (general bug - not structure related, wrong values in update fields)
+* Spell casting / casting results
+* Auras
+* Creature / Gameobject gossips (including vendors and trainers)
