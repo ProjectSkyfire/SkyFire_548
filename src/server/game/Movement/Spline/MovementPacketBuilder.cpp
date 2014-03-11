@@ -110,7 +110,7 @@ namespace Movement
         data.WriteBit(1);
         data.WriteBit(1);
 
-        data.WriteBits(0, 3);
+        data.WriteBits(1, 3);
         data.WriteBit(1);
         data.WriteBit(guid[2]);
         data.WriteBit(guid[7]);
@@ -161,7 +161,7 @@ namespace Movement
         data.WriteByteSeq(guid[6]);
         data.WriteByteSeq(guid[0]);
         data.WriteByteSeq(guid[4]);
-}
+    }
 
     void WriteLinearPath(Spline<int32> const& spline, ByteBuffer& data)
     {
@@ -183,15 +183,13 @@ namespace Movement
 
     void WriteUncompressedPath(Spline<int32> const& spline, ByteBuffer& data)
     {
-        uint32 count = spline.getPointCount() - 3;
-        data.append<Vector3>(&spline.getPoint(2), count);
+        data.append<Vector3>(&spline.getPoint(2), spline.getPointCount() - 3);
     }
 
     void WriteUncompressedCyclicPath(Spline<int32> const& spline, ByteBuffer& data)
     {
-        uint32 count = spline.getPointCount() - 3;
-        data << spline.getPoint(1); // fake point, client will erase it from the spline after first cycle done
-        data.append<Vector3>(&spline.getPoint(1), count);
+        data << spline.getPoint(1); // Fake point, client will erase it from the spline after first cycle done
+        data.append<Vector3>(&spline.getPoint(1), spline.getPointCount() - 3);
     }
 
     void PacketBuilder::WriteMonsterMove(const MoveSpline& move_spline, WorldPacket& data, Unit* unit)
@@ -204,17 +202,8 @@ namespace Movement
         data << uint32(getMSTime());
         data << float(0.f); // Most likely transport Z
         data << float(0.f); // Most likely transport X
+        data << move_spline.spline.getPoint(move_spline.spline.first());
 
-        if (!move_spline.isCyclic())
-        {
-            Vector3 dest = move_spline.FinalDestination();
-            data << float(dest.x);
-            data << float(dest.y);
-            data << float(dest.z);
-        }
-        else
-            data << Vector3::zero();
-        
         data.WriteBit(guid[3]);
         data.WriteBit(!move_spline.splineflags.raw());
         data.WriteBit(guid[6]);
@@ -260,9 +249,8 @@ namespace Movement
         data.WriteBit(1);
         data.WriteBit(guid[4]);
         
-        int32 splineWpCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? 0 : move_spline.spline.getPointCount() - 3;
-        //int32 splineWpCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? 1 : move_spline.spline.getPointCount() - 3;
-        data.WriteBits(splineWpCount, 22); // WP count
+        int32 compressedSplineCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? 0 : move_spline.spline.getPointCount() - 3;
+        data.WriteBits(compressedSplineCount, 22); // WP count
         data.WriteBit(1);
         data.WriteBit(0);
 
@@ -280,8 +268,8 @@ namespace Movement
         data.WriteBit(1); // Parabolic speed // esi+4Ch
         data.WriteBit(1);
 
-        //data.WriteBits(!splineWpCount ? move_spline.spline.getPointCount() - 2 : 1, 20);
-        data.WriteBits(!splineWpCount ? move_spline.spline.getPointCount() - (move_spline.splineflags.cyclic ? 2 : 3) : 1, 20);
+        uint32 uncompressedSplineCount = move_spline.splineflags & MoveSplineFlag::UncompressedPath ? move_spline.splineflags.cyclic ? move_spline.spline.getPointCount() - 2 : move_spline.spline.getPointCount() - 3 : 1;
+        data.WriteBits(uncompressedSplineCount,  20);
 
         data.WriteBit(guid[1]);
         data.WriteBit(0); // Send no block
@@ -321,7 +309,7 @@ namespace Movement
 
         data.WriteByteSeq(guid[7]);
 
-        if (!(move_spline.splineflags & MoveSplineFlag::UncompressedPath))
+        if (compressedSplineCount)
             WriteLinearPath(move_spline.spline, data);
 
         data.WriteByteSeq(guid[5]);
@@ -336,11 +324,7 @@ namespace Movement
                 WriteUncompressedPath(move_spline.spline, data);
         }
         else
-        {
-            uint32 last_idx = move_spline.spline.getPointCount() - 2;
-            const Vector3 * real_path = &move_spline.spline.getPoint(1);
-            data << real_path[last_idx].x << real_path[last_idx].y << real_path[last_idx].z; // destination
-        }
+            data << move_spline.spline.getPoint(move_spline.spline.getPointCount() - 2);
 
         data.WriteByteSeq(guid[6]);
 
