@@ -100,30 +100,29 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
 
     recvData >> menuId >> gossipListId;
 
+    guid[2] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
 
     boxTextLength = recvData.ReadBits(8);
 
-    guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-
     recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[3]);
 
     if (_player->PlayerTalkClass->IsGossipOptionCoded(gossipListId))
         code = recvData.ReadString(boxTextLength);
 
-    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
 
     Creature* unit = NULL;
     GameObject* go = NULL;
@@ -550,8 +549,8 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
         reason = 2;                                         // FIXME - Need the correct value
 
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-    data << uint32(reason);
     data.WriteBit(instantLogout);
+    data << uint32(reason);
     data.FlushBits();
     SendPacket(&data);
 
@@ -662,6 +661,7 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
+
     GetPlayer()->RepopAtGraveyard();
 }
 
@@ -669,23 +669,23 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[0] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[6]);
 
     _player->SetSelection(guid);
 }
@@ -913,8 +913,9 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_RECLAIM_CORPSE");
 
-    uint64 guid;
-    recvData >> guid;
+    //uint64 guid;
+    //recvData >> guid;
+    recvData.rfinish();
 
     if (GetPlayer()->IsAlive())
         return;
@@ -1720,7 +1721,7 @@ void WorldSession::HandleTimeSyncResp(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "CMSG_TIME_SYNC_RESP");
 
     uint32 counter, clientTicks;
-    recvData >> clientTicks >> counter;
+    recvData >> counter >> clientTicks;
 
     if (counter != _player->m_timeSyncQueue.front())
         TC_LOG_ERROR("network", "Wrong time sync counter from player %s (cheater?)", _player->GetName().c_str());
@@ -2117,28 +2118,28 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
     ObjectGuid* guids = new ObjectGuid[count];
     for (uint32 i = 0; i < count; ++i)
     {
-        guids[i][3] = recvPacket.ReadBit();
-        guids[i][7] = recvPacket.ReadBit();
-        guids[i][5] = recvPacket.ReadBit();
-        guids[i][6] = recvPacket.ReadBit();
         guids[i][2] = recvPacket.ReadBit();
-        guids[i][0] = recvPacket.ReadBit();
         guids[i][4] = recvPacket.ReadBit();
+        guids[i][3] = recvPacket.ReadBit();
+        guids[i][6] = recvPacket.ReadBit();
+        guids[i][7] = recvPacket.ReadBit();
         guids[i][1] = recvPacket.ReadBit();
+        guids[i][5] = recvPacket.ReadBit();
+        guids[i][0] = recvPacket.ReadBit();
     }
 
     uint32 entry;
     for (uint32 i = 0; i < count; ++i)
     {
         recvPacket.ReadByteSeq(guids[i][5]);
-        recvPacket.ReadByteSeq(guids[i][1]);
         recvPacket.ReadByteSeq(guids[i][4]);
-        recvPacket.ReadByteSeq(guids[i][6]);
-        recvPacket.ReadByteSeq(guids[i][7]);
-        recvPacket.ReadByteSeq(guids[i][2]);
-        recvPacket.ReadByteSeq(guids[i][0]);
         recvPacket.ReadByteSeq(guids[i][3]);
         recvPacket >> entry;
+        recvPacket.ReadByteSeq(guids[i][7]);
+        recvPacket.ReadByteSeq(guids[i][0]);
+        recvPacket.ReadByteSeq(guids[i][2]);
+        recvPacket.ReadByteSeq(guids[i][1]);
+        recvPacket.ReadByteSeq(guids[i][6]);
 
         switch (type)
         {
@@ -2191,10 +2192,10 @@ void WorldSession::SendBroadcastText(uint32 entry)
 
     WorldPacket data(SMSG_DB_REPLY);
     data << uint32(entry);
+    data << uint32(DB2_REPLY_BROADCAST);
     data << uint32(0);
     data << uint32(buffer.size());
     data.append(buffer);
-    data << uint32(DB2_REPLY_BROADCAST);
 
     SendPacket(&data);
 }
@@ -2255,23 +2256,23 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
     
-    guid[5] = recvPacket.ReadBit();
     guid[4] = recvPacket.ReadBit();
-    guid[2] = recvPacket.ReadBit();
-    guid[7] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
     guid[6] = recvPacket.ReadBit();
     guid[3] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
     guid[1] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[0]);
-    recvPacket.ReadByteSeq(guid[7]);
-    recvPacket.ReadByteSeq(guid[1]);
     recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[6]);
     recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[3]);
 
     WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
     TC_LOG_ERROR("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());

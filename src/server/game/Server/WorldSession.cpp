@@ -58,7 +58,7 @@ std::string const DefaultPlayerName = "<none>";
 bool MapSessionFilter::Process(WorldPacket* packet)
 {
     Opcodes opcode = DropHighBytes(packet->GetOpcode());
-    OpcodeHandler const* opHandle = opcodeTable[opcode];
+    OpcodeHandler const* opHandle = clientOpcodeTable[opcode];
 
     //let's check if our opcode can be really processed in Map::Update()
     if (opHandle->ProcessingPlace == PROCESS_INPLACE)
@@ -81,7 +81,7 @@ bool MapSessionFilter::Process(WorldPacket* packet)
 bool WorldSessionFilter::Process(WorldPacket* packet)
 {
     Opcodes opcode = DropHighBytes(packet->GetOpcode());
-    OpcodeHandler const* opHandle = opcodeTable[opcode];
+    OpcodeHandler const* opHandle = clientOpcodeTable[opcode];
     //check if packet handler is supposed to be safe
     if (opHandle->ProcessingPlace == PROCESS_INPLACE)
         return true;
@@ -221,10 +221,10 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
 
     if (!forced)
     {
-        OpcodeHandler const* handler = opcodeTable[packet->GetOpcode()];
+        OpcodeHandler const* handler = serverOpcodeTable[packet->GetOpcode()];
         if (!handler || handler->Status == STATUS_UNHANDLED)
         {
-            TC_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str(), GetPlayerInfo().c_str());
+            TC_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode(), true).c_str(), GetPlayerInfo().c_str());
             return;
         }
     }
@@ -277,7 +277,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason)
 {
     TC_LOG_ERROR("network.opcode", "Received unexpected opcode %s Status: %s Reason: %s from %s",
-        GetOpcodeNameForLogging(packet->GetOpcode()).c_str(), status, reason, GetPlayerInfo().c_str());
+        GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), status, reason, GetPlayerInfo().c_str());
 }
 
 /// Logging helper for unexpected opcodes
@@ -287,7 +287,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket* packet)
         return;
 
     TC_LOG_TRACE("network.opcode", "Unprocessed tail data (read stop at %u from %u) Opcode %s from %s",
-        uint32(packet->rpos()), uint32(packet->wpos()), GetOpcodeNameForLogging(packet->GetOpcode()).c_str(), GetPlayerInfo().c_str());
+        uint32(packet->rpos()), uint32(packet->wpos()), GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
     packet->print_storage();
 }
 
@@ -323,7 +323,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         if (!AntiDOS.EvaluateOpcode(*packet))
             KickPlayer();
 
-        OpcodeHandler const* opHandle = opcodeTable[packet->GetOpcode()];
+        OpcodeHandler const* opHandle = clientOpcodeTable[packet->GetOpcode()];
         try
         {
             switch (opHandle->Status)
@@ -344,7 +344,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             QueuePacket(packet);
                             //! Log
                                 TC_LOG_DEBUG("network", "Re-enqueueing packet with opcode %s with with status STATUS_LOGGEDIN. "
-                                    "Player is currently not in world yet.", GetOpcodeNameForLogging(packet->GetOpcode()).c_str());
+                                    "Player is currently not in world yet.", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str());
                         }
                     }
                     else if (_player->IsInWorld())
@@ -397,19 +397,19 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     LogUnprocessedTail(packet);
                     break;
                 case STATUS_NEVER:
-                        TC_LOG_ERROR("network.opcode", "Received not allowed opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str()
+                        TC_LOG_ERROR("network.opcode", "Received not allowed opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str()
                             , GetPlayerInfo().c_str());
                     break;
                 case STATUS_UNHANDLED:
-                        TC_LOG_ERROR("network.opcode", "Received not handled opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str()
+                        TC_LOG_ERROR("network.opcode", "Received not handled opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str()
                             , GetPlayerInfo().c_str());
                     break;
             }
         }
         catch (ByteBufferException const&)
         {
-            TC_LOG_ERROR("network", "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
-                    packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
+            TC_LOG_ERROR("network", "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %s) from client %s, accountid=%i. Skipped packet.",
+                    GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), GetRemoteAddress().c_str(), GetAccountId());
             packet->hexlike();
         }
 
@@ -585,8 +585,30 @@ void WorldSession::LogoutPlayer(bool save)
 
         //! Send the 'logout complete' packet to the client
         //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
-        WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);
+        WorldPacket data(SMSG_LOGOUT_COMPLETE);
+        ObjectGuid guid = 0; // Autolog guid - 0 for logout
+
+        data.WriteBit(0); // Dafuck ? 1st bit twice read ??????
+
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[7]);
         SendPacket(&data);
+
         TC_LOG_DEBUG("network", "SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
 
         //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
@@ -658,25 +680,19 @@ const char *WorldSession::GetTrinityString(int32 entry) const
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)
 {
     TC_LOG_ERROR("network.opcode", "Received unhandled opcode %s from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode()).c_str(), GetPlayerInfo().c_str());
+        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
 void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 {
     TC_LOG_ERROR("network.opcode", "Received opcode %s that must be processed in WorldSocket::OnRead from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode()).c_str(), GetPlayerInfo().c_str());
-}
-
-void WorldSession::Handle_ServerSide(WorldPacket& recvPacket)
-{
-    TC_LOG_ERROR("network.opcode", "Received server-side opcode %s from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode()).c_str(), GetPlayerInfo().c_str());
+        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
 void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
 {
     TC_LOG_ERROR("network.opcode", "Received deprecated opcode %s from %s"
-        , GetOpcodeNameForLogging(recvPacket.GetOpcode()).c_str(), GetPlayerInfo().c_str());
+        , GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
 void WorldSession::SendAuthWaitQue(uint32 position)
@@ -684,19 +700,19 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     if (position == 0)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
-        packet << uint8(AUTH_OK);
-        packet.WriteBit(0); // has queue info
         packet.WriteBit(0); // has account info
+        packet.WriteBit(0); // has queue info
+        packet << uint8(AUTH_OK);
         packet.FlushBits();
         SendPacket(&packet);
     }
     else
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 6);
-        packet << uint8(AUTH_WAIT_QUEUE);
+        packet.WriteBit(0); // has account info
         packet.WriteBit(1); // has queue info
         packet.WriteBit(0); // unk queue bool
-        packet.WriteBit(0); // has account info
+        packet << uint8(AUTH_WAIT_QUEUE);
         packet.FlushBits();
         packet << uint32(position);
         SendPacket(&packet);
@@ -776,12 +792,12 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
 void WorldSession::SendAccountDataTimes(uint32 mask)
 {
     WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + NUM_ACCOUNT_DATA_TYPES * 4);
+    data << uint32(mask);
     data << uint32(time(NULL)); // Server time
 
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         data << uint32(GetAccountData(AccountDataType(i))->Time); // also unix time
 
-    data << uint32(mask);
 
     data.WriteBit(1);
     data.FlushBits();
@@ -926,37 +942,37 @@ void WorldSession::SendAddonsInfo()
 
     uint8 pubKeyOrder[256] = 
     {
-         0xB5, 0xCD, 0x2C, 0x5D, 0xEC, 0x15, 0x5B, 0xDD, 0x85, 0x98, 0xE2, 0xAC, 0xA8, 0x92, 0x53, 0x71,
-         0x64, 0x32, 0xBF, 0xF1, 0x8E, 0x60, 0x11, 0xF4, 0x9B, 0xA0, 0x24, 0xC4, 0x2D, 0xA5, 0x20, 0x0F,
-         0x62, 0x14, 0x89, 0x58, 0x88, 0x16, 0xE7, 0xE0, 0xBC, 0x9E, 0xC0, 0xD9, 0xFD, 0x51, 0xD2, 0x7A,
-         0xDC, 0x4D, 0x23, 0xB4, 0x84, 0x49, 0xDF, 0x99, 0xF2, 0xBE, 0x4A, 0x22, 0x50, 0x90, 0x30, 0xFC,
-         0xA1, 0x0D, 0x26, 0xEF, 0x61, 0x09, 0xA6, 0x2B, 0x28, 0x04, 0x29, 0x25, 0x03, 0xAD, 0xD3, 0xC2,
-         0xBA, 0xC1, 0x6F, 0x5C, 0xF9, 0x69, 0x35, 0x6A, 0x74, 0x6B, 0x4C, 0xCC, 0xCA, 0x76, 0xE8, 0x9F,
-         0x31, 0xE4, 0xCB, 0x3C, 0xB3, 0x63, 0x1F, 0x65, 0x00, 0xA4, 0x59, 0x8D, 0xEA, 0x95, 0x75, 0xC6,
-         0x10, 0x52, 0x87, 0x94, 0x5E, 0x39, 0xE6, 0xEE, 0x33, 0x6D, 0x42, 0xF0, 0x67, 0xBB, 0x77, 0x6C,
-         0xAB, 0xC3, 0x5A, 0x82, 0x38, 0xF6, 0x27, 0xB9, 0x2F, 0xB8, 0x08, 0x0B, 0x5F, 0xD5, 0x8B, 0xB2,
-         0xB7, 0xB6, 0xF3, 0x43, 0xDA, 0xE5, 0x3D, 0xF8, 0xF5, 0x1B, 0xD6, 0xAE, 0x1C, 0x2A, 0xA2, 0x70,
-         0xD8, 0xD1, 0x78, 0x56, 0x40, 0x79, 0x1D, 0x83, 0x81, 0x06, 0xB0, 0x13, 0xE1, 0x3E, 0xE9, 0xC7,
-         0x1A, 0x3B, 0x7B, 0x91, 0x37, 0x4E, 0x7D, 0x45, 0x1E, 0x7E, 0xCF, 0x18, 0x93, 0x47, 0x73, 0x0E,
-         0x19, 0x2E, 0x9D, 0xD7, 0xFA, 0xC5, 0xED, 0x8C, 0xCE, 0x55, 0xDB, 0xD4, 0xE3, 0x0A, 0xFB, 0xDE,
-         0x3A, 0xFE, 0x01, 0x17, 0x9A, 0xA9, 0x8A, 0x54, 0x97, 0x07, 0x46, 0x44, 0x21, 0x02, 0xD0, 0x3F,
-         0x36, 0x86, 0xA7, 0x7F, 0xBD, 0xB1, 0x7C, 0x4B, 0x41, 0xAF, 0x4F, 0xEB, 0x34, 0xC9, 0x66, 0x05,
-         0x68, 0x96, 0xA3, 0xC8, 0x9C, 0x48, 0x6E, 0xF7, 0x8F, 0x72, 0x57, 0xFF, 0x12, 0x0C, 0xAA, 0x80
+         0x7A, 0xEE, 0x14, 0xB2, 0x6B, 0x4F, 0xDF, 0x04, 0x91, 0x0E, 0x74, 0x58, 0x38, 0xF3, 0x1A, 0xB3,
+         0xE9, 0xD8, 0x51, 0x53, 0x19, 0xF6, 0x08, 0x79, 0x44, 0xED, 0x6A, 0x09, 0x7E, 0xC5, 0xAE, 0x65,
+         0x7F, 0x5F, 0xD7, 0x0F, 0x07, 0x2B, 0x39, 0xE6, 0x2F, 0x3E, 0xC8, 0xA5, 0x81, 0xB6, 0x3A, 0x1D,
+         0x61, 0x06, 0x67, 0x57, 0x92, 0xBA, 0x4A, 0xE5, 0x75, 0x7C, 0xB9, 0x94, 0x2A, 0xEF, 0xD4, 0xF2,
+         0xB7, 0x24, 0xD9, 0xA6, 0xE8, 0x5E, 0xCD, 0x43, 0xDC, 0x2D, 0x05, 0xC6, 0x70, 0x0B, 0x46, 0x34,
+         0xF0, 0x1F, 0xC7, 0x0D, 0x72, 0x2C, 0x4B, 0x1C, 0xE0, 0x9B, 0xE1, 0xC0, 0xCC, 0x98, 0x63, 0xF7,
+         0x27, 0x25, 0xD5, 0x4C, 0x71, 0x02, 0x97, 0xB5, 0xAF, 0x54, 0xFC, 0x00, 0x2E, 0x64, 0xAA, 0xF1,
+         0x88, 0x18, 0xFB, 0x50, 0x03, 0x52, 0x20, 0x86, 0xB8, 0x68, 0x4E, 0x87, 0xBC, 0xA2, 0x13, 0x0C,
+         0xEC, 0xA8, 0xBB, 0x8B, 0x35, 0x42, 0x1E, 0xCB, 0x90, 0x3F, 0xFA, 0xFE, 0x1B, 0x56, 0x85, 0xA7,
+         0x84, 0xDD, 0x30, 0xA0, 0x22, 0x77, 0xA9, 0xF9, 0xE4, 0x73, 0x21, 0xC1, 0xBD, 0xAC, 0xBE, 0xCE,
+         0x9E, 0x6E, 0xD0, 0x16, 0xF4, 0x26, 0x3D, 0xC9, 0xF5, 0x76, 0x45, 0x11, 0x9D, 0x3C, 0x9F, 0x48,
+         0xBF, 0x32, 0x6C, 0x66, 0x9A, 0xDA, 0x17, 0x60, 0x83, 0xB1, 0x80, 0x5C, 0x8A, 0xAB, 0xDE, 0xC4,
+         0x5B, 0x23, 0xCF, 0xD3, 0x62, 0xB4, 0x8E, 0xF8, 0x59, 0x36, 0xA1, 0x8D, 0xE7, 0x0A, 0x9C, 0x78,
+         0x7D, 0xFD, 0x29, 0x3B, 0x47, 0x69, 0x82, 0x15, 0x5D, 0x6F, 0x55, 0x49, 0xEA, 0x93, 0xAD, 0x28,
+         0xDB, 0x89, 0x95, 0x40, 0xEB, 0xB0, 0x33, 0xD2, 0x4D, 0xD6, 0x8F, 0x12, 0x31, 0xA3, 0x8C, 0xE2,
+         0x01, 0x10, 0x96, 0x6D, 0x37, 0xE3, 0xA4, 0xD1, 0x41, 0x99, 0xCA, 0xC3, 0xC2, 0x7B, 0x5A, 0xFF,
     };
 
     WorldPacket data(SMSG_ADDON_INFO, 1000);
     
     AddonMgr::BannedAddonList const* bannedAddons = AddonMgr::GetBannedAddons();
-    data.WriteBits((uint32)bannedAddons->size(), 18);
     data.WriteBits((uint32)m_addonsList.size(), 23);
 
     for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
     {
         data.WriteBit(itr->Enabled);
-        data.WriteBit(!itr->UsePublicKeyOrCRC); // If client doesnt have it, send it
         data.WriteBit(0); // Has URL
+        data.WriteBit(!itr->UsePublicKeyOrCRC); // If client doesnt have it, send it
     }
-
+    
+    data.WriteBits((uint32)bannedAddons->size(), 18);
     data.FlushBits();
 
     for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
@@ -973,8 +989,8 @@ void WorldSession::SendAddonsInfo()
 
         if (itr->Enabled)
         {
-            data << uint8(itr->Enabled);
             data << uint32(0);
+            data << uint8(itr->Enabled);
         }
 
         data << uint8(itr->State);
@@ -987,6 +1003,7 @@ void WorldSession::SendAddonsInfo()
         for (int32 i = 0; i < 8; i++)
             data << uint32(0);
 
+        // Those 3 might be in wrong order
         data << uint32(itr->Id);
         data << uint32(itr->Timestamp);
         data << uint32(1);  // IsBanned

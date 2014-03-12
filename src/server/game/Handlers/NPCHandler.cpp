@@ -118,22 +118,22 @@ void WorldSession::SendShowBank(ObjectGuid guid)
 {
     WorldPacket data(SMSG_SHOW_BANK, 1 + 8);
 
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[5]);
     data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
     data.WriteBit(guid[1]);
     data.WriteBit(guid[6]);
     data.WriteBit(guid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
     data.WriteBit(guid[2]);
 
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[2]);
 
     SendPacket(&data);
@@ -143,23 +143,23 @@ void WorldSession::HandleTrainerListOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
+    guid[2] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[5]);
 
     SendTrainerList(guid);
 }
@@ -201,13 +201,25 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         return;
     }
 
+    ObjectGuid oGuid = guid;
+
     WorldPacket data(SMSG_TRAINER_LIST, 8+4+4+trainer_spells->spellList.size()*38 + strTitle.size()+1);
-    data << guid;
-    data << uint32(trainer_spells->trainerType);
-    data << uint32(1); // different value for each trainer, also found in CMSG_TRAINER_BUY_SPELL
 
     size_t count_pos = data.wpos();
-    data << uint32(trainer_spells->spellList.size());
+    data.WriteBits(trainer_spells->spellList.size(), 19);
+
+    data.WriteBit(oGuid[3]);
+    data.WriteBit(oGuid[2]);
+    data.WriteBit(oGuid[0]);
+    data.WriteBit(oGuid[7]);
+    data.WriteBit(oGuid[1]);
+    data.WriteBit(oGuid[5]);
+    data.WriteBits(strTitle.size(), 11);
+    data.WriteBit(oGuid[6]);
+    data.WriteBit(oGuid[4]);
+    data.FlushBits();
+
+    data.WriteByteSeq(oGuid[3]);
 
     // reputation discount
     float fDiscountMod = _player->GetReputationPriceDiscount(unit);
@@ -219,7 +231,6 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         TrainerSpell const* tSpell = &itr->second;
 
         bool valid = true;
-        bool primary_prof_first_rank = false;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (!tSpell->learnedSpell[i])
@@ -229,70 +240,88 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
                 valid = false;
                 break;
             }
-            SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(tSpell->learnedSpell[i]);
-            if (learnedSpellInfo && learnedSpellInfo->IsPrimaryProfessionFirstRank())
-                primary_prof_first_rank = true;
         }
         if (!valid)
             continue;
 
         TrainerSpellState state = _player->GetTrainerSpellState(tSpell);
 
-        data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
         data << uint8(state == TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
+        data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
+        data << uint32(tSpell->reqSkill);
         data << uint32(floor(tSpell->spellCost * fDiscountMod));
 
-        data << uint8(tSpell->reqLevel);
-        data << uint32(tSpell->reqSkill);
-        data << uint32(tSpell->reqSkillValue);
-        //prev + req or req + 0
+        // spells required (3 max)
         uint8 maxReq = 0;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (!tSpell->learnedSpell[i])
                 continue;
-            if (uint32 prevSpellId = sSpellMgr->GetPrevSpellInChain(tSpell->learnedSpell[i]))
-            {
-                data << uint32(prevSpellId);
-                ++maxReq;
-            }
-            if (maxReq == 2)
-                break;
             SpellsRequiringSpellMapBounds spellsRequired = sSpellMgr->GetSpellsRequiredForSpellBounds(tSpell->learnedSpell[i]);
             for (SpellsRequiringSpellMap::const_iterator itr2 = spellsRequired.first; itr2 != spellsRequired.second && maxReq < 3; ++itr2)
             {
                 data << uint32(itr2->second);
                 ++maxReq;
             }
-            if (maxReq == 2)
+            if (maxReq == 3)
                 break;
         }
-        while (maxReq < 2)
+        while (maxReq < 3)
         {
             data << uint32(0);
             ++maxReq;
         }
 
-        data << uint32(primary_prof_first_rank && can_learn_primary_prof ? 1 : 0);
-        // primary prof. learn confirmation dialog
-        data << uint32(primary_prof_first_rank ? 1 : 0);    // must be equal prev. field to have learn button in enabled state
+        data << uint8(tSpell->reqLevel);
+        data << uint32(tSpell->reqSkillValue);
 
         ++count;
     }
 
-    data << strTitle;
+    data.WriteByteSeq(oGuid[1]);
+    data.WriteByteSeq(oGuid[6]);
+    data.WriteByteSeq(oGuid[0]);
 
-    data.put<uint32>(count_pos, count);
+    data.WriteString(strTitle);
+    data << uint32(trainer_spells->trainerType);
+
+    data.WriteByteSeq(oGuid[2]);
+    data.WriteByteSeq(oGuid[4]);
+    data.WriteByteSeq(oGuid[5]);
+    data.WriteByteSeq(oGuid[7]);
+
+    data << uint32(1); // different value for each trainer, also found in CMSG_TRAINER_BUY_SPELL
+
+    data.PutBits(count_pos, count, 19);
     SendPacket(&data);
 }
 
 void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint32 spellId;
     uint32 trainerId;
 
-    recvData >> guid >> trainerId >> spellId;
+    recvData >> trainerId >> spellId;
+
+    guid[6] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[3]);
+
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u", uint32(GUID_LOPART(guid)), spellId);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
@@ -371,23 +400,23 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
     
-    guid[5] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
@@ -951,46 +980,43 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_REPAIR_ITEM");
 
-    ObjectGuid npcGUID;
-    ObjectGuid itemGUID;
-    uint8 guildBank;                                        // new in 2.3.2, bool that means from guild bank money
+    ObjectGuid npcGUID, itemGUID;
+    bool guildBank;                                         // new in 2.3.2, bool that means from guild bank money
 
-    npcGUID[7] = recvData.ReadBit();
-    itemGUID[4] = recvData.ReadBit();
-    itemGUID[1] = recvData.ReadBit();
-    npcGUID[4] = recvData.ReadBit();
-    itemGUID[3] = recvData.ReadBit();
-    itemGUID[0] = recvData.ReadBit();
-    itemGUID[6] = recvData.ReadBit();
-    npcGUID[6] = recvData.ReadBit();
-    itemGUID[5] = recvData.ReadBit();
     npcGUID[3] = recvData.ReadBit();
+    itemGUID[3] = recvData.ReadBit();
+    itemGUID[6] = recvData.ReadBit();
+    guildBank = recvData.ReadBit();
     npcGUID[2] = recvData.ReadBit();
+    itemGUID[0] = recvData.ReadBit();
+    npcGUID[7] = recvData.ReadBit();
+    npcGUID[6] = recvData.ReadBit();
     npcGUID[0] = recvData.ReadBit();
-
-    recvData >> guildBank;
-
     itemGUID[7] = recvData.ReadBit();
-    npcGUID[1] = recvData.ReadBit();
+    itemGUID[4] = recvData.ReadBit();
     npcGUID[5] = recvData.ReadBit();
+    itemGUID[5] = recvData.ReadBit();
+    npcGUID[4] = recvData.ReadBit();
     itemGUID[2] = recvData.ReadBit();
+    npcGUID[1] = recvData.ReadBit();
+    itemGUID[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(itemGUID[3]);
-    recvData.ReadByteSeq(npcGUID[1]);
-    recvData.ReadByteSeq(npcGUID[7]);
     recvData.ReadByteSeq(itemGUID[6]);
-    recvData.ReadByteSeq(itemGUID[7]);
-    recvData.ReadByteSeq(itemGUID[0]);
-    recvData.ReadByteSeq(itemGUID[1]);
-    recvData.ReadByteSeq(itemGUID[2]);
-    recvData.ReadByteSeq(npcGUID[6]);
-    recvData.ReadByteSeq(npcGUID[2]);
-    recvData.ReadByteSeq(npcGUID[5]);
+    recvData.ReadByteSeq(npcGUID[1]);
     recvData.ReadByteSeq(npcGUID[0]);
-    recvData.ReadByteSeq(npcGUID[3]);
-    recvData.ReadByteSeq(itemGUID[4]);
-    recvData.ReadByteSeq(npcGUID[4]);
+    recvData.ReadByteSeq(npcGUID[2]);
+    recvData.ReadByteSeq(itemGUID[2]);
     recvData.ReadByteSeq(itemGUID[5]);
+    recvData.ReadByteSeq(itemGUID[1]);
+    recvData.ReadByteSeq(npcGUID[6]);
+    recvData.ReadByteSeq(npcGUID[7]);
+    recvData.ReadByteSeq(itemGUID[3]);
+    recvData.ReadByteSeq(itemGUID[7]);
+    recvData.ReadByteSeq(npcGUID[3]);
+    recvData.ReadByteSeq(npcGUID[4]);
+    recvData.ReadByteSeq(npcGUID[5]);
+    recvData.ReadByteSeq(itemGUID[0]);
+    recvData.ReadByteSeq(itemGUID[4]);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
     if (!unit)

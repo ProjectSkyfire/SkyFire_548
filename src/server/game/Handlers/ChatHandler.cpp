@@ -250,8 +250,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             msg = recvData.ReadString(textLength);
             break;
         case CHAT_MSG_WHISPER:
-            receiverLength = recvData.ReadBits(10);
-            textLength = recvData.ReadBits(9);
+            textLength = recvData.ReadBits(8);
+            receiverLength = recvData.ReadBits(9);
             to = recvData.ReadString(receiverLength);
             msg = recvData.ReadString(textLength);
             break;

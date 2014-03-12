@@ -1919,8 +1919,8 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
 
     ObjectGuid guid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
     std::string name = fields[1].GetString();
-    uint8 plrRace = fields[2].GetUInt8();
-    uint8 plrClass = fields[3].GetUInt8();
+    uint8 playerRace = fields[2].GetUInt8();
+    uint8 playerClass = fields[3].GetUInt8();
     uint8 gender = fields[4].GetUInt8();
     uint8 skin = uint8(fields[5].GetUInt32() & 0xFF);
     uint8 face = uint8((fields[5].GetUInt32() >> 8) & 0xFF);
@@ -1971,7 +1971,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     uint32 petLevel   = 0;
     uint32 petFamily  = 0;
     // show pet at selection character in character list only for non-ghost character
-    if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (plrClass == CLASS_WARLOCK || plrClass == CLASS_HUNTER || plrClass == CLASS_DEATH_KNIGHT))
+    if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (playerClass == CLASS_WARLOCK || playerClass == CLASS_HUNTER || playerClass == CLASS_DEATH_KNIGHT))
     {
         uint32 entry = fields[16].GetUInt32();
         CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(entry);
@@ -1984,30 +1984,57 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     }
 
     // Packet content flags
-    bitBuffer->WriteBit(guid[0]);
     bitBuffer->WriteBit(guildGuid[4]);
-    bitBuffer->WriteBit(guid[7]);
-    bitBuffer->WriteBit(guildGuid[3]);
-    bitBuffer->WriteBit(guildGuid[7]);
-    bitBuffer->WriteBit(guid[5]);
-    bitBuffer->WriteBit(guid[4]);
+    bitBuffer->WriteBit(guid[0]);
+    bitBuffer->WriteBit(guid[3]);
     bitBuffer->WriteBit(guid[6]);
     bitBuffer->WriteBit(guildGuid[1]);
-    bitBuffer->WriteBit(guid[3]);
+    bitBuffer->WriteBit(guid[1]);
+    bitBuffer->WriteBit(guildGuid[2]);
+    bitBuffer->WriteBit(guildGuid[3]);
+    bitBuffer->WriteBit(atLoginFlags & AT_LOGIN_FIRST);
     bitBuffer->WriteBit(guid[2]);
     bitBuffer->WriteBit(guildGuid[0]);
-    bitBuffer->WriteBit(guildGuid[2]);
-    bitBuffer->WriteBit(guid[1]);
-    bitBuffer->WriteBit(guildGuid[5]);
-    bitBuffer->WriteBit(atLoginFlags & AT_LOGIN_FIRST);
-    bitBuffer->WriteBit(guildGuid[6]);
+    bitBuffer->WriteBit(guildGuid[7]);
     bitBuffer->WriteBits(uint32(name.length()), 6);
+    bitBuffer->WriteBit(0); // Has Been boosted to level 90
+    bitBuffer->WriteBit(guildGuid[6]);
+    bitBuffer->WriteBit(guid[4]);
+    bitBuffer->WriteBit(guildGuid[5]);
+    bitBuffer->WriteBit(guid[5]);
+    bitBuffer->WriteBit(guid[7]);
 
     // Character data
-    *dataBuffer << uint32(petLevel);                            // Pet level
-    *dataBuffer << uint8(level);                                // Level
+    *dataBuffer << uint8(face);                                 // Face
+
+    dataBuffer->WriteByteSeq(guildGuid[7]);
+
+    *dataBuffer << uint8(playerRace);                           // Race
+
+    dataBuffer->WriteByteSeq(guid[5]);
     dataBuffer->WriteByteSeq(guildGuid[2]);
+    dataBuffer->WriteByteSeq(guid[6]);
+   
+    *dataBuffer << uint32(charFlags);                           // Character flags
+    *dataBuffer << uint32(zone);                                // Zone id
+    
     dataBuffer->WriteByteSeq(guildGuid[3]);
+    
+    *dataBuffer << uint32(petLevel);                            // Pet level
+    *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID
+    *dataBuffer << uint32(0);                                   // UNK00 new field - Boost field
+    *dataBuffer << uint32(0);                                   // UNK02 - might be swaped with UNK03 and the pet fields 
+    
+    dataBuffer->WriteByteSeq(guid[3]);
+    dataBuffer->WriteByteSeq(guid[0]);
+
+    *dataBuffer << uint8(facialHair);                           // Facial hair
+    *dataBuffer << uint8(gender);                               // Gender
+    
+    dataBuffer->WriteByteSeq(guildGuid[0]);
+    
+    *dataBuffer << uint8(hairStyle);                            // Hair style
+    *dataBuffer << uint8(level);                                // Level
 
     for (uint8 slot = 0; slot < INVENTORY_SLOT_BAG_END; ++slot)
     {
@@ -2037,44 +2064,41 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
                 break;
         }
         
-        *dataBuffer << uint8(proto->InventoryType);
-        *dataBuffer << uint32(enchant ? enchant->aura_id : 0);
         *dataBuffer << uint32(proto->DisplayInfoID);
+        *dataBuffer << uint32(enchant ? enchant->aura_id : 0);
+        *dataBuffer << uint8(proto->InventoryType);
     }
 
-    dataBuffer->WriteByteSeq(guildGuid[6]);
-    *dataBuffer << uint8(slot);                                 // List order
-    *dataBuffer << uint8(hairStyle);                            // Hair style
-    *dataBuffer << uint32(customizationFlag);                   // Character customization flags
-    *dataBuffer << uint8(plrClass);                             // Class
-    dataBuffer->WriteByteSeq(guildGuid[7]);
-    dataBuffer->WriteByteSeq(guid[0]);
-    *dataBuffer << uint32(petFamily);                           // Pet family
-    dataBuffer->WriteByteSeq(guildGuid[1]);
-    dataBuffer->WriteByteSeq(guid[3]);
-    dataBuffer->WriteByteSeq(guid[7]);
-    dataBuffer->WriteByteSeq(guid[2]);
-    dataBuffer->WriteByteSeq(guildGuid[5]);
-    *dataBuffer << uint8(gender);                               // Gender
-    *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID
-    *dataBuffer << uint32(zone);                                // Zone id
-    dataBuffer->WriteByteSeq(guid[6]);
-    *dataBuffer << uint8(hairColor);                            // Hair color
-    *dataBuffer << uint8(facialHair);                           // Facial hair
-    dataBuffer->append(name.c_str(), name.length());            // Name
-    *dataBuffer << uint8(plrRace);                              // Race
-    dataBuffer->WriteByteSeq(guildGuid[4]);
-    *dataBuffer << uint8(skin);                                 // Skin
-    *dataBuffer << uint32(mapId);                               // Map Id
-    *dataBuffer << uint32(charFlags);                           // Character flags
-    *dataBuffer << float(y);                                    // Y
-    dataBuffer->WriteByteSeq(guildGuid[0]);
-    dataBuffer->WriteByteSeq(guid[4]);
-    dataBuffer->WriteByteSeq(guid[1]);
+    
     *dataBuffer << float(z);                                    // Z
-    dataBuffer->WriteByteSeq(guid[5]);
-    *dataBuffer << uint8(face);                                 // Face
+    
+    dataBuffer->WriteByteSeq(guildGuid[1]);
+
+    *dataBuffer << float(y);                                    // Y
+    *dataBuffer << uint8(skin);                                 // Skin
+    *dataBuffer << uint8(slot);                                 // List order
+    
+    dataBuffer->WriteByteSeq(guildGuid[5]);
+    dataBuffer->WriteByteSeq(guid[1]);
+    
+    *dataBuffer << uint32(0);                                   // UNK03 - might be swaped with UNK02 and the pet fields 
     *dataBuffer << float(x);                                    // X
+    dataBuffer->append(name.c_str(), name.length());            // Name
+    
+    *dataBuffer << uint32(mapId);                               // Map Id
+    *dataBuffer << uint32(petFamily);                           // Pet family
+    
+    *dataBuffer << uint8(hairColor);                            // Hair color
+    *dataBuffer << uint8(playerClass);                             // Class
+    
+    dataBuffer->WriteByteSeq(guildGuid[4]);
+    dataBuffer->WriteByteSeq(guid[2]);
+    
+    *dataBuffer << uint32(customizationFlag);                   // Character customization flags
+    
+    dataBuffer->WriteByteSeq(guid[7]);
+    dataBuffer->WriteByteSeq(guildGuid[6]);
+    dataBuffer->WriteByteSeq(guid[4]);
 
     return true;
 }
@@ -2301,14 +2325,15 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packets
-                WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
+                WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);              
+                data << uint32(mapid);
+
                 data.WriteBit(0);       // unknown
                 data.WriteBit(m_transport != NULL);
 
-                data << uint32(mapid);
-
                 if (m_transport)
                 {
+                    // Might be in wrong order
                     data << GetMapId();
                     data << m_transport->GetEntry();
                 }
@@ -2328,12 +2353,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
-                data << float(m_teleport_dest.GetPositionZ());
                 data << uint32(mapid);
                 data << float(m_teleport_dest.GetPositionY());
+                data << float(m_teleport_dest.GetPositionZ());
                 data << float(m_teleport_dest.GetOrientation());
                 data << float(m_teleport_dest.GetPositionX());
-
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
             }
@@ -3022,35 +3046,36 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
 {
     ObjectGuid guid = victim ? victim->GetGUID() : 0;
 
-    WorldPacket data(SMSG_LOG_XPGAIN, 21); // guess size?
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(0);                                       // fake?
+    WorldPacket data(SMSG_LOG_XPGAIN, 1 + 1 + 8 + 4 + 4 + 4 + 1);
+    data.WriteBit(0);                                       // has XP + bonus
     data.WriteBit(guid[6]);
-    data.WriteBit(1);
+    data.WriteBit(guid[3]);
+    data.WriteBit(0);                                       // has group bonus
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(0);                                       // unknown
     data.WriteBit(guid[2]);
     data.WriteBit(guid[1]);
-    data.WriteBit(1);
-    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[2]);
+
+    data << float(1);                                       // 1 - none 0 - 100% group bonus output
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+
+    data << uint32(GivenXP + BonusXP);                      // given experience
+    data << uint32(GivenXP);                                // experience without bonus
 
     data.WriteByteSeq(guid[0]);
 
-    data << uint32(GivenXP);                                // experience without bonus
-    data << float(1);                                       // 1 - none 0 - 100% group bonus output
-
-    data.WriteByteSeq(guid[2]);
-
-    data << uint32(GivenXP + BonusXP);                      // given experience
     data << uint8(recruitAFriend ? 1 : 0);                  // does the GivenXP include a RaF bonus?
-
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[6]);
 
     GetSession()->SendPacket(&data);
 }
@@ -3134,6 +3159,13 @@ void Player::GiveLevel(uint8 level)
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, ((MAX_POWERS_PER_CLASS * 4) + 4 + 4 + (MAX_STATS * 4) + 4));
 
+    data << uint32(level);
+    data << uint32(0);
+    data << uint32(int32(basehp) - int32(GetCreateHealth()));
+
+    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)       // Stats loop (0-4)
+        data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
+
     // for (int i = 0; i < MAX_STORED_POWERS; ++i)          // Powers loop (0-10)
     data << uint32(int32(basemana) - int32(GetCreateMana()));
 
@@ -3141,14 +3173,6 @@ void Player::GiveLevel(uint8 level)
         data << uint32(0);
 
     // end for
-
-    data << uint32(0);
-    data << uint32(int32(basehp) - int32(GetCreateHealth()));
-
-    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)       // Stats loop (0-4)
-        data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
-
-    data << uint32(level);
 
     GetSession()->SendPacket(&data);
 
@@ -3434,11 +3458,11 @@ void Player::SendInitialSpells()
     uint16 spellCount = 0;
 
     WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+4*m_spells.size()+2+m_spellCooldowns.size()*(2+2+2+4+4)));
+    data.WriteBit(0);
 
     size_t bitPos = data.bitwpos();
-
     data.WriteBits(0, 22); // spell count placeholder
-    data.WriteBit(0);
+
     data.FlushBits();
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
@@ -4043,8 +4067,8 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         WorldPacket data(SMSG_LEARNED_SPELL, 8);
         uint32 spellCount = 1;
 
-        data.WriteBits(spellCount, 22);
         data.WriteBit(0);
+        data.WriteBits(spellCount, 22);
 
         for (uint32 i = 0; i < spellCount; ++i)
             data << uint32(spell_id);
@@ -5151,11 +5175,11 @@ void Player::BuildPlayerRepop()
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
-    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
+    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);          // remove spirit healer position
+    data << float(0);
+    data << float(0);
+    data << float(0);
     data << uint32(-1);
-    data << float(0);
-    data << float(0);
-    data << float(0);
     GetSession()->SendPacket(&data);
 
     // speed change, land walk
@@ -5249,7 +5273,7 @@ void Player::KillPlayer()
     m_deathTimer = 6 * MINUTE * IN_MILLISECONDS;
 
     UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
-    SendCorpseReclaimDelay();
+    //SendCorpseReclaimDelay();
 
     // don't create corpse at this moment, player might be falling
 
@@ -5569,11 +5593,11 @@ void Player::RepopAtGraveyard()
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, orientation ? *orientation : GetOrientation());
         if (isDead())                                        // not send if alive, because it used in TeleportTo()
         {
-            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);  // show spirit healer position on minimap
-            data << ClosestGrave->map_id;
-            data << ClosestGrave->x;
+            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);  // show spirit healer position on minimap
             data << ClosestGrave->y;
             data << ClosestGrave->z;
+            data << ClosestGrave->x;
+            data << ClosestGrave->map_id;
             GetSession()->SendPacket(&data);
         }
     }
@@ -6608,8 +6632,15 @@ void Player::SendActionButtons(uint32 state) const
         buttonsTab[i].unk = uint32(ab->GetType());
     }
 
+    // Bits
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][2]);
+        data.WriteBit(buttons[i][0]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][4]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][6]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][7]);
@@ -6618,44 +6649,38 @@ void Player::SendActionButtons(uint32 state) const
         data.WriteBit(buttons[i][3]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][0]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][6]);
+        data.WriteBit(buttons[i][2]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][1]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][4]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][5]);
 
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][7]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][0]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][6]);
-
+    // Data
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][5]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][1]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][2]);
+        data.WriteByteSeq(buttons[i][3]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][4]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][3]);
+        data.WriteByteSeq(buttons[i][6]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][1]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][7]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][2]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][0]);
 
     data << uint8(state);
     GetSession()->SendPacket(&data);
@@ -13416,40 +13441,39 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 
     if (msg != EQUIP_ERR_OK)
     {
-        data.WriteBit(pItemGuid[4]);
-        data.WriteBit(pItemGuid2[6]);
-        data.WriteBit(pItemGuid2[4]);
-        data.WriteBit(pItemGuid[2]);
         data.WriteBit(pItemGuid2[0]);
-        data.WriteBit(pItemGuid[3]);
-        data.WriteBit(pItemGuid[0]);
-        data.WriteBit(pItemGuid[6]);
-        data.WriteBit(pItemGuid[7]);
-        data.WriteBit(pItemGuid2[7]);
-        data.WriteBit(pItemGuid[1]);
-        data.WriteBit(pItemGuid[5]);
-        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid2[4]);
         data.WriteBit(pItemGuid2[5]);
-        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid[7]);
         data.WriteBit(pItemGuid2[3]);
+        data.WriteBit(pItemGuid2[7]);
+        data.WriteBit(pItemGuid2[6]);
+        data.WriteBit(pItemGuid[4]);
+        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid[3]);
+        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid[1]);
+        data.WriteBit(pItemGuid[0]);
+        data.WriteBit(pItemGuid[5]);
+        data.WriteBit(pItemGuid[2]);
 
+        data.WriteByteSeq(pItemGuid[0]);
+        data.WriteByteSeq(pItemGuid[5]);
+        data.WriteByteSeq(pItemGuid2[3]);
+        data.WriteByteSeq(pItemGuid2[5]);
         data.WriteByteSeq(pItemGuid[2]);
-        data.WriteByteSeq(pItemGuid2[7]);
-        data.WriteByteSeq(pItemGuid[4]);
         data.WriteByteSeq(pItemGuid[1]);
+        data.WriteByteSeq(pItemGuid[7]);
 
         data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
 
-        data.WriteByteSeq(pItemGuid2[0]);
         data.WriteByteSeq(pItemGuid2[4]);
-        data.WriteByteSeq(pItemGuid[0]);
-        data.WriteByteSeq(pItemGuid[7]);
-        data.WriteByteSeq(pItemGuid[5]);
-        data.WriteByteSeq(pItemGuid2[1]);
+        data.WriteByteSeq(pItemGuid[6]);
 
         data << uint8(msg);
 
-        data.WriteByteSeq(pItemGuid2[2]);
+        data.WriteByteSeq(pItemGuid2[7]);
 
         if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS ||
             msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS ||
@@ -13459,8 +13483,15 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->ItemLimitCategory : 0);
         }
 
-        data.WriteByteSeq(pItemGuid2[5]);
-        data.WriteByteSeq(pItemGuid2[6]);
+        data.WriteByteSeq(pItemGuid2[2]);
+
+        if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
+            data << uint32(0);                  // slot
+
+        data.WriteByteSeq(pItemGuid[3]);
+        data.WriteByteSeq(pItemGuid2[0]);
+        data.WriteByteSeq(pItemGuid2[1]);
+        data.WriteByteSeq(pItemGuid[4]);
 
         if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I || msg == EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW)
         {
@@ -13468,12 +13499,7 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->RequiredLevel : 0);
         }
 
-        if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
-            data << uint32(0);                  // slot
-
-        data.WriteByteSeq(pItemGuid[6]);
-        data.WriteByteSeq(pItemGuid2[3]);
-        data.WriteByteSeq(pItemGuid[3]);
+        data.WriteByteSeq(pItemGuid2[6]);
 
         if (msg == EQUIP_ERR_NO_OUTPUT)
         {
@@ -20339,7 +20365,30 @@ void Player::SendAttackSwingCantAttack()
 
 void Player::SendAttackSwingCancelAttack()
 {
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_CANCEL_COMBAT, 0);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[5]);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
+    data << uint8(0); // Unk
+    data.WriteByteSeq(guid[7]);
+    data << uint32(0); // Unk
+    data.WriteByteSeq(guid[1]);
+    data << uint8(0); //Unk
+    data.WriteByteSeq(guid[0]);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -20650,69 +20699,114 @@ void Player::StopCastingCharm()
 
 inline void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix /*= NULL*/) const
 {
-    ObjectGuid guid(GetGUID());
+    data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
+
+    ObjectGuid target = 0;
+    ObjectGuid source = GetGUID();
+    ObjectGuid unkGuid = 0;
+    ObjectGuid unkGuid2 = 0;
+
+    data->WriteBit(0);
+    data->WriteBit(0);
+
+    data->WriteBit(unkGuid2[4]);
+    data->WriteBit(unkGuid2[5]);
+    data->WriteBit(unkGuid2[1]);
+    data->WriteBit(unkGuid2[0]);
+    data->WriteBit(unkGuid2[2]);
+    data->WriteBit(unkGuid2[6]);
+    data->WriteBit(unkGuid2[7]);
+    data->WriteBit(unkGuid2[3]);
 
     data->WriteBit(1);
-    data->WriteBit(0);                          // !hasText
+    data->WriteBit(0); // Send Language
+
+    data->WriteBit(source[2]);
+    data->WriteBit(source[7]);
+    data->WriteBit(source[0]);
+    data->WriteBit(source[3]);
+    data->WriteBit(source[4]);
+    data->WriteBit(source[6]);
+    data->WriteBit(source[1]);
+    data->WriteBit(source[5]);
+
+    data->WriteBit(0); // Show in chat log - 1 for showing only in bubble
     data->WriteBit(1);
-    data->WriteBits(0, 8);                      // skip GUID
     data->WriteBit(1);
-    data->WriteBit(1);                          // !realmId
     data->WriteBit(1);
     data->WriteBit(0);
-    data->WriteBit(0);                          // !hasLanguage
+    data->WriteBit(0);
+
+    data->WriteBit(target[5]);
+    data->WriteBit(target[7]);
+    data->WriteBit(target[6]);
+    data->WriteBit(target[4]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[0]);
+
     data->WriteBit(1);
-    data->WriteBits(0, 8);                      // skip GUID
+    data->WriteBit(0);
+
+    data->WriteBit(unkGuid[5]);
+    data->WriteBit(unkGuid[2]);
+    data->WriteBit(unkGuid[6]);
+    data->WriteBit(unkGuid[1]);
+    data->WriteBit(unkGuid[7]);
+    data->WriteBit(unkGuid[3]);
+    data->WriteBit(unkGuid[0]);
+    data->WriteBit(unkGuid[4]);
+
+    data->WriteBit(1);
     data->WriteBits(text.size(), 12);
     data->WriteBit(0);
     data->WriteBit(1);
-
-    data->WriteBit(guid[4]); // 28
-    data->WriteBit(guid[2]); // 26
-    data->WriteBit(guid[7]); // 31
-    data->WriteBit(guid[5]); // 29
-    data->WriteBit(guid[1]); // 25
-    data->WriteBit(guid[3]); // 27
-    data->WriteBit(guid[0]); // 24
-    data->WriteBit(guid[6]); // 30
-
     data->WriteBit(1);
     data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(0);
 
-    data->WriteBit(guid[1]); // 41
-    data->WriteBit(guid[5]); // 45
-    data->WriteBit(guid[4]); // 44
-    data->WriteBit(guid[6]); // 46
-    data->WriteBit(guid[3]); // 43
-    data->WriteBit(guid[2]); // 42
-    data->WriteBit(guid[7]); // 47
-    data->WriteBit(guid[0]); // 40
     data->FlushBits();
 
-    data->WriteByteSeq(guid[2]);
-    data->WriteByteSeq(guid[7]);
-    data->WriteByteSeq(guid[5]);
-    data->WriteByteSeq(guid[0]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(guid[4]);
-    data->WriteByteSeq(guid[1]);
-    data->WriteByteSeq(guid[6]);
+    data->WriteByteSeq(unkGuid2[7]);
+    data->WriteByteSeq(unkGuid2[2]);
+    data->WriteByteSeq(unkGuid2[1]);
+    data->WriteByteSeq(unkGuid2[4]);
+    data->WriteByteSeq(unkGuid2[6]);
+    data->WriteByteSeq(unkGuid2[5]);
+    data->WriteByteSeq(unkGuid2[3]);
+    data->WriteByteSeq(unkGuid2[0]);
 
-    data->WriteByteSeq(guid[5]);
-    data->WriteByteSeq(guid[7]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(guid[1]);
-    data->WriteByteSeq(guid[6]);
-    data->WriteByteSeq(guid[2]);
-    data->WriteByteSeq(guid[4]);
-    data->WriteByteSeq(guid[0]);
+    data->WriteByteSeq(unkGuid[5]);
+    data->WriteByteSeq(unkGuid[3]);
+    data->WriteByteSeq(unkGuid[2]);
+    data->WriteByteSeq(unkGuid[4]);
+    data->WriteByteSeq(unkGuid[1]);
+    data->WriteByteSeq(unkGuid[0]);
+    data->WriteByteSeq(unkGuid[7]);
+    data->WriteByteSeq(unkGuid[6]);
 
-    *data << uint8(language);
-    data->WriteString(text);
     *data << uint8(msgtype);
+
+    data->WriteByteSeq(source[4]);
+    data->WriteByteSeq(source[2]);
+    data->WriteByteSeq(source[3]);
+    data->WriteByteSeq(source[0]);
+    data->WriteByteSeq(source[6]);
+    data->WriteByteSeq(source[7]);
+    data->WriteByteSeq(source[5]);
+    data->WriteByteSeq(source[1]);
+
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[1]);
+    data->WriteByteSeq(target[0]);
+    data->WriteByteSeq(target[2]);
+    data->WriteByteSeq(target[4]);
+    data->WriteByteSeq(target[5]);
+    data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[3]);
+
+    data->WriteString(text);
+    *data << uint8(language);
 }
 
 void Player::Say(const std::string& text, const uint32 language)
@@ -22477,9 +22571,27 @@ void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
         AddSpellAndCategoryCooldowns(spellInfo, itemId, spell);
 
     // Send activate cooldown timer (possible 0) at client side
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[2]);
+
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
     data << uint32(spellInfo->Id);
-    data << uint64(GetGUID());
+    data.WriteByteSeq(guid[7]);
     SendDirectMessage(&data);
 }
 
@@ -23281,10 +23393,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 20);
-    data << uint32(1);
-    data << uint32(1);
     data.AppendPackedTime(sWorld->GetGameTime());
     data << float(0.01666667f);                             // game speed
+    data << uint32(1);
+    data << uint32(1);
     data.AppendPackedTime(sWorld->GetGameTime());
 
     GetSession()->SendPacket(&data);
@@ -23650,14 +23762,13 @@ void Player::SendAurasForTarget(Unit* target)
 
     WorldPacket data(SMSG_AURA_UPDATE);
     data.WriteBit(targetGuid[3]);
-    data.WriteBit(targetGuid[6]);
-    data.WriteBit(targetGuid[0]);
-    data.WriteBit(targetGuid[7]);
-    data.WriteBit(targetGuid[5]);
+    data.WriteBit(1);                                   // Is AURA_UPDATE_ALL
     data.WriteBit(targetGuid[4]);
-    data.WriteBits(1, 24);                              // Aura Count
-    data.WriteBit(0);                                   // Is AURA_UPDATE_ALL
-    data.WriteBit(!remove);                             // HasData
+    data.WriteBit(targetGuid[5]);
+    data.WriteBits(visibleAuras->size(), 24);           // Aura Count
+    data.WriteBit(targetGuid[7]);
+    data.WriteBit(targetGuid[6]);
+    
 
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
     {
@@ -23666,6 +23777,13 @@ void Player::SendAurasForTarget(Unit* target)
         uint32 flags = auraApp->GetFlags();
         if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
             flags |= AFLAG_DURATION;
+            
+        data.WriteBit(1);                               // Not remove
+        data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
+        data.WriteBits(0, 22);                          // Unk effect count
+        
+        data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
+        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
 
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
@@ -23678,29 +23796,26 @@ void Player::SendAurasForTarget(Unit* target)
         }
         else
             data.WriteBits(0, 22);                      // Effect Count
-
-        data.WriteBits(0, 22);                          // Unk effect count
-        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
+            
 
         if (!(flags & AFLAG_CASTER))
         {
             ObjectGuid casterGuid = aura->GetCasterGUID();
-            data.WriteBit(casterGuid[7]);
-            data.WriteBit(casterGuid[4]);
-            data.WriteBit(casterGuid[2]);
-            data.WriteBit(casterGuid[5]);
-            data.WriteBit(casterGuid[6]);
             data.WriteBit(casterGuid[1]);
-            data.WriteBit(casterGuid[3]);
+            data.WriteBit(casterGuid[6]);
             data.WriteBit(casterGuid[0]);
+            data.WriteBit(casterGuid[7]);
+            data.WriteBit(casterGuid[5]);
+            data.WriteBit(casterGuid[3]);
+            data.WriteBit(casterGuid[2]);
+            data.WriteBit(casterGuid[4]);
         }
 
-        data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
-        data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
     }
-
-    data.WriteBit(targetGuid[1]);
+    
     data.WriteBit(targetGuid[2]);
+    data.WriteBit(targetGuid[0]);
+    data.WriteBit(targetGuid[1]);
     data.FlushBits();
 
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
@@ -23714,18 +23829,17 @@ void Player::SendAurasForTarget(Unit* target)
         if (!(flags & AFLAG_CASTER))
         {
             ObjectGuid casterGuid = aura->GetCasterGUID();
-            data.WriteByteSeq(casterGuid[0]);
-            data.WriteByteSeq(casterGuid[3]);
-            data.WriteByteSeq(casterGuid[7]);
-            data.WriteByteSeq(casterGuid[1]);
             data.WriteByteSeq(casterGuid[2]);
             data.WriteByteSeq(casterGuid[5]);
-            data.WriteByteSeq(casterGuid[4]);
             data.WriteByteSeq(casterGuid[6]);
+            data.WriteByteSeq(casterGuid[7]);
+            data.WriteByteSeq(casterGuid[0]);
+            data.WriteByteSeq(casterGuid[1]);
+            data.WriteByteSeq(casterGuid[4]);
+            data.WriteByteSeq(casterGuid[3]);
         }
 
-        if (flags & AFLAG_DURATION)
-            data << uint32(aura->GetDuration());
+        data << uint32(auraApp->GetEffectMask());
 
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
@@ -23740,30 +23854,32 @@ void Player::SendAurasForTarget(Unit* target)
                 }
             }
         }
-
+        
+        data << uint8(flags);
+        data << uint32(aura->GetId());
         data << uint16(aura->GetCasterLevel());
-
-        if (flags & AFLAG_DURATION)
-            data << uint32(aura->GetMaxDuration());
-
         // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
         // stack amount has priority over charges (checked on retail with spell 50262)
         data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
+        
+        if (flags & AFLAG_DURATION)
+            data << uint32(aura->GetMaxDuration());
 
-        data << uint32(aura->GetId());
-        data << uint8(flags);
-        data << uint32(auraApp->GetEffectMask());
-        data << uint8(auraApp->GetSlot());
+        if (flags & AFLAG_DURATION)
+            data << uint32(aura->GetDuration());
+            
+            data << uint8(auraApp->GetSlot());
     }
+    
 
-    data.WriteByteSeq(targetGuid[5]);
+    data.WriteByteSeq(targetGuid[0]);
     data.WriteByteSeq(targetGuid[1]);
+    data.WriteByteSeq(targetGuid[3]);
+    data.WriteByteSeq(targetGuid[4]);
     data.WriteByteSeq(targetGuid[2]);
     data.WriteByteSeq(targetGuid[6]);
-    data.WriteByteSeq(targetGuid[0]);
     data.WriteByteSeq(targetGuid[7]);
-    data.WriteByteSeq(targetGuid[4]);
-    data.WriteByteSeq(targetGuid[3]);
+    data.WriteByteSeq(targetGuid[5]);
 
     GetSession()->SendPacket(&data);
 }
@@ -24667,7 +24783,11 @@ void Player::SendCorpseReclaimDelay(bool load)
 
     //! corpse reclaim delay 30 * 1000ms or longer at often deaths
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
-    data << uint32(delay*IN_MILLISECONDS);
+    data.WriteBit(delay == 0);
+
+    if (delay)
+        data << uint32(delay * IN_MILLISECONDS);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -25934,6 +26054,8 @@ bool Player::CanSeeSpellClickOn(Creature const* c) const
 void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 {
     size_t* wpos = new size_t[GetSpecsCount()];
+
+    *data << uint8(GetActiveSpec());                        // talent group index (0 or 1)
     data->WriteBits(GetSpecsCount(), 19);
 
     for (int i = 0; i < GetSpecsCount(); i++)
@@ -25942,11 +26064,10 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         data->WriteBits(0, 23);
     }
 
+    data->FlushBits();
+
     for (int32 i = 0; i < GetSpecsCount(); i++)
     {
-        for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
-            *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
-
         uint32 const* talentTabIds = GetClassSpecializations(getClass());
 
         int32 talentCount = 0;
@@ -25969,9 +26090,10 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 
         data->PutBits(wpos[i], talentCount, 23);
         *data << uint32(GetTalentSpecialization(GetActiveSpec()));
-    }
 
-    *data << uint8(GetActiveSpec());                        // talent group index (0 or 1)
+        for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
+            *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
+    }
     delete[] wpos;
 }
 
@@ -27319,7 +27441,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
     MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
     {
-        TC_LOG_ERROR("network", "Player::ReadMovementInfo: No movement sequence found for opcode %s", GetOpcodeNameForLogging(data.GetOpcode()).c_str());
+        TC_LOG_ERROR("network", "Player::ReadMovementInfo: No movement sequence found for opcode %s", GetOpcodeNameForLogging(data.GetOpcode(), false).c_str());
         return;
     }
 

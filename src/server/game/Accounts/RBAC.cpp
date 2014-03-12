@@ -21,6 +21,7 @@
 #include "AccountMgr.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
+#include "World.h"
 
 namespace rbac
 {
@@ -39,6 +40,14 @@ std::string GetDebugPermissionString(RBACPermissionContainer const& perms)
     }
 
     return str;
+}
+
+bool RBACData::HasPermission(uint32 permission) const
+{
+    if (sWorld->getIntConfig(CONFIG_RBAC_FREE_PERMISSION_MODE))
+        return true;
+
+    return _globalPerms.find(permission) != _globalPerms.end();
 }
 
 RBACCommandResult RBACData::GrantPermission(uint32 permissionId, int32 realmId /* = 0*/)

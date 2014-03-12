@@ -233,8 +233,9 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         charCount = uint32(result->GetRowCount());
         bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
-
-        bitBuffer.WriteBits(0, 21);
+        
+        bitBuffer.WriteBit(1);
+        bitBuffer.WriteBits(0, 21); // unk loop at the end - { uint32(); uint8; }
         bitBuffer.WriteBits(charCount, 16);
 
         do
@@ -253,14 +254,13 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
         } while (result->NextRow()); 
 
-        bitBuffer.WriteBit(1);
         bitBuffer.FlushBits();
     }
     else
     {		
+        bitBuffer.WriteBit(1);
         bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(0, 16);
-        bitBuffer.WriteBit(1);
         bitBuffer.FlushBits();
     }
 
@@ -269,9 +269,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
     data.append(bitBuffer);
 
     if (charCount)
-    {
         data.append(dataBuffer);
-    }
 
     SendPacket(&data);
 }
@@ -300,11 +298,11 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
     uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
 
-    recvData >> hairStyle >> gender >> skin >> hairColor;
-    recvData >> facialHair >> class_ >> race_ >> face >> outfitId;
+    recvData >> outfitId >> facialHair >> skin >> race_;
+    recvData >> hairStyle >> class_ >> face >> gender >> hairColor;
 
-    uint8 unk = recvData.ReadBit();
     uint32 nameLength = recvData.ReadBits(6);
+    uint8 unk = recvData.ReadBit();
     std::string name = recvData.ReadString(nameLength);
 
     if (unk)
@@ -731,23 +729,23 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[7] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[5]);
 
     TC_LOG_DEBUG("network", "Character (Guid: %u) deleted", GUID_LOPART(guid));
 
@@ -829,21 +827,21 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
     recvData >> unk;
 
     playerGuid[7] = recvData.ReadBit();
-    playerGuid[2] = recvData.ReadBit();
-    playerGuid[5] = recvData.ReadBit();
-    playerGuid[4] = recvData.ReadBit();
-    playerGuid[3] = recvData.ReadBit();
-    playerGuid[0] = recvData.ReadBit();
     playerGuid[6] = recvData.ReadBit();
+    playerGuid[0] = recvData.ReadBit();
+    playerGuid[4] = recvData.ReadBit();
+    playerGuid[5] = recvData.ReadBit();
+    playerGuid[2] = recvData.ReadBit();
+    playerGuid[3] = recvData.ReadBit();
     playerGuid[1] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(playerGuid[7]);
-    recvData.ReadByteSeq(playerGuid[1]);
+    
     recvData.ReadByteSeq(playerGuid[5]);
     recvData.ReadByteSeq(playerGuid[0]);
-    recvData.ReadByteSeq(playerGuid[3]);
+    recvData.ReadByteSeq(playerGuid[1]);
     recvData.ReadByteSeq(playerGuid[6]);
+    recvData.ReadByteSeq(playerGuid[7]);
     recvData.ReadByteSeq(playerGuid[2]);
+    recvData.ReadByteSeq(playerGuid[3]);
     recvData.ReadByteSeq(playerGuid[4]);
 
     //WorldObject* player = ObjectAccessor::GetWorldObject(*GetPlayer(), playerGuid);
@@ -901,11 +899,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
-    data << pCurrChar->GetMapId();
-    data << pCurrChar->GetPositionX();
     data << pCurrChar->GetOrientation();
-    data << pCurrChar->GetPositionY();
+    data << pCurrChar->GetMapId();
     data << pCurrChar->GetPositionZ();
+    data << pCurrChar->GetPositionX();
+    data << pCurrChar->GetPositionY();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -962,7 +960,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
                 stringBuffer.WriteString(string);
                 ++linecount;
             }
-            pos = nextpos+1;
+            pos = nextpos + 1;
         }
 
         if (pos<str_motd.length())

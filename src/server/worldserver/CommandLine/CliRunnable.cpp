@@ -112,7 +112,7 @@ void utf8print(void* /*arg*/, const char* str)
 
 void commandFinished(void*, bool /*success*/)
 {
-    printf("TC> ");
+    printf("SF> ");
     fflush(stdout);
 }
 
@@ -146,7 +146,7 @@ void CliRunnable::run()
 
     // print this here the first time
     // later it will be printed after command queue updates
-    printf("TC>");
+    printf("SF>");
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::IsStopped())
@@ -159,7 +159,7 @@ void CliRunnable::run()
         char commandbuf[256];
         command_str = fgets(commandbuf, sizeof(commandbuf), stdin);
 #else
-        command_str = readline("TC>");
+        command_str = readline("SF>");
         rl_bind_key('\t', rl_complete);
 #endif
 
@@ -175,7 +175,7 @@ void CliRunnable::run()
             if (!*command_str)
             {
 #if PLATFORM == PLATFORM_WINDOWS
-                printf("TC>");
+                printf("SF>");
 #else
                 free(command_str);
 #endif
@@ -186,7 +186,7 @@ void CliRunnable::run()
             if (!consoleToUtf8(command_str, command))         // convert from console encoding to utf8
             {
 #if PLATFORM == PLATFORM_WINDOWS
-                printf("TC>");
+                printf("SF>");
 #else
                 free(command_str);
 #endif

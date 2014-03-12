@@ -678,75 +678,112 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
 
     data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
 
-    ObjectGuid source(speaker ? speaker->GetGUID() : 0);
     ObjectGuid target(target_guid);
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBits(0, 8);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(type == CHAT_MSG_CHANNEL ? 0 : 1);
-    data->WriteBits(0, 8);
-    data->WriteBits(strlen(message), 12);
-    data->WriteBit(0);
-    data->WriteBit(1);
-
-    data->WriteBit(target[4]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[7]);
-    data->WriteBit(target[5]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[0]);
-    data->WriteBit(target[6]);
-
-    data->WriteBit(1);
-    data->WriteBit(1);
-
-    if (type == CHAT_MSG_CHANNEL)
-        data->WriteBits(strlen(channelName), 7);
+    ObjectGuid source(speaker ? speaker->GetGUID() : 0);
+    ObjectGuid unkGuid = 0;
+    ObjectGuid unkGuid2 = 0;
 
     data->WriteBit(0);
-    data->WriteBit(1);
     data->WriteBit(0);
 
-    data->WriteBit(source[1]);
-    data->WriteBit(source[5]);
-    data->WriteBit(source[4]);
-    data->WriteBit(source[6]);
-    data->WriteBit(source[3]);
+    data->WriteBit(unkGuid2[4]);
+    data->WriteBit(unkGuid2[5]);
+    data->WriteBit(unkGuid2[1]);
+    data->WriteBit(unkGuid2[0]);
+    data->WriteBit(unkGuid2[2]);
+    data->WriteBit(unkGuid2[6]);
+    data->WriteBit(unkGuid2[7]);
+    data->WriteBit(unkGuid2[3]);
+
+    data->WriteBit(1);
+    data->WriteBit(0); // Send Language
+
     data->WriteBit(source[2]);
     data->WriteBit(source[7]);
     data->WriteBit(source[0]);
+    data->WriteBit(source[3]);
+    data->WriteBit(source[4]);
+    data->WriteBit(source[6]);
+    data->WriteBit(source[1]);
+    data->WriteBit(source[5]);
+
+    data->WriteBit(0); // Show in chat log - 1 for showing only in bubble
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(0);
+
+    data->WriteBit(target[5]);
+    data->WriteBit(target[7]);
+    data->WriteBit(target[6]);
+    data->WriteBit(target[4]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[0]);
+
+    data->WriteBit(1);
+    data->WriteBit(0);
+
+    data->WriteBit(unkGuid[5]);
+    data->WriteBit(unkGuid[2]);
+    data->WriteBit(unkGuid[6]);
+    data->WriteBit(unkGuid[1]);
+    data->WriteBit(unkGuid[7]);
+    data->WriteBit(unkGuid[3]);
+    data->WriteBit(unkGuid[0]);
+    data->WriteBit(unkGuid[4]);
+
+    data->WriteBit(1);
+    data->WriteBits(strlen(message), 12);
+    data->WriteBit(0);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(1);
+
     data->FlushBits();
 
+    data->WriteByteSeq(unkGuid2[7]);
+    data->WriteByteSeq(unkGuid2[2]);
+    data->WriteByteSeq(unkGuid2[1]);
+    data->WriteByteSeq(unkGuid2[4]);
+    data->WriteByteSeq(unkGuid2[6]);
+    data->WriteByteSeq(unkGuid2[5]);
+    data->WriteByteSeq(unkGuid2[3]);
+    data->WriteByteSeq(unkGuid2[0]);
+
+    data->WriteByteSeq(unkGuid[5]);
+    data->WriteByteSeq(unkGuid[3]);
+    data->WriteByteSeq(unkGuid[2]);
+    data->WriteByteSeq(unkGuid[4]);
+    data->WriteByteSeq(unkGuid[1]);
+    data->WriteByteSeq(unkGuid[0]);
+    data->WriteByteSeq(unkGuid[7]);
+    data->WriteByteSeq(unkGuid[6]);
+
+    *data << uint8(type);
+
+    data->WriteByteSeq(source[4]);
     data->WriteByteSeq(source[2]);
+    data->WriteByteSeq(source[3]);
+    data->WriteByteSeq(source[0]);
+    data->WriteByteSeq(source[6]);
     data->WriteByteSeq(source[7]);
     data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[0]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[4]);
     data->WriteByteSeq(source[1]);
-    data->WriteByteSeq(source[6]);
 
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[1]);
+    data->WriteByteSeq(target[0]);
+    data->WriteByteSeq(target[2]);
+    data->WriteByteSeq(target[4]);
     data->WriteByteSeq(target[5]);
     data->WriteByteSeq(target[7]);
     data->WriteByteSeq(target[3]);
-    data->WriteByteSeq(target[1]);
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[2]);
-    data->WriteByteSeq(target[4]);
-    data->WriteByteSeq(target[0]);
 
-    data->WriteString(type == CHAT_MSG_CHANNEL ? channelName : "");
-    *data << uint8(language);
     data->WriteString(message);
-    *data << uint8(type);
+    *data << uint8(language);
 
     /*
     if (type == CHAT_MSG_CHANNEL)

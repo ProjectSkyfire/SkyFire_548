@@ -181,7 +181,8 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recvData)
     //TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOEQUIP_ITEM");
     uint8 srcbag, srcslot;
 
-    recvData >> srcbag >> srcslot;
+    recvData >> srcslot >> srcbag;
+    recvData.rfinish();
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
     Item* pSrcItem  = _player->GetItemByPos(srcbag, srcslot);
@@ -354,39 +355,39 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
 
     recvData >> count;
 
-    itemguid[2] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    itemguid[5] = recvData.ReadBit();
-    itemguid[3] = recvData.ReadBit();
     itemguid[7] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
-    vendorguid[2] = recvData.ReadBit();
     vendorguid[0] = recvData.ReadBit();
-    vendorguid[4] = recvData.ReadBit();
     vendorguid[3] = recvData.ReadBit();
-    itemguid[1] = recvData.ReadBit();
-    itemguid[0] = recvData.ReadBit();
+    itemguid[2] = recvData.ReadBit();
+    vendorguid[7] = recvData.ReadBit();
+    vendorguid[6] = recvData.ReadBit();
     vendorguid[5] = recvData.ReadBit();
+    vendorguid[2] = recvData.ReadBit();
     itemguid[4] = recvData.ReadBit();
     itemguid[6] = recvData.ReadBit();
+    itemguid[5] = recvData.ReadBit();
+    itemguid[2] = recvData.ReadBit();
+    vendorguid[1] = recvData.ReadBit();
+    vendorguid[4] = recvData.ReadBit();
+    itemguid[0] = recvData.ReadBit();
+    itemguid[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(itemguid[5]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(itemguid[3]);
-    recvData.ReadByteSeq(vendorguid[1]);
     recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(vendorguid[7]);
-    recvData.ReadByteSeq(itemguid[1]);
-    recvData.ReadByteSeq(itemguid[4]);
-    recvData.ReadByteSeq(itemguid[0]);
-    recvData.ReadByteSeq(itemguid[2]);
     recvData.ReadByteSeq(vendorguid[2]);
-    recvData.ReadByteSeq(itemguid[7]);
+    recvData.ReadByteSeq(itemguid[1]);
+    recvData.ReadByteSeq(vendorguid[0]);
+    recvData.ReadByteSeq(vendorguid[7]);
     recvData.ReadByteSeq(itemguid[6]);
+    recvData.ReadByteSeq(itemguid[0]);
+    recvData.ReadByteSeq(itemguid[7]);
+    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(vendorguid[5]);
+    recvData.ReadByteSeq(itemguid[5]);
+    recvData.ReadByteSeq(itemguid[3]);
+    recvData.ReadByteSeq(itemguid[4]);
+    recvData.ReadByteSeq(vendorguid[4]);
+    recvData.ReadByteSeq(vendorguid[3]);
+    recvData.ReadByteSeq(itemguid[2]);
 
     if (!itemguid)
         return;
@@ -600,42 +601,42 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
     uint32 item, slot, count, bagSlot;
     uint8 itemType; // 1 = item, 2 = currency
 
-    recvData >> bagSlot >> count >> item >> slot;
+    recvData >> bagSlot >> item >> count >> slot;
 
-    vendorguid[4] = recvData.ReadBit();
-    bagGuid[5] = recvData.ReadBit();
-    vendorguid[5] = recvData.ReadBit();
-    bagGuid[6] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
-    vendorguid[3] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    itemType = recvData.ReadBits(2);
+    bagGuid[2] = recvData.ReadBit();
     vendorguid[0] = recvData.ReadBit();
-    bagGuid[7] = recvData.ReadBit();
+    bagGuid[5] = recvData.ReadBit();
+    vendorguid[7] = recvData.ReadBit();
+    bagGuid[0] = recvData.ReadBit();
+    itemType = recvData.ReadBits(2);
+    bagGuid[6] = recvData.ReadBit();
     bagGuid[4] = recvData.ReadBit();
     vendorguid[2] = recvData.ReadBit();
-    bagGuid[1] = recvData.ReadBit();
-    bagGuid[2] = recvData.ReadBit();
+    vendorguid[1] = recvData.ReadBit();
     bagGuid[3] = recvData.ReadBit();
-    bagGuid[0] = recvData.ReadBit();
+    vendorguid[5] = recvData.ReadBit();
+    bagGuid[7] = recvData.ReadBit();
+    vendorguid[4] = recvData.ReadBit();
+    bagGuid[1] = recvData.ReadBit();
+    vendorguid[3] = recvData.ReadBit();
+    vendorguid[6] = recvData.ReadBit();
     recvData.FlushBits();
 
-    recvData.ReadByteSeq(bagGuid[5]);
-    recvData.ReadByteSeq(vendorguid[1]);
     recvData.ReadByteSeq(bagGuid[1]);
-    recvData.ReadByteSeq(bagGuid[6]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(bagGuid[2]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(bagGuid[0]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(vendorguid[2]);
-    recvData.ReadByteSeq(bagGuid[4]);
-    recvData.ReadByteSeq(bagGuid[7]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(vendorguid[6]);
     recvData.ReadByteSeq(bagGuid[3]);
+    recvData.ReadByteSeq(vendorguid[2]);
+    recvData.ReadByteSeq(vendorguid[0]);
+    recvData.ReadByteSeq(bagGuid[2]);
+    recvData.ReadByteSeq(vendorguid[4]);
+    recvData.ReadByteSeq(vendorguid[3]);
+    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(bagGuid[6]);
+    recvData.ReadByteSeq(vendorguid[6]);
+    recvData.ReadByteSeq(vendorguid[5]);
+    recvData.ReadByteSeq(bagGuid[5]);
+    recvData.ReadByteSeq(bagGuid[7]);
+    recvData.ReadByteSeq(bagGuid[4]);
+    recvData.ReadByteSeq(bagGuid[0]);
     recvData.ReadByteSeq(vendorguid[7]);
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
@@ -666,23 +667,23 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[2] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[2]);
 
     if (!GetPlayer()->IsAlive())
         return;
@@ -765,13 +766,9 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             if (int32 priceMod = _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES))
                 price -= CalculatePct(price, priceMod);
 
+            itemsData << int32(-1);
             itemsData << uint32(vendorItem->Type);                  // 1 is items, 2 is currency
             itemsData << uint32(itemTemplate->BuyCount);
-            itemsData << int32(leftInStock);
-            itemsData << uint32(itemTemplate->DisplayInfoID);
-            itemsData << uint32(slot + 1);                          // client expects counting to start at 1
-            itemsData << int32(-1);
-            itemsData << uint32(price);
 
             if (vendorItem->ExtendedCost)
             {
@@ -781,8 +778,12 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             else
                 hasExtendedCost[slot] = false;
 
-            itemsData << uint32(0);
+            itemsData << uint32(price);
             itemsData << uint32(vendorItem->item);
+            itemsData << uint32(slot + 1);                          // client expects counting to start at 1
+            itemsData << int32(leftInStock);
+            itemsData << uint32(0);
+            itemsData << uint32(itemTemplate->DisplayInfoID);
 
             if (++count >= MAX_VENDOR_ITEMS)
                 break;
@@ -797,19 +798,19 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             if (!vendorItem->ExtendedCost)
                 continue; // there's no price defined for currencies, only extendedcost is used
 
+            itemsData << int32(-1);
             itemsData << uint32(vendorItem->Type);                  // 1 is items, 2 is currency
-            itemsData << uint32(0);
-            itemsData << int32(-1);
-            itemsData << uint32(0);                                 // displayId
-            itemsData << uint32(slot + 1);                          // client expects counting to start at 1
-            itemsData << int32(-1);
-            itemsData << uint32(0);                                 // price, only seen currency types that have Extended cost
+            itemsData << uint32(0);                                 // buy count
 
             hasExtendedCost[slot] = true;
             itemsData << uint32(vendorItem->ExtendedCost);
 
-            itemsData << uint32(0);
+            itemsData << uint32(0);                                 // price, only seen currency types that have Extended cost
             itemsData << uint32(vendorItem->item);
+            itemsData << uint32(slot + 1);                          // client expects counting to start at 1
+            itemsData << int32(-1);                                 // left in stock
+            itemsData << uint32(0);
+            itemsData << uint32(0);                                 // displayId
 
             if (++count >= MAX_VENDOR_ITEMS)
                 break;
@@ -820,44 +821,44 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
     ObjectGuid guid = vendorGuid;
 
     WorldPacket data(SMSG_LIST_INVENTORY, 12 + itemsData.size());
-    data.WriteBits(count, 18);                      // item count
-    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBits(count, 18);                                      // item count
 
     for (uint32 i = 0; i < count; i++)
     {
-        data.WriteBit(0);                           // unknown
-        data.WriteBit(!hasExtendedCost[i]);         // has extended cost??
-        data.WriteBit(1);                           // has unknown??
+        data.WriteBit(0);                                           // unknown
+        data.WriteBit(1);                                           // has unknown
+        data.WriteBit(!hasExtendedCost[i]);                         // has extended cost
     }
 
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[2]);
     data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
     data.FlushBits();
 
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[6]);
-
+    data.WriteByteSeq(guid[3]);
     data.append(itemsData);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
 
-    // It doesn't matter what value is used here (PROBABLY its full vendor size)
-    // What matters is that if count of items we can see is 0 and this field is 1
-    // then client will open the vendor list, otherwise it won't
+    /* It doesn't matter what value is used here (PROBABLY its full vendor size)
+     * What matters is that if count of items we can see is 0 and this field is 1
+     * then client will open the vendor list, otherwise it won't
+     */
     if (rawItemCount)
         data << uint8(rawItemCount);
     else
         data << uint8(vendor->IsArmorer());
 
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
 
     SendPacket(&data);
 }
