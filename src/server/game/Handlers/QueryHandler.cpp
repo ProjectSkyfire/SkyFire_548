@@ -394,36 +394,38 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received MSG_CORPSE_QUERY");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
     if (!corpse)
     {
-        WorldPacket data(MSG_CORPSE_QUERY, 1);
-        data << uint8(0);                                   // corpse not found
+        WorldPacket data(SMSG_CORPSE_QUERY, 1);
+        data.WriteBits(0, 9); // Not found + guid stream
+        for (int i = 0; i < 5; i++)
+            data << uint32(0);
         SendPacket(&data);
         return;
     }
 
-    uint32 mapid = corpse->GetMapId();
+    uint32 mapId = corpse->GetMapId();
     float x = corpse->GetPositionX();
     float y = corpse->GetPositionY();
     float z = corpse->GetPositionZ();
-    uint32 corpsemapid = mapid;
+    uint32 corpseMapId = mapId;
 
     // if corpse at different map
-    if (mapid != _player->GetMapId())
+    if (mapId != _player->GetMapId())
     {
         // search entrance map for proper show entrance
-        if (MapEntry const* corpseMapEntry = sMapStore.LookupEntry(mapid))
+        if (MapEntry const* corpseMapEntry = sMapStore.LookupEntry(mapId))
         {
             if (corpseMapEntry->IsDungeon() && corpseMapEntry->entrance_map >= 0)
             {
                 // if corpse map have entrance
                 if (Map const* entranceMap = sMapMgr->CreateBaseMap(corpseMapEntry->entrance_map))
                 {
-                    mapid = corpseMapEntry->entrance_map;
+                    mapId = corpseMapEntry->entrance_map;
                     x = corpseMapEntry->entrance_x;
                     y = corpseMapEntry->entrance_y;
                     z = entranceMap->GetHeight(GetPlayer()->GetPhaseMask(), x, y, MAX_HEIGHT);
@@ -432,14 +434,34 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
         }
     }
 
-    WorldPacket data(MSG_CORPSE_QUERY, 1+(6*4));
-    data << uint8(1);                                       // corpse found
-    data << int32(mapid);
+    _player->SendCorpseReclaimDelay();
+
+    ObjectGuid corpseGuid = corpse->GetGUID();
+
+    WorldPacket data(SMSG_CORPSE_QUERY, 1+(6*4));
+    data.WriteBit(corpseGuid[4]);
+    data.WriteBit(corpseGuid[2]);
+    data.WriteBit(corpseGuid[5]);
+    data.WriteBit(corpseGuid[3]);
+    data.WriteBit(corpseGuid[1]);
+    data.WriteBit(corpseGuid[6]);
+    data.WriteBit(corpseGuid[0]);
+    data.WriteBit(1); // Corpse Found
+    data.WriteBit(corpseGuid[7]);
+
+    data.WriteByteSeq(corpseGuid[3]);
+    data.WriteByteSeq(corpseGuid[2]);
+    data.WriteByteSeq(corpseGuid[1]);
+    data << int32(mapId);
     data << float(x);
-    data << float(y);
+    data.WriteByteSeq(corpseGuid[6]);
+    data.WriteByteSeq(corpseGuid[4]);
+    data.WriteByteSeq(corpseGuid[5]);
+    data << uint32(0); // unknown
+    data.WriteByteSeq(corpseGuid[7]);
     data << float(z);
-    data << int32(corpsemapid);
-    data << uint32(0);                                      // unknown
+    data.WriteByteSeq(corpseGuid[0]);
+    data << float(y);
     SendPacket(&data);
 }
 

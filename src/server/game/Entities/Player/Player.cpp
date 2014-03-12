@@ -2015,14 +2015,14 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     dataBuffer->WriteByteSeq(guildGuid[2]);
     dataBuffer->WriteByteSeq(guid[6]);
    
-    *dataBuffer << uint32(0);                                   // UNK00 new field - might be swaped with either of the 2 flags
+    *dataBuffer << uint32(charFlags);                           // Character flags
     *dataBuffer << uint32(zone);                                // Zone id
     
     dataBuffer->WriteByteSeq(guildGuid[3]);
     
     *dataBuffer << uint32(petLevel);                            // Pet level
     *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID
-    *dataBuffer << uint32(customizationFlag);                   // Character customization flags - might be swapped with UNK00 or first flags
+    *dataBuffer << uint32(0);                                   // UNK00 new field - Boost field
     *dataBuffer << uint32(0);                                   // UNK02 - might be swaped with UNK03 and the pet fields 
     
     dataBuffer->WriteByteSeq(guid[3]);
@@ -2094,7 +2094,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     dataBuffer->WriteByteSeq(guildGuid[4]);
     dataBuffer->WriteByteSeq(guid[2]);
     
-    *dataBuffer << uint32(charFlags);                           // Character flags
+    *dataBuffer << uint32(customizationFlag);                   // Character customization flags
     
     dataBuffer->WriteByteSeq(guid[7]);
     dataBuffer->WriteByteSeq(guildGuid[6]);
@@ -5175,11 +5175,11 @@ void Player::BuildPlayerRepop()
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
-    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
+    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);          // remove spirit healer position
+    data << float(0);
+    data << float(0);
+    data << float(0);
     data << uint32(-1);
-    data << float(0);
-    data << float(0);
-    data << float(0);
     GetSession()->SendPacket(&data);
 
     // speed change, land walk
@@ -5273,7 +5273,7 @@ void Player::KillPlayer()
     m_deathTimer = 6 * MINUTE * IN_MILLISECONDS;
 
     UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
-    SendCorpseReclaimDelay();
+    //SendCorpseReclaimDelay();
 
     // don't create corpse at this moment, player might be falling
 
@@ -5593,11 +5593,11 @@ void Player::RepopAtGraveyard()
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, orientation ? *orientation : GetOrientation());
         if (isDead())                                        // not send if alive, because it used in TeleportTo()
         {
-            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);  // show spirit healer position on minimap
-            data << ClosestGrave->map_id;
-            data << ClosestGrave->x;
+            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);  // show spirit healer position on minimap
             data << ClosestGrave->y;
             data << ClosestGrave->z;
+            data << ClosestGrave->x;
+            data << ClosestGrave->map_id;
             GetSession()->SendPacket(&data);
         }
     }
@@ -24783,7 +24783,11 @@ void Player::SendCorpseReclaimDelay(bool load)
 
     //! corpse reclaim delay 30 * 1000ms or longer at often deaths
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
-    data << uint32(delay*IN_MILLISECONDS);
+    data.WriteBit(delay == 0);
+
+    if (delay)
+        data << uint32(delay * IN_MILLISECONDS);
+
     GetSession()->SendPacket(&data);
 }
 

@@ -661,6 +661,7 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
+
     GetPlayer()->RepopAtGraveyard();
 }
 
@@ -912,8 +913,9 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_RECLAIM_CORPSE");
 
-    uint64 guid;
-    recvData >> guid;
+    //uint64 guid;
+    //recvData >> guid;
+    recvData.rfinish();
 
     if (GetPlayer()->IsAlive())
         return;

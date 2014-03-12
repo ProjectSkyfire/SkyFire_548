@@ -181,6 +181,7 @@ enum Opcodes
    CMSG_CONNECT_TO_FAILED                                   = 0x0,
    CMSG_CONTACT_LIST                                        = 0x0,
    CMSG_CORPSE_MAP_POSITION_QUERY                           = 0x0,
+   CMSG_CORPSE_QUERY                                        = 0x129B, // 5.4.7 18019 - Guessed
    CMSG_CREATURE_QUERY                                      = 0x1E72, // 5.4.7 18019
    CMSG_DANCE_QUERY                                         = 0x0,
    CMSG_DECLINE_CHANNEL_INVITE                              = 0x0,
@@ -457,13 +458,13 @@ enum Opcodes
    CMSG_READ_ITEM                                           = 0x0,
    CMSG_REALM_SPLIT                                         = 0x0,
    CMSG_REALM_NAME_QUERY                                    = 0x1899, // 5.4.7 18019
-   CMSG_RECLAIM_CORPSE                                      = 0x0,
+   CMSG_RECLAIM_CORPSE                                      = 0x065C, // 5.4.7 18019
    CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
    CMSG_REFORGE_ITEM                                        = 0x0,
    CMSG_REORDER_CHARACTERS                                  = 0x0,
    CMSG_REPAIR_ITEM                                         = 0x0577, // 5.4.7 18019
    CMSG_REPLACE_ACCOUNT_DATA                                = 0x0,
-   CMSG_REPOP_REQUEST                                       = 0x0,
+   CMSG_REPOP_REQUEST                                       = 0x04FC, // 5.4.7 18019
    CMSG_REPORT_PVP_AFK                                      = 0x0,
    CMSG_REQUEST_ACCOUNT_DATA                                = 0x0,
    CMSG_REQUEST_CATEGORY_COOLDOWNS                          = 0x0,
@@ -485,7 +486,7 @@ enum Opcodes
    CMSG_RESET_FACTION_CHEAT                                 = 0x0,
    CMSG_RESET_INSTANCES                                     = 0x0,
    CMSG_RESURRECT_RESPONSE                                  = 0x0,
-   CMSG_RETURN_TO_GRAVEYARD                                 = 0x0,
+   CMSG_RETURN_TO_GRAVEYARD                                 = 0x0257, // 5.4.7 18019
    CMSG_ROLE_POLL_BEGIN                                     = 0x0,
    CMSG_SAVE_CUF_PROFILES                                   = 0x0,
    CMSG_SAVE_PLAYER                                         = 0x0,
@@ -596,7 +597,6 @@ enum Opcodes
    CMSG_ZONEUPDATE                                          = 0x0,
    MSG_CHANNEL_START                                        = 0x0,
    MSG_CHANNEL_UPDATE                                       = 0x0,
-   MSG_CORPSE_QUERY                                         = 0x0,
    MSG_GM_BIND_OTHER                                        = 0x0,
    MSG_GM_SHOWLABEL                                         = 0x0,
    MSG_GM_SUMMON                                            = 0x0,
@@ -813,9 +813,10 @@ enum Opcodes
    SMSG_CONVERT_RUNE                                        = 0x0,
    SMSG_COOLDOWN_CHEAT                                      = 0x0,
    SMSG_COOLDOWN_EVENT                                      = 0x1C5B, // 5.4.7 18019
-   SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE                  = 0x0,
-   SMSG_CORPSE_NOT_IN_INSTANCE                              = 0x0,
-   SMSG_CORPSE_RECLAIM_DELAY                                = 0x0,
+   SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE                  = 0x1C73, // 5.4.7 18019
+   SMSG_CORPSE_NOT_IN_INSTANCE                              = 0x1C3B, // 5.4.7 18019
+   SMSG_CORPSE_QUERY                                        = 0x1F32, // 5.4.7 18019
+   SMSG_CORPSE_RECLAIM_DELAY                                = 0x1E73, // 5.4.7 18019
    SMSG_CREATURE_QUERY_RESPONSE                             = 0x00E0, // 5.4.7 18019
    SMSG_CRITERIA_DELETED                                    = 0x0,
    SMSG_CRITERIA_UPDATE                                     = 0x0,
@@ -827,7 +828,7 @@ enum Opcodes
    SMSG_DAMAGE_DONE_OBSOLETE                                = 0x0,
    SMSG_DANCE_QUERY_RESPONSE                                = 0x0,
    SMSG_DB_REPLY                                            = 0x1F01, // 5.4.7 18019
-   SMSG_DEATH_RELEASE_LOC                                   = 0x0,
+   SMSG_DEATH_RELEASE_LOC                                   = 0x1672, // 5,4,7 18019
    SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
    SMSG_DEFENSE_MESSAGE                                     = 0x0,
    SMSG_DESTROY_OBJECT                                      = 0x1D69, // 5.4.7 17898

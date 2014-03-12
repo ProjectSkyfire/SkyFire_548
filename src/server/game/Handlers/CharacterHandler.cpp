@@ -269,9 +269,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
     data.append(bitBuffer);
 
     if (charCount)
-    {
         data.append(dataBuffer);
-    }
 
     SendPacket(&data);
 }
