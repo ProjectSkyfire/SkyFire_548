@@ -44,7 +44,7 @@ enum Opcodes
    CMSG_ADD_IGNORE                                          = 0x0,
    CMSG_ADD_VOICE_IGNORE                                    = 0x0,
    CMSG_ALTER_APPEARANCE                                    = 0x0,
-   CMSG_AREATRIGGER                                         = 0x0,
+   CMSG_AREATRIGGER                                         = 0x155A, // 5.4.7 18019
    CMSG_AREA_SPIRIT_HEALER_QUERY                            = 0x0,
    CMSG_AREA_SPIRIT_HEALER_QUEUE                            = 0x0,
    CMSG_ARENA_TEAM_ACCEPT                                   = 0x0,
