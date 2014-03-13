@@ -900,7 +900,7 @@ enum Opcodes
    SMSG_GOSSIP_POI                                          = 0x058F, // 5.4.7 18019
    SMSG_GROUPACTION_THROTTLED                               = 0x0,
    SMSG_GROUP_CANCEL                                        = 0x0,
-   SMSG_GROUP_DECLINE                                       = 0x0,
+   SMSG_GROUP_DECLINE                                       = 0x108F, // 5.4.7 18019
    SMSG_GROUP_DESTROYED                                     = 0x0,
    SMSG_GROUP_INVITE                                        = 0x1472, // 5.4.7 18019
    SMSG_GROUP_LIST                                          = 0x0,
