@@ -230,7 +230,7 @@ enum Opcodes
    CMSG_GROUP_CANCEL                                        = 0x0,
    CMSG_GROUP_CHANGE_SUB_GROUP                              = 0x0,
    CMSG_GROUP_DISBAND                                       = 0x0,
-   CMSG_GROUP_INVITE                                        = 0x0,
+   CMSG_GROUP_INVITE                                        = 0x1990, // 5.4.7 18019
    CMSG_GROUP_INVITE_RESPONSE                               = 0x0,
    CMSG_GROUP_RAID_CONVERT                                  = 0x0,
    CMSG_GROUP_REQUEST_JOIN_UPDATES                          = 0x0,
@@ -902,7 +902,7 @@ enum Opcodes
    SMSG_GROUP_CANCEL                                        = 0x0,
    SMSG_GROUP_DECLINE                                       = 0x0,
    SMSG_GROUP_DESTROYED                                     = 0x0,
-   SMSG_GROUP_INVITE                                        = 0x0,
+   SMSG_GROUP_INVITE                                        = 0x1472, // 5.4.7 18019
    SMSG_GROUP_LIST                                          = 0x0,
    SMSG_GROUP_SET_LEADER                                    = 0x0,
    SMSG_GROUP_SET_ROLE                                      = 0x0,
