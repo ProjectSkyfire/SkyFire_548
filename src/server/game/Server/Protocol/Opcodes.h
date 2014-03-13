@@ -903,7 +903,7 @@ enum Opcodes
    SMSG_GROUP_DECLINE                                       = 0x108F, // 5.4.7 18019
    SMSG_GROUP_DESTROYED                                     = 0x0,
    SMSG_GROUP_INVITE                                        = 0x1472, // 5.4.7 18019
-   SMSG_GROUP_LIST                                          = 0x0,
+   SMSG_GROUP_LIST                                          = 0x1E61, // 5.4.7 18019
    SMSG_GROUP_SET_LEADER                                    = 0x0,
    SMSG_GROUP_SET_ROLE                                      = 0x0,
    SMSG_GROUP_UNINVITE                                      = 0x0,

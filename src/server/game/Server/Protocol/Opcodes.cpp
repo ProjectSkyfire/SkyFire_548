@@ -847,7 +847,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_GROUP_DECLINE,                           STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_GROUP_DESTROYED,                         STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GROUP_INVITE,                            STATUS_NEVER    );
-    DEFINE_OPCODE_HANDLER(SMSG_GROUP_LIST,                              STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_GROUP_LIST,                              STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_GROUP_SET_LEADER,                        STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GROUP_SET_ROLE,                          STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GROUP_UNINVITE,                          STATUS_UNHANDLED);
