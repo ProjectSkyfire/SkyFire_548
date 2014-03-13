@@ -595,7 +595,7 @@ void WorldSession::HandleLootRoll(WorldPacket& recvData)
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received MSG_MINIMAP_PING");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_MINIMAP_PING");
 
     if (!GetPlayer()->GetGroup())
         return;
@@ -603,17 +603,37 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
     float x, y;
     recvData >> x;
     recvData >> y;
+    recvData.read_skip<uint8>();
 
     //TC_LOG_DEBUG("misc", "Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
 
     /** error handling **/
     /********************/
 
+    ObjectGuid guid = GetPlayer()->GetGUID();
+
     // everything's fine, do it
-    WorldPacket data(MSG_MINIMAP_PING, (8+4+4));
-    data << uint64(GetPlayer()->GetGUID());
-    data << float(x);
+    WorldPacket data(SMSG_MINIMAP_PING, 1 + 8 + 4 + 4);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[0]);
+
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
     data << float(y);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data << float(x);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
+
     GetPlayer()->GetGroup()->BroadcastPacket(&data, true, -1, GetPlayer()->GetGUID());
 }
 

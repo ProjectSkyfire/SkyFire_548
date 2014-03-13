@@ -357,6 +357,7 @@ enum Opcodes
    CMSG_MESSAGECHAT_WHISPER                                 = 0x0D60, // 5.4.7 18019
    CMSG_MESSAGECHAT_YELL                                    = 0x0C43, // 5.4.7 18019
    CMSG_MINIGAME_MOVE                                       = 0x0,
+   CMSG_MINIMAP_PING                                        = 0x1A93, // 5.4.7 18019
    CMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
    CMSG_MOVE_CHARM_TELEPORT_CHEAT                           = 0x0,
    CMSG_MOVE_CHNG_TRANSPORT                                 = 0x0,
@@ -603,7 +604,6 @@ enum Opcodes
    MSG_GM_SUMMON                                            = 0x0,
    MSG_INSPECT_ARENA_TEAMS                                  = 0x0,
    MSG_LIST_STABLED_PETS                                    = 0x0,
-   MSG_MINIMAP_PING                                         = 0x0,
    MSG_MOVE_CHARM_TELEPORT_CHEAT                            = 0x0,
    MSG_MOVE_FALL_LAND                                       = 0x055B, // 5.4.7 18019
    MSG_MOVE_HEARTBEAT                                       = 0x017B, // 5.4.7 18019
@@ -1051,6 +1051,7 @@ enum Opcodes
    SMSG_MESSAGE_BOX                                         = 0x0,
    SMSG_MINIGAME_SETUP                                      = 0x0,
    SMSG_MINIGAME_STATE                                      = 0x0,
+   SMSG_MINIMAP_PING                                        = 0x1501, // 5.4.7 18019
    SMSG_MIRRORIMAGE_DATA                                    = 0x0,
    SMSG_MISSILE_CANCEL                                      = 0x0,
    SMSG_MODIFY_COOLDOWN                                     = 0x0,
