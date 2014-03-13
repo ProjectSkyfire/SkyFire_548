@@ -257,12 +257,12 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GROUP_INVITE_RESPONSE");
 
-    recvData.ReadBit(); // unk always 0
+    recvData.read_skip<uint8>();                // Unknown
+    bool unknown = recvData.ReadBit();          // Unknown
     bool accept = recvData.ReadBit();
 
-    // Never actually received?
-    /*if (accept)
-        recvData.read_skip<uint32>(); // unk*/
+    /*if (unknown)
+        recvData.read_skip<uint32>();*/
 
     Group* group = GetPlayer()->GetGroupInvite();
 
