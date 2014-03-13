@@ -828,7 +828,7 @@ enum Opcodes
    SMSG_DAMAGE_DONE_OBSOLETE                                = 0x0,
    SMSG_DANCE_QUERY_RESPONSE                                = 0x0,
    SMSG_DB_REPLY                                            = 0x1F01, // 5.4.7 18019
-   SMSG_DEATH_RELEASE_LOC                                   = 0x1672, // 5,4,7 18019
+   SMSG_DEATH_RELEASE_LOC                                   = 0x1672, // 5.4.7 18019
    SMSG_DEBUG_RUNE_REGEN                                    = 0x0,
    SMSG_DEFENSE_MESSAGE                                     = 0x0,
    SMSG_DESTROY_OBJECT                                      = 0x1D69, // 5.4.7 17898
