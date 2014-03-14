@@ -334,10 +334,29 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GROUP_UNINVITE_GUID");
 
-    uint64 guid;
-    std::string reason;
-    recvData >> guid;
-    recvData >> reason;
+    ObjectGuid guid;
+
+    recvData.read_skip<uint8>();
+
+    guid[0] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    uint8 reasonLen = recvData.ReadBits(8);
+    guid[3] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[3]);
+    std::string reason = recvData.ReadString(reasonLen);
 
     //can't uninvite yourself
     if (guid == GetPlayer()->GetGUID())

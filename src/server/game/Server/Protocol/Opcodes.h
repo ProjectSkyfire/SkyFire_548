@@ -238,7 +238,7 @@ enum Opcodes
    CMSG_GROUP_SET_ROLES                                     = 0x0,
    CMSG_GROUP_SWAP_SUB_GROUP                                = 0x0,
    CMSG_GROUP_UNINVITE                                      = 0x0,
-   CMSG_GROUP_UNINVITE_GUID                                 = 0x0,
+   CMSG_GROUP_UNINVITE_GUID                                 = 0x0989, // 5.4.7 18019
    CMSG_GUILD_ACCEPT                                        = 0x0,
    CMSG_GUILD_ACHIEVEMENT_MEMBERS                           = 0x0,
    CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY                    = 0x0,
