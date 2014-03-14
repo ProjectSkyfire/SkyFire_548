@@ -1527,7 +1527,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
         data.FlushBits();
 
         data.WriteByteSeq(leaderGuid[1]);
-        data.WriteByteSeq(groupGuid[4]);
+        data.WriteByteSeq(groupGuid[3]);
         data.WriteByteSeq(leaderGuid[5]);
         data.WriteByteSeq(groupGuid[2]);
         data.WriteByteSeq(leaderGuid[0]);
@@ -1676,7 +1676,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     {
     }*/
 
-    data.WriteByteSeq(groupGuid[4]);
+    data.WriteByteSeq(groupGuid[3]);
     data.append(memberData);
 
     //if (hasInstanceDifficulty)
