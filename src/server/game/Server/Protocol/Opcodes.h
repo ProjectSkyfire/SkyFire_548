@@ -235,7 +235,7 @@ enum Opcodes
    CMSG_GROUP_RAID_CONVERT                                  = 0x0,
    CMSG_GROUP_REQUEST_JOIN_UPDATES                          = 0x0,
    CMSG_GROUP_SET_LEADER                                    = 0x1383, // 5.4.7 18019
-   CMSG_GROUP_SET_ROLES                                     = 0x0,
+   CMSG_GROUP_SET_ROLES                                     = 0x1C93, // 5.4.7 18019
    CMSG_GROUP_SWAP_SUB_GROUP                                = 0x0,
    CMSG_GROUP_UNINVITE                                      = 0x0,
    CMSG_GROUP_UNINVITE_GUID                                 = 0x0989, // 5.4.7 18019
@@ -905,7 +905,7 @@ enum Opcodes
    SMSG_GROUP_INVITE                                        = 0x1472, // 5.4.7 18019
    SMSG_GROUP_LIST                                          = 0x1E61, // 5.4.7 18019
    SMSG_GROUP_SET_LEADER                                    = 0x15A2, // 5.4.7 18019
-   SMSG_GROUP_SET_ROLE                                      = 0x0,
+   SMSG_GROUP_SET_ROLE                                      = 0x0890, // 5.4.7 18019
    SMSG_GROUP_UNINVITE                                      = 0x0,
    SMSG_GUILD_ACHIEVEMENT_DATA                              = 0x0,
    SMSG_GUILD_ACHIEVEMENT_DELETED                           = 0x0,
