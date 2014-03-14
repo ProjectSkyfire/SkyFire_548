@@ -233,7 +233,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GRANT_LEVEL,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGrantLevel                );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_ASSISTANT_LEADER,                  STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupAssistantLeaderOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_CHANGE_SUB_GROUP,                  STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupChangeSubGroupOpcode );
-    DEFINE_OPCODE_HANDLER(CMSG_GROUP_DISBAND,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupDisbandOpcode        );
+    DEFINE_OPCODE_HANDLER(CMSG_GROUP_DISBAND,                           STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupDisbandOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_INVITE,                            STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupInviteOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_INVITE_RESPONSE,                   STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupInviteResponseOpcode );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_RAID_CONVERT,                      STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupRaidConvertOpcode    );
