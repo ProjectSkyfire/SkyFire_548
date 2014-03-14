@@ -698,8 +698,15 @@ void Group::ChangeLeader(uint64 newLeaderGuid)
     m_leaderName = newLeader->GetName();
     ToggleGroupMemberFlag(slot, MEMBER_FLAG_ASSISTANT, false);
 
-    WorldPacket data(SMSG_GROUP_SET_LEADER, m_leaderName.size()+1);
-    data << slot->name;
+    uint8 leaderNameLen = m_leaderName.size();
+
+    WorldPacket data(SMSG_GROUP_SET_LEADER, 1 + 1 + leaderNameLen);
+    data.WriteBits(leaderNameLen, 6);
+    data.FlushBits();
+
+    data << uint8(0);
+    data.WriteString(m_leaderName);
+
     BroadcastPacket(&data, true);
 }
 
