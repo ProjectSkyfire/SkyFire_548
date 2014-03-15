@@ -1220,7 +1220,7 @@ enum Opcodes
    SMSG_REFER_A_FRIEND_EXPIRED                              = 0x0,
    SMSG_REFER_A_FRIEND_FAILURE                              = 0x0,
    SMSG_REFORGE_RESULT                                      = 0x0,
-   SMSG_REMOVED_SPELL                                       = 0x0,
+   SMSG_REMOVED_SPELL                                       = 0x05E3, // 5.4.7 18019
    SMSG_REPORT_PVP_AFK_RESULT                               = 0x0,
    SMSG_REQUEST_CEMETERY_LIST_RESPONSE                      = 0x0,
    SMSG_REQUEST_PVP_REWARDS_RESPONSE                        = 0x0,

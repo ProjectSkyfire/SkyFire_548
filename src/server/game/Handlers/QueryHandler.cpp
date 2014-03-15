@@ -457,7 +457,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
     data.WriteByteSeq(corpseGuid[6]);
     data.WriteByteSeq(corpseGuid[4]);
     data.WriteByteSeq(corpseGuid[5]);
-    data << uint32(0); // unknown
+    data << uint32(corpseMapId);
     data.WriteByteSeq(corpseGuid[7]);
     data << float(z);
     data.WriteByteSeq(corpseGuid[0]);
