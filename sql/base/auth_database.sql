@@ -163,7 +163,7 @@ UNLOCK TABLES;
 -- Table structure for table `ip2nationcountries`
 --
 
-DROP TABLE IF EXISTS `ip2nationcountries`;
+DROP TABLE IF EXISTS `ip2nationCountries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ip2nationcountries` (
