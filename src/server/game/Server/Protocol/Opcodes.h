@@ -504,7 +504,7 @@ enum Opcodes
    CMSG_SETDEATHBINDPOINT                                   = 0x0,
    CMSG_SETSHEATHED                                         = 0x0,
    CMSG_SET_ACTIONBAR_TOGGLES                               = 0x0,
-   CMSG_SET_ACTION_BUTTON                                   = 0x0,
+   CMSG_SET_ACTION_BUTTON                                   = 0x1393, // 5.4.7 18019
    CMSG_SET_ACTIVE_MOVER                                    = 0x0,
    CMSG_SET_ACTIVE_VOICE_CHANNEL                            = 0x0,
    CMSG_SET_ALLOW_LOW_LEVEL_RAID1                           = 0x0,
