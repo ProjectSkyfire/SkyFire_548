@@ -1,5 +1,4 @@
 ## To-do list (Try to keep the order by importance)
-* Glyphs
 * Groups (Parties / Raids)
 * Mounts / Pets
 * Bank
@@ -9,7 +8,6 @@
 * Loot
 * Quests
 * Update ingame damage / stats calculation, (including newest formulas from paper doll)
-* Properly finish living part of object update
 * Implement dynamic update fieldss
 * Implement PvP Power / Update resil
 * Battlegrounds
@@ -48,3 +46,5 @@
 * Spell casting / casting results
 * Auras
 * Creature / Gameobject gossips (including vendors and trainers)
+* Glyphs
+* Properly finish living part of object update
