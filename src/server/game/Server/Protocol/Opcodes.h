@@ -229,7 +229,7 @@ enum Opcodes
    CMSG_GROUP_ASSISTANT_LEADER                              = 0x0,
    CMSG_GROUP_CANCEL                                        = 0x0,
    CMSG_GROUP_CHANGE_SUB_GROUP                              = 0x0,
-   CMSG_GROUP_DISBAND                                       = 0x0DB2, // 5.4.7 10819
+   CMSG_GROUP_DISBAND                                       = 0x0DB2, // 5.4.7 18019
    CMSG_GROUP_INVITE                                        = 0x1990, // 5.4.7 18019
    CMSG_GROUP_INVITE_RESPONSE                               = 0x1C51, // 5.4.7 18019
    CMSG_GROUP_RAID_CONVERT                                  = 0x0,
@@ -326,7 +326,7 @@ enum Opcodes
    CMSG_LOOT                                                = 0x0,
    CMSG_LOOT_CURRENCY                                       = 0x0,
    CMSG_LOOT_MASTER_GIVE                                    = 0x0,
-   CMSG_LOOT_METHOD                                         = 0x0,
+   CMSG_LOOT_METHOD                                         = 0x1C10, // 5.4.7 18019
    CMSG_LOOT_MONEY                                          = 0x0,
    CMSG_LOOT_RELEASE                                        = 0x0,
    CMSG_LOOT_ROLL                                           = 0x0,
