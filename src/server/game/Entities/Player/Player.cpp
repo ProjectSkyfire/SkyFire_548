@@ -12022,7 +12022,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     {
         if (_class == CLASS_WARRIOR || _class == CLASS_PALADIN || _class == CLASS_DEATH_KNIGHT)
         {
-            if (getLevel() < 40)
+            if (getLevel() < 50)
             {
                 if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
                     return EQUIP_ERR_CLIENT_LOCKED_OUT;
@@ -12032,7 +12032,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
         else if (_class == CLASS_HUNTER || _class == CLASS_SHAMAN)
         {
-            if (getLevel() < 40)
+            if (getLevel() < 50)
             {
                 if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
                     return EQUIP_ERR_CLIENT_LOCKED_OUT;
@@ -12040,6 +12040,16 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
             else if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
                 return EQUIP_ERR_CLIENT_LOCKED_OUT;
         }
+		else if (_class == CLASS_MONK)
+		{
+			if (getLevel() < 50)
+			{
+				if (proto->SubClass != ITEM_SUBCLASS_ARMOR_CLOTH)
+					return EQUIP_ERR_CLIENT_LOCKED_OUT;
+			}
+			else if (proto->SubClass != ITEM_SUBCLASS_LEATHER)
+				return EQUIP_ERR_CLIENT_LOCKED_OUT;
+		}
 
         if (_class == CLASS_ROGUE || _class == CLASS_DRUID)
             if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
