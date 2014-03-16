@@ -77,7 +77,7 @@ enum Opcodes
    CMSG_AUTOSTORE_GROUND_ITEM                               = 0x0,
    CMSG_AUTOSTORE_LOOT_ITEM                                 = 0x0,
    CMSG_AUTO_DECLINE_GUILD_INVITES                          = 0x0,
-   CMSG_BANKER_ACTIVATE                                     = 0x0,
+   CMSG_BANKER_ACTIVATE                                     = 0x02FD, // 5.4.7 18019
    CMSG_BATTLEFIELD_JOIN                                    = 0x0,
    CMSG_BATTLEFIELD_LEAVE                                   = 0x0,
    CMSG_BATTLEFIELD_LIST                                    = 0x0,
