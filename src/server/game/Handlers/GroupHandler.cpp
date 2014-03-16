@@ -915,37 +915,62 @@ void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received MSG_RAID_READY_CHECK");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_RAID_READY_CHECK");
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
         return;
 
-    if (recvData.empty())                                   // request
-    {
-        /** error handling **/
-        if (!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
-            return;
-        /********************/
+    ObjectGuid playerGuid = GetPlayer()->GetGUID();
 
-        // everything's fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK, 8);
-        data << GetPlayer()->GetGUID();
-        group->BroadcastPacket(&data, false, -1);
+    /** error handling **/
+    if (!group->IsLeader(playerGuid) && !group->IsAssistant(playerGuid))
+        return;
+    /********************/
 
-        group->OfflineReadyCheck();
-    }
-    else                                                    // answer
-    {
-        uint8 state;
-        recvData >> state;
+    ObjectGuid groupGuid = group->GetGUID();
 
-        // everything's fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
-        data << uint64(GetPlayer()->GetGUID());
-        data << uint8(state);
-        group->BroadcastReadyCheck(&data);
-    }
+    // everything's fine, do it
+    WorldPacket data(SMSG_RAID_READY_CHECK, 1 + 8 + 1 + 8 + 1 + 4);
+    data.WriteBit(playerGuid[4]);
+    data.WriteBit(groupGuid[1]);
+    data.WriteBit(groupGuid[4]);
+    data.WriteBit(playerGuid[6]);
+    data.WriteBit(groupGuid[7]);
+    data.WriteBit(groupGuid[6]);
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(playerGuid[0]);
+    data.WriteBit(playerGuid[7]);
+    data.WriteBit(groupGuid[0]);
+    data.WriteBit(groupGuid[3]);
+    data.WriteBit(groupGuid[5]);
+    data.WriteBit(playerGuid[5]);
+    data.WriteBit(playerGuid[3]);
+    data.WriteBit(playerGuid[1]);
+    data.WriteBit(groupGuid[2]);
+
+    data.WriteByteSeq(groupGuid[6]);
+    data.WriteByteSeq(groupGuid[0]);
+    data.WriteByteSeq(playerGuid[4]);
+    data.WriteByteSeq(playerGuid[7]);
+    data.WriteByteSeq(groupGuid[5]);
+    data.WriteByteSeq(groupGuid[7]);
+    data.WriteByteSeq(playerGuid[6]);
+    data.WriteByteSeq(playerGuid[3]);
+    data << uint8(0);                       // Unknown
+    data.WriteByteSeq(groupGuid[1]);
+    data.WriteByteSeq(playerGuid[2]);
+    data.WriteByteSeq(groupGuid[3]);
+    data.WriteByteSeq(playerGuid[5]);
+    data.WriteByteSeq(groupGuid[4]);
+    data.WriteByteSeq(groupGuid[2]);
+    data << uint32(35000);                  // Ready check duration (35 sec)
+    data.WriteByteSeq(playerGuid[1]);
+    data.WriteByteSeq(playerGuid[0]);
+
+    group->BroadcastPacket(&data, false, -1);
+
+    group->OfflineReadyCheck();
 }
 
 void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recvData*/)
