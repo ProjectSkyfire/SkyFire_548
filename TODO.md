@@ -27,6 +27,7 @@
 * Guild Finder
 * Raid Finder
 * Implement char boost
+* Professions
 
 ## Finished Stuff
 * Auth
