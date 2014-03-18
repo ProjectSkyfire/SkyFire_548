@@ -21931,12 +21931,30 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
     if (it)
     {
         uint32 new_count = pVendor->UpdateVendorItemCurrentCount(crItem, count);
+        ObjectGuid vGuid = pVendor->GetGUID();
 
-        WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
-        data << uint64(pVendor->GetGUID());
+        WorldPacket data(SMSG_BUY_ITEM, 1 + 8 + 4 + 4 + 4);
+        data.WriteBit(vGuid[7]);
+        data.WriteBit(vGuid[0]);
+        data.WriteBit(vGuid[6]);
+        data.WriteBit(vGuid[1]);
+        data.WriteBit(vGuid[5]);
+        data.WriteBit(vGuid[2]);
+        data.WriteBit(vGuid[4]);
+        data.WriteBit(vGuid[3]);
+
+        data.WriteByteSeq(vGuid[1]);
+        data.WriteByteSeq(vGuid[5]);
+        data.WriteByteSeq(vGuid[2]);
+        data.WriteByteSeq(vGuid[3]);
         data << uint32(vendorslot + 1);                   // numbered from 1 at client
-        data << int32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
+        data.WriteByteSeq(vGuid[0]);
+        data.WriteByteSeq(vGuid[6]);
         data << uint32(count);
+        data.WriteByteSeq(vGuid[7]);
+        data << int32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
+        data.WriteByteSeq(vGuid[4]);
+
         GetSession()->SendPacket(&data);
         SendNewItem(it, count, true, false, false);
 
