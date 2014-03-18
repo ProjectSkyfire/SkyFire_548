@@ -487,7 +487,7 @@ enum Opcodes
    CMSG_REQUEST_VEHICLE_PREV_SEAT                           = 0x0,
    CMSG_REQUEST_VEHICLE_SWITCH_SEAT                         = 0x0,
    CMSG_RESET_FACTION_CHEAT                                 = 0x0,
-   CMSG_RESET_INSTANCES                                     = 0x0,
+   CMSG_RESET_INSTANCES                                     = 0x169B, // 5.4.7 18019
    CMSG_RESURRECT_RESPONSE                                  = 0x0,
    CMSG_RETURN_TO_GRAVEYARD                                 = 0x0257, // 5.4.7 18019
    CMSG_ROLE_POLL_BEGIN                                     = 0x0,
