@@ -5,7 +5,6 @@
 * Guilds
 * Reputations
 * XP Related Stuff
-* Loot
 * Quests
 * Update ingame damage / stats calculation, (including newest formulas from paper doll)
 * Implement dynamic update fieldss
@@ -49,3 +48,4 @@
 * Creature / Gameobject gossips (including vendors and trainers)
 * Glyphs
 * Properly finish living part of object update
+* Loot
