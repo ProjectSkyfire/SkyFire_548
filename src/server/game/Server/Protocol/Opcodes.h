@@ -982,7 +982,7 @@ enum Opcodes
    SMSG_ITEM_COOLDOWN                                       = 0x0,
    SMSG_ITEM_ENCHANT_TIME_UPDATE                            = 0x0,
    SMSG_ITEM_EXPIRE_PURCHASE_REFUND                         = 0x0,
-   SMSG_ITEM_PUSH_RESULT                                    = 0x0,
+   SMSG_ITEM_PUSH_RESULT                                    = 0x04A1, // 5.4.7 18019
    SMSG_ITEM_REFUND_INFO_RESPONSE                           = 0x0,
    SMSG_ITEM_REFUND_RESULT                                  = 0x0,
    SMSG_ITEM_REMOVE_PASSIVE                                 = 0x0,
