@@ -59,7 +59,7 @@ enum Opcodes
    CMSG_ARENA_TEAM_ROSTER                                   = 0x0,
    CMSG_ATTACKSTOP                                          = 0x1E13, // 5.4.7 18019 0x1777 
    CMSG_ATTACKSWING                                         = 0x1513, // 5.4.7 18019
-   CMSG_AUCTION_HELLO                                       = 0x0,
+   CMSG_AUCTION_HELLO                                       = 0x047F, // 5.4.7 18019
    CMSG_AUCTION_LIST_BIDDER_ITEMS                           = 0x0,
    CMSG_AUCTION_LIST_ITEMS                                  = 0x0,
    CMSG_AUCTION_LIST_OWNER_ITEMS                            = 0x0,
