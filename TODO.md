@@ -1,7 +1,7 @@
 ## To-do list (Try to keep the order by importance)
 * Groups (Parties / Raids)
 * Mounts / Pets
-* Bank
+* Bank/GuildBank - Assigned to AriDEV *.*
 * Guilds
 * Reputations
 * XP Related Stuff
