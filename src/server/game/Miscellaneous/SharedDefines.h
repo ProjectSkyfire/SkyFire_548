@@ -3535,6 +3535,7 @@ enum TotemCategory
 enum UnitDynFlags
 {
     UNIT_DYNFLAG_NONE                       = 0x0000,
+    // UNIT_DYNFLAG_UNK1                    = 0x0001,       // Could be related to battle pet tracking
     UNIT_DYNFLAG_LOOTABLE                   = 0x0002,
     UNIT_DYNFLAG_TRACK_UNIT                 = 0x0004,
     UNIT_DYNFLAG_TAPPED                     = 0x0008,       // Lua_UnitIsTapped

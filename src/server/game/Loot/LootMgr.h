@@ -92,11 +92,11 @@ enum LootType
 // type of Loot Item in Loot View
 enum LootSlotType
 {
-    LOOT_SLOT_TYPE_ALLOW_LOOT   = 0,                        // player can loot the item.
-    LOOT_SLOT_TYPE_ROLL_ONGOING = 1,                        // roll is ongoing. player cannot loot.
+    LOOT_SLOT_TYPE_ROLL_ONGOING = 0,                        // roll is ongoing. player cannot loot.
+    LOOT_SLOT_TYPE_LOCKED       = 1,                        // item is shown in red. player cannot loot.
     LOOT_SLOT_TYPE_MASTER       = 2,                        // item can only be distributed by group loot master.
-    LOOT_SLOT_TYPE_LOCKED       = 3,                        // item is shown in red. player cannot loot.
-    LOOT_SLOT_TYPE_OWNER        = 4                         // ignore binding confirmation and etc, for single player looting
+    LOOT_SLOT_TYPE_ALLOW_LOOT   = 5,                        // player can loot the item.
+    LOOT_SLOT_TYPE_OWNER        = 6                         // ignore binding confirmation and etc, for single player looting
 };
 
 class Player;
@@ -155,6 +155,10 @@ struct LootItem
     bool AllowedForPlayer(Player const* player) const;
     void AddAllowedLooter(Player const* player);
     const AllowedLooterSet & GetAllowedLooters() const { return allowedGUIDs; }
+
+    // Write packet data
+    void WriteBitDataPart(uint8 slotType, ByteBuffer* buff);
+    void WriteBasicDataPart(uint8 slot, ByteBuffer* buff);
 };
 
 struct QuestItem
@@ -281,13 +285,8 @@ class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
 //=====================================================
 struct LootView;
 
-ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
-ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
-
 struct Loot
 {
-    friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
-
     QuestItemMap const& GetPlayerQuestItems() const { return PlayerQuestItems; }
     QuestItemMap const& GetPlayerFFAItems() const { return PlayerFFAItems; }
     QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
@@ -348,7 +347,8 @@ struct Loot
     void NotifyQuestItemRemoved(uint8 questIndex);
     void NotifyMoneyRemoved();
     void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
-    void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
+    void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); } 
+    bool HasLooter(uint64 GUID) { return PlayersLooting.find(GUID) != PlayersLooting.end(); }
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT);
@@ -381,8 +381,11 @@ struct LootView
     Loot &loot;
     Player* viewer;
     PermissionTypes permission;
+
     LootView(Loot &_loot, Player* _viewer, PermissionTypes _permission = ALL_PERMISSION)
         : loot(_loot), viewer(_viewer), permission(_permission) { }
+
+    void WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data);
 };
 
 extern LootStore LootTemplates_Creature;

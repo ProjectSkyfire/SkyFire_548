@@ -9058,10 +9058,43 @@ void Player::RemovedInsignia(Player* looterPlr)
     looterPlr->SendLoot(bones->GetGUID(), LOOT_INSIGNIA);
 }
 
-void Player::SendLootRelease(uint64 guid)
+void Player::SendLootRelease(ObjectGuid guid)
 {
-    WorldPacket data(SMSG_LOOT_RELEASE_RESPONSE, (8+1));
-    data << uint64(guid) << uint8(1);
+    ObjectGuid lootGuid = guid;
+
+    WorldPacket data(SMSG_LOOT_RELEASE_RESPONSE, 20);
+    data.WriteBit(guid[2]);
+    data.WriteBit(lootGuid[4]);
+    data.WriteBit(lootGuid[3]);
+    data.WriteBit(lootGuid[6]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(lootGuid[5]);
+    data.WriteBit(lootGuid[1]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(lootGuid[7]);
+    data.WriteBit(lootGuid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(lootGuid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[5]);
+    data.WriteByteSeq(lootGuid[6]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(lootGuid[0]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(lootGuid[2]);
+    data.WriteByteSeq(lootGuid[4]);
+    data.WriteByteSeq(lootGuid[7]);
+    data.WriteByteSeq(lootGuid[5]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(lootGuid[1]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(lootGuid[3]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[1]);
     SendDirectMessage(&data);
 }
 
@@ -9368,10 +9401,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     loot->loot_type = loot_type;
 
     WorldPacket data(SMSG_LOOT_RESPONSE, 8 + 1 + 50 + 1 + 1);           // we guess size
-    data << uint64(guid);
-    data << uint8(loot_type);
-    data << LootView(*loot, this, permission);
-
+    LootView(*loot, this, permission).WriteData(guid, loot_type, &data);
     SendDirectMessage(&data);
 
     // add 'this' player as one of the players that are looting 'loot'
@@ -9384,14 +9414,66 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
 void Player::SendNotifyLootMoneyRemoved()
 {
-    WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 0);
+    ObjectGuid guid = GetLootGUID();
+    WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 9);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[5]);
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
+void Player::SendNotifyLootItemRemoved(uint8 lootSlot, ObjectGuid guid)
 {
-    WorldPacket data(SMSG_LOOT_REMOVED, 1);
+    ObjectGuid lootGuid = guid;
+
+    WorldPacket data(SMSG_LOOT_REMOVED, 19);
+    data.WriteBit(lootGuid[1]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(lootGuid[0]);
+    data.WriteBit(lootGuid[6]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(lootGuid[3]);
+    data.WriteBit(lootGuid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(lootGuid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(lootGuid[5]);
+    data.WriteBit(lootGuid[4]);
+
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(lootGuid[0]);
+    data.WriteByteSeq(lootGuid[6]);
+    data.WriteByteSeq(lootGuid[1]);
+    data.WriteByteSeq(lootGuid[4]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(lootGuid[7]);
+    data.WriteByteSeq(lootGuid[3]);
     data << uint8(lootSlot);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(lootGuid[5]);
+    data.WriteByteSeq(lootGuid[2]);
     GetSession()->SendPacket(&data);
 }
 
@@ -25577,7 +25659,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
             qitem->is_looted = true;
             //freeforall is 1 if everyone's supposed to get the quest item.
             if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                SendNotifyLootItemRemoved(lootSlot);
+                SendNotifyLootItemRemoved(lootSlot, GetLootGUID());
             else
                 loot->NotifyQuestItemRemoved(qitem->index);
         }
@@ -25587,7 +25669,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
             {
                 //freeforall case, notify only one player of the removal
                 ffaitem->is_looted = true;
-                SendNotifyLootItemRemoved(lootSlot);
+                SendNotifyLootItemRemoved(lootSlot, GetLootGUID());
             }
             else
             {
