@@ -40,37 +40,34 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     Loot* loot = NULL;
 
     int32 lootCount = recvData.ReadBits(23);
-    ObjectGuid** guids = new ObjectGuid*[lootCount];
+    ObjectGuid* guids = new ObjectGuid[lootCount];
 
     for (int i = 0; i < lootCount; i++)
     {
-        guids[i] = new ObjectGuid[8];
-        (*guids[i])[2] = recvData.ReadBit();
-        (*guids[i])[1] = recvData.ReadBit();
-        (*guids[i])[5] = recvData.ReadBit();
-        (*guids[i])[7] = recvData.ReadBit();
-        (*guids[i])[4] = recvData.ReadBit();
-        (*guids[i])[3] = recvData.ReadBit();
-        (*guids[i])[0] = recvData.ReadBit();
-        (*guids[i])[6] = recvData.ReadBit();
+        (guids[i])[2] = recvData.ReadBit();
+        (guids[i])[1] = recvData.ReadBit();
+        (guids[i])[5] = recvData.ReadBit();
+        (guids[i])[7] = recvData.ReadBit();
+        (guids[i])[4] = recvData.ReadBit();
+        (guids[i])[3] = recvData.ReadBit();
+        (guids[i])[0] = recvData.ReadBit();
+        (guids[i])[6] = recvData.ReadBit();
     }
 
     for (int i = 0; i < lootCount; i++)
     {
         uint8 lootSlot;
-        recvData.ReadByteSeq((*guids[i])[0]);
-        recvData.ReadByteSeq((*guids[i])[3]);
+        recvData.ReadByteSeq((guids[i])[0]);
+        recvData.ReadByteSeq((guids[i])[3]);
         recvData >> lootSlot;
-        recvData.ReadByteSeq((*guids[i])[7]);
-        recvData.ReadByteSeq((*guids[i])[2]);
-        recvData.ReadByteSeq((*guids[i])[4]);
-        recvData.ReadByteSeq((*guids[i])[1]);
-        recvData.ReadByteSeq((*guids[i])[6]);
-        recvData.ReadByteSeq((*guids[i])[5]);
+        recvData.ReadByteSeq((guids[i])[7]);
+        recvData.ReadByteSeq((guids[i])[2]);
+        recvData.ReadByteSeq((guids[i])[4]);
+        recvData.ReadByteSeq((guids[i])[1]);
+        recvData.ReadByteSeq((guids[i])[6]);
+        recvData.ReadByteSeq((guids[i])[5]);
 
-        uint64 guid = *guids[i];
-
-        delete guids[i]; // Needs  to be destroyed here, otherwise it could create a memleak
+        uint64 guid = guids[i];
 
         if (IS_GAMEOBJECT_GUID(guid))
         {
