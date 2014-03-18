@@ -278,7 +278,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket& recvData)
     int8 bag, slot;
 
     recvData >> count;
-    recvData >> bag >> slot;
+    recvData >> slot >> bag;
     //TC_LOG_DEBUG("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
 
     uint16 pos = (bag << 8) | slot;
