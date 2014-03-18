@@ -1,7 +1,7 @@
 ## To-do list (Try to keep the order by importance)
 * Groups (Parties / Raids)
 * Mounts / Pets
-* Bank/GuildBank - Assigned to AriDEV *.*
+* Bank / GuildBank - Assigned to AriDEV *.*
 * Guilds
 * Reputations
 * XP Related Stuff
@@ -12,8 +12,12 @@
 * Battlegrounds
 * Implement Premade characters
 * Instance Locking
+* Professions
 * Mail
+* ID / BattleTag / Broadcast System
 * Auction House
+* Reforges
+* Transmogrification
 * Void Storage
 * Calendair & Events
 * Arenas - needs full rewrite O.o
@@ -22,11 +26,12 @@
 * Ingame Shop
 * Archaeology
 * Rated Battlegrounds
+* Implement challenger mode system
+* Brawler's guild encounters
 * Dungeon Finder
 * Guild Finder
 * Raid Finder
 * Implement char boost
-* Professions
 
 ## Finished Stuff
 * Auth
