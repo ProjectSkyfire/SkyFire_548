@@ -696,7 +696,7 @@ enum Opcodes
    SMSG_ATTACKSWING_CANT_ATTACK                             = 0x0,
    SMSG_ATTACKSWING_DEADTARGET                              = 0x0,
    SMSG_ATTACKSWING_NOTINRANGE                              = 0x0,
-   SMSG_AUCTION_HELLO                                       = 0x0,
+   SMSG_AUCTION_HELLO                                       = 0x04E9, // 5.4.7 18019
    SMSG_AUCTION_BIDDER_LIST_RESULT                          = 0x0,
    SMSG_AUCTION_BIDDER_NOTIFICATION                         = 0x0,
    SMSG_AUCTION_COMMAND_RESULT                              = 0x0,
