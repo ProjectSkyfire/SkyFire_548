@@ -11,6 +11,7 @@ CREATE TABLE `playercreateinfo_spell` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*Data for the table `playercreateinfo_spell` */
+
 INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALUES 
 (0,0,6603,'Auto attack'),
 (0, 0, 113873, "Enable Remove talent"),
@@ -64,7 +65,6 @@ INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALU
 (0, 39, 202, "Two-Handed Swords"),
 (0, 111, 196, "One-Handed Axes"),
 (0, 13, 5011, "Crossbows"),
-(0, 9, 3018, "Shoot"),
 (0, 103, 197, "Two-Handed Axes"),
 (0, 1501, 1180, "Daggers"),
 (0, 1123, 199, "Two-Handed Maces"),
@@ -74,15 +74,12 @@ INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALU
 (0, 67, 9116, "Shield"),
 (0, 35, 8737, "Mail"),
 (0, 1135, 9077, "Leather"),
-(0, 9, 2764, "Throw"),
 (0, 9, 2567, "Thrown"),
 (0, 0, 9078, "Cloth"),
 (0, 1147, 198, "One-Handed Maces"),
 (0, 431, 201, "One-Handed Swords"),
 (1573, 2, 76271, "Armor Skills"),
 (1573, 2, 76294, "Weapon Skills"),
-(2099135, 4, 883, "Call Pet 1"),
-(2099135, 4, 982, "Revive Pet"),
 (2099135, 4, 76249, "Weapon Skills"),
 (2099135, 4, 76250, "Armor Skills"),
 (2098143, 8, 76273, "Armor Skills"),
@@ -101,36 +98,47 @@ INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALU
 (0, 0, 134732, "Tired of the fight");
 
 /* For races */
-INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALUES 
+
+INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALUES
+
 -- Humans
+
 (1,0,59752,'Every Man for Himself (Racial) Humans'),
 (1,0,20599,'Diplomacy (Racial Passive) Humans '),
 (1,0,20597,'Sword Specialization (Racial Passive) Humans'),
 (1,0,20864,'Mace Specialization (Racial Passive) Humans'),
 (1,0,20598,'The human spirit (Racial Passive) Humans'),
 (1,0,79738,'Language Humans ​​(Racial Passive) Humans'),
+
 -- Dwarves
-(8,0,20594,'Stone Shape (Racial)'),
-(8,0,92682,'Researcher (Racial Passive)'),
-(8,0,20595,'Dwarves ( NO idea ,Racial Passive)'),
-(8,0,20596,'Frost Resistance (Racial Passive)'),
-(8,0,59224,'Mace Specialization (Racial Passive) Dwarves'),
-(8,0,79739,'Language Dwarves ​​(Racial Passive) Dwarves'),
+
+(4,0,20594,'Stone Shape (Racial)'),
+(4,0,92682,'Researcher (Racial Passive)'),
+(4,0,20595,'Dwarves ( NO idea ,Racial Passive)'),
+(4,0,20596,'Frost Resistance (Racial Passive)'),
+(4,0,59224,'Mace Specialization (Racial Passive) Dwarves'),
+(4,0,79739,'Language Dwarves ​​(Racial Passive) Dwarves'),
+
 -- Night Elfs
+
 (8,0,58984,'Shadowmeld (Racial) Night Elfs'),
 (8,0,20585,'Wisp Spirit (Racial Passive) Night Elfs'),
 (8,0,21009,'Elusiveness (Racial Passive) Night Elfs'),
 (8,0,20582,'Quickness (Racial Passive) Night Elfs'),
 (8,0,20583,'Nature Resistance (Racial Passive) Night Elfs'),
 (8,0,76252,'Language Night Elfs ​​(Racial Passive) Night Elfs'),
+
 -- Gnomes
+
 (64,0,20589,'Escape Artist (Racial) Gnomes'),
 (64,0,20593,'Calling - Engineer! (Racial Passive) Gnomes'),
 (64,0,20591,'Inquisitive mind (Racial Passive) Gnomes'),
 (64,0,20592,'Arcane Resistance (Racial Passive) Gnomes'),
 (64,0,92680,'Specializing in short blades (Racial Passive) Gnomes'),
 (64,0,79740,'Language Gnomes ​​(Racial Passive) Gnomes'),
+
 -- Draeneis
+
 (1024,0,28880,'Gift of the Naaru (Racial) Draeneis'),
 (1024,0,6562,'Fighting spirit (Racial Passive) Draeneis'),
 (1024,0,28875,'Carving (Racial Passive) Draeneis'),
@@ -138,6 +146,7 @@ INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALU
 (1024,0,79741,'Language Draeneis ​​(Racial Passive) Draeneis'),
 
 -- Worgen
+
 (2097152,0,79738,'Language Worgen ​​(Racial Passive) Worgen'),
 
 -- Orcs
