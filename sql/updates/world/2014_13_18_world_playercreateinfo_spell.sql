@@ -189,12 +189,12 @@ INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALU
 (256,0,79749,'Language Goblin (Racial Passive) Goblin'),
 
 -- Pandaren
-(24,0,107079,'Shake his hand (Racial) Pandaren'),
-(24,0,107074,'Inner Harmony (Racial Passive) Pandaren'),
-(24,0,107073,'Gurman (Racial Passive) Pandaren'),
-(24,0,107076,'Jumping (Racial Passive) Pandaren'),
-(24,0,107072,'Epicureanism (Racial Passive) Pandaren'),
-(24,0,131701,'Language Pandaren (Racial Passive) Pandaren');
+(8388608,0,107079,'Shake his hand (Racial) Pandaren'),
+(8388608,0,107074,'Inner Harmony (Racial Passive) Pandaren'),
+(8388608,0,107073,'Gurman (Racial Passive) Pandaren'),
+(8388608,0,107076,'Jumping (Racial Passive) Pandaren'),
+(8388608,0,107072,'Epicureanism (Racial Passive) Pandaren'),
+(8388608,0,131701,'Language Pandaren (Racial Passive) Pandaren');
 
 /* For clases */
 
@@ -235,5 +235,5 @@ INSERT INTO `playercreateinfo_spell`(`racemask`,`classmask`,`Spell`,`Note`) VALU
 (0,32,76282,'Available armor (passive) Druid'),
 (0,32,76292,'Weapon Skills Druid'),
 -- Moonk
-(0,10,106904,'Available armor (passive) Moonk'),
-(0,10,106902,'Weapon Skills Moonk');
+(0,512,106904,'Available armor (passive) Moonk'),
+(0,512,106902,'Weapon Skills Moonk');
