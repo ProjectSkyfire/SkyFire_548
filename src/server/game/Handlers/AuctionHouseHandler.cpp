@@ -84,31 +84,27 @@ void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
         return;
     
     WorldPacket data(SMSG_AUCTION_HELLO, 13);
-
-    data.WriteBit(guid[3]);
-    
-    data.WriteBit(1);            // 1 - AH enabled, 0 - AH disabled
-
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[4]);
     data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
     data.WriteBit(guid[7]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(1);            // 1 - AH enabled, 0 - AH disabled
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[5]);
+    data.FlushBits();
 
     data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
-    
-    data << uint32(ahEntry->houseId);
-
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[7]);
-    
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
+    data << uint32(ahEntry->houseId);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
+
     SendPacket(&data);
 }
 
