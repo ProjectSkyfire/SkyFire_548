@@ -536,8 +536,8 @@ enum Opcodes
    CMSG_SET_VEHICLE_REC_ID_ACK                              = 0x0,
    CMSG_SET_WATCHED_FACTION                                 = 0x0,
    CMSG_SHOP_CATEGORY                                       = 0x0,
-   CMSG_SHOWING_CLOAK                                       = 0x0,
-   CMSG_SHOWING_HELM                                        = 0x0,
+   CMSG_SHOWING_CLOAK                                       = 0x1276, // 5.4.7 18019
+   CMSG_SHOWING_HELM                                        = 0x117F, // 5.4.7 18019
    CMSG_SOCKET_GEMS                                         = 0x0,
    CMSG_SPELLCLICK                                          = 0x0,
    CMSG_SPIRIT_HEALER_ACTIVATE                              = 0x0,

@@ -509,8 +509,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_ITEM,                          STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeItemOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_SET_VEHICLE_REC_ID_ACK,                  STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_SET_WATCHED_FACTION,                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSetWatchedFactionOpcode   );
-    DEFINE_OPCODE_HANDLER(CMSG_SHOWING_CLOAK,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleShowingCloakOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_SHOWING_HELM,                            STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleShowingHelmOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_SHOWING_CLOAK,                           STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleShowingCloakOpcode        );
+    DEFINE_OPCODE_HANDLER(CMSG_SHOWING_HELM,                            STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleShowingHelmOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_SOCKET_GEMS,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSocketOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_SPELLCLICK,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSpellClick                );
     DEFINE_OPCODE_HANDLER(CMSG_SPIRIT_HEALER_ACTIVATE,                  STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleSpiritHealerActivateOpcode);
