@@ -21,6 +21,9 @@ make pull requests to our
 For further information on the SkyFire project, please visit our project website at 
 [projectskyfire.org](http://www.projectskyfire.org).
 
+Connection patcher requiered.
+[SkyFire-Community-Tools] (https://github.com/ProjectSkyfire/SkyFire-Community-Tools).
+
 ## Status
 
 [Build status](https://travis-ci.org/ProjectSkyfire/SkyFire_5xx/builds)
