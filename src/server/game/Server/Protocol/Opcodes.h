@@ -395,6 +395,7 @@ enum Opcodes
    CMSG_OBJECT_UPDATE_FAILED                                = 0x0882, // 5.4.7 18019
    CMSG_OBJECT_UPDATE_RESCUED                               = 0x0,
    CMSG_OFFER_PETITION                                      = 0x0,
+   CMSG_ONLINE_STORE_QUERY								                          = 0x1993, // 5.4.7 18019 new in 5.4.7
    CMSG_OPENING_CINEMATIC                                   = 0x0,
    CMSG_OPEN_BROWSER                                        = 0x0,
    CMSG_OPEN_ITEM                                           = 0x0,
@@ -1117,6 +1118,7 @@ enum Opcodes
    SMSG_NPC_WONT_TALK                                       = 0x0,
    SMSG_OFFER_PETITION_ERROR                                = 0x0,
    SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA                = 0x0,
+   SMSG_ONLINE_STORE_RESPONSE								                       = 0x1C29, // 5.4.7 18019 new in 5.4.7
    SMSG_OPEN_BROWSER                                        = 0x0,
    SMSG_OPEN_CONTAINER                                      = 0x0,
    SMSG_OPEN_LFG_DUNGEON_FINDER                             = 0x0,
