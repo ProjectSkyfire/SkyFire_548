@@ -40,8 +40,8 @@ enum Opcodes
    CMSG_ACTIVATETAXI                                        = 0x0,
    CMSG_ACTIVATETAXIEXPRESS                                 = 0x0,
    CMSG_ADDON_REGISTERED_PREFIXES                           = 0x0,
-   CMSG_ADD_FRIEND                                          = 0x0,
-   CMSG_ADD_IGNORE                                          = 0x0,
+   CMSG_ADD_FRIEND                                          = 0x064F, // 5.4.7 18019
+   CMSG_ADD_IGNORE                                          = 0x126D, // 5.4.7 18019
    CMSG_ADD_VOICE_IGNORE                                    = 0x0,
    CMSG_ALTER_APPEARANCE                                    = 0x0,
    CMSG_AREATRIGGER                                         = 0x155A, // 5.4.7 18019
