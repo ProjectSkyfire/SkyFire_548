@@ -464,7 +464,7 @@ enum Opcodes
    CMSG_RECLAIM_CORPSE                                      = 0x065C, // 5.4.7 18019
    CMSG_REDIRECTION_AUTH_PROOF                              = 0x0,
    CMSG_REFORGE_ITEM                                        = 0x0,
-   CMSG_REORDER_CHARACTERS                                  = 0x0,
+   CMSG_REORDER_CHARACTERS                                  = 0x1892, // 5.4.7 18019
    CMSG_REPAIR_ITEM                                         = 0x0577, // 5.4.7 18019
    CMSG_REPLACE_ACCOUNT_DATA                                = 0x0,
    CMSG_REPOP_REQUEST                                       = 0x04FC, // 5.4.7 18019
