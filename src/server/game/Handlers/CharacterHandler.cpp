@@ -2395,7 +2395,7 @@ void WorldSession::HandleRandomizeCharNameOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleReorderCharacters(WorldPacket& recvData)
 {
-    uint32 charactersCount = recvData.ReadBits(11);
+    uint32 charactersCount = recvData.ReadBits(9);
 
     std::vector<ObjectGuid> guids(charactersCount);
     uint8 position;
