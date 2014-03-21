@@ -224,7 +224,9 @@ DBCStorage <SummonPropertiesEntry> sSummonPropertiesStore(SummonPropertiesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 TalentSpellPosMap sTalentSpellPosMap;
 typedef std::map<uint32, std::vector<uint32> > SpecializationSpellsMap;
+
 SpecializationSpellsMap sSpecializationSpellsMap;
+SpecializationOverrideSpellsMap sSpecializationOverrideSpellMap;
 
 // store absolute bit position for first rank for talent inspect
 static uint32 sSpecializationClassStore[MAX_CLASSES][4];
@@ -716,8 +718,15 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpecializationSpellsStore, dbcPath, "SpecializationSpells.dbc");
     for (uint32 j = 0; j < sSpecializationSpellsStore.GetNumRows(); j++)
+    {
         if (SpecializationSpellsEntry const* specializationSpells = sSpecializationSpellsStore.LookupEntry(j))
+        {
             sSpecializationSpellsMap[specializationSpells->SpecializationId].push_back(specializationSpells->SpellId);
+
+            if (specializationSpells->RemovesSpellId)
+                sSpecializationOverrideSpellMap[specializationSpells->RemovesSpellId] = specializationSpells->SpellId;
+        }
+    }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiNodesStore,              dbcPath, "TaxiNodes.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiPathStore,               dbcPath, "TaxiPath.dbc");//15595

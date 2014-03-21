@@ -35,6 +35,7 @@
 #include "GameObjectAI.h"
 #include "SpellAuraEffects.h"
 #include "Player.h"
+#include "DBCStores.h"
 
 void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets& targets)
 {
@@ -1032,6 +1033,19 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         // not have spell in spellbook
         recvPacket.rfinish(); // prevent spam at ignore packet
         return;
+    }
+
+    if (sSpecializationOverrideSpellMap.find(spellId) != sSpecializationOverrideSpellMap.end())
+    {
+        SpellInfo const* newSpellInfo = sSpellMgr->GetSpellInfo(sSpecializationOverrideSpellMap[spellId]);
+        if (newSpellInfo)
+        {
+            if (newSpellInfo->SpellLevel <= caster->getLevel())
+            {
+                spellInfo = newSpellInfo;
+                spellId = newSpellInfo->Id;
+            }
+        }
     }
 
     Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
