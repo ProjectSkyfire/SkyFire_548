@@ -116,7 +116,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BINDER_ACTIVATE,                         STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBinderActivateOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_BUG,                                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBugOpcode                 );
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode           );
-    DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                            STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem               );
+    DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                            STATUS_LOGGEDIN,    PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem               );
     DEFINE_OPCODE_HANDLER(CMSG_BUY_BANK_SLOT,                           STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleBuyBankSlotOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_BUY_ITEM,                                STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_ADD_EVENT,                      STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarAddEvent          );
