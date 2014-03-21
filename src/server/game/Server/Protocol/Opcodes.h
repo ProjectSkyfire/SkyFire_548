@@ -244,7 +244,7 @@ enum Opcodes
    CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY                    = 0x0,
    CMSG_GUILD_ADD_RANK                                      = 0x0,
    CMSG_GUILD_ASSIGN_MEMBER_RANK                            = 0x0,
-   CMSG_GUILD_BANKER_ACTIVATE                               = 0x0,
+   CMSG_GUILD_BANKER_ACTIVATE                               = 0x02F6, // 5.4.7 18019
    CMSG_GUILD_BANK_BUY_TAB                                  = 0x0,
    CMSG_GUILD_BANK_DEPOSIT_MONEY                            = 0x0,
    CMSG_GUILD_BANK_LOG_QUERY                                = 0x0,
@@ -911,7 +911,7 @@ enum Opcodes
    SMSG_GUILD_ACHIEVEMENT_DELETED                           = 0x0,
    SMSG_GUILD_ACHIEVEMENT_EARNED                            = 0x0,
    SMSG_GUILD_ACHIEVEMENT_MEMBERS                           = 0x0,
-   SMSG_GUILD_BANK_LIST                                     = 0x0,
+   SMSG_GUILD_BANK_LIST                                     = 0x1B7B, // 5.4.7 18019
    SMSG_GUILD_BANK_LOG_QUERY_RESULT                         = 0x0,
    SMSG_GUILD_BANK_MONEY_WITHDRAWN                          = 0x0,
    SMSG_GUILD_BANK_QUERY_TEXT_RESULT                        = 0x0,
