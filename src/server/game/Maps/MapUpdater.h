@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #ifndef _MAP_UPDATER_H_INCLUDED
 #define _MAP_UPDATER_H_INCLUDED
 

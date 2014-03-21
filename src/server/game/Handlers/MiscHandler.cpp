@@ -282,12 +282,12 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         zoneids[i] = temp;
         TC_LOG_DEBUG("network", "Zone %u: %u", i, zoneids[i]);
     }
-    
+
     if (bit724)
     {
         uint32 un1, un2;
-        recvData >> un1;         
-        recvData >> un2;         
+        recvData >> un1;
+        recvData >> un2;
     }
     TC_LOG_DEBUG("network", "Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
 
@@ -421,7 +421,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         bitsData.WriteBit(playerGuid[5]); //guid2
         bitsData.WriteBit(guildGuid[4]); //guid1
         bitsData.WriteBit(accountId[1]); //guid34
-        bitsData.WriteBits(gname.size(), 7); 
+        bitsData.WriteBits(gname.size(), 7);
         bitsData.WriteBits(pname.size(), 6);
         bitsData.WriteBit(accountId[2]);
         bitsData.WriteBit(guildGuid[2]); //guid34
@@ -485,10 +485,10 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         bytesData << uint8(lvl);
         bytesData.WriteByteSeq(guildGuid[4]);
         bytesData.WriteByteSeq(playerGuid[2]);
-        
+
         if (gname.size() > 0)
             bytesData.append(gname.c_str(), gname.size());
-        
+
         bytesData.WriteByteSeq(playerGuid[7]);
         bytesData.WriteByteSeq(playerGuid[0]);
         bytesData.WriteByteSeq(accountId[2]);
@@ -1188,7 +1188,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     if (type > NUM_ACCOUNT_DATA_TYPES)
         return;
-    
+
     AccountData* adata = GetAccountData(AccountDataType(type));
 
     uint32 size = adata->Data.size();
@@ -1212,7 +1212,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     data << uint32(size);                                   // decompressed length
     data << uint32(destSize);
-    data.append(dest);  
+    data.append(dest);
     data << uint32(adata->Time);                            // unix time
     data.WriteBit(guid[7]);
     data.WriteBits(type, 3);                                 // type (0-7)
@@ -1258,7 +1258,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
     buttonStream[0] = recvData.ReadBit();
     buttonStream[5] = recvData.ReadBit();
     buttonStream[1] = recvData.ReadBit();
- 
+
     recvData.ReadByteSeq(buttonStream[3]);
     recvData.ReadByteSeq(buttonStream[6]);
     recvData.ReadByteSeq(buttonStream[1]);
@@ -1295,7 +1295,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     uint32 time;
     recvData >> time;
-    
+
     guid[5] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
@@ -2255,7 +2255,7 @@ void WorldSession::HandleViolenceLevel(WorldPacket& recvPacket)
 void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
-    
+
     guid[4] = recvPacket.ReadBit();
     guid[6] = recvPacket.ReadBit();
     guid[3] = recvPacket.ReadBit();

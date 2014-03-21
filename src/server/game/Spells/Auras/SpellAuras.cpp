@@ -204,7 +204,7 @@ void AuraApplication::ClientUpdate(bool remove)
     {
         data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
         data.WriteBits(0, 22);                          // Unk effect count
-        
+
         data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
         data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
 
@@ -219,7 +219,7 @@ void AuraApplication::ClientUpdate(bool remove)
         }
         else
             data.WriteBits(0, 22);                      // Effect Count
-            
+
 
         if (!(flags & AFLAG_CASTER))
         {
@@ -234,7 +234,7 @@ void AuraApplication::ClientUpdate(bool remove)
             data.WriteBit(casterGuid[4]);
         }
     }
-    
+
     data.WriteBit(targetGuid[2]);
     data.WriteBit(targetGuid[0]);
     data.WriteBit(targetGuid[1]);
@@ -270,14 +270,14 @@ void AuraApplication::ClientUpdate(bool remove)
                 }
             }
         }
-        
+
         data << uint8(flags);
         data << uint32(aura->GetId());
         data << uint16(aura->GetCasterLevel());
         // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
         // stack amount has priority over charges (checked on retail with spell 50262)
         data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
-        
+
         if (flags & AFLAG_DURATION)
             data << uint32(aura->GetMaxDuration());
 
@@ -286,7 +286,7 @@ void AuraApplication::ClientUpdate(bool remove)
     }
 
     data << uint8(_slot);
-    
+
     data.WriteByteSeq(targetGuid[0]);
     data.WriteByteSeq(targetGuid[1]);
     data.WriteByteSeq(targetGuid[3]);

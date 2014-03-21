@@ -501,7 +501,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
                 *data << float(self->m_movementInfo.jump.cosAngle);
                 *data << float(self->m_movementInfo.jump.xyspeed);
             }
-            
+
             *data << float(self->m_movementInfo.jump.zspeed);
             *data << uint32(self->m_movementInfo.jump.fallTime);
         }
@@ -532,7 +532,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(guid[0]);
 
         if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
-            *data << float(Position::NormalizeOrientation(self->GetOrientation()));     
+            *data << float(Position::NormalizeOrientation(self->GetOrientation()));
     }
 
     if (hasTarget)
@@ -548,7 +548,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(victimGuid[6]);
         data->WriteByteSeq(victimGuid[7]);
     }
-    
+
     if (hasAnimKits)
     {
         data->WriteBit(1);  // Missing AnimKit1

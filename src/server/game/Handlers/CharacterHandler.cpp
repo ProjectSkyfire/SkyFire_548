@@ -224,7 +224,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 {
     uint32 charCount = 0;
     ByteBuffer bitBuffer;
-    ByteBuffer dataBuffer;    
+    ByteBuffer dataBuffer;
 
     if (result)
     {
@@ -233,7 +233,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         charCount = uint32(result->GetRowCount());
         bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
-        
+
         bitBuffer.WriteBit(1);
         bitBuffer.WriteBits(0, 21); // unk loop at the end - { uint32(); uint8; }
         bitBuffer.WriteBits(charCount, 16);
@@ -252,12 +252,12 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             if (!sWorld->HasCharacterNameData(guidLow)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
-        } while (result->NextRow()); 
+        } while (result->NextRow());
 
         bitBuffer.FlushBits();
     }
     else
-    {		
+    {
         bitBuffer.WriteBit(1);
         bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(0, 16);
@@ -834,7 +834,7 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
     playerGuid[2] = recvData.ReadBit();
     playerGuid[3] = recvData.ReadBit();
     playerGuid[1] = recvData.ReadBit();
-    
+
     recvData.ReadByteSeq(playerGuid[5]);
     recvData.ReadByteSeq(playerGuid[0]);
     recvData.ReadByteSeq(playerGuid[1]);

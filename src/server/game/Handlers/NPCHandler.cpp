@@ -399,7 +399,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GOSSIP_HELLO");
 
     ObjectGuid guid;
-    
+
     guid[6] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();

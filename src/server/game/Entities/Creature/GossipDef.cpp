@@ -171,7 +171,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
     std::string updatedQuestTitles[0x20];
     ObjectGuid guid = ObjectGuid(objectGUID);
 
-    WorldPacket data(SMSG_GOSSIP_MESSAGE, 150); //??? GUESSED 
+    WorldPacket data(SMSG_GOSSIP_MESSAGE, 150); //??? GUESSED
 
     data.WriteBit(guid[7]);
     data.WriteBit(guid[6]);

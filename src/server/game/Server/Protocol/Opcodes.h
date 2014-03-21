@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 /// \addtogroup u2w
 /// @{
 /// \file
@@ -40,8 +40,8 @@ enum Opcodes
    CMSG_ACTIVATETAXI                                        = 0x0,
    CMSG_ACTIVATETAXIEXPRESS                                 = 0x0,
    CMSG_ADDON_REGISTERED_PREFIXES                           = 0x0,
-   CMSG_ADD_FRIEND                                          = 0x0,
-   CMSG_ADD_IGNORE                                          = 0x0,
+   CMSG_ADD_FRIEND                                          = 0x064F, // 5.4.7 18019
+   CMSG_ADD_IGNORE                                          = 0x126D, // 5.4.7 18019
    CMSG_ADD_VOICE_IGNORE                                    = 0x0,
    CMSG_ALTER_APPEARANCE                                    = 0x0,
    CMSG_AREATRIGGER                                         = 0x155A, // 5.4.7 18019
@@ -57,7 +57,7 @@ enum Opcodes
    CMSG_ARENA_TEAM_QUERY                                    = 0x0,
    CMSG_ARENA_TEAM_REMOVE                                   = 0x0,
    CMSG_ARENA_TEAM_ROSTER                                   = 0x0,
-   CMSG_ATTACKSTOP                                          = 0x1E13, // 5.4.7 18019 0x1777 
+   CMSG_ATTACKSTOP                                          = 0x1E13, // 5.4.7 18019 0x1777
    CMSG_ATTACKSWING                                         = 0x1513, // 5.4.7 18019
    CMSG_AUCTION_HELLO                                       = 0x047F, // 5.4.7 18019
    CMSG_AUCTION_LIST_BIDDER_ITEMS                           = 0x0,
@@ -97,7 +97,7 @@ enum Opcodes
    CMSG_BOT_DETECTED2                                       = 0x0,
    CMSG_BUG                                                 = 0x0,
    CMSG_BUSY_TRADE                                          = 0x0,
-   CMSG_BUYBACK_ITEM                                        = 0x0,
+   CMSG_BUYBACK_ITEM                                        = 0x07D7, // 5.4.7 18019
    CMSG_BUY_BANK_SLOT                                       = 0x00FE, // 5.4.7 18019
    CMSG_BUY_ITEM                                            = 0x1077, // 5.4.7 18019
    CMSG_CALENDAR_ADD_EVENT                                  = 0x0,
@@ -204,7 +204,7 @@ enum Opcodes
    CMSG_FORCE_MOVE_ROOT_ACK                                 = 0x0,
    CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x0,
    CMSG_GAMEOBJECT_QUERY                                    = 0x14EA, // 5.4.7 18019
-   CMSG_GAMEOBJ_REPORT_USE                                  = 0x0,
+   CMSG_GAMEOBJ_REPORT_USE                                  = 0x06DF, // 5.4.7 18019
    CMSG_GAMEOBJ_USE                                         = 0x0,
    CMSG_GAMESPEED_SET                                       = 0x0,
    CMSG_GAMETIME_SET                                        = 0x0,
@@ -244,7 +244,7 @@ enum Opcodes
    CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY                    = 0x0,
    CMSG_GUILD_ADD_RANK                                      = 0x0,
    CMSG_GUILD_ASSIGN_MEMBER_RANK                            = 0x0,
-   CMSG_GUILD_BANKER_ACTIVATE                               = 0x0,
+   CMSG_GUILD_BANKER_ACTIVATE                               = 0x02F6, // 5.4.7 18019
    CMSG_GUILD_BANK_BUY_TAB                                  = 0x0,
    CMSG_GUILD_BANK_DEPOSIT_MONEY                            = 0x0,
    CMSG_GUILD_BANK_LOG_QUERY                                = 0x0,
@@ -766,7 +766,7 @@ enum Opcodes
    SMSG_CALENDAR_UPDATE_INVITE_LIST                         = 0x0,
    SMSG_CAMERA_SHAKE                                        = 0x0,
    SMSG_CANCEL_AUTO_REPEAT                                  = 0x0,
-   SMSG_CANCEL_COMBAT                                       = 0x1E7A, // 5.4.7 18019
+   SMSG_CANCEL_COMBAT                                       = 0x0,
    SMSG_CAST_FAILED                                         = 0x0560, // 5.4.7 18019
    SMSG_CHALLANGES_INFO                                     = 0x0,
    SMSG_CHANNEL_LIST                                        = 0x0,
@@ -911,7 +911,7 @@ enum Opcodes
    SMSG_GUILD_ACHIEVEMENT_DELETED                           = 0x0,
    SMSG_GUILD_ACHIEVEMENT_EARNED                            = 0x0,
    SMSG_GUILD_ACHIEVEMENT_MEMBERS                           = 0x0,
-   SMSG_GUILD_BANK_LIST                                     = 0x0,
+   SMSG_GUILD_BANK_LIST                                     = 0x1B7B, // 5.4.7 18019
    SMSG_GUILD_BANK_LOG_QUERY_RESULT                         = 0x0,
    SMSG_GUILD_BANK_MONEY_WITHDRAWN                          = 0x0,
    SMSG_GUILD_BANK_QUERY_TEXT_RESULT                        = 0x0,

@@ -29,25 +29,25 @@
 #include "World.h"
 #include "WorldPacket.h"
 
-enum BG_TP_Rewards  
-{  
-    BG_TP_WIN = 0,  
-    BG_TP_FLAG_CAP,  
-    BG_TP_MAP_COMPLETE,  
-    BG_TP_REWARD_NUM  
-};  
-  
-uint32 BG_TP_Honor[BG_HONOR_MODE_NUM][BG_TP_REWARD_NUM] =  
-{  
-    {20, 40, 40}, // normal honor  
-    {60, 40, 80}  // holiday  
-};  
-  
-uint32 BG_TP_Reputation[BG_HONOR_MODE_NUM][BG_TP_REWARD_NUM] =  
-{  
-    {0, 35, 0}, // normal honor  
-    {0, 45, 0}  // holiday  
-}; 
+enum BG_TP_Rewards
+{
+    BG_TP_WIN = 0,
+    BG_TP_FLAG_CAP,
+    BG_TP_MAP_COMPLETE,
+    BG_TP_REWARD_NUM
+};
+
+uint32 BG_TP_Honor[BG_HONOR_MODE_NUM][BG_TP_REWARD_NUM] =
+{
+    {20, 40, 40}, // normal honor
+    {60, 40, 80}  // holiday
+};
+
+uint32 BG_TP_Reputation[BG_HONOR_MODE_NUM][BG_TP_REWARD_NUM] =
+{
+    {0, 35, 0}, // normal honor
+    {0, 45, 0}  // holiday
+};
 
 BattlegroundTP::BattlegroundTP()
 {

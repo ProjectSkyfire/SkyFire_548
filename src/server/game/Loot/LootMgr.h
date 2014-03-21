@@ -347,7 +347,7 @@ struct Loot
     void NotifyQuestItemRemoved(uint8 questIndex);
     void NotifyMoneyRemoved();
     void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
-    void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); } 
+    void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
     bool HasLooter(uint64 GUID) { return PlayersLooting.find(GUID) != PlayersLooting.end(); }
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);

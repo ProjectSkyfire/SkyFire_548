@@ -22,7 +22,7 @@
 #include "WorldPacket.h"
 
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
-{   
+{
     QueryResult classResult = LoginDatabase.PQuery("SELECT class, expansion FROM realm_classes WHERE realmId = %u", realmID);
     QueryResult raceResult = LoginDatabase.PQuery("SELECT race, expansion FROM realm_races WHERE realmId = %u", realmID);
 
@@ -34,7 +34,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
-    
+
     packet.WriteBit(code == AUTH_OK);
 
     if (code == AUTH_OK)
@@ -65,21 +65,21 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         do
         {
             Field* fields = classResult->Fetch();
-            
+
             packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
-        } 
+        }
         while (classResult->NextRow());
 
         packet << uint8(Expansion());
-        
+
         do
         {
             Field* fields = raceResult->Fetch();
-            
+
             packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
-        } 
+        }
         while (raceResult->NextRow());
 
         packet << uint32(Expansion());

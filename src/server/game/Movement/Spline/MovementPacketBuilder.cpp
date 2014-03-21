@@ -192,7 +192,7 @@ namespace Movement
 
         data.WriteBit(1);
         data.WriteBit(guid[4]);
-        
+
         int32 compressedSplineCount = moveSpline.splineflags & MoveSplineFlag::UncompressedPath ? 0 : moveSpline.spline.getPointCount() - 3;
         data.WriteBits(compressedSplineCount, 22); // WP count
         data.WriteBit(1);

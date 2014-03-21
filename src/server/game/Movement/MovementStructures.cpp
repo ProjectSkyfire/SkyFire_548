@@ -4867,7 +4867,7 @@ MovementStatusElements const SplineMoveUnroot[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetCanFly[] = // 5.4.7 18019 
+MovementStatusElements const MoveSetCanFly[] = // 5.4.7 18019
 {
     MSEHasGuidByte4,
     MSEHasGuidByte2,

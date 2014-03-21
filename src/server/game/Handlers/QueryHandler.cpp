@@ -103,11 +103,11 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     data.WriteBit(guid2[3]);
 
     data.FlushBits();
-    
+
     if (names)
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
             data.WriteString(names->name[i]);
-    
+
     data.WriteByteSeq(guid3[4]);
     data.WriteByteSeq(guid3[5]);
     data.WriteByteSeq(guid3[7]);
@@ -179,7 +179,7 @@ void WorldSession::SendRealmNameQueryOpcode(uint32 realmId)
     WorldPacket data(SMSG_REALM_NAME_QUERY_RESPONSE);
     data << uint32(realmId);
     data << uint8(!result);
-    
+
     if (result)
     {
         Field* fields = result->Fetch();
@@ -328,7 +328,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[4]);
-    
+
     const GameObjectTemplate* info = sObjectMgr->GetGameObjectTemplate(entry);
     uint32 entryToSend = info ? entry : 0x80000000 | entry;
 

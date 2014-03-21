@@ -45,7 +45,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 {
     uint32 type = 0;
     uint32 lang;
-    
+
     switch (recvData.GetOpcode())
     {
         case CMSG_MESSAGECHAT_SAY:

@@ -1808,7 +1808,7 @@ void SpellMgr::LoadSpellProcEvents()
 
     do
     {
-        Field* fields = result->Fetch();   
+        Field* fields = result->Fetch();
         int i = 0;
 
         int32 spellId = fields[i++].GetInt32();

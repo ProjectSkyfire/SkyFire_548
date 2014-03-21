@@ -2014,25 +2014,25 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     dataBuffer->WriteByteSeq(guid[5]);
     dataBuffer->WriteByteSeq(guildGuid[2]);
     dataBuffer->WriteByteSeq(guid[6]);
-   
+
     *dataBuffer << uint32(charFlags);                           // Character flags
     *dataBuffer << uint32(zone);                                // Zone id
-    
+
     dataBuffer->WriteByteSeq(guildGuid[3]);
-    
+
     *dataBuffer << uint32(petLevel);                            // Pet level
     *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID
     *dataBuffer << uint32(0);                                   // UNK00 new field - Boost field
-    *dataBuffer << uint32(0);                                   // UNK02 - might be swaped with UNK03 and the pet fields 
-    
+    *dataBuffer << uint32(0);                                   // UNK02 - might be swaped with UNK03 and the pet fields
+
     dataBuffer->WriteByteSeq(guid[3]);
     dataBuffer->WriteByteSeq(guid[0]);
 
     *dataBuffer << uint8(facialHair);                           // Facial hair
     *dataBuffer << uint8(gender);                               // Gender
-    
+
     dataBuffer->WriteByteSeq(guildGuid[0]);
-    
+
     *dataBuffer << uint8(hairStyle);                            // Hair style
     *dataBuffer << uint8(level);                                // Level
 
@@ -2063,39 +2063,39 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
             if (enchant)
                 break;
         }
-        
+
         *dataBuffer << uint32(proto->DisplayInfoID);
         *dataBuffer << uint32(enchant ? enchant->aura_id : 0);
         *dataBuffer << uint8(proto->InventoryType);
     }
 
-    
+
     *dataBuffer << float(z);                                    // Z
-    
+
     dataBuffer->WriteByteSeq(guildGuid[1]);
 
     *dataBuffer << float(y);                                    // Y
     *dataBuffer << uint8(skin);                                 // Skin
     *dataBuffer << uint8(slot);                                 // List order
-    
+
     dataBuffer->WriteByteSeq(guildGuid[5]);
     dataBuffer->WriteByteSeq(guid[1]);
-    
-    *dataBuffer << uint32(0);                                   // UNK03 - might be swaped with UNK02 and the pet fields 
+
+    *dataBuffer << uint32(0);                                   // UNK03 - might be swaped with UNK02 and the pet fields
     *dataBuffer << float(x);                                    // X
     dataBuffer->append(name.c_str(), name.length());            // Name
-    
+
     *dataBuffer << uint32(mapId);                               // Map Id
     *dataBuffer << uint32(petFamily);                           // Pet family
-    
+
     *dataBuffer << uint8(hairColor);                            // Hair color
     *dataBuffer << uint8(playerClass);                             // Class
-    
+
     dataBuffer->WriteByteSeq(guildGuid[4]);
     dataBuffer->WriteByteSeq(guid[2]);
-    
+
     *dataBuffer << uint32(customizationFlag);                   // Character customization flags
-    
+
     dataBuffer->WriteByteSeq(guid[7]);
     dataBuffer->WriteByteSeq(guildGuid[6]);
     dataBuffer->WriteByteSeq(guid[4]);
@@ -2325,7 +2325,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packets
-                WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);              
+                WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
                 data << uint32(mapid);
 
                 data.WriteBit(0);       // unknown
@@ -2648,7 +2648,7 @@ void Player::Regenerate(Powers power)
                 float ChiRate = sWorld->getRate(RATE_POWER_CHI);
                 addvalue = 20 * ChiRate;
                 break;
-            } 
+            }
         case POWER_HEALTH:
             return;
         default:
@@ -3651,7 +3651,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
             return true;
         }
     }
-    else 
+    else
         itr->second->state = PLAYERSPELL_UNCHANGED;
 
     return false;
@@ -4495,7 +4495,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
         return false;
 
     sScriptMgr->OnPlayerTalentsReset(this, noCost);
-    
+
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
@@ -12122,16 +12122,16 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
             else if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
                 return EQUIP_ERR_CLIENT_LOCKED_OUT;
         }
-		else if (_class == CLASS_MONK)
-		{
-			if (getLevel() < 50)
-			{
-				if (proto->SubClass != ITEM_SUBCLASS_ARMOR_CLOTH)
-					return EQUIP_ERR_CLIENT_LOCKED_OUT;
-			}
-			else if (proto->SubClass != ITEM_SUBCLASS_LEATHER)
-				return EQUIP_ERR_CLIENT_LOCKED_OUT;
-		}
+        else if (_class == CLASS_MONK)
+        {
+            if (getLevel() < 50)
+            {
+                if (proto->SubClass != ITEM_SUBCLASS_ARMOR_CLOTH)
+                    return EQUIP_ERR_CLIENT_LOCKED_OUT;
+            }
+            else if (proto->SubClass != ITEM_SUBCLASS_LEATHER)
+                return EQUIP_ERR_CLIENT_LOCKED_OUT;
+        }
 
         if (_class == CLASS_ROGUE || _class == CLASS_DRUID)
             if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
@@ -23958,7 +23958,7 @@ void Player::SendAurasForTarget(Unit* target)
     data.WriteBits(visibleAuras->size(), 24);           // Aura Count
     data.WriteBit(targetGuid[7]);
     data.WriteBit(targetGuid[6]);
-    
+
 
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
     {
@@ -23967,11 +23967,11 @@ void Player::SendAurasForTarget(Unit* target)
         uint32 flags = auraApp->GetFlags();
         if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
             flags |= AFLAG_DURATION;
-            
+
         data.WriteBit(1);                               // Not remove
         data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
         data.WriteBits(0, 22);                          // Unk effect count
-        
+
         data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
         data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
 
@@ -23986,7 +23986,7 @@ void Player::SendAurasForTarget(Unit* target)
         }
         else
             data.WriteBits(0, 22);                      // Effect Count
-            
+
 
         if (!(flags & AFLAG_CASTER))
         {
@@ -24002,7 +24002,7 @@ void Player::SendAurasForTarget(Unit* target)
         }
 
     }
-    
+
     data.WriteBit(targetGuid[2]);
     data.WriteBit(targetGuid[0]);
     data.WriteBit(targetGuid[1]);
@@ -24044,23 +24044,23 @@ void Player::SendAurasForTarget(Unit* target)
                 }
             }
         }
-        
+
         data << uint8(flags);
         data << uint32(aura->GetId());
         data << uint16(aura->GetCasterLevel());
         // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
         // stack amount has priority over charges (checked on retail with spell 50262)
         data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
-        
+
         if (flags & AFLAG_DURATION)
             data << uint32(aura->GetMaxDuration());
 
         if (flags & AFLAG_DURATION)
             data << uint32(aura->GetDuration());
-            
+
             data << uint8(auraApp->GetSlot());
     }
-    
+
 
     data.WriteByteSeq(targetGuid[0]);
     data.WriteByteSeq(targetGuid[1]);
@@ -26034,7 +26034,7 @@ bool Player::LearnTalent(uint16 talentId)
 
     if (!talentInfo)
         return false;
-        
+
     uint32 maxTalentRow = GetUInt32Value(PLAYER_FIELD_MAX_TALENT_TIERS);
 
     // prevent learn talent for different class (cheating)
@@ -26351,7 +26351,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
 
             *data << uint32(talentInfo->TalentID);          // Talent.dbc
             *data << uint8(curtalent_maxrank);              // talentMaxRank (0-4)
-            
+
             ++talentIdCount;
         }
 
@@ -26784,7 +26784,7 @@ void Player::UpdateSpecCount(uint8 count)
 
 void Player::ActivateSpec(uint8 spec)
 {
-    
+
     if (GetActiveSpec() == spec)
         return;
 
