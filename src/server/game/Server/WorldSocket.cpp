@@ -100,7 +100,7 @@ struct WorldClientPktHeader
 
 WorldSocket::WorldSocket (void): WorldHandler(),
 m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
-m_RecvWPct(0), m_RecvPct(), m_Header(sizeof(AuthClientPktHeader)), 
+m_RecvWPct(0), m_RecvPct(), m_Header(sizeof(AuthClientPktHeader)),
 m_WorldHeader(sizeof(WorldClientPktHeader)), m_OutBuffer(0),
 m_OutBufferSize(65536), m_OutActive(false),
 
@@ -486,7 +486,7 @@ int WorldSocket::handle_input_header (void)
         uint8* uintHeader = (uint8*)m_WorldHeader.rd_ptr();
         m_Crypt.DecryptRecv(uintHeader, sizeof(WorldClientPktHeader));
         WorldClientPktHeader& header = *(WorldClientPktHeader*)uintHeader;
-        
+
         uint32 value = *(uint32*)uintHeader;
         header.cmd = value & 0x1FFF;
         header.size = ((value & ~(uint32)0x1FFF) >> 13);
@@ -503,7 +503,7 @@ int WorldSocket::handle_input_header (void)
             errno = EINVAL;
             return -1;
         }
-        
+
         ACE_NEW_RETURN(m_RecvWPct, WorldPacket (PacketFilter::DropHighBytes(Opcodes(header.cmd)), header.size), -1);
 
         if (header.size > 0)
@@ -757,7 +757,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     ACE_Auto_Ptr<WorldPacket> aptr(new_pct);
 
     Opcodes opcode = PacketFilter::DropHighBytes(new_pct->GetOpcode());
-    
+
 
     if (closing_)
         return -1;
@@ -769,7 +769,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     std::string opcodeName = GetOpcodeNameForLogging(opcode, false);
     if (m_Session)
         TC_LOG_TRACE("network.opcode", "C->S: %s %s", m_Session->GetPlayerInfo().c_str(), opcodeName.c_str());
-     
+
     try
     {
         switch (opcode)

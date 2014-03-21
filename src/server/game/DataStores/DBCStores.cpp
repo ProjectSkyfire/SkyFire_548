@@ -1138,7 +1138,7 @@ std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 spe
 
             if (spellInfo->SpellLevel <= minLevel || spellInfo->SpellLevel > maxLevel)
                 continue;
-            
+
             spellList.push_back(spellInfo->Id);
         }
     }

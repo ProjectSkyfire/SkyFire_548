@@ -82,7 +82,7 @@ void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
     AuctionHouseEntry const* ahEntry = AuctionHouseMgr::GetAuctionHouseEntry(unit->getFaction());
     if (!ahEntry)
         return;
-    
+
     WorldPacket data(SMSG_AUCTION_HELLO, 13);
     data.WriteBit(guid[2]);
     data.WriteBit(guid[0]);

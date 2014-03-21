@@ -874,7 +874,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
 
     if (permission == NONE_PERMISSION)
     {
-        data->WriteBit(1); 
+        data->WriteBit(1);
         data->WriteBit(guid[5]);
         data->WriteBit(lootGuid[2]);
         data->WriteBit(lootGuid[7]);
@@ -942,17 +942,17 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
     data->WriteBits(0, 20);
 
     // currency permission loop
-    
+
     data->WriteBit(lootGuid[6]);
     data->WriteBit(lootGuid[5]);
     data->WriteBit(0); // lootType present
     data->WriteBit(guid[4]);
     data->WriteBit(guid[0]);
     data->WriteBit(1); // Missing unk8
-    
+
     size_t itemCountPos = data->bitwpos();
     data->WriteBits(0, 19);
-    
+
     data->WriteBit(guid[1]);
 
     bool hasPermission = true;
@@ -1149,13 +1149,13 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
     data->WriteByteSeq(lootGuid[6]);
 
     data->append(itemBuff);
-    
+
     data->WriteByteSeq(lootGuid[7]);
     data->WriteByteSeq(guid[2]);
     data->WriteByteSeq(guid[3]);
 
     data->append(currencyBuff);
-    
+
     data->WriteByteSeq(guid[6]);
     data->WriteByteSeq(lootGuid[3]);
     data->WriteByteSeq(lootGuid[0]);

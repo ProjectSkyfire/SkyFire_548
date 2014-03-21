@@ -1501,7 +1501,7 @@ struct MapEntry
     //char*       internalname;                             // 1 unused
     uint32  map_type;                                       // 2
     //uint32 flags;                                         // 3
-    //uint32 isPvp;                                         // 4  
+    //uint32 isPvp;                                         // 4
     char* name;                                             // 5        m_MapName_lang
     uint32  linked_zone;                                    // 6        m_areaTableID
     //char*     hordeIntro;                                 // 7        m_MapDescription0_lang
@@ -2105,7 +2105,7 @@ struct SpellTargetRestrictionsEntry
     uint32    Id;                                           // 0        m_ID
     //uint32  spellId;                                      // 1  - Pandaria
     //uint32  unk0;                                         // 2  - Pandaria always after spellId
-    //float  unk0;                                          // 3  
+    //float  unk0;                                          // 3
     //uint32  unk0;                                         // 4  - Pandaria always  after spellId
     uint32    MaxAffectedTargets;                           // 5        m_maxTargets
     uint32    MaxTargetLevel;                               // 6        m_maxTargetLevel

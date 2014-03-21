@@ -325,7 +325,7 @@ enum HitInfo
     HITINFO_SWINGNOHITSOUND     = 0x00200000,               // unused?
     // 0x00400000
     HITINFO_RAGE_GAIN           = 0x00800000,
-	HITINFO_FAKE_DAMAGE         = 0x01000000, // enables damage animation even if no damage done, set only if no damage
+    HITINFO_FAKE_DAMAGE         = 0x01000000, // enables damage animation even if no damage done, set only if no damage
     HITINFO_UNK25               = 0x02000000,
     HITINFO_UNK26               = 0x04000000,
 };

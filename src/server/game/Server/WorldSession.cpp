@@ -940,7 +940,7 @@ void WorldSession::SendAddonsInfo()
         0x0D, 0x36, 0xEA, 0x01, 0xE0, 0xAA, 0x91, 0x20, 0x54, 0xF0, 0x72, 0xD8, 0x1E, 0xC7, 0x89, 0xD2
     };
 
-    uint8 pubKeyOrder[256] = 
+    uint8 pubKeyOrder[256] =
     {
          0x7A, 0xEE, 0x14, 0xB2, 0x6B, 0x4F, 0xDF, 0x04, 0x91, 0x0E, 0x74, 0x58, 0x38, 0xF3, 0x1A, 0xB3,
          0xE9, 0xD8, 0x51, 0x53, 0x19, 0xF6, 0x08, 0x79, 0x44, 0xED, 0x6A, 0x09, 0x7E, 0xC5, 0xAE, 0x65,
@@ -961,7 +961,7 @@ void WorldSession::SendAddonsInfo()
     };
 
     WorldPacket data(SMSG_ADDON_INFO, 1000);
-    
+
     AddonMgr::BannedAddonList const* bannedAddons = AddonMgr::GetBannedAddons();
     data.WriteBits((uint32)m_addonsList.size(), 23);
 
@@ -971,7 +971,7 @@ void WorldSession::SendAddonsInfo()
         data.WriteBit(0); // Has URL
         data.WriteBit(!itr->UsePublicKeyOrCRC); // If client doesnt have it, send it
     }
-    
+
     data.WriteBits((uint32)bannedAddons->size(), 18);
     data.FlushBits();
 

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 /// \addtogroup u2w
 /// @{
 /// \file
@@ -57,7 +57,7 @@ enum Opcodes
    CMSG_ARENA_TEAM_QUERY                                    = 0x0,
    CMSG_ARENA_TEAM_REMOVE                                   = 0x0,
    CMSG_ARENA_TEAM_ROSTER                                   = 0x0,
-   CMSG_ATTACKSTOP                                          = 0x1E13, // 5.4.7 18019 0x1777 
+   CMSG_ATTACKSTOP                                          = 0x1E13, // 5.4.7 18019 0x1777
    CMSG_ATTACKSWING                                         = 0x1513, // 5.4.7 18019
    CMSG_AUCTION_HELLO                                       = 0x047F, // 5.4.7 18019
    CMSG_AUCTION_LIST_BIDDER_ITEMS                           = 0x0,
@@ -766,7 +766,7 @@ enum Opcodes
    SMSG_CALENDAR_UPDATE_INVITE_LIST                         = 0x0,
    SMSG_CAMERA_SHAKE                                        = 0x0,
    SMSG_CANCEL_AUTO_REPEAT                                  = 0x0,
-   SMSG_CANCEL_COMBAT                                       = 0x1E7A, // 5.4.7 18019
+   SMSG_CANCEL_COMBAT                                       = 0x0,
    SMSG_CAST_FAILED                                         = 0x0560, // 5.4.7 18019
    SMSG_CHALLANGES_INFO                                     = 0x0,
    SMSG_CHANNEL_LIST                                        = 0x0,
