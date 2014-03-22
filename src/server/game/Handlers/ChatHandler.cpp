@@ -57,6 +57,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_PARTY:
             type = CHAT_MSG_PARTY;
             break;
+        case CMSG_MESSAGECHAT_RAID:
+            type = CHAT_MSG_RAID;
+            break;
+        case CMSG_MESSAGECHAT_RAID_WARNING:
+            type = CHAT_MSG_RAID_WARNING;
+            break;
         case CMSG_MESSAGECHAT_GUILD:
             type = CHAT_MSG_GUILD;
             break;
@@ -79,14 +85,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             type = CHAT_MSG_DND;
             break;
         /*
-        case CMSG_MESSAGECHAT_RAID:
-            type = CHAT_MSG_RAID;
-            break;
-        case CMSG_MESSAGECHAT_BATTLEGROUND:
+            case CMSG_MESSAGECHAT_BATTLEGROUND:
             type = CHAT_MSG_BATTLEGROUND;
-            break;
-        case CMSG_MESSAGECHAT_RAID_WARNING:
-            type = CHAT_MSG_RAID_WARNING;
             break;
         */
         default:

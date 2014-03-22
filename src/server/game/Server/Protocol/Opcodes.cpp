@@ -236,7 +236,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_DISBAND,                           STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupDisbandOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_INVITE,                            STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupInviteOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_INVITE_RESPONSE,                   STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupInviteResponseOpcode );
-    DEFINE_OPCODE_HANDLER(CMSG_GROUP_RAID_CONVERT,                      STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGroupRaidConvertOpcode    );
+    DEFINE_OPCODE_HANDLER(CMSG_GROUP_RAID_CONVERT,                      STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupRaidConvertOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_REQUEST_JOIN_UPDATES,              STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_SET_LEADER,                        STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGroupSetLeaderOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_SET_ROLES,                         STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleGroupSetRolesOpcode       );
@@ -351,8 +351,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_GUILD,                       STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_OFFICER,                     STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_PARTY,                       STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID,                        STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID_WARNING,                STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID,                        STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID_WARNING,                STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_SAY,                         STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_WHISPER,                     STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_YELL,                        STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode         );

@@ -232,7 +232,7 @@ enum Opcodes
    CMSG_GROUP_DISBAND                                       = 0x0DB2, // 5.4.7 18019
    CMSG_GROUP_INVITE                                        = 0x1990, // 5.4.7 18019
    CMSG_GROUP_INVITE_RESPONSE                               = 0x1C51, // 5.4.7 18019
-   CMSG_GROUP_RAID_CONVERT                                  = 0x0,
+   CMSG_GROUP_RAID_CONVERT                                  = 0x19A0, // 5.4.7 18019
    CMSG_GROUP_REQUEST_JOIN_UPDATES                          = 0x0,
    CMSG_GROUP_SET_LEADER                                    = 0x1383, // 5.4.7 18019
    CMSG_GROUP_SET_ROLES                                     = 0x1C93, // 5.4.7 18019
@@ -351,8 +351,8 @@ enum Opcodes
    CMSG_MESSAGECHAT_GUILD                                   = 0x070B, // 5.4.7 18019
    CMSG_MESSAGECHAT_OFFICER                                 = 0x1F69, // 5.4.7 18019
    CMSG_MESSAGECHAT_PARTY                                   = 0x0F02, // 5.4.7 18019
-   CMSG_MESSAGECHAT_RAID                                    = 0x0,
-   CMSG_MESSAGECHAT_RAID_WARNING                            = 0x0,
+   CMSG_MESSAGECHAT_RAID                                    = 0x054B, // 5.4.7 18019
+   CMSG_MESSAGECHAT_RAID_WARNING                            = 0x0423, // 5.4.7 18019
    CMSG_MESSAGECHAT_SAY                                     = 0x0C41, // 5.4.7 18019
    CMSG_MESSAGECHAT_WHISPER                                 = 0x0D60, // 5.4.7 18019
    CMSG_MESSAGECHAT_YELL                                    = 0x0C43, // 5.4.7 18019

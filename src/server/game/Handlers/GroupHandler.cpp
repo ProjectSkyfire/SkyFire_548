@@ -802,7 +802,7 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recvData)
     // New 4.x: it is now possible to convert a raid to a group if member count is 5 or less
 
     bool toRaid;
-    recvData >> toRaid;
+    toRaid = recvData.ReadBit();
 
     if (toRaid)
         group->ConvertToRaid();
