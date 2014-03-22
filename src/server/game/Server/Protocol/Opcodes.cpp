@@ -559,7 +559,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_WARDEN_DATA,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode          ); // STATUS_UNHANDLED
     DEFINE_OPCODE_HANDLER(CMSG_WARGAME_ACCEPT,                          STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_WARGAME_START,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(CMSG_WHO,                                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleWhoOpcode                 );
+    DEFINE_OPCODE_HANDLER(CMSG_WHO,                                     STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleWhoOpcode                 );
     DEFINE_OPCODE_HANDLER(CMSG_WHOIS,                                   STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleWhoisOpcode               );
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_STATE_UI_TIMER_UPDATE,             STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleWorldStateUITimerUpdate   );
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_TELEPORT,                          STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleWorldTeleportOpcode       );
@@ -1307,13 +1307,13 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_WEEKLY_RESET_CURRENCY,                   STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_WEEKLY_SPELL_USAGE,                      STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_WEEKLY_SPELL_USAGE_UPDATE,               STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_WHO,                                     STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_WHO,                                     STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_WHOIS,                                   STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_WORLD_SERVER_INFO,                       STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_WORLD_STATE_UI_TIMER_UPDATE,             STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_XP_GAIN_ABORTED,                         STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ZONE_UNDER_ATTACK,                       STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(MSG_VERIFY_CONNECTIVITY,                      STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT,                            STATUS_NEVER     );
+    DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT,                            STATUS_NEVER    );
     #undef DEFINE_OPCODE_HANDLER
 };

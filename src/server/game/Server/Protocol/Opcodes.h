@@ -592,7 +592,7 @@ enum Opcodes
    CMSG_WARDEN_DATA                                         = 0x1681, // 5.4.7 18019
    CMSG_WARGAME_ACCEPT                                      = 0x0,
    CMSG_WARGAME_START                                       = 0x0,
-   CMSG_WHO                                                 = 0x0,
+   CMSG_WHO                                                 = 0x13C1, // 5.4.7 18019
    CMSG_WHOIS                                               = 0x0,
    CMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
    CMSG_WORLD_TELEPORT                                      = 0x0,
@@ -1393,7 +1393,7 @@ enum Opcodes
    SMSG_WEEKLY_RESET_CURRENCY                               = 0x0,
    SMSG_WEEKLY_SPELL_USAGE                                  = 0x0,
    SMSG_WEEKLY_SPELL_USAGE_UPDATE                           = 0x0,
-   SMSG_WHO                                                 = 0x0,
+   SMSG_WHO                                                 = 0x0460, // 5.4.7 18019
    SMSG_WHOIS                                               = 0x0,
    SMSG_WORLD_SERVER_INFO                                   = 0x0,
    SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
