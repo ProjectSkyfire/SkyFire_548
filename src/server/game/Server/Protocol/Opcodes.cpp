@@ -217,7 +217,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_UNROOT_ACK,                   STATUS_UNHANDLED,    PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck             );
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJECT_QUERY,                        STATUS_LOGGEDIN,     PROCESS_INPLACE,      &WorldSession::HandleGameObjectQueryOpcode     );
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_REPORT_USE,                      STATUS_LOGGEDIN,    PROCESS_THREADUNSAFE, &WorldSession::HandleGameobjectReportUse       );
-    DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_USE,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGameObjectUseOpcode       );
+    DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_USE,                             STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleGameObjectUseOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_GET_MAIL_LIST,                           STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGetMailList               );
     DEFINE_OPCODE_HANDLER(CMSG_GET_MIRRORIMAGE_DATA,                    STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleMirrorImageDataRequest    );
     DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE,                      STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve         );

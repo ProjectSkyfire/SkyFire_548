@@ -205,7 +205,7 @@ enum Opcodes
    CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x0,
    CMSG_GAMEOBJECT_QUERY                                    = 0x14EA, // 5.4.7 18019
    CMSG_GAMEOBJ_REPORT_USE                                  = 0x06DF, // 5.4.7 18019
-   CMSG_GAMEOBJ_USE                                         = 0x0,
+   CMSG_GAMEOBJ_USE                                         = 0x055F, // 5.4.7 18019
    CMSG_GAMESPEED_SET                                       = 0x0,
    CMSG_GAMETIME_SET                                        = 0x0,
    CMSG_GETDEATHBINDZONE                                    = 0x0,
