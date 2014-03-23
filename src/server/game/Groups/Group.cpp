@@ -1811,15 +1811,53 @@ void Group::BroadcastReadyCheck(WorldPacket* packet)
 
 void Group::OfflineReadyCheck()
 {
+    ObjectGuid groupGuid = GetGUID();
+
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         Player* player = ObjectAccessor::FindPlayer(citr->guid);
         if (!player || !player->GetSession())
         {
-            WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
-            data << uint64(citr->guid);
-            data << uint8(0);
-            BroadcastReadyCheck(&data);
+            ObjectGuid playerGuid = citr->guid;
+
+            WorldPacket data(SMSG_RAID_READY_CHECK_CONFIRM, 1 + 1 + 8 + 1 + 8);
+            data.WriteBit(groupGuid[0]);
+            data.WriteBit(groupGuid[2]);
+            data.WriteBit(0);
+            data.WriteBit(playerGuid[7]);
+            data.WriteBit(playerGuid[6]);
+            data.WriteBit(playerGuid[2]);
+            data.WriteBit(groupGuid[4]);
+            data.WriteBit(groupGuid[3]);
+            data.WriteBit(groupGuid[5]);
+            data.WriteBit(playerGuid[3]);
+            data.WriteBit(groupGuid[7]);
+            data.WriteBit(playerGuid[5]);
+            data.WriteBit(groupGuid[6]);
+            data.WriteBit(groupGuid[1]);
+            data.WriteBit(playerGuid[0]);
+            data.WriteBit(playerGuid[1]);
+            data.WriteBit(playerGuid[4]);
+            data.FlushBits();
+
+            data.WriteByteSeq(playerGuid[1]);
+            data.WriteByteSeq(groupGuid[5]);
+            data.WriteByteSeq(playerGuid[2]);
+            data.WriteByteSeq(groupGuid[7]);
+            data.WriteByteSeq(groupGuid[0]);
+            data.WriteByteSeq(playerGuid[4]);
+            data.WriteByteSeq(playerGuid[3]);
+            data.WriteByteSeq(groupGuid[4]);
+            data.WriteByteSeq(playerGuid[7]);
+            data.WriteByteSeq(groupGuid[6]);
+            data.WriteByteSeq(playerGuid[5]);
+            data.WriteByteSeq(groupGuid[2]);
+            data.WriteByteSeq(groupGuid[1]);
+            data.WriteByteSeq(groupGuid[3]);
+            data.WriteByteSeq(playerGuid[0]);
+            data.WriteByteSeq(playerGuid[6]);
+
+            BroadcastPacket(&data, false, -1);
         }
     }
 }
