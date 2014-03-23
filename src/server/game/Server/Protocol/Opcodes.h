@@ -287,7 +287,7 @@ enum Opcodes
    CMSG_HEARTH_AND_RESURRECT                                = 0x0,
    CMSG_IGNORE_TRADE                                        = 0x0,
    CMSG_INITIATE_TRADE                                      = 0x0,
-   CMSG_INSPECT                                             = 0x0,
+   CMSG_INSPECT                                             = 0x01D4, // 5.4.7 18019
    CMSG_INSPECT_HONOR_STATS                                 = 0x0,
    CMSG_INSTANCE_LOCK_WARNING_RESPONSE                      = 0x0,
    CMSG_ITEM_REFUND                                         = 0x0,
@@ -965,7 +965,7 @@ enum Opcodes
    SMSG_INITIAL_SPELLS                                      = 0x1B05, // 5.4.7 18019
    SMSG_INIT_CURRENCY                                       = 0x0,
    SMSG_INIT_WORLD_STATES                                   = 0x0,
-   SMSG_INSPECT                                             = 0x0,
+   SMSG_INSPECT                                             = 0x022F, // 5.4.7 18019
    SMSG_INSPECT_HONOR_STATS                                 = 0x0,
    SMSG_INSPECT_RATED_BG_STATS                              = 0x0,
    SMSG_INSPECT_RESULTS_UPDATE                              = 0x0,
