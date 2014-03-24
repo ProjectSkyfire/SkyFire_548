@@ -442,7 +442,7 @@ enum Opcodes
     CMSG_QUESTLOG_SWAP_QUEST                                 = 0x0,
     CMSG_QUEST_CONFIRM_ACCEPT                                = 0x0,
     CMSG_QUEST_NPC_QUERY                                     = 0x0,
-    CMSG_QUEST_POI_QUERY                                     = 0x0,
+    CMSG_QUEST_POI_QUERY                                     = 0x16B8, // 5.4.7
     CMSG_QUEST_QUERY                                         = 0x0,
     CMSG_RANDOMIZE_CHAR_NAME                                 = 0x184C, // 5.4.1 17538
     CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x144C, // 5.4.1 17538
