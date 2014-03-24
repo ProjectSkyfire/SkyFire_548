@@ -122,7 +122,7 @@ enum Opcodes
    CMSG_CANCEL_CAST                                         = 0x12EB, // 5.4.7 18019
    CMSG_CANCEL_CHANNELLING                                  = 0x0,
    CMSG_CANCEL_GROWTH_AURA                                  = 0x0,
-   CMSG_CANCEL_MOUNT_AURA                                   = 0x0,
+   CMSG_CANCEL_MOUNT_AURA                                   = 0x1552, // 5.4.7 18019
    CMSG_CANCEL_QUEUED_SPELL                                 = 0x0,
    CMSG_CANCEL_TEMP_ENCHANTMENT                             = 0x0,
    CMSG_CANCEL_TRADE                                        = 0x1D32, // 5.4.7 18019
