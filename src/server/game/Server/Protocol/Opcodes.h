@@ -111,7 +111,7 @@ enum Opcodes
    CMSG_CALENDAR_EVENT_RSVP                                 = 0x0,
    CMSG_CALENDAR_EVENT_SIGNUP                               = 0x0,
    CMSG_CALENDAR_EVENT_STATUS                               = 0x0,
-   CMSG_CALENDAR_GET_CALENDAR                               = 0x0,
+   CMSG_CALENDAR_GET_CALENDAR                               = 0x0429, // 5.4.7 18019
    CMSG_CALENDAR_GET_EVENT                                  = 0x0,
    CMSG_CALENDAR_GET_NUM_PENDING                            = 0x0,
    CMSG_CALENDAR_GUILD_FILTER                               = 0x0,
@@ -173,7 +173,7 @@ enum Opcodes
    CMSG_COMMENTATOR_GET_PARTY_INFO                          = 0x0,
    CMSG_COMMENTATOR_GET_PLAYER_INFO                         = 0x0,
    CMSG_COMMENTATOR_INSTANCE_COMMAND                        = 0x0,
-   CMSG_COMMENTATOR_SKIRMISH_QUEUE_COMMAND                  = 0x0,
+   CMSG_COMMENTATOR_SKIRMISH_QUEUE_COMMAND                  = 0x051B, // 5.4.7 18019
    CMSG_COMMENTATOR_START_WARGAME                           = 0x0,
    CMSG_COMPLAIN                                            = 0x0,
    CMSG_COMPLETE_CINEMATIC                                  = 0x0,
@@ -202,7 +202,7 @@ enum Opcodes
    CMSG_EQUIPMENT_SET_USE                                   = 0x0,
    CMSG_FAR_SIGHT                                           = 0x0,
    CMSG_FORCE_MOVE_ROOT_ACK                                 = 0x0,
-   CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x0,
+   CMSG_FORCE_MOVE_UNROOT_ACK                               = 0x00EB, // 5.4.7 18019
    CMSG_GAMEOBJECT_QUERY                                    = 0x14EA, // 5.4.7 18019
    CMSG_GAMEOBJ_REPORT_USE                                  = 0x06DF, // 5.4.7 18019
    CMSG_GAMEOBJ_USE                                         = 0x055F, // 5.4.7 18019
@@ -222,6 +222,7 @@ enum Opcodes
    CMSG_GM_INVIS                                            = 0x0,
    CMSG_GM_NUKE                                             = 0x0,
    CMSG_GM_REPORT_LAG                                       = 0x0,
+   CMSG_GM_REQUEST_PLAYER_INFO                              = 0x022F, // 5.4.7 18019
    CMSG_GM_SET_SECURITY_GROUP                               = 0x0,
    CMSG_GOSSIP_HELLO                                        = 0x05F6, // 5.4.7 18019
    CMSG_GOSSIP_SELECT_OPTION                                = 0x02D7, // 5.4.7 18019
@@ -268,7 +269,7 @@ enum Opcodes
    CMSG_GUILD_MEMBER_SEND_SOR_REQUEST                       = 0x0,
    CMSG_GUILD_MOTD                                          = 0x0,
    CMSG_GUILD_NEWS_UPDATE_STICKY                            = 0x0,
-   CMSG_GUILD_PERMISSIONS                                   = 0x0,
+   CMSG_GUILD_PERMISSIONS                                   = 0x03FD, // 5.4.7 18019
    CMSG_GUILD_PROMOTE                                       = 0x0,
    CMSG_GUILD_QUERY                                         = 0x0,
    CMSG_GUILD_QUERY_NEWS                                    = 0x0,
@@ -298,6 +299,7 @@ enum Opcodes
    CMSG_LEARN_PREVIEW_TALENTS                               = 0x0,
    CMSG_LEARN_PREVIEW_TALENTS_PET                           = 0x0,
    CMSG_LEARN_TALENT                                        = 0x1F5A, // 5.4.7 18019
+   CMSG_LEARN_SPELL                                         = 0x0010, // 5.4.7 18019
    CMSG_LEAVE_CHANNEL                                       = 0x0,
    CMSG_LFG_GET_STATUS                                      = 0x0,
    CMSG_LFG_JOIN                                            = 0x0,
@@ -360,6 +362,7 @@ enum Opcodes
    CMSG_MINIMAP_PING                                        = 0x1A93, // 5.4.7 18019
    CMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
    CMSG_MOVE_CHARM_TELEPORT_CHEAT                           = 0x0,
+   CMSG_MOVE_CHARM_PORT_CHEAT                               = 0x00E0, // 5.4.7 18019
    CMSG_MOVE_CHNG_TRANSPORT                                 = 0x0,
    CMSG_MOVE_ENABLE_SWIM_TO_FLY_TRANS_ACK                   = 0x0,
    CMSG_MOVE_FALL_RESET                                     = 0x0,
@@ -399,7 +402,7 @@ enum Opcodes
    CMSG_OPEN_BROWSER                                        = 0x0,
    CMSG_OPEN_ITEM                                           = 0x0,
    CMSG_OPT_OUT_OF_LOOT                                     = 0x0,
-   CMSG_PAGE_TEXT_QUERY                                     = 0x0,
+   CMSG_PAGE_TEXT_QUERY                                     = 0x005A, // 5.4.7 18019
    CMSG_PARTY_SILENCE                                       = 0x0,
    CMSG_PARTY_UNSILENCE                                     = 0x0,
    CMSG_PETITION_BUY                                        = 0x0,
@@ -437,6 +440,7 @@ enum Opcodes
    CMSG_QUERY_GUILD_XP                                      = 0x0,
    CMSG_QUERY_INSPECT_ACHIEVEMENTS                          = 0x047E, // 5.4.7 18019
    CMSG_QUERY_QUESTS_COMPLETED                              = 0x0,
+   CMSG_QUERY_SERVER_BUCK_DATA                              = 0x041B, // 5.4.7 18019
    CMSG_QUERY_TIME                                          = 0x0,
    CMSG_QUESTGIVER_ACCEPT_QUEST                             = 0x0,
    CMSG_QUESTGIVER_CANCEL                                   = 0x0,
@@ -505,6 +509,7 @@ enum Opcodes
    CMSG_SERVERTIME                                          = 0x0,
    CMSG_SETDEATHBINDPOINT                                   = 0x0,
    CMSG_SETSHEATHED                                         = 0x0,
+   CMSG_SET_RUNE_COOLDOWN                                   = 0x0459, // 5.4.7 18019
    CMSG_SET_ACTIONBAR_TOGGLES                               = 0x03F5, // 5.4.7 18019
    CMSG_SET_ACTION_BUTTON                                   = 0x1393, // 5.4.7 18019
    CMSG_SET_ACTIVE_MOVER                                    = 0x0,
@@ -544,6 +549,7 @@ enum Opcodes
    CMSG_SPIRIT_HEALER_ACTIVATE                              = 0x0,
    CMSG_SPLIT_ITEM                                          = 0x0,
    CMSG_STANDSTATECHANGE                                    = 0x0,
+   CMSG_STABLE_SWAP_PET                                     = 0x0275, // 5.4.7 18019
    CMSG_START_QUEST                                         = 0x0,
    CMSG_STOP_DANCE                                          = 0x0,
    CMSG_STORE_LOOT_IN_SLOT                                  = 0x0,
@@ -575,7 +581,7 @@ enum Opcodes
    CMSG_TUTORIAL_CLEAR                                      = 0x0,
    CMSG_TUTORIAL_FLAG                                       = 0x07A4, // 5.4.7 18019
    CMSG_TUTORIAL_RESET                                      = 0x0,
-   CMSG_UNACCEPT_TRADE                                      = 0x0,
+   CMSG_UNACCEPT_TRADE                                      = 0x011B, // 5.4.7 18019
    CMSG_UNLEARN_SKILL                                       = 0x0,
    CMSG_UNLEARN_SPECIALIZATION                              = 0x0,
    CMSG_UNREGISTER_ALL_ADDON_PREFIXES                       = 0x0,
@@ -657,6 +663,7 @@ enum Opcodes
    MSG_PVP_LOG_DATA                                         = 0x0,
    MSG_QUERY_NEXT_MAIL_TIME                                 = 0x0,
    MSG_QUEST_PUSH_RESULT                                    = 0x0,
+   MSG_QUERY_GUILD_BANK_TEXT                                = 0x040A, // 5.4.7 18019
    MSG_RAID_READY_CHECK_FINISHED                            = 0x0,
    MSG_RAID_TARGET_UPDATE                                   = 0x0,
    MSG_SAVE_GUILD_EMBLEM                                    = 0x0,
@@ -735,9 +742,9 @@ enum Opcodes
    SMSG_BATTLEGROUND_PLAYER_JOINED                          = 0x0,
    SMSG_BATTLEGROUND_PLAYER_LEFT                            = 0x0,
    SMSG_BINDER_CONFIRM                                      = 0x0,
-   SMSG_BINDPOINTUPDATE                                     = 0x0,
+   SMSG_BINDPOINTUPDATE                                     = 0x0155, // 5.4.7 18019
    SMSG_BINDZONEREPLY                                       = 0x0,
-   SMSG_BREAK_TARGET                                        = 0x0,
+   SMSG_BREAK_TARGET                                        = 0x0152, // 5.4.7 18019
    SMSG_BUY_BANK_SLOT_RESULT                                = 0x0,
    SMSG_BUY_FAILED                                          = 0x0,
    SMSG_BUY_ITEM                                            = 0x0763, // 5.4.7 18019
@@ -756,7 +763,7 @@ enum Opcodes
    SMSG_CALENDAR_EVENT_REMOVED_ALERT                        = 0x0,
    SMSG_CALENDAR_EVENT_STATUS                               = 0x0,
    SMSG_CALENDAR_EVENT_UPDATED_ALERT                        = 0x0,
-   SMSG_CALENDAR_FILTER_GUILD                               = 0x0,
+   SMSG_CALENDAR_FILTER_GUILD                               = 0x0438, // 5.4.7 18019
    SMSG_CALENDAR_RAID_LOCKOUT_ADDED                         = 0x0,
    SMSG_CALENDAR_RAID_LOCKOUT_REMOVED                       = 0x0,
    SMSG_CALENDAR_RAID_LOCKOUT_UPDATED                       = 0x0,
@@ -868,7 +875,7 @@ enum Opcodes
    SMSG_FLOOD_DETECTED                                      = 0x0,
    SMSG_FORCEACTIONSHOW                                     = 0x0,
    SMSG_FORCED_DEATH_UPDATE                                 = 0x0,
-   SMSG_FORCE_DISPLAY_UPDATE                                = 0x0,
+   SMSG_FORCE_DISPLAY_UPDATE                                = 0x0403, // 5.4.7 18019
    SMSG_FORCE_SEND_QUEUED_PACKETS                           = 0x0,
    SMSG_FORCE_SET_VEHICLE_REC_ID                            = 0x0,
    SMSG_FORGE_MASTER_SET                                    = 0x0,
@@ -899,7 +906,7 @@ enum Opcodes
    SMSG_GOSSIP_MESSAGE                                      = 0x0E52, // 5.4.7 18019
    SMSG_GOSSIP_POI                                          = 0x058F, // 5.4.7 18019
    SMSG_GROUPACTION_THROTTLED                               = 0x0,
-   SMSG_GROUP_CANCEL                                        = 0x0,
+   SMSG_GROUP_CANCEL                                        = 0x0071, // 5.4.7 18019
    SMSG_GROUP_DECLINE                                       = 0x108F, // 5.4.7 18019
    SMSG_GROUP_DESTROYED                                     = 0x1564, // 5.4.7 18019
    SMSG_GROUP_INVITE                                        = 0x1472, // 5.4.7 18019
@@ -1060,7 +1067,7 @@ enum Opcodes
    SMSG_MONSTER_MOVE_TRANSPORT                              = 0x0, // Obsolute
    SMSG_MOTD                                                = 0x0E20, // 5.4.7 18019
    SMSG_MOUNTRESULT                                         = 0x0,
-   SMSG_MOUNTSPECIAL_ANIM                                   = 0x0,
+   SMSG_MOUNTSPECIAL_ANIM                                   = 0x0172, // 5.4.7 18019
    SMSG_MOVE_COLLISION_DISABLE                              = 0x0,
    SMSG_MOVE_COLLISION_ENABLE                               = 0x0,
    SMSG_MOVE_FEATHER_FALL                                   = 0x0,
@@ -1232,7 +1239,7 @@ enum Opcodes
    SMSG_RESET_FAILED_NOTIFY                                 = 0x0,
    SMSG_RESISTLOG                                           = 0x0,
    SMSG_RESPOND_INSPECT_ACHIEVEMENTS                        = 0x0,
-   SMSG_RESURRECT_REQUEST                                   = 0x0,
+   SMSG_RESURRECT_REQUEST                                   = 0x015B, // 5.4.7 18019
    SMSG_RESYNC_RUNES                                        = 0x0,
    SMSG_ROLE_POLL_BEGIN                                     = 0x0,
    SMSG_RWHOIS                                              = 0x0,
@@ -1344,7 +1351,7 @@ enum Opcodes
    SMSG_TIME_SYNC_REQ                                       = 0x12F1, // 5.4.7 18019
    SMSG_TITLE_EARNED                                        = 0x0,
    SMSG_TOGGLE_XP_GAIN                                      = 0x0,
-   SMSG_TOTEM_CREATED                                       = 0x0,
+   SMSG_TOTEM_CREATED                                       = 0x0413, // 5.4.7 18019
    SMSG_TRADE_STATUS                                        = 0x0,
    SMSG_TRADE_STATUS_EXTENDED                               = 0x0,
    SMSG_TRAINER_BUY_FAILED                                  = 0x0,
@@ -1399,7 +1406,7 @@ enum Opcodes
    SMSG_WORLD_SERVER_INFO                                   = 0x0,
    SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
    SMSG_XP_GAIN_ABORTED                                     = 0x0,
-   SMSG_ZONE_UNDER_ATTACK                                   = 0x0,
+   SMSG_ZONE_UNDER_ATTACK                                   = 0x0254, // 5.4.7 18019
 };
 
 /// Player state
