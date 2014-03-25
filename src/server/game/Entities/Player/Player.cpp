@@ -23535,12 +23535,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // guild bank list wtf?
 
     // Homebind
-    WorldPacket data(SMSG_BINDPOINTUPDATE, 5*4);
-    data << m_homebindZ;
-    data << m_homebindX;
-    data << (uint32) m_homebindMapId;
-    data << m_homebindY;
+    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
     data << (uint32) m_homebindAreaId;
+    data << m_homebindX;
+    data << m_homebindZ;
+    data << m_homebindY;
+    data << (uint32) m_homebindMapId;
+
     GetSession()->SendPacket(&data);
 
     // SMSG_SET_PROFICIENCY
