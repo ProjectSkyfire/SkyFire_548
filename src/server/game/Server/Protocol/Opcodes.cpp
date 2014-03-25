@@ -113,7 +113,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_ARENA,                 STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterJoinArena     );
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_RATED,                 STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_BEGIN_TRADE,                             STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBeginTradeOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_BINDER_ACTIVATE,                         STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBinderActivateOpcode      );
+    DEFINE_OPCODE_HANDLER(CMSG_BINDER_ACTIVATE,                         STATUS_LOGGEDIN,     PROCESS_THREADUNSAFE, &WorldSession::HandleBinderActivateOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_BUG,                                     STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBugOpcode                 );
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE,                              STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                            STATUS_UNHANDLED,    PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem               );
