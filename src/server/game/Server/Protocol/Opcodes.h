@@ -248,7 +248,7 @@ enum Opcodes
    CMSG_GUILD_BANK_BUY_TAB                                  = 0x0,
    CMSG_GUILD_BANK_DEPOSIT_MONEY                            = 0x0,
    CMSG_GUILD_BANK_LOG_QUERY                                = 0x0,
-   CMSG_GUILD_BANK_MONEY_WITHDRAWN_QUERY                    = 0x0,
+   CMSG_GUILD_BANK_MONEY_WITHDRAWN_QUERY                    = 0x03FC, // 5.4.7 18019
    CMSG_GUILD_BANK_NOTE                                     = 0x0,
    CMSG_GUILD_BANK_QUERY_TAB                                = 0x0,
    CMSG_GUILD_BANK_QUERY_TEXT                               = 0x0,
