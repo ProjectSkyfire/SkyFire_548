@@ -734,7 +734,7 @@ enum Opcodes
    SMSG_BATTLEGROUND_INFO_THROTTLED                         = 0x0,
    SMSG_BATTLEGROUND_PLAYER_JOINED                          = 0x0,
    SMSG_BATTLEGROUND_PLAYER_LEFT                            = 0x0,
-   SMSG_BINDER_CONFIRM                                      = 0x0,
+   SMSG_BINDER_CONFIRM                                      = 0x0F22, // 5.4.7 18019
    SMSG_BINDPOINTUPDATE                                     = 0x11E2, // 5.4.7 18019
    SMSG_BINDZONEREPLY                                       = 0x0,
    SMSG_BREAK_TARGET                                        = 0x0,
