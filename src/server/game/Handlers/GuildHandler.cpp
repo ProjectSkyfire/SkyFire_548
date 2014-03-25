@@ -418,11 +418,27 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recvPacket)
 // Called when opening guild bank tab only (first one)
 void WorldSession::HandleGuildBankQueryTab(WorldPacket& recvPacket)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint8 tabId;
-    bool sendAllSlots;
 
-    recvPacket >> guid >> tabId >> sendAllSlots;
+	guid[4] = recvPacket.ReadBit();
+	guid[0] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    recvPacket >> tabId;
+    guid[3] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[4]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TAB [%s]: Go: [" UI64FMTD "], TabId: %u, AllSlots: %u"
         , GetPlayerInfo().c_str(), guid, tabId, sendAllSlots);
