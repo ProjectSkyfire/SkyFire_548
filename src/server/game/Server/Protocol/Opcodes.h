@@ -961,9 +961,9 @@ enum Opcodes
    SMSG_HIGHEST_THREAT_UPDATE                               = 0x0,
    SMSG_HOTFIX_INFO                                         = 0x0,
    SMSG_HOTFIX_NOTIFY                                       = 0x0,
-   SMSG_INITIALIZE_FACTIONS                                 = 0x0,
+   SMSG_INITIALIZE_FACTIONS                                 = 0x11E1, // 5.4.7 18019
    SMSG_INITIAL_SPELLS                                      = 0x1B05, // 5.4.7 18019
-   SMSG_INIT_CURRENCY                                       = 0x0,
+   SMSG_INIT_CURRENCY                                       = 0x1E3A, // 5.4.7 18019
    SMSG_INIT_WORLD_STATES                                   = 0x0,
    SMSG_INSPECT                                             = 0x0,
    SMSG_INSPECT_HONOR_STATS                                 = 0x0,

@@ -201,10 +201,10 @@ void ReputationMgr::SendState(FactionState const* faction)
 void ReputationMgr::SendInitialReputations()
 {
     uint16 count = 256;
-    WorldPacket data(SMSG_INITIALIZE_FACTIONS, 4 + count * 5);
-    data << uint32(count);
-
     RepListID a = 0;
+    ByteBuffer bitData;
+
+    WorldPacket data(SMSG_INITIALIZE_FACTIONS, (count * (1 + 4)) + 32);
 
     for (FactionStateList::iterator itr = _factions.begin(); itr != _factions.end(); ++itr)
     {
@@ -213,11 +213,15 @@ void ReputationMgr::SendInitialReputations()
         {
             data << uint8(0);
             data << uint32(0);
+            bitData.WriteBit(0);
         }
 
         // fill in encountered data
         data << uint8(itr->second.Flags);
         data << uint32(itr->second.Standing);
+
+        // Bonus reputation (Your account has unlocked bonus reputation gain with this faction.)
+        bitData.WriteBit(0);
 
         itr->second.needSend = false;
 
@@ -229,7 +233,10 @@ void ReputationMgr::SendInitialReputations()
     {
         data << uint8(0);
         data << uint32(0);
+        bitData.WriteBit(0);
     }
+
+    data.append(bitData);
 
     _player->SendDirectMessage(&data);
 }
