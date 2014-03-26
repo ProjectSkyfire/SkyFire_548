@@ -794,7 +794,7 @@ enum Opcodes
    SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                           = 0x0,
    SMSG_CLEAR_TARGET                                        = 0x0,
    SMSG_CLIENTCACHE_VERSION                                 = 0x1E41, // 5.4.7 18019
-   SMSG_CLIENT_CONTROL_UPDATE                               = 0x0,
+   SMSG_CLIENT_CONTROL_UPDATE                               = 0x01EA, // 5.4.7 18019
    SMSG_CLOSE_BROWSER                                       = 0x0,
    SMSG_COMBAT_EVENT_FAILED                                 = 0x0,
    SMSG_COMBAT_LOG_MULTIPLE                                 = 0x0,
@@ -1070,7 +1070,7 @@ enum Opcodes
    SMSG_MOVE_LAND_WALK                                      = 0x0,
    SMSG_MOVE_NORMAL_FALL                                    = 0x0,
    SMSG_MOVE_ROOT                                           = 0x0,
-   SMSG_MOVE_SET_ACTIVE_MOVER                               = 0x0,
+   SMSG_MOVE_SET_ACTIVE_MOVER                               = 0x129A, // 5.4.7 18019
    SMSG_MOVE_SET_CAN_FLY                                    = 0x01F4, // 5.4.7 18019
    SMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY        = 0x0,
    SMSG_MOVE_SET_COLLISION_HEIGHT                           = 0x0,
