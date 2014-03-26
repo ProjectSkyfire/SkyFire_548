@@ -1352,7 +1352,7 @@ enum Opcodes
    SMSG_TRAINER_LIST                                        = 0x1509, // 5.4.7 18019
    SMSG_TRANSFER_ABORTED                                    = 0x0,
    SMSG_TRANSFER_PENDING                                    = 0x0440, // 5.4.7 18019
-   SMSG_TRIGGER_CINEMATIC                                   = 0x0,
+   SMSG_TRIGGER_CINEMATIC                                   = 0x04CC, // 5.4.7 18019
    SMSG_TRIGGER_MOVIE                                       = 0x0,
    SMSG_TURN_IN_PETITION_RESULTS                            = 0x0,
    SMSG_TUTORIAL_FLAGS                                      = 0x10A7, // 5.4.7 18019
