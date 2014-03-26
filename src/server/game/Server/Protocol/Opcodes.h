@@ -457,7 +457,7 @@ enum Opcodes
    CMSG_RAID_READY_CHECK                                    = 0x0D88, // 5.4.7 18019
    CMSG_RAID_READY_CHECK_CONFIRM                            = 0x13D9, // 5.4.7 18019
    CMSG_RANDOM_ROLL                                         = 0x1891, // 5.4.7 18019
-   CMSG_RANDOMIZE_CHAR_NAME                                 = 0x0,
+   CMSG_RANDOMIZE_CHAR_NAME                                 = 0x1DB9, // 5.4.7 18019
    CMSG_READY_FOR_ACCOUNT_DATA_TIMES                        = 0x13CB, // 5.4.7 18019
    CMSG_READ_ITEM                                           = 0x0,
    CMSG_REALM_SPLIT                                         = 0x1282, // 5.4.7 18019
@@ -1209,7 +1209,7 @@ enum Opcodes
    SMSG_RAID_READY_CHECK_THROTTLED_ERROR                    = 0x0,
    SMSG_RAID_SUMMON_FAILED                                  = 0x0,
    SMSG_RANDOM_ROLL                                         = 0x0529, // 5.4.7 18019
-   SMSG_RANDOMIZE_CHAR_NAME                                 = 0x0,
+   SMSG_RANDOMIZE_CHAR_NAME                                 = 0x074B, // 5.4.7 18019
    SMSG_RATED_BG_RATING                                     = 0x0,
    SMSG_RATED_BG_STATS                                      = 0x0,
    SMSG_READ_ITEM_FAILED                                    = 0x0,
