@@ -910,34 +910,43 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_DATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    bool featureBit4 = true;
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 7);         // checked in 4.2.2
-    data << uint8(2);                                       // unknown value
-    data << uint32(1);
-    data << uint32(1);
-    data << uint32(2);
+    bool feedbackSystem = true;
+    bool parentalControls = false;
+
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 1 + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
+    data << uint8(2);
+    data << uint32(0);                  // Scroll of Resurrection daily limit
     data << uint32(0);
+    data << uint32(1);
+    data << uint32(14);
+
     data.WriteBit(1);
+    data.WriteBit(parentalControls);    // parental controls
+    data.WriteBit(1);                   // show ingame shop icon
+    data.WriteBit(0);                   // Recruit a Friend button
+    data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
     data.WriteBit(1);
-    data.WriteBit(0);
-    data.WriteBit(featureBit4);
-    data.WriteBit(0);
-    data.WriteBit(0);
+    data.WriteBit(0);                   // voice chat
+    data.WriteBit(1);                   // ingame shop status (0 - "The Shop is temporarily unavailable.")
+    data.WriteBit(0);                   // Scroll of Resurrection button
+    data.WriteBit(0);                   // ingame shop parental control (1 - "Feature has been disabled by Parental Controls.")
     data.FlushBits();
-    if (featureBit4)
+
+    if (feedbackSystem)
     {
-        data << uint32(1);
+        data << uint32(60000);
         data << uint32(0);
+        data << uint32(1);
         data << uint32(10);
-        data << uint32(60);
     }
 
-    //if (featureBit5)
-    //{
-    //    data << uint32(0);
-    //    data << uint32(0);
-    //    data << uint32(0);
-    //}
+    if (parentalControls)
+    {
+        data << uint32(0);
+        data << uint32(0);              // excessive play time warning after period(in seconds)
+        data << uint32(0);
+    }
+
     SendPacket(&data);
 
     // Send MOTD
