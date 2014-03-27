@@ -595,7 +595,7 @@ enum Opcodes
    CMSG_WARGAME_START                                       = 0x0,
    CMSG_WHO                                                 = 0x13C1, // 5.4.7 18019
    CMSG_WHOIS                                               = 0x0,
-   CMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
+   CMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x1CA3, // 5.4.7 18019
    CMSG_WORLD_TELEPORT                                      = 0x0,
    CMSG_WRAP_ITEM                                           = 0x0,
    CMSG_ZONEUPDATE                                          = 0x0,
@@ -1397,7 +1397,7 @@ enum Opcodes
    SMSG_WHO                                                 = 0x0460, // 5.4.7 18019
    SMSG_WHOIS                                               = 0x0,
    SMSG_WORLD_SERVER_INFO                                   = 0x0,
-   SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0,
+   SMSG_WORLD_STATE_UI_TIMER_UPDATE                         = 0x0C22, // 5.4.7 18019
    SMSG_XP_GAIN_ABORTED                                     = 0x0,
    SMSG_ZONE_UNDER_ATTACK                                   = 0x0,
 };
