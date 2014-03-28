@@ -272,7 +272,7 @@ enum Opcodes
    CMSG_GUILD_PROMOTE                                       = 0x0,
    CMSG_GUILD_QUERY                                         = 0x0,
    CMSG_GUILD_QUERY_NEWS                                    = 0x0,
-   CMSG_GUILD_QUERY_RANKS                                   = 0x0,
+   CMSG_GUILD_QUERY_RANKS                                   = 0x1BBC, // 5.4.7 18019
    CMSG_GUILD_REMOVE                                        = 0x0,
    CMSG_GUILD_REPLACE_GUILD_MASTER                          = 0x0,
    CMSG_GUILD_REQUEST_CHALLENGE_UPDATE                      = 0x0,
