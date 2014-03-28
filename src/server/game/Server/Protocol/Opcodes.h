@@ -437,7 +437,7 @@ enum Opcodes
    CMSG_QUERY_GUILD_XP                                      = 0x0,
    CMSG_QUERY_INSPECT_ACHIEVEMENTS                          = 0x047E, // 5.4.7 18019
    CMSG_QUERY_QUESTS_COMPLETED                              = 0x0,
-   CMSG_QUERY_TIME                                          = 0x072B, // 5.4.7 18019 - guessed
+   CMSG_QUERY_TIME                                          = 0x03FD, // 5.4.7 18019 - guessed
    CMSG_QUESTGIVER_ACCEPT_QUEST                             = 0x0,
    CMSG_QUESTGIVER_CANCEL                                   = 0x0,
    CMSG_QUESTGIVER_CHOOSE_REWARD                            = 0x0,
