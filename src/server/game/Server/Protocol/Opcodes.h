@@ -437,7 +437,7 @@ enum Opcodes
    CMSG_QUERY_GUILD_XP                                      = 0x0,
    CMSG_QUERY_INSPECT_ACHIEVEMENTS                          = 0x047E, // 5.4.7 18019
    CMSG_QUERY_QUESTS_COMPLETED                              = 0x0,
-   CMSG_QUERY_TIME                                          = 0x0,
+   CMSG_QUERY_TIME                                          = 0x072B, // 5.4.7 18019 - guessed
    CMSG_QUESTGIVER_ACCEPT_QUEST                             = 0x0,
    CMSG_QUESTGIVER_CANCEL                                   = 0x0,
    CMSG_QUESTGIVER_CHOOSE_REWARD                            = 0x0,
@@ -1178,7 +1178,7 @@ enum Opcodes
    SMSG_PVP_LOG_DATA                                        = 0x0,
    SMSG_PVP_OPTIONS_ENABLED                                 = 0x0,
    SMSG_QUERY_QUESTS_COMPLETED_RESPONSE                     = 0x0,
-   SMSG_QUERY_TIME_RESPONSE                                 = 0x0,
+   SMSG_QUERY_TIME_RESPONSE                                 = 0x0E2A, // 5.4.7 18019
    SMSG_QUESTGIVER_OFFER_REWARD                             = 0x0,
    SMSG_QUESTGIVER_QUEST_COMPLETE                           = 0x0,
    SMSG_QUESTGIVER_QUEST_DETAILS                            = 0x0,
@@ -1260,6 +1260,7 @@ enum Opcodes
    SMSG_SET_PLAY_HOVER_ANIM                                 = 0x0,
    SMSG_SET_PROFICIENCY                                     = 0x1E3B, // 5.4.7 18019
    SMSG_SET_PROJECTILE_POSITION                             = 0x0,
+   SMSG_SET_TIMEZONE_INFORMATION                            = 0x0C2B, // 5.4.7 18019
    SMSG_SHOP_BUY                                            = 0x0,
    SMSG_SHOP_BUY_ERROR                                      = 0x0,
    SMSG_SHOP_ITEM                                           = 0x0,

@@ -1011,6 +1011,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         pCurrChar->SetGuildLevel(0);
     }
 
+    SendTimezoneInformation();
+
     data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4+4);
     data << uint64(0);
     SendPacket(&data);

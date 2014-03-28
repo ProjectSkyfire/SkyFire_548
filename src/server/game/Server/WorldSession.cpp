@@ -1012,6 +1012,24 @@ void WorldSession::SendAddonsInfo()
     SendPacket(&data);
 }
 
+void WorldSession::SendTimezoneInformation()
+{
+    char timezoneString[256];
+    //TIME_ZONE_INFORMATION timeZoneInfo;
+    //GetTimeZoneInformation(&timeZoneInfo);
+    //wcstombs(timezoneString, timeZoneInfo.StandardName, sizeof(timezoneString));
+
+    sprintf(timezoneString, "Etc/UTC"); // The method above cannot be used, because of non-english OS translations, so we send const data (possible strings are hardcoded in the client because of the same reasom)
+
+    WorldPacket data(SMSG_SET_TIMEZONE_INFORMATION, 2 + strlen(timezoneString) * 2);
+    data.WriteBits(strlen(timezoneString), 7);
+    data.WriteBits(strlen(timezoneString), 7);
+    data.FlushBits();
+    data.WriteString(timezoneString);
+    data.WriteString(timezoneString);
+    SendPacket(&data);
+}
+
 bool WorldSession::IsAddonRegistered(const std::string& prefix) const
 {
     if (!_filterAddonMessages) // if we have hit the softcap (64) nothing should be filtered
