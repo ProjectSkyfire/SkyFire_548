@@ -253,14 +253,14 @@ enum Opcodes
    CMSG_GUILD_BANK_QUERY_TAB                                = 0x07DC, // 5.4.7 18019
    CMSG_GUILD_BANK_QUERY_TEXT                               = 0x0,
    CMSG_GUILD_BANK_SWAP_ITEMS                               = 0x0,
-   CMSG_GUILD_BANK_UPDATE_TAB                               = 0x0,
+   CMSG_GUILD_BANK_UPDATE_TAB                               = 0x1054, // 5.4.7 18019
    CMSG_GUILD_BANK_WITHDRAW_MONEY                           = 0x0,
    CMSG_GUILD_CHANGE_NAME_REQUEST                           = 0x0,
    CMSG_GUILD_DECLINE                                       = 0x1B05, // 5.4.7 18019
    CMSG_GUILD_DEL_RANK                                      = 0x1D3C, // 5.4.7 18019
    CMSG_GUILD_DEMOTE                                        = 0x1B1C, // 5.4.7 18019
    CMSG_GUILD_DISBAND                                       = 0x190E, // 5.4.7 18019
-   CMSG_GUILD_EVENT_LOG_QUERY                               = 0x0,
+   CMSG_GUILD_EVENT_LOG_QUERY                               = 0x1D17, // 5.4.7 18019
    CMSG_GUILD_INFO                                          = 0x0,
    CMSG_GUILD_INFO_TEXT                                     = 0x0,
    CMSG_GUILD_INVITE                                        = 0x188B, // 5.4.7 18019
