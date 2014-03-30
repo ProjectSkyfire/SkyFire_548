@@ -105,7 +105,7 @@ enum Opcodes
    CMSG_CALENDAR_COMPLAIN                                   = 0x0,
    CMSG_CALENDAR_CONTEXT_EVENT_SIGNUP                       = 0x0,
    CMSG_CALENDAR_COPY_EVENT                                 = 0x0,
-   CMSG_CALENDAR_EVENT_INVITE                               = 0x0,
+   CMSG_CALENDAR_EVENT_INVITE                               = 0x1551, // 5.4.7 18019
    CMSG_CALENDAR_EVENT_MODERATOR_STATUS                     = 0x0,
    CMSG_CALENDAR_EVENT_REMOVE_INVITE                        = 0x0,
    CMSG_CALENDAR_EVENT_RSVP                                 = 0x0,
