@@ -514,7 +514,7 @@ enum Opcodes
    CMSG_SET_CHANNEL_WATCH                                   = 0x0,
    CMSG_SET_CONTACT_NOTES                                   = 0x0,
    CMSG_SET_CURRENCY_FLAGS                                  = 0x0,
-   CMSG_SET_DUNGEON_DIFFICULTY                              = 0x0,
+   CMSG_SET_DUNGEON_DIFFICULTY                              = 0x1898, // 5.4.7 18019
    CMSG_SET_EVERYONE_IS_ASSISTANT                           = 0x0,
    CMSG_SET_FACTION_ATWAR                                   = 0x0,
    CMSG_SET_FACTION_CHEAT                                   = 0x0,
