@@ -446,8 +446,8 @@ enum Opcodes
    CMSG_QUESTGIVER_QUERY_QUEST                              = 0x0,
    CMSG_QUESTGIVER_QUEST_AUTOLAUNCH                         = 0x0,
    CMSG_QUESTGIVER_REQUEST_REWARD                           = 0x0,
-   CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY                    = 0x0,
-   CMSG_QUESTGIVER_STATUS_QUERY                             = 0x0,
+   CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY                    = 0x0275, // 5.4.7 18019
+   CMSG_QUESTGIVER_STATUS_QUERY                             = 0x0152, // 5.4.7 18019
    CMSG_QUESTLOG_REMOVE_QUEST                               = 0x0,
    CMSG_QUESTLOG_SWAP_QUEST                                 = 0x0,
    CMSG_QUEST_CONFIRM_ACCEPT                                = 0x0,
@@ -1187,7 +1187,7 @@ enum Opcodes
    SMSG_QUESTGIVER_QUEST_LIST                               = 0x0,
    SMSG_QUESTGIVER_REQUEST_ITEMS                            = 0x0,
    SMSG_QUESTGIVER_STATUS                                   = 0x0,
-   SMSG_QUESTGIVER_STATUS_MULTIPLE                          = 0x0,
+   SMSG_QUESTGIVER_STATUS_MULTIPLE                          = 0x0F79, // 5.4.7 18019 or 0x1D8A
    SMSG_QUESTLOG_FULL                                       = 0x0,
    SMSG_QUESTUPDATE_ADD_ITEM                                = 0x0,
    SMSG_QUESTUPDATE_ADD_KILL                                = 0x0,
