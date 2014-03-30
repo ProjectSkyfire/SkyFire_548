@@ -1931,9 +1931,8 @@ void World::LoadAutobroadcasts()
     m_Autobroadcasts.clear();
     m_AutobroadcastsWeights.clear();
 
-    uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0);
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTOBROADCAST);
-    stmt->setInt32(0, realmId);
+    stmt->setInt32(0, realmID);
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
     if (!result)

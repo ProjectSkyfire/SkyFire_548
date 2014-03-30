@@ -1442,8 +1442,8 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         memberData.WriteByteSeq(guid[2]);
         memberData.WriteByteSeq(guid[4]);
         memberData << uint32(member->GetZoneId());
-        memberData << uint8(1);                                     // unk
-        memberData << uint32(sConfigMgr->GetIntDefault("RealmID", 0)); // RealmID
+        memberData << uint8(0);        // Gender
+        memberData << uint32(realmID); // RealmID
         memberData.WriteByteSeq(guid[7]);
         memberData.WriteByteSeq(guid[5]);
         memberData << uint32(member->GetAchievementPoints());
@@ -1544,7 +1544,7 @@ void Guild::HandleQuery(WorldSession* session)
         data << uint32(m_emblemInfo.GetBorderStyle());
         data << uint32(m_emblemInfo.GetBorderColor());
         data.WriteByteSeq(guid[5]);
-        data << uint32(sConfigMgr->GetIntDefault("RealmID", 0));
+        data << uint32(realmID);
         data << uint32(m_emblemInfo.GetBackgroundColor());
         data.WriteByteSeq(guid[7]);
     }
@@ -1811,7 +1811,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
 
     pInvitee->SetGuildIdInvited(m_id);
     _LogEvent(GUILD_EVENT_LOG_INVITE_PLAYER, player->GetGUIDLow(), pInvitee->GetGUIDLow());
-    uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0);
+
     ObjectGuid oldGuildGuid = MAKE_NEW_GUID(pInvitee->GetGuildId(), 0, pInvitee->GetGuildId() ? uint32(HIGHGUID_GUILD) : 0);
     ObjectGuid newGuildGuid = GetGUID();
 
@@ -1846,12 +1846,12 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
 
     data << uint32(0);
     data.WriteString(pInvitee->GetGuildName());
-    data << uint32(realmId);
+    data << uint32(realmID);
     data << uint32(m_emblemInfo.GetBorderStyle());
     data.WriteByteSeq(oldGuildGuid[1]);
     data.WriteByteSeq(oldGuildGuid[0]);
     data << uint32(m_emblemInfo.GetColor());    data.WriteByteSeq(oldGuildGuid[6]);
-    data << uint32(realmId);
+    data << uint32(realmID);
     data.WriteByteSeq(newGuildGuid[0]);
     data << uint32(m_emblemInfo.GetStyle());
     data.WriteByteSeq(oldGuildGuid[3]);

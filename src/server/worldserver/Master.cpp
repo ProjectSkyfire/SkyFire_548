@@ -463,6 +463,20 @@ bool Master::_StartDB()
         TC_LOG_ERROR("server.worldserver", "Realm ID not defined in configuration file");
         return false;
     }
+
+    // Load realm names into a store
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST);
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            realmNameStore[fields[0].GetUInt32()] = fields[1].GetString(); // Store the realm name into the store
+        }
+        while (result->NextRow());
+    }
+
     TC_LOG_INFO("server.worldserver", "Realm running as realm ID %d", realmID);
 
     ///- Clean the database before starting

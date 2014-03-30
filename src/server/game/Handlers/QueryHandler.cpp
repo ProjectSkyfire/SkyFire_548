@@ -56,7 +56,7 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 
     if (nameData)
     {
-        data << uint32(sConfigMgr->GetIntDefault("RealmID", 0)); // RealmID
+        data << uint32(realmID); // RealmID
         data << uint32(50397209); // const player time
         data << uint8(nameData->m_level);
         data << uint8(nameData->m_race);
@@ -171,22 +171,19 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recvData)
 
 void WorldSession::SendRealmNameQueryOpcode(uint32 realmId)
 {
-    std::string realmName = "";
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMNAME_BY_ID);
-    stmt->setInt32(0, realmId);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    RealmNameMap::const_iterator iter = realmNameStore.find(realmId);
+
+    bool found = iter != realmNameStore.end();
+    std::string realmName = found ? iter->second : "";
 
     WorldPacket data(SMSG_REALM_NAME_QUERY_RESPONSE);
     data << uint32(realmId);
-    data << uint8(!result);
+    data << uint8(!found);
 
-    if (result)
+    if (found)
     {
-        Field* fields = result->Fetch();
-        realmName = fields[0].GetString();
-
         data.WriteBits(realmName.length(), 8);
-        data.WriteBit(0);
+        data.WriteBit(realmId == realmID);
         data.WriteBits(realmName.length(), 8);
         data.FlushBits();
 

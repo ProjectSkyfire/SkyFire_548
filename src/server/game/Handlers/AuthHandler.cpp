@@ -24,27 +24,20 @@
 
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {
-    std::map<uint32, std::string> realmnames;
-    uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0);
+    std::map<uint32, std::string> realmNamesToSend;
 
     QueryResult classResult = LoginDatabase.PQuery("SELECT class, expansion FROM realm_classes WHERE realmId = %u", realmID);
     QueryResult raceResult = LoginDatabase.PQuery("SELECT race, expansion FROM realm_races WHERE realmId = %u", realmID);
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMNAME_BY_ID);
-    stmt->setInt32(0, realmId);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-    if (result) // Add local realm
-    {
-        Field* fields = result->Fetch();
-        realmnames[realmId] = (fields[0].GetString());
-    }
-
 
     if (!classResult || !raceResult)
     {
         TC_LOG_ERROR("network", "Unable to retrieve class or race data.");
         return;
     }
+
+    RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
+    if (iter != realmNameStore.end()) // Add local realm
+        realmNamesToSend[realmID] = iter->second;
 
     TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
@@ -53,13 +46,13 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     if (code == AUTH_OK)
     {
-        packet.WriteBits(realmnames.size(), 21); // Send current realmId
+        packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
 
-        for (std::map<uint32, std::string>::const_iterator iter = realmnames.begin(); iter != realmnames.end(); iter++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
-            packet.WriteBits(iter->second.size(), 8);
-            packet.WriteBit(iter->first == realmId); // Home realm
-            packet.WriteBits(iter->second.size(), 8);
+            packet.WriteBits(itr->second.size(), 8);
+            packet.WriteBit(itr->first == realmID); // Home realm
+            packet.WriteBits(itr->second.size(), 8);
         }
 
         packet.WriteBit(0);
@@ -106,11 +99,11 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
         packet << uint32(Expansion());
 
-        for (std::map<uint32, std::string>::const_iterator iter = realmnames.begin(); iter != realmnames.end(); iter++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
-            packet << uint32(iter->first);
-            packet.WriteString(iter->second);
-            packet.WriteString(iter->second);
+            packet << uint32(itr->first);
+            packet.WriteString(itr->second);
+            packet.WriteString(itr->second);
         }
 
         packet << uint32(0);
