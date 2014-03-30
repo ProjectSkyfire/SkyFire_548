@@ -561,7 +561,7 @@ enum Opcodes
    CMSG_TAXIQUERYAVAILABLENODES                             = 0x0,
    CMSG_TAXISHOWNODES                                       = 0x0,
    CMSG_TELEPORT_TO_UNIT                                    = 0x0,
-   CMSG_TEXT_EMOTE                                          = 0x0,
+   CMSG_TEXT_EMOTE                                          = 0x037D, // 5.4.7 18019
    CMSG_TIME_ADJUSTMENT_RESPONSE                            = 0x0,
    CMSG_TIME_SYNC_RESP                                      = 0x0413, // 5.4.7 18019
    CMSG_TIME_SYNC_RESP_FAILED                               = 0x0,
@@ -1337,7 +1337,7 @@ enum Opcodes
    SMSG_TALENTS_INVOLUNTARILY_RESET                         = 0x0,
    SMSG_TAXINODE_STATUS                                     = 0x0,
    SMSG_TEST_DROP_RATE_RESULT                               = 0x0,
-   SMSG_TEXT_EMOTE                                          = 0x0,
+   SMSG_TEXT_EMOTE                                          = 0x087B, // 5.4.7 18019
    SMSG_THREAT_CLEAR                                        = 0x0,
    SMSG_THREAT_REMOVE                                       = 0x0,
    SMSG_THREAT_UPDATE                                       = 0x0,
