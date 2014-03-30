@@ -539,7 +539,7 @@ void GuildMgr::LoadGuildRewards()
         reward.Standing      = fields[1].GetUInt8();
         reward.Racemask      = fields[2].GetInt32();
         reward.Price         = fields[3].GetUInt64();
-        reward.AchievementId = fields[4].GetUInt32();
+        reward.Achievements.push_back(fields[4].GetUInt32()); // Todo: Load as an array
 
         if (!sObjectMgr->GetItemTemplate(reward.Entry))
         {
@@ -547,10 +547,13 @@ void GuildMgr::LoadGuildRewards()
             continue;
         }
 
-        if (reward.AchievementId != 0 && (!sAchievementMgr->GetAchievement(reward.AchievementId)))
+        for (uint32 AchievementId = 0; AchievementId < reward.Achievements.size(); AchievementId++)
         {
-            TC_LOG_ERROR("server.loading", "Guild rewards constains not existing achievement entry %u", reward.AchievementId);
-            continue;
+            if (AchievementId != 0 && (!sAchievementMgr->GetAchievement(AchievementId)))
+            {
+                TC_LOG_ERROR("server.loading", "Guild rewards constains not existing achievement entry %u", AchievementId);
+                continue;
+            }
         }
 
         if (reward.Standing >= MAX_REPUTATION_RANK)

@@ -138,6 +138,9 @@ bool normalizePlayerName(std::string& name)
     if (name.empty())
         return false;
 
+    // Remove realmname for now
+    name = name.substr(0, name.find("-"));
+
     wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME+1];
     size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
 

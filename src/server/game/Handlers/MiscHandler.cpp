@@ -1493,7 +1493,6 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[7]);
-    
     Player* player = ObjectAccessor::FindPlayer(guid);
 
     if (!player)

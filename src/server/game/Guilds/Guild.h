@@ -263,7 +263,7 @@ struct GuildReward
     uint32 Entry;
     int32 Racemask;
     uint64 Price;
-    uint32 AchievementId;
+    std::vector<uint32> Achievements;
     uint8 Standing;
 };
 

@@ -1,23 +1,21 @@
 ## To-do list (Try to keep the order by importance)
-* Groups (Parties / Raids)
-* Mounts / Pets
-* Bank/GuildBank - Assigned to AriDEV *.*
-* Guilds
+* Bank / Guild Bank
 * Reputations
-* XP Related Stuff
 * Quests
+* Achievements / Guild Acievements / Implement acc achievements
 * Update ingame damage / stats calculation, (including newest formulas from paper doll)
 * Implement dynamic update fieldss
 * Implement PvP Power / Update resil
 * Battlegrounds
 * Implement Premade characters
 * Instance Locking
+* Professions
 * Mail
 * Auction House
 * Void Storage
 * Calendair & Events
 * Arenas - needs full rewrite O.o
-* Pet Battles
+* Pets / Pet Battles
 * Scenarios
 * Ingame Shop
 * Archaeology
@@ -26,7 +24,6 @@
 * Guild Finder
 * Raid Finder
 * Implement char boost
-* Professions
 
 ## Finished Stuff
 * Auth
@@ -48,4 +45,8 @@
 * Creature / Gameobject gossips (including vendors and trainers)
 * Glyphs
 * Properly finish living part of object update
+* XP Related Stuff
 * Loot
+* Groups (Parties / Raids)
+* Mounts
+* Guilds
