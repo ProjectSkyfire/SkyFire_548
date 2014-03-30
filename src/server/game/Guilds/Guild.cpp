@@ -2228,8 +2228,8 @@ void Guild::SendNewsUpdate(WorldSession* session)
         data.AppendPackedTime(news->GetTimestamp());
         data.WriteByteSeq(guid[4]);
         data.WriteByteSeq(guid[0]);
-        data.WriteByteSeq(guid[7]);
         data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[7]);
         data << uint32(news->GetFlags());   // 1 sticky
         data.WriteByteSeq(guid[1]);
         data << uint32(news->GetValue());
