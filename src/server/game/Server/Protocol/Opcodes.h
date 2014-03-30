@@ -100,7 +100,7 @@ enum Opcodes
    CMSG_BUYBACK_ITEM                                        = 0x07D7, // 5.4.7 18019
    CMSG_BUY_BANK_SLOT                                       = 0x00FE, // 5.4.7 18019
    CMSG_BUY_ITEM                                            = 0x1077, // 5.4.7 18019
-   CMSG_CALENDAR_ADD_EVENT                                  = 0x0,
+   CMSG_CALENDAR_ADD_EVENT                                  = 0x16D0, // 5.4.7 18019
    CMSG_CALENDAR_ARENA_TEAM                                 = 0x0,
    CMSG_CALENDAR_COMPLAIN                                   = 0x0,
    CMSG_CALENDAR_CONTEXT_EVENT_SIGNUP                       = 0x0,
