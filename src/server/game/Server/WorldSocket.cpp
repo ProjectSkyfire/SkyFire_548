@@ -175,12 +175,14 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
         pkt = &buff;
     }*/
 
+    uint16 opcodeNumber = serverOpcodeTable[pkt->GetOpcode()]->OpcodeNumber;
+
     if (m_Session)
         TC_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pkt->GetOpcode(), true).c_str());
 
     sScriptMgr->OnPacketSend(this, *pkt);
 
-    ServerPktHeader header(!m_Crypt.IsInitialized() ? pkt->size() + 2 : pct.size(), pkt->GetOpcode(), &m_Crypt);
+    ServerPktHeader header(!m_Crypt.IsInitialized() ? pkt->size() + 2 : pct.size(), opcodeNumber, &m_Crypt);
 
     if (m_OutBuffer->space() >= pkt->size() + header.getHeaderLength() && msg_queue()->is_empty())
     {
@@ -504,7 +506,9 @@ int WorldSocket::handle_input_header (void)
             return -1;
         }
 
-        ACE_NEW_RETURN(m_RecvWPct, WorldPacket (PacketFilter::DropHighBytes(Opcodes(header.cmd)), header.size), -1);
+        uint16 opcodeNumber = PacketFilter::DropHighBytes(header.cmd);
+        ACE_NEW_RETURN(m_RecvWPct, WorldPacket(clientOpcodeTable.GetOpcodeByNumber(opcodeNumber), header.size), -1);
+        m_RecvWPct->SetReceivedOpcode(opcodeNumber);
 
         if (header.size > 0)
         {
@@ -535,7 +539,9 @@ int WorldSocket::handle_input_header (void)
 
         header.size -= 4;
 
-        ACE_NEW_RETURN(m_RecvWPct, WorldPacket (PacketFilter::DropHighBytes(Opcodes(header.cmd)), header.size), -1);
+        uint16 opcodeNumber = PacketFilter::DropHighBytes(header.cmd);
+        ACE_NEW_RETURN(m_RecvWPct, WorldPacket(clientOpcodeTable.GetOpcodeByNumber(opcodeNumber), header.size), -1);
+        m_RecvWPct->SetReceivedOpcode(opcodeNumber);
 
         if (header.size > 0)
         {
@@ -756,8 +762,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     // manage memory ;)
     ACE_Auto_Ptr<WorldPacket> aptr(new_pct);
 
-    Opcodes opcode = PacketFilter::DropHighBytes(new_pct->GetOpcode());
-
+    Opcodes opcode = new_pct->GetOpcode();
 
     if (closing_)
         return -1;
@@ -819,13 +824,13 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 }
 
                 // prevent invalid memory access/crash with custom opcodes
-                if (opcode >= NUM_OPCODE_HANDLERS)
+                if (opcode >= MUM_OPCODES)
                     return 0;
 
                 OpcodeHandler const* handler = clientOpcodeTable[opcode];
                 if (!handler || handler->Status == STATUS_UNHANDLED)
                 {
-                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode(), false).c_str(), m_Session->GetPlayerInfo().c_str());
+                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(new_pct->GetOpcode(), false, new_pct->GetReceivedOpcode()).c_str(), m_Session->GetPlayerInfo().c_str());
                     return 0;
                 }
 
