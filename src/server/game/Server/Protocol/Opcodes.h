@@ -1400,7 +1400,7 @@ enum Opcodes
     SMSG_WORLD_STATE_UI_TIMER_UPDATE,
     SMSG_XP_GAIN_ABORTED,
     SMSG_ZONE_UNDER_ATTACK,
-    MUM_OPCODES,
+    NUM_OPCODES,
     UNKNOWN_OPCODE
 };
 
@@ -1474,7 +1474,7 @@ class OpcodeTable
         OpcodeTable(OpcodeTable const&);
         OpcodeTable& operator=(OpcodeTable const&);
 
-        OpcodeHandler* _internalTable[MUM_OPCODES];
+        OpcodeHandler* _internalTable[NUM_OPCODES];
 
         // Store opcode / number list - for speed
         Opcodes _opcodeTable[NUM_OPCODE_HANDLERS];

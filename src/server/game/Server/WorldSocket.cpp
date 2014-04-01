@@ -824,7 +824,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 }
 
                 // prevent invalid memory access/crash with custom opcodes
-                if (opcode >= MUM_OPCODES)
+                if (opcode >= NUM_OPCODES)
                     return 0;
 
                 OpcodeHandler const* handler = clientOpcodeTable[opcode];
