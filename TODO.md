@@ -50,3 +50,6 @@
 * Groups (Parties / Raids)
 * Mounts
 * Guilds
+
+
+April fools ;) Even though a bit late
