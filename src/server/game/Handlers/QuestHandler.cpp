@@ -291,10 +291,31 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint32 questId;
-    uint8 unk1;
-    recvData >> guid >> questId >> unk1;
+    uint8 Unk1;
+	
+	recvData >> questId;
+	guid[2] = recvData.ReadBit();
+	recvData >> Unk1;
+
+    guid[3] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[6]);
+    
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u, unk1 = %u", uint32(GUID_LOPART(guid)), questId, unk1);
 
     // Verify that the guid is valid and is a questgiver or involved in the requested quest
