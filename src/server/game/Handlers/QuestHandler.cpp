@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "Common.h"
 #include "Log.h"
@@ -36,7 +36,7 @@
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
- 
+
     guid[2] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
@@ -54,7 +54,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[7]);
-    
+
     uint32 questStatus = DIALOG_STATUS_NONE;
     uint32 defstatus = DIALOG_STATUS_NONE;
 
@@ -67,7 +67,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
 
     switch (questgiver->GetTypeId())
     {
-        case TYPEID_UNIT:
+    case TYPEID_UNIT:
         {
             TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY for npc, guid = %u", uint32(GUID_LOPART(guid)));
             Creature* cr_questgiver=questgiver->ToCreature();
@@ -79,7 +79,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
             }
             break;
         }
-        case TYPEID_GAMEOBJECT:
+    case TYPEID_GAMEOBJECT:
         {
             TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY for GameObject guid = %u", uint32(GUID_LOPART(guid)));
             GameObject* go_questgiver=(GameObject*)questgiver;
@@ -88,9 +88,9 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
                 questStatus = getDialogStatus(_player, go_questgiver, defstatus);
             break;
         }
-        default:
-            TC_LOG_ERROR("network", "QuestGiver called for unexpected type %u", questgiver->GetTypeId());
-            break;
+    default:
+        TC_LOG_ERROR("network", "QuestGiver called for unexpected type %u", questgiver->GetTypeId());
+        break;
     }
 
     //inform client about status of quest
@@ -157,8 +157,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
 #define CLOSE_GOSSIP_CLEAR_DIVIDER() \
     do { \
-        _player->PlayerTalkClass->SendCloseGossip(); \
-        _player->SetDivider(0); \
+    _player->PlayerTalkClass->SendCloseGossip(); \
+    _player->SetDivider(0); \
     } while (0)
 
     // no or incorrect quest giver
@@ -171,7 +171,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
     if (Player* playerQuestObject = object->ToPlayer())
     {
         if ((_player->GetDivider() && _player->GetDivider() != guid) ||
-           ((object != _player && !playerQuestObject->CanShareQuest(questId))))
+            ((object != _player && !playerQuestObject->CanShareQuest(questId))))
         {
             CLOSE_GOSSIP_CLEAR_DIVIDER();
             return;
@@ -242,12 +242,12 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
             switch (object->GetTypeId())
             {
-                case TYPEID_UNIT:
-                    sScriptMgr->OnQuestAccept(_player, (object->ToCreature()), quest);
-                    object->ToCreature()->AI()->sQuestAccept(_player, quest);
-                    break;
-                case TYPEID_ITEM:
-                case TYPEID_CONTAINER:
+            case TYPEID_UNIT:
+                sScriptMgr->OnQuestAccept(_player, (object->ToCreature()), quest);
+                object->ToCreature()->AI()->sQuestAccept(_player, quest);
+                break;
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
                 {
                     Item* item = (Item*)object;
                     sScriptMgr->OnQuestAccept(_player, item, quest);
@@ -268,12 +268,12 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
                     break;
                 }
-                case TYPEID_GAMEOBJECT:
-                    sScriptMgr->OnQuestAccept(_player, object->ToGameObject(), quest);
-                    object->ToGameObject()->AI()->QuestAccept(_player, quest);
-                    break;
-                default:
-                    break;
+            case TYPEID_GAMEOBJECT:
+                sScriptMgr->OnQuestAccept(_player, object->ToGameObject(), quest);
+                object->ToGameObject()->AI()->QuestAccept(_player, quest);
+                break;
+            default:
+                break;
             }
             _player->PlayerTalkClass->SendCloseGossip();
 
@@ -294,10 +294,10 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     uint32 questId;
     uint8 Unk1;
-	
-	recvData >> questId;
-	guid[2] = recvData.ReadBit();
-	recvData >> Unk1;
+
+    recvData >> questId;
+    guid[2] = recvData.ReadBit();
+    recvData >> Unk1;
 
     guid[3] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
@@ -315,8 +315,8 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[6]);
-    
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u, unk1 = %u", uint32(GUID_LOPART(guid)), questId, unk1);
+
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u", uint32(GUID_LOPART(guid)), questId);
 
     // Verify that the guid is valid and is a questgiver or involved in the requested quest
     Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM);
@@ -396,7 +396,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         (_player->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE && !quest->IsAutoComplete()))
     {
         TC_LOG_ERROR("network", "Error in QUEST_STATUS_COMPLETE: player %s (guid %u) tried to complete quest %u, but is not allowed to do so (possible packet-hacking or high latency)",
-                        _player->GetName().c_str(), _player->GetGUIDLow(), questId);
+            _player->GetName().c_str(), _player->GetGUIDLow(), questId);
         return;
     }
 
@@ -406,8 +406,8 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
 
         switch (object->GetTypeId())
         {
-            case TYPEID_UNIT:
-            case TYPEID_PLAYER:
+        case TYPEID_UNIT:
+        case TYPEID_PLAYER:
             {
                 //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
                 Creature* creatureQGiver = object->ToCreature();
@@ -431,27 +431,27 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                 }
                 break;
             }
-            case TYPEID_GAMEOBJECT:
-                if (!sScriptMgr->OnQuestReward(_player, ((GameObject*)object), quest, reward))
+        case TYPEID_GAMEOBJECT:
+            if (!sScriptMgr->OnQuestReward(_player, ((GameObject*)object), quest, reward))
+            {
+                // Send next quest
+                if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
                 {
-                    // Send next quest
-                    if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
+                    if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                     {
-                        if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
-                        {
-                            _player->AddQuest(nextQuest, object);
-                            if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
-                                _player->CompleteQuest(nextQuest->GetQuestId());
-                        }
-
-                        _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextQuest, guid, true);
+                        _player->AddQuest(nextQuest, object);
+                        if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
+                            _player->CompleteQuest(nextQuest->GetQuestId());
                     }
 
-                    object->ToGameObject()->AI()->QuestReward(_player, quest, reward);
+                    _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextQuest, guid, true);
                 }
-                break;
-            default:
-                break;
+
+                object->ToGameObject()->AI()->QuestReward(_player, quest, reward);
+            }
+            break;
+        default:
+            break;
         }
     }
     else
@@ -736,22 +736,22 @@ uint32 WorldSession::getDialogStatus(Player* player, Object* questgiver, uint32 
 
     switch (questgiver->GetTypeId())
     {
-        case TYPEID_GAMEOBJECT:
+    case TYPEID_GAMEOBJECT:
         {
             qr  = sObjectMgr->GetGOQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetGOQuestInvolvedRelationBounds(questgiver->GetEntry());
             break;
         }
-        case TYPEID_UNIT:
+    case TYPEID_UNIT:
         {
             qr  = sObjectMgr->GetCreatureQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetCreatureQuestInvolvedRelationBounds(questgiver->GetEntry());
             break;
         }
-        default:
-            //its imposible, but check ^)
-            TC_LOG_ERROR("network", "Warning: GetDialogStatus called for unexpected type %u", questgiver->GetTypeId());
-            return DIALOG_STATUS_NONE;
+    default:
+        //its imposible, but check ^)
+        TC_LOG_ERROR("network", "Warning: GetDialogStatus called for unexpected type %u", questgiver->GetTypeId());
+        return DIALOG_STATUS_NONE;
     }
 
     for (QuestRelations::const_iterator i = qir.first; i != qir.second; ++i)
