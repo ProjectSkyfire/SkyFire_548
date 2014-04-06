@@ -117,7 +117,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BINDER_ACTIVATE,                    0x0477, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBinderActivateOpcode         ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_BUG,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBugOpcode                    );
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode              );
-    DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                       0x07D7, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem                  ); // 5.4.7 18019
+    DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                       0x07D7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem                  ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_BUY_BANK_SLOT,                      0x00FE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBuyBankSlotOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_BUY_ITEM,                           0x1077, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemOpcode                ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_ADD_EVENT,                 0x16D0, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarAddEvent             ); // 5.4.7 18019
