@@ -351,7 +351,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_EMOTE,                  0x0520, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_GUILD,                  0x070B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_OFFICER,                0x1F69, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_PARTY,                  0x0F02, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_PARTY,                  0x0642, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID,                   0x054B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID_WARNING,           0x0423, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_SAY,                    0x0C41, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 5.4.7 18019

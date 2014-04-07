@@ -28,6 +28,7 @@
 #include "CellImpl.h"
 #include "Chat.h"
 #include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "Language.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -639,6 +640,14 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
         *data << uint32(LANG_UNIVERSAL);
     */
 
+    ObjectGuid groupGuid = 0;
+    if (type == CHAT_MSG_PARTY
+        || type == CHAT_MSG_PARTY_LEADER
+        || type == CHAT_MSG_RAID
+        || type == CHAT_MSG_RAID_LEADER
+        || type == CHAT_MSG_RAID_WARNING)
+        groupGuid = session->GetPlayer()->GetGroup()->GetGUID();
+
     switch (type)
     {
         case CHAT_MSG_SAY:
@@ -680,7 +689,6 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
 
     ObjectGuid target(target_guid);
     ObjectGuid source(speaker ? speaker->GetGUID() : 0);
-    ObjectGuid unkGuid = 0;
     ObjectGuid unkGuid2 = 0;
 
     data->WriteBit(0);
@@ -698,14 +706,14 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     data->WriteBit(1);
     data->WriteBit(0); // Send Language
 
-    data->WriteBit(source[2]);
-    data->WriteBit(source[7]);
-    data->WriteBit(source[0]);
-    data->WriteBit(source[3]);
-    data->WriteBit(source[4]);
-    data->WriteBit(source[6]);
-    data->WriteBit(source[1]);
-    data->WriteBit(source[5]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[7]);
+    data->WriteBit(target[0]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[4]);
+    data->WriteBit(target[6]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[5]);
 
     data->WriteBit(0); // Show in chat log - 1 for showing only in bubble
     data->WriteBit(1);
@@ -714,26 +722,26 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     data->WriteBit(0);
     data->WriteBit(0);
 
-    data->WriteBit(target[5]);
-    data->WriteBit(target[7]);
-    data->WriteBit(target[6]);
-    data->WriteBit(target[4]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[0]);
+    data->WriteBit(source[5]);
+    data->WriteBit(source[7]);
+    data->WriteBit(source[6]);
+    data->WriteBit(source[4]);
+    data->WriteBit(source[3]);
+    data->WriteBit(source[2]);
+    data->WriteBit(source[1]);
+    data->WriteBit(source[0]);
 
     data->WriteBit(1);
     data->WriteBit(0);
 
-    data->WriteBit(unkGuid[5]);
-    data->WriteBit(unkGuid[2]);
-    data->WriteBit(unkGuid[6]);
-    data->WriteBit(unkGuid[1]);
-    data->WriteBit(unkGuid[7]);
-    data->WriteBit(unkGuid[3]);
-    data->WriteBit(unkGuid[0]);
-    data->WriteBit(unkGuid[4]);
+    data->WriteBit(groupGuid[5]);
+    data->WriteBit(groupGuid[2]);
+    data->WriteBit(groupGuid[6]);
+    data->WriteBit(groupGuid[1]);
+    data->WriteBit(groupGuid[7]);
+    data->WriteBit(groupGuid[3]);
+    data->WriteBit(groupGuid[0]);
+    data->WriteBit(groupGuid[4]);
 
     data->WriteBit(1);
     data->WriteBits(strlen(message), 12);
@@ -753,34 +761,34 @@ void ChatHandler::FillMessageData(WorldPacket* data, WorldSession* session, uint
     data->WriteByteSeq(unkGuid2[3]);
     data->WriteByteSeq(unkGuid2[0]);
 
-    data->WriteByteSeq(unkGuid[5]);
-    data->WriteByteSeq(unkGuid[3]);
-    data->WriteByteSeq(unkGuid[2]);
-    data->WriteByteSeq(unkGuid[4]);
-    data->WriteByteSeq(unkGuid[1]);
-    data->WriteByteSeq(unkGuid[0]);
-    data->WriteByteSeq(unkGuid[7]);
-    data->WriteByteSeq(unkGuid[6]);
+    data->WriteByteSeq(groupGuid[5]);
+    data->WriteByteSeq(groupGuid[3]);
+    data->WriteByteSeq(groupGuid[2]);
+    data->WriteByteSeq(groupGuid[4]);
+    data->WriteByteSeq(groupGuid[1]);
+    data->WriteByteSeq(groupGuid[0]);
+    data->WriteByteSeq(groupGuid[7]);
+    data->WriteByteSeq(groupGuid[6]);
 
     *data << uint8(type);
 
-    data->WriteByteSeq(source[4]);
-    data->WriteByteSeq(source[2]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[0]);
-    data->WriteByteSeq(source[6]);
-    data->WriteByteSeq(source[7]);
-    data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[1]);
-
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[1]);
-    data->WriteByteSeq(target[0]);
-    data->WriteByteSeq(target[2]);
     data->WriteByteSeq(target[4]);
-    data->WriteByteSeq(target[5]);
-    data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[2]);
     data->WriteByteSeq(target[3]);
+    data->WriteByteSeq(target[0]);
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[5]);
+    data->WriteByteSeq(target[1]);
+
+    data->WriteByteSeq(source[6]);
+    data->WriteByteSeq(source[1]);
+    data->WriteByteSeq(source[0]);
+    data->WriteByteSeq(source[2]);
+    data->WriteByteSeq(source[4]);
+    data->WriteByteSeq(source[5]);
+    data->WriteByteSeq(source[7]);
+    data->WriteByteSeq(source[3]);
 
     data->WriteString(message);
     *data << uint8(language);
