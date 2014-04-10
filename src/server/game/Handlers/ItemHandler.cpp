@@ -1495,15 +1495,17 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     Player* player = GetPlayer();
 
     // Read data
+    uint32 count;
+    ObjectGuid npcGuid;
+    
 
-	ObjectGuid npcGuid;
     npcGuid[3] = recvData.ReadBit();
     npcGuid[2] = recvData.ReadBit();
     npcGuid[4] = recvData.ReadBit();
     npcGuid[5] = recvData.ReadBit();
     npcGuid[1] = recvData.ReadBit();
     npcGuid[0] = recvData.ReadBit();
-	uint32 count = recvData.ReadBits(21);
+    count = recvData.ReadBits(21);
     npcGuid[7] = recvData.ReadBit();
     npcGuid[6] = recvData.ReadBit();
 
@@ -1520,43 +1522,43 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     std::vector<ObjectGuid> itemGuids(count, ObjectGuid(0));
     std::vector<uint32> newEntries(count, 0);
     std::vector<uint32> slots(count, 0);
-	bool unk0, unk1;
+    bool unk0, unk1;
 
-    for (uint8 i = 0; i < count; ++i)
-	{
-		unk0 = recvData.ReadBit();     
-		unk1 = recvData.ReadBit();
+    for (uint8 i = 0; i < count; ++i) {
 		
-		if(unk1) {
-			itemGuids[i][5] = recvData.ReadBit();
-			itemGuids[i][6] = recvData.ReadBit();
-			itemGuids[i][4] = recvData.ReadBit();
-			itemGuids[i][0] = recvData.ReadBit();
-			itemGuids[i][7] = recvData.ReadBit();
-			itemGuids[i][3] = recvData.ReadBit();
-			itemGuids[i][1] = recvData.ReadBit();
-			itemGuids[i][2] = recvData.ReadBit();
-		}
-        
-		if(unk0) {
-			itemGuids[i][3] = recvData.ReadBit();
-			itemGuids[i][6] = recvData.ReadBit();
-			itemGuids[i][4] = recvData.ReadBit();
-			itemGuids[i][0] = recvData.ReadBit();
-			itemGuids[i][1] = recvData.ReadBit();
-			itemGuids[i][7] = recvData.ReadBit();
-			itemGuids[i][5] = recvData.ReadBit();
-			itemGuids[i][2] = recvData.ReadBit();
-		}
-        
+        unk0 = recvData.ReadBit();
+        unk1 = recvData.ReadBit();
+
+        if(unk1) {
+                 itemGuids[i][5] = recvData.ReadBit();
+                 itemGuids[i][6] = recvData.ReadBit();
+                 itemGuids[i][4] = recvData.ReadBit();
+                 itemGuids[i][0] = recvData.ReadBit();
+                 itemGuids[i][7] = recvData.ReadBit();
+                 itemGuids[i][3] = recvData.ReadBit();
+                 itemGuids[i][1] = recvData.ReadBit();
+                 itemGuids[i][2] = recvData.ReadBit();
+        }
+
+        if(unk0) {
+                 itemGuids[i][3] = recvData.ReadBit();
+                 itemGuids[i][6] = recvData.ReadBit();
+                 itemGuids[i][4] = recvData.ReadBit();
+                 itemGuids[i][0] = recvData.ReadBit();
+                 itemGuids[i][1] = recvData.ReadBit();
+                 itemGuids[i][7] = recvData.ReadBit();
+                 itemGuids[i][5] = recvData.ReadBit();
+                 itemGuids[i][2] = recvData.ReadBit();
+        }
+
     }
 
-	for (uint8 i = 0; i < count; ++i) {
+    for (uint8 i = 0; i < count; ++i) {
 
-		recvData >> newEntries[i];
-		recvData >> slots[i];
+        recvData >> newEntries[i];
+        recvData >> slots[i];
 
-	}
+    }
 
     recvData.ReadByteSeq(npcGuid[5]);
     recvData.ReadByteSeq(npcGuid[4]);
@@ -1567,30 +1569,30 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     recvData.ReadByteSeq(npcGuid[6]);
     recvData.ReadByteSeq(npcGuid[3]);
 
-	for (uint8 i = 0; i < count; ++i)
-	{
-		if(unk0) {
-			recvData.ReadByteSeq(itemGuids[i][4]);
-			recvData.ReadByteSeq(itemGuids[i][0]);
-			recvData.ReadByteSeq(itemGuids[i][5]);
-			recvData.ReadByteSeq(itemGuids[i][6]);
-			recvData.ReadByteSeq(itemGuids[i][2]);
-			recvData.ReadByteSeq(itemGuids[i][7]);
-			recvData.ReadByteSeq(itemGuids[i][1]);
-			recvData.ReadByteSeq(itemGuids[i][3]);
-		}
-        
-		if(unk1) {
-			recvData.ReadByteSeq(itemGuids[i][3]);
-			recvData.ReadByteSeq(itemGuids[i][6]);
-			recvData.ReadByteSeq(itemGuids[i][2]);
-			recvData.ReadByteSeq(itemGuids[i][7]);
-			recvData.ReadByteSeq(itemGuids[i][4]);
-			recvData.ReadByteSeq(itemGuids[i][5]);
-			recvData.ReadByteSeq(itemGuids[i][0]);
-			recvData.ReadByteSeq(itemGuids[i][1]);
-		}
-        
+    for (uint8 i = 0; i < count; ++i) {
+		
+         if(unk0) {
+                  recvData.ReadByteSeq(itemGuids[i][4]);
+		  recvData.ReadByteSeq(itemGuids[i][0]);
+		  recvData.ReadByteSeq(itemGuids[i][5]);
+		  recvData.ReadByteSeq(itemGuids[i][6]);
+		  recvData.ReadByteSeq(itemGuids[i][2]);
+		  recvData.ReadByteSeq(itemGuids[i][7]);
+		  recvData.ReadByteSeq(itemGuids[i][1]);
+		  recvData.ReadByteSeq(itemGuids[i][3]);
+         }
+
+         if(unk1) {
+                  recvData.ReadByteSeq(itemGuids[i][3]);
+                  recvData.ReadByteSeq(itemGuids[i][6]);
+                  recvData.ReadByteSeq(itemGuids[i][2]);
+                  recvData.ReadByteSeq(itemGuids[i][7]);
+                  recvData.ReadByteSeq(itemGuids[i][4]);
+                  recvData.ReadByteSeq(itemGuids[i][5]);
+                  recvData.ReadByteSeq(itemGuids[i][0]);
+                  recvData.ReadByteSeq(itemGuids[i][1]);
+                  }
+
     }
 
     // Validate
