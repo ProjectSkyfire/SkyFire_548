@@ -28,7 +28,7 @@
 void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket) //Fix it
 {
     ObjectGuid guid;
-	guid[2] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
     guid[0] = recvPacket.ReadBit();
     guid[4] = recvPacket.ReadBit();
     guid[3] = recvPacket.ReadBit();
@@ -45,7 +45,7 @@ void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket) //Fix it
     recvPacket.ReadByteSeq(guid[4]);
     recvPacket.ReadByteSeq(guid[1]);
     recvPacket.ReadByteSeq(guid[7]);
-	//structure ok
+    //structure ok
 }
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
