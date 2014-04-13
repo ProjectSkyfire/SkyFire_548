@@ -411,10 +411,10 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
 {
     ObjectGuid mailbox;
     uint32 mailId;
-	
+    
     recvData >> mailId;
-	mailbox[1] = recvData.ReadBit();
-	mailbox[7] = recvData.ReadBit();
+    mailbox[1] = recvData.ReadBit();
+    mailbox[7] = recvData.ReadBit();
     mailbox[6] = recvData.ReadBit();
     mailbox[3] = recvData.ReadBit();
     mailbox[4] = recvData.ReadBit();
@@ -487,10 +487,10 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
     uint32 itemId;
 
     recvData >> mailId;
-	recvData >> itemId;
+    recvData >> itemId;
 
-	mailbox[3] = recvData.ReadBit();
-	mailbox[2] = recvData.ReadBit();
+    mailbox[3] = recvData.ReadBit();
+    mailbox[2] = recvData.ReadBit();
     mailbox[0] = recvData.ReadBit();
     mailbox[5] = recvData.ReadBit();
     mailbox[6] = recvData.ReadBit();
@@ -599,12 +599,12 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
     ObjectGuid mailbox;
     uint64 money;
     uint32 mailId;
-	
+    
     recvData >> money;
     recvData >> mailId;
 
-	mailbox[3] = recvData.ReadBit();
-	mailbox[5] = recvData.ReadBit();
+    mailbox[3] = recvData.ReadBit();
+    mailbox[5] = recvData.ReadBit();
     mailbox[4] = recvData.ReadBit();
     mailbox[2] = recvData.ReadBit();
     mailbox[6] = recvData.ReadBit();
@@ -658,7 +658,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
 {
     ObjectGuid mailbox;
 
-	mailbox[5] = recvData.ReadBit();
+    mailbox[5] = recvData.ReadBit();
     mailbox[3] = recvData.ReadBit();
     mailbox[6] = recvData.ReadBit();
     mailbox[0] = recvData.ReadBit();
@@ -796,10 +796,10 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
 {
     ObjectGuid mailbox;
     uint32 mailId;
-	
+    
     recvData >> mailId;
 
-	mailbox[3] = recvData.ReadBit();
+    mailbox[3] = recvData.ReadBit();
     mailbox[1] = recvData.ReadBit();
     mailbox[0] = recvData.ReadBit();
     mailbox[7] = recvData.ReadBit();
