@@ -206,9 +206,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CRITTER,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissCritter               );
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_ACCEPTED,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDuelAcceptedOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_CANCELLED,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDuelCancelledOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_DUEL_PROPOSED,                      0x19B3, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDuelProposedOpcode          );
     DEFINE_OPCODE_HANDLER(CMSG_EJECT_PASSENGER,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_EMOTE,                              0x12C5, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleEmoteOpcode                  );
+    DEFINE_OPCODE_HANDLER(CMSG_EMOTE,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleEmoteOpcode                  );
     DEFINE_OPCODE_HANDLER(CMSG_ENABLETAXI,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiQueryAvailableNodes      );
     DEFINE_OPCODE_HANDLER(CMSG_ENABLE_NAGLE,                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess               );
     DEFINE_OPCODE_HANDLER(CMSG_EQUIPMENT_SET_DELETE,               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleEquipmentSetDelete           );
@@ -333,12 +332,12 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_MONEY,                         0x15A0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootMoneyOpcode              ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_RELEASE,                       0x12F0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootReleaseOpcode            ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_ROLL,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLootRoll                     );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_CREATE_TEXT_ITEM,              0x0254, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailCreateTextItem           );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_DELETE,                        0x13A3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailDelete                   );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_MARK_AS_READ,                  0x027F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailMarkAsRead               );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_RETURN_TO_SENDER,              0x1C8A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailReturnToSender           );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_ITEM,                     0x06F6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeItem                 );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_MONEY,                    0x0676, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeMoney                );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_CREATE_TEXT_ITEM,              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMailCreateTextItem           );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_DELETE,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMailDelete                   );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_MARK_AS_READ,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMailMarkAsRead               );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_RETURN_TO_SENDER,              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMailReturnToSender           );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_ITEM,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeItem                 );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_MONEY,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeMoney                );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_BATTLEGROUND,     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_GUILD,            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_OFFICER,          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
@@ -481,7 +480,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleSaveCUFProfiles              );
     DEFINE_OPCODE_HANDLER(CMSG_SELF_RES,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode                );
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                          0x115F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode               ); // 5.4.7 18019
-    DEFINE_OPCODE_HANDLER(CMSG_SEND_MAIL,                          0x01A9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSendMail                     );
+    DEFINE_OPCODE_HANDLER(CMSG_SEND_MAIL,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSendMail                     );
     DEFINE_OPCODE_HANDLER(CMSG_SEND_SOR_REQUEST_VIA_ADDRESS,       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                      );
     DEFINE_OPCODE_HANDLER(CMSG_SETSHEATHED,                        0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSetSheathedOpcode            );
@@ -531,7 +530,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TAXINODE_STATUS_QUERY,              0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiNodeStatusQueryOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_TAXIQUERYAVAILABLENODES,            0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiQueryAvailableNodes      );
     DEFINE_OPCODE_HANDLER(CMSG_TELEPORT_TO_UNIT,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x037D, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_TIME_ADJUSTMENT_RESPONSE,           0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP,                     0x0413, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleTimeSyncResp                 ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP_FAILED,              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -800,7 +799,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_DUMP_RIDE_TICKETS_RESPONSE,         0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_DURABILITY_DAMAGE_DEATH,            0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ECHO_PARTY_SQUELCH,                 0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_EMOTE,                              0x022F, STATUS_NEVER    ); // 5.4.7 18019
+    DEFINE_OPCODE_HANDLER(SMSG_EMOTE,                              0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ENABLE_BARBER_SHOP,                 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ENCHANTMENTLOG,                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ENVIRONMENTALDAMAGELOG,             0x0000, STATUS_UNHANDLED);
@@ -979,7 +978,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLL_WON,                      0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_SLOT_CHANGED,                  0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_START_ROLL,                    0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_MAIL_LIST_RESULT,                   0x0401, STATUS_NEVER    ); // 5.4.7 18019
+    DEFINE_OPCODE_HANDLER(SMSG_MAIL_LIST_RESULT,                   0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MAP_OBJ_EVENTS,                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MEETINGSTONE_COMPLETE,              0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MEETINGSTONE_IN_PROGRESS,           0x0000, STATUS_UNHANDLED);
@@ -1255,7 +1254,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_TALENTS_INVOLUNTARILY_RESET,        0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TAXINODE_STATUS,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TEST_DROP_RATE_RESULT,              0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_TEXT_EMOTE,                         0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_TEXT_EMOTE,                         0x0522, STATUS_UNHANDLED); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_CLEAR,                       0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_REMOVE,                      0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_UPDATE,                      0x0000, STATUS_UNHANDLED);

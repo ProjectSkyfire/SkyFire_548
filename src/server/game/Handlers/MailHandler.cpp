@@ -361,8 +361,8 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recvData)
     ObjectGuid GuidMail;
     uint32 mailId;
 
-	GuidMail[4] = recvData.ReadBit();
-	GuidMail[0] = recvData.ReadBit();
+    GuidMail[4] = recvData.ReadBit();
+    GuidMail[0] = recvData.ReadBit();
     GuidMail[2] = recvData.ReadBit();
     GuidMail[7] = recvData.ReadBit();
     GuidMail[1] = recvData.ReadBit();
