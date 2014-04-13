@@ -538,7 +538,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TOTEM_DESTROYED,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTotemDestroyed               );
     DEFINE_OPCODE_HANDLER(CMSG_TRAINER_BUY_SPELL,                  0x0274, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTrainerBuySpellOpcode        ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_TRAINER_LIST,                       0x075E, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTrainerListOpcode            ); // 5.4.7 18019
-    DEFINE_OPCODE_HANDLER(CMSG_TRANSMOGRIFY_ITEMS,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTransmogrifyItems            );
+    DEFINE_OPCODE_HANDLER(CMSG_TRANSMOGRIFY_ITEMS,                 0x13F8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTransmogrifyItems            );
     DEFINE_OPCODE_HANDLER(CMSG_TURN_IN_PETITION,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTurnInPetitionOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_CLEAR,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialClear                );
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_FLAG,                      0x07A4, STATUS_NEVER,     PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialFlag                 ); // 5.4.7 18019

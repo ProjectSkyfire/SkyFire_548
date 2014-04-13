@@ -5839,17 +5839,17 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
     // Table for base dodge values
     const float dodge_base[MAX_CLASSES] =
     {
-         0.037580f, // Warrior
-         0.036520f, // Paladin
-        -0.054500f, // Hunter
-        -0.005900f, // Rogue
-         0.031830f, // Priest
-         0.036640f, // DK
-         0.016750f, // Shaman
-         0.034575f, // Mage
-         0.020350f, // Warlock
-         0.0f,      // ??
-         0.049510f  // Druid
+         3.7580f, // Warrior
+         3.6520f, // Paladin
+        -5.4500f, // Hunter
+        -0.5900f, // Rogue
+         3.1830f, // Priest
+         3.6640f, // DK
+         1.6750f, // Shaman
+         3.4575f, // Mage
+         2.0350f, // Warlock
+         5.6097f, // Monk
+         4.9510f  // Druid
     };
     // Crit/agility to dodge/agility coefficient multipliers; 3.2.0 increased required agility by 15%
     const float crit_to_dodge[MAX_CLASSES] =
@@ -5863,7 +5863,7 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
          1.60f/1.15f,    // Shaman
          1.00f/1.15f,    // Mage
          0.97f/1.15f,    // Warlock (?)
-         0.0f,           // ??
+         2.00f/1.15f,    // Monk
          2.00f/1.15f     // Druid
     };
 
@@ -5874,17 +5874,21 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
         level = GT_MAX_LEVEL;
 
     // Dodge per agility is proportional to crit per agility, which is available from DBC files
-    GtChanceToMeleeCritEntry  const* dodgeRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    GtChanceToMeleeCritEntry const* dodgeRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + (level - 1));
     if (dodgeRatio == NULL || pclass > MAX_CLASSES)
         return;
 
-    /// @todo research if talents/effects that increase total agility by x% should increase non-diminishing part
+    // TODO: research if talents/effects that increase total agility by x% should increase non-diminishing part
     float base_agility = GetCreateStat(STAT_AGILITY) * m_auraModifiersGroup[UNIT_MOD_STAT_START + STAT_AGILITY][BASE_PCT];
     float bonus_agility = GetStat(STAT_AGILITY) - base_agility;
 
+	float dodge_ratio = 1 / dodgeRatio->ratio;
+	if(pclass == CLASS_DEATH_KNIGHT || pclass == CLASS_PALADIN || pclass == CLASS_WARRIOR) dodge_ratio = 0;
+
     // calculate diminishing (green in char screen) and non-diminishing (white) contribution
-    diminishing = 100.0f * bonus_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1];
-    nondiminishing = 100.0f * (dodge_base[pclass-1] + base_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1]);
+    diminishing = bonus_agility * dodge_ratio * crit_to_dodge[pclass-1];
+    nondiminishing = dodge_base[pclass-1] + base_agility * dodge_ratio * crit_to_dodge[pclass-1];
+
 }
 
 float Player::GetSpellCritFromIntellect()
