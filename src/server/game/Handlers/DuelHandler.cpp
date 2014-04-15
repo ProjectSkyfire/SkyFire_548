@@ -25,6 +25,29 @@
 #include "UpdateData.h"
 #include "Player.h"
 
+void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket) //Fix it
+{
+    ObjectGuid guid;
+    guid[2] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[7]);
+    //structure ok
+}
+
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
     uint64 guid;

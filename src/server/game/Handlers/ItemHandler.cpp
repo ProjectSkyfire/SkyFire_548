@@ -1526,7 +1526,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     bool unk0, unk1;
 
     for (uint8 i = 0; i < count; ++i) {
-		
+        
         unk0 = recvData.ReadBit();
         unk1 = recvData.ReadBit();
 
@@ -1571,16 +1571,16 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     recvData.ReadByteSeq(npcGuid[3]);
 
     for (uint8 i = 0; i < count; ++i) {
-		
+        
          if(unk0) {
                   recvData.ReadByteSeq(itemGuids[i][4]);
-		  recvData.ReadByteSeq(itemGuids[i][0]);
-		  recvData.ReadByteSeq(itemGuids[i][5]);
-		  recvData.ReadByteSeq(itemGuids[i][6]);
-		  recvData.ReadByteSeq(itemGuids[i][2]);
-		  recvData.ReadByteSeq(itemGuids[i][7]);
-		  recvData.ReadByteSeq(itemGuids[i][1]);
-		  recvData.ReadByteSeq(itemGuids[i][3]);
+          recvData.ReadByteSeq(itemGuids[i][0]);
+          recvData.ReadByteSeq(itemGuids[i][5]);
+          recvData.ReadByteSeq(itemGuids[i][6]);
+          recvData.ReadByteSeq(itemGuids[i][2]);
+          recvData.ReadByteSeq(itemGuids[i][7]);
+          recvData.ReadByteSeq(itemGuids[i][1]);
+          recvData.ReadByteSeq(itemGuids[i][3]);
          }
 
          if(unk1) {
