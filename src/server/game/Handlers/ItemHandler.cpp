@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
+#include "Chat.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Item.h"
@@ -1703,7 +1704,6 @@ void WorldSession::SendReforgeResult(bool success)
 {
     WorldPacket data(SMSG_REFORGE_RESULT, 1);
     data.WriteBit(success);
-    data.FlushBits();
     SendPacket(&data);
 }
 
@@ -1714,29 +1714,31 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     uint32 bag;
     Player* player = GetPlayer();
 
-    recvData >> reforgeEntry >> slot >> bag;
+    recvData >> slot >> reforgeEntry >> bag;
+	
 
-    guid[2] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+
 
     if (!player->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_REFORGER))
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Unit (GUID: %u) not found or player can't interact with it.", GUID_LOPART(guid));
+        TC_LOG_INFO("network", "WORLD: HandleReforgeItemOpcode - Unit (GUID: %u) not found or player can't interact with it.", GUID_LOPART(guid));
         SendReforgeResult(false);
         return;
     }
@@ -1745,8 +1747,8 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
 
     if (!item)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an invalid/non-existant item.", player->GetGUIDLow(), player->GetName().c_str());
-        SendReforgeResult(false);
+        TC_LOG_INFO("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an invalid/non-existant item.", player->GetGUIDLow(), player->GetName().c_str());
+		SendReforgeResult(false);
         return;
     }
 
@@ -1763,7 +1765,7 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     ItemReforgeEntry const* stats = sItemReforgeStore.LookupEntry(reforgeEntry);
     if (!stats)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an item with invalid reforge entry (%u).", player->GetGUIDLow(), player->GetName().c_str(), reforgeEntry);
+        TC_LOG_INFO("network", "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an item with invalid reforge entry (%u).", player->GetGUIDLow(), player->GetName().c_str(), reforgeEntry);
         SendReforgeResult(false);
         return;
     }

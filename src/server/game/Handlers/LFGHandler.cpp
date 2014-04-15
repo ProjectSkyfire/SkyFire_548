@@ -90,15 +90,17 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         recvData.rfinish();
         return;
     }
-
     uint32 roles;
+    bool unk1;
+    uint8 unk0;
 
-    recvData >> roles;
+    recvData >> unk0;
     for (int32 i = 0; i < 3; ++i)
         recvData.read_skip<uint32>();
-
-    uint32 commentLen = recvData.ReadBits(9);
-    uint32 numDungeons = recvData.ReadBits(24);
+    recvData >> roles;
+    uint32 numDungeons = recvData.ReadBits(22);
+    uint32 commentLen = recvData.ReadBits(8);
+    unk1 = recvData.ReadBit();
 
     if (!numDungeons)
     {
@@ -567,32 +569,36 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
     WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size);
     data << uint32(3);
     data << uint8(joinData.result);                        // Check Result
+    data << uint8(joinData.state);
     data << uint32(queueId);                               // Queue Id
-    data << uint8(joinData.state);                         // Check Value
     data << uint32(time(NULL));                            // Join date
+
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
     data.WriteBit(guid[2]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
+    data.WriteBit(guid[5]);
     data.WriteBit(guid[0]);
-    data.WriteBits(joinData.lockmap.size(), 24);
+    data.WriteBit(guid[1]);
+    data.WriteBits(joinData.lockmap.size(), 22);
+    data.WriteBit(guid[3]);
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         ObjectGuid playerGuid = it->first;
         data.WriteBit(playerGuid[7]);
-        data.WriteBit(playerGuid[5]);
-        data.WriteBit(playerGuid[3]);
-        data.WriteBit(playerGuid[6]);
         data.WriteBit(playerGuid[0]);
+        data.WriteBit(playerGuid[1]);
+        data.WriteBit(playerGuid[6]);
         data.WriteBit(playerGuid[2]);
         data.WriteBit(playerGuid[4]);
-        data.WriteBit(playerGuid[1]);
-        data.WriteBits(it->second.size(), 22);
+        data.WriteBits(it->second.size(), 20);
+        data.WriteBit(playerGuid[3]);
+        data.WriteBit(playerGuid[5]);
+        
     }
 
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
+    
+    data.WriteByteSeq(guid[5]);
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         ObjectGuid playerGuid = it->first;
@@ -604,24 +610,24 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
             data << uint32(itr->first);                        // Dungeon entry (id + type)
         }
 
-        data.WriteByteSeq(playerGuid[2]);
-        data.WriteByteSeq(playerGuid[5]);
         data.WriteByteSeq(playerGuid[1]);
-        data.WriteByteSeq(playerGuid[0]);
         data.WriteByteSeq(playerGuid[4]);
-        data.WriteByteSeq(playerGuid[3]);
-        data.WriteByteSeq(playerGuid[6]);
         data.WriteByteSeq(playerGuid[7]);
+        data.WriteByteSeq(playerGuid[6]);
+        data.WriteByteSeq(playerGuid[3]);
+        data.WriteByteSeq(playerGuid[2]);
+        data.WriteByteSeq(playerGuid[0]);
+        data.WriteByteSeq(playerGuid[5]);
     }
 
-    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
+    
 
     SendPacket(&data);
 }
