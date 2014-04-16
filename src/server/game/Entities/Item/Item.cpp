@@ -259,6 +259,14 @@ Item::Item()
     m_refundRecipient = 0;
     m_paidMoney = 0;
     m_paidExtendedCost = 0;
+
+    m_dynamicTab.resize(ITEM_DYNAMIC_END);
+    m_dynamicChange.resize(ITEM_DYNAMIC_END);
+    for (int i = 0; i < ITEM_DYNAMIC_END; i++)
+    {
+        m_dynamicTab[i] = new uint32[32];
+        m_dynamicChange[i] = new bool[32];
+    }
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
