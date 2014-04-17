@@ -830,9 +830,7 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY");
 
     uint32 count = 0;
-
-    WorldPacket data(SMSG_QUESTGIVER_STATUS_MULTIPLE, 4 + 8 + 4);
-    data << uint32(count);                                  // placeholder
+    ByteBuffer bitData, byteData;
 
     for (Player::ClientGUIDs::const_iterator itr = _player->m_clientGUIDs.begin(); itr != _player->m_clientGUIDs.end(); ++itr)
     {
@@ -851,8 +849,27 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
             if (questStatus > 6)
                 questStatus = getDialogStatus(_player, questgiver, defstatus);
 
-            data << uint64(questgiver->GetGUID());
-            data << uint32(questStatus);
+            ObjectGuid guid = questgiver->GetGUID();
+
+            bitData.WriteBit(guid[7]);
+            bitData.WriteBit(guid[0]);
+            bitData.WriteBit(guid[6]);
+            bitData.WriteBit(guid[2]);
+            bitData.WriteBit(guid[5]);
+            bitData.WriteBit(guid[1]);
+            bitData.WriteBit(guid[4]);
+            bitData.WriteBit(guid[3]);
+
+            byteData.WriteByteSeq(guid[5]);
+            byteData << uint32(questStatus);
+            byteData.WriteByteSeq(guid[4]);
+            byteData.WriteByteSeq(guid[2]);
+            byteData.WriteByteSeq(guid[3]);
+            byteData.WriteByteSeq(guid[6]);
+            byteData.WriteByteSeq(guid[1]);
+            byteData.WriteByteSeq(guid[7]);
+            byteData.WriteByteSeq(guid[0]);
+
             ++count;
         }
         else if (IS_GAMEOBJECT_GUID(*itr))
@@ -866,13 +883,36 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
             if (questStatus > 6)
                 questStatus = getDialogStatus(_player, questgiver, defstatus);
 
-            data << uint64(questgiver->GetGUID());
-            data << uint32(questStatus);
+            ObjectGuid guid = questgiver->GetGUID();
+
+            bitData.WriteBit(guid[7]);
+            bitData.WriteBit(guid[0]);
+            bitData.WriteBit(guid[6]);
+            bitData.WriteBit(guid[2]);
+            bitData.WriteBit(guid[5]);
+            bitData.WriteBit(guid[1]);
+            bitData.WriteBit(guid[4]);
+            bitData.WriteBit(guid[3]);
+
+            byteData.WriteByteSeq(guid[5]);
+            byteData << uint32(questStatus);
+            byteData.WriteByteSeq(guid[4]);
+            byteData.WriteByteSeq(guid[2]);
+            byteData.WriteByteSeq(guid[3]);
+            byteData.WriteByteSeq(guid[6]);
+            byteData.WriteByteSeq(guid[1]);
+            byteData.WriteByteSeq(guid[7]);
+            byteData.WriteByteSeq(guid[0]);
+
             ++count;
         }
     }
 
-    data.put<uint32>(0, count);                             // write real count
+    WorldPacket data(SMSG_QUESTGIVER_STATUS_MULTIPLE, 3 + count * (1 + 8 + 4));
+    data.WriteBits(count, 21);
+    data.append(bitData);
+    data.append(byteData);
+
     SendPacket(&data);
 }
 
