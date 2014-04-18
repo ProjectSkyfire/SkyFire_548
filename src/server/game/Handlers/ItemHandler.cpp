@@ -779,15 +779,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             itemsData << int32(-1);
             itemsData << uint32(vendorItem->Type);                  // 1 is items, 2 is currency
             itemsData << uint32(itemTemplate->BuyCount);
-
-            if (vendorItem->ExtendedCost)
-            {
-                hasExtendedCost[slot] = true;
-                itemsData << uint32(vendorItem->ExtendedCost);
-            }
-            else
-                hasExtendedCost[slot] = false;
-
+            itemsData << uint32(vendorItem->ExtendedCost);
             itemsData << uint32(price);
             itemsData << uint32(vendorItem->item);
             itemsData << uint32(slot + 1);                          // client expects counting to start at 1
