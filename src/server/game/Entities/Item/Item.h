@@ -168,7 +168,6 @@ enum EnchantmentSlot
     BONUS_ENCHANTMENT_SLOT          = 5,
     PRISMATIC_ENCHANTMENT_SLOT      = 6,                    // added at apply special permanent enchantment
     //TODO: 7,
-    TRANSMOGRIFY_ENCHANTMENT_SLOT   = 9, // no longer exist
     MAX_INSPECTED_ENCHANTMENT_SLOT  = 8,
 
     PROP_ENCHANTMENT_SLOT_0         = 8,                   // used with RandomSuffix
