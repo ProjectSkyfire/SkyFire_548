@@ -53,17 +53,10 @@ enum EItemFields
     ITEM_END                                                 = OBJECT_END + 0x3D,
 };
 
-enum EPlayerDynamicFields
-{
-    PLAYER_DYNAMIC_RESEARCH_SITES = 0x1,
-    PLAYER_DYNAMIC_DAILY_QUESTS_COMPLETED = 0x2,
-    PLAYER_DYNAMIC_END = 0x4
-};
-
 enum ItemDynamicFields
 {
     ITEM_DYNAMIC_MODIFIERS = 0x0,
-    ITEM_DYNAMIC_END = 0x4
+    ITEM_DYNAMIC_END = 0x1
 };
 
 enum EContainerFields
