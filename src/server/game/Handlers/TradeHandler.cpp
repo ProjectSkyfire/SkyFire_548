@@ -143,7 +143,7 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
             itemData.WriteByteSeq(creatorGuid[7]);
             itemData.WriteByteSeq(creatorGuid[4]);
 
-            itemData << uint32(item->GetEnchantmentId(REFORGE_ENCHANTMENT_SLOT));
+            itemData << uint32(item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0));
             itemData << uint32(item->GetUInt32Value(ITEM_FIELD_DURABILITY));
             itemData << uint32(item->GetItemRandomPropertyId());
 
