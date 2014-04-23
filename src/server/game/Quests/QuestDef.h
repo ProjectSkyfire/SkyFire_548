@@ -178,6 +178,20 @@ enum QuestSpecialFlags
     QUEST_SPECIAL_FLAGS_PLAYER_KILL          = 0x800    // Internal flag computed only
 };
 
+enum QuestObjectiveType
+{
+    QUEST_OBJECTIVE_TYPE_NPC          = 0,
+    QUEST_OBJECTIVE_TYPE_ITEM         = 1,
+    QUEST_OBJECTIVE_TYPE_GO           = 2,
+    //QUEST_OBJECTIVE_TYPE_UNK          = 3,
+    QUEST_OBJECTIVE_TYPE_CURRENCY     = 4,
+    QUEST_OBJECTIVE_TYPE_SPELL        = 5,
+    QUEST_OBJECTIVE_TYPE_FACTION_REP  = 6,
+    QUEST_OBJECTIVE_TYPE_FACTION_REP2 = 7,
+    //QUEST_OBJECTIVE_TYPE_UNK          = 8,
+    QUEST_OBJECTIVE_TYPE_PLAYER       = 9
+};
+
 struct QuestLocale
 {
     QuestLocale() { ObjectiveText.resize(QUEST_OBJECTIVES_COUNT); }
