@@ -214,6 +214,7 @@ class Object
         float GetFloatValue(uint16 index) const;
         uint8 GetByteValue(uint16 index, uint8 offset) const;
         uint16 GetUInt16Value(uint16 index, uint8 offset) const;
+        uint32 GetDynamicUInt32Value(uint32 tab, uint16 index) const;
 
         void SetInt32Value(uint16 index, int32 value);
         void SetUInt32Value(uint16 index, uint32 value);
@@ -225,6 +226,7 @@ class Object
         void SetInt16Value(uint16 index, uint8 offset, int16 value) { SetUInt16Value(index, offset, (uint16)value); }
         void SetStatFloatValue(uint16 index, float value);
         void SetStatInt32Value(uint16 index, int32 value);
+        void SetDynamicUInt32Value(uint32 tab, uint16 index, uint32 value);
 
         bool AddUInt64Value(uint16 index, uint64 value);
         bool RemoveUInt64Value(uint16 index, uint64 value);
@@ -289,7 +291,6 @@ class Object
         AreaTrigger* ToAreaTrigger() { if (GetTypeId() == TYPEID_AREATRIGGER) return reinterpret_cast<AreaTrigger*>(this); else return NULL; }
         AreaTrigger const* ToAreaTrigger() const { if (GetTypeId() == TYPEID_AREATRIGGER) return reinterpret_cast<AreaTrigger const*>(this); else return NULL; }
 
-
     protected:
         Object();
 
@@ -301,7 +302,11 @@ class Object
         uint32 GetUpdateFieldData(Player const* target, uint32*& flags) const;
 
         void BuildMovementUpdate(ByteBuffer* data, uint16 flags) const;
+        void BuildDynamicValuesUpdate(ByteBuffer *data) const;
         virtual void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
+
+        std::vector<uint32*> m_dynamicTab;
+        std::vector<bool*> m_dynamicChange;
 
         uint16 m_objectType;
 
