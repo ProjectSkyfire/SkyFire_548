@@ -35,38 +35,17 @@
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
 {
     //TC_LOG_DEBUG("network", "WORLD: CMSG_SPLIT_ITEM");
-    uint8 srcbag, srcslot, dstbag, dstslot, unknownBitCounter;
+    uint8 srcBag, srcSlot, dstBag, dstSlot;
     uint32 count;
 
-    recvData >> dstslot >> dstbag >> srcslot;
     recvData >> count;
-    recvData >> srcbag;
-
-    unknownBitCounter = recvData.ReadBits(2);
-
-    uint8 unknownBits[3][2];
-
-    for (uint8 i = 0; i < unknownBitCounter; i++)
-    {
-        unknownBits[i][0] = recvData.ReadBit();
-        unknownBits[i][1] = recvData.ReadBit();
-    }
-
-    uint8 unknownBytes[3][2];
-
-    for (uint8 i = 0; i < unknownBitCounter; i++)
-    {
-        if (unknownBits[i][0])
-            recvData >> unknownBytes[i][0];
-
-        if (unknownBits[i][1])
-            recvData >> unknownBytes[i][1];
-    }
+    recvData >> srcSlot >> dstSlot >> dstBag >> srcBag;
+    recvData.rfinish();
 
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u, count = %u", srcbag, srcslot, dstbag, dstslot, count);
 
-    uint16 src = ((srcbag << 8) | srcslot);
-    uint16 dst = ((dstbag << 8) | dstslot);
+    uint16 src = ((srcBag << 8) | srcSlot);
+    uint16 dst = ((dstBag << 8) | dstSlot);
 
     if (src == dst)
         return;
@@ -74,13 +53,13 @@ void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
     if (count == 0)
         return;                                             //check count - if zero it's fake packet
 
-    if (!_player->IsValidPos(srcbag, srcslot, true))
+    if (!_player->IsValidPos(srcBag, srcSlot, true))
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
-    if (!_player->IsValidPos(dstbag, dstslot, false))       // can be autostore pos
+    if (!_player->IsValidPos(dstBag, dstSlot, false))       // can be autostore pos
     {
         _player->SendEquipError(EQUIP_ERR_WRONG_SLOT, NULL, NULL);
         return;
