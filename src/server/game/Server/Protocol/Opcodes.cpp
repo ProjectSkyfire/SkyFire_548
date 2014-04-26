@@ -93,7 +93,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_REMOVE_ITEM,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionRemoveItem            );
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_SELL_ITEM,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionSellItem              );
     DEFINE_OPCODE_HANDLER(CMSG_AUTH_SESSION,                       0x1A51, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess               ); // 5.4.7 18019
-    DEFINE_OPCODE_HANDLER(CMSG_AUTOBANK_ITEM,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAutoBankItemOpcode           );
+    DEFINE_OPCODE_HANDLER(CMSG_AUTOBANK_ITEM,                      0x1C42, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoBankItemOpcode           ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM,                     0x166B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemOpcode          ); // 5.4.7 18019
     DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM_SLOT,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemSlotOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BAG_ITEM,                 0x162B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBagItemOpcode       ); // 5.4.7 18019

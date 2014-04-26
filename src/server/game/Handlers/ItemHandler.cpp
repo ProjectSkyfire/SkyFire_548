@@ -978,12 +978,14 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvData)
 void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOBANK_ITEM");
-    uint8 srcbag, srcslot;
+    uint8 srcBag, srcSlot;
 
-    recvPacket >> srcbag >> srcslot;
-    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
+    recvPacket >> srcSlot >> srcBag;
+    recvPacket.rfinish();
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcBag, srcSlot);
+
+    Item* pItem = _player->GetItemByPos(srcBag, srcSlot);
     if (!pItem)
         return;
 
@@ -1001,7 +1003,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    _player->RemoveItem(srcbag, srcslot, true);
+    _player->RemoveItem(srcBag, srcSlot, true);
     _player->ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
     _player->BankItem(dest, pItem, true);
 }
