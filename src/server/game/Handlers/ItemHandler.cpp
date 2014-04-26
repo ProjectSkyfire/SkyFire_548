@@ -855,16 +855,18 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
 void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
 {
     //TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOSTORE_BAG_ITEM");
-    uint8 srcbag, srcslot, dstbag;
+    uint8 srcBag, srcSlot, dstBag;
 
-    recvData >> srcbag >> srcslot >> dstbag;
+    recvData >> srcBag >> dstBag >> srcSlot;
+    recvData.rfinish();
+
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u", srcbag, srcslot, dstbag);
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    Item* pItem = _player->GetItemByPos(srcBag, srcSlot);
     if (!pItem)
         return;
 
-    if (!_player->IsValidPos(dstbag, NULL_SLOT, false))      // can be autostore pos
+    if (!_player->IsValidPos(dstBag, NULL_SLOT, false))      // can be autostore pos
     {
         _player->SendEquipError(EQUIP_ERR_WRONG_SLOT, NULL, NULL);
         return;
@@ -884,7 +886,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
     }
 
     ItemPosCountVec dest;
-    InventoryResult msg = _player->CanStoreItem(dstbag, NULL_SLOT, dest, pItem, false);
+    InventoryResult msg = _player->CanStoreItem(dstBag, NULL_SLOT, dest, pItem, false);
     if (msg != EQUIP_ERR_OK)
     {
         _player->SendEquipError(msg, pItem, NULL);
@@ -899,7 +901,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
         return;
     }
 
-    _player->RemoveItem(srcbag, srcslot, true);
+    _player->RemoveItem(srcBag, srcSlot, true);
     _player->StoreItem(dest, pItem, true);
 }
 
