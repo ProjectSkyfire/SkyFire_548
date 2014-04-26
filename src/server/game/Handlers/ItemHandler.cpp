@@ -1011,16 +1011,16 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOSTORE_BANK_ITEM");
-    uint8 srcbag, srcslot;
+    uint8 srcBag, srcSlot;
 
-    recvPacket >> srcbag >> srcslot;
-    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
+    recvPacket >> srcBag >> srcSlot;
+    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcBag, srcSlot);
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    Item* pItem = _player->GetItemByPos(srcBag, srcSlot);
     if (!pItem)
         return;
 
-    if (_player->IsBankPos(srcbag, srcslot))                 // moving from bank to inventory
+    if (_player->IsBankPos(srcBag, srcSlot))                 // moving from bank to inventory
     {
         ItemPosCountVec dest;
         InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
@@ -1030,7 +1030,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
             return;
         }
 
-        _player->RemoveItem(srcbag, srcslot, true);
+        _player->RemoveItem(srcBag, srcSlot, true);
         if (Item const* storedItem = _player->StoreItem(dest, pItem, true))
             _player->ItemAddedQuestCheck(storedItem->GetEntry(), storedItem->GetCount());
     }
@@ -1044,7 +1044,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
             return;
         }
 
-        _player->RemoveItem(srcbag, srcslot, true);
+        _player->RemoveItem(srcBag, srcSlot, true);
         _player->BankItem(dest, pItem, true);
     }
 }
