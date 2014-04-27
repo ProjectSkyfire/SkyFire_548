@@ -53,6 +53,12 @@ enum EItemFields
     ITEM_END                                                 = OBJECT_END + 0x3D,
 };
 
+enum ItemDynamicFields
+{
+    ITEM_DYNAMIC_MODIFIERS = 0x0,
+    ITEM_DYNAMIC_END = 0x1
+};
+
 enum EContainerFields
 {
     CONTAINER_FIELD_SLOTS                                    = ITEM_END + 0x00, // Size: 72, Flags: UF_FLAG_PUBLIC

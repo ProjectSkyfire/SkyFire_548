@@ -35,38 +35,17 @@
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
 {
     //TC_LOG_DEBUG("network", "WORLD: CMSG_SPLIT_ITEM");
-    uint8 srcbag, srcslot, dstbag, dstslot, unknownBitCounter;
+    uint8 srcBag, srcSlot, dstBag, dstSlot;
     uint32 count;
 
-    recvData >> dstslot >> dstbag >> srcslot;
     recvData >> count;
-    recvData >> srcbag;
-
-    unknownBitCounter = recvData.ReadBits(2);
-
-    uint8 unknownBits[3][2];
-
-    for (uint8 i = 0; i < unknownBitCounter; i++)
-    {
-        unknownBits[i][0] = recvData.ReadBit();
-        unknownBits[i][1] = recvData.ReadBit();
-    }
-
-    uint8 unknownBytes[3][2];
-
-    for (uint8 i = 0; i < unknownBitCounter; i++)
-    {
-        if (unknownBits[i][0])
-            recvData >> unknownBytes[i][0];
-
-        if (unknownBits[i][1])
-            recvData >> unknownBytes[i][1];
-    }
+    recvData >> srcSlot >> dstSlot >> dstBag >> srcBag;
+    recvData.rfinish();
 
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u, count = %u", srcbag, srcslot, dstbag, dstslot, count);
 
-    uint16 src = ((srcbag << 8) | srcslot);
-    uint16 dst = ((dstbag << 8) | dstslot);
+    uint16 src = ((srcBag << 8) | srcSlot);
+    uint16 dst = ((dstBag << 8) | dstSlot);
 
     if (src == dst)
         return;
@@ -74,13 +53,13 @@ void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
     if (count == 0)
         return;                                             //check count - if zero it's fake packet
 
-    if (!_player->IsValidPos(srcbag, srcslot, true))
+    if (!_player->IsValidPos(srcBag, srcSlot, true))
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
-    if (!_player->IsValidPos(dstbag, dstslot, false))       // can be autostore pos
+    if (!_player->IsValidPos(dstBag, dstSlot, false))       // can be autostore pos
     {
         _player->SendEquipError(EQUIP_ERR_WRONG_SLOT, NULL, NULL);
         return;
@@ -876,16 +855,18 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
 void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
 {
     //TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOSTORE_BAG_ITEM");
-    uint8 srcbag, srcslot, dstbag;
+    uint8 srcBag, srcSlot, dstBag;
 
-    recvData >> srcbag >> srcslot >> dstbag;
+    recvData >> srcBag >> dstBag >> srcSlot;
+    recvData.rfinish();
+
     //TC_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u", srcbag, srcslot, dstbag);
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    Item* pItem = _player->GetItemByPos(srcBag, srcSlot);
     if (!pItem)
         return;
 
-    if (!_player->IsValidPos(dstbag, NULL_SLOT, false))      // can be autostore pos
+    if (!_player->IsValidPos(dstBag, NULL_SLOT, false))      // can be autostore pos
     {
         _player->SendEquipError(EQUIP_ERR_WRONG_SLOT, NULL, NULL);
         return;
@@ -905,7 +886,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
     }
 
     ItemPosCountVec dest;
-    InventoryResult msg = _player->CanStoreItem(dstbag, NULL_SLOT, dest, pItem, false);
+    InventoryResult msg = _player->CanStoreItem(dstBag, NULL_SLOT, dest, pItem, false);
     if (msg != EQUIP_ERR_OK)
     {
         _player->SendEquipError(msg, pItem, NULL);
@@ -920,7 +901,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
         return;
     }
 
-    _player->RemoveItem(srcbag, srcslot, true);
+    _player->RemoveItem(srcBag, srcSlot, true);
     _player->StoreItem(dest, pItem, true);
 }
 
@@ -997,12 +978,14 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvData)
 void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOBANK_ITEM");
-    uint8 srcbag, srcslot;
+    uint8 srcBag, srcSlot;
 
-    recvPacket >> srcbag >> srcslot;
-    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
+    recvPacket >> srcSlot >> srcBag;
+    recvPacket.rfinish();
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcBag, srcSlot);
+
+    Item* pItem = _player->GetItemByPos(srcBag, srcSlot);
     if (!pItem)
         return;
 
@@ -1020,7 +1003,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    _player->RemoveItem(srcbag, srcslot, true);
+    _player->RemoveItem(srcBag, srcSlot, true);
     _player->ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
     _player->BankItem(dest, pItem, true);
 }
@@ -1028,16 +1011,16 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOSTORE_BANK_ITEM");
-    uint8 srcbag, srcslot;
+    uint8 srcBag, srcSlot;
 
-    recvPacket >> srcbag >> srcslot;
-    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
+    recvPacket >> srcBag >> srcSlot;
+    TC_LOG_DEBUG("network", "STORAGE: receive srcbag = %u, srcslot = %u", srcBag, srcSlot);
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    Item* pItem = _player->GetItemByPos(srcBag, srcSlot);
     if (!pItem)
         return;
 
-    if (_player->IsBankPos(srcbag, srcslot))                 // moving from bank to inventory
+    if (_player->IsBankPos(srcBag, srcSlot))                 // moving from bank to inventory
     {
         ItemPosCountVec dest;
         InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
@@ -1047,7 +1030,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
             return;
         }
 
-        _player->RemoveItem(srcbag, srcslot, true);
+        _player->RemoveItem(srcBag, srcSlot, true);
         if (Item const* storedItem = _player->StoreItem(dest, pItem, true))
             _player->ItemAddedQuestCheck(storedItem->GetEntry(), storedItem->GetCount());
     }
@@ -1061,7 +1044,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
             return;
         }
 
-        _player->RemoveItem(srcbag, srcslot, true);
+        _player->RemoveItem(srcBag, srcSlot, true);
         _player->BankItem(dest, pItem, true);
     }
 }
@@ -1662,7 +1645,9 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
 
         if (!newEntries[i]) // reset look
         {
-            itemTransmogrified->ClearEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT);
+            itemTransmogrified->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1, 0);
+            itemTransmogrified->RemoveFlag(ITEM_FIELD_MODIFIERS_MASK, 3);
+            itemTransmogrified->SetState(ITEM_CHANGED, player);
             player->SetVisibleItemSlot(slots[i], itemTransmogrified);
         }
         else
@@ -1674,7 +1659,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             }
 
             // All okay, proceed
-            itemTransmogrified->SetEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT, newEntries[i], 0, 0);
+            itemTransmogrified->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1, newEntries[i]);
+            itemTransmogrified->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 3);
             player->SetVisibleItemSlot(slots[i], itemTransmogrified);
 
             itemTransmogrified->UpdatePlayedTime(player);
@@ -1689,6 +1675,8 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             itemTransmogrifier->SetOwnerGUID(player->GetGUID());
             itemTransmogrifier->SetNotRefundable(player);
             itemTransmogrifier->ClearSoulboundTradeable(player);
+
+            itemTransmogrified->SetState(ITEM_CHANGED, player);
 
             cost += itemTransmogrified->GetSpecialPrice();
         }
@@ -1757,7 +1745,10 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
         // Reset the item
         if (item->IsEquipped())
             player->ApplyReforgeEnchantment(item, false);
-        item->ClearEnchantment(REFORGE_ENCHANTMENT_SLOT);
+        item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, 0);
+        if (!item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1)) // check transmog on item before remove
+            item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0);
+        item->SetState(ITEM_CHANGED, player);
         SendReforgeResult(true);
         return;
     }
@@ -1784,7 +1775,9 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
 
     player->ModifyMoney(-int64(item->GetSpecialPrice()));
 
-    item->SetEnchantment(REFORGE_ENCHANTMENT_SLOT, reforgeEntry, 0, 0);
+    item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, reforgeEntry);
+    item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
+    item->SetState(ITEM_CHANGED, player);
 
     SendReforgeResult(true);
 
