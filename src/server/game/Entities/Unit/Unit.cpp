@@ -191,6 +191,7 @@ Unit::Unit(bool isWorldObject) :
     m_movementCounter = 0;
 
     m_state = 0;
+    m_rootCounter = 0;
     m_deathState = ALIVE;
 
     for (uint8 i = 0; i < CURRENT_MAX_SPELL; ++i)
@@ -14114,10 +14115,62 @@ void Unit::SetRooted(bool apply, bool packetOnly /*= false*/)
             RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
     }
 
-    if (apply)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_ROOT, SMSG_MOVE_ROOT, SMSG_MOVE_ROOT).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNROOT, SMSG_MOVE_UNROOT, SMSG_MOVE_UNROOT).Send();
+    if (ToPlayer()) {
+        m_rootCounter++;
+        if (apply) {
+            ObjectGuid guid = GetGUID();
+            WorldPacket data(SMSG_MOVE_ROOT, 1 + 8 + 4);
+            data.WriteBit(guid[5]);
+            data.WriteBit(guid[3]);
+            data.WriteBit(guid[6]);
+            data.WriteBit(guid[0]);
+            data.WriteBit(guid[1]);
+            data.WriteBit(guid[4]);
+            data.WriteBit(guid[2]);
+            data.WriteBit(guid[7]);
+
+            data.WriteByteSeq(guid[1]);
+            data.WriteByteSeq(guid[2]);
+            data.WriteByteSeq(guid[6]);
+            data.WriteByteSeq(guid[4]);
+            data.WriteByteSeq(guid[3]);
+            data.WriteByteSeq(guid[5]);
+            data << uint32(m_rootCounter);
+            data.WriteByteSeq(guid[7]);
+            data.WriteByteSeq(guid[0]);
+
+            SendMessageToSet(&data, true);
+
+        } else {
+            ObjectGuid guid = GetGUID();
+            WorldPacket data(SMSG_MOVE_UNROOT, 1 + 8 + 4);
+            data.WriteBit(guid[0]);
+            data.WriteBit(guid[6]);
+            data.WriteBit(guid[4]);
+            data.WriteBit(guid[1]);
+            data.WriteBit(guid[2]);
+            data.WriteBit(guid[3]);
+            data.WriteBit(guid[7]);
+            data.WriteBit(guid[5]);
+
+            data.WriteByteSeq(guid[1]);
+            data.WriteByteSeq(guid[0]);
+            data.WriteByteSeq(guid[3]);
+            data.WriteByteSeq(guid[6]);
+            data.WriteByteSeq(guid[4]);
+            data << uint32(m_rootCounter);
+            data.WriteByteSeq(guid[5]);
+            data.WriteByteSeq(guid[7]);
+            data.WriteByteSeq(guid[2]);
+
+            SendMessageToSet(&data, true);
+        }
+    } else { // Not a Player
+        if (apply)
+            Movement::PacketSender(this, SMSG_SPLINE_MOVE_ROOT, SMSG_MOVE_ROOT, SMSG_MOVE_ROOT).Send();
+        else
+            Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNROOT, SMSG_MOVE_UNROOT, SMSG_MOVE_UNROOT).Send();
+    }
 }
 
 void Unit::SetFeared(bool apply)
