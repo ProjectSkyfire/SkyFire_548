@@ -2255,6 +2255,7 @@ class Unit : public WorldObject
 
     private:
 
+        uint32 m_rootCounter;
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         TimeTrackerSmall m_movesplineTimer;
