@@ -293,28 +293,26 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
     uint32 questId;
-    uint8 Unk1;
 
     recvData >> questId;
-    guid[2] = recvData.ReadBit();
-    recvData >> Unk1;
-
+    guid[6] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
+    recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[7]);
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u", uint32(GUID_LOPART(guid)), questId);
 
