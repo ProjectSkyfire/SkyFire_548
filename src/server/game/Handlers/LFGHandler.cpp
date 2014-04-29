@@ -137,23 +137,23 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
     recvData.read_skip<uint32>();                          // Always 3
     recvData.read_skip<uint32>();                          // Queue Id
 
-    leaveGuid[4] = recvData.ReadBit();
-    leaveGuid[5] = recvData.ReadBit();
     leaveGuid[0] = recvData.ReadBit();
-    leaveGuid[6] = recvData.ReadBit();
-    leaveGuid[2] = recvData.ReadBit();
-    leaveGuid[7] = recvData.ReadBit();
     leaveGuid[1] = recvData.ReadBit();
+    leaveGuid[6] = recvData.ReadBit();
+    leaveGuid[7] = recvData.ReadBit();
     leaveGuid[3] = recvData.ReadBit();
+    leaveGuid[5] = recvData.ReadBit();
+    leaveGuid[2] = recvData.ReadBit();
+    leaveGuid[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(leaveGuid[7]);
-    recvData.ReadByteSeq(leaveGuid[4]);
-    recvData.ReadByteSeq(leaveGuid[3]);
-    recvData.ReadByteSeq(leaveGuid[2]);
-    recvData.ReadByteSeq(leaveGuid[6]);
-    recvData.ReadByteSeq(leaveGuid[0]);
     recvData.ReadByteSeq(leaveGuid[1]);
     recvData.ReadByteSeq(leaveGuid[5]);
+    recvData.ReadByteSeq(leaveGuid[6]);
+    recvData.ReadByteSeq(leaveGuid[7]);
+    recvData.ReadByteSeq(leaveGuid[4]);
+    recvData.ReadByteSeq(leaveGuid[2]);
+    recvData.ReadByteSeq(leaveGuid[3]);
+    recvData.ReadByteSeq(leaveGuid[0]);
 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_LEAVE %s in group: %u sent guid " UI64FMTD ".",
         GetPlayerInfo().c_str(), group ? 1 : 0, uint64(leaveGuid));
