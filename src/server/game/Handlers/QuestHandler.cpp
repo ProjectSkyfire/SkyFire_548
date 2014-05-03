@@ -402,14 +402,28 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recvData)
 void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
 {
     uint32 questId, reward;
-    uint64 guid;
-    recvData >> guid >> questId >> reward;
+    ObjectGuid guid;
 
-    if (reward >= QUEST_REWARD_CHOICES_COUNT)
-    {
-        TC_LOG_ERROR("network", "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player %s (guid %d) tried to get invalid reward (%u) (possible packet-hacking detected)", _player->GetName().c_str(), _player->GetGUIDLow(), reward);
-        return;
-    }
+    recvData >> reward;     // 5.x - reward value is now an item ID and not slot ID
+    recvData >> questId;
+
+    guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[0]);
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u", uint32(GUID_LOPART(guid)), questId, reward);
 
@@ -418,6 +432,12 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         return;
 
     Object* object = _player;
+
+    if (!quest->IsRewChoiceItemValid(reward))
+    {
+        TC_LOG_ERROR("network", "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player %s (guid %d) tried to get invalid reward (%u) (possible packet-hacking detected)", _player->GetName().c_str(), _player->GetGUIDLow(), reward);
+        return;
+    }
 
     if (!quest->HasFlag(QUEST_FLAGS_AUTO_SUBMIT))
     {
@@ -499,8 +519,27 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
 void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recvData)
 {
     uint32 questId;
-    uint64 guid;
-    recvData >> guid >> questId;
+    ObjectGuid guid;
+
+    recvData >> questId;
+
+    guid[4] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[0]);
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u", uint32(GUID_LOPART(guid)), questId);
 
@@ -611,9 +650,29 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recvData)
 void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
 {
     uint32 questId;
-    uint64 playerGuid;
+    ObjectGuid playerGuid;
     bool autoCompleteMode;      // 0 - standart complete quest mode with npc, 1 - auto-complete mode
-    recvData >> playerGuid >> questId >> autoCompleteMode;
+
+    recvData >> questId;
+
+    playerGuid[6] = recvData.ReadBit();
+    playerGuid[5] = recvData.ReadBit();
+    playerGuid[7] = recvData.ReadBit();
+    playerGuid[4] = recvData.ReadBit();
+    playerGuid[3] = recvData.ReadBit();
+    playerGuid[0] = recvData.ReadBit();
+    autoCompleteMode = recvData.ReadBit();
+    playerGuid[1] = recvData.ReadBit();
+    playerGuid[2] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(playerGuid[0]);
+    recvData.ReadByteSeq(playerGuid[5]);
+    recvData.ReadByteSeq(playerGuid[3]);
+    recvData.ReadByteSeq(playerGuid[2]);
+    recvData.ReadByteSeq(playerGuid[4]);
+    recvData.ReadByteSeq(playerGuid[6]);
+    recvData.ReadByteSeq(playerGuid[1]);
+    recvData.ReadByteSeq(playerGuid[7]);
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, questId = %u", uint32(GUID_LOPART(playerGuid)), questId);
 

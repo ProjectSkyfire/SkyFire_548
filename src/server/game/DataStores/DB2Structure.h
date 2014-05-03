@@ -169,6 +169,16 @@ struct KeyChainEntry
     uint8       Key[KEYCHAIN_SIZE];
 };
 
+// QuestPackageItem.db2
+struct QuestPackageItemEntry
+{
+    uint32      ID;                                         // 0
+    uint32      QuestPackageID;                             // 1
+    uint32      ItemID;                                     // 2
+    uint32      Unk1;                                       // 3
+    uint32      Unk2;                                       // 4
+};
+
 // SceneScript.db2
 struct SceneScriptEntry
 {
