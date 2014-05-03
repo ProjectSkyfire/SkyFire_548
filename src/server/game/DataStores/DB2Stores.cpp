@@ -31,6 +31,7 @@ DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
 DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DB2Storage<ItemSparseEntry> sItemSparseStore(ItemSparsefmt, &DB2Utilities::HasItemSparseEntry, &DB2Utilities::WriteItemSparseDbReply);
 DB2Storage<KeyChainEntry> sKeyChainStore(KeyChainfmt);
+DB2Storage<QuestPackageItemEntry> sQuestPackageItemStore(QuestPackageItemfmt);
 DB2Storage<SceneScriptEntry> sSceneScriptStore(SceneScriptfmt);
 DB2Storage<SpellReagentsEntry> sSpellReagentsStore(SpellReagentsfmt);
 
@@ -107,6 +108,7 @@ void LoadDB2Stores(std::string const& dataPath)
     LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore, db2Path, "ItemExtendedCost.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sKeyChainStore, db2Path, "KeyChain.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sQuestPackageItemStore, db2Path, "QuestPackageItem.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sSceneScriptStore, db2Path, "SceneScript.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sSpellReagentsStore, db2Path, "SpellReagents.db2");
 
@@ -130,6 +132,7 @@ void LoadDB2Stores(std::string const& dataPath)
     if (!sBroadcastTextStore.LookupEntry(77161)     ||       // last broadcast text added in 5.4.7 (18019)
         !sItemStore.LookupEntry(109014)             ||       // last item added in 5.4.7 (18019)
         !sItemExtendedCostStore.LookupEntry(5268)   ||       // last item extended cost added in 5.4.7 (18019)
+        !sQuestPackageItemStore.LookupEntry(2256)   ||       // last quest package item in 5.4.7 (18019)
         !sSceneScriptStore.LookupEntry(11156))               // last scene script added in 5.4.7 (18019)
     {
         TC_LOG_ERROR("misc", "You have _outdated_ DB2 files, Please extract correct db2 files from client 5.4.7 18019.");
