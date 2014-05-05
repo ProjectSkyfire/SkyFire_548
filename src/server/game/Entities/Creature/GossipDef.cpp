@@ -223,11 +223,11 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         QuestMenuItem const& item = _questMenu.GetItem(i);
         Quest const* quest = sObjectMgr->GetQuestTemplate(item.QuestId);
 
-        data << int32(quest->GetFlags());
+        data << int32(quest->GetFlags2());
         data << int32(item.QuestId);
         data << int32(quest->GetQuestLevel());
         data << int32(item.QuestIcon);
-        data << int32(quest->GetSpecialFlags());
+        data << int32(quest->GetFlags());
         data.WriteString(updatedQuestTitles[i]);
     }
 
@@ -388,7 +388,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
             questData << uint32(quest->GetFlags());
             questData.WriteString(title);
             questData << uint32(qmi.QuestIcon);
-            questData << uint32(quest->GetSpecialFlags());
+            questData << uint32(quest->GetFlags2());
             questData << uint32(questID);
         }
     }

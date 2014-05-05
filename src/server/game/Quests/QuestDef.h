@@ -157,6 +157,24 @@ enum QuestFlags
     // ... 4.x added flags up to 0x80000000 - all unknown for now
 };
 
+enum QuestFlags2
+{
+    QUEST_FLAGS2_NONE                                 = 0x0000,
+    QUEST_FLAGS2_KEEP_ADDITIONAL_ITEMS                = 0x0001,
+    QUEST_FLAGS2_SUPPRESS_GOSSIP_COMPLETE             = 0x0002,
+    QUEST_FLAGS2_SUPPRESS_GOSSIP_ACCEPT               = 0x0004,
+    QUEST_FLAGS2_DISALLOW_PLAYER_AS_QUESTGIVER        = 0x0008,
+    QUEST_FLAGS2_DISPLAY_CLASS_CHOICE_REWARDS         = 0x0010,
+    QUEST_FLAGS2_DISPLAY_SPEC_CHOICE_REWARDS          = 0x0020,
+    QUEST_FLAGS2_REMOVE_FROM_LOG_ON_PERIDOIC_RESET    = 0x0040,
+    QUEST_FLAGS2_ACCOUNT_LEVEL_QUEST                  = 0x0080,
+    QUEST_FLAGS2_LEGENDARY_QUEST                      = 0x0100,
+    QUEST_FLAGS2_NO_GUILD_XP                          = 0x0200,
+    QUEST_FLAGS2_RESET_CACHE_ON_ACCEPT                = 0x0400,
+    QUEST_FLAGS2_NO_ABANDON_ON_ANY_OBJECTIVE_COMPLETE = 0x0800,
+    QUEST_FLAGS2_RECAST_ACCEPT_SPELL_ON_LOGIN         = 0x1000
+};
+
 enum QuestSpecialFlags
 {
     QUEST_SPECIAL_FLAGS_NONE                 = 0x000,
@@ -223,6 +241,8 @@ class Quest
 
         bool HasFlag(uint32 flag) const { return (Flags & flag) != 0; }
         void SetFlag(uint32 flag) { Flags |= flag; }
+        bool HasFlag2(uint32 flag) const { return (Flags2 & flag) != 0; }
+        void SetFlag2(uint32 flag) { Flags2 |= flag; }
 
         bool HasSpecialFlag(uint32 flag) const { return (SpecialFlags & flag) != 0; }
         void SetSpecialFlag(uint32 flag) { SpecialFlags |= flag; }
@@ -293,6 +313,7 @@ class Quest
         bool   IsAutoAccept() const;
         bool   IsAutoComplete() const;
         uint32 GetFlags() const { return Flags; }
+        uint32 GetFlags2() const { return Flags2; }
         uint32 GetSpecialFlags() const { return SpecialFlags; }
         uint32 GetMinimapTargetMark() const { return MinimapTargetMark; }
         uint32 GetRewardSkillId() const { return RewardSkillId; }
@@ -429,6 +450,8 @@ class Quest
         std::string QuestTurnTargetName;
         uint32 SoundAccept;
         uint32 SoundTurnIn;
+        // new in 5.x
+        uint32 Flags2;
 
         uint32 SpecialFlags; // custom flags, not sniffed/WDB
 };
