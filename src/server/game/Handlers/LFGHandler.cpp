@@ -134,26 +134,26 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 
     recvData.read_skip<uint32>();                          // Always 8
     recvData.read_skip<uint32>();                          // Join date
+    recvData.read_skip<uint32>();                          // Queue Id 
     recvData.read_skip<uint32>();                          // Always 3
-    recvData.read_skip<uint32>();                          // Queue Id
 
-    leaveGuid[4] = recvData.ReadBit();
-    leaveGuid[5] = recvData.ReadBit();
     leaveGuid[0] = recvData.ReadBit();
-    leaveGuid[6] = recvData.ReadBit();
-    leaveGuid[2] = recvData.ReadBit();
-    leaveGuid[7] = recvData.ReadBit();
     leaveGuid[1] = recvData.ReadBit();
+    leaveGuid[6] = recvData.ReadBit();
+    leaveGuid[7] = recvData.ReadBit();
     leaveGuid[3] = recvData.ReadBit();
+    leaveGuid[5] = recvData.ReadBit();
+    leaveGuid[2] = recvData.ReadBit();
+    leaveGuid[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(leaveGuid[7]);
-    recvData.ReadByteSeq(leaveGuid[4]);
-    recvData.ReadByteSeq(leaveGuid[3]);
-    recvData.ReadByteSeq(leaveGuid[2]);
-    recvData.ReadByteSeq(leaveGuid[6]);
-    recvData.ReadByteSeq(leaveGuid[0]);
     recvData.ReadByteSeq(leaveGuid[1]);
     recvData.ReadByteSeq(leaveGuid[5]);
+    recvData.ReadByteSeq(leaveGuid[6]);
+    recvData.ReadByteSeq(leaveGuid[7]);
+    recvData.ReadByteSeq(leaveGuid[4]);
+    recvData.ReadByteSeq(leaveGuid[2]);
+    recvData.ReadByteSeq(leaveGuid[3]);
+    recvData.ReadByteSeq(leaveGuid[0]);
 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_LEAVE %s in group: %u sent guid " UI64FMTD ".",
         GetPlayerInfo().c_str(), group ? 1 : 0, uint64(leaveGuid));
@@ -176,41 +176,44 @@ void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
     recvData.read_skip<uint32>();
     recvData.read_skip<uint32>();
 
-    guid2[4] = recvData.ReadBit();
-    guid2[5] = recvData.ReadBit();
-    guid2[0] = recvData.ReadBit();
-    guid2[6] = recvData.ReadBit();
     guid2[2] = recvData.ReadBit();
-    guid2[7] = recvData.ReadBit();
-    guid2[1] = recvData.ReadBit();
-    guid2[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid2[7]);
-    recvData.ReadByteSeq(guid2[4]);
-    recvData.ReadByteSeq(guid2[3]);
-    recvData.ReadByteSeq(guid2[2]);
-    recvData.ReadByteSeq(guid2[6]);
-    recvData.ReadByteSeq(guid2[0]);
-    recvData.ReadByteSeq(guid2[1]);
-    recvData.ReadByteSeq(guid2[5]);
-
-    guid1[7] = recvData.ReadBit();
-    accept =  recvData.ReadBit();
-    guid1[1] = recvData.ReadBit();
-    guid1[3] = recvData.ReadBit();
-    guid1[0] = recvData.ReadBit();
-    guid1[5] = recvData.ReadBit();
-    guid1[4] = recvData.ReadBit();
     guid1[6] = recvData.ReadBit();
+    guid2[4] = recvData.ReadBit();
+    guid2[3] = recvData.ReadBit();
     guid1[2] = recvData.ReadBit();
+    guid2[5] = recvData.ReadBit();
+    guid2[6] = recvData.ReadBit();
+    guid2[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid1[7]);
+	guid1[5] = recvData.ReadBit();
+	guid1[0] = recvData.ReadBit();
+    accept =  recvData.ReadBit();
+    
+    guid1[1] = recvData.ReadBit();
+    guid1[4] = recvData.ReadBit();
+    guid1[3] = recvData.ReadBit();
+    guid1[7] = recvData.ReadBit();
+    guid2[0] = recvData.ReadBit();
+    guid2[7] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid2[0]);
+    recvData.ReadByteSeq(guid2[7]);
+    recvData.ReadByteSeq(guid2[3]);
     recvData.ReadByteSeq(guid1[1]);
-    recvData.ReadByteSeq(guid1[5]);
-    recvData.ReadByteSeq(guid1[6]);
-    recvData.ReadByteSeq(guid1[3]);
     recvData.ReadByteSeq(guid1[4]);
     recvData.ReadByteSeq(guid1[0]);
+    recvData.ReadByteSeq(guid2[1]);
+    recvData.ReadByteSeq(guid1[5]);
+
+    
+
+    recvData.ReadByteSeq(guid1[7]);
+    recvData.ReadByteSeq(guid1[3]);
+    recvData.ReadByteSeq(guid1[6]);
+    recvData.ReadByteSeq(guid2[4]);
+    recvData.ReadByteSeq(guid2[2]);
+    recvData.ReadByteSeq(guid2[5]);
+    recvData.ReadByteSeq(guid2[6]);
     recvData.ReadByteSeq(guid1[2]);
 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_PROPOSAL_RESULT %s proposal: %u accept: %u",
@@ -643,36 +646,38 @@ void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
 
     ObjectGuid guid = _player->GetGUID();
     WorldPacket data(SMSG_LFG_QUEUE_STATUS, 4 + 4 + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 4 + 4 + 4 + 4 + 8);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-
-    data.WriteByteSeq(guid[0]);
+    
+	data << int32(queueData.waitTime);                     // Wait Time
+    data << uint32(queueData.joinTime);                    // Join time
+    data << uint32(queueData.dungeonId);                   // Dungeon
+    data << uint32(queueData.queuedTime);                  // Player wait time in queue
     data << uint8(queueData.tanks);                        // Tanks needed
     data << int32(queueData.waitTimeTank);                 // Wait Tanks
     data << uint8(queueData.healers);                      // Healers needed
     data << int32(queueData.waitTimeHealer);               // Wait Healers
     data << uint8(queueData.dps);                          // Dps needed
     data << int32(queueData.waitTimeDps);                  // Wait Dps
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data << int32(queueData.waitTime);                     // Wait Time
-    data << uint32(queueData.joinTime);                    // Join time
-    data << uint32(queueData.dungeonId);                   // Dungeon
-    data << uint32(queueData.queuedTime);                  // Player wait time in queue
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[3]);
     data << uint32(queueData.queueId);                     // Queue Id
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[2]);
     data << int32(queueData.waitTimeAvg);                  // Average Wait time
     data << uint32(3);
+
+	data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+
+	data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
+	data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+	data.WriteByteSeq(guid[5]);
+	data.WriteByteSeq(guid[0]);
 
     SendPacket(&data);
 }
@@ -764,19 +769,13 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     ObjectGuid guid1 = guid;
     ObjectGuid guid2 = gguid;
 
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid1[3]);
-    data.WriteBit(guid1[7]);
-    data.WriteBit(guid1[0]);
-    data.WriteBit(guid2[1]);
-    data.WriteBit(silent);
     data.WriteBit(guid1[4]);
-    data.WriteBit(guid1[5]);
-    data.WriteBit(guid2[3]);
-    data.WriteBits(proposal.players.size(), 23);
-    data.WriteBit(guid2[7]);
+	data.WriteBit(silent);
+    data.WriteBit(guid1[2]);
+    data.WriteBit(guid1[0]);
+	data.WriteBits(proposal.players.size(), 21);
 
-    for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
+	for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
         lfg::LfgProposalPlayer const& player = it->second;
 
@@ -796,21 +795,37 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
         data.WriteBit(it->first == guid);
     }
 
-    data.WriteBit(guid2[5]);
-    data.WriteBit(guid1[6]);
-    data.WriteBit(guid2[2]);
-    data.WriteBit(guid2[6]);
-    data.WriteBit(guid1[2]);
+
+    data.WriteBit(guid1[5]);
+    data.WriteBit(guid2[7]);
+    
+    data.WriteBit(guid2[4]);
     data.WriteBit(guid1[1]);
+    data.WriteBit(guid2[6]);
+    
     data.WriteBit(guid2[0]);
 
-    data.WriteByteSeq(guid1[5]);
+    
+
+    data.WriteBit(guid2[1]);
+    data.WriteBit(guid1[6]);
+    data.WriteBit(guid1[3]);
+    data.WriteBit(guid2[3]);
+    data.WriteBit(guid2[2]);
+    data.WriteBit(guid1[7]);
+    data.WriteBit(guid2[5]);
+
     data.WriteByteSeq(guid2[3]);
-    data.WriteByteSeq(guid2[6]);
-    data.WriteByteSeq(guid1[6]);
-    data.WriteByteSeq(guid1[0]);
-    data.WriteByteSeq(guid2[5]);
+    data.WriteByteSeq(guid2[0]);
+    data.WriteByteSeq(guid1[2]);
+    data.WriteByteSeq(guid1[3]);
     data.WriteByteSeq(guid1[1]);
+    data.WriteByteSeq(guid1[4]);
+    data.WriteByteSeq(guid2[6]);
+	data.WriteByteSeq(guid2[4]);
+    data.WriteByteSeq(guid2[1]);
+    data.WriteByteSeq(guid2[5]);
+    data.WriteByteSeq(guid1[6]);
 
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
@@ -818,15 +833,12 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
         data << uint32(player.role);
     }
 
-    data.WriteByteSeq(guid2[7]);
-    data.WriteByteSeq(guid1[4]);
-    data.WriteByteSeq(guid2[0]);
-    data.WriteByteSeq(guid2[1]);
-    data.WriteByteSeq(guid1[2]);
-    data.WriteByteSeq(guid1[7]);
+    
     data.WriteByteSeq(guid2[2]);
-    data.WriteByteSeq(guid1[3]);
-    data.WriteByteSeq(guid2[4]);
+    data.WriteByteSeq(guid1[7]);
+    data.WriteByteSeq(guid1[0]);
+    data.WriteByteSeq(guid2[7]);
+    data.WriteByteSeq(guid1[5]);
 
     SendPacket(&data);
 }
