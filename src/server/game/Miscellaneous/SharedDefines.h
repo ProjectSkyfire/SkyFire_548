@@ -80,7 +80,8 @@ enum Gender
 {
     GENDER_MALE                        = 0,
     GENDER_FEMALE                      = 1,
-    GENDER_NONE                        = 2
+    GENDER_NONE                        = 2,
+    GENDER_BOTH                        = 3
 };
 
 // Race value is index in ChrRaces.dbc
