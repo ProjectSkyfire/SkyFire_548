@@ -42,7 +42,7 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
 
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, 500);
-    data.WriteBit(guid[6]);
+    data.WriteBit(guid[4]);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[2]);
     data.WriteBit(guid[6]);
@@ -125,7 +125,6 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     data.WriteString(nameData->m_name);
     data.WriteByteSeq(guid2[3]);
     data.WriteByteSeq(guid2[6]);
-
 
     SendPacket(&data);
 }
