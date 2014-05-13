@@ -347,7 +347,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
     itemguid[7] = recvData.ReadBit();
     vendorguid[0] = recvData.ReadBit();
     vendorguid[3] = recvData.ReadBit();
-    itemguid[2] = recvData.ReadBit();
+    itemguid[3] = recvData.ReadBit();
     vendorguid[7] = recvData.ReadBit();
     vendorguid[6] = recvData.ReadBit();
     vendorguid[5] = recvData.ReadBit();
