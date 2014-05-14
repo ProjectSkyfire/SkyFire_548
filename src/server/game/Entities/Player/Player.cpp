@@ -3047,7 +3047,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
     ObjectGuid guid = victim ? victim->GetGUID() : 0;
 
     WorldPacket data(SMSG_LOG_XPGAIN, 1 + 1 + 8 + 4 + 4 + 4 + 1);
-    data.WriteBit(0);                                       // has XP + bonus
+    data.WriteBit(0);                                       // has XP
     data.WriteBit(guid[6]);
     data.WriteBit(guid[3]);
     data.WriteBit(0);                                       // has group bonus
@@ -3064,17 +3064,12 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[2]);
-
     data << float(1);                                       // 1 - none 0 - 100% group bonus output
-
     data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[6]);
-
-    data << uint32(GivenXP + BonusXP);                      // given experience
     data << uint32(GivenXP);                                // experience without bonus
-
+    data << uint32(GivenXP + BonusXP);                      // given experience
     data.WriteByteSeq(guid[0]);
-
     data << uint8(recruitAFriend ? 1 : 0);                  // does the GivenXP include a RaF bonus?
 
     GetSession()->SendPacket(&data);
