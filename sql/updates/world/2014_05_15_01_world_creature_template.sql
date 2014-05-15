@@ -1,0 +1,12 @@
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 32795;
+UPDATE creature_template SET speed_run = 1.14286 WHERE entry = 32795;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 31350;
+UPDATE creature_template SET speed_run = 1.14286 WHERE entry = 31350;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 25855;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 28833;
+UPDATE creature_template SET speed_run = 1.14286 WHERE entry = 28833;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 29613;
+UPDATE creature_template SET speed_run = 1.14286 WHERE entry = 29613;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 30337;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 2674;
+UPDATE creature_template SET speed_walk = 1 WHERE entry = 28887;
