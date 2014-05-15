@@ -1001,11 +1001,11 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[2]);
     data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[5]);
     data << uint32(0);                                                      // unknown
-    data << uint32(0);                                                      // unknown
+    data << uint32(quest->GetFlags2());
     data << int32(quest->GetMinLevel());                                    // min level
     data << uint32(quest->RequiredSourceItemId[1]);
     data << uint32(0);                                                      // unknown
-    data << uint32(0);                                                      // unknown
+    data << uint32(quest->GetRewardPackageItemId());
     data << uint32(quest->GetCharTitleId());                                // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
     data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[4]);
     data << uint32(quest->GetSrcItemId());                                  // source item id

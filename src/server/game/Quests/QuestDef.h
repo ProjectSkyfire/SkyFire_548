@@ -364,6 +364,8 @@ class Quest
         uint32 GetRewItemsCount() const { return _rewItemsCount; }
         uint32 GetRewCurrencyCount() const { return _rewCurrencyCount; }
         uint32 GetReqCurrencyCount() const { return _reqCurrencyCount; }
+        // 5.x
+        uint32 GetRewardPackageItemId() const { return RewardPackageItemId; }
 
         typedef std::vector<int32> PrevQuests;
         PrevQuests prevQuests;
@@ -452,6 +454,7 @@ class Quest
         uint32 SoundTurnIn;
         // new in 5.x
         uint32 Flags2;
+        uint32 RewardPackageItemId;
 
         uint32 SpecialFlags; // custom flags, not sniffed/WDB
 };
