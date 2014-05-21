@@ -861,12 +861,14 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 int WorldSocket::HandleSendAuthSession()
 {
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
-    packet << m_Seed;
+    packet << uint16(0);
 
     for (int i = 0; i < 8; i++)
         packet << uint32(0);
 
     packet << uint8(1);
+    packet << uint32(m_Seed);
+
     return SendPacket(packet);
 
 }
@@ -885,43 +887,43 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     BigNumber k;
     WorldPacket addonsData;
 
-    // TEMP! Digest fails to verify, incorrect?
     recvPacket.read_skip<uint32>();
     recvPacket.read_skip<uint32>();
-    recvPacket >> digest[4];
-    recvPacket >> digest[13];
-    recvPacket >> digest[3];
-    recvPacket >> digest[8];
-    recvPacket.read_skip<uint32>();
-    recvPacket >> digest[12];
     recvPacket >> digest[18];
-    recvPacket >> digest[15];
-    recvPacket >> digest[5];
-    recvPacket.read_skip<uint64>();
-    recvPacket >> digest[11];
-    recvPacket.read_skip<uint32>();
-    recvPacket >> digest[7];
-    recvPacket >> digest[19];
-    recvPacket >> digest[16];
     recvPacket >> digest[14];
+    recvPacket >> digest[3];
+    recvPacket >> digest[4];
     recvPacket >> digest[0];
-    recvPacket >> digest[9];
-    recvPacket >> clientBuild;
-    recvPacket >> digest[1];
-    recvPacket.read_skip<uint8>();
-    recvPacket >> digest[17];
-    recvPacket >> digest[10];
-    recvPacket >> digest[6];
-    recvPacket >> digest[2];
-    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint32>();
+    recvPacket >> digest[11];
     recvPacket >> clientSeed;
+    recvPacket >> digest[19];
+    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint8>();
+    recvPacket >> digest[2];
+    recvPacket >> digest[9];
+    recvPacket >> digest[12];
+    recvPacket.read_skip<uint64>();
+    recvPacket.read_skip<uint32>();
+    recvPacket >> digest[16];
+    recvPacket >> digest[5];
+    recvPacket >> digest[6];
+    recvPacket >> digest[8];
+    recvPacket >> clientBuild;
+    recvPacket >> digest[17];
+    recvPacket >> digest[7];
+    recvPacket >> digest[13];
+    recvPacket >> digest[15];
+    recvPacket >> digest[1];
+    recvPacket >> digest[10];
     recvPacket >> addonSize;
 
     addonsData.resize(addonSize);
     recvPacket.read((uint8*)addonsData.contents(), addonSize);
 
-    uint32 accountNameLength = recvPacket.ReadBits(11);
     recvPacket.ReadBit();
+    uint32 accountNameLength = recvPacket.ReadBits(11);
+
     account = recvPacket.ReadString(accountNameLength);
 
     if (sWorld->IsClosed())
@@ -1053,13 +1055,12 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     std::string address = GetRemoteAddress();
 
-    // TEMP! Digest fails to verify here
-    /*if (memcmp(sha.GetDigest(), digest, 20))
+    if (memcmp(sha.GetDigest(), digest, 20))
     {
         SendAuthResponseError(AUTH_FAILED);
         TC_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", id, account.c_str(), address.c_str());
         return -1;
-    }*/
+    }
 
     TC_LOG_DEBUG("network", "WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
         account.c_str(),

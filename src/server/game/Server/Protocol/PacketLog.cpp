@@ -51,7 +51,9 @@ void PacketLog::Initialize()
 void PacketLog::LogPacket(WorldPacket const& packet, Direction direction)
 {
     ByteBuffer data(4+4+4+1+packet.size());
-    data << int32(packet.GetOpcode());
+    uint32 opcode = direction == CLIENT_TO_SERVER ? const_cast<WorldPacket&>(packet).GetReceivedOpcode() : serverOpcodeTable[packet.GetOpcode()]->OpcodeNumber;
+
+    data << int32(opcode);
     data << int32(packet.size());
     data << uint32(time(NULL));
     data << uint8(direction);

@@ -51,17 +51,17 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
             packet.WriteBits(itr->second.size(), 8);
-            packet.WriteBit(itr->first == realmID); // Home realm
             packet.WriteBits(itr->second.size(), 8);
+            packet.WriteBit(itr->first == realmID); // Home realm
         }
 
-        packet.WriteBit(0);
-        packet.WriteBits(raceResult->GetRowCount(), 23);
+        packet.WriteBits(classResult->GetRowCount(), 23);
         packet.WriteBits(0, 21);
         packet.WriteBit(0);
-        packet.WriteBits(classResult->GetRowCount(), 23);
         packet.WriteBit(0);
         packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBits(raceResult->GetRowCount(), 23);
         packet.WriteBit(0);
     }
 
@@ -77,16 +77,12 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     if (code == AUTH_OK)
     {
-        do
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
-            Field* fields = classResult->Fetch();
-
-            packet << fields[1].GetUInt8();
-            packet << fields[0].GetUInt8();
+            packet << uint32(itr->first);
+            packet.WriteString(itr->second);
+            packet.WriteString(itr->second);
         }
-        while (classResult->NextRow());
-
-        packet << uint8(Expansion());
 
         do
         {
@@ -97,23 +93,25 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         }
         while (raceResult->NextRow());
 
-        packet << uint32(Expansion());
-
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
+        do
         {
-            packet << uint32(itr->first);
-            packet.WriteString(itr->second);
-            packet.WriteString(itr->second);
+            Field* fields = classResult->Fetch();
+
+            packet << fields[1].GetUInt8();
+            packet << fields[0].GetUInt8();
         }
+        while (classResult->NextRow());
 
         packet << uint32(0);
+        packet << uint8(Expansion());
+        packet << uint32(Expansion());
         packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-
         packet << uint8(Expansion());
         packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
     }
+
     packet << uint8(code);                             // Auth response ?
 
     SendPacket(&packet);
