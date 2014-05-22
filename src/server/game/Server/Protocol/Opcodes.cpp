@@ -296,7 +296,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefund                   );
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND_INFO,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefundInfoRequest        );
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_TEXT_QUERY,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemTextQuery                );
-    DEFINE_OPCODE_HANDLER(CMSG_JOIN_CHANNEL,                       0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleJoinChannel                  );
+    DEFINE_OPCODE_HANDLER(CMSG_JOIN_CHANNEL,                       0x148E, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleJoinChannel                  );
     DEFINE_OPCODE_HANDLER(CMSG_KEEP_ALIVE,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess               );
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS,              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalents          );
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS_PET,          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalentsPet       );
@@ -725,7 +725,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_CAST_FAILED,                        0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_CHANNEL_LIST,                       0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_CHANNEL_MEMBER_COUNT,               0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_CHANNEL_NOTIFY,                     0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_CHANNEL_NOTIFY,                     0x0F06, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_CHARACTER_LOGIN_FAILED,             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_CHAR_CREATE,                        0x1CAA, STATUS_NEVER    ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(SMSG_CHAR_CUSTOMIZE,                     0x0000, STATUS_UNHANDLED);
