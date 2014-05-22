@@ -1880,21 +1880,22 @@ struct SpellMiscEntry
     uint32    AttributesEx3;                                // 6        m_attributesExC
     uint32    AttributesEx4;                                // 7        m_attributesExD
     uint32    AttributesEx5;                                // 8        m_attributesExE
-    uint32    AttributesEx6;                                // 9       m_attributesExF
+    uint32    AttributesEx6;                                // 9        m_attributesExF
     uint32    AttributesEx7;                                // 10       m_attributesExG
     uint32    AttributesEx8;                                // 11       m_attributesExH
     uint32    AttributesEx9;                                // 12       m_attributesExI
     uint32    AttributesEx10;                               // 13       m_attributesExJ
     uint32    AttributesEx11;                               // 14       m_attributesExK
     uint32    AttributesEx12;                               // 15       m_attributesExL
-    uint32    CastingTimeIndex;                             // 16       m_castingTimeIndex
-    uint32    DurationIndex;                                // 17       m_durationIndex
-    uint32    rangeIndex;                                   // 18       m_rangeIndex
-    float     speed;                                        // 19       m_speed
-    uint32    SpellVisual[2];                               // 20-21    m_spellVisualID
-    uint32    SpellIconID;                                  // 22       m_spellIconID
-    uint32    activeIconID;                                 // 23       m_activeIconID
-    uint32    SchoolMask;                                   // 24       m_schoolMask
+    uint32    AttributesEx13;                               // 16       m_attributesExM
+    uint32    CastingTimeIndex;                             // 17       m_castingTimeIndex
+    uint32    DurationIndex;                                // 18       m_durationIndex
+    uint32    rangeIndex;                                   // 19       m_rangeIndex
+    float     speed;                                        // 20       m_speed
+    uint32    SpellVisual[2];                               // 21-22    m_spellVisualID
+    uint32    SpellIconID;                                  // 23       m_spellIconID
+    uint32    activeIconID;                                 // 24       m_activeIconID
+    uint32    SchoolMask;                                   // 25       m_schoolMask
 };
 
 // SpellEffectScaling.dbc
