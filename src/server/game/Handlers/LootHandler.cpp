@@ -45,27 +45,27 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     for (int i = 0; i < lootCount; i++)
     {
         (guids[i])[2] = recvData.ReadBit();
-        (guids[i])[1] = recvData.ReadBit();
-        (guids[i])[5] = recvData.ReadBit();
         (guids[i])[7] = recvData.ReadBit();
-        (guids[i])[4] = recvData.ReadBit();
-        (guids[i])[3] = recvData.ReadBit();
         (guids[i])[0] = recvData.ReadBit();
         (guids[i])[6] = recvData.ReadBit();
+        (guids[i])[5] = recvData.ReadBit();
+        (guids[i])[3] = recvData.ReadBit();
+        (guids[i])[1] = recvData.ReadBit();
+        (guids[i])[4] = recvData.ReadBit();
     }
 
     for (int i = 0; i < lootCount; i++)
     {
         uint8 lootSlot;
         recvData.ReadByteSeq((guids[i])[0]);
-        recvData.ReadByteSeq((guids[i])[3]);
-        recvData >> lootSlot;
-        recvData.ReadByteSeq((guids[i])[7]);
-        recvData.ReadByteSeq((guids[i])[2]);
         recvData.ReadByteSeq((guids[i])[4]);
         recvData.ReadByteSeq((guids[i])[1]);
+        recvData.ReadByteSeq((guids[i])[7]);
         recvData.ReadByteSeq((guids[i])[6]);
         recvData.ReadByteSeq((guids[i])[5]);
+        recvData.ReadByteSeq((guids[i])[3]);
+        recvData.ReadByteSeq((guids[i])[2]);
+        recvData >> lootSlot;
 
         uint64 guid = guids[i];
 
