@@ -32,10 +32,10 @@ EndContentData */
 
 enum Texts
 {
-    SAY_AGGRO         = "You will take my place on the eternal brazier.",
-	SAY_ANCIENT_FLAME = "Your flesh will melt.",
-	SAY_BURNING_SOUL  = "Burn!",
-	SAY_POOL_OF_FIRE  = "You will feel but a fraction of my agony."
+    SAY_AGGRO         = 0,
+	SAY_BURNING_SOUL  = 1,
+	SAY_ANCIENT_FLAME = 2,
+	SAY_POOL_OF_FIRE  = 3
 };
 
 enum Spells
