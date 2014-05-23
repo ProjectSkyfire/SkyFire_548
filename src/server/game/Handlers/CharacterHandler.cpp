@@ -899,12 +899,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->GetMotionMaster()->Initialize();
     pCurrChar->SendDungeonDifficulty(false);
 
-    WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
+    WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 4 + 4 + 4 + 4 + 4);
+    data << pCurrChar->GetPositionX();
     data << pCurrChar->GetOrientation();
+    data << pCurrChar->GetPositionY();
     data << pCurrChar->GetMapId();
     data << pCurrChar->GetPositionZ();
-    data << pCurrChar->GetPositionX();
-    data << pCurrChar->GetPositionY();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -912,40 +912,40 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
     bool feedbackSystem = true;
-    bool parentalControls = false;
+    bool excessiveWarning = false;
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 1 + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
-    data << uint8(2);
-    data << uint32(0);                  // Scroll of Resurrection daily limit
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 4 + 4 + 4 + 1 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
+    data << uint32(0);                  // Scroll of Resurrection per day?
+    data << uint32(0);                  // Scroll of Resurrection current
     data << uint32(0);
-    data << uint32(1);
-    data << uint32(14);
+    data << uint8(2);
+    data << uint32(0);
 
     data.WriteBit(1);
-    data.WriteBit(parentalControls);    // parental controls
-    data.WriteBit(1);                   // show ingame shop icon
-    data.WriteBit(0);                   // Recruit a Friend button
-    data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
-    data.WriteBit(1);
-    data.WriteBit(0);                   // voice chat
     data.WriteBit(1);                   // ingame shop status (0 - "The Shop is temporarily unavailable.")
+    data.WriteBit(1);
+    data.WriteBit(0);                   // Recruit a Friend button
+    data.WriteBit(0);                   // server supports voice chat
+    data.WriteBit(1);                   // show ingame shop icon
     data.WriteBit(0);                   // Scroll of Resurrection button
+    data.WriteBit(excessiveWarning);    // excessive play time warning
     data.WriteBit(0);                   // ingame shop parental control (1 - "Feature has been disabled by Parental Controls.")
+    data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
     data.FlushBits();
+
+    if (excessiveWarning)
+    {
+        data << uint32(0);              // excessive play time warning after period(in seconds)
+        data << uint32(0);
+        data << uint32(0);
+    }
 
     if (feedbackSystem)
     {
-        data << uint32(60000);
         data << uint32(0);
         data << uint32(1);
         data << uint32(10);
-    }
-
-    if (parentalControls)
-    {
-        data << uint32(0);
-        data << uint32(0);              // excessive play time warning after period(in seconds)
-        data << uint32(0);
+        data << uint32(60000);
     }
 
     SendPacket(&data);
