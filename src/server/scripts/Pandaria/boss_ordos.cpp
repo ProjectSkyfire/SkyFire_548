@@ -37,8 +37,8 @@ enum Texts
     SAY_SLAY          = 2, // Ordos yells: Up in smoke.
     SAY_ANCIENT_FLAME = 3, // Ordos yells: Your flesh will melt.
     SAY_ETERNAL_AGONY = 4, // Ordos yells: Your pain will be endless.
-    SAY_POOL_OF_FIRE  = 5  // Ordos Yells: You will feel but a fraction of my agony.
-    SAY_BURNING_SOUL  = 6, // Ordos Yells: Burn!
+    SAY_POOL_OF_FIRE  = 5, // Ordos Yells: You will feel but a fraction of my agony.
+    SAY_BURNING_SOUL  = 6  // Ordos Yells: Burn!
 };
 
 enum Spells
@@ -112,7 +112,7 @@ class boss_ordos : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_ETERNAL_AGONY:
-						    Talk(SAY_ETERNAL_AGONY);
+                            Talk(SAY_ETERNAL_AGONY);
                             DoCastVictim(SPELL_ETERNAL_AGONY);
                             _events.ScheduleEvent(EVENT_ETERNAL_AGONY, urand(10000, 25000));
                             break;
