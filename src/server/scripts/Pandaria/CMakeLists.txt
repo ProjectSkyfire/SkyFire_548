@@ -11,6 +11,7 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  Pandaria/boss_ordos.cpp
   Pandaria/zone_dread_wastes.cpp
   Pandaria/zone_isle_of_giants.cpp
   Pandaria/zone_isle_of_thunder.cpp
