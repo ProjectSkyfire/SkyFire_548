@@ -220,7 +220,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJECT_QUERY,                   0x1461, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleGameObjectQueryOpcode        ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_REPORT_USE,                 0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGameobjectReportUse          );
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_USE,                        0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGameObjectUseOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_GET_MAIL_LIST,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGetMailList                  );
+    DEFINE_OPCODE_HANDLER(CMSG_GET_MAIL_LIST,                      0x077A, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGetMailList                  ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(CMSG_GET_MIRRORIMAGE_DATA,               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMirrorImageDataRequest       );
     DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve            );
     DEFINE_OPCODE_HANDLER(CMSG_GMSURVEY_SUBMIT,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmit               );
