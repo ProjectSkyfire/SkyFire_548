@@ -30,7 +30,7 @@ INSERT INTO `player_factionchange_titles`
 -- A: Sergeant <Name>
 -- H: Sergeant <Name>
 DELETE FROM player_factionchange_titles WHERE alliance_id=197 OR horde_id=211;
-INSERT INTO `skyfireworld`.`player_factionchange_titles`
+INSERT INTO `player_factionchange_titles`
 (`alliance_id`, `horde_id`) VALUES (197, 211);
 
 -- Earn a battleground rating of 1400.
