@@ -491,23 +491,23 @@ void WorldSession::HandleBuybackItem(WorldPacket& recvData)
 
     recvData >> slot;
 
-    vendorguid[3] = recvData.ReadBit();
-    vendorguid[5] = recvData.ReadBit();
-    vendorguid[0] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
     vendorguid[2] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
+    vendorguid[3] = recvData.ReadBit();
+    vendorguid[0] = recvData.ReadBit();
     vendorguid[4] = recvData.ReadBit();
+    vendorguid[1] = recvData.ReadBit();
+    vendorguid[7] = recvData.ReadBit();
+    vendorguid[5] = recvData.ReadBit();
+    vendorguid[6] = recvData.ReadBit();
 
+    recvData.ReadByteSeq(vendorguid[0]);
+    recvData.ReadByteSeq(vendorguid[6]);
     recvData.ReadByteSeq(vendorguid[1]);
     recvData.ReadByteSeq(vendorguid[7]);
-    recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[0]);
     recvData.ReadByteSeq(vendorguid[5]);
+    recvData.ReadByteSeq(vendorguid[2]);
     recvData.ReadByteSeq(vendorguid[3]);
     recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(vendorguid[2]);
 
     Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
