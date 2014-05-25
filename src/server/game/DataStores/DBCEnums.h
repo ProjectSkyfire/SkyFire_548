@@ -323,6 +323,25 @@ enum AreaFlags
     AREA_FLAG_UNK9             = 0x40000000,
 };
 
+enum DifficultyTypes
+{
+    NONE                         = 0,
+    NORMAL                       = 1,
+	HEROIC                       = 2,
+	MAN10                        = 3,
+	MAN25                        = 4,
+	MAN10H                       = 5,
+	MAN25H                       = 6,
+	LFR                          = 7,
+	CHALLANGEMODE                = 8,
+	MAN40                        = 9,
+	//UNKNOWN                      = 10,
+	SZENARIO_H                   = 11,
+	SZENARIO                     = 12,
+	//UNKNOWN                      = 13,
+	FLEXIBLE                     = 14
+};
+
 enum Difficulty
 {
     REGULAR_DIFFICULTY           = 0,
