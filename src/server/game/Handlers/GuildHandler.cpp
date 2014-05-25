@@ -468,9 +468,27 @@ void WorldSession::HandleGuildBankQueryTab(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recvPacket)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint64 money;
-    recvPacket >> guid >> money;
+    recvPacket >> money;
+	
+	guid[4] = recvPacket.ReadBit();
+	guid[7] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[7]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_DEPOSIT_MONEY [%s]: Go: [" UI64FMTD "], money: " UI64FMTD,
         GetPlayerInfo().c_str(), guid, money);
