@@ -2040,7 +2040,8 @@ enum TextEmotes
     TEXT_EMOTE_OBJECT               = 450,
     TEXT_EMOTE_SWEAT                = 451,
     TEXT_EMOTE_YW                   = 453,
-    TEXT_EMOTE_READ                 = 456
+    TEXT_EMOTE_READ                 = 456,
+	TEXT_EMOTE_BOOT                 = 506
 };
 
 // Emotes.dbc
