@@ -470,28 +470,28 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
 
-    guid[0] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[6]);
 
     GossipText const* pGossip = sObjectMgr->GetGossipText(textID);
 
     WorldPacket data(SMSG_NPC_TEXT_UPDATE, 1 + 4 + 64);
-
+    data << textID;
     data << uint32(64);                                 // size (8 * 4) * 2
 
     for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
@@ -501,8 +501,6 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS - 1; i++)
         data << uint32(0);
-
-    data << textID;
 
     data.WriteBit(1);                                   // has data
     data.FlushBits();
