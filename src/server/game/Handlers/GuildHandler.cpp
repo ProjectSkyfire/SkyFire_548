@@ -428,9 +428,27 @@ void WorldSession::HandleGuildPermissions(WorldPacket& /* recvPacket */)
 // Called when clicking on Guild bank gameobject
 void WorldSession::HandleGuildBankerActivate(WorldPacket& recvPacket)
 {
-    uint64 guid;
-    bool sendAllSlots;
-    recvPacket >> guid >> sendAllSlots;
+    ObjectGuid guid;
+	bool SendAllSlots;
+	
+	guid[3] = recvPacket.ReadBit();
+	guid[2] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+	recvPacket >> SendAllSlots;
+    guid[1] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[5]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANKER_ACTIVATE [%s]: Go: [" UI64FMTD "] AllSlots: %u"
         , GetPlayerInfo().c_str(), guid, sendAllSlots);
