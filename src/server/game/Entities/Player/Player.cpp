@@ -6662,10 +6662,16 @@ void Player::SendActionButtons(uint32 state) const
 
     // Bits
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][0]);
+        data.WriteBit(buttons[i][4]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][4]);
+        data.WriteBit(buttons[i][5]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][3]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteBit(buttons[i][1]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][6]);
@@ -6674,23 +6680,17 @@ void Player::SendActionButtons(uint32 state) const
         data.WriteBit(buttons[i][7]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][3]);
+        data.WriteBit(buttons[i][0]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteBit(buttons[i][2]);
 
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][1]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteBit(buttons[i][5]);
-
     // Data
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][5]);
+        data.WriteByteSeq(buttons[i][0]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][3]);
+        data.WriteByteSeq(buttons[i][1]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][4]);
@@ -6699,16 +6699,16 @@ void Player::SendActionButtons(uint32 state) const
         data.WriteByteSeq(buttons[i][6]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][1]);
-
-    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][7]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
         data.WriteByteSeq(buttons[i][2]);
 
     for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
-        data.WriteByteSeq(buttons[i][0]);
+        data.WriteByteSeq(buttons[i][5]);
+
+    for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
+        data.WriteByteSeq(buttons[i][3]);
 
     data << uint8(state);
     GetSession()->SendPacket(&data);
@@ -23660,10 +23660,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // Homebind
     WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
-    data << (uint32) m_homebindAreaId;
     data << m_homebindX;
     data << m_homebindZ;
     data << m_homebindY;
+    data << (uint32) m_homebindAreaId;
     data << (uint32) m_homebindMapId;
 
     GetSession()->SendPacket(&data);
@@ -23676,17 +23676,18 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendTalentsInfoData();
 
     data.Initialize(SMSG_WORLD_SERVER_INFO, 4 + 4 + 1 + 1);
-    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
-    data << uint32(GetMap()->GetDifficulty());
-    data << uint8(0);                                               // IsOnTournamentRealm
-
+    // Bitfields have wrong order
     data.WriteBit(0);                                               // IneligibleForLoot
     data.WriteBit(0);                                               // HasRestrictedLevel
     data.WriteBit(0);                                               // HasRestrictedMoney
-    data.WriteBit(0);                                               // HasUnknown
+    data.WriteBit(0);                                               // HasGroupSize
     data.FlushBits();
+    
+    data << uint8(0);                                               // IsOnTournamentRealm
+    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
+    data << uint32(GetMap()->GetDifficulty());
 
-    //if (HasUnknown)
+    //if (HasGroupSize)
     //    data << uint32(0);
     //if (HasRestrictedLevel)
     //    data << uint32(20);                                       // RestrictedLevel (starter accounts)
@@ -23694,13 +23695,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
     //    data << uint32(0);                                        // EncounterMask
     //if (HasRestrictedMoney)
     //    data << uint32(100000);                                   // RestrictedMoney (starter accounts)
-
     GetSession()->SendPacket(&data);
 
     SendInitialSpells();
 
     data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
-    data << uint32(0);                                      // count, for (count) uint32;
+    data.WriteBits(0, 22); // Count
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 
     SendInitialActionButtons();
@@ -23710,12 +23711,11 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 20);
+    data << uint32(0);
+    data.AppendPackedTime(sWorld->GetGameTime());
+    data << uint32(0);
     data.AppendPackedTime(sWorld->GetGameTime());
     data << float(0.01666667f);                             // game speed
-    data << uint32(0);
-    data << uint32(0);
-    data.AppendPackedTime(sWorld->GetGameTime());
-
     GetSession()->SendPacket(&data);
 
     GetReputationMgr().SendForceReactions();                // SMSG_SET_FORCED_REACTIONS
@@ -24971,23 +24971,23 @@ void Player::SetMover(Unit* target)
     ObjectGuid guid = target->GetGUID();
 
     WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 9);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
     data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[2]);
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
     data.WriteBit(guid[7]);
+    data.WriteBit(guid[0]);
     data.WriteBit(guid[6]);
 
     data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
 
     SendDirectMessage(&data);
 }
@@ -26405,6 +26405,9 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 
     for (int32 i = 0; i < GetSpecsCount(); i++)
     {
+        for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
+            *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
+
         uint32 const* talentTabIds = GetClassSpecializations(getClass());
 
         int32 talentCount = 0;
@@ -26427,10 +26430,8 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 
         data->PutBits(wpos[i], talentCount, 23);
         *data << uint32(GetTalentSpecialization(GetActiveSpec()));
-
-        for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
-            *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
     }
+
     delete[] wpos;
 }
 
