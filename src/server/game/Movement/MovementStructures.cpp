@@ -5022,47 +5022,47 @@ MovementStatusElements const MoveNormalFall[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveRoot[] =
+MovementStatusElements const MoveRoot[] = // 5.4.8 18291
 {
-    MSEHasGuidByte5,
-    MSEHasGuidByte3,
-    MSEHasGuidByte6,
     MSEHasGuidByte0,
-    MSEHasGuidByte1,
+    MSEHasGuidByte3,
     MSEHasGuidByte4,
+    MSEHasGuidByte1,
+    MSEHasGuidByte5,
     MSEHasGuidByte2,
+    MSEHasGuidByte6,
     MSEHasGuidByte7,
+    MSEGuidByte4,
+    MSEGuidByte7,
     MSEGuidByte1,
     MSEGuidByte2,
     MSEGuidByte6,
-    MSEGuidByte4,
-    MSEGuidByte3,
     MSEGuidByte5,
     MSECounter,
-    MSEGuidByte7,
     MSEGuidByte0,
+    MSEGuidByte3,
     MSEEnd,
 };
 
-MovementStatusElements const MoveUnroot[] =
+MovementStatusElements const MoveUnroot[] = // 5.4.8 18291
 {
-    MSEHasGuidByte0,
-    MSEHasGuidByte6,
-    MSEHasGuidByte4,
-    MSEHasGuidByte1,
-    MSEHasGuidByte2,
     MSEHasGuidByte3,
-    MSEHasGuidByte7,
     MSEHasGuidByte5,
-    MSEGuidByte1,
+    MSEHasGuidByte7,
+    MSEHasGuidByte1,
+    MSEHasGuidByte0,
+    MSEHasGuidByte2,
+    MSEHasGuidByte4,
+    MSEHasGuidByte6,
     MSEGuidByte0,
-    MSEGuidByte3,
-    MSEGuidByte6,
-    MSEGuidByte4,
+    MSEGuidByte7,
     MSECounter,
     MSEGuidByte5,
-    MSEGuidByte7,
+    MSEGuidByte4,
     MSEGuidByte2,
+    MSEGuidByte1,
+    MSEGuidByte3,
+    MSEGuidByte6,
     MSEEnd,
 };
 
@@ -5550,10 +5550,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MoveFeatherFall;
         //case SMSG_MOVE_NORMAL_FALL:
         //    return MoveNormalFall;
-        //case SMSG_MOVE_ROOT:
-        //    return MoveRoot;
-        //case SMSG_MOVE_UNROOT:
-        //    return MoveUnroot;
+        case SMSG_MOVE_ROOT:
+            return MoveRoot;
+        case SMSG_MOVE_UNROOT:
+            return MoveUnroot;
         //case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
         //    return ChangeSeatsOnControlledVehicle;
         //case CMSG_CAST_SPELL:
