@@ -1014,20 +1014,19 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     SendTimezoneInformation();
 
-    data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4+4);
-    data << uint64(0);
-    SendPacket(&data);
+    HotfixData const& hotfix = sObjectMgr->GetHotfixData();
 
     data.Initialize(SMSG_HOTFIX_INFO);
-    HotfixData const& hotfix = sObjectMgr->GetHotfixData();
-    data.WriteBits(hotfix.size(), 22);
+    data.WriteBits(hotfix.size(), 20);
     data.FlushBits();
+
     for (uint32 i = 0; i < hotfix.size(); ++i)
     {
-        data << uint32(hotfix[i].Type);
         data << uint32(hotfix[i].Timestamp);
         data << uint32(hotfix[i].Entry);
+        data << uint32(hotfix[i].Type);
     }
+
     SendPacket(&data);
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
