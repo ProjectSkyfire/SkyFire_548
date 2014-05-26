@@ -1162,125 +1162,125 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 
 UPDATE creature_template SET npcflag = 129 WHERE entry = 3362;
 DELETE FROM npc_vendor WHERE entry = 3362;
-INSERT INTO npc_vendor VALUES 
-(3362, 0, 1132, 0, 0, 0, 1),
-(3362, 1, 5665, 0, 0, 0, 1),
-(3362, 2, 5668, 0, 0, 0, 1), 
-(3362, 3, 46099, 0, 0, 0, 1),
-(3362, 4, 18797, 0, 0, 0, 1),
-(3362, 5, 18798, 0, 0, 0, 1),
-(3362, 6, 18796, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(3362, 1132, 0, 0, 0),
+(3362, 5665, 0, 0, 0),
+(3362, 5668, 0, 0, 0),
+(3362, 18796, 0, 0, 0),
+(3362, 18797, 0, 0, 0),
+(3362, 18798, 0, 0, 0),
+(3362, 46099, 0, 0, 0); 
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 17584;
 DELETE FROM npc_vendor WHERE entry = 17584;
-INSERT INTO npc_vendor VALUES 
-(17584, 0, 29743, 0, 0, 0, 1),
-(17584, 1, 29744, 0, 0, 0, 1),
-(17584, 2, 28481, 0, 0, 0, 1),
-(17584, 3, 29747, 0, 0, 0, 1),
-(17584, 4, 29746, 0, 0, 0, 1),
-(17584, 5, 29745, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(17584, 28481, 0, 0, 0),
+(17584, 29743, 0, 0, 0),
+(17584, 29744, 0, 0, 0),
+(17584, 29745, 0, 0, 0),
+(17584, 29746, 0, 0, 0),
+(17584, 29747, 0, 0, 0);
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 4731;
 DELETE FROM npc_vendor WHERE entry = 4731;
-INSERT INTO npc_vendor VALUES 
-(4731, 0, 13331, 0, 0, 0, 1),
-(4731, 1, 13333, 0, 0, 0, 1),
-(4731, 2, 13332, 0, 0, 0, 1),
-(4731, 3, 46308, 0, 0, 0, 1),
-(4731, 4, 18791, 0, 0, 0, 1),
-(4731, 5, 47101, 0, 0, 0, 1),
-(4731, 6, 13334, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(4731, 13331, 0, 0, 0),
+(4731, 13332, 0, 0, 0),
+(4731, 13333, 0, 0, 0),
+(4731, 13334, 0, 0, 0),
+(4731, 18791, 0, 0, 0),
+(4731, 46308, 0, 0, 0),
+(4731, 47101, 0, 0, 0);
  
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 4730;
 DELETE FROM npc_vendor WHERE entry = 4730;
-INSERT INTO npc_vendor VALUES 
-(4730, 0, 8629, 0, 0, 0, 1),
-(4730, 1, 8631, 0, 0, 0, 1),
-(4730, 2, 47100, 0, 0, 0, 1),
-(4730, 3, 8632, 0, 0, 0, 1),
-(4730, 4, 18902, 0, 0, 0, 1),
-(4730, 5, 18767, 0, 0, 0, 1),
-(4730, 6, 18766, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(4730, 8629, 0, 0, 0),
+(4730, 8631, 0, 0, 0),
+(4730, 8632, 0, 0, 0),
+(4730, 18766, 0, 0, 0),
+(4730, 18767, 0, 0, 0),
+(4730, 18902, 0, 0, 0),
+(4730, 47100, 0, 0, 0);
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 16264;
 DELETE FROM npc_vendor WHERE entry = 16264;
-INSERT INTO npc_vendor VALUES 
-(16264, 0, 28927, 0, 0, 0, 1),
-(16264, 1, 29222, 0, 0, 0, 1),
-(16264, 2, 29220, 0, 0, 0, 1),
-(16264, 3, 29221, 0, 0, 0, 1),
-(16264, 4, 29224, 0, 0, 0, 1),
-(16264, 5, 28936, 0, 0, 0, 1),
-(16264, 6, 29223, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(16264, 28927, 0, 0, 0),
+(16264, 28936, 0, 0, 0),
+(16264, 29220, 0, 0, 0),
+(16264, 29221, 0, 0, 0),
+(16264, 29222, 0, 0, 0),
+(16264, 29223, 0, 0, 0),
+(16264, 29224, 0, 0, 0);
 
 UPDATE creature_template SET npcflag = 129 WHERE entry = 7952;
 DELETE FROM npc_vendor WHERE entry = 7952;
-INSERT INTO npc_vendor VALUES 
-(7952, 0, 8592, 0, 0, 0, 1),
-(7952, 1, 8591, 0, 0, 0, 1),
-(7952, 2, 8588, 0, 0, 0, 1), 
-(7952, 3, 18790, 0, 0, 0, 1),
-(7952, 4, 18789, 0, 0, 0, 1),
-(7952, 5, 18788, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(7952, 8588, 0, 0, 0),
+(7952, 8591, 0, 0, 0),
+(7952, 8592, 0, 0, 0),
+(7952, 18788, 0, 0, 0),
+(7952, 18789, 0, 0, 0),
+(7952, 18790, 0, 0, 0);
  
 UPDATE creature_template SET npcflag = 129 WHERE entry = 7955;
 DELETE FROM npc_vendor WHERE entry = 7955;
-INSERT INTO npc_vendor VALUES 
-(7955, 0, 13322, 0, 0, 0, 1),
-(7955, 1, 8563, 0, 0, 0, 1),
-(7955, 2, 13321, 0, 0, 0, 1), 
-(7955, 3, 8595, 0, 0, 0, 1),
-(7955, 4, 18774, 0, 0, 0, 1),
-(7955, 5, 18773, 0, 0, 0, 1),
-(7955, 6, 18772, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(7955, 8563, 0, 0, 0),
+(7955, 8595, 0, 0, 0),
+(7955, 13321, 0, 0, 0),
+(7955, 13322, 0, 0, 0),
+(7955, 18772, 0, 0, 0),
+(7955, 18773, 0, 0, 0),
+(7955, 18774, 0, 0, 0); 
 
 UPDATE creature_template SET npcflag = 129 WHERE entry = 1261;
 DELETE FROM npc_vendor WHERE entry = 1261;
-INSERT INTO npc_vendor VALUES 
-(1261, 0, 5873, 0, 0, 0, 1),
-(1261, 1, 5864, 0, 0, 0, 1),
-(1261, 2, 5872, 0, 0, 0, 1), 
-(1261, 3, 18785, 0, 0, 0, 1),
-(1261, 4, 18787, 0, 0, 0, 1),
-(1261, 5, 18786, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(1261, 5864, 0, 0, 0),
+(1261, 5872, 0, 0, 0),
+(1261, 5873, 0, 0, 0),
+(1261, 18785, 0, 0, 0),
+(1261, 18786, 0, 0, 0),
+(1261, 18787, 0, 0, 0); 
 
 UPDATE creature_template SET npcflag = 129 WHERE entry = 4885;
 DELETE FROM npc_vendor WHERE entry = 4885;
-INSERT INTO npc_vendor VALUES 
-(4885, 0, 2414, 0, 0, 0, 1),
-(4885, 1, 5655, 0, 0, 0, 1),
-(4885, 2, 5656, 0, 0, 0, 1), 
-(4885, 3, 18778, 0, 0, 0, 1),
-(4885, 4, 18776, 0, 0, 0, 1),
-(4885, 5, 18777, 0, 0, 0, 1);
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(4885, 2414, 0, 0, 0),
+(4885, 5655, 0, 0, 0),
+(4885, 5656, 0, 0, 0),
+(4885, 18776, 0, 0, 0),
+(4885, 18777, 0, 0, 0),
+(4885, 18778, 0, 0, 0);
 
 UPDATE creature_template SET npcflag = 129 WHERE entry = 384;
 DELETE FROM npc_vendor WHERE entry = 384;
-INSERT INTO npc_vendor VALUES 
-(384, 0, 2414, 0, 0, 0, 1),
-(384, 1, 5655, 0, 0, 0, 1),
-(384, 2, 5656, 0, 0, 0, 1), 
-(384, 3, 18778, 0, 0, 0, 1),
-(384, 4, 18776, 0, 0, 0, 1),
-(384, 5, 18777, 0, 0, 0, 1);
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(384, 2414, 0, 0, 0),
+(384, 5655, 0, 0, 0),
+(384, 5656, 0, 0, 0),
+(384, 18776, 0, 0, 0),
+(384, 18777, 0, 0, 0),
+(384, 18778, 0, 0, 0);
 
 UPDATE creature_template SET npcflag = 129 WHERE entry = 43694;
 DELETE FROM npc_vendor WHERE entry = 43694;
-INSERT INTO npc_vendor VALUES 
-(43694, 0, 2414, 0, 0, 0, 1),
-(43694, 1, 5655, 0, 0, 0, 1),
-(43694, 2, 5656, 0, 0, 0, 1), 
-(43694, 3, 2411, 0, 0, 0, 1),
-(43694, 4, 18778, 0, 0, 0, 1),
-(43694, 5, 18776, 0, 0, 0, 1),
-(43694, 6, 18777, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(43694, 2411, 0, 0, 0),
+(43694, 2414, 0, 0, 0),
+(43694, 5655, 0, 0, 0),
+(43694, 5656, 0, 0, 0),
+(43694, 18776, 0, 0, 0),
+(43694, 18777, 0, 0, 0),
+(43694, 18778, 0, 0, 0);
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 48510;
 DELETE FROM npc_vendor WHERE entry = 48510;
-INSERT INTO npc_vendor VALUES 
-(48510, 0, 62461, 0, 0, 0, 1),
-(48510, 1, 62462, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(48510, 62461, 0, 0, 0),
+(48510, 62462, 0, 0, 0); 
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 65068;
 DELETE FROM `npc_vendor` WHERE `entry` = 65068;
@@ -1312,16 +1312,38 @@ INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 66022;
 DELETE FROM npc_vendor WHERE entry = 66022;
-INSERT INTO npc_vendor VALUES 
-(66022, 0, 92070, 0, 0, 0, 1),
-(66022, 1, 83080, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(66022, 82765, 0, 0, 0),
+(66022, 82811, 0, 0, 0),
+(66022, 87795, 0, 0, 0),
+(66022, 87796, 0, 0, 0),
+(66022, 87797, 0, 0, 0),
+(66022, 87799, 0, 0, 0),
+(66022, 87800, 0, 0, 0),
+(66022, 87801, 0, 0, 0),
+(66022, 87802, 0, 0, 0),
+(66022, 87803, 0, 0, 0),
+(66022, 87804, 0, 0, 0),
+(66022, 87805, 0, 0, 0),
+(66022, 91004, 0, 0, 0),
+(66022, 91005, 0, 0, 0),
+(66022, 91006, 0, 0, 0),
+(66022, 91007, 0, 0, 0),
+(66022, 91008, 0, 0, 0),
+(66022, 91009, 0, 0, 0),
+(66022, 91010, 0, 0, 0),
+(66022, 91011, 0, 0, 0),
+(66022, 91012, 0, 0, 0),
+(66022, 91013, 0, 0, 0),
+(66022, 91014, 0, 0, 0),
+(66022, 91015, 0, 0, 0); 
 
 UPDATE creature_template SET npcflag = 129, ScriptName = 'npc_mount_vendor' WHERE entry = 3685;
 DELETE FROM npc_vendor WHERE entry = 3685;
-INSERT INTO npc_vendor VALUES 
-(3685, 0, 46100, 0, 0, 0, 1),
-(3685, 1, 15277, 0, 0, 0, 1),
-(3685, 2, 15290, 0, 0, 0, 1),
-(3685, 3, 18793, 0, 0, 0, 1),
-(3685, 4, 18795, 0, 0, 0, 1),
-(3685, 5, 18794, 0, 0, 0, 1); 
+INSERT INTO `npc_vendor` (`entry`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
+(3685, 15277, 0, 0, 0),
+(3685, 15290, 0, 0, 0),
+(3685, 18793, 0, 0, 0),
+(3685, 18794, 0, 0, 0),
+(3685, 18795, 0, 0, 0),
+(3685, 46100, 0, 0, 0);
