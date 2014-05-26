@@ -5782,10 +5782,10 @@ void Spell::EffectBind(SpellEffIndex effIndex)
 
     // binding
     WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
-    data << uint32(areaId);
     data << float(homeLoc.GetPositionX());
-    data << float(homeLoc.GetPositionZ());
     data << float(homeLoc.GetPositionY());
+    data << float(homeLoc.GetPositionZ());
+    data << uint32(areaId);
     data << uint32(homeLoc.GetMapId());
 
     player->SendDirectMessage(&data);
