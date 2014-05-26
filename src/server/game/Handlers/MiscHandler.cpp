@@ -559,8 +559,8 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
         reason = 2;                                         // FIXME - Need the correct value
 
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-    data.WriteBit(instantLogout);
     data << uint32(reason);
+    data.WriteBit(instantLogout);
     data.FlushBits();
     SendPacket(&data);
 
