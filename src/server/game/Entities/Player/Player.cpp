@@ -7427,23 +7427,25 @@ void Player::SendNewCurrency(uint32 id) const
     uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
     uint32 weekCount = itr->second.weekCount / precision;
     uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
+    uint32 seassonCount = 0;
 
+    packet.WriteBit(seassonCount);
     packet.WriteBits(0, 5); // some flags
     packet.WriteBit(weekCap);
     packet.WriteBit(weekCount);
-    packet.WriteBit(0);     // season total earned
-
-    currencyData << uint32(itr->second.totalCount / precision);
-    currencyData << uint32(entry->ID);
-
-    if (weekCap)
-        currencyData << uint32(weekCap);
-
-    //if (seasonTotal)
-    //    currencyData << uint32(seasonTotal / precision);
 
     if (weekCount)
         currencyData << uint32(weekCount);
+
+    currencyData << uint32(entry->ID);
+
+    if (seassonCount)
+        currencyData << uint32(seassonCount);
+
+    currencyData << uint32(itr->second.totalCount / precision);
+
+    if (weekCap)
+        currencyData << uint32(weekCap);
 
     packet.FlushBits();
     packet.append(currencyData);
@@ -7469,23 +7471,25 @@ void Player::SendCurrencies() const
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
         uint32 weekCount = itr->second.weekCount / precision;
         uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-
+        uint32 seassonCount = 0;
+        
+        packet.WriteBit(seassonCount);
         packet.WriteBits(0, 5); // some flags
         packet.WriteBit(weekCap);
         packet.WriteBit(weekCount);
-        packet.WriteBit(0);     // season total earned
-
-        currencyData << uint32(itr->second.totalCount / precision);
-        currencyData << uint32(entry->ID);
-
-        if (weekCap)
-            currencyData << uint32(weekCap);
-
-        //if (seasonTotal)
-        //    currencyData << uint32(seasonTotal / precision);
 
         if (weekCount)
             currencyData << uint32(weekCount);
+
+        currencyData << uint32(entry->ID);
+
+        if (seassonCount)
+            currencyData << uint32(seassonCount);
+
+        currencyData << uint32(itr->second.totalCount / precision);
+
+        if (weekCap)
+            currencyData << uint32(weekCap);
 
         ++count;
     }
