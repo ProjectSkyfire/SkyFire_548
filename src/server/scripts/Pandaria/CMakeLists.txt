@@ -20,6 +20,7 @@ set(scripts_STAT_SRCS
   Pandaria/zone_the_jade_forest.cpp
   Pandaria/zone_the_situation_in_dalaran.cpp
   Pandaria/zone_the_veiled_stair.cpp
+  Pandaria/timeless_isle.cpp
   Pandaria/zone_timeless_isle.cpp
   Pandaria/zone_townlong_steppes.cpp
   Pandaria/zone_vale_of_eternal_blossoms.cpp
