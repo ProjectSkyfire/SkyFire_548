@@ -3101,7 +3101,11 @@ void World::LoadDBVersion()
     }
 
     if (m_DBVersion.empty())
-        m_DBVersion = "Unknown world database.";
+    {
+        m_DBVersion = "Unknown WorldDB Version";
+        TC_LOG_ERROR("server.loading", "Make sure to update your Database Version.", m_DBVersion);
+        exit(0);
+    }
 }
 
 void World::ProcessStartEvent()
