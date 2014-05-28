@@ -784,7 +784,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     {
         case EMOTE_STATE_SLEEP:
         case EMOTE_STATE_SIT:
-        case EMOTE_STATE_KNEEL:
+		case EMOTE_STATE_KNEEL_DONT_WORK:
         case EMOTE_ONESHOT_NONE:
             break;
         default:
