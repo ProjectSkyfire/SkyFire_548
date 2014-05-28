@@ -231,7 +231,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GMTICKET_UPDATETEXT,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketUpdateOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_GM_REPORT_LAG,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleReportLag                    );
     DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_HELLO,                       0x12F3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGossipHelloOpcode            ); // 5.4.8 18291
-    DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_SELECT_OPTION,               0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGossipSelectOptionOpcode     );
+    DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_SELECT_OPTION,               0x0748, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGossipSelectOptionOpcode     ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(CMSG_GRANT_LEVEL,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGrantLevel                   );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_ASSISTANT_LEADER,             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGroupAssistantLeaderOpcode   );
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_CHANGE_SUB_GROUP,             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGroupChangeSubGroupOpcode    );
