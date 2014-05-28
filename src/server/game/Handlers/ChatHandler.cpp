@@ -252,8 +252,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_WHISPER:
             textLength = recvData.ReadBits(8);
             receiverLength = recvData.ReadBits(9);
-            msg = recvData.ReadString(receiverLength);
-            to = recvData.ReadString(textLength);
+			msg = recvData.ReadString(textLength);
+			to = recvData.ReadString(receiverLength);
             break;
         case CHAT_MSG_CHANNEL:
             textLength = recvData.ReadBits(8);
@@ -678,30 +678,61 @@ namespace Trinity
     class EmoteChatBuilder
     {
         public:
-            EmoteChatBuilder(Player const& player, uint32 text_emote, uint32 emote_num, Unit const* target)
-                : i_player(player), i_text_emote(text_emote), i_emote_num(emote_num), i_target(target) { }
+			EmoteChatBuilder(Player const& player, uint32 text_emote, uint32 emote_num, uint64 target)
+                : i_player(player), i_text_emote(text_emote), i_emote_num(emote_num), i_target(target){ }
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                std::string const name(i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
-                uint32 namlen = name.size();
+				ObjectGuid sender = i_player.GetGUID();
+				ObjectGuid receiver = i_target;
 
-                data.Initialize(SMSG_TEXT_EMOTE, 20 + namlen);
-                data << i_player.GetGUID();
-                data << uint32(i_text_emote);
-                data << uint32(i_emote_num);
-                data << uint32(namlen);
-                if (namlen > 1)
-                    data << name;
-                else
-                    data << uint8(0x00);
+				data.Initialize(SMSG_TEXT_EMOTE, 2 + 8 + 8 + 4 + 4);
+
+				data.WriteBit(sender[1]);
+				data.WriteBit(receiver[7]);
+				data.WriteBit(sender[6]);
+				data.WriteBit(receiver[5]);
+				data.WriteBit(sender[3]);
+				data.WriteBit(receiver[6]);
+				data.WriteBit(receiver[2]);
+				data.WriteBit(sender[7]);
+				data.WriteBit(receiver[0]);
+				data.WriteBit(receiver[1]);
+				data.WriteBit(sender[4]);
+				data.WriteBit(sender[2]);
+				data.WriteBit(receiver[3]);
+				data.WriteBit(receiver[4]);
+				data.WriteBit(sender[0]);
+				data.WriteBit(sender[5]);
+
+				data.WriteByteSeq(receiver[2]);
+				data.WriteByteSeq(receiver[1]);
+				data.WriteByteSeq(sender[7]);
+				data.WriteByteSeq(sender[4]);
+				data.WriteByteSeq(receiver[7]);
+				data.WriteByteSeq(sender[5]);
+				data.WriteByteSeq(sender[2]);
+				
+				data << uint32(i_text_emote);
+				
+				data.WriteByteSeq(sender[6]);
+				data.WriteByteSeq(receiver[0]);
+				data.WriteByteSeq(sender[3]);
+				data.WriteByteSeq(sender[1]);
+				data.WriteByteSeq(receiver[6]);
+				data.WriteByteSeq(sender[0]);
+				data.WriteByteSeq(receiver[3]);
+				data.WriteByteSeq(receiver[5]);
+				data.WriteByteSeq(receiver[4]);
+
+				data << uint32(i_emote_num);
             }
 
         private:
             Player const& i_player;
             uint32        i_text_emote;
             uint32        i_emote_num;
-            Unit const*   i_target;
+			ObjectGuid    i_target;
     };
 }                                                           // namespace Trinity
 
@@ -718,11 +749,28 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     }
 
     uint32 text_emote, emoteNum;
-    uint64 guid;
+	ObjectGuid guid;
 
     recvData >> text_emote;
     recvData >> emoteNum;
-    recvData >> guid;
+
+	guid[6] = recvData.ReadBit();
+	guid[7] = recvData.ReadBit();
+	guid[3] = recvData.ReadBit();
+	guid[2] = recvData.ReadBit();
+	guid[0] = recvData.ReadBit();
+	guid[5] = recvData.ReadBit();
+	guid[1] = recvData.ReadBit();
+	guid[4] = recvData.ReadBit();
+
+	recvData.ReadByteSeq(guid[0]);
+	recvData.ReadByteSeq(guid[5]);
+	recvData.ReadByteSeq(guid[1]);
+	recvData.ReadByteSeq(guid[4]);
+	recvData.ReadByteSeq(guid[2]);
+	recvData.ReadByteSeq(guid[3]);
+	recvData.ReadByteSeq(guid[7]);
+	recvData.ReadByteSeq(guid[6]);
 
     sScriptMgr->OnPlayerTextEmote(GetPlayer(), text_emote, emoteNum, guid);
 
@@ -748,13 +796,14 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     }
 
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
+	uint64 target = guid;
 
     CellCoord p = Trinity::ComputeCellCoord(GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::EmoteChatBuilder emote_builder(*GetPlayer(), text_emote, emoteNum, unit);
+	Trinity::EmoteChatBuilder emote_builder(*GetPlayer(), text_emote, emoteNum, target);
     Trinity::LocalizedPacketDo<Trinity::EmoteChatBuilder > emote_do(emote_builder);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::EmoteChatBuilder > > emote_worker(GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), emote_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::EmoteChatBuilder> >, WorldTypeMapContainer> message(emote_worker);
@@ -808,8 +857,19 @@ void WorldSession::HandleChannelDeclineInvite(WorldPacket &recvPacket)
 
 void WorldSession::SendPlayerNotFoundNotice(std::string const& name)
 {
-    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size()+1);
+	uint8 size = name.size();
+	WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, 2 + size);
+	
+	data.WriteBit(0);
+
+	size_t bitPos = data.bitwpos();
+	data.WriteBits(0, 8); //name size placeholder
+	
+	data.FlushBits();
+
     data << name;
+	data.PutBits(bitPos, size, 8);
+
     SendPacket(&data);
 }
 
