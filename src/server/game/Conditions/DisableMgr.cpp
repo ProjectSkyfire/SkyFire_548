@@ -134,9 +134,12 @@ void LoadDisables()
                             isFlagInvalid = true;
                         break;
                     case MAP_INSTANCE:
-                    case MAP_RAID:
                         if (flags & DUNGEON_STATUSFLAG_HEROIC && !GetMapDifficultyData(entry, DUNGEON_DIFFICULTY_HEROIC))
                             flags -= DUNGEON_STATUSFLAG_HEROIC;
+                        if (!flags)
+                            isFlagInvalid = true;
+                        break;
+                    case MAP_RAID:
                         if (flags & RAID_STATUSFLAG_10MAN_HEROIC && !GetMapDifficultyData(entry, RAID_DIFFICULTY_10MAN_HEROIC))
                             flags -= RAID_STATUSFLAG_10MAN_HEROIC;
                         if (flags & RAID_STATUSFLAG_25MAN_HEROIC && !GetMapDifficultyData(entry, RAID_DIFFICULTY_25MAN_HEROIC))
@@ -204,11 +207,16 @@ void LoadDisables()
                             TC_LOG_INFO("misc", "Liquid status disabled for world map %u.", entry);
                         break;
                     case MAP_INSTANCE:
-                    case MAP_RAID:
                         if (flags & VMAP_DISABLE_HEIGHT)
                             TC_LOG_INFO("misc", "Height disabled for instance map %u.", entry);
                         if (flags & VMAP_DISABLE_LOS)
                             TC_LOG_INFO("misc", "LoS disabled for instance map %u.", entry);
+                        break;
+                    case MAP_RAID:
+                        if (flags & VMAP_DISABLE_HEIGHT)
+                            TC_LOG_INFO("misc", "Height disabled for raid map %u.", entry);
+                        if (flags & VMAP_DISABLE_LOS)
+                            TC_LOG_INFO("misc", "LoS disabled for raid map %u.", entry);
                         break;
                     case MAP_BATTLEGROUND:
                         if (flags & VMAP_DISABLE_HEIGHT)

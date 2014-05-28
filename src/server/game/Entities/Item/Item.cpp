@@ -1033,12 +1033,32 @@ void Item::SendUpdateSockets()
 void Item::SendTimeUpdate(Player* owner)
 {
     uint32 duration = GetUInt32Value(ITEM_FIELD_EXPIRATION);
+
     if (!duration)
         return;
 
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_ITEM_TIME_UPDATE, (8+4));
-    data << uint64(GetGUID());
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
     data << uint32(duration);
+
     owner->GetSession()->SendPacket(&data);
 }
 

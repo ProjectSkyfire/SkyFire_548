@@ -1334,8 +1334,12 @@ void World::SetInitialWorldSettings()
         || !MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f)
         || !MapManager::ExistMapAndVMap(1, -2917.58f, -257.98f)
         || (m_int_configs[CONFIG_EXPANSION] && (
-            !MapManager::ExistMapAndVMap(530, 10349.6f, -6357.29f) ||
-            !MapManager::ExistMapAndVMap(530, -3961.64f, -13931.2f))))
+           !MapManager::ExistMapAndVMap(530, 10349.6f, -6357.29f)
+        || !MapManager::ExistMapAndVMap(530, -3961.64f, -13931.2f)
+        || !MapManager::ExistMapAndVMap(648, -8423.81f, 1361.3f)
+        || !MapManager::ExistMapAndVMap(654, -1451.53f, 1403.35f)
+        || !MapManager::ExistMapAndVMap(609, 2356.21f, -5662.21f)
+        || !MapManager::ExistMapAndVMap(860, 1471.67f, 3466.25f))))
     {
         TC_LOG_ERROR("server.loading", "Correct *.map files not found in path '%smaps' or *.vmtree/*.vmtile files in '%svmaps'. Please place *.map/*.vmtree/*.vmtile files in appropriate directories or correct the DataDir value in the worldserver.conf file.", m_dataPath.c_str(), m_dataPath.c_str());
         exit(1);
