@@ -1734,6 +1734,9 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
     {
         case FORM_CAT:                                      // 0x01
         case FORM_GHOUL:                                    // 0x07
+
+        case FORM_STURDY_OX:                                // 0x17
+        case FORM_FIERCE_TIGER:                             // 0x18
             PowerType = POWER_ENERGY;
             break;
 
