@@ -253,7 +253,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
         }
         while (result->NextRow());
-      
+
         bitBuffer.WriteBit(1); // Sucess
         bitBuffer.FlushBits();
     }

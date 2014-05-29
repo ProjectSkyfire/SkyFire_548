@@ -428,7 +428,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
 {
     ObjectGuid mailbox;
     uint32 mailId;
-    
+
     recvData >> mailId;
     mailbox[1] = recvData.ReadBit();
     mailbox[7] = recvData.ReadBit();
@@ -616,7 +616,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
     ObjectGuid mailbox;
     uint64 money;
     uint32 mailId;
-    
+
     recvData >> money;
     recvData >> mailId;
 
@@ -813,7 +813,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
 {
     ObjectGuid mailbox;
     uint32 mailId;
-    
+
     recvData >> mailId;
 
     mailbox[3] = recvData.ReadBit();

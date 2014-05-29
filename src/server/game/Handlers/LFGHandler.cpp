@@ -593,11 +593,11 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
         data.WriteBits(it->second.size(), 20);
         data.WriteBit(playerGuid[3]);
         data.WriteBit(playerGuid[5]);
-        
+
     }
 
     data.WriteBit(guid[7]);
-    
+
     data.WriteByteSeq(guid[5]);
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
@@ -627,7 +627,7 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[1]);
-    
+
 
     SendPacket(&data);
 }
