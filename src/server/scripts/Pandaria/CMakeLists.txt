@@ -24,6 +24,7 @@ set(scripts_STAT_SRCS
   Pandaria/zone_townlong_steppes.cpp
   Pandaria/zone_vale_of_eternal_blossoms.cpp
   Pandaria/zone_valley_of_the_four_winds.cpp
+  Pandaria/worldboss_chiji.cpp
 )
 
 message(" -> Prepared: Pandaria")
