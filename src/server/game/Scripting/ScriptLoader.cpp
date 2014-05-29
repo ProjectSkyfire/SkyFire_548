@@ -676,6 +676,7 @@ void AddSC_boss_ordos();
 //void AddSC_townlong_steppes();
 //void AddSC_vale_of_eternal_blossoms();
 //void AddSC_valley_of_the_four_winds();
+void AddSC_worldboss_chiji();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1414,6 +1415,7 @@ void AddPandariaScripts()
     //AddSC_townlong_steppes();
     //AddSC_vale_of_eternal_blossoms();
     //AddSC_valley_of_the_four_winds();
+    AddSC_worldboss_chiji();
 #endif
 }
 
