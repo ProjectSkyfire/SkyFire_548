@@ -703,6 +703,7 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;
+    m_chiPowerRegenTimerCount = 0;
     m_focusRegenTimerCount = 0;
     m_weaponChangeTimer = 0;
 
@@ -2517,6 +2518,9 @@ void Player::RegenerateAll()
 
     if (getClass() == CLASS_PALADIN)
         m_holyPowerRegenTimerCount += m_regenTimer;
+
+    if (getClass() == CLASS_MONK)
+        m_chiPowerRegenTimerCount += m_regenTimer;
 
     if (getClass() == CLASS_HUNTER)
         m_focusRegenTimerCount += m_regenTimer;
