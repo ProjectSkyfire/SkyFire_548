@@ -93,7 +93,7 @@ enum AuraType
     SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED                   = 32,
     SPELL_AURA_MOD_DECREASE_SPEED                           = 33,
     SPELL_AURA_MOD_INCREASE_HEALTH                          = 34,
-    SPELL_AURA_MOD_INCREASE_ENERGY                          = 35,
+    SPELL_AURA_MOD_INCREASE_MAX_POWER_FLAT                  = 35,
     SPELL_AURA_MOD_SHAPESHIFT                               = 36,
     SPELL_AURA_EFFECT_IMMUNITY                              = 37,
     SPELL_AURA_STATE_IMMUNITY                               = 38,
