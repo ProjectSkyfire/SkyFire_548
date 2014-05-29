@@ -2564,9 +2564,6 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
-        if (getClass() == CLASS_MONK)
-            Regenerate(POWER_CHI);
-
         m_regenTimerCount -= 2000;
     }
 
@@ -2574,6 +2571,12 @@ void Player::RegenerateAll()
     {
         Regenerate(POWER_HOLY_POWER);
         m_holyPowerRegenTimerCount -= 10000;
+    }
+
+    if (m_chiPowerRegenTimerCount >= 10000 && getClass() == CLASS_MONK)
+    {
+        Regenerate(POWER_CHI);
+        m_chiPowerRegenTimerCount -= 10000;
     }
 
     m_regenTimer = 0;
@@ -2627,7 +2630,7 @@ void Player::Regenerate(Powers power)
         case POWER_FOCUS:
             addvalue += (6.0f + CalculatePct(6.0f, rangedHaste)) * sWorld->getRate(RATE_POWER_FOCUS);
             break;
-        case POWER_ENERGY:                                              // Regenerate energy (rogue)
+        case POWER_ENERGY:                                              // Regenerate energy (rogue) & (monk)
             addvalue += ((0.01f * m_regenTimer) + CalculatePct(0.01f, meleeHaste)) * sWorld->getRate(RATE_POWER_ENERGY);
             break;
         case POWER_RUNIC_POWER:
@@ -2647,12 +2650,12 @@ void Player::Regenerate(Powers power)
         break;
         case POWER_RUNES:
             break;
-        case POWER_CHI:                                  // Regenerate chi (monk)
-            {
-                float ChiRate = sWorld->getRate(RATE_POWER_CHI);
-                addvalue = 20 * ChiRate;
-                break;
-            }
+        case POWER_CHI:                                                 // Regenerate chi (monk)
+        {
+            if (!IsInCombat())
+            addvalue += -1.0f;      // remove 1 each 10 sec
+        }
+        break;
         case POWER_HEALTH:
             return;
         default:
