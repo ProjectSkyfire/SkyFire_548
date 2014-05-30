@@ -581,13 +581,13 @@ class WorldSession
         void HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket);
         void HandleAutoDeclineGuildInvites(WorldPacket& recvPacket);
 
-        void HandleGuildFinderAddRecruit(WorldPacket& recvPacket);
+        void HandleGuildFinderAddApplication(WorldPacket& recvPacket);
         void HandleGuildFinderBrowse(WorldPacket& recvPacket);
         void HandleGuildFinderDeclineRecruit(WorldPacket& recvPacket);
         void HandleGuildFinderGetApplications(WorldPacket& recvPacket);
         void HandleGuildFinderGetRecruits(WorldPacket& recvPacket);
         void HandleGuildFinderPostRequest(WorldPacket& recvPacket);
-        void HandleGuildFinderRemoveRecruit(WorldPacket& recvPacket);
+        void HandleGuildFinderRemoveApplication(WorldPacket& recvPacket);
         void HandleGuildFinderSetGuildPost(WorldPacket& recvPacket);
 
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);

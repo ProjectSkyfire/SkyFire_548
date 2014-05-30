@@ -324,7 +324,7 @@ void GuildFinderMgr::DeleteGuild(uint32 guildId)
 
 void GuildFinderMgr::SendApplicantListUpdate(Guild& guild)
 {
-    WorldPacket data(SMSG_LF_GUILD_APPLICANT_LIST_UPDATED, 0);
+    WorldPacket data(SMSG_LF_GUILD_APPLICANT_LIST_CHANGED, 0);
     if (Player* player = ObjectAccessor::FindPlayer(guild.GetLeaderGUID()))
         player->SendDirectMessage(&data);
     guild.BroadcastPacketToRank(&data, GR_OFFICER);
