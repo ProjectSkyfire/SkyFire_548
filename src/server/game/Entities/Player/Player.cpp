@@ -703,6 +703,7 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;
+    m_chiPowerRegenTimerCount = 0;
     m_focusRegenTimerCount = 0;
     m_weaponChangeTimer = 0;
 
@@ -2518,6 +2519,9 @@ void Player::RegenerateAll()
     if (getClass() == CLASS_PALADIN)
         m_holyPowerRegenTimerCount += m_regenTimer;
 
+    if (getClass() == CLASS_MONK)
+        m_chiPowerRegenTimerCount += m_regenTimer;
+
     if (getClass() == CLASS_HUNTER)
         m_focusRegenTimerCount += m_regenTimer;
 
@@ -2564,9 +2568,6 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
-        if (getClass() == CLASS_MONK)
-            Regenerate(POWER_CHI);
-
         m_regenTimerCount -= 2000;
     }
 
@@ -2574,6 +2575,12 @@ void Player::RegenerateAll()
     {
         Regenerate(POWER_HOLY_POWER);
         m_holyPowerRegenTimerCount -= 10000;
+    }
+
+    if (m_chiPowerRegenTimerCount >= 10000 && getClass() == CLASS_MONK)
+    {
+        Regenerate(POWER_CHI);
+        m_chiPowerRegenTimerCount -= 10000;
     }
 
     m_regenTimer = 0;
@@ -2627,7 +2634,7 @@ void Player::Regenerate(Powers power)
         case POWER_FOCUS:
             addvalue += (6.0f + CalculatePct(6.0f, rangedHaste)) * sWorld->getRate(RATE_POWER_FOCUS);
             break;
-        case POWER_ENERGY:                                              // Regenerate energy (rogue)
+        case POWER_ENERGY:                                              // Regenerate energy (rogue) & (monk)
             addvalue += ((0.01f * m_regenTimer) + CalculatePct(0.01f, meleeHaste)) * sWorld->getRate(RATE_POWER_ENERGY);
             break;
         case POWER_RUNIC_POWER:
@@ -2647,12 +2654,12 @@ void Player::Regenerate(Powers power)
         break;
         case POWER_RUNES:
             break;
-        case POWER_CHI:                                  // Regenerate chi (monk)
-            {
-                float ChiRate = sWorld->getRate(RATE_POWER_CHI);
-                addvalue = 20 * ChiRate;
-                break;
-            }
+        case POWER_CHI:                                                 // Regenerate chi (monk)
+        {
+            if (!IsInCombat())
+            addvalue += -1.0f;      // remove 1 each 10 sec
+        }
+        break;
         case POWER_HEALTH:
             return;
         default:
@@ -17075,16 +17082,16 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP)
     }
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, 4 + 4 + 4 + 4 + 4 + 4 + 1);
-    data << uint32(quest->GetRewardSkillPoints());         // 4.x bonus skill points
-    data << uint32(questId);
-    data << uint32(quest->GetBonusTalents());              // bonus talents (still sent to 5.4.7 client)
-    data << uint32(quest->GetRewardSkillId());             // 4.x bonus skill id
-    data << uint32(moneyReward);
-    data << uint32(xp);
-
     data.WriteBit(1);                                      // FIXME: unknown bits, common values sent
     data.WriteBit(0);
     data.FlushBits();
+
+    data << uint32(quest->GetBonusTalents());              // bonus talents (still sent to 5.4.x client)
+    data << uint32(moneyReward);
+    data << uint32(questId);
+    data << uint32(quest->GetRewardSkillId());             // 4.x bonus skill id
+    data << uint32(xp);
+    data << uint32(quest->GetRewardSkillPoints());         // 4.x bonus skill points
 
     GetSession()->SendPacket(&data);
 }
@@ -17166,28 +17173,29 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
     ObjectGuid oGuid = guid;
 
     WorldPacket data(SMSG_QUESTUPDATE_ADD_KILL, 1 + 8 + 2 + 1 + 4 + 2 + 4);
-    data.WriteBit(oGuid[5]);
-    data.WriteBit(oGuid[3]);
-    data.WriteBit(oGuid[6]);
-    data.WriteBit(oGuid[7]);
-    data.WriteBit(oGuid[4]);
+    data << uint16(old_count + add_count);
+    data << uint8(0);
+    data << uint32(quest->GetQuestId());
+    data << uint16(quest->RequiredNpcOrGoCount[creatureOrGO_idx]);
+    data << uint32(entry);
+
+    data.WriteBit(oGuid[0]);
     data.WriteBit(oGuid[1]);
     data.WriteBit(oGuid[2]);
-    data.WriteBit(oGuid[0]);
+    data.WriteBit(oGuid[6]);
+    data.WriteBit(oGuid[1]);
+    data.WriteBit(oGuid[5]);
+    data.WriteBit(oGuid[7]);
+    data.WriteBit(oGuid[3]);
 
-    data.WriteByteSeq(oGuid[4]);
-    data << uint16(quest->RequiredNpcOrGoCount[ creatureOrGO_idx ]);
-    data << uint8(0);
-    data.WriteByteSeq(oGuid[6]);
-    data << uint32(entry);
-    data.WriteByteSeq(oGuid[0]);
+    data.WriteByteSeq(oGuid[2]);
+    data.WriteByteSeq(oGuid[7]);
     data.WriteByteSeq(oGuid[3]);
-    data.WriteByteSeq(oGuid[1]);
+    data.WriteByteSeq(oGuid[0]);
+    data.WriteByteSeq(oGuid[4]);
     data.WriteByteSeq(oGuid[5]);
     data.WriteByteSeq(oGuid[2]);
-    data << uint16(old_count + add_count);
-    data.WriteByteSeq(oGuid[7]);
-    data << uint32(quest->GetQuestId());
+    data.WriteByteSeq(oGuid[6]);
 
     GetSession()->SendPacket(&data);
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL");
@@ -22077,6 +22085,12 @@ void Player::InitDataForForm(bool reapplyMods)
         {
             if (getPowerType() != POWER_RAGE)
                 setPowerType(POWER_RAGE);
+            break;
+        }
+        case FORM_WISE_SERPENT:
+        {
+            if (getPowerType() != POWER_MANA)
+            setPowerType(POWER_MANA);
             break;
         }
         default:                                            // 0, for example
