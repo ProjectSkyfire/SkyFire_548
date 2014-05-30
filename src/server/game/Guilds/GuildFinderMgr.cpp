@@ -42,8 +42,8 @@ void GuildFinderMgr::LoadGuildSettings()
     //                                                           0                1             2                  3             4           5             6         7
     QueryResult result = CharacterDatabase.Query("SELECT gfgs.guildId, gfgs.availability, gfgs.classRoles, gfgs.interests, gfgs.level, gfgs.listed, gfgs.comment, c.race "
                                                  "FROM guild_finder_guild_settings gfgs "
-                                                 "LEFT JOIN guild_member gm ON gm.guildid=gfgs.guildId "
-                                                 "LEFT JOIN characters c ON c.guid = gm.guid LIMIT 1");
+                                                 "LEFT JOIN guild g ON g.guildId = gfgs.guildId "
+                                                 "LEFT JOIN characters c ON c.guid = g.leaderguid");
 
     if (!result)
     {
@@ -249,8 +249,10 @@ LFGuildStore GuildFinderMgr::GetGuildsMatchingSetting(LFGuildPlayer& settings, T
         if (!(guildSettings.GetInterests() & settings.GetInterests()))
             continue;
 
+        /* Not working
         if (!(guildSettings.GetLevel() & settings.GetLevel()))
             continue;
+        */
 
         resultSet.insert(std::make_pair(itr->first, guildSettings));
     }
