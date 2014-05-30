@@ -17082,16 +17082,16 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP)
     }
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, 4 + 4 + 4 + 4 + 4 + 4 + 1);
-    data << uint32(quest->GetRewardSkillPoints());         // 4.x bonus skill points
-    data << uint32(questId);
-    data << uint32(quest->GetBonusTalents());              // bonus talents (still sent to 5.4.7 client)
-    data << uint32(quest->GetRewardSkillId());             // 4.x bonus skill id
-    data << uint32(moneyReward);
-    data << uint32(xp);
-
     data.WriteBit(1);                                      // FIXME: unknown bits, common values sent
     data.WriteBit(0);
     data.FlushBits();
+
+    data << uint32(quest->GetBonusTalents());              // bonus talents (still sent to 5.4.x client)
+    data << uint32(moneyReward);
+    data << uint32(questId);
+    data << uint32(quest->GetRewardSkillId());             // 4.x bonus skill id
+    data << uint32(xp);
+    data << uint32(quest->GetRewardSkillPoints());         // 4.x bonus skill points
 
     GetSession()->SendPacket(&data);
 }
@@ -17173,28 +17173,29 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
     ObjectGuid oGuid = guid;
 
     WorldPacket data(SMSG_QUESTUPDATE_ADD_KILL, 1 + 8 + 2 + 1 + 4 + 2 + 4);
-    data.WriteBit(oGuid[5]);
-    data.WriteBit(oGuid[3]);
-    data.WriteBit(oGuid[6]);
-    data.WriteBit(oGuid[7]);
-    data.WriteBit(oGuid[4]);
+    data << uint16(old_count + add_count);
+    data << uint8(0);
+    data << uint32(quest->GetQuestId());
+    data << uint16(quest->RequiredNpcOrGoCount[creatureOrGO_idx]);
+    data << uint32(entry);
+
+    data.WriteBit(oGuid[0]);
     data.WriteBit(oGuid[1]);
     data.WriteBit(oGuid[2]);
-    data.WriteBit(oGuid[0]);
+    data.WriteBit(oGuid[6]);
+    data.WriteBit(oGuid[1]);
+    data.WriteBit(oGuid[5]);
+    data.WriteBit(oGuid[7]);
+    data.WriteBit(oGuid[3]);
 
-    data.WriteByteSeq(oGuid[4]);
-    data << uint16(quest->RequiredNpcOrGoCount[ creatureOrGO_idx ]);
-    data << uint8(0);
-    data.WriteByteSeq(oGuid[6]);
-    data << uint32(entry);
-    data.WriteByteSeq(oGuid[0]);
+    data.WriteByteSeq(oGuid[2]);
+    data.WriteByteSeq(oGuid[7]);
     data.WriteByteSeq(oGuid[3]);
-    data.WriteByteSeq(oGuid[1]);
+    data.WriteByteSeq(oGuid[0]);
+    data.WriteByteSeq(oGuid[4]);
     data.WriteByteSeq(oGuid[5]);
     data.WriteByteSeq(oGuid[2]);
-    data << uint16(old_count + add_count);
-    data.WriteByteSeq(oGuid[7]);
-    data << uint32(quest->GetQuestId());
+    data.WriteByteSeq(oGuid[6]);
 
     GetSession()->SendPacket(&data);
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL");
