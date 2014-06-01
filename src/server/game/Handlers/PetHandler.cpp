@@ -421,39 +421,39 @@ void WorldSession::HandlePetNameQuery(WorldPacket& recvData)
     ObjectGuid petGuid;
     ObjectGuid petNumber;
 
-    petNumber[1] = recvData.ReadBit();
-    petGuid[5] = recvData.ReadBit();
-    petNumber[3] = recvData.ReadBit();
-    petGuid[0] = recvData.ReadBit();
-    petGuid[3] = recvData.ReadBit();
-    petNumber[4] = recvData.ReadBit();
-    petGuid[1] = recvData.ReadBit();
-    petGuid[4] = recvData.ReadBit();
     petNumber[0] = recvData.ReadBit();
+    petNumber[5] = recvData.ReadBit();
+    petGuid[1] = recvData.ReadBit();
+    petGuid[7] = recvData.ReadBit();
     petNumber[7] = recvData.ReadBit();
     petGuid[6] = recvData.ReadBit();
-    petGuid[7] = recvData.ReadBit();
-    petGuid[2] = recvData.ReadBit();
-    petNumber[5] = recvData.ReadBit();
-    petNumber[2] = recvData.ReadBit();
+    petGuid[4] = recvData.ReadBit();
+    petGuid[5] = recvData.ReadBit();
+    petGuid[0] = recvData.ReadBit();
+    petNumber[3] = recvData.ReadBit();
     petNumber[6] = recvData.ReadBit();
+    petNumber[2] = recvData.ReadBit();
+    petGuid[3] = recvData.ReadBit();
+    petGuid[2] = recvData.ReadBit();
+    petNumber[1] = recvData.ReadBit();
+    petNumber[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(petGuid[1]);
-    recvData.ReadByteSeq(petNumber[5]);
-    recvData.ReadByteSeq(petGuid[5]);
-    recvData.ReadByteSeq(petGuid[4]);
-    recvData.ReadByteSeq(petNumber[1]);
-    recvData.ReadByteSeq(petNumber[7]);
-    recvData.ReadByteSeq(petGuid[7]);
-    recvData.ReadByteSeq(petNumber[4]);
     recvData.ReadByteSeq(petNumber[2]);
+    recvData.ReadByteSeq(petNumber[1]);
     recvData.ReadByteSeq(petNumber[0]);
-    recvData.ReadByteSeq(petNumber[6]);
-    recvData.ReadByteSeq(petGuid[6]);
+    recvData.ReadByteSeq(petNumber[7]);
+    recvData.ReadByteSeq(petGuid[5]);
     recvData.ReadByteSeq(petGuid[0]);
-    recvData.ReadByteSeq(petGuid[3]);
+    recvData.ReadByteSeq(petNumber[6]);
+    recvData.ReadByteSeq(petGuid[4]);
+    recvData.ReadByteSeq(petNumber[5]);
     recvData.ReadByteSeq(petGuid[2]);
+    recvData.ReadByteSeq(petGuid[6]);
     recvData.ReadByteSeq(petNumber[3]);
+    recvData.ReadByteSeq(petGuid[3]);
+    recvData.ReadByteSeq(petNumber[4]);
+    recvData.ReadByteSeq(petGuid[1]);
+    recvData.ReadByteSeq(petGuid[7]);
 
     SendPetNameQuery(petGuid, petNumber);
 }
@@ -474,7 +474,6 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
 
     WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 5 + pet->GetName().size() + 4));
     data.WriteBit(1);                               // has data
-    data.WriteBit(0);                               // unknown
 
     bool declinedNames = pet->IsPet() && ((Pet*)pet)->GetDeclinedNames();
 
@@ -486,6 +485,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
             data.WriteBits(0, 7);
     }
 
+    data.WriteBit(0);                               // unknown
     data.WriteBits(pet->GetName().size(), 8);
     data.FlushBits();
 

@@ -26,4 +26,4 @@ set(scripts_STAT_SRCS
   Pandaria/zone_valley_of_the_four_winds.cpp
 )
 
-message(" -> Prepared: Pandaria")
+message("  -> Prepared: Pandaria")
