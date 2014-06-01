@@ -55,40 +55,39 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "Received opcode CMSG_PETITION_BUY");
 
-    uint64 guidNPC;
-    uint32 clientIndex;                                     // 1 for guild and arenaslot+1 for arenas in client
-    std::string name;
+    ObjectGuid guid;
 
-    recvData >> guidNPC;                                   // NPC GUID
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint64>();                          // 0
-    recvData >> name;                                      // name
-    recvData.read_skip<std::string>();                     // some string
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint16>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
-    recvData.read_skip<uint32>();                          // 0
+    guid[5] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
 
-    for (int i = 0; i < 10; ++i)
-        recvData.read_skip<std::string>();
+    uint8 nameLength = recvData.ReadBits(7);
 
-    recvData >> clientIndex;                               // index
-    recvData.read_skip<uint32>();                          // 0
+    guid[4] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
 
-    TC_LOG_DEBUG("network", "Petitioner with GUID %u tried sell petition: name %s", GUID_LOPART(guidNPC), name.c_str());
+    recvData.ReadBit(); //Flush bit
+
+    std::string name = recvData.ReadString(nameLength);
+
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[3]);
+    TC_LOG_DEBUG("network", "Petitioner with GUID %u tried sell petition: name %s", GUID_LOPART(guid), name.c_str());
 
     // prevent cheating
-    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(guidNPC, UNIT_NPC_FLAG_PETITIONER);
+    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_PETITIONER);
     if (!creature)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandlePetitionBuyOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(guidNPC));
+        TC_LOG_DEBUG("network", "WORLD: HandlePetitionBuyOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(guid));
         return;
     }
 
@@ -111,69 +110,19 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
         type = GUILD_CHARTER_TYPE;
     }
     else
+        return; //No arena teams in mop
+
+
+    if (sGuildMgr->GetGuildByName(name))
     {
-        /// @todo find correct opcode
-        if (_player->getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        {
-            SendNotification(LANG_ARENA_ONE_TOOLOW, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
-            return;
-        }
-
-        switch (clientIndex)                                 // arenaSlot+1 as received from client (1 from 3 case)
-        {
-            case 1:
-                charterid = ARENA_TEAM_CHARTER_2v2;
-                cost = ARENA_TEAM_CHARTER_2v2_COST;
-                type = ARENA_TEAM_CHARTER_2v2_TYPE;
-                break;
-            case 2:
-                charterid = ARENA_TEAM_CHARTER_3v3;
-                cost = ARENA_TEAM_CHARTER_3v3_COST;
-                type = ARENA_TEAM_CHARTER_3v3_TYPE;
-                break;
-            case 3:
-                charterid = ARENA_TEAM_CHARTER_5v5;
-                cost = ARENA_TEAM_CHARTER_5v5_COST;
-                type = ARENA_TEAM_CHARTER_5v5_TYPE;
-                break;
-            default:
-                TC_LOG_DEBUG("network", "unknown selection at buy arena petition: %u", clientIndex);
-                return;
-        }
-
-        if (_player->GetArenaTeamId(clientIndex - 1))        // arenaSlot+1 as received from client
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
-            return;
-        }
+        Guild::SendCommandResult(this, GUILD_COMMAND_CREATE, ERR_GUILD_NAME_EXISTS_S, name);
+        return;
     }
 
-    if (type == GUILD_CHARTER_TYPE)
+    if (sObjectMgr->IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
     {
-        if (sGuildMgr->GetGuildByName(name))
-        {
-            Guild::SendCommandResult(this, GUILD_COMMAND_CREATE, ERR_GUILD_NAME_EXISTS_S, name);
-            return;
-        }
-
-        if (sObjectMgr->IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
-        {
-            Guild::SendCommandResult(this, GUILD_COMMAND_CREATE, ERR_GUILD_NAME_INVALID, name);
-            return;
-        }
-    }
-    else
-    {
-        if (sArenaTeamMgr->GetArenaTeamByName(name))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_EXISTS_S);
-            return;
-        }
-        if (sObjectMgr->IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_INVALID);
-            return;
-        }
+        Guild::SendCommandResult(this, GUILD_COMMAND_CREATE, ERR_GUILD_NAME_INVALID, name);
+        return;
     }
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(charterid);
@@ -202,10 +151,37 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
     if (!charter)
         return;
 
+    //I think this has changed
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
     // ITEM_FIELD_ENCHANTMENT is guild/arenateam id
     // ITEM_FIELD_ENCHANTMENT+1 is current signatures count (showed on item)
     charter->SetState(ITEM_CHANGED, _player);
+
+    ObjectGuid vGuid = guid;
+
+    //Seems this has no effect but it's sent
+    WorldPacket data(SMSG_BUY_ITEM, 1 + 8 + 4 + 4 + 4);
+    data.WriteBit(vGuid[3]);
+    data.WriteBit(vGuid[4]);
+    data.WriteBit(vGuid[7]);
+    data.WriteBit(vGuid[6]);
+    data.WriteBit(vGuid[0]);
+    data.WriteBit(vGuid[2]);
+    data.WriteBit(vGuid[1]);
+    data.WriteBit(vGuid[5]);
+    data.WriteByteSeq(vGuid[6]);
+    data.WriteByteSeq(vGuid[7]);
+    data << uint32(1); //count
+    data.WriteByteSeq(vGuid[1]);
+    data.WriteByteSeq(vGuid[3]);
+    data.WriteByteSeq(vGuid[5]);
+    data.WriteByteSeq(vGuid[2]);
+    data << int32(0xFFFFFFFE);
+    data.WriteByteSeq(vGuid[0]);
+    data.WriteByteSeq(vGuid[4]);
+    data << uint32(1); // vendorSlot numbered from 1 at client
+    _player->GetSession()->SendPacket(&data);
+
     _player->SendNewItem(charter, 1, true, false);
 
     // a petition is invalid, if both the owner and the type matches
@@ -230,6 +206,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
     // delete petitions with the same guid as this one
     ssInvalidPetitionGUIDs << '\'' << charter->GetGUIDLow() << '\'';
 
+    //Probably DB Charter Petitions has changed too
     TC_LOG_DEBUG("network", "Invalid petition GUIDs: %s", ssInvalidPetitionGUIDs.str().c_str());
     CharacterDatabase.EscapeString(name);
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -240,7 +217,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
     stmt->setUInt32(0, _player->GetGUIDLow());
     stmt->setUInt32(1, charter->GetGUIDLow());
     stmt->setString(2, name);
-    stmt->setUInt8(3, uint8(type));
+    stmt->setUInt8(3, uint8(type)); //Type no needed anymore
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
@@ -867,34 +844,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recvData)
         }
     }
     else
-    {
-        // Receive the rest of the packet in arena team creation case
-        uint32 background, icon, iconcolor, border, bordercolor;
-        recvData >> background >> icon >> iconcolor >> border >> bordercolor;
-
-        // Create arena team
-        ArenaTeam* arenaTeam = new ArenaTeam();
-
-        if (!arenaTeam->Create(_player->GetGUID(), type, name, background, icon, iconcolor, border, bordercolor))
-        {
-            delete arenaTeam;
-            return;
-        }
-
-        // Register arena team
-        sArenaTeamMgr->AddArenaTeam(arenaTeam);
-        TC_LOG_DEBUG("network", "PetitonsHandler: Arena team (guid: %u) added to ObjectMgr", arenaTeam->GetId());
-
-        // Add members
-        for (uint8 i = 0; i < signatures; ++i)
-        {
-            Field* fields = result->Fetch();
-            uint32 memberGUID = fields[0].GetUInt32();
-            TC_LOG_DEBUG("network", "PetitionsHandler: Adding arena team (guid: %u) member %u", arenaTeam->GetId(), memberGUID);
-            arenaTeam->AddMember(MAKE_NEW_GUID(memberGUID, 0, HIGHGUID_PLAYER));
-            result->NextRow();
-        }
-    }
+        return; //No arena team creation in mop
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
@@ -935,44 +885,35 @@ void WorldSession::SendPetitionShowList(uint64 guid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_SHOWLIST, 8+1+4*6);
-    data << guid;                                           // npc guid
+    ObjectGuid sendGuid = guid;
+
+    WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
 
     if (creature->IsTabardDesigner())
     {
-        data << uint8(1);                                   // count
-        data << uint32(1);                                  // index
-        data << uint32(GUILD_CHARTER);                      // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(GUILD_CHARTER_COST);                 // charter cost
-        data << uint32(0);                                  // unknown
-        data << uint32(sWorld->getIntConfig(CONFIG_MIN_PETITION_SIGNS)); // required signs
+        data.WriteBit(sendGuid[3]);
+        data.WriteBit(sendGuid[5]);
+        data.WriteBit(sendGuid[7]);
+        data.WriteBit(sendGuid[6]);
+        data.WriteBit(sendGuid[1]);
+        data.WriteBit(sendGuid[0]);
+        data.WriteBit(sendGuid[2]);
+        data.WriteBit(sendGuid[4]);
+
+        data.WriteByteSeq(sendGuid[6]);
+        data.WriteByteSeq(sendGuid[0]);
+        data.WriteByteSeq(sendGuid[1]);
+
+        data << uint32(GUILD_CHARTER_COST); // charter cost
+
+        data.WriteByteSeq(sendGuid[4]);
+        data.WriteByteSeq(sendGuid[3]);
+        data.WriteByteSeq(sendGuid[5]);
+        data.WriteByteSeq(sendGuid[2]);
+        data.WriteByteSeq(sendGuid[7]);
     }
     else
-    {
-        data << uint8(3);                                   // count
-        // 2v2
-        data << uint32(1);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_2v2);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_2v2_COST);        // charter cost
-        data << uint32(2);                                  // unknown
-        data << uint32(2);                                  // required signs?
-        // 3v3
-        data << uint32(2);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_3v3);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_3v3_COST);        // charter cost
-        data << uint32(3);                                  // unknown
-        data << uint32(3);                                  // required signs?
-        // 5v5
-        data << uint32(3);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_5v5);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_5v5_COST);        // charter cost
-        data << uint32(5);                                  // unknown
-        data << uint32(5);                                  // required signs?
-    }
+        return; //No arena team petitions in mop
 
     SendPacket(&data);
     TC_LOG_DEBUG("network", "Sent SMSG_PETITION_SHOWLIST");

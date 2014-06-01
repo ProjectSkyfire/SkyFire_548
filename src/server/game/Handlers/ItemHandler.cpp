@@ -586,47 +586,49 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUY_ITEM");
 
-    ObjectGuid vendorguid, bagGuid;
+    ObjectGuid vendorGuid, bagGuid;
     uint32 item, slot, count, bagSlot;
     uint8 itemType; // 1 = item, 2 = currency
 
-    recvData >> bagSlot >> item >> count >> slot;
+    recvData >> bagSlot >> count >> item >> slot;
 
-    bagGuid[2] = recvData.ReadBit();
-    vendorguid[0] = recvData.ReadBit();
-    bagGuid[5] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    bagGuid[0] = recvData.ReadBit();
-    itemType = recvData.ReadBits(2);
+    vendorGuid[6] = recvData.ReadBit();
     bagGuid[6] = recvData.ReadBit();
     bagGuid[4] = recvData.ReadBit();
-    vendorguid[2] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
+    vendorGuid[4] = recvData.ReadBit();
+
+    itemType = recvData.ReadBits(2);
+
+    vendorGuid[0] = recvData.ReadBit();
+    vendorGuid[3] = recvData.ReadBit();
     bagGuid[3] = recvData.ReadBit();
-    vendorguid[5] = recvData.ReadBit();
+    vendorGuid[7] = recvData.ReadBit();
+    vendorGuid[5] = recvData.ReadBit();
+    bagGuid[2] = recvData.ReadBit();
+    vendorGuid[1] = recvData.ReadBit();
     bagGuid[7] = recvData.ReadBit();
-    vendorguid[4] = recvData.ReadBit();
+    vendorGuid[2] = recvData.ReadBit();
     bagGuid[1] = recvData.ReadBit();
-    vendorguid[3] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
+    bagGuid[0] = recvData.ReadBit();
+    bagGuid[5] = recvData.ReadBit();
     recvData.FlushBits();
 
-    recvData.ReadByteSeq(bagGuid[1]);
+    recvData.ReadByteSeq(vendorGuid[5]);
+    recvData.ReadByteSeq(vendorGuid[0]);
     recvData.ReadByteSeq(bagGuid[3]);
-    recvData.ReadByteSeq(vendorguid[2]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(bagGuid[2]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(bagGuid[1]);
     recvData.ReadByteSeq(bagGuid[6]);
-    recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(bagGuid[5]);
-    recvData.ReadByteSeq(bagGuid[7]);
-    recvData.ReadByteSeq(bagGuid[4]);
+    recvData.ReadByteSeq(vendorGuid[2]);
+    recvData.ReadByteSeq(vendorGuid[7]);
+    recvData.ReadByteSeq(vendorGuid[6]);
     recvData.ReadByteSeq(bagGuid[0]);
-    recvData.ReadByteSeq(vendorguid[7]);
+    recvData.ReadByteSeq(bagGuid[5]);
+    recvData.ReadByteSeq(vendorGuid[4]);
+    recvData.ReadByteSeq(bagGuid[2]);
+    recvData.ReadByteSeq(vendorGuid[3]);
+    recvData.ReadByteSeq(bagGuid[7]);
+    recvData.ReadByteSeq(vendorGuid[1]);
+    recvData.ReadByteSeq(bagGuid[7]);
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)
@@ -644,10 +646,10 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
         else if (bagGuid == GetPlayer()->GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
             bag = INVENTORY_SLOT_BAG_0;
 
-        GetPlayer()->BuyItemFromVendorSlot(vendorguid, slot, item, count, bag, bagSlot);
+        GetPlayer()->BuyItemFromVendorSlot(vendorGuid, slot, item, count, bag, bagSlot);
     }
     else if (itemType == ITEM_VENDOR_TYPE_CURRENCY)
-        GetPlayer()->BuyCurrencyFromVendorSlot(vendorguid, slot, item, count);
+        GetPlayer()->BuyCurrencyFromVendorSlot(vendorGuid, slot, item, count);
     else
         TC_LOG_DEBUG("network", "WORLD: received wrong itemType (%u) in HandleBuyItemOpcode", itemType);
 }

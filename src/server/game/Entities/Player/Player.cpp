@@ -13673,43 +13673,48 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
     ObjectGuid pItemGuid = pItem ? pItem->GetGUID() : 0;
     ObjectGuid pItemGuid2 = pItem2 ? pItem2->GetGUID() : 0;
 
-    WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I ? 22 : 18));
+    WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (msg == EQUIP_ERR_NO_OUTPUT ? 26 : 24));
 
     if (msg != EQUIP_ERR_OK)
     {
-        data.WriteBit(pItemGuid2[0]);
         data.WriteBit(pItemGuid2[4]);
-        data.WriteBit(pItemGuid2[5]);
-        data.WriteBit(pItemGuid[7]);
-        data.WriteBit(pItemGuid2[3]);
-        data.WriteBit(pItemGuid2[7]);
-        data.WriteBit(pItemGuid2[6]);
-        data.WriteBit(pItemGuid[4]);
-        data.WriteBit(pItemGuid2[1]);
-        data.WriteBit(pItemGuid2[2]);
         data.WriteBit(pItemGuid[3]);
-        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid2[6]);
+        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid[4]);
+        data.WriteBit(pItemGuid2[5]);
         data.WriteBit(pItemGuid[1]);
+        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid2[0]);
+        data.WriteBit(pItemGuid2[3]);
+        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid[2]);
         data.WriteBit(pItemGuid[0]);
         data.WriteBit(pItemGuid[5]);
-        data.WriteBit(pItemGuid[2]);
+        data.WriteBit(pItemGuid[7]);
+        data.WriteBit(pItemGuid[7]);
 
-        data.WriteByteSeq(pItemGuid[0]);
-        data.WriteByteSeq(pItemGuid[5]);
-        data.WriteByteSeq(pItemGuid2[3]);
-        data.WriteByteSeq(pItemGuid2[5]);
-        data.WriteByteSeq(pItemGuid[2]);
-        data.WriteByteSeq(pItemGuid[1]);
-        data.WriteByteSeq(pItemGuid[7]);
+        data.WriteByteSeq(pItemGuid2[0]);
 
         data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
 
-        data.WriteByteSeq(pItemGuid2[4]);
+        data.WriteByteSeq(pItemGuid2[6]);
+        data.WriteByteSeq(pItemGuid[4]);
+        data.WriteByteSeq(pItemGuid[0]);
+        data.WriteByteSeq(pItemGuid[7]);
+        data.WriteByteSeq(pItemGuid[3]);
+        data.WriteByteSeq(pItemGuid2[1]);
+        data.WriteByteSeq(pItemGuid2[5]);
+        data.WriteByteSeq(pItemGuid[5]);
+        data.WriteByteSeq(pItemGuid2[7]);
+        data.WriteByteSeq(pItemGuid2[2]);
+        data.WriteByteSeq(pItemGuid[1]);
         data.WriteByteSeq(pItemGuid[6]);
+        data.WriteByteSeq(pItemGuid[2]);
+        data.WriteByteSeq(pItemGuid2[3]);
+        data.WriteByteSeq(pItemGuid2[4]);
 
         data << uint8(msg);
-
-        data.WriteByteSeq(pItemGuid2[7]);
 
         if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS ||
             msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS ||
@@ -13719,15 +13724,8 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->ItemLimitCategory : 0);
         }
 
-        data.WriteByteSeq(pItemGuid2[2]);
-
         if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
             data << uint32(0);                  // slot
-
-        data.WriteByteSeq(pItemGuid[3]);
-        data.WriteByteSeq(pItemGuid2[0]);
-        data.WriteByteSeq(pItemGuid2[1]);
-        data.WriteByteSeq(pItemGuid[4]);
 
         if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I || msg == EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW)
         {
@@ -13735,12 +13733,11 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->RequiredLevel : 0);
         }
 
-        data.WriteByteSeq(pItemGuid2[6]);
-
-        if (msg == EQUIP_ERR_NO_OUTPUT)
+        if (msg == EQUIP_ERR_NO_OUTPUT)         // unk
         {
             data.WriteBits(0, 8);               // item guid
             data.WriteBits(0, 8);               // container
+            // Would need WriteByteSeq's
         }
     }
 
@@ -13750,10 +13747,34 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 void Player::SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 /*param*/)
 {
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_BUY_FAILED");
-    WorldPacket data(SMSG_BUY_FAILED, (8+4+4+1));
-    data << uint64(creature ? creature->GetGUID() : 0);
-    data << uint32(item);
+
+    ObjectGuid guid = uint64(creature ? creature->GetGUID() : 0);
+
+    WorldPacket data(SMSG_BUY_FAILED, 1 + 1 + 8 + 4);
+
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+
     data << uint8(msg);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[7]);
+
+    data << uint32(item);
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -14662,58 +14683,65 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
         return;
 
     ObjectGuid playerGuid = GetGUID();
-    ObjectGuid unknownGuid = uint64(0);
+    ObjectGuid unknownGuid = uint64(0); //May be vendor or bag
 
-    WorldPacket data(SMSG_ITEM_PUSH_RESULT, 1 + 8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4);
-    data.WriteBit(1);                                       // display in chat
-    data.WriteBit(created);                                 // 0=received, 1=created
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(unknownGuid[3]);
-    data.WriteBit(unknownGuid[7]);
-    data.WriteBit(unknownGuid[1]);
-    data.WriteBit(unknownGuid[4]);
-    data.WriteBit(unknownGuid[6]);
-    data.WriteBit(0);                                       // 1 = bonus item - "You received bonus loot"
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[1]);
-    data.WriteBit(unknownGuid[5]);
-    data.WriteBit(playerGuid[6]);
+    WorldPacket data(SMSG_ITEM_PUSH_RESULT, 3 + 8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1);
+
     data.WriteBit(unknownGuid[2]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(unknownGuid[0]);
-    data.WriteBit(playerGuid[3]);
+    data.WriteBit(playerGuid[4]);
+    data.WriteBit(unknownGuid[5]);
+    data.WriteBit(1);                                       // display in chat
+    data.WriteBit(playerGuid[1]);
     data.WriteBit(received);                                // 0=looted, 1=from npc
+    data.WriteBit(unknownGuid[4]);
+    data.WriteBit(playerGuid[6]);
+    data.WriteBit(playerGuid[5]);
+    data.WriteBit(playerGuid[7]);
+    data.WriteBit(playerGuid[0]);
+    data.WriteBit(unknownGuid[0]);
+    data.WriteBit(unknownGuid[7]);
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(unknownGuid[6]);
+    data.WriteBit(0);                                       // 1 = bonus item - "You received bonus loot"    
+    data.WriteBit(playerGuid[3]);
+    data.WriteBit(unknownGuid[1]);
+    data.WriteBit(created);                                 // 0=received, 1=created
+    data.WriteBit(unknownGuid[3]);
     data.FlushBits();
 
-    // uint32 value order needs to be rechecked
-    data.WriteByteSeq(unknownGuid[6]);
-    data << uint32(item->GetItemSuffixFactor());            // SuffixFactor
     data.WriteByteSeq(playerGuid[1]);
-    data << uint32(0);
-    data << uint32(count);                                  // count of items
-    data << uint32(0);
-    data << uint32(item->GetItemRandomPropertyId());        // random item property id
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(unknownGuid[7]);
-    data.WriteByteSeq(playerGuid[5]);
-    data << uint32(0);
-    data.WriteByteSeq(playerGuid[2]);
-    data.WriteByteSeq(unknownGuid[0]);
     data.WriteByteSeq(unknownGuid[1]);
-    data.WriteByteSeq(playerGuid[7]);
-    data << uint8(item->GetBagSlot());                      // bagslot
-    data << uint32(item->GetEntry());                       // item id
-    data << uint32(0);
-    data.WriteByteSeq(playerGuid[0]);
-    data.WriteByteSeq(playerGuid[4]);
+
+    data << uint32(0); //unk
+
+    data.WriteByteSeq(unknownGuid[0]);
+    data.WriteByteSeq(playerGuid[5]);
+    data.WriteByteSeq(playerGuid[2]);
+    data << uint32(item->GetItemSuffixFactor());            // SuffixFactor Guessed
     data.WriteByteSeq(unknownGuid[5]);
-    data.WriteByteSeq(unknownGuid[2]);
+
+    data << uint32(0); //unk
+
+    data << uint32(item->GetEntry());                       // item id
+    data << uint32(item->GetItemRandomPropertyId());        // random item property id
+    data.WriteByteSeq(unknownGuid[6]);
+
+    data << uint32(0); //unk
+
     data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
-                                                            // item slot, but when added to stack: 0xFFFFFFFF
-    data << uint32((item->GetCount() == count) ? item->GetSlot() : -1);
+    data.WriteByteSeq(unknownGuid[2]);
+    data.WriteByteSeq(playerGuid[0]);
+    data << uint32(count);                                  // count of items
+    data.WriteByteSeq(playerGuid[7]);
+    data.WriteByteSeq(unknownGuid[5]);
+    data.WriteByteSeq(playerGuid[4]);
+    data << uint32((item->GetCount() == count) ? item->GetSlot() : -1); // item slot, but when added to stack: 0xFFFFFFFF
+    data << uint8(item->GetBagSlot());                      // bagslot
+    data.WriteByteSeq(playerGuid[3]);
     data.WriteByteSeq(playerGuid[6]);
+    
+    data << uint32(0); //unk
+
     data.WriteByteSeq(unknownGuid[3]);
     data.WriteByteSeq(unknownGuid[4]);
 
@@ -14721,20 +14749,6 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
         GetGroup()->BroadcastPacket(&data, true);
     else
         GetSession()->SendPacket(&data);
-
-    /*WorldPacket data(SMSG_ITEM_PUSH_RESULT, (8+4+4+4+1+4+4+4+4+4));
-    data << uint64(GetGUID());                              // player GUID
-    data << uint32(received);                               // 0=looted, 1=from npc
-    data << uint32(created);                                // 0=received, 1=created
-    data << uint32(1);                                      // bool print error to chat
-    data << uint8(item->GetBagSlot());                      // bagslot
-                                                            // item slot, but when added to stack: 0xFFFFFFFF
-    data << uint32((item->GetCount() == count) ? item->GetSlot() : -1);
-    data << uint32(item->GetEntry());                       // item id
-    data << uint32(item->GetItemSuffixFactor());            // SuffixFactor
-    data << int32(item->GetItemRandomPropertyId());         // random item property id
-    data << uint32(count);                                  // count of items
-    data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory*/
 }
 
 /*********************************************************/
@@ -15020,11 +15034,11 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             GetSession()->SendShowBank(guid);
             break;
         case GOSSIP_OPTION_PETITIONER:
-            PlayerTalkClass->SendCloseGossip();
+            //PlayerTalkClass->SendCloseGossip(); //Probably obsolete
             GetSession()->SendPetitionShowList(guid);
             break;
         case GOSSIP_OPTION_TABARDDESIGNER:
-            PlayerTalkClass->SendCloseGossip();
+            //PlayerTalkClass->SendCloseGossip(); //Probably obsolete
             GetSession()->SendTabardVendorActivate(guid);
             break;
         case GOSSIP_OPTION_AUCTIONEER:
@@ -22180,26 +22194,31 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
         ObjectGuid vGuid = pVendor->GetGUID();
 
         WorldPacket data(SMSG_BUY_ITEM, 1 + 8 + 4 + 4 + 4);
+        data.WriteBit(vGuid[3]);
+        data.WriteBit(vGuid[4]);
         data.WriteBit(vGuid[7]);
-        data.WriteBit(vGuid[0]);
         data.WriteBit(vGuid[6]);
+        data.WriteBit(vGuid[0]);
+        data.WriteBit(vGuid[2]);
         data.WriteBit(vGuid[1]);
         data.WriteBit(vGuid[5]);
-        data.WriteBit(vGuid[2]);
-        data.WriteBit(vGuid[4]);
-        data.WriteBit(vGuid[3]);
+
+        data.WriteByteSeq(vGuid[6]);
+        data.WriteByteSeq(vGuid[7]);
+
+        data << uint32(count);
 
         data.WriteByteSeq(vGuid[1]);
+        data.WriteByteSeq(vGuid[3]);
         data.WriteByteSeq(vGuid[5]);
         data.WriteByteSeq(vGuid[2]);
-        data.WriteByteSeq(vGuid[3]);
-        data << uint32(vendorslot + 1);                   // numbered from 1 at client
-        data.WriteByteSeq(vGuid[0]);
-        data.WriteByteSeq(vGuid[6]);
-        data << uint32(count);
-        data.WriteByteSeq(vGuid[7]);
+
         data << int32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
+
+        data.WriteByteSeq(vGuid[0]);
         data.WriteByteSeq(vGuid[4]);
+
+        data << uint32(vendorslot + 1);                   // numbered from 1 at client
 
         GetSession()->SendPacket(&data);
         SendNewItem(it, count, true, false, false);
