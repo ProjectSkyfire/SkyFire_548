@@ -627,7 +627,7 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvData)
     if (recvData.size() == 1)
     {
         bool newPvPStatus;
-        recvData >> newPvPStatus;
+        newPvPStatus = recvData.ReadBit();
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
     }

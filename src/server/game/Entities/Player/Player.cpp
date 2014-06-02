@@ -9079,38 +9079,39 @@ void Player::SendLootRelease(ObjectGuid guid)
     ObjectGuid lootGuid = guid;
 
     WorldPacket data(SMSG_LOOT_RELEASE_RESPONSE, 20);
-    data.WriteBit(guid[2]);
+    data.WriteBit(lootGuid[0]);
+    data.WriteBit(lootGuid[7]);
+    data.WriteBit(lootGuid[5]);
+    data.WriteBit(guid[0]);
     data.WriteBit(lootGuid[4]);
-    data.WriteBit(lootGuid[3]);
     data.WriteBit(lootGuid[6]);
     data.WriteBit(guid[1]);
-    data.WriteBit(lootGuid[5]);
-    data.WriteBit(lootGuid[1]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(lootGuid[7]);
-    data.WriteBit(lootGuid[0]);
-    data.WriteBit(guid[4]);
     data.WriteBit(lootGuid[2]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
     data.WriteBit(guid[5]);
-    data.WriteByteSeq(lootGuid[6]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(lootGuid[0]);
+    data.WriteBit(lootGuid[3]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(lootGuid[1]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(lootGuid[1]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(lootGuid[5]);
+    data.WriteByteSeq(lootGuid[7]);
+    data.WriteByteSeq(lootGuid[3]);
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(lootGuid[2]);
-    data.WriteByteSeq(lootGuid[4]);
-    data.WriteByteSeq(lootGuid[7]);
-    data.WriteByteSeq(lootGuid[5]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(lootGuid[1]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(lootGuid[3]);
+    data.WriteByteSeq(lootGuid[0]);
     data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(lootGuid[6]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(lootGuid[4]);
     data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[1]);
     SendDirectMessage(&data);
 }
 
@@ -9431,65 +9432,70 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 void Player::SendNotifyLootMoneyRemoved()
 {
     ObjectGuid guid = GetLootGUID();
+
     WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 9);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[0]);
     data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
+    data.WriteBit(guid[0]);
     data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
     data.WriteBit(guid[5]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
+
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+
     GetSession()->SendPacket(&data);
 }
 
 void Player::SendNotifyLootItemRemoved(uint8 lootSlot, ObjectGuid guid)
 {
     ObjectGuid lootGuid = guid;
+    // Guid could also be itemID
 
     WorldPacket data(SMSG_LOOT_REMOVED, 19);
-    data.WriteBit(lootGuid[1]);
-    data.WriteBit(guid[0]);
     data.WriteBit(guid[7]);
-    data.WriteBit(lootGuid[0]);
-    data.WriteBit(lootGuid[6]);
+    data.WriteBit(guid[0]);
     data.WriteBit(guid[2]);
-    data.WriteBit(lootGuid[3]);
-    data.WriteBit(lootGuid[7]);
-    data.WriteBit(guid[6]);
+    data.WriteBit(lootGuid[0]);
+    data.WriteBit(lootGuid[1]);
     data.WriteBit(lootGuid[2]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[4]);
+    data.WriteBit(lootGuid[7]);
+    data.WriteBit(lootGuid[6]);
+    data.WriteBit(lootGuid[5]);
     data.WriteBit(guid[1]);
     data.WriteBit(guid[5]);
-    data.WriteBit(lootGuid[5]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(lootGuid[3]);
     data.WriteBit(lootGuid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
 
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(lootGuid[0]);
-    data.WriteByteSeq(lootGuid[6]);
     data.WriteByteSeq(lootGuid[1]);
-    data.WriteByteSeq(lootGuid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(lootGuid[7]);
-    data.WriteByteSeq(lootGuid[3]);
-    data << uint8(lootSlot);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(lootGuid[7]);
+    data.WriteByteSeq(lootGuid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(lootGuid[5]);
+    data.WriteByteSeq(lootGuid[3]);
     data.WriteByteSeq(lootGuid[2]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data << uint8(lootSlot);
+    data.WriteByteSeq(lootGuid[6]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(lootGuid[4]);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -20691,21 +20697,15 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
 
 void Player::SendDungeonDifficulty(bool IsInGroup)
 {
-    uint8 val = 0x00000001;
-    WorldPacket data(MSG_SET_DUNGEON_DIFFICULTY, 12);
-    data << (uint32)GetDungeonDifficulty();
-    data << uint32(val);
-    data << uint32(IsInGroup);
+    WorldPacket data(SMSG_SET_DUNGEON_DIFFICULTY, 4);
+    data << uint32(GetDungeonDifficulty());
     GetSession()->SendPacket(&data);
 }
 
 void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
 {
-    uint8 val = 0x00000001;
-    WorldPacket data(MSG_SET_RAID_DIFFICULTY, 12);
+    WorldPacket data(MSG_SET_RAID_DIFFICULTY, 4);
     data << uint32(forcedDifficulty == -1 ? GetRaidDifficulty() : forcedDifficulty);
-    data << uint32(val);
-    data << uint32(IsInGroup);
     GetSession()->SendPacket(&data);
 }
 
