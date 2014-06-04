@@ -627,7 +627,7 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvData)
     if (recvData.size() == 1)
     {
         bool newPvPStatus;
-        recvData >> newPvPStatus;
+        newPvPStatus = recvData.ReadBit();
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
     }
@@ -1258,23 +1258,23 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
     uint8 slotId;
 
     recvData >> slotId;
-
-    buttonStream[4] = recvData.ReadBit();
+	
     buttonStream[7] = recvData.ReadBit();
-    buttonStream[6] = recvData.ReadBit();
-    buttonStream[3] = recvData.ReadBit();
-    buttonStream[2] = recvData.ReadBit();
     buttonStream[0] = recvData.ReadBit();
     buttonStream[5] = recvData.ReadBit();
+    buttonStream[2] = recvData.ReadBit();
     buttonStream[1] = recvData.ReadBit();
+    buttonStream[6] = recvData.ReadBit();
+    buttonStream[3] = recvData.ReadBit();
+    buttonStream[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(buttonStream[3]);
     recvData.ReadByteSeq(buttonStream[6]);
-    recvData.ReadByteSeq(buttonStream[1]);
-    recvData.ReadByteSeq(buttonStream[5]);
     recvData.ReadByteSeq(buttonStream[7]);
-    recvData.ReadByteSeq(buttonStream[4]);
+    recvData.ReadByteSeq(buttonStream[3]);
+    recvData.ReadByteSeq(buttonStream[5]);
     recvData.ReadByteSeq(buttonStream[2]);
+    recvData.ReadByteSeq(buttonStream[1]);
+    recvData.ReadByteSeq(buttonStream[4]);
     recvData.ReadByteSeq(buttonStream[0]);
 
     ActionButtonPACKET* button = reinterpret_cast<ActionButtonPACKET*>(&buttonStream);

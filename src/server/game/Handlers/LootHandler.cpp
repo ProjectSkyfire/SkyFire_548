@@ -45,27 +45,27 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     for (int i = 0; i < lootCount; i++)
     {
         (guids[i])[2] = recvData.ReadBit();
-        (guids[i])[1] = recvData.ReadBit();
-        (guids[i])[5] = recvData.ReadBit();
         (guids[i])[7] = recvData.ReadBit();
-        (guids[i])[4] = recvData.ReadBit();
-        (guids[i])[3] = recvData.ReadBit();
         (guids[i])[0] = recvData.ReadBit();
         (guids[i])[6] = recvData.ReadBit();
+        (guids[i])[5] = recvData.ReadBit();
+        (guids[i])[3] = recvData.ReadBit();
+        (guids[i])[1] = recvData.ReadBit();
+        (guids[i])[4] = recvData.ReadBit();
     }
 
     for (int i = 0; i < lootCount; i++)
     {
-        uint8 lootSlot;
         recvData.ReadByteSeq((guids[i])[0]);
-        recvData.ReadByteSeq((guids[i])[3]);
-        recvData >> lootSlot;
-        recvData.ReadByteSeq((guids[i])[7]);
-        recvData.ReadByteSeq((guids[i])[2]);
         recvData.ReadByteSeq((guids[i])[4]);
         recvData.ReadByteSeq((guids[i])[1]);
+        recvData.ReadByteSeq((guids[i])[7]);
         recvData.ReadByteSeq((guids[i])[6]);
         recvData.ReadByteSeq((guids[i])[5]);
+        recvData.ReadByteSeq((guids[i])[3]);
+        recvData.ReadByteSeq((guids[i])[2]);
+        uint8 lootSlot;
+        recvData >> lootSlot;
 
         uint64 guid = guids[i];
 
@@ -224,9 +224,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                         guild->HandleMemberDepositMoney(this, guildGold, true);
 
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-                data << uint32(goldPerPlayer);
                 data.WriteBit(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
                 data.FlushBits();
+                data << uint32(goldPerPlayer);
                 (*i)->GetSession()->SendPacket(&data);
             }
         }
@@ -240,9 +240,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                     guild->HandleMemberDepositMoney(this, guildGold, true);
 
             WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-            data << uint32(loot->gold);
             data.WriteBit(1);   // "You loot..."
             data.FlushBits();
+            data << uint32(loot->gold);
             SendPacket(&data);
         }
 
@@ -264,23 +264,23 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-    guid[6] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
 
     // Check possible cheat
     if (!_player->IsAlive())
@@ -302,21 +302,22 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
     guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[7]);
+    guid[1] = recvData.ReadBit();
+
     recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[1]);
 
     if (uint64 lootGuid = GetPlayer()->GetLootGUID())
         if (lootGuid == guid)

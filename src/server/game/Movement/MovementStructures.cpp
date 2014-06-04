@@ -4301,26 +4301,26 @@ MovementStatusElements const MoveSetWalkSpeed[] = // 5.4.7 18019
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetRunSpeed[] = // 5.4.7 18019
+MovementStatusElements const MoveSetRunSpeed[] = // 5.4.8 18291
 {
     MSEHasGuidByte1,
-    MSEHasGuidByte5,
-    MSEHasGuidByte2,
-    MSEHasGuidByte0,
-    MSEHasGuidByte4,
-    MSEHasGuidByte3,
     MSEHasGuidByte7,
+    MSEHasGuidByte4,
+    MSEHasGuidByte2,
+    MSEHasGuidByte5,
+    MSEHasGuidByte3,
     MSEHasGuidByte6,
-    MSEGuidByte3,
-    MSEGuidByte2,
-    MSEGuidByte6,
-    MSEGuidByte0,
-    MSECounter,
-    MSEGuidByte5,
-    MSEExtraElement,
-    MSEGuidByte7,
-    MSEGuidByte4,
+    MSEHasGuidByte0,
     MSEGuidByte1,
+    MSECounter,
+    MSEGuidByte7,
+    MSEGuidByte3,
+    MSEGuidByte0,
+    MSEExtraElement,
+    MSEGuidByte2,
+    MSEGuidByte4,
+    MSEGuidByte6,
+    MSEGuidByte5,
     MSEEnd,
 };
 
@@ -4416,25 +4416,25 @@ MovementStatusElements const MoveSetTurnRate[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetFlightSpeed[] = //5.4.7 18019
+MovementStatusElements const MoveSetFlightSpeed[] = //5.4.8 18291
 {
-    MSEHasGuidByte2,
-    MSEHasGuidByte1,
+    MSEExtraElement,
+    MSEUintCount,
     MSEHasGuidByte6,
     MSEHasGuidByte5,
-    MSEHasGuidByte7,
-    MSEHasGuidByte3,
     MSEHasGuidByte0,
     MSEHasGuidByte4,
+    MSEHasGuidByte1,
+    MSEHasGuidByte7,
+    MSEHasGuidByte3,
+    MSEHasGuidByte2,
+    MSEGuidByte0,
     MSEGuidByte7,
     MSEGuidByte4,
-    MSEGuidByte3,
-    MSEUintCount,
     MSEGuidByte5,
-    MSEExtraElement,
     MSEGuidByte6,
     MSEGuidByte2,
-    MSEGuidByte0,
+    MSEGuidByte3,
     MSEGuidByte1,
     MSEEnd,
 };
@@ -4846,46 +4846,46 @@ MovementStatusElements const SplineMoveUnroot[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetCanFly[] = // 5.4.7 18019
+MovementStatusElements const MoveSetCanFly[] = // 5.4.8 18291
 {
-    MSEHasGuidByte4,
-    MSEHasGuidByte2,
-    MSEHasGuidByte3,
-    MSEHasGuidByte0,
-    MSEHasGuidByte5,
-    MSEHasGuidByte1,
-    MSEHasGuidByte7,
     MSEHasGuidByte6,
-    MSEGuidByte0,
-    MSEGuidByte5,
-    MSEUintCount,
+    MSEHasGuidByte1,
+    MSEHasGuidByte4,
+    MSEHasGuidByte0,
+    MSEHasGuidByte3,
+    MSEHasGuidByte7,
+    MSEHasGuidByte5,
+    MSEHasGuidByte2,
+    MSEGuidByte4,
     MSEGuidByte2,
-    MSEGuidByte1,
+    MSEUintCount,
     MSEGuidByte6,
     MSEGuidByte3,
-    MSEGuidByte4,
+    MSEGuidByte1,
+    MSEGuidByte0,
     MSEGuidByte7,
+    MSEGuidByte5,
     MSEEnd,
 };
 
-MovementStatusElements const MoveUnsetCanFly[] = // 5.4.7 18019
+MovementStatusElements const MoveUnsetCanFly[] = // 5.4.8 18291
 {
-    MSEHasGuidByte5,
-    MSEHasGuidByte3,
-    MSEHasGuidByte2,
-    MSEHasGuidByte4,
-    MSEHasGuidByte7,
-    MSEHasGuidByte1,
-    MSEHasGuidByte0,
     MSEHasGuidByte6,
+    MSEHasGuidByte5,
+    MSEHasGuidByte0,
+    MSEHasGuidByte4,
+    MSEHasGuidByte3,
+    MSEHasGuidByte7,
+    MSEHasGuidByte2,
+    MSEHasGuidByte1,
     MSEGuidByte4,
     MSEGuidByte5,
-    MSECounter,
-    MSEGuidByte1,
-    MSEGuidByte3,
     MSEGuidByte7,
-    MSEGuidByte2,
+    MSECounter,
     MSEGuidByte6,
+    MSEGuidByte2,
+    MSEGuidByte3,
+    MSEGuidByte1,
     MSEGuidByte0,
     MSEEnd,
 };
@@ -5486,8 +5486,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveSetPitchRate;
         //case SMSG_MOVE_SET_WALK_SPEED:
         //    return MoveSetWalkSpeed;
-        //case SMSG_MOVE_SET_RUN_SPEED:
-        //    return MoveSetRunSpeed;
+        case SMSG_MOVE_SET_RUN_SPEED:
+            return MoveSetRunSpeed;
         //case SMSG_MOVE_SET_RUN_BACK_SPEED:
         //    return MoveSetRunBackSpeed;
         //case SMSG_MOVE_SET_SWIM_SPEED:
@@ -5496,8 +5496,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MoveSetSwimBackSpeed;
         //case SMSG_MOVE_SET_TURN_RATE:
         //    return MoveSetTurnRate;
-        //case SMSG_MOVE_SET_FLIGHT_SPEED:
-        //   return MoveSetFlightSpeed;
+        case SMSG_MOVE_SET_FLIGHT_SPEED:
+           return MoveSetFlightSpeed;
         //case SMSG_MOVE_SET_FLIGHT_BACK_SPEED:
         //    return MoveSetFlightBackSpeed;
         //case SMSG_MOVE_SET_PITCH_RATE:
@@ -5534,10 +5534,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return SplineMoveRoot;
         //case SMSG_SPLINE_MOVE_UNROOT:
         //    return SplineMoveUnroot;
-        //case SMSG_MOVE_SET_CAN_FLY:
-        //    return MoveSetCanFly;
-        //case SMSG_MOVE_UNSET_CAN_FLY:
-        //    return MoveUnsetCanFly;
+        case SMSG_MOVE_SET_CAN_FLY:
+            return MoveSetCanFly;
+        case SMSG_MOVE_UNSET_CAN_FLY:
+            return MoveUnsetCanFly;
         //case SMSG_MOVE_SET_HOVER:
         //    return MoveSetHover;
         //case SMSG_MOVE_UNSET_HOVER:
