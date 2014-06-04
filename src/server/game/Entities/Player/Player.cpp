@@ -13684,57 +13684,52 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 
     if (msg != EQUIP_ERR_OK)
     {
-        data.WriteBit(pItemGuid2[0]);
         data.WriteBit(pItemGuid2[4]);
-        data.WriteBit(pItemGuid2[5]);
-        data.WriteBit(pItemGuid[7]);
-        data.WriteBit(pItemGuid2[3]);
-        data.WriteBit(pItemGuid2[7]);
-        data.WriteBit(pItemGuid2[6]);
-        data.WriteBit(pItemGuid[4]);
-        data.WriteBit(pItemGuid2[1]);
-        data.WriteBit(pItemGuid2[2]);
         data.WriteBit(pItemGuid[3]);
-        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid2[6]);
+        data.WriteBit(pItemGuid2[2]);
+        data.WriteBit(pItemGuid[4]);
+        data.WriteBit(pItemGuid2[5]);
         data.WriteBit(pItemGuid[1]);
+        data.WriteBit(pItemGuid[6]);
+        data.WriteBit(pItemGuid2[0]);
+        data.WriteBit(pItemGuid2[3]);
+        data.WriteBit(pItemGuid2[1]);
+        data.WriteBit(pItemGuid[2]);
         data.WriteBit(pItemGuid[0]);
         data.WriteBit(pItemGuid[5]);
-        data.WriteBit(pItemGuid[2]);
+        data.WriteBit(pItemGuid[7]);
+        data.WriteBit(pItemGuid2[7]);
 
-        data.WriteByteSeq(pItemGuid[0]);
-        data.WriteByteSeq(pItemGuid[5]);
-        data.WriteByteSeq(pItemGuid2[3]);
-        data.WriteByteSeq(pItemGuid2[5]);
-        data.WriteByteSeq(pItemGuid[2]);
-        data.WriteByteSeq(pItemGuid[1]);
-        data.WriteByteSeq(pItemGuid[7]);
-
+        data.WriteByteSeq(pItemGuid2[0]);
         data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
-
-        data.WriteByteSeq(pItemGuid2[4]);
+        data.WriteByteSeq(pItemGuid2[6]);
+        data.WriteByteSeq(pItemGuid[4]);
+        data.WriteByteSeq(pItemGuid[0]);
+        data.WriteByteSeq(pItemGuid[7]);
+        data.WriteByteSeq(pItemGuid[3]);
+        data.WriteByteSeq(pItemGuid2[1]);
+        data.WriteByteSeq(pItemGuid2[5]);
+        data.WriteByteSeq(pItemGuid[5]);
+        data.WriteByteSeq(pItemGuid2[7]);
+        data.WriteByteSeq(pItemGuid2[2]);
+        data.WriteByteSeq(pItemGuid[1]);
         data.WriteByteSeq(pItemGuid[6]);
-
+        data.WriteByteSeq(pItemGuid[2]);
+        data.WriteByteSeq(pItemGuid2[3]);
+        data.WriteByteSeq(pItemGuid2[4]);
         data << uint8(msg);
 
-        data.WriteByteSeq(pItemGuid2[7]);
-
-        if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS ||
-            msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS ||
-            msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS)
+        if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS
+            || msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS
+            || msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS)
         {
             ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
             data << uint32(proto ? proto->ItemLimitCategory : 0);
         }
 
-        data.WriteByteSeq(pItemGuid2[2]);
-
         if (msg == EQUIP_ERR_NO_OUTPUT)         // no idea about this one...
             data << uint32(0);                  // slot
-
-        data.WriteByteSeq(pItemGuid[3]);
-        data.WriteByteSeq(pItemGuid2[0]);
-        data.WriteByteSeq(pItemGuid2[1]);
-        data.WriteByteSeq(pItemGuid[4]);
 
         if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I || msg == EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW)
         {
@@ -13742,12 +13737,10 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             data << uint32(proto ? proto->RequiredLevel : 0);
         }
 
-        data.WriteByteSeq(pItemGuid2[6]);
-
         if (msg == EQUIP_ERR_NO_OUTPUT)
         {
-            data.WriteBits(0, 8);               // item guid
             data.WriteBits(0, 8);               // container
+            data.WriteBits(0, 8);               // item guid
         }
     }
 
@@ -13757,20 +13750,76 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 void Player::SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 /*param*/)
 {
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_BUY_FAILED");
-    WorldPacket data(SMSG_BUY_FAILED, (8+4+4+1));
-    data << uint64(creature ? creature->GetGUID() : 0);
-    data << uint32(item);
+
+    ObjectGuid guid = creature ? creature->GetGUID() : 0;
+
+    WorldPacket data(SMSG_BUY_FAILED, 1 + 8 + 1 + 4);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+
     data << uint8(msg);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[7]);
+    data << uint32(item);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+
     GetSession()->SendPacket(&data);
 }
 
 void Player::SendSellError(SellResult msg, Creature* creature, uint64 guid)
 {
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_SELL_ITEM");
-    WorldPacket data(SMSG_SELL_ITEM, (8+8+1));  // last check 4.3.4
-    data << uint64(creature ? creature->GetGUID() : 0);
-    data << uint64(guid);
+
+    ObjectGuid npcGuid = creature ? creature->GetGUID() : 0;
+    ObjectGuid itemGuid = guid;
+
+    WorldPacket data(SMSG_SELL_ITEM, 1 + 8 + 1 + 8 + 1);
+    data.WriteBit(itemGuid[2]);
+    data.WriteBit(npcGuid[4]);
+    data.WriteBit(itemGuid[5]);
+    data.WriteBit(itemGuid[4]);
+    data.WriteBit(npcGuid[3]);
+    data.WriteBit(npcGuid[5]);
+    data.WriteBit(itemGuid[3]);
+    data.WriteBit(npcGuid[6]);
+    data.WriteBit(npcGuid[0]);
+    data.WriteBit(npcGuid[2]);
+    data.WriteBit(itemGuid[1]);
+    data.WriteBit(itemGuid[7]);
+    data.WriteBit(npcGuid[1]);
+    data.WriteBit(itemGuid[0]);
+    data.WriteBit(itemGuid[6]);
+    data.WriteBit(npcGuid[7]);
+
+    data.WriteByteSeq(itemGuid[4]);
+    data.WriteByteSeq(itemGuid[1]);
     data << uint8(msg);
+    data.WriteByteSeq(itemGuid[2]);
+    data.WriteByteSeq(npcGuid[4]);
+    data.WriteByteSeq(npcGuid[0]);
+    data.WriteByteSeq(npcGuid[5]);
+    data.WriteByteSeq(npcGuid[2]);
+    data.WriteByteSeq(itemGuid[0]);
+    data.WriteByteSeq(npcGuid[3]);
+    data.WriteByteSeq(itemGuid[5]);
+    data.WriteByteSeq(itemGuid[6]);
+    data.WriteByteSeq(itemGuid[7]);
+    data.WriteByteSeq(npcGuid[6]);
+    data.WriteByteSeq(npcGuid[1]);
+    data.WriteByteSeq(itemGuid[3]);
+    data.WriteByteSeq(npcGuid[7]);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -22181,26 +22230,26 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
         ObjectGuid vGuid = pVendor->GetGUID();
 
         WorldPacket data(SMSG_BUY_ITEM, 1 + 8 + 4 + 4 + 4);
+        data.WriteBit(vGuid[3]);
+        data.WriteBit(vGuid[4]);
         data.WriteBit(vGuid[7]);
-        data.WriteBit(vGuid[0]);
         data.WriteBit(vGuid[6]);
+        data.WriteBit(vGuid[0]);
+        data.WriteBit(vGuid[2]);
         data.WriteBit(vGuid[1]);
         data.WriteBit(vGuid[5]);
-        data.WriteBit(vGuid[2]);
-        data.WriteBit(vGuid[4]);
-        data.WriteBit(vGuid[3]);
 
+        data.WriteByteSeq(vGuid[6]);
+        data.WriteByteSeq(vGuid[7]);
+        data << uint32(count);
         data.WriteByteSeq(vGuid[1]);
+        data.WriteByteSeq(vGuid[3]);
         data.WriteByteSeq(vGuid[5]);
         data.WriteByteSeq(vGuid[2]);
-        data.WriteByteSeq(vGuid[3]);
-        data << uint32(vendorslot + 1);                   // numbered from 1 at client
-        data.WriteByteSeq(vGuid[0]);
-        data.WriteByteSeq(vGuid[6]);
-        data << uint32(count);
-        data.WriteByteSeq(vGuid[7]);
         data << int32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
+        data.WriteByteSeq(vGuid[0]);
         data.WriteByteSeq(vGuid[4]);
+        data << uint32(vendorslot + 1);                   // numbered from 1 at client
 
         GetSession()->SendPacket(&data);
         SendNewItem(it, count, true, false, false);
@@ -22396,7 +22445,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
     if (!pProto)
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+        SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0);
         return false;
     }
 
@@ -22404,20 +22453,20 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     if (!creature)
     {
         TC_LOG_DEBUG("network", "WORLD: BuyItemFromVendor - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)));
-        SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, NULL, item, 0);
+        SendEquipError(EQUIP_ERR_OUT_OF_RANGE, NULL, NULL, 0);
         return false;
     }
 
     VendorItemData const* vItems = creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0);
         return false;
     }
 
     if (vendorslot >= vItems->GetItemCount())
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0);
         return false;
     }
 
@@ -22425,7 +22474,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     // store diff item (cheating)
     if (!crItem || crItem->item != item)
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0);
         return false;
     }
 
@@ -22434,14 +22483,14 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     {
         if (creature->GetVendorItemCurrentCount(crItem) < pProto->BuyCount * count)
         {
-            SendBuyError(BUY_ERR_ITEM_ALREADY_SOLD, creature, item, 0);
+            SendEquipError(EQUIP_ERR_VENDOR_SOLD_OUT, NULL, NULL, 0);
             return false;
         }
     }
 
     if (pProto->RequiredReputationFaction && (uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank))
     {
-        SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, item, 0);
+        SendEquipError(EQUIP_ERR_CANT_EQUIP_REPUTATION, NULL, NULL, 0);
         return false;
     }
 
@@ -22479,7 +22528,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
             if (!entry)
             {
-                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+                SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0);
                 return false;
             }
 
@@ -22505,7 +22554,8 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
 
         if (iece->RequiredFactionId && uint32(GetReputationRank(iece->RequiredFactionId)) < iece->RequiredFactionStanding)
         {
-            SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, item, 0);
+            SendEquipError(EQUIP_ERR_CANT_EQUIP_REPUTATION, NULL, NULL, 0);
+
             return false;
         }
 
@@ -22547,7 +22597,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
 
         if (!HasEnoughMoney(uint64(price)))
         {
-            SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, creature, item, 0);
+            SendEquipError(EQUIP_ERR_NOT_ENOUGH_MONEY, NULL, NULL, 0);
             return false;
         }
     }
