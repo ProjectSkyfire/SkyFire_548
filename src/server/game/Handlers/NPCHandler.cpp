@@ -994,48 +994,48 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_REPAIR_ITEM");
 
-    ObjectGuid npcGUID, itemGUID;
+    ObjectGuid npcGuid, itemGuid;
     bool guildBank;                                         // new in 2.3.2, bool that means from guild bank money
 
-    npcGUID[3] = recvData.ReadBit();
-    itemGUID[3] = recvData.ReadBit();
-    itemGUID[6] = recvData.ReadBit();
+    itemGuid[2] = recvData.ReadBit();
+    itemGuid[5] = recvData.ReadBit();
+    npcGuid[3] = recvData.ReadBit();
     guildBank = recvData.ReadBit();
-    npcGUID[2] = recvData.ReadBit();
-    itemGUID[0] = recvData.ReadBit();
-    npcGUID[7] = recvData.ReadBit();
-    npcGUID[6] = recvData.ReadBit();
-    npcGUID[0] = recvData.ReadBit();
-    itemGUID[7] = recvData.ReadBit();
-    itemGUID[4] = recvData.ReadBit();
-    npcGUID[5] = recvData.ReadBit();
-    itemGUID[5] = recvData.ReadBit();
-    npcGUID[4] = recvData.ReadBit();
-    itemGUID[2] = recvData.ReadBit();
-    npcGUID[1] = recvData.ReadBit();
-    itemGUID[1] = recvData.ReadBit();
+    npcGuid[7] = recvData.ReadBit();
+    itemGuid[4] = recvData.ReadBit();
+    npcGuid[2] = recvData.ReadBit();
+    itemGuid[0] = recvData.ReadBit();
+    itemGuid[3] = recvData.ReadBit();
+    npcGuid[6] = recvData.ReadBit();
+    npcGuid[1] = recvData.ReadBit();
+    npcGuid[4] = recvData.ReadBit();
+    itemGuid[6] = recvData.ReadBit();
+    npcGuid[5] = recvData.ReadBit();
+    npcGuid[0] = recvData.ReadBit();
+    itemGuid[7] = recvData.ReadBit();
+    itemGuid[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(itemGUID[6]);
-    recvData.ReadByteSeq(npcGUID[1]);
-    recvData.ReadByteSeq(npcGUID[0]);
-    recvData.ReadByteSeq(npcGUID[2]);
-    recvData.ReadByteSeq(itemGUID[2]);
-    recvData.ReadByteSeq(itemGUID[5]);
-    recvData.ReadByteSeq(itemGUID[1]);
-    recvData.ReadByteSeq(npcGUID[6]);
-    recvData.ReadByteSeq(npcGUID[7]);
-    recvData.ReadByteSeq(itemGUID[3]);
-    recvData.ReadByteSeq(itemGUID[7]);
-    recvData.ReadByteSeq(npcGUID[3]);
-    recvData.ReadByteSeq(npcGUID[4]);
-    recvData.ReadByteSeq(npcGUID[5]);
-    recvData.ReadByteSeq(itemGUID[0]);
-    recvData.ReadByteSeq(itemGUID[4]);
+    recvData.ReadByteSeq(itemGuid[2]);
+    recvData.ReadByteSeq(npcGuid[1]);
+    recvData.ReadByteSeq(itemGuid[1]);
+    recvData.ReadByteSeq(npcGuid[4]);
+    recvData.ReadByteSeq(npcGuid[7]);
+    recvData.ReadByteSeq(npcGuid[3]);
+    recvData.ReadByteSeq(npcGuid[2]);
+    recvData.ReadByteSeq(itemGuid[7]);
+    recvData.ReadByteSeq(npcGuid[5]);
+    recvData.ReadByteSeq(npcGuid[0]);
+    recvData.ReadByteSeq(itemGuid[5]);
+    recvData.ReadByteSeq(itemGuid[3]);
+    recvData.ReadByteSeq(itemGuid[4]);
+    recvData.ReadByteSeq(itemGuid[6]);
+    recvData.ReadByteSeq(npcGuid[6]);
+    recvData.ReadByteSeq(itemGuid[0]);
 
-    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
+    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_REPAIR);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleRepairItemOpcode - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(npcGUID)));
+        TC_LOG_DEBUG("network", "WORLD: HandleRepairItemOpcode - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(npcGuid)));
         return;
     }
 
@@ -1046,17 +1046,17 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
     // reputation discount
     float discountMod = _player->GetReputationPriceDiscount(unit);
 
-    if (itemGUID)
+    if (itemGuid)
     {
-        TC_LOG_DEBUG("network", "ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
+        TC_LOG_DEBUG("network", "ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGuid), GUID_LOPART(npcGuid));
 
-        Item* item = _player->GetItemByGuid(itemGUID);
+        Item* item = _player->GetItemByGuid(itemGuid);
         if (item)
             _player->DurabilityRepair(item->GetPos(), true, discountMod, guildBank);
     }
     else
     {
-        TC_LOG_DEBUG("network", "ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
+        TC_LOG_DEBUG("network", "ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGuid));
         _player->DurabilityRepairAll(true, discountMod, guildBank);
     }
 }

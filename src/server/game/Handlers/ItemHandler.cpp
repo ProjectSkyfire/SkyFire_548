@@ -342,53 +342,53 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_SELL_ITEM");
 
-    ObjectGuid vendorguid, itemguid;
+    ObjectGuid vendorGuid, itemGuid;
     uint32 count;
 
     recvData >> count;
 
-    itemguid[7] = recvData.ReadBit();
-    vendorguid[0] = recvData.ReadBit();
-    vendorguid[3] = recvData.ReadBit();
-    itemguid[3] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
-    vendorguid[5] = recvData.ReadBit();
-    vendorguid[2] = recvData.ReadBit();
-    itemguid[4] = recvData.ReadBit();
-    itemguid[6] = recvData.ReadBit();
-    itemguid[5] = recvData.ReadBit();
-    itemguid[2] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
-    vendorguid[4] = recvData.ReadBit();
-    itemguid[0] = recvData.ReadBit();
-    itemguid[1] = recvData.ReadBit();
+    itemGuid[4] = recvData.ReadBit();
+    itemGuid[3] = recvData.ReadBit();
+    itemGuid[7] = recvData.ReadBit();
+    vendorGuid[6] = recvData.ReadBit();
+    vendorGuid[5] = recvData.ReadBit();
+    vendorGuid[1] = recvData.ReadBit();
+    itemGuid[5] = recvData.ReadBit();
+    itemGuid[2] = recvData.ReadBit();
+    itemGuid[1] = recvData.ReadBit();
+    vendorGuid[2] = recvData.ReadBit();
+    itemGuid[6] = recvData.ReadBit();
+    vendorGuid[4] = recvData.ReadBit();
+    vendorGuid[0] = recvData.ReadBit();
+    vendorGuid[7] = recvData.ReadBit();
+    vendorGuid[3] = recvData.ReadBit();
+    itemGuid[0] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[2]);
-    recvData.ReadByteSeq(itemguid[1]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(vendorguid[7]);
-    recvData.ReadByteSeq(itemguid[6]);
-    recvData.ReadByteSeq(itemguid[0]);
-    recvData.ReadByteSeq(itemguid[7]);
-    recvData.ReadByteSeq(vendorguid[1]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(itemguid[5]);
-    recvData.ReadByteSeq(itemguid[3]);
-    recvData.ReadByteSeq(itemguid[4]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(itemguid[2]);
+    recvData.ReadByteSeq(vendorGuid[6]);
+    recvData.ReadByteSeq(vendorGuid[3]);
+    recvData.ReadByteSeq(vendorGuid[1]);
+    recvData.ReadByteSeq(itemGuid[1]);
+    recvData.ReadByteSeq(vendorGuid[2]);
+    recvData.ReadByteSeq(itemGuid[7]);
+    recvData.ReadByteSeq(itemGuid[5]);
+    recvData.ReadByteSeq(vendorGuid[7]);
+    recvData.ReadByteSeq(itemGuid[2]);
+    recvData.ReadByteSeq(vendorGuid[0]);
+    recvData.ReadByteSeq(vendorGuid[5]);
+    recvData.ReadByteSeq(itemGuid[3]);
+    recvData.ReadByteSeq(itemGuid[6]);
+    recvData.ReadByteSeq(vendorGuid[4]);
+    recvData.ReadByteSeq(itemGuid[4]);
+    recvData.ReadByteSeq(itemGuid[0]);
 
-    if (!itemguid)
+    if (!itemGuid)
         return;
 
-    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
+    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleSellItemOpcode - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(vendorguid)));
-        _player->SendSellError(SELL_ERR_CANT_FIND_VENDOR, NULL, itemguid);
+        TC_LOG_DEBUG("network", "WORLD: HandleSellItemOpcode - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(vendorGuid)));
+        _player->SendSellError(SELL_ERR_CANT_FIND_VENDOR, NULL, itemGuid);
         return;
     }
 
@@ -396,27 +396,27 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Item* pItem = _player->GetItemByGuid(itemguid);
+    Item* pItem = _player->GetItemByGuid(itemGuid);
     if (pItem)
     {
         // prevent sell not owner item
         if (_player->GetGUID() != pItem->GetOwnerGUID())
         {
-            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid);
+            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemGuid);
             return;
         }
 
         // prevent sell non empty bag by drag-and-drop at vendor's item list
         if (pItem->IsNotEmptyBag())
         {
-            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid);
+            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemGuid);
             return;
         }
 
         // prevent sell currently looted item
         if (_player->GetLootGUID() == pItem->GetGUID())
         {
-            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid);
+            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemGuid);
             return;
         }
 
@@ -434,7 +434,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
             // prevent sell more items that exist in stack (possible only not from client)
             if (count > pItem->GetCount())
             {
-                _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid);
+                _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemGuid);
                 return;
             }
         }
@@ -450,7 +450,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
                     if (!pNewItem)
                     {
                         TC_LOG_ERROR("network", "WORLD: HandleSellItemOpcode - could not create clone of item %u; count = %u", pItem->GetEntry(), count);
-                        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid);
+                        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemGuid);
                         return;
                     }
 
@@ -477,11 +477,11 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
                 _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
             }
             else
-                _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid);
+                _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemGuid);
             return;
         }
     }
-    _player->SendSellError(SELL_ERR_CANT_FIND_ITEM, creature, itemguid);
+    _player->SendSellError(SELL_ERR_CANT_FIND_ITEM, creature, itemGuid);
     return;
 }
 
@@ -489,33 +489,33 @@ void WorldSession::HandleBuybackItem(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUYBACK_ITEM");
 
-    ObjectGuid vendorguid;
+    ObjectGuid vendorGuid;
     uint32 slot;
 
     recvData >> slot;
 
-    vendorguid[3] = recvData.ReadBit();
-    vendorguid[5] = recvData.ReadBit();
-    vendorguid[0] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    vendorguid[2] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
-    vendorguid[4] = recvData.ReadBit();
+    vendorGuid[2] = recvData.ReadBit();
+    vendorGuid[3] = recvData.ReadBit();
+    vendorGuid[0] = recvData.ReadBit();
+    vendorGuid[4] = recvData.ReadBit();
+    vendorGuid[1] = recvData.ReadBit();
+    vendorGuid[7] = recvData.ReadBit();
+    vendorGuid[5] = recvData.ReadBit();
+    vendorGuid[6] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(vendorguid[1]);
-    recvData.ReadByteSeq(vendorguid[7]);
-    recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(vendorguid[2]);
+    recvData.ReadByteSeq(vendorGuid[0]);
+    recvData.ReadByteSeq(vendorGuid[6]);
+    recvData.ReadByteSeq(vendorGuid[1]);
+    recvData.ReadByteSeq(vendorGuid[7]);
+    recvData.ReadByteSeq(vendorGuid[5]);
+    recvData.ReadByteSeq(vendorGuid[2]);
+    recvData.ReadByteSeq(vendorGuid[3]);
+    recvData.ReadByteSeq(vendorGuid[4]);
 
-    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
+    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBuybackItem - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(vendorguid)));
+        TC_LOG_DEBUG("network", "WORLD: HandleBuybackItem - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(vendorGuid)));
         _player->SendSellError(SELL_ERR_CANT_FIND_VENDOR, NULL, 0);
         return;
     }
@@ -589,47 +589,47 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_BUY_ITEM");
 
-    ObjectGuid vendorguid, bagGuid;
+    ObjectGuid vendorGuid, bagGuid;
     uint32 item, slot, count, bagSlot;
     uint8 itemType; // 1 = item, 2 = currency
 
-    recvData >> bagSlot >> item >> count >> slot;
+    recvData >> bagSlot >> count >> item >> slot;
 
-    bagGuid[2] = recvData.ReadBit();
-    vendorguid[0] = recvData.ReadBit();
-    bagGuid[5] = recvData.ReadBit();
-    vendorguid[7] = recvData.ReadBit();
-    bagGuid[0] = recvData.ReadBit();
-    itemType = recvData.ReadBits(2);
+    vendorGuid[6] = recvData.ReadBit();
     bagGuid[6] = recvData.ReadBit();
     bagGuid[4] = recvData.ReadBit();
-    vendorguid[2] = recvData.ReadBit();
-    vendorguid[1] = recvData.ReadBit();
+    vendorGuid[4] = recvData.ReadBit();
+    itemType = recvData.ReadBits(2);
+    vendorGuid[0] = recvData.ReadBit();
+    vendorGuid[3] = recvData.ReadBit();
     bagGuid[3] = recvData.ReadBit();
-    vendorguid[5] = recvData.ReadBit();
+    vendorGuid[7] = recvData.ReadBit();
+    vendorGuid[5] = recvData.ReadBit();
+    bagGuid[2] = recvData.ReadBit();
+    vendorGuid[1] = recvData.ReadBit();
     bagGuid[7] = recvData.ReadBit();
-    vendorguid[4] = recvData.ReadBit();
+    vendorGuid[2] = recvData.ReadBit();
     bagGuid[1] = recvData.ReadBit();
-    vendorguid[3] = recvData.ReadBit();
-    vendorguid[6] = recvData.ReadBit();
+    bagGuid[0] = recvData.ReadBit();
+    bagGuid[5] = recvData.ReadBit();
     recvData.FlushBits();
 
-    recvData.ReadByteSeq(bagGuid[1]);
+    recvData.ReadByteSeq(vendorGuid[5]);
+    recvData.ReadByteSeq(vendorGuid[0]);
     recvData.ReadByteSeq(bagGuid[3]);
-    recvData.ReadByteSeq(vendorguid[2]);
-    recvData.ReadByteSeq(vendorguid[0]);
-    recvData.ReadByteSeq(bagGuid[2]);
-    recvData.ReadByteSeq(vendorguid[4]);
-    recvData.ReadByteSeq(vendorguid[3]);
-    recvData.ReadByteSeq(vendorguid[1]);
+    recvData.ReadByteSeq(bagGuid[1]);
     recvData.ReadByteSeq(bagGuid[6]);
-    recvData.ReadByteSeq(vendorguid[6]);
-    recvData.ReadByteSeq(vendorguid[5]);
-    recvData.ReadByteSeq(bagGuid[5]);
-    recvData.ReadByteSeq(bagGuid[7]);
-    recvData.ReadByteSeq(bagGuid[4]);
+    recvData.ReadByteSeq(vendorGuid[2]);
+    recvData.ReadByteSeq(vendorGuid[7]);
+    recvData.ReadByteSeq(vendorGuid[6]);
     recvData.ReadByteSeq(bagGuid[0]);
-    recvData.ReadByteSeq(vendorguid[7]);
+    recvData.ReadByteSeq(bagGuid[5]);
+    recvData.ReadByteSeq(vendorGuid[4]);
+    recvData.ReadByteSeq(bagGuid[2]);
+    recvData.ReadByteSeq(vendorGuid[3]);
+    recvData.ReadByteSeq(bagGuid[7]);
+    recvData.ReadByteSeq(vendorGuid[1]);
+    recvData.ReadByteSeq(bagGuid[4]);
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)
@@ -647,10 +647,10 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recvData)
         else if (bagGuid == GetPlayer()->GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
             bag = INVENTORY_SLOT_BAG_0;
 
-        GetPlayer()->BuyItemFromVendorSlot(vendorguid, slot, item, count, bag, bagSlot);
+        GetPlayer()->BuyItemFromVendorSlot(vendorGuid, slot, item, count, bag, bagSlot);
     }
     else if (itemType == ITEM_VENDOR_TYPE_CURRENCY)
-        GetPlayer()->BuyCurrencyFromVendorSlot(vendorguid, slot, item, count);
+        GetPlayer()->BuyCurrencyFromVendorSlot(vendorGuid, slot, item, count);
     else
         TC_LOG_DEBUG("network", "WORLD: received wrong itemType (%u) in HandleBuyItemOpcode", itemType);
 }
