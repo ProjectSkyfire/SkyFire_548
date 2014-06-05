@@ -1,0 +1,22 @@
+UPDATE `quest_template` SET RequiredClasses='512' WHERE Id=30027;
+UPDATE `quest_template` SET RequiredClasses='128' WHERE Id=30033;
+UPDATE `quest_template` SET RequiredClasses='4' WHERE Id=30034;
+UPDATE `quest_template` SET RequiredClasses='16' WHERE Id=30035;
+UPDATE `quest_template` SET RequiredClasses='8' WHERE Id=30036;
+UPDATE `quest_template` SET RequiredClasses='64' WHERE Id=30037;
+UPDATE `quest_template` SET RequiredClasses='1' WHERE Id=30038;
+UPDATE `quest_template` SET RequiredClasses='512' WHERE Id=30039;
+UPDATE `quest_template` SET RequiredClasses='128' WHERE Id=30040;
+UPDATE `quest_template` SET RequiredClasses='4' WHERE Id=30041;
+UPDATE `quest_template` SET RequiredClasses='16' WHERE Id=30042;
+UPDATE `quest_template` SET RequiredClasses='8' WHERE Id=30043;
+UPDATE `quest_template` SET RequiredClasses='64' WHERE Id=30044;
+UPDATE `quest_template` SET RequiredClasses='1' WHERE Id=30045;
+
+
+UPDATE `quest_template` SET PrevQuestId='29406', NextQuestId='29408' WHERE ID=29524;
+UPDATE `quest_template` SET PrevQuestId='29524', NextQuestId='29409' WHERE ID=29408;
+UPDATE `quest_template` SET PrevQuestId='29408', NextQuestId='29410' WHERE ID=29409;
+UPDATE `quest_template` SET PrevQuestId='29409', NextQuestId='0' WHERE ID=29410;
+UPDATE `quest_template` SET PrevQuestId='29410', NextQuestId='29419' WHERE ID=29424;
+UPDATE `quest_template` SET PrevQuestId='29424', NextQuestId='0' WHERE ID=29419;
