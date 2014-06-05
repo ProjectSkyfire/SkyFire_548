@@ -1753,7 +1753,7 @@ struct SpecializationSpellsEntry
 struct SpellEffectEntry
 {
     uint32    Id;                                           // 0         m_ID
-    //uint32    Unk0;                                       // 1         unk - Pandaria
+    uint32    EffectDifficulty;                             // 1         m_effectDifficulty
     uint32    Effect;                                       // 2         m_effect
     float     EffectValueMultiplier;                        // 3         m_effectAmplitude
     uint32    EffectApplyAuraName;                          // 4         m_effectAura

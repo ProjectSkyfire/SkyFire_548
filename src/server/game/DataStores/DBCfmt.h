@@ -130,8 +130,8 @@ const std::string CustomSpellDifficultyfmt = "ppppp";
 const std::string CustomSpellDifficultyIndex = "id";
 char const SpellDurationfmt[] = "niii";
 //                                             0         10        20    26
-char const SpellEffectEntryfmt[] =            "nxifiiiffiiiiiifiifiiiiixiiiix";
-const std::string CustomSpellEffectEntryfmt = "ppppppppppapppappppppppppp";
+char const SpellEffectEntryfmt[] =            "niifiiiffiiiiiifiifiiiiixiiiix";
+const std::string CustomSpellEffectEntryfmt = "papppppppppapppappppppppppp";
 const std::string CustomSpellEffectEntryIndex = "Id";
 char const SpellEntryfmt[] =            "nssxxixxiiiiiiiiiiiiiiiii";
 //const std::string CustomSpellEntryfmt = "ppppppppppppppapaaaaaaaaapaaaaaapapppaapppaaapa";
