@@ -4369,8 +4369,6 @@ void Spell::SendSpellGo()
         }
     }
 
-    data.PutBits(missCountPos, missCount, 24);
-
     //for (uint32 i = 0; i < extraTargetCount; ++i)
     //{
     //}
@@ -4444,8 +4442,6 @@ void Spell::SendSpellGo()
         }
     }
 
-    data.PutBits(missTypeCountPos, missTypeCount, 25);
-
     if (hasTargetMask)
         data.WriteBits(m_targets.GetTargetMask(), 20);
 
@@ -4507,10 +4503,12 @@ void Spell::SendSpellGo()
         ++hitCount;
     }
 
-    data.PutBits(hitCountPos, hitCount, 24);
-
     data.WriteBit(casterGuid[3]);
     data.FlushBits();
+
+    data.PutBits(missCountPos, missCount, 24);
+    data.PutBits(missTypeCountPos, missTypeCount, 25);
+    data.PutBits(hitCountPos, hitCount, 24);
 
     data.WriteByteSeq(targetGuid[5]);
     data.WriteByteSeq(targetGuid[2]);
