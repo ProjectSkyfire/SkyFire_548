@@ -383,6 +383,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL          );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,      0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleSetCollisionHeightAck        );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SPLINE_DONE,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveSplineDoneOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_TELEPORT_ACK,                  0x0078, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveTeleportAck              ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TIME_SKIPPED,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_WATER_WALK_ACK,                0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck             );
     DEFINE_OPCODE_HANDLER(CMSG_NAME_QUERY,                         0x0328, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode              ); // 5.4.8 18291
@@ -599,7 +600,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(MSG_MOVE_STOP_STRAFE,                    0x0171, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(MSG_MOVE_STOP_SWIM,                      0x0950, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(MSG_MOVE_STOP_TURN,                      0x1170, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 5.4.8 18291
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT_ACK,                   0x0000, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveTeleportAck              );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT_CHEAT,                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TIME_SKIPPED,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TOGGLE_COLLISION_CHEAT,         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -1021,6 +1021,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_SET_SWIM_SPEED,                0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_SET_TURN_RATE,                 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_SET_WALK_SPEED,                0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_MOVE_TELEPORT,                      0x0B39, STATUS_NEVER    ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UNROOT,                        0x1FAE, STATUS_NEVER    ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UNSET_CAN_FLY,                 0x0162, STATUS_NEVER    ); // 5.4.8 18291
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UNSET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY, 0x0000, STATUS_UNHANDLED);
@@ -1322,7 +1323,6 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_XP_GAIN_ABORTED,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ZONE_UNDER_ATTACK,                  0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(MSG_VERIFY_CONNECTIVITY,                 0x4F57, STATUS_NEVER    ); // Not an opcode
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT,                       0x0000, STATUS_NEVER    );
 
     #undef DEFINE_OPCODE_HANDLER
 };

@@ -195,29 +195,29 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "MSG_MOVE_TELEPORT_ACK");
+    TC_LOG_DEBUG("network", "CMSG_MOVE_TELEPORT_ACK");
 
     ObjectGuid guid;
     uint32 flags, time;
-    recvPacket >> flags >> time;
+    recvPacket >> time >> flags;
 
     guid[0] = recvPacket.ReadBit();
     guid[7] = recvPacket.ReadBit();
-    guid[6] = recvPacket.ReadBit();
-    guid[2] = recvPacket.ReadBit();
-    guid[5] = recvPacket.ReadBit();
-    guid[1] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
     guid[3] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[0]);
     recvPacket.ReadByteSeq(guid[1]);
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[7]);
     recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[0]);
     recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[3]);
 
     TC_LOG_DEBUG("network", "Guid " UI64FMTD, uint64(guid));
     TC_LOG_DEBUG("network", "Flags %u, time %u", flags, time/IN_MILLISECONDS);

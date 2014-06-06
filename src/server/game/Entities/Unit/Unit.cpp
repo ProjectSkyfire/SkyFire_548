@@ -15839,7 +15839,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
 void Unit::SendTeleportPacket(Position& pos)
 {
     // SMSG_MOVE_UPDATE_TELEPORT is sent to nearby players to signal the teleport
-    // MSG_MOVE_TELEPORT is sent to self in order to trigger MSG_MOVE_TELEPORT_ACK and update the position server side
+    // SMSG_MOVE_TELEPORT is sent to self in order to trigger CMSG_MOVE_TELEPORT_ACK and update the position server side
 
     // This oldPos actually contains the destination position if the Unit is a Player.
     Position oldPos = {GetPositionX(), GetPositionY(), GetPositionZMinusOffset(), GetOrientation()};
@@ -15855,61 +15855,59 @@ void Unit::SendTeleportPacket(Position& pos)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data2(MSG_MOVE_TELEPORT, 38);
-        data2 << float(GetPositionX());
-        data2 << float(GetPositionZMinusOffset());
-        data2 << float(GetPositionY());
-        data2 << uint32(0); // counter
-        data2 << float(GetOrientation());
-
-        data2.WriteBit(guid[5]);
-        data2.WriteBit(guid[4]);
-        data2.WriteBit(guid[6]);
-        data2.WriteBit(guid[7]);
-        data2.WriteBit(guid[3]);
+        WorldPacket data2(SMSG_MOVE_TELEPORT, 1 + 8 + 1 + 8 + 1 + 4 + 4 + 4 + 4);
         data2.WriteBit(guid[0]);
+        data2.WriteBit(guid[6]);
+        data2.WriteBit(guid[5]);
+        data2.WriteBit(guid[7]);
+        data2.WriteBit(guid[2]);
         data2.WriteBit(uint64(transGuid));
+        data2.WriteBit(guid[4]);
 
         if (transGuid)
         {
+            data2.WriteBit(transGuid[1]);
+            data2.WriteBit(transGuid[3]);
             data2.WriteBit(transGuid[6]);
             data2.WriteBit(transGuid[4]);
-            data2.WriteBit(transGuid[2]);
             data2.WriteBit(transGuid[5]);
-            data2.WriteBit(transGuid[3]);
+            data2.WriteBit(transGuid[2]);
             data2.WriteBit(transGuid[0]);
             data2.WriteBit(transGuid[7]);
-            data2.WriteBit(transGuid[1]);
         }
 
-        data2.WriteBit(0);
+        data2.WriteBit(guid[3]);
         data2.WriteBit(guid[1]);
-        data2.WriteBit(guid[2]);
+        data2.WriteBit(0);
         data2.FlushBits();
-
-        data2.WriteByteSeq(guid[2]);
-        data2.WriteByteSeq(guid[5]);
 
         if (transGuid)
         {
-            data2.WriteByteSeq(transGuid[2]);
-            data2.WriteByteSeq(transGuid[1]);
             data2.WriteByteSeq(transGuid[4]);
-            data2.WriteByteSeq(transGuid[0]);
-            data2.WriteByteSeq(transGuid[6]);
-            data2.WriteByteSeq(transGuid[5]);
-            data2.WriteByteSeq(transGuid[7]);
             data2.WriteByteSeq(transGuid[3]);
+            data2.WriteByteSeq(transGuid[7]);
+            data2.WriteByteSeq(transGuid[1]);
+            data2.WriteByteSeq(transGuid[6]);
+            data2.WriteByteSeq(transGuid[0]);
+            data2.WriteByteSeq(transGuid[2]);
+            data2.WriteByteSeq(transGuid[5]);
         }
 
-        data2.WriteByteSeq(guid[0]);
         data2.WriteByteSeq(guid[4]);
+        data2.WriteByteSeq(guid[7]);
+        data2 << float(GetPositionZMinusOffset());
+        data2 << float(GetPositionY());
+        data2.WriteByteSeq(guid[2]);
         data2.WriteByteSeq(guid[3]);
+        data2.WriteByteSeq(guid[5]);
+        data2 << float(GetPositionX());
+        data2 << uint32(0); // counter
+        data2.WriteByteSeq(guid[0]);
         data2.WriteByteSeq(guid[6]);
         data2.WriteByteSeq(guid[1]);
-        data2.WriteByteSeq(guid[7]);
+        data2 << float(GetOrientation());
 
-        ToPlayer()->SendDirectMessage(&data2); // Send the MSG_MOVE_TELEPORT packet to self.
+        ToPlayer()->SendDirectMessage(&data2); // Send the SMSG_MOVE_TELEPORT packet to self.
     }
 
     // Relocate the player/creature to its old position, so we can broadcast to nearby players correctly
