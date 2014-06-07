@@ -71,8 +71,28 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recvData)
 
 void WorldSession::SendTabardVendorActivate(uint64 guid)
 {
-    WorldPacket data(MSG_TABARDVENDOR_ACTIVATE, 8);
-    data << guid;
+    ObjectGuid sendGuid = guid;
+
+    WorldPacket data(SMSG_TABARDVENDOR_ACTIVATE, 1 + 8);
+
+    data.WriteBit(sendGuid[1]);
+    data.WriteBit(sendGuid[5]);
+    data.WriteBit(sendGuid[0]);
+    data.WriteBit(sendGuid[7]);
+    data.WriteBit(sendGuid[4]);
+    data.WriteBit(sendGuid[6]);
+    data.WriteBit(sendGuid[3]);
+    data.WriteBit(sendGuid[2]);
+
+    data.WriteByteSeq(sendGuid[5]);
+    data.WriteByteSeq(sendGuid[4]);
+    data.WriteByteSeq(sendGuid[2]);
+    data.WriteByteSeq(sendGuid[3]);
+    data.WriteByteSeq(sendGuid[6]);
+    data.WriteByteSeq(sendGuid[0]);
+    data.WriteByteSeq(sendGuid[1]);
+    data.WriteByteSeq(sendGuid[7]);
+
     SendPacket(&data);
 }
 
