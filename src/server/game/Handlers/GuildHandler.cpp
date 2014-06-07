@@ -34,41 +34,41 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
     ObjectGuid guildGuid;
     ObjectGuid playerGuid;
 
-    guildGuid[0] = recvPacket.ReadBit();
-    guildGuid[4] = recvPacket.ReadBit();
-    playerGuid[0] = recvPacket.ReadBit();
-    guildGuid[1] = recvPacket.ReadBit();
-    guildGuid[7] = recvPacket.ReadBit();
-    guildGuid[6] = recvPacket.ReadBit();
-    playerGuid[6] = recvPacket.ReadBit();
-    playerGuid[2] = recvPacket.ReadBit();
-    guildGuid[5] = recvPacket.ReadBit();
-    playerGuid[5] = recvPacket.ReadBit();
     playerGuid[7] = recvPacket.ReadBit();
-    playerGuid[1] = recvPacket.ReadBit();
     playerGuid[3] = recvPacket.ReadBit();
     playerGuid[4] = recvPacket.ReadBit();
-    guildGuid[2] = recvPacket.ReadBit();
     guildGuid[3] = recvPacket.ReadBit();
+    guildGuid[4] = recvPacket.ReadBit();
+    playerGuid[2] = recvPacket.ReadBit();
+    playerGuid[6] = recvPacket.ReadBit();
+    guildGuid[2] = recvPacket.ReadBit();
+    guildGuid[5] = recvPacket.ReadBit();
+    playerGuid[1] = recvPacket.ReadBit();
+    playerGuid[5] = recvPacket.ReadBit();
+    guildGuid[7] = recvPacket.ReadBit();
+    playerGuid[0] = recvPacket.ReadBit();
+    guildGuid[1] = recvPacket.ReadBit();
+    guildGuid[6] = recvPacket.ReadBit();
+    guildGuid[0] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guildGuid[7]);
-    recvPacket.ReadByteSeq(playerGuid[4]);
-    recvPacket.ReadByteSeq(playerGuid[0]);
-    recvPacket.ReadByteSeq(playerGuid[3]);
-    recvPacket.ReadByteSeq(playerGuid[6]);
     recvPacket.ReadByteSeq(playerGuid[7]);
     recvPacket.ReadByteSeq(guildGuid[2]);
-    recvPacket.ReadByteSeq(guildGuid[5]);
+    recvPacket.ReadByteSeq(guildGuid[4]);
+    recvPacket.ReadByteSeq(guildGuid[7]);
+    recvPacket.ReadByteSeq(playerGuid[6]);
+    recvPacket.ReadByteSeq(playerGuid[0]);
+    recvPacket.ReadByteSeq(guildGuid[6]);
     recvPacket.ReadByteSeq(guildGuid[0]);
     recvPacket.ReadByteSeq(guildGuid[3]);
     recvPacket.ReadByteSeq(playerGuid[2]);
-    recvPacket.ReadByteSeq(playerGuid[5]);
+    recvPacket.ReadByteSeq(guildGuid[5]);
+    recvPacket.ReadByteSeq(playerGuid[3]);
     recvPacket.ReadByteSeq(guildGuid[1]);
+    recvPacket.ReadByteSeq(playerGuid[4]);
     recvPacket.ReadByteSeq(playerGuid[1]);
-    recvPacket.ReadByteSeq(guildGuid[6]);
-    recvPacket.ReadByteSeq(guildGuid[4]);
+    recvPacket.ReadByteSeq(playerGuid[5]);
 
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_QUERY [%s]: Guild: %u Target: %u",
+    TC_LOG_ERROR("guild", "CMSG_GUILD_QUERY [%s]: Guild: %u Target: %u",
         GetPlayerInfo().c_str(), GUID_LOPART(guildGuid), GUID_LOPART(playerGuid));
 
     if (Guild* guild = sGuildMgr->GetGuildByGuid(guildGuid))
@@ -91,23 +91,23 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid playerGuid;
 
-    playerGuid[3] = recvPacket.ReadBit();
-    playerGuid[1] = recvPacket.ReadBit();
-    playerGuid[6] = recvPacket.ReadBit();
-    playerGuid[0] = recvPacket.ReadBit();
     playerGuid[7] = recvPacket.ReadBit();
+    playerGuid[3] = recvPacket.ReadBit();
+    playerGuid[4] = recvPacket.ReadBit();
     playerGuid[2] = recvPacket.ReadBit();
     playerGuid[5] = recvPacket.ReadBit();
-    playerGuid[4] = recvPacket.ReadBit();
+    playerGuid[6] = recvPacket.ReadBit();
+    playerGuid[1] = recvPacket.ReadBit();
+    playerGuid[0] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(playerGuid[2]);
-    recvPacket.ReadByteSeq(playerGuid[6]);
     recvPacket.ReadByteSeq(playerGuid[0]);
+    recvPacket.ReadByteSeq(playerGuid[2]);
+    recvPacket.ReadByteSeq(playerGuid[5]);
+    recvPacket.ReadByteSeq(playerGuid[6]);
+    recvPacket.ReadByteSeq(playerGuid[7]);
     recvPacket.ReadByteSeq(playerGuid[1]);
     recvPacket.ReadByteSeq(playerGuid[4]);
     recvPacket.ReadByteSeq(playerGuid[3]);
-    recvPacket.ReadByteSeq(playerGuid[5]);
-    recvPacket.ReadByteSeq(playerGuid[7]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_REMOVE [%s]: Target: %u", GetPlayerInfo().c_str(), GUID_LOPART(playerGuid));
 
@@ -147,23 +147,23 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid targetGuid;
 
-    targetGuid[4] = recvPacket.ReadBit();
-    targetGuid[0] = recvPacket.ReadBit();
-    targetGuid[3] = recvPacket.ReadBit();
-    targetGuid[5] = recvPacket.ReadBit();
-    targetGuid[7] = recvPacket.ReadBit();
-    targetGuid[1] = recvPacket.ReadBit();
-    targetGuid[2] = recvPacket.ReadBit();
     targetGuid[6] = recvPacket.ReadBit();
+    targetGuid[0] = recvPacket.ReadBit();
+    targetGuid[4] = recvPacket.ReadBit();
+    targetGuid[3] = recvPacket.ReadBit();
+    targetGuid[1] = recvPacket.ReadBit();
+    targetGuid[7] = recvPacket.ReadBit();
+    targetGuid[2] = recvPacket.ReadBit();
+    targetGuid[5] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(targetGuid[7]);
-    recvPacket.ReadByteSeq(targetGuid[0]);
-    recvPacket.ReadByteSeq(targetGuid[5]);
-    recvPacket.ReadByteSeq(targetGuid[2]);
-    recvPacket.ReadByteSeq(targetGuid[3]);
-    recvPacket.ReadByteSeq(targetGuid[6]);
-    recvPacket.ReadByteSeq(targetGuid[4]);
     recvPacket.ReadByteSeq(targetGuid[1]);
+    recvPacket.ReadByteSeq(targetGuid[7]);
+    recvPacket.ReadByteSeq(targetGuid[2]);
+    recvPacket.ReadByteSeq(targetGuid[5]);
+    recvPacket.ReadByteSeq(targetGuid[3]);
+    recvPacket.ReadByteSeq(targetGuid[4]);
+    recvPacket.ReadByteSeq(targetGuid[0]);
+    recvPacket.ReadByteSeq(targetGuid[6]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_PROMOTE [%s]: Target: %u", GetPlayerInfo().c_str(), GUID_LOPART(targetGuid));
 
@@ -175,22 +175,22 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid targetGuid;
 
-    targetGuid[1] = recvPacket.ReadBit();
+    targetGuid[3] = recvPacket.ReadBit();
+    targetGuid[6] = recvPacket.ReadBit();
     targetGuid[0] = recvPacket.ReadBit();
+    targetGuid[2] = recvPacket.ReadBit();
     targetGuid[7] = recvPacket.ReadBit();
     targetGuid[5] = recvPacket.ReadBit();
-    targetGuid[3] = recvPacket.ReadBit();
-    targetGuid[2] = recvPacket.ReadBit();
     targetGuid[4] = recvPacket.ReadBit();
-    targetGuid[6] = recvPacket.ReadBit();
+    targetGuid[1] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(targetGuid[3]);
-    recvPacket.ReadByteSeq(targetGuid[4]);
-    recvPacket.ReadByteSeq(targetGuid[1]);
-    recvPacket.ReadByteSeq(targetGuid[0]);
     recvPacket.ReadByteSeq(targetGuid[7]);
+    recvPacket.ReadByteSeq(targetGuid[4]);
     recvPacket.ReadByteSeq(targetGuid[2]);
     recvPacket.ReadByteSeq(targetGuid[5]);
+    recvPacket.ReadByteSeq(targetGuid[1]);
+    recvPacket.ReadByteSeq(targetGuid[3]);
+    recvPacket.ReadByteSeq(targetGuid[0]);
     recvPacket.ReadByteSeq(targetGuid[6]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_DEMOTE [%s]: Target: %u", GetPlayerInfo().c_str(), GUID_LOPART(targetGuid));
@@ -202,50 +202,33 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleGuildAssignRankOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid targetGuid;
-    ObjectGuid setterGuid;
 
     uint32 rankId;
     recvPacket >> rankId;
 
-    targetGuid[1] = recvPacket.ReadBit();
-    targetGuid[7] = recvPacket.ReadBit();
-    setterGuid[4] = recvPacket.ReadBit();
-    setterGuid[2] = recvPacket.ReadBit();
-    targetGuid[4] = recvPacket.ReadBit();
-    targetGuid[5] = recvPacket.ReadBit();
-    targetGuid[6] = recvPacket.ReadBit();
-    setterGuid[1] = recvPacket.ReadBit();
-    setterGuid[7] = recvPacket.ReadBit();
     targetGuid[2] = recvPacket.ReadBit();
     targetGuid[3] = recvPacket.ReadBit();
+    targetGuid[1] = recvPacket.ReadBit();
+    targetGuid[6] = recvPacket.ReadBit();
     targetGuid[0] = recvPacket.ReadBit();
-    setterGuid[6] = recvPacket.ReadBit();
-    setterGuid[3] = recvPacket.ReadBit();
-    setterGuid[0] = recvPacket.ReadBit();
-    setterGuid[5] = recvPacket.ReadBit();
+    targetGuid[4] = recvPacket.ReadBit();
+    targetGuid[7] = recvPacket.ReadBit();
+    targetGuid[5] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(targetGuid[0]);
-    recvPacket.ReadByteSeq(setterGuid[1]);
-    recvPacket.ReadByteSeq(setterGuid[3]);
-    recvPacket.ReadByteSeq(setterGuid[5]);
     recvPacket.ReadByteSeq(targetGuid[7]);
     recvPacket.ReadByteSeq(targetGuid[3]);
-    recvPacket.ReadByteSeq(setterGuid[0]);
-    recvPacket.ReadByteSeq(targetGuid[1]);
-    recvPacket.ReadByteSeq(setterGuid[6]);
     recvPacket.ReadByteSeq(targetGuid[2]);
     recvPacket.ReadByteSeq(targetGuid[5]);
-    recvPacket.ReadByteSeq(targetGuid[4]);
-    recvPacket.ReadByteSeq(setterGuid[2]);
-    recvPacket.ReadByteSeq(setterGuid[4]);
     recvPacket.ReadByteSeq(targetGuid[6]);
-    recvPacket.ReadByteSeq(setterGuid[7]);
+    recvPacket.ReadByteSeq(targetGuid[0]);
+    recvPacket.ReadByteSeq(targetGuid[4]);
+    recvPacket.ReadByteSeq(targetGuid[1]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_ASSIGN_MEMBER_RANK [%s]: Target: %u Rank: %u, Issuer: %u",
-        GetPlayerInfo().c_str(), GUID_LOPART(targetGuid), rankId, GUID_LOPART(setterGuid));
+        GetPlayerInfo().c_str(), GUID_LOPART(targetGuid), rankId, GUID_LOPART(_player->GetGUID()));
 
     if (Guild* guild = GetPlayer()->GetGuild())
-        guild->HandleSetMemberRank(this, targetGuid, setterGuid, rankId);
+        guild->HandleSetMemberRank(this, targetGuid, _player->GetGUID(), rankId);
 }
 
 void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
@@ -310,23 +293,23 @@ void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guildGuid;
 
-    guildGuid[2] = recvPacket.ReadBit();
-    guildGuid[7] = recvPacket.ReadBit();
     guildGuid[0] = recvPacket.ReadBit();
+    guildGuid[2] = recvPacket.ReadBit();
     guildGuid[5] = recvPacket.ReadBit();
-    guildGuid[6] = recvPacket.ReadBit();
-    guildGuid[3] = recvPacket.ReadBit();
     guildGuid[4] = recvPacket.ReadBit();
+    guildGuid[3] = recvPacket.ReadBit();
+    guildGuid[7] = recvPacket.ReadBit();
+    guildGuid[6] = recvPacket.ReadBit();
     guildGuid[1] = recvPacket.ReadBit();
 
     recvPacket.ReadByteSeq(guildGuid[6]);
     recvPacket.ReadByteSeq(guildGuid[0]);
     recvPacket.ReadByteSeq(guildGuid[1]);
     recvPacket.ReadByteSeq(guildGuid[7]);
-    recvPacket.ReadByteSeq(guildGuid[2]);
     recvPacket.ReadByteSeq(guildGuid[3]);
-    recvPacket.ReadByteSeq(guildGuid[4]);
+    recvPacket.ReadByteSeq(guildGuid[2]);
     recvPacket.ReadByteSeq(guildGuid[5]);
+    recvPacket.ReadByteSeq(guildGuid[4]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_QUERY_RANKS [%s]: Guild: %u",
         GetPlayerInfo().c_str(), GUID_LOPART(guildGuid));
@@ -666,23 +649,23 @@ void WorldSession::HandleGuildQueryXPOpcode(WorldPacket& recvPacket)
 
     ObjectGuid guildGuid;
 
-    guildGuid[3] = recvPacket.ReadBit();
-    guildGuid[2] = recvPacket.ReadBit();
-    guildGuid[7] = recvPacket.ReadBit();
     guildGuid[5] = recvPacket.ReadBit();
     guildGuid[6] = recvPacket.ReadBit();
     guildGuid[0] = recvPacket.ReadBit();
     guildGuid[1] = recvPacket.ReadBit();
+    guildGuid[3] = recvPacket.ReadBit();
+    guildGuid[7] = recvPacket.ReadBit();
     guildGuid[4] = recvPacket.ReadBit();
+    guildGuid[2] = recvPacket.ReadBit();
 
+    recvPacket.ReadByteSeq(guildGuid[4]);
+    recvPacket.ReadByteSeq(guildGuid[6]);
     recvPacket.ReadByteSeq(guildGuid[3]);
+    recvPacket.ReadByteSeq(guildGuid[0]);
     recvPacket.ReadByteSeq(guildGuid[7]);
+    recvPacket.ReadByteSeq(guildGuid[5]);
     recvPacket.ReadByteSeq(guildGuid[2]);
     recvPacket.ReadByteSeq(guildGuid[1]);
-    recvPacket.ReadByteSeq(guildGuid[5]);
-    recvPacket.ReadByteSeq(guildGuid[4]);
-    recvPacket.ReadByteSeq(guildGuid[0]);
-    recvPacket.ReadByteSeq(guildGuid[6]);
 
     TC_LOG_DEBUG("guild", "CMSG_QUERY_GUILD_XP [%s]: Guild: %u", GetPlayerInfo().c_str(), GUID_LOPART(guildGuid));
 
@@ -808,8 +791,6 @@ void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
         std::vector<GuildReward> const& rewards = sGuildMgr->GetGuildRewards();
 
         WorldPacket data(SMSG_GUILD_REWARDS_LIST, 3 + rewards.size() * (4 + 4 + 4 + 8 + 4 + 4));
-        data << uint32(time(NULL));
-
         data.WriteBits(rewards.size(), 19);
 
         for (uint32 i = 0; i < rewards.size(); i++)
@@ -822,13 +803,14 @@ void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
             for (uint32 j = 0; j < rewards[i].Achievements.size(); j++)
                 data << rewards[i].Achievements[j];
 
-            data << uint64(rewards[i].Price);
-            data << uint32(rewards[i].Standing);
             data << int32(rewards[i].Racemask);
             data << uint32(rewards[i].Entry);
-            data << uint32(0); // Unused
+            data << uint32(0); // minGuildLevel
+            data << uint32(rewards[i].Standing);
+            data << uint64(rewards[i].Price);
         }
 
+        data << uint32(time(NULL));
         SendPacket(&data);
     }
 }
@@ -836,6 +818,7 @@ void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleGuildQueryNewsOpcode(WorldPacket& recvPacket)
 {
     recvPacket.rfinish();
+
     TC_LOG_DEBUG("guild", "CMSG_GUILD_QUERY_NEWS [%s]", GetPlayerInfo().c_str());
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SendNewsUpdate(this);
