@@ -1187,15 +1187,64 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_SOCKET_GEMS");
 
-    uint64 item_guid;
-    uint64 gem_guids[MAX_GEM_SOCKETS];
-
-    recvData >> item_guid;
-    if (!item_guid)
-        return;
+    ObjectGuid item_guid;
+    ObjectGuid gem_guids[MAX_GEM_SOCKETS];
+	
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][4] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][0] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][6] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][2] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][1] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][7] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][3] = recvData.ReadBit();
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        gem_guids[i][5] = recvData.ReadBit();
+	
+    item_guid[5] = recvData.ReadBit();
+    item_guid[0] = recvData.ReadBit();
+    item_guid[6] = recvData.ReadBit();
+    item_guid[2] = recvData.ReadBit();
+    item_guid[3] = recvData.ReadBit();
+    item_guid[4] = recvData.ReadBit();
+    item_guid[7] = recvData.ReadBit();
+    item_guid[1] = recvData.ReadBit();
+	
+    recvData.ReadByteSeq(item_guid[7]);
+    recvData.ReadByteSeq(item_guid[2]);
+    recvData.ReadByteSeq(item_guid[6]);
 
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
-        recvData >> gem_guids[i];
+        recvData.ReadByteSeq(gem_guids[i][6]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][4]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][3]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][2]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][0]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][1]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][7]);
+    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+        recvData.ReadByteSeq(gem_guids[i][5]);
+
+    recvData.ReadByteSeq(item_guid[4]);
+    recvData.ReadByteSeq(item_guid[3]);
+    recvData.ReadByteSeq(item_guid[1]);
+    recvData.ReadByteSeq(item_guid[5]);
+    recvData.ReadByteSeq(item_guid[0]);
+
+    if (!item_guid)
+        return;
 
     //cheat -> tried to socket same gem multiple times
     if ((gem_guids[0] && (gem_guids[0] == gem_guids[1] || gem_guids[0] == gem_guids[2])) ||
