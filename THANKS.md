@@ -100,4 +100,4 @@ laly, mrquickfx, Koord, amnell, GWRde, EdwinDW, gildor, darkstalker, Feanordev, 
 thymuswisewood, sohrab, Lazzalf, Taser, Ottowayne, Exordian, nucleartux, John Holiver, j4r0d,
 Trazom62, Brian, enjoi, teacher, Alex Bolotsin, Troy, silver1ce, nihal, arcanzic, Chaz Brown,
 pendragon, aven_coda, cca220v, ArcticDevil, derex_tri, AlterEgo, AriDEV, Fabian, Rawaho, Projectcore,
-Zalito12, Palabola, caffeine239
+Zalito12, Palabola, caffeine239, mansemino
