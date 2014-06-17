@@ -20,7 +20,7 @@
 #include "MovementStructures.h"
 #include "Player.h"
 
-MovementStatusElements const PlayerMove[] = // 5.4.8 18291
+MovementStatusElements const PlayerMove[] = // 5.4.8 18414
 {
     MSEHasPitch,               // 112
     MSEHasGuidByte2,           // 18
@@ -95,7 +95,7 @@ MovementStatusElements const PlayerMove[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementFallLand[] = // 5.4.8 18291
+MovementStatusElements const MovementFallLand[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionZ,              // 44
@@ -171,7 +171,7 @@ MovementStatusElements const MovementFallLand[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementHeartBeat[] = // 5.4.8 18291
+MovementStatusElements const MovementHeartBeat[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionX,              // 36
@@ -247,7 +247,7 @@ MovementStatusElements const MovementHeartBeat[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementJump[] = // 5.4.8 18291
+MovementStatusElements const MovementJump[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionX,              // 36
@@ -323,7 +323,7 @@ MovementStatusElements const MovementJump[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementSetFacing[] = // 5.4.8 18291
+MovementStatusElements const MovementSetFacing[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionX,              // 36
@@ -399,7 +399,7 @@ MovementStatusElements const MovementSetFacing[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementSetPitch[] = // 5.4.8 18291
+MovementStatusElements const MovementSetPitch[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionX,              // 36
@@ -475,7 +475,7 @@ MovementStatusElements const MovementSetPitch[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartBackward[] = // 5.4.8 18291
+MovementStatusElements const MovementStartBackward[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionZ,              // 44
@@ -551,7 +551,7 @@ MovementStatusElements const MovementStartBackward[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartForward[] = // 5.4.8 18291
+MovementStatusElements const MovementStartForward[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionX,              // 36
@@ -627,7 +627,7 @@ MovementStatusElements const MovementStartForward[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartStrafeLeft[] = // 5.4.8 18291
+MovementStatusElements const MovementStartStrafeLeft[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionZ,              // 44
@@ -703,7 +703,7 @@ MovementStatusElements const MovementStartStrafeLeft[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartStrafeRight[] = // 5.4.8 18291
+MovementStatusElements const MovementStartStrafeRight[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionX,              // 36
@@ -779,7 +779,7 @@ MovementStatusElements const MovementStartStrafeRight[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartTurnLeft[] = // 5.4.8 18291
+MovementStatusElements const MovementStartTurnLeft[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionX,              // 36
@@ -855,7 +855,7 @@ MovementStatusElements const MovementStartTurnLeft[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartTurnRight[] = // 5.4.8 18291
+MovementStatusElements const MovementStartTurnRight[] = // 5.4.8 18414
 {
     MSEPositionX,              // 36
     MSEPositionZ,              // 44
@@ -931,7 +931,7 @@ MovementStatusElements const MovementStartTurnRight[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStop[] = // 5.4.8 18291
+MovementStatusElements const MovementStop[] = // 5.4.8 18414
 {
     MSEPositionX,              // 36
     MSEPositionY,              // 40
@@ -1007,7 +1007,7 @@ MovementStatusElements const MovementStop[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStopStrafe[] = // 5.4.8 18291
+MovementStatusElements const MovementStopStrafe[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionX,              // 36
@@ -1083,7 +1083,7 @@ MovementStatusElements const MovementStopStrafe[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStopTurn[] = // 5.4.8 18291
+MovementStatusElements const MovementStopTurn[] = // 5.4.8 18414
 {
     MSEPositionX,              // 36
     MSEPositionZ,              // 44
@@ -1159,7 +1159,7 @@ MovementStatusElements const MovementStopTurn[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartAscend[] = // 5.4.8 18291
+MovementStatusElements const MovementStartAscend[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionX,              // 36
@@ -1236,7 +1236,7 @@ MovementStatusElements const MovementStartAscend[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartDescend[] = // 5.4.8 18291
+MovementStatusElements const MovementStartDescend[] = // 5.4.8 18414
 {
     MSEPositionX,              // 36
     MSEPositionY,              // 40
@@ -1312,7 +1312,7 @@ MovementStatusElements const MovementStartDescend[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartSwim[] = // 5.4.8 18291
+MovementStatusElements const MovementStartSwim[] = // 5.4.8 18414
 {
     MSEPositionX,              // 36
     MSEPositionY,              // 40
@@ -1388,7 +1388,7 @@ MovementStatusElements const MovementStartSwim[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStopSwim[] = // 5.4.8 18291
+MovementStatusElements const MovementStopSwim[] = // 5.4.8 18414
 {
     MSEPositionX,              // 36
     MSEPositionZ,              // 44
@@ -1464,7 +1464,7 @@ MovementStatusElements const MovementStopSwim[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStopAscend[] = // 5.4.8 18291
+MovementStatusElements const MovementStopAscend[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionX,              // 36
@@ -1540,7 +1540,7 @@ MovementStatusElements const MovementStopAscend[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStopPitch[] = // 5.4.8 18291
+MovementStatusElements const MovementStopPitch[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionX,              // 36
@@ -1616,7 +1616,7 @@ MovementStatusElements const MovementStopPitch[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartPitchDown[] = // 5.4.8 18291
+MovementStatusElements const MovementStartPitchDown[] = // 5.4.8 18414
 {
     MSEPositionZ,              // 44
     MSEPositionY,              // 40
@@ -1692,7 +1692,7 @@ MovementStatusElements const MovementStartPitchDown[] = // 5.4.8 18291
     MSEEnd
 };
 
-MovementStatusElements const MovementStartPitchUp[] = // 5.4.8 18291
+MovementStatusElements const MovementStartPitchUp[] = // 5.4.8 18414
 {
     MSEPositionY,              // 40
     MSEPositionZ,              // 44
@@ -4301,7 +4301,7 @@ MovementStatusElements const MoveSetWalkSpeed[] = // 5.4.7 18019
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetRunSpeed[] = // 5.4.8 18291
+MovementStatusElements const MoveSetRunSpeed[] = // 5.4.8 18414
 {
     MSEHasGuidByte1,
     MSEHasGuidByte7,
@@ -4416,7 +4416,7 @@ MovementStatusElements const MoveSetTurnRate[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetFlightSpeed[] = //5.4.8 18291
+MovementStatusElements const MoveSetFlightSpeed[] = //5.4.8 18414
 {
     MSEExtraElement,
     MSEUintCount,
@@ -4846,7 +4846,7 @@ MovementStatusElements const SplineMoveUnroot[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveSetCanFly[] = // 5.4.8 18291
+MovementStatusElements const MoveSetCanFly[] = // 5.4.8 18414
 {
     MSEHasGuidByte6,
     MSEHasGuidByte1,
@@ -4868,7 +4868,7 @@ MovementStatusElements const MoveSetCanFly[] = // 5.4.8 18291
     MSEEnd,
 };
 
-MovementStatusElements const MoveUnsetCanFly[] = // 5.4.8 18291
+MovementStatusElements const MoveUnsetCanFly[] = // 5.4.8 18414
 {
     MSEHasGuidByte6,
     MSEHasGuidByte5,
@@ -5022,7 +5022,7 @@ MovementStatusElements const MoveNormalFall[] =
     MSEEnd,
 };
 
-MovementStatusElements const MoveRoot[] = // 5.4.8 18291
+MovementStatusElements const MoveRoot[] = // 5.4.8 18414
 {
     MSEHasGuidByte0,
     MSEHasGuidByte3,
@@ -5044,7 +5044,7 @@ MovementStatusElements const MoveRoot[] = // 5.4.8 18291
     MSEEnd,
 };
 
-MovementStatusElements const MoveUnroot[] = // 5.4.8 18291
+MovementStatusElements const MoveUnroot[] = // 5.4.8 18414
 {
     MSEHasGuidByte3,
     MSEHasGuidByte5,

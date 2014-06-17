@@ -94,7 +94,7 @@ float CONF_float_to_int16_limit = 2048.0f;   // Max accuracy = val/65536
 float CONF_flat_height_delta_limit = 0.005f; // If max - min less this value - surface is flat
 float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - liquid surface is flat
 
-uint32 CONF_TargetBuild = 18273;              // 5.4.8 18273 -- current build is 18291, but Blizz didnt rename the MPQ files
+uint32 CONF_TargetBuild = 18273;              // 5.4.8 18273 -- current build is 18414, but Blizz didnt rename the MPQ files
 
 // List MPQ for extract maps from
 char const* CONF_mpq_list[] =
@@ -437,7 +437,6 @@ struct map_heightHeader
 
 #define MAP_LIQUID_TYPE_DARK_WATER  0x10
 #define MAP_LIQUID_TYPE_WMO_WATER   0x20
-
 
 #define MAP_LIQUID_NO_TYPE    0x0001
 #define MAP_LIQUID_NO_HEIGHT  0x0002
@@ -1213,7 +1212,6 @@ bool LoadLocaleMPQFile(int locale)
         prefix = "";
         _stprintf(buff, _T("%s/Data/%s/wow-update-%s-%u.MPQ"), input_path, LocalesT[locale], LocalesT[locale], Builds[i]);
 
-
         if (!SFileOpenPatchArchive(LocaleMpq, buff, prefix, 0))
         {
             if (GetLastError() != ERROR_FILE_NOT_FOUND)
@@ -1230,7 +1228,6 @@ bool LoadLocaleMPQFile(int locale)
         prefix = "";
         _stprintf(buff, _T("%s/Data/%s"), input_path, CONF_mpq_dbc_list[i]);
 
-
         if (!SFileOpenPatchArchive(LocaleMpq, buff, prefix, 0))
         {
             if (GetLastError() != ERROR_FILE_NOT_FOUND)
@@ -1240,7 +1237,6 @@ bool LoadLocaleMPQFile(int locale)
         else
             _tprintf(_T("Loaded %s\n"), buff);
     }
-
 
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
     {
@@ -1252,7 +1248,6 @@ bool LoadLocaleMPQFile(int locale)
         memset(buff, 0, sizeof(buff));
         prefix = "";
         _stprintf(buff, _T("%s/Data/wow-update-base-%u.MPQ"), input_path, Builds[i]);
-
 
         if (!SFileOpenPatchArchive(LocaleMpq, buff, prefix, 0))
         {

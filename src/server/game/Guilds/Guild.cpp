@@ -1402,14 +1402,8 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
 
     WorldPacket data(SMSG_GUILD_ROSTER, 100);
 
-    data << uint32(0);
-    data << uint32(m_accountsNumber);
-    data.AppendPackedTime(m_createdDate);
-    data << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP));
-
-    data.WriteBits(m_motd.length(), 10);
-    data.WriteBits(m_info.length(), 11);
     data.WriteBits(m_members.size(), 17);
+    data.WriteBits(m_motd.length(), 10);
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
@@ -1418,55 +1412,62 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         size_t offNoteLength = member->GetOfficerNote().length();
 
         ObjectGuid guid = member->GetGUID();
+        data.WriteBits(offNoteLength, 8);
+        data.WriteBit(guid[5]);
         data.WriteBit(0); // Can Scroll of Ressurect
         data.WriteBits(pubNoteLength, 8);
-        data.WriteBit(0); // Has Authenticator
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[4]);
-        data.WriteBits(member->GetName().length(), 6);
-        data.WriteBit(guid[6]);
-        data.WriteBit(guid[2]);
         data.WriteBit(guid[7]);
-        data.WriteBits(offNoteLength, 8);
-        data.WriteBit(guid[1]);
-        data.WriteBit(guid[3]);
         data.WriteBit(guid[0]);
-        memberData << uint32(member->GetTotalReputation());
+        data.WriteBit(guid[6]);
+        data.WriteBits(member->GetName().length(), 6);
+        data.WriteBit(0); // Has Authenticator
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[2]);
+
         memberData << uint8(member->GetClass());
-        memberData << uint8(member->GetLevel());
-        memberData << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - member->GetWeekReputation());
-        memberData << uint64(member->GetTotalActivity());
-        memberData.WriteString(member->GetPublicNote());
-        memberData.WriteByteSeq(guid[1]);
-        memberData << float(member->IsOnline() ? 0.0f : float(::time(NULL) - member->GetLogoutTime()) / DAY);
-        memberData.WriteByteSeq(guid[2]);
-        memberData.WriteByteSeq(guid[4]);
-        memberData << uint32(member->GetZoneId());
-        memberData << uint8(0);        // Gender
-        memberData << uint32(realmID); // RealmID
-        memberData.WriteByteSeq(guid[7]);
-        memberData.WriteByteSeq(guid[5]);
-        memberData << uint32(member->GetAchievementPoints());
-        memberData.WriteByteSeq(guid[3]);
-        memberData << uint8(member->GetFlags());
-        memberData.WriteByteSeq(guid[6]);
-        memberData << uint64(member->GetWeekActivity());
+        memberData << uint32(member->GetTotalReputation());
         memberData.WriteString(member->GetName());
-        memberData.WriteString(member->GetOfficerNote());
+        memberData.WriteByteSeq(guid[0]);
 
         // for (2 professions)
         memberData << uint32(0) << uint32(0) << uint32(0);
         memberData << uint32(0) << uint32(0) << uint32(0);
 
-        memberData.WriteByteSeq(guid[0]);
+        memberData << uint8(member->GetLevel());
+        memberData << uint8(member->GetFlags());
+        memberData << uint32(member->GetZoneId());
+        memberData << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - member->GetWeekReputation());
+        memberData.WriteByteSeq(guid[3]);
+        memberData << uint64(member->GetTotalActivity());
+        memberData.WriteString(member->GetOfficerNote());
+        memberData << float(member->IsOnline() ? 0.0f : float(::time(NULL) - member->GetLogoutTime()) / DAY);
+        memberData << uint8(0);        // Gender
         memberData << uint32(member->GetRankId());
+        memberData << uint32(realmID);
+        memberData.WriteByteSeq(guid[5]);
+        memberData.WriteByteSeq(guid[7]);
+        memberData.WriteString(member->GetPublicNote());
+        memberData.WriteByteSeq(guid[4]);
+        memberData << uint64(member->GetWeekActivity());
+        memberData << uint32(member->GetAchievementPoints());
+        memberData.WriteByteSeq(guid[6]);
+        memberData.WriteByteSeq(guid[1]);
+        memberData.WriteByteSeq(guid[2]);
     }
+
+    data.WriteBits(m_info.length(), 11);
 
     data.FlushBits();
     data.append(memberData);
 
+    data << uint32(m_accountsNumber);
+    data.AppendPackedTime(m_createdDate);
     data.WriteString(m_info);
+    data << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP));
     data.WriteString(m_motd);
+    data << uint32(0);
 
     if (session)
     {
@@ -1486,76 +1487,77 @@ void Guild::HandleQuery(WorldSession* session)
 
     WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200);      // Guess size
 
+    data.WriteBit(guid[2]);
     data.WriteBit(1); // HasData
 
     // if (hasData)
     {
-        data.WriteBit(guid[0]);
         data.WriteBits(_GetRanksSize(), 21);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[6]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[7]);
 
         for (uint8 i = 0; i < _GetRanksSize(); i++)
             data.WriteBits(m_ranks[i].GetName().length(), 7);
 
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[1]);
-        data.WriteBit(guid[7]);
-
-        data.WriteBits(m_name.length(), 7);
-
-        data.WriteBit(guid[4]);
         data.WriteBit(guid[3]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[6]);
+        data.WriteBits(m_name.length(), 7);
     }
 
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[4]);
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
     data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[6]);
     data.WriteBit(guid[2]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
 
     data.FlushBits();
-    data.WriteByteSeq(guid[6]);
 
     //if (hasData)
     {
-        data.WriteString(m_name);
-
+        data << uint32(m_emblemInfo.GetBorderStyle());
         data << uint32(m_emblemInfo.GetStyle());
-        data << uint32(m_emblemInfo.GetColor());
 
-        data.WriteByteSeq(guid[1]);
-        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[7]);
+
+        data << uint32(m_emblemInfo.GetColor());
+        data << uint32(realmID);
 
         for (uint8 i = 0; i < _GetRanksSize(); i++)
         {
-            data << uint32(m_ranks[i].GetId());
             data << uint32(i);
+            data << uint32(m_ranks[i].GetId());
             data.WriteString(m_ranks[i].GetName());
         }
 
-        data.WriteByteSeq(guid[3]);
-        data.WriteByteSeq(guid[4]);
-        data.WriteByteSeq(guid[6]);
-        data.WriteByteSeq(guid[2]);
-        data << uint32(m_emblemInfo.GetBorderStyle());
+        data.WriteString(m_name);
         data << uint32(m_emblemInfo.GetBorderColor());
+
         data.WriteByteSeq(guid[5]);
-        data << uint32(realmID);
+        data.WriteByteSeq(guid[4]);
+
         data << uint32(m_emblemInfo.GetBackgroundColor());
-        data.WriteByteSeq(guid[7]);
+
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[3]);
     }
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
 
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_QUERY_RESPONSE [%s]", session->GetPlayerInfo().c_str());
@@ -1566,6 +1568,7 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
     WorldPacket data(SMSG_GUILD_RANK, 100);
 
     data.WriteBits(_GetRanksSize(), 17);
+
     for (uint8 i = 0; i < _GetRanksSize(); i++)
         data.WriteBits(m_ranks[i].GetName().length(), 7);
 
@@ -1575,9 +1578,8 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
     {
         RankInfo const* rankInfo = GetRankInfo(i);
 
-        data << uint32(rankInfo->GetId());
-        data.WriteString(rankInfo->GetName());
-        data << uint32(rankInfo->GetRights());
+        data << uint32(i);
+        data << uint32(rankInfo->GetBankMoneyPerDay());
 
         for (uint8 j = 0; j < GUILD_BANK_MAX_TABS; ++j)
         {
@@ -1585,9 +1587,9 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
             data << uint32(rankInfo->GetBankTabRights(j));
         }
 
-        data << uint32(rankInfo->GetBankMoneyPerDay());
-        data << uint32(i);
-
+        data.WriteString(rankInfo->GetName());
+        data << uint32(rankInfo->GetId());
+        data << uint32(rankInfo->GetRights());
     }
 
     session->SendPacket(&data);
@@ -2237,7 +2239,6 @@ void Guild::SendNewsUpdate(WorldSession* session)
         data.WriteByteSeq(guid[3]);
         data << uint32(news->GetGUID());
         data << uint32(0);
-
     }
 
     session->SendPacket(&data);

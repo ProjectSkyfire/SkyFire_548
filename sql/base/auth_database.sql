@@ -439,7 +439,7 @@ CREATE TABLE `realmlist` (
   `timezone` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `allowedSecurityLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `population` float unsigned NOT NULL DEFAULT '0',
-  `gamebuild` int(10) unsigned NOT NULL DEFAULT '18291',
+  `gamebuild` int(10) unsigned NOT NULL DEFAULT '18414',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='Realm System';
@@ -451,7 +451,7 @@ CREATE TABLE `realmlist` (
 
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
-INSERT INTO `realmlist` VALUES (1,'Skyfire MoP','127.0.0.1','127.0.0.1','255.255.255.0',8085,1,0,1,0,0,18291);
+INSERT INTO `realmlist` VALUES (1,'Skyfire MoP','127.0.0.1','127.0.0.1','255.255.255.0',8085,1,0,1,0,0,18414);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 
