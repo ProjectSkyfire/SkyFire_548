@@ -2236,15 +2236,12 @@ void Guild::SendNewsUpdate(WorldSession* session)
         data.WriteByteSeq(guid[3]);
         data.WriteByteSeq(guid[5]);
         data << uint32(0);
-<<<<<<< HEAD
-=======
         data << uint32(news->GetType());
         data << uint32(news->GetFlags());   // 1 sticky
         data.WriteByteSeq(guid[6]);
         data.AppendPackedTime(news->GetTimestamp());
         data << uint32(news->GetGUID());
         data.WriteByteSeq(guid[0]);
->>>>>>> d78e8850bb769b8376bbd96279b7375f563a1dc1
     }
 
     session->SendPacket(&data);
