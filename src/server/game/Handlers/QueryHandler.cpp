@@ -568,8 +568,7 @@ void WorldSession::HandleCorpseMapPositionQuery(WorldPacket& recvData)
 
 void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
 {
-    uint32 count;
-    recvData >> count; // quest count, max=25
+    uint32 count = recvData.ReadBits(22);
 
     if (count >= MAX_QUEST_LOG_SIZE)
     {
@@ -577,13 +576,15 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
         return;
     }
 
+    ByteBuffer poiData;
+
     WorldPacket data(SMSG_QUEST_POI_QUERY_RESPONSE, 4+(4+4)*count);
-    data << uint32(count); // count
+    data.WriteBits(count, 20);
 
     for (uint32 i = 0; i < count; ++i)
     {
         uint32 questId;
-        recvData >> questId; // quest id
+        recvData >> questId;
 
         bool questOk = false;
 
@@ -598,39 +599,56 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
 
             if (POI)
             {
-                data << uint32(questId); // quest ID
-                data << uint32(POI->size()); // POI count
+                data.WriteBits(POI->size(), 18);                // POI count bits
 
                 for (QuestPOIVector::const_iterator itr = POI->begin(); itr != POI->end(); ++itr)
                 {
-                    data << uint32(itr->Id);                // POI index
-                    data << int32(itr->ObjectiveIndex);     // objective index
-                    data << uint32(itr->MapId);             // mapid
-                    data << uint32(itr->AreaId);            // areaid
-                    data << uint32(itr->Unk2);              // unknown
-                    data << uint32(itr->Unk3);              // unknown
-                    data << uint32(itr->Unk4);              // unknown
-                    data << uint32(itr->points.size());     // POI points count
+                    data.WriteBits(itr->points.size(), 21);     // POI points count bits
+
+                    poiData << uint32(itr->FloorId);            // floor id
 
                     for (std::vector<QuestPOIPoint>::const_iterator itr2 = itr->points.begin(); itr2 != itr->points.end(); ++itr2)
                     {
-                        data << int32(itr2->x); // POI point x
-                        data << int32(itr2->y); // POI point y
+                        poiData << int32(itr2->x);              // POI point x
+                        poiData << int32(itr2->y);              // POI point y
                     }
+
+                    poiData << int32(itr->ObjectiveIndex);      // objective index 
+                    poiData << uint32(itr->Id);                 // POI index
+                    poiData << uint32(0);                       // unknown (new 5.x.x)
+                    poiData << uint32(0);                       // unknown (new 5.x.x)
+                    poiData << uint32(itr->MapId);              // mapid
+                    poiData << uint32(itr->points.size());      // POI points count
+                    poiData << uint32(itr->AreaId);             // areaid
+                    poiData << uint32(0);                       // unknown (new 5.x.x)
+                    poiData << uint32(itr->Unk4);               // unknown
+                    poiData << uint32(itr->Unk3);               // unknown
                 }
+
+                poiData << uint32(questId);                     // quest ID
+                poiData << uint32(POI->size());                 // POI count
             }
             else
             {
-                data << uint32(questId); // quest ID
-                data << uint32(0); // POI count
+                poiData << uint32(questId);
+                poiData << uint32(0);
+
+                data.WriteBits(0, 18);
             }
         }
         else
         {
-            data << uint32(questId); // quest ID
-            data << uint32(0); // POI count
+            poiData << uint32(questId);
+            poiData << uint32(0);
+
+            data.WriteBits(0, 18);
         }
     }
+
+    poiData << uint32(count);
+
+    data.FlushBits();
+    data.append(poiData);
 
     SendPacket(&data);
 }

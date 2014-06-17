@@ -97,7 +97,7 @@ enum FriendsResult
     FRIEND_UNKNOWN          = 0x1A                          // Unknown friend response from server
 };
 
-#define SOCIALMGR_FRIEND_LIMIT  50
+#define SOCIALMGR_FRIEND_LIMIT  100
 #define SOCIALMGR_IGNORE_LIMIT  50
 
 class PlayerSocial

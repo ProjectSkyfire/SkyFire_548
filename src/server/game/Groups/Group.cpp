@@ -1501,71 +1501,92 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     // if MemberSlot wasn't provided
     if (!slot)
     {
+        ObjectGuid GUID = uint64(0); // = player->GetGUID();
         ObjectGuid groupGuid = m_guid;
         ObjectGuid leaderGuid = uint64(0);
 
         WorldPacket data(SMSG_GROUP_LIST, 4 + 1 + 1 + 1 + 4 + 1 + 8 + 1 + 8 + 3);
-        data << int32(-1);
-        data << uint8(0x10);
-        data << uint8(0);
-        data << uint8(0);
-        data << uint32(m_counter++);
 
-        data.WriteBit(0);
-        data.WriteBit(groupGuid[5]);
-        data.WriteBits(0, 21);
-        data.WriteBit(groupGuid[7]);
+        data.WriteBit(groupGuid[0]);
+        data.WriteBit(leaderGuid[7]);
         data.WriteBit(leaderGuid[1]);
         data.WriteBit(0);
-        data.WriteBit(leaderGuid[5]);
-        data.WriteBit(groupGuid[0]);
-        data.WriteBit(groupGuid[4]);
-        data.WriteBit(leaderGuid[2]);
-        data.WriteBit(groupGuid[3]);
-        data.WriteBit(leaderGuid[0]);
-        data.WriteBit(leaderGuid[4]);
-        data.WriteBit(groupGuid[1]);
-        data.WriteBit(groupGuid[2]);
-        data.WriteBit(groupGuid[6]);
-        data.WriteBit(leaderGuid[3]);
+        data.WriteBit(groupGuid[7]);
         data.WriteBit(leaderGuid[6]);
-        data.WriteBit(leaderGuid[7]);
+        data.WriteBit(leaderGuid[5]);
+        data.WriteBits(0, 21);
+
+        data.WriteBit(leaderGuid[3]);
+        data.WriteBit(leaderGuid[0]);
         data.WriteBit(0);
+        data.WriteBit(groupGuid[5]);
+
+        // Jumping over the guid part for now
+
+        data.WriteBit(groupGuid[2]);
+        data.WriteBit(groupGuid[4]);
+        data.WriteBit(groupGuid[1]);
+        data.WriteBit(0);
+        data.WriteBit(leaderGuid[2]);
+        data.WriteBit(groupGuid[6]);
+
+        data.WriteBit(leaderGuid[4]);
+        data.WriteBit(groupGuid[3]);
+
+        // data.WriteBit(0);
         data.FlushBits();
 
-        data.WriteByteSeq(leaderGuid[1]);
-        data.WriteByteSeq(groupGuid[3]);
-        data.WriteByteSeq(leaderGuid[5]);
-        data.WriteByteSeq(groupGuid[2]);
+        // Writing in the guid's
+
         data.WriteByteSeq(leaderGuid[0]);
-        data.WriteByteSeq(groupGuid[6]);
-        data.WriteByteSeq(groupGuid[5]);
-        data.WriteByteSeq(groupGuid[4]);
-        data.WriteByteSeq(leaderGuid[2]);
-        data.WriteByteSeq(leaderGuid[3]);
-        data.WriteByteSeq(leaderGuid[6]);
-        data.WriteByteSeq(groupGuid[0]);
-        data.WriteByteSeq(leaderGuid[7]);
-        data.WriteByteSeq(groupGuid[7]);
-        data.WriteByteSeq(leaderGuid[4]);
+
+        // data.append(memberData);
+
         data.WriteByteSeq(groupGuid[1]);
+        data.WriteByteSeq(leaderGuid[4]);
+        data.WriteByteSeq(leaderGuid[2]);
+        data.WriteByteSeq(groupGuid[6]);
+        data.WriteByteSeq(groupGuid[4]);
+
+        data << uint8(0);
+        data << uint8(0);
+        data << int32(1);
+        // data << uint32(m_counter++);
+
+        data.WriteByteSeq(groupGuid[7]);
+        data.WriteByteSeq(leaderGuid[3]);
+        data.WriteByteSeq(leaderGuid[1]);
+
+        data << uint32(m_counter++);
+
+        data.WriteByteSeq(groupGuid[0]);
+        data.WriteByteSeq(groupGuid[2]);
+        data.WriteByteSeq(groupGuid[5]);
+        data.WriteByteSeq(groupGuid[3]);
+        data.WriteByteSeq(leaderGuid[7]);
+
+        data << uint8(1);
+
+        data.WriteByteSeq(leaderGuid[5]);
+        data.WriteByteSeq(leaderGuid[6]);
 
         player->GetSession()->SendPacket(&data);
         return;
+
     }
 
     if (player->GetGroup() != this)
         return;
 
-    uint8 groupPosition;
+    uint8 groupPosition = 0;
     uint8 i = 0;
 
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
-        if(citr->group != slot->group)
+        if (citr->group != slot->group)
             continue;
 
-        if(citr->guid == slot->guid)
+        if (citr->guid == slot->guid)
         {
             groupPosition = i;
             break;
@@ -1574,138 +1595,148 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
         i++;
     }
 
+    uint32 write_guid = 1;
+    uint32 dungen_raid = 1;
     ByteBuffer memberData;
     ObjectGuid groupGuid = m_guid;
     ObjectGuid leaderGuid = m_leaderGuid;
     ObjectGuid looterGuid = m_looterGuid;
-
+    ObjectGuid GUID = (playerGUID != leaderGuid ? 0 : playerGUID);
     WorldPacket data(SMSG_GROUP_LIST, 4 + 3 + 4 + 1 + 8 + 1 + 8 + 3 + (GetMembersCount() * (4 + 2 + 8)) + 1 + 8 + 2 + 4 + 4);
-    data << uint32(groupPosition);
-    data << uint8(m_groupType);                         // group type (flags in 3.3)
-    data << uint8(slot->group);
-    data << uint8(slot->roles);
-    data << uint32(m_counter++);                        // 3.3, value increases every time this packet gets sent
 
-    data.WriteBit(1);                                   // has dungeon and raid difficulty
-    data.WriteBit(groupGuid[5]);
-    data.WriteBits(GetMembersCount(), 21);
-    data.WriteBit(groupGuid[7]);
+    data.WriteBit(groupGuid[0]);
+    data.WriteBit(leaderGuid[7]);
     data.WriteBit(leaderGuid[1]);
+    data.WriteBit(dungen_raid);               // Has Dungen and raid difficulty. Needs more testing
+    data.WriteBit(groupGuid[7]); 
+    data.WriteBit(leaderGuid[6]);
+    data.WriteBit(leaderGuid[5]);
+    data.WriteBits(GetMembersCount(), 21);
 
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
+
         ObjectGuid memberGuid = citr->guid;
         std::string memberName = citr->name;
 
         Player* member = ObjectAccessor::FindPlayer(memberGuid);
+
 
         uint8 onlineState = member ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
         onlineState = onlineState | ((isBGGroup() || isBFGroup()) ? MEMBER_STATUS_PVP : 0);
 
         data.WriteBit(memberGuid[1]);
         data.WriteBit(memberGuid[2]);
-        data.WriteBit(memberGuid[4]);
-        data.WriteBit(memberGuid[6]);
-        data.WriteBit(memberGuid[0]);
-        data.WriteBit(memberGuid[3]);
-        data.WriteBits(memberName.size(), 6);
         data.WriteBit(memberGuid[5]);
+        data.WriteBit(memberGuid[6]);
+        data.WriteBits(memberName.size(), 6);
         data.WriteBit(memberGuid[7]);
+        data.WriteBit(memberGuid[3]);
+        data.WriteBit(memberGuid[0]);
+        data.WriteBit(memberGuid[4]);
 
-        // uint8 values need rechecking
         memberData.WriteByteSeq(memberGuid[6]);
         memberData.WriteByteSeq(memberGuid[3]);
-        memberData << uint8(citr->flags);               // See enum GroupMemberFlags
-        memberData.WriteByteSeq(memberGuid[2]);
-        memberData.WriteByteSeq(memberGuid[1]);
-        memberData << uint8(onlineState);               // online-state
-        memberData.WriteByteSeq(memberGuid[4]);
-        memberData.WriteByteSeq(memberGuid[5]);
-        memberData << uint8(citr->roles);               // Lfg Roles
-        memberData.WriteString(memberName);
-        memberData << uint8(citr->group);               // groupid
+        
+        memberData << uint8(citr->flags);
+        memberData << uint8(onlineState);
+        
         memberData.WriteByteSeq(memberGuid[7]);
+        memberData.WriteByteSeq(memberGuid[4]);
+        memberData.WriteByteSeq(memberGuid[1]);
+        memberData.WriteString(memberName);
+        memberData.WriteByteSeq(memberGuid[5]);
+        memberData.WriteByteSeq(memberGuid[2]);
+        
+        memberData << uint8(citr->roles);
+        
         memberData.WriteByteSeq(memberGuid[0]);
-    }
 
-    data.WriteBit(0);                                   // is LFG
-    data.WriteBit(leaderGuid[5]);
-    data.WriteBit(groupGuid[0]);
-    data.WriteBit(groupGuid[4]);
-    data.WriteBit(leaderGuid[2]);
-    data.WriteBit(groupGuid[3]);
-    data.WriteBit(leaderGuid[0]);
-    data.WriteBit(leaderGuid[4]);
-    data.WriteBit(groupGuid[1]);
-    data.WriteBit(groupGuid[2]);
-    data.WriteBit(groupGuid[6]);
+        memberData << uint8(citr->group);
+    }
     data.WriteBit(leaderGuid[3]);
-    data.WriteBit(leaderGuid[6]);
-    data.WriteBit(leaderGuid[7]);
+    data.WriteBit(leaderGuid[0]);
+    data.WriteBit(write_guid);
+    data.WriteBit(groupGuid[5]);
 
-    /*if (isLFGGroup())
+    if (write_guid)
     {
-    }*/
-
-    data.WriteBit(1);                                   // has loot mode
-
-    //if (hasLootMode)
-    {
-        data.WriteBit(looterGuid[3]);
-        data.WriteBit(looterGuid[7]);
-        data.WriteBit(looterGuid[4]);
-        data.WriteBit(looterGuid[5]);
-        data.WriteBit(looterGuid[6]);
-        data.WriteBit(looterGuid[0]);
-        data.WriteBit(looterGuid[1]);
-        data.WriteBit(looterGuid[2]);
+        data.WriteBit(GUID[6]);
+        data.WriteBit(GUID[4]);
+        data.WriteBit(GUID[5]);
+        data.WriteBit(GUID[2]);
+        data.WriteBit(GUID[1]);
+        data.WriteBit(GUID[0]);
+        data.WriteBit(GUID[7]);
+        data.WriteBit(GUID[3]);
     }
+
+    data.WriteBit(groupGuid[2]);
+    data.WriteBit(groupGuid[4]);
+    data.WriteBit(groupGuid[1]);
+    data.WriteBit(0);
+    data.WriteBit(leaderGuid[2]);
+    data.WriteBit(groupGuid[6]);
+
+    data.WriteBit(leaderGuid[4]);
+    data.WriteBit(groupGuid[3]);
 
     data.FlushBits();
 
-    //if (hasLootMode)
+    data.WriteByteSeq(leaderGuid[0]);
+    if (dungen_raid)
     {
-        data.WriteByteSeq(looterGuid[3]);
-        data.WriteByteSeq(looterGuid[5]);
-        data << uint8(m_lootMethod);                    // loot method
-        data.WriteByteSeq(looterGuid[0]);
-        data.WriteByteSeq(looterGuid[1]);
-        data.WriteByteSeq(looterGuid[2]);
-        data.WriteByteSeq(looterGuid[4]);
-        data.WriteByteSeq(looterGuid[6]);
-        data << uint8(m_lootThreshold);                 // loot threshold
-        data.WriteByteSeq(looterGuid[7]);
+        data << uint32(m_raidDifficulty);               // Raid Difficulty. Needs more testing 
+        data << uint32(m_dungeonDifficulty);            // Dungeon Difficulty. Needs more testing
     }
 
-    data.WriteByteSeq(leaderGuid[1]);
-
-    /*if (isLFGGroup())
-    {
-    }*/
-
-    data.WriteByteSeq(groupGuid[3]);
     data.append(memberData);
 
-    //if (hasInstanceDifficulty)
+    data.WriteByteSeq(groupGuid[1]);
+    data.WriteByteSeq(leaderGuid[4]);
+    data.WriteByteSeq(leaderGuid[2]);
+    if (write_guid)
     {
-        data << uint32(m_raidDifficulty);               // Raid Difficulty
-        data << uint32(m_dungeonDifficulty);            // Dungeon Difficulty
+        data << uint8(m_lootMethod);
+
+        data.WriteByteSeq(GUID[0]);
+        data.WriteByteSeq(GUID[5]);
+        data.WriteByteSeq(GUID[4]);
+        data.WriteByteSeq(GUID[3]);
+        data.WriteByteSeq(GUID[2]);
+
+        data << uint8(m_lootThreshold);
+
+        data.WriteByteSeq(GUID[7]);
+        data.WriteByteSeq(GUID[1]);
+        data.WriteByteSeq(GUID[6]);
     }
 
-    data.WriteByteSeq(leaderGuid[5]);
-    data.WriteByteSeq(groupGuid[2]);
-    data.WriteByteSeq(leaderGuid[0]);
+
     data.WriteByteSeq(groupGuid[6]);
-    data.WriteByteSeq(groupGuid[5]);
     data.WriteByteSeq(groupGuid[4]);
-    data.WriteByteSeq(leaderGuid[2]);
-    data.WriteByteSeq(leaderGuid[3]);
-    data.WriteByteSeq(leaderGuid[6]);
-    data.WriteByteSeq(groupGuid[0]);
-    data.WriteByteSeq(leaderGuid[7]);
+
+    data << uint8(0); // Unk 1. Needs more testing
+    data << uint8(0); // Unk 2. Needs more testing
+    data << uint32(groupPosition);
+
     data.WriteByteSeq(groupGuid[7]);
-    data.WriteByteSeq(leaderGuid[4]);
-    data.WriteByteSeq(groupGuid[1]);
+    data.WriteByteSeq(leaderGuid[3]);
+    data.WriteByteSeq(leaderGuid[1]);
+
+
+    data << uint32(m_counter++);
+
+    data.WriteByteSeq(groupGuid[0]);
+    data.WriteByteSeq(groupGuid[2]);
+    data.WriteByteSeq(groupGuid[5]);
+    data.WriteByteSeq(groupGuid[3]);
+    data.WriteByteSeq(leaderGuid[7]);
+
+    data << uint8(m_groupType);
+
+    data.WriteByteSeq(leaderGuid[5]);
+    data.WriteByteSeq(leaderGuid[6]);
 
     player->GetSession()->SendPacket(&data);
 
