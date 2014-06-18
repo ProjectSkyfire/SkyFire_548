@@ -172,6 +172,7 @@ class Group
             uint8       group;
             uint8       flags;
             uint8       roles;
+            bool        readyCheckHasResponded;
         };
         typedef std::list<MemberSlot> MemberSlotList;
         typedef MemberSlotList::const_iterator member_citerator;
@@ -227,6 +228,8 @@ class Group
         bool IsLeader(uint64 guid) const;
         uint64 GetMemberGUID(const std::string& name);
         bool IsAssistant(uint64 guid) const;
+        bool ReadyCheckInProgress() const { return _readyCheckInProgress; }
+        bool ReadyCheckAllResponded() const;
 
         Player* GetInvited(uint64 guid) const;
         Player* GetInvited(const std::string& name) const;
@@ -257,6 +260,9 @@ class Group
         void SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag);
         void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
 
+        void SetMemberRole(uint64 guid, uint32 role);
+        uint32 GetMemberRole(uint64 guid) const;
+
         Difficulty GetDifficulty(bool isRaid) const;
         Difficulty GetDungeonDifficulty() const;
         Difficulty GetRaidDifficulty() const;
@@ -266,12 +272,17 @@ class Group
         bool InCombatToInstance(uint32 instanceId);
         void ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo);
 
+        void ReadyCheck(bool state) { _readyCheckInProgress = state; }
+        void ReadyCheckMemberHasResponded(uint64 guid);
+        void ReadyCheckResetResponded();
+
         // -no description-
         //void SendInit(WorldSession* session);
         void SendTargetIconList(WorldSession* session);
         void SendUpdate();
         void SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot = NULL);
         void UpdatePlayerOutOfRange(Player* player);
+        void SendReadyCheckCompleted();
                                                             // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket* packet, bool ignorePlayersInBGRaid, int group = -1, uint64 ignore = 0);
         void BroadcastAddonMessagePacket(WorldPacket* packet, const std::string& prefix, bool ignorePlayersInBGRaid, int group = -1, uint64 ignore = 0);
@@ -346,5 +357,6 @@ class Group
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST
         uint32              m_maxEnchantingLevel;
         uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
+        bool                _readyCheckInProgress;
 };
 #endif

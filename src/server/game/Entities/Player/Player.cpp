@@ -706,6 +706,7 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
     m_chiPowerRegenTimerCount = 0;
     m_focusRegenTimerCount = 0;
     m_weaponChangeTimer = 0;
+    _readyCheckTimer = 0;
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
@@ -1837,6 +1838,12 @@ void Player::Update(uint32 p_time)
 
     // group update
     SendUpdateToOutOfRangeGroupMembers();
+
+    if (_readyCheckTimer > 0)
+        if (p_time >= _readyCheckTimer)
+            ReadyCheckComplete();
+        else
+            _readyCheckTimer -= p_time;
 
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
@@ -27841,6 +27848,25 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 bool Player::CanUseMastery() const
 {
     return HasSpell(MasterySpells[getClass()]);
+}
+
+void Player::ReadyCheckComplete()
+{
+    Group* group = GetGroup();
+    if (!group)
+        return;
+
+    if (!group->IsLeader(GetGUID()))
+        return;
+
+    if (!group->ReadyCheckInProgress())
+        return;
+
+    _readyCheckTimer = 0;
+
+    group->ReadyCheck(false);
+    group->ReadyCheckResetResponded();
+    group->SendReadyCheckCompleted();
 }
 
 void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::ExtraMovementStatusElement* extras /*= NULL*/)

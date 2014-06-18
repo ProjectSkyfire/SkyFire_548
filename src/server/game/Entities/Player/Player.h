@@ -2428,6 +2428,7 @@ class Player : public Unit, public GridObject<Player>
         void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
         Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
+        void SetReadyCheckTimer(uint32 timer) { _readyCheckTimer = timer; }
 
         // Battleground / Battlefield Group System
         void SetBattlegroundOrBattlefieldRaid(Group* group, int8 subgroup = -1);
@@ -2528,6 +2529,8 @@ class Player : public Unit, public GridObject<Player>
         bool SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot);
         VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
+
+        void ReadyCheckComplete();
 
     protected:
         // Gamemaster whisper whitelist
@@ -2750,6 +2753,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 m_drunkTimer;
         uint32 m_weaponChangeTimer;
+        uint32 _readyCheckTimer;
 
         uint32 m_zoneUpdateId;
         uint32 m_zoneUpdateTimer;
