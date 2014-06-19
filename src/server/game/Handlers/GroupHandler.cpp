@@ -939,8 +939,9 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& /*recvData*/)
 
     group->BroadcastPacket(&data, false);
 
-    group->OfflineReadyCheck();
     group->ReadyCheck(true);
+    group->ReadyCheckMemberHasResponded(playerGuid);
+    group->OfflineReadyCheck();
 
     // leader keeps track of ready check timer
     GetPlayer()->SetReadyCheckTimer(readyCheckDuration);

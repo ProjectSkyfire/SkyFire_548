@@ -1885,6 +1885,8 @@ void Group::OfflineReadyCheck()
             data.WriteByteSeq(groupGuid[7]);
 
             BroadcastPacket(&data, false);
+
+            ReadyCheckMemberHasResponded(playerGuid);
         }
     }
 }
