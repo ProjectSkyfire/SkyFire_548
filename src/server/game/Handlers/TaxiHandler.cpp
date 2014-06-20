@@ -315,7 +315,7 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
     nodes.resize(2);
 
     recvData >> nodes[0] >> nodes[1];
-		
+        
     guid[4] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
