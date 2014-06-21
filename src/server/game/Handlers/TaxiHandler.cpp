@@ -314,7 +314,7 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
     std::vector<uint32> nodes;
     nodes.resize(2);
 
-    recvData >> nodes[0] >> nodes[1];
+    recvData >> nodes[1] >> nodes[0];
         
     guid[4] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
