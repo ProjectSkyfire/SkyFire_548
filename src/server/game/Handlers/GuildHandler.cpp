@@ -346,7 +346,7 @@ void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
 {
-    uint32 length = recvPacket.ReadBits(12);
+    uint32 length = recvPacket.ReadBits(11);
     std::string info = recvPacket.ReadString(length);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_INFO_TEXT [%s]: %s", GetPlayerInfo().c_str(), info.c_str());
@@ -832,24 +832,24 @@ void WorldSession::HandleGuildNewsUpdateStickyOpcode(WorldPacket& recvPacket)
 
     recvPacket >> newsId;
 
-    guid[3] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    sticky = recvPacket.ReadBit();
     guid[2] = recvPacket.ReadBit();
     guid[7] = recvPacket.ReadBit();
-    sticky = recvPacket.ReadBit();
     guid[5] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
-    guid[6] = recvPacket.ReadBit();
-    guid[1] = recvPacket.ReadBit();
     guid[4] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[7]);
-    recvPacket.ReadByteSeq(guid[2]);
     recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[0]);
     recvPacket.ReadByteSeq(guid[1]);
     recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[7]);
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleNewsSetSticky(this, newsId, sticky);
@@ -859,6 +859,30 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
 {
     uint8 nameLength = recvPacket.ReadBits(9);
     std::string playerName = recvPacket.ReadString(nameLength);
+
+    normalizePlayerName(playerName);
+
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSetNewGuildMaster(this, playerName);
+}
+
+
+void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
+{
+    WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * 6 * 5);
+    for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeWeeklyMaximum[i]);
+
+    for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeGoldReward[i]);
+
+    for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeMaxLevelGoldReward[i]);
+
+    for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeXPReward[i]);
+
+    for (int i = 0; i < 6; i++)
+        data << uint32(0); // Progress - NYI
+    SendPacket(&data);
 }

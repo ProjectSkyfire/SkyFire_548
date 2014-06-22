@@ -269,6 +269,12 @@ struct GuildReward
 
 uint32 const MinNewsItemLevel[MAX_CONTENT] = { 61, 90, 200, 353 };
 
+// GuildChallengeInfo
+const uint32 GuildChallengeWeeklyMaximum[] = { 0, 7, 1, 3, 15, 3 };
+const uint32 GuildChallengeGoldReward[] = { 0, 125, 500, 250, 125, 250 };
+const uint32 GuildChallengeMaxLevelGoldReward[] = { 0, 250, 1000, 500, 250, 500 };
+const uint32 GuildChallengeXPReward[] = { 0, 300000, 3000000, 1500000, 50000, 1000000 };
+
 // Emblem info
 class EmblemInfo
 {

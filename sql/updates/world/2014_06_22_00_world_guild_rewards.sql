@@ -1,7 +1,6 @@
 DELETE FROM guild_rewards;
 ALTER TABLE guild_rewards DROP COLUMN achievement;
 ALTER TABLE guild_rewards ADD COLUMN achievements VARCHAR(256) NOT NULL DEFAULT "" AFTER price;
-DELETE FROM guild_rewards;
 
 INSERT INTO guild_rewards (entry, standing, racemask, price, achievements) VALUES
 (69209, 4, -1, 1250000, ""),
