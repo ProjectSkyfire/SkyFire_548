@@ -801,7 +801,7 @@ void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
         for (uint32 i = 0; i < rewards.size(); i++)
         {
             for (uint32 j = 0; j < rewards[i].Achievements.size(); j++)
-                data << rewards[i].Achievements[j];
+                data << uint32(rewards[i].Achievements[j]);
 
             data << int32(rewards[i].Racemask);
             data << uint32(rewards[i].Entry);
