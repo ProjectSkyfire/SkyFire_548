@@ -89,7 +89,6 @@ SpellDestination::SpellDestination(WorldObject const& wObj)
     _position.SetOrientation(wObj.GetOrientation());
 }
 
-
 SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0), m_strTarget()
 {
     m_objectTarget = NULL;
@@ -266,7 +265,6 @@ GameObject* SpellCastTargets::GetGOTarget() const
         return m_objectTarget->ToGameObject();
     return NULL;
 }
-
 
 void SpellCastTargets::SetGOTarget(GameObject* target)
 {
@@ -2697,7 +2695,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         // Select rank for aura with level requirements only in specific cases
         // Unit has to be target only of aura effect, both caster and target have to be players, target has to be other than unit target
         SpellInfo const* aurSpellInfo = m_spellInfo;
-        int32 basePoints[3];
+        int32 basePoints[MAX_SPELL_EFFECTS];
+
         if (scaleAura)
         {
             aurSpellInfo = m_spellInfo->GetAuraRankForLevel(unitTarget->getLevel());
@@ -4304,8 +4303,6 @@ void Spell::SendSpellGo()
     bool hasRunesStateAfter = (castFlags & CAST_FLAG_RUNE_LIST) && m_caster->GetTypeId() == TYPEID_PLAYER;
     uint8 predictedPowerCount = castFlags & CAST_FLAG_POWER_LEFT_SELF ? 1 : 0;
     uint8 runeCooldownPassedCount = (castFlags & CAST_FLAG_RUNE_LIST) && m_caster->GetTypeId() == TYPEID_PLAYER ? MAX_RUNES : 0;
-
-
 
     // This function also fill data for channeled spells:
     // m_needAliveTargetMask req for stop channelig if one target die

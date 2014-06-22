@@ -995,7 +995,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                         // item shall not be displayed.
                         continue;
 
-                    loot.items[i].WriteBitDataPart(permission, LOOT_SLOT_TYPE_ALLOW_LOOT, data);
+                    loot.items[i].WriteBitDataPart(permission, true, data);
                     loot.items[i].WriteBasicDataPart(LOOT_SLOT_TYPE_ALLOW_LOOT, i, &itemBuff);
                     ++itemsShown;
                 }

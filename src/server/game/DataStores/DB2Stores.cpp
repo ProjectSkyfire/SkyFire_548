@@ -129,13 +129,13 @@ void LoadDB2Stores(std::string const& dataPath)
     }
 
     // Check loaded DB2 files proper version
-    if (!sBroadcastTextStore.LookupEntry(77161)     ||       // last broadcast text added in 5.4.8 (180291)
-        !sItemStore.LookupEntry(112353)             ||       // last item added in 5.4.8 (18019)
-        !sItemExtendedCostStore.LookupEntry(5280)   ||       // last item extended cost added in 5.4.8 (18019)
-        !sQuestPackageItemStore.LookupEntry(2256)   ||       // last quest package item in 5.4.8 (18019)
-        !sSceneScriptStore.LookupEntry(11156))               // last scene script added in 5.4.8 (18019)
+    if (!sBroadcastTextStore.LookupEntry(77161)     ||       // last broadcast text added in 5.4.8 (18414)
+        !sItemStore.LookupEntry(112353)             ||       // last item added in 5.4.8 (18414)
+        !sItemExtendedCostStore.LookupEntry(5280)   ||       // last item extended cost added in 5.4.8 (18414)
+        !sQuestPackageItemStore.LookupEntry(2256)   ||       // last quest package item in 5.4.8 (18414)
+        !sSceneScriptStore.LookupEntry(11156))               // last scene script added in 5.4.8 (18414)
     {
-        TC_LOG_ERROR("misc", "You have _outdated_ DB2 files, Please extract correct db2 files from client 5.4.7 18019.");
+        TC_LOG_ERROR("misc", "You have _outdated_ DB2 files, Please extract correct db2 files from client 5.4.8 18414.");
         exit(1);
     }
 
