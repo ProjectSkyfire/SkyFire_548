@@ -675,22 +675,22 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
 {
     ObjectGuid mailbox;
 
+    mailbox[4] = recvData.ReadBit();
     mailbox[5] = recvData.ReadBit();
-    mailbox[3] = recvData.ReadBit();
-    mailbox[6] = recvData.ReadBit();
+    mailbox[2] = recvData.ReadBit();
+    mailbox[7] = recvData.ReadBit();
     mailbox[0] = recvData.ReadBit();
     mailbox[1] = recvData.ReadBit();
-    mailbox[4] = recvData.ReadBit();
-    mailbox[7] = recvData.ReadBit();
-    mailbox[2] = recvData.ReadBit();
+    mailbox[3] = recvData.ReadBit();
+    mailbox[6] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(mailbox[4]);
-    recvData.ReadByteSeq(mailbox[7]);
     recvData.ReadByteSeq(mailbox[3]);
     recvData.ReadByteSeq(mailbox[5]);
-    recvData.ReadByteSeq(mailbox[6]);
     recvData.ReadByteSeq(mailbox[0]);
+    recvData.ReadByteSeq(mailbox[6]);
+    recvData.ReadByteSeq(mailbox[4]);
     recvData.ReadByteSeq(mailbox[1]);
+    recvData.ReadByteSeq(mailbox[7]);
     recvData.ReadByteSeq(mailbox[2]);
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
