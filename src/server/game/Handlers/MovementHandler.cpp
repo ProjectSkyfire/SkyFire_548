@@ -195,29 +195,29 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "MSG_MOVE_TELEPORT_ACK");
+    TC_LOG_DEBUG("network", "CMSG_MOVE_TELEPORT_ACK");
 
     ObjectGuid guid;
     uint32 flags, time;
-    recvPacket >> flags >> time;
+    recvPacket >> time >> flags;
 
     guid[0] = recvPacket.ReadBit();
     guid[7] = recvPacket.ReadBit();
-    guid[6] = recvPacket.ReadBit();
-    guid[2] = recvPacket.ReadBit();
-    guid[5] = recvPacket.ReadBit();
-    guid[1] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
     guid[3] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[0]);
     recvPacket.ReadByteSeq(guid[1]);
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[7]);
     recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[0]);
     recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[3]);
 
     TC_LOG_DEBUG("network", "Guid " UI64FMTD, uint64(guid));
     TC_LOG_DEBUG("network", "Flags %u, time %u", flags, time/IN_MILLISECONDS);
@@ -457,7 +457,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
     };
 
     switch (opcode)
-    {/*
+    {
         case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:        move_type = MOVE_WALK;        break;
         case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:         move_type = MOVE_RUN;         break;
         case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK:    move_type = MOVE_RUN_BACK;    break;
@@ -466,7 +466,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
         case CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK:         move_type = MOVE_TURN_RATE;   break;
         case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:      move_type = MOVE_FLIGHT;      break;
         case CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK: move_type = MOVE_FLIGHT_BACK; break;
-        case CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK:        move_type = MOVE_PITCH_RATE;  break;*/
+        case CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK:        move_type = MOVE_PITCH_RATE;  break;
         default:
             TC_LOG_ERROR("network", "WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
             return;

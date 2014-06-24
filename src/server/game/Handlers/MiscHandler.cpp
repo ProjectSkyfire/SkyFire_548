@@ -98,31 +98,30 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
     uint8 boxTextLength = 0;
     std::string code = "";
 
-    recvData >> menuId >> gossipListId;
+    recvData >> gossipListId >> menuId;
 
-    guid[2] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-
     boxTextLength = recvData.ReadBits(8);
+    guid[2] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
 
     if (_player->PlayerTalkClass->IsGossipOptionCoded(gossipListId))
         code = recvData.ReadString(boxTextLength);
 
-    recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[4]);
 
     Creature* unit = NULL;
     GameObject* go = NULL;
@@ -559,8 +558,8 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
         reason = 2;                                         // FIXME - Need the correct value
 
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-    data.WriteBit(instantLogout);
     data << uint32(reason);
+    data.WriteBit(instantLogout);
     data.FlushBits();
     SendPacket(&data);
 
@@ -628,7 +627,7 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvData)
     if (recvData.size() == 1)
     {
         bool newPvPStatus;
-        recvData >> newPvPStatus;
+        newPvPStatus = recvData.ReadBit();
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
     }
@@ -679,23 +678,23 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[3] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
 
     _player->SetSelection(guid);
 }
@@ -724,7 +723,6 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recvData)
     std::string friendNote;
 
     recvData >> friendName;
-
     recvData >> friendNote;
 
     if (!normalizePlayerName(friendName))
@@ -1259,23 +1257,23 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
     uint8 slotId;
 
     recvData >> slotId;
-
-    buttonStream[4] = recvData.ReadBit();
+	
     buttonStream[7] = recvData.ReadBit();
-    buttonStream[6] = recvData.ReadBit();
-    buttonStream[3] = recvData.ReadBit();
-    buttonStream[2] = recvData.ReadBit();
     buttonStream[0] = recvData.ReadBit();
     buttonStream[5] = recvData.ReadBit();
+    buttonStream[2] = recvData.ReadBit();
     buttonStream[1] = recvData.ReadBit();
+    buttonStream[6] = recvData.ReadBit();
+    buttonStream[3] = recvData.ReadBit();
+    buttonStream[4] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(buttonStream[3]);
     recvData.ReadByteSeq(buttonStream[6]);
-    recvData.ReadByteSeq(buttonStream[1]);
-    recvData.ReadByteSeq(buttonStream[5]);
     recvData.ReadByteSeq(buttonStream[7]);
-    recvData.ReadByteSeq(buttonStream[4]);
+    recvData.ReadByteSeq(buttonStream[3]);
+    recvData.ReadByteSeq(buttonStream[5]);
     recvData.ReadByteSeq(buttonStream[2]);
+    recvData.ReadByteSeq(buttonStream[1]);
+    recvData.ReadByteSeq(buttonStream[4]);
     recvData.ReadByteSeq(buttonStream[0]);
 
     ActionButtonPACKET* button = reinterpret_cast<ActionButtonPACKET*>(&buttonStream);
@@ -2146,28 +2144,28 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
     ObjectGuid* guids = new ObjectGuid[count];
     for (uint32 i = 0; i < count; ++i)
     {
-        guids[i][2] = recvPacket.ReadBit();
-        guids[i][4] = recvPacket.ReadBit();
-        guids[i][3] = recvPacket.ReadBit();
         guids[i][6] = recvPacket.ReadBit();
-        guids[i][7] = recvPacket.ReadBit();
-        guids[i][1] = recvPacket.ReadBit();
-        guids[i][5] = recvPacket.ReadBit();
+        guids[i][3] = recvPacket.ReadBit();
         guids[i][0] = recvPacket.ReadBit();
+        guids[i][1] = recvPacket.ReadBit();
+        guids[i][4] = recvPacket.ReadBit();
+        guids[i][5] = recvPacket.ReadBit();
+        guids[i][7] = recvPacket.ReadBit();
+        guids[i][2] = recvPacket.ReadBit();
     }
 
     uint32 entry;
     for (uint32 i = 0; i < count; ++i)
     {
-        recvPacket.ReadByteSeq(guids[i][5]);
-        recvPacket.ReadByteSeq(guids[i][4]);
-        recvPacket.ReadByteSeq(guids[i][3]);
-        recvPacket >> entry;
-        recvPacket.ReadByteSeq(guids[i][7]);
-        recvPacket.ReadByteSeq(guids[i][0]);
-        recvPacket.ReadByteSeq(guids[i][2]);
         recvPacket.ReadByteSeq(guids[i][1]);
+        recvPacket >> entry;
+        recvPacket.ReadByteSeq(guids[i][0]);
+        recvPacket.ReadByteSeq(guids[i][5]);
         recvPacket.ReadByteSeq(guids[i][6]);
+        recvPacket.ReadByteSeq(guids[i][4]);
+        recvPacket.ReadByteSeq(guids[i][7]);
+        recvPacket.ReadByteSeq(guids[i][2]);
+        recvPacket.ReadByteSeq(guids[i][3]);
 
         switch (type)
         {
@@ -2220,8 +2218,8 @@ void WorldSession::SendBroadcastText(uint32 entry)
 
     WorldPacket data(SMSG_DB_REPLY);
     data << uint32(entry);
-    data << uint32(DB2_REPLY_BROADCAST);
     data << uint32(0);
+    data << uint32(DB2_REPLY_BROADCAST);
     data << uint32(buffer.size());
     data.append(buffer);
 

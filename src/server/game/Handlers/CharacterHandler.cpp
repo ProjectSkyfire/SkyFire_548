@@ -234,8 +234,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
 
-        bitBuffer.WriteBit(1);
-        bitBuffer.WriteBits(0, 21); // unk loop at the end - { uint32(); uint8; }
+        bitBuffer.WriteBits(0, 21); // factionChangeRestrictions - raceId / mask loop
         bitBuffer.WriteBits(charCount, 16);
 
         do
@@ -252,15 +251,17 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             if (!sWorld->HasCharacterNameData(guidLow)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
+        bitBuffer.WriteBit(1); // Sucess
         bitBuffer.FlushBits();
     }
     else
     {
-        bitBuffer.WriteBit(1);
         bitBuffer.WriteBits(0, 21);
         bitBuffer.WriteBits(0, 16);
+        bitBuffer.WriteBit(1); // Success
         bitBuffer.FlushBits();
     }
 
@@ -298,8 +299,8 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
     uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
 
-    recvData >> outfitId >> facialHair >> skin >> race_;
-    recvData >> hairStyle >> class_ >> face >> gender >> hairColor;
+    recvData >> outfitId >> hairStyle >> class_ >> skin;
+    recvData >> face >> race_ >> facialHair >> gender >> hairColor;
 
     uint32 nameLength = recvData.ReadBits(6);
     uint8 unk = recvData.ReadBit();
@@ -729,22 +730,22 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[6] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
 
+    recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[5]);
 
     TC_LOG_DEBUG("network", "Character (Guid: %u) deleted", GUID_LOPART(guid));
@@ -826,23 +827,23 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 
     recvData >> unk;
 
-    playerGuid[7] = recvData.ReadBit();
-    playerGuid[6] = recvData.ReadBit();
-    playerGuid[0] = recvData.ReadBit();
-    playerGuid[4] = recvData.ReadBit();
-    playerGuid[5] = recvData.ReadBit();
-    playerGuid[2] = recvData.ReadBit();
-    playerGuid[3] = recvData.ReadBit();
     playerGuid[1] = recvData.ReadBit();
+    playerGuid[4] = recvData.ReadBit();
+    playerGuid[7] = recvData.ReadBit();
+    playerGuid[3] = recvData.ReadBit();
+    playerGuid[2] = recvData.ReadBit();
+    playerGuid[6] = recvData.ReadBit();
+    playerGuid[5] = recvData.ReadBit();
+    playerGuid[0] = recvData.ReadBit();
 
     recvData.ReadByteSeq(playerGuid[5]);
-    recvData.ReadByteSeq(playerGuid[0]);
     recvData.ReadByteSeq(playerGuid[1]);
+    recvData.ReadByteSeq(playerGuid[0]);
     recvData.ReadByteSeq(playerGuid[6]);
-    recvData.ReadByteSeq(playerGuid[7]);
     recvData.ReadByteSeq(playerGuid[2]);
-    recvData.ReadByteSeq(playerGuid[3]);
     recvData.ReadByteSeq(playerGuid[4]);
+    recvData.ReadByteSeq(playerGuid[7]);
+    recvData.ReadByteSeq(playerGuid[3]);
 
     //WorldObject* player = ObjectAccessor::GetWorldObject(*GetPlayer(), playerGuid);
     TC_LOG_DEBUG("network", "Character (Guid: %u) logging in", GUID_LOPART(playerGuid));
@@ -898,12 +899,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->GetMotionMaster()->Initialize();
     pCurrChar->SendDungeonDifficulty(false);
 
-    WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
+    WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 4 + 4 + 4 + 4 + 4);
+    data << pCurrChar->GetPositionX();
     data << pCurrChar->GetOrientation();
+    data << pCurrChar->GetPositionY();
     data << pCurrChar->GetMapId();
     data << pCurrChar->GetPositionZ();
-    data << pCurrChar->GetPositionX();
-    data << pCurrChar->GetPositionY();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -911,40 +912,40 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
     bool feedbackSystem = true;
-    bool parentalControls = false;
+    bool excessiveWarning = false;
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 1 + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
-    data << uint8(2);
-    data << uint32(0);                  // Scroll of Resurrection daily limit
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 4 + 4 + 4 + 1 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
+    data << uint32(0);                  // Scroll of Resurrection per day?
+    data << uint32(0);                  // Scroll of Resurrection current
     data << uint32(0);
-    data << uint32(1);
-    data << uint32(14);
+    data << uint8(2);
+    data << uint32(0);
 
     data.WriteBit(1);
-    data.WriteBit(parentalControls);    // parental controls
-    data.WriteBit(1);                   // show ingame shop icon
-    data.WriteBit(0);                   // Recruit a Friend button
-    data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
-    data.WriteBit(1);
-    data.WriteBit(0);                   // voice chat
     data.WriteBit(1);                   // ingame shop status (0 - "The Shop is temporarily unavailable.")
+    data.WriteBit(1);
+    data.WriteBit(0);                   // Recruit a Friend button
+    data.WriteBit(0);                   // server supports voice chat
+    data.WriteBit(1);                   // show ingame shop icon
     data.WriteBit(0);                   // Scroll of Resurrection button
+    data.WriteBit(excessiveWarning);    // excessive play time warning
     data.WriteBit(0);                   // ingame shop parental control (1 - "Feature has been disabled by Parental Controls.")
+    data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
     data.FlushBits();
+
+    if (excessiveWarning)
+    {
+        data << uint32(0);              // excessive play time warning after period(in seconds)
+        data << uint32(0);
+        data << uint32(0);
+    }
 
     if (feedbackSystem)
     {
-        data << uint32(60000);
         data << uint32(0);
         data << uint32(1);
         data << uint32(10);
-    }
-
-    if (parentalControls)
-    {
-        data << uint32(0);
-        data << uint32(0);              // excessive play time warning after period(in seconds)
-        data << uint32(0);
+        data << uint32(60000);
     }
 
     SendPacket(&data);
@@ -1013,20 +1014,19 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     SendTimezoneInformation();
 
-    data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4+4);
-    data << uint64(0);
-    SendPacket(&data);
+    HotfixData const& hotfix = sObjectMgr->GetHotfixData();
 
     data.Initialize(SMSG_HOTFIX_INFO);
-    HotfixData const& hotfix = sObjectMgr->GetHotfixData();
-    data.WriteBits(hotfix.size(), 22);
+    data.WriteBits(hotfix.size(), 20);
     data.FlushBits();
+
     for (uint32 i = 0; i < hotfix.size(); ++i)
     {
-        data << uint32(hotfix[i].Type);
         data << uint32(hotfix[i].Timestamp);
         data << uint32(hotfix[i].Entry);
+        data << uint32(hotfix[i].Type);
     }
+
     SendPacket(&data);
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
@@ -2413,28 +2413,28 @@ void WorldSession::HandleReorderCharacters(WorldPacket& recvData)
 
     for (uint8 i = 0; i < charactersCount; ++i)
     {
-        guids[i][3] = recvData.ReadBit();
-        guids[i][7] = recvData.ReadBit();
         guids[i][4] = recvData.ReadBit();
-        guids[i][1] = recvData.ReadBit();
         guids[i][2] = recvData.ReadBit();
-        guids[i][5] = recvData.ReadBit();
-        guids[i][0] = recvData.ReadBit();
+        guids[i][7] = recvData.ReadBit();
         guids[i][6] = recvData.ReadBit();
+        guids[i][0] = recvData.ReadBit();
+        guids[i][5] = recvData.ReadBit();
+        guids[i][3] = recvData.ReadBit();
+        guids[i][1] = recvData.ReadBit();
     }
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     for (uint8 i = 0; i < charactersCount; ++i)
     {
-        recvData.ReadByteSeq(guids[i][4]);
-        recvData.ReadByteSeq(guids[i][7]);
-        recvData.ReadByteSeq(guids[i][0]);
-        recvData.ReadByteSeq(guids[i][2]);
-        recvData >> position;
-        recvData.ReadByteSeq(guids[i][6]);
-        recvData.ReadByteSeq(guids[i][3]);
         recvData.ReadByteSeq(guids[i][1]);
+        recvData.ReadByteSeq(guids[i][2]);
+        recvData.ReadByteSeq(guids[i][7]);
         recvData.ReadByteSeq(guids[i][5]);
+        recvData.ReadByteSeq(guids[i][4]);
+        recvData.ReadByteSeq(guids[i][0]);
+        recvData.ReadByteSeq(guids[i][3]);
+        recvData.ReadByteSeq(guids[i][6]);
+        recvData >> position;
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_LIST_SLOT);
         stmt->setUInt8(0, position);

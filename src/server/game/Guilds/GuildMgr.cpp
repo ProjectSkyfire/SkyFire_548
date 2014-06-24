@@ -361,7 +361,6 @@ void GuildMgr::LoadGuilds()
         }
     }
 
-
     // 8. Load all guild bank tabs
     TC_LOG_INFO("server.loading", "Loading guild bank tabs...");
     {
@@ -521,7 +520,7 @@ void GuildMgr::LoadGuildRewards()
     uint32 oldMSTime = getMSTime();
 
     //                                                 0     1         2         3      4
-    QueryResult result  = WorldDatabase.Query("SELECT entry, standing, racemask, price, achievement FROM guild_rewards");
+    QueryResult result  = WorldDatabase.Query("SELECT entry, standing, racemask, price, achievements FROM guild_rewards");
 
     if (!result)
     {
@@ -535,25 +534,34 @@ void GuildMgr::LoadGuildRewards()
     {
         GuildReward reward;
         Field* fields = result->Fetch();
-        reward.Entry         = fields[0].GetUInt32();
-        reward.Standing      = fields[1].GetUInt8();
-        reward.Racemask      = fields[2].GetInt32();
-        reward.Price         = fields[3].GetUInt64();
-        reward.Achievements.push_back(fields[4].GetUInt32()); // Todo: Load as an array
+        reward.Entry            = fields[0].GetUInt32();
+        reward.Standing         = fields[1].GetUInt8();
+        reward.Racemask         = fields[2].GetInt32();
+        reward.Price            = fields[3].GetUInt64();
+        char const* achivements = fields[4].GetCString();
+
+        if (strlen(achivements))
+        {
+            Tokenizer tokenizer(achivements, ' ');
+
+            for (Tokenizer::const_iterator iter = tokenizer.begin(); iter != tokenizer.end(); iter++)
+            {
+                uint32 achivementId = atoi(*iter);
+
+                if (!sAchievementMgr->GetAchievement(achivementId))
+                {
+                    TC_LOG_ERROR("server.loading", "Guild rewards constains not existing achievement entry %u", achivementId);
+                    continue;
+                }
+
+                reward.Achievements.push_back(achivementId);
+            }
+        }
 
         if (!sObjectMgr->GetItemTemplate(reward.Entry))
         {
             TC_LOG_ERROR("server.loading", "Guild rewards constains not existing item entry %u", reward.Entry);
             continue;
-        }
-
-        for (uint32 AchievementId = 0; AchievementId < reward.Achievements.size(); AchievementId++)
-        {
-            if (AchievementId != 0 && (!sAchievementMgr->GetAchievement(AchievementId)))
-            {
-                TC_LOG_ERROR("server.loading", "Guild rewards constains not existing achievement entry %u", AchievementId);
-                continue;
-            }
         }
 
         if (reward.Standing >= MAX_REPUTATION_RANK)
