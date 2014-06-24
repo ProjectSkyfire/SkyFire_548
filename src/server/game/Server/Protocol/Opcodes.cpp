@@ -220,7 +220,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJECT_QUERY,                   0x1461, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleGameObjectQueryOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_REPORT_USE,                 0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGameobjectReportUse          );
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_USE,                        0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGameObjectUseOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_GET_MAIL_LIST,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGetMailList                  );
+    DEFINE_OPCODE_HANDLER(CMSG_GET_MAIL_LIST,                      0x077A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGetMailList                  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GET_MIRRORIMAGE_DATA,               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMirrorImageDataRequest       );
     DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve            );
     DEFINE_OPCODE_HANDLER(CMSG_GMSURVEY_SUBMIT,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmit               );
@@ -333,12 +333,12 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_MONEY,                         0x02F6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootMoneyOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_RELEASE,                       0x0840, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootReleaseOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_ROLL,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLootRoll                     );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_CREATE_TEXT_ITEM,              0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailCreateTextItem           );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_DELETE,                        0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailDelete                   );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_MARK_AS_READ,                  0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailMarkAsRead               );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_RETURN_TO_SENDER,              0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailReturnToSender           );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_ITEM,                     0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeItem                 );
-    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_MONEY,                    0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeMoney                );
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_CREATE_TEXT_ITEM,              0x1270, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailCreateTextItem           ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_DELETE,                        0x14E2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailDelete                   ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_MARK_AS_READ,                  0x0241, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailMarkAsRead               ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_RETURN_TO_SENDER,              0x1FA8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailReturnToSender           ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_ITEM,                     0x1371, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeItem                 ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_MONEY,                    0x06FA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeMoney                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_BATTLEGROUND,     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_GUILD,            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_OFFICER,          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
@@ -484,7 +484,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleSaveCUFProfiles              );
     DEFINE_OPCODE_HANDLER(CMSG_SELF_RES,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode                );
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                          0x1358, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode               ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_SEND_MAIL,                          0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSendMail                     );
+    DEFINE_OPCODE_HANDLER(CMSG_SEND_MAIL,                          0x1DBA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSendMail                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SEND_SOR_REQUEST_VIA_ADDRESS,       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                      );
     DEFINE_OPCODE_HANDLER(CMSG_SETSHEATHED,                        0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSetSheathedOpcode            );
@@ -978,7 +978,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLL_WON,                      0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_SLOT_CHANGED,                  0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_START_ROLL,                    0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_MAIL_LIST_RESULT,                   0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_MAIL_LIST_RESULT,                   0x1C0B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MAP_OBJ_EVENTS,                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MEETINGSTONE_COMPLETE,              0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MEETINGSTONE_IN_PROGRESS,           0x0000, STATUS_UNHANDLED);
@@ -1146,7 +1146,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_READ_ITEM_OK,                       0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_REALM_SPLIT,                        0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_REAL_GROUP_UPDATE,                  0x0000, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_RECEIVED_MAIL,                      0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_RECEIVED_MAIL,                      0x182B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_REDIRECT_CLIENT,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_REFER_A_FRIEND_EXPIRED,             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_REFER_A_FRIEND_FAILURE,             0x0000, STATUS_UNHANDLED);
@@ -1165,7 +1165,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_ROLE_POLL_BEGIN,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_RWHOIS,                             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_SELL_ITEM,                          0x048E, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_SEND_MAIL_RESULT,                   0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_SEND_MAIL_RESULT,                   0x1A9B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SEND_UNLEARN_SPELLS,                0x0CE1, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SERVERTIME,                         0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_SERVER_FIRST_ACHIEVEMENT,           0x0000, STATUS_UNHANDLED);

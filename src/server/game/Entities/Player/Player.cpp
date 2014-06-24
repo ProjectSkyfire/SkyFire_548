@@ -3548,17 +3548,14 @@ void Player::RemoveMail(uint32 id)
 
 void Player::SendMailResult(uint32 mailId, MailResponseType mailAction, MailResponseResult mailError, uint32 equipError, uint32 item_guid, uint32 item_count)
 {
-    WorldPacket data(SMSG_SEND_MAIL_RESULT, (4+4+4+(mailError == MAIL_ERR_EQUIP_ERROR?4:(mailAction == MAIL_ITEM_TAKEN?4+4:0))));
+    WorldPacket data(SMSG_SEND_MAIL_RESULT, 4 + 4 + 4 + 4 + 4 + 4);
     data << uint32(mailId);
-    data << uint32(mailAction);
+    data << uint32(equipError);
     data << uint32(mailError);
-    if (mailError == MAIL_ERR_EQUIP_ERROR)
-        data << uint32(equipError);
-    else if (mailAction == MAIL_ITEM_TAKEN)
-    {
-        data << uint32(item_guid);                         // item guid low?
-        data << uint32(item_count);                        // item count?
-    }
+    data << uint32(mailAction);
+    data << uint32(item_guid);
+    data << uint32(item_count);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -3566,7 +3563,7 @@ void Player::SendNewMail()
 {
     // deliver undelivered mail
     WorldPacket data(SMSG_RECEIVED_MAIL, 4);
-    data << (uint32) 0;
+    data << float(0);
     GetSession()->SendPacket(&data);
 }
 
