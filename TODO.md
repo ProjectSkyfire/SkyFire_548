@@ -1,7 +1,6 @@
 ## To-do list (Try to keep the order by importance)
 * Bank / Guild Bank
 * Reputations
-* Quests
 * Achievements / Guild Acievements / Implement acc achievements
 * Update ingame damage / stats calculation, (including newest formulas from paper doll)
 * Implement dynamic update fieldss
@@ -10,7 +9,6 @@
 * Implement Premade characters
 * Instance Locking
 * Professions
-* Mail
 * Auction House
 * Void Storage
 * Calendair & Events
@@ -50,6 +48,5 @@
 * Groups (Parties / Raids)
 * Mounts
 * Guilds
-
-
-April fools ;) Even though a bit late
+* Quests
+* Mail
