@@ -2167,18 +2167,29 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
         recvPacket.ReadByteSeq(guids[i][2]);
         recvPacket.ReadByteSeq(guids[i][3]);
 
-        switch (type)
+        // temp: this should be moved once broadcast text is properly implemented
+        if (type == DB2_REPLY_BROADCAST)
         {
-            case DB2_REPLY_BROADCAST:
-            {
-                SendBroadcastText(entry);
-                break;
-            }
-            default:
-                TC_LOG_ERROR("network", "SMSG_DB_REPLY: Unhandled hotfix type: %u", type);
+            SendBroadcastText(entry);
+            continue;
         }
 
-        //TC_LOG_ERROR("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, (uint32)store->GetHash());
+        if (!store->HasRecord(entry))
+            continue;
+
+        ByteBuffer record;
+        store->WriteRecord(entry, (uint32)GetSessionDbcLocale(), record);
+
+        WorldPacket data(SMSG_DB_REPLY);
+        data << uint32(entry);
+        data << uint32(time(NULL));
+        data << uint32(type);
+        data << uint32(record.size());
+        data.append(record);
+
+        SendPacket(&data);
+
+        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, type);
     }
 
     delete[] guids;
@@ -2218,7 +2229,7 @@ void WorldSession::SendBroadcastText(uint32 entry)
 
     WorldPacket data(SMSG_DB_REPLY);
     data << uint32(entry);
-    data << uint32(0);
+    data << uint32(time(NULL));
     data << uint32(DB2_REPLY_BROADCAST);
     data << uint32(buffer.size());
     data.append(buffer);

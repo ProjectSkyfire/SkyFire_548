@@ -61,6 +61,7 @@ void DB2Utilities::WriteItemSparseDbReply(DB2Storage<ItemSparseEntry> const& /*s
     buffer << uint32(proto->Quality);
     buffer << uint32(proto->Flags);
     buffer << uint32(proto->Flags2);
+    buffer << uint32(proto->Flags3);
     buffer << float(proto->Unk430_1);
     buffer << float(proto->Unk430_2);
     buffer << uint32(proto->BuyCount);
