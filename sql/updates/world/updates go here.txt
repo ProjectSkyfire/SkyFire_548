@@ -1,1 +1,2 @@
-World Updates.
+INSERT INTO `game_tele` (`id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, `name`) VALUES 
+(2002, 7202, 6289, 12.4723, 0.61348, 1064, 'IsleofThunder');
