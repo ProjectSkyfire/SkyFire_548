@@ -799,6 +799,10 @@ enum TrinityStrings
     LANG_NPCINFO_MAILBOX                = 841,
     LANG_NPCINFO_PLAYER_VEHICLE         = 842,
 
+    LANG_NPCINFO_REFORGER               = 882,
+    LANG_NPCINFO_TRANSMOGRIFIER         = 883,
+    LANG_NPCINFO_VAULTKEEPER            = 884,
+
     // Pinfo commands
     LANG_PINFO_PLAYER                   = 453,
     LANG_PINFO_GM_ACTIVE                = 548,
@@ -851,7 +855,7 @@ enum TrinityStrings
     //                                  = 879, see LANG_PINFO_CHR_REGMAILS
     LANG_ACCOUNT_SEC_TYPE               = 880,
     LANG_RBAC_EMAIL_REQUIRED            = 881,
-    // Room for in-game strings           882-999 not used
+    // Room for in-game strings           885-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
