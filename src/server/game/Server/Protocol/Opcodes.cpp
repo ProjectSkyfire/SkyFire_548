@@ -519,7 +519,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SHOWING_CLOAK,                      0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleShowingCloakOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_SHOWING_HELM,                       0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleShowingHelmOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_SOCKET_GEMS,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSocketOpcode                 );
-    DEFINE_OPCODE_HANDLER(CMSG_SPELLCLICK,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSpellClick                   );
+    DEFINE_OPCODE_HANDLER(CMSG_SPELLCLICK,                         0x067A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSpellClick                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SPIRIT_HEALER_ACTIVATE,             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSpiritHealerActivateOpcode   );
     DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                         0x02EC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_STANDSTATECHANGE,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleStandStateChangeOpcode       );
