@@ -1327,7 +1327,9 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
     guid[3] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
-    recvData.ReadBit();
+
+    uint8 unk = recvData.ReadBit(); 
+
     guid[1] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
 
