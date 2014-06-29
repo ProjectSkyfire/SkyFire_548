@@ -201,9 +201,9 @@ void BattlegroundDS::HandleAreaTrigger(Player* player, uint32 trigger)
     }
 }
 
-void BattlegroundDS::FillInitialWorldStates(WorldPacket &data)
+void BattlegroundDS::FillInitialWorldStates(WorldStateBuilder& builder)
 {
-    data << uint32(3610) << uint32(1);                                              // 9 show
+    builder.AppendState(3610, 1);                                              // 9 show
     UpdateArenaWorldState();
 }
 

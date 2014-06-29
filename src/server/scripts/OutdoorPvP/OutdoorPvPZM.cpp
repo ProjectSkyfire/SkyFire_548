@@ -34,14 +34,14 @@ OPvPCapturePointZM_Beacon::OPvPCapturePointZM_Beacon(OutdoorPvP* pvp, ZM_BeaconT
     SetCapturePointData(ZMCapturePoints[type].entry, ZMCapturePoints[type].map, ZMCapturePoints[type].x, ZMCapturePoints[type].y, ZMCapturePoints[type].z, ZMCapturePoints[type].o, ZMCapturePoints[type].rot0, ZMCapturePoints[type].rot1, ZMCapturePoints[type].rot2, ZMCapturePoints[type].rot3);
 }
 
-void OPvPCapturePointZM_Beacon::FillInitialWorldStates(WorldPacket &data)
+void OPvPCapturePointZM_Beacon::FillInitialWorldStates(WorldStateBuilder& builder)
 {
-    data << uint32(ZMBeaconInfo[m_TowerType].ui_tower_n) << uint32(bool(m_TowerState & ZM_TOWERSTATE_N));
-    data << uint32(ZMBeaconInfo[m_TowerType].map_tower_n) << uint32(bool(m_TowerState & ZM_TOWERSTATE_N));
-    data << uint32(ZMBeaconInfo[m_TowerType].ui_tower_a) << uint32(bool(m_TowerState & ZM_TOWERSTATE_A));
-    data << uint32(ZMBeaconInfo[m_TowerType].map_tower_a) << uint32(bool(m_TowerState & ZM_TOWERSTATE_A));
-    data << uint32(ZMBeaconInfo[m_TowerType].ui_tower_h) << uint32(bool(m_TowerState & ZM_TOWERSTATE_H));
-    data << uint32(ZMBeaconInfo[m_TowerType].map_tower_h) << uint32(bool(m_TowerState & ZM_TOWERSTATE_H));
+    builder.AppendState(ZMBeaconInfo[m_TowerType].ui_tower_n, bool(m_TowerState & ZM_TOWERSTATE_N));
+    builder.AppendState(ZMBeaconInfo[m_TowerType].map_tower_n, bool(m_TowerState & ZM_TOWERSTATE_N));
+    builder.AppendState(ZMBeaconInfo[m_TowerType].ui_tower_a, bool(m_TowerState & ZM_TOWERSTATE_A));
+    builder.AppendState(ZMBeaconInfo[m_TowerType].map_tower_a, bool(m_TowerState & ZM_TOWERSTATE_A));
+    builder.AppendState(ZMBeaconInfo[m_TowerType].ui_tower_h, bool(m_TowerState & ZM_TOWERSTATE_H));
+    builder.AppendState(ZMBeaconInfo[m_TowerType].map_tower_h, bool(m_TowerState & ZM_TOWERSTATE_H));
 }
 
 void OPvPCapturePointZM_Beacon::UpdateTowerState()
@@ -276,16 +276,16 @@ void OPvPCapturePointZM_GraveYard::UpdateTowerState()
     m_PvP->SendUpdateWorldState(ZM_MAP_HORDE_FLAG_NOT_READY, uint32(m_BothControllingFaction != HORDE));
 }
 
-void OPvPCapturePointZM_GraveYard::FillInitialWorldStates(WorldPacket &data)
+void OPvPCapturePointZM_GraveYard::FillInitialWorldStates(WorldStateBuilder& builder)
 {
-    data << ZM_MAP_GRAVEYARD_N  << uint32(bool(m_GraveYardState & ZM_GRAVEYARD_N));
-    data << ZM_MAP_GRAVEYARD_H  << uint32(bool(m_GraveYardState & ZM_GRAVEYARD_H));
-    data << ZM_MAP_GRAVEYARD_A  << uint32(bool(m_GraveYardState & ZM_GRAVEYARD_A));
+    builder.AppendState(ZM_MAP_GRAVEYARD_N, bool(m_GraveYardState & ZM_GRAVEYARD_N));
+    builder.AppendState(ZM_MAP_GRAVEYARD_H, bool(m_GraveYardState & ZM_GRAVEYARD_H));
+    builder.AppendState(ZM_MAP_GRAVEYARD_A, bool(m_GraveYardState & ZM_GRAVEYARD_A));
 
-    data << ZM_MAP_ALLIANCE_FLAG_READY  << uint32(m_BothControllingFaction == ALLIANCE);
-    data << ZM_MAP_ALLIANCE_FLAG_NOT_READY  << uint32(m_BothControllingFaction != ALLIANCE);
-    data << ZM_MAP_HORDE_FLAG_READY  << uint32(m_BothControllingFaction == HORDE);
-    data << ZM_MAP_HORDE_FLAG_NOT_READY  << uint32(m_BothControllingFaction != HORDE);
+    builder.AppendState(ZM_MAP_ALLIANCE_FLAG_READY, m_BothControllingFaction == ALLIANCE);
+    builder.AppendState(ZM_MAP_ALLIANCE_FLAG_NOT_READY, m_BothControllingFaction != ALLIANCE);
+    builder.AppendState(ZM_MAP_HORDE_FLAG_READY, m_BothControllingFaction == HORDE);
+    builder.AppendState(ZM_MAP_HORDE_FLAG_NOT_READY, m_BothControllingFaction != HORDE);
 }
 
 void OPvPCapturePointZM_GraveYard::SetBeaconState(uint32 controlling_faction)
@@ -414,12 +414,13 @@ void OutdoorPvPZM::SetHordeTowersControlled(uint32 count)
     m_HordeTowersControlled = count;
 }
 
-void OutdoorPvPZM::FillInitialWorldStates(WorldPacket &data)
+void OutdoorPvPZM::FillInitialWorldStates(WorldStateBuilder& builder)
 {
-    data << ZM_WORLDSTATE_UNK_1 << uint32(1);
+    builder.AppendState(ZM_WORLDSTATE_UNK_1, 1);
+
     for (OPvPCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
     {
-        itr->second->FillInitialWorldStates(data);
+        itr->second->FillInitialWorldStates(builder);
     }
 }
 

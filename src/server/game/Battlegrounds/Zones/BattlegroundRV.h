@@ -104,7 +104,7 @@ class BattlegroundRV : public Battleground
         void StartingEventCloseDoors();
         void StartingEventOpenDoors();
         void Reset();
-        void FillInitialWorldStates(WorldPacket &d);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
 
         void RemovePlayer(Player* player, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player* Source, uint32 Trigger);

@@ -154,13 +154,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                 BloodQuickeningMinutes = 0;
             }
 
-            void FillInitialWorldStates(WorldPacket& data) OVERRIDE
+            void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
             {
-                data << uint32(WORLDSTATE_SHOW_TIMER)         << uint32(BloodQuickeningState == IN_PROGRESS);
-                data << uint32(WORLDSTATE_EXECUTION_TIME)     << uint32(BloodQuickeningMinutes);
-                data << uint32(WORLDSTATE_SHOW_ATTEMPTS)      << uint32(instance->IsHeroic());
-                data << uint32(WORLDSTATE_ATTEMPTS_REMAINING) << uint32(HeroicAttempts);
-                data << uint32(WORLDSTATE_ATTEMPTS_MAX)       << uint32(MaxHeroicAttempts);
+                builder.AppendState(WORLDSTATE_SHOW_TIMER,         BloodQuickeningState == IN_PROGRESS);
+                builder.AppendState(WORLDSTATE_EXECUTION_TIME,     BloodQuickeningMinutes);
+                builder.AppendState(WORLDSTATE_SHOW_ATTEMPTS,      instance->IsHeroic());
+                builder.AppendState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
+                builder.AppendState(WORLDSTATE_ATTEMPTS_MAX,       MaxHeroicAttempts);
             }
 
             void OnPlayerEnter(Player* player) OVERRIDE

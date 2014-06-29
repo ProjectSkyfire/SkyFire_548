@@ -22,6 +22,7 @@
 
 #include "Util.h"
 #include "SharedDefines.h"
+#include "WorldStateBuilder.h"
 #include "ZoneScript.h"
 
 class GameObject;
@@ -96,7 +97,7 @@ class OPvPCapturePoint
 
         virtual ~OPvPCapturePoint() { }
 
-        virtual void FillInitialWorldStates(WorldPacket & /*data*/) { }
+        virtual void FillInitialWorldStates(WorldStateBuilder& /*builder*/) { }
 
         // send world state update to all players present
         void SendUpdateWorldState(uint32 field, uint32 value);
@@ -206,7 +207,7 @@ class OutdoorPvP : public ZoneScript
 
         typedef std::map<uint32/*lowguid*/, OPvPCapturePoint*> OPvPCapturePointMap;
 
-        virtual void FillInitialWorldStates(WorldPacket & /*data*/) { }
+        virtual void FillInitialWorldStates(WorldStateBuilder& /*builder*/) { }
 
         // called when a player triggers an areatrigger
         virtual bool HandleAreaTrigger(Player* player, uint32 trigger);

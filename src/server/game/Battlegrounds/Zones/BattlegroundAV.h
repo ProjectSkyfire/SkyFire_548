@@ -1601,7 +1601,7 @@ class BattlegroundAV : public Battleground
         void ChangeMineOwner(uint8 mine, uint32 team, bool initial=false);
 
         /*worldstates*/
-        void FillInitialWorldStates(WorldPacket& data);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
         uint8 GetWorldStateType(uint8 state, uint16 team);
         void SendMineWorldStates(uint32 mine);
         void UpdateNodeWorldState(BG_AV_Nodes node);

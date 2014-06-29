@@ -359,7 +359,7 @@ class BattlegroundEY : public Battleground
         void UpdateTeamScore(uint32 Team);
         void EndBattleground(uint32 winner);
         void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
-        void FillInitialWorldStates(WorldPacket& data);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
         void SetDroppedFlagGUID(uint64 guid, int32 /*TeamID*/ = -1)  { m_DroppedFlagGUID = guid;}
         uint64 GetDroppedFlagGUID() const          { return m_DroppedFlagGUID;}
 

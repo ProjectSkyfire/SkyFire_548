@@ -395,44 +395,44 @@ void BattlegroundSA::StartingEventCloseDoors() { }
 
 void BattlegroundSA::StartingEventOpenDoors() { }
 
-void BattlegroundSA::FillInitialWorldStates(WorldPacket& data)
+void BattlegroundSA::FillInitialWorldStates(WorldStateBuilder& builder)
 {
   uint32 ally_attacks = uint32(Attackers == TEAM_ALLIANCE ? 1 : 0);
   uint32 horde_attacks = uint32(Attackers == TEAM_HORDE ? 1 : 0);
 
-  data << uint32(BG_SA_ANCIENT_GATEWS) << uint32(GateStatus[BG_SA_ANCIENT_GATE]);
-  data << uint32(BG_SA_YELLOW_GATEWS) << uint32(GateStatus[BG_SA_YELLOW_GATE]);
-  data << uint32(BG_SA_GREEN_GATEWS) << uint32(GateStatus[BG_SA_GREEN_GATE]);
-  data << uint32(BG_SA_BLUE_GATEWS) << uint32(GateStatus[BG_SA_BLUE_GATE]);
-  data << uint32(BG_SA_RED_GATEWS) << uint32(GateStatus[BG_SA_RED_GATE]);
-  data << uint32(BG_SA_PURPLE_GATEWS) << uint32(GateStatus[BG_SA_PURPLE_GATE]);
+  builder.AppendState(BG_SA_ANCIENT_GATEWS, GateStatus[BG_SA_ANCIENT_GATE]);
+  builder.AppendState(BG_SA_YELLOW_GATEWS, GateStatus[BG_SA_YELLOW_GATE]);
+  builder.AppendState(BG_SA_GREEN_GATEWS, GateStatus[BG_SA_GREEN_GATE]);
+  builder.AppendState(BG_SA_BLUE_GATEWS, GateStatus[BG_SA_BLUE_GATE]);
+  builder.AppendState(BG_SA_RED_GATEWS, GateStatus[BG_SA_RED_GATE]);
+  builder.AppendState(BG_SA_PURPLE_GATEWS, GateStatus[BG_SA_PURPLE_GATE]);
 
-  data << uint32(BG_SA_BONUS_TIMER) << uint32(0);
+  builder.AppendState(BG_SA_BONUS_TIMER, 0);
 
-  data << uint32(BG_SA_HORDE_ATTACKS) << horde_attacks;
-  data << uint32(BG_SA_ALLY_ATTACKS) << ally_attacks;
+  builder.AppendState(BG_SA_HORDE_ATTACKS, horde_attacks);
+  builder.AppendState(BG_SA_ALLY_ATTACKS, ally_attacks);
 
   //Time will be sent on first update...
-  data << uint32(BG_SA_ENABLE_TIMER) << ((TimerEnabled) ? uint32(1) : uint32(0));
-  data << uint32(BG_SA_TIMER_MINS) << uint32(0);
-  data << uint32(BG_SA_TIMER_SEC_TENS) << uint32(0);
-  data << uint32(BG_SA_TIMER_SEC_DECS) << uint32(0);
+  builder.AppendState(BG_SA_ENABLE_TIMER, TimerEnabled ? 1 : 0);
+  builder.AppendState(BG_SA_TIMER_MINS, 0);
+  builder.AppendState(BG_SA_TIMER_SEC_TENS, 0);
+  builder.AppendState(BG_SA_TIMER_SEC_DECS, 0);
 
-  data << uint32(BG_SA_RIGHT_GY_HORDE) << uint32(GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == TEAM_HORDE ? 1 : 0);
-  data << uint32(BG_SA_LEFT_GY_HORDE) << uint32(GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == TEAM_HORDE ? 1 : 0);
-  data << uint32(BG_SA_CENTER_GY_HORDE) << uint32(GraveyardStatus[BG_SA_CENTRAL_CAPTURABLE_GY] == TEAM_HORDE ? 1 : 0);
+  builder.AppendState(BG_SA_RIGHT_GY_HORDE, GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == TEAM_HORDE ? 1 : 0);
+  builder.AppendState(BG_SA_LEFT_GY_HORDE, GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == TEAM_HORDE ? 1 : 0);
+  builder.AppendState(BG_SA_CENTER_GY_HORDE, GraveyardStatus[BG_SA_CENTRAL_CAPTURABLE_GY] == TEAM_HORDE ? 1 : 0);
 
-  data << uint32(BG_SA_RIGHT_GY_ALLIANCE) << uint32(GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == TEAM_ALLIANCE ? 1 : 0);
-  data << uint32(BG_SA_LEFT_GY_ALLIANCE) << uint32(GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == TEAM_ALLIANCE ? 1 : 0);
-  data << uint32(BG_SA_CENTER_GY_ALLIANCE) << uint32(GraveyardStatus[BG_SA_CENTRAL_CAPTURABLE_GY] == TEAM_ALLIANCE ? 1 : 0);
+  builder.AppendState(BG_SA_RIGHT_GY_ALLIANCE, GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == TEAM_ALLIANCE ? 1 : 0);
+  builder.AppendState(BG_SA_LEFT_GY_ALLIANCE, GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == TEAM_ALLIANCE ? 1 : 0);
+  builder.AppendState(BG_SA_CENTER_GY_ALLIANCE, GraveyardStatus[BG_SA_CENTRAL_CAPTURABLE_GY] == TEAM_ALLIANCE ? 1 : 0);
 
-  data << uint32(BG_SA_HORDE_DEFENCE_TOKEN) << ally_attacks;
-  data << uint32(BG_SA_ALLIANCE_DEFENCE_TOKEN) << horde_attacks;
+  builder.AppendState(BG_SA_HORDE_DEFENCE_TOKEN, ally_attacks);
+  builder.AppendState(BG_SA_ALLIANCE_DEFENCE_TOKEN, horde_attacks);
 
-  data << uint32(BG_SA_LEFT_ATT_TOKEN_HRD) << horde_attacks;
-  data << uint32(BG_SA_RIGHT_ATT_TOKEN_HRD) << horde_attacks;
-  data << uint32(BG_SA_RIGHT_ATT_TOKEN_ALL) <<  ally_attacks;
-  data << uint32(BG_SA_LEFT_ATT_TOKEN_ALL) <<  ally_attacks;
+  builder.AppendState(BG_SA_LEFT_ATT_TOKEN_HRD, horde_attacks);
+  builder.AppendState(BG_SA_RIGHT_ATT_TOKEN_HRD, horde_attacks);
+  builder.AppendState(BG_SA_RIGHT_ATT_TOKEN_ALL, ally_attacks);
+  builder.AppendState(BG_SA_LEFT_ATT_TOKEN_ALL, ally_attacks);
 }
 
 void BattlegroundSA::AddPlayer(Player* player)

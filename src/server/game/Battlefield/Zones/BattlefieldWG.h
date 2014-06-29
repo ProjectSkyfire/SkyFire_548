@@ -399,7 +399,7 @@ class BattlefieldWG : public Battlefield
 
         void SendInitWorldStatesTo(Player* player);
         void SendInitWorldStatesToAll();
-        void FillInitialWorldStates(WorldPacket& data);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
 
         void HandleKill(Player* killer, Unit* victim);
         void OnUnitDeath(Unit* unit);

@@ -37,11 +37,11 @@ OutdoorPvPSI::OutdoorPvPSI()
     m_LastController = 0;
 }
 
-void OutdoorPvPSI::FillInitialWorldStates(WorldPacket &data)
+void OutdoorPvPSI::FillInitialWorldStates(WorldStateBuilder& builder)
 {
-    data << SI_GATHERED_A << m_Gathered_A;
-    data << SI_GATHERED_H << m_Gathered_H;
-    data << SI_SILITHYST_MAX << SI_MAX_RESOURCES;
+    builder.AppendState(SI_GATHERED_A, m_Gathered_A);
+    builder.AppendState(SI_GATHERED_H, m_Gathered_H);
+    builder.AppendState(SI_SILITHYST_MAX, SI_MAX_RESOURCES);
 }
 
 void OutdoorPvPSI::SendRemoveWorldStates(Player* player)

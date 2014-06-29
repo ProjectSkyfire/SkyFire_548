@@ -199,10 +199,10 @@ public:
             }
         }
 
-        void FillInitialWorldStates(WorldPacket& data) OVERRIDE
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
         {
-            data << uint32(WORLD_STATE_HOR_WAVES_ENABLED) << uint32(0);
-            data << uint32(WORLD_STATE_HOR_WAVE_COUNT) << uint32(0);
+            builder.AppendState(WORLD_STATE_HOR_WAVES_ENABLED, 0);
+            builder.AppendState(WORLD_STATE_HOR_WAVE_COUNT, 0);
         }
 
         bool SetBossState(uint32 type, EncounterState state) OVERRIDE

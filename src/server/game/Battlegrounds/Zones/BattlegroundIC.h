@@ -885,7 +885,7 @@ class BattlegroundIC : public Battleground
         /* Scorekeeping */
         void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true);
 
-        void FillInitialWorldStates(WorldPacket& data);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
 
         void DoAction(uint32 action, uint64 var);
 

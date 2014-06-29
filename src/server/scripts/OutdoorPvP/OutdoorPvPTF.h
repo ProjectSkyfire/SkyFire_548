@@ -135,7 +135,7 @@ class OPvPCapturePointTF : public OPvPCapturePoint
 
         void SendChangePhase();
 
-        void FillInitialWorldStates(WorldPacket & data);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
 
         // used when player is activated/inactivated in the area
         bool HandlePlayerEnter(Player* player);
@@ -163,7 +163,7 @@ class OutdoorPvPTF : public OutdoorPvP
 
         bool Update(uint32 diff);
 
-        void FillInitialWorldStates(WorldPacket &data);
+        void FillInitialWorldStates(WorldStateBuilder& builder);
 
         void SendRemoveWorldStates(Player* player);
 

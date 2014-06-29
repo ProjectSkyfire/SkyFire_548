@@ -23,6 +23,7 @@
 #include "ZoneScript.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "WorldStateBuilder.h"
 
 #define OUT_SAVE_INST_DATA             TC_LOG_DEBUG("scripts", "Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_SAVE_INST_DATA_COMPLETE    TC_LOG_DEBUG("scripts", "Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
@@ -216,7 +217,7 @@ class InstanceScript : public ZoneScript
 
         void SendEncounterUnit(uint32 type, Unit* unit = NULL, uint8 param1 = 0, uint8 param2 = 0);
 
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/) { }
+        virtual void FillInitialWorldStates(WorldStateBuilder& /*builder*/) { }
 
         // ReCheck PhaseTemplate related conditions
         void UpdatePhasing();

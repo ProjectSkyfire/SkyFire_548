@@ -108,9 +108,9 @@ void BattlegroundRL::HandleAreaTrigger(Player* player, uint32 trigger)
     }
 }
 
-void BattlegroundRL::FillInitialWorldStates(WorldPacket &data)
+void BattlegroundRL::FillInitialWorldStates(WorldStateBuilder& builder)
 {
-    data << uint32(0xbba) << uint32(1);           // 9
+    builder.AppendState(0xbba, 1);           // 9
     UpdateArenaWorldState();
 }
 

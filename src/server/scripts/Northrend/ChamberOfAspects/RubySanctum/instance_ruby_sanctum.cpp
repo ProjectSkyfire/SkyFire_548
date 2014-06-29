@@ -308,11 +308,11 @@ class instance_ruby_sanctum : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void FillInitialWorldStates(WorldPacket& data) OVERRIDE
+            void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
             {
-                data << uint32(WORLDSTATE_CORPOREALITY_MATERIAL) << uint32(50);
-                data << uint32(WORLDSTATE_CORPOREALITY_TWILIGHT) << uint32(50);
-                data << uint32(WORLDSTATE_CORPOREALITY_TOGGLE) << uint32(0);
+                builder.AppendState(WORLDSTATE_CORPOREALITY_MATERIAL, 50);
+                builder.AppendState(WORLDSTATE_CORPOREALITY_TWILIGHT, 50);
+                builder.AppendState(WORLDSTATE_CORPOREALITY_TOGGLE, 0);
             }
 
             void Load(char const* str) OVERRIDE
