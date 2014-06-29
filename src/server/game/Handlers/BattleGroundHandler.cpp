@@ -74,31 +74,38 @@ void WorldSession::SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId
 void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
 {
     uint32 bgTypeId_;
-    uint32 instanceId;
     uint8 asGroup;
     bool isPremade = false;
     Group* grp = NULL;
     ObjectGuid guid;
+    bool hasRoleMask;
+    uint8 roleMask = 0;
 
-    recvData >> instanceId;                 // Instance Id
-    guid[2] = recvData.ReadBit();
+    for (int i = 0; i < 2; i++) // blacklistedMapIds
+        recvData.read_skip<uint32>();
+
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
     asGroup = recvData.ReadBit();           // As Group
     guid[4] = recvData.ReadBit();
+    hasRoleMask = !recvData.ReadBit();
     guid[6] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[1]);
+
+    if (hasRoleMask)
+        recvData >> roleMask; // Need to set this as group role later
 
     //extract from guid
     bgTypeId_ = GUID_LOPART(guid);
@@ -127,12 +134,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         return;
 
     // get bg instance or bg template if instance not found
-    Battleground* bg = NULL;
-    if (instanceId)
-        bg = sBattlegroundMgr->GetBattlegroundThroughClientInstance(instanceId, bgTypeId);
-
-    if (!bg)
-        bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
+    Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
     if (!bg)
         return;
 
@@ -402,38 +404,38 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
 
     uint32 time;
     uint32 queueSlot;
-    uint32 unk;
+    uint32 id;
     uint8 action;                       // enter battle 0x1, leave queue 0x0
     ObjectGuid guid;
 
-    recvData >> time;
-    recvData >> queueSlot;
-    recvData >> unk;
-
-    guid[0] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-
     action = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[0]);
+    recvData >> queueSlot;
+    recvData >> id;
+    recvData >> time;
+
+    guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+
     recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
 
     if (!_player->InBattlegroundQueue())
     {
         TC_LOG_DEBUG("bg.battleground", "CMSG_BATTLEFIELD_PORT %s Slot: %u, Unk: %u, Time: %u, Action: %u. Player not in queue!",
-            GetPlayerInfo().c_str(), queueSlot, unk, time, action);
+            GetPlayerInfo().c_str(), queueSlot, id, time, action);
         return;
     }
 
@@ -441,7 +443,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     if (bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
     {
         TC_LOG_DEBUG("bg.battleground", "CMSG_BATTLEFIELD_PORT %s Slot: %u, Unk: %u, Time: %u, Action: %u. Invalid queueSlot!",
-            GetPlayerInfo().c_str(), queueSlot, unk, time, action);
+            GetPlayerInfo().c_str(), queueSlot, id, time, action);
         return;
     }
 
@@ -452,14 +454,14 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     if (!bgQueue.GetPlayerGroupInfoData(_player->GetGUID(), &ginfo))
     {
         TC_LOG_DEBUG("bg.battleground", "CMSG_BATTLEFIELD_PORT %s Slot: %u, Unk: %u, Time: %u, Action: %u. Player not in queue (No player Group Info)!",
-            GetPlayerInfo().c_str(), queueSlot, unk, time, action);
+            GetPlayerInfo().c_str(), queueSlot, id, time, action);
         return;
     }
     // if action == 1, then instanceId is required
     if (!ginfo.IsInvitedToBGInstanceGUID && action == 1)
     {
         TC_LOG_DEBUG("bg.battleground", "CMSG_BATTLEFIELD_PORT %s Slot: %u, Unk: %u, Time: %u, Action: %u. Player is not invited to any bg!",
-            GetPlayerInfo().c_str(), queueSlot, unk, time, action);
+            GetPlayerInfo().c_str(), queueSlot, id, time, action);
         return;
     }
 
@@ -472,7 +474,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
         if (action)
         {
             TC_LOG_DEBUG("bg.battleground", "CMSG_BATTLEFIELD_PORT %s Slot: %u, Unk: %u, Time: %u, Action: %u. Cant find BG with id %u!",
-                GetPlayerInfo().c_str(), queueSlot, unk, time, action, ginfo.IsInvitedToBGInstanceGUID);
+                GetPlayerInfo().c_str(), queueSlot, id, time, action, ginfo.IsInvitedToBGInstanceGUID);
             return;
         }
 
@@ -485,7 +487,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     }
 
     TC_LOG_DEBUG("bg.battleground", "CMSG_BATTLEFIELD_PORT %s Slot: %u, Unk: %u, Time: %u, Action: %u.",
-        GetPlayerInfo().c_str(), queueSlot, unk, time, action);
+        GetPlayerInfo().c_str(), queueSlot, id, time, action);
 
     // get real bg type
     bgTypeId = bg->GetTypeID();

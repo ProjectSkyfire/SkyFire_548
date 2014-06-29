@@ -192,9 +192,26 @@ public:
                                             unit->BuildMonsterChat(&packet, CHAT_MSG_MONSTER_YELL, YELL_EFFORTS, 0, YELL_EFFORTS_NAME, i->GetSource()->GetGUID());
                                             i->GetSource()->GetSession()->SendPacket(&packet);
 
-                                            WorldPacket data2(SMSG_PLAY_SOUND, 4);
+                                            ObjectGuid guid = unit->GetGUID();
+
+                                            WorldPacket data2(SMSG_PLAY_SOUND, 4 + 9);
+                                            data2.WriteBit(guid[2]);
+                                            data2.WriteBit(guid[3]);
+                                            data2.WriteBit(guid[7]);
+                                            data2.WriteBit(guid[6]);
+                                            data2.WriteBit(guid[0]);
+                                            data2.WriteBit(guid[5]);
+                                            data2.WriteBit(guid[4]);
+                                            data2.WriteBit(guid[1]);
                                             data2 << uint32(10986);
-                                            data2 << uint64(unit->GetGUID());
+                                            data2.WriteByteSeq(guid[3]);
+                                            data2.WriteByteSeq(guid[2]);
+                                            data2.WriteByteSeq(guid[4]);
+                                            data2.WriteByteSeq(guid[7]);
+                                            data2.WriteByteSeq(guid[5]);
+                                            data2.WriteByteSeq(guid[0]);
+                                            data2.WriteByteSeq(guid[6]);
+                                            data2.WriteByteSeq(guid[1]);
                                             i->GetSource()->GetSession()->SendPacket(&data2);
                                          }
                                     }

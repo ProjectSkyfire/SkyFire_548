@@ -2107,9 +2107,26 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
 
 void WorldObject::SendPlaySound(uint32 Sound, bool OnlySelf)
 {
-    WorldPacket data(SMSG_PLAY_SOUND, 4);
+    ObjectGuid guid = GetGUID();
+
+    WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
     data << uint32(Sound);
-    data << uint64(GetGUID());
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
     if (OnlySelf && GetTypeId() == TYPEID_PLAYER)
         this->ToPlayer()->GetSession()->SendPacket(&data);
     else
@@ -2290,26 +2307,111 @@ void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisp
 
 void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const* text, uint32 language, std::string const &name, uint64 targetGuid) const
 {
-    *data << (uint8)msgtype;
-    *data << (uint32)language;
-    *data << (uint64)GetGUID();
-    *data << (uint32)0;                                     // 2.1.0
-    *data << (uint32)(name.size()+1);
-    *data << name;
-    *data << (uint64)targetGuid;                            // Unit Target
-    if (targetGuid && !IS_PLAYER_GUID(targetGuid))
-    {
-        *data << (uint32)1;                                 // target name length
-        *data << (uint8)0;                                  // target name
-    }
-    *data << (uint32)(strlen(text)+1);
-    *data << text;
-    *data << (uint8)0;                                      // ChatTag
-    if (msgtype == CHAT_MSG_RAID_BOSS_EMOTE || msgtype == CHAT_MSG_RAID_BOSS_WHISPER)
-    {
-        *data << float(0);
-        *data << uint8(0);
-    }
+    ObjectGuid target = targetGuid;
+    ObjectGuid source = GetGUID();
+    ObjectGuid unkGuid = 0;
+    ObjectGuid unkGuid2 = 0;
+
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(1);
+
+    data->WriteBit(unkGuid[0]);
+    data->WriteBit(unkGuid[1]);
+    data->WriteBit(unkGuid[5]);
+    data->WriteBit(unkGuid[4]);
+    data->WriteBit(unkGuid[3]);
+    data->WriteBit(unkGuid[2]);
+    data->WriteBit(unkGuid[6]);
+    data->WriteBit(unkGuid[7]);
+
+    data->WriteBit(0);
+
+    data->WriteBit(source[7]);
+    data->WriteBit(source[6]);
+    data->WriteBit(source[1]);
+    data->WriteBit(source[4]);
+    data->WriteBit(source[0]);
+    data->WriteBit(source[2]);
+    data->WriteBit(source[3]);
+    data->WriteBit(source[5]);
+
+    data->WriteBit(0);
+    data->WriteBit(0); // Send Language
+    data->WriteBit(1);
+
+    data->WriteBit(target[0]);
+    data->WriteBit(target[3]);
+    data->WriteBit(target[7]);
+    data->WriteBit(target[2]);
+    data->WriteBit(target[1]);
+    data->WriteBit(target[5]);
+    data->WriteBit(target[4]);
+    data->WriteBit(target[6]);
+
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBits(strlen(text), 12);
+    data->WriteBit(1);
+    data->WriteBit(1);
+    data->WriteBit(0);
+
+    data->WriteBit(unkGuid2[2]);
+    data->WriteBit(unkGuid2[5]);
+    data->WriteBit(unkGuid2[7]);
+    data->WriteBit(unkGuid2[4]);
+    data->WriteBit(unkGuid2[0]);
+    data->WriteBit(unkGuid2[1]);
+    data->WriteBit(unkGuid2[3]);
+    data->WriteBit(unkGuid2[6]);
+
+    data->FlushBits();
+
+    data->WriteByteSeq(unkGuid2[4]);
+    data->WriteByteSeq(unkGuid2[5]);
+    data->WriteByteSeq(unkGuid2[7]);
+    data->WriteByteSeq(unkGuid2[3]);
+    data->WriteByteSeq(unkGuid2[2]);
+    data->WriteByteSeq(unkGuid2[6]);
+    data->WriteByteSeq(unkGuid2[0]);
+    data->WriteByteSeq(unkGuid2[1]);
+
+    data->WriteByteSeq(target[4]);
+    data->WriteByteSeq(target[7]);
+    data->WriteByteSeq(target[1]);
+    data->WriteByteSeq(target[5]);
+    data->WriteByteSeq(target[0]);
+    data->WriteByteSeq(target[6]);
+    data->WriteByteSeq(target[2]);
+    data->WriteByteSeq(target[3]);
+
+    *data << uint8(msgtype);
+
+    data->WriteByteSeq(unkGuid[1]);
+    data->WriteByteSeq(unkGuid[3]);
+    data->WriteByteSeq(unkGuid[4]);
+    data->WriteByteSeq(unkGuid[6]);
+    data->WriteByteSeq(unkGuid[0]);
+    data->WriteByteSeq(unkGuid[2]);
+    data->WriteByteSeq(unkGuid[5]);
+    data->WriteByteSeq(unkGuid[7]);
+
+    data->WriteByteSeq(source[2]);
+    data->WriteByteSeq(source[5]);
+    data->WriteByteSeq(source[3]);
+    data->WriteByteSeq(source[6]);
+    data->WriteByteSeq(source[7]);
+    data->WriteByteSeq(source[4]);
+    data->WriteByteSeq(source[1]);
+    data->WriteByteSeq(source[0]);
+
+    *data << uint8(language);
+    data->WriteString(text);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool self)
@@ -3041,9 +3143,27 @@ bool WorldObject::InSamePhase(WorldObject const* obj) const
 
 void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target /*= NULL*/)
 {
-    WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4+8);
+    ObjectGuid guid = GetGUID();
+
+    WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 9);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
     data << uint32(sound_id);
-    data << uint64(GetGUID());
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
+
     if (target)
         target->SendDirectMessage(&data);
     else

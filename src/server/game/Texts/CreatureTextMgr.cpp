@@ -39,29 +39,113 @@ class CreatureTextBuilder
             std::string const& text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
             std::string const& localizedName = _source->GetNameForLocaleIdx(locale);
 
-            *data << uint8(_msgType);
-            *data << uint32(_language);
-            *data << uint64(_source->GetGUID());
-            *data << uint32(1);                                      // 2.1.0
-            *data << uint32(localizedName.size() + 1);
-            *data << localizedName;
-            size_t whisperGUIDpos = data->wpos();
-            *data << uint64(_targetGUID);                           // Unit Target
-            if (_targetGUID && !IS_PLAYER_GUID(_targetGUID))
-            {
-                *data << uint32(1);                                  // target name length
-                *data << uint8(0);                                   // target name
-            }
-            *data << uint32(text.length() + 1);
-            *data << text;
-            *data << uint8(0);                                       // ChatTag
-            if (_msgType == CHAT_MSG_RAID_BOSS_EMOTE || _msgType == CHAT_MSG_RAID_BOSS_WHISPER)
-            {
-                *data << float(0);
-                *data << uint8(0);
-            }
+            ObjectGuid target = _targetGUID;
+            ObjectGuid source = _source->GetGUID();
+            ObjectGuid unkGuid = 0;
+            ObjectGuid unkGuid2 = 0;
 
-            return whisperGUIDpos;
+            data->WriteBit(1);
+            data->WriteBit(0);
+            data->WriteBit(0);
+            data->WriteBit(1);
+            data->WriteBit(0);
+            data->WriteBit(1);
+            data->WriteBit(1);
+            data->WriteBit(1);
+
+            data->WriteBit(unkGuid[0]);
+            data->WriteBit(unkGuid[1]);
+            data->WriteBit(unkGuid[5]);
+            data->WriteBit(unkGuid[4]);
+            data->WriteBit(unkGuid[3]);
+            data->WriteBit(unkGuid[2]);
+            data->WriteBit(unkGuid[6]);
+            data->WriteBit(unkGuid[7]);
+
+            data->WriteBit(0);
+
+            data->WriteBit(source[7]);
+            data->WriteBit(source[6]);
+            data->WriteBit(source[1]);
+            data->WriteBit(source[4]);
+            data->WriteBit(source[0]);
+            data->WriteBit(source[2]);
+            data->WriteBit(source[3]);
+            data->WriteBit(source[5]);
+
+            data->WriteBit(0);
+            data->WriteBit(0); // Send Language
+            data->WriteBit(1);
+
+            data->WriteBit(target[0]);
+            data->WriteBit(target[3]);
+            data->WriteBit(target[7]);
+            data->WriteBit(target[2]);
+            data->WriteBit(target[1]);
+            data->WriteBit(target[5]);
+            data->WriteBit(target[4]);
+            data->WriteBit(target[6]);
+
+            data->WriteBit(1);
+            data->WriteBit(0);
+            data->WriteBits(text.length(), 12);
+            data->WriteBit(1);
+            data->WriteBit(1);
+            data->WriteBit(0);
+
+            data->WriteBit(unkGuid2[2]);
+            data->WriteBit(unkGuid2[5]);
+            data->WriteBit(unkGuid2[7]);
+            data->WriteBit(unkGuid2[4]);
+            data->WriteBit(unkGuid2[0]);
+            data->WriteBit(unkGuid2[1]);
+            data->WriteBit(unkGuid2[3]);
+            data->WriteBit(unkGuid2[6]);
+
+            data->FlushBits();
+
+            data->WriteByteSeq(unkGuid2[4]);
+            data->WriteByteSeq(unkGuid2[5]);
+            data->WriteByteSeq(unkGuid2[7]);
+            data->WriteByteSeq(unkGuid2[3]);
+            data->WriteByteSeq(unkGuid2[2]);
+            data->WriteByteSeq(unkGuid2[6]);
+            data->WriteByteSeq(unkGuid2[0]);
+            data->WriteByteSeq(unkGuid2[1]);
+
+            data->WriteByteSeq(target[4]);
+            data->WriteByteSeq(target[7]);
+            data->WriteByteSeq(target[1]);
+            data->WriteByteSeq(target[5]);
+            data->WriteByteSeq(target[0]);
+            data->WriteByteSeq(target[6]);
+            data->WriteByteSeq(target[2]);
+            data->WriteByteSeq(target[3]);
+
+            *data << uint8(_msgType);
+
+            data->WriteByteSeq(unkGuid[1]);
+            data->WriteByteSeq(unkGuid[3]);
+            data->WriteByteSeq(unkGuid[4]);
+            data->WriteByteSeq(unkGuid[6]);
+            data->WriteByteSeq(unkGuid[0]);
+            data->WriteByteSeq(unkGuid[2]);
+            data->WriteByteSeq(unkGuid[5]);
+            data->WriteByteSeq(unkGuid[7]);
+
+            data->WriteByteSeq(source[2]);
+            data->WriteByteSeq(source[5]);
+            data->WriteByteSeq(source[3]);
+            data->WriteByteSeq(source[6]);
+            data->WriteByteSeq(source[7]);
+            data->WriteByteSeq(source[4]);
+            data->WriteByteSeq(source[1]);
+            data->WriteByteSeq(source[0]);
+
+            *data << uint8(_language);
+            data->WriteString(text);
+
+            return NULL;
         }
 
         WorldObject* _source;
@@ -84,28 +168,111 @@ class PlayerTextBuilder
         {
             std::string const& text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
 
+            ObjectGuid target = _targetGUID;
+            ObjectGuid source = _talker->GetGUID();
+            ObjectGuid unkGuid = 0;
+            ObjectGuid unkGuid2 = 0;
+
+            data->WriteBit(1);
+            data->WriteBit(0);
+            data->WriteBit(0);
+            data->WriteBit(1);
+            data->WriteBit(0);
+            data->WriteBit(1);
+            data->WriteBit(1);
+            data->WriteBit(1);
+
+            data->WriteBit(unkGuid[0]);
+            data->WriteBit(unkGuid[1]);
+            data->WriteBit(unkGuid[5]);
+            data->WriteBit(unkGuid[4]);
+            data->WriteBit(unkGuid[3]);
+            data->WriteBit(unkGuid[2]);
+            data->WriteBit(unkGuid[6]);
+            data->WriteBit(unkGuid[7]);
+
+            data->WriteBit(0);
+
+            data->WriteBit(source[7]);
+            data->WriteBit(source[6]);
+            data->WriteBit(source[1]);
+            data->WriteBit(source[4]);
+            data->WriteBit(source[0]);
+            data->WriteBit(source[2]);
+            data->WriteBit(source[3]);
+            data->WriteBit(source[5]);
+
+            data->WriteBit(0);
+            data->WriteBit(0); // Send Language
+            data->WriteBit(1);
+
+            data->WriteBit(target[0]);
+            data->WriteBit(target[3]);
+            data->WriteBit(target[7]);
+            data->WriteBit(target[2]);
+            data->WriteBit(target[1]);
+            data->WriteBit(target[5]);
+            data->WriteBit(target[4]);
+            data->WriteBit(target[6]);
+
+            data->WriteBit(1);
+            data->WriteBit(0);
+            data->WriteBits(text.length(), 12);
+            data->WriteBit(1);
+            data->WriteBit(1);
+            data->WriteBit(0);
+
+            data->WriteBit(unkGuid2[2]);
+            data->WriteBit(unkGuid2[5]);
+            data->WriteBit(unkGuid2[7]);
+            data->WriteBit(unkGuid2[4]);
+            data->WriteBit(unkGuid2[0]);
+            data->WriteBit(unkGuid2[1]);
+            data->WriteBit(unkGuid2[3]);
+            data->WriteBit(unkGuid2[6]);
+
+            data->FlushBits();
+
+            data->WriteByteSeq(unkGuid2[4]);
+            data->WriteByteSeq(unkGuid2[5]);
+            data->WriteByteSeq(unkGuid2[7]);
+            data->WriteByteSeq(unkGuid2[3]);
+            data->WriteByteSeq(unkGuid2[2]);
+            data->WriteByteSeq(unkGuid2[6]);
+            data->WriteByteSeq(unkGuid2[0]);
+            data->WriteByteSeq(unkGuid2[1]);
+
+            data->WriteByteSeq(target[4]);
+            data->WriteByteSeq(target[7]);
+            data->WriteByteSeq(target[1]);
+            data->WriteByteSeq(target[5]);
+            data->WriteByteSeq(target[0]);
+            data->WriteByteSeq(target[6]);
+            data->WriteByteSeq(target[2]);
+            data->WriteByteSeq(target[3]);
+
             *data << uint8(_msgType);
-            *data << uint32(_language);
-            *data << uint64(_talker->GetGUID());
-            *data << uint32(1);                                      // 2.1.0
-            *data << uint32(_talker->GetName().size() + 1);
-            *data << _talker->GetName();
-            size_t whisperGUIDpos = data->wpos();
-            *data << uint64(_targetGUID);                           // Unit Target
-            if (_targetGUID && !IS_PLAYER_GUID(_targetGUID))
-            {
-                *data << uint32(1);                                  // target name length
-                *data << uint8(0);                                   // target name
-            }
-            *data << uint32(text.length() + 1);
-            *data << text;
-            *data << uint8(0);                                       // ChatTag
-            if (_msgType == CHAT_MSG_RAID_BOSS_EMOTE || _msgType == CHAT_MSG_RAID_BOSS_WHISPER)
-            {
-                *data << float(0);
-                *data << uint8(0);
-            }
-            return whisperGUIDpos;
+
+            data->WriteByteSeq(unkGuid[1]);
+            data->WriteByteSeq(unkGuid[3]);
+            data->WriteByteSeq(unkGuid[4]);
+            data->WriteByteSeq(unkGuid[6]);
+            data->WriteByteSeq(unkGuid[0]);
+            data->WriteByteSeq(unkGuid[2]);
+            data->WriteByteSeq(unkGuid[5]);
+            data->WriteByteSeq(unkGuid[7]);
+
+            data->WriteByteSeq(source[2]);
+            data->WriteByteSeq(source[5]);
+            data->WriteByteSeq(source[3]);
+            data->WriteByteSeq(source[6]);
+            data->WriteByteSeq(source[7]);
+            data->WriteByteSeq(source[4]);
+            data->WriteByteSeq(source[1]);
+            data->WriteByteSeq(source[0]);
+
+            *data << uint8(_language);
+            data->WriteString(text);
         }
 
         WorldObject* _source;
@@ -353,9 +520,27 @@ void CreatureTextMgr::SendSound(Creature* source, uint32 sound, ChatMsg msgType,
     if (!sound || !source)
         return;
 
-    WorldPacket data(SMSG_PLAY_SOUND, 4);
+    ObjectGuid guid = source->GetGUID();
+
+    WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+
     data << uint32(sound);
-    data << uint64(source->GetGUID());
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
     SendNonChatPacket(source, &data, msgType, whisperGuid, range, team, gmOnly);
 }
 

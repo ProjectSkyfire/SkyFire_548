@@ -70,14 +70,111 @@ namespace Trinity
             {
                 uint64 target_guid = _source ? _source->GetGUID() : 0;
 
-                data << uint8 (_msgtype);
-                data << uint32(LANG_UNIVERSAL);
-                data << uint64(target_guid);                // there 0 for BG messages
-                data << uint32(0);                          // can be chat msg group or something
-                data << uint64(target_guid);
-                data << uint32(strlen(text) + 1);
-                data << text;
-                data << uint8 (_source ? _source->GetChatTag() : 0);
+                ObjectGuid target = target_guid;
+                ObjectGuid source = target_guid;
+                ObjectGuid unkGuid = 0;
+                ObjectGuid unkGuid2 = 0;
+
+                data.WriteBit(1);
+                data.WriteBit(0);
+                data.WriteBit(0);
+                data.WriteBit(1);
+                data.WriteBit(0);
+                data.WriteBit(1);
+                data.WriteBit(1);
+                data.WriteBit(1);
+
+                data.WriteBit(unkGuid[0]);
+                data.WriteBit(unkGuid[1]);
+                data.WriteBit(unkGuid[5]);
+                data.WriteBit(unkGuid[4]);
+                data.WriteBit(unkGuid[3]);
+                data.WriteBit(unkGuid[2]);
+                data.WriteBit(unkGuid[6]);
+                data.WriteBit(unkGuid[7]);
+
+                data.WriteBit(0);
+
+                data.WriteBit(source[7]);
+                data.WriteBit(source[6]);
+                data.WriteBit(source[1]);
+                data.WriteBit(source[4]);
+                data.WriteBit(source[0]);
+                data.WriteBit(source[2]);
+                data.WriteBit(source[3]);
+                data.WriteBit(source[5]);
+
+                data.WriteBit(0);
+                data.WriteBit(0); // Send Language
+                data.WriteBit(1);
+
+                data.WriteBit(target[0]);
+                data.WriteBit(target[3]);
+                data.WriteBit(target[7]);
+                data.WriteBit(target[2]);
+                data.WriteBit(target[1]);
+                data.WriteBit(target[5]);
+                data.WriteBit(target[4]);
+                data.WriteBit(target[6]);
+
+                data.WriteBit(1);
+                data.WriteBit(0);
+                data.WriteBits(strlen(text), 12);
+                data.WriteBit(1);
+                data.WriteBit(1);
+                data.WriteBit(0);
+
+                data.WriteBit(unkGuid2[2]);
+                data.WriteBit(unkGuid2[5]);
+                data.WriteBit(unkGuid2[7]);
+                data.WriteBit(unkGuid2[4]);
+                data.WriteBit(unkGuid2[0]);
+                data.WriteBit(unkGuid2[1]);
+                data.WriteBit(unkGuid2[3]);
+                data.WriteBit(unkGuid2[6]);
+
+                data.FlushBits();
+
+                data.WriteByteSeq(unkGuid2[4]);
+                data.WriteByteSeq(unkGuid2[5]);
+                data.WriteByteSeq(unkGuid2[7]);
+                data.WriteByteSeq(unkGuid2[3]);
+                data.WriteByteSeq(unkGuid2[2]);
+                data.WriteByteSeq(unkGuid2[6]);
+                data.WriteByteSeq(unkGuid2[0]);
+                data.WriteByteSeq(unkGuid2[1]);
+
+                data.WriteByteSeq(target[4]);
+                data.WriteByteSeq(target[7]);
+                data.WriteByteSeq(target[1]);
+                data.WriteByteSeq(target[5]);
+                data.WriteByteSeq(target[0]);
+                data.WriteByteSeq(target[6]);
+                data.WriteByteSeq(target[2]);
+                data.WriteByteSeq(target[3]);
+
+                data << uint8(_msgtype);
+
+                data.WriteByteSeq(unkGuid[1]);
+                data.WriteByteSeq(unkGuid[3]);
+                data.WriteByteSeq(unkGuid[4]);
+                data.WriteByteSeq(unkGuid[6]);
+                data.WriteByteSeq(unkGuid[0]);
+                data.WriteByteSeq(unkGuid[2]);
+                data.WriteByteSeq(unkGuid[5]);
+                data.WriteByteSeq(unkGuid[7]);
+
+                data.WriteByteSeq(source[2]);
+                data.WriteByteSeq(source[5]);
+                data.WriteByteSeq(source[3]);
+                data.WriteByteSeq(source[6]);
+                data.WriteByteSeq(source[7]);
+                data.WriteByteSeq(source[4]);
+                data.WriteByteSeq(source[1]);
+                data.WriteByteSeq(source[0]);
+
+                data << uint8(LANG_UNIVERSAL);
+                data.WriteString(text);
             }
 
             ChatMsg _msgtype;
@@ -484,9 +581,9 @@ inline void Battleground::_ProcessJoin(uint32 diff)
         uint32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
 
         WorldPacket data(SMSG_START_TIMER, 4+4+4);
-        data << uint32(0); // unk
-        data << uint32(countdownMaxForBGType - (GetElapsedTime() / 1000));
         data << uint32(countdownMaxForBGType);
+        data << uint32(countdownMaxForBGType - (GetElapsedTime() / 1000));
+        data << uint32(0); // unk
 
         for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(itr->first))
@@ -1250,9 +1347,9 @@ void Battleground::AddPlayer(Player* player)
 
             int32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
             WorldPacket data(SMSG_START_TIMER, 4+4+4);
-            data << uint32(0); // unk
-            data << uint32(countdownMaxForBGType - (GetElapsedTime() / 1000));
             data << uint32(countdownMaxForBGType);
+            data << uint32(countdownMaxForBGType - (GetElapsedTime() / 1000));
+            data << uint32(0); // unk
             player->GetSession()->SendPacket(&data);
         }
     }
@@ -1790,18 +1887,112 @@ void Battleground::SendWarningToAll(int32 entry, ...)
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
 
-    data << (uint8)CHAT_MSG_RAID_BOSS_EMOTE;
-    data << (uint32)LANG_UNIVERSAL;
-    data << (uint64)0;
-    data << (uint32)0;                                     // 2.1.0
-    data << (uint32)1;
-    data << (uint8)0;
-    data << (uint64)0;
-    data << (uint32)(msg.length() + 1);
-    data << msg.c_str();
-    data << (uint8)0;
-    data << (float)0.0f;                                   // added in 4.2.0, unk
-    data << (uint8)0;                                      // added in 4.2.0, unk
+    ObjectGuid target = 0;
+    ObjectGuid source = 0;
+    ObjectGuid unkGuid = 0;
+    ObjectGuid unkGuid2 = 0;
+
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(1);
+
+    data.WriteBit(unkGuid[0]);
+    data.WriteBit(unkGuid[1]);
+    data.WriteBit(unkGuid[5]);
+    data.WriteBit(unkGuid[4]);
+    data.WriteBit(unkGuid[3]);
+    data.WriteBit(unkGuid[2]);
+    data.WriteBit(unkGuid[6]);
+    data.WriteBit(unkGuid[7]);
+
+    data.WriteBit(0);
+
+    data.WriteBit(source[7]);
+    data.WriteBit(source[6]);
+    data.WriteBit(source[1]);
+    data.WriteBit(source[4]);
+    data.WriteBit(source[0]);
+    data.WriteBit(source[2]);
+    data.WriteBit(source[3]);
+    data.WriteBit(source[5]);
+
+    data.WriteBit(0);
+    data.WriteBit(0); // Send Language
+    data.WriteBit(1);
+
+    data.WriteBit(target[0]);
+    data.WriteBit(target[3]);
+    data.WriteBit(target[7]);
+    data.WriteBit(target[2]);
+    data.WriteBit(target[1]);
+    data.WriteBit(target[5]);
+    data.WriteBit(target[4]);
+    data.WriteBit(target[6]);
+
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBits(msg.length(), 12);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(0);
+
+    data.WriteBit(unkGuid2[2]);
+    data.WriteBit(unkGuid2[5]);
+    data.WriteBit(unkGuid2[7]);
+    data.WriteBit(unkGuid2[4]);
+    data.WriteBit(unkGuid2[0]);
+    data.WriteBit(unkGuid2[1]);
+    data.WriteBit(unkGuid2[3]);
+    data.WriteBit(unkGuid2[6]);
+
+    data.FlushBits();
+
+    data.WriteByteSeq(unkGuid2[4]);
+    data.WriteByteSeq(unkGuid2[5]);
+    data.WriteByteSeq(unkGuid2[7]);
+    data.WriteByteSeq(unkGuid2[3]);
+    data.WriteByteSeq(unkGuid2[2]);
+    data.WriteByteSeq(unkGuid2[6]);
+    data.WriteByteSeq(unkGuid2[0]);
+    data.WriteByteSeq(unkGuid2[1]);
+
+    data.WriteByteSeq(target[4]);
+    data.WriteByteSeq(target[7]);
+    data.WriteByteSeq(target[1]);
+    data.WriteByteSeq(target[5]);
+    data.WriteByteSeq(target[0]);
+    data.WriteByteSeq(target[6]);
+    data.WriteByteSeq(target[2]);
+    data.WriteByteSeq(target[3]);
+
+    data << uint8(CHAT_MSG_RAID_BOSS_EMOTE);
+
+    data.WriteByteSeq(unkGuid[1]);
+    data.WriteByteSeq(unkGuid[3]);
+    data.WriteByteSeq(unkGuid[4]);
+    data.WriteByteSeq(unkGuid[6]);
+    data.WriteByteSeq(unkGuid[0]);
+    data.WriteByteSeq(unkGuid[2]);
+    data.WriteByteSeq(unkGuid[5]);
+    data.WriteByteSeq(unkGuid[7]);
+
+    data.WriteByteSeq(source[2]);
+    data.WriteByteSeq(source[5]);
+    data.WriteByteSeq(source[3]);
+    data.WriteByteSeq(source[6]);
+    data.WriteByteSeq(source[7]);
+    data.WriteByteSeq(source[4]);
+    data.WriteByteSeq(source[1]);
+    data.WriteByteSeq(source[0]);
+
+    data << uint8(LANG_UNIVERSAL);
+    data.WriteString(msg);
+
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         if (Player* player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
             player->SendDirectMessage(&data);

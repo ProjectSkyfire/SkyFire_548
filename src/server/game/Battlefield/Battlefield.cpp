@@ -356,10 +356,9 @@ void Battlefield::EndBattle(bool endByTimer)
 
 void Battlefield::DoPlaySoundToAll(uint32 SoundID)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_PLAY_SOUND, 4);
+    WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
+    data.WriteBits(0, 8);
     data << uint32(SoundID);
-    data << uint64(0);
 
     for (int team = 0; team < BG_TEAMS_COUNT; team++)
         for (GuidSet::const_iterator itr = m_PlayersInWar[team].begin(); itr != m_PlayersInWar[team].end(); ++itr)
@@ -451,19 +450,111 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
 
-    data << uint8(CHAT_MSG_RAID_BOSS_EMOTE);
-    data << uint32(LANG_UNIVERSAL);
-    data << uint64(0);
-    data << uint32(0);                                      // 2.1.0
-    data << uint32(1);
-    data << uint8(0);
-    data << uint64(0);
-    data << uint32(msg.length() + 1);
-    data << msg;
-    data << uint8(0);
-    data << float(0);
-    data << uint8(0);
+    ObjectGuid target = 0;
+    ObjectGuid source = 0;
+    ObjectGuid unkGuid = 0;
+    ObjectGuid unkGuid2 = 0;
 
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(1);
+
+    data.WriteBit(unkGuid[0]);
+    data.WriteBit(unkGuid[1]);
+    data.WriteBit(unkGuid[5]);
+    data.WriteBit(unkGuid[4]);
+    data.WriteBit(unkGuid[3]);
+    data.WriteBit(unkGuid[2]);
+    data.WriteBit(unkGuid[6]);
+    data.WriteBit(unkGuid[7]);
+
+    data.WriteBit(0);
+
+    data.WriteBit(source[7]);
+    data.WriteBit(source[6]);
+    data.WriteBit(source[1]);
+    data.WriteBit(source[4]);
+    data.WriteBit(source[0]);
+    data.WriteBit(source[2]);
+    data.WriteBit(source[3]);
+    data.WriteBit(source[5]);
+
+    data.WriteBit(0);
+    data.WriteBit(0); // Send Language
+    data.WriteBit(1);
+
+    data.WriteBit(target[0]);
+    data.WriteBit(target[3]);
+    data.WriteBit(target[7]);
+    data.WriteBit(target[2]);
+    data.WriteBit(target[1]);
+    data.WriteBit(target[5]);
+    data.WriteBit(target[4]);
+    data.WriteBit(target[6]);
+
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBits(msg.length(), 12);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(0);
+
+    data.WriteBit(unkGuid2[2]);
+    data.WriteBit(unkGuid2[5]);
+    data.WriteBit(unkGuid2[7]);
+    data.WriteBit(unkGuid2[4]);
+    data.WriteBit(unkGuid2[0]);
+    data.WriteBit(unkGuid2[1]);
+    data.WriteBit(unkGuid2[3]);
+    data.WriteBit(unkGuid2[6]);
+
+    data.FlushBits();
+
+    data.WriteByteSeq(unkGuid2[4]);
+    data.WriteByteSeq(unkGuid2[5]);
+    data.WriteByteSeq(unkGuid2[7]);
+    data.WriteByteSeq(unkGuid2[3]);
+    data.WriteByteSeq(unkGuid2[2]);
+    data.WriteByteSeq(unkGuid2[6]);
+    data.WriteByteSeq(unkGuid2[0]);
+    data.WriteByteSeq(unkGuid2[1]);
+
+    data.WriteByteSeq(target[4]);
+    data.WriteByteSeq(target[7]);
+    data.WriteByteSeq(target[1]);
+    data.WriteByteSeq(target[5]);
+    data.WriteByteSeq(target[0]);
+    data.WriteByteSeq(target[6]);
+    data.WriteByteSeq(target[2]);
+    data.WriteByteSeq(target[3]);
+
+    data << uint8(CHAT_MSG_RAID_BOSS_EMOTE);
+
+    data.WriteByteSeq(unkGuid[1]);
+    data.WriteByteSeq(unkGuid[3]);
+    data.WriteByteSeq(unkGuid[4]);
+    data.WriteByteSeq(unkGuid[6]);
+    data.WriteByteSeq(unkGuid[0]);
+    data.WriteByteSeq(unkGuid[2]);
+    data.WriteByteSeq(unkGuid[5]);
+    data.WriteByteSeq(unkGuid[7]);
+
+    data.WriteByteSeq(source[2]);
+    data.WriteByteSeq(source[5]);
+    data.WriteByteSeq(source[3]);
+    data.WriteByteSeq(source[6]);
+    data.WriteByteSeq(source[7]);
+    data.WriteByteSeq(source[4]);
+    data.WriteByteSeq(source[1]);
+    data.WriteByteSeq(source[0]);
+
+    data << uint8(LANG_UNIVERSAL);
+    data.WriteString(msg);
     return data;
 }
 
