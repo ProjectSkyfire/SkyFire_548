@@ -103,7 +103,7 @@ void PhaseMgr::Recalculate()
                 if (phase->phasemask)
                     _UpdateFlags |= PHASE_UPDATE_FLAG_SERVERSIDE_CHANGED;
 
-                if (phase->phaseId || phase->terrainswapmap)
+                if (phase->phaseId || phase->terrainswapmap || phase->worldMapArea)
                     _UpdateFlags |= PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED;
 
                 if (phase->IsLastDefinition())
@@ -165,6 +165,9 @@ void PhaseMgr::RegisterPhasingAuraEffect(AuraEffect const* auraEffect)
 
             if (itr->second.terrainswapmap)
                 phaseInfo.terrainswapmap = itr->second.terrainswapmap;
+
+            if (itr->second.worldMapArea)
+                phaseInfo.worldMapArea = itr->second.worldMapArea;
         }
     }
 
@@ -264,6 +267,7 @@ void PhaseData::SendPhaseshiftToPlayer()
     // Client side update
     std::set<uint32> phaseIds;
     std::set<uint32> terrainswaps;
+    std::set<uint32> worldMapAreas;
 
     for (PhaseInfoContainer::const_iterator itr = spellPhaseInfo.begin(); itr != spellPhaseInfo.end(); ++itr)
     {
@@ -272,6 +276,9 @@ void PhaseData::SendPhaseshiftToPlayer()
 
         if (itr->second.phaseId)
             phaseIds.insert(itr->second.phaseId);
+
+        if (itr->second.worldMapArea)
+            worldMapAreas.insert(itr->second.worldMapArea);
     }
 
     // Phase Definitions
@@ -282,9 +289,12 @@ void PhaseData::SendPhaseshiftToPlayer()
 
         if ((*itr)->terrainswapmap)
             terrainswaps.insert((*itr)->terrainswapmap);
+
+        if ((*itr)->terrainswapmap)
+            worldMapAreas.insert((*itr)->worldMapArea);
     }
 
-    player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps);
+    player->GetSession()->SendSetPhaseShift(phaseIds, terrainswaps, worldMapAreas);
 }
 
 void PhaseData::GetActivePhases(std::set<uint32>& phases) const

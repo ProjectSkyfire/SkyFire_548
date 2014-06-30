@@ -53,6 +53,7 @@ struct PhaseDefinition
     uint32 phasemask;
     uint32 phaseId;
     uint32 terrainswapmap;
+    uint32 worldMapArea;
     uint8 flags;
 
     bool IsOverwritingExistingPhases() const { return flags & PHASE_FLAG_OVERWRITE_EXISTING; }
@@ -68,6 +69,7 @@ struct SpellPhaseInfo
     uint32 spellId;
     uint32 phasemask;
     uint32 terrainswapmap;
+    uint32 worldMapArea;
 };
 
 typedef UNORDERED_MAP<uint32 /*spellId*/, SpellPhaseInfo> SpellPhaseStore;
@@ -79,9 +81,10 @@ struct PhaseInfo
     uint32 phasemask;
     uint32 terrainswapmap;
     uint32 phaseId;
+    uint32 worldMapArea;
 
     bool NeedsServerSideUpdate() const { return phasemask; }
-    bool NeedsClientSideUpdate() const { return terrainswapmap || phaseId; }
+    bool NeedsClientSideUpdate() const { return terrainswapmap || phaseId || worldMapArea; }
 };
 
 typedef UNORDERED_MAP<uint32 /*spellId*/, PhaseInfo> PhaseInfoContainer;
