@@ -290,7 +290,7 @@ void PhaseData::SendPhaseshiftToPlayer()
         if ((*itr)->terrainswapmap)
             terrainswaps.insert((*itr)->terrainswapmap);
 
-        if ((*itr)->terrainswapmap)
+        if ((*itr)->worldMapArea)
             worldMapAreas.insert((*itr)->worldMapArea);
     }
 
