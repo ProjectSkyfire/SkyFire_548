@@ -273,6 +273,8 @@ class PlayerTextBuilder
 
             *data << uint8(_language);
             data->WriteString(text);
+
+            return NULL;
         }
 
         WorldObject* _source;
