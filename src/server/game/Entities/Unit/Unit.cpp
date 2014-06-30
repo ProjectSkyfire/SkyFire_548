@@ -8553,48 +8553,51 @@ void Unit::SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 
 {
     ObjectGuid victimGuid = victim->GetGUID();
     ObjectGuid casterGuid = GetGUID();
+
     // we guess size
     WorldPacket data(SMSG_SPELLHEALLOG, 8 + 8 + 4 + 4 + 4 + 4 + 1 + 1);
-    data.WriteBit(casterGuid[0]);
-    data.WriteBit(casterGuid[7]);
-    data.WriteBit(victimGuid[6]);
-    data.WriteBit(0);
-    data.WriteBit(victimGuid[5]);
-    data.WriteBit(victimGuid[1]);
-    data.WriteBit(0);
-    data.WriteBit(victimGuid[4]);
-    data.WriteBit(victimGuid[0]);
-    data.WriteBit(casterGuid[3]);
-    data.WriteBit(casterGuid[1]);
-    data.WriteBit(casterGuid[5]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(casterGuid[2]);
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(critical);
-    data.WriteBit(casterGuid[6]);
-    data.WriteBit(0);
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(casterGuid[4]);
 
-    data.WriteByteSeq(casterGuid[5]);
-    data.WriteByteSeq(victimGuid[7]);
-    data.WriteByteSeq(casterGuid[2]);
-    data.WriteByteSeq(victimGuid[1]);
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(victimGuid[2]);
     data << uint32(SpellID);
-    data.WriteByteSeq(victimGuid[6]);
     data << uint32(Absorb);
-    data << uint32(OverHeal);
-    data.WriteByteSeq(casterGuid[6]);
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(casterGuid[7]);
-    data.WriteByteSeq(casterGuid[1]);
-    data.WriteByteSeq(victimGuid[3]);
-    data.WriteByteSeq(casterGuid[0]);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(casterGuid[3]);
     data << uint32(Damage);
+    data << uint32(OverHeal);
+
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(casterGuid[2]);
+    data.WriteBit(casterGuid[6]);
+    data.WriteBit(victimGuid[2]);
+    data.WriteBit(critical);
+    data.WriteBit(casterGuid[3]);
+    data.WriteBit(casterGuid[0]);
+    data.WriteBit(casterGuid[5]);
+    data.WriteBit(victimGuid[3]);
+    data.WriteBit(0); // PowerData
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(victimGuid[5]);
+    data.WriteBit(casterGuid[7]);
+    data.WriteBit(victimGuid[4]);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.WriteBit(casterGuid[4]);
+    data.WriteBit(casterGuid[1]);
+    data.WriteBit(victimGuid[1]);
+    data.WriteBit(victimGuid[6]);
+
+    data.WriteByteSeq(casterGuid[2]);
+    data.WriteByteSeq(victimGuid[6]);
+    data.WriteByteSeq(casterGuid[5]);
+    data.WriteByteSeq(casterGuid[3]);
+    data.WriteByteSeq(victimGuid[7]);
+    data.WriteByteSeq(casterGuid[7]);
+    data.WriteByteSeq(casterGuid[6]);
+    data.WriteByteSeq(casterGuid[1]);
+    data.WriteByteSeq(victimGuid[2]);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(victimGuid[3]);
+    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(victimGuid[5]);
+    data.WriteByteSeq(casterGuid[0]);
+    data.WriteByteSeq(victimGuid[1]);
     data.WriteByteSeq(casterGuid[4]);
 
     SendMessageToSet(&data, true);
