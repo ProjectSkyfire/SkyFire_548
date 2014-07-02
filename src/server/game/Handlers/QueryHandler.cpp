@@ -101,7 +101,7 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     data.WriteBit(guid3[1]);
     data.WriteBit(guid3[4]);
     data.WriteBits(nameData->m_name.size(), 6);
-    data.WriteBit(guid2[2]);
+    data.WriteBit(guid2[6]);
 
     data.FlushBits();
 
