@@ -1404,6 +1404,11 @@ void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
     GetPlayer()->SetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2, actionBar);
 }
 
+void WorldSession::HandleSendTimezoneInformation(WorldPacket& recvData)
+{
+    SendTimezoneInformation();
+}
+
 void WorldSession::HandlePlayedTime(WorldPacket& recvData)
 {
     uint8 unk1;
