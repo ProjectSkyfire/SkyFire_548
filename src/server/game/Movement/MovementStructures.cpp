@@ -152,6 +152,7 @@ MovementStatusElements const MovementFallLand[] = // 5.4.8 18414
     MSETransportPositionY,     // 68
     MSETransportOrientation,   // 76
     MSETransportPositionZ,     // 72
+    MSETransportSeat,          // 80
     MSETransportGuidByte3,     // 59
     MSETransportGuidByte6,     // 62
     MSETransportTime2,         // 88
@@ -457,6 +458,7 @@ MovementStatusElements const MovementSetPitch[] = // 5.4.8 18414
     MSETransportGuidByte6,     // 62
     MSETransportTime,          // 84
     MSETransportGuidByte4,     // 60
+    MSETransportSeat,          // 80
     MSETransportOrientation,   // 76
     MSETransportPositionY,     // 68
     MSETransportGuidByte1,     // 57
@@ -530,6 +532,7 @@ MovementStatusElements const MovementStartBackward[] = // 5.4.8 18414
     MSETransportGuidByte5,     // 61
     MSETransportGuidByte3,     // 59
     MSETransportGuidByte6,     // 62
+    MSETransportSeat,          // 80
     MSETransportOrientation,   // 76
     MSETransportPositionX,     // 64
     MSETransportGuidByte0,     // 56
