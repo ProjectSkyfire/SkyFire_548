@@ -66,7 +66,7 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
     uint32 unk;
     std::string channelName;
     recvPacket >> unk;                                      // channel id?
-    uint32 length = recvPacket.ReadBits(8);
+    uint32 length = recvPacket.ReadBits(7);
     channelName = recvPacket.ReadString(length);
 
     TC_LOG_DEBUG("chat.system", "CMSG_LEAVE_CHANNEL %s Channel: %s, unk1: %u",

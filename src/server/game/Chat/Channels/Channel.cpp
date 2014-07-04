@@ -715,13 +715,12 @@ void Channel::SetOwner(uint64 guid, bool exclaim)
         uint8 oldFlag = GetPlayerFlags(_ownerGUID);
         playersStore[_ownerGUID].SetModerator(true);
         playersStore[_ownerGUID].SetOwner(true);
-
-        WorldPacket data;
-        MakeModeChange(&data, _ownerGUID, oldFlag);
-        SendToAll(&data);
-
         if (exclaim)
         {
+            WorldPacket data;
+            MakeModeChange(&data, _ownerGUID, oldFlag);
+            SendToAll(&data);
+
             MakeOwnerChanged(&data, _ownerGUID);
             SendToAll(&data);
         }
