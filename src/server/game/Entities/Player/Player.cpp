@@ -17256,7 +17256,7 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
     data << uint32(entry);
 
     data.WriteBit(oGuid[0]);
-    data.WriteBit(oGuid[1]);
+    data.WriteBit(oGuid[4]);
     data.WriteBit(oGuid[2]);
     data.WriteBit(oGuid[6]);
     data.WriteBit(oGuid[1]);
@@ -17270,7 +17270,7 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
     data.WriteByteSeq(oGuid[0]);
     data.WriteByteSeq(oGuid[4]);
     data.WriteByteSeq(oGuid[5]);
-    data.WriteByteSeq(oGuid[2]);
+    data.WriteByteSeq(oGuid[1]);
     data.WriteByteSeq(oGuid[6]);
 
     GetSession()->SendPacket(&data);
