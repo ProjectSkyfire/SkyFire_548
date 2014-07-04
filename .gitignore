@@ -16,3 +16,10 @@ CMakeLists.txt.user
 *.BACKUP.*
 *.BASE.*
 *.LOCAL.*
+*__x64_*
+*__Win32_*
+bin
+*.suo
+*.sdf
+ipch
+*.opensdf

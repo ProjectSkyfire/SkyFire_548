@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\server\authserver\Authentication\AuthCodes.cpp">
+      <Filter>Authentication</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\authserver\Authentication\TOTP.cpp">
+      <Filter>Authentication</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\authserver\Realms\RealmList.cpp">
+      <Filter>Realms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\authserver\Server\AuthSocket.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\authserver\Server\RealmSocket.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\authserver\Main.cpp">
+      <Filter>localdir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\authserver\PrecompiledHeaders\authPCH.cpp">
+      <Filter>PrecompiledHeaders</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\authserver\Authentication\AuthCodes.h">
+      <Filter>Authentication</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\authserver\Authentication\TOTP.h">
+      <Filter>Authentication</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\authserver\Realms\RealmList.h">
+      <Filter>Realms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\authserver\Server\AuthSocket.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\authserver\Server\RealmAcceptor.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\authserver\Server\RealmSocket.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\authserver\resource.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\server\authserver\authserver.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{89D9288A-A24D-4A65-8E3F-1D172E6BB0E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{36CC6276-B26B-4911-85B7-771F67C03704}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Authentication">
+      <UniqueIdentifier>{B9076E75-FA9E-4050-8D18-DF8F2C20FBDD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PrecompiledHeaders">
+      <UniqueIdentifier>{A7708EBD-785E-4605-975E-AA8D0590372D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Realms">
+      <UniqueIdentifier>{E404C315-F10C-4515-A227-00A268E60BA1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{68389803-D936-4E1C-B778-CE43C378A657}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="localdir">
+      <UniqueIdentifier>{94C22B23-738F-471C-A7D3-F421E785EFFD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
