@@ -979,6 +979,13 @@ class ObjectMgr
         PhaseDefinitionStore const* GetPhaseDefinitionStore() { return &_PhaseDefinitionStore; }
         SpellPhaseStore const* GetSpellPhaseStore() { return &_SpellPhaseStore; }
 
+        void LoadBattlePetBreedData();
+        void LoadBattlePetQualityData();
+
+        uint64 BattlePetGetNewId();
+        uint8 BattlePetGetRandomBreed(uint32 speciesId) const;
+        uint8 BattlePetGetRandomQuality(uint32 speciesId) const;
+
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint8 level);
         uint32 GetXPForLevel(uint8 level) const;
@@ -1285,6 +1292,8 @@ class ObjectMgr
         uint32 _hiAreaTriggerGuid;
         uint32 _hiMoTransGuid;
 
+        uint32 m_battlePetId;
+
         QuestMap _questTemplates;
 
         typedef UNORDERED_MAP<uint32, GossipText> GossipTextContainer;
@@ -1338,6 +1347,14 @@ class ObjectMgr
 
         PhaseDefinitionStore _PhaseDefinitionStore;
         SpellPhaseStore _SpellPhaseStore;
+
+        typedef std::set<uint8> BattleBetBreedSet;
+        typedef UNORDERED_MAP<uint16, BattleBetBreedSet> BattlePetBreedXSpeciesMap;
+        typedef std::set<uint8> BattlePetQualitySet;
+        typedef UNORDERED_MAP<uint16, BattlePetQualitySet> BattlePetQualityXSpeciesMap;
+
+        BattlePetBreedXSpeciesMap sBattlePetBreedXSpeciesStore;
+        BattlePetQualityXSpeciesMap sBattlePetQualityXSpeciesStore;
 
     private:
         void LoadScripts(ScriptsType type);

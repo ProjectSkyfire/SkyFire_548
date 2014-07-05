@@ -20,6 +20,15 @@
 #ifndef TRINITY_DB2SFRM_H
 #define TRINITY_DB2SFRM_H
 
+char const BattlePetAbilityfmt[] = "niiixxss";
+char const BattlePetAbilityStatefmt[] = "niii";
+char const BattlePetBreedStatefmt[] = "niii";
+char const BattlePetSpeciesfmt[] = "niiiixiss";
+char const BattlePetSpeciesStatefmt[] = "niii";
+char const BattlePetSpeciesXAbilityfmt[] = "niiii";
+char const BattlePetStatefmt[] = "nxsi";
+char const ItemToBattlePetfmt[] = "ni";
+
 char const BroadcastTextfmt[] ="nxssxxxxxxixx";
 char const Itemfmt[] ="niiiiiii";
 char const ItemCurrencyCostfmt[]="xn";
