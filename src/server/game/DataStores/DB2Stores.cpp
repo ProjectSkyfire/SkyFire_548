@@ -196,7 +196,7 @@ float BattlePetSpeciesMainStat(uint16 stateId, uint16 speciesId)
     if (stateId != BATTLE_PET_STATE_STAT_POWER
         && stateId != BATTLE_PET_STATE_STAT_STAMINA
         && stateId != BATTLE_PET_STATE_STAT_SPEED)
-        return NULL;
+        return 0;
 
     for (uint32 i = 0; i < sBattlePetSpeciesStateStore.GetNumRows(); i++)
     {
@@ -216,7 +216,7 @@ float BattlePetBreedMainStatModifier(uint16 stateId, uint8 breedId)
     if (stateId != BATTLE_PET_STATE_STAT_POWER
         && stateId != BATTLE_PET_STATE_STAT_STAMINA
         && stateId != BATTLE_PET_STATE_STAT_SPEED)
-        return NULL;
+        return 0;
 
     for (uint32 i = 0; i < sBattlePetBreedStateStore.GetNumRows(); i++)
     {
@@ -228,14 +228,14 @@ float BattlePetBreedMainStatModifier(uint16 stateId, uint8 breedId)
             return ((float)stateEntry->Value - BATTLE_PET_MAIN_STAT_OFFSET) / BATTLE_PET_MAIN_STAT_DIV;
     }
 
-    return NULL;
+    return 0;
 }
 
 uint32 BattlePetGetSummonSpell(uint16 speciesId)
 {
     BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
     if (!speciesEntry)
-        return NULL;
+        return 0;
 
     return speciesEntry->SpellId;
 }
@@ -244,7 +244,7 @@ bool BattlePetSpeciesHasFlag(uint16 speciesId, uint16 flag)
 {
     BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
     if (!speciesEntry)
-        return NULL;
+        return false;
 
     return (speciesEntry->Flags & flag) != 0;
 }

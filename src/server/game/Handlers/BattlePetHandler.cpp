@@ -80,15 +80,15 @@ void WorldSession::HandleBattlePetModifyName(WorldPacket& recvData)
     BattlePet* battlePet = GetPlayer()->GetBattlePetMgr()->GetBattlePet(petEntry);
     if (!battlePet)
     {
-        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_MODIFY_NAME - Player %u tryed to set the name for Battle Pet %u which it doesn't own!",
-            GetPlayer()->GetGUIDLow(), petEntry);
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_MODIFY_NAME - Player %u tryed to set the name for Battle Pet %lu which it doesn't own!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
         return;
     }
 
     if (nickname.size() > BATTLE_PET_MAX_NAME_LENGTH)
     {
-        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_MODIFY_NAME - Player %u tryed to set the name for Battle Pet %u with an invalid length!",
-            GetPlayer()->GetGUIDLow(), petEntry);
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_MODIFY_NAME - Player %u tryed to set the name for Battle Pet %lu with an invalid length!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
         return;
     }
 
@@ -134,23 +134,23 @@ void WorldSession::HandleBattlePetSetBattleSlot(WorldPacket& recvData)
     BattlePet* battlePet = battlePetMgr->GetBattlePet(petEntry);
     if (!battlePet)
     {
-        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_BATTLE_SLOT - Player %u tryed to add Battle Pet %u to loadout which it doesn't own!",
-            GetPlayer()->GetGUIDLow(), petEntry);
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_BATTLE_SLOT - Player %u tryed to add Battle Pet %lu to loadout which it doesn't own!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
         return;
     }
 
     if (!battlePetMgr->HasLoadoutSlot(slot))
     {
-        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_BATTLE_SLOT - Player %u tryed to add Battle Pet %u into slot %u which is locked!",
-            GetPlayer()->GetGUIDLow(), petEntry, slot);
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_BATTLE_SLOT - Player %u tryed to add Battle Pet %lu into slot %u which is locked!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry, slot);
         return;
     }
 
     // this check is also done clientside
     if (BattlePetSpeciesHasFlag(battlePet->GetSpecies(), BATTLE_PET_FLAG_COMPANION))
     {
-        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_BATTLE_SLOT - Player %u tryed to add a compainion Battle Pet %u into slot %u!",
-            GetPlayer()->GetGUIDLow(), petEntry, slot);
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_BATTLE_SLOT - Player %u tryed to add a compainion Battle Pet %lu into slot %u!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry, slot);
         return;
     }
 
@@ -200,8 +200,8 @@ void WorldSession::HandleBattlePetSetFlags(WorldPacket& recvData)
     BattlePet* battlePet = GetPlayer()->GetBattlePetMgr()->GetBattlePet(petEntry);
     if (!battlePet)
     {
-        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_FLAGS - Player %u tryed to set the flags for Battle Pet %u which it doesn't own!",
-            GetPlayer()->GetGUIDLow(), petEntry);
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_SET_FLAGS - Player %u tryed to set the flags for Battle Pet %lu which it doesn't own!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
         return;
     }
 
@@ -260,8 +260,8 @@ void WorldSession::HandleBattlePetSummonCompanion(WorldPacket& recvData)
     BattlePet* battlePet = battlePetMgr->GetBattlePet(petEntry);
     if (!battlePet)
     {
-        TC_LOG_DEBUG("network", "CMSG_SUMMON_BATTLE_PET_COMPANION - Player %u tryed to summon battle pet companion %u which it doesn't own!",
-            player->GetGUIDLow(), petEntry);
+        TC_LOG_DEBUG("network", "CMSG_SUMMON_BATTLE_PET_COMPANION - Player %u tryed to summon battle pet companion %lu which it doesn't own!",
+            player->GetGUIDLow(), (uint64)petEntry);
         return;
     }
 
@@ -269,7 +269,7 @@ void WorldSession::HandleBattlePetSummonCompanion(WorldPacket& recvData)
     {
         battlePetMgr->GetCurrentSummon()->UnSummon();
         battlePetMgr->SetCurrentSummon(NULL);
-        battlePetMgr->SetCurrentSummonId(NULL);
+        battlePetMgr->SetCurrentSummonId(0);
     }
     else
     {

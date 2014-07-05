@@ -43,8 +43,8 @@ public:
         m_power(power), m_speed(speed), m_quality(quality), m_breed(breedId), m_flags(flags), m_saveRequired(false) { }
 
     BattlePet(uint64 id, uint16 speciesId, uint8 level, uint8 quality, uint8 breedId)
-        : m_id(id), m_species(speciesId), m_breed(breedId), m_nickname(""), m_level(level), m_xp(NULL), m_curHealth(NULL),
-        m_maxHealth(NULL), m_power(NULL), m_speed(NULL), m_quality(quality), m_flags(NULL), m_saveRequired(false) 
+        : m_id(id), m_species(speciesId), m_breed(breedId), m_nickname(""), m_level(level), m_xp(0), m_curHealth(0),
+        m_maxHealth(0), m_power(0), m_speed(0), m_quality(quality), m_flags(0), m_saveRequired(false) 
     {
         CalculateStats(true);
     }

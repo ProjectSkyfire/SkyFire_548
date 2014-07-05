@@ -9157,7 +9157,7 @@ uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
         }
     }
 
-    return NULL;
+    return 0;
 }
 
 uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const

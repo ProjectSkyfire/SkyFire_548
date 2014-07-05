@@ -8876,7 +8876,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
                 continue;
 
             m_battlePetMgr->Create(itr->second);
-            learning_spell_id = NULL;
+            learning_spell_id = 0;
 
             break;
         }

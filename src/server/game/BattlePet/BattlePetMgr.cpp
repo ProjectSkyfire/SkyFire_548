@@ -61,27 +61,27 @@ void BattlePetMgr::LoadFromDb(PreparedQueryResult result)
 
         if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
         {
-            TC_LOG_ERROR("sql.sql", "Species %u defined in `account_battle_pet` for Battle Pet %u does not exist, skipped.", speciesId, id);
+            TC_LOG_ERROR("sql.sql", "Species %u defined in `account_battle_pet` for Battle Pet %lu does not exist, skipped.", speciesId, (uint64)id);
             continue;
         }
 
         if (sBattlePetBreedSet.find(breedId) == sBattlePetBreedSet.end() && breedId != 0)
         {
-            TC_LOG_ERROR("sql.sql", "Breed %u defined in `account_battle_pet` for Battle Pet %u does not exist, skipped.", breedId, id);
+            TC_LOG_ERROR("sql.sql", "Breed %u defined in `account_battle_pet` for Battle Pet %lu does not exist, skipped.", breedId, (uint64)id);
             continue;
         }
 
         // highest quality client supports, currently players can not obtain legendary pets on retail
         if (quality > ITEM_QUALITY_LEGENDARY)
         {
-            TC_LOG_ERROR("sql.sql", "Quality %u defined in `account_battle_pet` for Battle Pet %u is invalid, skipped.", quality, id);
+            TC_LOG_ERROR("sql.sql", "Quality %u defined in `account_battle_pet` for Battle Pet %lu is invalid, skipped.", quality, (uint64)id);
             continue;
         }
 
         // client supports up to level 255 (uint8)
         if (level > BATTLE_PET_MAX_LEVEL)
         {
-            TC_LOG_ERROR("sql.sql", "Level %u defined in `account_battle_pet` for Battle Pet %u is invalid, skipped.", quality, id);
+            TC_LOG_ERROR("sql.sql", "Level %u defined in `account_battle_pet` for Battle Pet %lu is invalid, skipped.", quality, (uint64)id);
             continue;
         }
 
@@ -254,7 +254,7 @@ void BattlePetMgr::SetLoadoutSlot(uint8 slot, uint64 id, bool save)
 uint64 BattlePetMgr::GetLoadoutSlot(uint8 slot) const
 {
     if (!HasLoadoutSlot(slot))
-        return NULL;
+        return 0;
 
     return m_loadout[slot];
 }
