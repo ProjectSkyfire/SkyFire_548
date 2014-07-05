@@ -403,7 +403,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_DECLINE,                   0x1279, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionDeclineOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_RENAME,                    0x1F9A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionRenameOpcode         ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_QUERY,                     0x0255, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionQueryOpcode          ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_PETITION_SHOWLIST,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionShowListOpcode       ); // Obsolute
+    DEFINE_OPCODE_HANDLER(CMSG_PETITION_SHOWLIST,                  0x037B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionShowListOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_SHOW_SIGNATURES,           0x136B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionShowSignOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_SIGN,                      0x06DA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionSignOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PET_ABANDON,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetAbandon                   );
