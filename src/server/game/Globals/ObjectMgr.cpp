@@ -9146,11 +9146,11 @@ uint64 ObjectMgr::BattlePetGetNewId()
 
 uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
 {
-    for (BattlePetBreedXSpeciesMap::const_iterator mapCitr = sBattlePetBreedXSpeciesStore.cbegin(); mapCitr != sBattlePetBreedXSpeciesStore.cend(); mapCitr++)
+    for (BattlePetBreedXSpeciesMap::const_iterator mapCitr = sBattlePetBreedXSpeciesStore.begin(); mapCitr != sBattlePetBreedXSpeciesStore.end(); mapCitr++)
     {
         if (mapCitr->first == speciesId)
         {
-            BattleBetBreedSet::iterator setItr(mapCitr->second.cbegin());
+            BattleBetBreedSet::iterator setItr(mapCitr->second.begin());
             std::advance(setItr, urand(0, mapCitr->second.size() - 1));
 
             return *setItr;
@@ -9162,11 +9162,11 @@ uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
 
 uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const
 {
-    for (BattlePetQualityXSpeciesMap::const_iterator mapCitr = sBattlePetQualityXSpeciesStore.cbegin(); mapCitr != sBattlePetQualityXSpeciesStore.cend(); mapCitr++)
+    for (BattlePetQualityXSpeciesMap::const_iterator mapCitr = sBattlePetQualityXSpeciesStore.begin(); mapCitr != sBattlePetQualityXSpeciesStore.end(); mapCitr++)
     {
         if (mapCitr->first == speciesId)
         {
-            BattlePetQualitySet::iterator setItr(mapCitr->second.cbegin());
+            BattlePetQualitySet::iterator setItr(mapCitr->second.begin());
             std::advance(setItr, urand(0, mapCitr->second.size() - 1));
 
             return *setItr;

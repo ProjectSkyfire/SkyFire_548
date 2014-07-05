@@ -160,7 +160,7 @@ void BattlePetMgr::LoadSlotsFromDb(PreparedQueryResult result)
     if ((!HasLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_3) || !GetBattlePet(slot3)) && slot3 != 0)
         slotErrors.insert(BATTLE_PET_LOADOUT_SLOT_3);
 
-    for (std::set<uint8>::const_iterator citr = slotErrors.cbegin(); citr != slotErrors.cend(); citr++)
+    for (std::set<uint8>::const_iterator citr = slotErrors.begin(); citr != slotErrors.end(); citr++)
     {
         TC_LOG_ERROR("sql.sql", "Battle Pet slot %u in `account_battle_pet_slots` for account %u is invalid!",
             *citr, m_owner->GetSession()->GetAccountId());
@@ -208,7 +208,7 @@ uint8 BattlePetMgr::GetBattlePetCount(uint16 speciesId) const
 {
     uint8 counter = 0;
 
-    for (BattlePetSet::const_iterator citr = m_battlePetSet.cbegin(); citr != m_battlePetSet.cend(); citr++)
+    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
         if ((*citr)->GetSpecies() == speciesId)
             counter++;
 
@@ -334,7 +334,7 @@ void BattlePetMgr::SendBattlePetJournal()
     size_t writePos = data.bitwpos();
     data.WriteBits(petCount, 19);               // placeholder
     
-    for (BattlePetSet::const_iterator citr = m_battlePetSet.cbegin(); citr != m_battlePetSet.cend(); citr++)
+    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
     {
         BattlePet const* battlePet = *citr;
 
