@@ -611,6 +611,7 @@ MovementStatusElements const MovementStartForward[] = // 5.4.8 18414
     MSETransportPositionZ,     // 72
     MSETransportGuidByte4,     // 60
     MSETransportTime3,         // 96
+    MSETransportSeat,          // 80
     MSETransportGuidByte7,     // 63
     MSETransportOrientation,   // 76
     MSETransportTime2,         // 88
