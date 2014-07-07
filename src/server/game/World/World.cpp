@@ -279,11 +279,20 @@ void World::AddSession_(WorldSession* s)
         return;
     }
 
+    s->SendUnk1E9B();
+
     s->SendAuthResponse(AUTH_OK, false);
+
+    s->SendUnk121E();
+
     s->SendAddonsInfo();
     s->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
     s->SendTutorialsData();
-    s->SendTimezoneInformation();
+
+    s->SendUnk043F();
+    s->SendUnk00A3();
+
+    //s->SendTimezoneInformation();
 
     UpdateMaxSessionCounters();
 

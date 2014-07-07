@@ -1,0 +1,354 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\server\shared\Configuration\Config.cpp">
+      <Filter>Configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Cryptography\ARC4.cpp">
+      <Filter>Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Cryptography\Authentication\AuthCrypt.cpp">
+      <Filter>Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Cryptography\BigNumber.cpp">
+      <Filter>Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Cryptography\HMACSHA1.cpp">
+      <Filter>Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Cryptography\OpenSSLCrypto.cpp">
+      <Filter>Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Cryptography\SHA1.cpp">
+      <Filter>Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\AdhocStatement.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\DatabaseWorker.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\Field.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\Implementation\CharacterDatabase.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\Implementation\LoginDatabase.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\Implementation\WorldDatabase.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\MySQLConnection.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\PreparedStatement.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\QueryHolder.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\QueryResult.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\Transaction.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\DataStores\DB2FileLoader.cpp">
+      <Filter>DataStores</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\DataStores\DBCFileLoader.cpp">
+      <Filter>DataStores</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Debugging\Errors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\Appender.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\AppenderConsole.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\AppenderDB.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\AppenderFile.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\Log.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\Logger.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\LogOperation.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Logging\LogWorker.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Packets\ByteBuffer.cpp">
+      <Filter>Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Threading\DelayExecutor.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Threading\Threading.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Utilities\EventProcessor.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Utilities\ServiceWin32.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Utilities\Util.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Common.cpp">
+      <Filter>localdir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\PrecompiledHeaders\sharedPCH.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\shared\Configuration\Config.h">
+      <Filter>Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\ARC4.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\Authentication\AuthCrypt.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\BigNumber.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\HMACSHA1.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\OpenSSLCrypto.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\SHA1.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Cryptography\WardenKeyGeneration.h">
+      <Filter>Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\AdhocStatement.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseEnv.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseWorker.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseWorkerPool.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\Field.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\Implementation\CharacterDatabase.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\Implementation\LoginDatabase.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\Implementation\WorldDatabase.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\MySQLConnection.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\MySQLThreading.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\PreparedStatement.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\QueryHolder.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\QueryResult.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\SQLOperation.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\Transaction.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\DataStores\DB2FileLoader.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\DataStores\DB2Store.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\DataStores\DBCFileLoader.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\DataStores\DBCStore.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Debugging\Errors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\FactoryHolder.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\HashNamespace.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedList.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\Reference.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\RefManager.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\ObjectRegistry.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainer.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerFunctions.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerVisitor.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeList.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedMap.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedSet.h">
+      <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\Appender.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\AppenderConsole.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\AppenderDB.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\AppenderFile.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\Log.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\Logger.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\LogOperation.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Logging\LogWorker.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Packets\ByteBuffer.h">
+      <Filter>Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Threading\Callback.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Threading\DelayExecutor.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Threading\LockedQueue.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Threading\Threading.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Utilities\ByteConverter.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Utilities\EventProcessor.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Utilities\ServiceWin32.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Utilities\SignalHandler.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Utilities\Timer.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Utilities\Util.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\AutoPtr.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Common.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\CompilerDefs.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Containers.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Define.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Memory.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\SystemConfig.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{89D9288A-A24D-4A65-8E3F-1D172E6BB0E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{36CC6276-B26B-4911-85B7-771F67C03704}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Configuration">
+      <UniqueIdentifier>{0A91CD71-9DF8-4F54-9F34-9F78A298C2AF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Cryptography">
+      <UniqueIdentifier>{720319A9-B8BD-47CC-939D-662E9EF7462D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Database">
+      <UniqueIdentifier>{966F0110-C738-4471-AB05-5851670B157C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataStores">
+      <UniqueIdentifier>{6FF14309-3A06-4AA8-89BB-53B90FF4DDEC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dynamic">
+      <UniqueIdentifier>{61421E73-C573-4065-BEAB-110B2E75B570}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logging">
+      <UniqueIdentifier>{E86A053F-F6F6-4ABF-9AD8-F5AA177D9CE8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packets">
+      <UniqueIdentifier>{903DEA2E-3557-49A8-A241-2C814B949F09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threading">
+      <UniqueIdentifier>{00B00D11-1625-4033-A213-A489E876BB65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{C27B47F1-8627-4133-AD60-E9C94B8010C9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="localdir">
+      <UniqueIdentifier>{94C22B23-738F-471C-A7D3-F421E785EFFD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

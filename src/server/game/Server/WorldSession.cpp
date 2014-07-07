@@ -1033,6 +1033,43 @@ void WorldSession::SendTimezoneInformation()
     SendPacket(&data);
 }
 
+void WorldSession::SendUnk00A3()
+{
+    WorldPacket data(SMSG_UNK_00A3, 4);
+    data << UINT32(0);
+    SendPacket(&data);
+}
+
+void WorldSession::SendUnk043F()
+{
+    WorldPacket data(SMSG_UNK_043F, 4 + 3);
+    data << UINT32(0);
+    data.WriteBits(0, 19);
+    data.FlushBits();
+    SendPacket(&data);
+}
+
+void WorldSession::SendUnk121E()
+{
+    WorldPacket data(SMSG_UNK_121E, 1);
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(1);
+    data.FlushBits();
+    SendPacket(&data);
+}
+
+void WorldSession::SendUnk1E9B()
+{
+    WorldPacket data(SMSG_UNK_1E9B, 4 + 4 + 4 + 4 + 1);
+    data << UINT32(0x473216);
+    data << UINT32(0x0C24E5);
+    data << UINT32(0xA58757);
+    data << UINT32(0x108D59);
+    data << UINT8(0x80);
+    SendPacket(&data);
+}
+
 bool WorldSession::IsAddonRegistered(const std::string& prefix) const
 {
     if (!_filterAddonMessages) // if we have hit the softcap (64) nothing should be filtered

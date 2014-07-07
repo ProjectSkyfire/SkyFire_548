@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\server\worldserver\CommandLine\CliRunnable.cpp">
+      <Filter>CommandLine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\RemoteAccess\RARunnable.cpp">
+      <Filter>RemoteAcces</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\RemoteAccess\RASocket.cpp">
+      <Filter>RemoteAcces</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\TCSoap\TCSoap.cpp">
+      <Filter>TCSoap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.cpp">
+      <Filter>WorldThread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\Main.cpp">
+      <Filter>localdir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\Master.cpp">
+      <Filter>localdir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\worldserver\PrecompiledHeaders\worldPCH.cpp">
+      <Filter>PrecompiledHeaders</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\worldserver\CommandLine\CliRunnable.h">
+      <Filter>CommandLine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\worldserver\RemoteAccess\RARunnable.h">
+      <Filter>RemoteAcces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\worldserver\RemoteAccess\RASocket.h">
+      <Filter>RemoteAcces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\worldserver\TCSoap\TCSoap.h">
+      <Filter>TCSoap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.h">
+      <Filter>WorldThread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\worldserver\Master.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\worldserver\resource.h">
+      <Filter>localdir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\server\worldserver\worldserver.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{89D9288A-A24D-4A65-8E3F-1D172E6BB0E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{36CC6276-B26B-4911-85B7-771F67C03704}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommandLine">
+      <UniqueIdentifier>{505F0A31-C819-4011-9E8F-FF7D6D8E1B69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PrecompiledHeaders">
+      <UniqueIdentifier>{A7708EBD-785E-4605-975E-AA8D0590372D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RemoteAcces">
+      <UniqueIdentifier>{67613462-702E-4AEB-A731-140DC9EB0BCE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TCSoap">
+      <UniqueIdentifier>{8CD02C47-5FC8-4C7D-8CE1-4AD4A59983D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WorldThread">
+      <UniqueIdentifier>{56B375A0-134C-4DB8-A007-521CB0B1FD6F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="localdir">
+      <UniqueIdentifier>{94C22B23-738F-471C-A7D3-F421E785EFFD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

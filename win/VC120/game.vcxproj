@@ -1,0 +1,627 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{8F4B870D-5DA3-417A-A898-3BE4C0249209}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>game</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>gamePCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>gamePCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>gamePCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>gamePCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>gamePCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>gamePCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>gamePCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>gamePCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\dep\recastnavigation\Detour;..\..\dep\recastnavigation\Recast;..\..\dep\g3dlite\include;..\..\dep\SFMT;..\..\dep\zlib;..\..\src\server\collision;..\..\src\server\collision\Management;..\..\src\server\collision\Models;..\..\src\server\collision\Maps;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\AI;..\..\src\server\game\AI\CoreAI;..\..\src\server\game\AI\ScriptedAI;..\..\src\server\game\AI\SmartScripts;..\..\src\server\game\AuctionHouse;..\..\src\server\game\Battlefield;..\..\src\server\game\Battlefield\Zones;..\..\src\server\game\Battlegrounds;..\..\src\server\game\Battlegrounds\Zones;..\..\src\server\game\Calendar;..\..\src\server\game\Chat;..\..\src\server\game\Chat\Channels;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities;..\..\src\server\game\Entities\AreaTrigger;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Totem;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Entities\Transport;..\..\src\server\game\Events;..\..\src\server\game\Globals;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Grids\Notifiers;..\..\src\server\game\Grids;..\..\src\server\game\Groups;..\..\src\server\game\Guilds;..\..\src\server\game\Handlers;..\..\src\server\game\Instances;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Spline;..\..\src\server\game\Movement\MovementGenerators;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\OutdoorPvP;..\..\src\server\game\Pools;..\..\src\server\game\PrecompiledHeaders;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Scripting;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server;..\..\src\server\game\Skills;..\..\src\server\game\Spells;..\..\src\server\game\Spells\Auras;..\..\src\server\game\Texts;..\..\src\server\game\Tools;..\..\src\server\game\Tickets;..\..\src\server\game\Warden;..\..\src\server\game\Warden\Modules;..\..\src\server\game\Weather;..\..\src\server\game\World;..\..\src\server\scripts\PrecompiledHeaders;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\game\Accounts\AccountMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Accounts\RBAC.h" />
+    <ClInclude Include="..\..\src\server\game\Achievements\AchievementMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Addons\AddonMgr.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\CombatAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\GameObjectAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\GuardAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\PassiveAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\PetAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\ReactorAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\TotemAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\UnitAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAIFactory.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAIImpl.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAIRegistry.h" />
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAISelector.h" />
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedCreature.h" />
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedEscortAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedFollowerAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedGossip.h" />
+    <ClInclude Include="..\..\src\server\game\AI\SmartScripts\SmartAI.h" />
+    <ClInclude Include="..\..\src\server\game\AI\SmartScripts\SmartScript.h" />
+    <ClInclude Include="..\..\src\server\game\AI\SmartScripts\SmartScriptMgr.h" />
+    <ClInclude Include="..\..\src\server\game\AuctionHouse\AuctionHouseMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Battlefield\Battlefield.h" />
+    <ClInclude Include="..\..\src\server\game\Battlefield\BattlefieldMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Battlefield\Zones\BattlefieldWG.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\ArenaTeam.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\ArenaTeamMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Battleground.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\BattlegroundMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\BattlegroundQueue.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundAB.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundAV.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundBE.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundBFG.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundDS.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundEY.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundIC.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundNA.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundRL.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundRV.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundSA.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundTP.h" />
+    <ClInclude Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundWS.h" />
+    <ClInclude Include="..\..\src\server\game\Calendar\CalendarMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Chat\Channels\Channel.h" />
+    <ClInclude Include="..\..\src\server\game\Chat\Channels\ChannelMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Chat\Chat.h" />
+    <ClInclude Include="..\..\src\server\game\Chat\ChatLink.h" />
+    <ClInclude Include="..\..\src\server\game\Combat\HostileRefManager.h" />
+    <ClInclude Include="..\..\src\server\game\Combat\ThreatManager.h" />
+    <ClInclude Include="..\..\src\server\game\Combat\UnitEvents.h" />
+    <ClInclude Include="..\..\src\server\game\Conditions\ConditionMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Conditions\DisableMgr.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DB2fmt.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DB2Stores.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DB2Structure.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DB2Utility.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCEnums.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCfmt.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCStores.h" />
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCStructure.h" />
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFG.h" />
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFGGroupData.h" />
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFGMgr.h" />
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFGPlayerData.h" />
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFGQueue.h" />
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFGScripts.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\AreaTrigger\AreaTrigger.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Corpse\Corpse.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\Creature.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\CreatureGroups.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\GossipDef.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\TemporarySummon.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\DynamicObject\DynamicObject.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\GameObject\GameObject.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Item\Container\Bag.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Item\Item.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Item\ItemEnchantmentMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Item\ItemPrototype.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Object.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\ObjectDefines.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\ObjectPosSelector.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateData.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateFieldFlags.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateFields.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateMask.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Pet\Pet.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Pet\PetDefines.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Player\Player.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Player\SocialMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Totem\Totem.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Transport\Transport.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Unit\Unit.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Vehicle\Vehicle.h" />
+    <ClInclude Include="..\..\src\server\game\Entities\Vehicle\VehicleDefines.h" />
+    <ClInclude Include="..\..\src\server\game\Events\GameEventMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Globals\ObjectAccessor.h" />
+    <ClInclude Include="..\..\src\server\game\Globals\ObjectMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\Cells\Cell.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\Cells\CellImpl.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\Grid.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\GridDefines.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\GridLoader.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\GridReference.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\GridRefManager.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\GridStates.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\NGrid.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\Notifiers\GridNotifiers.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\Notifiers\GridNotifiersImpl.h" />
+    <ClInclude Include="..\..\src\server\game\Grids\ObjectGridLoader.h" />
+    <ClInclude Include="..\..\src\server\game\Groups\Group.h" />
+    <ClInclude Include="..\..\src\server\game\Groups\GroupMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Groups\GroupReference.h" />
+    <ClInclude Include="..\..\src\server\game\Groups\GroupRefManager.h" />
+    <ClInclude Include="..\..\src\server\game\Guilds\Guild.h" />
+    <ClInclude Include="..\..\src\server\game\Guilds\GuildFinderMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Guilds\GuildMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Handlers\AddonHandler.h" />
+    <ClInclude Include="..\..\src\server\game\Handlers\NPCHandler.h" />
+    <ClInclude Include="..\..\src\server\game\Instances\InstanceSaveMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Instances\InstanceScript.h" />
+    <ClInclude Include="..\..\src\server\game\Loot\LootMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Mails\Mail.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\Map.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\MapInstanced.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\MapManager.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\MapReference.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\MapRefManager.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\MapUpdater.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\PhaseMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\TransportMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Maps\ZoneScript.h" />
+    <ClInclude Include="..\..\src\server\game\Miscellaneous\Formulas.h" />
+    <ClInclude Include="..\..\src\server\game\Miscellaneous\Language.h" />
+    <ClInclude Include="..\..\src\server\game\Miscellaneous\SharedDefines.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\FollowerReference.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\FollowerRefManager.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MotionMaster.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGeneratorImpl.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\ConfusedMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\FleeingMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\HomeMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\IdleMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\PointMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\RandomMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\TargetedMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\WaypointMovementGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\MovementStructures.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\PathGenerator.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\MovementPacketBuilder.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\MovementTypedefs.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\MoveSpline.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\MoveSplineFlag.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\MoveSplineInit.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\MoveSplineInitArgs.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\Spline.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Spline\SplineImpl.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Waypoints\Path.h" />
+    <ClInclude Include="..\..\src\server\game\Movement\Waypoints\WaypointManager.h" />
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\OutdoorPvP.h" />
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\OutdoorPvPMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Pools\PoolMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Quests\QuestDef.h" />
+    <ClInclude Include="..\..\src\server\game\Reputation\ReputationMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Scripting\ScriptLoader.h" />
+    <ClInclude Include="..\..\src\server\game\Scripting\ScriptMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Scripting\ScriptSystem.h" />
+    <ClInclude Include="..\..\src\server\game\Server\Protocol\Opcodes.h" />
+    <ClInclude Include="..\..\src\server\game\Server\Protocol\PacketLog.h" />
+    <ClInclude Include="..\..\src\server\game\Server\WorldPacket.h" />
+    <ClInclude Include="..\..\src\server\game\Server\WorldSession.h" />
+    <ClInclude Include="..\..\src\server\game\Server\WorldSocket.h" />
+    <ClInclude Include="..\..\src\server\game\Server\WorldSocketAcceptor.h" />
+    <ClInclude Include="..\..\src\server\game\Server\WorldSocketMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Skills\SkillDiscovery.h" />
+    <ClInclude Include="..\..\src\server\game\Skills\SkillExtraItems.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\Auras\SpellAuraDefines.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\Auras\SpellAuraEffects.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\Auras\SpellAuras.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\Spell.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\SpellInfo.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\SpellMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Spells\SpellScript.h" />
+    <ClInclude Include="..\..\src\server\game\Texts\CreatureTextMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Tools\CharacterDatabaseCleaner.h" />
+    <ClInclude Include="..\..\src\server\game\Tools\PlayerDump.h" />
+    <ClInclude Include="..\..\src\server\game\Tickets\TicketMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Warden\Modules\WardenModuleMac.h" />
+    <ClInclude Include="..\..\src\server\game\Warden\Modules\WardenModuleWin.h" />
+    <ClInclude Include="..\..\src\server\game\Warden\Warden.h" />
+    <ClInclude Include="..\..\src\server\game\Warden\WardenCheckMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Warden\WardenMac.h" />
+    <ClInclude Include="..\..\src\server\game\Warden\WardenWin.h" />
+    <ClInclude Include="..\..\src\server\game\Weather\Weather.h" />
+    <ClInclude Include="..\..\src\server\game\Weather\WeatherMgr.h" />
+    <ClInclude Include="..\..\src\server\game\World\World.h" />
+    <ClCompile Include="..\..\src\server\game\Accounts\AccountMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Accounts\RBAC.cpp" />
+    <ClCompile Include="..\..\src\server\game\Achievements\AchievementMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Addons\AddonMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\CombatAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\GameObjectAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\GuardAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\PassiveAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\PetAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\ReactorAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\TotemAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\UnitAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CreatureAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CreatureAIRegistry.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\CreatureAISelector.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedCreature.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedEscortAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedFollowerAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\SmartScripts\SmartAI.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\SmartScripts\SmartScript.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\SmartScripts\SmartScriptMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\AuctionHouse\AuctionHouseMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlefield\Battlefield.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlefield\BattlefieldMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlefield\Zones\BattlefieldWG.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\ArenaTeam.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\ArenaTeamMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Battleground.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\BattlegroundMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\BattlegroundQueue.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundAB.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundAV.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundBE.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundBFG.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundDS.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundEY.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundIC.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundNA.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundRL.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundRV.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundSA.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundTP.cpp" />
+    <ClCompile Include="..\..\src\server\game\Battlegrounds\Zones\BattlegroundWS.cpp" />
+    <ClCompile Include="..\..\src\server\game\Calendar\CalendarMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Chat\Channels\Channel.cpp" />
+    <ClCompile Include="..\..\src\server\game\Chat\Channels\ChannelMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Chat\Chat.cpp" />
+    <ClCompile Include="..\..\src\server\game\Chat\ChatLink.cpp" />
+    <ClCompile Include="..\..\src\server\game\Combat\HostileRefManager.cpp" />
+    <ClCompile Include="..\..\src\server\game\Combat\ThreatManager.cpp" />
+    <ClCompile Include="..\..\src\server\game\Conditions\ConditionMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Conditions\DisableMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\DataStores\DB2Stores.cpp" />
+    <ClCompile Include="..\..\src\server\game\DataStores\DB2Utility.cpp" />
+    <ClCompile Include="..\..\src\server\game\DataStores\DBCStores.cpp" />
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFG.cpp" />
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFGGroupData.cpp" />
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFGMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFGPlayerData.cpp" />
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFGQueue.cpp" />
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFGScripts.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\AreaTrigger\AreaTrigger.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Corpse\Corpse.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\Creature.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\CreatureGroups.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\GossipDef.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\TemporarySummon.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\DynamicObject\DynamicObject.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\GameObject\GameObject.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Item\Container\Bag.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Item\Item.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Item\ItemEnchantmentMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Object\Object.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Object\ObjectPosSelector.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Object\Updates\UpdateData.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Object\Updates\UpdateFieldFlags.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Pet\Pet.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Player\Player.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Player\SocialMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Totem\Totem.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Transport\Transport.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Unit\StatSystem.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Unit\Unit.cpp" />
+    <ClCompile Include="..\..\src\server\game\Entities\Vehicle\Vehicle.cpp" />
+    <ClCompile Include="..\..\src\server\game\Events\GameEventMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Globals\ObjectAccessor.cpp" />
+    <ClCompile Include="..\..\src\server\game\Globals\ObjectMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Grids\GridStates.cpp" />
+    <ClCompile Include="..\..\src\server\game\Grids\Notifiers\GridNotifiers.cpp" />
+    <ClCompile Include="..\..\src\server\game\Grids\ObjectGridLoader.cpp" />
+    <ClCompile Include="..\..\src\server\game\Groups\Group.cpp" />
+    <ClCompile Include="..\..\src\server\game\Groups\GroupMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Groups\GroupReference.cpp" />
+    <ClCompile Include="..\..\src\server\game\Guilds\Guild.cpp" />
+    <ClCompile Include="..\..\src\server\game\Guilds\GuildFinderMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Guilds\GuildMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\AddonHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\ArenaTeamHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\AuctionHouseHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\AuthHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\BattlefieldHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\BattleGroundHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\CalendarHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\ChannelHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\CharacterHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\ChatHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\CombatHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\DuelHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\GroupHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\GuildFinderHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\GuildHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\ItemHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\LFGHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\LootHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\MailHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\MiscHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\MovementHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\NPCHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\PetHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\PetitionsHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\QueryHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\QuestHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\ReferAFriendHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\SkillHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\SpellHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\TaxiHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\TicketHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\TradeHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\VehicleHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\VoiceChatHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Handlers\VoidStorageHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Instances\InstanceSaveMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Instances\InstanceScript.cpp" />
+    <ClCompile Include="..\..\src\server\game\Loot\LootMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Mails\Mail.cpp" />
+    <ClCompile Include="..\..\src\server\game\Maps\Map.cpp" />
+    <ClCompile Include="..\..\src\server\game\Maps\MapInstanced.cpp" />
+    <ClCompile Include="..\..\src\server\game\Maps\MapManager.cpp" />
+    <ClCompile Include="..\..\src\server\game\Maps\MapUpdater.cpp" />
+    <ClCompile Include="..\..\src\server\game\Maps\PhaseMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Maps\TransportMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\FollowerReference.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MotionMaster.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\ConfusedMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\FleeingMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\HomeMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\IdleMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\PointMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\RandomMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\TargetedMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\WaypointMovementGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\MovementStructures.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\PathGenerator.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\Spline\MovementPacketBuilder.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\Spline\MovementUtil.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\Spline\MoveSpline.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\Spline\MoveSplineInit.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\Spline\Spline.cpp" />
+    <ClCompile Include="..\..\src\server\game\Movement\Waypoints\WaypointManager.cpp" />
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\OutdoorPvP.cpp" />
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\OutdoorPvPMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Pools\PoolMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Quests\QuestDef.cpp" />
+    <ClCompile Include="..\..\src\server\game\Reputation\ReputationMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Scripting\MapScripts.cpp" />
+    <ClCompile Include="..\..\src\server\game\Scripting\ScriptLoader.cpp" />
+    <ClCompile Include="..\..\src\server\game\Scripting\ScriptMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Scripting\ScriptSystem.cpp" />
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Opcodes.cpp" />
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\PacketLog.cpp" />
+    <ClCompile Include="..\..\src\server\game\Server\WorldPacket.cpp" />
+    <ClCompile Include="..\..\src\server\game\Server\WorldSession.cpp" />
+    <ClCompile Include="..\..\src\server\game\Server\WorldSocket.cpp" />
+    <ClCompile Include="..\..\src\server\game\Server\WorldSocketMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Skills\SkillDiscovery.cpp" />
+    <ClCompile Include="..\..\src\server\game\Skills\SkillExtraItems.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuraEffects.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuras.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\Spell.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\SpellEffects.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\SpellInfo.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\SpellMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\SpellScript.cpp" />
+    <ClCompile Include="..\..\src\server\game\Texts\CreatureTextMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Tools\CharacterDatabaseCleaner.cpp" />
+    <ClCompile Include="..\..\src\server\game\Tools\PlayerDump.cpp" />
+    <ClCompile Include="..\..\src\server\game\Tickets\TicketMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Warden\Warden.cpp" />
+    <ClCompile Include="..\..\src\server\game\Warden\WardenCheckMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Warden\WardenMac.cpp" />
+    <ClCompile Include="..\..\src\server\game\Warden\WardenWin.cpp" />
+    <ClCompile Include="..\..\src\server\game\Weather\Weather.cpp" />
+    <ClCompile Include="..\..\src\server\game\Weather\WeatherMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\World\World.cpp" />
+    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">gamePCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">gamePCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">gamePCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">gamePCH.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,339 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{57D666F7-2F45-4ECB-B75A-D41F5C133B48}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>shared</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">shared</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">shared</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">shared</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.\$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">shared</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>sharedPCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>sharedPCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>sharedPCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>sharedPCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>sharedPCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>sharedPCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..;..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267;4619;4996;4355;4244;4985;4267;4619</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForcedIncludeFiles>sharedPCH.h</ForcedIncludeFiles>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>sharedPCH.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatSpecificWarningsAsErrors>4263;4264</TreatSpecificWarningsAsErrors>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE="$(ConfigurationName)";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_BUILD_DIRECTIVE=\"$(ConfigurationName)\";_WIN64;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SCRIPTS;NO_CORE_FUNCS;TRINITY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\src\server\shared;..\..\dep\recastnavigation\Detour;..\..\dep\SFMT;..\..\dep\sockets\include;..\..\dep\utf8cpp;..\..\src\server;..\..\src\server\shared;..\..\src\server\shared\Configuration;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Debugging;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\game\Entities\Object;..\..\dep\acelite;..\..\dep\mysqllite\include;C:\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\shared\Configuration\Config.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\ARC4.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\Authentication\AuthCrypt.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\BigNumber.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\HMACSHA1.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\OpenSSLCrypto.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\SHA1.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\WardenKeyGeneration.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\AdhocStatement.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseEnv.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseWorker.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseWorkerPool.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Field.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Implementation\CharacterDatabase.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Implementation\LoginDatabase.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Implementation\WorldDatabase.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\MySQLConnection.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\MySQLThreading.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\PreparedStatement.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\QueryHolder.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\QueryResult.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\SQLOperation.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Transaction.h" />
+    <ClInclude Include="..\..\src\server\shared\DataStores\DB2FileLoader.h" />
+    <ClInclude Include="..\..\src\server\shared\DataStores\DB2Store.h" />
+    <ClInclude Include="..\..\src\server\shared\DataStores\DBCFileLoader.h" />
+    <ClInclude Include="..\..\src\server\shared\DataStores\DBCStore.h" />
+    <ClInclude Include="..\..\src\server\shared\Debugging\Errors.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\FactoryHolder.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\HashNamespace.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedList.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\Reference.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\RefManager.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\ObjectRegistry.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainer.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerFunctions.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerVisitor.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeList.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedMap.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedSet.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\Appender.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\AppenderConsole.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\AppenderDB.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\AppenderFile.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\Log.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\Logger.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\LogOperation.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\LogWorker.h" />
+    <ClInclude Include="..\..\src\server\shared\Packets\ByteBuffer.h" />
+    <ClInclude Include="..\..\src\server\shared\Threading\Callback.h" />
+    <ClInclude Include="..\..\src\server\shared\Threading\DelayExecutor.h" />
+    <ClInclude Include="..\..\src\server\shared\Threading\LockedQueue.h" />
+    <ClInclude Include="..\..\src\server\shared\Threading\Threading.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\ByteConverter.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\EventProcessor.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\ServiceWin32.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\SignalHandler.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\Timer.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\Util.h" />
+    <ClInclude Include="..\..\src\server\shared\AutoPtr.h" />
+    <ClInclude Include="..\..\src\server\shared\Common.h" />
+    <ClInclude Include="..\..\src\server\shared\CompilerDefs.h" />
+    <ClInclude Include="..\..\src\server\shared\Containers.h" />
+    <ClInclude Include="..\..\src\server\shared\Define.h" />
+    <ClInclude Include="..\..\src\server\shared\Memory.h" />
+    <ClInclude Include="..\..\src\server\shared\SystemConfig.h" />
+    <ClCompile Include="..\..\src\server\shared\Configuration\Config.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\ARC4.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\Authentication\AuthCrypt.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\BigNumber.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\HMACSHA1.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\OpenSSLCrypto.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\SHA1.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\AdhocStatement.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\DatabaseWorker.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Field.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Implementation\CharacterDatabase.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Implementation\LoginDatabase.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Implementation\WorldDatabase.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\MySQLConnection.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\PreparedStatement.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\QueryHolder.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\QueryResult.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Transaction.cpp" />
+    <ClCompile Include="..\..\src\server\shared\DataStores\DB2FileLoader.cpp" />
+    <ClCompile Include="..\..\src\server\shared\DataStores\DBCFileLoader.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Debugging\Errors.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\Appender.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\AppenderConsole.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\AppenderDB.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\AppenderFile.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\Log.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\Logger.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\LogOperation.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\LogWorker.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Packets\ByteBuffer.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Threading\DelayExecutor.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Threading\Threading.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\EventProcessor.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\ServiceWin32.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\Util.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Common.cpp" />
+    <ClCompile Include="..\..\src\server\shared\PrecompiledHeaders\sharedPCH.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">sharedPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">sharedPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">sharedPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">sharedPCH.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="ace.vcxproj">
+      <Project>45867821-5E5F-4810-88ED-F6E107233E0A</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
