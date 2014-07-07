@@ -17,6 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BattlePet.h"
 #include "DB2Stores.h"
 #include "DB2fmt.h"
 #include "DB2Utility.h"
@@ -24,6 +25,18 @@
 #include "Log.h"
 #include "World.h"
 #include "DBCStores.h"
+
+DB2Storage<BattlePetAbilityEntry> sBattlePetAbilityStore(BattlePetAbilityfmt);
+DB2Storage<BattlePetAbilityStateEntry> sBattlePetAbilityStateStore(BattlePetAbilityStatefmt);
+DB2Storage<BattlePetBreedStateEntry> sBattlePetBreedStateStore(BattlePetBreedStatefmt);
+DB2Storage<BattlePetSpeciesEntry> sBattlePetSpeciesStore(BattlePetSpeciesfmt);
+DB2Storage<BattlePetSpeciesStateEntry> sBattlePetSpeciesStateStore(BattlePetSpeciesStatefmt);
+DB2Storage<BattlePetSpeciesXAbilityEntry> sBattlePetSpeciesXAbilityStore(BattlePetSpeciesXAbilityfmt);
+DB2Storage<BattlePetStateEntry> sBattlePetStateStore(BattlePetStatefmt);
+DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore(ItemToBattlePetfmt);
+
+BattlePetBreedSet sBattlePetBreedSet;
+BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
 DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
 DB2Storage<ItemEntry> sItemStore(Itemfmt, &DB2Utilities::HasItemEntry, &DB2Utilities::WriteItemDbReply);
@@ -102,6 +115,25 @@ void LoadDB2Stores(std::string const& dataPath)
     DB2StoreProblemList bad_db2_files;
     uint32 availableDb2Locales = 0xFF;
 
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityStore, db2Path, "BattlePetAbility.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityStateStore, db2Path, "BattlePetAbilityState.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedStateStore, db2Path, "BattlePetBreedState.db2");
+
+    for (uint32 i = 0; i < sBattlePetBreedStateStore.GetNumRows(); i++)
+        if (BattlePetBreedStateEntry const* breedStateEntry = sBattlePetBreedStateStore.LookupEntry(i))
+            if (sBattlePetBreedSet.find(breedStateEntry->BreedId) == sBattlePetBreedSet.end())
+                sBattlePetBreedSet.insert(breedStateEntry->BreedId);
+
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStore, db2Path, "BattlePetSpecies.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStateStore, db2Path, "BattlePetSpeciesState.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesXAbilityStore, db2Path, "BattlePetSpeciesXAbility.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetStateStore, db2Path, "BattlePetState.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemToBattlePetStore, db2Path, "ItemToBattlePet.db2");
+
+    for (uint32 i = 0; i < sItemToBattlePetStore.GetNumRows(); i++)
+        if (ItemToBattlePetEntry const* itemEntry = sItemToBattlePetStore.LookupEntry(i))
+            sBattlePetItemXSpeciesStore.insert(std::make_pair(itemEntry->ItemId, itemEntry->SpeciesId));
+
     LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore, db2Path, "BroadcastText.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemStore, db2Path, "Item.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore, db2Path, "ItemCurrencyCost.db2");
@@ -129,11 +161,15 @@ void LoadDB2Stores(std::string const& dataPath)
     }
 
     // Check loaded DB2 files proper version
-    if (!sBroadcastTextStore.LookupEntry(77161)     ||       // last broadcast text added in 5.4.8 (18414)
-        !sItemStore.LookupEntry(112353)             ||       // last item added in 5.4.8 (18414)
-        !sItemExtendedCostStore.LookupEntry(5280)   ||       // last item extended cost added in 5.4.8 (18414)
-        !sQuestPackageItemStore.LookupEntry(2256)   ||       // last quest package item in 5.4.8 (18414)
-        !sSceneScriptStore.LookupEntry(11156))               // last scene script added in 5.4.8 (18414)
+    if (!sBattlePetAbilityStore.LookupEntry(1238)           // last battle pet ability added in 5.4.8 (18414)
+        || !sBattlePetSpeciesStore.LookupEntry(1386)        // last battle pet species added in 5.4.8 (18414)
+        || !sBattlePetStateStore.LookupEntry(176)           // last battle pet state added in 5.4.8 (18414)
+        || !sItemToBattlePetStore.LookupEntry(109014)       // last battle pet item added in 5.4.8 (18414)
+        || !sBroadcastTextStore.LookupEntry(77161)          // last broadcast text added in 5.4.8 (18414)
+        || !sItemStore.LookupEntry(112353)                  // last item added in 5.4.8 (18414)
+        || !sItemExtendedCostStore.LookupEntry(5280)        // last item extended cost added in 5.4.8 (18414)
+        || !sQuestPackageItemStore.LookupEntry(2256)        // last quest package item in 5.4.8 (18414)
+        || !sSceneScriptStore.LookupEntry(11156))           // last scene script added in 5.4.8 (18414)
     {
         TC_LOG_ERROR("misc", "You have _outdated_ DB2 files, Please extract correct db2 files from client 5.4.8 18414.");
         exit(1);
@@ -149,4 +185,66 @@ DB2StorageBase const* GetDB2Storage(uint32 type)
         return itr->second;
 
     return NULL;
+}
+
+#define BATTLE_PET_MAIN_STAT_VALUE  8.0f
+#define BATTLE_PET_MAIN_STAT_DIV    200.0f
+#define BATTLE_PET_MAIN_STAT_OFFSET 1600.0f
+
+float BattlePetSpeciesMainStat(uint16 stateId, uint16 speciesId)
+{
+    if (stateId != BATTLE_PET_STATE_STAT_POWER
+        && stateId != BATTLE_PET_STATE_STAT_STAMINA
+        && stateId != BATTLE_PET_STATE_STAT_SPEED)
+        return 0;
+
+    for (uint32 i = 0; i < sBattlePetSpeciesStateStore.GetNumRows(); i++)
+    {
+        BattlePetSpeciesStateEntry const* stateEntry = sBattlePetSpeciesStateStore.LookupEntry(i);
+        if (!stateEntry)
+            continue;
+
+        if (stateEntry->StateId == stateId && stateEntry->SpeciesId == speciesId)
+            return BATTLE_PET_MAIN_STAT_VALUE + ((float)stateEntry->Modifier / BATTLE_PET_MAIN_STAT_DIV);
+    }
+
+    return BATTLE_PET_MAIN_STAT_VALUE;
+}
+
+float BattlePetBreedMainStatModifier(uint16 stateId, uint8 breedId)
+{
+    if (stateId != BATTLE_PET_STATE_STAT_POWER
+        && stateId != BATTLE_PET_STATE_STAT_STAMINA
+        && stateId != BATTLE_PET_STATE_STAT_SPEED)
+        return 0;
+
+    for (uint32 i = 0; i < sBattlePetBreedStateStore.GetNumRows(); i++)
+    {
+        BattlePetBreedStateEntry const* stateEntry = sBattlePetBreedStateStore.LookupEntry(i);
+        if (!stateEntry)
+            continue;
+
+        if (stateEntry->StateId == stateId && stateEntry->BreedId == breedId)
+            return ((float)stateEntry->Value - BATTLE_PET_MAIN_STAT_OFFSET) / BATTLE_PET_MAIN_STAT_DIV;
+    }
+
+    return 0;
+}
+
+uint32 BattlePetGetSummonSpell(uint16 speciesId)
+{
+    BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
+    if (!speciesEntry)
+        return 0;
+
+    return speciesEntry->SpellId;
+}
+
+bool BattlePetSpeciesHasFlag(uint16 speciesId, uint16 flag)
+{
+    BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
+    if (!speciesEntry)
+        return false;
+
+    return (speciesEntry->Flags & flag) != 0;
 }

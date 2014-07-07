@@ -348,6 +348,7 @@ class Spell
         void EffectResurrectWithAura(SpellEffIndex effIndex);
         void EffectCreateAreaTrigger(SpellEffIndex effIndex);
         void EffectRemoveTalent(SpellEffIndex effIndex);
+        void EffectBattlePetsUnlock(SpellEffIndex effIndex);
 
         typedef std::set<Aura*> UsedSpellMods;
 

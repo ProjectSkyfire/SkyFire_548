@@ -971,6 +971,14 @@ class WorldSession
         void HandleSaveCUFProfiles(WorldPacket& recvPacket);
         void SendLoadCUFProfiles();
 
+        // Battle Pets
+        void HandleBattlePetDelete(WorldPacket& recvData);
+        void HandleBattlePetModifyName(WorldPacket& recvData);
+        void HandleBattlePetQueryName(WorldPacket& recvData);
+        void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
+        void HandleBattlePetSetFlags(WorldPacket& recvData);
+        void HandleBattlePetSummonCompanion(WorldPacket& recvData);
+
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

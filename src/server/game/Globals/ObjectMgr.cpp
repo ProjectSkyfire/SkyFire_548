@@ -247,7 +247,8 @@ ObjectMgr::ObjectMgr():
     _hiDoGuid(1),
     _hiCorpseGuid(1),
     _hiAreaTriggerGuid(1),
-    _hiMoTransGuid(1)
+    _hiMoTransGuid(1),
+    m_battlePetId(1)
 {
     for (uint8 i = 0; i < MAX_CLASSES; ++i)
         for (uint8 j = 0; j < MAX_RACES; ++j)
@@ -6168,6 +6169,10 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query("SELECT MAX(itemId) from character_void_storage");
     if (result)
         _voidItemId = (*result)[0].GetUInt64()+1;
+
+    result = CharacterDatabase.Query("SELECT MAX(id) from account_battle_pet");
+    if (result)
+        m_battlePetId = (*result)[0].GetUInt64() + 1;
 }
 
 uint32 ObjectMgr::GenerateAuctionID()
@@ -9045,4 +9050,128 @@ PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
     if (!info)
         return NULL;
     return info;
+}
+
+void ObjectMgr::LoadBattlePetBreedData()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT species, breed FROM `battle_pet_breed`");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Battle Pets breed definitions. DB table `battle_pet_breed` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint16 speciesId = fields[0].GetUInt16();
+        uint8 breedId    = fields[1].GetUInt8();
+
+        if (!sBattlePetSpeciesStore.HasRecord(speciesId))
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet species %u defined in `battle_pet_breed` does not exists, skipped.", speciesId);
+            continue;
+        }
+
+        if (sBattlePetBreedSet.find(breedId) == sBattlePetBreedSet.end())
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet breed %u defined in `battle_pet_breed` does not exists, skipped.", breedId);
+            continue;
+        }
+
+        if (sBattlePetBreedXSpeciesStore.find(speciesId) == sBattlePetBreedXSpeciesStore.end())
+            sBattlePetBreedXSpeciesStore.insert(make_pair(speciesId, BattleBetBreedSet()));
+
+        sBattlePetBreedXSpeciesStore[speciesId].insert(breedId);
+
+        count++;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Battle Pet breed definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadBattlePetQualityData()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT species, quality FROM `battle_pet_quality`");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Battle Pets quality definitions. DB table `battle_pet_quality` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint16 speciesId = fields[0].GetUInt16();
+        uint8 quality    = fields[1].GetUInt8();
+
+        if (!sBattlePetSpeciesStore.HasRecord(speciesId))
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet species %u defined in `battle_pet_quality` does not exists, skipped.", speciesId);
+            continue;
+        }
+
+        if (quality > ITEM_QUALITY_LEGENDARY)
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet quality %u defined in `battle_pet_quality` is invalid, skipped.", quality);
+            continue;
+        }
+
+        if (sBattlePetQualityXSpeciesStore.find(speciesId) == sBattlePetQualityXSpeciesStore.end())
+            sBattlePetQualityXSpeciesStore.insert(make_pair(speciesId, BattlePetQualitySet()));
+
+        sBattlePetQualityXSpeciesStore[speciesId].insert(quality);
+
+        count++;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Battle Pet quality definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+uint64 ObjectMgr::BattlePetGetNewId()
+{
+    ASSERT(m_battlePetId < 0xFFFFFFFFFFFFFFFE && "Battle Pet id overflow!");
+    return m_battlePetId++;
+}
+
+uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
+{
+    for (BattlePetBreedXSpeciesMap::const_iterator mapCitr = sBattlePetBreedXSpeciesStore.begin(); mapCitr != sBattlePetBreedXSpeciesStore.end(); mapCitr++)
+    {
+        if (mapCitr->first == speciesId)
+        {
+            BattleBetBreedSet::iterator setItr(mapCitr->second.begin());
+            std::advance(setItr, urand(0, mapCitr->second.size() - 1));
+
+            return *setItr;
+        }
+    }
+
+    return 0;
+}
+
+uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const
+{
+    for (BattlePetQualityXSpeciesMap::const_iterator mapCitr = sBattlePetQualityXSpeciesStore.begin(); mapCitr != sBattlePetQualityXSpeciesStore.end(); mapCitr++)
+    {
+        if (mapCitr->first == speciesId)
+        {
+            BattlePetQualitySet::iterator setItr(mapCitr->second.begin());
+            std::advance(setItr, urand(0, mapCitr->second.size() - 1));
+
+            return *setItr;
+        }
+    }
+
+    return ITEM_QUALITY_NORMAL;
 }

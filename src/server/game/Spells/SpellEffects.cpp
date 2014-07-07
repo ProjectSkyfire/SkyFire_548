@@ -67,6 +67,7 @@
 #include "GuildMgr.h"
 #include "ReputationMgr.h"
 #include "AreaTrigger.h"
+#include "BattlePetMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -271,7 +272,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //198 SPELL_EFFECT_198
     &Spell::EffectNULL,                                     //199 SPELL_EFFECT_199
     &Spell::EffectNULL,                                     //200 SPELL_EFFECT_200
-    &Spell::EffectNULL,                                     //201 SPELL_EFFECT_201
+    &Spell::EffectBattlePetsUnlock,                         //201 SPELL_EFFECT_BATTLE_PET_UNLOCK
     &Spell::EffectNULL,                                     //202 SPELL_EFFECT_202
     &Spell::EffectNULL,                                     //203 SPELL_EFFECT_203
     &Spell::EffectNULL,                                     //204 SPELL_EFFECT_204
@@ -2195,12 +2196,31 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     if (!summon || !summon->HasUnitTypeMask(UNIT_MASK_MINION))
                         return;
 
-                    summon->SelectLevel(summon->GetCreatureTemplate());       // some summoned creaters have different from 1 DB data for level/hp
+                    Player* player = m_caster->ToPlayer();
+                    BattlePetMgr* battlePetMgr = player->GetBattlePetMgr();
+
+                    BattlePet* battlePet = battlePetMgr->GetBattlePet(battlePetMgr->GetCurrentSummonId());
+                    if (!battlePet)
+                        return;
+
+                    battlePetMgr->SetCurrentSummon(summon);
+
+                    player->SetUInt64Value(PLAYER_FIELD_SUMMONED_BATTLE_PET_GUID, battlePet->GetId());
+                    player->SetUInt32Value(PLAYER_FIELD_CURRENT_BATTLE_PET_BREED_QUALITY, battlePet->GetQuality());
+
+                    summon->SetCreateHealth(battlePet->GetMaxHealth());
+                    summon->SetMaxHealth(battlePet->GetMaxHealth());
+                    summon->SetHealth(battlePet->GetCurrentHealth());
+
+                    summon->SetUInt64Value(UNIT_FIELD_BATTLE_PET_COMPANION_GUID, battlePet->GetId());
+                    summon->SetUInt32Value(UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP, battlePet->GetTimestamp());
+                    summon->SetUInt64Value(UNIT_FIELD_CREATED_BY, player->GetGUID());
+                    summon->SetUInt32Value(UNIT_FIELD_WILD_BATTLE_PET_LEVEL, battlePet->GetLevel());
                     summon->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);
 
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-
                     summon->AI()->EnterEvadeMode();
+
                     break;
                 }
                 default:
@@ -5920,4 +5940,30 @@ void Spell::EffectRemoveTalent(SpellEffIndex effIndex)
     // Blizz sends talentId as glyphIndex
     if (player)
         player->RemoveTalent(m_glyphIndex);
+}
+
+void Spell::EffectBattlePetsUnlock(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    Player* player = GetCaster()->ToPlayer();
+    if (!player)
+        return;
+
+    BattlePetMgr* battlePetMgr = player->GetBattlePetMgr();
+    if (!battlePetMgr)
+        return;
+
+    if (player->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET_ENABLED))
+        return;
+
+    player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET_ENABLED);
+
+    player->learnSpell(SPELL_BATTLE_PET_TRAINING_PASSIVE, false);
+    player->learnSpell(SPELL_TRACK_PETS, false);
+    player->learnSpell(SPELL_REVIVE_BATTLE_PETS, false);
+
+    for (uint8 i = 0; i < sWorld->getIntConfig(CONFIG_BATTLE_PET_LOADOUT_UNLOCK_COUNT); i++)
+        battlePetMgr->UnlockLoadoutSlot(i);
 }

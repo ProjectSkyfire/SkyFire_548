@@ -27,6 +27,7 @@
 #include "BattlefieldWG.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
+#include "BattlePetMgr.h"
 #include "CellImpl.h"
 #include "Channel.h"
 #include "ChannelMgr.h"
@@ -890,6 +891,7 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
 
     m_achievementMgr = new AchievementMgr<Player>(this);
     m_reputationMgr = new ReputationMgr(this);
+    m_battlePetMgr = new BattlePetMgr(this);
 }
 
 Player::~Player()
@@ -922,6 +924,7 @@ Player::~Player()
     delete m_runes;
     delete m_achievementMgr;
     delete m_reputationMgr;
+    delete m_battlePetMgr;
 
     for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
         delete _voidStorageItems[i];
@@ -8865,6 +8868,17 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: %u) in have wrong spell id %u, ignoring ", proto->ItemId, learn_spell_id);
             SendEquipError(EQUIP_ERR_INTERNAL_BAG_ERROR, item, NULL);
             return;
+        }
+
+        for (BattlePetItemXSpeciesStore::iterator itr = sBattlePetItemXSpeciesStore.begin(); itr != sBattlePetItemXSpeciesStore.end(); itr++)
+        {
+            if (itr->first != item->GetEntry())
+                continue;
+
+            m_battlePetMgr->Create(itr->second);
+            learning_spell_id = 0;
+
+            break;
         }
 
         Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
@@ -18003,6 +18017,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, GetTalentSpecialization(GetActiveSpec()));
 
+    // must be loaded before spells
+    m_battlePetMgr->LoadFromDb(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BATTLE_PETS));
+    m_battlePetMgr->LoadSlotsFromDb(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BATTLE_PET_SLOTS));
+
     _LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENTS));
     _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELLS));
 
@@ -19884,6 +19902,7 @@ void Player::SaveToDB(bool create /*=false*/)
     _SaveInstanceTimeRestrictions(trans);
     _SaveCurrency(trans);
     _SaveCUFProfiles(trans);
+    m_battlePetMgr->SaveToDb(trans);
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
@@ -23854,6 +23873,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
+
+    m_battlePetMgr->SendBattlePetJournal();
+    m_battlePetMgr->SendBattlePetJournalLock();
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

@@ -31,6 +31,82 @@
 #endif
 
 // Structures used to access raw DB2 data and required packing to portability
+struct BattlePetAbilityEntry
+{
+    uint32 AbilityId;                                       // 0 - battle pet ability id
+    int32 FamilyId;                                         // 1 - battle pet family id or -1 for aura
+    uint32 IconId;                                          // 2 - icon id
+    uint32 Cooldown;                                        // 3 - cooldown in turns
+    //uint32 Unk1;                                          // 4 - something to do with linked abilities
+    //uint32 Unk2;                                          // 5
+    LocalizedString* Name;                                  // 6 - name text
+    LocalizedString* Description;                           // 7 - description text
+};
+
+struct BattlePetAbilityStateEntry
+{
+    uint32 Id;                                              // 0
+    uint32 AbilityId;                                       // 1 - battle pet ability id (BattlePetAbility.db2)
+    uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
+    uint32 Value;                                           // 3 - value for state
+};
+
+struct BattlePetBreedStateEntry
+{
+    uint32 Id;                                              // 0
+    uint32 BreedId;                                         // 1 - battle pet breed id
+    uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
+    uint32 Value;                                           // 3 - value for state
+};
+
+typedef std::set<uint32> BattlePetBreedSet;
+
+struct BattlePetSpeciesEntry
+{
+    uint32 SpeciesId;                                       // 0 - battle pet species id
+    uint32 NpcId;                                           // 1 - npc id
+    uint32 IconId;                                          // 2 - icon id
+    uint32 SpellId;                                         // 3 - summon spell id (Spell.dbc)
+    uint32 FamilyId;                                        // 4 - battle pet family id
+    //int32 Unk1;                                           // 5
+    uint32 Flags;                                           // 6 - flags (see BattlePetSpeciesFlags enum)
+    LocalizedString* Description;                           // 7 - description text, contains method to obtain and cost
+    LocalizedString* Flavor;                                // 8 - flavor text
+};
+
+struct BattlePetSpeciesStateEntry
+{
+    uint32 Id;                                              // 0
+    uint32 SpeciesId;                                       // 1 - battle pet species id (BattlePetSpecies.db2)
+    uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
+    int32 Modifier;                                         // 3 - modifier value for state
+};
+
+struct BattlePetSpeciesXAbilityEntry
+{
+    uint32 Id;                                              // 0
+    uint32 SpeciesId;                                       // 1 - battle pet species id (BattlePetSpecies.db2)
+    uint32 AbilityId;                                       // 2 - battle pet ability id (BattlePetAbility.db2)
+    uint32 RequiredLevel;                                   // 3 - required level to use this ability
+    uint32 SlotId;                                          // 4 - ability slot id (0-2)
+};
+
+struct BattlePetStateEntry
+{
+    uint32 StateId;                                         // 0 - battle pet state id
+    //uint32 Unk1;                                          // 1 - only states 21 and 34 (linked states?)
+    LocalizedString* Name;                                  // 2 - name text
+    uint32 Flags;                                           // 3 - flags
+};
+
+typedef std::map<uint32, uint16> BattlePetItemXSpeciesStore;
+
+struct ItemToBattlePetEntry
+{
+    uint32 ItemId;                                          // 0 - item id
+    uint32 SpeciesId;                                       // 1 - battle pet species id (BattlePetSpecies.db2)
+};
+
 struct BroadcastTextEntry
 {
     uint32   ID;                                             // 0
