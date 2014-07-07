@@ -77,6 +77,7 @@ public:
     Player* GetOwner() const { return m_owner; }
     BattlePet* GetBattlePet(uint64 id) const;
     uint8 GetBattlePetCount(uint16 speciesId) const;
+    uint8 GetLoadoutSlotForBattlePet(uint64 id);
 
     uint64 GetCurrentSummonId() const { return m_summonId; }
     TempSummon* GetCurrentSummon() const { return m_summon; }
@@ -98,10 +99,12 @@ public:
     void SetLoadoutFlag(uint8 flag);
 
     void Create(uint16 speciesId);
+    void Delete(BattlePet* battlePet);
 
+    void SendBattlePetDeleted(uint64 id);
     void SendBattlePetJournalLock();
     void SendBattlePetJournal();
-    void SendBattlePetSlotUpdate(uint8 slot, bool notification, ObjectGuid petEntry = 0);
+    void SendBattlePetSlotUpdate(uint8 slot, bool notification, uint64 id = 0);
     void SendBattlePetUpdate(BattlePet* battlePet, bool notification);
 
 private:

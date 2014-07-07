@@ -57,13 +57,13 @@ void BattlePet::CalculateStats(bool currentHealth)
     m_power = roundf(basePower * m_level * qualityMod);
     m_speed = roundf(baseSpeed * m_level * qualityMod);
 
-    m_saveRequired = true;
+    m_dbState = BATTLE_PET_DB_STATE_SAVE;
 }
 
 void BattlePet::SetNickname(std::string nickname)
 {
     m_nickname = nickname;
-    m_saveRequired = true;
+    m_dbState = BATTLE_PET_DB_STATE_SAVE;
 }
 
 void BattlePet::SetQuality(ItemQualities quality)
@@ -78,7 +78,7 @@ void BattlePet::SetFlag(uint16 flag)
         return;
 
     m_flags |= flag;
-    m_saveRequired = true;
+    m_dbState = BATTLE_PET_DB_STATE_SAVE;
 }
 
 void BattlePet::UnSetFlag(uint16 flag)
@@ -87,5 +87,5 @@ void BattlePet::UnSetFlag(uint16 flag)
         return;
 
     m_flags &= ~flag;
-    m_saveRequired = true;
+    m_dbState = BATTLE_PET_DB_STATE_SAVE;
 }

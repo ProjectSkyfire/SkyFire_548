@@ -26,7 +26,7 @@ enum BattlePetSpeciesFlags
     BATTLE_PET_FLAG_LIMITED_ABILITIES   = 0x0001, // battle pets with less than 6 abilites have this flag
     BATTLE_PET_FLAG_NOT_TRADABLE        = 0x0002,
     BATTLE_PET_FLAG_NOT_ACCOUNT_BOUND   = 0x0004,
-    BATTLE_PET_FLAG_UNKNOWN_1           = 0x0008,
+    BATTLE_PET_FLAG_RELEASABLE          = 0x0008,
     BATTLE_PET_FLAG_NOT_CAGEABLE        = 0x0010,
     BATTLE_PET_FLAG_NOT_TAMEABLE        = 0x0020,
     BATTLE_PET_FLAG_UNIQUE              = 0x0040,

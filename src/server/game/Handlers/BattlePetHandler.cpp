@@ -23,15 +23,55 @@
 #include "DB2Enums.h"
 #include "DB2Stores.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
+#include "TemporarySummon.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
 
-enum BattlePetFlagModes
+void WorldSession::HandleBattlePetDelete(WorldPacket& recvData)
 {
-    BATTLE_PET_FLAG_MODE_UNSET       = 0,
-    BATTLE_PET_FLAG_MODE_SET         = 3
-};
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PET_DELETE");
+
+    ObjectGuid petEntry;
+
+    petEntry[3] = recvData.ReadBit();
+    petEntry[5] = recvData.ReadBit();
+    petEntry[6] = recvData.ReadBit();
+    petEntry[2] = recvData.ReadBit();
+    petEntry[4] = recvData.ReadBit();
+    petEntry[0] = recvData.ReadBit();
+    petEntry[7] = recvData.ReadBit();
+    petEntry[1] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(petEntry[4]);
+    recvData.ReadByteSeq(petEntry[1]);
+    recvData.ReadByteSeq(petEntry[5]);
+    recvData.ReadByteSeq(petEntry[0]);
+    recvData.ReadByteSeq(petEntry[7]);
+    recvData.ReadByteSeq(petEntry[2]);
+    recvData.ReadByteSeq(petEntry[3]);
+    recvData.ReadByteSeq(petEntry[6]);
+
+    BattlePetMgr* battlePetMgr = GetPlayer()->GetBattlePetMgr();
+
+    BattlePet* battlePet = battlePetMgr->GetBattlePet(petEntry);
+    if (!battlePet)
+    {
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_DELETE - Player %u tryed to release Battle Pet %lu which it doesn't own!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
+        return;
+    }
+
+    if (!BattlePetSpeciesHasFlag(battlePet->GetSpecies(), BATTLE_PET_FLAG_RELEASABLE))
+    {
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_DELETE - Player %u tryed to release Battle Pet %lu which isn't releasable!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
+        return;
+    }
+
+    battlePetMgr->Delete(battlePet);
+}
 
 #define BATTLE_PET_MAX_DECLINED_NAMES 5
 
@@ -77,7 +117,9 @@ void WorldSession::HandleBattlePetModifyName(WorldPacket& recvData)
         for (uint8 i = 0; i < BATTLE_PET_MAX_DECLINED_NAMES; i++)
             declinedNames[i] = recvData.ReadString(declinedNameLen[i]);
 
-    BattlePet* battlePet = GetPlayer()->GetBattlePetMgr()->GetBattlePet(petEntry);
+    BattlePetMgr* battlePetMgr = GetPlayer()->GetBattlePetMgr();
+
+    BattlePet* battlePet = battlePetMgr->GetBattlePet(petEntry);
     if (!battlePet)
     {
         TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_MODIFY_NAME - Player %u tryed to set the name for Battle Pet %lu which it doesn't own!",
@@ -95,11 +137,89 @@ void WorldSession::HandleBattlePetModifyName(WorldPacket& recvData)
     // TODO: check for invalid characters, ect...
 
     battlePet->SetNickname(nickname);
+    battlePet->SetTimestamp((uint32)time(NULL));
+
+    if (battlePetMgr->GetCurrentSummonId())
+        battlePetMgr->GetCurrentSummon()->SetUInt32Value(UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP, battlePet->GetTimestamp());
 }
 
 void WorldSession::HandleBattlePetQueryName(WorldPacket& recvData)
 {
-    // TODO: implement this...
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PET_QUERY_NAME");
+
+    ObjectGuid petEntry, petguid;
+
+    petguid[2] = recvData.ReadBit();
+    petEntry[6] = recvData.ReadBit();
+    petEntry[3] = recvData.ReadBit();
+    petguid[3] = recvData.ReadBit();
+    petEntry[7] = recvData.ReadBit();
+    petguid[4] = recvData.ReadBit();
+    petguid[1] = recvData.ReadBit();
+    petguid[0] = recvData.ReadBit();
+    petEntry[0] = recvData.ReadBit();
+    petguid[7] = recvData.ReadBit();
+    petguid[5] = recvData.ReadBit();
+    petguid[6] = recvData.ReadBit();
+    petEntry[1] = recvData.ReadBit();
+    petEntry[2] = recvData.ReadBit();
+    petEntry[5] = recvData.ReadBit();
+    petEntry[4] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(petguid[5]);
+    recvData.ReadByteSeq(petEntry[1]);
+    recvData.ReadByteSeq(petguid[0]);
+    recvData.ReadByteSeq(petEntry[4]);
+    recvData.ReadByteSeq(petguid[3]);
+    recvData.ReadByteSeq(petEntry[3]);
+    recvData.ReadByteSeq(petguid[1]);
+    recvData.ReadByteSeq(petguid[6]);
+    recvData.ReadByteSeq(petEntry[6]);
+    recvData.ReadByteSeq(petEntry[0]);
+    recvData.ReadByteSeq(petEntry[2]);
+    recvData.ReadByteSeq(petguid[7]);
+    recvData.ReadByteSeq(petguid[2]);
+    recvData.ReadByteSeq(petEntry[7]);
+    recvData.ReadByteSeq(petguid[4]);
+    recvData.ReadByteSeq(petEntry[5]);
+
+    TempSummon* tempSummon = sObjectAccessor->FindUnit(petguid)->ToTempSummon();
+    if (!tempSummon)
+    {
+        TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_QUERY_NAME - Player %u queried the name of Battle Pet %lu which doesnt't exist in world!",
+            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
+        return;
+    }
+
+    Player* petOwner = tempSummon->GetSummoner()->ToPlayer();
+    if (!petOwner)
+        return;
+
+    BattlePetMgr* battlePetMgr = petOwner->GetBattlePetMgr();
+
+    BattlePet* battlePet = battlePetMgr->GetBattlePet(battlePetMgr->GetCurrentSummonId());
+    if (!battlePet)
+        return;
+
+    BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(battlePet->GetSpecies());
+
+    WorldPacket data(SMSG_BATTLE_PET_QUERY_NAME_RESPONSE, 8 + 4 + 4 + 5 + battlePet->GetNickname().size());
+    data << uint64(petEntry);
+    data << uint32(battlePet->GetTimestamp());
+    data << uint32(speciesEntry->NpcId);
+    data.WriteBit(1);               // has names
+    data.WriteBits(battlePet->GetNickname().size(), 8);
+
+    // TODO: finish declined names
+    for (uint8 i = 0; i < BATTLE_PET_MAX_DECLINED_NAMES; i++)
+        data.WriteBits(0, 7);
+
+    data.WriteBit(0);               // allowed?
+    data.FlushBits();
+
+    data.WriteString(battlePet->GetNickname());
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleBattlePetSetBattleSlot(WorldPacket& recvData)
@@ -155,19 +275,18 @@ void WorldSession::HandleBattlePetSetBattleSlot(WorldPacket& recvData)
     }
 
     // sever handles slot swapping, find source slot and replace it with the destination slot
-    uint8 srcSlot = BATTLE_PET_LOADOUT_SLOT_NONE;
-    if (battlePetMgr->GetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_1) == petEntry)
-        srcSlot = BATTLE_PET_LOADOUT_SLOT_1;
-    else if (battlePetMgr->GetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_2) == petEntry)
-        srcSlot = BATTLE_PET_LOADOUT_SLOT_2;
-    else if (battlePetMgr->GetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_3) == petEntry)
-        srcSlot = BATTLE_PET_LOADOUT_SLOT_3;
-
+    uint8 srcSlot = battlePetMgr->GetLoadoutSlotForBattlePet(petEntry);
     if (srcSlot != BATTLE_PET_LOADOUT_SLOT_NONE)
         battlePetMgr->SetLoadoutSlot(srcSlot, battlePetMgr->GetLoadoutSlot(slot), true);
 
     battlePetMgr->SetLoadoutSlot(slot, petEntry, true);
 }
+
+enum BattlePetFlagModes
+{
+    BATTLE_PET_FLAG_MODE_UNSET       = 0,
+    BATTLE_PET_FLAG_MODE_SET         = 3
+};
 
 void WorldSession::HandleBattlePetSetFlags(WorldPacket& recvData)
 {
@@ -218,7 +337,6 @@ void WorldSession::HandleBattlePetSetFlags(WorldPacket& recvData)
 
     // TODO: check if Battle Pet is correct level for ability
 
-    // more modes?
     switch (mode)
     {
         case BATTLE_PET_FLAG_MODE_SET:
@@ -261,6 +379,13 @@ void WorldSession::HandleBattlePetSummonCompanion(WorldPacket& recvData)
     if (!battlePet)
     {
         TC_LOG_DEBUG("network", "CMSG_SUMMON_BATTLE_PET_COMPANION - Player %u tryed to summon battle pet companion %lu which it doesn't own!",
+            player->GetGUIDLow(), (uint64)petEntry);
+        return;
+    }
+
+    if (!battlePet->GetCurrentHealth())
+    {
+        TC_LOG_DEBUG("network", "CMSG_SUMMON_BATTLE_PET_COMPANION - Player %u tryed to summon battle pet companion %lu which is dead!",
             player->GetGUIDLow(), (uint64)petEntry);
         return;
     }

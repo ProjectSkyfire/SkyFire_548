@@ -2208,13 +2208,12 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     player->SetUInt64Value(PLAYER_FIELD_SUMMONED_BATTLE_PET_GUID, battlePet->GetId());
                     player->SetUInt32Value(PLAYER_FIELD_CURRENT_BATTLE_PET_BREED_QUALITY, battlePet->GetQuality());
 
-                    //summon->SelectLevel(summon->GetCreatureTemplate());       // some summoned creaters have different from 1 DB data for level/hp
-
                     summon->SetCreateHealth(battlePet->GetMaxHealth());
                     summon->SetMaxHealth(battlePet->GetMaxHealth());
                     summon->SetHealth(battlePet->GetCurrentHealth());
 
                     summon->SetUInt64Value(UNIT_FIELD_BATTLE_PET_COMPANION_GUID, battlePet->GetId());
+                    summon->SetUInt32Value(UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP, battlePet->GetTimestamp());
                     summon->SetUInt64Value(UNIT_FIELD_CREATED_BY, player->GetGUID());
                     summon->SetUInt32Value(UNIT_FIELD_WILD_BATTLE_PET_LEVEL, battlePet->GetLevel());
                     summon->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);

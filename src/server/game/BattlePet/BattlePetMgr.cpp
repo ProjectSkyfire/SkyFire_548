@@ -49,15 +49,16 @@ void BattlePetMgr::LoadFromDb(PreparedQueryResult result)
         uint64 id            = fields[0].GetUInt64();
         uint16 speciesId     = fields[1].GetUInt16();
         std::string nickname = fields[2].GetString();
-        uint8 level          = fields[3].GetUInt8();
-        uint16 xp            = fields[4].GetUInt16();
-        uint16 health        = fields[5].GetUInt16();
-        uint16 maxHealth     = fields[6].GetUInt16();
-        uint16 power         = fields[7].GetUInt16();
-        uint16 speed         = fields[8].GetUInt16();
-        uint8 quality        = fields[9].GetUInt8();
-        uint8 breedId        = fields[10].GetUInt8();
-        uint16 flags         = fields[11].GetUInt16();
+        uint32 timestamp     = fields[3].GetUInt32();
+        uint8 level          = fields[4].GetUInt8();
+        uint16 xp            = fields[5].GetUInt16();
+        uint16 health        = fields[6].GetUInt16();
+        uint16 maxHealth     = fields[7].GetUInt16();
+        uint16 power         = fields[8].GetUInt16();
+        uint16 speed         = fields[9].GetUInt16();
+        uint8 quality        = fields[10].GetUInt8();
+        uint8 breedId        = fields[11].GetUInt8();
+        uint16 flags         = fields[12].GetUInt16();
 
         if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
         {
@@ -85,7 +86,7 @@ void BattlePetMgr::LoadFromDb(PreparedQueryResult result)
             continue;
         }
 
-        BattlePet* battlePet = new BattlePet(id, speciesId, nickname, level, xp,
+        BattlePet* battlePet = new BattlePet(id, speciesId, nickname, timestamp, level, xp,
             health, maxHealth, power, speed, quality, breedId, flags);
 
         m_battlePetSet.insert(battlePet);
@@ -98,33 +99,50 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
     if (m_battlePetSet.empty())
         return;
 
-    for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); itr++)
+    BattlePetSet::iterator itr = m_battlePetSet.begin();
+    while (itr != m_battlePetSet.end())
     {
-        BattlePet* battlePet = *itr;
-        if (!battlePet->SaveRequired())
-            continue;
-            
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_BATTLE_PET);
-        stmt->setUInt64(0, battlePet->GetId());
-        trans->Append(stmt);
+        BattlePet* battlePet = *itr++;
+        switch (battlePet->GetDbState())
+        {
+            case BATTLE_PET_DB_STATE_DELETE:
+            {
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_BATTLE_PET);
+                stmt->setUInt64(0, battlePet->GetId());
+                trans->Append(stmt);
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_BATTLE_PET);
-        stmt->setUInt64(0, battlePet->GetId());
-        stmt->setUInt32(1, m_owner->GetSession()->GetAccountId());
-        stmt->setUInt16(2, battlePet->GetSpecies());
-        stmt->setString(3, battlePet->GetNickname());
-        stmt->setUInt8 (4, battlePet->GetLevel());
-        stmt->setUInt16(5, battlePet->GetXp());
-        stmt->setUInt16(6, battlePet->GetCurrentHealth());
-        stmt->setUInt16(7, battlePet->GetMaxHealth());
-        stmt->setUInt16(8, battlePet->GetPower());
-        stmt->setUInt16(9, battlePet->GetSpeed());
-        stmt->setUInt8 (10, battlePet->GetQuality());
-        stmt->setUInt8 (11, battlePet->GetBreed());
-        stmt->setUInt16(12, battlePet->GetFlags());
-        trans->Append(stmt);
+                m_battlePetSet.erase(itr);
+                delete battlePet;
 
-        battlePet->SaveRequired(false);
+                break;
+            }
+            case BATTLE_PET_DB_STATE_SAVE:
+            {
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_BATTLE_PET);
+                stmt->setUInt64(0, battlePet->GetId());
+                trans->Append(stmt);
+
+                stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_BATTLE_PET);
+                stmt->setUInt64(0, battlePet->GetId());
+                stmt->setUInt32(1, m_owner->GetSession()->GetAccountId());
+                stmt->setUInt16(2, battlePet->GetSpecies());
+                stmt->setString(3, battlePet->GetNickname());
+                stmt->setUInt32(4, battlePet->GetTimestamp());
+                stmt->setUInt8 (5, battlePet->GetLevel());
+                stmt->setUInt16(6, battlePet->GetXp());
+                stmt->setUInt16(7, battlePet->GetCurrentHealth());
+                stmt->setUInt16(8, battlePet->GetMaxHealth());
+                stmt->setUInt16(9, battlePet->GetPower());
+                stmt->setUInt16(10, battlePet->GetSpeed());
+                stmt->setUInt8 (11, battlePet->GetQuality());
+                stmt->setUInt8 (12, battlePet->GetBreed());
+                stmt->setUInt16(13, battlePet->GetFlags());
+                trans->Append(stmt);
+
+                battlePet->SetDbState(BATTLE_PET_DB_STATE_NONE);
+                break;
+            }
+        }
     }
 
     SaveSlotsToDb(trans);
@@ -137,15 +155,16 @@ void BattlePetMgr::LoadSlotsFromDb(PreparedQueryResult result)
 
     Field* fields = result->Fetch();
 
-    uint64 slot1 = fields[0].GetUInt64();
-    uint64 slot2 = fields[1].GetUInt64();
-    uint64 slot3 = fields[2].GetUInt64();
+    uint64 slot1   = fields[0].GetUInt64();
+    uint64 slot2   = fields[1].GetUInt64();
+    uint64 slot3   = fields[2].GetUInt64();
     m_loadoutFlags = fields[3].GetUInt8();
 
     // update flag and spell state for new alt characters
     if (m_loadoutFlags != BATTLE_PET_LOADOUT_SLOT_FLAG_NONE && !m_owner->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET_ENABLED))
     {
         m_owner->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET_ENABLED);
+
         m_owner->learnSpell(SPELL_BATTLE_PET_TRAINING_PASSIVE, false);
         m_owner->learnSpell(SPELL_TRACK_PETS, false);
         m_owner->learnSpell(SPELL_REVIVE_BATTLE_PETS, false);
@@ -213,6 +232,15 @@ uint8 BattlePetMgr::GetBattlePetCount(uint16 speciesId) const
             counter++;
 
     return counter;
+}
+
+uint8 BattlePetMgr::GetLoadoutSlotForBattlePet(uint64 id)
+{
+    for (uint8 i = 0; i < BATTLE_PET_MAX_LOADOUT_SLOTS; i++)
+        if (GetLoadoutSlot(i) == id)
+            return i;
+
+    return BATTLE_PET_LOADOUT_SLOT_NONE;
 }
 
 void BattlePetMgr::UnlockLoadoutSlot(uint8 slot)
@@ -313,6 +341,54 @@ void BattlePetMgr::Create(uint16 speciesId)
     SendBattlePetUpdate(battlePet, true);
 }
 
+void BattlePetMgr::Delete(BattlePet* battlePet)
+{
+    if (!battlePet)
+        return;
+
+    if (battlePet->GetDbState() == BATTLE_PET_DB_STATE_DELETE)
+        return;
+
+    // this shouldn't happen since the client doesn't allow releasing of slotted Battle Pets
+    uint8 srcSlot = GetLoadoutSlotForBattlePet(battlePet->GetId());
+    if (srcSlot != BATTLE_PET_LOADOUT_SLOT_NONE)
+    {
+        SetLoadoutSlot(srcSlot, 0, true);
+        SendBattlePetSlotUpdate(srcSlot, false);
+    }
+
+    battlePet->SetDbState(BATTLE_PET_DB_STATE_DELETE);
+
+    // alert client of deleted pet
+    SendBattlePetDeleted(battlePet->GetId());
+}
+
+void BattlePetMgr::SendBattlePetDeleted(uint64 id)
+{
+    ObjectGuid petEntry = id;
+
+    WorldPacket data(SMSG_BATTLE_PET_DELETED, 1 + 8);
+    data.WriteBit(petEntry[0]);
+    data.WriteBit(petEntry[4]);
+    data.WriteBit(petEntry[7]);
+    data.WriteBit(petEntry[6]);
+    data.WriteBit(petEntry[1]);
+    data.WriteBit(petEntry[5]);
+    data.WriteBit(petEntry[2]);
+    data.WriteBit(petEntry[3]);
+
+    data.WriteByteSeq(petEntry[6]);
+    data.WriteByteSeq(petEntry[1]);
+    data.WriteByteSeq(petEntry[7]);
+    data.WriteByteSeq(petEntry[0]);
+    data.WriteByteSeq(petEntry[4]);
+    data.WriteByteSeq(petEntry[3]);
+    data.WriteByteSeq(petEntry[5]);
+    data.WriteByteSeq(petEntry[2]);
+
+    m_owner->GetSession()->SendPacket(&data);
+}
+
 void BattlePetMgr::SendBattlePetJournalLock()
 {
     WorldPacket data(SMSG_BATTLE_PET_JOURNAL_LOCK_ACQUIRED, 0);
@@ -337,6 +413,8 @@ void BattlePetMgr::SendBattlePetJournal()
     for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
     {
         BattlePet const* battlePet = *citr;
+        if (battlePet->GetDbState() == BATTLE_PET_DB_STATE_DELETE)
+            continue;
 
         CreatureTemplate const* creatureTemplate = sObjectMgr->GetCreatureTemplate(sBattlePetSpeciesStore.LookupEntry(battlePet->GetSpecies())->NpcId);
         if (!creatureTemplate)
@@ -433,8 +511,10 @@ void BattlePetMgr::SendBattlePetJournal()
     m_owner->GetSession()->SendPacket(&data);
 }
 
-void BattlePetMgr::SendBattlePetSlotUpdate(uint8 slot, bool notification, ObjectGuid petEntry)
+void BattlePetMgr::SendBattlePetSlotUpdate(uint8 slot, bool notification, uint64 id)
 {
+    ObjectGuid petEntry = id;
+
     WorldPacket data(SMSG_BATTLE_PET_SLOT_UPDATE, 5 + 1);
     data.WriteBits(1, 25);
     data.WriteBit(0);                   // unknown
