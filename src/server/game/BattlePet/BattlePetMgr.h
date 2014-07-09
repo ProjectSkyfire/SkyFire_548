@@ -22,6 +22,7 @@
 
 #include "BattlePet.h"
 #include "Common.h"
+#include "TemporarySummon.h"
 
 typedef std::set<BattlePet*> BattlePetSet;
 

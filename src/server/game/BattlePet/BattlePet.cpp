@@ -19,6 +19,7 @@
 
 #include "BattlePet.h"
 #include "Common.h"
+#include "DB2Stores.h"
 
 void BattlePet::CalculateStats(bool currentHealth)
 {

@@ -21,6 +21,7 @@
 #include "Log.h"
 #include "SharedDefines.h"
 #include "SpellMgr.h"
+#include "SpellInfo.h"
 #include "TransportMgr.h"
 #include "DBCfmt.h"
 #include "ItemPrototype.h"

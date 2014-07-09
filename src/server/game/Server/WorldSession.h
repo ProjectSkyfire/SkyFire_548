@@ -33,6 +33,7 @@
 #include "Cryptography/BigNumber.h"
 #include "Opcodes.h"
 #include "AccountMgr.h"
+#include "Object.h"
 
 class Creature;
 class GameObject;
