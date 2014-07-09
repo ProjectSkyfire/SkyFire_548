@@ -350,7 +350,7 @@ enum ItemSubclassContainer
     ITEM_SUBCLASS_COOKING_CONTAINER             = 10
 };
 
-#define MAX_ITEM_SUBCLASS_CONTAINER               10
+#define MAX_ITEM_SUBCLASS_CONTAINER               11
 
 enum ItemSubclassWeapon
 {
