@@ -43,23 +43,23 @@ void WorldSession::HandleVoidStorageUnlock(WorldPacket& recvData)
     Player* player = GetPlayer();
 
     ObjectGuid npcGuid;
-    npcGuid[4] = recvData.ReadBit();
-    npcGuid[5] = recvData.ReadBit();
     npcGuid[3] = recvData.ReadBit();
-    npcGuid[0] = recvData.ReadBit();
-    npcGuid[2] = recvData.ReadBit();
     npcGuid[1] = recvData.ReadBit();
-    npcGuid[7] = recvData.ReadBit();
+    npcGuid[5] = recvData.ReadBit();
     npcGuid[6] = recvData.ReadBit();
+    npcGuid[4] = recvData.ReadBit();
+    npcGuid[0] = recvData.ReadBit();
+    npcGuid[7] = recvData.ReadBit();
+    npcGuid[2] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(npcGuid[7]);
-    recvData.ReadByteSeq(npcGuid[1]);
-    recvData.ReadByteSeq(npcGuid[2]);
-    recvData.ReadByteSeq(npcGuid[3]);
-    recvData.ReadByteSeq(npcGuid[5]);
-    recvData.ReadByteSeq(npcGuid[0]);
-    recvData.ReadByteSeq(npcGuid[6]);
     recvData.ReadByteSeq(npcGuid[4]);
+    recvData.ReadByteSeq(npcGuid[3]);
+    recvData.ReadByteSeq(npcGuid[6]);
+    recvData.ReadByteSeq(npcGuid[2]);
+    recvData.ReadByteSeq(npcGuid[1]);
+    recvData.ReadByteSeq(npcGuid[5]);
+    recvData.ReadByteSeq(npcGuid[7]);
+    recvData.ReadByteSeq(npcGuid[0]);
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
