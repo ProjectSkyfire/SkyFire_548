@@ -21,6 +21,7 @@
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
+#include "BattlePetMgr.h"
 #include "Creature.h"
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
@@ -1332,6 +1333,7 @@ void Battleground::AddPlayer(Player* player)
 
         player->DestroyConjuredItems(true);
         player->UnsummonPetTemporaryIfAny();
+        player->GetBattlePetMgr()->UnSummonCurrentBattlePet(false);
 
         if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
         {

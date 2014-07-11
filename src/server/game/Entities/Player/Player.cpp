@@ -2242,6 +2242,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 UnsummonPetTemporaryIfAny();
         }
 
+        if (TempSummon* tempSummon = GetBattlePetMgr()->GetCurrentSummon())
+            if (!tempSummon->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityRange()))
+                GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
+
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
             CombatStop();
 
@@ -2324,6 +2328,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // remove pet on map change
             if (pet)
                 UnsummonPetTemporaryIfAny();
+
+            GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
 
             // remove all dyn objects
             RemoveAllDynObjects();
@@ -2490,7 +2496,9 @@ void Player::RemoveFromWorld()
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
         StopCastingCharm();
         StopCastingBindSight();
+        GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
         UnsummonPetTemporaryIfAny();
+
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sBattlefieldMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }

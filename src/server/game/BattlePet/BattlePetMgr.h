@@ -71,7 +71,7 @@ class BattlePetMgr
 {
 public:
     BattlePetMgr(Player* owner)
-        : m_owner(owner), m_summon(0), m_summonId(0), m_loadoutFlags(0), m_loadoutSave(false) { }
+        : m_owner(owner), m_summon(NULL), m_summonId(0), m_summonLastId(0), m_loadoutFlags(0), m_loadoutSave(false) { }
 
     ~BattlePetMgr();
 
@@ -84,6 +84,9 @@ public:
     TempSummon* GetCurrentSummon() const { return m_summon; }
     void SetCurrentSummonId(uint64 summonId) { m_summonId = summonId; }
     void SetCurrentSummon(TempSummon* summon) { m_summon = summon; }
+
+    void UnSummonCurrentBattlePet(bool temporary);
+    void ResummonLastBattlePet();
 
     void LoadFromDb(PreparedQueryResult result);
     void LoadSlotsFromDb(PreparedQueryResult result);
@@ -114,6 +117,7 @@ private:
 
     TempSummon* m_summon;
     uint64 m_summonId;
+    uint64 m_summonLastId;
 
     bool m_loadoutSave;
     uint8 m_loadoutFlags;
