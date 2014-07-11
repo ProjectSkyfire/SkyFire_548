@@ -25,6 +25,7 @@ Category: commandscripts
 EndScriptData */
 
 #include "AchievementMgr.h"
+#include "Guild.h"
 #include "Chat.h"
 #include "Language.h"
 #include "Player.h"
@@ -73,7 +74,14 @@ public:
         }
 
         if (AchievementEntry const* achievementEntry = sAchievementMgr->GetAchievement(achievementId))
-            target->CompletedAchievement(achievementEntry);
+        {
+            if (achievementEntry->flags & ACHIEVEMENT_FLAG_GUILD)
+            {
+                if (Guild* guild = target->GetGuild())
+                    guild->GetAchievementMgr().CompletedAchievement(achievementEntry, target);
+            } else
+                target->CompletedAchievement(achievementEntry);
+        }
 
         return true;
     }
