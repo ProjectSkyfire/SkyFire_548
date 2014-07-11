@@ -25,28 +25,36 @@
 #include "UpdateData.h"
 #include "Player.h"
 
-void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket) //Fix it
+void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
-    guid[2] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
-    guid[3] = recvPacket.ReadBit();
-    guid[7] = recvPacket.ReadBit();
+
     guid[1] = recvPacket.ReadBit();
     guid[5] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
     guid[6] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[0]);
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[2]);
-    recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[7]);
-    //structure ok
-}
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[0]);
+	
+    Player* caster = GetPlayer();
+    Unit* unitTarget = NULL;
+
+    unitTarget = sObjectAccessor->GetUnit(*caster, guid);
+
+    caster->CastSpell(unitTarget, 7266, false);
+
+	TC_LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_REQUEST");
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
