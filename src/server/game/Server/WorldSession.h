@@ -940,6 +940,14 @@ class WorldSession
         void HandleReforgeItemOpcode(WorldPacket& recvData);
         void SendReforgeResult(bool success);
 
+		// BlackMarket
+		void HandleBlackMarketHelloOpcode(WorldPacket& recvData);
+		void SendBlackMarketHello(uint64 guid);
+		void HandleBlackMarketRequestItemOpcode(WorldPacket& recvData);
+		void SendBlackMarketRequestItemsResult();
+		void HandleBlackMarketBidOpcode(WorldPacket& recvData);
+		void SendBlackMarketBidResult();
+
         // Miscellaneous
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
