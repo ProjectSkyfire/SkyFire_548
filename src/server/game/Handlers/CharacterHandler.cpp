@@ -1279,11 +1279,29 @@ void WorldSession::HandleShowingCloakOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
+    std::string unk;
     std::string newName;
-
-    recvData >> guid;
+	
+	guid[6] = recvData.ReadBit();
+	guid[3] = recvData.ReadBit();
+	guid[0] = recvData.ReadBit();
     recvData >> newName;
+	guid[1] = recvData.ReadBit();
+	guid[5] = recvData.ReadBit();
+	guid[7] = recvData.ReadBit();
+	guid[2] = recvData.ReadBit();
+	guid[4] = recvData.ReadBit();
+	
+	recvData.ReadByteSeq(guid[1]);
+	recvData.ReadByteSeq(guid[6]);
+	recvData.ReadByteSeq(guid[5]);
+    recvData >> unk;
+	recvData.ReadByteSeq(guid[2]);
+	recvData.ReadByteSeq(guid[4]);
+	recvData.ReadByteSeq(guid[3]);
+	recvData.ReadByteSeq(guid[7]);
+	recvData.ReadByteSeq(guid[0]);
 
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName))
@@ -1589,10 +1607,33 @@ void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
 
 void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     std::string newName;
+    std::string unk;
+    uint8 gender, skin, face, hairStyle, hairColor, facialHair;
+	
+    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
+	
+	guid[2] = recvData.ReadBit();
+	guid[6] = recvData.ReadBit();
+	guid[1] = recvData.ReadBit();
+	guid[0] = recvData.ReadBit();
+	guid[7] = recvData.ReadBit();
+	guid[5] = recvData.ReadBit();
+    recvData >> newName;
+	guid[4] = recvData.ReadBit();
+	guid[3] = recvData.ReadBit();
+	
+	recvData.ReadByteSeq(guid[4]);
+    recvData >> unk;
+	recvData.ReadByteSeq(guid[0]);
+	recvData.ReadByteSeq(guid[2]);
+	recvData.ReadByteSeq(guid[6]);
+	recvData.ReadByteSeq(guid[5]);
+	recvData.ReadByteSeq(guid[3]);
+	recvData.ReadByteSeq(guid[1]);
+	recvData.ReadByteSeq(guid[7]);
 
-    recvData >> guid;
     if (!IsLegitCharacterForAccount(GUID_LOPART(guid)))
     {
         TC_LOG_ERROR("network", "Account %u, IP: %s tried to customise character %u, but it does not belong to their account!",
@@ -1602,10 +1643,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
         return;
     }
 
-    recvData >> newName;
 
-    uint8 gender, skin, face, hairStyle, hairColor, facialHair;
-    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_AT_LOGIN);
     stmt->setUInt32(0, GUID_LOPART(guid));
