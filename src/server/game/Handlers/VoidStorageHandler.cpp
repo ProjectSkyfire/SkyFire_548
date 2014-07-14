@@ -84,23 +84,24 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
     Player* player = GetPlayer();
 
     ObjectGuid npcGuid;
-    npcGuid[4] = recvData.ReadBit();
-    npcGuid[0] = recvData.ReadBit();
-    npcGuid[5] = recvData.ReadBit();
-    npcGuid[7] = recvData.ReadBit();
-    npcGuid[6] = recvData.ReadBit();
-    npcGuid[3] = recvData.ReadBit();
-    npcGuid[1] = recvData.ReadBit();
-    npcGuid[2] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(npcGuid[5]);
+    npcGuid[1] = recvData.ReadBit();
+    npcGuid[5] = recvData.ReadBit();
+    npcGuid[6] = recvData.ReadBit();
+    npcGuid[0] = recvData.ReadBit();
+    npcGuid[7] = recvData.ReadBit();
+    npcGuid[2] = recvData.ReadBit();
+    npcGuid[3] = recvData.ReadBit();
+    npcGuid[4] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(npcGuid[1]);
     recvData.ReadByteSeq(npcGuid[6]);
+    recvData.ReadByteSeq(npcGuid[4]);
     recvData.ReadByteSeq(npcGuid[3]);
     recvData.ReadByteSeq(npcGuid[7]);
-    recvData.ReadByteSeq(npcGuid[1]);
     recvData.ReadByteSeq(npcGuid[0]);
-    recvData.ReadByteSeq(npcGuid[4]);
     recvData.ReadByteSeq(npcGuid[2]);
+    recvData.ReadByteSeq(npcGuid[5]);
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
@@ -135,50 +136,54 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
         ObjectGuid itemId = item->ItemId;
         ObjectGuid creatorGuid = item->CreatorGuid;
 
-        data.WriteBit(creatorGuid[3]);
-        data.WriteBit(itemId[5]);
-        data.WriteBit(creatorGuid[6]);
         data.WriteBit(creatorGuid[1]);
+        data.WriteBit(creatorGuid[3]);
         data.WriteBit(itemId[1]);
-        data.WriteBit(itemId[3]);
-        data.WriteBit(itemId[6]);
-        data.WriteBit(creatorGuid[5]);
         data.WriteBit(creatorGuid[2]);
         data.WriteBit(itemId[2]);
-        data.WriteBit(creatorGuid[4]);
-        data.WriteBit(itemId[0]);
-        data.WriteBit(itemId[4]);
-        data.WriteBit(itemId[7]);
+        data.WriteBit(creatorGuid[5]);
         data.WriteBit(creatorGuid[0]);
+        data.WriteBit(itemId[6]);
+        data.WriteBit(itemId[5]);
+        data.WriteBit(creatorGuid[4]);
+        data.WriteBit(itemId[7]);
+        data.WriteBit(itemId[3]);
+        data.WriteBit(itemId[4]);
+        data.WriteBit(itemId[0]);
+        data.WriteBit(creatorGuid[6]);
         data.WriteBit(creatorGuid[7]);
 
-        itemData.WriteByteSeq(creatorGuid[3]);
-
-        itemData << uint32(item->ItemSuffixFactor);
-
         itemData.WriteByteSeq(creatorGuid[4]);
-
-        itemData << uint32(i);
-
-        itemData.WriteByteSeq(itemId[0]);
-        itemData.WriteByteSeq(itemId[6]);
-        itemData.WriteByteSeq(creatorGuid[0]);
-
-        itemData << uint32(item->ItemRandomPropertyId);
-
-        itemData.WriteByteSeq(itemId[4]);
-        itemData.WriteByteSeq(itemId[5]);
-        itemData.WriteByteSeq(itemId[2]);
-        itemData.WriteByteSeq(creatorGuid[2]);
-        itemData.WriteByteSeq(creatorGuid[6]);
-        itemData.WriteByteSeq(itemId[1]);
-        itemData.WriteByteSeq(itemId[3]);
-        itemData.WriteByteSeq(creatorGuid[5]);
         itemData.WriteByteSeq(creatorGuid[7]);
+        itemData.WriteByteSeq(itemId[6]);
+        itemData.WriteByteSeq(creatorGuid[6]);
+        itemData.WriteByteSeq(itemId[2]);
 
-        itemData << uint32(item->ItemEntry);
+        itemData << uint32(item->ItemSuffixFactor); //= 32
 
         itemData.WriteByteSeq(itemId[7]);
+        itemData.WriteByteSeq(itemId[3]);
+        itemData.WriteByteSeq(creatorGuid[0]);
+
+        itemData << uint32(i); //= 16
+
+        itemData.WriteByteSeq(itemId[0]);
+
+        itemData << uint32(item->ItemRandomPropertyId); //= 24
+
+        itemData.WriteByteSeq(creatorGuid[2]);
+        itemData.WriteByteSeq(creatorGuid[5]);
+        itemData.WriteByteSeq(creatorGuid[3]);
+
+        itemData << uint32(item->ItemEntry); //= 28
+
+        itemData.WriteByteSeq(itemId[5]);
+        itemData.WriteByteSeq(itemId[1]);
+
+		itemData << uint32(0); //= 20
+
+        itemData.WriteByteSeq(itemId[4]);
+        itemData.WriteByteSeq(creatorGuid[1]);
     }
 
     data.FlushBits();
@@ -189,40 +194,11 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
 
 void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
+	TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
     Player* player = GetPlayer();
 
-    // Read everything
-
     ObjectGuid npcGuid;
-    npcGuid[1] = recvData.ReadBit();
-
-    uint32 countDeposit = recvData.ReadBits(26);
-
-    if (countDeposit > 9)
-    {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) wants to deposit more than 9 items (%u).", player->GetGUIDLow(), player->GetName().c_str(), countDeposit);
-        return;
-    }
-
-    std::vector<ObjectGuid> itemGuids(countDeposit);
-    for (uint32 i = 0; i < countDeposit; ++i)
-    {
-        itemGuids[i][4] = recvData.ReadBit();
-        itemGuids[i][6] = recvData.ReadBit();
-        itemGuids[i][7] = recvData.ReadBit();
-        itemGuids[i][0] = recvData.ReadBit();
-        itemGuids[i][1] = recvData.ReadBit();
-        itemGuids[i][5] = recvData.ReadBit();
-        itemGuids[i][3] = recvData.ReadBit();
-        itemGuids[i][2] = recvData.ReadBit();
-    }
-
-    npcGuid[2] = recvData.ReadBit();
-    npcGuid[0] = recvData.ReadBit();
-    npcGuid[3] = recvData.ReadBit();
-    npcGuid[5] = recvData.ReadBit();
-    npcGuid[6] = recvData.ReadBit();
+    npcGuid[7] = recvData.ReadBit();
     npcGuid[4] = recvData.ReadBit();
 
     uint32 countWithdraw = recvData.ReadBits(26);
@@ -237,50 +213,76 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
     for (uint32 i = 0; i < countWithdraw; ++i)
     {
         itemIds[i][4] = recvData.ReadBit();
-        itemIds[i][7] = recvData.ReadBit();
-        itemIds[i][1] = recvData.ReadBit();
         itemIds[i][0] = recvData.ReadBit();
+        itemIds[i][5] = recvData.ReadBit();
+        itemIds[i][7] = recvData.ReadBit();
+        itemIds[i][6] = recvData.ReadBit();
+        itemIds[i][1] = recvData.ReadBit();
         itemIds[i][2] = recvData.ReadBit();
         itemIds[i][3] = recvData.ReadBit();
-        itemIds[i][5] = recvData.ReadBit();
-        itemIds[i][6] = recvData.ReadBit();
+    }
+	
+    uint32 countDeposit = recvData.ReadBits(26); //40
+
+    if (countDeposit > 9)
+    {
+        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) wants to deposit more than 9 items (%u).", player->GetGUIDLow(), player->GetName().c_str(), countDeposit);
+        return;
     }
 
-    npcGuid[7] = recvData.ReadBit();
-
+    std::vector<ObjectGuid> itemGuids(countDeposit);
     for (uint32 i = 0; i < countDeposit; ++i)
     {
-        recvData.ReadByteSeq(itemGuids[i][6]);
-        recvData.ReadByteSeq(itemGuids[i][1]);
-        recvData.ReadByteSeq(itemGuids[i][0]);
-        recvData.ReadByteSeq(itemGuids[i][2]);
-        recvData.ReadByteSeq(itemGuids[i][4]);
-        recvData.ReadByteSeq(itemGuids[i][5]);
-        recvData.ReadByteSeq(itemGuids[i][3]);
-        recvData.ReadByteSeq(itemGuids[i][7]);
+        itemGuids[i][0] = recvData.ReadBit();
+        itemGuids[i][3] = recvData.ReadBit();
+        itemGuids[i][6] = recvData.ReadBit();
+        itemGuids[i][5] = recvData.ReadBit();
+        itemGuids[i][4] = recvData.ReadBit();
+        itemGuids[i][2] = recvData.ReadBit();
+        itemGuids[i][1] = recvData.ReadBit();
+        itemGuids[i][7] = recvData.ReadBit();
+    }
+
+    npcGuid[6] = recvData.ReadBit();
+    npcGuid[0] = recvData.ReadBit();
+    npcGuid[3] = recvData.ReadBit();
+    npcGuid[1] = recvData.ReadBit();
+    npcGuid[2] = recvData.ReadBit();
+    npcGuid[5] = recvData.ReadBit();
+	
+    for (uint32 i = 0; i < countWithdraw; ++i)
+    {
+        recvData.ReadByteSeq(itemIds[i][0]);
+        recvData.ReadByteSeq(itemIds[i][4]);
+        recvData.ReadByteSeq(itemIds[i][1]);
+        recvData.ReadByteSeq(itemIds[i][2]);
+        recvData.ReadByteSeq(itemIds[i][6]);
+        recvData.ReadByteSeq(itemIds[i][3]);
+        recvData.ReadByteSeq(itemIds[i][7]);
+        recvData.ReadByteSeq(itemIds[i][5]);
     }
 
     recvData.ReadByteSeq(npcGuid[5]);
-    recvData.ReadByteSeq(npcGuid[6]);
-
-    for (uint32 i = 0; i < countWithdraw; ++i)
+	
+    for (uint32 i = 0; i < countDeposit; ++i)
     {
-        recvData.ReadByteSeq(itemIds[i][3]);
-        recvData.ReadByteSeq(itemIds[i][0]);
-        recvData.ReadByteSeq(itemIds[i][1]);
-        recvData.ReadByteSeq(itemIds[i][6]);
-        recvData.ReadByteSeq(itemIds[i][2]);
-        recvData.ReadByteSeq(itemIds[i][7]);
-        recvData.ReadByteSeq(itemIds[i][5]);
-        recvData.ReadByteSeq(itemIds[i][4]);
+        recvData.ReadByteSeq(itemGuids[i][5]);
+        recvData.ReadByteSeq(itemGuids[i][6]);
+        recvData.ReadByteSeq(itemGuids[i][3]);
+        recvData.ReadByteSeq(itemGuids[i][4]);
+        recvData.ReadByteSeq(itemGuids[i][1]);
+        recvData.ReadByteSeq(itemGuids[i][7]);
+        recvData.ReadByteSeq(itemGuids[i][2]);
+        recvData.ReadByteSeq(itemGuids[i][0]);
     }
 
     recvData.ReadByteSeq(npcGuid[1]);
-    recvData.ReadByteSeq(npcGuid[4]);
     recvData.ReadByteSeq(npcGuid[7]);
+    recvData.ReadByteSeq(npcGuid[4]);
     recvData.ReadByteSeq(npcGuid[3]);
     recvData.ReadByteSeq(npcGuid[2]);
     recvData.ReadByteSeq(npcGuid[0]);
+    recvData.ReadByteSeq(npcGuid[6]);
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
