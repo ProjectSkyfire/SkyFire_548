@@ -1725,7 +1725,6 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
 
     recvData >> slot >> reforgeEntry >> bag;
 	
-
     guid[1] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
@@ -1743,7 +1742,6 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[5]);
-
 
     if (!player->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_REFORGER))
     {
