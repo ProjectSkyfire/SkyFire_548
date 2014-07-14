@@ -533,9 +533,9 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                         0x02EC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_STANDSTATECHANGE,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleStandStateChangeOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_STOP_DANCE,                         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_SUBMIT_BUG,                         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SUBMIT_BUG,                         0x0861, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUBMIT_COMPLAIN,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_SUGGESTION_SUBMIT,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SUGGESTION_SUBMIT,                  0x0A12, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUMMON_RESPONSE,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSummonResponseOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_SUSPEND_TOKEN,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SWAP_INV_ITEM,                      0x03DF, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSwapInvItemOpcode            ); // 5.4.8 18414
@@ -558,7 +558,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_FLAG,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialFlag                 );
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_RESET,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialReset                );
     DEFINE_OPCODE_HANDLER(CMSG_UNACCEPT_TRADE,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUnacceptTradeOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_UNLEARN_SKILL,                      0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUnlearnSkillOpcode           );
+    DEFINE_OPCODE_HANDLER(CMSG_UNLEARN_SKILL,                      0x0268, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUnlearnSkillOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_UNLEARN_SPECIALIZATION,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_UNREGISTER_ALL_ADDON_PREFIXES,      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUnregisterAddonPrefixesOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_UPDATE_ACCOUNT_DATA,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUpdateAccountData            );
