@@ -94,9 +94,9 @@ void WorldSession::SendBlackMarketHello(uint64 npcGuid)
 void WorldSession::HandleBlackMarketRequestItemOpcode(WorldPacket& recvData)
 {
 	ObjectGuid guid;
-	uint32 unk;
+	uint32 Timestamp;
 
-	recvData >> unk;
+	recvData >> Timestamp;
 	
 	guid[2] = recvData.ReadBit();
 	guid[6] = recvData.ReadBit();
