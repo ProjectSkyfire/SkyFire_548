@@ -683,18 +683,49 @@ namespace Trinity
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                std::string const name(i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
-                uint32 namlen = name.size();
+                ObjectGuid Guid = i_target ? i_target->GetGUID() : 0;
+                ObjectGuid TargetGuid = i_player.GetGUID();
 
-                data.Initialize(SMSG_TEXT_EMOTE, 20 + namlen);
-                data << i_player.GetGUID();
-                data << uint32(i_text_emote);
+                data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
+
+                data.WriteBit(Guid[1]);
+                data.WriteBit(TargetGuid[7]);
+                data.WriteBit(Guid[6]);
+                data.WriteBit(TargetGuid[5]);
+                data.WriteBit(Guid[3]);
+                data.WriteBit(TargetGuid[6]);
+                data.WriteBit(TargetGuid[2]);
+                data.WriteBit(Guid[7]);
+                data.WriteBit(TargetGuid[0]);
+                data.WriteBit(TargetGuid[1]);
+                data.WriteBit(Guid[4]);
+                data.WriteBit(Guid[2]);
+                data.WriteBit(TargetGuid[3]);
+                data.WriteBit(TargetGuid[4]);
+                data.WriteBit(Guid[0]);
+                data.WriteBit(Guid[5]);
+
+                data.WriteByteSeq(TargetGuid[2]);
+                data.WriteByteSeq(TargetGuid[1]);
+                data.WriteByteSeq(Guid[7]);
+                data.WriteByteSeq(Guid[4]);
+                data.WriteByteSeq(TargetGuid[7]);
+                data.WriteByteSeq(Guid[5]);
+                data.WriteByteSeq(Guid[2]);
+
                 data << uint32(i_emote_num);
-                data << uint32(namlen);
-                if (namlen > 1)
-                    data << name;
-                else
-                    data << uint8(0x00);
+
+                data.WriteByteSeq(Guid[6]);
+                data.WriteByteSeq(TargetGuid[0]);
+                data.WriteByteSeq(Guid[3]);
+                data.WriteByteSeq(Guid[1]);
+                data.WriteByteSeq(TargetGuid[6]);
+                data.WriteByteSeq(Guid[0]);
+                data.WriteByteSeq(TargetGuid[3]);
+                data.WriteByteSeq(TargetGuid[5]);
+                data.WriteByteSeq(TargetGuid[4]);
+
+                data << uint32(i_text_emote);
             }
 
         private:
