@@ -468,6 +468,7 @@ class WorldSession
         void HandleGMResponseResolve(WorldPacket& recvPacket);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
+        void HandleSetPvP(WorldPacket& recvPacket);
 
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
         void HandleSetSelectionOpcode(WorldPacket& recvPacket);
