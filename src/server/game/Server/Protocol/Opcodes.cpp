@@ -318,7 +318,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LFG_SET_BOOT_VOTE,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetBootVoteOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_LFG_SET_COMMENT,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_LFG_SET_ROLES,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetRolesOpcode            );
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_TELEPORT,                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgTeleportOpcode            );
+    DEFINE_OPCODE_HANDLER(CMSG_LFG_TELEPORT,                       0x1AA6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgTeleportOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_ADD_RECRUIT,               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderAddRecruit        );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_BROWSE,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderBrowse            );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_DECLINE_RECRUIT,           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderDeclineRecruit    );
