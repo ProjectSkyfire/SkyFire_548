@@ -1200,7 +1200,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
                 108060, /* Monk */         0       /* Druid */
             };
 
-            pCurrChar->CastSpell(pCurrChar, PandarenRemoveWeaponSpells[pCurrChar->getRace()], true);
+            pCurrChar->CastSpell(pCurrChar, PandarenRemoveWeaponSpells[pCurrChar->getClass()], true);
         }
     }
 
