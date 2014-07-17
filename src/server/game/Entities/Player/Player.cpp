@@ -1302,14 +1302,14 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 
     ObjectGuid Guid = GetGUID();
 
-    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, ();
+    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, 9 + 1 + 4 + 1 + 4 + 4);
     data.WriteBit(Guid[5]);
     data.WriteBit(Guid[7]);
     data.WriteBit(Guid[1]);
     data.WriteBit(Guid[4]);
     data.WriteBit(Guid[2]);
     data.WriteBit(Guid[0]);
-    data << uint8(0); // Power Data
+    data.WriteBit(0); // Power Data
     data.WriteBit(Guid[6]);
     data.WriteBit(Guid[3]);
 
