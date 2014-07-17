@@ -372,6 +372,7 @@ SpellEffectInfo::SpellEffectInfo(SpellEntry const* /*spellEntry*/, SpellInfo con
     if (!_effectScalingEntry)
         return;
 
+	ScalingMultiplier = 0.0f;
     ScalingMultiplier = _effectScalingEntry->Multiplier;
     DeltaScalingMultiplier = _effectScalingEntry->RandomPointsMultiplier;
     ComboScalingMultiplier = _effectScalingEntry->OtherMultiplier;

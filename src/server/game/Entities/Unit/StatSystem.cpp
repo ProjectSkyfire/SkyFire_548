@@ -81,7 +81,6 @@ bool Player::UpdateStats(Stats stat)
             UpdateMaxHealth();
             break;
         case STAT_INTELLECT:
-            UpdateMaxPower(POWER_MANA);
             UpdateAllSpellCritChances();
             UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
             break;
@@ -223,7 +222,7 @@ float Player::GetHealthBonusFromStamina()
 {
     // Taken from PaperDollFrame.lua - 4.3.4.15595
     float ratio = 10.0f;
-    if (gtOCTHpPerStaminaEntry const* hpBase = sGtOCTHpPerStaminaStore.LookupEntry((getClass() - 1) * GT_MAX_LEVEL + getLevel() - 1))
+    if (gtOCTHpPerStaminaEntry const* hpBase = sGtOCTHpPerStaminaStore.LookupEntry(getLevel()))
         ratio = hpBase->ratio;
 
     float stamina = GetStat(STAT_STAMINA);
@@ -235,13 +234,7 @@ float Player::GetHealthBonusFromStamina()
 
 float Player::GetManaBonusFromIntellect()
 {
-    // Taken from PaperDollFrame.lua - 4.3.4.15595
-    float intellect = GetStat(STAT_INTELLECT);
-
-    float baseInt = std::min(20.0f, intellect);
-    float moreInt = intellect - baseInt;
-
-    return baseInt + (moreInt * 15.0f);
+	return 0;
 }
 
 void Player::UpdateMaxHealth()
@@ -733,18 +726,13 @@ void Player::UpdateManaRegen()
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
     spirit_regen *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA);
 
-    // SpiritRegen(SPI, INT, LEVEL) = (0.001 + (SPI x sqrt(INT) x BASE_REGEN[LEVEL])) x 5
-    if (GetStat(STAT_INTELLECT) > 0.0f)
-        spirit_regen *= sqrt(GetStat(STAT_INTELLECT));
-
-    // CombatRegen = 5% of Base Mana
-    float base_regen = GetCreateMana() * 0.01f + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
+	float base_regen = GetMaxPower(POWER_MANA) * 0.004f + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
 
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, base_regen + CalculatePct(spirit_regen, modManaRegenInterrupt));
-    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, 0.001f + spirit_regen + base_regen);
+    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, spirit_regen + base_regen);
 }
 
 void Player::UpdateRuneRegen(RuneType rune)
@@ -1129,9 +1117,6 @@ void Guardian::UpdateMaxPower(Powers power)
     value *= GetModifierValue(unitMod, BASE_PCT);
     value += GetModifierValue(unitMod, TOTAL_VALUE) + addValue * multiplicator;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
-
-    if(power == POWER_MANA && value >= 300000)
-        value = 300000;
 
     SetMaxPower(power, uint32(value));
 }
