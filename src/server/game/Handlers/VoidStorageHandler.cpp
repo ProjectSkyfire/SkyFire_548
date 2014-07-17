@@ -180,7 +180,7 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
         itemData.WriteByteSeq(itemId[5]);
         itemData.WriteByteSeq(itemId[1]);
 
-itemData << uint32(0); //= 20
+        itemData << uint32(0); //= 20
 
         itemData.WriteByteSeq(itemId[4]);
         itemData.WriteByteSeq(creatorGuid[1]);
