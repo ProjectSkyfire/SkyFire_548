@@ -1299,35 +1299,32 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     damage -= absorb + resist;
 
     DealDamageMods(this, damage, &absorb);
-	
+
     ObjectGuid Guid = GetGUID();
-    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, (21));
 
-	data.WriteBit(Guid[5]);//69
-	data.WriteBit(Guid[7]);//71
-	data.WriteBit(Guid[1]);//65
-	data.WriteBit(Guid[4]);//68
-	data.WriteBit(Guid[2]);//66
-	data.WriteBit(Guid[0]);//64
-    data << uint8(0);//48
-	data.WriteBit(Guid[6]);//70
-	data.WriteBit(Guid[3]);//67
+    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, ();
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[4]);
+    data.WriteBit(Guid[2]);
+    data.WriteBit(Guid[0]);
+    data << uint8(0); // Power Data
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[3]);
 
-	data.FlushBits(); // if uint8 type
-	
-    data << uint32(damage);//uint32 60
-    data.WriteByteSeq(Guid[0]);//64
-    data.WriteByteSeq(Guid[7]);//71
-    data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);//uint8 52
-    data.WriteByteSeq(Guid[6]);//70
-    data.WriteByteSeq(Guid[3]);//67
-    data.WriteByteSeq(Guid[5]);//69
-    data << uint32(absorb);//uint32 56
-    data.WriteByteSeq(Guid[1]);//65
-    data.WriteByteSeq(Guid[2]);//66
-    data.WriteByteSeq(Guid[4]);//68
-    data << uint32(resist);//uint32 16
-
+    data << uint32(damage);
+    data.WriteByteSeq(Guid[0]);
+    data.WriteByteSeq(Guid[7]);
+    data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
+    data.WriteByteSeq(Guid[6]);
+    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(Guid[5]);
+    data << uint32(absorb);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[4]);
+    data << uint32(resist);
     SendMessageToSet(&data, true);
 
     uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -3205,12 +3202,12 @@ void Player::GiveLevel(uint8 level)
 
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, ((MAX_POWERS_PER_CLASS * 4) + 4 + 4 + (MAX_STATS * 4) + 4));
-	
+
     data << uint32(int32(basehp) - int32(GetCreateHealth()));
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)       // Stats loop (0-4)
         data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
-	
+
     bool talent = false;
 
     data << bool(talent);
@@ -3220,7 +3217,7 @@ void Player::GiveLevel(uint8 level)
     data << uint32(0); //unk
     data << uint32(0); //unk
     data << uint32(0); //unk
-		
+
     GetSession()->SendPacket(&data);
 
     SetUInt32Value(PLAYER_FIELD_NEXT_LEVEL_XP, sObjectMgr->GetXPForLevel(level));
@@ -5669,8 +5666,8 @@ void Player::RepopAtGraveyard()
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);  // show spirit healer position on minimap
             data << ClosestGrave->map_id;
             data << ClosestGrave->y;
-            data << ClosestGrave->z;
             data << ClosestGrave->x;
+            data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
     }
@@ -10199,25 +10196,25 @@ void Player::SetBindPoint(uint64 guid)
 {
     ObjectGuid ikGuid = guid;
 
-    WorldPacket data(SMSG_BINDER_CONFIRM, 7);
-	data.WriteBit(ikGuid[4]);
-	data.WriteBit(ikGuid[6]);
-	data.WriteBit(ikGuid[2]);
-	data.WriteBit(ikGuid[1]);
-	data.WriteBit(ikGuid[5]);
-	data.WriteBit(ikGuid[3]);
-	data.WriteBit(ikGuid[0]);
-	data.WriteBit(ikGuid[7]);
-	
-	data.WriteByteSeq(ikGuid[6]);
-	data.WriteByteSeq(ikGuid[2]);
-	data.WriteByteSeq(ikGuid[5]);
-	data.WriteByteSeq(ikGuid[0]);
-	data.WriteByteSeq(ikGuid[4]);
-	data.WriteByteSeq(ikGuid[7]);
-	data.WriteByteSeq(ikGuid[1]);
-	data.WriteByteSeq(ikGuid[3]);
+    WorldPacket data(SMSG_BINDER_CONFIRM, 9);
+    data.WriteBit(ikGuid[4]);
+    data.WriteBit(ikGuid[6]);
+    data.WriteBit(ikGuid[2]);
+    data.WriteBit(ikGuid[1]);
+    data.WriteBit(ikGuid[5]);
+    data.WriteBit(ikGuid[3]);
+    data.WriteBit(ikGuid[0]);
+    data.WriteBit(ikGuid[7]);
+    data.FlushBits();
 
+    data.WriteByteSeq(ikGuid[6]);
+    data.WriteByteSeq(ikGuid[2]);
+    data.WriteByteSeq(ikGuid[5]);
+    data.WriteByteSeq(ikGuid[0]);
+    data.WriteByteSeq(ikGuid[4]);
+    data.WriteByteSeq(ikGuid[7]);
+    data.WriteByteSeq(ikGuid[1]);
+    data.WriteByteSeq(ikGuid[3]);
     GetSession()->SendPacket(&data);
 }
 
@@ -23652,28 +23649,28 @@ void Player::SendComboPoints()
         }
         else
             data.Initialize(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
+
         ObjectGuid guid = combotarget->GetGUID();
-		
-		data.WriteBit(guid[5]);
-		data.WriteBit(guid[6]);
-		data.WriteBit(guid[4]);
-		data.WriteBit(guid[1]);
-		data.WriteBit(guid[3]);
-		data.WriteBit(guid[2]);
-		data.WriteBit(guid[7]);
-		data.WriteBit(guid[0]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[0]);
 
         data.FlushBits();
 
         data.WriteByteSeq(guid[1]);
-		data.WriteByteSeq(guid[7]);
-		data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[3]);
         data << uint8(m_comboPoints);
-		data.WriteByteSeq(guid[6]);
-		data.WriteByteSeq(guid[0]);
-		data.WriteByteSeq(guid[4]);
-		data.WriteByteSeq(guid[2]);
-		data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[5]);
 
         GetSession()->SendPacket(&data);
     }

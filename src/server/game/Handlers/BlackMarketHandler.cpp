@@ -29,25 +29,25 @@ void WorldSession::HandleBlackMarketHelloOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-	guid[4] = recvData.ReadBit();
-	guid[5] = recvData.ReadBit();
-	guid[2] = recvData.ReadBit();
-	guid[7] = recvData.ReadBit();
-	guid[0] = recvData.ReadBit();
-	guid[1] = recvData.ReadBit();
-	guid[3] = recvData.ReadBit();
-	guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
 
-	recvData.ReadByteSeq(guid[3]);
-	recvData.ReadByteSeq(guid[5]);
-	recvData.ReadByteSeq(guid[0]);
-	recvData.ReadByteSeq(guid[6]);
-	recvData.ReadByteSeq(guid[4]);
-	recvData.ReadByteSeq(guid[1]);
-	recvData.ReadByteSeq(guid[7]);
-	recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
 
-	uint64 npcGuid = uint64(guid);
+    uint64 npcGuid = uint64(guid);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_BLACKMARKET);
 
@@ -66,57 +66,57 @@ void WorldSession::HandleBlackMarketHelloOpcode(WorldPacket& recvData)
 void WorldSession::SendBlackMarketHello(uint64 npcGuid)
 {
     WorldPacket data(SMSG_BLACKMARKET_HELLO, 8);
-    
-	ObjectGuid guid = npcGuid;
 
-	data.WriteBit(guid[2]);
-	data.WriteBit(guid[0]);
-	data.WriteBit(guid[4]);
-	data.WriteBit(guid[1]);
-	data.WriteBit(guid[3]);
-	data.WriteBit(guid[6]);
-	data.WriteBit(guid[5]);
-	data.WriteBit(guid[7]);
-	data.WriteBit(1);      //Unknow
+    ObjectGuid guid = npcGuid;
 
-	data.WriteByteSeq(guid[6]);
-	data.WriteByteSeq(guid[1]);
-	data.WriteByteSeq(guid[2]);
-	data.WriteByteSeq(guid[5]);
-	data.WriteByteSeq(guid[0]);
-	data.WriteByteSeq(guid[7]);
-	data.WriteByteSeq(guid[4]);
-	data.WriteByteSeq(guid[3]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(1);      //Unknow
+
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
 
     SendPacket(&data);
 }
 
 void WorldSession::HandleBlackMarketRequestItemOpcode(WorldPacket& recvData)
 {
-	ObjectGuid guid;
-	uint32 Timestamp;
+    ObjectGuid guid;
+    uint32 Timestamp;
 
-	recvData >> Timestamp;
-	
-	guid[2] = recvData.ReadBit();
-	guid[6] = recvData.ReadBit();
-	guid[0] = recvData.ReadBit();
-	guid[3] = recvData.ReadBit();
-	guid[4] = recvData.ReadBit();
-	guid[5] = recvData.ReadBit();
-	guid[1] = recvData.ReadBit();
-	guid[7] = recvData.ReadBit();
+    recvData >> Timestamp;
 
-	recvData.ReadByteSeq(guid[6]);
-	recvData.ReadByteSeq(guid[2]);
-	recvData.ReadByteSeq(guid[3]);
-	recvData.ReadByteSeq(guid[5]);
-	recvData.ReadByteSeq(guid[7]);
-	recvData.ReadByteSeq(guid[4]);
-	recvData.ReadByteSeq(guid[1]);
-	recvData.ReadByteSeq(guid[0]);
-	
-	uint64 NpcGuid = uint64(guid);
+    guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[0]);
+
+    uint64 NpcGuid = uint64(guid);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(NpcGuid, UNIT_NPC_FLAG_BLACKMARKET);
     if (!unit)
@@ -125,50 +125,50 @@ void WorldSession::HandleBlackMarketRequestItemOpcode(WorldPacket& recvData)
         return;
     }
 
-	SendBlackMarketRequestItemsResult();
+    SendBlackMarketRequestItemsResult();
 }
 
 void WorldSession::SendBlackMarketRequestItemsResult()
 {
-	WorldPacket data(SMSG_BLACKMARKET_REQUEST_ITEMS_RESULT);
-	//need structure
-	SendPacket(&data);
+    WorldPacket data(SMSG_BLACKMARKET_REQUEST_ITEMS_RESULT);
+    //need structure
+    SendPacket(&data);
 }
 
 void WorldSession::HandleBlackMarketBidOpcode(WorldPacket& recvData)
 {
-	ObjectGuid guid;
-	uint32 itemid, id;
-	uint64 price;
+    ObjectGuid guid;
+    uint32 itemid, id;
+    uint64 price;
 
-	recvData >> id >> itemid >> price;
+    recvData >> id >> itemid >> price;
 
-	guid[0] = recvData.ReadBit();
-	guid[5] = recvData.ReadBit();
-	guid[4] = recvData.ReadBit();
-	guid[3] = recvData.ReadBit();
-	guid[7] = recvData.ReadBit();
-	guid[6] = recvData.ReadBit();
-	guid[1] = recvData.ReadBit();
-	guid[2] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
 
-	recvData.ReadByteSeq(guid[4]);
-	recvData.ReadByteSeq(guid[3]);
-	recvData.ReadByteSeq(guid[6]);
-	recvData.ReadByteSeq(guid[5]);
-	recvData.ReadByteSeq(guid[7]);
-	recvData.ReadByteSeq(guid[1]);
-	recvData.ReadByteSeq(guid[0]);
-	recvData.ReadByteSeq(guid[2]);
-	//structure ok need implement database data
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[2]);
+    //structure ok need implement database data
 
-	SendBlackMarketBidResult();
-	SendBlackMarketRequestItemsResult();
+    SendBlackMarketBidResult();
+    SendBlackMarketRequestItemsResult();
 }
 
 void WorldSession::SendBlackMarketBidResult()
 {
-	WorldPacket data(SMSG_BLACKMARKET_BID_RESULT, 5);
-	data << uint32(0); //unk
-	SendPacket(&data);
+    WorldPacket data(SMSG_BLACKMARKET_BID_RESULT, 5);
+    data << uint32(0); //unk
+    SendPacket(&data);
 }

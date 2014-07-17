@@ -180,7 +180,7 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
         itemData.WriteByteSeq(itemId[5]);
         itemData.WriteByteSeq(itemId[1]);
 
-		itemData << uint32(0); //= 20
+itemData << uint32(0); //= 20
 
         itemData.WriteByteSeq(itemId[4]);
         itemData.WriteByteSeq(creatorGuid[1]);
@@ -194,7 +194,7 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
 
 void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
 {
-	TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
+TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
     Player* player = GetPlayer();
 
     ObjectGuid npcGuid;
@@ -221,7 +221,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
         itemIds[i][2] = recvData.ReadBit();
         itemIds[i][3] = recvData.ReadBit();
     }
-	
+
     uint32 countDeposit = recvData.ReadBits(26); //40
 
     if (countDeposit > 9)
@@ -249,7 +249,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
     npcGuid[1] = recvData.ReadBit();
     npcGuid[2] = recvData.ReadBit();
     npcGuid[5] = recvData.ReadBit();
-	
+
     for (uint32 i = 0; i < countWithdraw; ++i)
     {
         recvData.ReadByteSeq(itemIds[i][0]);
@@ -263,7 +263,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
     }
 
     recvData.ReadByteSeq(npcGuid[5]);
-	
+
     for (uint32 i = 0; i < countDeposit; ++i)
     {
         recvData.ReadByteSeq(itemGuids[i][5]);

@@ -141,29 +141,29 @@ void WorldSession::SendTaxiMenu(Creature* unit)
 
     WorldPacket data(SMSG_SHOWTAXINODES, (4 + 8 + 4 + 8 * 4));
     ObjectGuid Guid = unit->GetGUID();
-	
-	data.WriteBit(1); //unk
 
-	data.WriteBit(Guid[3]);
-	data.WriteBit(Guid[0]);
-	data.WriteBit(Guid[4]);
-	data.WriteBit(Guid[2]);
-	data.WriteBit(Guid[1]);
-	data.WriteBit(Guid[7]);
-	data.WriteBit(Guid[6]);
-	data.WriteBit(Guid[5]);
-	
-	data.WriteBits(TaxiMaskSize, 24);
+data.WriteBit(1); //unk
 
-	data.WriteByteSeq(Guid[0]);
-	data.WriteByteSeq(Guid[3]);
+data.WriteBit(Guid[3]);
+data.WriteBit(Guid[0]);
+data.WriteBit(Guid[4]);
+data.WriteBit(Guid[2]);
+data.WriteBit(Guid[1]);
+data.WriteBit(Guid[7]);
+data.WriteBit(Guid[6]);
+data.WriteBit(Guid[5]);
+
+data.WriteBits(TaxiMaskSize, 24);
+
+data.WriteByteSeq(Guid[0]);
+data.WriteByteSeq(Guid[3]);
     data << uint32(curloc);
-	data.WriteByteSeq(Guid[5]);
-	data.WriteByteSeq(Guid[2]);
-	data.WriteByteSeq(Guid[6]);
-	data.WriteByteSeq(Guid[1]);
-	data.WriteByteSeq(Guid[7]);
-	data.WriteByteSeq(Guid[4]);
+data.WriteByteSeq(Guid[5]);
+data.WriteByteSeq(Guid[2]);
+data.WriteByteSeq(Guid[6]);
+data.WriteByteSeq(Guid[1]);
+data.WriteByteSeq(Guid[7]);
+data.WriteByteSeq(Guid[4]);
 
     GetPlayer()->m_taxi.AppendTaximaskTo(data, GetPlayer()->isTaxiCheater());
     SendPacket(&data);
@@ -369,8 +369,8 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-	ObjectGuid guid;
-	
+ObjectGuid guid;
+
     WorldPacket data(SMSG_ACTIVATETAXIREPLY, 8);
     data.WriteBit(guid[2]);
     data.WriteBit(guid[7]);
