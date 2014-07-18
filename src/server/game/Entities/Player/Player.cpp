@@ -7546,15 +7546,18 @@ void Player::SendCurrencies() const
 
 void Player::SendPvpRewards() const
 {
-    WorldPacket packet(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
-    packet << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
-    packet << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
-    packet << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RBG, true);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
-    GetSession()->SendPacket(&packet);
+    WorldPacket data(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RBG, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    data << uint32(0); // UnkMop
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    data << uint32(0); // unkMop2
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true);
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    GetSession()->SendPacket(&data);
 }
 
 uint32 Player::GetCurrency(uint32 id, bool usePrecision) const
@@ -9575,9 +9578,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
     builder.AppendState(0x8d4, 0x0);                   // 5
     builder.AppendState(0x8d3, 0x0);                   // 6
                                                             // 7 1 - Arena season in progress, 0 - end of season
-    builder.AppendState(0xC77, sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
+    //builder.AppendState(0xC77, sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
                                                             // 8 Arena season id
-    builder.AppendState(0xF3D, sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
+    //builder.AppendState(0xF3D, sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
 
     if (mapid == 530)                                       // Outland
     {
