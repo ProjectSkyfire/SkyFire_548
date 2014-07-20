@@ -2153,6 +2153,8 @@ class Unit : public WorldObject
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
 
+        uint32 GetMovementCounter() const { return m_movementCounter; }
+
     protected:
         explicit Unit (bool isWorldObject);
 
@@ -2229,6 +2231,7 @@ class Unit : public WorldObject
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
         void DisableSpline();
+
     private:
         bool IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const* & spellProcEvent);
         bool HandleAuraProcOnPowerAmount(Unit* victim, uint32 damage, AuraEffect* triggeredByAura, SpellInfo const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);

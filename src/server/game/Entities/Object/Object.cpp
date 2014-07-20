@@ -386,7 +386,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasLiving = flags & UPDATEFLAG_LIVING;
     bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
     bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
-    bool hasTransportPosition = false; // flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
+    bool hasTransportPosition = flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
     bool hasTarget = flags & UPDATEFLAG_HAS_TARGET;
     bool hasVehicle = false; //flags & UPDATEFLAG_VEHICLE;
     bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
@@ -394,9 +394,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasFallData;
     bool hasFallDirection;
     bool hasSpline;
+    bool hasPitch;
+    bool hasSplineElevation;
+    bool hasUnitTransport;
+
     uint32 movementFlags;
     uint32 movementFlagsExtra;
-
 
     data->WriteBit(0);
     data->WriteBit(hasAnimKits);
@@ -430,45 +433,60 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         movementFlags = self->GetUnitMovementFlags();
         movementFlagsExtra = self->GetExtraUnitMovementFlags();
         hasSpline = self->IsSplineEnabled() && self->GetTypeId() != TYPEID_PLAYER;
+        hasPitch = self->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || self->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+        hasSplineElevation = self->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+        hasUnitTransport = self->m_movementInfo.transport.guid;
 
         if (GetTypeId() == TYPEID_UNIT)
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
 
         data->WriteBit(guid[2]);
         data->WriteBit(0);
-        data->WriteBit(1); // !ReadFloat
-        data->WriteBit(0); // HasTransport // OK !!!
+        data->WriteBit(!hasPitch);
+        data->WriteBit(hasUnitTransport);
         data->WriteBit(0);
 
-        // TransportData
+        if (hasUnitTransport)
+        {
+            ObjectGuid transGuid = self->m_movementInfo.transport.guid;
+            data->WriteBit(transGuid[4]);
+            data->WriteBit(transGuid[2]);
+            data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
+            data->WriteBit(transGuid[0]);
+            data->WriteBit(transGuid[1]);
+            data->WriteBit(transGuid[3]);
+            data->WriteBit(transGuid[6]);
+            data->WriteBit(transGuid[7]);
+            data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
+            data->WriteBit(transGuid[5]);
+        }
 
-        data->WriteBit(0); // read uint32
+        data->WriteBit(!self->m_movementInfo.time);
         data->WriteBit(guid[6]);
         data->WriteBit(guid[4]);
         data->WriteBit(guid[3]);
 
         data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f)); //!G3D::fuzzyEq(self->GetOrientation(), 0.0f)
 
-        data->WriteBit(1); // skip uint32
+        data->WriteBit(!self->GetMovementCounter());
         data->WriteBit(guid[5]);
-        data->WriteBits(0, 22);
+        data->WriteBits(0, 22); // Forces
         data->WriteBit(!movementFlags);
         data->WriteBits(0, 19);
         data->WriteBit(hasFallData);
 
-
         if (movementFlags)
             data->WriteBits(movementFlags, 30);
 
-        data->WriteBit(1); // !ReadFloat
-        data->WriteBit(0); // hasSpline
+        data->WriteBit(!hasSplineElevation);
+        data->WriteBit(hasSpline);
         data->WriteBit(0);
         data->WriteBit(guid[0]);
         data->WriteBit(guid[7]);
         data->WriteBit(guid[1]);
 
-        //if (hasSpline)
-        //    Movement::PacketBuilder::WriteCreateBits(*self->movespline, *data);
+        if (hasSpline)
+            Movement::PacketBuilder::WriteCreateBits(*self->movespline, *data);
 
         data->WriteBit(!movementFlagsExtra);
 
@@ -479,24 +497,23 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
            data->WriteBits(movementFlagsExtra, 13);
     }
 
-    /*
     if (hasTransportPosition)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
-        data->WriteBit(transGuid[3]);
-        data->WriteBit(transGuid[5]);
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[1]);
         data->WriteBit(transGuid[4]);
-        data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
-        data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
+        data->WriteBit(transGuid[1]);
         data->WriteBit(transGuid[0]);
+        data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
         data->WriteBit(transGuid[6]);
+        data->WriteBit(transGuid[5]);
+        data->WriteBit(transGuid[3]);
+        data->WriteBit(transGuid[2]);
         data->WriteBit(transGuid[7]);
+        data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
     }
 
-
+    /*
     if (hasAnimKits)
     {
         data->WriteBit(1);  // Missing AnimKit1
@@ -526,14 +543,44 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
 
-        // Transport Here
+        if (hasUnitTransport)
+        {
+            ObjectGuid transGuid = self->m_movementInfo.transport.guid;
+
+            data->WriteByteSeq(transGuid[7]);
+            *data << float(self->GetTransOffsetX());
+
+            if (self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid)
+                *data << uint32(self->m_movementInfo.transport.time3);
+
+            *data << float(self->GetTransOffsetO());
+            *data << float(self->GetTransOffsetY());
+            data->WriteByteSeq(transGuid[4]);
+            data->WriteByteSeq(transGuid[1]);
+            data->WriteByteSeq(transGuid[3]);
+            *data << float(self->GetTransOffsetZ());
+            data->WriteByteSeq(transGuid[5]);
+
+            if (self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid)
+                *data << uint32(self->m_movementInfo.transport.time2);
+
+            data->WriteByteSeq(transGuid[0]);
+            *data << int8(self->GetTransSeat());
+            data->WriteByteSeq(transGuid[6]);
+            data->WriteByteSeq(transGuid[2]);
+            *data << uint32(self->GetTransTime());
+        }
 
         data->WriteByteSeq(guid[4]);
 
-        //if (hasSpline)
-        //    Movement::PacketBuilder::WriteCreateData(*self->movespline, *data);
+        if (hasSpline)
+            Movement::PacketBuilder::WriteCreateData(*self->movespline, *data);
 
         *data << float(self->GetSpeed(MOVE_FLIGHT));
+
+        if (self->GetMovementCounter())
+            *data << uint32(self->GetMovementCounter());
+
         data->WriteByteSeq(guid[2]);
 
         if (hasFallData)
@@ -551,11 +598,21 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         data->WriteByteSeq(guid[1]);
         *data << float(self->GetSpeed(MOVE_TURN_RATE));
-        *data << uint32(0);
-        *data << float(self->GetSpeed(MOVE_SWIM));
+
+        if (self->m_movementInfo.time)
+            *data << uint32(self->m_movementInfo.time);
+
+        *data << float(self->GetSpeed(MOVE_RUN_BACK));
+
+        if (hasSplineElevation)
+            *data << float(self->m_movementInfo.splineElevation);
+
         data->WriteByteSeq(guid[7]);
         *data << float(self->GetSpeed(MOVE_PITCH_RATE));
         *data << float(self->GetPositionX());
+
+        if (hasPitch)
+            *data << float(self->m_movementInfo.pitch);
 
         if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
             *data << float(Position::NormalizeOrientation(self->GetOrientation()));
@@ -567,43 +624,42 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(guid[5]);
         data->WriteByteSeq(guid[6]);
         data->WriteByteSeq(guid[0]);
-        *data << float(self->GetSpeed(MOVE_RUN_BACK));
-        *data << float(self->GetSpeed(MOVE_RUN));
         *data << float(self->GetSpeed(MOVE_SWIM_BACK));
+        *data << float(self->GetSpeed(MOVE_RUN));
+        *data << float(self->GetSpeed(MOVE_SWIM));
         *data << float(self->GetPositionZMinusOffset());
 
     }
 
-    /*
     if (hasTransportPosition)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
 
-        *data << int8(self->GetTransSeat());
-        *data << float(self->GetTransOffsetX());
-        data->WriteBit(transGuid[1]);
-        data->WriteBit(transGuid[0]);
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[6]);
-        data->WriteBit(transGuid[5]);
-        data->WriteBit(transGuid[4]);
-
         if (self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time2);
 
-        data->WriteBit(transGuid[7]);
-        *data << float(self->GetTransOffsetO());
-        *data << float(self->GetTransOffsetZ());
         *data << float(self->GetTransOffsetY());
+        *data << int8(self->GetTransSeat());
+        *data << float(self->GetTransOffsetX());
+        data->WriteBit(transGuid[2]);
+        data->WriteBit(transGuid[4]);
+        data->WriteBit(transGuid[1]);
 
         if (self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time3);
 
-        data->WriteBit(transGuid[3]);
         *data << uint32(self->GetTransTime());
+
+        *data << float(self->GetTransOffsetO());
+        *data << float(self->GetTransOffsetZ());
+
+        data->WriteBit(transGuid[6]);
+        data->WriteBit(transGuid[0]);
+        data->WriteBit(transGuid[5]);
+        data->WriteBit(transGuid[3]);
+        data->WriteBit(transGuid[7]);
     }
-    */
 
     if (hasTarget)
     {
@@ -657,8 +713,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     if (hasGobjectRotation)
         *data << uint64(ToGameObject()->GetRotation());
 
-    // if (hasLiving && hasSpline)
-    //    Movement::PacketBuilder::WriteFacingTargetPart(*ToUnit()->movespline, *data);
+     if (hasLiving && hasSpline)
+        Movement::PacketBuilder::WriteFacingTargetPart(*ToUnit()->movespline, *data);
 }
 
 void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const

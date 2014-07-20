@@ -290,11 +290,11 @@ namespace Movement
             return;
 
         data.WriteBit(moveSpline.splineflags & (MoveSplineFlag::Parabolic | MoveSplineFlag::Animation));
-        data.WriteBits(moveSpline.spline.mode(), 2);
-        data.WriteBits(moveSpline.getPath().size(), 20);
-        data.WriteBits(moveSpline.splineflags.raw(), 25);
         data.WriteBit((moveSpline.splineflags & MoveSplineFlag::Parabolic) && moveSpline.effect_start_time < moveSpline.Duration());
         data.WriteBit(0); // NYI Block
+        data.WriteBits(moveSpline.getPath().size(), 20);
+        data.WriteBits(moveSpline.spline.mode(), 2);
+        data.WriteBits(moveSpline.splineflags.raw(), 25);
     }
 
     void PacketBuilder::WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data)
@@ -304,41 +304,44 @@ namespace Movement
             MoveSplineFlag const& splineFlags = moveSpline.splineflags;
             MonsterMoveType type = GetMonsterMoveType(moveSpline);
 
+            data << moveSpline.timePassed();
             data << float(1.f);                             // splineInfo.duration_mod_next; added in 3.1
+            data << float(1.f);                             // splineInfo.duration_mod; added in 3.1
 
             uint32 nodes = moveSpline.getPath().size();
             for (uint32 i = 0; i < nodes; ++i)
             {
+                data << float(moveSpline.getPath()[i].x);
                 data << float(moveSpline.getPath()[i].z);
                 data << float(moveSpline.getPath()[i].y);
-                data << float(moveSpline.getPath()[i].x);
             }
-
-            data << uint8(type);
-            data << float(1.f);                             // splineInfo.duration_mod; added in 3.1
-
-            //    NYI block here
-
-            if (type == MonsterMoveFacingPoint)
-                data << moveSpline.facing.f.x << moveSpline.facing.f.y << moveSpline.facing.f.z;
-
-            if ((splineFlags & MoveSplineFlag::Parabolic) && moveSpline.effect_start_time < moveSpline.Duration())
-                data << moveSpline.vertical_acceleration;   // added in 3.1
-
-            if (type == MonsterMoveFacingAngle)
-                data << moveSpline.facing.angle;
-
-            data << moveSpline.Duration();
 
             if (splineFlags & (MoveSplineFlag::Parabolic | MoveSplineFlag::Animation))
                 data << moveSpline.effect_start_time;       // added in 3.1
 
-            data << moveSpline.timePassed();
+            data << uint8(type);
+
+            if (type == MonsterMoveFacingAngle)
+                data << float(moveSpline.facing.angle);
+
+            if (type == MonsterMoveFacingPoint)
+                data << moveSpline.facing.f.x << moveSpline.facing.f.z << moveSpline.facing.f.y;
+
+            if ((splineFlags & MoveSplineFlag::Parabolic) && moveSpline.effect_start_time < moveSpline.Duration())
+                data << float(moveSpline.vertical_acceleration);   // added in 3.1
+
+            //    NYI block here
+            data << moveSpline.Duration();
+
         }
 
-        data << moveSpline.GetId();
         Vector3 destination = moveSpline.isCyclic() ? Vector3::zero() : moveSpline.FinalDestination();
-        data << destination;
+
+        data << float(destination.x);
+        data << float(destination.z);
+        data << moveSpline.GetId();
+        data << float(destination.y);
+
     }
 
     void PacketBuilder::WriteFacingTargetPart(MoveSpline const& moveSpline, ByteBuffer& data)
@@ -346,22 +349,23 @@ namespace Movement
         if (GetMonsterMoveType(moveSpline) == MonsterMoveFacingTarget && !moveSpline.Finalized())
         {
             ObjectGuid facingGuid = moveSpline.facing.target;
-            data.WriteBit(facingGuid[6]);
+            data.WriteBit(facingGuid[4]);
             data.WriteBit(facingGuid[7]);
-            data.WriteBit(facingGuid[3]);
             data.WriteBit(facingGuid[0]);
             data.WriteBit(facingGuid[5]);
             data.WriteBit(facingGuid[1]);
-            data.WriteBit(facingGuid[4]);
             data.WriteBit(facingGuid[2]);
+            data.WriteBit(facingGuid[3]);
+            data.WriteBit(facingGuid[6]);
+
             data.WriteByteSeq(facingGuid[4]);
             data.WriteByteSeq(facingGuid[2]);
+            data.WriteByteSeq(facingGuid[0]);
             data.WriteByteSeq(facingGuid[5]);
             data.WriteByteSeq(facingGuid[6]);
-            data.WriteByteSeq(facingGuid[0]);
-            data.WriteByteSeq(facingGuid[7]);
-            data.WriteByteSeq(facingGuid[1]);
             data.WriteByteSeq(facingGuid[3]);
+            data.WriteByteSeq(facingGuid[1]);
+            data.WriteByteSeq(facingGuid[7]);
         }
     }
 }
