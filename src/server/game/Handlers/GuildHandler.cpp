@@ -636,7 +636,7 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvPacket)
 
     recvPacket >> tabId;
     guid[5] = recvPacket.ReadBit();
-    iconLen = recvPacket.ReadBit();
+    iconLen = recvPacket.ReadBits(9);
     guid[1] = recvPacket.ReadBit();
     guid[4] = recvPacket.ReadBit();
     guid[2] = recvPacket.ReadBit();
