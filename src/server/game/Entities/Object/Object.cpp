@@ -52,6 +52,7 @@
 #include "Group.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "Chat.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -2204,270 +2205,146 @@ namespace Trinity
     class MonsterChatBuilder
     {
         public:
-            MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, int32 textId, uint32 language, uint64 targetGUID)
-                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_targetGUID(targetGUID) { }
+            MonsterChatBuilder(WorldObject const* obj, ChatMsg msgtype, int32 textId, uint32 language, WorldObject const* target)
+                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(Language(language)), i_target(target) { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
 
                 /// @todo i_object.GetName() also must be localized?
-                i_object.BuildMonsterChat(&data, i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_targetGUID);
+                ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, text, 0, "", loc_idx);
             }
 
         private:
-            WorldObject const& i_object;
+            WorldObject const* i_object;
             ChatMsg i_msgtype;
             int32 i_textId;
-            uint32 i_language;
-            uint64 i_targetGUID;
+            Language i_language;
+            WorldObject const* i_target;
     };
 
     class MonsterCustomChatBuilder
     {
         public:
-            MonsterCustomChatBuilder(WorldObject const& obj, ChatMsg msgtype, const char* text, uint32 language, uint64 targetGUID)
-                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_targetGUID(targetGUID) { }
+            MonsterCustomChatBuilder(WorldObject const* obj, ChatMsg msgtype, const char* text, uint32 language, WorldObject const* target)
+                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(Language(language)), i_target(target) { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 /// @todo i_object.GetName() also must be localized?
-                i_object.BuildMonsterChat(&data, i_msgtype, i_text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_targetGUID);
+                ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, i_text, 0, "", loc_idx);
             }
 
         private:
-            WorldObject const& i_object;
+            WorldObject const* i_object;
             ChatMsg i_msgtype;
             const char* i_text;
-            uint32 i_language;
-            uint64 i_targetGUID;
+            Language i_language;
+            WorldObject const* i_target;
     };
 }                                                           // namespace Trinity
 
-void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterSay(const char* text, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterCustomChatBuilder say_build(*this, CHAT_MSG_MONSTER_SAY, text, language, TargetGuid);
+    Trinity::MonsterCustomChatBuilder say_build(this, CHAT_MSG_MONSTER_SAY, text, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterSay(int32 textId, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterSay(int32 textId, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_SAY, textId, language, TargetGuid);
+    Trinity::MonsterChatBuilder say_build(this, CHAT_MSG_MONSTER_SAY, textId, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterYell(const char* text, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterCustomChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, text, language, TargetGuid);
+    Trinity::MonsterCustomChatBuilder say_build(this, CHAT_MSG_MONSTER_YELL, text, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
 }
 
-void WorldObject::MonsterYell(int32 textId, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterYell(int32 textId, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, TargetGuid);
+    Trinity::MonsterChatBuilder say_build(this, CHAT_MSG_MONSTER_YELL, textId, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
 }
 
-void WorldObject::MonsterYellToZone(int32 textId, uint32 language, uint64 TargetGuid)
+
+void WorldObject::MonsterTextEmote(const char* text, WorldObject const* target, bool IsBossEmote)
 {
-    Trinity::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, TargetGuid);
-    Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
-
-    uint32 zoneid = GetZoneId();
-
-    Map::PlayerList const& pList = GetMap()->GetPlayers();
-    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (itr->GetSource()->GetZoneId() == zoneid)
-            say_do(itr->GetSource());
-}
-
-void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote)
-{
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, GetName(), TargetGuid);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, this, target, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
-void WorldObject::MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote)
+void WorldObject::MonsterTextEmote(int32 textId, WorldObject const* target, bool IsBossEmote)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterChatBuilder say_build(*this, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, textId, LANG_UNIVERSAL, TargetGuid);
+    Trinity::MonsterChatBuilder say_build(this, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, textId, LANG_UNIVERSAL, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
 }
 
-void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(const char* text, Player const* target, bool IsBossWhisper)
 {
-    Player* player = ObjectAccessor::FindPlayer(receiver);
-    if (!player || !player->GetSession())
+    if (!target)
         return;
 
-    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
-
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetNameForLocaleIdx(loc_idx), receiver);
-
-    player->GetSession()->SendPacket(&data);
+    LocaleConstant loc_idx = target->GetSession()->GetSessionDbLocaleIndex();
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
+    target->GetSession()->SendPacket(&data);
 }
 
-void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(int32 textId, Player const* target, bool IsBossWhisper)
 {
-    Player* player = ObjectAccessor::FindPlayer(receiver);
-    if (!player || !player->GetSession())
+    if (!target)
         return;
 
-    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+    LocaleConstant loc_idx = target->GetSession()->GetSessionDbLocaleIndex();
     char const* text = sObjectMgr->GetTrinityString(textId, loc_idx);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetNameForLocaleIdx(loc_idx), receiver);
-
-    player->GetSession()->SendPacket(&data);
-}
-
-void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const* text, uint32 language, std::string const &name, uint64 targetGuid) const
-{
-    ObjectGuid target = targetGuid;
-    ObjectGuid source = GetGUID();
-    ObjectGuid unkGuid = 0;
-    ObjectGuid unkGuid2 = 0;
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
-
-    data->WriteBit(unkGuid[0]);
-    data->WriteBit(unkGuid[1]);
-    data->WriteBit(unkGuid[5]);
-    data->WriteBit(unkGuid[4]);
-    data->WriteBit(unkGuid[3]);
-    data->WriteBit(unkGuid[2]);
-    data->WriteBit(unkGuid[6]);
-    data->WriteBit(unkGuid[7]);
-
-    data->WriteBit(0);
-
-    data->WriteBit(source[7]);
-    data->WriteBit(source[6]);
-    data->WriteBit(source[1]);
-    data->WriteBit(source[4]);
-    data->WriteBit(source[0]);
-    data->WriteBit(source[2]);
-    data->WriteBit(source[3]);
-    data->WriteBit(source[5]);
-
-    data->WriteBit(0);
-    data->WriteBit(0); // Send Language
-    data->WriteBit(1);
-
-    data->WriteBit(target[0]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[7]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[5]);
-    data->WriteBit(target[4]);
-    data->WriteBit(target[6]);
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBits(strlen(text), 12);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
-
-    data->WriteBit(unkGuid2[2]);
-    data->WriteBit(unkGuid2[5]);
-    data->WriteBit(unkGuid2[7]);
-    data->WriteBit(unkGuid2[4]);
-    data->WriteBit(unkGuid2[0]);
-    data->WriteBit(unkGuid2[1]);
-    data->WriteBit(unkGuid2[3]);
-    data->WriteBit(unkGuid2[6]);
-
-    data->FlushBits();
-
-    data->WriteByteSeq(unkGuid2[4]);
-    data->WriteByteSeq(unkGuid2[5]);
-    data->WriteByteSeq(unkGuid2[7]);
-    data->WriteByteSeq(unkGuid2[3]);
-    data->WriteByteSeq(unkGuid2[2]);
-    data->WriteByteSeq(unkGuid2[6]);
-    data->WriteByteSeq(unkGuid2[0]);
-    data->WriteByteSeq(unkGuid2[1]);
-
-    data->WriteByteSeq(target[4]);
-    data->WriteByteSeq(target[7]);
-    data->WriteByteSeq(target[1]);
-    data->WriteByteSeq(target[5]);
-    data->WriteByteSeq(target[0]);
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[2]);
-    data->WriteByteSeq(target[3]);
-
-    *data << uint8(msgtype);
-
-    data->WriteByteSeq(unkGuid[1]);
-    data->WriteByteSeq(unkGuid[3]);
-    data->WriteByteSeq(unkGuid[4]);
-    data->WriteByteSeq(unkGuid[6]);
-    data->WriteByteSeq(unkGuid[0]);
-    data->WriteByteSeq(unkGuid[2]);
-    data->WriteByteSeq(unkGuid[5]);
-    data->WriteByteSeq(unkGuid[7]);
-
-    data->WriteByteSeq(source[2]);
-    data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[6]);
-    data->WriteByteSeq(source[7]);
-    data->WriteByteSeq(source[4]);
-    data->WriteByteSeq(source[1]);
-    data->WriteByteSeq(source[0]);
-
-    *data << uint8(language);
-    data->WriteString(text);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
+    target->GetSession()->SendPacket(&data);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool self)

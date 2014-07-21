@@ -60,7 +60,7 @@ public:
             switch (waypointId)
             {
                 case 26:
-                    Talk(SAY_END_WP_REACHED, player->GetGUID());
+                    Talk(SAY_END_WP_REACHED, player);
                     break;
                 case 27:
                     player->GroupEventHappens(QUEST_BITTER_DEPARTURE, me);
@@ -284,7 +284,7 @@ public:
                         if (Vehicle* vehicle = me->GetVehicleKit())
                             if (Unit* passenger = vehicle->GetPassenger(0))
                             {
-                                Talk(TEXT_EMOTE, passenger->GetGUID());
+                                Talk(TEXT_EMOTE, passenger);
                                 me->GetMotionMaster()->MovePath(NPC_DRAKE, false);
                             }
                     }

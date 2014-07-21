@@ -116,7 +116,7 @@ public:
             if (rand()%5)
                 return;
 
-            Talk(SAY_KILLTARGET, victim->GetGUID());
+            Talk(SAY_KILLTARGET, victim);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

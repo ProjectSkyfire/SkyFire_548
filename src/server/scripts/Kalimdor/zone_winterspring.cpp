@@ -526,7 +526,7 @@ public:
                     if (Player* player = GetPlayerForEscort())
                     {
                         me->SetFacingToObject(player);
-                        Talk(SAY_RANSHALLA_END_1, player->GetGUID());
+                        Talk(SAY_RANSHALLA_END_1, player);
                     }
                     break;
                 case SAY_RANSHALLA_END_2:
@@ -540,7 +540,7 @@ public:
                     if (Player* player = GetPlayerForEscort())
                     {
                         player->GroupEventHappens(QUEST_GUARDIANS_ALTAR, me);
-                        Talk(SAY_RANSHALLA_END_2, player->GetGUID());
+                        Talk(SAY_RANSHALLA_END_2, player);
                     }
                     me->DespawnOrUnsummon(4000);
                     break;

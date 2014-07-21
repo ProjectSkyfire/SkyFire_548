@@ -21097,124 +21097,13 @@ void Player::StopCastingCharm()
     }
 }
 
-inline void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix /*= NULL*/) const
-{
-    data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
-
-    ObjectGuid target = GetGUID();
-    ObjectGuid source = GetGUID();
-    ObjectGuid unkGuid = 0;
-    ObjectGuid unkGuid2 = 0;
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
-
-    data->WriteBit(unkGuid[0]);
-    data->WriteBit(unkGuid[1]);
-    data->WriteBit(unkGuid[5]);
-    data->WriteBit(unkGuid[4]);
-    data->WriteBit(unkGuid[3]);
-    data->WriteBit(unkGuid[2]);
-    data->WriteBit(unkGuid[6]);
-    data->WriteBit(unkGuid[7]);
-
-    data->WriteBit(0);
-
-    data->WriteBit(source[7]);
-    data->WriteBit(source[6]);
-    data->WriteBit(source[1]);
-    data->WriteBit(source[4]);
-    data->WriteBit(source[0]);
-    data->WriteBit(source[2]);
-    data->WriteBit(source[3]);
-    data->WriteBit(source[5]);
-
-    data->WriteBit(0);
-    data->WriteBit(0); // Send Language
-    data->WriteBit(1);
-
-    data->WriteBit(target[0]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[7]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[5]);
-    data->WriteBit(target[4]);
-    data->WriteBit(target[6]);
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBits(text.size(), 12);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
-
-    data->WriteBit(unkGuid2[2]);
-    data->WriteBit(unkGuid2[5]);
-    data->WriteBit(unkGuid2[7]);
-    data->WriteBit(unkGuid2[4]);
-    data->WriteBit(unkGuid2[0]);
-    data->WriteBit(unkGuid2[1]);
-    data->WriteBit(unkGuid2[3]);
-    data->WriteBit(unkGuid2[6]);
-
-    data->FlushBits();
-
-    data->WriteByteSeq(unkGuid2[4]);
-    data->WriteByteSeq(unkGuid2[5]);
-    data->WriteByteSeq(unkGuid2[7]);
-    data->WriteByteSeq(unkGuid2[3]);
-    data->WriteByteSeq(unkGuid2[2]);
-    data->WriteByteSeq(unkGuid2[6]);
-    data->WriteByteSeq(unkGuid2[0]);
-    data->WriteByteSeq(unkGuid2[1]);
-
-    data->WriteByteSeq(target[4]);
-    data->WriteByteSeq(target[7]);
-    data->WriteByteSeq(target[1]);
-    data->WriteByteSeq(target[5]);
-    data->WriteByteSeq(target[0]);
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[2]);
-    data->WriteByteSeq(target[3]);
-
-    *data << uint8(msgtype);
-
-    data->WriteByteSeq(unkGuid[1]);
-    data->WriteByteSeq(unkGuid[3]);
-    data->WriteByteSeq(unkGuid[4]);
-    data->WriteByteSeq(unkGuid[6]);
-    data->WriteByteSeq(unkGuid[0]);
-    data->WriteByteSeq(unkGuid[2]);
-    data->WriteByteSeq(unkGuid[5]);
-    data->WriteByteSeq(unkGuid[7]);
-
-    data->WriteByteSeq(source[2]);
-    data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[6]);
-    data->WriteByteSeq(source[7]);
-    data->WriteByteSeq(source[4]);
-    data->WriteByteSeq(source[1]);
-    data->WriteByteSeq(source[0]);
-
-    *data << uint8(language);
-    data->WriteString(text);
-}
-
 void Player::Say(const std::string& text, const uint32 language)
 {
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_SAY, language, _text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_SAY, _text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_SAY, Language(language), this, this, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
 }
 
@@ -21223,8 +21112,8 @@ void Player::Yell(const std::string& text, const uint32 language)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_YELL, language, _text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_YELL, _text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_YELL, Language(language), this, this, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), true);
 }
 
@@ -21233,8 +21122,8 @@ void Player::TextEmote(const std::string& text)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_EMOTE, LANG_UNIVERSAL, _text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_EMOTE, _text, LANG_UNIVERSAL);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_EMOTE, LANG_UNIVERSAL, this, this, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
 }
 
@@ -21246,8 +21135,8 @@ void Player::WhisperAddon(const std::string& text, const std::string& prefix, Pl
     if (!receiver->GetSession()->IsAddonRegistered(prefix))
         return;
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, LANG_UNIVERSAL, prefix.c_str());
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, LANG_ADDON, this, this, text, 0, "", DEFAULT_LOCALE, prefix);
     receiver->GetSession()->SendPacket(&data);
 }
 
@@ -21263,16 +21152,15 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_WHISPER, language, _text, rPlayer);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, Language(language), this, this, text);
     rPlayer->GetSession()->SendPacket(&data);
 
     // rest stuff shouldn't happen in case of addon message
     if (isAddonMessage)
         return;
 
-    data.Initialize(SMSG_MESSAGECHAT, 200);
-    rPlayer->BuildPlayerChat(&data, CHAT_MSG_WHISPER_INFORM, _text, language);
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, Language(language), rPlayer, rPlayer, text);
     GetSession()->SendPacket(&data);
 
     if (!isAcceptWhispers() && !IsGameMaster() && !rPlayer->IsGameMaster())

@@ -565,25 +565,11 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
         sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_ADDON, TEXT_RANGE_ZONE);
 }
 
-/*void Battlefield::SendWarningToAllInWar(int32 entry, ...)
-{
-    const char *format = sObjectMgr->GetTrinityStringForDBCLocale(entry);
-    va_list ap;
-    char str [1024];
-    va_start(ap, entry);
-    vsnprintf(str, 1024, format, ap);
-    va_end(ap);
-    std::string msg = (std::string)str;
-
-    WorldPacket data = BuildWarningAnnPacket(msg);
-    BroadcastPacketWar(data);
-}*/
-
 void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)
 {
     if (player)
         if (Creature* stalker = GetCreature(StalkerGuid))
-            sCreatureTextMgr->SendChat(stalker, (uint8)entry, player->GetGUID());
+            sCreatureTextMgr->SendChat(stalker, (uint8)entry, player);
 }
 
 void Battlefield::SendUpdateWorldState(uint32 field, uint32 value)

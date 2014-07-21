@@ -455,7 +455,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
                     if (Player* player = itr->GetSource())
                     {
                         if (events.IsInPhase(PHASE_ONE))
-                            Talk(WHISPER_VOICE_PHASE_1_WIPE, player->GetGUID());
+                            Talk(WHISPER_VOICE_PHASE_1_WIPE, player);
 
                         player->RemoveAurasDueToSpell(SPELL_SANITY);
                         player->RemoveAurasDueToSpell(SPELL_INSANE);
@@ -534,7 +534,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
                         case EVENT_EXTINGUISH_ALL_LIFE:
                             if (Creature* yogg = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_YOGG_SARON)))
                             {
-                                yogg->AI()->Talk(EMOTE_YOGG_SARON_EXTINGUISH_ALL_LIFE, me->GetGUID());
+                                yogg->AI()->Talk(EMOTE_YOGG_SARON_EXTINGUISH_ALL_LIFE, me);
                                 yogg->CastSpell((Unit*)NULL, SPELL_EXTINGUISH_ALL_LIFE, true);
                             }
                             events.ScheduleEvent(EVENT_EXTINGUISH_ALL_LIFE, 10000);    // cast it again after a short while, players can survive
@@ -1527,8 +1527,8 @@ class npc_observation_ring_keeper : public CreatureScript
                 me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 me->DespawnOrUnsummon(2000);
                 DoCast(SPELL_TELEPORT);
-                Talk(SAY_KEEPER_CHOSEN_1, player->GetGUID());
-                Talk(SAY_KEEPER_CHOSEN_2, player->GetGUID());
+                Talk(SAY_KEEPER_CHOSEN_1, player);
+                Talk(SAY_KEEPER_CHOSEN_2, player);
 
                 switch (me->GetEntry())
                 {
@@ -2237,7 +2237,7 @@ class spell_yogg_saron_boil_ominously : public SpellScriptLoader    // 63030
                     if (!target->HasAura(SPELL_FLASH_FREEZE) && !GetCaster()->HasAura(SPELL_SUMMON_GUARDIAN_1) && !GetCaster()->HasAura(SPELL_SUMMON_GUARDIAN_2))
                     {
                         if (Creature* caster = GetCaster()->ToCreature())
-                            caster->AI()->Talk(EMOTE_OMINOUS_CLOUD_PLAYER_TOUCH, target->GetGUID());
+                            caster->AI()->Talk(EMOTE_OMINOUS_CLOUD_PLAYER_TOUCH, target);
 
                         GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_GUARDIAN_1, true);
                     }
@@ -2908,7 +2908,7 @@ class spell_yogg_saron_insane : public SpellScriptLoader     // 63120
             {
                 if (Unit* caster = GetCaster())
                     if (Creature* yogg = caster->ToCreature())
-                        yogg->AI()->Talk(WHISPER_VOICE_INSANE, GetTarget()->GetGUID());
+                        yogg->AI()->Talk(WHISPER_VOICE_INSANE, GetTarget());
 
                 GetTarget()->CastSpell(GetTarget(), SPELL_INSANE_VISUAL, true);
             }

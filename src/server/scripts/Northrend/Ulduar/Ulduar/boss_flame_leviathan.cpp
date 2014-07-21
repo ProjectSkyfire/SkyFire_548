@@ -1182,7 +1182,7 @@ class npc_lorekeeper : public CreatureScript
                             if (Creature* Branz = creature->FindNearestCreature(NPC_BRANZ_BRONZBEARD, 1000, true))
                             {
                                 Delorah->GetMotionMaster()->MovePoint(0, Branz->GetPositionX()-4, Branz->GetPositionY(), Branz->GetPositionZ());
-                                /// @todo Delorah->AI()->Talk(xxxx, Branz->GetGUID()); when reached at branz
+                                /// @todo Delorah->AI()->Talk(xxxx, Branz); when reached at branz
                             }
                         }
                     }
@@ -1533,7 +1533,7 @@ class spell_auto_repair : public SpellScriptLoader
                 if (!driver)
                     return;
 
-                driver->MonsterTextEmote(EMOTE_REPAIR, driver->GetGUID(), true);
+                driver->MonsterTextEmote(EMOTE_REPAIR, driver, true);
 
                 InstanceScript* instance = driver->GetInstanceScript();
                 if (!instance)
@@ -1695,7 +1695,7 @@ class spell_pursue : public SpellScriptLoader
                 {
                     if (IS_PLAYER_GUID(itr->second.Passenger.Guid))
                     {
-                        caster->AI()->Talk(EMOTE_PURSUE, itr->second.Passenger.Guid);
+                        caster->AI()->Talk(EMOTE_PURSUE, sObjectAccessor->GetWorldObject(*caster, itr->second.Passenger.Guid));
                         return;
                     }
                 }

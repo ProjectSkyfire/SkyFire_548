@@ -189,7 +189,7 @@ public:
                                          if (i->GetSource())
                                          {
                                             WorldPacket packet(SMSG_MESSAGECHAT, 200);
-                                            unit->BuildMonsterChat(&packet, CHAT_MSG_MONSTER_YELL, YELL_EFFORTS, 0, YELL_EFFORTS_NAME, i->GetSource()->GetGUID());
+                                            unit->MonsterYell(YELL_EFFORTS, LANG_UNIVERSAL, i->GetSource());
                                             i->GetSource()->GetSession()->SendPacket(&packet);
 
                                             ObjectGuid guid = unit->GetGUID();

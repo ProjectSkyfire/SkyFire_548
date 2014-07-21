@@ -191,7 +191,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                             if (Creature* chromie = instance->SummonCreature(NPC_CHROMIE_2, ChromieSummonPos))
                                 if (!instance->GetPlayers().isEmpty())
                                     if (Player* player = instance->GetPlayers().getFirst()->GetSource())
-                                        sCreatureTextMgr->SendChat(chromie, SAY_CRATES_COMPLETED, player->GetGUID(), CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_MAP);
+                                        sCreatureTextMgr->SendChat(chromie, SAY_CRATES_COMPLETED, player, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_MAP);
                         }
                         DoUpdateWorldState(WORLDSTATE_CRATES_REVEALED, _crateCount);
                         break;

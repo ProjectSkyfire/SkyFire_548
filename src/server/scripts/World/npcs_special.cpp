@@ -960,14 +960,14 @@ public:
                             {
                                 if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
                                 {
-                                    Talk(SAY_THANKS, caster->GetGUID());
+                                    Talk(SAY_THANKS, caster);
                                     CanRun = true;
                                 }
                                 else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
                                 {
                                     CasterGUID = caster->GetGUID();
                                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster->GetGUID());
+                                    Talk(SAY_HEALED, caster);
                                     IsHealed = true;
                                 }
                             }
@@ -977,14 +977,14 @@ public:
                             {
                                 if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
                                 {
-                                    Talk(SAY_THANKS, caster->GetGUID());
+                                    Talk(SAY_THANKS, caster);
                                     CanRun = true;
                                 }
                                 else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
                                 {
                                     CasterGUID = caster->GetGUID();
                                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster->GetGUID());
+                                    Talk(SAY_HEALED, caster);
                                     IsHealed = true;
                                 }
                             }
@@ -994,14 +994,14 @@ public:
                             {
                                 if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
                                 {
-                                    Talk(SAY_THANKS, caster->GetGUID());
+                                    Talk(SAY_THANKS, caster);
                                     CanRun = true;
                                 }
                                 else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
                                 {
                                     CasterGUID = caster->GetGUID();
                                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster->GetGUID());
+                                    Talk(SAY_HEALED, caster);
                                     IsHealed = true;
                                 }
                             }
@@ -1011,14 +1011,14 @@ public:
                             {
                                 if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
                                 {
-                                    Talk(SAY_THANKS, caster->GetGUID());
+                                    Talk(SAY_THANKS, caster);
                                     CanRun = true;
                                 }
                                 else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
                                 {
                                     CasterGUID = caster->GetGUID();
                                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster->GetGUID());
+                                    Talk(SAY_HEALED, caster);
                                     IsHealed = true;
                                 }
                             }
@@ -1028,14 +1028,14 @@ public:
                             {
                                 if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
                                 {
-                                    Talk(SAY_THANKS, caster->GetGUID());
+                                    Talk(SAY_THANKS, caster);
                                     CanRun = true;
                                 }
                                 else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
                                 {
                                     CasterGUID = caster->GetGUID();
                                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster->GetGUID());
+                                    Talk(SAY_HEALED, caster);
                                     IsHealed = true;
                                 }
                             }
@@ -1065,19 +1065,19 @@ public:
                         switch (me->GetEntry())
                         {
                             case ENTRY_SHAYA:
-                                Talk(SAY_GOODBYE, unit->GetGUID());
+                                Talk(SAY_GOODBYE, unit);
                                 break;
                             case ENTRY_ROBERTS:
-                                Talk(SAY_GOODBYE, unit->GetGUID());
+                                Talk(SAY_GOODBYE, unit);
                                 break;
                             case ENTRY_DOLF:
-                                Talk(SAY_GOODBYE, unit->GetGUID());
+                                Talk(SAY_GOODBYE, unit);
                                 break;
                             case ENTRY_KORJA:
-                                Talk(SAY_GOODBYE, unit->GetGUID());
+                                Talk(SAY_GOODBYE, unit);
                                 break;
                             case ENTRY_DG_KEL:
-                                Talk(SAY_GOODBYE, unit->GetGUID());
+                                Talk(SAY_GOODBYE, unit);
                                 break;
                         }
 
