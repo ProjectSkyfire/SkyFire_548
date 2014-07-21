@@ -1214,7 +1214,7 @@ public:
             return false;
         }
 
-        creature->MonsterSay(args, LANG_UNIVERSAL, 0);
+        creature->MonsterSay(args, LANG_UNIVERSAL, NULL);
 
         // make some emotes
         char lastchar = args[strlen(args) - 1];
@@ -1301,10 +1301,11 @@ public:
         uint64 receiver_guid = atol(receiver_str);
 
         // check online security
-        if (handler->HasLowerSecurity(ObjectAccessor::FindPlayer(receiver_guid), 0))
+        Player* receiver = ObjectAccessor::FindPlayer(receiver_guid);
+        if (handler->HasLowerSecurity(receiver, 0))
             return false;
 
-        creature->MonsterWhisper(text, receiver_guid);
+        creature->MonsterWhisper(text, receiver);
         return true;
     }
 
@@ -1321,7 +1322,7 @@ public:
             return false;
         }
 
-        creature->MonsterYell(args, LANG_UNIVERSAL, 0);
+        creature->MonsterYell(args, LANG_UNIVERSAL, NULL);
 
         // make an emote
         creature->HandleEmoteCommand(EMOTE_ONESHOT_SHOUT);

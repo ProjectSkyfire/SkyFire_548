@@ -88,23 +88,23 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-    guid[7] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
 
     // cheating checks
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);
@@ -138,11 +138,30 @@ void WorldSession::SendTaxiMenu(Creature* unit)
         GetPlayer()->SetTaxiCheater(true); // Grimwing in Ebon Hold, special case. NOTE: Not perfect, Zul'Aman should not be included according to WoWhead, and I think taxicheat includes it.
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ", curloc);
+    ObjectGuid Guid = unit->GetGUID();
 
     WorldPacket data(SMSG_SHOWTAXINODES, (4 + 8 + 4 + 8 * 4));
-    data << uint32(1);
-    data << uint64(unit->GetGUID());
+    data.WriteBit(1); //unk
+    data.WriteBit(Guid[3]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(Guid[4]);
+    data.WriteBit(Guid[2]);
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[5]);
+    data.WriteBits(TaxiMaskSize, 24);
+
+    data.WriteByteSeq(Guid[0]);
+    data.WriteByteSeq(Guid[3]);
     data << uint32(curloc);
+    data.WriteByteSeq(Guid[5]);
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[6]);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[7]);
+    data.WriteByteSeq(Guid[4]);
+
     GetPlayer()->m_taxi.AppendTaximaskTo(data, GetPlayer()->isTaxiCheater());
     SendPacket(&data);
 
@@ -315,7 +334,7 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
     nodes.resize(2);
 
     recvData >> nodes[1] >> nodes[0];
-        
+
     guid[4] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
@@ -324,7 +343,7 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
     guid[6] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
-    
+
     recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[6]);
@@ -347,8 +366,28 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+    ObjectGuid guid(_player->GetGUID());
+
+    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 8);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
     data << uint32(reply);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[0]);
+
     SendPacket(&data);
 
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_ACTIVATETAXIREPLY");

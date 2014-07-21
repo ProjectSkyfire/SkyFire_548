@@ -28,6 +28,8 @@ class Unit;
 
 enum MovementStatusElements
 {
+    MSEForcesCount,
+    MSEHasCounter,
     MSEHasGuidByte0,
     MSEHasGuidByte1,
     MSEHasGuidByte2,
@@ -57,6 +59,8 @@ enum MovementStatusElements
     MSEHasSplineElevation,
     MSEHasSpline,
 
+    MSEForces,
+    MSECounter,
     MSEGuidByte0,
     MSEGuidByte1,
     MSEGuidByte2,
@@ -96,11 +100,7 @@ enum MovementStatusElements
     MSEFallHorizontalSpeed,
     MSESplineElevation,
 
-    MSECounter,
-    MSECounterCount,
     MSEUintCount,
-    MSEHasUnkTime,
-    MSEUnkTime,
 
     // Special
     MSEZeroBit,         // writes bit value 1 or skips read bit

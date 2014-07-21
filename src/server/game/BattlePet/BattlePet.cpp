@@ -23,13 +23,13 @@
 
 void BattlePet::CalculateStats(bool currentHealth)
 {
-    float basePower = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_POWER, m_species) + 
+    float basePower = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_POWER, m_species) +
         BattlePetBreedMainStatModifier(BATTLE_PET_STATE_STAT_POWER, m_breed);
-    float baseHealth = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_STAMINA, m_species) + 
+    float baseHealth = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_STAMINA, m_species) +
         BattlePetBreedMainStatModifier(BATTLE_PET_STATE_STAT_STAMINA, m_breed);
-    float baseSpeed = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_SPEED, m_species) + 
+    float baseSpeed = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_SPEED, m_species) +
         BattlePetBreedMainStatModifier(BATTLE_PET_STATE_STAT_SPEED, m_breed);
-    
+
     float qualityMod = 1.0f; // ITEM_QUALITY_POOR
     switch (m_quality)
     {
@@ -50,13 +50,14 @@ void BattlePet::CalculateStats(bool currentHealth)
             break;
     }
 
-    m_maxHealth = roundf((baseHealth * 5.0f * m_level * qualityMod) + 100.0f);
+    // No round in older cpp, just for compatibility
+    m_maxHealth = floor(((baseHealth * 5.0f * m_level * qualityMod) + 100.0f) + 0.5f);
 
     if (currentHealth)
         m_curHealth = m_maxHealth;
 
-    m_power = roundf(basePower * m_level * qualityMod);
-    m_speed = roundf(baseSpeed * m_level * qualityMod);
+    m_power = floor((basePower * m_level * qualityMod) + 0.5f);
+    m_speed = floor((baseSpeed * m_level * qualityMod) + 0.5f);
 
     m_dbState = BATTLE_PET_DB_STATE_SAVE;
 }

@@ -434,29 +434,29 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
 
     ObjectGuid corpseGuid = corpse->GetGUID();
 
-    WorldPacket data(SMSG_CORPSE_QUERY, 1+(6*4));
-    data.WriteBit(corpseGuid[4]);
-    data.WriteBit(corpseGuid[2]);
-    data.WriteBit(corpseGuid[5]);
-    data.WriteBit(corpseGuid[3]);
-    data.WriteBit(corpseGuid[1]);
-    data.WriteBit(corpseGuid[6]);
+    WorldPacket data(SMSG_CORPSE_QUERY, 9 + 1 + (4 * 5));
     data.WriteBit(corpseGuid[0]);
+    data.WriteBit(corpseGuid[3]);
+    data.WriteBit(corpseGuid[2]);
     data.WriteBit(1); // Corpse Found
+    data.WriteBit(corpseGuid[5]);
+    data.WriteBit(corpseGuid[4]);
+    data.WriteBit(corpseGuid[1]);
     data.WriteBit(corpseGuid[7]);
+    data.WriteBit(corpseGuid[6]);
 
-    data.WriteByteSeq(corpseGuid[3]);
-    data.WriteByteSeq(corpseGuid[2]);
+    data.WriteByteSeq(corpseGuid[5]);
+    data << float(z);
     data.WriteByteSeq(corpseGuid[1]);
-    data << int32(mapId);
-    data << float(x);
+    data << uint32(corpseMapId);
     data.WriteByteSeq(corpseGuid[6]);
     data.WriteByteSeq(corpseGuid[4]);
-    data.WriteByteSeq(corpseGuid[5]);
-    data << uint32(corpseMapId);
+    data << float(x);
+    data.WriteByteSeq(corpseGuid[3]);
     data.WriteByteSeq(corpseGuid[7]);
-    data << float(z);
+    data.WriteByteSeq(corpseGuid[2]);
     data.WriteByteSeq(corpseGuid[0]);
+    data << int32(mapId);
     data << float(y);
     SendPacket(&data);
 }
@@ -613,7 +613,7 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
                         poiData << int32(itr2->y);              // POI point y
                     }
 
-                    poiData << int32(itr->ObjectiveIndex);      // objective index 
+                    poiData << int32(itr->ObjectiveIndex);      // objective index
                     poiData << uint32(itr->Id);                 // POI index
                     poiData << uint32(0);                       // unknown (new 5.x.x)
                     poiData << uint32(0);                       // unknown (new 5.x.x)

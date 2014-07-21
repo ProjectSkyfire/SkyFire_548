@@ -7092,10 +7092,27 @@ void Spell::Delayed() // only called in DealDamage()
 
     TC_LOG_INFO("spells", "Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->Id, delaytime);
 
-    WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
-    data.append(m_caster->GetPackGUID());
-    data << uint32(delaytime);
+    ObjectGuid guid = m_caster->GetGUID();
 
+    WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
+    data << uint32(delaytime);
+    data.WriteByteSeq(guid[4]);
     m_caster->SendMessageToSet(&data, true);
 }
 

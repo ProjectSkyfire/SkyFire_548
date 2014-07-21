@@ -563,7 +563,7 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recvData)
     npcGuid[2] = recvData.ReadBit();
     npcGuid[1] = recvData.ReadBit();
     npcGuid[3] = recvData.ReadBit();
-	
+
     recvData.ReadByteSeq(npcGuid[0]);
     recvData.ReadByteSeq(npcGuid[4]);
     recvData.ReadByteSeq(npcGuid[2]);
