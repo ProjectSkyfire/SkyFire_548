@@ -64,27 +64,27 @@ class CreatureTextBuilder
 
             data->WriteBit(0);
 
-            data->WriteBit(source[7]);
-            data->WriteBit(source[6]);
-            data->WriteBit(source[1]);
-            data->WriteBit(source[4]);
-            data->WriteBit(source[0]);
-            data->WriteBit(source[2]);
-            data->WriteBit(source[3]);
-            data->WriteBit(source[5]);
+            data->WriteBit(target[7]);
+            data->WriteBit(target[6]);
+            data->WriteBit(target[1]);
+            data->WriteBit(target[4]);
+            data->WriteBit(target[0]);
+            data->WriteBit(target[2]);
+            data->WriteBit(target[3]);
+            data->WriteBit(target[5]);
 
             data->WriteBit(0);
             data->WriteBit(0); // Send Language
             data->WriteBit(1);
 
-            data->WriteBit(target[0]);
-            data->WriteBit(target[3]);
-            data->WriteBit(target[7]);
-            data->WriteBit(target[2]);
-            data->WriteBit(target[1]);
-            data->WriteBit(target[5]);
-            data->WriteBit(target[4]);
-            data->WriteBit(target[6]);
+            data->WriteBit(source[0]);
+            data->WriteBit(source[3]);
+            data->WriteBit(source[7]);
+            data->WriteBit(source[2]);
+            data->WriteBit(source[1]);
+            data->WriteBit(source[5]);
+            data->WriteBit(source[4]);
+            data->WriteBit(source[6]);
 
             data->WriteBit(1);
             data->WriteBit(0);
@@ -113,14 +113,14 @@ class CreatureTextBuilder
             data->WriteByteSeq(unkGuid2[0]);
             data->WriteByteSeq(unkGuid2[1]);
 
-            data->WriteByteSeq(target[4]);
-            data->WriteByteSeq(target[7]);
-            data->WriteByteSeq(target[1]);
-            data->WriteByteSeq(target[5]);
-            data->WriteByteSeq(target[0]);
-            data->WriteByteSeq(target[6]);
-            data->WriteByteSeq(target[2]);
-            data->WriteByteSeq(target[3]);
+            data->WriteByteSeq(source[4]);
+            data->WriteByteSeq(source[7]);
+            data->WriteByteSeq(source[1]);
+            data->WriteByteSeq(source[5]);
+            data->WriteByteSeq(source[0]);
+            data->WriteByteSeq(source[6]);
+            data->WriteByteSeq(source[2]);
+            data->WriteByteSeq(source[3]);
 
             *data << uint8(_msgType);
 
@@ -133,14 +133,14 @@ class CreatureTextBuilder
             data->WriteByteSeq(unkGuid[5]);
             data->WriteByteSeq(unkGuid[7]);
 
-            data->WriteByteSeq(source[2]);
-            data->WriteByteSeq(source[5]);
-            data->WriteByteSeq(source[3]);
-            data->WriteByteSeq(source[6]);
-            data->WriteByteSeq(source[7]);
-            data->WriteByteSeq(source[4]);
-            data->WriteByteSeq(source[1]);
-            data->WriteByteSeq(source[0]);
+            data->WriteByteSeq(target[2]);
+            data->WriteByteSeq(target[5]);
+            data->WriteByteSeq(target[3]);
+            data->WriteByteSeq(target[6]);
+            data->WriteByteSeq(target[7]);
+            data->WriteByteSeq(target[4]);
+            data->WriteByteSeq(target[1]);
+            data->WriteByteSeq(target[0]);
 
             *data << uint8(_language);
             data->WriteString(text);
