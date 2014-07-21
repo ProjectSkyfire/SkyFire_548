@@ -27968,8 +27968,8 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
     bool hasFallData = false;
     bool hasFallDirection = false;
     bool hasSplineElevation = false;
-    bool hasUnkTime = false;
-    uint32 counterCount = 0u;
+    bool hasCounter = false;
+    uint32 forcesCount = 0u;
 
     ObjectGuid guid;
     ObjectGuid tguid;
@@ -28146,18 +28146,18 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasSplineElevation)
                     data >> mi->splineElevation;
                 break;
-            case MSECounterCount:
-                counterCount = data.ReadBits(22);
+            case MSEForcesCount:
+                forcesCount = data.ReadBits(22);
+                break;
+            case MSEForces:
+                for (uint32 i = 0; i < forcesCount; i++)
+                    data.read_skip<uint32>();
+                break;
+            case MSEHasCounter:
+                hasCounter = !data.ReadBit();
                 break;
             case MSECounter:
-                for (int i = 0; i != counterCount; i++)
-                    data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
-                break;
-            case MSEHasUnkTime:
-                hasUnkTime = !data.ReadBit();
-                break;
-            case MSEUnkTime:
-                if (hasUnkTime)
+                if (hasCounter)
                     data.read_skip<uint32>();
                 break;
             case MSEZeroBit:
