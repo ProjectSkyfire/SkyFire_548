@@ -1856,7 +1856,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
     data.WriteByteSeq(oldGuildGuid[2]);
     data.WriteByteSeq(oldGuildGuid[5]);
     data << uint32(GetLevel());
-    data << uint32(pInvitee->GetGuildId());
+    data << uint32(pInvitee->GetGuildId() ? realmID : 0);
     data.WriteByteSeq(newGuildGuid[7]);
     data.WriteByteSeq(newGuildGuid[3]);
     data.WriteByteSeq(oldGuildGuid[4]);
