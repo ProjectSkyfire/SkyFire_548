@@ -5334,12 +5334,17 @@ void Spell::EffectQuestStart(SpellEffIndex effIndex)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    uint32 questId = m_spellInfo->Effects[effIndex].MiscValue;
     Player* player = unitTarget->ToPlayer();
-    if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(m_spellInfo->Effects[effIndex].MiscValue))
+
+    if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(questId))
     {
         if (player->CanTakeQuest(qInfo, false) && player->CanAddQuest(qInfo, false))
         {
             player->AddQuest(qInfo, NULL);
+
+            if (player->CanCompleteQuest(questId))
+                player->CompleteQuest(questId);
         }
     }
 }
