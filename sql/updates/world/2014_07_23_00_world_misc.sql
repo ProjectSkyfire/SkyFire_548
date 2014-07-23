@@ -70,7 +70,7 @@ INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance) VALUES
 (54130, 72071, -100);
 
 -- Corsac Fox Loot
-DELETE FROM creature_loot_template WHERE entry=57797;
+DELETE FROM creature_loot_template WHERE entry=53704;
 INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance) VALUES
 (53704, 62328, 75),
 (53704, 3300, 25),
