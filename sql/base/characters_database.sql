@@ -1,19 +1,80 @@
--- MySQL dump 10.13  Distrib 5.6.11, for Win32 (x86)
+-- MySQL dump 10.15  Distrib 10.0.12-MariaDB, for Win64 (x86)
 --
--- Host: localhost    Database: mop_char
+-- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version	5.6.11
+-- Server version	10.0.12-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES UTF8 */;
+/*!40101 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `account_battle_pet`
+--
+
+DROP TABLE IF EXISTS `account_battle_pet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_battle_pet` (
+  `id` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `accountId` int(10) unsigned NOT NULL DEFAULT '0',
+  `species` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `nickname` varchar(16) NOT NULL DEFAULT '',
+  `timestamp` int(10) unsigned NOT NULL DEFAULT '0',
+  `level` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `xp` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `health` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `maxHealth` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `power` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `speed` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `quality` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `breed` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `flags` smallint(5) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `account_battle_pet`
+--
+
+LOCK TABLES `account_battle_pet` WRITE;
+/*!40000 ALTER TABLE `account_battle_pet` DISABLE KEYS */;
+/*!40000 ALTER TABLE `account_battle_pet` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `account_battle_pet_slots`
+--
+
+DROP TABLE IF EXISTS `account_battle_pet_slots`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_battle_pet_slots` (
+  `accountId` int(10) unsigned NOT NULL DEFAULT '0',
+  `slot1` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `slot2` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `slot3` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`accountId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `account_battle_pet_slots`
+--
+
+LOCK TABLES `account_battle_pet_slots` WRITE;
+/*!40000 ALTER TABLE `account_battle_pet_slots` DISABLE KEYS */;
+/*!40000 ALTER TABLE `account_battle_pet_slots` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `account_data`
@@ -2206,8 +2267,8 @@ CREATE TABLE `item_instance` (
   `flags` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `enchantments` text NOT NULL,
   `randomPropertyId` smallint(5) NOT NULL DEFAULT '0',
-  `reforgeID` int (10) NOT NULL DEFAULT '0',
-  `transmogrifyId` int (10) NOT NULL DEFAULT '0',
+  `reforgeID` int(10) NOT NULL DEFAULT '0',
+  `transmogrifyId` int(10) NOT NULL DEFAULT '0',
   `durability` smallint(5) unsigned NOT NULL DEFAULT '0',
   `playedTime` int(10) unsigned NOT NULL DEFAULT '0',
   `text` text,
@@ -2681,3 +2742,5 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2014-07-26 18:52:31
