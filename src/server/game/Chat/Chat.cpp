@@ -634,7 +634,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
                                   uint32 achievementId /*= 0*/, bool gmMessage /*= false*/, std::string const& channelName /*= ""*/,
                                   std::string const& addonPrefix /*= ""*/)
 {
-    bool hasAchievementId = chatType == CHAT_MSG_ACHIEVEMENT || chatType == CHAT_MSG_GUILD_ACHIEVEMENT && achievementId;
+    bool hasAchievementId = (chatType == CHAT_MSG_ACHIEVEMENT || chatType == CHAT_MSG_GUILD_ACHIEVEMENT) && achievementId;
     bool hasSenderName = false;
     bool hasReceiverName = false;
     bool hasChannelName = false;

@@ -624,8 +624,7 @@ class WorldSession
         void SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 reason);
 
         void HandleDuelProposedOpcode(WorldPacket& recvPacket);
-        void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
-        void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
+        void HandleDuelResponseOpcode(WorldPacket& recvPacket);
 
         void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
         void HandleBeginTradeOpcode(WorldPacket& recvPacket);

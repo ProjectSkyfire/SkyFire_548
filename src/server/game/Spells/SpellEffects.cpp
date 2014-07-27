@@ -4050,9 +4050,44 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     //END
 
     // Send request
-    WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8);
-    data << uint64(pGameObj->GetGUID());
-    data << uint64(caster->GetGUID());
+    ObjectGuid arbiterGuid = pGameObj->GetGUID();
+    ObjectGuid casterGuid = caster->GetGUID();
+
+    WorldPacket data(SMSG_DUEL_REQUESTED, 9 + 9);
+    data.WriteBit(arbiterGuid[5]);
+    data.WriteBit(casterGuid[4]);
+    data.WriteBit(casterGuid[2]);
+    data.WriteBit(casterGuid[7]);
+    data.WriteBit(arbiterGuid[0]);
+    data.WriteBit(casterGuid[5]);
+    data.WriteBit(arbiterGuid[4]);
+    data.WriteBit(arbiterGuid[6]);
+    data.WriteBit(casterGuid[1]);
+    data.WriteBit(casterGuid[3]);
+    data.WriteBit(casterGuid[6]);
+    data.WriteBit(arbiterGuid[7]);
+    data.WriteBit(arbiterGuid[3]);
+    data.WriteBit(arbiterGuid[2]);
+    data.WriteBit(arbiterGuid[1]);
+    data.WriteBit(casterGuid[0]);
+
+    data.WriteByteSeq(arbiterGuid[5]);
+    data.WriteByteSeq(arbiterGuid[3]);
+    data.WriteByteSeq(casterGuid[7]);
+    data.WriteByteSeq(casterGuid[4]);
+    data.WriteByteSeq(arbiterGuid[7]);
+    data.WriteByteSeq(casterGuid[3]);
+    data.WriteByteSeq(casterGuid[6]);
+    data.WriteByteSeq(casterGuid[0]);
+    data.WriteByteSeq(arbiterGuid[4]);
+    data.WriteByteSeq(casterGuid[2]);
+    data.WriteByteSeq(casterGuid[1]);
+    data.WriteByteSeq(arbiterGuid[0]);
+    data.WriteByteSeq(arbiterGuid[2]);
+    data.WriteByteSeq(arbiterGuid[6]);
+    data.WriteByteSeq(arbiterGuid[1]);
+    data.WriteByteSeq(casterGuid[5]);
+
     caster->GetSession()->SendPacket(&data);
     target->GetSession()->SendPacket(&data);
 
