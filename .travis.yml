@@ -22,7 +22,8 @@ compiler:
   - gcc
 
 before_install:
-  - sudo apt-get update
+  - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
+  - sudo apt-get update - qq
   - sudo apt-get install libace-dev
   - sudo apt-get install libncurses5-dev
   - sudo apt-get install build-essential autoconf libtool gcc g++ make cmake git-core patch wget links zip unzip unrar
@@ -31,7 +32,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake ../ -DSCRIPTS=1
+  - cmake -DSCRIPTS=1 ..
   - make -j16
 
 notifications:
