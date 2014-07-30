@@ -75,7 +75,7 @@ char const* CONF_mpq_list[]=
     "expansion4.MPQ", // added in 5.x.x
 };
 
-uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17345, 17538, 17645, 17688, 17898, 18273, 0};
+uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17325, 17345, 17538, 17645, 17688, 17898, 18273, 0};
 #define LAST_DBC_IN_DATA_BUILD 15595    // after this build mpqs with dbc are back to locale folder
 #define NEW_BASE_SET_BUILD 16016 // 15211
 
