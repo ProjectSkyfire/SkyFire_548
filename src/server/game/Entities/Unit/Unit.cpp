@@ -8616,11 +8616,11 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
 
 void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powers powerType)
 {
-    WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
-
     //bool hasPower = false;
     ObjectGuid victimGuid = victim->GetGUID();
     ObjectGuid casterGuid = GetGUID();
+
+    WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
 
     data.WriteBit(victimGuid[7]);
     data.WriteBit(victimGuid[3]);
