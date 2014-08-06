@@ -34,10 +34,10 @@ Connection patcher requiered.
 + Processor with SSE2 support
 + ACE = 5.8.3 (included for Windows)
 + MySQL = 5.1.0 (included for Windows)
-+ CMake = 2.8.0
++ CMake = 2.8.11.2 / 2.8.9 (Windows / Linux)
 + OpenSSL = 0.9.8o
-+ GCC = 4.3 (Linux only)
-+ MS Visual Studio = 9 (2008) (Windows only)
++ GCC = 4.7.2 (Linux only)
++ MS Visual Studio = 12 (2013) (Windows only)
 
 
 ## Install
