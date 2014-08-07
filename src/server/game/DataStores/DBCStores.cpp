@@ -1144,6 +1144,8 @@ std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 spe
         for (int i = 0; i != learnSpellList.size(); i++)
         {
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(learnSpellList[i]);
+            if (!spellInfo)
+                continue;
 
             if (spellInfo->SpellLevel <= minLevel || spellInfo->SpellLevel > maxLevel)
                 continue;
