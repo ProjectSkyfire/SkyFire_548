@@ -57,19 +57,54 @@ void WorldSession::HandleDismissCritter(WorldPacket& recvData)
     }
 }
 
-void WorldSession::HandlePetAction(WorldPacket& recvData)
+void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 18291]
 {
-    uint64 guid1;
+    ObjectGuid guid1;
+    ObjectGuid guid2;
     uint32 data;
-    uint64 guid2;
     float x, y, z;
-    recvData >> guid1;                                     //pet guid
+
+    // Data Comes Single
     recvData >> data;
-    recvData >> guid2;                                     //tag guid
+
     // Position
-    recvData >> x;
     recvData >> y;
     recvData >> z;
+    recvData >> x;
+
+    guid2[1] = recvData.ReadBit();
+    guid2[0] = recvData.ReadBit();
+    guid2[6] = recvData.ReadBit();
+    guid2[7] = recvData.ReadBit();
+    guid2[5] = recvData.ReadBit();
+    guid1[7] = recvData.ReadBit();
+    guid2[2] = recvData.ReadBit();
+    guid2[3] = recvData.ReadBit();
+    guid1[6] = recvData.ReadBit();
+    guid1[3] = recvData.ReadBit();
+    guid1[0] = recvData.ReadBit();
+    guid1[2] = recvData.ReadBit();
+    guid1[5] = recvData.ReadBit();
+    guid2[4] = recvData.ReadBit();
+    guid1[4] = recvData.ReadBit();
+    guid1[1] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid2[7]);
+    recvData.ReadByteSeq(guid2[6]);
+    recvData.ReadByteSeq(guid2[1]);
+    recvData.ReadByteSeq(guid2[2]);
+    recvData.ReadByteSeq(guid2[5]);
+    recvData.ReadByteSeq(guid2[4]);
+    recvData.ReadByteSeq(guid1[5]);
+    recvData.ReadByteSeq(guid2[3]);
+    recvData.ReadByteSeq(guid1[0]);
+    recvData.ReadByteSeq(guid1[1]);
+    recvData.ReadByteSeq(guid1[7]);
+    recvData.ReadByteSeq(guid1[4]);
+    recvData.ReadByteSeq(guid1[6]);
+    recvData.ReadByteSeq(guid1[2]);
+    recvData.ReadByteSeq(guid1[3]);
+    recvData.ReadByteSeq(guid2[0]);
 
     uint32 spellid = UNIT_ACTION_BUTTON_ACTION(data);
     uint8 flag = UNIT_ACTION_BUTTON_TYPE(data);             //delete = 0x07 CastSpell = C1
