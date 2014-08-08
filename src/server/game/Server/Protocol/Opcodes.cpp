@@ -571,7 +571,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_QUERY,                 0x0140, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageQuery             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_TRANSFER,              0x1440, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageTransfer          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_UNLOCK,                0x0444, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageUnlock            ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_VOID_SWAP_ITEM,                     0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleVoidSwapItem                 );
+    DEFINE_OPCODE_HANDLER(CMSG_VOID_SWAP_ITEM,                     0x0655, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleVoidSwapItem                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_WARDEN_DATA,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_WARGAME_ACCEPT,                     0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_WARGAME_START,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
