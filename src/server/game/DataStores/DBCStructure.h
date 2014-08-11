@@ -55,7 +55,7 @@ struct AchievementEntry
     //char* reward;                                         // 11
     uint32 count;                                           // 12 - need this count of completed criterias (own or referenced achievement criterias)
     uint32 refAchievement;                                  // 13 - referenced achievement (counting of all completed criterias)
-    //uint32 unk;                                           // 14 - Pandaria
+    uint32 criteriaTreeID;                                  // 14 - Pandaria
 };
 
 struct AchievementCategoryEntry
@@ -910,6 +910,45 @@ struct CurrencyCategoryEntry
     //                                                      // 18       string flags
 };
 */
+
+struct CriteriaEntry
+{
+    uint32 ID;                                              // 0
+    uint32 type;                                            // 1
+    uint32 criteriaArg1;                                    // 2
+    uint32 timedCriteriaStartType;                          // 3
+    uint32 timedCriteriaMiscId;                             // 4
+    uint32 timeLimit;                                       // 5
+    //uint32 unk;                                           // 6
+    //uint32 unk;                                           // 7
+    uint32 modifierTreeId;                                  // 8
+    uint32 completionFlag;                                  // 9
+    uint32 worldStateId;                                    // 10
+    uint32 worldStateValue;                                 // 11
+};
+
+struct CriteriaTreeEntry
+{
+    uint32 ID;                                              // 0
+    uint32 criteriaID;                                      // 1
+    uint32 criteriaArg0;                                    // 2
+    //uint32 unk;                                           // 3
+    uint32 _operator;                                       // 4
+    uint32 parentID;                                        // 5
+    uint32 treeFlags;                                       // 6
+    char* name;                                             // 7
+};
+
+struct ModifierTreeEntry
+ {
+    uint32 ID;                                              // 0
+    uint32 conditionType;                                   // 1
+    uint32 conditionValue[2];                               // 2 - 3
+    uint32 _operator;                                       // 4
+    // uint32 unk;                                          // 5
+    uint32 parent;                                          // 6
+    };
+
 
 struct CurrencyTypesEntry
 {
