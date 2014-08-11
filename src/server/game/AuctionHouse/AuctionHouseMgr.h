@@ -30,8 +30,9 @@ class Item;
 class Player;
 class WorldPacket;
 
-#define MIN_AUCTION_TIME (12*HOUR)
-#define MAX_AUCTION_ITEMS 160
+#define MIN_AUCTION_TIME    (12*HOUR)
+#define MAX_AUCTION_ITEMS    32
+#define AUCTION_SEARCH_DELAY 300 // time in MS till the player can search again
 
 enum AuctionError
 {
