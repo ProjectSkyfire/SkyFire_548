@@ -33,8 +33,8 @@ class Unit;
 class Player;
 class WorldPacket;
 
-typedef std::vector<AchievementCriteriaEntry const*> AchievementCriteriaEntryList;
-typedef std::vector<AchievementEntry const*>         AchievementEntryList;
+typedef std::vector<AchievementCriteriaEntry const*>        AchievementCriteriaEntryList;
+typedef std::vector<AchievementEntry const*>                AchievementEntryList;
 
 typedef UNORDERED_MAP<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByAchievement;
 typedef UNORDERED_MAP<uint32, AchievementEntryList>         AchievementListByReferencedId;
