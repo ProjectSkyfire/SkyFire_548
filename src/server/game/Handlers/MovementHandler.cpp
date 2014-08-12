@@ -32,6 +32,7 @@
 #include "InstanceSaveMgr.h"
 #include "ObjectMgr.h"
 #include "MovementStructures.h"
+#include "BattlePetMgr.h"
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
@@ -189,6 +190,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
 
+    // resummon battle pet
+    GetPlayer()->GetBattlePetMgr()->ResummonLastBattlePet();
+
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
 }
@@ -256,6 +260,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
+
+    // resummon battle pet
+    GetPlayer()->GetBattlePetMgr()->ResummonLastBattlePet();
 
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();

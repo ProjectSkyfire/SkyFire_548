@@ -2140,7 +2140,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     WorldPacket data(SMSG_ATTACKSTOP, 8 + 8);
 
     ObjectGuid attackerGuid = GetGUID();
-    ObjectGuid victimGuid = victim ? victim->GetGUID() : NULL;
+    ObjectGuid victimGuid = victim ? victim->GetGUID() : 0;
 
     data.WriteBit(victimGuid[5]);
     data.WriteBit(victimGuid[6]);
@@ -8616,12 +8616,71 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
 
 void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powers powerType)
 {
+    //bool hasPower = false;
+    ObjectGuid victimGuid = victim->GetGUID();
+    ObjectGuid casterGuid = GetGUID();
+
     WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
-    data.append(victim->GetPackGUID());
-    data.append(GetPackGUID());
-    data << uint32(spellId);
-    data << uint32(powerType);
+
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(victimGuid[3]);
+    data.WriteBit(casterGuid[1]);
+    data.WriteBit(victimGuid[4]);
+    data.WriteBit(victimGuid[2]);
+    data.WriteBit(casterGuid[3]);
+    data.WriteBit(victimGuid[5]);
+
+    data.WriteBit(0); // hasPower
+
+    data.WriteBit(casterGuid[7]);
+    data.WriteBit(casterGuid[0]);
+    data.WriteBit(casterGuid[2]);
+
+    //if (hasPower)
+    //    data.WriteBits(count, 21);
+
+    data.WriteBit(casterGuid[4]);
+    data.WriteBit(casterGuid[6]);
+    data.WriteBit(victimGuid[6]);
+    data.WriteBit(victimGuid[1]);
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(casterGuid[5]);
+
+
+    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(casterGuid[5]);
+    data.WriteByteSeq(victimGuid[6]);
+
+    /*if (hasPower)
+    {
+        data << UInt32();
+    
+        for (var i = 0; i < count; ++i)
+        {
+            data << Int32();
+            data << Int32();
+        }
+        data << Int32();
+        data << Int32();
+    }*/
+    data.WriteByteSeq(casterGuid[6]);
+    data.WriteByteSeq(victimGuid[2]);
+    data.WriteByteSeq(casterGuid[0]);
+    data.WriteByteSeq(victimGuid[1]);
     data << int32(damage);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(casterGuid[1]);
+    data.WriteByteSeq(casterGuid[7]);
+    data.WriteByteSeq(victimGuid[5]);
+    data.WriteByteSeq(casterGuid[2]);
+    data.WriteByteSeq(casterGuid[3]);
+    data.WriteByteSeq(victimGuid[7]);
+    data.WriteByteSeq(casterGuid[4]);
+    data.WriteByteSeq(victimGuid[3]);
+    data << uint32(spellId);
+
+    data << uint32(powerType);
+
     SendMessageToSet(&data, true);
 }
 
@@ -15690,6 +15749,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             if (hasTransportData)
                 data.WriteByteSeq(tguid[element - MSETransportGuidByte0]);
             break;
+        case MSEHasCounter:
+            data.WriteBit(!m_movementCounter);
+            break;
         case MSEHasMovementFlags:
             data.WriteBit(!hasMovementFlags);
             break;
@@ -15814,11 +15876,13 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             if (hasSplineElevation)
                 data << mi.splineElevation;
             break;
-        case MSECounterCount:
+        case MSEForcesCount:
             data.WriteBits(0, 22);
             break;
         case MSECounter:
-            data << m_movementCounter++;
+            if (m_movementCounter)
+                data << m_movementCounter;
+            m_movementCounter++;
             break;
         case MSEZeroBit:
             data.WriteBit(0);

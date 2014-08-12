@@ -369,6 +369,8 @@ SpellEffectInfo::SpellEffectInfo(SpellEntry const* /*spellEntry*/, SpellInfo con
     uint32 _effectScalingId = _effect ? sSpellEffectScallingByEffectId.find(_effect->Id) != sSpellEffectScallingByEffectId.end() ? sSpellEffectScallingByEffectId[_effect->Id] : 0 : 0;
     SpellEffectScalingEntry const* _effectScalingEntry = sSpellEffectScalingStore.LookupEntry(_effectScalingId);
 
+    ScalingMultiplier = 0.0f;
+
     if (!_effectScalingEntry)
         return;
 

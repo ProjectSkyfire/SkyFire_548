@@ -172,12 +172,10 @@ void ReputationMgr::SendState(FactionState const* faction)
     uint32 count = 1;
 
     WorldPacket data(SMSG_SET_FACTION_STANDING, 4 + 4 + 3 + 4 + 4);
-    data << float(0);
-    data << float(0);
-
     size_t countPos = data.bitwpos();
-    data.WriteBits(count, 21);
+
     data.WriteBit(_sendFactionIncreased);
+    data.WriteBits(count, 21);
     data.FlushBits();
 
     _sendFactionIncreased = false; // Reset
@@ -192,12 +190,16 @@ void ReputationMgr::SendState(FactionState const* faction)
             itr->second.needSend = false;
             if (itr->second.ReputationListID != faction->ReputationListID)
             {
-                data << uint32(itr->second.ReputationListID);
                 data << uint32(itr->second.Standing);
+                data << uint32(itr->second.ReputationListID);
                 ++count;
             }
         }
     }
+
+    // RaF data
+    data << float(0);
+    data << float(0);
 
     data.PutBits(countPos, count, 21);
     _player->SendDirectMessage(&data);

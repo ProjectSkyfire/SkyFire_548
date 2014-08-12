@@ -183,19 +183,19 @@ void WorldSession::HandleBattlePetQueryName(WorldPacket& recvData)
     recvData.ReadByteSeq(petguid[4]);
     recvData.ReadByteSeq(petEntry[5]);
 
-    TempSummon* tempSummon = sObjectAccessor->FindUnit(petguid)->ToTempSummon();
-    if (!tempSummon)
+    Unit* tempUnit = sObjectAccessor->FindUnit(petguid);
+    if (!tempUnit)
     {
         TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_QUERY_NAME - Player %u queried the name of Battle Pet %lu which doesnt't exist in world!",
             GetPlayer()->GetGUIDLow(), (uint64)petEntry);
         return;
     }
 
-    Player* petOwner = tempSummon->GetSummoner()->ToPlayer();
-    if (!petOwner)
+    Unit* ownerUnit = tempUnit->ToTempSummon()->GetSummoner();
+    if (!ownerUnit)
         return;
 
-    BattlePetMgr* battlePetMgr = petOwner->GetBattlePetMgr();
+    BattlePetMgr* battlePetMgr = ownerUnit->ToPlayer()->GetBattlePetMgr();
 
     BattlePet* battlePet = battlePetMgr->GetBattlePet(battlePetMgr->GetCurrentSummonId());
     if (!battlePet)
@@ -391,11 +391,7 @@ void WorldSession::HandleBattlePetSummonCompanion(WorldPacket& recvData)
     }
 
     if (battlePetMgr->GetCurrentSummonId() == petEntry)
-    {
-        battlePetMgr->GetCurrentSummon()->UnSummon();
-        battlePetMgr->SetCurrentSummon(NULL);
-        battlePetMgr->SetCurrentSummonId(0);
-    }
+        battlePetMgr->UnSummonCurrentBattlePet(false);
     else
     {
         if (uint32 summonSpell = BattlePetGetSummonSpell(battlePet->GetSpecies()))

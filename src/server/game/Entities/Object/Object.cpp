@@ -52,6 +52,7 @@
 #include "Group.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "Chat.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -386,7 +387,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasLiving = flags & UPDATEFLAG_LIVING;
     bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
     bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
-    bool hasTransportPosition = false; // flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
+    bool hasTransportPosition = flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
     bool hasTarget = flags & UPDATEFLAG_HAS_TARGET;
     bool hasVehicle = false; //flags & UPDATEFLAG_VEHICLE;
     bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
@@ -394,9 +395,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasFallData;
     bool hasFallDirection;
     bool hasSpline;
+    bool hasPitch;
+    bool hasSplineElevation;
+    bool hasUnitTransport;
+
     uint32 movementFlags;
     uint32 movementFlagsExtra;
-
 
     data->WriteBit(0);
     data->WriteBit(hasAnimKits);
@@ -430,45 +434,60 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         movementFlags = self->GetUnitMovementFlags();
         movementFlagsExtra = self->GetExtraUnitMovementFlags();
         hasSpline = self->IsSplineEnabled() && self->GetTypeId() != TYPEID_PLAYER;
+        hasPitch = self->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || self->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+        hasSplineElevation = self->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+        hasUnitTransport = self->m_movementInfo.transport.guid;
 
         if (GetTypeId() == TYPEID_UNIT)
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
 
         data->WriteBit(guid[2]);
         data->WriteBit(0);
-        data->WriteBit(1); // !ReadFloat
-        data->WriteBit(0); // HasTransport // OK !!!
+        data->WriteBit(!hasPitch);
+        data->WriteBit(hasUnitTransport);
         data->WriteBit(0);
 
-        // TransportData
+        if (hasUnitTransport)
+        {
+            ObjectGuid transGuid = self->m_movementInfo.transport.guid;
+            data->WriteBit(transGuid[4]);
+            data->WriteBit(transGuid[2]);
+            data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
+            data->WriteBit(transGuid[0]);
+            data->WriteBit(transGuid[1]);
+            data->WriteBit(transGuid[3]);
+            data->WriteBit(transGuid[6]);
+            data->WriteBit(transGuid[7]);
+            data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
+            data->WriteBit(transGuid[5]);
+        }
 
-        data->WriteBit(0); // read uint32
+        data->WriteBit(!self->m_movementInfo.time);
         data->WriteBit(guid[6]);
         data->WriteBit(guid[4]);
         data->WriteBit(guid[3]);
 
         data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f)); //!G3D::fuzzyEq(self->GetOrientation(), 0.0f)
 
-        data->WriteBit(1); // skip uint32
+        data->WriteBit(!self->GetMovementCounter());
         data->WriteBit(guid[5]);
-        data->WriteBits(0, 22);
+        data->WriteBits(0, 22); // Forces
         data->WriteBit(!movementFlags);
         data->WriteBits(0, 19);
         data->WriteBit(hasFallData);
 
-
         if (movementFlags)
             data->WriteBits(movementFlags, 30);
 
-        data->WriteBit(1); // !ReadFloat
-        data->WriteBit(0); // hasSpline
+        data->WriteBit(!hasSplineElevation);
+        data->WriteBit(hasSpline);
         data->WriteBit(0);
         data->WriteBit(guid[0]);
         data->WriteBit(guid[7]);
         data->WriteBit(guid[1]);
 
-        //if (hasSpline)
-        //    Movement::PacketBuilder::WriteCreateBits(*self->movespline, *data);
+        if (hasSpline)
+            Movement::PacketBuilder::WriteCreateBits(*self->movespline, *data);
 
         data->WriteBit(!movementFlagsExtra);
 
@@ -479,24 +498,23 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
            data->WriteBits(movementFlagsExtra, 13);
     }
 
-    /*
     if (hasTransportPosition)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
-        data->WriteBit(transGuid[3]);
-        data->WriteBit(transGuid[5]);
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[1]);
         data->WriteBit(transGuid[4]);
-        data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
-        data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
+        data->WriteBit(transGuid[1]);
         data->WriteBit(transGuid[0]);
+        data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
         data->WriteBit(transGuid[6]);
+        data->WriteBit(transGuid[5]);
+        data->WriteBit(transGuid[3]);
+        data->WriteBit(transGuid[2]);
         data->WriteBit(transGuid[7]);
+        data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
     }
 
-
+    /*
     if (hasAnimKits)
     {
         data->WriteBit(1);  // Missing AnimKit1
@@ -526,14 +544,44 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
 
-        // Transport Here
+        if (hasUnitTransport)
+        {
+            ObjectGuid transGuid = self->m_movementInfo.transport.guid;
+
+            data->WriteByteSeq(transGuid[7]);
+            *data << float(self->GetTransOffsetX());
+
+            if (self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid)
+                *data << uint32(self->m_movementInfo.transport.time3);
+
+            *data << float(self->GetTransOffsetO());
+            *data << float(self->GetTransOffsetY());
+            data->WriteByteSeq(transGuid[4]);
+            data->WriteByteSeq(transGuid[1]);
+            data->WriteByteSeq(transGuid[3]);
+            *data << float(self->GetTransOffsetZ());
+            data->WriteByteSeq(transGuid[5]);
+
+            if (self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid)
+                *data << uint32(self->m_movementInfo.transport.time2);
+
+            data->WriteByteSeq(transGuid[0]);
+            *data << int8(self->GetTransSeat());
+            data->WriteByteSeq(transGuid[6]);
+            data->WriteByteSeq(transGuid[2]);
+            *data << uint32(self->GetTransTime());
+        }
 
         data->WriteByteSeq(guid[4]);
 
-        //if (hasSpline)
-        //    Movement::PacketBuilder::WriteCreateData(*self->movespline, *data);
+        if (hasSpline)
+            Movement::PacketBuilder::WriteCreateData(*self->movespline, *data);
 
         *data << float(self->GetSpeed(MOVE_FLIGHT));
+
+        if (self->GetMovementCounter())
+            *data << uint32(self->GetMovementCounter());
+
         data->WriteByteSeq(guid[2]);
 
         if (hasFallData)
@@ -551,11 +599,21 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         data->WriteByteSeq(guid[1]);
         *data << float(self->GetSpeed(MOVE_TURN_RATE));
-        *data << uint32(0);
-        *data << float(self->GetSpeed(MOVE_SWIM));
+
+        if (self->m_movementInfo.time)
+            *data << uint32(self->m_movementInfo.time);
+
+        *data << float(self->GetSpeed(MOVE_RUN_BACK));
+
+        if (hasSplineElevation)
+            *data << float(self->m_movementInfo.splineElevation);
+
         data->WriteByteSeq(guid[7]);
         *data << float(self->GetSpeed(MOVE_PITCH_RATE));
         *data << float(self->GetPositionX());
+
+        if (hasPitch)
+            *data << float(self->m_movementInfo.pitch);
 
         if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
             *data << float(Position::NormalizeOrientation(self->GetOrientation()));
@@ -567,43 +625,42 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(guid[5]);
         data->WriteByteSeq(guid[6]);
         data->WriteByteSeq(guid[0]);
-        *data << float(self->GetSpeed(MOVE_RUN_BACK));
-        *data << float(self->GetSpeed(MOVE_RUN));
         *data << float(self->GetSpeed(MOVE_SWIM_BACK));
+        *data << float(self->GetSpeed(MOVE_RUN));
+        *data << float(self->GetSpeed(MOVE_SWIM));
         *data << float(self->GetPositionZMinusOffset());
 
     }
 
-    /*
     if (hasTransportPosition)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
 
-        *data << int8(self->GetTransSeat());
-        *data << float(self->GetTransOffsetX());
-        data->WriteBit(transGuid[1]);
-        data->WriteBit(transGuid[0]);
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[6]);
-        data->WriteBit(transGuid[5]);
-        data->WriteBit(transGuid[4]);
-
         if (self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time2);
 
-        data->WriteBit(transGuid[7]);
-        *data << float(self->GetTransOffsetO());
-        *data << float(self->GetTransOffsetZ());
         *data << float(self->GetTransOffsetY());
+        *data << int8(self->GetTransSeat());
+        *data << float(self->GetTransOffsetX());
+        data->WriteBit(transGuid[2]);
+        data->WriteBit(transGuid[4]);
+        data->WriteBit(transGuid[1]);
 
         if (self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time3);
 
-        data->WriteBit(transGuid[3]);
         *data << uint32(self->GetTransTime());
+
+        *data << float(self->GetTransOffsetO());
+        *data << float(self->GetTransOffsetZ());
+
+        data->WriteBit(transGuid[6]);
+        data->WriteBit(transGuid[0]);
+        data->WriteBit(transGuid[5]);
+        data->WriteBit(transGuid[3]);
+        data->WriteBit(transGuid[7]);
     }
-    */
 
     if (hasTarget)
     {
@@ -657,8 +714,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     if (hasGobjectRotation)
         *data << uint64(ToGameObject()->GetRotation());
 
-    // if (hasLiving && hasSpline)
-    //    Movement::PacketBuilder::WriteFacingTargetPart(*ToUnit()->movespline, *data);
+     if (hasLiving && hasSpline)
+        Movement::PacketBuilder::WriteFacingTargetPart(*ToUnit()->movespline, *data);
 }
 
 void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
@@ -2148,270 +2205,146 @@ namespace Trinity
     class MonsterChatBuilder
     {
         public:
-            MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, int32 textId, uint32 language, uint64 targetGUID)
-                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_targetGUID(targetGUID) { }
+            MonsterChatBuilder(WorldObject const* obj, ChatMsg msgtype, int32 textId, uint32 language, WorldObject const* target)
+                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(Language(language)), i_target(target) { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
 
                 /// @todo i_object.GetName() also must be localized?
-                i_object.BuildMonsterChat(&data, i_msgtype, text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_targetGUID);
+                ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, text, 0, "", loc_idx);
             }
 
         private:
-            WorldObject const& i_object;
+            WorldObject const* i_object;
             ChatMsg i_msgtype;
             int32 i_textId;
-            uint32 i_language;
-            uint64 i_targetGUID;
+            Language i_language;
+            WorldObject const* i_target;
     };
 
     class MonsterCustomChatBuilder
     {
         public:
-            MonsterCustomChatBuilder(WorldObject const& obj, ChatMsg msgtype, const char* text, uint32 language, uint64 targetGUID)
-                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_targetGUID(targetGUID) { }
+            MonsterCustomChatBuilder(WorldObject const* obj, ChatMsg msgtype, const char* text, uint32 language, WorldObject const* target)
+                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(Language(language)), i_target(target) { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 /// @todo i_object.GetName() also must be localized?
-                i_object.BuildMonsterChat(&data, i_msgtype, i_text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_targetGUID);
+                ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, i_text, 0, "", loc_idx);
             }
 
         private:
-            WorldObject const& i_object;
+            WorldObject const* i_object;
             ChatMsg i_msgtype;
             const char* i_text;
-            uint32 i_language;
-            uint64 i_targetGUID;
+            Language i_language;
+            WorldObject const* i_target;
     };
 }                                                           // namespace Trinity
 
-void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterSay(const char* text, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterCustomChatBuilder say_build(*this, CHAT_MSG_MONSTER_SAY, text, language, TargetGuid);
+    Trinity::MonsterCustomChatBuilder say_build(this, CHAT_MSG_MONSTER_SAY, text, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterSay(int32 textId, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterSay(int32 textId, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_SAY, textId, language, TargetGuid);
+    Trinity::MonsterChatBuilder say_build(this, CHAT_MSG_MONSTER_SAY, textId, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterYell(const char* text, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterCustomChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, text, language, TargetGuid);
+    Trinity::MonsterCustomChatBuilder say_build(this, CHAT_MSG_MONSTER_YELL, text, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
 }
 
-void WorldObject::MonsterYell(int32 textId, uint32 language, uint64 TargetGuid)
+void WorldObject::MonsterYell(int32 textId, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, TargetGuid);
+    Trinity::MonsterChatBuilder say_build(this, CHAT_MSG_MONSTER_YELL, textId, language, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
 }
 
-void WorldObject::MonsterYellToZone(int32 textId, uint32 language, uint64 TargetGuid)
+
+void WorldObject::MonsterTextEmote(const char* text, WorldObject const* target, bool IsBossEmote)
 {
-    Trinity::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, TargetGuid);
-    Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
-
-    uint32 zoneid = GetZoneId();
-
-    Map::PlayerList const& pList = GetMap()->GetPlayers();
-    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (itr->GetSource()->GetZoneId() == zoneid)
-            say_do(itr->GetSource());
-}
-
-void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote)
-{
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, GetName(), TargetGuid);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, this, target, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
-void WorldObject::MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote)
+void WorldObject::MonsterTextEmote(int32 textId, WorldObject const* target, bool IsBossEmote)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::MonsterChatBuilder say_build(*this, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, textId, LANG_UNIVERSAL, TargetGuid);
+    Trinity::MonsterChatBuilder say_build(this, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, textId, LANG_UNIVERSAL, target);
     Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> say_do(say_build);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
 }
 
-void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(const char* text, Player const* target, bool IsBossWhisper)
 {
-    Player* player = ObjectAccessor::FindPlayer(receiver);
-    if (!player || !player->GetSession())
+    if (!target)
         return;
 
-    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
-
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetNameForLocaleIdx(loc_idx), receiver);
-
-    player->GetSession()->SendPacket(&data);
+    LocaleConstant loc_idx = target->GetSession()->GetSessionDbLocaleIndex();
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
+    target->GetSession()->SendPacket(&data);
 }
 
-void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(int32 textId, Player const* target, bool IsBossWhisper)
 {
-    Player* player = ObjectAccessor::FindPlayer(receiver);
-    if (!player || !player->GetSession())
+    if (!target)
         return;
 
-    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+    LocaleConstant loc_idx = target->GetSession()->GetSessionDbLocaleIndex();
     char const* text = sObjectMgr->GetTrinityString(textId, loc_idx);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetNameForLocaleIdx(loc_idx), receiver);
-
-    player->GetSession()->SendPacket(&data);
-}
-
-void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const* text, uint32 language, std::string const &name, uint64 targetGuid) const
-{
-    ObjectGuid target = targetGuid;
-    ObjectGuid source = GetGUID();
-    ObjectGuid unkGuid = 0;
-    ObjectGuid unkGuid2 = 0;
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
-
-    data->WriteBit(unkGuid[0]);
-    data->WriteBit(unkGuid[1]);
-    data->WriteBit(unkGuid[5]);
-    data->WriteBit(unkGuid[4]);
-    data->WriteBit(unkGuid[3]);
-    data->WriteBit(unkGuid[2]);
-    data->WriteBit(unkGuid[6]);
-    data->WriteBit(unkGuid[7]);
-
-    data->WriteBit(0);
-
-    data->WriteBit(source[7]);
-    data->WriteBit(source[6]);
-    data->WriteBit(source[1]);
-    data->WriteBit(source[4]);
-    data->WriteBit(source[0]);
-    data->WriteBit(source[2]);
-    data->WriteBit(source[3]);
-    data->WriteBit(source[5]);
-
-    data->WriteBit(0);
-    data->WriteBit(0); // Send Language
-    data->WriteBit(1);
-
-    data->WriteBit(target[0]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[7]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[5]);
-    data->WriteBit(target[4]);
-    data->WriteBit(target[6]);
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBits(strlen(text), 12);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
-
-    data->WriteBit(unkGuid2[2]);
-    data->WriteBit(unkGuid2[5]);
-    data->WriteBit(unkGuid2[7]);
-    data->WriteBit(unkGuid2[4]);
-    data->WriteBit(unkGuid2[0]);
-    data->WriteBit(unkGuid2[1]);
-    data->WriteBit(unkGuid2[3]);
-    data->WriteBit(unkGuid2[6]);
-
-    data->FlushBits();
-
-    data->WriteByteSeq(unkGuid2[4]);
-    data->WriteByteSeq(unkGuid2[5]);
-    data->WriteByteSeq(unkGuid2[7]);
-    data->WriteByteSeq(unkGuid2[3]);
-    data->WriteByteSeq(unkGuid2[2]);
-    data->WriteByteSeq(unkGuid2[6]);
-    data->WriteByteSeq(unkGuid2[0]);
-    data->WriteByteSeq(unkGuid2[1]);
-
-    data->WriteByteSeq(target[4]);
-    data->WriteByteSeq(target[7]);
-    data->WriteByteSeq(target[1]);
-    data->WriteByteSeq(target[5]);
-    data->WriteByteSeq(target[0]);
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[2]);
-    data->WriteByteSeq(target[3]);
-
-    *data << uint8(msgtype);
-
-    data->WriteByteSeq(unkGuid[1]);
-    data->WriteByteSeq(unkGuid[3]);
-    data->WriteByteSeq(unkGuid[4]);
-    data->WriteByteSeq(unkGuid[6]);
-    data->WriteByteSeq(unkGuid[0]);
-    data->WriteByteSeq(unkGuid[2]);
-    data->WriteByteSeq(unkGuid[5]);
-    data->WriteByteSeq(unkGuid[7]);
-
-    data->WriteByteSeq(source[2]);
-    data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[6]);
-    data->WriteByteSeq(source[7]);
-    data->WriteByteSeq(source[4]);
-    data->WriteByteSeq(source[1]);
-    data->WriteByteSeq(source[0]);
-
-    *data << uint8(language);
-    data->WriteString(text);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
+    target->GetSession()->SendPacket(&data);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool self)

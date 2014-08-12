@@ -602,8 +602,13 @@ void Channel::Say(uint64 guid, std::string const& what, uint32 lang)
         return;
 
     uint8 chatTag = 0;
+    bool isGM = false;
+
     if (Player* player = ObjectAccessor::FindPlayer(guid))
+    {
         chatTag = player->GetChatTag();
+        isGM = player->GetSession()->HasPermission(rbac::RBAC_PERM_COMMAND_GM_CHAT);
+    }
 
     // TODO: Add proper RBAC check
     if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
@@ -625,16 +630,8 @@ void Channel::Say(uint64 guid, std::string const& what, uint32 lang)
         return;
     }
 
-    WorldPacket data(SMSG_MESSAGECHAT, 1 + 4 + 8 + 4 + _name.size() + 8 + 4 + what.size() + 1);
-    data << uint8(CHAT_MSG_CHANNEL);
-    data << uint32(lang);
-    data << uint64(guid);
-    data << uint32(0);
-    data << _name;
-    data << uint64(guid);
-    data << uint32(what.size() + 1);
-    data << what;
-    data << uint8(chatTag);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, Language(lang), guid, guid, what, chatTag, "", "", 0, isGM, _name);
 
     SendToAll(&data, !playersStore[guid].IsModerator() ? guid : false);
 }
@@ -715,13 +712,12 @@ void Channel::SetOwner(uint64 guid, bool exclaim)
         uint8 oldFlag = GetPlayerFlags(_ownerGUID);
         playersStore[_ownerGUID].SetModerator(true);
         playersStore[_ownerGUID].SetOwner(true);
-
-        WorldPacket data;
-        MakeModeChange(&data, _ownerGUID, oldFlag);
-        SendToAll(&data);
-
         if (exclaim)
         {
+            WorldPacket data;
+            MakeModeChange(&data, _ownerGUID, oldFlag);
+            SendToAll(&data);
+
             MakeOwnerChanged(&data, _ownerGUID);
             SendToAll(&data);
         }

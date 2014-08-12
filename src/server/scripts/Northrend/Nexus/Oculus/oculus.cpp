@@ -370,7 +370,7 @@ public:
                     {
                         if (WelcomeTimer <= diff)
                         {
-                            Talk(WHISPER_DRAKES_WELCOME, me->GetCreatorGUID());
+                            Talk(WHISPER_DRAKES_WELCOME, me->GetOwner());
                             WelcomeOff = true;
                             WelcomeSequelOff = true;
                         }
@@ -384,7 +384,7 @@ public:
                 {
                     if (WelcomeSequelTimer <= diff)
                     {
-                        Talk(WHISPER_DRAKES_ABILITIES, me->GetCreatorGUID());
+                        Talk(WHISPER_DRAKES_ABILITIES, me->GetOwner());
                         WelcomeSequelOff = false;
                     }
                     else WelcomeSequelTimer -= diff;
@@ -396,7 +396,7 @@ public:
                     {
                         if (SpecialTimer <= diff)
                         {
-                            Talk(WHISPER_DRAKES_SPECIAL, me->GetCreatorGUID());
+                            Talk(WHISPER_DRAKES_SPECIAL, me->GetOwner());
                             SpecialOff = true;
                         }
                         else SpecialTimer -= diff;
@@ -407,7 +407,7 @@ public:
                 {
                     if (me->GetHealthPct() <= 40.0f)
                     {
-                        Talk(WHISPER_DRAKES_LOWHEALTH, me->GetCreatorGUID());
+                        Talk(WHISPER_DRAKES_LOWHEALTH, me->GetOwner());
                         HealthWarningOff = true;
                     }
                 }

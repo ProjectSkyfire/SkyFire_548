@@ -24,7 +24,7 @@
 #include "Define.h"
 #include <cassert>
 
-#define MAX_CREATURE_BASE_HP 4
+#define MAX_CREATURE_BASE_HP 5
 
 enum SpellEffIndex
 {
@@ -1768,13 +1768,15 @@ enum GameObjectFlags
     GO_FLAG_DESTROYED       = 0x00000400
 };
 
+// flags shifting needs to be verified / everything was swifted by 1
 enum GameObjectDynamicLowFlags
 {
-    GO_DYNFLAG_LO_ACTIVATE          = 0x01,                 // enables interaction with GO
-    GO_DYNFLAG_LO_ANIMATE           = 0x02,                 // possibly more distinct animation of GO
-    GO_DYNFLAG_LO_NO_INTERACT       = 0x04,                 // appears to disable interaction (not fully verified)
-    GO_DYNFLAG_LO_SPARKLE           = 0x08,                 // makes GO sparkle
-    GO_DYNFLAG_LO_STOPPED           = 0x10                  // Transport is stopped
+    GO_UNK_MOP                      = 0x01,                  // makes gameobject dissapear
+    GO_DYNFLAG_LO_ACTIVATE          = 0x02,                 // enables interaction with GO
+    GO_DYNFLAG_LO_ANIMATE           = 0x04,                 // possibly more distinct animation of GO
+    GO_DYNFLAG_LO_NO_INTERACT       = 0x08,                 // appears to disable interaction (not fully verified)
+    GO_DYNFLAG_LO_SPARKLE           = 0x10,                 // makes GO sparkle
+    GO_DYNFLAG_LO_STOPPED           = 0x20                  // Transport is stopped
 };
 
 enum GameObjectDestructibleState
@@ -3623,7 +3625,7 @@ enum ChatMsg
     CHAT_MSG_PARTY_LEADER           = 0x33
 };
 
-#define MAX_CHAT_MSG_TYPE 0x34
+#define MSG_NULL_ACTION 0x34
 
 enum ChatLinkColors
 {

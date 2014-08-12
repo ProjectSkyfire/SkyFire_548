@@ -1730,7 +1730,7 @@ public:
                         Talk(SAY_IMPRISIONED_BERYL_1);
                         break;
                     case 2:
-                        Talk(SAY_IMPRISIONED_BERYL_2, caster->GetGUID());
+                        Talk(SAY_IMPRISIONED_BERYL_2, caster);
                         break;
                     case 3:
                         Talk(SAY_IMPRISIONED_BERYL_3);
@@ -1742,7 +1742,7 @@ public:
                         Talk(SAY_IMPRISIONED_BERYL_5);
                         break;
                     case 6:
-                        Talk(SAY_IMPRISIONED_BERYL_6, caster->GetGUID());
+                        Talk(SAY_IMPRISIONED_BERYL_6, caster);
                         break;
                     case 7:
                         Talk(SAY_IMPRISIONED_BERYL_7);
@@ -1874,7 +1874,7 @@ public:
         if (quest->GetQuestId() == QUEST_GET_ME_OUTA_HERE)
         {
             creature->SetStandState(UNIT_STAND_STATE_STAND);
-            creature->AI()->Talk(SAY_BONKER_2, player->GetGUID());
+            creature->AI()->Talk(SAY_BONKER_2, player);
             CAST_AI(npc_escortAI, (creature->AI()))->Start(true, true, player->GetGUID());
         }
         return true;

@@ -234,6 +234,29 @@ uint8 BattlePetMgr::GetBattlePetCount(uint16 speciesId) const
     return counter;
 }
 
+void BattlePetMgr::UnSummonCurrentBattlePet(bool temporary)
+{
+    if (!m_summon || !m_summonId)
+        return;
+
+    m_summonLastId = temporary ? m_summonId : 0;
+    m_summonId = 0;
+
+    m_summon->UnSummon();
+    m_summon = NULL;
+}
+
+void BattlePetMgr::ResummonLastBattlePet()
+{
+    if (!m_summonLastId)
+        return;
+
+    m_summonId = m_summonLastId;
+    m_owner->CastSpell(m_owner, BattlePetGetSummonSpell(GetBattlePet(m_summonId)->GetSpecies()), true);
+
+    m_summonLastId = 0;
+}
+
 uint8 BattlePetMgr::GetLoadoutSlotForBattlePet(uint64 id)
 {
     for (uint8 i = 0; i < BATTLE_PET_MAX_LOADOUT_SLOTS; i++)
@@ -248,19 +271,21 @@ void BattlePetMgr::UnlockLoadoutSlot(uint8 slot)
     if (HasLoadoutSlot(slot))
         return;
 
+    if (slot >= BATTLE_PET_MAX_LOADOUT_SLOTS)
+        return;
+
+    SetLoadoutSlot(slot, 0);
+
     switch (slot)
     {
         case BATTLE_PET_LOADOUT_SLOT_1:
             SetLoadoutFlag(BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_1);
-            SetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_1, 0);
             break;
         case BATTLE_PET_LOADOUT_SLOT_2:
             SetLoadoutFlag(BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_2);
-            SetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_2, 0);
             break;
         case BATTLE_PET_LOADOUT_SLOT_3:
             SetLoadoutFlag(BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_3);
-            SetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_3, 0);
             break;
     }
 

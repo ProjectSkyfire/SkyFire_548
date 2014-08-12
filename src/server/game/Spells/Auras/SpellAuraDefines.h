@@ -479,7 +479,7 @@ enum AuraType
     SPELL_AURA_417                                          = 417,
     SPELL_AURA_418                                          = 418,
     SPELL_AURA_419                                          = 419,
-    SPELL_AURA_420                                          = 420,
+    SPELL_AURA_MOD_PET_XP_PCT                               = 420, // NYI
     SPELL_AURA_421                                          = 421,
     SPELL_AURA_422                                          = 422,
     SPELL_AURA_423                                          = 423,

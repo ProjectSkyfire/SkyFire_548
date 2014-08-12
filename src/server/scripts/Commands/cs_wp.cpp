@@ -216,7 +216,7 @@ public:
         target->LoadPath(pathid);
         target->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
         target->GetMotionMaster()->Initialize();
-        target->MonsterSay("Path loaded.", 0, 0);
+        target->MonsterSay("Path loaded.", LANG_UNIVERSAL, NULL);
 
         return true;
     }

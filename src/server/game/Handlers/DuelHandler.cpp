@@ -25,79 +25,102 @@
 #include "UpdateData.h"
 #include "Player.h"
 
-void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket) //Fix it
+#define SPELL_DUEL         7266
+#define SPELL_MOUNTED_DUEL 62875
+
+void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
-    guid[2] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
-    guid[3] = recvPacket.ReadBit();
-    guid[7] = recvPacket.ReadBit();
+
     guid[1] = recvPacket.ReadBit();
     guid[5] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
     guid[6] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[0]);
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[2]);
-    recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[7]);
-    //structure ok
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[0]);
+
+    if (Player* player = sObjectAccessor->FindPlayer(guid))
+    {
+        if (_player->IsMounted())
+            _player->CastSpell(player, SPELL_MOUNTED_DUEL, false);
+        else
+            _player->CastSpell(player, SPELL_DUEL, false);
+    }
 }
 
-void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
 {
-    uint64 guid;
+    bool accepted;
+    ObjectGuid guid;
     Player* player;
     Player* plTarget;
 
-    recvPacket >> guid;
+    guid[7] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    accepted = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[3]);
 
     if (!GetPlayer()->duel)                                  // ignore accept from duel-sender
         return;
 
-    player       = GetPlayer();
-    plTarget = player->duel->opponent;
-
-    if (player == player->duel->initiator || !plTarget || player == plTarget || player->duel->startTime != 0 || plTarget->duel->startTime != 0)
-        return;
-
-    //TC_LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_ACCEPTED");
-    TC_LOG_DEBUG("network", "Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName().c_str());
-    TC_LOG_DEBUG("network", "Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName().c_str());
-
-    time_t now = time(NULL);
-    player->duel->startTimer = now;
-    plTarget->duel->startTimer = now;
-
-    player->SendDuelCountdown(3000);
-    plTarget->SendDuelCountdown(3000);
-}
-
-void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
-{
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_CANCELLED");
-    uint64 guid;
-    recvPacket >> guid;
-
-    // no duel requested
-    if (!GetPlayer()->duel)
-        return;
-
-    // player surrendered in a duel using /forfeit
-    if (GetPlayer()->duel->startTime != 0)
+    if (accepted)
     {
-        GetPlayer()->CombatStopWithPets(true);
-        if (GetPlayer()->duel->opponent)
-            GetPlayer()->duel->opponent->CombatStopWithPets(true);
+        player = GetPlayer();
+        plTarget = player->duel->opponent;
 
-        GetPlayer()->CastSpell(GetPlayer(), 7267, true);    // beg
-        GetPlayer()->DuelComplete(DUEL_WON);
-        return;
+        if (player == player->duel->initiator || !plTarget || player == plTarget || player->duel->startTime != 0 || plTarget->duel->startTime != 0)
+            return;
+
+        //TC_LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_ACCEPTED");
+        TC_LOG_DEBUG("network", "Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName().c_str());
+        TC_LOG_DEBUG("network", "Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName().c_str());
+
+        time_t now = time(NULL);
+        player->duel->startTimer = now;
+        plTarget->duel->startTimer = now;
+
+        player->SendDuelCountdown(3000);
+        plTarget->SendDuelCountdown(3000);
     }
+    else
+    {
+        // player surrendered in a duel using /forfeit
+        if (GetPlayer()->duel->startTime != 0)
+        {
+            GetPlayer()->CombatStopWithPets(true);
+            if (GetPlayer()->duel->opponent)
+                GetPlayer()->duel->opponent->CombatStopWithPets(true);
 
-    GetPlayer()->DuelComplete(DUEL_INTERRUPTED);
+            GetPlayer()->CastSpell(GetPlayer(), 7267, true);    // beg
+            GetPlayer()->DuelComplete(DUEL_WON);
+            return;
+        }
+
+        GetPlayer()->DuelComplete(DUEL_INTERRUPTED);
+    }
 }

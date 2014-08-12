@@ -1259,10 +1259,10 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
             StopMirrorTimer(Type);
         return;
     }
-    WorldPacket data(SMSG_START_MIRROR_TIMER, (21));
+    WorldPacket data(SMSG_START_MIRROR_TIMER, 21);
     data << (uint32)Type;
-    data << CurrentValue;
     data << MaxValue;
+    data << CurrentValue;
     data << Regen;
     data << (uint8)0;
     data << (uint32)0;                                      // spell id
@@ -1300,11 +1300,30 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 
     DealDamageMods(this, damage, &absorb);
 
-    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, (21));
-    data << uint64(GetGUID());
-    data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
+    ObjectGuid Guid = GetGUID();
+
+    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, 9 + 1 + 4 + 1 + 4 + 4);
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[4]);
+    data.WriteBit(Guid[2]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(0); // Power Data
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[3]);
+
     data << uint32(damage);
+    data.WriteByteSeq(Guid[0]);
+    data.WriteByteSeq(Guid[7]);
+    data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
+    data.WriteByteSeq(Guid[6]);
+    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(Guid[5]);
     data << uint32(absorb);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[4]);
     data << uint32(resist);
     SendMessageToSet(&data, true);
 
@@ -2242,6 +2261,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 UnsummonPetTemporaryIfAny();
         }
 
+        if (TempSummon* tempSummon = GetBattlePetMgr()->GetCurrentSummon())
+            if (!tempSummon->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityRange()))
+                GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
+
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
             CombatStop();
 
@@ -2324,6 +2347,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // remove pet on map change
             if (pet)
                 UnsummonPetTemporaryIfAny();
+
+            GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
 
             // remove all dyn objects
             RemoveAllDynObjects();
@@ -2490,7 +2515,9 @@ void Player::RemoveFromWorld()
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
         StopCastingCharm();
         StopCastingBindSight();
+        GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
         UnsummonPetTemporaryIfAny();
+
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sBattlefieldMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }
@@ -3176,20 +3203,20 @@ void Player::GiveLevel(uint8 level)
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, ((MAX_POWERS_PER_CLASS * 4) + 4 + 4 + (MAX_STATS * 4) + 4));
 
-    data << uint32(level);
-    data << uint32(0);
     data << uint32(int32(basehp) - int32(GetCreateHealth()));
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)       // Stats loop (0-4)
         data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
 
-    // for (int i = 0; i < MAX_STORED_POWERS; ++i)          // Powers loop (0-10)
+    bool talent = false;
+
+    data << bool(talent);
+    data << uint32(level);
     data << uint32(int32(basemana) - int32(GetCreateMana()));
-
-    for (int i = 0; i < 4; i++)
-        data << uint32(0);
-
-    // end for
+    data << uint32(0); //unk
+    data << uint32(0); //unk
+    data << uint32(0); //unk
+    data << uint32(0); //unk
 
     GetSession()->SendPacket(&data);
 
@@ -5219,10 +5246,10 @@ void Player::BuildPlayerRepop()
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);          // remove spirit healer position
-    data << float(0);
-    data << float(0);
-    data << float(0);
     data << uint32(-1);
+    data << float(0);
+    data << float(0);
+    data << float(0);
     GetSession()->SendPacket(&data);
 
     // speed change, land walk
@@ -5637,10 +5664,10 @@ void Player::RepopAtGraveyard()
         if (isDead())                                        // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);  // show spirit healer position on minimap
-            data << ClosestGrave->y;
-            data << ClosestGrave->z;
-            data << ClosestGrave->x;
             data << ClosestGrave->map_id;
+            data << ClosestGrave->y;
+            data << ClosestGrave->x;
+            data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
     }
@@ -7519,15 +7546,18 @@ void Player::SendCurrencies() const
 
 void Player::SendPvpRewards() const
 {
-    WorldPacket packet(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
-    packet << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
-    packet << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
-    packet << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RBG, true);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
-    GetSession()->SendPacket(&packet);
+    WorldPacket data(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RBG, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    data << uint32(0); // UnkMop
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    data << uint32(0); // unkMop2
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
+    data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true);
+    data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+    GetSession()->SendPacket(&data);
 }
 
 uint32 Player::GetCurrency(uint32 id, bool usePrecision) const
@@ -8082,8 +8112,9 @@ void Player::DuelComplete(DuelCompleteType type)
 
     TC_LOG_DEBUG("entities.unit", "Duel Complete %s %s", GetName().c_str(), duel->opponent->GetName().c_str());
 
-    WorldPacket data(SMSG_DUEL_COMPLETE, (1));
-    data << (uint8)((type != DUEL_INTERRUPTED) ? 1 : 0);
+    WorldPacket data(SMSG_DUEL_COMPLETE, 1);
+    data.WriteBit(type != DUEL_INTERRUPTED);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 
     if (duel->opponent->GetSession())
@@ -8091,10 +8122,14 @@ void Player::DuelComplete(DuelCompleteType type)
 
     if (type != DUEL_INTERRUPTED)
     {
-        data.Initialize(SMSG_DUEL_WINNER, (1+20));          // we guess size
-        data << uint8(type == DUEL_WON ? 0 : 1);            // 0 = just won; 1 = fled
-        data << duel->opponent->GetName();
-        data << GetName();
+        data.Initialize(SMSG_DUEL_WINNER, 1 + 20);          // we guess size
+        data.WriteBit(type != DUEL_WON);                    // 0 = just won; 1 = fled
+        data.WriteBits(duel->opponent->GetName().length(), 6);
+        data.WriteBits(GetName().length(), 6);
+        data << uint32(realmID);
+        data.WriteString(duel->opponent->GetName());
+        data << uint32(realmID);
+        data.WriteString(GetName());
         SendMessageToSet(&data, true);
     }
 
@@ -9548,9 +9583,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
     builder.AppendState(0x8d4, 0x0);                   // 5
     builder.AppendState(0x8d3, 0x0);                   // 6
                                                             // 7 1 - Arena season in progress, 0 - end of season
-    builder.AppendState(0xC77, sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
+    //builder.AppendState(0xC77, sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
                                                             // 8 Arena season id
-    builder.AppendState(0xF3D, sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
+    //builder.AppendState(0xF3D, sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
 
     if (mapid == 530)                                       // Outland
     {
@@ -10169,25 +10204,25 @@ void Player::SetBindPoint(uint64 guid)
 {
     ObjectGuid ikGuid = guid;
 
-    WorldPacket data(SMSG_BINDER_CONFIRM, 1 + 8);
-    data.WriteBit(ikGuid[7]);
-    data.WriteBit(ikGuid[0]);
+    WorldPacket data(SMSG_BINDER_CONFIRM, 9);
+    data.WriteBit(ikGuid[4]);
+    data.WriteBit(ikGuid[6]);
+    data.WriteBit(ikGuid[2]);
     data.WriteBit(ikGuid[1]);
     data.WriteBit(ikGuid[5]);
     data.WriteBit(ikGuid[3]);
-    data.WriteBit(ikGuid[6]);
-    data.WriteBit(ikGuid[2]);
-    data.WriteBit(ikGuid[4]);
+    data.WriteBit(ikGuid[0]);
+    data.WriteBit(ikGuid[7]);
+    data.FlushBits();
 
-    data.WriteByteSeq(ikGuid[3]);
-    data.WriteByteSeq(ikGuid[4]);
     data.WriteByteSeq(ikGuid[6]);
     data.WriteByteSeq(ikGuid[2]);
-    data.WriteByteSeq(ikGuid[1]);
-    data.WriteByteSeq(ikGuid[7]);
     data.WriteByteSeq(ikGuid[5]);
     data.WriteByteSeq(ikGuid[0]);
-
+    data.WriteByteSeq(ikGuid[4]);
+    data.WriteByteSeq(ikGuid[7]);
+    data.WriteByteSeq(ikGuid[1]);
+    data.WriteByteSeq(ikGuid[3]);
     GetSession()->SendPacket(&data);
 }
 
@@ -12503,12 +12538,31 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                     m_weaponChangeTimer = spellProto->StartRecoveryTime;
 
                     GetGlobalCooldownMgr().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
+                    ObjectGuid guid = GetGUID();
 
-                    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
-                    data << uint64(GetGUID());
-                    data << uint8(1);
+                    WorldPacket data(SMSG_SPELL_COOLDOWN, 9 + 3 + 8);
+                    data.WriteBit(guid[0]);
+                    data.WriteBit(guid[6]);
+                    data.WriteBit(1); // Missing flags
+                    data.WriteBit(guid[7]);
+                    data.WriteBit(guid[3]);
+                    data.WriteBit(guid[1]);
+                    data.WriteBit(guid[5]);
+                    size_t bitpos = data.bitwpos();
+                    data.WriteBits(1, 21);
+                    data.WriteBit(guid[2]);
+                    data.WriteBit(guid[4]);
+
                     data << uint32(cooldownSpell);
                     data << uint32(0);
+                    data.WriteByteSeq(guid[5]);
+                    data.WriteByteSeq(guid[3]);
+                    data.WriteByteSeq(guid[7]);
+                    data.WriteByteSeq(guid[4]);
+                    data.WriteByteSeq(guid[1]);
+                    data.WriteByteSeq(guid[0]);
+                    data.WriteByteSeq(guid[2]);
+                    data.WriteByteSeq(guid[6]);
                     GetSession()->SendPacket(&data);
                 }
             }
@@ -14730,80 +14784,66 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
     if (!item)                                              // prevent crash
         return;
 
+    uint32 itemSlot = (item->GetCount() == count) ? item->GetSlot() : -1;
+
     ObjectGuid playerGuid = GetGUID();
-    ObjectGuid unknownGuid = uint64(0);
+    ObjectGuid itemGuid = item->GetGUID();
 
     WorldPacket data(SMSG_ITEM_PUSH_RESULT, 1 + 8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4);
-    data.WriteBit(1);                                       // display in chat
-    data.WriteBit(created);                                 // 0=received, 1=created
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(playerGuid[0]);
+    data.WriteBit(itemGuid[2]);
     data.WriteBit(playerGuid[4]);
-    data.WriteBit(unknownGuid[3]);
-    data.WriteBit(unknownGuid[7]);
-    data.WriteBit(unknownGuid[1]);
-    data.WriteBit(unknownGuid[4]);
-    data.WriteBit(unknownGuid[6]);
-    data.WriteBit(0);                                       // 1 = bonus item - "You received bonus loot"
-    data.WriteBit(playerGuid[5]);
+    data.WriteBit(itemGuid[5]);
+    data.WriteBit(1);                                       // display in chat
     data.WriteBit(playerGuid[1]);
-    data.WriteBit(unknownGuid[5]);
+    data.WriteBit(received);                                // 0 = looted, 1 = npc
+    data.WriteBit(itemGuid[4]);
     data.WriteBit(playerGuid[6]);
-    data.WriteBit(unknownGuid[2]);
+    data.WriteBit(playerGuid[5]);
     data.WriteBit(playerGuid[7]);
-    data.WriteBit(unknownGuid[0]);
+    data.WriteBit(playerGuid[0]);
+    data.WriteBit(itemGuid[0]);
+    data.WriteBit(itemGuid[7]);
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(itemGuid[6]);
+    data.WriteBit(0);                                       // bonus loot
     data.WriteBit(playerGuid[3]);
-    data.WriteBit(received);                                // 0=looted, 1=from npc
+    data.WriteBit(itemGuid[1]);
+    data.WriteBit(created);                                 // 0 = received. 1 = created
+    data.WriteBit(itemGuid[3]);
     data.FlushBits();
 
-    // uint32 value order needs to be rechecked
-    data.WriteByteSeq(unknownGuid[6]);
-    data << uint32(item->GetItemSuffixFactor());            // SuffixFactor
     data.WriteByteSeq(playerGuid[1]);
-    data << uint32(0);
-    data << uint32(count);                                  // count of items
-    data << uint32(0);
-    data << uint32(item->GetItemRandomPropertyId());        // random item property id
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(unknownGuid[7]);
+    data.WriteByteSeq(itemGuid[1]);
+    data << uint32(0);                                      // battle pet species
+    data.WriteByteSeq(itemGuid[0]);
     data.WriteByteSeq(playerGuid[5]);
-    data << uint32(0);
     data.WriteByteSeq(playerGuid[2]);
-    data.WriteByteSeq(unknownGuid[0]);
-    data.WriteByteSeq(unknownGuid[1]);
-    data.WriteByteSeq(playerGuid[7]);
-    data << uint8(item->GetBagSlot());                      // bagslot
+    data << uint32(item->GetItemSuffixFactor());            // suffix factor
+    data.WriteByteSeq(itemGuid[7]);
+    data << uint32(0);                                      // battle pet quality
     data << uint32(item->GetEntry());                       // item id
-    data << uint32(0);
-    data.WriteByteSeq(playerGuid[0]);
-    data.WriteByteSeq(playerGuid[4]);
-    data.WriteByteSeq(unknownGuid[5]);
-    data.WriteByteSeq(unknownGuid[2]);
+    data << int32(item->GetItemRandomPropertyId());         // random item property id
+    data.WriteByteSeq(itemGuid[6]);
+    data << uint32(0);                                      // battle pet breed
     data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
-                                                            // item slot, but when added to stack: 0xFFFFFFFF
-    data << uint32((item->GetCount() == count) ? item->GetSlot() : -1);
+    data.WriteByteSeq(itemGuid[2]);
+    data.WriteByteSeq(playerGuid[0]);
+    data << uint32(count);                                  // count of items
+    data.WriteByteSeq(playerGuid[5]);
+    data.WriteByteSeq(itemGuid[5]);
+    data.WriteByteSeq(playerGuid[4]);
+    data << uint8(item->GetBagSlot());                      // bag slot
+    data << uint32(itemSlot);                               // item slot, but when added to stack: 0xFFFFFFFF
+    data.WriteByteSeq(playerGuid[3]);
     data.WriteByteSeq(playerGuid[6]);
-    data.WriteByteSeq(unknownGuid[3]);
-    data.WriteByteSeq(unknownGuid[4]);
+    data << uint32(0);                                      // battle pet level
+    data.WriteByteSeq(itemGuid[3]);
+    data.WriteByteSeq(itemGuid[4]);
 
     if (broadcast && GetGroup())
         GetGroup()->BroadcastPacket(&data, true);
     else
         GetSession()->SendPacket(&data);
-
-    /*WorldPacket data(SMSG_ITEM_PUSH_RESULT, (8+4+4+4+1+4+4+4+4+4));
-    data << uint64(GetGUID());                              // player GUID
-    data << uint32(received);                               // 0=looted, 1=from npc
-    data << uint32(created);                                // 0=received, 1=created
-    data << uint32(1);                                      // bool print error to chat
-    data << uint8(item->GetBagSlot());                      // bagslot
-                                                            // item slot, but when added to stack: 0xFFFFFFFF
-    data << uint32((item->GetCount() == count) ? item->GetSlot() : -1);
-    data << uint32(item->GetEntry());                       // item id
-    data << uint32(item->GetItemSuffixFactor());            // SuffixFactor
-    data << int32(item->GetItemRandomPropertyId());         // random item property id
-    data << uint32(count);                                  // count of items
-    data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory*/
 }
 
 /*********************************************************/
@@ -17270,7 +17310,7 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
     data << uint32(entry);
 
     data.WriteBit(oGuid[0]);
-    data.WriteBit(oGuid[1]);
+    data.WriteBit(oGuid[4]);
     data.WriteBit(oGuid[2]);
     data.WriteBit(oGuid[6]);
     data.WriteBit(oGuid[1]);
@@ -17284,7 +17324,7 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
     data.WriteByteSeq(oGuid[0]);
     data.WriteByteSeq(oGuid[4]);
     data.WriteByteSeq(oGuid[5]);
-    data.WriteByteSeq(oGuid[2]);
+    data.WriteByteSeq(oGuid[1]);
     data.WriteByteSeq(oGuid[6]);
 
     GetSession()->SendPacket(&data);
@@ -21062,124 +21102,13 @@ void Player::StopCastingCharm()
     }
 }
 
-inline void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix /*= NULL*/) const
-{
-    data->Initialize(SMSG_MESSAGECHAT, 100); // guess size
-
-    ObjectGuid target = GetGUID();
-    ObjectGuid source = GetGUID();
-    ObjectGuid unkGuid = 0;
-    ObjectGuid unkGuid2 = 0;
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(1);
-
-    data->WriteBit(unkGuid[0]);
-    data->WriteBit(unkGuid[1]);
-    data->WriteBit(unkGuid[5]);
-    data->WriteBit(unkGuid[4]);
-    data->WriteBit(unkGuid[3]);
-    data->WriteBit(unkGuid[2]);
-    data->WriteBit(unkGuid[6]);
-    data->WriteBit(unkGuid[7]);
-
-    data->WriteBit(0);
-
-    data->WriteBit(source[7]);
-    data->WriteBit(source[6]);
-    data->WriteBit(source[1]);
-    data->WriteBit(source[4]);
-    data->WriteBit(source[0]);
-    data->WriteBit(source[2]);
-    data->WriteBit(source[3]);
-    data->WriteBit(source[5]);
-
-    data->WriteBit(0);
-    data->WriteBit(0); // Send Language
-    data->WriteBit(1);
-
-    data->WriteBit(target[0]);
-    data->WriteBit(target[3]);
-    data->WriteBit(target[7]);
-    data->WriteBit(target[2]);
-    data->WriteBit(target[1]);
-    data->WriteBit(target[5]);
-    data->WriteBit(target[4]);
-    data->WriteBit(target[6]);
-
-    data->WriteBit(1);
-    data->WriteBit(0);
-    data->WriteBits(text.size(), 12);
-    data->WriteBit(1);
-    data->WriteBit(1);
-    data->WriteBit(0);
-
-    data->WriteBit(unkGuid2[2]);
-    data->WriteBit(unkGuid2[5]);
-    data->WriteBit(unkGuid2[7]);
-    data->WriteBit(unkGuid2[4]);
-    data->WriteBit(unkGuid2[0]);
-    data->WriteBit(unkGuid2[1]);
-    data->WriteBit(unkGuid2[3]);
-    data->WriteBit(unkGuid2[6]);
-
-    data->FlushBits();
-
-    data->WriteByteSeq(unkGuid2[4]);
-    data->WriteByteSeq(unkGuid2[5]);
-    data->WriteByteSeq(unkGuid2[7]);
-    data->WriteByteSeq(unkGuid2[3]);
-    data->WriteByteSeq(unkGuid2[2]);
-    data->WriteByteSeq(unkGuid2[6]);
-    data->WriteByteSeq(unkGuid2[0]);
-    data->WriteByteSeq(unkGuid2[1]);
-
-    data->WriteByteSeq(target[4]);
-    data->WriteByteSeq(target[7]);
-    data->WriteByteSeq(target[1]);
-    data->WriteByteSeq(target[5]);
-    data->WriteByteSeq(target[0]);
-    data->WriteByteSeq(target[6]);
-    data->WriteByteSeq(target[2]);
-    data->WriteByteSeq(target[3]);
-
-    *data << uint8(msgtype);
-
-    data->WriteByteSeq(unkGuid[1]);
-    data->WriteByteSeq(unkGuid[3]);
-    data->WriteByteSeq(unkGuid[4]);
-    data->WriteByteSeq(unkGuid[6]);
-    data->WriteByteSeq(unkGuid[0]);
-    data->WriteByteSeq(unkGuid[2]);
-    data->WriteByteSeq(unkGuid[5]);
-    data->WriteByteSeq(unkGuid[7]);
-
-    data->WriteByteSeq(source[2]);
-    data->WriteByteSeq(source[5]);
-    data->WriteByteSeq(source[3]);
-    data->WriteByteSeq(source[6]);
-    data->WriteByteSeq(source[7]);
-    data->WriteByteSeq(source[4]);
-    data->WriteByteSeq(source[1]);
-    data->WriteByteSeq(source[0]);
-
-    *data << uint8(language);
-    data->WriteString(text);
-}
-
 void Player::Say(const std::string& text, const uint32 language)
 {
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_SAY, language, _text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_SAY, _text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_SAY, Language(language), this, this, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
 }
 
@@ -21188,8 +21117,8 @@ void Player::Yell(const std::string& text, const uint32 language)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_YELL, language, _text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_YELL, _text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_YELL, Language(language), this, this, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), true);
 }
 
@@ -21198,8 +21127,8 @@ void Player::TextEmote(const std::string& text)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_EMOTE, LANG_UNIVERSAL, _text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_EMOTE, _text, LANG_UNIVERSAL);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_EMOTE, LANG_UNIVERSAL, this, this, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
 }
 
@@ -21211,8 +21140,8 @@ void Player::WhisperAddon(const std::string& text, const std::string& prefix, Pl
     if (!receiver->GetSession()->IsAddonRegistered(prefix))
         return;
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, LANG_UNIVERSAL, prefix.c_str());
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, LANG_ADDON, this, this, text, 0, "", DEFAULT_LOCALE, prefix);
     receiver->GetSession()->SendPacket(&data);
 }
 
@@ -21228,16 +21157,15 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_WHISPER, language, _text, rPlayer);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, Language(language), this, this, text);
     rPlayer->GetSession()->SendPacket(&data);
 
     // rest stuff shouldn't happen in case of addon message
     if (isAddonMessage)
         return;
 
-    data.Initialize(SMSG_MESSAGECHAT, 200);
-    rPlayer->BuildPlayerChat(&data, CHAT_MSG_WHISPER_INFORM, _text, language);
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, Language(language), rPlayer, rPlayer, text);
     GetSession()->SendPacket(&data);
 
     if (!isAcceptWhispers() && !IsGameMaster() && !rPlayer->IsGameMaster())
@@ -22113,11 +22041,24 @@ void Player::ContinueTaxiFlight()
 
 void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
 {
-                                                            // last check 2.0.10
-    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
-    data << uint64(GetGUID());
-    data << uint8(0x0);                                     // flags (0x1, 0x2)
     time_t curTime = time(NULL);
+    ObjectGuid guid = GetGUID();
+    uint32 count = 0;
+
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 9 + 3 + m_spells.size() * 8);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(1); // Missing flags
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    size_t bitpos = data.bitwpos();
+    data.WriteBits(0, 21);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[4]);
+    data.FlushBits();
+
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second->state == PLAYERSPELL_REMOVED)
@@ -22142,8 +22083,20 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
             data << uint32(unSpellId);
             data << uint32(unTimeMs);                       // in m.secs
             AddSpellCooldown(unSpellId, 0, curTime + unTimeMs/IN_MILLISECONDS);
+            count++;
         }
     }
+
+    data.PutBits(bitpos, count, 21);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -23636,25 +23589,29 @@ void Player::SendComboPoints()
         }
         else
             data.Initialize(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
+
         ObjectGuid guid = combotarget->GetGUID();
         data.WriteBit(guid[0]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[7]);
         data.WriteBit(guid[5]);
         data.WriteBit(guid[6]);
         data.WriteBit(guid[3]);
+        data.WriteBit(guid[7]);
         data.WriteBit(guid[4]);
         data.WriteBit(guid[1]);
+        data.WriteBit(guid[2]);
+
         data.FlushBits();
-        data.WriteByteSeq(guid[0]);
-        data.WriteByteSeq(guid[6]);
-        data << uint8(m_comboPoints);
-        data.WriteByteSeq(guid[3]);
-        data.WriteByteSeq(guid[4]);
-        data.WriteByteSeq(guid[1]);
+
         data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[4]);
         data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[0]);
+        data << uint8(m_comboPoints);
         data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[1]);
+
         GetSession()->SendPacket(&data);
     }
 }
@@ -27904,8 +27861,8 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
     bool hasFallData = false;
     bool hasFallDirection = false;
     bool hasSplineElevation = false;
-    bool hasUnkTime = false;
-    uint32 counterCount = 0u;
+    bool hasCounter = false;
+    uint32 forcesCount = 0u;
 
     ObjectGuid guid;
     ObjectGuid tguid;
@@ -28082,18 +28039,18 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasSplineElevation)
                     data >> mi->splineElevation;
                 break;
-            case MSECounterCount:
-                counterCount = data.ReadBits(22);
+            case MSEForcesCount:
+                forcesCount = data.ReadBits(22);
+                break;
+            case MSEForces:
+                for (uint32 i = 0; i < forcesCount; i++)
+                    data.read_skip<uint32>();
+                break;
+            case MSEHasCounter:
+                hasCounter = !data.ReadBit();
                 break;
             case MSECounter:
-                for (int i = 0; i != counterCount; i++)
-                    data.read_skip<uint32>();   /// @TODO: Maybe compare it with m_movementCounter to verify that packets are sent & received in order?
-                break;
-            case MSEHasUnkTime:
-                hasUnkTime = !data.ReadBit();
-                break;
-            case MSEUnkTime:
-                if (hasUnkTime)
+                if (hasCounter)
                     data.read_skip<uint32>();
                 break;
             case MSEZeroBit:

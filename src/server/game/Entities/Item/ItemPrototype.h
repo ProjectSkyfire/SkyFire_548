@@ -247,6 +247,7 @@ enum BAG_FAMILY_MASK
     BAG_FAMILY_MASK_CURRENCY_TOKENS           = 0x00002000,
     BAG_FAMILY_MASK_QUEST_ITEMS               = 0x00004000,
     BAG_FAMILY_MASK_FISHING_SUPP              = 0x00008000,
+    BAG_FAMILY_MASK_COOKING_SUPP              = 0x00010000,
 };
 
 enum SocketColor
@@ -314,10 +315,11 @@ enum ItemClass
     ITEM_CLASS_KEY                              = 13,
     ITEM_CLASS_PERMANENT                        = 14, // OBSOLETE
     ITEM_CLASS_MISCELLANEOUS                    = 15,
-    ITEM_CLASS_GLYPH                            = 16
+    ITEM_CLASS_GLYPH                            = 16,
+    ITEM_CLASS_BATTLE_PET                       = 17
 };
 
-#define MAX_ITEM_CLASS                            17
+#define MAX_ITEM_CLASS                            18
 
 enum ItemSubclassConsumable
 {
@@ -345,10 +347,11 @@ enum ItemSubclassContainer
     ITEM_SUBCLASS_MINING_CONTAINER              = 6,
     ITEM_SUBCLASS_LEATHERWORKING_CONTAINER      = 7,
     ITEM_SUBCLASS_INSCRIPTION_CONTAINER         = 8,
-    ITEM_SUBCLASS_TACKLE_CONTAINER              = 9
+    ITEM_SUBCLASS_TACKLE_CONTAINER              = 9,
+    ITEM_SUBCLASS_COOKING_CONTAINER             = 10
 };
 
-#define MAX_ITEM_SUBCLASS_CONTAINER               10
+#define MAX_ITEM_SUBCLASS_CONTAINER               11
 
 enum ItemSubclassWeapon
 {
@@ -552,6 +555,13 @@ enum ItemSubclassGlyph
 
 #define MAX_ITEM_SUBCLASS_GLYPH                   12
 
+enum ItemSubclassBattlePet
+{
+    ITEM_SUBCLASS_BATTLE_PET                    = 0
+};
+
+#define MAX_ITEM_SUBCLASS_BATTLE_PET              1
+
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 {
     MAX_ITEM_SUBCLASS_CONSUMABLE,
@@ -570,7 +580,8 @@ const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
     MAX_ITEM_SUBCLASS_KEY,
     MAX_ITEM_SUBCLASS_PERMANENT,
     MAX_ITEM_SUBCLASS_JUNK,
-    MAX_ITEM_SUBCLASS_GLYPH
+    MAX_ITEM_SUBCLASS_GLYPH,
+    MAX_ITEM_SUBCLASS_BATTLE_PET
 };
 
 inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemSubClass)

@@ -91,13 +91,17 @@ namespace MMAP
     {
         std::vector<std::string> files;
         uint32 mapID, tileX, tileY, tileID, count = 0;
-        char filter[12];
+        char filter[14];
+
+        const std::string MAP_FORMAT = "xxxx.map";
+        const std::string VMTREE_FORMAT = ".vmtree";
+        const std::string VMTILE_FORMAT = "_xx_xx.vmtile";
 
         printf("Discovering maps... ");
         getDirContents(files, "maps");
         for (uint32 i = 0; i < files.size(); ++i)
         {
-            mapID = uint32(atoi(files[i].substr(0,3).c_str()));
+            mapID = uint32(atoi(files[i].substr(0, (files[i].length() - MAP_FORMAT.length())).c_str()));
             if (m_tiles.find(mapID) == m_tiles.end())
             {
                 m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, new std::set<uint32>));
@@ -109,7 +113,7 @@ namespace MMAP
         getDirContents(files, "vmaps", "*.vmtree");
         for (uint32 i = 0; i < files.size(); ++i)
         {
-            mapID = uint32(atoi(files[i].substr(0,3).c_str()));
+            mapID = uint32(atoi(files[i].substr(0, (files[i].length() - VMTREE_FORMAT.length())).c_str()));
             m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, new std::set<uint32>));
             count++;
         }
@@ -122,26 +126,28 @@ namespace MMAP
             std::set<uint32>* tiles = (*itr).second;
             mapID = (*itr).first;
 
-            sprintf(filter, "%03u*.vmtile", mapID);
+            sprintf(filter, "%03u_*.vmtile", mapID);
             files.clear();
             getDirContents(files, "vmaps", filter);
             for (uint32 i = 0; i < files.size(); ++i)
             {
-                tileX = uint32(atoi(files[i].substr(7,2).c_str()));
-                tileY = uint32(atoi(files[i].substr(4,2).c_str()));
+                tileX = uint32(atoi(files[i].substr((files[i].length() - VMTILE_FORMAT.length())+4,2).c_str()));
+                tileY = uint32(atoi(files[i].substr((files[i].length() - VMTILE_FORMAT.length())+1,2).c_str()));
                 tileID = StaticMapTree::packTileID(tileY, tileX);
 
                 tiles->insert(tileID);
                 count++;
             }
 
-            sprintf(filter, "%03u*", mapID);
             files.clear();
-            getDirContents(files, "maps", filter);
+            getDirContents(files, "maps");
             for (uint32 i = 0; i < files.size(); ++i)
             {
-                tileY = uint32(atoi(files[i].substr(3,2).c_str()));
-                tileX = uint32(atoi(files[i].substr(5,2).c_str()));
+                if (uint32(atoi(files[i].substr(0, (files[i].length() - MAP_FORMAT.length())).c_str())) != mapID)
+                    continue;
+
+                tileX = uint32(atoi(files[i].substr((files[i].length() - MAP_FORMAT.length())+2,2).c_str()));
+                tileY = uint32(atoi(files[i].substr(files[i].length() - MAP_FORMAT.length(),2).c_str()));
                 tileID = StaticMapTree::packTileID(tileX, tileY);
 
                 if (tiles->insert(tileID).second)
@@ -478,7 +484,7 @@ namespace MMAP
         dtNavMesh* navMesh)
     {
         // console output
-        char tileString[20];
+        char tileString[21];
         sprintf(tileString, "[Map %03i] [%02i,%02i]: ", mapID, tileX, tileY);
         printf("%s Building movemap tiles...\n", tileString);
 

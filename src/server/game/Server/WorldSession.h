@@ -33,6 +33,7 @@
 #include "Cryptography/BigNumber.h"
 #include "Opcodes.h"
 #include "AccountMgr.h"
+#include "Object.h"
 
 class Creature;
 class GameObject;
@@ -467,6 +468,7 @@ class WorldSession
         void HandleGMResponseResolve(WorldPacket& recvPacket);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
+        void HandleSetPvP(WorldPacket& recvPacket);
 
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
         void HandleSetSelectionOpcode(WorldPacket& recvPacket);
@@ -622,8 +624,7 @@ class WorldSession
         void SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 reason);
 
         void HandleDuelProposedOpcode(WorldPacket& recvPacket);
-        void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
-        void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
+        void HandleDuelResponseOpcode(WorldPacket& recvPacket);
 
         void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
         void HandleBeginTradeOpcode(WorldPacket& recvPacket);
@@ -938,6 +939,14 @@ class WorldSession
         // Reforge
         void HandleReforgeItemOpcode(WorldPacket& recvData);
         void SendReforgeResult(bool success);
+
+        // BlackMarket
+        void HandleBlackMarketHelloOpcode(WorldPacket& recvData);
+        void SendBlackMarketHello(uint64 guid);
+        void HandleBlackMarketRequestItemOpcode(WorldPacket& recvData);
+        void SendBlackMarketRequestItemsResult();
+        void HandleBlackMarketBidOpcode(WorldPacket& recvData);
+        void SendBlackMarketBidResult();
 
         // Miscellaneous
         void HandleSpellClick(WorldPacket& recvData);

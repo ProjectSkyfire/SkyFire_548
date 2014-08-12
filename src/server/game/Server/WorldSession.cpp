@@ -645,7 +645,7 @@ void WorldSession::SendNotification(const char *format, ...)
 
         size_t len = strlen(szStr);
         WorldPacket data(SMSG_NOTIFICATION, 2 + len);
-        data.WriteBits(len, 13);
+        data.WriteBits(len, 12);
         data.FlushBits();
         data.append(szStr, len);
         SendPacket(&data);
@@ -666,7 +666,7 @@ void WorldSession::SendNotification(uint32 string_id, ...)
 
         size_t len = strlen(szStr);
         WorldPacket data(SMSG_NOTIFICATION, 2 + len);
-        data.WriteBits(len, 13);
+        data.WriteBits(len, 12);
         data.FlushBits();
         data.append(szStr, len);
         SendPacket(&data);

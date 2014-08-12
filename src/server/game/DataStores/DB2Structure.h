@@ -266,6 +266,9 @@ struct SceneScriptEntry
     uint32 m_nextScriptPartID;                               // 4         m_nextScriptPartID - Next Script Part Id From Chain
 };
 
+#define MAX_SPELL_REAGENTS 8
+#define MAX_SPELL_REAGENTS2 10
+
 // SpellReagents.db2
 struct SpellReagentsEntry
 {

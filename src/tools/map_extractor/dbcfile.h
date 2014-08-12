@@ -30,7 +30,7 @@ class DBCFile
         ~DBCFile();
 
         // Open database. It must be openened before it can be used.
-        bool open();
+        virtual bool open();
 
         // Database exceptions
         class Exception
@@ -87,6 +87,8 @@ class DBCFile
 
                 friend class DBCFile;
                 friend class DBCFile::Iterator;
+
+				Record& operator=(Record const& right);
         };
         /** Iterator that iterates over records
         */
@@ -119,6 +121,8 @@ class DBCFile
 
             private:
                 Record record;
+
+				Iterator& operator=(Iterator const& right);
         };
 
         // Get record by id
@@ -132,7 +136,7 @@ class DBCFile
         size_t getFieldCount() const { return _fieldCount; }
         size_t getMaxId();
 
-    private:
+    protected:
         HANDLE _file;
         size_t _recordSize;
         size_t _recordCount;

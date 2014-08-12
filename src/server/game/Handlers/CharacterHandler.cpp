@@ -1004,6 +1004,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         TC_LOG_DEBUG("network", "WORLD: Sent server info");
     }
 
+    data.Initialize(SMSG_PVP_SEASON, 4 + 4);
+    data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) - 1); // Old season
+    data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));     // Current season
+    SendPacket(&data);
+
     //QueryResult* result = CharacterDatabase.PQuery("SELECT guildid, rank FROM guild_member WHERE guid = '%u'", pCurrChar->GetGUIDLow());
     if (PreparedQueryResult resultGuild = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GUILD))
     {
@@ -1156,21 +1161,51 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         {
             static uint32 const HunterCreatePetSpells[MAX_RACES] =
             {
-                0,  /* None */                          79597,  /* Human - Young Wolf */
+                0,      /* None */                          79597,  /* Human - Young Wolf */
                 79598,  /* Orc - Young Boar */              79593,  /* Dwarf - Young Bear */
                 79602,  /* Night Elf - Young Cat */         79600,  /* Undead - Young Widow */
-                79603,  /* Tauren - Young Tallstrider */        0,  /* Gnome */
+                79603,  /* Tauren - Young Tallstrider */    0,      /* Gnome */
                 79599,  /* Troll - Young Raptor */          79595,  /* Goblin - Young Crab */
                 79594,  /* Blood Elf - Young Dragonhawk */  79601,  /* Draenei - Young Moth */
-                0,  /* Fel Orc */                           0,  /* Naga */
-                0,  /* Broken */                            0,  /* Skeleton */
-                0,  /* Vrykul */                            0,  /* Tuskarr */
-                0,  /* Forest Troll */                      0,  /* Taunka */
-                0,  /* Northrend Skeleton */                0,  /* Ice Troll */
-                79596,  /* Worgen - Young Mastiff */        //   57239,  /* Pandaren - Wise Turtle*/
+                0,      /* Fel Orc */                       0,      /* Naga */
+                0,      /* Broken */                        0,      /* Skeleton */
+                0,      /* Vrykul */                        0,      /* Tuskarr */
+                0,      /* Forest Troll */                  0,      /* Taunka */
+                0,      /* Northrend Skeleton */            0,      /* Ice Troll */
+                79596,  /* Worgen - Young Mastiff */        0,      /* Gilnean */
+                107924, /* Pandaren - Wise Turtle */        0,      /* Pandaren Alliance */
+                0       /* Pandaren Horde*/
             };
 
             pCurrChar->CastSpell(pCurrChar, HunterCreatePetSpells[pCurrChar->getRace()], true);
+        }
+
+        if (pCurrChar->getRace() == RACE_PANDAREN_NEUTRAL)
+        {
+            static uint32 const PandarenStartingQuestSpells[MAX_CLASSES] =
+            {
+                0,      /* None */         107922, /* Warrior */
+                0,      /* Paladin */      107917, /* Hunter */
+                107920, /* Rogue */        107919, /* Priest */
+                0,      /* Death Knight */ 107921, /* Shaman */
+                107916, /* Mage */         0,      /* Warlock */
+                107915, /* Monk */         0       /* Druid */
+            };
+
+            pCurrChar->CastSpell(pCurrChar, 100750, true); // Launch Starting Quest
+            pCurrChar->CastSpell(pCurrChar, PandarenStartingQuestSpells[pCurrChar->getClass()], true);
+
+            static uint32 const PandarenRemoveWeaponSpells[MAX_CLASSES] =
+            {
+                0,      /* None */         108059, /* Warrior */
+                0,      /* Paladin */      108061, /* Hunter */
+                108058, /* Rogue */        108057, /* Priest */
+                0,      /* Death Knight */ 108056, /* Shaman */
+                108055, /* Mage */         0,      /* Warlock */
+                108060, /* Monk */         0       /* Druid */
+            };
+
+            pCurrChar->CastSpell(pCurrChar, PandarenRemoveWeaponSpells[pCurrChar->getClass()], true);
         }
     }
 
@@ -1279,11 +1314,29 @@ void WorldSession::HandleShowingCloakOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
+    std::string unk;
     std::string newName;
 
-    recvData >> guid;
+    guid[6] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
     recvData >> newName;
+    guid[1] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData >> unk;
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[0]);
 
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName))
@@ -1498,7 +1551,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "CMSG_ALTER_APPEARANCE");
 
     uint32 Hair, Color, FacialHair, SkinColor;
-    recvData >> Hair >> Color >> FacialHair >> SkinColor;
+    recvData >> SkinColor >> Color >> Hair >> FacialHair;
 
     BarberShopStyleEntry const* bs_hair = sBarberShopStyleStore.LookupEntry(Hair);
 
@@ -1589,10 +1642,33 @@ void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
 
 void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     std::string newName;
+    std::string unk;
+    uint8 gender, skin, face, hairStyle, hairColor, facialHair;
 
-    recvData >> guid;
+    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
+
+guid[2] = recvData.ReadBit();
+guid[6] = recvData.ReadBit();
+guid[1] = recvData.ReadBit();
+guid[0] = recvData.ReadBit();
+guid[7] = recvData.ReadBit();
+guid[5] = recvData.ReadBit();
+    recvData >> newName;
+guid[4] = recvData.ReadBit();
+guid[3] = recvData.ReadBit();
+
+recvData.ReadByteSeq(guid[4]);
+    recvData >> unk;
+recvData.ReadByteSeq(guid[0]);
+recvData.ReadByteSeq(guid[2]);
+recvData.ReadByteSeq(guid[6]);
+recvData.ReadByteSeq(guid[5]);
+recvData.ReadByteSeq(guid[3]);
+recvData.ReadByteSeq(guid[1]);
+recvData.ReadByteSeq(guid[7]);
+
     if (!IsLegitCharacterForAccount(GUID_LOPART(guid)))
     {
         TC_LOG_ERROR("network", "Account %u, IP: %s tried to customise character %u, but it does not belong to their account!",
@@ -1602,10 +1678,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
         return;
     }
 
-    recvData >> newName;
 
-    uint8 gender, skin, face, hairStyle, hairColor, facialHair;
-    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_AT_LOGIN);
     stmt->setUInt32(0, GUID_LOPART(guid));

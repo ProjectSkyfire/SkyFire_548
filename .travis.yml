@@ -22,6 +22,7 @@ compiler:
   - gcc
 
 before_install:
+  - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
   - sudo apt-get update
   - sudo apt-get install libace-dev
   - sudo apt-get install libncurses5-dev

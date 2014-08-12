@@ -156,11 +156,13 @@ public:
         if (!*args)
             return false;
 
-        std::string str = handler->GetTrinityString(LANG_GLOBAL_NOTIFY);
-        str += args;
+        std::string msg = handler->GetTrinityString(LANG_GLOBAL_NOTIFY);
+        msg += args;
 
-        WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
-        data << str;
+        WorldPacket data(SMSG_NOTIFICATION, 2 + msg.length());
+        data.WriteBits(msg.length(), 12);
+        data.FlushBits();
+        data.WriteString(msg);
         sWorld->SendGlobalMessage(&data);
 
         return true;

@@ -376,12 +376,12 @@ public:
                             uiPhase = 0;
                             break;
                         case 6:
-                            Talk(SAY_GURGTHOCK_7, _playerGUID);
+                            Talk(SAY_GURGTHOCK_7, sObjectAccessor->FindPlayer(_playerGUID));
                             uiTimer = 5000;
                             uiPhase = 9;
                             break;
                         case 7:
-                            Talk(SAY_GURGTHOCK_9, _playerGUID);
+                            Talk(SAY_GURGTHOCK_9, sObjectAccessor->FindPlayer(_playerGUID));
                             uiTimer = 3000;
                             uiPhase = 8;
                             break;
@@ -391,7 +391,7 @@ public:
                             uiPhase = 11;
                             break;
                         case 9:
-                            Talk(SAY_QUEST_AMPHITHEATER_ANGUISH_YGGDRAS, _playerGUID);
+                            Talk(SAY_QUEST_AMPHITHEATER_ANGUISH_YGGDRAS, sObjectAccessor->FindPlayer(_playerGUID));
                             uiTimer = 10000;
                             uiPhase = 10;
                             break;
@@ -406,7 +406,7 @@ public:
                             uiPhase = 0;
                             break;
                         case 12:
-                            Talk(SAY_GURGTHOCK_9, _playerGUID);
+                            Talk(SAY_GURGTHOCK_9, sObjectAccessor->FindPlayer(_playerGUID));
                             uiTimer = 5000;
                             uiPhase = 13;
                             break;
@@ -1485,7 +1485,7 @@ public:
                         case EVENT_EASY_123:
                             if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
                             {
-                                Talk(SAY_EASY_123, _playerGUID);
+                                Talk(SAY_EASY_123, player);
                                 DoCast(player, SPELL_RANDOM_INGREDIENT_EASY_AURA);
                                 ++_getingredienttry;
                             }
@@ -1493,7 +1493,7 @@ public:
                         case EVENT_MEDIUM_4:
                             if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
                             {
-                                Talk(SAY_MEDIUM_4, _playerGUID);
+                                Talk(SAY_MEDIUM_4, player);
                                 DoCast(player, SPELL_RANDOM_INGREDIENT_MEDIUM_AURA);
                                 ++_getingredienttry;
                             }
@@ -1501,7 +1501,7 @@ public:
                         case EVENT_MEDIUM_5:
                             if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
                             {
-                                Talk(SAY_MEDIUM_5, _playerGUID);
+                                Talk(SAY_MEDIUM_5, player);
                                 DoCast(player, SPELL_RANDOM_INGREDIENT_MEDIUM_AURA);
                                 ++_getingredienttry;
                             }
@@ -1509,7 +1509,7 @@ public:
                         case EVENT_HARD_6:
                             if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
                             {
-                                Talk(SAY_HARD_6, _playerGUID);
+                                Talk(SAY_HARD_6, player);
                                 DoCast(player, SPELL_RANDOM_INGREDIENT_HARD_AURA);
                                 ++_getingredienttry;
                             }
@@ -1672,7 +1672,7 @@ class spell_random_ingredient : public SpellScriptLoader
                     if (Creature* finklestein = GetClosestCreatureWithEntry(player, NPC_FINKLESTEIN, 25.0f))
                     {
                         finklestein->CastSpell(player, FetchIngredients[ingredient][0], true, NULL);
-                        finklestein->AI()->Talk(FetchIngredients[ingredient][3], player->GetGUID());
+                        finklestein->AI()->Talk(FetchIngredients[ingredient][3], player);
                     }
                 }
             }
@@ -1755,7 +1755,7 @@ class spell_pot_check : public SpellScriptLoader
                             RemoveItems(player);
                             player->RemoveAura(SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
                             if (Creature* finklestein = GetClosestCreatureWithEntry(player, NPC_FINKLESTEIN, 25.0f))
-                                finklestein->AI()->Talk(SAY_RUINED, player->GetGUID());
+                                finklestein->AI()->Talk(SAY_RUINED, player);
                             return;
                         }
                     }
@@ -1802,7 +1802,7 @@ class spell_fetch_ingredient_aura : public SpellScriptLoader
                         if (Creature* finklestein = GetClosestCreatureWithEntry(target, NPC_FINKLESTEIN, 100.0f))
                         {
                             target->RemoveAura(SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
-                            finklestein->AI()->Talk(SAY_RUINED, target->GetGUID());
+                            finklestein->AI()->Talk(SAY_RUINED, target);
                         }
             }
 

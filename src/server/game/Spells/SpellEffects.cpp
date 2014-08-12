@@ -240,7 +240,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectGiveCurrency,                             //166 SPELL_EFFECT_GIVE_CURRENCY
     &Spell::EffectNULL,                                     //167 SPELL_EFFECT_167
     &Spell::EffectNULL,                                     //168 SPELL_EFFECT_168
-    &Spell::EffectNULL,                                     //169 SPELL_EFFECT_DESTROY_ITEM
+    &Spell::EffectDestroyItem,                              //169 SPELL_EFFECT_DESTROY_ITEM
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170
     &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171
     &Spell::EffectResurrectWithAura,                        //172 SPELL_EFFECT_RESURRECT_WITH_AURA
@@ -4050,9 +4050,44 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     //END
 
     // Send request
-    WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8);
-    data << uint64(pGameObj->GetGUID());
-    data << uint64(caster->GetGUID());
+    ObjectGuid arbiterGuid = pGameObj->GetGUID();
+    ObjectGuid casterGuid = caster->GetGUID();
+
+    WorldPacket data(SMSG_DUEL_REQUESTED, 9 + 9);
+    data.WriteBit(arbiterGuid[5]);
+    data.WriteBit(casterGuid[4]);
+    data.WriteBit(casterGuid[2]);
+    data.WriteBit(casterGuid[7]);
+    data.WriteBit(arbiterGuid[0]);
+    data.WriteBit(casterGuid[5]);
+    data.WriteBit(arbiterGuid[4]);
+    data.WriteBit(arbiterGuid[6]);
+    data.WriteBit(casterGuid[1]);
+    data.WriteBit(casterGuid[3]);
+    data.WriteBit(casterGuid[6]);
+    data.WriteBit(arbiterGuid[7]);
+    data.WriteBit(arbiterGuid[3]);
+    data.WriteBit(arbiterGuid[2]);
+    data.WriteBit(arbiterGuid[1]);
+    data.WriteBit(casterGuid[0]);
+
+    data.WriteByteSeq(arbiterGuid[5]);
+    data.WriteByteSeq(arbiterGuid[3]);
+    data.WriteByteSeq(casterGuid[7]);
+    data.WriteByteSeq(casterGuid[4]);
+    data.WriteByteSeq(arbiterGuid[7]);
+    data.WriteByteSeq(casterGuid[3]);
+    data.WriteByteSeq(casterGuid[6]);
+    data.WriteByteSeq(casterGuid[0]);
+    data.WriteByteSeq(arbiterGuid[4]);
+    data.WriteByteSeq(casterGuid[2]);
+    data.WriteByteSeq(casterGuid[1]);
+    data.WriteByteSeq(arbiterGuid[0]);
+    data.WriteByteSeq(arbiterGuid[2]);
+    data.WriteByteSeq(arbiterGuid[6]);
+    data.WriteByteSeq(arbiterGuid[1]);
+    data.WriteByteSeq(casterGuid[5]);
+
     caster->GetSession()->SendPacket(&data);
     target->GetSession()->SendPacket(&data);
 
@@ -5334,12 +5369,17 @@ void Spell::EffectQuestStart(SpellEffIndex effIndex)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    uint32 questId = m_spellInfo->Effects[effIndex].MiscValue;
     Player* player = unitTarget->ToPlayer();
-    if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(m_spellInfo->Effects[effIndex].MiscValue))
+
+    if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(questId))
     {
         if (player->CanTakeQuest(qInfo, false) && player->CanAddQuest(qInfo, false))
         {
             player->AddQuest(qInfo, NULL);
+
+            if (player->CanCompleteQuest(questId))
+                player->CompleteQuest(questId);
         }
     }
 }
@@ -5716,6 +5756,21 @@ void Spell::EffectGiveCurrency(SpellEffIndex effIndex)
         return;
 
     unitTarget->ToPlayer()->ModifyCurrency(m_spellInfo->Effects[effIndex].MiscValue, damage);
+}
+
+void Spell::EffectDestroyItem(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player* player = unitTarget->ToPlayer();
+    uint32 itemId = m_spellInfo->Effects[effIndex].ItemType;
+
+    if (Item* item = player->GetItemByEntry(itemId))
+        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 }
 
 void Spell::EffectCastButtons(SpellEffIndex effIndex)
