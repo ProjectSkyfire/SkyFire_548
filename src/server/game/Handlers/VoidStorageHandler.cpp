@@ -487,39 +487,42 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
 
     recvData >> newSlot;
 
-    npcGuid[2] = recvData.ReadBit();
-    npcGuid[4] = recvData.ReadBit();
-    npcGuid[0] = recvData.ReadBit();
-    itemId[2] = recvData.ReadBit();
-    itemId[6] = recvData.ReadBit();
-    itemId[5] = recvData.ReadBit();
-    npcGuid[1] = recvData.ReadBit();
-    npcGuid[7] = recvData.ReadBit();
-    itemId[3] = recvData.ReadBit();
-    itemId[7] = recvData.ReadBit();
-    itemId[0] = recvData.ReadBit();
-    npcGuid[6] = recvData.ReadBit();
-    npcGuid[5] = recvData.ReadBit();
-    npcGuid[3] = recvData.ReadBit();
-    itemId[1] = recvData.ReadBit();
-    itemId[4] = recvData.ReadBit();
+    //  -- sub_6949E7
+    // To Do : Complete SMSG_VOID_ITEM_SWAP_RESPONSE
 
-    recvData.ReadByteSeq(npcGuid[1]);
-    recvData.ReadByteSeq(itemId[3]);
-    recvData.ReadByteSeq(itemId[2]);
-    recvData.ReadByteSeq(itemId[4]);
+    npcGuid[6] = recvData.ReadBit(); // >23
+    itemId[4]  = recvData.ReadBit(); // <23
+    itemId[7]  = recvData.ReadBit(); // <23
+    itemId[3]  = recvData.ReadBit(); // <23
+    itemId[2]  = recvData.ReadBit(); // <23
+    npcGuid[4] = recvData.ReadBit(); // >23
+    npcGuid[2] = recvData.ReadBit(); // >23
+    itemId[0]  = recvData.ReadBit(); // <23
+    itemId[1]  = recvData.ReadBit(); // <23
+    npcGuid[7] = recvData.ReadBit(); // >23
+    npcGuid[1] = recvData.ReadBit(); // >23
+    itemId[6]  = recvData.ReadBit(); // <23
+    npcGuid[3] = recvData.ReadBit(); // >23
+    npcGuid[5] = recvData.ReadBit(); // >23
+    itemId[5]  = recvData.ReadBit(); // <23
+    npcGuid[0] = recvData.ReadBit(); // >23
+
     recvData.ReadByteSeq(npcGuid[3]);
-    recvData.ReadByteSeq(npcGuid[0]);
-    recvData.ReadByteSeq(itemId[6]);
-    recvData.ReadByteSeq(itemId[1]);
     recvData.ReadByteSeq(npcGuid[5]);
+    recvData.ReadByteSeq(itemId[6]);
+    recvData.ReadByteSeq(npcGuid[4]);
+    recvData.ReadByteSeq(itemId[4]);
+    recvData.ReadByteSeq(npcGuid[0]);
     recvData.ReadByteSeq(itemId[5]);
+    recvData.ReadByteSeq(itemId[7]);
+    recvData.ReadByteSeq(npcGuid[7]);
+    recvData.ReadByteSeq(npcGuid[2]);
+    recvData.ReadByteSeq(npcGuid[1]);
+    recvData.ReadByteSeq(itemId[1]);
+    recvData.ReadByteSeq(itemId[3]);
     recvData.ReadByteSeq(npcGuid[6]);
     recvData.ReadByteSeq(itemId[0]);
-    recvData.ReadByteSeq(npcGuid[2]);
-    recvData.ReadByteSeq(npcGuid[7]);
-    recvData.ReadByteSeq(npcGuid[4]);
-    recvData.ReadByteSeq(itemId[7]);
+    recvData.ReadByteSeq(itemId[2]);
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
