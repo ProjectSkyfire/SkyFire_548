@@ -196,6 +196,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 {
+    //CMSG_WHO
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_WHO Message");
 
     time_t now = time(NULL);
@@ -212,13 +213,13 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
     uint8 unkLen2, unkLen3;
     std::string playerName, guildName;
 
-    recvData >> raceMask;                                   // race mask
-    recvData >> levelMax;                                   // minimal player level, default 100 (MAX_LEVEL)
-    recvData >> levelMin;                                   // maximal player level, default 0
-    recvData >> classMask;                                  // class mask
+    recvData >> classMask;                                  // race mask
+    recvData >> raceMask;                                   // minimal player level, default 100 (MAX_LEVEL)
+    recvData >> levelMax;                                   // maximal player level, default 0
+    recvData >> levelMin;                                   // class mask
 
     guildLen = recvData.ReadBits(7);
-    recvData.ReadBit();
+    recvData.ReadBit(); 
 
     patternsCount = recvData.ReadBits(3);
     if (patternsCount > 4)
@@ -295,6 +296,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
     wstrToLower(wplayer_name);
     wstrToLower(wguild_name);
 
+    // SMSG_WHO
     // client send in case not set max level value 100 but Trinity supports 255 max level,
     // update it to show GMs with characters after 100 level
     if (levelMax >= MAX_LEVEL)
@@ -414,34 +416,38 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         ObjectGuid playerGuid = itr->second->GetGUID();
         ObjectGuid accountId = itr->second->GetSession()->GetAccountId();
         ObjectGuid guildGuid = itr->second->GetGuild() ? itr->second->GetGuild()->GetGUID() : 0;
+        bool bitEd;
+        bool bit214;
+        uint32 realmId;
 
-        bitsData.WriteBit(playerGuid[1]);
+        bitsData.WriteBit(accountId[2]);
         bitsData.WriteBit(playerGuid[2]);
-        bitsData.WriteBit(guildGuid[3]);
+        bitsData.WriteBit(accountId[7]);
+        bitsData.WriteBit(guildGuid[5]);
 
         bitsData.WriteBits(gname.size(), 7);
 
-        bitsData.WriteBit(guildGuid[0]);
-        bitsData.WriteBit(accountId[6]);
-        bitsData.WriteBit(playerGuid[6]);
-        bitsData.WriteBit(playerGuid[4]);
-        bitsData.WriteBit(playerGuid[7]);
-        bitsData.WriteBit(accountId[4]);
+        bitsData.WriteBit(accountId[1]);
+        bitsData.WriteBit(accountId[5]);
+        bitsData.WriteBit(guildGuid[7]);
+        bitsData.WriteBit(playerGuid[5]);
+        bitsData.WriteBit(bitEd); //unk someone please lmk
         bitsData.WriteBit(guildGuid[1]);
-        bitsData.WriteBit(accountId[0]);
+        bitsData.WriteBit(playerGuid[6]);
+        bitsData.WriteBit(guildGuid[2]);
+        bitsData.WriteBit(playerGuid[4]);
+        bitsData.WriteBit(guildGuid[0]);
+        bitsData.WriteBit(guildGuid[3]);
+        bitsData.WriteBit(accountId[6]);
+        bitsData.WriteBit(bit214); // Unk someone please lmk
+        bitsData.WriteBit(playerGuid[1]);
         bitsData.WriteBit(guildGuid[4]);
-        bitsData.WriteBit(playerGuid[0]);
-        bitsData.WriteBit(guildGuid[5]);
-
-        bitsData.WriteBit(0); // unk bit
-        bitsData.WriteBit(0); // unk bit
-
-        bitsData.WriteBit(accountId[7]);
+        bitsData.WriteBit(accountId[0]);
 
         if (DeclinedName const* names = itr->second->GetDeclinedNames())
         {
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                bitsData.WriteBits(names->name[i].size(), 7);
+                bitsData.WriteBits(names->name[i].size(), 14);
         }
         else
         {
@@ -449,66 +455,44 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
                 bitsData.WriteBits(0, 7);
         }
 
-        bitsData.WriteBit(guildGuid[7]);
-        bitsData.WriteBit(guildGuid[2]);
-        bitsData.WriteBit(accountId[2]);
-        bitsData.WriteBit(accountId[5]);
+        bitsData.WriteBit(playerGuid[3]);
+        bitsData.WriteBit(guildGuid[6]);
+        bitsData.WriteBit(playerGuid[0]);
+        bitsData.WriteBit(accountId[4]);
         bitsData.WriteBit(accountId[3]);
-
+        bitsData.WriteBit(playerGuid[7]);
         bitsData.WriteBits(pname.size(), 6);
 
-        bitsData.WriteBit(playerGuid[3]);
-        bitsData.WriteBit(accountId[1]);
-        bitsData.WriteBit(playerGuid[5]);
-        bitsData.WriteBit(guildGuid[6]);
-
-        bytesData.WriteByteSeq(accountId[7]);
-        bytesData << uint8(level);
-        bytesData.WriteByteSeq(playerGuid[3]);
-        bytesData << int32(50462740); // RealmId
-        bytesData.WriteByteSeq(playerGuid[5]);
-        bytesData.WriteByteSeq(guildGuid[1]);
-        bytesData << uint8(gender);
+        //2nd part of 3GUIDs    
+        bytesData.WriteByteSeq(playerGuid[1]);
+        bytesData << uint32(realmId);
         bytesData.WriteByteSeq(playerGuid[7]);
-
-        bytesData << int32(38297239); // Unk
-        bytesData << uint8(race);
-
-        bytesData.WriteByteSeq(guildGuid[0]);
-        bytesData.WriteByteSeq(guildGuid[4]);
-        bytesData.WriteByteSeq(accountId[0]);
+        bytesData << uint32(realmId);
         bytesData.WriteByteSeq(playerGuid[4]);
-        bytesData.WriteByteSeq(guildGuid[3]);
-        bytesData.WriteByteSeq(playerGuid[0]);
 
-        if (gname.size() > 0)
-            bytesData.append(gname.c_str(), gname.size());
-
-        bytesData.WriteByteSeq(accountId[2]);
-        bytesData.WriteByteSeq(playerGuid[2]);
-        bytesData.WriteByteSeq(playerGuid[6]);
-
-        bytesData << uint8(class_);
-
-        bytesData.WriteByteSeq(accountId[5]);
-        bytesData.WriteByteSeq(guildGuid[2]);
-
-        if (pname.size() > 0)
+        if (pname.size() > 0) // packet.ReadWoWString("Player Name", playerNameLength[i], i);
             bytesData.append(pname.c_str(), pname.size());
 
-        bytesData << int32(50462740); // RealmId
-
-        bytesData.WriteByteSeq(playerGuid[1]);
-        bytesData.WriteByteSeq(accountId[1]);
-
-        bytesData << int32(zoneId);
-
-        bytesData.WriteByteSeq(guildGuid[7]);
+        bytesData.WriteByteSeq(guildGuid[1]);
+        bytesData.WriteByteSeq(playerGuid[0]);
+        bytesData.WriteByteSeq(guildGuid[2]);
+        bytesData.WriteByteSeq(guildGuid[0]);
+        bytesData.WriteByteSeq(guildGuid[4]);
+        bytesData.WriteByteSeq(playerGuid[3]);
         bytesData.WriteByteSeq(guildGuid[6]);
-        bytesData.WriteByteSeq(accountId[3]);
+        bytesData << uint32(0); //Unk
+
+        if (gname.size() > 0) // packet.ReadWoWString("Guild Name", guildNameLength[i], i);
+            bytesData.append(gname.c_str(), gname.size());
+
+        bytesData.WriteByteSeq(guildGuid[3]);
         bytesData.WriteByteSeq(accountId[4]);
-        bytesData.WriteByteSeq(accountId[6]);
-        bytesData.WriteByteSeq(guildGuid[5]);
+
+        bytesData << uint8(class_); //packet.ReadEnum<Class>("Class", TypeCode.Byte, i);
+
+        bytesData.WriteByteSeq(accountId[7]);
+        bytesData.WriteByteSeq(playerGuid[6]);
+        bytesData.WriteByteSeq(playerGuid[2]);
 
         if (DeclinedName const* names = itr->second->GetDeclinedNames())
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
@@ -516,6 +500,20 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
                     bytesData.append(names->name[i].c_str(), names->name[i].size());
 
         ++displaycount;
+
+        bytesData.WriteByteSeq(accountId[2]);
+        bytesData.WriteByteSeq(accountId[3]);
+        bytesData << uint8(race);
+        bytesData.WriteByteSeq(guildGuid[7]);
+        bytesData.WriteByteSeq(accountId[1]);
+        bytesData.WriteByteSeq(accountId[5]);
+        bytesData.WriteByteSeq(accountId[6]);
+        bytesData.WriteByteSeq(playerGuid[5]);
+        bytesData.WriteByteSeq(accountId[0]);
+        bytesData << uint8(gender);
+        bytesData.WriteByteSeq(guildGuid[5]);
+        bytesData << uint8(level);
+        bytesData << int32(zoneId);
     }
 
     if (displaycount != 0)
