@@ -2128,7 +2128,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     dataBuffer->WriteByteSeq(guid[6]);
 
     *dataBuffer << uint32(charFlags);                           // Character flags
-	*dataBuffer << uint32(zone);                                // Zone id
+    *dataBuffer << uint32(zone);                                // Zone id
 
     dataBuffer->WriteByteSeq(guildGuid[7]);
 
