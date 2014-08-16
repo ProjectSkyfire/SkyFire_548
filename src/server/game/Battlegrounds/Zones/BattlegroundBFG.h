@@ -166,12 +166,12 @@ const float BG_BFG_DoorPositions[2][8] =
     { 708.0903f, 708.4479f, -17.8342f, -2.391099f, 0.050291f, 0.015127f, 0.929217f, -0.365784f }
 };
 
-// Tick intervals and given points: case 0, 1,     2,    3,    4,    5 captured nodes
-const uint32 BG_BFG_TickIntervals[6] = { 0, 12000, 9000, 6000, 3000, 1000 };
-const uint32 BG_BFG_TickPoints[6] = { 0, 10, 10, 10, 10, 30 };
+// Tick intervals and given points: case 0, 1,     2,    3 captured nodes
+const uint32 BG_BFG_TickIntervals[6] = { 0, 12000, 9000, 6000 };
+const uint32 BG_BFG_TickPoints[6] =    { 0, 10,    10,   30 };
 
-// WorldSafeLocs ids for 5 nodes, and for ally, and horde starting location
-const uint32 BG_BFG_GraveyardIds[BG_BFG_ALL_NODES_COUNT] = { 895, 894, 893 };
+// WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
+const uint32 BG_BFG_GraveyardIds[BG_BFG_ALL_NODES_COUNT] = { 893, 894, 895, 896, 897 };
 
 // x, y, z, o
 const float BG_BFG_BuffPositions[BG_BFG_DYNAMIC_NODES_COUNT][4] =
