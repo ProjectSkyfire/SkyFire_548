@@ -9,7 +9,6 @@
 * Implement Premade characters
 * Instance Locking
 * Professions
-* Auction House
 * Void Storage
 * Calendair & Events
 * Arenas - needs full rewrite O.o
@@ -50,3 +49,4 @@
 * Guilds
 * Quests
 * Mail
+* Auction House
