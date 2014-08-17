@@ -389,6 +389,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
     bool hasTransportPosition = flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
     bool hasTarget = flags & UPDATEFLAG_HAS_TARGET;
+    bool hasTransport = flags & UPDATEFLAG_TRANSPORT;
     bool hasVehicle = false; //flags & UPDATEFLAG_VEHICLE;
     bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
 
@@ -411,7 +412,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(hasVehicle);
     data->WriteBit(0);
     data->WriteBit(0);
-    data->WriteBit(0);
+    data->WriteBit(hasTransport);
     data->WriteBit(hasGobjectRotation);
     data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_SELF);
@@ -698,17 +699,25 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetPositionX());
     }
 
-
+    /*
     if (hasAnimKits)
     {
-        /*
         if (hasAnimKit3)
             *data << uint16(animKit3);
         if (hasAnimKit2)
             *data << uint16(animKit2);
         if (hasAnimKit1)
             *data << uint16(animKit1);
-        */
+    }*/
+
+    if (hasTransport)
+    {
+        GameObject const* go = ToGameObject();
+
+        if (go && go->ToTransport())
+            *data << uint32(go->GetGOValue()->Transport.PathProgress);
+        else
+            *data << uint32(getMSTime());
     }
 
     if (hasGobjectRotation)
