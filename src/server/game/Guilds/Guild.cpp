@@ -1491,7 +1491,7 @@ void Guild::HandleQuery(WorldSession* session)
 
     WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200);      // Guess size
 
-    data.WriteBit(guid[2]);
+    data.WriteBit(guid[5]);
     data.WriteBit(1); // HasData
 
     // if (hasData)
