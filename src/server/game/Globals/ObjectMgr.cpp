@@ -1957,7 +1957,7 @@ void ObjectMgr::LoadGameobjects()
         data.artKit         = 0;
 
         uint32 go_state     = fields[13].GetUInt8();
-        if (go_state >= MAX_GO_STATE)
+        if (go_state != GO_STATE_ACTIVE && go_state != GO_STATE_READY && go_state != GO_STATE_ACTIVE_ALTERNATIVE && go_state != GO_STATE_PREPARE_TRANSPORT)
         {
             TC_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);
             continue;
