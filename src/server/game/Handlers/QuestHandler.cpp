@@ -354,6 +354,7 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
         if (quest->IsAutoAccept() && _player->CanAddQuest(quest, true))
         {
             _player->AddQuest(quest, object);
+            sScriptMgr->OnQuestAccept(_player, (object->ToCreature()), quest);
             if (_player->CanCompleteQuest(questId))
                 _player->CompleteQuest(questId);
         }
@@ -477,6 +478,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                         if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                         {
                             _player->AddQuest(nextQuest, object);
+                            sScriptMgr->OnQuestAccept(_player, creatureQGiver, nextQuest);
                             if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
                                 _player->CompleteQuest(nextQuest->GetQuestId());
                         }
@@ -498,6 +500,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                     if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                     {
                         _player->AddQuest(nextQuest, object);
+                        sScriptMgr->OnQuestAccept(_player, ((GameObject*)object), nextQuest); //kontownik
                         if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
                             _player->CompleteQuest(nextQuest->GetQuestId());
                     }

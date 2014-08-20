@@ -15297,6 +15297,22 @@ void Player::SendPreparedQuest(uint64 guid)
                 if (quest->IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
                 {
                     AddQuest(quest, object);
+                    switch (object->GetTypeId())
+                    {
+                    case TYPEID_UNIT:
+                    case TYPEID_PLAYER:
+                    {
+                       sScriptMgr->OnQuestAccept(this, (object->ToCreature()), quest);
+                       break;
+                    }
+                    case TYPEID_GAMEOBJECT:
+                    {
+                       sScriptMgr->OnQuestAccept(this, ((GameObject*)object), quest);
+                       break;
+                    }
+                    default:
+                       break;
+                    }
                     if (CanCompleteQuest(questId))
                         CompleteQuest(questId);
                 }
