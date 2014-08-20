@@ -500,7 +500,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                     if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                     {
                         _player->AddQuest(nextQuest, object);
-                        sScriptMgr->OnQuestAccept(_player, ((GameObject*)object), nextQuest); //kontownik
+                        sScriptMgr->OnQuestAccept(_player, ((GameObject*)object), nextQuest);
                         if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
                             _player->CompleteQuest(nextQuest->GetQuestId());
                     }
