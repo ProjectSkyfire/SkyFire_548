@@ -64,7 +64,10 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
-    SPELL_SHAMAN_TIDAL_WAVES                    = 53390
+    SPELL_SHAMAN_TIDAL_WAVES                    = 53390,
+    SPELL_SHAMAN_ASCENDANCE_ELEMENTAL           = 114050,
+    SPELL_SHAMAN_ASCENDANCE_ENHANCEMENT         = 114051,
+    SPELL_SHAMAN_ASCENDANCE_RESTORATION         = 114052
 };
 
 enum ShamanSpellIcons
@@ -1167,6 +1170,70 @@ class spell_sha_tidal_waves : public SpellScriptLoader
         }
 };
 
+
+// 114049 - Ascendance
+class spell_sha_ascendance : public SpellScriptLoader
+{
+    public:
+        spell_sha_ascendance() : SpellScriptLoader("spell_sha_ascendance") { }
+
+        class spell_sha_ascendance_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sha_ascendance_SpellScript);
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                {
+                    switch (player->GetTalentSpecialization(player->GetActiveSpec()))
+                    {
+                        case TALENT_TREE_SHAMAN_ENHANCEMENT:
+                        case TALENT_TREE_SHAMAN_ELEMENTAL:
+                        case TALENT_TREE_SHAMAN_RESTORATION:
+                            return SPELL_CAST_OK;
+                        default:
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    }
+                }
+
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleOnHit()
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                {
+                    switch (player->GetTalentSpecialization(player->GetActiveSpec()))
+                    {
+                        case TALENT_TREE_SHAMAN_ENHANCEMENT:
+                            player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_ENHANCEMENT, true);
+                            break;
+                        case TALENT_TREE_SHAMAN_ELEMENTAL:
+                            player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_ELEMENTAL, true);
+                            break;
+                        case TALENT_TREE_SHAMAN_RESTORATION:
+                            player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_RESTORATION, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                OnCheckCast += SpellCheckCastFn(spell_sha_ascendance_SpellScript::CheckRequirement);
+                OnHit += SpellHitFn(spell_sha_ascendance_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_sha_ascendance_SpellScript();
+        }
+};
+
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening();
@@ -1195,4 +1262,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_telluric_currents();
     new spell_sha_thunderstorm();
     new spell_sha_tidal_waves();
+    new spell_sha_ascendance();
 }

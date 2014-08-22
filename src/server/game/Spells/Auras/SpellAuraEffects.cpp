@@ -426,7 +426,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleUnused,                                    //364 unused (4.3.4)
     &AuraEffect::HandleNULL,                                      //365 SPELL_AURA_MAX_FAR_CLIP_PLANE
     &AuraEffect::HandleNULL,                                      //366 SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT
-    &AuraEffect::HandleNULL,                                      //367 SPELL_AURA_367
+    &AuraEffect::HandleAuraOverrideAutoattackWithSpell,           //367 SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_SPELL
     &AuraEffect::HandleUnused,                                    //368 unused (4.3.4)
     &AuraEffect::HandleNULL,                                      //369 SPELL_AURA_ENABLE_POWER_BAR_TIMER
     &AuraEffect::HandleNULL,                                      //370 SPELL_AURA_SET_FAIR_FAR_CLIP
@@ -6503,4 +6503,25 @@ void AuraEffect::HandleEnableAltPower(AuraApplication const* aurApp, uint8 mode,
         aurApp->GetTarget()->SetMaxPower(POWER_ALTERNATE_POWER, powerEntry->MaxPower);
     else
         aurApp->GetTarget()->SetMaxPower(POWER_ALTERNATE_POWER, 0);
+}
+
+void AuraEffect::HandleAuraOverrideAutoattackWithSpell(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (apply)
+    {
+        SpellInfo const* overrideSpell = sSpellMgr->GetSpellInfo(m_spellInfo->Effects[GetEffIndex()].TriggerSpell);
+        target->SetAutoattackOverrideRange(overrideSpell->GetMaxRange());
+        target->SetAutoattackOverrideSpell(overrideSpell);
+
+    }
+    else
+    {
+        target->SetAutoattackOverrideSpell(0);
+        target->SetAutoattackOverrideRange(0);
+    }
 }
