@@ -1662,7 +1662,7 @@ void Player::Update(uint32 p_time)
 
             if (isAttackReady(BASE_ATTACK))
             {
-                if (!IsWithinMeleeRange(victim))
+                if (!(IsWithinMeleeRange(victim) || (m_overrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_overrideAutoattackRange))))
                 {
                     setAttackTimer(BASE_ATTACK, 100);
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
@@ -1698,7 +1698,7 @@ void Player::Update(uint32 p_time)
 
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if (!IsWithinMeleeRange(victim))
+                if (!(IsWithinMeleeRange(victim) || (m_overrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_overrideAutoattackRange))))
                     setAttackTimer(OFF_ATTACK, 100);
                 else if (!HasInArc(2*M_PI/3, victim))
                     setAttackTimer(OFF_ATTACK, 100);
