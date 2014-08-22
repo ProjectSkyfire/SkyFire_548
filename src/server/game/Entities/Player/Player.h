@@ -1372,8 +1372,8 @@ class Player : public Unit, public GridObject<Player>
         static bool IsBankPos(uint8 bag, uint8 slot);
         bool IsValidPos(uint16 pos, bool explicit_pos) { return IsValidPos(pos >> 8, pos & 255, explicit_pos); }
         bool IsValidPos(uint8 bag, uint8 slot, bool explicit_pos);
-        uint8 GetBankBagSlotCount() const { return 0;/*GetByteValue(PLAYER_FIELD_REST_STATE, 2);*/ }
-        void SetBankBagSlotCount(uint8 count) { /*SetByteValue(PLAYER_FIELD_REST_STATE, 2, count);*/ }
+        uint8 GetBankBagSlotCount() const { return GetByteValue(PLAYER_FIELD_REST_STATE, 2); }
+        void SetBankBagSlotCount(uint8 count) { SetByteValue(PLAYER_FIELD_REST_STATE, 2, count); }
         bool HasItemCount(uint32 item, uint32 count = 1, bool inBankAlso = false) const;
         bool HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item const* ignoreItem = NULL) const;
         bool CanNoReagentCast(SpellInfo const* spellInfo) const;
