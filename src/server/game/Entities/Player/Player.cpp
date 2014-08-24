@@ -26523,7 +26523,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
             TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
             if (!talentInfo)
                 continue;
-                /*
+
             // skip another tab talents
             if (talentInfo->TalentTab != talentTabId)
                 continue;
