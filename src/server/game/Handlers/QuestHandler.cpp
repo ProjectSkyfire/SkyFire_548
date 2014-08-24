@@ -1010,8 +1010,8 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
         }
     }
 
-    data.PutBits(pos, count, 21);
     data.FlushBits();
+    data.PutBits(pos, count, 21);
     data.append(byteData);
 
     SendPacket(&data);
