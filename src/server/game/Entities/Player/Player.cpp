@@ -15700,6 +15700,27 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest_id);
 
     UpdateForQuestWorldObjects();
+    if (questGiver) // script managment for every quest
+    {
+        switch (questGiver->GetTypeId())
+        {
+            case TYPEID_UNIT:
+                sScriptMgr->OnQuestAccept(this, (questGiver->ToCreature()), quest);
+                break;
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
+                {
+                    Item* item = (Item*)questGiver;
+                    sScriptMgr->OnQuestAccept(this, item, quest);
+                    break;
+                }
+            case TYPEID_GAMEOBJECT:
+                sScriptMgr->OnQuestAccept(this, questGiver->ToGameObject(), quest);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Player::CompleteQuest(uint32 quest_id)
