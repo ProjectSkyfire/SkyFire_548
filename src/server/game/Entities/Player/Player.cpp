@@ -1863,10 +1863,12 @@ void Player::Update(uint32 p_time)
     SendUpdateToOutOfRangeGroupMembers();
 
     if (_readyCheckTimer > 0)
+    {
         if (p_time >= _readyCheckTimer)
             ReadyCheckComplete();
         else
             _readyCheckTimer -= p_time;
+    }
 
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
