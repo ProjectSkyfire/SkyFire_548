@@ -682,7 +682,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
 
         case CHAT_MSG_CHANNEL:
             hasChannelName = channelName.length();
-            hasSenderName = channelName.length();
+            hasSenderName = senderName.length();
             break;
         default:
             if (gmMessage)
