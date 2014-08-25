@@ -107,6 +107,8 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
         BattlePet* battlePet = *itr++;
         switch (battlePet->GetDbState())
         {
+            case BATTLE_PET_DB_STATE_NONE: 
+                break;
             case BATTLE_PET_DB_STATE_DELETE:
             {
                 PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_BATTLE_PET);
@@ -144,6 +146,8 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
                 battlePet->SetDbState(BATTLE_PET_DB_STATE_NONE);
                 break;
             }
+            default:
+                break;
         }
     }
 }

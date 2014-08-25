@@ -84,7 +84,9 @@ enum GuildRankRights
     GR_RIGHT_WITHDRAW_REPAIR            = 0x00040000,                   // withdraw for repair
     GR_RIGHT_WITHDRAW_GOLD              = 0x00080000,                   // withdraw gold
     GR_RIGHT_CREATE_GUILD_EVENT         = 0x00100000,                   // wotlk
-    GR_RIGHT_ALL                        = 0x00DDFFBF
+    GR_RIGHT_REQUIRES_AUTHENTICATOR     = 0x00200000,
+    GR_RIGHT_MODIFY_BANK_TAB            = 0x00400000,
+    GR_RIGHT_ALL                        = 0x00DDFFBF                    // FDFFBF with GR_RIGHT_REQUIRES_AUTHENTICATOR
 };
 
 enum GuildCommandType
@@ -801,6 +803,7 @@ public:
     void HandleDisband(WorldSession* session);
     void HandleGuildPartyRequest(WorldSession* session);
     void HandleNewsSetSticky(WorldSession* session, uint32 newsId, bool sticky);
+    void HandleSetBankTabNote(WorldSession* session, uint32 tabId, std::string note);
 
     void UpdateMemberData(Player* player, uint8 dataid, uint32 value);
     void OnPlayerStatusChange(Player* player, uint32 flag, bool state);

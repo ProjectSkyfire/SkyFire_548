@@ -59,7 +59,7 @@ struct ServerPktHeader
     {
         if (_authCrypt->IsInitialized())
         {
-            uint32 data =  (size << 13) | cmd & MAX_OPCODE;
+            uint32 data = (size << 13) | (cmd & MAX_OPCODE);
             memcpy(&header[0], &data, 4);
             _authCrypt->EncryptSend((uint8*)&header[0], getHeaderLength());
         }

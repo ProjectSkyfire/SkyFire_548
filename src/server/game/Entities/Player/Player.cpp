@@ -1863,10 +1863,12 @@ void Player::Update(uint32 p_time)
     SendUpdateToOutOfRangeGroupMembers();
 
     if (_readyCheckTimer > 0)
+    {
         if (p_time >= _readyCheckTimer)
             ReadyCheckComplete();
         else
             _readyCheckTimer -= p_time;
+    }
 
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
@@ -15698,6 +15700,27 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest_id);
 
     UpdateForQuestWorldObjects();
+    if (questGiver) // script managment for every quest
+    {
+        switch (questGiver->GetTypeId())
+        {
+            case TYPEID_UNIT:
+                sScriptMgr->OnQuestAccept(this, (questGiver->ToCreature()), quest);
+                break;
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
+                {
+                    Item* item = (Item*)questGiver;
+                    sScriptMgr->OnQuestAccept(this, item, quest);
+                    break;
+                }
+            case TYPEID_GAMEOBJECT:
+                sScriptMgr->OnQuestAccept(this, questGiver->ToGameObject(), quest);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Player::CompleteQuest(uint32 quest_id)
@@ -26477,7 +26500,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         }
 
         data->PutBits(wpos[i], talentCount, 23);
-        *data << uint32(GetTalentSpecialization(GetActiveSpec()));
+        *data << uint32(GetTalentSpecialization(i));
     }
 
     delete[] wpos;
@@ -26523,7 +26546,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
             TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
             if (!talentInfo)
                 continue;
-                /*
+
             // skip another tab talents
             if (talentInfo->TalentTab != talentTabId)
                 continue;
@@ -26790,29 +26813,29 @@ void Player::SendClearAllCooldowns(Unit* target)
     uint32 spellCount = m_spellCooldowns.size();
     ObjectGuid guid = target ? target->GetGUID() : 0;
 
-    WorldPacket data(SMSG_CLEAR_COOLDOWNS, 4+8+1+spellCount*4);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[4]);
-    data.WriteBits(spellCount, 22); // Spell Count
+    WorldPacket data(SMSG_CLEAR_COOLDOWNS, 1 + 8 + 3 + (spellCount * 4));
     data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[2]);
-    data.WriteBit(guid[7]);
+    data.WriteBits(spellCount, 22); // Spell Count
     data.WriteBit(guid[1]);
-
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
     data.FlushBits();
 
-    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[6]);
+
     for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
         data << uint32(itr->first); // Spell ID
 
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[2]);
 
     SendDirectMessage(&data);
