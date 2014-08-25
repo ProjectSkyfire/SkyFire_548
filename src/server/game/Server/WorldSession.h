@@ -893,6 +893,7 @@ class WorldSession
         void HandleGuildBankDepositMoney(WorldPacket& recvData);
         void HandleGuildBankWithdrawMoney(WorldPacket& recvData);
         void HandleGuildBankSwapItems(WorldPacket& recvData);
+        void HandleGuildBankTabNote(WorldPacket& recvData);
 
         void HandleGuildBankUpdateTab(WorldPacket& recvData);
         void HandleGuildBankBuyTab(WorldPacket& recvData);

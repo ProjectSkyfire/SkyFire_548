@@ -453,14 +453,33 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recvPacket)
 // Called when opening guild bank tab only (first one)
 void WorldSession::HandleGuildBankQueryTab(WorldPacket& recvPacket)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint8 tabId;
     bool sendAllSlots;
 
-    recvPacket >> guid >> tabId >> sendAllSlots;
+    recvPacket >> tabId;
+
+    guid[7] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    sendAllSlots = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[1]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TAB [%s]: Go: [" UI64FMTD "], TabId: %u, AllSlots: %u"
-        , GetPlayerInfo().c_str(), guid, tabId, sendAllSlots);
+        , GetPlayerInfo().c_str(), (uint64)guid, tabId, sendAllSlots);
 
     if (GetPlayer()->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_GUILD_BANK))
         if (Guild* guild = GetPlayer()->GetGuild())
@@ -518,15 +537,6 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_SWAP_ITEMS [%s]", GetPlayerInfo().c_str());
 
-    uint64 GoGuid;
-    recvPacket >> GoGuid;
-
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(GoGuid, GAMEOBJECT_TYPE_GUILD_BANK))
-    {
-        recvPacket.rfinish();                   // Prevent additional spam at rejected packet
-        return;
-    }
-
     Guild* guild = GetPlayer()->GetGuild();
     if (!guild)
     {
@@ -534,65 +544,81 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recvPacket)
         return;
     }
 
-    uint8 bankToBank;
-    recvPacket >> bankToBank;
+    ObjectGuid banker;
+    uint32 stackCount, itemId, itemId2 = 0, bankItemCount = 0;
+    uint8 bankSlot, bankTab, toSlot, containerSlot = NULL_BAG, containerItemSlot = NULL_SLOT, bankSlot2 = 0, bankTab2 = 0;
+    bool hasContainerSlot, hasContainerItemSlot, hasItemId2, hasBankSlot2, hasBankTab2, hasBankItemCount, bankOnly, autoStore;
 
-    uint8 tabId;
-    uint8 slotId;
-    uint32 itemEntry;
-    uint32 splitedAmount = 0;
+    recvPacket >> stackCount;
+    recvPacket >> bankSlot;
+    recvPacket >> toSlot;
+    recvPacket >> itemId;
+    recvPacket >> bankTab;
 
-    if (bankToBank)
+    banker[5] = recvPacket.ReadBit();
+    hasBankTab2 = !recvPacket.ReadBit();
+    banker[1] = recvPacket.ReadBit();
+    hasContainerSlot = !recvPacket.ReadBit();
+    autoStore = recvPacket.ReadBit();
+    banker[0] = recvPacket.ReadBit();
+    hasItemId2 = !recvPacket.ReadBit();
+    hasBankSlot2 = !recvPacket.ReadBit();
+    banker[2] = recvPacket.ReadBit();
+    bankOnly = recvPacket.ReadBit();
+    banker[4] = recvPacket.ReadBit();
+    banker[7] = recvPacket.ReadBit();
+    banker[3] = recvPacket.ReadBit();
+    hasContainerItemSlot = !recvPacket.ReadBit();
+    banker[6] = recvPacket.ReadBit();
+    hasBankItemCount = !recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(banker[2]);
+    recvPacket.ReadByteSeq(banker[6]);
+    recvPacket.ReadByteSeq(banker[5]);
+    recvPacket.ReadByteSeq(banker[4]);
+    recvPacket.ReadByteSeq(banker[0]);
+    recvPacket.ReadByteSeq(banker[3]);
+    recvPacket.ReadByteSeq(banker[1]);
+    recvPacket.ReadByteSeq(banker[7]);
+
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(banker, GAMEOBJECT_TYPE_GUILD_BANK))
     {
-        uint8 destTabId;
-        recvPacket >> destTabId;
-
-        uint8 destSlotId;
-        recvPacket >> destSlotId;
-
-        uint32 destItemEntry;
-        recvPacket >> destItemEntry;
-
-        recvPacket >> tabId;
-        recvPacket >> slotId;
-        recvPacket >> itemEntry;
-        recvPacket.read_skip<uint8>();                       // Always 0
-        recvPacket >> splitedAmount;
-
-        guild->SwapItems(GetPlayer(), tabId, slotId, destTabId, destSlotId, splitedAmount);
+        recvPacket.rfinish();                   // Prevent additional spam at rejected packet
+        return;
     }
+
+    if (hasItemId2)
+        recvPacket >> itemId2;                  // source item id
+
+    if (hasContainerSlot)
+        recvPacket >> containerSlot;
+
+    if (hasContainerItemSlot)
+        recvPacket >> containerItemSlot;
+
+    if (hasBankSlot2)
+        recvPacket >> bankSlot2;                // source bank slot
+
+    if (hasBankItemCount)
+        recvPacket >> bankItemCount;
+
+    if (hasBankTab2)
+        recvPacket >> bankTab2;                 // source bank tab
+
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(banker, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
+        recvPacket.rfinish();                   // Prevent additional spam at rejected packet
+        return;
+    }
+
+    if (bankOnly)
+        guild->SwapItems(GetPlayer(), bankTab2, bankSlot2, bankTab, bankSlot, stackCount);
     else
     {
-        uint8 playerBag = NULL_BAG;
-        uint8 playerSlotId = NULL_SLOT;
-        uint8 toChar = 1;
-
-        recvPacket >> tabId;
-        recvPacket >> slotId;
-        recvPacket >> itemEntry;
-
-        uint8 autoStore;
-        recvPacket >> autoStore;
-        if (autoStore)
-        {
-            recvPacket.read_skip<uint32>();                  // autoStoreCount
-            recvPacket.read_skip<uint8>();                   // ToChar (?), always and expected to be 1 (autostore only triggered in Bank -> Char)
-            recvPacket.read_skip<uint32>();                  // Always 0
-        }
-        else
-        {
-            recvPacket >> playerBag;
-            recvPacket >> playerSlotId;
-            recvPacket >> toChar;
-            recvPacket >> splitedAmount;
-        }
-
-        // Player <-> Bank
-        // Allow to work with inventory only
-        if (!Player::IsInventoryPos(playerBag, playerSlotId) && !(playerBag == NULL_BAG && playerSlotId == NULL_SLOT))
+        if (!Player::IsInventoryPos(containerSlot, containerItemSlot) && !(containerSlot == NULL_BAG && containerItemSlot == NULL_SLOT))
             GetPlayer()->SendEquipError(EQUIP_ERR_INTERNAL_BAG_ERROR, NULL);
         else
-            guild->SwapItemsWithInventory(GetPlayer(), toChar, tabId, slotId, playerBag, playerSlotId, splitedAmount);
+            guild->SwapItemsWithInventory(GetPlayer(), toSlot != 0, bankTab, bankSlot, containerSlot, containerItemSlot, stackCount);
     }
 }
 
@@ -657,7 +683,6 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recvPacket)
     recvPacket.ReadByteSeq(guid[3]);
     recvPacket.ReadByteSeq(guid[6]);
 
-
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_UPDATE_TAB [%s]: Go: [" UI64FMTD "], TabId: %u, Name: %s, Icon: %s"
         , GetPlayerInfo().c_str(), (uint64)guid, tabId, name.c_str(), icon.c_str());
     if (!name.empty() && !icon.empty())
@@ -679,7 +704,7 @@ void WorldSession::HandleGuildBankLogQuery(WorldPacket& recvPacket)
 
 void WorldSession::HandleQueryGuildBankTabText(WorldPacket &recvPacket)
 {
-    uint8 tabId;
+    uint32 tabId;
     recvPacket >> tabId;
 
     TC_LOG_DEBUG("guild", "MSG_QUERY_GUILD_BANK_TEXT [%s]: TabId: %u", GetPlayerInfo().c_str(), tabId);
@@ -719,7 +744,6 @@ void WorldSession::HandleGuildQueryXPOpcode(WorldPacket& recvPacket)
 
     recvPacket.ReadByteSeq(guildGuid[4]);
     recvPacket.ReadByteSeq(guildGuid[6]);
-    recvPacket.ReadByteSeq(guildGuid[3]);
     recvPacket.ReadByteSeq(guildGuid[0]);
     recvPacket.ReadByteSeq(guildGuid[7]);
     recvPacket.ReadByteSeq(guildGuid[5]);
@@ -925,7 +949,6 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
         guild->HandleSetNewGuildMaster(this, playerName);
 }
 
-
 void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
 {
     WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * 6 * 5);
@@ -944,4 +967,20 @@ void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
     for (int i = 0; i < 6; i++)
         data << uint32(0); // Progress - NYI
     SendPacket(&data);
+}
+
+void WorldSession::HandleGuildBankTabNote(WorldPacket& recvData)
+{
+    uint32 tabId, noteLength;
+    std::string note;
+
+    recvData >> tabId;
+
+    noteLength = recvData.ReadBits(14);
+    recvData.FlushBits();
+
+    note = recvData.ReadString(noteLength);
+
+    if (Guild* guild = GetPlayer()->GetGuild())
+        guild->HandleSetBankTabNote(this, tabId, note);
 }
