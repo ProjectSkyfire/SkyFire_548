@@ -273,7 +273,7 @@ enum EGameObjectFields
 
 enum EDynamicObjectFields
 {
-    DYNAMICOBJECT_FIELD_CASTER                               = OBJECT_END + 0x0, // Size: 2, Flags: UF_FLAGý_PUBLIC
+    DYNAMICOBJECT_FIELD_CASTER                               = OBJECT_END + 0x0, // Size: 2, Flags: UF_FLAG_PUBLIC
     DYNAMICOBJECT_FIELD_TYPE_AND_VISUAL_ID                   = OBJECT_END + 0x2, // Size: 1, Flags: UF_FLAG_VIEWER_DEPENDENT
     DYNAMICOBJECT_FIELD_SPELL_ID                             = OBJECT_END + 0x3, // Size: 1, Flags: UF_FLAG_PUBLIC
     DYNAMICOBJECT_FIELD_RADIUS                               = OBJECT_END + 0x4, // Size: 1, Flags: UF_FLAG_PUBLIC
