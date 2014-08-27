@@ -15314,6 +15314,30 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
 
 uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
 {
+    if (totemType == 3211)
+        totemType = SUMMON_TYPE_TOTEM_FIRE;
+
+    if (totemType == 3403)
+        totemType = SUMMON_TYPE_TOTEM_FIRE;
+
+    if (totemType == 3402)
+        totemType = SUMMON_TYPE_TOTEM_WATER;
+
+    if (totemType == 3406)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3407)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3405)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3399)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3400)
+        totemType = SUMMON_TYPE_TOTEM_EARTH;
+
     switch (getRace())
     {
         case RACE_ORC:
@@ -15403,6 +15427,23 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
                     return 30784;
                 case SUMMON_TYPE_TOTEM_AIR:     // air
                     return 30781;
+            }
+            break;
+        }
+        case RACE_PANDAREN_NEUTRAL:
+        case RACE_PANDAREN_ALLIANCE:
+        case RACE_PANDAREN_HORDE:
+        {
+            switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                    return 41670;
+                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                    return 41669;
+                case SUMMON_TYPE_TOTEM_WATER:   // water
+                    return 41671;
+                case SUMMON_TYPE_TOTEM_AIR:     // air
+                    return 41668;
             }
             break;
         }
