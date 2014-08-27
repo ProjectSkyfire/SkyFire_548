@@ -130,6 +130,14 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5,
 };
 
+enum BarberShopResult
+{
+    BARBER_SHOP_SUCCESS          = 0,
+    BARBER_SHOP_NOT_ENOUGH_MONEY = 1,
+    BARBER_SHOP_NOT_SITTING      = 2
+    /*BARBER_SHOP_NOT_ENOUGH_MONEY = 3*/
+};
+
 #define DB2_REPLY_BROADCAST 35137211
 #define DB2_REPLY_SPARSE    2442913102
 #define DB2_REPLY_ITEM      1344507586
@@ -953,6 +961,7 @@ class WorldSession
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
         void HandleAlterAppearance(WorldPacket& recvData);
+        void SendBarberShopResult(BarberShopResult result);
         void HandleRemoveGlyph(WorldPacket& recvData);
         void HandleCharCustomize(WorldPacket& recvData);
         void HandleQueryInspectAchievements(WorldPacket& recvData);

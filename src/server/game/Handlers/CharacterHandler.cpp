@@ -1571,38 +1571,24 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     GameObject* go = _player->FindNearestGameObjectOfType(GAMEOBJECT_TYPE_BARBER_CHAIR, 5.0f);
     if (!go)
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(2);
-        SendPacket(&data);
+        SendBarberShopResult(BARBER_SHOP_NOT_SITTING);
         return;
     }
 
     if (_player->getStandState() != UNIT_STAND_STATE_SIT_LOW_CHAIR + go->GetGOInfo()->barberChair.chairheight)
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(2);
-        SendPacket(&data);
+        SendBarberShopResult(BARBER_SHOP_NOT_SITTING);
         return;
     }
 
     uint32 cost = _player->GetBarberShopCost(bs_hair->hair_id, Color, bs_facialHair->hair_id, bs_skinColor);
-
-    // 0 - ok
-    // 1, 3 - not enough money
-    // 2 - you have to sit on barber chair
     if (!_player->HasEnoughMoney((uint64)cost))
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(1);                                  // no money
-        SendPacket(&data);
+        SendBarberShopResult(BARBER_SHOP_NOT_ENOUGH_MONEY);
         return;
     }
-    else
-    {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(0);                                  // ok
-        SendPacket(&data);
-    }
+
+    SendBarberShopResult(BARBER_SHOP_SUCCESS);
 
     _player->ModifyMoney(-int64(cost));                     // it isn't free
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_AT_BARBER, cost);
@@ -1616,6 +1602,13 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_VISIT_BARBER_SHOP, 1);
 
     _player->SetStandState(0);                              // stand up
+}
+
+void WorldSession::SendBarberShopResult(BarberShopResult result)
+{
+    WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+    data << uint32(result);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
