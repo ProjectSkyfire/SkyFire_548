@@ -33,7 +33,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake ../ -DSCRIPTS=1 -DTOOLS=0
+  - cmake ../ -DSCRIPTS=1 -DTOOLS=1
   - make -j16
 
 notifications:
