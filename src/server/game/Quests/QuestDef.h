@@ -35,17 +35,14 @@ class ObjectMgr;
 
 #define MAX_QUEST_LOG_SIZE 25
 
-#define QUEST_OBJECTIVES_COUNT 4
-#define QUEST_ITEM_OBJECTIVES_COUNT 6
 #define QUEST_SOURCE_ITEM_IDS_COUNT 4
 #define QUEST_REWARD_CHOICES_COUNT 6
 #define QUEST_REWARDS_COUNT 4
 #define QUEST_DEPLINK_COUNT 10
 #define QUEST_REPUTATIONS_COUNT 5
 #define QUEST_EMOTE_COUNT 4
-#define QUEST_PVP_KILL_SLOT 0
 #define QUEST_REWARD_CURRENCY_COUNT 4
-#define QUEST_REQUIRED_CURRENCY_COUNT 4
+#define QUEST_SOURCE_ITEM_COUNT 1
 
 enum QuestFailedReason
 {
@@ -189,31 +186,34 @@ enum QuestSpecialFlags
 
     QUEST_SPECIAL_FLAGS_DB_ALLOWED = QUEST_SPECIAL_FLAGS_REPEATABLE | QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT | QUEST_SPECIAL_FLAGS_AUTO_ACCEPT | QUEST_SPECIAL_FLAGS_DF_QUEST | QUEST_SPECIAL_FLAGS_MONTHLY | QUEST_SPECIAL_FLAGS_CAST,
 
-    QUEST_SPECIAL_FLAGS_DELIVER              = 0x080,   // Internal flag computed only
-    QUEST_SPECIAL_FLAGS_SPEAKTO              = 0x100,   // Internal flag computed only
-    QUEST_SPECIAL_FLAGS_KILL                 = 0x200,   // Internal flag computed only
+    //QUEST_SPECIAL_FLAGS_DELIVER              = 0x080,   // Internal flag computed only
+    //QUEST_SPECIAL_FLAGS_SPEAKTO              = 0x100,   // Internal flag computed only
+    //QUEST_SPECIAL_FLAGS_KILL                 = 0x200,   // Internal flag computed only
     QUEST_SPECIAL_FLAGS_TIMED                = 0x400,   // Internal flag computed only
-    QUEST_SPECIAL_FLAGS_PLAYER_KILL          = 0x800    // Internal flag computed only
+    //QUEST_SPECIAL_FLAGS_PLAYER_KILL          = 0x800    // Internal flag computed only
 };
 
 enum QuestObjectiveType
 {
-    QUEST_OBJECTIVE_TYPE_NPC          = 0,
-    QUEST_OBJECTIVE_TYPE_ITEM         = 1,
-    QUEST_OBJECTIVE_TYPE_GO           = 2,
-    //QUEST_OBJECTIVE_TYPE_UNK          = 3,
-    QUEST_OBJECTIVE_TYPE_CURRENCY     = 4,
-    QUEST_OBJECTIVE_TYPE_SPELL        = 5,
-    QUEST_OBJECTIVE_TYPE_FACTION_REP  = 6,
-    QUEST_OBJECTIVE_TYPE_FACTION_REP2 = 7,
-    //QUEST_OBJECTIVE_TYPE_UNK          = 8,
-    QUEST_OBJECTIVE_TYPE_PLAYER       = 9
+    QUEST_OBJECTIVE_TYPE_NPC              = 0,
+    QUEST_OBJECTIVE_TYPE_ITEM             = 1,
+    QUEST_OBJECTIVE_TYPE_GO               = 2,
+    QUEST_OBJECTIVE_TYPE_NPC_INTERACT     = 3,
+    QUEST_OBJECTIVE_TYPE_CURRENCY         = 4,
+    QUEST_OBJECTIVE_TYPE_SPELL            = 5,
+    QUEST_OBJECTIVE_TYPE_FACTION_REP      = 6,
+    QUEST_OBJECTIVE_TYPE_FACTION_REP2     = 7,
+    QUEST_OBJECTIVE_TYPE_MONEY            = 8,
+    QUEST_OBJECTIVE_TYPE_PLAYER           = 9,
+    QUEST_OBJECTIVE_TYPE_DUMMY            = 10,
+    QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER = 11,
+    QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE = 12,
+    QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP   = 13,
+    QUEST_OBJECTIVE_TYPE_END
 };
 
 struct QuestLocale
 {
-    QuestLocale() { ObjectiveText.resize(QUEST_OBJECTIVES_COUNT); }
-
     StringVector Title;
     StringVector Details;
     StringVector Objectives;
@@ -221,13 +221,37 @@ struct QuestLocale
     StringVector RequestItemsText;
     StringVector EndText;
     StringVector CompletedText;
-    std::vector< StringVector > ObjectiveText;
     // new on 4.x
     StringVector QuestGiverTextWindow;
     StringVector QuestGiverTargetName;
     StringVector QuestTurnTextWindow;
     StringVector QuestTurnTargetName;
 };
+
+struct QuestObjectiveLocale
+{
+    StringVector Description;
+};
+
+typedef std::vector<uint32> VisualEffectVec;
+typedef std::vector<uint8> ObjectiveTypeCountVec;
+
+struct QuestObjective
+{
+    QuestObjective(uint32 id, uint8 index, uint8 type, uint32 objectId, int32 amount, uint32 flags, std::string description)
+        : Id(id), Index(index), Type(type), ObjectId(objectId), Amount(amount), Flags(flags), Description(description) { }
+
+    uint32 Id;
+    uint8 Index;
+    uint8 Type;
+    uint32 ObjectId;
+    int32 Amount;
+    uint32 Flags;
+    std::string Description;
+    VisualEffectVec VisualEffects;
+};
+
+typedef std::set<QuestObjective*> QuestObjectiveSet;
 
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,
 // all base quest information, and any utility functions such as generating the amount of
@@ -259,10 +283,6 @@ class Quest
         uint32 GetRequiredRaces() const { return RequiredRaces; }
         uint32 GetRequiredSkill() const { return RequiredSkillId; }
         uint32 GetRequiredSkillValue() const { return RequiredSkillPoints; }
-        uint32 GetRepObjectiveFaction() const { return RequiredFactionId1; }
-        int32  GetRepObjectiveValue() const { return RequiredFactionValue1; }
-        uint32 GetRepObjectiveFaction2() const { return RequiredFactionId2; }
-        int32  GetRepObjectiveValue2() const { return RequiredFactionValue2; }
         uint32 GetRequiredMinRepFaction() const { return RequiredMinRepFaction; }
         int32  GetRequiredMinRepValue() const { return RequiredMinRepValue; }
         uint32 GetRequiredMaxRepFaction() const { return RequiredMaxRepFaction; }
@@ -274,12 +294,10 @@ class Quest
         int32  GetExclusiveGroup() const { return ExclusiveGroup; }
         uint32 GetNextQuestInChain() const { return NextQuestIdChain; }
         uint32 GetCharTitleId() const { return RewardTitleId; }
-        uint32 GetPlayersSlain() const { return RequiredPlayerKills; }
         uint32 GetBonusTalents() const { return RewardTalents; }
         int32  GetRewArenaPoints() const {return RewardArenaPoints; }
         uint32 GetXPId() const { return RewardXPId; }
         uint32 GetSrcItemId() const { return SourceItemId; }
-        uint32 GetSrcItemCount() const { return SourceItemIdCount; }
         uint32 GetSrcSpell() const { return SourceSpellid; }
         std::string const& GetTitle() const { return Title; }
         std::string const& GetDetails() const { return Details; }
@@ -292,7 +310,7 @@ class Quest
         std::string const& GetQuestGiverTargetName() const { return QuestGiverTargetName; }
         std::string const& GetQuestTurnTextWindow() const { return QuestTurnTextWindow; }
         std::string const& GetQuestTurnTargetName() const { return QuestTurnTargetName; }
-        int32  GetRewOrReqMoney() const;
+        int32  GetRewMoney() const;
         uint32 GetRewHonorAddition() const { return RewardHonor; }
         float GetRewHonorMultiplier() const { return RewardHonorMultiplier; }
         uint32 GetRewMoneyMaxLevel() const; // use in XP calculation at client
@@ -304,7 +322,6 @@ class Quest
         float  GetPointX() const { return PointX; }
         float  GetPointY() const { return PointY; }
         uint32 GetPointOpt() const { return PointOption; }
-        uint32 GetRequiredSpell() const { return RequiredSpell; }
         uint32 GetSoundAccept() const { return SoundAccept; }
         uint32 GetSoundTurnIn() const { return SoundTurnIn; }
         uint32 GetIncompleteEmote() const { return EmoteOnIncomplete; }
@@ -334,13 +351,8 @@ class Quest
         uint32 CalculateHonorGain(uint8 level) const;
 
         // multiple values
-        std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
-        uint32 RequiredItemId[QUEST_ITEM_OBJECTIVES_COUNT];
-        uint32 RequiredItemCount[QUEST_ITEM_OBJECTIVES_COUNT];
         uint32 RequiredSourceItemId[QUEST_SOURCE_ITEM_IDS_COUNT];
         uint32 RequiredSourceItemCount[QUEST_SOURCE_ITEM_IDS_COUNT];
-        int32  RequiredNpcOrGo[QUEST_OBJECTIVES_COUNT];   // >0 Creature <0 Gameobject
-        uint32 RequiredNpcOrGoCount[QUEST_OBJECTIVES_COUNT];
         uint32 RewardChoiceItemId[QUEST_REWARD_CHOICES_COUNT];
         uint32 RewardChoiceItemCount[QUEST_REWARD_CHOICES_COUNT];
         uint32 RewardItemId[QUEST_REWARDS_COUNT];
@@ -355,15 +367,10 @@ class Quest
         // 4.x
         uint32 RewardCurrencyId[QUEST_REWARD_CURRENCY_COUNT];
         uint32 RewardCurrencyCount[QUEST_REWARD_CURRENCY_COUNT];
-        uint32 RequiredCurrencyId[QUEST_REQUIRED_CURRENCY_COUNT];
-        uint32 RequiredCurrencyCount[QUEST_REQUIRED_CURRENCY_COUNT];
 
-        uint32 GetReqItemsCount() const { return _reqItemsCount; }
-        uint32 GetReqCreatureOrGOcount() const { return _reqNpcOrGoCount; }
         uint32 GetRewChoiceItemsCount() const { return _rewChoiceItemsCount; }
         uint32 GetRewItemsCount() const { return _rewItemsCount; }
         uint32 GetRewCurrencyCount() const { return _rewCurrencyCount; }
-        uint32 GetReqCurrencyCount() const { return _reqCurrencyCount; }
         // 5.x
         uint32 GetRewardPackageItemId() const { return RewardPackageItemId; }
 
@@ -372,14 +379,22 @@ class Quest
         typedef std::vector<uint32> PrevChainQuests;
         PrevChainQuests prevChainQuests;
 
+        // objective stuff
+        QuestObjectiveSet m_questObjectives;
+
+        QuestObjective const* GetQuestObjective(uint32 objectiveId) const;
+        QuestObjective const* GetQuestObjectiveXIndex(uint8 index) const;
+        QuestObjective const* GetQuestObjectiveXObjectId(uint32 objectId) const;
+
+        uint8 GetQuestObjectiveCount() const { return m_questObjectives.size(); }
+        uint8 GetQuestObjectiveCountType(uint8 type) const;
+
         // cached data
     private:
-        uint32 _reqItemsCount;
-        uint32 _reqNpcOrGoCount;
         uint32 _rewChoiceItemsCount;
         uint32 _rewItemsCount;
         uint32 _rewCurrencyCount;
-        uint32 _reqCurrencyCount;
+        ObjectiveTypeCountVec m_questObjecitveTypeCount;
 
         // table data
     protected:
@@ -394,10 +409,6 @@ class Quest
         uint32 RequiredRaces;
         uint32 RequiredSkillId;
         uint32 RequiredSkillPoints;
-        uint32 RequiredFactionId1;
-        int32  RequiredFactionValue1;
-        uint32 RequiredFactionId2;
-        int32  RequiredFactionValue2;
         uint32 RequiredMinRepFaction;
         int32  RequiredMinRepValue;
         uint32 RequiredMaxRepFaction;
@@ -415,7 +426,6 @@ class Quest
         uint32 NextQuestIdChain;
         uint32 RewardXPId;
         uint32 SourceItemId;
-        uint32 SourceItemIdCount;
         uint32 SourceSpellid;
         std::string Title;
         std::string Details;
@@ -426,7 +436,7 @@ class Quest
         std::string CompletedText;
         uint32 RewardHonor;
         float RewardHonorMultiplier;
-        int32  RewardOrRequiredMoney;
+        int32  RewardMoney;
         uint32 RewardMoneyMaxLevel;
         uint32 RewardSpell;
         int32  RewardSpellCast;
@@ -445,7 +455,6 @@ class Quest
         uint32 RewardReputationMask;
         uint32 QuestGiverPortrait;
         uint32 QuestTurnInPortrait;
-        uint32 RequiredSpell;
         std::string QuestGiverTextWindow;
         std::string QuestGiverTargetName;
         std::string QuestTurnTextWindow;
@@ -461,17 +470,10 @@ class Quest
 
 struct QuestStatusData
 {
-    QuestStatusData(): Status(QUEST_STATUS_NONE), Timer(0), PlayerCount(0), Explored(false)
-    {
-        memset(ItemCount, 0, QUEST_ITEM_OBJECTIVES_COUNT * sizeof(uint16));
-        memset(CreatureOrGOCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint16));
-    }
+    QuestStatusData() : Status(QUEST_STATUS_NONE), Timer(0), Explored(false) { }
 
     QuestStatus Status;
     uint32 Timer;
-    uint16 ItemCount[QUEST_ITEM_OBJECTIVES_COUNT];
-    uint16 CreatureOrGOCount[QUEST_OBJECTIVES_COUNT];
-    uint16 PlayerCount;
     bool Explored;
 };
 #endif

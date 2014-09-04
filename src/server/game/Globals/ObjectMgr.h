@@ -452,6 +452,7 @@ typedef UNORDERED_MAP<uint32, PageTextLocale> PageTextLocaleContainer;
 typedef UNORDERED_MAP<int32, TrinityStringLocale> TrinityStringLocaleContainer;
 typedef UNORDERED_MAP<uint32, GossipMenuItemsLocale> GossipMenuItemsLocaleContainer;
 typedef UNORDERED_MAP<uint32, PointOfInterestLocale> PointOfInterestLocaleContainer;
+typedef UNORDERED_MAP<uint32, QuestObjectiveLocale> QuestObjectiveLocaleContainer;
 
 typedef std::multimap<uint32, uint32> QuestRelations;
 typedef std::pair<QuestRelations::const_iterator, QuestRelations::const_iterator> QuestRelationBounds;
@@ -649,6 +650,7 @@ struct HotfixInfo
 };
 
 typedef std::vector<HotfixInfo> HotfixData;
+typedef std::map<uint32, uint32> QuestObjectiveLookupMap;
 
 class PlayerDumpReader;
 
@@ -849,6 +851,9 @@ class ObjectMgr
         }
 
         void LoadQuests();
+        void LoadQuestObjectives();
+        void LoadQuestObjectiveVisualEffects();
+        void LoadQuestObjectiveLocales();
         void LoadQuestStartersAndEnders()
         {
             TC_LOG_INFO("server.loading", "Loading GO Start Quest Data...");
@@ -1116,6 +1121,7 @@ class ObjectMgr
             if (itr == _pointOfInterestLocaleStore.end()) return NULL;
             return &itr->second;
         }
+        QuestObjectiveLocale const* GetQuestObjectiveLocale(uint32 objectiveId) const;
 
         GameObjectData const* GetGOData(uint32 guid) const
         {
@@ -1271,6 +1277,9 @@ class ObjectMgr
 
         void LoadMissingKeyChains();
 
+        bool QuestObjectiveExists(uint32 objectiveId) const;
+        uint32 GetQuestObjectiveQuestId(uint32 objectiveId) const;
+
     private:
         // first free id for selected id type
         uint32 _auctionId;
@@ -1291,10 +1300,10 @@ class ObjectMgr
         uint32 _hiCorpseGuid;
         uint32 _hiAreaTriggerGuid;
         uint32 _hiMoTransGuid;
-
         uint32 m_battlePetId;
 
         QuestMap _questTemplates;
+        QuestObjectiveLookupMap m_questObjectiveLookup;
 
         typedef UNORDERED_MAP<uint32, GossipText> GossipTextContainer;
         typedef UNORDERED_MAP<uint32, uint32> QuestAreaTriggerContainer;
@@ -1410,6 +1419,7 @@ class ObjectMgr
         TrinityStringLocaleContainer _trinityStringLocaleStore;
         GossipMenuItemsLocaleContainer _gossipMenuItemsLocaleStore;
         PointOfInterestLocaleContainer _pointOfInterestLocaleStore;
+        QuestObjectiveLocaleContainer m_questObjectiveLocaleStore;
 
         CacheVendorItemContainer _cacheVendorItemStore;
         CacheTrainerSpellContainer _cacheTrainerSpellStore;

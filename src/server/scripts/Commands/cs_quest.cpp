@@ -184,66 +184,63 @@ public:
             return false;
         }
 
-        // Add quest items for quests that require items
-        for (uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
+        for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
         {
-            uint32 id = quest->RequiredItemId[x];
-            uint32 count = quest->RequiredItemCount[x];
-            if (!id || !count)
-                continue;
-
-            uint32 curItemCount = player->GetItemCount(id, true);
-
-            ItemPosCountVec dest;
-            uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, id, count-curItemCount);
-            if (msg == EQUIP_ERR_OK)
+            QuestObjective const* questObjective = *citr;
+            switch (questObjective->Type)
             {
-                Item* item = player->StoreNewItem(dest, id, true);
-                player->SendNewItem(item, count-curItemCount, true, false);
+                case QUEST_OBJECTIVE_TYPE_NPC:
+                {
+                    if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(questObjective->ObjectId))
+                        for (uint32 i = 0; i < uint32(questObjective->Amount); i++)
+                            player->KilledMonster(creatureInfo, 0);
+
+                    break;
+                }
+                case QUEST_OBJECTIVE_TYPE_GO:
+                {
+                    if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(questObjective->ObjectId))
+                        for (uint32 i = 0; i < uint32(questObjective->Amount); i++)
+                            player->KillCreditGO(questObjective->ObjectId, 0);
+
+                    break;
+                }
+                case QUEST_OBJECTIVE_TYPE_ITEM:
+                {
+                    ItemPosCountVec dest;
+                    uint32 currentCounter = player->GetItemCount(questObjective->ObjectId, true);
+
+                    uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, questObjective->ObjectId, uint32(questObjective->Amount) - currentCounter);
+                    if (msg == EQUIP_ERR_OK)
+                    {
+                        Item* item = player->StoreNewItem(dest, questObjective->ObjectId, true);
+                        player->SendNewItem(item, uint32(questObjective->Amount) - currentCounter, true, false);
+                    }
+
+                    player->SendQuestUpdateAddCredit(quest, questObjective, ObjectGuid(0), currentCounter, uint32(questObjective->Amount) - currentCounter);
+
+                    break;
+                }
+                case QUEST_OBJECTIVE_TYPE_FACTION_REP:
+                case QUEST_OBJECTIVE_TYPE_FACTION_REP2:
+                {
+                    if (player->GetReputationMgr().GetReputation(questObjective->ObjectId) < questObjective->Amount)
+                        if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(questObjective->ObjectId))
+                            player->GetReputationMgr().SetReputation(factionEntry, questObjective->Amount);
+
+                    break;
+                }
+                case QUEST_OBJECTIVE_TYPE_MONEY:
+                {
+                    player->ModifyMoney(uint64(questObjective->Amount));
+                    break;
+                }
+                default:
+                    break;
             }
+
+            //player->SendQuestUpdateAddCredit();
         }
-
-        // All creature/GO slain/casted (not required, but otherwise it will display "Creature slain 0/10")
-        for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        {
-            int32 creature = quest->RequiredNpcOrGo[i];
-            uint32 creatureCount = quest->RequiredNpcOrGoCount[i];
-
-            if (creature > 0)
-            {
-                if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(creature))
-                    for (uint16 z = 0; z < creatureCount; ++z)
-                        player->KilledMonster(creatureInfo, 0);
-            }
-            else if (creature < 0)
-                for (uint16 z = 0; z < creatureCount; ++z)
-                    player->KillCreditGO(creature, 0);
-        }
-
-        // If the quest requires reputation to complete
-        if (uint32 repFaction = quest->GetRepObjectiveFaction())
-        {
-            uint32 repValue = quest->GetRepObjectiveValue();
-            uint32 curRep = player->GetReputationMgr().GetReputation(repFaction);
-            if (curRep < repValue)
-                if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(repFaction))
-                    player->GetReputationMgr().SetReputation(factionEntry, repValue);
-        }
-
-        // If the quest requires a SECOND reputation to complete
-        if (uint32 repFaction = quest->GetRepObjectiveFaction2())
-        {
-            uint32 repValue2 = quest->GetRepObjectiveValue2();
-            uint32 curRep = player->GetReputationMgr().GetReputation(repFaction);
-            if (curRep < repValue2)
-                if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(repFaction))
-                    player->GetReputationMgr().SetReputation(factionEntry, repValue2);
-        }
-
-        // If the quest requires money
-        int32 ReqOrRewMoney = quest->GetRewOrReqMoney();
-        if (ReqOrRewMoney < 0)
-            player->ModifyMoney(-ReqOrRewMoney);
 
         player->CompleteQuest(entry);
         return true;

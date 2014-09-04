@@ -620,19 +620,12 @@ public:
             if (itr->second.Status != QUEST_STATUS_INCOMPLETE)
                 return;
 
-            for (uint8 i = 0; i < 3; ++i)
-            {
-                if (uint32(quest->RequiredNpcOrGo[i]) != me->GetEntry())
-                    continue;
+            if (!quest->GetQuestObjectiveXObjectId(me->GetEntry()))
+                return;
 
-                if (itr->second.CreatureOrGOCount[i] != 0)
-                    continue;
-
-                player->KilledMonsterCredit(me->GetEntry(), 0);
-                player->Say(SAY_OFFER, LANG_UNIVERSAL);
-                sayStep = 1;
-                break;
-            }
+            player->KilledMonsterCredit(me->GetEntry(), 0);
+            player->Say(SAY_OFFER, LANG_UNIVERSAL);
+            sayStep = 1;
         }
 
         private:
