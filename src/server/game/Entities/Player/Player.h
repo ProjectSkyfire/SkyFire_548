@@ -2539,7 +2539,7 @@ class Player : public Unit, public GridObject<Player>
 
         void ReadyCheckComplete();
 
-		void ShowNeutralPlayerFactionSelectUI();
+        void ShowNeutralPlayerFactionSelectUI();
 
         uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 
