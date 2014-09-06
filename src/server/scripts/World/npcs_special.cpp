@@ -2471,7 +2471,6 @@ public:
 
 void AddSC_npcs_special()
 {
-	new npc_Spirit_of_Master_Shang_Xi();
     new npc_air_force_bots();
     new npc_lunaclaw_spirit();
     new npc_chicken_cluck();
@@ -2492,5 +2491,6 @@ void AddSC_npcs_special()
     new npc_locksmith();
     new npc_experience();
     new npc_firework();
+    new npc_Spirit_of_Master_Shang_Xi();
     new npc_spring_rabbit();
 }
