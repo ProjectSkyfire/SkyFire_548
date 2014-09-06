@@ -669,7 +669,7 @@ void AddSC_boss_ordos();
 //void AddSC_isle_of_thunder();
 //void AddSC_krasarang_wilds();
 //void AddSC_kun_lai_summit();
-//void AddSC_the_jade_forest();
+void AddSC_the_jade_forest();
 //void AddSC_the_situation_in_dalaran();
 //void AddSC_the_veiled_stair();
 //void AddSC_timeless_isle();
@@ -1407,7 +1407,7 @@ void AddPandariaScripts()
     //AddSC_isle_of_thunder();
     //AddSC_krasarang_wilds();
     //AddSC_kun_lai_summit();
-    //AddSC_the_jade_forest();
+    AddSC_the_jade_forest();
     //AddSC_the_situation_in_dalaran();
     //AddSC_the_veiled_stair();
     //AddSC_timeless_isle();
