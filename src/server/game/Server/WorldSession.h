@@ -979,7 +979,8 @@ class WorldSession
         void HandleRequestHotfix(WorldPacket& recvPacket);
         void HandleUpdateMissileTrajectory(WorldPacket& recvPacket);
         void HandleViolenceLevel(WorldPacket& recvPacket);
-        void HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket);
+		void HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket);
+		void HandleSelectFactionOpcode(WorldPacket& recvPacket);
         void HandleRequestCategoryCooldowns(WorldPacket& recvPacket);
 
         void SendBroadcastText(uint32 entry);
