@@ -17,9 +17,10 @@ git:
 branches:
   only:
     - master
+    - modern
 
 compiler:
-  - clang
+  - gcc
 
 before_install:
   - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
