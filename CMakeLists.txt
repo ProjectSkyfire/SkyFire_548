@@ -62,6 +62,7 @@ if( NOT USE_MYSQL_SOURCES )
 endif()
 
 if( UNIX )
+  add_definitions(-std=c++11)
   find_package(Readline)
   find_package(ZLIB)
   find_package(BZip2)

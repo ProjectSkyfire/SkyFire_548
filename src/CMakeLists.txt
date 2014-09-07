@@ -13,7 +13,5 @@ add_subdirectory(genrev)
 add_subdirectory(server)
 
 if(TOOLS)
-  add_definitions(-std=c++11)
   add_subdirectory(tools)
 endif(TOOLS)
-
