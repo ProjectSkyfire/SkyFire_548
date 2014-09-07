@@ -19,7 +19,7 @@ branches:
     - master
 
 compiler:
-  - gcc-4.8
+  - clang
 
 before_install:
   - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
