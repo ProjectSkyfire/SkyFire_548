@@ -21,9 +21,7 @@ set(SRC_FILES
            src/sparse/sparse.cpp
            src/FileStream.cpp
            src/SBaseCommon.cpp
-           src/SBaseDumpData.cpp
            src/SBaseFileTable.cpp
-           src/SBaseSubTypes.cpp
            src/SCompression.cpp
            src/SFileAddFile.cpp
            src/SFileAttributes.cpp
@@ -31,15 +29,12 @@ set(SRC_FILES
            src/SFileCreateArchive.cpp
            src/SFileExtractFile.cpp
            src/SFileFindFile.cpp
-           src/SFileGetFileInfo.cpp
            src/SFileListFile.cpp
            src/SFileOpenArchive.cpp
            src/SFileOpenFileEx.cpp
            src/SFilePatchArchives.cpp
            src/SFileReadFile.cpp
            src/SFileVerify.cpp
-           src/libtomcrypt/src/pk/rsa/rsa_verify_simple.c
-           src/libtomcrypt/src/misc/crypt_libc.c
 )
 
 set(TOMCRYPT_FILES
@@ -55,6 +50,7 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/misc/crypt_find_prng.c
            src/libtomcrypt/src/misc/crypt_hash_descriptor.c
            src/libtomcrypt/src/misc/crypt_hash_is_valid.c
+           src/libtomcrypt/src/misc/crypt_libc.c
            src/libtomcrypt/src/misc/crypt_ltc_mp_descriptor.c
            src/libtomcrypt/src/misc/crypt_prng_descriptor.c
            src/libtomcrypt/src/misc/crypt_prng_is_valid.c
@@ -75,20 +71,6 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/pk/asn1/der_decode_short_integer.c
            src/libtomcrypt/src/pk/asn1/der_decode_utctime.c
            src/libtomcrypt/src/pk/asn1/der_decode_utf8_string.c
-           src/libtomcrypt/src/pk/asn1/der_encode_bit_string.c
-           src/libtomcrypt/src/pk/asn1/der_encode_boolean.c
-           src/libtomcrypt/src/pk/asn1/der_encode_ia5_string.c
-           src/libtomcrypt/src/pk/asn1/der_encode_integer.c
-           src/libtomcrypt/src/pk/asn1/der_encode_object_identifier.c
-           src/libtomcrypt/src/pk/asn1/der_encode_octet_string.c
-           src/libtomcrypt/src/pk/asn1/der_encode_printable_string.c
-           src/libtomcrypt/src/pk/asn1/der_encode_sequence_ex.c
-           src/libtomcrypt/src/pk/asn1/der_encode_sequence_multi.c
-           src/libtomcrypt/src/pk/asn1/der_encode_set.c
-           src/libtomcrypt/src/pk/asn1/der_encode_setof.c
-           src/libtomcrypt/src/pk/asn1/der_encode_short_integer.c
-           src/libtomcrypt/src/pk/asn1/der_encode_utctime.c
-           src/libtomcrypt/src/pk/asn1/der_encode_utf8_string.c
            src/libtomcrypt/src/pk/asn1/der_length_bit_string.c
            src/libtomcrypt/src/pk/asn1/der_length_boolean.c
            src/libtomcrypt/src/pk/asn1/der_length_ia5_string.c
@@ -110,15 +92,13 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_mgf1.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_oaep_decode.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_pss_decode.c
-           src/libtomcrypt/src/pk/pkcs1/pkcs_1_pss_encode.c
            src/libtomcrypt/src/pk/pkcs1/pkcs_1_v1_5_decode.c
-           src/libtomcrypt/src/pk/pkcs1/pkcs_1_v1_5_encode.c
            src/libtomcrypt/src/pk/rsa/rsa_exptmod.c
            src/libtomcrypt/src/pk/rsa/rsa_free.c
            src/libtomcrypt/src/pk/rsa/rsa_import.c
            src/libtomcrypt/src/pk/rsa/rsa_make_key.c
-           src/libtomcrypt/src/pk/rsa/rsa_sign_hash.c
            src/libtomcrypt/src/pk/rsa/rsa_verify_hash.c
+           src/libtomcrypt/src/pk/rsa/rsa_verify_simple.c
 )
 
 set(TOMMATH_FILES
@@ -251,7 +231,7 @@ set(ZLIB_BZIP2_FILES
            src/bzip2/huffman.c
            src/bzip2/randtable.c
            src/zlib/adler32.c
-           src/zlib/compress.c
+           src/zlib/compress2.c
            src/zlib/crc32.c
            src/zlib/deflate.c
            src/zlib/inffast.c
@@ -262,30 +242,25 @@ set(ZLIB_BZIP2_FILES
 )
 
 set(TEST_SRC_FILES
-           test/StormTest.cpp
+           test/Test.cpp
 )
 
 add_definitions(-D_7ZIP_ST -DBZ_STRICT_ANSI)
 
 if(WIN32)
     if(MSVC)
-        message(STATUS "Using MSVC")
         add_definitions(-D_7ZIP_ST -DWIN32)
-    else()
-        message(STATUS "Using mingw")
     endif()
     set(SRC_ADDITIONAL_FILES ${ZLIB_BZIP2_FILES} ${TOMCRYPT_FILES} ${TOMMATH_FILES})
     set(LINK_LIBS wininet)
 endif()
 
 if(APPLE)
-    message(STATUS "Using Mac OS X port")
     set(LINK_LIBS z bz2)
     set(SRC_ADDITIONAL_FILES ${TOMCRYPT_FILES} ${TOMMATH_FILES})
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-    message(STATUS "Using Linux port")
     option(WITH_LIBTOMCRYPT "Use system LibTomCrypt library" OFF)
     if(WITH_LIBTOMCRYPT)
         set(LINK_LIBS z bz2 tomcrypt)
@@ -295,39 +270,14 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     endif()
 endif()
 
-add_library(storm SHARED ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
+add_library(storm STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
 target_link_libraries(storm ${LINK_LIBS})
 
-option(WITH_TEST "Compile Test application" OFF)
-if(WITH_TEST)
-    add_executable(storm_test ${TEST_SRC_FILES})
-    target_link_libraries(storm_test storm)
-endif()
-
-option(WITH_STATIC "Compile static linked library" OFF)
-if(WITH_STATIC)
-    add_library(storm_static STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
-    target_link_libraries(storm_static ${LINK_LIBS})
-    set_target_properties(storm_static PROPERTIES OUTPUT_NAME storm)
-    install(TARGETS storm_static RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib FRAMEWORK DESTINATION /Library/Frameworks)
-endif()
-
-if(APPLE)
-    set_target_properties(storm PROPERTIES FRAMEWORK true)
-    set_target_properties(storm PROPERTIES PUBLIC_HEADER "src/StormLib.h src/StormPort.h")
-    set_target_properties(storm PROPERTIES LINK_FLAGS "-framework Carbon")
-endif()
-
 if(UNIX)
-    set_target_properties(storm PROPERTIES VERSION 9.0.0)
-    set_target_properties(storm PROPERTIES SOVERSION 9)
+    set_target_properties(storm PROPERTIES SOVERSION 0)
 endif()
 
 # On Win32, build StormLib.dll since we don't want to clash with Storm.dll
 if(WIN32)
     set_target_properties(storm PROPERTIES OUTPUT_NAME StormLib)
 endif()
-
-install(TARGETS storm RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib FRAMEWORK DESTINATION /Library/Frameworks)
-install(FILES src/StormLib.h src/StormPort.h DESTINATION include)
-

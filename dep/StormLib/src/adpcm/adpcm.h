@@ -12,15 +12,11 @@
 #define __ADPCM_H__
 
 //-----------------------------------------------------------------------------
-// Defines
+// Functions
 
-#define MAX_ADPCM_CHANNEL_COUNT   2
-#define INITIAL_ADPCM_STEP_INDEX  0x2C
+#include "../StormPort.h"
 
-//-----------------------------------------------------------------------------
-// Public functions
-
-int  CompressADPCM  (void * pvOutBuffer, int dwOutLength, void * pvInBuffer, int dwInLength, int nCmpType, int ChannelCount);
-int  DecompressADPCM(void * pvOutBuffer, int dwOutLength, void * pvInBuffer, int dwInLength, int ChannelCount);
+int  CompressADPCM  (unsigned char * pbOutBuffer, int dwOutLength, short * pwInBuffer, int dwInLength, int nCmpType, int nChannels);
+int  DecompressADPCM(unsigned char * pbOutBuffer, int dwOutLength, unsigned char * pbInBuffer, int dwInLength, int nChannels);
 
 #endif // __ADPCM_H__

@@ -91,7 +91,7 @@ void DumpHetAndBetTable(TMPQHetTable * pHetTable, TMPQBetTable * pBetTable)
         DWORD dwFlags = 0;
         DWORD dwBetIndex = 0;
 
-        GetBits(pHetTable->pBetIndexes, i * pHetTable->dwIndexSizeTotal,
+        pHetTable->pBetIndexes->GetBits(i * pHetTable->dwIndexSizeTotal,
                                         pHetTable->dwIndexSize,
                                        &dwBetIndex,
                                         4);
@@ -100,27 +100,27 @@ void DumpHetAndBetTable(TMPQHetTable * pHetTable, TMPQBetTable * pBetTable)
         {
             DWORD dwEntryIndex = pBetTable->dwTableEntrySize * dwBetIndex;
 
-            GetBits(pBetTable->pBetHashes, dwBetIndex * pBetTable->dwBetHashSizeTotal,
+            pBetTable->pBetHashes->GetBits(dwBetIndex * pBetTable->dwBetHashSizeTotal,
                                            pBetTable->dwBetHashSize,
                                           &BetHash,
                                            8);
 
-            GetBits(pBetTable->pFileTable, dwEntryIndex + pBetTable->dwBitIndex_FilePos,
+            pBetTable->pFileTable->GetBits(dwEntryIndex + pBetTable->dwBitIndex_FilePos,
                                            pBetTable->dwBitCount_FilePos,
                                           &ByteOffset,
                                            8);
 
-            GetBits(pBetTable->pFileTable, dwEntryIndex + pBetTable->dwBitIndex_FileSize,
+            pBetTable->pFileTable->GetBits(dwEntryIndex + pBetTable->dwBitIndex_FileSize,
                                            pBetTable->dwBitCount_FileSize,
                                           &dwFileSize,
                                            4);
 
-            GetBits(pBetTable->pFileTable, dwEntryIndex + pBetTable->dwBitIndex_CmpSize,
+            pBetTable->pFileTable->GetBits(dwEntryIndex + pBetTable->dwBitIndex_CmpSize,
                                            pBetTable->dwBitCount_CmpSize,
                                           &dwCmpSize,
                                            4);
 
-            GetBits(pBetTable->pFileTable, dwEntryIndex + pBetTable->dwBitIndex_FlagIndex,
+            pBetTable->pFileTable->GetBits(dwEntryIndex + pBetTable->dwBitIndex_FlagIndex,
                                            pBetTable->dwBitCount_FlagIndex,
                                           &dwFlagIndex,
                                            4);

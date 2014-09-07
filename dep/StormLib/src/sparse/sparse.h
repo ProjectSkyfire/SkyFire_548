@@ -13,7 +13,7 @@
 
 #include "../StormPort.h"
 
-void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer);
-int  DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer);
+void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutLength, unsigned char * pbInBuffer, int cbInLength);
+int  DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutLength, unsigned char * pbInBuffer, int cbInLength);
 
 #endif // __SPARSE_H__

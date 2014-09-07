@@ -10,389 +10,349 @@
 /* 11.03.03  1.00  Lad  Splitted from Pkware.cpp                             */
 /* 20.05.03  2.00  Lad  Added compression                                    */
 /* 19.11.03  2.01  Dan  Big endian handling                                  */
-/* 10.01.13  3.00  Lad  Refactored, beautified, documented :-)               */
 /*****************************************************************************/
 
-#include "../StormPort.h"
 #include "adpcm.h"
+
+//------------------------------------------------------------------------------
+// Structures
+
+typedef union _BYTE_AND_WORD_PTR
+{
+    short * pw;
+    unsigned char * pb;
+} BYTE_AND_WORD_PTR;
+
+typedef union _WORD_AND_BYTE_ARRAY
+{
+    short w;
+    unsigned char b[2];
+} WORD_AND_BYTE_ARRAY;
 
 //-----------------------------------------------------------------------------
 // Tables necessary dor decompression
 
-static int NextStepTable[] =
+static long Table1503F120[] =
 {
-    -1, 0, -1, 4, -1, 2, -1, 6,
-    -1, 1, -1, 5, -1, 3, -1, 7,
-    -1, 1, -1, 5, -1, 3, -1, 7,
-    -1, 2, -1, 4, -1, 6, -1, 8
+    0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000004, 0xFFFFFFFF, 0x00000002, 0xFFFFFFFF, 0x00000006,
+    0xFFFFFFFF, 0x00000001, 0xFFFFFFFF, 0x00000005, 0xFFFFFFFF, 0x00000003, 0xFFFFFFFF, 0x00000007,
+    0xFFFFFFFF, 0x00000001, 0xFFFFFFFF, 0x00000005, 0xFFFFFFFF, 0x00000003, 0xFFFFFFFF, 0x00000007,  
+    0xFFFFFFFF, 0x00000002, 0xFFFFFFFF, 0x00000004, 0xFFFFFFFF, 0x00000006, 0xFFFFFFFF, 0x00000008  
 };
 
-static int StepSizeTable[] =
+static long step_table[] =
 {
-        7,     8,     9,    10,     11,    12,    13,    14,
-       16,    17,    19,    21,     23,    25,    28,    31,
-       34,    37,    41,    45,     50,    55,    60,    66,
-       73,    80,    88,    97,    107,   118,   130,   143,
-      157,   173,   190,   209,    230,   253,   279,   307,
-      337,   371,   408,   449,    494,   544,   598,   658,
-      724,   796,   876,   963,   1060,  1166,  1282,  1411,
-     1552,  1707,  1878,  2066,   2272,  2499,  2749,  3024,
-     3327,  3660,  4026,  4428,   4871,  5358,  5894,  6484,
-     7132,  7845,  8630,  9493,  10442, 11487, 12635, 13899,
-     15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794,
-     32767
+    0x00000007, 0x00000008, 0x00000009, 0x0000000A, 0x0000000B, 0x0000000C, 0x0000000D, 0x0000000E,
+    0x00000010, 0x00000011, 0x00000013, 0x00000015, 0x00000017, 0x00000019, 0x0000001C, 0x0000001F,
+    0x00000022, 0x00000025, 0x00000029, 0x0000002D, 0x00000032, 0x00000037, 0x0000003C, 0x00000042,
+    0x00000049, 0x00000050, 0x00000058, 0x00000061, 0x0000006B, 0x00000076, 0x00000082, 0x0000008F,
+    0x0000009D, 0x000000AD, 0x000000BE, 0x000000D1, 0x000000E6, 0x000000FD, 0x00000117, 0x00000133,
+    0x00000151, 0x00000173, 0x00000198, 0x000001C1, 0x000001EE, 0x00000220, 0x00000256, 0x00000292,
+    0x000002D4, 0x0000031C, 0x0000036C, 0x000003C3, 0x00000424, 0x0000048E, 0x00000502, 0x00000583,
+    0x00000610, 0x000006AB, 0x00000756, 0x00000812, 0x000008E0, 0x000009C3, 0x00000ABD, 0x00000BD0,
+    0x00000CFF, 0x00000E4C, 0x00000FBA, 0x0000114C, 0x00001307, 0x000014EE, 0x00001706, 0x00001954,
+    0x00001BDC, 0x00001EA5, 0x000021B6, 0x00002515, 0x000028CA, 0x00002CDF, 0x0000315B, 0x0000364B,
+    0x00003BB9, 0x000041B2, 0x00004844, 0x00004F7E, 0x00005771, 0x0000602F, 0x000069CE, 0x00007462,
+    0x00007FFF
 };
 
-//-----------------------------------------------------------------------------
-// Helper class for writing output ADPCM data
-
-class TADPCMStream
-{
-    public:
-
-    TADPCMStream(void * pvBuffer, size_t cbBuffer)
-    {
-        pbBufferEnd = (unsigned char *)pvBuffer + cbBuffer;
-        pbBuffer = (unsigned char *)pvBuffer;
-    }
-
-    bool ReadByteSample(unsigned char & ByteSample)
-    {
-        // Check if there is enough space in the buffer
-        if(pbBuffer >= pbBufferEnd)
-            return false;
-
-        ByteSample = *pbBuffer++;
-        return true;
-    }
-
-    bool WriteByteSample(unsigned char ByteSample)
-    {
-        // Check if there is enough space in the buffer
-        if(pbBuffer >= pbBufferEnd)
-            return false;
-
-        *pbBuffer++ = ByteSample;
-        return true;
-    }
-
-    bool ReadWordSample(short & OneSample)
-    {
-        // Check if we have enough space in the output buffer
-        if((size_t)(pbBufferEnd - pbBuffer) < sizeof(short))
-            return false;
-
-        // Write the sample
-        OneSample = pbBuffer[0] + (((short)pbBuffer[1]) << 0x08);
-        pbBuffer += sizeof(short);
-        return true;
-    }
-
-    bool WriteWordSample(short OneSample)
-    {
-        // Check if we have enough space in the output buffer
-        if((size_t)(pbBufferEnd - pbBuffer) < sizeof(short))
-            return false;
-
-        // Write the sample
-        *pbBuffer++ = (unsigned char)(OneSample & 0xFF);
-        *pbBuffer++ = (unsigned char)(OneSample >> 0x08);
-        return true;
-    }
-
-    int LengthProcessed(void * pvBuffer)
-    {
-        return pbBuffer - (unsigned char *)pvBuffer;
-    }
-
-    unsigned char * pbBufferEnd;
-    unsigned char * pbBuffer;
-};                    
-
 //----------------------------------------------------------------------------
-// Local functions
+// CompressWave
 
-static inline short GetNextStepIndex(int StepIndex, unsigned int EncodedSample)
+// 1500EF70
+int CompressADPCM(unsigned char * pbOutBuffer, int dwOutLength, short * pwInBuffer, int dwInLength, int nChannels, int nCmpLevel)
+//                ECX                          EDX
 {
-    // Get the next step index
-    StepIndex = StepIndex + NextStepTable[EncodedSample & 0x1F];
+    WORD_AND_BYTE_ARRAY Wcmp;
+    BYTE_AND_WORD_PTR out;                    // Pointer to the output buffer
+    long SInt32Array1[2];
+    long SInt32Array2[2];
+    long SInt32Array3[2];
+    long nBytesRemains = dwOutLength;       // Number of bytes remaining
+    long nWordsRemains;                     // Number of words remaining
+//  unsigned char * pbSaveOutBuffer;        // Copy of output buffer (actually not used)
+    unsigned long dwBitBuff;
+    unsigned long dwStopBit;
+    unsigned long dwBit;
+    unsigned long ebx;
+    unsigned long esi;
+    long nTableValue;
+    long nOneWord;
+    long var_1C;
+    long var_2C;
+    int nLength;
+    int nIndex;
+    int nValue;
+    int i, chnl;
 
-    // Don't make the step index overflow
-    if(StepIndex < 0)
-        StepIndex = 0;
-    else if(StepIndex > 88)
-        StepIndex = 88;
-
-    return (short)StepIndex;
-}
-
-static inline int UpdatePredictedSample(int PredictedSample, int EncodedSample, int Difference)
-{
-    // Is the sign bit set?
-    if(EncodedSample & 0x40)
-    {
-        PredictedSample -= Difference;
-        if(PredictedSample <= -32768)
-            PredictedSample = -32768;
-    }
-    else
-    {
-        PredictedSample += Difference;
-        if(PredictedSample >= 32767)
-            PredictedSample = 32767;
-    }
-
-    return PredictedSample;
-}
-
-static inline int DecodeSample(int PredictedSample, int EncodedSample, int StepSize, int Difference)
-{
-    if(EncodedSample & 0x01)
-        Difference += (StepSize >> 0);
-
-    if(EncodedSample & 0x02)
-        Difference += (StepSize >> 1);
-
-    if(EncodedSample & 0x04)
-        Difference += (StepSize >> 2);
-
-    if(EncodedSample & 0x08)
-        Difference += (StepSize >> 3);
-
-    if(EncodedSample & 0x10)
-        Difference += (StepSize >> 4);
-
-    if(EncodedSample & 0x20)
-        Difference += (StepSize >> 5);
-
-    return UpdatePredictedSample(PredictedSample, EncodedSample, Difference);
-}
-
-//----------------------------------------------------------------------------
-// Compression routine
-
-int CompressADPCM(void * pvOutBuffer, int cbOutBuffer, void * pvInBuffer, int cbInBuffer, int ChannelCount, int CompressionLevel)
-{
-    TADPCMStream os(pvOutBuffer, cbOutBuffer);      // The output stream
-    TADPCMStream is(pvInBuffer, cbInBuffer);        // The input stream
-    unsigned char BitShift = (unsigned char)(CompressionLevel - 1);
-    short PredictedSamples[MAX_ADPCM_CHANNEL_COUNT];// Predicted samples for each channel
-    short StepIndexes[MAX_ADPCM_CHANNEL_COUNT];     // Step indexes for each channel
-    short InputSample;                              // Input sample for the current channel
-    int TotalStepSize;
-    int ChannelIndex;
-    int AbsDifference;
-    int Difference;
-    int MaxBitMask;
-    int StepSize;
-
-//  _tprintf(_T("== CMPR Started ==============\n"));
-
-    // First byte in the output stream contains zero. The second one contains the compression level
-    os.WriteByteSample(0);
-    if(!os.WriteByteSample(BitShift))
+    // If less than 2 bytes remain, don't decompress anything
+//  pbSaveOutBuffer = pbOutBuffer;
+    out.pb = pbOutBuffer;
+    if(nBytesRemains < 2)
         return 2;
 
-    // Set the initial step index for each channel
-    StepIndexes[0] = StepIndexes[1] = INITIAL_ADPCM_STEP_INDEX;
+    Wcmp.b[1] = (unsigned char)(nCmpLevel - 1);
+    Wcmp.b[0] = (unsigned char)0;
 
-    // Next, InitialSample value for each channel follows
-    for(int i = 0; i < ChannelCount; i++)
+    *out.pw++ = BSWAP_INT16_SIGNED(Wcmp.w);
+    if((out.pb - pbOutBuffer + (nChannels * 2)) > nBytesRemains)
+        return (int)(out.pb - pbOutBuffer + (nChannels * 2));
+
+    SInt32Array1[0] = SInt32Array1[1] = 0x2C;
+
+    for(i = 0; i < nChannels; i++)
     {
-        // Get the initial sample from the input stream
-        if(!is.ReadWordSample(InputSample))
-            return os.LengthProcessed(pvOutBuffer);
-
-        // Store the initial sample to our sample array
-        PredictedSamples[i] = InputSample;
-
-        // Also store the loaded sample to the output stream
-        if(!os.WriteWordSample(InputSample))
-            return os.LengthProcessed(pvOutBuffer);
+        nOneWord = BSWAP_INT16_SIGNED(*pwInBuffer++);
+        *out.pw++ = BSWAP_INT16_SIGNED((short)nOneWord);
+        SInt32Array2[i] = nOneWord;
     }
 
-    // Get the initial index
-    ChannelIndex = ChannelCount - 1;
+    // Weird. But it's there
+    nLength = dwInLength;
+    if(nLength < 0)                     // mov eax, dwInLength; cdq; sub eax, edx;
+        nLength++;
+
+    nLength = (nLength / 2) - (int)(out.pb - pbOutBuffer);
+    nLength = (nLength < 0) ? 0 : nLength;
     
-    // Now keep reading the input data as long as there is something in the input buffer
-    while(is.ReadWordSample(InputSample))
+    nIndex  = nChannels - 1;            // edi
+    nWordsRemains = dwInLength / 2;     // eax
+    
+    // ebx - nChannels
+    // ecx - pwOutPos
+    for(chnl = nChannels; chnl < nWordsRemains; chnl++)
     {
-        int EncodedSample = 0;
+        // 1500F030
+        if((out.pb - pbOutBuffer + 2) > nBytesRemains)
+            return (int)(out.pb - pbOutBuffer + 2);
 
-        // If we have two channels, we need to flip the channel index
-        ChannelIndex = (ChannelIndex + 1) % ChannelCount;
+        // Switch index
+        if(nChannels == 2)
+            nIndex = (nIndex == 0) ? 1 : 0;
 
-        // Get the difference from the previous sample.
-        // If the difference is negative, set the sign bit to the encoded sample
-        AbsDifference = InputSample - PredictedSamples[ChannelIndex];
-        if(AbsDifference < 0)
+        // Load one word from the input stream
+        nOneWord = BSWAP_INT16_SIGNED(*pwInBuffer++);   // ecx - nOneWord
+        SInt32Array3[nIndex] = nOneWord;
+
+        // esi - SInt32Array2[nIndex]
+        // eax - nValue
+        nValue = nOneWord - SInt32Array2[nIndex];
+        nValue = (nValue < 0) ? ((nValue ^ 0xFFFFFFFF) + 1) : nValue;
+
+        ebx = (nOneWord >= SInt32Array2[nIndex]) ? 0 : 0x40;
+
+        // esi - SInt32Array2[nIndex]
+        // edx - step_table[SInt32Array2[nIndex]]
+        // edi - (step_table[SInt32Array1[nIndex]] >> nCmpLevel)
+        nTableValue = step_table[SInt32Array1[nIndex]];
+        dwStopBit = (unsigned long)nCmpLevel;
+
+        // edi - nIndex;
+        if(nValue < (nTableValue >> nCmpLevel))
         {
-            AbsDifference = -AbsDifference;
-            EncodedSample |= 0x40;
-        }
-
-        // If the difference is too low (higher that difference treshold),
-        // write a step index modifier marker
-        StepSize = StepSizeTable[StepIndexes[ChannelIndex]];
-        if(AbsDifference < (StepSize >> CompressionLevel))
-        {
-            if(StepIndexes[ChannelIndex] != 0)
-                StepIndexes[ChannelIndex]--;
-            
-            os.WriteByteSample(0x80);
+            if(SInt32Array1[nIndex] != 0)
+                SInt32Array1[nIndex]--;
+            *out.pb++ = 0x80;
         }
         else
         {
-            // If the difference is too high, write marker that
-            // indicates increase in step size
-            while(AbsDifference > (StepSize << 1))
+            while(nValue > nTableValue * 2)
             {
-                if(StepIndexes[ChannelIndex] >= 0x58)
+                if(SInt32Array1[nIndex] >= 0x58 || nLength == 0)
                     break;
 
-                // Modify the step index
-                StepIndexes[ChannelIndex] += 8;
-                if(StepIndexes[ChannelIndex] > 0x58)
-                    StepIndexes[ChannelIndex] = 0x58;
+                SInt32Array1[nIndex] += 8;
+                if(SInt32Array1[nIndex] > 0x58)
+                    SInt32Array1[nIndex] = 0x58;
 
-                // Write the "modify step index" marker
-                StepSize = StepSizeTable[StepIndexes[ChannelIndex]];
-                os.WriteByteSample(0x81);
+                nTableValue = step_table[SInt32Array1[nIndex]];
+                *out.pb++ = 0x81;
+                nLength--;
             }
 
-            // Get the limit bit value
-            MaxBitMask = (1 << (BitShift - 1));
-            MaxBitMask = (MaxBitMask > 0x20) ? 0x20 : MaxBitMask;
-            Difference = StepSize >> BitShift;
-            TotalStepSize = 0;
+            var_2C = nTableValue >> Wcmp.b[1];
+            dwBitBuff = 0;
 
-            for(int BitVal = 0x01; BitVal <= MaxBitMask; BitVal <<= 1)
+            esi = (1 << (dwStopBit - 2));
+            dwStopBit = (esi <= 0x20) ? esi : 0x20;
+
+            for(var_1C = 0, dwBit = 1; ; dwBit <<= 1)
             {
-                if((TotalStepSize + StepSize) <= AbsDifference)
+//              esi = var_1C + nTableValue;
+                if((var_1C + nTableValue) <= nValue)
                 {
-                    TotalStepSize += StepSize;
-                    EncodedSample |= BitVal;
+                    var_1C += nTableValue;
+                    dwBitBuff |= dwBit;
                 }
-                StepSize >>= 1;
+                if(dwBit == dwStopBit)
+                    break;
+               
+                nTableValue >>= 1;
             }
 
-            PredictedSamples[ChannelIndex] = (short)UpdatePredictedSample(PredictedSamples[ChannelIndex],
-                                                                          EncodedSample,
-                                                                          Difference + TotalStepSize);
-            // Write the encoded sample to the output stream
-            if(!os.WriteByteSample((unsigned char)EncodedSample))
-                break;
-            
-            // Calculates the step index to use for the next encode
-            StepIndexes[ChannelIndex] = GetNextStepIndex(StepIndexes[ChannelIndex], EncodedSample);
+            nValue = SInt32Array2[nIndex];
+            if(ebx != 0)
+            {
+                nValue -= (var_1C + var_2C);
+                if(nValue < -32768)
+                    nValue = -32768;
+            }
+            else
+            {
+                nValue += (var_1C + var_2C);
+                if(nValue > 32767)
+                    nValue = 32767;
+            }
+
+            SInt32Array2[nIndex]  = nValue;
+            *out.pb++ = (unsigned char)(dwBitBuff | ebx);
+            nTableValue = Table1503F120[dwBitBuff & 0x1F];
+            SInt32Array1[nIndex]  = SInt32Array1[nIndex] + nTableValue; 
+            if(SInt32Array1[nIndex] < 0)
+                SInt32Array1[nIndex] = 0;
+            else if(SInt32Array1[nIndex] > 0x58)
+                SInt32Array1[nIndex] = 0x58;
         }
     }
 
-//  _tprintf(_T("== CMPR Ended ================\n"));
-    return os.LengthProcessed(pvOutBuffer);
+    return (int)(out.pb - pbOutBuffer);
 }
 
 //----------------------------------------------------------------------------
-// Decompression routine
+// DecompressADPCM
 
-int DecompressADPCM(void * pvOutBuffer, int cbOutBuffer, void * pvInBuffer, int cbInBuffer, int ChannelCount)
+// 1500F230
+int DecompressADPCM(unsigned char * pbOutBuffer, int dwOutLength, unsigned char * pbInBuffer, int dwInLength, int nChannels)
 {
-    TADPCMStream os(pvOutBuffer, cbOutBuffer);          // Output stream
-    TADPCMStream is(pvInBuffer, cbInBuffer);            // Input stream
-    unsigned char EncodedSample;
-    unsigned char BitShift;
-    short PredictedSamples[MAX_ADPCM_CHANNEL_COUNT];    // Predicted sample for each channel
-    short StepIndexes[MAX_ADPCM_CHANNEL_COUNT];         // Predicted step index for each channel
-    int ChannelIndex;                                   // Current channel index
+    BYTE_AND_WORD_PTR out;                // Output buffer
+    BYTE_AND_WORD_PTR in;
+    unsigned char * pbInBufferEnd = (pbInBuffer + dwInLength);
+    long SInt32Array1[2];
+    long SInt32Array2[2];
+    long nOneWord;
+    int nIndex;
+    int i;
 
-    // Initialize the StepIndex for each channel
-    StepIndexes[0] = StepIndexes[1] = INITIAL_ADPCM_STEP_INDEX;
+    SInt32Array1[0] = SInt32Array1[1] = 0x2C;
+    out.pb = pbOutBuffer;
+    in.pb = pbInBuffer;
+    in.pw++;
 
-//  _tprintf(_T("== DCMP Started ==============\n"));
-
-    // The first byte is always zero, the second one contains bit shift (compression level - 1)
-    is.ReadByteSample(BitShift);
-    is.ReadByteSample(BitShift);
-//  _tprintf(_T("DCMP: BitShift = %u\n"), (unsigned int)(unsigned char)BitShift);
-
-    // Next, InitialSample value for each channel follows
-    for(int i = 0; i < ChannelCount; i++)
+    // Fill the Uint32Array2 array by channel values.
+    for(i = 0; i < nChannels; i++)
     {
-        // Get the initial sample from the input stream
-        short InitialSample;
+        nOneWord = BSWAP_INT16_SIGNED(*in.pw++);
+        SInt32Array2[i] = nOneWord;
+        if(dwOutLength < 2)
+            return (int)(out.pb - pbOutBuffer);
 
-        // Attempt to read the initial sample
-        if(!is.ReadWordSample(InitialSample))
-            return os.LengthProcessed(pvOutBuffer);
-
-//      _tprintf(_T("DCMP: Loaded InitialSample[%u]: %04X\n"), i, (unsigned int)(unsigned short)InitialSample);
-
-        // Store the initial sample to our sample array
-        PredictedSamples[i] = InitialSample;
-
-        // Also store the loaded sample to the output stream
-        if(!os.WriteWordSample(InitialSample))
-            return os.LengthProcessed(pvOutBuffer);
+        *out.pw++ = BSWAP_INT16_SIGNED((short)nOneWord);
+        dwOutLength -= sizeof(short);
     }
 
     // Get the initial index
-    ChannelIndex = ChannelCount - 1;
+    nIndex = nChannels - 1;
 
-    // Keep reading as long as there is something in the input buffer
-    while(is.ReadByteSample(EncodedSample))
+    // Perform the decompression
+    while(in.pb < pbInBufferEnd)
     {
-//      _tprintf(_T("DCMP: Loaded Encoded Sample: %02X\n"), (unsigned int)(unsigned char)EncodedSample);
+        unsigned char nOneByte = *in.pb++;
 
-        // If we have two channels, we need to flip the channel index
-        ChannelIndex = (ChannelIndex + 1) % ChannelCount;
+        // Switch index
+        if(nChannels == 2)
+            nIndex = (nIndex == 0) ? 1 : 0;
 
-        if(EncodedSample == 0x80)
+        // 1500F2A2: Get one byte from input buffer
+        if(nOneByte & 0x80)
         {
-            if(StepIndexes[ChannelIndex] != 0)
-                StepIndexes[ChannelIndex]--;
+            switch(nOneByte & 0x7F)
+            {
+                case 0:     // 1500F315
+                    if(SInt32Array1[nIndex] != 0)
+                        SInt32Array1[nIndex]--;
 
-//          _tprintf(_T("DCMP: Writing Decoded Sample: %04lX\n"), (unsigned int)(unsigned short)PredictedSamples[ChannelIndex]);
-            if(!os.WriteWordSample(PredictedSamples[ChannelIndex]))
-                return os.LengthProcessed(pvOutBuffer);
-        }
-        else if(EncodedSample == 0x81)
-        {
-            // Modify the step index
-            StepIndexes[ChannelIndex] += 8;
-            if(StepIndexes[ChannelIndex] > 0x58)
-                StepIndexes[ChannelIndex] = 0x58;
+                    if(dwOutLength < 2)
+                        return (int)(out.pb - pbOutBuffer);
 
-//          _tprintf(_T("DCMP: New value of StepIndex: %04lX\n"), (unsigned int)(unsigned short)StepIndexes[ChannelIndex]);
+                    *out.pw++ = BSWAP_INT16_SIGNED((unsigned short)SInt32Array2[nIndex]);
+                    dwOutLength -= sizeof(unsigned short);
+                    break;
 
-            // Next pass, keep going on the same channel
-            ChannelIndex = (ChannelIndex + 1) % ChannelCount;
+                case 1:     // 1500F2E8
+                    SInt32Array1[nIndex] += 8;
+                    if(SInt32Array1[nIndex] > 0x58)
+                        SInt32Array1[nIndex] = 0x58;
+                    
+                    if(nChannels == 2)
+                        nIndex = (nIndex == 0) ? 1 : 0;
+                    break;
+
+                case 2:     // 1500F41E
+                    break;
+
+                default:    // 1500F2C4
+                    SInt32Array1[nIndex] -= 8;
+                    if(SInt32Array1[nIndex] < 0)
+                        SInt32Array1[nIndex] = 0;
+
+                    if(nChannels == 2)
+                        nIndex = (nIndex == 0) ? 1 : 0;
+                    break;
+            }
         }
         else
         {
-            int StepIndex = StepIndexes[ChannelIndex];
-            int StepSize = StepSizeTable[StepIndex];
+            // 1500F349
+            long temp1 = step_table[SInt32Array1[nIndex]];     // EDI
+            long temp2 = temp1 >> pbInBuffer[1];               // ESI
+            long temp3 = SInt32Array2[nIndex];                 // ECX
 
-            // Encode one sample
-            PredictedSamples[ChannelIndex] = (short)DecodeSample(PredictedSamples[ChannelIndex],
-                                                                 EncodedSample, 
-                                                                 StepSize,
-                                                                 StepSize >> BitShift);
+            if(nOneByte & 0x01)          // EBX = nOneByte
+                temp2 += (temp1 >> 0);
 
-//          _tprintf(_T("DCMP: Writing decoded sample: %04X\n"), (unsigned int)(unsigned short)PredictedSamples[ChannelIndex]);
+            if(nOneByte & 0x02)
+                temp2 += (temp1 >> 1);
 
-            // Write the decoded sample to the output stream
-            if(!os.WriteWordSample(PredictedSamples[ChannelIndex]))
+            if(nOneByte & 0x04)
+                temp2 += (temp1 >> 2);
+
+            if(nOneByte & 0x08)
+                temp2 += (temp1 >> 3);
+
+            if(nOneByte & 0x10)
+                temp2 += (temp1 >> 4);
+
+            if(nOneByte & 0x20)
+                temp2 += (temp1 >> 5);
+
+            if(nOneByte & 0x40)
+            {
+                temp3 = temp3 - temp2;
+                if(temp3 <= -32768)
+                    temp3 = -32768;
+            }
+            else
+            {
+                temp3 = temp3 + temp2;
+                if(temp3 >= 32767)
+                    temp3 = 32767;
+            }
+
+            SInt32Array2[nIndex] = temp3;
+            if(dwOutLength < 2)
                 break;
 
-            // Calculates the step index to use for the next encode
-            StepIndexes[ChannelIndex] = GetNextStepIndex(StepIndex, EncodedSample);
-//          _tprintf(_T("DCMP: New step index: %04X\n"), (unsigned int)(unsigned short)StepIndexes[ChannelIndex]);
+            // Store the output 16-bit value
+            *out.pw++ = BSWAP_INT16_SIGNED((short)SInt32Array2[nIndex]);
+            dwOutLength -= 2;
+
+            SInt32Array1[nIndex] += Table1503F120[nOneByte & 0x1F];
+
+            if(SInt32Array1[nIndex] < 0)
+                SInt32Array1[nIndex] = 0;
+            else if(SInt32Array1[nIndex] > 0x58)
+                SInt32Array1[nIndex] = 0x58;
         }
     }
-
-//  _tprintf(_T("DCMP: Total length written: %u\n"), (unsigned int)os.LengthProcessed(pvOutBuffer));
-//  _tprintf(_T("== DCMP Ended ================\n"));
-
-    // Return total bytes written since beginning of the output buffer
-    return os.LengthProcessed(pvOutBuffer);
+    return (int)(out.pb - pbOutBuffer);
 }

@@ -23,15 +23,13 @@
 //-----------------------------------------------------------------------------
 // Public functions
 
-void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer)
+void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned char * pbInBuffer, int cbInBuffer)
 {
-    unsigned char * pbOutBufferEnd = (unsigned char *)pvOutBuffer + *pcbOutBuffer;
-    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
-    unsigned char * pbLastNonZero = (unsigned char *)pvInBuffer;
-    unsigned char * pbOutBuffer0 = (unsigned char *)pvOutBuffer;
-    unsigned char * pbInBuffPtr = (unsigned char *)pvInBuffer;
-    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
-    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
+    unsigned char * pbOutBufferEnd = pbOutBuffer + *pcbOutBuffer;
+    unsigned char * pbInBufferEnd = pbInBuffer + cbInBuffer;
+    unsigned char * pbLastNonZero = pbInBuffer;
+    unsigned char * pbOutBuffer0 = pbOutBuffer;
+    unsigned char * pbInBuffPtr = pbInBuffer;
     size_t NumberOfNonZeros;
     size_t NumberOfZeros;
 
@@ -236,11 +234,9 @@ void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, i
     *pcbOutBuffer = (int)(pbOutBuffer - pbOutBuffer0);
 }
 
-int DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer)
+int DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned char * pbInBuffer, int cbInBuffer)
 {
-    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
-    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
-    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
+    unsigned char * pbInBufferEnd = pbInBuffer + cbInBuffer;
     unsigned int cbChunkSize;
     unsigned int cbOutBuffer = 0;
     unsigned int OneByte;
@@ -260,7 +256,7 @@ int DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, 
     cbOutBuffer |= (OneByte << 0x00);
 
     // Verify the size of the stream against the output buffer size
-    if(cbOutBuffer > (unsigned int)*pcbOutBuffer)
+    if(cbOutBuffer > *pcbOutBuffer)
         return 0;
 
     // Put the output size to the buffer
