@@ -37,12 +37,14 @@ struct TMPQSearch
 //-----------------------------------------------------------------------------
 // Local functions
 
-static bool IsValidSearchHandle(TMPQSearch * hs)
+static TMPQSearch * IsValidSearchHandle(HANDLE hFind)
 {
-    if(hs == NULL)
-        return false;
+    TMPQSearch * hs = (TMPQSearch *)hFind;
 
-    return IsValidMpqHandle(hs->ha);
+    if(hs != NULL && IsValidMpqHandle(hs->ha))
+        return hs;
+
+    return NULL;
 }
 
 bool CheckWildCard(const char * szString, const char * szWildCard)
@@ -95,7 +97,7 @@ bool CheckWildCard(const char * szString, const char * szWildCard)
                 // Calculate match count
                 while(nMatchCount < nSubStringLength)
                 {
-                    if(toupper(szString[nMatchCount]) != toupper(szWildCard[nMatchCount]))
+                    if(AsciiToUpperTable[(BYTE)szString[nMatchCount]] != AsciiToUpperTable[(BYTE)szWildCard[nMatchCount]])
                         break;
                     if(szString[nMatchCount] == 0)
                         break;
@@ -118,7 +120,7 @@ bool CheckWildCard(const char * szString, const char * szWildCard)
         else
         {
             // If we came to the end of the string, compare it to the wildcard
-            if(toupper(*szString) != toupper(*szWildCard))
+            if(AsciiToUpperTable[(BYTE)*szString] != AsciiToUpperTable[(BYTE)*szWildCard])
                 return false;
 
             // If we arrived to the end of the string, it's a match
@@ -140,7 +142,7 @@ static DWORD GetSearchTableItems(TMPQArchive * ha)
     while(ha != NULL)
     {
         // Append the number of files
-        dwMergeItems += (ha->pHetTable != NULL) ? ha->pHetTable->dwMaxFileCount
+        dwMergeItems += (ha->pHetTable != NULL) ? ha->pHetTable->dwEntryCount
                                                 : ha->pHeader->dwBlockTableSize;
         // Move to the patched archive
         ha = ha->haPatch;
@@ -287,35 +289,38 @@ static int DoMPQSearch(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData)
                     {
                         // Open the file by its pseudo-name.
                         // This also generates the file name with a proper extension
-                        sprintf(szPseudoName, "File%08u.xxx", dwBlockIndex);
-                        if(SFileOpenFileEx((HANDLE)hs->ha, szPseudoName, SFILE_OPEN_FROM_MPQ, &hFile))
+                        sprintf(szPseudoName, "File%08u.xxx", (unsigned int)dwBlockIndex);
+                        if(SFileOpenFileEx((HANDLE)hs->ha, szPseudoName, SFILE_OPEN_BASE_FILE, &hFile))
                         {
                             szFileName = (pFileEntry->szFileName != NULL) ? pFileEntry->szFileName : szPseudoName;
                             SFileCloseFile(hFile);
                         }
                     }
 
-                    // Check the file name against the wildcard
-                    if(CheckWildCard(szFileName + nPrefixLength, hs->szSearchMask))
+                    // If the file name is still NULL, we cannot include the file to the search
+                    if(szFileName != NULL)
                     {
-                        // Fill the found entry
-                        lpFindFileData->dwHashIndex  = pPatchEntry->dwHashIndex;
-                        lpFindFileData->dwBlockIndex = dwBlockIndex;
-                        lpFindFileData->dwFileSize   = pPatchEntry->dwFileSize;
-                        lpFindFileData->dwFileFlags  = pPatchEntry->dwFlags;
-                        lpFindFileData->dwCompSize   = pPatchEntry->dwCmpSize;
-                        lpFindFileData->lcLocale     = pPatchEntry->lcLocale;
+                        // Check the file name against the wildcard
+                        if(CheckWildCard(szFileName + nPrefixLength, hs->szSearchMask))
+                        {
+                            // Fill the found entry
+                            lpFindFileData->dwHashIndex  = pPatchEntry->dwHashIndex;
+                            lpFindFileData->dwBlockIndex = dwBlockIndex;
+                            lpFindFileData->dwFileSize   = pPatchEntry->dwFileSize;
+                            lpFindFileData->dwFileFlags  = pPatchEntry->dwFlags;
+                            lpFindFileData->dwCompSize   = pPatchEntry->dwCmpSize;
+                            lpFindFileData->lcLocale     = pPatchEntry->lcLocale;
 
-                        // Fill the filetime
-                        lpFindFileData->dwFileTimeHi = (DWORD)(pPatchEntry->FileTime >> 32);
-                        lpFindFileData->dwFileTimeLo = (DWORD)(pPatchEntry->FileTime);
+                            // Fill the filetime
+                            lpFindFileData->dwFileTimeHi = (DWORD)(pPatchEntry->FileTime >> 32);
+                            lpFindFileData->dwFileTimeLo = (DWORD)(pPatchEntry->FileTime);
 
-                        // Fill the file name and plain file name
-                        strcpy(lpFindFileData->cFileName, szFileName + nPrefixLength);
-                        lpFindFileData->szPlainName = (char *)GetPlainFileNameA(lpFindFileData->cFileName);
-                        return ERROR_SUCCESS;
+                            // Fill the file name and plain file name
+                            strcpy(lpFindFileData->cFileName, szFileName + nPrefixLength);
+                            lpFindFileData->szPlainName = (char *)GetPlainFileName(lpFindFileData->cFileName);
+                            return ERROR_SUCCESS;
+                        }
                     }
-
                 }
             }
 
@@ -353,7 +358,7 @@ HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DA
     int nError = ERROR_SUCCESS;
 
     // Check for the valid parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         nError = ERROR_INVALID_HANDLE;
     if(szMask == NULL || lpFindFileData == NULL)
         nError = ERROR_INVALID_PARAMETER;
@@ -376,7 +381,7 @@ HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DA
     if(nError == ERROR_SUCCESS)
     {
         memset(hs, 0, sizeof(TMPQSearch));
-        strcpy(&hs->szSearchMask[0], szMask);
+        strcpy(hs->szSearchMask, szMask);
         hs->dwFlagMask = MPQ_FILE_EXISTS;
         hs->ha = ha;
 
@@ -413,11 +418,11 @@ HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DA
 
 bool WINAPI SFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData)
 {
-    TMPQSearch * hs = (TMPQSearch *)hFind;
+    TMPQSearch * hs = IsValidSearchHandle(hFind);
     int nError = ERROR_SUCCESS;
 
     // Check the parameters
-    if(!IsValidSearchHandle(hs))
+    if(hs == NULL)
         nError = ERROR_INVALID_HANDLE;
     if(lpFindFileData == NULL)
         nError = ERROR_INVALID_PARAMETER;
@@ -432,10 +437,10 @@ bool WINAPI SFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData)
 
 bool WINAPI SFileFindClose(HANDLE hFind)
 {
-    TMPQSearch * hs = (TMPQSearch *)hFind;
+    TMPQSearch * hs = IsValidSearchHandle(hFind);
 
     // Check the parameters
-    if(!IsValidSearchHandle(hs))
+    if(hs == NULL)
     {
         SetLastError(ERROR_INVALID_HANDLE);
         return false;

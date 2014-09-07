@@ -34,7 +34,7 @@ static bool GetDefaultPatchPrefix(
     const TCHAR * szDash;
 
     // Ensure that both names are plain names
-    szBaseMpqName = GetPlainFileNameT(szBaseMpqName);
+    szBaseMpqName = GetPlainFileName(szBaseMpqName);
 
     // Patch prefix is for the Cataclysm MPQs, whose names
     // are like "locale-enGB.MPQ" or "speech-enGB.MPQ"
@@ -65,7 +65,6 @@ static void Decompress_RLE(LPBYTE pbDecompressed, DWORD cbDecompressed, LPBYTE p
 
     // Cut the initial DWORD from the compressed chunk
     pbCompressed += sizeof(DWORD);
-    cbCompressed -= sizeof(DWORD);
 
     // Pre-fill decompressed buffer with zeros
     memset(pbDecompressed, 0, cbDecompressed);
@@ -113,7 +112,7 @@ static int LoadMpqPatch_COPY(TMPQFile * hf, TPatchHeader * pPatchHeader)
         pbPatchFile += sizeof(TPatchHeader);
 
         // Load the rest of the patch
-        if(!SFileReadFile((HANDLE)hf, pbPatchFile, pPatchHeader->dwSizeOfPatchData - sizeof(TPatchHeader)))
+        if(!SFileReadFile((HANDLE)hf, pbPatchFile, pPatchHeader->dwSizeOfPatchData - sizeof(TPatchHeader), NULL, NULL))
             nError = GetLastError();
     }
 
@@ -133,13 +132,13 @@ static int LoadMpqPatch_BSD0(TMPQFile * hf, TPatchHeader * pPatchHeader)
     cbCompressed = pPatchHeader->dwXfrmBlockSize - SIZE_OF_XFRM_HEADER;
     pbCompressed = STORM_ALLOC(BYTE, cbCompressed);
     if(pbCompressed == NULL)
-        nError = ERROR_SUCCESS;
+        nError = ERROR_NOT_ENOUGH_MEMORY;
 
     // Read the compressed patch data
     if(nError == ERROR_SUCCESS)
     {
         // Load the rest of the header
-        SFileReadFile((HANDLE)hf, pbCompressed, cbCompressed, &dwBytesRead);
+        SFileReadFile((HANDLE)hf, pbCompressed, cbCompressed, &dwBytesRead, NULL);
         if(dwBytesRead != cbCompressed)
             nError = ERROR_FILE_CORRUPT;
     }
@@ -315,7 +314,7 @@ static int LoadMpqPatch(TMPQFile * hf)
     int nError = ERROR_SUCCESS;
 
     // Read the patch header
-    SFileReadFile((HANDLE)hf, &PatchHeader, sizeof(TPatchHeader), &dwBytesRead);
+    SFileReadFile((HANDLE)hf, &PatchHeader, sizeof(TPatchHeader), &dwBytesRead, NULL);
     if(dwBytesRead != sizeof(TPatchHeader))
         nError = ERROR_FILE_CORRUPT;
 
@@ -431,7 +430,7 @@ int PatchFileData(TMPQFile * hf)
     int nError = ERROR_SUCCESS;
 
     // Move to the first patch
-    hf = hf->hfPatchFile;
+    hf = hf->hfPatch;
 
     // Now go through all patches and patch the original data
     while(hf != NULL)
@@ -450,7 +449,7 @@ int PatchFileData(TMPQFile * hf)
             break;
 
         // Move to the next patch
-        hf = hf->hfPatchFile;
+        hf = hf->hfPatch;
     }
 
     return nError;
@@ -493,7 +492,7 @@ bool WINAPI SFileOpenPatchArchive(
     dwFlags = dwFlags;
 
     // Verify input parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         nError = ERROR_INVALID_HANDLE;
     if(szPatchMpqName == NULL || *szPatchMpqName == 0)
         nError = ERROR_INVALID_PARAMETER;
@@ -520,7 +519,7 @@ bool WINAPI SFileOpenPatchArchive(
 
     if(nError == ERROR_SUCCESS)
     {
-        if(!FileStream_IsReadOnly(ha->pStream))
+        if(!(ha->dwFlags & MPQ_FLAG_READ_ONLY))
             nError = ERROR_ACCESS_DENIED;
     }
 
@@ -580,7 +579,7 @@ bool WINAPI SFileIsPatchedArchive(HANDLE hMpq)
     TMPQArchive * ha = (TMPQArchive *)hMpq;
 
     // Verify input parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         return false;
 
     return (ha->haPatch != NULL);

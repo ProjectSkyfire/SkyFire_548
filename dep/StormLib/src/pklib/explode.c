@@ -133,8 +133,8 @@ static void GenDecodeTabs(
     unsigned char * length_bits,        // [in] Table of lengths. Each length is stored as number of bits
     size_t elements)                    // [in] Number of elements in start_indexes and length_bits
 {
-    unsigned long index;
-    unsigned long length;
+    unsigned int index;
+    unsigned int length;
     size_t i;
 
     for(i = 0; i < elements; i++)
@@ -151,7 +151,7 @@ static void GenDecodeTabs(
 static void GenAscTabs(TDcmpStruct * pWork)
 {
     unsigned short * pChCodeAsc = &ChCodeAsc[0xFF];
-    unsigned long  acc, add;
+    unsigned int  acc, add;
     unsigned short count;
 
     for(count = 0x00FF; pChCodeAsc >= ChCodeAsc; pChCodeAsc--, count--)
@@ -227,7 +227,7 @@ static void GenAscTabs(TDcmpStruct * pWork)
 // Returns: PKDCL_OK:         Operation was successful
 //          PKDCL_STREAM_END: There are no more bits in the input buffer
 
-static int WasteBits(TDcmpStruct * pWork, unsigned long nBits)
+static int WasteBits(TDcmpStruct * pWork, unsigned int nBits)
 {
     // If number of bits required is less than number of (bits in the buffer) ?
     if(nBits <= pWork->extra_bits)
@@ -267,11 +267,11 @@ static int WasteBits(TDcmpStruct * pWork, unsigned long nBits)
 //           0x305: End of stream
 //           0x306: Error
 
-static unsigned long DecodeLit(TDcmpStruct * pWork)
+static unsigned int DecodeLit(TDcmpStruct * pWork)
 {
-    unsigned long extra_length_bits;    // Number of bits of extra literal length
-    unsigned long length_code;          // Length code
-    unsigned long value;
+    unsigned int extra_length_bits;    // Number of bits of extra literal length
+    unsigned int length_code;          // Length code
+    unsigned int value;
 
     // Test the current bit in byte buffer. If is not set, simply return the next 8 bits.
     if(pWork->bit_buff & 1)
@@ -290,7 +290,7 @@ static unsigned long DecodeLit(TDcmpStruct * pWork)
         // Are there some extra bits for the obtained length code ?
         if((extra_length_bits = pWork->ExLenBits[length_code]) != 0)
         {
-            unsigned long extra_length = pWork->bit_buff & ((1 << extra_length_bits) - 1);
+            unsigned int extra_length = pWork->bit_buff & ((1 << extra_length_bits) - 1);
 
             if(WasteBits(pWork, extra_length_bits))
             {
@@ -312,7 +312,7 @@ static unsigned long DecodeLit(TDcmpStruct * pWork)
     // If the binary compression type, read 8 bits and return them as one byte.
     if(pWork->ctype == CMP_BINARY)
     {
-        unsigned long uncompressed_byte = pWork->bit_buff & 0xFF;
+        unsigned int uncompressed_byte = pWork->bit_buff & 0xFF;
 
         if(WasteBits(pWork, 8))
             return 0x306;
@@ -357,11 +357,11 @@ static unsigned long DecodeLit(TDcmpStruct * pWork)
 // Decodes the distance of the repetition, backwards relative to the
 // current output buffer position
 
-static unsigned long DecodeDist(TDcmpStruct * pWork, unsigned long rep_length)
+static unsigned int DecodeDist(TDcmpStruct * pWork, unsigned int rep_length)
 {
-    unsigned long dist_pos_code;            // Distance position code
-    unsigned long dist_pos_bits;            // Number of bits of distance position
-    unsigned long distance;                 // Distance position
+    unsigned int dist_pos_code;            // Distance position code
+    unsigned int dist_pos_bits;            // Number of bits of distance position
+    unsigned int distance;                 // Distance position
 
     // Next 2-8 bits in the input buffer is the distance position code
     dist_pos_code = pWork->DistPosCodes[pWork->bit_buff & 0xFF];
@@ -388,10 +388,10 @@ static unsigned long DecodeDist(TDcmpStruct * pWork, unsigned long rep_length)
     return distance + 1;
 }
 
-static unsigned long Expand(TDcmpStruct * pWork)
+static unsigned int Expand(TDcmpStruct * pWork)
 {
-    unsigned long next_literal;         // Literal decoded from the compressed data
-    unsigned long result;               // Value to be returned
+    unsigned int next_literal;         // Literal decoded from the compressed data
+    unsigned int result;               // Value to be returned
     unsigned int copyBytes;             // Number of bytes to copy to the output buffer
 
     pWork->outputPos = 0x1000;          // Initialize output buffer position
@@ -412,8 +412,8 @@ static unsigned long Expand(TDcmpStruct * pWork)
         {
             unsigned char * source;
             unsigned char * target;
-            unsigned long rep_length;       // Length of the repetition, in bytes
-            unsigned long minus_dist;       // Backward distance to the repetition, relative to the current buffer position
+            unsigned int rep_length;       // Length of the repetition, in bytes
+            unsigned int minus_dist;       // Backward distance to the repetition, relative to the current buffer position
 
             // Get the length of the repeating sequence.
             // Note that the repeating block may overlap the current output position,
