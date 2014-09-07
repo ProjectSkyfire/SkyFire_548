@@ -241,7 +241,7 @@ uint32 ReadBuild(int locale)
     //printf("Read %s file... ", filename.c_str());
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, filename.c_str(), SFILE_OPEN_BASE_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, filename.c_str(), SFILE_OPEN_PATCHED_FILE, &dbcFile))
     {
         printf("Fatal error: Not found %s file!\n", filename.c_str());
         exit(1);
@@ -285,7 +285,7 @@ uint32 ReadMapDBC()
     printf("Read Map.dbc file... ");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\Map.dbc", SFILE_OPEN_BASE_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\Map.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
     {
         printf("Fatal error: Cannot find Map.dbc in archive!\n");
         exit(1);
@@ -315,7 +315,7 @@ void ReadAreaTableDBC()
 {
     printf("Read AreaTable.dbc file...");
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\AreaTable.dbc", SFILE_OPEN_BASE_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\AreaTable.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
     {
         printf("Fatal error: Cannot find AreaTable.dbc in archive!\n");
         exit(1);
@@ -343,7 +343,7 @@ void ReadLiquidTypeTableDBC()
 {
     printf("Read LiquidType.dbc file...");
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_BASE_FILE, &dbcFile))
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
     {
         printf("Fatal error: Cannot find LiquidType.dbc in archive!\n");
         exit(1);
@@ -1085,7 +1085,7 @@ void ExtractDBCFiles(int l, bool basicLocale)
 
         do
         {
-            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_BASE_FILE, &dbcFile))
+            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_PATCHED_FILE, &dbcFile))
             {
                 printf("Unable to open file %s in the archive\n", foundFile.cFileName);
                 continue;
@@ -1132,7 +1132,7 @@ void ExtractDB2Files(int l, bool basicLocale)
 
         do
         {
-            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_BASE_FILE, &dbcFile))
+            if (!SFileOpenFileEx(LocaleMpq, foundFile.cFileName, SFILE_OPEN_PATCHED_FILE, &dbcFile))
             {
                 printf("Unable to open file %s in the archive\n", foundFile.cFileName);
                 continue;
