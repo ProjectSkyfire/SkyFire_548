@@ -25107,8 +25107,8 @@ void Player::SetMover(Unit* target)
 
 void Player::ShowNeutralPlayerFactionSelectUI()
 {
-	WorldPacket data(SMSG_SHOW_NEURTRAL_PLAYER_FACTION_SELECT_UI);
-	GetSession()->SendPacket(&data);
+    WorldPacket data(SMSG_SHOW_NEURTRAL_PLAYER_FACTION_SELECT_UI);
+    GetSession()->SendPacket(&data);
 }
 
 void Player::UpdateZoneDependentAuras(uint32 newZone)

@@ -2439,36 +2439,36 @@ void WorldSession::SendLoadCUFProfiles()
 
 void WorldSession::HandleSelectFactionOpcode(WorldPacket& recvPacket)
 {
-	uint32 choice = recvPacket.read<uint32>();
+    uint32 choice = recvPacket.read<uint32>();
 
-	if (_player->getRace() != RACE_PANDAREN_NEUTRAL)
-		return;
+    if (_player->getRace() != RACE_PANDAREN_NEUTRAL)
+        return;
 
-	if (choice == JOIN_THE_HORDE)
-	{
-		_player->SetByteValue(UNIT_FIELD_SEX, 0, RACE_PANDAREN_HORDE);
-		_player->setFactionForRace(RACE_PANDAREN_HORDE);
-		_player->SaveToDB();
-		WorldLocation location(1, 1357.62f, -4373.55f, 26.13f, 0.13f);
-		_player->TeleportTo(location);
-		_player->SetHomebind(location, 363);
-		_player->learnSpell(669, false); // Language Orcish
-		_player->learnSpell(108127, false); // Language Pandaren
-	}
-	else if (choice == JOIN_THE_ALLIANCE)
-	{
-		_player->SetByteValue(UNIT_FIELD_SEX, 0, RACE_PANDAREN_ALLIANCE);
-		_player->setFactionForRace(RACE_PANDAREN_ALLIANCE);
-		_player->SaveToDB();
-		WorldLocation location(0, -8960.02f, 516.10f, 96.36f, 0.67f);
-		_player->TeleportTo(location);
-		_player->SetHomebind(location, 9);
-		_player->learnSpell(668, false); // Language Common
-		_player->learnSpell(108127, false); // Language Pandaren
-	}
+    if (choice == JOIN_THE_HORDE)
+    {
+        _player->SetByteValue(UNIT_FIELD_SEX, 0, RACE_PANDAREN_HORDE);
+        _player->setFactionForRace(RACE_PANDAREN_HORDE);
+        _player->SaveToDB();
+        WorldLocation location(1, 1357.62f, -4373.55f, 26.13f, 0.13f);
+        _player->TeleportTo(location);
+        _player->SetHomebind(location, 363);
+        _player->learnSpell(669, false); // Language Orcish
+        _player->learnSpell(108127, false); // Language Pandaren
+    }
+    else if (choice == JOIN_THE_ALLIANCE)
+    {
+        _player->SetByteValue(UNIT_FIELD_SEX, 0, RACE_PANDAREN_ALLIANCE);
+        _player->setFactionForRace(RACE_PANDAREN_ALLIANCE);
+        _player->SaveToDB();
+        WorldLocation location(0, -8960.02f, 516.10f, 96.36f, 0.67f);
+        _player->TeleportTo(location);
+        _player->SetHomebind(location, 9);
+        _player->learnSpell(668, false); // Language Common
+        _player->learnSpell(108127, false); // Language Pandaren
+    }
 
-	if (_player->GetQuestStatus(31450) == QUEST_STATUS_INCOMPLETE)
-		_player->KilledMonsterCredit(64594);
+    if (_player->GetQuestStatus(31450) == QUEST_STATUS_INCOMPLETE)
+        _player->KilledMonsterCredit(64594);
 
-	_player->SendMovieStart(116);
+    _player->SendMovieStart(116);
 }
