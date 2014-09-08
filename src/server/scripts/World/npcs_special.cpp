@@ -2443,30 +2443,30 @@ public:
 class npc_Spirit_of_Master_Shang_Xi : public CreatureScript
 {
 public:
-	npc_Spirit_of_Master_Shang_Xi() : CreatureScript("npc_Spirit_of_Master_Shang_Xi") { }
+    npc_Spirit_of_Master_Shang_Xi() : CreatureScript("npc_Spirit_of_Master_Shang_Xi") { }
 
-	bool OnGossipHello(Player* player, Creature* creature)
-	{
-		if (creature->IsQuestGiver())
-			player->PrepareQuestMenu(creature->GetGUID());
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
 
-		if (player->getRace() == RACE_PANDAREN_NEUTRAL)
-		{
-			if (player->GetQuestStatus(31450) == QUEST_STATUS_INCOMPLETE)
-				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_CHOOSE_FACTION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-		}
-		player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_EXP, creature->GetGUID());
-		return true;
-	}
+        if (player->getRace() == RACE_PANDAREN_NEUTRAL)
+        {
+            if (player->GetQuestStatus(31450) == QUEST_STATUS_INCOMPLETE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_CHOOSE_FACTION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+        player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_EXP, creature->GetGUID());
+        return true;
+    }
 
-	bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
-	{
-		if (action == GOSSIP_ACTION_INFO_DEF + 1)
-			player->ShowNeutralPlayerFactionSelectUI();
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
+    {
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            player->ShowNeutralPlayerFactionSelectUI();
 
-		player->PlayerTalkClass->SendCloseGossip();
-		return true;
-	}
+        player->PlayerTalkClass->SendCloseGossip();
+        return true;
+    }
 };
 
 void AddSC_npcs_special()
