@@ -270,8 +270,8 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         data << uint32(info->expansion);                      // Expansion Required
         data << uint32(info->type);                           // CreatureType.dbc
         data << float(info->ModHealth);                       // Hp modifier
-        data << uint32(info->type_flags2);                    // Flags2
         data << uint32(info->type_flags);                     // Flags
+        data << uint32(info->type_flags2);                    // Flags2
         data << uint32(info->rank);                           // Creature Rank (elite, boss, etc)
         data << uint32(info->movementId);                     // CreatureMovementInfo.dbc
         data << Name;
