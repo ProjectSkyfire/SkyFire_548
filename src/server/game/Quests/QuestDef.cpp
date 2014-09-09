@@ -309,7 +309,7 @@ QuestObjective const* Quest::GetQuestObjectiveXObjectId(uint32 objectId) const
 
 uint8 Quest::GetQuestObjectiveCountType(uint8 type) const
 {
-    if (!type || type >= QUEST_OBJECTIVE_TYPE_END)
+    if (type >= QUEST_OBJECTIVE_TYPE_END)
         return 0;
 
     return m_questObjecitveTypeCount[type];
