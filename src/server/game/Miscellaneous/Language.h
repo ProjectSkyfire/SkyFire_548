@@ -544,7 +544,7 @@ enum TrinityStrings
     LANG_NPCINFO_CHAR                   = 539,
     LANG_NPCINFO_LEVEL                  = 540,
     LANG_NPCINFO_HEALTH                 = 541,
-    LANG_NPCINFO_FLAGS                  = 542,
+    LANG_NPCINFO_FLAGS2                 = 542,
     LANG_NPCINFO_LOOT                   = 543,
     LANG_NPCINFO_POSITION               = 544,
     LANG_NPCINFO_VENDOR                 = 545,
