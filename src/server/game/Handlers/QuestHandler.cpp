@@ -271,9 +271,13 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
                     // destroy not required for quest finish quest starting item
                     bool destroyItem = true;
-                    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+
+                    if (!quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+                        break;
+
+                    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
                     {
-                        if (quest->RequiredItemId[i] == item->GetEntry() && item->GetTemplate()->MaxCount > 0)
+                        if ((*citr)->ObjectId == item->GetEntry() && item->GetTemplate()->MaxCount > 0)
                         {
                             destroyItem = false;
                             break;
@@ -707,9 +711,9 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
     }
     else
     {
-        if (quest->GetReqItemsCount())                  // some items required
+        if (quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
             _player->PlayerTalkClass->SendQuestGiverRequestItems(quest, playerGuid, _player->CanRewardQuest(quest, false), false);
-        else                                            // no items required
+        else
             _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, playerGuid, true);
     }
 
@@ -812,7 +816,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
         Player* player = ObjectAccessor::FindPlayer(_player->GetDivider());
         if (player)
         {
-            WorldPacket data(MSG_QUEST_PUSH_RESULT, 8 + 4 + 1);
+            WorldPacket data(CMSG_QUEST_PUSH_RESULT, 8 + 4 + 1);
             data << uint64(_player->GetGUID());
             data << uint8(msg);                             // valid values: 0-8
             player->SendDirectMessage(&data);
