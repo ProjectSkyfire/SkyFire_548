@@ -125,6 +125,7 @@ extern uint32 const MasterySpells[MAX_CLASSES];
 
 enum TalentTree // talent tabs
 {
+    TALENT_TREE_NONE                 = 0,
     TALENT_TREE_WARRIOR_ARMS         = 746,
     TALENT_TREE_WARRIOR_FURY         = 815,
     TALENT_TREE_WARRIOR_PROTECTION   = 845,
