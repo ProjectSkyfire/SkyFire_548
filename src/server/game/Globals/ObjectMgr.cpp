@@ -9303,7 +9303,7 @@ uint32 ObjectMgr::GetQuestObjectiveQuestId(uint32 objectiveId) const
 {
     QuestObjectiveLookupMap::const_iterator citr = m_questObjectiveLookup.find(objectiveId);
     if (citr == m_questObjectiveLookup.end())
-        return NULL;
+        return 0;
 
     return citr->second;
 }
