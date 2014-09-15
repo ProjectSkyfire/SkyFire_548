@@ -949,6 +949,10 @@ class WorldSession
         void HandleReforgeItemOpcode(WorldPacket& recvData);
         void SendReforgeResult(bool success);
 
+        // Item Ugrade
+        void HandleUpgradeItemOpcode(WorldPacket& recvData);
+        void SendItemUpgradeResult(bool success);
+
         // BlackMarket
         void HandleBlackMarketHelloOpcode(WorldPacket& recvData);
         void SendBlackMarketHello(uint64 guid);

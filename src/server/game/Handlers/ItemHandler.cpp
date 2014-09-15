@@ -1853,3 +1853,100 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     if (item->IsEquipped())
         player->ApplyReforgeEnchantment(item, true);
 }
+
+void WorldSession::HandleUpgradeItemOpcode(WorldPacket& recvData)
+{
+    /*    CMSG     */        
+    recvData << uint32(0); //Currently unk
+    recvData << uint32(0); //Currently unk
+    recvData << uint32(0); //Currently unk
+
+    ObjectGuid guid1; // Probably player
+    ObjectGuid guid2; // Probably item
+    Player* player = GetPlayer();
+    Item* item = player->GetItemByEntry();
+
+    guid2[5] = recvData.ReadBit();
+    guid1[6] = recvData.ReadBit();
+    guid2[6] = recvData.ReadBit();
+    guid2[0] = recvData.ReadBit();
+    guid2[1] = recvData.ReadBit();
+    guid1[4] = recvData.ReadBit();
+    guid1[1] = recvData.ReadBit();
+    guid1[7] = recvData.ReadBit();
+    guid2[7] = recvData.ReadBit();
+    guid2[2] = recvData.ReadBit();
+    guid2[3] = recvData.ReadBit();
+    guid1[0] = recvData.ReadBit();
+    guid1[2] = recvData.ReadBit();
+    guid1[5] = recvData.ReadBit();
+    guid2[4] = recvData.ReadBit();
+    guid1[3] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid2[7]);
+    recvData.ReadByteSeq(guid1[6]);
+    recvData.ReadByteSeq(guid2[6]);
+    recvData.ReadByteSeq(guid1[3]);
+    recvData.ReadByteSeq(guid1[2]);
+    recvData.ReadByteSeq(guid2[5]);
+    recvData.ReadByteSeq(guid1[1]);
+    recvData.ReadByteSeq(guid2[1]);
+    recvData.ReadByteSeq(guid1[0]);
+    recvData.ReadByteSeq(guid2[2]);
+    recvData.ReadByteSeq(guid2[0]);
+    recvData.ReadByteSeq(guid1[4]);
+    recvData.ReadByteSeq(guid1[5]);
+    recvData.ReadByteSeq(guid2[3]);
+    recvData.ReadByteSeq(guid1[7]);
+    recvData.ReadByteSeq(guid2[4]);    
+
+    /*   SMSG   */
+
+    WorldPacket data(SMSG_SEND_ITEM_UPGRADE, 8);
+    ObjectGuid guid;
+
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[0]);
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    
+    if (!player->GetNPCIfCanInteractWith(guid, UINT_NPC_FLAG_UPGRADE))
+    {
+        TC_LOG_INFO("network", "WORLD: HandleUpgradeOpcode - Unit (GUID: %u) not found or player can't interact with it.", GUID_LOPART(guid));
+        SendItemUpgradeResult(false);
+        return;
+    }
+
+    /*  
+    
+    Pulled from Reforge, simple fact is, it's not based on money, it's based on Valor points.
+    So we need to implement that as a monetary factor
+    
+    if (!player->HasEnoughMoney(uint64(item->GetSpecialPrice())))
+    {
+        SendItemUpgradeResult(false);
+        return;
+    }
+    */
+
+    /*if (item->IsEquipped())
+        player->ApplyReforgeEnchantment(item, true); // AGAIN PLACEHOLDER. We need to actually implement HOW the upgrade is done.
+    */
+
+    data.FlushBits();
+    SendPacket(&data);
+    SendReforgeResult(true);
+}
