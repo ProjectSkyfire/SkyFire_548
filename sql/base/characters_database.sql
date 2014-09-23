@@ -1004,15 +1004,6 @@ CREATE TABLE `character_queststatus` (
   `status` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `explored` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `timer` int(10) unsigned NOT NULL DEFAULT '0',
-  `mobcount1` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `mobcount2` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `mobcount3` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `mobcount4` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `itemcount1` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `itemcount2` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `itemcount3` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `itemcount4` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `playercount` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`,`quest`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1024,6 +1015,30 @@ CREATE TABLE `character_queststatus` (
 LOCK TABLES `character_queststatus` WRITE;
 /*!40000 ALTER TABLE `character_queststatus` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_queststatus` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_queststatus_objective`
+--
+
+DROP TABLE IF EXISTS `character_queststatus_objective`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_queststatus_objective` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `objectiveId` int(10) unsigned NOT NULL DEFAULT '0',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`objectiveId`,`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_queststatus_objective`
+--
+
+LOCK TABLES `character_queststatus_objective` WRITE;
+/*!40000 ALTER TABLE `character_queststatus_objective` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_queststatus_objective` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
