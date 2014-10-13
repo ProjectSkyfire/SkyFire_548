@@ -143,14 +143,13 @@ void CreateDir(std::string const& path)
     if (chdir(path.c_str()) == 0)
     {
             chdir("../");
-            return;
-    }
-
+    } else {
 #ifdef _WIN32
-    _mkdir(path.c_str());
+        _mkdir(path.c_str());
 #else
-    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO); // 0777
+        mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO); // 0777
 #endif
+    }
 }
 
 bool FileExists(TCHAR const* fileName)
