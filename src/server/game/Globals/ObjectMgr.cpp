@@ -3570,13 +3570,8 @@ void ObjectMgr::LoadQuests()
     uint32 oldMSTime = getMSTime();
 
     // For reload case
-    for (QuestMap::const_iterator citrQuest = _questTemplates.begin(); citrQuest != _questTemplates.end(); citrQuest++)
-    {
-        for (QuestObjectiveSet::const_iterator citrObjective = citrQuest->second->m_questObjectives.begin(); citrObjective != citrQuest->second->m_questObjectives.end(); citrObjective++)
-            delete &citrObjective;
-
-        delete citrQuest->second;
-    }
+    for (QuestMap::const_iterator itr = _questTemplates.begin(); itr != _questTemplates.end(); ++itr)
+        delete itr->second;
 
     _questTemplates.clear();
 
