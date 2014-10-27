@@ -1,18 +1,18 @@
-REVOKE ALL PRIVILEGES ON * . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON * . * FROM 'skyfire'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `world` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `world` . * FROM 'skyfire'@'localhost';
 
-REVOKE GRANT OPTION ON `world` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `world` . * FROM 'skyfire'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `characters` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `characters` . * FROM 'skyfire'@'localhost';
 
-REVOKE GRANT OPTION ON `characters` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `characters` . * FROM 'skyfire'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `auth` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `auth` . * FROM 'skyfire'@'localhost';
 
-REVOKE GRANT OPTION ON `auth` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `auth` . * FROM 'skyfire'@'localhost';
 
-DROP USER 'trinity'@'localhost';
+DROP USER 'skyfire'@'localhost';
 
 DROP DATABASE IF EXISTS `world`;
 
