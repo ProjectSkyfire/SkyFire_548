@@ -572,6 +572,92 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         return;
                 break;
             }
+            case SPELLFAMILY_MONK:
+            {
+                float abilityMult = 0.0f;
+                float vengeanceMult = 1.0f;
+                float stanceMult = 1.0f;
+
+                if (m_spellInfo->SpellFamilyFlags[0] & 0x00000004) // jab
+                    abilityMult = 1.5f;
+                else switch (m_spellInfo->Id)
+                {
+                    case 100787:// Tiger Palm
+                        abilityMult = 3.0f;
+                        break;
+                    case 107428:// Rising Sun Kick
+                        abilityMult = 14.4f;
+                        break;
+                    case 100784:// Blackout Kick
+                        abilityMult = 7.12f;
+                        break;
+                    case 107270:// Spinning Crane Kick   
+                        abilityMult = 1.59f;
+                        vengeanceMult = 0.4f;
+                        break;
+                    case 121253:// Keg Smash
+                        abilityMult = 8.121f;
+                        break;
+                    case 117418:// Fists of Fury
+                        abilityMult = 7.5f;
+                        break;
+                    case 115073:// Spinning Fire Blossom
+                        abilityMult = 2.1f;
+                        break;
+                    case 124335:// Swift Reflexes
+                        abilityMult = 0.3f;
+                        vengeanceMult = 0.4f;
+                        break;
+                }
+
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && abilityMult != 0.0f)
+                {
+                    float dwcoeff = 0.898882275f;
+                    float apc = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 14.0f;
+                    Item* pMainHand = m_caster->ToPlayer()->GetWeaponForAttack(BASE_ATTACK, true);
+                    Item* pOffHand = m_caster->ToPlayer()->GetWeaponForAttack(OFF_ATTACK, true);
+                    
+                    float dwmult = 1.0f;
+
+                    if (!m_caster->HasSpell(124146))// Dual Wield
+                        dwmult = 1.5f;
+
+                    if (!m_caster->HasSpell(120267))// Vengeance
+                        vengeanceMult = 1.0f;
+
+                    float minDamage = 0;
+                    float maxDamage = 0;
+
+                    if (pMainHand)
+                    {
+                        if (pMainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM ||
+                            pMainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_STAFF)
+                        {
+                            dwcoeff = 1.0f;
+                            dwmult = 1.0f;
+                        }
+
+                        float mhSpeed = pMainHand->GetTemplate()->Delay / 1000.0f;
+                        minDamage += float(pMainHand->GetTemplate()->DamageMin / mhSpeed + apc - 1.0f) * dwmult;
+                        maxDamage += float(pMainHand->GetTemplate()->DamageMax / mhSpeed + apc + 1.0f) * dwmult;
+                    }
+                    else 
+                    {
+                        minDamage += apc - 1.0f;
+                        maxDamage += apc + 1.0f;
+                    }
+
+                    if (pOffHand)
+                    {
+                        float ohSpeed = pOffHand->GetTemplate()->Delay / 1000.0f;
+                        minDamage += float(pOffHand->GetTemplate()->DamageMin / ohSpeed + apc - 1.0f) / 2.0f;
+                        maxDamage += float(pOffHand->GetTemplate()->DamageMax / ohSpeed + apc + 1.0f) / 2.0f;
+                    }
+
+                    damage = irand(int32(minDamage * abilityMult * dwcoeff * vengeanceMult), int32(maxDamage * abilityMult * dwcoeff * vengeanceMult));
+                }
+            }
+            break;
         }
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus)

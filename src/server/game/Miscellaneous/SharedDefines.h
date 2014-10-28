@@ -3963,6 +3963,7 @@ enum SpellFamilyNames
     // 16 - unused
     SPELLFAMILY_PET         = 17,
     SPELLFAMILY_UNK3        = 50,
+    SPELLFAMILY_MONK        = 53,
 };
 
 enum TradeStatus
