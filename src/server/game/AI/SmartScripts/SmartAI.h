@@ -17,6 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if USE_SMART_SCRIPTS
 #ifndef TRINITY_SMARTAI_H
 #define TRINITY_SMARTAI_H
 
@@ -265,4 +266,5 @@ class SmartGameObjectAI : public GameObjectAI
         GameObject* const go;
         SmartScript mScript;
 };
+#endif
 #endif

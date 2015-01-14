@@ -27,7 +27,9 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "SpellAuraEffects.h"
+#if USE_SMART_SCRIPTS
 #include "SmartAI.h"
+#endif
 #include "icecrown_citadel.h"
 
 // Weekly quest support
@@ -1616,6 +1618,7 @@ class npc_captain_rupert : public CreatureScript
         }
 };
 
+#if USE_SMART_SCRIPTS
 class npc_frostwing_vrykul : public CreatureScript
 {
     public:
@@ -1639,6 +1642,7 @@ class npc_frostwing_vrykul : public CreatureScript
             return new npc_frostwing_vrykulAI(creature);
         }
 };
+#endif
 
 class npc_impaling_spear : public CreatureScript
 {
@@ -2150,7 +2154,9 @@ void AddSC_icecrown_citadel()
     new npc_captain_brandon();
     new npc_captain_grondel();
     new npc_captain_rupert();
+#if USE_SMART_SCRIPTS
     new npc_frostwing_vrykul();
+#endif
     new npc_impaling_spear();
     new npc_arthas_teleport_visual();
     new spell_icc_stoneform();

@@ -17,6 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if USE_SMART_SCRIPTS
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "ObjectDefines.h"
@@ -948,3 +949,4 @@ void AddSC_SmartSCripts()
 {
     new SmartTrigger();
 }
+#endif

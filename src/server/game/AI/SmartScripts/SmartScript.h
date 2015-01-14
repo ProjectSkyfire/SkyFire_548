@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+#if USE_SMART_SCRIPTS
 #ifndef TRINITY_SMARTSCRIPT_H
 #define TRINITY_SMARTSCRIPT_H
 
@@ -276,4 +276,5 @@ class SmartScript
         }
 };
 
+#endif
 #endif
