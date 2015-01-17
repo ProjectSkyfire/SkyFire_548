@@ -254,7 +254,7 @@ void WorldSession::HandleGuildFinderGetApplications(WorldPacket& /*recvPacket*/)
     else
         bufferDataHead.WriteBits(0, 24);
 
-    WorldPacket data(SMSG_LF_GUILD_APPLICATIONS_LIST_UPDATED, bufferDataHead.size() + bufferDataRest.size() + 8);
+    WorldPacket data(SMSG_LF_GUILD_APPLICANT_LIST_UPDATED, bufferDataHead.size() + bufferDataRest.size() + 8);
 
     data.append(bufferDataHead);
 
