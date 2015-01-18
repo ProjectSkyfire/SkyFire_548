@@ -2329,7 +2329,7 @@ void Guild::SendMoneyInfo(WorldSession* session) const
     if (!member)
         return;
 
-    int32 amount = _GetMemberRemainingMoney(member);
+    int64 amount = _GetMemberRemainingMoney(member);
     WorldPacket data(SMSG_GUILD_BANK_MONEY_WITHDRAWN, 8);
     data << int64(amount);
     session->SendPacket(&data);

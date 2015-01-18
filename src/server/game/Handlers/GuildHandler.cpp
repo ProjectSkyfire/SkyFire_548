@@ -261,32 +261,32 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid playerGuid;
 
-    playerGuid[1] = recvPacket.ReadBit();
-    playerGuid[4] = recvPacket.ReadBit();
-    playerGuid[5] = recvPacket.ReadBit();
-    playerGuid[3] = recvPacket.ReadBit();
-    playerGuid[0] = recvPacket.ReadBit();
-    playerGuid[7] = recvPacket.ReadBit();
-    bool ispublic = recvPacket.ReadBit();      // 0 == Officer, 1 == Public
-    playerGuid[6] = recvPacket.ReadBit();
-    uint32 noteLength = recvPacket.ReadBits(8);
-    playerGuid[2] = recvPacket.ReadBit();
+    playerGuid[1]     = recvPacket.ReadBit();
+    uint32 notelength = recvPacket.ReadBits(8);
+    playerGuid[4]     = recvPacket.ReadBit();
+    playerGuid[2]     = recvPacket.ReadBit();
+    bool isPublic     = recvPacket.ReadBit();                  // 0 == Officer, 1 == Public
+    playerGuid[3]     = recvPacket.ReadBit();
+    playerGuid[5]     = recvPacket.ReadBit();
+    playerGuid[0]     = recvPacket.ReadBit();
+    playerGuid[6]     = recvPacket.ReadBit();
+    playerGuid[7]     = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(playerGuid[4]);
     recvPacket.ReadByteSeq(playerGuid[5]);
-    recvPacket.ReadByteSeq(playerGuid[0]);
-    recvPacket.ReadByteSeq(playerGuid[3]);
     recvPacket.ReadByteSeq(playerGuid[1]);
     recvPacket.ReadByteSeq(playerGuid[6]);
+    std::string note = recvPacket.ReadString(notelength);
+    recvPacket.ReadByteSeq(playerGuid[0]);
     recvPacket.ReadByteSeq(playerGuid[7]);
-    std::string note = recvPacket.ReadString(noteLength);
+    recvPacket.ReadByteSeq(playerGuid[4]);
+    recvPacket.ReadByteSeq(playerGuid[3]);
     recvPacket.ReadByteSeq(playerGuid[2]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_SET_NOTE [%s]: Target: %u, Note: %s, Public: %u",
-        GetPlayerInfo().c_str(), GUID_LOPART(playerGuid), note.c_str(), ispublic);
+        GetPlayerInfo().c_str(), GUID_LOPART(playerGuid), note.c_str(), isPublic);
 
     if (Guild* guild = GetPlayer()->GetGuild())
-        guild->HandleSetMemberNote(this, note, playerGuid, ispublic);
+        guild->HandleSetMemberNote(this, note, playerGuid, isPublic);
 }
 
 void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recvPacket)
@@ -521,12 +521,30 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildBankWithdrawMoney(WorldPacket& recvPacket)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint64 money;
-    recvPacket >> guid >> money;
+    recvPacket >> money;
+
+    guid[1] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[5]);
 
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_WITHDRAW_MONEY [%s]: Go: [" UI64FMTD "], money: " UI64FMTD,
-        GetPlayerInfo().c_str(), guid, money);
+        GetPlayerInfo().c_str(), (uint64)guid, money);
 
     if (money && GetPlayer()->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_GUILD_BANK))
         if (Guild* guild = GetPlayer()->GetGuild())
