@@ -16132,7 +16132,8 @@ void Unit::SendClearThreatListOpcode()
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_CLEAR Message");
     WorldPacket data(SMSG_THREAT_CLEAR, 8);
-    ObjectGuid UnitGUID;
+    ObjectGuid UnitGUID = GetGUID();
+
     data.WriteBit(UnitGUID[6]);
     data.WriteBit(UnitGUID[7]);
     data.WriteBit(UnitGUID[4]);

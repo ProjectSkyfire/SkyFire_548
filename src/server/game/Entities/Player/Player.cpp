@@ -20878,7 +20878,7 @@ void Player::SendAttackSwingBadFacingAttack()
 void Player::SendAutoRepeatCancel(Unit* target)
 {
     WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 8);
-    ObjectGuid Guid = GetGUID();
+    ObjectGuid Guid = target->GetGUID();
 
     data.WriteBit(Guid[1]);
     data.WriteBit(Guid[3]);
