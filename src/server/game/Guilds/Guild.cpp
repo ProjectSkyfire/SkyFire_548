@@ -2307,16 +2307,18 @@ void Guild::SendPermissions(WorldSession* session) const
     uint8 rankId = member->GetRankId();
 
     WorldPacket data(SMSG_GUILD_PERMISSIONS_QUERY_RESULTS, 4 * 15 + 1);
-    data << uint32(_GetMemberRemainingMoney(member));
+    data << uint32(rankId);
+    data << uint32(_GetRankBankMoneyPerDay(rankId));
     data << uint32(_GetPurchasedTabsSize());
     data << uint32(_GetRankRights(rankId));
-    data << uint32(rankId);
-    data.WriteBits(GUILD_BANK_MAX_TABS, 23);
+
+    data.WriteBits(GUILD_BANK_MAX_TABS, 21);
+    data.FlushBits();
 
     for (uint8 tabId = 0; tabId < GUILD_BANK_MAX_TABS; ++tabId)
     {
-        data << uint32(_GetRankBankTabRights(rankId, tabId));
         data << uint32(_GetMemberRemainingSlots(member, tabId));
+        data << uint32(_GetRankBankTabRights(rankId, tabId));
     }
 
     session->SendPacket(&data);

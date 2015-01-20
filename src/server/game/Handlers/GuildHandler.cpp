@@ -402,6 +402,7 @@ void WorldSession::HandleGuildBankMoneyWithdrawn(WorldPacket& /* recvPacket */)
 
 void WorldSession::HandleGuildPermissions(WorldPacket& /* recvPacket */)
 {
+    // Null Packet
     TC_LOG_DEBUG("guild", "CMSG_GUILD_PERMISSIONS [%s]", GetPlayerInfo().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
