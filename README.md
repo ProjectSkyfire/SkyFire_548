@@ -1,4 +1,4 @@
-# ![logo](http://www.projectskyfire.org/public/style_images/9_1_s2QNl.png) [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire_5xx.png)](https://travis-ci.org/ProjectSkyfire/SkyFire_5xx)
+# ![logo](http://www.projectskyfire.org/public/style_images/9_1_s2QNl.png) [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire.548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire.548)
 
 
 ## Introduction
@@ -16,7 +16,7 @@ It is completely open source; community involvement is highly encouraged.
 
 If you wish to contribute ideas or code please visit our site linked below or
 make pull requests to our 
-[Github repository](https://github.com/ProjectSkyfire/SkyFire_5xx).
+[Github repository](https://github.com/ProjectSkyfire/SkyFire.548).
 
 For further information on the SkyFire project, please visit our project website at 
 [projectskyfire.org](http://www.projectskyfire.org).
@@ -26,7 +26,7 @@ Connection patcher requiered.
 
 ## Status
 
-[Build status](https://travis-ci.org/ProjectSkyfire/SkyFire_5xx/builds)
+[Build status](https://travis-ci.org/ProjectSkyfire/SkyFire.548/builds)
 
 ## Requirements
 
