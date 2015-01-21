@@ -1,8 +1,8 @@
--- MySQL dump 10.15  Distrib 10.0.12-MariaDB, for Win64 (x86)
+-- MySQL dump 10.13  Distrib 5.6.21, for Win32 (x86)
 --
 -- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version	10.0.12-MariaDB
+-- Server version	5.6.21-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -38,7 +38,7 @@ CREATE TABLE `account_battle_pet` (
   `breed` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `flags` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,7 +64,7 @@ CREATE TABLE `account_battle_pet_slots` (
   `slot3` bigint(20) unsigned NOT NULL DEFAULT '0',
   `flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`accountId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1018,30 +1018,6 @@ LOCK TABLES `character_queststatus` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `character_queststatus_objective`
---
-
-DROP TABLE IF EXISTS `character_queststatus_objective`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `character_queststatus_objective` (
-  `guid` int(10) unsigned NOT NULL DEFAULT '0',
-  `objectiveId` int(10) unsigned NOT NULL DEFAULT '0',
-  `amount` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`objectiveId`,`guid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `character_queststatus_objective`
---
-
-LOCK TABLES `character_queststatus_objective` WRITE;
-/*!40000 ALTER TABLE `character_queststatus_objective` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_queststatus_objective` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `character_queststatus_daily`
 --
 
@@ -1088,6 +1064,30 @@ CREATE TABLE `character_queststatus_monthly` (
 LOCK TABLES `character_queststatus_monthly` WRITE;
 /*!40000 ALTER TABLE `character_queststatus_monthly` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_queststatus_monthly` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_queststatus_objective`
+--
+
+DROP TABLE IF EXISTS `character_queststatus_objective`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_queststatus_objective` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `objectiveId` int(10) unsigned NOT NULL DEFAULT '0',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`objectiveId`,`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_queststatus_objective`
+--
+
+LOCK TABLES `character_queststatus_objective` WRITE;
+/*!40000 ALTER TABLE `character_queststatus_objective` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_queststatus_objective` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2758,4 +2758,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-26 18:52:31
+-- Dump completed on 2015-01-21 17:40:22
