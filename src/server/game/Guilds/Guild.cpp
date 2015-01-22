@@ -1727,7 +1727,42 @@ void Guild::HandleSetMemberNote(WorldSession* session, std::string const& note, 
         else
             member->SetOfficerNote(note);
 
-        HandleRoster(session); // FIXME - We should send SMSG_GUILD_MEMBER_UPDATE_NOTE
+        ObjectGuid memberGuid = member->GetGUID();
+
+        WorldPacket data(SMSG_GUILD_MEMBER_UPDATE_NOTE, 1 + 1 + 1 + 8 + note.length());
+
+        data.WriteBit(memberGuid[2]);
+        data.WriteBits(note.length(), 8);
+        data.WriteBit(isPublic);
+        data.WriteBit(memberGuid[5]);
+        data.WriteBit(memberGuid[0]);
+        data.WriteBit(memberGuid[4]);
+        data.WriteBit(memberGuid[3]);
+        data.WriteBit(memberGuid[1]);
+        data.WriteBit(memberGuid[6]);
+        data.WriteBit(memberGuid[7]);
+        data.FlushBits();
+
+        data.WriteByteSeq(memberGuid[7]);
+        data.WriteByteSeq(memberGuid[5]);
+        data.WriteByteSeq(memberGuid[0]);
+        data.WriteByteSeq(memberGuid[1]);
+        data.WriteString(note);
+        data.WriteByteSeq(memberGuid[3]);
+        data.WriteByteSeq(memberGuid[6]);
+        data.WriteByteSeq(memberGuid[4]);
+        data.WriteByteSeq(memberGuid[2]);
+
+        if (session)
+        {
+            TC_LOG_DEBUG("guild", "SMSG_GUILD_MEMBER_UPDATE_NOTE [%s]", session->GetPlayerInfo().c_str());
+            session->SendPacket(&data);
+        }
+        else
+        {
+            TC_LOG_DEBUG("guild", "SMSG_GUILD_MEMBER_UPDATE_NOTE [Broadcast]");
+            BroadcastPacket(&data);
+        }
     }
 }
 
