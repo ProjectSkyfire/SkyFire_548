@@ -623,12 +623,28 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)
     if (!_player->IsAlive() || _player->IsInCombat())
         return;
 
-    uint64 summonerGuid;
-    bool agree;
-    recvData >> summonerGuid;
-    recvData >> agree;
+    ObjectGuid SummonerGUID;
 
-    _player->SummonIfPossible(agree);
+    SummonerGUID[1] = recvData.ReadBit();
+    SummonerGUID[3] = recvData.ReadBit();
+    SummonerGUID[5] = recvData.ReadBit();
+    SummonerGUID[2] = recvData.ReadBit();
+    bool Accept = recvData.ReadBit();
+    SummonerGUID[7] = recvData.ReadBit();
+    SummonerGUID[0] = recvData.ReadBit();
+    SummonerGUID[4] = recvData.ReadBit();
+    SummonerGUID[6] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(SummonerGUID[0]);
+    recvData.ReadByteSeq(SummonerGUID[1]);
+    recvData.ReadByteSeq(SummonerGUID[6]);
+    recvData.ReadByteSeq(SummonerGUID[3]);
+    recvData.ReadByteSeq(SummonerGUID[5]);
+    recvData.ReadByteSeq(SummonerGUID[4]);
+    recvData.ReadByteSeq(SummonerGUID[2]);
+    recvData.ReadByteSeq(SummonerGUID[7]);
+
+    _player->SummonIfPossible(Accept);
 }
 
 void WorldSession::HandleSetCollisionHeightAck(WorldPacket& recvPacket)
