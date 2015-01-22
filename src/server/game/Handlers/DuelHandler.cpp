@@ -24,6 +24,7 @@
 #include "Opcodes.h"
 #include "UpdateData.h"
 #include "Player.h"
+#include "ObjectAccessor.h"
 
 #define SPELL_DUEL         7266
 #define SPELL_MOUNTED_DUEL 62875
