@@ -1,5 +1,4 @@
 ## To-do list (Try to keep the order by importance)
-* Bank / Guild Bank
 * Reputations
 * Achievements / Guild Acievements / Implement acc achievements
 * Update ingame damage / stats calculation, (including newest formulas from paper doll)
@@ -50,3 +49,4 @@
 * Quests
 * Mail
 * Auction House
+* Bank / Guild Bank
