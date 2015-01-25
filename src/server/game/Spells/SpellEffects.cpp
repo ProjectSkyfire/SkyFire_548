@@ -4627,7 +4627,26 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
         return;
 
     WorldPacket data(SMSG_CLEAR_TARGET, 8);
-    data << uint64(m_caster->GetGUID());
+    ObjectGuid CasterGUID = m_caster->GetGUID();
+
+    data.WriteBit(CasterGUID[6]);
+    data.WriteBit(CasterGUID[2]);
+    data.WriteBit(CasterGUID[0]);
+    data.WriteBit(CasterGUID[4]);
+    data.WriteBit(CasterGUID[7]);
+    data.WriteBit(CasterGUID[1]);
+    data.WriteBit(CasterGUID[3]);
+    data.WriteBit(CasterGUID[5]);
+
+    data.WriteByteSeq(CasterGUID[4]);
+    data.WriteByteSeq(CasterGUID[0]);
+    data.WriteByteSeq(CasterGUID[3]);
+    data.WriteByteSeq(CasterGUID[5]);
+    data.WriteByteSeq(CasterGUID[2]);
+    data.WriteByteSeq(CasterGUID[7]);
+    data.WriteByteSeq(CasterGUID[6]);
+    data.WriteByteSeq(CasterGUID[1]);
+
     m_caster->SendMessageToSet(&data, true);
 }
 
