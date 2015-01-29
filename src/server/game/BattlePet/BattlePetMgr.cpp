@@ -105,6 +105,10 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
     while (itr != m_battlePetSet.end())
     {
         BattlePet* battlePet = *itr++;
+
+        if (!battlePet)
+            return;
+
         switch (battlePet->GetDbState())
         {
             case BATTLE_PET_DB_STATE_NONE: 
