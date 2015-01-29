@@ -1616,7 +1616,7 @@ class Unit : public WorldObject
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
 
 
-        void SendSetPlayHoverAnim(bool enable);
+        void SendSetPlayHoverAnim(bool PlayHoverAnim);
         void SendMovementSetSplineAnim(Movement::AnimType anim);
 
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY); }
