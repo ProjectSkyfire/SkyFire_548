@@ -13603,12 +13603,10 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
         if (spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
         {
             Item* item = NULL;
-            if (attType == BASE_ATTACK)
+            if (attType == BASE_ATTACK || attType == RANGED_ATTACK)
                 item = player->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             else if (attType == OFF_ATTACK)
                 item = player->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            else
-                item = player->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
             if (player->IsInFeralForm())
                 return false;

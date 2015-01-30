@@ -3427,8 +3427,8 @@ void Spell::handle_immediate()
     TakeCastItem();
 
     // handle ammo consumption for thrown weapons
-    if (m_spellInfo->IsRangedWeaponSpell() && m_spellInfo->IsChanneled())
-        TakeAmmo();
+    //if (m_spellInfo->IsRangedWeaponSpell() && m_spellInfo->IsChanneled())
+    //   TakeAmmo();
 
     if (m_spellState != SPELL_STATE_CASTING)
         finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
@@ -5134,7 +5134,7 @@ void Spell::TakePower()
         m_caster->ModifyPower(powerType, -irand(0, m_powerCost/4));
 }
 
-void Spell::TakeAmmo()
+/*void Spell::TakeAmmo()
 {
     if (m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -5159,7 +5159,7 @@ void Spell::TakeAmmo()
             }
         }
     }
-}
+}*/
 
 SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
 {
@@ -7445,7 +7445,7 @@ void Spell::HandleLaunchPhase()
                     case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
                     case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
                     ammoTaken=true;
-                    TakeAmmo();
+                    //TakeAmmo();
                 }
                 if (ammoTaken)
                     break;

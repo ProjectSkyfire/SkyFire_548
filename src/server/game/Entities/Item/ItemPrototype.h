@@ -779,6 +779,12 @@ struct ItemTemplate
                SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
                SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
     }
+    bool IsRangedInventoryType() const
+    {
+        return InventoryType == INVTYPE_RANGED ||
+               InventoryType == INVTYPE_THROWN ||
+               InventoryType == INVTYPE_RANGEDRIGHT;
+    }
 };
 
 // Benchmarked: Faster than std::map (insert/find)
