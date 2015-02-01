@@ -180,8 +180,8 @@ void ReputationMgr::SendState(FactionState const* faction)
 
     _sendFactionIncreased = false; // Reset
 
-    data << uint32(faction->ReputationListID);
     data << uint32(faction->Standing);
+    data << uint32(faction->ReputationListID);
 
     for (FactionStateList::iterator itr = _factions.begin(); itr != _factions.end(); ++itr)
     {
@@ -190,8 +190,8 @@ void ReputationMgr::SendState(FactionState const* faction)
             itr->second.needSend = false;
             if (itr->second.ReputationListID != faction->ReputationListID)
             {
-                data << uint32(itr->second.Standing);
                 data << uint32(itr->second.ReputationListID);
+                data << uint32(itr->second.Standing);
                 ++count;
             }
         }
