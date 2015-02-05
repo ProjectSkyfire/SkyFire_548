@@ -1496,16 +1496,6 @@ struct GtOCTClassCombatRatingScalarEntry
     float    ratio;
 };
 
-struct GtOCTRegenHPEntry
-{
-    float    ratio;
-};
-
-struct GtOCTRegenMPEntry
-{
-    float    ratio;
-};
-
 struct gtOCTHpPerStaminaEntry
 {
     float    ratio;
@@ -2487,12 +2477,6 @@ struct SpellItemEnchantmentConditionEntry
     uint8   CompareColor[5];                                // 15-20    m_rt_operandType[5]
     uint32  Value[5];                                       // 21-25    m_rt_operand[5]
     //uint8   Logic[5]                                      // 25-30    m_logic[5]
-};
-
-struct StableSlotPricesEntry
-{
-    uint32 Slot;
-    uint32 Price;
 };
 
 struct SummonPropertiesEntry
