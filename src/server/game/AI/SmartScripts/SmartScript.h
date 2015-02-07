@@ -28,7 +28,7 @@
 #include "GridNotifiers.h"
 
 #include "SmartScriptMgr.h"
-//#include "SmartAI.h"
+#include "SmartAI.h"
 
 class SmartScript
 {

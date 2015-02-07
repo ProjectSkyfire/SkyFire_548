@@ -28,8 +28,8 @@
 #include "Spell.h"
 #include "DB2Stores.h"
 
-//#include "SmartScript.h"
-//#include "SmartAI.h"
+#include "SmartScript.h"
+#include "SmartAI.h"
 
 struct WayPoint
 {

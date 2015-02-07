@@ -1736,7 +1736,7 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Waypoints...");
     sWaypointMgr->Load();
 
-#ifndef USE_SMART_SCRIPTS
+#if USE_SMART_SCRIPTS
     TC_LOG_INFO("server.loading", "Loading SmartAI Waypoints...");
     sSmartWaypointMgr->LoadFromDB();
 #endif
