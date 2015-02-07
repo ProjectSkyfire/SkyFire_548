@@ -2059,7 +2059,7 @@ class Unit : public WorldObject
         ///----------Pet responses methods-----------------
         void SendPetActionFeedback (uint8 msg);
         void SendPetTalk (uint32 pettalk);
-        void SendPetAIReaction(uint64 guid);
+        void SendPetAIReaction(ObjectGuid UnitGUID);
         ///----------End of Pet responses methods----------
 
         void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }

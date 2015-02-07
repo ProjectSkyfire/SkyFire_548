@@ -12399,13 +12399,13 @@ void CharmInfo::BuildActionBar(WorldPacket* data)
         *data << uint32(PetActionBar[i].packedData);
 }
 
-void CharmInfo::SetSpellAutocast(SpellInfo const* spellInfo, bool state)
+void CharmInfo::SetSpellAutocast(SpellInfo const* spellInfo, bool AutocastEnabled)
 {
     for (uint8 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
     {
         if (spellInfo->Id == PetActionBar[i].GetAction() && PetActionBar[i].IsActionBarForSpell())
         {
-            PetActionBar[i].SetType(state ? ACT_ENABLED : ACT_DISABLED);
+            PetActionBar[i].SetType(AutocastEnabled ? ACT_ENABLED : ACT_DISABLED);
             break;
         }
     }
@@ -13014,33 +13014,32 @@ void Unit::SendPetTalk(uint32 pettalk)
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-void Unit::SendPetAIReaction(uint64 guid)
+void Unit::SendPetAIReaction(ObjectGuid UnitGUID)
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
     WorldPacket data(SMSG_AI_REACTION, 8 + 4);
-    ObjectGuid Guid = guid;
+    
+    data.WriteBit(UnitGUID[5]);
+    data.WriteBit(UnitGUID[7]);
+    data.WriteBit(UnitGUID[0]);
+    data.WriteBit(UnitGUID[4]);
+    data.WriteBit(UnitGUID[6]);
+    data.WriteBit(UnitGUID[2]);
+    data.WriteBit(UnitGUID[3]);
+    data.WriteBit(UnitGUID[1]);
 
-    data.WriteBit(Guid[5]);
-    data.WriteBit(Guid[7]);
-    data.WriteBit(Guid[0]);
-    data.WriteBit(Guid[4]);
-    data.WriteBit(Guid[6]);
-    data.WriteBit(Guid[2]);
-    data.WriteBit(Guid[3]);
-    data.WriteBit(Guid[1]);
-
-    data.WriteByteSeq(Guid[4]);
-    data.WriteByteSeq(Guid[6]);
-    data.WriteByteSeq(Guid[5]);
+    data.WriteByteSeq(UnitGUID[4]);
+    data.WriteByteSeq(UnitGUID[6]);
+    data.WriteByteSeq(UnitGUID[5]);
     data << uint32(AI_REACTION_HOSTILE);
-    data.WriteByteSeq(Guid[7]);
-    data.WriteByteSeq(Guid[1]);
-    data.WriteByteSeq(Guid[2]);
-    data.WriteByteSeq(Guid[0]);
-    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(UnitGUID[7]);
+    data.WriteByteSeq(UnitGUID[1]);
+    data.WriteByteSeq(UnitGUID[2]);
+    data.WriteByteSeq(UnitGUID[0]);
+    data.WriteByteSeq(UnitGUID[3]);
 
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
