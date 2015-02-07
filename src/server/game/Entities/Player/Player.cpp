@@ -21299,41 +21299,32 @@ void Player::PetSpellInitialize()
     TC_LOG_DEBUG("entities.pet", "Pet Spells Groups");
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
+    ObjectGuid guid = pet->GetGUID();
+
+    uint32 spellCount = 0;
+    uint32 spellHistoryCount = 0;
+    uint32 cooldownCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
-    data << uint64(pet->GetGUID());
-    data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
-    data << uint32(pet->GetDuration());
-    data << uint8(pet->GetReactState());
-    data << uint8(charmInfo->GetCommandState());
-    data << uint16(0); // Flags, mostly unknown
+
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[4]);
+    data.WriteBits(spellHistoryCount, 21);
+    size_t spellCountPos = data.bitwpos();
+    data.WriteBits(spellCount, 22);               // Spell Count
+    data.WriteBit(guid[2]);
+    size_t cooldownCountPos = data.bitwpos();
+    data.WriteBits(cooldownCount, 20);            // Cooldown Count
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[1]);
+
+    data.FlushBits();
 
     // action bar loop
     charmInfo->BuildActionBar(&data);
-
-    size_t spellsCountPos = data.wpos();
-
-    // spells count
-    uint8 addlist = 0;
-    data << uint8(addlist);                                 // placeholder
-
-    if (pet->IsPermanentPetFor(this))
-    {
-        // spells loop
-        for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
-        {
-            if (itr->second.state == PETSPELL_REMOVED)
-                continue;
-
-            data << uint32(MAKE_UNIT_ACTION_BUTTON(itr->first, itr->second.active));
-            ++addlist;
-        }
-    }
-
-    data.put<uint8>(spellsCountPos, addlist);
-
-    uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
-    data << uint8(cooldownsCount);
 
     time_t curTime = time(NULL);
 
@@ -21343,30 +21334,61 @@ void Player::PetSpellInitialize()
         if (!spellInfo)
         {
             data << uint32(0);
-            data << uint16(0);
             data << uint32(0);
+            data << uint16(0);
             data << uint32(0);
             continue;
         }
 
         time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
-        data << uint32(itr->first);                 // spell ID
 
         CreatureSpellCooldowns::const_iterator categoryitr = pet->m_CreatureCategoryCooldowns.find(spellInfo->GetCategory());
         if (categoryitr != pet->m_CreatureCategoryCooldowns.end())
         {
             time_t categoryCooldown = (categoryitr->second > curTime) ? (categoryitr->second - curTime) * IN_MILLISECONDS : 0;
+            data << uint32(categoryCooldown);           // category cooldown
+            data << uint32(itr->first);                 // spell ID
             data << uint16(spellInfo->GetCategory());   // spell category
             data << uint32(cooldown);                   // spell cooldown
-            data << uint32(categoryCooldown);           // category cooldown
         }
         else
         {
+            data << uint32(0);
+            data << uint32(itr->first);                 // spell ID
             data << uint16(0);
             data << uint32(cooldown);
-            data << uint32(0);
         }
+        ++cooldownCount;
     }
+
+    data.PutBits(cooldownCountPos, cooldownCount, 20);
+    data.WriteByteSeq(guid[2]);
+
+    // Spell data loop
+    if (pet->IsPermanentPetFor(this))
+    {
+        for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+        {
+            if (itr->second.state == PETSPELL_REMOVED)
+                continue;
+
+            data << uint32(MAKE_UNIT_ACTION_BUTTON(itr->first, itr->second.active));
+            ++spellCount;
+        }
+        data.PutBits(spellCountPos, spellCount, 22);
+    }
+
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data << uint16(pet->GetCreatureTemplate()->family); // Creature Family
+    data << uint16(0);                                  // Creature Specialization need implementation
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+    data << uint32(pet->GetDuration());
+    data.WriteByteSeq(guid[5]);
+    data << uint32(0);                                  // flags ??
 
     GetSession()->SendPacket(&data);
 }
@@ -21385,17 +21407,37 @@ void Player::PossessSpellInitialize()
         return;
     }
 
+    ObjectGuid Guid = charm->GetGUID();
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
-    data << uint64(charm->GetGUID());
-    data << uint16(0);
-    data << uint32(0);
-    data << uint32(0);
+
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[4]);
+    data.WriteBits(0, 21);     // cooldowns count
+    data.WriteBits(0, 22);     // spells count
+    data.WriteBit(Guid[2]);
+    data.WriteBits(0, 20);     // CooldownCount
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[3]);
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(Guid[1]);
+
+    data.FlushBits();
 
     charmInfo->BuildActionBar(&data);
-
-    data << uint8(0);                                       // spells count
-    data << uint8(0);                                       // cooldowns count
-
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[7]);
+    data.WriteByteSeq(Guid[0]);
+    data.WriteByteSeq(Guid[3]);
+    data << uint16(0);
+    data << uint16(0);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[4]);
+    data.WriteByteSeq(Guid[6]);
+    data << uint32(0);
+    data.WriteByteSeq(Guid[5]);
+    data << uint32(0);
+    
     GetSession()->SendPacket(&data);
 }
 
