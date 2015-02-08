@@ -280,7 +280,7 @@ ObjectMgr::~ObjectMgr()
     _cacheTrainerSpellStore.clear();
     _graveyardOrientations.clear();
 
-    for (DungeonEncounterContainer::iterator itr =_dungeonEncounterStore.begin(); itr != _dungeonEncounterStore.end(); ++itr)
+    for (DungeonEncounterContainer::iterator itr = _dungeonEncounterStore.begin(); itr != _dungeonEncounterStore.end(); ++itr)
         for (DungeonEncounterList::iterator encounterItr = itr->second.begin(); encounterItr != itr->second.end(); ++encounterItr)
             delete *encounterItr;
 
@@ -348,7 +348,7 @@ void ObjectMgr::LoadCreatureLocales()
 
         for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
         {
-            LocaleConstant locale = (LocaleConstant) i;
+            LocaleConstant locale = (LocaleConstant)i;
             AddLocaleString(fields[1 + 2 * (i - 1)].GetString(), locale, data.Name);
             AddLocaleString(fields[1 + 2 * (i - 1) + 1].GetString(), locale, data.SubName);
         }
@@ -386,7 +386,7 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
 
         for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
         {
-            LocaleConstant locale = (LocaleConstant) i;
+            LocaleConstant locale = (LocaleConstant)i;
             AddLocaleString(fields[2 + 2 * (i - 1)].GetString(), locale, data.OptionText);
             AddLocaleString(fields[2 + 2 * (i - 1) + 1].GetString(), locale, data.BoxText);
         }
@@ -476,8 +476,8 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.SubName           = fields[11].GetString();
         creatureTemplate.IconName          = fields[12].GetString();
         creatureTemplate.GossipMenuId      = fields[13].GetUInt32();
-        creatureTemplate.minlevel          = fields[14].GetUInt8();
-        creatureTemplate.maxlevel          = fields[15].GetUInt8();
+        creatureTemplate.minlevel          = fields[14].GetInt16();
+        creatureTemplate.maxlevel          = fields[15].GetInt16();
         creatureTemplate.expansion         = uint32(fields[16].GetInt16());
         creatureTemplate.expansionUnknown  = uint32(fields[17].GetUInt16());
         creatureTemplate.faction_A         = uint32(fields[18].GetUInt16());
@@ -814,7 +814,7 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         }
     }
 
-    if (!cInfo->unit_class || ((1 << (cInfo->unit_class-1)) & CLASSMASK_ALL_CREATURES) == 0)
+    if (!cInfo->unit_class || ((1 << (cInfo->unit_class - 1)) & CLASSMASK_ALL_CREATURES) == 0)
     {
         TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has invalid unit_class (%u) in creature_template. Set to 1 (UNIT_CLASS_WARRIOR).", cInfo->Entry, cInfo->unit_class);
         const_cast<CreatureTemplate*>(cInfo)->unit_class = UNIT_CLASS_WARRIOR;
@@ -827,7 +827,7 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     }
 
     if (cInfo->baseattacktime == 0)
-        const_cast<CreatureTemplate*>(cInfo)->baseattacktime  = BASE_ATTACK_TIME;
+        const_cast<CreatureTemplate*>(cInfo)->baseattacktime = BASE_ATTACK_TIME;
 
     if (cInfo->rangeattacktime == 0)
         const_cast<CreatureTemplate*>(cInfo)->rangeattacktime = BASE_ATTACK_TIME;
@@ -893,7 +893,7 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     {
         if (cInfo->spells[j] && !sSpellMgr->GetSpellInfo(cInfo->spells[j]))
         {
-            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing Spell%d (%u), set to 0.", cInfo->Entry, j+1, cInfo->spells[j]);
+            TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has non-existing Spell%d (%u), set to 0.", cInfo->Entry, j + 1, cInfo->spells[j]);
             const_cast<CreatureTemplate*>(cInfo)->spells[j] = 0;
         }
     }
@@ -929,6 +929,27 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     {
         TC_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with disallowed `flags_extra` %u, removing incorrect flag.", cInfo->Entry, badFlags);
         const_cast<CreatureTemplate*>(cInfo)->flags_extra &= CREATURE_FLAG_EXTRA_DB_ALLOWED;
+    }
+
+    // -1 is used in the client for auto-updating the levels
+    // having their expansion set to it to the latest one
+    if (cInfo->expansion == -1)
+    {
+        const_cast<CreatureTemplate*>(cInfo)->minlevel = (MAX_LEVEL + cInfo->minlevel);
+        const_cast<CreatureTemplate*>(cInfo)->maxlevel = (MAX_LEVEL + cInfo->maxlevel);
+        const_cast<CreatureTemplate*>(cInfo)->expansion = EXPANSION_MISTS_OF_PANDARIA;
+    }
+
+    if (cInfo->minlevel < 1 || cInfo->minlevel > STRONG_MAX_LEVEL)
+    {
+        TC_LOG_ERROR("sql.sql", "Creature (ID: %u): MinLevel %i is not within [1, 255], value has been set to 1.", cInfo->Entry, cInfo->minlevel);
+        const_cast<CreatureTemplate*>(cInfo)->minlevel = 1;
+    }
+
+    if (cInfo->maxlevel < 1 || cInfo->maxlevel > STRONG_MAX_LEVEL)
+    {
+        TC_LOG_ERROR("sql.sql", "Creature (ID: %u): MaxLevel %i is not within [1, 255], value has been set to 1.", cInfo->Entry, cInfo->maxlevel);
+        const_cast<CreatureTemplate*>(cInfo)->maxlevel = 1;
     }
 
     const_cast<CreatureTemplate*>(cInfo)->dmg_multiplier *= Creature::_GetDamageMod(cInfo->rank);
