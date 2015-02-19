@@ -345,7 +345,7 @@ SpellEffectInfo::SpellEffectInfo(SpellEntry const* /*spellEntry*/, SpellInfo con
     _effIndex = _effect ? _effect->EffectIndex : effIndex;
     Effect = _effect ? _effect->Effect : 0;
     ApplyAuraName = _effect ? _effect->EffectApplyAuraName : 0;
-    Amplitude = _effect ? _effect->EffectAmplitude : 0;
+    ApplyAuraTickCount = _effect ? _effect->EffectAuraTickCount : 0;
     DieSides = _effect ? _effect->EffectDieSides : 0;
     RealPointsPerLevel = _effect ? _effect->EffectRealPointsPerLevel : 0.0f;
     BasePoints = _effect ? _effect->EffectBasePoints : 0;
@@ -592,6 +592,14 @@ int32 SpellEffectInfo::CalcBaseValue(int32 value) const
         return value;
     else
         return value - 1;
+}
+
+float SpellEffectInfo::CalcBonusMultiplier(Unit* caster, Spell* spell) const
+{
+    float multiplier = BonusMultiplier;
+    if (Player* modOwner = (caster ? caster->GetSpellModOwner() : NULL))
+        modOwner->ApplySpellMod(_spellInfo->Id, SPELLMOD_BONUS_MULTIPLIER, multiplier, spell);
+    return multiplier;
 }
 
 float SpellEffectInfo::CalcValueMultiplier(Unit* caster, Spell* spell) const
@@ -2328,8 +2336,8 @@ uint32 SpellInfo::GetMaxTicks() const
                 case SPELL_AURA_PERIODIC_DAMAGE:
                 case SPELL_AURA_PERIODIC_HEAL:
                 case SPELL_AURA_PERIODIC_LEECH:
-                    if (Effects[x].Amplitude != 0)
-                        return DotDuration / Effects[x].Amplitude;
+                    if (Effects[x].ApplyAuraTickCount != 0)
+                        return DotDuration / Effects[x].ApplyAuraTickCount;
                     break;
             }
     }

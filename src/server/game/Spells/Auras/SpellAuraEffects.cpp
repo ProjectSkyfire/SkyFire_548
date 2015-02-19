@@ -544,11 +544,12 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 {
     // default amount calculation
     int32 amount = 0;
+    float m_BonusMultiplier = GetSpellInfo()->Effects[GetEffIndex()].CalcBonusMultiplier(caster);
 
-    if (!(m_spellInfo->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION) || G3D::fuzzyEq(m_spellInfo->Effects[m_effIndex].BonusMultiplier, 0.0f))
+    if (!(m_spellInfo->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION) || G3D::fuzzyEq(m_BonusMultiplier, 0.0f))
         amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
     else if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-        amount = int32(caster->GetFloatValue(PLAYER_FIELD_MASTERY) * m_spellInfo->Effects[m_effIndex].BonusMultiplier);
+        amount = int32(caster->GetFloatValue(PLAYER_FIELD_MASTERY) * m_BonusMultiplier);
 
     // check item enchant aura cast
     if (!amount && caster)
@@ -664,7 +665,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
 void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= true*/, bool load /*= false*/)
 {
-    m_amplitude = m_spellInfo->Effects[m_effIndex].Amplitude;
+    m_amplitude = m_spellInfo->Effects[m_effIndex].ApplyAuraTickCount;
 
     // prepare periodics
     switch (GetAuraType())
@@ -1187,7 +1188,7 @@ void AuraEffect::CleanupTriggeredSpells(Unit* target)
     // needed for spell 43680, maybe others
     /// @todo is there a spell flag, which can solve this in a more sophisticated way?
     if (m_spellInfo->Effects[GetEffIndex()].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
-            uint32(m_spellInfo->GetDuration()) == m_spellInfo->Effects[GetEffIndex()].Amplitude)
+        uint32(m_spellInfo->GetDuration()) == m_spellInfo->Effects[GetEffIndex()].ApplyAuraTickCount)
         return;
 
     target->RemoveAurasDueToSpell(tSpellId, GetCasterGUID());
