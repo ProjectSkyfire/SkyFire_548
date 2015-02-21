@@ -703,9 +703,7 @@ void AddScripts()
 {
     AddExampleScripts();
     AddSpellScripts();
-#if USE_SMART_SCRIPTS
     AddSC_SmartSCripts();
-#endif
     AddCommandScripts();
 #ifdef SCRIPTS
     AddWorldScripts();

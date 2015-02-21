@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#if USE_SMART_SCRIPTS
+
 #ifndef TRINITY_SMARTSCRIPT_H
 #define TRINITY_SMARTSCRIPT_H
 
@@ -28,7 +28,7 @@
 #include "GridNotifiers.h"
 
 #include "SmartScriptMgr.h"
-#include "SmartAI.h"
+//#include "SmartAI.h"
 
 class SmartScript
 {
@@ -276,5 +276,4 @@ class SmartScript
         }
 };
 
-#endif
 #endif

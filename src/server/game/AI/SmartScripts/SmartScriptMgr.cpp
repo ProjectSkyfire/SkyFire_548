@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#if USE_SMART_SCRIPT
+
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "ObjectDefines.h"
@@ -1075,4 +1075,3 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
     }
     return true;
 }*/
-#endif
