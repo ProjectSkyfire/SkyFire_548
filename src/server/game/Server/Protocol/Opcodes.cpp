@@ -119,7 +119,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_BATTLE_SLOT,         0x0163, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetBattleSlot       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_FLAGS,               0x17AC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetFlags            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SUMMON_COMPANION,        0x1896, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSummonCompanion     ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_BEGIN_TRADE,                        0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBeginTradeOpcode             );
+    DEFINE_OPCODE_HANDLER(CMSG_BEGIN_TRADE,                        0x1CE3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBeginTradeOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BINDER_ACTIVATE,                    0x1248, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBinderActivateOpcode         ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BLACKMARKET_BID,                    0x12C8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBlackMarketBidOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_BLACKMARKET_HELLO,                  0x075A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBlackMarketHelloOpcode       ); // 5.4.8 18414
@@ -189,7 +189,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CHAT_IGNORED,                       0x048A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChatIgnoredOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_CLEAR_CHANNEL_WATCH,                0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_CLEAR_RAID_MARKER,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_CLEAR_TRADE_ITEM,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleClearTradeItemOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_CLEAR_TRADE_ITEM,                   0x00A7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleClearTradeItemOpcode         ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_COMMENTATOR_ENABLE,                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_COMMENTATOR_ENTER_INSTANCE,         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_COMMENTATOR_EXIT_INSTANCE,          0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -297,7 +297,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_SET_RANK_PERMISSIONS,         0x0C7A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildSetRankPermissionsOpcode); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_SWITCH_RANK,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_HEARTH_AND_RESURRECT,               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleHearthAndResurrect           );
-    DEFINE_OPCODE_HANDLER(CMSG_IGNORE_TRADE,                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleIgnoreTradeOpcode            );
+    DEFINE_OPCODE_HANDLER(CMSG_IGNORE_TRADE,                       0x0276, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleIgnoreTradeOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_INITIATE_TRADE,                     0x0267, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInitiateTradeOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                            0x1259, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT_HONOR_STATS,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode      );
@@ -523,9 +523,9 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SET_SELECTION,                      0x0740, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSetSelectionOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_TAXI_BENCHMARK_MODE,            0x0762, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTaxiBenchmarkOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_TITLE,                          0x03C7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTitleOpcode               );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_CURRENCY,                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_GOLD,                     0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeGoldOpcode           );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_ITEM,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeItemOpcode           );
+    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_CURRENCY,                 0x0C44, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_GOLD,                     0x14E3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeGoldOpcode           ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_ITEM,                     0x03D5, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeItemOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_VEHICLE_REC_ID_ACK,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SET_WATCHED_FACTION,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetWatchedFactionOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_SHOWING_CLOAK,                      0x02F2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleShowingCloakOpcode           ); // 5.4.8 18414
@@ -560,7 +560,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_CLEAR,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialClear                );
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_FLAG,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialFlag                 );
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_RESET,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialReset                );
-    DEFINE_OPCODE_HANDLER(CMSG_UNACCEPT_TRADE,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUnacceptTradeOpcode          );
+    DEFINE_OPCODE_HANDLER(CMSG_UNACCEPT_TRADE,                     0x0023, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUnacceptTradeOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_UNLEARN_SKILL,                      0x0268, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUnlearnSkillOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_UNLEARN_SPECIALIZATION,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_UNREGISTER_ALL_ADDON_PREFIXES,      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUnregisterAddonPrefixesOpcode);
@@ -1298,8 +1298,8 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_TITLE_EARNED,                       0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TOGGLE_XP_GAIN,                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TOTEM_CREATED,                      0x1C8F, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_TRADE_STATUS,                       0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_TRADE_STATUS_EXTENDED,              0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_TRADE_STATUS,                       0x1963, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_TRADE_STATUS_EXTENDED,              0x181E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_TRAINER_BUY_FAILED,                 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TRAINER_BUY_SUCCEEDED,              0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TRAINER_LIST,                       0x189F, STATUS_NEVER    ); // 5.4.8 18414

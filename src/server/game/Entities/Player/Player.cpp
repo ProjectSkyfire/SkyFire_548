@@ -397,9 +397,9 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
     if (!state)
     {
         if (crosssend)
-            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_UNACCEPTED);
         else
-            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_UNACCEPTED);
     }
 }
 
