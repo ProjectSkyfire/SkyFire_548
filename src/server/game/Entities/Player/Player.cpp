@@ -6131,6 +6131,9 @@ void Player::UpdateRating(CombatRating cr)
         case CR_MASTERY:
             UpdateMastery();
             break;
+        case CR_PVP_POWER:
+            UpdatePvpPower();
+            break;
     }
 }
 
@@ -8463,6 +8466,9 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 break;
             case ITEM_MOD_ARCANE_RESISTANCE:
                 HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_PVP_POWER:
+                ApplyRatingMod(CR_PVP_POWER, int32(val), apply);
                 break;
         }
     }
@@ -14668,6 +14674,10 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         case ITEM_MOD_MASTERY_RATING:
                             ApplyRatingMod(CR_MASTERY, enchant_amount, apply);
                             TC_LOG_DEBUG("entities.player.items", "+ %u MASTERY", enchant_amount);
+                            break;
+                        case ITEM_MOD_PVP_POWER:
+                            ApplyRatingMod(CR_PVP_POWER, enchant_amount, apply);
+                            TC_LOG_DEBUG("entities.player.items", "+ %u PVP_POWER", enchant_amount);
                             break;
                         default:
                             break;

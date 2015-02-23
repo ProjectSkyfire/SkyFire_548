@@ -116,6 +116,19 @@ bool Player::UpdateStats(Stats stat)
     return true;
 }
 
+void Player::UpdatePvpPower()
+{
+    float precision = 100.0f;
+    float value = GetRatingBonusValue(CR_PVP_POWER);
+    value += GetTotalAuraModifier(SPELL_AURA_MOD_RATING);
+
+    float pvpHealing = value / precision;
+    float pvpDamage = value / precision;
+
+    SetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING, pvpHealing);
+    SetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE, pvpDamage);
+}
+
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
     apply = _ModifyUInt32(apply, m_baseSpellPower, amount);

@@ -74,9 +74,10 @@ enum ItemModType
     ITEM_MOD_SHADOW_RESISTANCE        = 54,
     ITEM_MOD_NATURE_RESISTANCE        = 55,
     ITEM_MOD_ARCANE_RESISTANCE        = 56,
+    ITEM_MOD_PVP_POWER                = 57
 };
 
-#define MAX_ITEM_MOD                    57
+#define MAX_ITEM_MOD                    58
 
 enum ItemSpelltriggerType
 {

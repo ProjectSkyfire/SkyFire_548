@@ -1978,6 +1978,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
         void UpdateMastery();
+        void UpdatePvpPower();
         bool CanUseMastery() const;
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
