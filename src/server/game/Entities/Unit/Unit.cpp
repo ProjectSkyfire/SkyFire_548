@@ -1402,6 +1402,17 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
+    if (GetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE) == 483)
+    {
+        SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0x0);
+        return;
+    }
+    else if (anim_id == 483)
+    {
+        SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, anim_id);
+        return;
+    }
+
     WorldPacket data(SMSG_EMOTE, 4 + 8);
     data << uint32(anim_id);
     data << uint64(GetGUID());
