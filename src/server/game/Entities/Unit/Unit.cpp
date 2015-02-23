@@ -6354,10 +6354,29 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 newCooldownDelay -= 2;
                             ToPlayer()->AddSpellCooldown(16166, 0, uint32(time(NULL) + newCooldownDelay));
 
-                            WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+                            ObjectGuid playerGuid = GetGUID();          // Player GUID
+                            WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+
+                            data.WriteBit(playerGuid[2]);
+                            data.WriteBit(playerGuid[1]);
+                            data.WriteBit(playerGuid[0]);
+                            data.WriteBit(playerGuid[4]);
+                            data.WriteBit(playerGuid[7]);
+                            data.WriteBit(playerGuid[3]);
+                            data.WriteBit(playerGuid[6]);
+                            data.WriteBit(playerGuid[5]);
+
+                            data.WriteByteSeq(playerGuid[4]);
+                            data.WriteByteSeq(playerGuid[1]);
                             data << uint32(16166);                  // Spell ID
-                            data << uint64(GetGUID());              // Player GUID
+                            data.WriteByteSeq(playerGuid[3]);
+                            data.WriteByteSeq(playerGuid[6]);
+                            data.WriteByteSeq(playerGuid[7]);
+                            data.WriteByteSeq(playerGuid[5]);
+                            data.WriteByteSeq(playerGuid[0]);
                             data << int32(-2000);                   // Cooldown mod in milliseconds
+                            data.WriteByteSeq(playerGuid[2]);
+
                             ToPlayer()->GetSession()->SendPacket(&data);
                             return true;
                         }
@@ -13835,10 +13854,29 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
 
             if (creature)
             {
-                WorldPacket data2(SMSG_LOOT_LIST, 8 + 1 + 1);
-                data2 << uint64(creature->GetGUID());
-                data2 << uint8(0); // unk1
-                data2 << uint8(0); // no group looter
+                ObjectGuid creatureGuid = creature->GetGUID();
+                WorldPacket data2(SMSG_LOOT_LIST);
+
+                data2.WriteBit(creatureGuid[5]);
+                data2.WriteBit(0);
+                data2.WriteBit(creatureGuid[1]);
+                data2.WriteBit(0);
+                data2.WriteBit(creatureGuid[4]);
+                data2.WriteBit(creatureGuid[3]);
+                data2.WriteBit(creatureGuid[2]);
+                data2.WriteBit(creatureGuid[7]);
+                data2.WriteBit(creatureGuid[0]);
+                data2.WriteBit(creatureGuid[6]);
+                
+                data2.WriteByteSeq(creatureGuid[5]);
+                data2.WriteByteSeq(creatureGuid[1]);
+                data2.WriteByteSeq(creatureGuid[6]);
+                data2.WriteByteSeq(creatureGuid[2]);
+                data2.WriteByteSeq(creatureGuid[3]);
+                data2.WriteByteSeq(creatureGuid[0]);
+                data2.WriteByteSeq(creatureGuid[7]);
+                data2.WriteByteSeq(creatureGuid[4]);
+
                 player->SendMessageToSet(&data2, true);
             }
         }
@@ -14907,34 +14945,30 @@ void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float 
 {
     ObjectGuid guid = GetGUID();
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, (1+8+4+4+4+4+4));
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-
-    data.WriteByteSeq(guid[1]);
 
     data << float(vsin);
+    data << float(vcos);
+    data << float(speedXY);
     data << uint32(0);
+    data << float(speedZ);
+
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
 
     data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-
-    data << float(speedXY);
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
-
-    data << float(speedZ);
-    data << float(vcos);
-
-    data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
 
     player->GetSession()->SendPacket(&data);
 }
