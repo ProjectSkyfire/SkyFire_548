@@ -405,7 +405,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_OPENING_CINEMATIC,                  0x0130, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpeningCinematic             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPEN_ITEM,                          0x1D10, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpenItemOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPT_OUT_OF_LOOT,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleOptOutOfLootOpcode           );
-    DEFINE_OPCODE_HANDLER(CMSG_PAGE_TEXT_QUERY,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePageTextQueryOpcode          );
+    DEFINE_OPCODE_HANDLER(CMSG_PAGE_TEXT_QUERY,                    0x1022, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePageTextQueryOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PARTY_SILENCE,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_PARTY_UNSILENCE,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_BUY,                       0x12D9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionBuyOpcode            ); // 5.4.8 18414
@@ -460,7 +460,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_RANDOM_ROLL,                        0x08A3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRandomRollOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RANDOMIZE_CHAR_NAME,                0x0B1C, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleRandomizeCharNameOpcode      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_READY_FOR_ACCOUNT_DATA_TIMES,       0x031C, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleReadyForAccountDataTimes     ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_READ_ITEM,                          0x1022, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReadItem                     ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_READ_ITEM,                          0x0D00, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReadItem                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REALM_SPLIT,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRealmSplitOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_RECLAIM_CORPSE,                     0x03D3, STATUS_LOGGEDIN , PROCESS_THREADUNSAFE, &WorldSession::HandleReclaimCorpseOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REDIRECTION_AUTH_PROOF,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -1080,7 +1080,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_OPEN_CONTAINER,                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_OPEN_LFG_DUNGEON_FINDER,            0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_OVERRIDE_LIGHT,                     0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_PAGE_TEXT_QUERY_RESPONSE,           0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_PAGE_TEXT_QUERY_RESPONSE,           0x081E, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_PARTYKILLLOG,                       0x048A, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PARTY_COMMAND_RESULT,               0x0F86, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PARTY_MEMBER_STATS,                 0x0A9A, STATUS_UNHANDLED); // 5.4.8 18414
