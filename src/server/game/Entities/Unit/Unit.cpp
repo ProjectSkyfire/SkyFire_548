@@ -13829,9 +13829,43 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
     if (isRewardAllowed && player && player != victim)
     {
-        WorldPacket data(SMSG_PARTYKILLLOG, (8+8)); // send event PARTY_KILL
-        data << uint64(player->GetGUID()); // player with killing blow
-        data << uint64(victim->GetGUID()); // victim
+        ObjectGuid playerGuid = player->GetGUID();
+        ObjectGuid victimGuid = victim->GetGUID();
+        WorldPacket data(SMSG_PARTYKILLLOG); // send event PARTY_KILL
+
+        data.WriteBit(victimGuid[7]);
+        data.WriteBit(victimGuid[2]);
+        data.WriteBit(playerGuid[1]);
+        data.WriteBit(victimGuid[4]);
+        data.WriteBit(playerGuid[2]);
+        data.WriteBit(playerGuid[5]);
+        data.WriteBit(victimGuid[3]);
+        data.WriteBit(victimGuid[1]);
+        data.WriteBit(victimGuid[0]);
+        data.WriteBit(playerGuid[3]);
+        data.WriteBit(playerGuid[0]);
+        data.WriteBit(playerGuid[4]);
+        data.WriteBit(victimGuid[6]);
+        data.WriteBit(playerGuid[7]);
+        data.WriteBit(victimGuid[5]);
+        data.WriteBit(playerGuid[6]);
+
+        data.WriteByteSeq(victimGuid[0]);
+        data.WriteByteSeq(victimGuid[5]);
+        data.WriteByteSeq(playerGuid[0]);
+        data.WriteByteSeq(playerGuid[2]);
+        data.WriteByteSeq(victimGuid[7]);
+        data.WriteByteSeq(victimGuid[6]);
+        data.WriteByteSeq(victimGuid[1]);
+        data.WriteByteSeq(victimGuid[4]);
+        data.WriteByteSeq(playerGuid[4]);
+        data.WriteByteSeq(playerGuid[1]);
+        data.WriteByteSeq(victimGuid[2]);
+        data.WriteByteSeq(playerGuid[6]);
+        data.WriteByteSeq(playerGuid[3]);
+        data.WriteByteSeq(playerGuid[5]);
+        data.WriteByteSeq(playerGuid[7]);
+        data.WriteByteSeq(victimGuid[3]);
 
         Player* looter = player;
 
