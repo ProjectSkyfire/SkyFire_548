@@ -523,7 +523,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SET_SELECTION,                      0x0740, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSetSelectionOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_TAXI_BENCHMARK_MODE,            0x0762, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTaxiBenchmarkOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_TITLE,                          0x03C7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTitleOpcode               );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_CURRENCY,                 0x0C44, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_CURRENCY,                 0x0C44, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_GOLD,                     0x14E3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeGoldOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_TRADE_ITEM,                     0x03D5, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTradeItemOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_VEHICLE_REC_ID_ACK,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -1291,7 +1291,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_TEST_DROP_RATE_RESULT,              0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TEXT_EMOTE,                         0x002E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_CLEAR,                       0x180B, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_THREAT_REMOVE,                      0x1E0F, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_THREAT_REMOVE,                      0x1E0F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_UPDATE,                      0x0632, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_TIME_ADJUSTMENT,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ,                      0x1A8F, STATUS_NEVER    ); // 5.4.8 18414
