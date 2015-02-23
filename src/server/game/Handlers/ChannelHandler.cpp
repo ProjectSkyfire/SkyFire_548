@@ -87,13 +87,7 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
-    uint32 channelId;
-
-    recvPacket >> channelId; // flags
-    recvPacket.ReadBit();
     uint32 length = recvPacket.ReadBits(7);
-    recvPacket.ReadBits(7);
-    recvPacket.ReadBit();
     std::string channelName = recvPacket.ReadString(length);
 
     TC_LOG_DEBUG("chat.system", "%s %s Channel: %s",
