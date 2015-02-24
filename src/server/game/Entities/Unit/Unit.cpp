@@ -14829,31 +14829,85 @@ void Unit::SetAuraStack(uint32 spellId, Unit* target, uint32 stack)
         aura->SetStackAmount(stack);
 }
 
-void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
+void Unit::SendPlaySpellVisual(uint32 SpellVisualId, float x, float y, float z, float orientation, uint8 SpeedTime, uint16 MissReason, uint16 ReflectStatus)
 {
-    ObjectGuid guid = GetGUID();
+    ObjectGuid SourceGuid = GetGUID();
+    ObjectGuid TargetGuid;
 
-    WorldPacket data(SMSG_PLAY_SPELL_VISUAL_KIT, 4 + 4+ 4 + 8);
-    data << uint32(0);
-    data << uint32(id);     // SpellVisualKit.dbc index
-    data << uint32(unkParam);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.FlushBits();
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 4 + 4 + 4 + 8);
+
+    data.WriteBit(SourceGuid[4]);
+    data.WriteBit(TargetGuid[6]);
+    data.WriteBit(TargetGuid[4]);
+    data.WriteBit(TargetGuid[7]);
+    data.WriteBit(SourceGuid[6]);
+    data.WriteBit(TargetGuid[2]);
+    data.WriteBit(TargetGuid[0]);
+    data.WriteBit(SourceGuid[2]);
+    data.WriteBit(SpeedTime);
+    data.WriteBit(SourceGuid[7]);
+    data.WriteBit(TargetGuid[3]);
+    data.WriteBit(TargetGuid[1]);
+    data.WriteBit(SourceGuid[0]);
+    data.WriteBit(SourceGuid[1]);
+    data.WriteBit(TargetGuid[5]);
+    data.WriteBit(SourceGuid[5]);
+    data.WriteBit(SourceGuid[3]);
+
+    data << float(z);
+    data.WriteByteSeq(SourceGuid[2]);
+    data.WriteByteSeq(SourceGuid[6]);
+    data.WriteByteSeq(SourceGuid[5]);
+    data.WriteByteSeq(TargetGuid[2]);
+    data.WriteByteSeq(SourceGuid[1]);
+    data << float(x);
+    data.WriteByteSeq(SourceGuid[3]);
+    data << uint16(ReflectStatus);
+    data.WriteByteSeq(TargetGuid[4]);
+    data.WriteByteSeq(TargetGuid[7]);
+    data << float(orientation);
+    data << float(y);
+    data.WriteByteSeq(SourceGuid[4]);
+    data.WriteByteSeq(TargetGuid[5]);
+    data << uint32(SpellVisualId);
+    data.WriteByteSeq(TargetGuid[1]);
+    data.WriteByteSeq(SourceGuid[7]);
+    data << uint16(MissReason);
+    data.WriteByteSeq(TargetGuid[0]);
+    data.WriteByteSeq(TargetGuid[6]);
+    data.WriteByteSeq(SourceGuid[0]);
+    data.WriteByteSeq(TargetGuid[3]);
+
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SendPlaySpellVisualKit(uint32 SpellVisualId, uint32 Duration, int32 Type)
+{
+    ObjectGuid UnitGuid = GetGUID();
+
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL_KIT, 4 + 4 + 4 + 8);
+
+    data.WriteBit(UnitGuid[4]);
+    data.WriteBit(UnitGuid[2]);
+    data.WriteBit(UnitGuid[6]);
+    data.WriteBit(UnitGuid[5]);
+    data.WriteBit(UnitGuid[1]);
+    data.WriteBit(UnitGuid[3]);
+    data.WriteBit(UnitGuid[0]);
+    data.WriteBit(UnitGuid[7]);
+
+    data.WriteByteSeq(UnitGuid[5]);
+    data.WriteByteSeq(UnitGuid[7]);
+    data << uint32(Type);
+    data.WriteByteSeq(UnitGuid[1]);
+    data.WriteByteSeq(UnitGuid[0]);
+    data.WriteByteSeq(UnitGuid[6]);
+    data << uint32(Duration);
+    data.WriteByteSeq(UnitGuid[4]);
+    data.WriteByteSeq(UnitGuid[2]);
+    data.WriteByteSeq(UnitGuid[3]);
+    data << uint32(SpellVisualId);
+
     SendMessageToSet(&data, true);
 }
 
