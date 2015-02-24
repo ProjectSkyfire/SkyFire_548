@@ -349,11 +349,10 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
     }
 
     // can't be learn, cheat? Or double learn with lags...
-    if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
-    {
-        SendTrainerBuyFailed(guid, spellId, 0);
-        return;
-    }
+    //if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
+     //   SendTrainerBuyFailed(guid, spellId, 0);
+     //   return;
+    //}
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
