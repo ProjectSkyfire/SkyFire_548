@@ -2737,7 +2737,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                 mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
             }
 
-            //ASSERT(mapSave);
+            ASSERT(mapSave);
 
             // check for existing instance binds
             InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
