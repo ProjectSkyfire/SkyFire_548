@@ -2239,11 +2239,11 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
         return;
 
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
-    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
-    data.FlushBits();
+
+    data << uint32(0);                                                              // Needed guild members
     data << float(0.f);                                                             // Guild XP multiplier
     data << uint32(0);                                                              // Current guild members
-    data << uint32(0);                                                              // Needed guild members
+    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
 
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_PARTY_STATE_RESPONSE [%s]", session->GetPlayerInfo().c_str());
