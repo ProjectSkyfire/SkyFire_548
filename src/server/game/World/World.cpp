@@ -318,7 +318,7 @@ bool World::HasRecentlyDisconnected(WorldSession* session)
         }
     }
     return false;
- }
+}
 
 int32 World::GetQueuePos(WorldSession* sess)
 {

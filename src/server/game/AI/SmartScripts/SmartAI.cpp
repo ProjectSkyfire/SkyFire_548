@@ -300,7 +300,9 @@ void SmartAI::UpdatePath(const uint32 diff)
                     mWPReached = true;
             }
             mWPPauseTimer = 0;
-        } else {
+        }
+        else
+        {
             mWPPauseTimer -= diff;
         }
     }

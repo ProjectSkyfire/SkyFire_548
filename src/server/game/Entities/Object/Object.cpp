@@ -126,8 +126,8 @@ Object::~Object()
 
     for (size_t i = 0; i < m_dynamicTab.size(); ++i)
     {
-        delete[] m_dynamicTab[i];
-        delete[] m_dynamicChange[i];
+        delete [] m_dynamicTab[i];
+        delete [] m_dynamicChange[i];
     }
 }
 
@@ -2732,7 +2732,7 @@ void WorldObject::GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureL
 }
 
 void WorldObject::GetPlayerListInGrid(std::list<Player*>& playerList, float maxSearchRange) const
-{    
+{
     Trinity::AnyPlayerInObjectRangeCheck checker(this, maxSearchRange);
     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, playerList, checker);
     this->VisitNearbyWorldObject(maxSearchRange, searcher);

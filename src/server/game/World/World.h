@@ -21,8 +21,8 @@
 /// @{
 /// \file
 
-#ifndef __WORLD_H
-#define __WORLD_H
+#ifndef SF_WORLD_H
+#define SF_WORLD_H
 
 #include "Common.h"
 #include "Timer.h"
@@ -528,7 +528,7 @@ struct CliCommandHolder
         memcpy(m_command, command, len);
     }
 
-    ~CliCommandHolder() { delete[] m_command; }
+    ~CliCommandHolder() { delete [] m_command; }
 };
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;

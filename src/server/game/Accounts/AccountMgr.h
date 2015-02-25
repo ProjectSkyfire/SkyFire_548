@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ACCMGR_H
-#define _ACCMGR_H
+#ifndef SF_ACCMGR_H
+#define SF_ACCMGR_H
 
 #include "RBAC.h"
 #include <ace/Singleton.h>

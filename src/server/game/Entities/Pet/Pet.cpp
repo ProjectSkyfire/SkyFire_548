@@ -1809,8 +1809,7 @@ void Pet::ToggleAutocast(SpellInfo const* spellInfo, bool apply)
 
     if (apply)
     {
-        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i)
-            ;                                               // just search
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i);    // just search
 
         if (i == m_autospells.size())
         {
@@ -1827,8 +1826,7 @@ void Pet::ToggleAutocast(SpellInfo const* spellInfo, bool apply)
     else
     {
         AutoSpellList::iterator itr2 = m_autospells.begin();
-        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i, ++itr2)
-            ;                                               // just search
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i, ++itr2);    // just search
 
         if (i < m_autospells.size())
         {

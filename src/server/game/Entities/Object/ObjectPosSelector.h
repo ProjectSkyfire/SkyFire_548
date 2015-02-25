@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OBJECT_POS_SELECTOR_H
-#define _OBJECT_POS_SELECTOR_H
+#ifndef SF_OBJECT_POS_SELECTOR_H
+#define SF_OBJECT_POS_SELECTOR_H
 
 #include<Common.h>
 

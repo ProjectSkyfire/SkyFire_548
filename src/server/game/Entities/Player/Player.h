@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PLAYER_H
-#define _PLAYER_H
+#ifndef SF_PLAYER_H
+#define SF_PLAYER_H
 
 #include "DBCStores.h"
 #include "GroupReference.h"

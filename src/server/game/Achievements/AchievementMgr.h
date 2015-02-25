@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_ACHIEVEMENTMGR_H
-#define __TRINITY_ACHIEVEMENTMGR_H
+#ifndef SF_ACHIEVEMENTMGR_H
+#define SF_ACHIEVEMENTMGR_H
 
 #include <map>
 #include <string>

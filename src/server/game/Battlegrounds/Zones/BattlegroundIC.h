@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BATTLEGROUNDIC_H
-#define __BATTLEGROUNDIC_H
+#ifndef SF_BATTLEGROUNDIC_H
+#define SF_BATTLEGROUNDIC_H
 
 #include "Battleground.h"
 #include "Language.h"
@@ -916,12 +916,12 @@ class BattlegroundIC : public Battleground
             uint32 i = 0;
             switch (id)
             {
-                case GO_HORDE_GATE_1: i = BG_IC_H_FRONT ;break;
-                case GO_HORDE_GATE_2: i = BG_IC_H_WEST ;break;
-                case GO_HORDE_GATE_3: i = BG_IC_H_EAST ;break;
-                case GO_ALLIANCE_GATE_3: i = BG_IC_A_FRONT ;break;
-                case GO_ALLIANCE_GATE_1: i = BG_IC_A_WEST ;break;
-                case GO_ALLIANCE_GATE_2: i = BG_IC_A_EAST ;break;
+                case GO_HORDE_GATE_1: i = BG_IC_H_FRONT; break;
+                case GO_HORDE_GATE_2: i = BG_IC_H_WEST; break;
+                case GO_HORDE_GATE_3: i = BG_IC_H_EAST; break;
+                case GO_ALLIANCE_GATE_3: i = BG_IC_A_FRONT; break;
+                case GO_ALLIANCE_GATE_1: i = BG_IC_A_WEST; break;
+                case GO_ALLIANCE_GATE_2: i = BG_IC_A_EAST; break;
             }
             return i;
         }

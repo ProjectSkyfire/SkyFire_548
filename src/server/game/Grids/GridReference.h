@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _GRIDREFERENCE_H
-#define _GRIDREFERENCE_H
+#ifndef SF_GRIDREFERENCE_H
+#define SF_GRIDREFERENCE_H
 
 #include "LinkedReference/Reference.h"
 
@@ -50,4 +50,3 @@ class GridReference : public Reference<GridRefManager<OBJECT>, OBJECT>
         GridReference* next() { return (GridReference*)Reference<GridRefManager<OBJECT>, OBJECT>::next(); }
 };
 #endif
-

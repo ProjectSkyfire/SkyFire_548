@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __UNIT_H
-#define __UNIT_H
+#ifndef SF_UNIT_H
+#define SF_UNIT_H
 
 #include "DBCStructure.h"
 #include "EventProcessor.h"
@@ -1648,7 +1648,7 @@ class Unit : public WorldObject
         DeathState getDeathState() const { return m_deathState; }
         virtual void setDeathState(DeathState s);           // overwrited in Creature/Player/Pet
 
-        uint64 GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONED_BY); }
+        uint64 GetOwnerGUID() const { return GetUInt64Value(UNIT_FIELD_SUMMONED_BY); }
         void SetOwnerGUID(uint64 owner);
         uint64 GetCreatorGUID() const { return GetUInt64Value(UNIT_FIELD_CREATED_BY); }
         void SetCreatorGUID(uint64 creator) { SetUInt64Value(UNIT_FIELD_CREATED_BY, creator); }
@@ -1656,7 +1656,7 @@ class Unit : public WorldObject
         void SetMinionGUID(uint64 guid) { SetUInt64Value(UNIT_FIELD_SUMMON, guid); }
         uint64 GetCharmerGUID() const { return GetUInt64Value(UNIT_FIELD_CHARMED_BY); }
         void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMED_BY, owner); }
-        uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
+        uint64 GetCharmGUID() const { return GetUInt64Value(UNIT_FIELD_CHARM); }
         void SetPetGUID(uint64 guid) { m_SummonSlot[SUMMON_SLOT_PET] = guid; }
         uint64 GetPetGUID() const { return m_SummonSlot[SUMMON_SLOT_PET]; }
         void SetCritterGUID(uint64 guid) { SetUInt64Value(UNIT_FIELD_CRITTER, guid); }

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GROUPMGR_H
-#define _GROUPMGR_H
+#ifndef SF_GROUPMGR_H
+#define SF_GROUPMGR_H
 
 #include "Group.h"
 

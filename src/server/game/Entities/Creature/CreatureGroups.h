@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _FORMATIONS_H
-#define _FORMATIONS_H
+#ifndef SF_FORMATIONS_H
+#define SF_FORMATIONS_H
 
 #include "Define.h"
 #include "UnorderedMap.h"

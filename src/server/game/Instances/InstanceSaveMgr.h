@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _INSTANCESAVEMGR_H
-#define _INSTANCESAVEMGR_H
+#ifndef SF_INSTANCESAVEMGR_H
+#define SF_INSTANCESAVEMGR_H
 
 #include "Define.h"
 #include <ace/Singleton.h>

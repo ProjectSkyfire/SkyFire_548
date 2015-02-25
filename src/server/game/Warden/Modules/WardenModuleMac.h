@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _WARDEN_MODULE_MAC_H
-#define _WARDEN_MODULE_MAC_H
+#ifndef SF_WARDEN_MODULE_MAC_H
+#define SF_WARDEN_MODULE_MAC_H
 
 uint8 Module_0DBBF209A27B1E279A9FEC5C168A15F7_Data[9318] =
 {

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BATTLEGROUNDEY_H
-#define __BATTLEGROUNDEY_H
+#ifndef SF_BATTLEGROUNDEY_H
+#define SF_BATTLEGROUNDEY_H
 
 #include "Language.h"
 #include "Battleground.h"
@@ -414,4 +414,3 @@ class BattlegroundEY : public Battleground
         uint32 m_HonorTics;
 };
 #endif
-

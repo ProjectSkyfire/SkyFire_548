@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARENATEAMMGR_H
-#define _ARENATEAMMGR_H
+#ifndef SF_ARENATEAMMGR_H
+#define SF_ARENATEAMMGR_H
 
 #include "ArenaTeam.h"
 

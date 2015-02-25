@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GUILDMGR_H
-#define _GUILDMGR_H
+#ifndef SF_GUILDMGR_H
+#define SF_GUILDMGR_H
 
 #include "Guild.h"
 

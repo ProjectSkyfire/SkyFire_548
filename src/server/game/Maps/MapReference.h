@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MAPREFERENCE_H
-#define _MAPREFERENCE_H
+#ifndef SF_MAPREFERENCE_H
+#define SF_MAPREFERENCE_H
 
 #include "Reference.h"
 #include "Map.h"
@@ -51,4 +51,3 @@ class MapReference : public Reference<Map, Player>
         MapReference const* nocheck_prev() const { return (MapReference const*)Reference<Map, Player>::nocheck_prev(); }
 };
 #endif
-

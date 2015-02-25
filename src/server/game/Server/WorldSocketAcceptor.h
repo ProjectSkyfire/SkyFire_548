@@ -22,8 +22,8 @@
  *  \file WorldSocketMgr.h
  */
 
-#ifndef __WORLDSOCKETACCEPTOR_H_
-#define __WORLDSOCKETACCEPTOR_H_
+#ifndef SF_WORLDSOCKETACCEPTOR_H
+#define SF_WORLDSOCKETACCEPTOR_H
 
 #include "Common.h"
 

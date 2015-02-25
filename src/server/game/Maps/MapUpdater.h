@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MAP_UPDATER_H_INCLUDED
-#define _MAP_UPDATER_H_INCLUDED
+#ifndef SF_MAP_UPDATER_H_INCLUDED
+#define SF_MAP_UPDATER_H_INCLUDED
 
 #include <ace/Thread_Mutex.h>
 #include <ace/Condition_Thread_Mutex.h>

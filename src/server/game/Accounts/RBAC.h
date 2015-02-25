@@ -39,8 +39,8 @@
 * - Groups, Roles and Permissions can be assigned by realm
 */
 
-#ifndef _RBAC_H
-#define _RBAC_H
+#ifndef SF_RBAC_H
+#define SF_RBAC_H
 
 #include "Define.h"
 #include <string>

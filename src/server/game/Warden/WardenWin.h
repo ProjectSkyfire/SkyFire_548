@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _WARDEN_WIN_H
-#define _WARDEN_WIN_H
+#ifndef SF_WARDEN_WIN_H
+#define SF_WARDEN_WIN_H
 
 #include <map>
 #include "Cryptography/ARC4.h"
