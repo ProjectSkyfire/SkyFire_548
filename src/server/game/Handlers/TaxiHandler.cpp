@@ -82,8 +82,8 @@ void WorldSession::SendTaxiStatus(uint64 guid)
     data.WriteBit(Guid[7]);
     data.WriteBit(Guid[5]);
     data.WriteBit(Guid[4]);
-    data.WriteBit(Guid[1]);
-    data << uint8(GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc) ? 1 : 0);
+    data.WriteBit(Guid[1]); 
+    data.WriteBits(!GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc), 2);
     data.WriteBit(Guid[3]);
     data.WriteBit(Guid[0]);
 
@@ -170,6 +170,7 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     data.WriteBit(Guid[6]);
     data.WriteBit(Guid[5]);
     data.WriteBits(TaxiMaskSize, 24);
+    data.FlushBits();
 
     data.WriteByteSeq(Guid[0]);
     data.WriteByteSeq(Guid[3]);
@@ -425,7 +426,7 @@ void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
     WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 1 + 1 + 8);
     data.WriteBit(guid[2]);
     data.WriteBit(guid[7]);
-    data << uint32(reply);
+    data.WriteBit(!reply);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[6]);
