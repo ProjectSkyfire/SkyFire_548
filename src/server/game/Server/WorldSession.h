@@ -593,7 +593,7 @@ class WorldSession
         void HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket);
         void HandleAutoDeclineGuildInvites(WorldPacket& recvPacket);
 
-        void HandleGuildFinderAddRecruit(WorldPacket& recvPacket);
+        void HandleGuildFinderAddApplication(WorldPacket& recvPacket);
         void HandleGuildFinderBrowse(WorldPacket& recvPacket);
         void HandleGuildFinderDeclineRecruit(WorldPacket& recvPacket);
         void HandleGuildFinderGetApplications(WorldPacket& recvPacket);

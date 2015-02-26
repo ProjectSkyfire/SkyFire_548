@@ -24009,10 +24009,12 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
+    data.WriteBit(!arg);
+    data.WriteBits(reason, 5); // transfer abort reason
+    if (arg)
+        data << uint8(arg);
     data << uint32(mapid);
-    data << uint8(reason); // transfer abort reason
-    data << uint8(arg);
     GetSession()->SendPacket(&data);
 }
 
