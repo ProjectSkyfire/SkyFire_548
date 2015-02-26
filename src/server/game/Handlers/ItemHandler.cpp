@@ -1541,11 +1541,11 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     npcGuid[4] = recvData.ReadBit();
     count = recvData.ReadBits(21);
 
-    std::vector<ObjectGuid> itemGuids(count, ObjectGuid(0));
-    std::vector<uint32> newEntries(count, 0);
-    std::vector<uint32> slots(count, 0);
-    std::vector<bool> HasItemBonus(count, false);
-    std::vector<bool> HasModifications(count, false);
+    std::vector<ObjectGuid>itemGuids(count, ObjectGuid(0));
+    std::vector<uint32>newEntries(count, 0);
+    std::vector<uint32>slots(count, 0);
+    std::vector<bool>HasItemBonus(count, false);
+    std::vector<bool>HasModifications(count, false);
 
     for (uint8 i = 0; i < count; ++i)
     {
@@ -1631,8 +1631,6 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             recvData.ReadByteSeq(itemGuids[i][2]);
         }
     }
-
-    // Validate
 
     if (!player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_TRANSMOGRIFIER))
     {
