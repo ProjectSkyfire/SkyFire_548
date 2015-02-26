@@ -50,3 +50,4 @@
 * Mail
 * Auction House
 * Bank / Guild Bank
+* Transmogrify
