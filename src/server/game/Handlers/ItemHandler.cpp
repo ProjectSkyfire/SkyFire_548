@@ -1539,7 +1539,19 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     npcGuid[2] = recvData.ReadBit();
     npcGuid[3] = recvData.ReadBit();
     npcGuid[4] = recvData.ReadBit();
-    count = recvData.ReadBits(19);
+    count = recvData.ReadBits(21);
+
+    std::vector<ObjectGuid> itemGuids(count, ObjectGuid(0));
+    std::vector<uint32> newEntries(count, 0);
+    std::vector<uint32> slots(count, 0);
+    std::vector<bool> HasItemBonus(count, false);
+    std::vector<bool> HasModifications(count, false);
+
+    for (uint8 i = 0; i < count; ++i)
+    {
+        HasItemBonus[i] = recvData.ReadBit();
+        HasModifications[i] = recvData.ReadBit();
+    }
 
     if (count >= EQUIPMENT_SLOT_END)
     {
@@ -1551,18 +1563,9 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
     npcGuid[0] = recvData.ReadBit();
     npcGuid[7] = recvData.ReadBit();
 
-    std::vector<ObjectGuid> itemGuids(count, ObjectGuid(0));
-    std::vector<uint32> newEntries(count, 0);
-    std::vector<uint32> slots(count, 0);
-    std::vector<bool> unk0(count, false);
-    std::vector<bool> unk1(count, false);
-
     for (uint8 i = 0; i < count; ++i)
     {
-        unk0[i] = recvData.ReadBit();
-        unk1[i] = recvData.ReadBit();
-
-        if (unk1[i])
+        if (HasModifications[i])
         {
             itemGuids[i][5] = recvData.ReadBit();
             itemGuids[i][6] = recvData.ReadBit();
@@ -1574,7 +1577,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             itemGuids[i][2] = recvData.ReadBit();
         }
 
-        if (unk0[i])
+        if (HasItemBonus[i])
         {
             itemGuids[i][4] = recvData.ReadBit();
             itemGuids[i][1] = recvData.ReadBit();
@@ -1585,13 +1588,12 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             itemGuids[i][7] = recvData.ReadBit();
             itemGuids[i][3] = recvData.ReadBit();
         }
-
     }
 
     for (uint8 i = 0; i < count; ++i)
     {
-        recvData >> newEntries[i];
         recvData >> slots[i];
+        recvData >> newEntries[i];
     }
 
     recvData.ReadByteSeq(npcGuid[5]);
@@ -1605,7 +1607,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
 
     for (uint8 i = 0; i < count; ++i)
     {
-        if (unk0[i])
+        if (HasModifications[i])
         {
             recvData.ReadByteSeq(itemGuids[i][2]);
             recvData.ReadByteSeq(itemGuids[i][5]);
@@ -1617,7 +1619,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             recvData.ReadByteSeq(itemGuids[i][1]);
         }
 
-        if (unk1[i])
+        if (HasItemBonus[i])
         {
             recvData.ReadByteSeq(itemGuids[i][7]);
             recvData.ReadByteSeq(itemGuids[i][1]);
