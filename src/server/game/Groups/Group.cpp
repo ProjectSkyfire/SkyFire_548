@@ -78,7 +78,7 @@ Group::~Group()
         itr = RollId.begin();
         Roll *r = *itr;
         RollId.erase(itr);
-        delete(r);
+        delete (r);
     }
 
     // it is undefined whether objectmgr (which stores the groups) or instancesavemgr
@@ -89,7 +89,7 @@ Group::~Group()
             itr2->second.save->RemoveGroup(this);
 
     // Sub group counters clean up
-    delete[] m_subGroupsCounts;
+    delete [] m_subGroupsCounts;
 }
 
 bool Group::Create(Player* leader)
@@ -272,7 +272,7 @@ void Group::ConvertToGroup()
 
     if (m_subGroupsCounts)
     {
-        delete[] m_subGroupsCounts;
+        delete [] m_subGroupsCounts;
         m_subGroupsCounts = NULL;
     }
 
@@ -1362,7 +1362,8 @@ void Group::EndRoll(Loot* pLoot)
 {
     for (Rolls::iterator itr = RollId.begin(); itr != RollId.end();)
     {
-        if ((*itr)->getLoot() == pLoot) {
+        if ((*itr)->getLoot() == pLoot)
+        {
             CountTheRoll(itr);           //i don't have to edit player votes, who didn't vote ... he will pass
             itr = RollId.begin();
         }
@@ -1643,7 +1644,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.WriteBit(leaderGuid[7]);
     data.WriteBit(leaderGuid[1]);
     data.WriteBit(1);                                   // has dungeon and raid difficulty
-    data.WriteBit(groupGuid[7]); 
+    data.WriteBit(groupGuid[7]);
     data.WriteBit(leaderGuid[6]);
     data.WriteBit(leaderGuid[5]);
     data.WriteBits(GetMembersCount(), 21);
@@ -2642,7 +2643,8 @@ void Group::SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag)
         return;
 
     // Do flag specific actions, e.g ensure uniqueness
-    switch (flag) {
+    switch (flag)
+    {
         case MEMBER_FLAG_MAINASSIST:
             RemoveUniqueGroupMemberFlag(MEMBER_FLAG_MAINASSIST);         // Remove main assist flag from current if any.
             break;

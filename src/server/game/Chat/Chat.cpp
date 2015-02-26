@@ -250,7 +250,7 @@ void ChatHandler::SendGlobalGMSysMessage(const char *str)
     {
         BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
         sWorld->SendGlobalGMMessage(&data);
-     }
+    }
     free(buf);
 }
 

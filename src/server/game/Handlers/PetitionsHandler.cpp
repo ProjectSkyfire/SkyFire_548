@@ -322,7 +322,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
     data.WriteByteSeq(petitionGuid[0]);
     data.WriteByteSeq(playerGuid[2]);
 
-    delete[] playerGuids;
+    delete [] playerGuids;
     SendPacket(&data);
 }
 
@@ -843,7 +843,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recvData)
     data.WriteByteSeq(petitionGuid[0]);
     data.WriteByteSeq(playerGuid[2]);
 
-    delete[] playerGuids;
+    delete [] playerGuids;
     player->GetSession()->SendPacket(&data);
 }
 

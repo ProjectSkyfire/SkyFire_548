@@ -11,27 +11,13 @@
 
 language: cpp
 
-env:
-  global:
-    - secure: "kGeoqRlZKNa9TCQrVx8faZTwXEf7QDP+7aqfELc5gcpcPoaSHYG3B+q1ntJ3ugZ+d6EYaL68s8kC7GzwAQc4luyQeBFRnXAXS1wqiIpsusbSWRYUVnCaWv0Djt+jamTkR5dPMXAHvweufb2OO3P+8jp/7v2fhyUFaQE7BETTydg="
-
-addons:
-  coverity_scan:
-    project:
-      name: "ProjectSkyfire/SkyFire.548"
-      description: "Build submitted via Travis CI"
-    notification_email: aridev666@gmail.com
-    build_command_prepend: "cmake ../ -DCMAKE_BUILD_TYPE=Debug -DSCRIPTS=1 -DTOOLS=1"
-    build_command:   "make -j 16"
-    branch_pattern: coverity_scan
-
 git:
   depth: 1
 
 branches:
   only:
     - master
-    - coverity_scan
+    - scan
 
 compiler:
   - clang

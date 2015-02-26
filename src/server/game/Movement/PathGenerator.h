@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PATH_GENERATOR_H
-#define _PATH_GENERATOR_H
+#ifndef SF_PATH_GENERATOR_H
+#define SF_PATH_GENERATOR_H
 
 #include "SharedDefines.h"
 #include "DetourNavMesh.h"

@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _WORLDSTATE_BUILDER_
-#define _WORLDSTATE_BUILDER_
+#ifndef SF_WORLDSTATE_BUILDER_H
+#define SF_WORLDSTATE_BUILDER_H
 
 #include "WorldPacket.h"
 #include "WorldSession.h"

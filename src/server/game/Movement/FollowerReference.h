@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _FOLLOWERREFERENCE_H
-#define _FOLLOWERREFERENCE_H
+#ifndef SF_FOLLOWERREFERENCE_H
+#define SF_FOLLOWERREFERENCE_H
 
 #include "Reference.h"
 

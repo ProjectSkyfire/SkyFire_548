@@ -132,9 +132,8 @@ namespace Trinity
         uint32 team;
         Player const* skipped_receiver;
         MessageDistDeliverer(WorldObject* src, WorldPacket* msg, float dist, bool own_team_only = false, Player const* skipped = NULL)
-            : i_source(src), i_message(msg), i_phaseMask(src->GetPhaseMask()), i_distSq(dist * dist)
-            , team(0)
-            , skipped_receiver(skipped)
+            : i_source(src), i_message(msg), i_phaseMask(src->GetPhaseMask()), i_distSq(dist * dist),
+            team(0), skipped_receiver(skipped)
         {
             if (own_team_only)
                 if (Player* player = src->ToPlayer())

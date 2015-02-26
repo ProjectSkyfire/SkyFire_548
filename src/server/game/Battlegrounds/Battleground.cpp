@@ -1671,7 +1671,7 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
     if (respawntime)
         creature->SetRespawnDelay(respawntime);
 
-    return  creature;
+    return creature;
 }
 
 bool Battleground::DelCreature(uint32 type)

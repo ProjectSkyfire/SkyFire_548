@@ -37,11 +37,11 @@
 #include "Vehicle.h"
 #include "VMapFactory.h"
 
-u_map_magic MapMagic        = { {'M','A','P','S'} };
-u_map_magic MapVersionMagic = { {'v','1','.','3'} };
-u_map_magic MapAreaMagic    = { {'A','R','E','A'} };
-u_map_magic MapHeightMagic  = { {'M','H','G','T'} };
-u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
+u_map_magic MapMagic        = { {'M', 'A', 'P', 'S'} };
+u_map_magic MapVersionMagic = { {'v', '1', '.', '3'} };
+u_map_magic MapAreaMagic    = { {'A', 'R', 'E', 'A'} };
+u_map_magic MapHeightMagic  = { {'M', 'H', 'G', 'T'} };
+u_map_magic MapLiquidMagic  = { {'M', 'L', 'I', 'Q'} };
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -108,7 +108,7 @@ bool Map::ExistMap(uint32 mapid, int gx, int gy)
         fclose(pf);
     }
 
-    delete[] fileName;
+    delete [] fileName;
     return ret;
 }
 
@@ -198,7 +198,7 @@ void Map::LoadMap(int gx, int gy, bool reload)
     GridMaps[gx][gy] = new GridMap();
     if (!GridMaps[gx][gy]->loadData(tmp))
         TC_LOG_ERROR("maps", "Error loading map file: \n %s\n", tmp);
-    delete[] tmp;
+    delete [] tmp;
 
     sScriptMgr->OnLoadGridMap(this, GridMaps[gx][gy], gx, gy);
 }
@@ -1447,12 +1447,12 @@ bool GridMap::loadData(char* filename)
 
 void GridMap::unloadData()
 {
-    delete[] _areaMap;
-    delete[] m_V9;
-    delete[] m_V8;
-    delete[] _liquidEntry;
-    delete[] _liquidFlags;
-    delete[] _liquidMap;
+    delete [] _areaMap;
+    delete [] m_V9;
+    delete [] m_V8;
+    delete [] _liquidEntry;
+    delete [] _liquidFlags;
+    delete [] _liquidMap;
     _areaMap = NULL;
     m_V9 = NULL;
     m_V8 = NULL;
@@ -2092,7 +2092,7 @@ uint16 Map::GetAreaFlag(float x, float y, float z, bool *isOutdoors) const
             *isOutdoors = true;
     }
     return areaflag;
- }
+}
 
 uint8 Map::GetTerrainType(float x, float y) const
 {
@@ -3252,4 +3252,3 @@ time_t Map::GetLinkedRespawnTime(uint64 guid) const
 
     return time_t(0);
 }
-

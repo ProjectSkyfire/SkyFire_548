@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TICKETMGR_H
-#define _TICKETMGR_H
+#ifndef SF_TICKETMGR_H
+#define SF_TICKETMGR_H
 
 #include <string>
 #include <ace/Singleton.h>

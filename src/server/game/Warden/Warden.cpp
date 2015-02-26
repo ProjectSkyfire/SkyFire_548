@@ -35,7 +35,7 @@ Warden::Warden() : _inputCrypto(16), _outputCrypto(16), _checkTimer(10000/*10 se
 
 Warden::~Warden()
 {
-    delete[] _module->CompressedData;
+    delete [] _module->CompressedData;
     delete _module;
     _module = NULL;
     _initialized = false;
@@ -206,7 +206,7 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
             if (check)
                 banReason << ": " << check->Comment << " (CheckId: " << check->CheckId << ")";
 
-            sWorld->BanAccount(BAN_ACCOUNT, accountName, duration.str(), banReason.str(),"Server");
+            sWorld->BanAccount(BAN_ACCOUNT, accountName, duration.str(), banReason.str(), "Server");
 
             return "Ban";
         }

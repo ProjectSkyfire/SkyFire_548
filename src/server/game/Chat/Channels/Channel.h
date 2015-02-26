@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CHANNEL_H
-#define _CHANNEL_H
+#ifndef SF_CHANNEL_H
+#define SF_CHANNEL_H
 
 #include <list>
 #include <map>
@@ -285,4 +285,3 @@ class Channel
         BannedContainer bannedStore;
 };
 #endif
-

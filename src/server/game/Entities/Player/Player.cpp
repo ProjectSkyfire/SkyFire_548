@@ -5935,7 +5935,7 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
     float bonus_agility = GetStat(STAT_AGILITY) - base_agility;
 
     float dodge_ratio = 1 / dodgeRatio->ratio;
-    if(pclass == CLASS_DEATH_KNIGHT || pclass == CLASS_PALADIN || pclass == CLASS_WARRIOR) dodge_ratio = 0;
+    if (pclass == CLASS_DEATH_KNIGHT || pclass == CLASS_PALADIN || pclass == CLASS_WARRIOR) dodge_ratio = 0;
 
     // calculate diminishing (green in char screen) and non-diminishing (white) contribution
     diminishing = bonus_agility * dodge_ratio * crit_to_dodge[pclass-1];
@@ -8776,7 +8776,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                                 slot = EQUIPMENT_SLOT_MAINHAND; break;
                             case OFF_ATTACK:
                                 slot = EQUIPMENT_SLOT_OFFHAND;  break;
-                            
+
                             default: slot = EQUIPMENT_SLOT_END; break;
                         }
                         if (slot != i)
@@ -10748,7 +10748,7 @@ Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool useable /*= f
         case OFF_ATTACK:
             slot = EQUIPMENT_SLOT_OFFHAND;
             break;
-         
+
         default: return NULL;
     }
 
@@ -14157,7 +14157,7 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         case ITEM_MOD_DEFENSE_SKILL_RATING:
             ApplyRatingMod(CR_DEFENSE_SKILL, -int32(removeValue), apply);
             break;
-        case  ITEM_MOD_DODGE_RATING:
+        case ITEM_MOD_DODGE_RATING:
             ApplyRatingMod(CR_DODGE, -int32(removeValue), apply);
             break;
         case ITEM_MOD_PARRY_RATING:
@@ -14270,7 +14270,7 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         case ITEM_MOD_DEFENSE_SKILL_RATING:
             ApplyRatingMod(CR_DEFENSE_SKILL, int32(addValue), apply);
             break;
-        case  ITEM_MOD_DODGE_RATING:
+        case ITEM_MOD_DODGE_RATING:
             ApplyRatingMod(CR_DODGE, int32(addValue), apply);
             break;
         case ITEM_MOD_PARRY_RATING:
@@ -14537,7 +14537,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             ApplyRatingMod(CR_DEFENSE_SKILL, enchant_amount, apply);
                             TC_LOG_DEBUG("entities.player.items", "+ %u DEFENCE", enchant_amount);
                             break;
-                        case  ITEM_MOD_DODGE_RATING:
+                        case ITEM_MOD_DODGE_RATING:
                             ApplyRatingMod(CR_DODGE, enchant_amount, apply);
                             TC_LOG_DEBUG("entities.player.items", "+ %u DODGE", enchant_amount);
                             break;
@@ -17112,7 +17112,7 @@ void Player::QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type, u
 
                 break;
             }
-        }   
+        }
     }
 }
 
@@ -17168,7 +17168,7 @@ bool Player::HasQuestForItem(uint32 itemId) const
                     {
                         if (GetItemCount(itemId, true) < qInfo->RequiredSourceItemCount[j])
                             return true;
-                    } 
+                    }
                     else if (GetItemCount(itemId, true) < pProto->GetMaxStackSize())
                         return true;
                 }
@@ -20796,7 +20796,7 @@ void Player::UpdateSpeakTime()
 
 bool Player::CanSpeak() const
 {
-    return  GetSession()->m_muteTime <= time (NULL);
+    return GetSession()->m_muteTime <= time (NULL);
 }
 
 /*********************************************************/
@@ -26575,7 +26575,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
 
 bool Player::IsPetNeedBeTemporaryUnsummoned() const
 {
-    return !IsInWorld() || !IsAlive() || IsMounted() /*+in flight*/;
+    return !IsInWorld() || !IsAlive() || IsMounted(); /*+in flight*/
 }
 
 bool Player::CanSeeSpellClickOn(Creature const* c) const
@@ -26645,7 +26645,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         *data << uint32(GetTalentSpecialization(i));
     }
 
-    delete[] wpos;
+    delete [] wpos;
 }
 
 void Player::BuildPetTalentsInfoData(WorldPacket* data)
@@ -27551,7 +27551,7 @@ void Player::RefundItem(Item* item)
                 store_error = true;
                 break;
             }
-         }
+        }
     }
 
     if (store_error)

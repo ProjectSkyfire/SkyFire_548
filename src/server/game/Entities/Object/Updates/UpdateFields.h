@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _UPDATEFIELDS_H
-#define _UPDATEFIELDS_H
+#ifndef SF_UPDATEFIELDS_H
+#define SF_UPDATEFIELDS_H
 
 // Auto generated for version 5.4.7 18019
 

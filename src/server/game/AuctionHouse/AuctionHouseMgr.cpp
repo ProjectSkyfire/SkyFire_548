@@ -381,15 +381,15 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
         // but no easy way convert creature faction to player race faction for specific city
         switch (factionTemplateId)
         {
-            case   12: houseid = 1; break; // human
-            case   29: houseid = 6; break; // orc, and generic for horde
-            case   55: houseid = 2; break; // dwarf, and generic for alliance
-            case   68: houseid = 4; break; // undead
-            case   80: houseid = 3; break; // n-elf
-            case  104: houseid = 5; break; // trolls
-            case  120: houseid = 7; break; // booty bay, neutral
-            case  474: houseid = 7; break; // gadgetzan, neutral
-            case  855: houseid = 7; break; // everlook, neutral
+            case 12:   houseid = 1; break; // human
+            case 29:   houseid = 6; break; // orc, and generic for horde
+            case 55:   houseid = 2; break; // dwarf, and generic for alliance
+            case 68:   houseid = 4; break; // undead
+            case 80:   houseid = 3; break; // n-elf
+            case 104:  houseid = 5; break; // trolls
+            case 120:  houseid = 7; break; // booty bay, neutral
+            case 474:  houseid = 7; break; // gadgetzan, neutral
+            case 855:  houseid = 7; break; // everlook, neutral
             case 1604: houseid = 6; break; // b-elfs,
             default:                       // for unknown case
             {

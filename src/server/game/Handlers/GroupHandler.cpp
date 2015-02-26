@@ -1068,7 +1068,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     data->Initialize(SMSG_PARTY_MEMBER_STATS, 80);          // average value
     data->WriteBit(guid[0]);
     data->WriteBit(guid[5]);
-    data->WriteBit(1); // Ukn 
+    data->WriteBit(1); // Ukn
     data->WriteBit(guid[1]);
     data->WriteBit(guid[4]);
     data->WriteBit(1); // Ukn
@@ -1116,7 +1116,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     data->WriteByteSeq(guid[0]);
     *data << uint32(0);
 
-/* 
+/*
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
         *data << uint32(player->GetHealth());
 

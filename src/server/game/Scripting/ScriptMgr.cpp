@@ -235,8 +235,8 @@ void ScriptMgr::Unload()
         delete *itr;
     ExampleScripts.clear();
 
-    delete[] SpellSummary;
-    delete[] UnitAI::AISpellInfo;
+    delete [] SpellSummary;
+    delete [] UnitAI::AISpellInfo;
 }
 
 void ScriptMgr::LoadDatabase()

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LFGGROUPDATA_H
-#define _LFGGROUPDATA_H
+#ifndef SF_LFGGROUPDATA_H
+#define SF_LFGGROUPDATA_H
 
 #include "LFG.h"
 

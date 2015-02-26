@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MOVEMENT_STRUCTURES_H
-#define _MOVEMENT_STRUCTURES_H
+#ifndef SF_MOVEMENT_STRUCTURES_H
+#define SF_MOVEMENT_STRUCTURES_H
 
 #include "Opcodes.h"
 #include "Object.h"

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _UNITEVENTS
-#define _UNITEVENTS
+#ifndef SF_UNITEVENTS
+#define SF_UNITEVENTS
 
 #include "Common.h"
 

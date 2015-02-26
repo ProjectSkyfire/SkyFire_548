@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _UPDATEFIELDFLAGS_H
-#define _UPDATEFIELDFLAGS_H
+#ifndef SF_UPDATEFIELDFLAGS_H
+#define SF_UPDATEFIELDFLAGS_H
 
 #include "UpdateFields.h"
 #include "Define.h"

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PLAYER_DUMP_H
-#define _PLAYER_DUMP_H
+#ifndef SF_PLAYER_DUMP_H
+#define SF_PLAYER_DUMP_H
 
 #include <string>
 #include <map>

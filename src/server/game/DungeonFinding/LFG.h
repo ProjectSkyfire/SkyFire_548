@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LFG_H
-#define _LFG_H
+#ifndef SF_LFG_H
+#define SF_LFG_H
 
 #include "Common.h"
 

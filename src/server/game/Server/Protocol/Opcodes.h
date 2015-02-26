@@ -21,8 +21,8 @@
 /// @{
 /// \file
 
-#ifndef _OPCODES_H
-#define _OPCODES_H
+#ifndef SF_OPCODES_H
+#define SF_OPCODES_H
 
 #include "Common.h"
 

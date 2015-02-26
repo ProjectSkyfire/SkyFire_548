@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GRIDREFMANAGER
-#define _GRIDREFMANAGER
+#ifndef SF_GRIDREFMANAGER
+#define SF_GRIDREFMANAGER
 
 #include "RefManager.h"
 
@@ -40,4 +40,3 @@ class GridRefManager : public RefManager<GridRefManager<OBJECT>, OBJECT>
         iterator rend() { return iterator(NULL); }
 };
 #endif
-

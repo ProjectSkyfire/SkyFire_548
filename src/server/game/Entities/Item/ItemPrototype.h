@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ITEMPROTOTYPE_H
-#define _ITEMPROTOTYPE_H
+#ifndef SF_ITEMPROTOTYPE_H
+#define SF_ITEMPROTOTYPE_H
 
 #include "Common.h"
 #include "SharedDefines.h"

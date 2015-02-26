@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ADDONHANDLER_H
-#define __ADDONHANDLER_H
+#ifndef SF_ADDONHANDLER_H
+#define SF_ADDONHANDLER_H
 
 #include "Common.h"
 #include "Config.h"
@@ -38,4 +38,3 @@ class AddonHandler
 };
 #define sAddOnHandler ACE_Singleton<AddonHandler, ACE_Null_Mutex>::instance()
 #endif
-

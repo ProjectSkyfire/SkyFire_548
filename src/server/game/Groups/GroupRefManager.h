@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GROUPREFMANAGER
-#define _GROUPREFMANAGER
+#ifndef SF_GROUPREFMANAGER_H
+#define SF_GROUPREFMANAGER_H
 
 #include "RefManager.h"
 
@@ -33,4 +33,3 @@ class GroupRefManager : public RefManager<Group, Player>
         GroupReference const* getFirst() const { return ((GroupReference const*)RefManager<Group, Player>::getFirst()); }
 };
 #endif
-

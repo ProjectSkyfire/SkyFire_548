@@ -453,7 +453,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
                     memcpy(str, buff.contents() + buff.rpos(), luaStrLen);
                     str[luaStrLen] = '\0'; // null terminator
                     TC_LOG_DEBUG("warden", "Lua string: %s", str);
-                    delete[] str;
+                    delete [] str;
                 }
                 buff.rpos(buff.rpos() + luaStrLen);         // Skip string
                 TC_LOG_DEBUG("warden", "RESULT LUA_STR_CHECK passed, CheckId %u account Id %u", *itr, _session->GetAccountId());

@@ -156,7 +156,7 @@ void BattlegroundAV::HandleQuestComplete(uint32 questid, Player* player)
                         DePopulateNode(i);
                         PopulateNode(i);
                             //maybe this is bad, because it will instantly respawn all creatures on every grave..
-                     }
+                    }
             }
             break;
         case AV_QUEST_A_COMMANDER1:
@@ -401,7 +401,9 @@ void BattlegroundAV::PostUpdateImpl(uint32 diff)
 
                 if (m_Mine_Reclaim_Timer[mine] > diff)
                     m_Mine_Reclaim_Timer[mine] -= diff;
-                else{ //we don't need to set this timer to 0 cause this codepart wont get called when this thing is 0
+                else
+                {
+                    //we don't need to set this timer to 0 cause this codepart wont get called when this thing is 0
                     ChangeMineOwner(mine, AV_NEUTRAL_TEAM);
                 }
             }

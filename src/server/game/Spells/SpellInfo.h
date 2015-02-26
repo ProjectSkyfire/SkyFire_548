@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SPELLINFO_H
-#define _SPELLINFO_H
+#ifndef SF_SPELLINFO_H
+#define SF_SPELLINFO_H
 
 #include "SharedDefines.h"
 #include "Util.h"
