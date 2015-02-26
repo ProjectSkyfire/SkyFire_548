@@ -683,7 +683,7 @@ bool AuthSocket::_HandleLogonProof()
             socket().recv(token, size);
             unsigned int validToken = TOTP::GenerateToken(_tokenKey.c_str());
             unsigned int incomingToken = atoi(token);
-            delete[] token;
+            delete [] token;
             if (validToken != incomingToken)
             {
                 char data[] = { AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0 };

@@ -90,7 +90,7 @@ namespace TOTP
         unsigned int truncHash = (hmacRes[offset] << 24) | (hmacRes[offset+1] << 16 )| (hmacRes[offset+2] << 8) | (hmacRes[offset+3]);
         truncHash &= 0x7FFFFFFF;
 
-        delete[] encoded;
+        delete [] encoded;
 
         return truncHash % 1000000;
     }

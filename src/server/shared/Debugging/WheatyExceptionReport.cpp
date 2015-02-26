@@ -145,7 +145,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
     if (m_previousFilter)
         return m_previousFilter(pExceptionInfo);
     else
-        return EXCEPTION_EXECUTE_HANDLER/*EXCEPTION_CONTINUE_SEARCH*/;
+        return EXCEPTION_EXECUTE_HANDLER;/*EXCEPTION_CONTINUE_SEARCH*/
 }
 
 BOOL WheatyExceptionReport::_GetProcessorName(TCHAR* sProcessorName, DWORD maxcount)
@@ -442,8 +442,8 @@ PEXCEPTION_POINTERS pExceptionInfo)
     #ifdef _M_IX86                                          // X86 Only!
     _tprintf(_T("\r\nRegisters:\r\n"));
 
-    _tprintf(_T("EAX:%08X\r\nEBX:%08X\r\nECX:%08X\r\nEDX:%08X\r\nESI:%08X\r\nEDI:%08X\r\n")
-        , pCtx->Eax, pCtx->Ebx, pCtx->Ecx, pCtx->Edx,
+    _tprintf(_T("EAX:%08X\r\nEBX:%08X\r\nECX:%08X\r\nEDX:%08X\r\nESI:%08X\r\nEDI:%08X\r\n"),
+        pCtx->Eax, pCtx->Ebx, pCtx->Ecx, pCtx->Edx,
         pCtx->Esi, pCtx->Edi);
 
     _tprintf(_T("CS:EIP:%04X:%08X\r\n"), pCtx->SegCs, pCtx->Eip);
@@ -457,8 +457,8 @@ PEXCEPTION_POINTERS pExceptionInfo)
     #ifdef _M_X64
     _tprintf(_T("\r\nRegisters:\r\n"));
     _tprintf(_T("RAX:%016I64X\r\nRBX:%016I64X\r\nRCX:%016I64X\r\nRDX:%016I64X\r\nRSI:%016I64X\r\nRDI:%016I64X\r\n")
-        _T("R8: %016I64X\r\nR9: %016I64X\r\nR10:%016I64X\r\nR11:%016I64X\r\nR12:%016I64X\r\nR13:%016I64X\r\nR14:%016I64X\r\nR15:%016I64X\r\n")
-        , pCtx->Rax, pCtx->Rbx, pCtx->Rcx, pCtx->Rdx,
+        _T("R8: %016I64X\r\nR9: %016I64X\r\nR10:%016I64X\r\nR11:%016I64X\r\nR12:%016I64X\r\nR13:%016I64X\r\nR14:%016I64X\r\nR15:%016I64X\r\n"),
+        pCtx->Rax, pCtx->Rbx, pCtx->Rcx, pCtx->Rdx,
         pCtx->Rsi, pCtx->Rdi, pCtx->R9, pCtx->R10, pCtx->R11, pCtx->R12, pCtx->R13, pCtx->R14, pCtx->R15);
     _tprintf(_T("CS:RIP:%04X:%016I64X\r\n"), pCtx->SegCs, pCtx->Rip);
     _tprintf(_T("SS:RSP:%04X:%016X  RBP:%08X\r\n"),
