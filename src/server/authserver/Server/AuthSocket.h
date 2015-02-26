@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AUTHSOCKET_H
-#define _AUTHSOCKET_H
+#ifndef SF_AUTHSOCKET_H
+#define SF_AUTHSOCKET_H
 
 #include "Common.h"
 #include "BigNumber.h"

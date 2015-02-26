@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __REALMACCEPTOR_H__
-#define __REALMACCEPTOR_H__
+#ifndef SF_REALMACCEPTOR_H
+#define SF_REALMACCEPTOR_H
 
 #include <ace/Acceptor.h>
 #include <ace/SOCK_Acceptor.h>

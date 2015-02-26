@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AUTHCODES_H
-#define _AUTHCODES_H
+#ifndef SF_AUTHCODES_H
+#define SF_AUTHCODES_H
 
 enum AuthResult
 {
