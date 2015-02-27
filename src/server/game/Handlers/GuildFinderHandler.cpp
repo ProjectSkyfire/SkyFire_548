@@ -335,10 +335,10 @@ void WorldSession::HandleGuildFinderPostRequest(WorldPacket& /*recvPacket*/)
 
     if (isGuildMaster)
     {
+        data.WriteString(settings.GetComment());
         data.WriteBit(settings.IsListed());
         data.WriteBits(settings.GetComment().size(), 11);
         data << uint32(settings.GetLevel());
-        data.WriteString(settings.GetComment());
         data << uint32(0); // Unk Int32
         data << uint32(settings.GetAvailability());
         data << uint32(settings.GetClassRoles());
@@ -346,6 +346,7 @@ void WorldSession::HandleGuildFinderPostRequest(WorldPacket& /*recvPacket*/)
     }
     else
         data.FlushBits();
+
     player->SendDirectMessage(&data);
 }
 
@@ -389,12 +390,12 @@ void WorldSession::HandleGuildFinderSetGuildPost(WorldPacket& recvPacket)
     uint32 guildInterests =  0;
     uint32 level = 0;
 
-    recvPacket >> level >> availability >> guildInterests >> classRoles;
+    recvPacket >> level >> availability >> classRoles >> guildInterests;
     // Level sent is zero if untouched, force to any (from interface). Idk why
     if (!level)
         level = ANY_FINDER_LEVEL;
 
-    uint16 length = recvPacket.ReadBits(11);
+    uint16 length = recvPacket.ReadBits(10);
     bool listed = recvPacket.ReadBit();
     std::string comment = recvPacket.ReadString(length);
 
