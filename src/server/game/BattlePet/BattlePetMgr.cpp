@@ -90,7 +90,7 @@ void BattlePetMgr::LoadFromDb(PreparedQueryResult result)
             health, maxHealth, power, speed, quality, breedId, flags);
 
         m_battlePetSet.insert(battlePet);
-    } 
+    }
     while (result->NextRow());
 }
 
@@ -111,7 +111,7 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
 
         switch (battlePet->GetDbState())
         {
-            case BATTLE_PET_DB_STATE_NONE: 
+            case BATTLE_PET_DB_STATE_NONE:
                 break;
             case BATTLE_PET_DB_STATE_DELETE:
             {

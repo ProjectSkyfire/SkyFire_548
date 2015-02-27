@@ -27,14 +27,6 @@
 #include <ace/Thread_Mutex.h>
 #include <AutoPtr.h>
 
-#define USE_SYSTEM_CONFIG 1
-
-#if USE_SYSTEM_CONFIG
-#define USE_SMART_SCRIPTS 0
-#else
-#define USE_SMART_SCRIPTS 0
-#endif
-
 typedef Trinity::AutoPtr<ACE_Configuration_Heap, ACE_Null_Mutex> Config;
 
 class ConfigMgr

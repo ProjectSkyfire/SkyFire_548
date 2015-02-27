@@ -497,7 +497,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     SendPacket(&data);
 
-    delete[] words, wordLens;
+    delete [] words, wordLens;
 
     TC_LOG_DEBUG("network", "WORLD: Send SMSG_WHO Message");
 }
@@ -1170,8 +1170,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 
-    uint32 type;
-    recvData >> type;
+    uint32 type = recvData.ReadBits(3);
 
     TC_LOG_DEBUG("network", "RAD: type %u", type);
 
@@ -1195,33 +1194,33 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     dest.resize(destSize);
 
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8+4+4+4+destSize);
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8 + 4 + 4 + 4 + destSize);
 
     ObjectGuid guid;
 
-    data << uint32(size);                                   // decompressed length
-    data << uint32(destSize);
-    data.append(dest);
-    data << uint32(adata->Time);                            // unix time
-    data.WriteBit(guid[7]);
-    data.WriteBits(type, 3);                                 // type (0-7)
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[1]);
+    data.WriteBits(type, 3);       // type (0-7)
     data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[4]);
     data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
 
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[5]);
+    data << uint32(size);         // decompressed length
+    data << uint32(destSize);
+    data.append(dest);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[2]);
-
+    data << uint32(adata->Time); // unix time
+    
     SendPacket(&data);
 }
 
@@ -1454,23 +1453,25 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recvData)
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
+
+    guid[0] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
     guid[1] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[3]);
     recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[6]);
+
     Player* player = ObjectAccessor::FindPlayer(guid);
 
     if (!player)
@@ -1480,27 +1481,31 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
     }
 
     ObjectGuid playerGuid = player->GetGUID();
-    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8+1+4+4);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[1]);
-    data << uint8(0);                                               // rank
+    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8 + 1 + 4 + 4);
+
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
     data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // yesterday kills
     data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // today kills
-    data.WriteByteSeq(playerGuid[2]);
-    data.WriteByteSeq(playerGuid[0]);
-    data.WriteByteSeq(playerGuid[6]);
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[4]);
+    data << uint8(0);                                               // rank
+
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(playerGuid[1]);
+    data.WriteBit(playerGuid[6]);
+    data.WriteBit(playerGuid[4]);
+    data.WriteBit(playerGuid[5]);
+    data.WriteBit(playerGuid[3]);
+    data.WriteBit(playerGuid[7]);
+    data.WriteBit(playerGuid[0]);
+
     data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(playerGuid[5]);
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
+    data.WriteByteSeq(playerGuid[3]);
+    data.WriteByteSeq(playerGuid[6]);
     data.WriteByteSeq(playerGuid[7]);
+    data.WriteByteSeq(playerGuid[2]);
+    data.WriteByteSeq(playerGuid[4]);
+    data.WriteByteSeq(playerGuid[5]);
+    data.WriteByteSeq(playerGuid[0]);
+
     SendPacket(&data);
 }
 
@@ -1917,23 +1922,24 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
 void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[0]);
+    guid[2] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+
     recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[3]);
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     if (!player)
@@ -2047,10 +2053,26 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_AREA_SPIRIT_HEALER_QUEUE");
 
+    ObjectGuid guid;
     Battleground* bg = _player->GetBattleground();
 
-    uint64 guid;
-    recvData >> guid;
+    guid[5] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[5]);
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
     if (!unit)
@@ -2172,7 +2194,7 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
         TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, type);
     }
 
-    delete[] guids;
+    delete [] guids;
 }
 
 void WorldSession::SendBroadcastText(uint32 entry)
@@ -2324,32 +2346,32 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
     for (uint8 i = 0; i < count; ++i)
     {
         profiles[i] = new CUFProfile;
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2            , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_157                         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1            , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP               , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR               , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS                    , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS         , recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2,             recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_157,                          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1,             recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP,                recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR,                recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS,                     recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS,          recvPacket.ReadBit());
         profiles[i]->BoolOptions.set(CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_156                         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST    , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER                  , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS                , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_145                         , recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_156,                          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST,     recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER,                   recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS,                 recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_145,                          recvPacket.ReadBit());
         strlens[i] = (uint8)recvPacket.ReadBits(8);
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE               , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS       , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER            , recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE,                recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS,        recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER,             recvPacket.ReadBit());
     }
 
     for (uint8 i = 0; i < count; ++i)

@@ -76,11 +76,7 @@
 #include "ScriptMgr.h"
 #include "WeatherMgr.h"
 #include "CreatureTextMgr.h"
-
-#if USE_SMART_SCRIPTS
 #include "SmartAI.h"
-#endif
-
 #include "Channel.h"
 #include "WardenCheckMgr.h"
 #include "Warden.h"
@@ -322,7 +318,7 @@ bool World::HasRecentlyDisconnected(WorldSession* session)
         }
     }
     return false;
- }
+}
 
 int32 World::GetQueuePos(WorldSession* sess)
 {
@@ -1736,10 +1732,8 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Waypoints...");
     sWaypointMgr->Load();
 
-#if USE_SMART_SCRIPTS
     TC_LOG_INFO("server.loading", "Loading SmartAI Waypoints...");
     sSmartWaypointMgr->LoadFromDB();
-#endif
 
     TC_LOG_INFO("server.loading", "Loading Creature Formations...");
     sFormationMgr->LoadCreatureFormations();
@@ -1808,10 +1802,8 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Validating spell scripts...");
     sObjectMgr->ValidateSpellScripts();
 
-#if USE_SMART_SCRIPTS
     TC_LOG_INFO("server.loading", "Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
-#endif
 
     TC_LOG_INFO("server.loading", "Loading Calendar data...");
     sCalendarMgr->LoadFromDB();

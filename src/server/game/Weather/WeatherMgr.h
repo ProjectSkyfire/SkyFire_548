@@ -21,8 +21,8 @@
 /// @{
 /// \file
 
-#ifndef __WEATHERMGR_H
-#define __WEATHERMGR_H
+#ifndef SF_WEATHERMGR_H
+#define SF_WEATHERMGR_H
 
 #include "Define.h"
 

@@ -17,7 +17,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if USE_SMART_SCRIPT
 #ifndef TRINITY_SMARTSCRIPTMGR_H
 #define TRINITY_SMARTSCRIPTMGR_H
 
@@ -28,8 +27,8 @@
 #include "Spell.h"
 #include "DB2Stores.h"
 
-#include "SmartScript.h"
-#include "SmartAI.h"
+//#include "SmartScript.h"
+//#include "SmartAI.h"
 
 struct WayPoint
 {
@@ -739,7 +738,7 @@ struct SmartAction
         } summonGO;
 
         struct
-         {
+        {
             uint32 state;
         } active;
 
@@ -1293,9 +1292,8 @@ enum SmartCastFlags
 // one line in DB is one event
 struct SmartScriptHolder
 {
-    SmartScriptHolder() : entryOrGuid(0), source_type(SMART_SCRIPT_TYPE_CREATURE)
-        , event_id(0), link(0), event(), action(), target(), timer(0), active(false), runOnce(false)
-        , enableTimed(false) { }
+    SmartScriptHolder() : entryOrGuid(0), source_type(SMART_SCRIPT_TYPE_CREATURE),
+        event_id(0), link(0), event(), action(), target(), timer(0), active(false), runOnce(false), enableTimed(false) { }
 
     int32 entryOrGuid;
     SmartScriptType source_type;
@@ -1513,5 +1511,4 @@ class SmartAIMgr
 
 #define sSmartScriptMgr ACE_Singleton<SmartAIMgr, ACE_Null_Mutex>::instance()
 #define sSmartWaypointMgr ACE_Singleton<SmartWaypointMgr, ACE_Null_Mutex>::instance()
-#endif
 #endif

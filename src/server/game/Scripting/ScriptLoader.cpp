@@ -676,6 +676,7 @@ void AddSC_boss_ordos();
 //void AddSC_townlong_steppes();
 //void AddSC_vale_of_eternal_blossoms();
 //void AddSC_valley_of_the_four_winds();
+void AddSC_zone_wandering_island();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -703,9 +704,7 @@ void AddScripts()
 {
     AddExampleScripts();
     AddSpellScripts();
-#if USE_SMART_SCRIPTS
     AddSC_SmartSCripts();
-#endif
     AddCommandScripts();
 #ifdef SCRIPTS
     AddWorldScripts();
@@ -1416,6 +1415,7 @@ void AddPandariaScripts()
     //AddSC_townlong_steppes();
     //AddSC_vale_of_eternal_blossoms();
     //AddSC_valley_of_the_four_winds();
+    AddSC_zone_wandering_island();
 #endif
 }
 

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GROUPREFERENCE_H
-#define _GROUPREFERENCE_H
+#ifndef SF_GROUPREFERENCE_H
+#define SF_GROUPREFERENCE_H
 
 #include "LinkedReference/Reference.h"
 
@@ -41,4 +41,3 @@ class GroupReference : public Reference<Group, Player>
         void setSubGroup(uint8 pSubGroup) { iSubGroup = pSubGroup; }
 };
 #endif
-

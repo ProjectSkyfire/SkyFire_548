@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LFGPLAYERDATA_H
-#define _LFGPLAYERDATA_H
+#ifndef SF_LFGPLAYERDATA_H
+#define SF_LFGPLAYERDATA_H
 
 #include "LFG.h"
 

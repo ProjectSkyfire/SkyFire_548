@@ -44,7 +44,7 @@ class MapInstanced : public Map
         Map* FindInstanceMap(uint32 instanceId) const
         {
             InstancedMaps::const_iterator i = m_InstancedMaps.find(instanceId);
-            return(i == m_InstancedMaps.end() ? NULL : i->second);
+            return (i == m_InstancedMaps.end() ? NULL : i->second);
         }
         bool DestroyInstance(InstancedMaps::iterator &itr);
 

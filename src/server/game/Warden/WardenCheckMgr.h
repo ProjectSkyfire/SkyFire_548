@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _WARDENCHECKMGR_H
-#define _WARDENCHECKMGR_H
+#ifndef SF_WARDENCHECKMGR_H
+#define SF_WARDENCHECKMGR_H
 
 #include <map>
 #include "Cryptography/BigNumber.h"

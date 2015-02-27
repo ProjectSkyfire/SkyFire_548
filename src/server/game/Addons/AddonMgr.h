@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ADDONMGR_H
-#define _ADDONMGR_H
+#ifndef SF_ADDONMGR_H
+#define SF_ADDONMGR_H
 
 #include "Define.h"
 #include <string>

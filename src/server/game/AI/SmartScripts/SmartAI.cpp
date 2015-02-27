@@ -17,7 +17,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if USE_SMART_SCRIPTS
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "ObjectDefines.h"
@@ -301,7 +300,9 @@ void SmartAI::UpdatePath(const uint32 diff)
                     mWPReached = true;
             }
             mWPPauseTimer = 0;
-        } else {
+        }
+        else
+        {
             mWPPauseTimer -= diff;
         }
     }
@@ -949,4 +950,3 @@ void AddSC_SmartSCripts()
 {
     new SmartTrigger();
 }
-#endif

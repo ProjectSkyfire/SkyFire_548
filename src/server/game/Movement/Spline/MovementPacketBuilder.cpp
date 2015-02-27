@@ -137,7 +137,7 @@ namespace Movement
 
     void WriteUncompressedPath(Spline<int32> const& spline, ByteBuffer& data)
     {
-        for (int i = 2; i < spline.getPointCount() - 3; i++)
+        for (int i = 1; i < spline.getPointCount() - 1; i++)
             data << spline.getPoint(i).y << spline.getPoint(i).x << spline.getPoint(i).z;
     }
 
@@ -185,7 +185,7 @@ namespace Movement
         data.WriteBit(1);
         data.WriteBit(1);
 
-        uint32 uncompressedSplineCount = moveSpline.splineflags & MoveSplineFlag::UncompressedPath ? moveSpline.splineflags.cyclic ? moveSpline.spline.getPointCount() - 2 : moveSpline.spline.getPointCount() - 3 : 1;
+        uint32 uncompressedSplineCount = moveSpline.splineflags & MoveSplineFlag::UncompressedPath ? moveSpline.splineflags.cyclic ? moveSpline.spline.getPointCount() - 3 : moveSpline.spline.getPointCount() - 2 : 1;
         data.WriteBits(uncompressedSplineCount,  20);
 
         data.WriteBit(!moveSpline.splineflags.raw());

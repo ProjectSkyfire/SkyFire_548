@@ -197,7 +197,7 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
         }
     }
      return true;
- }
+}
 
 void WaypointMovementGenerator<Creature>::MovementInform(Creature* creature)
 {

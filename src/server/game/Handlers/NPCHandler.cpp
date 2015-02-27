@@ -50,29 +50,29 @@ enum StableResultCode
     STABLE_ERR_STABLE       = 0x0C,                         // "Internal pet error"
 };
 
-void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recvData)
-{
-    uint64 guid;
-    recvData >> guid;
-
-    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TABARDDESIGNER);
-    if (!unit)
-    {
-        TC_LOG_DEBUG("network", "WORLD: HandleTabardVendorActivateOpcode - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(guid)));
-        return;
-    }
-
-    // remove fake death
-    if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
-
-    SendTabardVendorActivate(guid);
-}
-
 void WorldSession::SendTabardVendorActivate(uint64 guid)
 {
-    WorldPacket data(MSG_TABARDVENDOR_ACTIVATE, 8);
-    data << guid;
+    ObjectGuid Guid = guid;
+    WorldPacket data(SMSG_TABARD_VENDOR_ACTIVATE, 8);
+
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[4]);
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[3]);
+    data.WriteBit(Guid[2]);
+
+    data.WriteByteSeq(Guid[5]);
+    data.WriteByteSeq(Guid[4]);
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(Guid[6]);
+    data.WriteByteSeq(Guid[0]);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[7]);
+
     SendPacket(&data);
 }
 
@@ -349,11 +349,10 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
     }
 
     // can't be learn, cheat? Or double learn with lags...
-    if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
-    {
-        SendTrainerBuyFailed(guid, spellId, 0);
-        return;
-    }
+    //if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
+     //   SendTrainerBuyFailed(guid, spellId, 0);
+     //   return;
+    //}
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
@@ -367,8 +366,8 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
 
     _player->ModifyMoney(-int64(nSpellCost));
 
-    unit->SendPlaySpellVisualKit(179, 0);       // 53 SpellCastDirected
-    _player->SendPlaySpellVisualKit(362, 1);    // 113 EmoteSalute
+    unit->SendPlaySpellVisualKit(179, 0, 0);       // 53 SpellCastDirected
+    _player->SendPlaySpellVisualKit(362, 1, 0);    // 113 EmoteSalute
 
     // learn explicitly or cast explicitly
     if (trainer_spell->IsCastable())
@@ -1076,4 +1075,3 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
         _player->DurabilityRepairAll(true, discountMod, guildBank);
     }
 }
-

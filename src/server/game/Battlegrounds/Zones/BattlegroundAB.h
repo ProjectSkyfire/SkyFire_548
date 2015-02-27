@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BATTLEGROUNDAB_H
-#define __BATTLEGROUNDAB_H
+#ifndef SF_BATTLEGROUNDAB_H
+#define SF_BATTLEGROUNDAB_H
 
 #include "Battleground.h"
 

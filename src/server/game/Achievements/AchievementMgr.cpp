@@ -1096,13 +1096,13 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
     // disable for gamemasters with GM-mode enabled
     if (referencePlayer->IsGameMaster())
     {
-        TC_LOG_DEBUG("achievement", "UpdateAchievementCriteria: [Player %s GM mode on] %s, %s (%u), " UI64FMTD ", " UI64FMTD ", " UI64FMTD
-            , referencePlayer->GetName().c_str(), GetLogNameForGuid(GetOwner()->GetGUID()), AchievementGlobalMgr::GetCriteriaTypeString(type), type, miscValue1, miscValue2, miscValue3);
+        TC_LOG_DEBUG("achievement", "UpdateAchievementCriteria: [Player %s GM mode on] %s, %s (%u), " UI64FMTD ", " UI64FMTD ", " UI64FMTD,
+            referencePlayer->GetName().c_str(), GetLogNameForGuid(GetOwner()->GetGUID()), AchievementGlobalMgr::GetCriteriaTypeString(type), type, miscValue1, miscValue2, miscValue3);
         return;
     }
 
-    TC_LOG_DEBUG("achievement", "UpdateAchievementCriteria: %s, %s (%u), " UI64FMTD ", " UI64FMTD ", " UI64FMTD
-        , GetLogNameForGuid(GetOwner()->GetGUID()), AchievementGlobalMgr::GetCriteriaTypeString(type), type, miscValue1, miscValue2, miscValue3);
+    TC_LOG_DEBUG("achievement", "UpdateAchievementCriteria: %s, %s (%u), " UI64FMTD ", " UI64FMTD ", " UI64FMTD,
+        GetLogNameForGuid(GetOwner()->GetGUID()), AchievementGlobalMgr::GetCriteriaTypeString(type), type, miscValue1, miscValue2, miscValue3);
 
     // Lua_GetGuildLevelEnabled() is checked in achievement UI to display guild tab
     if (IsGuild<T>() && !sWorld->getBoolConfig(CONFIG_GUILD_LEVELING_ENABLED))
@@ -2120,83 +2120,109 @@ void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achi
     VisibleAchievementPred isVisible;
     size_t numCriteria = m_criteriaProgress.size();
     size_t numAchievements = std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible);
-    ByteBuffer criteriaData(numCriteria * 16);
+    ByteBuffer criteriaData(numCriteria * 32);
+    ByteBuffer achievementsData(numAchievements * 24);
 
     WorldPacket data(SMSG_RESPOND_INSPECT_ACHIEVEMENTS, 1 + 8 + 3 + 3 + numAchievements * (4 + 4) + numCriteria * (0));
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[1]);
-    data.WriteBits(numAchievements, 23);
-    data.WriteBit(guid[0]);
+
     data.WriteBit(guid[3]);
-    data.WriteBits(numCriteria, 21);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
     data.WriteBit(guid[2]);
+    data.WriteBits(numAchievements, 20);
+    data.WriteBits(numCriteria, 19);
+
     for (CriteriaProgressMap::const_iterator itr = m_criteriaProgress.begin(); itr != m_criteriaProgress.end(); ++itr)
     {
         counter = itr->second.counter;
+        ObjectGuid guid2 = itr->second.CompletedGUID;
 
-        data.WriteBit(counter[5]);
-        data.WriteBit(counter[3]);
-        data.WriteBit(guid[1]);
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(counter[6]);
-        data.WriteBit(guid[0]);
-        data.WriteBit(counter[4]);
-        data.WriteBit(counter[1]);
-        data.WriteBit(counter[2]);
-        data.WriteBit(guid[3]);
-        data.WriteBit(guid[7]);
-        data.WriteBits(0, 2);           // criteria progress flags
-        data.WriteBit(counter[0]);
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[6]);
+        data.WriteBit(guid2[1]);
+        data.WriteBit(guid2[4]);
+        data.WriteBit(guid2[5]);
         data.WriteBit(counter[7]);
+        data.WriteBit(counter[4]);
+        data.WriteBit(counter[3]);
+        data.WriteBit(guid2[7]);
+        data.WriteBit(guid2[0]);
+        data.WriteBit(guid2[6]);
+        data.WriteBits(0, 4);           // criteria progress flags
+        data.WriteBit(guid2[2]);
+        data.WriteBit(counter[5]);
+        data.WriteBit(counter[6]);
+        data.WriteBit(counter[0]);
+        data.WriteBit(counter[2]);
+        data.WriteBit(counter[1]);
+        data.WriteBit(guid2[3]);
 
-        criteriaData.WriteByteSeq(guid[3]);
         criteriaData.WriteByteSeq(counter[4]);
-        criteriaData << uint32(0);      // timer 1
-        criteriaData.WriteByteSeq(guid[1]);
-        criteriaData.AppendPackedTime(itr->second.date);
-        criteriaData.WriteByteSeq(counter[3]);
-        criteriaData.WriteByteSeq(counter[7]);
-        criteriaData.WriteByteSeq(guid[5]);
-        criteriaData.WriteByteSeq(counter[0]);
-        criteriaData.WriteByteSeq(guid[4]);
-        criteriaData.WriteByteSeq(guid[2]);
-        criteriaData.WriteByteSeq(guid[6]);
-        criteriaData.WriteByteSeq(guid[7]);
-        criteriaData.WriteByteSeq(counter[6]);
-        criteriaData << uint32(itr->first);
-        criteriaData << uint32(0);      // timer 2
+        criteriaData << uint32(0);             // timer 1
         criteriaData.WriteByteSeq(counter[1]);
+        criteriaData.WriteByteSeq(guid2[1]);
+        criteriaData.WriteByteSeq(counter[7]);
+        criteriaData << uint32(itr->first);
+        criteriaData.WriteByteSeq(guid2[3]);
+        criteriaData.WriteByteSeq(counter[3]);
         criteriaData.WriteByteSeq(counter[5]);
-        criteriaData.WriteByteSeq(guid[0]);
         criteriaData.WriteByteSeq(counter[2]);
+        criteriaData.WriteByteSeq(guid2[4]);
+        criteriaData.WriteByteSeq(counter[0]);
+        criteriaData.WriteByteSeq(guid2[0]);
+        criteriaData << uint32(0);             // timer 2
+        criteriaData.WriteByteSeq(guid2[7]);
+        criteriaData.AppendPackedTime(itr->second.date);
+        criteriaData.WriteByteSeq(counter[6]);
+        criteriaData.WriteByteSeq(guid2[2]);
+        criteriaData.WriteByteSeq(guid2[6]);
+        criteriaData.WriteByteSeq(guid2[5]);
     }
 
-    data.WriteBit(guid[6]);
     data.WriteBit(guid[5]);
-    data.FlushBits();
-    data.append(criteriaData);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[2]);
 
     for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
     {
-        if (!isVisible(*itr))
-            continue;
+        ObjectGuid guid3 = *(itr->second.guids.begin());
 
-        data << uint32(itr->first);
-        data.AppendPackedTime(itr->second.date);
+        data.WriteBit(guid3[0]);
+        data.WriteBit(guid3[2]);
+        data.WriteBit(guid3[5]);
+        data.WriteBit(guid3[4]);
+        data.WriteBit(guid3[3]);
+        data.WriteBit(guid3[6]);
+        data.WriteBit(guid3[1]);
+        data.WriteBit(guid3[7]);
+
+        achievementsData.WriteByteSeq(guid3[1]);
+        achievementsData.WriteByteSeq(guid3[0]);
+        achievementsData.AppendPackedTime(itr->second.date);
+        achievementsData << uint32(0);           //RealmID
+        achievementsData << uint32(itr->first);
+        achievementsData.WriteByteSeq(guid3[7]);
+        achievementsData.WriteByteSeq(guid3[4]);
+        achievementsData.WriteByteSeq(guid3[6]);
+        achievementsData.WriteByteSeq(guid3[2]);
+        achievementsData.WriteByteSeq(guid3[3]);
+        achievementsData.WriteByteSeq(guid3[5]);
+        achievementsData << uint32(0);           //RealmID
     }
 
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[1]);
+
+    data.WriteByteSeq(guid[5]);
+    data.FlushBits();
+
+    data.append(achievementsData);
+    data.append(criteriaData);
+
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
 
     receiver->GetSession()->SendPacket(&data);
 }

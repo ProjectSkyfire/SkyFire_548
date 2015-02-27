@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LFGMGR_H
-#define _LFGMGR_H
+#ifndef SF_LFGMGR_H
+#define SF_LFGMGR_H
 
 #include <ace/Singleton.h>
 #include "DBCStructure.h"

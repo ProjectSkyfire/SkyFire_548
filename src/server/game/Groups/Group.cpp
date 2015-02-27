@@ -78,7 +78,7 @@ Group::~Group()
         itr = RollId.begin();
         Roll *r = *itr;
         RollId.erase(itr);
-        delete(r);
+        delete (r);
     }
 
     // it is undefined whether objectmgr (which stores the groups) or instancesavemgr
@@ -89,7 +89,7 @@ Group::~Group()
             itr2->second.save->RemoveGroup(this);
 
     // Sub group counters clean up
-    delete[] m_subGroupsCounts;
+    delete [] m_subGroupsCounts;
 }
 
 bool Group::Create(Player* leader)
@@ -272,7 +272,7 @@ void Group::ConvertToGroup()
 
     if (m_subGroupsCounts)
     {
-        delete[] m_subGroupsCounts;
+        delete [] m_subGroupsCounts;
         m_subGroupsCounts = NULL;
     }
 
@@ -914,15 +914,29 @@ void Group::SendLooter(Creature* creature, Player* groupLooter)
 {
     ASSERT(creature);
 
-    WorldPacket data(SMSG_LOOT_LIST, (8+8));
-    data << uint64(creature->GetGUID());
-    data << uint8(0); // unk1
+    ObjectGuid creatureGuid = creature->GetGUID();
+    WorldPacket data(SMSG_LOOT_LIST);
 
-    if (groupLooter)
-        data.append(groupLooter->GetPackGUID());
-    else
-        data << uint8(0);
-
+    data.WriteBit(creatureGuid[5]);
+    data.WriteBit(0);
+    data.WriteBit(creatureGuid[1]);
+    data.WriteBit(0);
+    data.WriteBit(creatureGuid[4]);
+    data.WriteBit(creatureGuid[3]);
+    data.WriteBit(creatureGuid[2]);
+    data.WriteBit(creatureGuid[7]);
+    data.WriteBit(creatureGuid[0]);
+    data.WriteBit(creatureGuid[6]);
+    
+    data.WriteByteSeq(creatureGuid[5]);
+    data.WriteByteSeq(creatureGuid[1]);
+    data.WriteByteSeq(creatureGuid[6]);
+    data.WriteByteSeq(creatureGuid[2]);
+    data.WriteByteSeq(creatureGuid[3]);
+    data.WriteByteSeq(creatureGuid[0]);
+    data.WriteByteSeq(creatureGuid[7]);
+    data.WriteByteSeq(creatureGuid[4]);
+    
     BroadcastPacket(&data, false);
 }
 
@@ -1226,10 +1240,12 @@ void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
 {
     TC_LOG_DEBUG("network", "Group::MasterLoot (SMSG_LOOT_MASTER_LIST)");
 
-    uint32 real_count = 0;
+    uint32 realCount = 0;
+    ObjectGuid lootedGuid = pLootedObject->GetGUID();
+    WorldPacket data(SMSG_LOOT_MASTER_LIST);
 
-    WorldPacket data(SMSG_LOOT_MASTER_LIST, 1 + GetMembersCount() * 8);
-    data << uint8(GetMembersCount());
+    data.WriteBit(lootedGuid[1]);
+    data.WriteBits(0, 24);
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -1239,12 +1255,55 @@ void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
 
         if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
         {
-            data << uint64(looter->GetGUID());
-            ++real_count;
+            ObjectGuid looterGuid = looter->GetGUID();
+            data.WriteBit(looterGuid[4]);
+            data.WriteBit(looterGuid[1]);
+            data.WriteBit(looterGuid[2]);
+            data.WriteBit(looterGuid[5]);
+            data.WriteBit(looterGuid[3]);
+            data.WriteBit(looterGuid[7]);
+            data.WriteBit(looterGuid[0]);
+            data.WriteBit(looterGuid[6]);
+            ++realCount;
         }
     }
 
-    data.put<uint8>(0, real_count);
+    data.WriteBit(lootedGuid[2]);
+    data.WriteBit(lootedGuid[0]);
+    data.WriteBit(lootedGuid[6]);
+    data.WriteBit(lootedGuid[7]);
+    data.WriteBit(lootedGuid[3]);
+    data.WriteBit(lootedGuid[4]);
+
+    data.WriteByteSeq(lootedGuid[3]);
+    data.WriteByteSeq(lootedGuid[0]);
+    data.WriteByteSeq(lootedGuid[2]);
+
+    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* looter = itr->GetSource();
+        if (!looter->IsInWorld())
+            continue;
+
+        if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
+        {
+            ObjectGuid looterGuid = looter->GetGUID();
+            data.WriteByteSeq(looterGuid[1]);
+            data.WriteByteSeq(looterGuid[3]);
+            data.WriteByteSeq(looterGuid[7]);
+            data.WriteByteSeq(looterGuid[2]);
+            data.WriteByteSeq(looterGuid[0]);
+            data.WriteByteSeq(looterGuid[6]);
+            data.WriteByteSeq(looterGuid[4]);
+            data.WriteByteSeq(looterGuid[5]);
+        }
+    }
+
+    data.WriteByteSeq(lootedGuid[7]);
+    data.WriteByteSeq(lootedGuid[1]);
+    data.WriteByteSeq(lootedGuid[6]);
+    data.WriteByteSeq(lootedGuid[4]);
+    data.WriteByteSeq(lootedGuid[5]);
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -1303,7 +1362,8 @@ void Group::EndRoll(Loot* pLoot)
 {
     for (Rolls::iterator itr = RollId.begin(); itr != RollId.end();)
     {
-        if ((*itr)->getLoot() == pLoot) {
+        if ((*itr)->getLoot() == pLoot)
+        {
             CountTheRoll(itr);           //i don't have to edit player votes, who didn't vote ... he will pass
             itr = RollId.begin();
         }
@@ -1584,7 +1644,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.WriteBit(leaderGuid[7]);
     data.WriteBit(leaderGuid[1]);
     data.WriteBit(1);                                   // has dungeon and raid difficulty
-    data.WriteBit(groupGuid[7]); 
+    data.WriteBit(groupGuid[7]);
     data.WriteBit(leaderGuid[6]);
     data.WriteBit(leaderGuid[5]);
     data.WriteBits(GetMembersCount(), 21);
@@ -2583,7 +2643,8 @@ void Group::SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag)
         return;
 
     // Do flag specific actions, e.g ensure uniqueness
-    switch (flag) {
+    switch (flag)
+    {
         case MEMBER_FLAG_MAINASSIST:
             RemoveUniqueGroupMemberFlag(MEMBER_FLAG_MAINASSIST);         // Remove main assist flag from current if any.
             break;

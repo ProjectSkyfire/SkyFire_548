@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __REALMSOCKET_H__
-#define __REALMSOCKET_H__
+#ifndef SF_REALMSOCKET_H
+#define SF_REALMSOCKET_H
 
 #include <ace/Synch_Traits.h>
 #include <ace/Svc_Handler.h>

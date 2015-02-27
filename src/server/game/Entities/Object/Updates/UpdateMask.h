@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __UPDATEMASK_H
-#define __UPDATEMASK_H
+#ifndef SF_UPDATEMASK_H
+#define SF_UPDATEMASK_H
 
 #include "UpdateFields.h"
 #include "Errors.h"
@@ -43,7 +43,7 @@ class UpdateMask
             memcpy(_bits, right._bits, sizeof(uint8) * _blockCount * 32);
         }
 
-        ~UpdateMask() { delete[] _bits; }
+        ~UpdateMask() { delete [] _bits; }
 
         void SetBit(uint32 index) { _bits[index] = 1; }
         void UnsetBit(uint32 index) { _bits[index] = 0; }
@@ -67,7 +67,7 @@ class UpdateMask
 
         void SetCount(uint32 valuesCount)
         {
-            delete[] _bits;
+            delete [] _bits;
 
             _fieldCount = valuesCount;
             _blockCount = (valuesCount + CLIENT_UPDATE_MASK_BITS - 1) / CLIENT_UPDATE_MASK_BITS;
@@ -124,4 +124,3 @@ class UpdateMask
 };
 
 #endif
-

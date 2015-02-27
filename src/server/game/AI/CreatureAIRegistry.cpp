@@ -28,9 +28,8 @@
 #include "CreatureAIRegistry.h"
 #include "WaypointMovementGenerator.h"
 #include "CreatureAIFactory.h"
-#if USE_SMART_SCRIPTS
 #include "SmartAI.h"
-#endif
+
 namespace AIRegistry
 {
     void Initialize()
@@ -48,15 +47,12 @@ namespace AIRegistry
         (new CreatureAIFactory<ArcherAI>("ArcherAI"))->RegisterSelf();
         (new CreatureAIFactory<TurretAI>("TurretAI"))->RegisterSelf();
         (new CreatureAIFactory<VehicleAI>("VehicleAI"))->RegisterSelf();
-#if USE_SMART_SCRIPTS
         (new CreatureAIFactory<SmartAI>("SmartAI"))->RegisterSelf();
-#endif
+
         (new GameObjectAIFactory<GameObjectAI>("GameObjectAI"))->RegisterSelf();
-#if USE_SMART_SCRIPTS
         (new GameObjectAIFactory<SmartGameObjectAI>("SmartGameObjectAI"))->RegisterSelf();
-#endif
+
         (new MovementGeneratorFactory<RandomMovementGenerator<Creature> >(RANDOM_MOTION_TYPE))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator<Creature> >(WAYPOINT_MOTION_TYPE))->RegisterSelf();
     }
 }
-

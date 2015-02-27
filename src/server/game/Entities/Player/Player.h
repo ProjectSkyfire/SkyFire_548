@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PLAYER_H
-#define _PLAYER_H
+#ifndef SF_PLAYER_H
+#define SF_PLAYER_H
 
 #include "DBCStores.h"
 #include "GroupReference.h"
@@ -1978,6 +1978,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
         void UpdateMastery();
+        void UpdatePvpPower();
         bool CanUseMastery() const;
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);

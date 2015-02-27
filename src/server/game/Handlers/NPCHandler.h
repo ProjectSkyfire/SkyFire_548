@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __NPCHANDLER_H
-#define __NPCHANDLER_H
+#ifndef SF_NPCHANDLER_H
+#define SF_NPCHANDLER_H
 
 struct QEmote
 {
@@ -57,4 +57,3 @@ struct NpcTextLocale
     std::vector<StringVector> Text_1;
 };
 #endif
-

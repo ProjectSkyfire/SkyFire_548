@@ -1068,7 +1068,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     data->Initialize(SMSG_PARTY_MEMBER_STATS, 80);          // average value
     data->WriteBit(guid[0]);
     data->WriteBit(guid[5]);
-    data->WriteBit(1); // Ukn 
+    data->WriteBit(1); // Ukn
     data->WriteBit(guid[1]);
     data->WriteBit(guid[4]);
     data->WriteBit(1); // Ukn
@@ -1116,7 +1116,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     data->WriteByteSeq(guid[0]);
     *data << uint32(0);
 
-/* 
+/*
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
         *data << uint32(player->GetHealth());
 
@@ -1315,8 +1315,27 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
-    uint64 guid;
-    recvData >> guid;
+    ObjectGuid guid;
+
+    recvData.ReadBit(); // unk bit
+
+    guid[7] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
 
     Player* player = HashMapHolder<Player>::Find(guid);
     if (!player)

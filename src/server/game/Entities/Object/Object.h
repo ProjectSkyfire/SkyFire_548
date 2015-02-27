@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OBJECT_H
-#define _OBJECT_H
+#ifndef SF_OBJECT_H
+#define SF_OBJECT_H
 
 #include "Common.h"
 #include "UpdateMask.h"

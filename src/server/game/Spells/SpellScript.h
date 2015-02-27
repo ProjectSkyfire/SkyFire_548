@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SPELL_SCRIPT_H
-#define __SPELL_SCRIPT_H
+#ifndef SF_SPELL_SCRIPT_H
+#define SF_SPELL_SCRIPT_H
 
 #include "Util.h"
 #include "SharedDefines.h"

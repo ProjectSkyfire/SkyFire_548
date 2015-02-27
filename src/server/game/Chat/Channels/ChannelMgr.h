@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_CHANNELMGR_H
-#define __TRINITY_CHANNELMGR_H
+#ifndef SF_TRINITY_CHANNELMGR_H
+#define SF_TRINITY_CHANNELMGR_H
 
 #include "Common.h"
 #include "Channel.h"

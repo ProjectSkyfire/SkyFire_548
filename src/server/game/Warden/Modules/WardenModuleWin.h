@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _WARDEN_MODULE_WIN_H
-#define _WARDEN_MODULE_WIN_H
+#ifndef SF_WARDEN_MODULE_WIN_H
+#define SF_WARDEN_MODULE_WIN_H
 
 /*
 Seed: 4D808D2C77D905C41A6380EC08586AFE (0x05 packet)

@@ -110,8 +110,7 @@ void Guild::SendCommandResult(WorldSession* session, GuildCommandType type, Guil
 
     session->SendPacket(&data);
 
-    TC_LOG_DEBUG("guild", "SMSG_GUILD_COMMAND_RESULT [%s]: Type: %u, code: %u, param: %s"
-         , session->GetPlayerInfo().c_str(), type, errCode, param.c_str());
+    TC_LOG_DEBUG("guild", "SMSG_GUILD_COMMAND_RESULT [%s]: Type: %u, code: %u, param: %s", session->GetPlayerInfo().c_str(), type, errCode, param.c_str());
 }
 
 void Guild::SendSaveEmblemResult(WorldSession* session, GuildEmblemError errCode)
@@ -623,8 +622,7 @@ void Guild::BankTab::SendText(Guild const* guild, WorldSession* session) const
 
     if (session)
     {
-        TC_LOG_DEBUG("guild", "SMSG_GUILD_BANK_QUERY_TEXT_RESULT [%s]: Tabid: %u, Text: %s"
-            , session->GetPlayerInfo().c_str(), m_tabId, m_text.c_str());
+        TC_LOG_DEBUG("guild", "SMSG_GUILD_BANK_QUERY_TEXT_RESULT [%s]: Tabid: %u, Text: %s", session->GetPlayerInfo().c_str(), m_tabId, m_text.c_str());
         session->SendPacket(&data);
     }
     else
@@ -2239,11 +2237,11 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
         return;
 
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
-    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
-    data.FlushBits();
+
+    data << uint32(0);                                                              // Needed guild members
     data << float(0.f);                                                             // Guild XP multiplier
     data << uint32(0);                                                              // Current guild members
-    data << uint32(0);                                                              // Needed guild members
+    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
 
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_PARTY_STATE_RESPONSE [%s]", session->GetPlayerInfo().c_str());

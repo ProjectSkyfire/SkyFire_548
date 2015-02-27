@@ -2072,12 +2072,12 @@ struct SpellEffectEntry
     uint32    Id;                                           // 0         m_ID
     //uint32    Unk0;                                       // 1         unk - Pandaria
     uint32    Effect;                                       // 2         m_effect
-    float     EffectValueMultiplier;                        // 3         m_effectAmplitude
+    float     EffectValueMultiplier;                        // 3         m_effectValueMultiplier
     uint32    EffectApplyAuraName;                          // 4         m_effectAura
-    uint32    EffectAmplitude;                              // 5         m_effectAuraPeriod
+    uint32    EffectAuraTickCount;                          // 5         m_effectAuraTickCount
     int32     EffectBasePoints;                             // 6         m_effectBasePoints (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
-    float     EffectBonusMultiplier;                        // 7         m_effectBonus
-    float     EffectDamageMultiplier;                       // 8         m_effectChainAmplitude
+    float     EffectBonusMultiplier;                        // 7         m_effectBonusMultiplier
+    float     EffectDamageMultiplier;                       // 8         m_effectDamageMultiplier
     uint32    EffectChainTarget;                            // 9         m_effectChainTargets
     int32     EffectDieSides;                               // 10         m_effectDieSides
     uint32    EffectItemType;                               // 11        m_effectItemType
@@ -2689,9 +2689,11 @@ struct VehicleSeatEntry
 
     bool CanEnterOrExit() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT; }
     bool CanSwitchFromSeat() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_SWITCH; }
-    bool IsUsableByOverride() const { return (m_flags & (VEHICLE_SEAT_FLAG_UNCONTROLLED | VEHICLE_SEAT_FLAG_UNK18)
-                                    || (m_flagsB & (VEHICLE_SEAT_FLAG_B_USABLE_FORCED | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_2 |
-                                        VEHICLE_SEAT_FLAG_B_USABLE_FORCED_3 | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_4))); }
+    bool IsUsableByOverride() const
+    {
+        return (m_flags & (VEHICLE_SEAT_FLAG_UNCONTROLLED | VEHICLE_SEAT_FLAG_UNK18) ||
+            (m_flagsB & (VEHICLE_SEAT_FLAG_B_USABLE_FORCED | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_2 | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_3 | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_4)));
+    }
     bool IsEjectable() const { return m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE; }
 };
 

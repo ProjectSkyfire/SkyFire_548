@@ -262,14 +262,14 @@ ObjectMgr::~ObjectMgr()
         delete i->second;
 
     for (PetLevelInfoContainer::iterator i = _petInfoStore.begin(); i != _petInfoStore.end(); ++i)
-        delete[] i->second;
+        delete [] i->second;
 
     for (int race = 0; race < MAX_RACES; ++race)
     {
         for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
         {
             if (_playerInfo[race][class_])
-                delete[] _playerInfo[race][class_]->levelInfo;
+                delete [] _playerInfo[race][class_]->levelInfo;
             delete _playerInfo[race][class_];
         }
     }

@@ -23,8 +23,8 @@
  * \author Derex <derex101@gmail.com>
  */
 
-#ifndef _WORLDSOCKET_H
-#define _WORLDSOCKET_H
+#ifndef SF_WORLDSOCKET_H
+#define SF_WORLDSOCKET_H
 
 #include <ace/Basic_Types.h>
 #include <ace/Synch_Traits.h>
@@ -216,4 +216,3 @@ class WorldSocket : public WorldHandler
 #endif  /* _WORLDSOCKET_H */
 
 /// @}
-

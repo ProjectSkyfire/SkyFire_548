@@ -214,7 +214,6 @@ void PlayerTaxi::LoadTaxiMask(std::string const &data)
 
 void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
 {
-    data << uint32(TaxiMaskSize);
     if (all)
     {
         for (uint8 i = 0; i < TaxiMaskSize; ++i)
@@ -397,9 +396,9 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
     if (!state)
     {
         if (crosssend)
-            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_UNACCEPTED);
         else
-            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_UNACCEPTED);
     }
 }
 
@@ -3095,33 +3094,37 @@ void Player::RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method /* =
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend, float /*group_rate*/)
 {
-    ObjectGuid guid = victim ? victim->GetGUID() : 0;
+    ObjectGuid victimGuid = victim ? victim->GetGUID() : NULL;
 
     WorldPacket data(SMSG_LOG_XPGAIN, 1 + 1 + 8 + 4 + 4 + 4 + 1);
-    data.WriteBit(0);                                       // has XP
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(0);                                       // has group bonus
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(0);                                       // unknown
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[4]);
+    data.WriteBit(0);                       // has XP
+    data.WriteBit(victimGuid[1]);//17
+    data.WriteBit(victimGuid[2]);//18
+    data.WriteBit(victimGuid[7]);//23
+    data.WriteBit(victimGuid[4]);//20
+    data.WriteBit(victimGuid[3]);//19
+    data.WriteBit(0);                      // has group bonus
+    data.WriteBit(victimGuid[0]);//16
+    data.WriteBit(victimGuid[5]);//21
+    data.WriteBit(victimGuid[6]);//22
+    data.WriteBit(0);                      // unknown
 
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
-    data << float(1);                                       // 1 - none 0 - 100% group bonus output
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data << uint32(GivenXP);                                // experience without bonus
-    data << uint32(GivenXP + BonusXP);                      // given experience
-    data.WriteByteSeq(guid[0]);
-    data << uint8(recruitAFriend ? 1 : 0);                  // does the GivenXP include a RaF bonus?
+    data.WriteByteSeq(victimGuid[4]);//20
+    data.WriteByteSeq(victimGuid[2]);//18
+    data << uint8(recruitAFriend ? 1 : 0); // does the GivenXP include a RaF bonus?
+    data << float(1);                      // 1 - none 0 - 100% group bonus output
+    data.WriteByteSeq(victimGuid[7]);//23
+    data.WriteByteSeq(victimGuid[1]);//17
+    data.WriteByteSeq(victimGuid[3]);//19
+    data.WriteByteSeq(victimGuid[6]);//22
+
+    data << uint32(GivenXP + BonusXP);    // given experience
+
+    if (victim)
+        data << uint32(GivenXP);          // experience without bonus
+
+    data.WriteByteSeq(victimGuid[0]);//16
+    data.WriteByteSeq(victimGuid[5]);//21
 
     GetSession()->SendPacket(&data);
 }
@@ -5931,7 +5934,7 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
     float bonus_agility = GetStat(STAT_AGILITY) - base_agility;
 
     float dodge_ratio = 1 / dodgeRatio->ratio;
-    if(pclass == CLASS_DEATH_KNIGHT || pclass == CLASS_PALADIN || pclass == CLASS_WARRIOR) dodge_ratio = 0;
+    if (pclass == CLASS_DEATH_KNIGHT || pclass == CLASS_PALADIN || pclass == CLASS_WARRIOR) dodge_ratio = 0;
 
     // calculate diminishing (green in char screen) and non-diminishing (white) contribution
     diminishing = bonus_agility * dodge_ratio * crit_to_dodge[pclass-1];
@@ -6126,6 +6129,9 @@ void Player::UpdateRating(CombatRating cr)
             break;
         case CR_MASTERY:
             UpdateMastery();
+            break;
+        case CR_PVP_POWER:
+            UpdatePvpPower();
             break;
     }
 }
@@ -8460,6 +8466,9 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_ARCANE_RESISTANCE:
                 HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(val), apply);
                 break;
+            case ITEM_MOD_PVP_POWER:
+                ApplyRatingMod(CR_PVP_POWER, int32(val), apply);
+                break;
         }
     }
 
@@ -8766,7 +8775,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                                 slot = EQUIPMENT_SLOT_MAINHAND; break;
                             case OFF_ATTACK:
                                 slot = EQUIPMENT_SLOT_OFFHAND;  break;
-                            
+
                             default: slot = EQUIPMENT_SLOT_END; break;
                         }
                         if (slot != i)
@@ -10738,7 +10747,7 @@ Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool useable /*= f
         case OFF_ATTACK:
             slot = EQUIPMENT_SLOT_OFFHAND;
             break;
-         
+
         default: return NULL;
     }
 
@@ -14147,7 +14156,7 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         case ITEM_MOD_DEFENSE_SKILL_RATING:
             ApplyRatingMod(CR_DEFENSE_SKILL, -int32(removeValue), apply);
             break;
-        case  ITEM_MOD_DODGE_RATING:
+        case ITEM_MOD_DODGE_RATING:
             ApplyRatingMod(CR_DODGE, -int32(removeValue), apply);
             break;
         case ITEM_MOD_PARRY_RATING:
@@ -14260,7 +14269,7 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         case ITEM_MOD_DEFENSE_SKILL_RATING:
             ApplyRatingMod(CR_DEFENSE_SKILL, int32(addValue), apply);
             break;
-        case  ITEM_MOD_DODGE_RATING:
+        case ITEM_MOD_DODGE_RATING:
             ApplyRatingMod(CR_DODGE, int32(addValue), apply);
             break;
         case ITEM_MOD_PARRY_RATING:
@@ -14527,7 +14536,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             ApplyRatingMod(CR_DEFENSE_SKILL, enchant_amount, apply);
                             TC_LOG_DEBUG("entities.player.items", "+ %u DEFENCE", enchant_amount);
                             break;
-                        case  ITEM_MOD_DODGE_RATING:
+                        case ITEM_MOD_DODGE_RATING:
                             ApplyRatingMod(CR_DODGE, enchant_amount, apply);
                             TC_LOG_DEBUG("entities.player.items", "+ %u DODGE", enchant_amount);
                             break;
@@ -14664,6 +14673,10 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         case ITEM_MOD_MASTERY_RATING:
                             ApplyRatingMod(CR_MASTERY, enchant_amount, apply);
                             TC_LOG_DEBUG("entities.player.items", "+ %u MASTERY", enchant_amount);
+                            break;
+                        case ITEM_MOD_PVP_POWER:
+                            ApplyRatingMod(CR_PVP_POWER, enchant_amount, apply);
+                            TC_LOG_DEBUG("entities.player.items", "+ %u PVP_POWER", enchant_amount);
                             break;
                         default:
                             break;
@@ -17098,7 +17111,7 @@ void Player::QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type, u
 
                 break;
             }
-        }   
+        }
     }
 }
 
@@ -17154,7 +17167,7 @@ bool Player::HasQuestForItem(uint32 itemId) const
                     {
                         if (GetItemCount(itemId, true) < qInfo->RequiredSourceItemCount[j])
                             return true;
-                    } 
+                    }
                     else if (GetItemCount(itemId, true) < pProto->GetMaxStackSize())
                         return true;
                 }
@@ -20782,7 +20795,7 @@ void Player::UpdateSpeakTime()
 
 bool Player::CanSpeak() const
 {
-    return  GetSession()->m_muteTime <= time (NULL);
+    return GetSession()->m_muteTime <= time (NULL);
 }
 
 /*********************************************************/
@@ -23023,10 +23036,29 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
     else
         m_spellCooldowns.erase(itr);
 
+    ObjectGuid playerGuid = GetGUID();          // Player GUID
     WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-    data << uint32(spellId);            // Spell ID
-    data << uint64(GetGUID());          // Player GUID
-    data << int32(cooldown);            // Cooldown mod in milliseconds
+
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(playerGuid[1]);
+    data.WriteBit(playerGuid[0]);
+    data.WriteBit(playerGuid[4]);
+    data.WriteBit(playerGuid[7]);
+    data.WriteBit(playerGuid[3]);
+    data.WriteBit(playerGuid[6]);
+    data.WriteBit(playerGuid[5]);
+
+    data.WriteByteSeq(playerGuid[4]);
+    data.WriteByteSeq(playerGuid[1]);
+    data << uint32(spellId);         // Spell ID
+    data.WriteByteSeq(playerGuid[3]);
+    data.WriteByteSeq(playerGuid[6]);
+    data.WriteByteSeq(playerGuid[7]);
+    data.WriteByteSeq(playerGuid[5]);
+    data.WriteByteSeq(playerGuid[0]);
+    data << int32(cooldown);         // Cooldown mod in milliseconds
+    data.WriteByteSeq(playerGuid[2]);
+
     GetSession()->SendPacket(&data);
 
     TC_LOG_DEBUG("misc", "ModifySpellCooldown:: Player: %s (GUID: %u) Spell: %u cooldown: %u", GetName().c_str(), GetGUIDLow(), spellId, GetSpellCooldownDelay(spellId));
@@ -23977,10 +24009,12 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
+    data.WriteBit(!arg);
+    data.WriteBits(reason, 5); // transfer abort reason
+    if (arg)
+        data << uint8(arg);
     data << uint32(mapid);
-    data << uint8(reason); // transfer abort reason
-    data << uint8(arg);
     GetSession()->SendPacket(&data);
 }
 
@@ -26542,7 +26576,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
 
 bool Player::IsPetNeedBeTemporaryUnsummoned() const
 {
-    return !IsInWorld() || !IsAlive() || IsMounted() /*+in flight*/;
+    return !IsInWorld() || !IsAlive() || IsMounted(); /*+in flight*/
 }
 
 bool Player::CanSeeSpellClickOn(Creature const* c) const
@@ -26612,7 +26646,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         *data << uint32(GetTalentSpecialization(i));
     }
 
-    delete[] wpos;
+    delete [] wpos;
 }
 
 void Player::BuildPetTalentsInfoData(WorldPacket* data)
@@ -27518,7 +27552,7 @@ void Player::RefundItem(Item* item)
                 store_error = true;
                 break;
             }
-         }
+        }
     }
 
     if (store_error)

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __UPDATEDATA_H
-#define __UPDATEDATA_H
+#ifndef SF_UPDATEDATA_H
+#define SF_UPDATEDATA_H
 
 #include "ByteBuffer.h"
 #include <set>
@@ -73,4 +73,3 @@ class UpdateData
         ByteBuffer m_data;
 };
 #endif
-

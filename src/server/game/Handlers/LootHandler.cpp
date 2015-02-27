@@ -129,7 +129,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         if (loot->isLooted() && IS_ITEM_GUID(guid))
             player->GetSession()->DoLootRelease(guid);
     }
-    delete[] guids;
+    delete [] guids;
 }
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)

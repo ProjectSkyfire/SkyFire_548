@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MAPREFMANAGER
-#define _MAPREFMANAGER
+#ifndef SF_MAPREFMANAGER_H
+#define SF_MAPREFMANAGER_H
 
 #include "RefManager.h"
 
@@ -43,4 +43,3 @@ class MapRefManager : public RefManager<Map, Player>
         const_iterator end() const  { return const_iterator(NULL); }
 };
 #endif
-

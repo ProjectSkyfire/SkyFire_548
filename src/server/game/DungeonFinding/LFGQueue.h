@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LFGQUEUE_H
-#define _LFGQUEUE_H
+#ifndef SF_LFGQUEUE_H
+#define SF_LFGQUEUE_H
 
 #include "LFG.h"
 

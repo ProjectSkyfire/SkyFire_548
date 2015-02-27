@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_GUILDFINDER_H
-#define __TRINITY_GUILDFINDER_H
+#ifndef SF_GUILDFINDER_H
+#define SF_GUILDFINDER_H
 
 #include <ace/Singleton.h>
 #include "Common.h"

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_LANGUAGE_H
-#define __TRINITY_LANGUAGE_H
+#ifndef SF_LANGUAGE_H
+#define SF_LANGUAGE_H
 
 enum TrinityStrings
 {

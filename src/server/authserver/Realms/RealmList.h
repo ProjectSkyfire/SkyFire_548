@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _REALMLIST_H
-#define _REALMLIST_H
+#ifndef SF_REALMLIST_H
+#define SF_REALMLIST_H
 
 #include <ace/Singleton.h>
 #include <ace/Null_Mutex.h>

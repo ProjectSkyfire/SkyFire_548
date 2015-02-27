@@ -819,7 +819,7 @@ AllFlightPaths = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-InstantFlightPaths = 1
+InstantFlightPaths = 0
 
 #
 #    ActivateWeather

@@ -483,11 +483,8 @@ private:
     public:
         static bool IsMoneyEvent(GuildBankEventLogTypes eventType)
         {
-            return
-                eventType == GUILD_BANK_LOG_DEPOSIT_MONEY ||
-                eventType == GUILD_BANK_LOG_WITHDRAW_MONEY ||
-                eventType == GUILD_BANK_LOG_REPAIR_MONEY ||
-                eventType == GUILD_BANK_LOG_CASH_FLOW_DEPOSIT;
+            return eventType == GUILD_BANK_LOG_DEPOSIT_MONEY || eventType == GUILD_BANK_LOG_WITHDRAW_MONEY ||
+                   eventType == GUILD_BANK_LOG_REPAIR_MONEY || eventType == GUILD_BANK_LOG_CASH_FLOW_DEPOSIT;
         }
 
         bool IsMoneyEvent() const
