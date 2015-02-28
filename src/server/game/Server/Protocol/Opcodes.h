@@ -1480,7 +1480,7 @@ class OpcodeTable
 
         ~OpcodeTable()
         {
-            for (uint16 i = 0; i < NUM_OPCODE_HANDLERS; ++i)
+            for (uint16 i = 0; i < NUM_OPCODES; ++i)
                 delete _internalTable[i];
         }
 
