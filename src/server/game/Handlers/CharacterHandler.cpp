@@ -1655,11 +1655,9 @@ void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
 void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    std::string newName;
-    std::string unk;
     uint8 gender, skin, face, hairStyle, hairColor, facialHair;
 
-    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
+    recvData >> hairStyle >> gender >> skin >> face >> hairColor >> facialHair;
 
     guid[2] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
@@ -1667,12 +1665,12 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     guid[0] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
-    recvData >> newName;
+    uint32 Namelen = recvData.ReadBits(6);            // Name size
     guid[4] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[4]);
-    recvData >> unk;
+    std::string newName = recvData.ReadString(Namelen);  // New Name
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[6]);
@@ -1781,15 +1779,38 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newName, gender);
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1+8+(newName.size()+1)+6);
-    data << uint8(RESPONSE_SUCCESS);
-    data << uint64(guid);
+
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+
+    data.WriteByteSeq(guid[1]);
+
+    data << uint8(RESPONSE_SUCCESS); // 16
+    data << uint8(facialHair);       // 86
+    data << uint8(skin);             // 82
+    data << uint8(gender);           // 85
+    data << uint8(hairStyle);        // 83
+    data << uint8(face);             // 32
+    data << uint8(hairColor);        // 84
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[4]);
+
     data << newName;
-    data << uint8(gender);
-    data << uint8(skin);
-    data << uint8(face);
-    data << uint8(hairStyle);
-    data << uint8(hairColor);
-    data << uint8(facialHair);
+
+    if (!RESPONSE_SUCCESS)
+        data << newName;
+
     SendPacket(&data);
 }
 
@@ -2129,7 +2150,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             trans->Append(stmt);
         }
 
-        if (recvData.GetOpcode() == CMSG_CHAR_FACTION_CHANGE)
+        if (recvData.GetOpcode() == CMSG_CHAR_FACTION_OR_RACE_CHANGE)
         {
             // Delete all Flypaths
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_TAXI_PATH);
