@@ -1791,13 +1791,13 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     data.WriteByteSeq(guid[1]);
 
-    data << uint8(RESPONSE_SUCCESS); // 16
-    data << uint8(facialHair);       // 86
-    data << uint8(skin);             // 82
-    data << uint8(gender);           // 85
-    data << uint8(hairStyle);        // 83
-    data << uint8(face);             // 32
-    data << uint8(hairColor);        // 84
+    data << uint8(RESPONSE_SUCCESS);
+    data << uint8(facialHair);
+    data << uint8(skin);
+    data << uint8(gender);
+    data << uint8(hairStyle);
+    data << uint8(face);
+    data << uint8(hairColor);
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[5]);
