@@ -546,12 +546,12 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TAXI_NODE_STATUS_QUERY,             0x02E1, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleTaxiNodeStatusQueryOpcode    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TAXI_QUERY_AVAILABLE_NODES,         0x02E3, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleTaxiQueryAvailableNodes      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TELEPORT_TO_UNIT,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x07E9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x07E9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TIME_ADJUSTMENT_RESPONSE,           0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP,                     0x01DB, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleTimeSyncResp                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP_FAILED,              0x0058, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TOGGLE_PVP,                         0x0644, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTogglePvP                    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_TOTEM_DESTROYED,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTotemDestroyed               );
+    DEFINE_OPCODE_HANDLER(CMSG_TOTEM_DESTROYED,                    0x1263, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTotemDestroyed               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TRAINER_BUY_SPELL,                  0x0352, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTrainerBuySpellOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TRAINER_LIST,                       0x034B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTrainerListOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TRANSMOGRIFY_ITEMS,                 0x06D7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTransmogrifyItems            );

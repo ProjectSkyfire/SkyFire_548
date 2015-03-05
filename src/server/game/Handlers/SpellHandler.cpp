@@ -1282,10 +1282,28 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
     if (_player->m_mover != _player)
         return;
 
+    ObjectGuid guid;
     uint8 slotId;
-    uint64 guid;
+
     recvPacket >> slotId;
-    recvPacket >> guid;
+
+    guid[4] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[7]);
 
     ++slotId;
     if (slotId >= MAX_TOTEM_SLOT)
