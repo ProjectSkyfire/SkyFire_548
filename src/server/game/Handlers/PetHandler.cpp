@@ -796,7 +796,7 @@ void WorldSession::HandlePetAbandon(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[3]);
 
-    TC_LOG_INFO("network", "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART((uint64)guid));
+    TC_LOG_INFO("network", "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid));
 
     if (!_player->IsInWorld())
         return;
