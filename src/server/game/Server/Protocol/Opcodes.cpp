@@ -463,8 +463,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REALM_SPLIT,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRealmSplitOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_RECLAIM_CORPSE,                     0x03D3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReclaimCorpseOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REDIRECTION_AUTH_PROOF,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_REFORGE_ITEM,                       0x0C4F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReforgeItemOpcode            );
-    DEFINE_OPCODE_HANDLER(CMSG_REORDER_CHARACTERS,                 0x08A7, STATUS_AUTHED,    PROCESS_INPLACE,      &WorldSession::HandleReorderCharacters            );
+    DEFINE_OPCODE_HANDLER(CMSG_REFORGE_ITEM,                       0x0C4F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReforgeItemOpcode            ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_REORDER_CHARACTERS,                 0x08A7, STATUS_AUTHED,    PROCESS_INPLACE,      &WorldSession::HandleReorderCharacters            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REPAIR_ITEM,                        0x02C1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRepairItemOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REPOP_REQUEST,                      0x134A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRepopRequestOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REPORT_PVP_AFK,                     0x06F9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReportPvPAFK                 ); // 5.4.8 18414
@@ -487,7 +487,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_SWITCH_SEAT,        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle);
     DEFINE_OPCODE_HANDLER(CMSG_RESET_FACTION_CHEAT,                0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_RESET_INSTANCES,                    0x0C69, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleResetInstancesOpcode         ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_RESURRECT_RESPONSE,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleResurrectResponseOpcode      );
+    DEFINE_OPCODE_HANDLER(CMSG_RESURRECT_RESPONSE,                 0x0B0C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleResurrectResponseOpcode      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RETURN_TO_GRAVEYARD,                0x12EA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReturnToGraveyard            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_ROLE_POLL_BEGIN,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleSaveCUFProfiles              );
