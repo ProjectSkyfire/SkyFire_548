@@ -16430,26 +16430,44 @@ void Unit::SendClearThreatListOpcode()
 void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_REMOVE Message");
-    ObjectGuid unitGuid = pHostileReference->getUnitGuid();
-    WorldPacket data(SMSG_THREAT_REMOVE, 8 + 8);
+    ObjectGuid victimGUID = GetGUID();
+    ObjectGuid hostileGUID = pHostileReference->getUnitGuid();
 
-    data.WriteBit(unitGuid[1]);
-    data.WriteBit(unitGuid[3]);
-    data.WriteBit(unitGuid[0]);
-    data.WriteBit(unitGuid[4]);
-    data.WriteBit(unitGuid[6]);
-    data.WriteBit(unitGuid[7]);
-    data.WriteBit(unitGuid[5]);
-    data.WriteBit(unitGuid[2]);
+    WorldPacket data(SMSG_THREAT_REMOVE, 1 + 1 + 8 + 8);
 
-    data.WriteByteSeq(unitGuid[7]);
-    data.WriteByteSeq(unitGuid[6]);
-    data.WriteByteSeq(unitGuid[2]);
-    data.WriteByteSeq(unitGuid[5]);
-    data.WriteByteSeq(unitGuid[0]);
-    data.WriteByteSeq(unitGuid[4]);
-    data.WriteByteSeq(unitGuid[1]);
-    data.WriteByteSeq(unitGuid[3]);
+    data.WriteBit(victimGUID [0]);
+    data.WriteBit(victimGUID [1]);
+    data.WriteBit(victimGUID [5]);
+    data.WriteBit(hostileGUID[4]);
+    data.WriteBit(hostileGUID[0]);
+    data.WriteBit(victimGUID [4]);
+    data.WriteBit(victimGUID [6]);
+    data.WriteBit(hostileGUID[7]);
+    data.WriteBit(hostileGUID[6]);
+    data.WriteBit(hostileGUID[3]);
+    data.WriteBit(victimGUID [2]);
+    data.WriteBit(hostileGUID[1]);
+    data.WriteBit(victimGUID [3]);
+    data.WriteBit(victimGUID [7]);
+    data.WriteBit(hostileGUID[5]);
+    data.WriteBit(hostileGUID[2]);
+
+    data.WriteByteSeq(hostileGUID[3]);
+    data.WriteByteSeq(hostileGUID[0]);
+    data.WriteByteSeq(hostileGUID[2]);
+    data.WriteByteSeq(victimGUID [5]);
+    data.WriteByteSeq(victimGUID [4]);
+    data.WriteByteSeq(victimGUID [7]);
+    data.WriteByteSeq(victimGUID [3]);
+    data.WriteByteSeq(victimGUID [0]);
+    data.WriteByteSeq(hostileGUID[4]);
+    data.WriteByteSeq(victimGUID [1]);
+    data.WriteByteSeq(hostileGUID[1]);
+    data.WriteByteSeq(victimGUID [6]);
+    data.WriteByteSeq(hostileGUID[7]);
+    data.WriteByteSeq(hostileGUID[6]);
+    data.WriteByteSeq(victimGUID [2]);
+    data.WriteByteSeq(hostileGUID[5]);
 
     SendMessageToSet(&data, false);
 }
