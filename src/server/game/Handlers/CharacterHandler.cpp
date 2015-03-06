@@ -1319,13 +1319,11 @@ void WorldSession::HandleShowingCloakOpcode(WorldPacket& recvData)
 void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    std::string unk;
-    std::string newName;
 
     guid[6] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
     guid[0] = recvData.ReadBit();
-    recvData >> newName;
+    uint32 Namelen = recvData.ReadBits(6);            // Name size
     guid[1] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
@@ -1335,7 +1333,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[6]);
     recvData.ReadByteSeq(guid[5]);
-    recvData >> unk;
+    std::string newName = recvData.ReadString(Namelen);  // New Name
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[4]);
     recvData.ReadByteSeq(guid[3]);
@@ -1351,13 +1349,30 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
         return;
     }
 
-    uint8 res = ObjectMgr::CheckPlayerName(newName, true);
-    if (res != CHAR_NAME_SUCCESS)
+    uint8 result = ObjectMgr::CheckPlayerName(newName, true);
+    if (result != CHAR_NAME_SUCCESS)
     {
-        WorldPacket data(SMSG_CHAR_RENAME, 1+8+(newName.size()+1));
-        data << uint8(res);
-        data << uint64(guid);
+        WorldPacket data(SMSG_CHAR_RENAME, 1 + 8 + (newName.size() + 1));
+        data << uint8(result);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[5]);
+
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[7]);
         data << newName;
+
         SendPacket(&data);
         return;
     }
@@ -1640,11 +1655,9 @@ void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
 void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    std::string newName;
-    std::string unk;
     uint8 gender, skin, face, hairStyle, hairColor, facialHair;
 
-    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
+    recvData >> hairStyle >> gender >> skin >> face >> hairColor >> facialHair;
 
     guid[2] = recvData.ReadBit();
     guid[6] = recvData.ReadBit();
@@ -1652,12 +1665,12 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     guid[0] = recvData.ReadBit();
     guid[7] = recvData.ReadBit();
     guid[5] = recvData.ReadBit();
-    recvData >> newName;
+    uint32 Namelen = recvData.ReadBits(6);            // Name size
     guid[4] = recvData.ReadBit();
     guid[3] = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[4]);
-    recvData >> unk;
+    std::string newName = recvData.ReadString(Namelen);  // New Name
     recvData.ReadByteSeq(guid[0]);
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[6]);
@@ -1766,15 +1779,38 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newName, gender);
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1+8+(newName.size()+1)+6);
+
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+
+    data.WriteByteSeq(guid[1]);
+
     data << uint8(RESPONSE_SUCCESS);
-    data << uint64(guid);
-    data << newName;
-    data << uint8(gender);
-    data << uint8(skin);
-    data << uint8(face);
-    data << uint8(hairStyle);
-    data << uint8(hairColor);
     data << uint8(facialHair);
+    data << uint8(skin);
+    data << uint8(gender);
+    data << uint8(hairStyle);
+    data << uint8(face);
+    data << uint8(hairColor);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[4]);
+
+    data << newName;
+
+    if (!RESPONSE_SUCCESS)
+        data << newName;
+
     SendPacket(&data);
 }
 
@@ -1945,7 +1981,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     Field* fields = result->Fetch();
     uint32 at_loginFlags = fields[0].GetUInt16();
     char const* knownTitlesStr = fields[1].GetCString();
-    uint32 used_loginFlag = ((recvData.GetOpcode() == CMSG_CHAR_RACE_CHANGE) ? AT_LOGIN_CHANGE_RACE : AT_LOGIN_CHANGE_FACTION);
+    uint32 used_loginFlag = ((recvData.GetOpcode() == CMSG_CHAR_FACTION_OR_RACE_CHANGE) ? AT_LOGIN_CHANGE_RACE : AT_LOGIN_CHANGE_FACTION);
 
     if (!sObjectMgr->GetPlayerInfo(race, playerClass))
     {
@@ -2114,7 +2150,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             trans->Append(stmt);
         }
 
-        if (recvData.GetOpcode() == CMSG_CHAR_FACTION_CHANGE)
+        if (recvData.GetOpcode() == CMSG_CHAR_FACTION_OR_RACE_CHANGE)
         {
             // Delete all Flypaths
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_TAXI_PATH);

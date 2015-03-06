@@ -163,9 +163,8 @@ enum Opcodes
     CMSG_CHAR_CREATE,
     CMSG_CHAR_CUSTOMIZE,
     CMSG_CHAR_DELETE,
-    CMSG_CHAR_ENUM,
-    CMSG_CHAR_FACTION_CHANGE,
-    CMSG_CHAR_RACE_CHANGE,
+    CMSG_CHAR_ENUM, 
+    CMSG_CHAR_FACTION_OR_RACE_CHANGE,
     CMSG_CHAR_RENAME,
     CMSG_CHAT_FILTERED,
     CMSG_CHAT_IGNORED,
@@ -1480,7 +1479,7 @@ class OpcodeTable
 
         ~OpcodeTable()
         {
-            for (uint16 i = 0; i < NUM_OPCODE_HANDLERS; ++i)
+            for (uint16 i = 0; i < NUM_OPCODES; ++i)
                 delete _internalTable[i];
         }
 

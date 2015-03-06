@@ -309,6 +309,9 @@ class WorldSession
 
         void SendPetitionQueryOpcode(uint64 petitionguid);
 
+        // Totem
+        void SendTotemCreated(ObjectGuid TotemGUID, uint32 Duration, uint32 SpellID, uint8 Slot);
+
         // Spell
         void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets & targets);
 

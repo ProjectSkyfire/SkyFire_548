@@ -27,8 +27,25 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_GRANT_LEVEL");
 
-    uint64 guid;
-    recvData.readPackGUID(guid);
+    ObjectGuid guid;
+
+    guid[2] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[0]);
 
     Player* target = ObjectAccessor::GetObjectInWorld(guid, _player);
 
@@ -62,7 +79,25 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
     }
 
     WorldPacket data2(SMSG_PROPOSE_LEVEL_GRANT, 8);
-    data2.append(_player->GetPackGUID());
+
+    data2.WriteBit(guid[6]);
+    data2.WriteBit(guid[7]);
+    data2.WriteBit(guid[2]);
+    data2.WriteBit(guid[5]);
+    data2.WriteBit(guid[3]);
+    data2.WriteBit(guid[0]);
+    data2.WriteBit(guid[1]);
+    data2.WriteBit(guid[4]);
+
+    data2.WriteByteSeq(guid[2]);
+    data2.WriteByteSeq(guid[5]);
+    data2.WriteByteSeq(guid[6]);
+    data2.WriteByteSeq(guid[7]);
+    data2.WriteByteSeq(guid[1]);
+    data2.WriteByteSeq(guid[4]);
+    data2.WriteByteSeq(guid[3]);
+    data2.WriteByteSeq(guid[0]);
+
     target->GetSession()->SendPacket(&data2);
 }
 
