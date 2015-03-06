@@ -16435,23 +16435,38 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 
     WorldPacket data(SMSG_THREAT_REMOVE, 1 + 1 + 8 + 8);
 
-    data.WriteGuidMask(victimGUID, 0, 1, 5);
-    data.WriteGuidMask(hostileGUID, 4, 0);
-    data.WriteGuidMask(victimGUID, 4, 6);
-    data.WriteGuidMask(hostileGUID, 7, 6, 3);
-    data.WriteBit(victimGUID[2]);
+    data.WriteBit(victimGUID [0]);
+    data.WriteBit(victimGUID [1]);
+    data.WriteBit(victimGUID [5]);
+    data.WriteBit(hostileGUID[4]);
+    data.WriteBit(hostileGUID[0]);
+    data.WriteBit(victimGUID [4]);
+    data.WriteBit(victimGUID [6]);
+    data.WriteBit(hostileGUID[7]);
+    data.WriteBit(hostileGUID[6]);
+    data.WriteBit(hostileGUID[3]);
+    data.WriteBit(victimGUID [2]);
     data.WriteBit(hostileGUID[1]);
-    data.WriteGuidMask(victimGUID, 3, 7);
-    data.WriteGuidMask(hostileGUID, 5, 2);
+    data.WriteBit(victimGUID [3]);
+    data.WriteBit(victimGUID [7]);
+    data.WriteBit(hostileGUID[5]);
+    data.WriteBit(hostileGUID[2]);
 
-    data.WriteGuidBytes(hostileGUID, 3, 0, 2);
-    data.WriteGuidBytes(victimGUID, 5, 4, 7, 3, 0);
+    data.WriteByteSeq(hostileGUID[3]);
+    data.WriteByteSeq(hostileGUID[0]);
+    data.WriteByteSeq(hostileGUID[2]);
+    data.WriteByteSeq(victimGUID [5]);
+    data.WriteByteSeq(victimGUID [4]);
+    data.WriteByteSeq(victimGUID [7]);
+    data.WriteByteSeq(victimGUID [3]);
+    data.WriteByteSeq(victimGUID [0]);
     data.WriteByteSeq(hostileGUID[4]);
-    data.WriteByteSeq(victimGUID[1]);
+    data.WriteByteSeq(victimGUID [1]);
     data.WriteByteSeq(hostileGUID[1]);
-    data.WriteByteSeq(victimGUID[6]);
-    data.WriteGuidBytes(hostileGUID, 7, 6);
-    data.WriteByteSeq(victimGUID[2]);
+    data.WriteByteSeq(victimGUID [6]);
+    data.WriteByteSeq(hostileGUID[7]);
+    data.WriteByteSeq(hostileGUID[6]);
+    data.WriteByteSeq(victimGUID [2]);
     data.WriteByteSeq(hostileGUID[5]);
 
     SendMessageToSet(&data, false);
