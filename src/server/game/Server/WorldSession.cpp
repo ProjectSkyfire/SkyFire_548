@@ -1057,7 +1057,7 @@ void WorldSession::HandleAddonRegisteredPrefixesOpcode(WorldPacket& recvPacket)
 
     // This is always sent after CMSG_UNREGISTER_ALL_ADDON_PREFIXES
 
-    uint32 count = recvPacket.ReadBits(25);
+    uint32 count = recvPacket.ReadBits(24);
 
     if (count > REGISTERED_ADDON_PREFIX_SOFTCAP)
     {
