@@ -2146,20 +2146,20 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
     _player->SetPendingBind(0, 0);
 }
 
-void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
+void WorldSession::HandleDBQueryBulk(WorldPacket& recvPacket)
 {
-    uint32 type, count;
-    recvPacket >> type;
+    uint32 TableHash, RecordId;
+    recvPacket >> TableHash;
 
-    DB2StorageBase const* store = GetDB2Storage(type);
+    DB2StorageBase const* store = GetDB2Storage(TableHash);
     if (!store)
     {
-        TC_LOG_ERROR("network", "CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", type);
+        TC_LOG_ERROR("network", "CMSG_DB_QUERY_BULK: Received unknown hash query: %u", TableHash);
         recvPacket.rfinish();
         return;
     }
 
-    count = recvPacket.ReadBits(21);
+    uint32 count = recvPacket.ReadBits(21);
 
     ObjectGuid* guids = new ObjectGuid[count];
     for (uint32 i = 0; i < count; ++i)
@@ -2174,11 +2174,10 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
         guids[i][2] = recvPacket.ReadBit();
     }
 
-    uint32 entry;
     for (uint32 i = 0; i < count; ++i)
     {
         recvPacket.ReadByteSeq(guids[i][1]);
-        recvPacket >> entry;
+        recvPacket >> RecordId;
         recvPacket.ReadByteSeq(guids[i][0]);
         recvPacket.ReadByteSeq(guids[i][5]);
         recvPacket.ReadByteSeq(guids[i][6]);
@@ -2188,28 +2187,28 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
         recvPacket.ReadByteSeq(guids[i][3]);
 
         // temp: this should be moved once broadcast text is properly implemented
-        if (type == DB2_REPLY_BROADCAST)
+        if (TableHash == DB2_REPLY_BROADCAST)
         {
-            SendBroadcastText(entry);
+            SendBroadcastText(RecordId);
             continue;
         }
 
-        if (!store->HasRecord(entry))
+        if (!store->HasRecord(RecordId))
             continue;
 
-        ByteBuffer record;
-        store->WriteRecord(entry, (uint32)GetSessionDbcLocale(), record);
+        ByteBuffer Record;
+        store->WriteRecord(RecordId, (uint32)GetSessionDbcLocale(), Record);
 
         WorldPacket data(SMSG_DB_REPLY);
-        data << uint32(entry);
+        data << uint32(RecordId);
         data << uint32(time(NULL));
-        data << uint32(type);
-        data << uint32(record.size());
-        data.append(record);
+        data << uint32(RecordId);
+        data << uint32(Record.size());
+        data.append(Record);
 
         SendPacket(&data);
 
-        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, type);
+        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent db entry: %u type: %u", RecordId, TableHash);
     }
 
     delete [] guids;
