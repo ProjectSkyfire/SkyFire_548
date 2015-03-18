@@ -654,7 +654,7 @@ void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
     WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 1 + 4 + 4 * GraveyardIds.size());
 
     data << uint32(GraveyardIds.size());
-    data.WriteBit(0); // unk
+    data.WriteBit(0); // IsTriggered
 
     for (uint32 i = 0; i < GraveyardIds.size(); ++i)
         data << uint32(GraveyardIds[i]);

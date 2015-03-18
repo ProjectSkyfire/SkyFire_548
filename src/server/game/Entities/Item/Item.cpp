@@ -1036,7 +1036,7 @@ void Item::SendUpdateSockets()
     data.WriteBit(Guid[4]);
 
     data.WriteByteSeq(Guid[2]);
-    data << uint32(0);         // unk
+    data << uint32(0);         // SocketMatch
     data.WriteByteSeq(Guid[3]);
     data.WriteByteSeq(Guid[7]);
     data.WriteByteSeq(Guid[4]);
