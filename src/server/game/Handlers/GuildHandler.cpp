@@ -822,23 +822,23 @@ void WorldSession::HandleGuildRequestPartyState(WorldPacket& recvPacket)
 
     ObjectGuid guildGuid;
 
-    guildGuid[0] = recvPacket.ReadBit();
-    guildGuid[6] = recvPacket.ReadBit();
-    guildGuid[7] = recvPacket.ReadBit();
-    guildGuid[3] = recvPacket.ReadBit();
-    guildGuid[5] = recvPacket.ReadBit();
     guildGuid[1] = recvPacket.ReadBit();
+    guildGuid[5] = recvPacket.ReadBit();
+    guildGuid[7] = recvPacket.ReadBit();
     guildGuid[2] = recvPacket.ReadBit();
+    guildGuid[6] = recvPacket.ReadBit();
+    guildGuid[3] = recvPacket.ReadBit();
+    guildGuid[0] = recvPacket.ReadBit();
     guildGuid[4] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guildGuid[6]);
-    recvPacket.ReadByteSeq(guildGuid[3]);
     recvPacket.ReadByteSeq(guildGuid[2]);
-    recvPacket.ReadByteSeq(guildGuid[1]);
     recvPacket.ReadByteSeq(guildGuid[5]);
+    recvPacket.ReadByteSeq(guildGuid[4]);
+    recvPacket.ReadByteSeq(guildGuid[6]);
+    recvPacket.ReadByteSeq(guildGuid[1]);
     recvPacket.ReadByteSeq(guildGuid[0]);
     recvPacket.ReadByteSeq(guildGuid[7]);
-    recvPacket.ReadByteSeq(guildGuid[4]);
+    recvPacket.ReadByteSeq(guildGuid[3]);
 
     if (Guild* guild = sGuildMgr->GetGuildByGuid(guildGuid))
         guild->HandleGuildPartyRequest(this);
