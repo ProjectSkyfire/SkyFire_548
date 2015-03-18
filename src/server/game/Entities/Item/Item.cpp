@@ -1023,10 +1023,31 @@ bool Item::IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) cons
 
 void Item::SendUpdateSockets()
 {
-    WorldPacket data(SMSG_SOCKET_GEMS_RESULT, 8+4+4+4+4);
-    data << uint64(GetGUID());
+    ObjectGuid Guid = GetGUID();
+    WorldPacket data(SMSG_SOCKET_GEMS_RESULT, 8 + 4 + 4 + 4 + 4);
+
+    data.WriteBit(Guid[2]);
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[3]);
+    data.WriteBit(Guid[4]);
+
+    data.WriteByteSeq(Guid[2]);
+    data << uint32(0);         // unk
+    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(Guid[7]);
+    data.WriteByteSeq(Guid[4]);
+
     for (uint32 i = SOCK_ENCHANTMENT_SLOT; i <= BONUS_ENCHANTMENT_SLOT; ++i)
         data << uint32(GetEnchantmentId(EnchantmentSlot(i)));
+
+    data.WriteByteSeq(Guid[5]);
+    data.WriteByteSeq(Guid[0]);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[6]);
 
     GetOwner()->GetSession()->SendPacket(&data);
 }
