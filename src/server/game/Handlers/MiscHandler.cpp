@@ -631,6 +631,37 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recvData)
     //GetPlayer()->SendInitWorldStates(true, newZone);
 }
 
+void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
+{
+    uint32 ZoneId = _player->GetZoneId();
+    uint32 Team = _player->GetTeam();
+
+    std::vector<uint32> GraveyardIds;
+    auto range = sObjectMgr->GraveYardStore.equal_range(ZoneId);
+
+    for (auto it = range.first; it != range.second && GraveyardIds.size() < 16; ++it)
+    {
+        if (it->second.team == 0 || it->second.team == Team)
+            GraveyardIds.push_back(it->first);
+    }
+
+    if (GraveyardIds.empty())
+    {
+        TC_LOG_DEBUG("network", "No graveyards found for zone %u for player %u (team %u) in CMSG_REQUEST_CEMETERY_LIST", ZoneId, m_GUIDLow, Team);
+        return;
+    }
+
+    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 1 + 4 + 4 * GraveyardIds.size());
+
+    data << uint32(GraveyardIds.size());
+    data.WriteBit(0); // unk
+
+    for (uint32 i = 0; i < GraveyardIds.size(); ++i)
+        data << uint32(GraveyardIds[i]);
+
+    SendPacket(&data);
+}
+
 void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
