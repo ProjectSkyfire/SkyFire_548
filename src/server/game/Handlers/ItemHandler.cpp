@@ -1053,11 +1053,65 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint32 itemId, uint32 enchantId)
 {
-    WorldPacket data(SMSG_ENCHANTMENTLOG, (8+8+4+4));
-    data.appendPackGUID(target);
-    data.appendPackGUID(caster);
+    ObjectGuid CasterGuid = caster;
+    ObjectGuid OwnerGuid; // TODO implemente
+    ObjectGuid TargetGuid = target;
+    WorldPacket data(SMSG_ENCHANTMENT_LOG, (8+8+4+4));
+
     data << uint32(itemId);
+    data << uint32(0);     // EnchantSlot
     data << uint32(enchantId);
+
+    data.WriteBit(OwnerGuid[6]);
+    data.WriteBit(OwnerGuid[7]);
+    data.WriteBit(CasterGuid[6]);
+    data.WriteBit(CasterGuid[4]);
+    data.WriteBit(OwnerGuid[5]);
+    data.WriteBit(TargetGuid[7]);
+    data.WriteBit(TargetGuid[2]);
+    data.WriteBit(TargetGuid[3]);
+    data.WriteBit(OwnerGuid[4]);
+    data.WriteBit(OwnerGuid[3]);
+    data.WriteBit(TargetGuid[6]);
+    data.WriteBit(CasterGuid[1]);
+    data.WriteBit(OwnerGuid[2]);
+    data.WriteBit(CasterGuid[5]);
+    data.WriteBit(TargetGuid[4]);
+    data.WriteBit(CasterGuid[0]);
+    data.WriteBit(TargetGuid[1]);
+    data.WriteBit(OwnerGuid[0]);
+    data.WriteBit(CasterGuid[3]);
+    data.WriteBit(CasterGuid[7]);
+    data.WriteBit(TargetGuid[5]);
+    data.WriteBit(TargetGuid[0]);
+    data.WriteBit(CasterGuid[2]);
+    data.WriteBit(OwnerGuid[1]);
+
+    data.WriteByteSeq(OwnerGuid[0]);
+    data.WriteByteSeq(CasterGuid[2]);
+    data.WriteByteSeq(TargetGuid[7]);
+    data.WriteByteSeq(OwnerGuid[1]);
+    data.WriteByteSeq(CasterGuid[4]);
+    data.WriteByteSeq(TargetGuid[5]);
+    data.WriteByteSeq(OwnerGuid[4]);
+    data.WriteByteSeq(TargetGuid[2]);
+    data.WriteByteSeq(CasterGuid[6]);
+    data.WriteByteSeq(CasterGuid[0]);
+    data.WriteByteSeq(TargetGuid[0]);
+    data.WriteByteSeq(TargetGuid[4]);
+    data.WriteByteSeq(OwnerGuid[3]);
+    data.WriteByteSeq(CasterGuid[5]);
+    data.WriteByteSeq(TargetGuid[1]);
+    data.WriteByteSeq(CasterGuid[3]);
+    data.WriteByteSeq(CasterGuid[7]);
+    data.WriteByteSeq(OwnerGuid[7]);
+    data.WriteByteSeq(TargetGuid[3]);
+    data.WriteByteSeq(OwnerGuid[6]);
+    data.WriteByteSeq(OwnerGuid[2]);
+    data.WriteByteSeq(OwnerGuid[5]);
+    data.WriteByteSeq(TargetGuid[6]);
+    data.WriteByteSeq(CasterGuid[1]);
+
     GetPlayer()->SendMessageToSet(&data, true);
 }
 
