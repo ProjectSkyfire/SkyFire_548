@@ -181,6 +181,9 @@ DBCStorage <ScalingStatValuesEntry> sScalingStatValuesStore(ScalingStatValuesfmt
 
 DBCStorage <SkillLineEntry> sSkillLineStore(SkillLinefmt);
 DBCStorage <SkillLineAbilityEntry> sSkillLineAbilityStore(SkillLineAbilityfmt);
+DBCStorage <SkillRaceClassInfoEntry> sSkillRaceClassInfoStore(SkillRaceClassInfofmt);
+SkillRaceClassInfoMap SkillRaceClassInfoBySkill;
+DBCStorage <SkillTiersEntry> sSkillTiersStore(SkillTiersfmt);
 
 DBCStorage <SoundEntriesEntry> sSoundEntriesStore(SoundEntriesfmt);
 
@@ -511,6 +514,13 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatValuesStore,      dbcPath, "ScalingStatValues.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineStore,              dbcPath, "SkillLine.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineAbilityStore,       dbcPath, "SkillLineAbility.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSkillRaceClassInfoStore,     dbcPath, "SkillRaceClassInfo.dbc");//18414
+    for (uint32 i = 0; i < sSkillRaceClassInfoStore.GetNumRows(); ++i)
+        if (SkillRaceClassInfoEntry const* entry = sSkillRaceClassInfoStore.LookupEntry(i))
+            if (sSkillLineStore.LookupEntry(entry->SkillID))
+                SkillRaceClassInfoBySkill.emplace(entry->SkillID, entry);
+
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSkillTiersStore,             dbcPath, "SkillTiers.dbc");//18414
     LoadDBC(availableDbcLocales, bad_dbc_files, sSoundEntriesStore,           dbcPath, "SoundEntries.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore,                  dbcPath, "Spell.dbc"/*, &CustomSpellEntryfmt, &CustomSpellEntryIndex*/);//
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoriesStore,        dbcPath,"SpellCategories.dbc");//15595
@@ -561,97 +571,6 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
 
         sSpellEffectScallingByEffectId.insert(std::make_pair(spellEffectScaling->SpellEffectId, j));
-    }
-
-    std::map<std::string, uint32> classIdByName;
-    for (uint32 j = 0; j < sChrClassesStore.GetNumRows(); j++)
-    {
-        ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(j);
-        if (!classEntry)
-            continue;
-
-        classIdByName.insert(std::make_pair(std::string(classEntry->name), j));
-    }
-
-    for (uint32 j = 0; j < sSkillLineStore.GetNumRows(); j++)
-    {
-        SkillLineEntry const* skillEntry = sSkillLineStore.LookupEntry(j);
-        if (!skillEntry)
-            continue;
-
-        if (skillEntry->categoryId != SKILL_CATEGORY_CLASS)
-            continue;
-
-        std::map<std::string, uint32> ::const_iterator iter = classIdByName.find(std::string(skillEntry->name));
-        if (iter == classIdByName.end())
-            continue;
-
-        sClassBySkillIdStore.insert(std::make_pair(j, iter->second));
-    }
-
-    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-    {
-        SkillLineAbilityEntry const* skillAbility = sSkillLineAbilityStore.LookupEntry(j);
-        if (!skillAbility)
-            continue;
-
-        if (skillAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
-            continue;
-
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillAbility->spellId);
-        if (!spellInfo)
-            continue;
-
-        SpellLevelsEntry const* spellLevels = sSpellLevelsStore.LookupEntry(spellInfo->SpellLevelsId);
-        if (!spellLevels || !spellLevels->spellLevel)
-            continue;
-
-        uint32 classId = GetClassBySkillId(skillAbility->skillId);
-
-        if (!classId)
-            continue;
-
-        if (sSpellsPerClassStore.find(classId) == sSpellsPerClassStore.end())
-            sSpellsPerClassStore.insert(make_pair(classId, std::list<SkillLineAbilityEntry const*>()));
-
-        sSpellsPerClassStore[classId].push_back(skillAbility);
-    }
-
-    // Must be done when sSkillLineAbilityStore, sSpellStore, sSpellLevelsStore and sCreatureFamilyStore are all loaded
-    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-    {
-        SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);
-        if (!skillLine)
-            continue;
-
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-        if (!spellInfo)
-            continue;
-
-        SpellLevelsEntry const* levels = sSpellLevelsStore.LookupEntry(spellInfo->SpellLevelsId);
-        if (spellInfo->SpellLevelsId && (!levels || levels->spellLevel))
-            continue;
-
-        if (SpellMiscEntry const* spellMisc = sSpellMiscStore.LookupEntry(spellInfo->SpellMiscId))
-        {
-            if (spellMisc->Attributes & SPELL_ATTR0_PASSIVE)
-            {
-                for (uint32 i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
-                {
-                    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(i);
-                    if (!cFamily)
-                        continue;
-
-                    if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
-                        continue;
-
-                    if (skillLine->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
-                        continue;
-
-                    sPetFamilySpellsStore[i].insert(spellInfo->Id);
-                }
-            }
-        }
     }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sTalentStore,                 dbcPath, "Talent.dbc");//15595
@@ -1118,11 +1037,11 @@ std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 spe
                 if (!skillLine)
                     continue;
 
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(skillLine->spellId);
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(skillLine->SpellID);
                 if (!spellInfo)
                     continue;
 
-                if (skillLine->racemask && !(skillLine->racemask & raceMask))
+                if (skillLine->RaceMask && !(skillLine->RaceMask & raceMask))
                     continue;
 
                 if (spellInfo->SpellLevel <= minLevel || spellInfo->SpellLevel > maxLevel)
@@ -1409,6 +1328,22 @@ LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, Difficulty difficulty)
 
         if (dungeon->map == int32(mapId) && Difficulty(dungeon->difficulty) == difficulty)
             return dungeon;
+    }
+
+    return NULL;
+}
+
+SkillRaceClassInfoEntry const* GetSkillRaceClassInfo(uint32 skill, uint8 race, uint8 class_)
+{
+    SkillRaceClassInfoBounds bounds = SkillRaceClassInfoBySkill.equal_range(skill);
+    for (SkillRaceClassInfoMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        if (itr->second->RaceMask && !(itr->second->RaceMask & (1 << (race - 1))))
+            continue;
+        if (itr->second->ClassMask && !(itr->second->ClassMask & (1 << (class_ - 1))))
+            continue;
+
+        return itr->second;
     }
 
     return NULL;
