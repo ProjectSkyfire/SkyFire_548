@@ -4711,35 +4711,195 @@ void Spell::SendSpellGo()
 void Spell::SendLogExecute()
 {
     ObjectGuid guid = m_caster->GetGUID();
-
-    // TODO: Finish me
-    WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
-    /*
-    data.WriteBit(0);
-    data.WriteBit(guid[6]);
-    data.WriteBits(0, 19); // Count
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
+    //TODO finish this !
+    WorldPacket data(SMSG_SPELL_LOG_EXECUTE, (8 + 4 + 4 + 4 + 4 + 8));
     data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
+    data.WriteBits(0, 19);
+    data.WriteBit(guid[4]);
+
+    /*if (EffectCount) //28
+    {
+        data << uint32(0);// unk
+
+        if (ExtraAttacksTargetsCount) //20
+        {
+            ObjectGuid VictimGuid;
+            data.WriteBit(VictimGuid[5]);
+            data.WriteBit(VictimGuid[4]);
+            data.WriteBit(VictimGuid[2]);
+            data.WriteBit(VictimGuid[3]);
+            data.WriteBit(VictimGuid[1]);
+            data.WriteBit(VictimGuid[0]);
+            data.WriteBit(VictimGuid[6]);
+            data.WriteBit(VictimGuid[7]);
+        }
+
+        data << uint32(0);// unk
+
+        if (PowerDrainTargetsCount) //4
+        {
+            ObjectGuid VictimGuid;
+            data.WriteBit(VictimGuid[0]);
+            data.WriteBit(VictimGuid[3]);
+            data.WriteBit(VictimGuid[1]);
+            data.WriteBit(VictimGuid[5]);
+            data.WriteBit(VictimGuid[6]);
+            data.WriteBit(VictimGuid[4]);
+            data.WriteBit(VictimGuid[7]);
+            data.WriteBit(VictimGuid[2]);
+        }
+
+        data << uint32(0);// unk
+        data << uint32(0);// unk
+        data << uint32(0);// unk
+
+        if (DurabilityDamageTargetsCount) //36
+        {
+            ObjectGuid VictimGuid;
+            data.WriteBit(VictimGuid[7]);
+            data.WriteBit(VictimGuid[2]);
+            data.WriteBit(VictimGuid[0]);
+            data.WriteBit(VictimGuid[5]);
+            data.WriteBit(VictimGuid[6]);
+            data.WriteBit(VictimGuid[3]);
+            data.WriteBit(VictimGuid[4]);
+            data.WriteBit(VictimGuid[1]);
+        }
+
+        data << uint32(0);// unk
+
+        if (GenericVictimTargetsCount) //52
+        {
+            ObjectGuid VictimGuid;
+            data.WriteBit(VictimGuid[6]);
+            data.WriteBit(VictimGuid[5]);
+            data.WriteBit(VictimGuid[1]);
+            data.WriteBit(VictimGuid[0]);
+            data.WriteBit(VictimGuid[3]);
+            data.WriteBit(VictimGuid[4]);
+            data.WriteBit(VictimGuid[7]);
+            data.WriteBit(VictimGuid[2]);
+        }
+    }*/
+
+    data.WriteBit(guid[1]);
     data.WriteBit(guid[3]);
+    data.WriteBit(0);
+    /*
+    if ( v31 )
+    {
+    	sub_70FED7(v32);// unk
+    }
 
+    if (72)
+    {
+        if (56)
+        {
+            data << uint32(0);// unk
+            data << uint32(0);// unk
+        }
+
+        data << uint32(0);// unk
+        data << uint32(0);// unk
+        data << uint32(0);// unk
+    }
+
+    if (EffectCount) //28
+    {
+        if (GenericVictimTargetsCount) //52
+        {
+            ObjectGuid VictimGuid;
+            data.WriteByteSeq(VictimGuid[7]);
+            data.WriteByteSeq(VictimGuid[5]);
+            data.WriteByteSeq(VictimGuid[1]);
+            data.WriteByteSeq(VictimGuid[2]);
+            data.WriteByteSeq(VictimGuid[6]);
+            data.WriteByteSeq(VictimGuid[4]);
+            data.WriteByteSeq(VictimGuid[0]);
+            data.WriteByteSeq(VictimGuid[3]);
+        }
+
+        if (DurabilityDamageTargetsCount) //36
+        {
+            ObjectGuid VictimGuid;
+            data.WriteByteSeq(VictimGuid[4]);
+            data.WriteByteSeq(VictimGuid[3]);
+
+            data << uint32(0);// ItemID
+
+            data.WriteByteSeq(VictimGuid[6]);
+            data.WriteByteSeq(VictimGuid[5]);
+            data.WriteByteSeq(VictimGuid[0]);
+            data.WriteByteSeq(VictimGuid[7]);
+
+             data << uint32(0);// Amount
+
+            data.WriteByteSeq(VictimGuid[2]);
+            data.WriteByteSeq(VictimGuid[1]);
+        }
+
+        if (PowerDrainTargetsCount) //4
+        {
+            ObjectGuid VictimGuid;
+            data.WriteByteSeq(VictimGuid[3]);
+            data.WriteByteSeq(VictimGuid[7]);
+            data.WriteByteSeq(VictimGuid[5]);
+            data.WriteByteSeq(VictimGuid[2]);
+            data.WriteByteSeq(VictimGuid[0]);
+
+            data << uint32(0);// Points
+            data << uint32(0);// PowerType
+
+            data.WriteByteSeq(VictimGuid[4]);
+            data.WriteByteSeq(VictimGuid[1]);
+
+             data << float(0);// Amplitude
+
+            data.WriteByteSeq(guid[6]);
+        }
+
+        if (ExtraAttacksTargetsCount) //20
+        {
+            ObjectGuid VictimGuid;
+            data.WriteByteSeq(VictimGuid[0]);
+            data.WriteByteSeq(VictimGuid[6]);
+            data.WriteByteSeq(VictimGuid[4]);
+            data.WriteByteSeq(VictimGuid[7]);
+            data.WriteByteSeq(VictimGuid[2]);
+            data.WriteByteSeq(VictimGuid[5]);
+            data.WriteByteSeq(VictimGuid[3]);
+
+            data << uint32(0);// NumAttacks
+
+            data.WriteByteSeq(VictimGuid[1]);
+        }
+
+        //if (84)
+        {
+            data << uint32(0);
+        }
+
+        data << uint32(0);
+
+        //if ( *(v36 + *(v3 + 32) + 68) )
+        {
+            data << uint32(0);
+        }
+    }*/
+
+    data << uint32(m_spellInfo->Id);
     data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[7]);
-    data << uint32(m_spellInfo->Id);
+    data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[4]);
-    */
-
-    data.append(m_caster->GetPackGUID());
-
-    data << uint32(m_spellInfo->Id);
+    data.WriteByteSeq(guid[3]);
 
     uint8 effCount = 0;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -4764,6 +4924,7 @@ void Spell::SendLogExecute()
         delete m_effectExecuteData[i];
         m_effectExecuteData[i] = NULL;
     }
+
     m_caster->SendMessageToSet(&data, true);
 }
 
