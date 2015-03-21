@@ -1484,6 +1484,9 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     if (!sObjectMgr->GetPlayerNameByGUID(guid, name))
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
+        data.WriteBit(1);
+        data.WriteBits(0, 8);
+        data.FlushBits();
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1492,7 +1495,10 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     std::wstring wname;
     if (!Utf8toWStr(name, wname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
+        data.WriteBit(1);
+        data.WriteBits(0, 8);
+        data.FlushBits();
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1500,7 +1506,10 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (!isCyrillicCharacter(wname[0]))                      // name already stored as only single alphabet using
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
+        data.WriteBit(1);
+        data.WriteBits(0, 8);
+        data.FlushBits();
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1513,7 +1522,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (name2 != name)                                       // character have different name
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1524,7 +1533,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
         recvData >> declinedname.name[i];
         if (!normalizePlayerName(declinedname.name[i]))
         {
-            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
             data << uint32(1);
             SendPacket(&data);
             return;
@@ -1533,7 +1542,10 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (!ObjectMgr::CheckDeclinedNames(wname, declinedname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
+        data.WriteBit(1);
+        data.WriteBits(0, 8);
+        data.FlushBits();
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1558,7 +1570,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     CharacterDatabase.CommitTransaction(trans);
 
-    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
     data.WriteBit(guid[2]);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[3]);
@@ -1568,6 +1580,8 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     data.WriteBit(guid[5]);
     data.WriteBit(guid[7]);
 
+	data.FlushBits();
+	
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[1]);

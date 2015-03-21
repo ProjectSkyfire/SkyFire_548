@@ -1259,14 +1259,17 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
             StopMirrorTimer(Type);
         return;
     }
-    WorldPacket data(SMSG_START_MIRROR_TIMER, 21);
-    data << (uint32)Type;
+	
+	WorldPacket data(SMSG_START_MIRROR_TIMER, 21);
+    
     data << MaxValue;
-    data << CurrentValue;
-    data << Regen;
-    data << (uint8)0;
     data << (uint32)0;                                      // spell id
-    GetSession()->SendPacket(&data);
+    data << (uint32)Type;
+    data << Regen;
+    data << CurrentValue;
+    data << (uint8)0;
+	
+	GetSession()->SendPacket(&data);
 }
 
 void Player::StopMirrorTimer(MirrorTimerType Type)
@@ -5158,7 +5161,27 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 void Player::BuildPlayerRepop()
 {
     WorldPacket data(SMSG_PRE_RESURRECT, GetPackGUID().size());
-    data.append(GetPackGUID());
+
+    ObjectGuid guid = GetGUID();
+    
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
+    
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+
     GetSession()->SendPacket(&data);
 
     if (getRace() == RACE_NIGHTELF)
@@ -10202,7 +10225,8 @@ void Player::SetBindPoint(uint64 guid)
 
 void Player::SendTalentWipeConfirm(uint64 guid)
 {
-    WorldPacket data(MSG_TALENT_WIPE_CONFIRM, (8+4));
+    // Needs redone in 5.x 
+    WorldPacket data(MSG_RESPEC_WIPE_CONFIRM, (8+4));
     data << uint64(guid);
     uint32 cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
     data << cost;
@@ -13875,6 +13899,23 @@ bool Player::IsTwoHandUsed() const
 {
     Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     return mainItem && mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON && !CanTitanGrip();
+}
+
+void Player::IgnoreTrade()
+{
+    if (m_trade)
+    {
+        Player* trader = m_trade->GetTrader();
+
+        trader->GetSession()->SendTradeStatus(TRADE_STATUS_FAILED);
+
+        // cleanup
+        delete m_trade;
+        m_trade = NULL;
+
+        delete trader->m_trade;
+        trader->m_trade = NULL;
+    }
 }
 
 void Player::TradeCancel(bool sendback)
@@ -21608,13 +21649,13 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
                     val += (*itr)->value;
             val += apply ? mod->value : -(mod->value);
 
-            data << float(val);
+			data << float(val);
             data << uint8(eff);
             ++modTypeCount;
         }
     }
 
-    if (mod->type == SPELLMOD_PCT)
+    if (mod->type != SPELLMOD_FLAT)
         data << uint8(mod->op);
 
     data.PutBits(writePos, modTypeCount, 21);
@@ -25251,7 +25292,7 @@ void Player::SetMover(Unit* target)
 
 void Player::ShowNeutralPlayerFactionSelectUI()
 {
-    WorldPacket data(SMSG_SHOW_NEURTRAL_PLAYER_FACTION_SELECT_UI);
+    WorldPacket data(SMSG_SHOW_NEUTRAL_PLAYER_FACTION_SELECT_UI);
     GetSession()->SendPacket(&data);
 }
 

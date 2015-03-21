@@ -77,11 +77,32 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
 }
 
-void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
+void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "MSG_TALENT_WIPE_CONFIRM");
-    uint64 guid;
-    recvData >> guid;
+    TC_LOG_DEBUG("network", "MSG_RESPEC_WIPE_CONFIRM");
+    ObjectGuid guid;
+	uint8 specGroup;
+	uint32 unk;
+
+	guid[5] = recvData.ReadBit();
+	guid[7] = recvData.ReadBit();
+	guid[3] = recvData.ReadBit();
+	guid[2] = recvData.ReadBit();
+	guid[1] = recvData.ReadBit();
+	guid[0] = recvData.ReadBit();
+	guid[4] = recvData.ReadBit();
+	guid[6] = recvData.ReadBit();
+
+	recvData.ReadByteSeq(guid[1]);
+	recvData.ReadByteSeq(guid[0]);
+	recvData >> specGroup;
+	recvData.ReadByteSeq(guid[7]);
+	recvData.ReadByteSeq(guid[3]);
+	recvData.ReadByteSeq(guid[2]);
+	recvData.ReadByteSeq(guid[5]);
+	recvData.ReadByteSeq(guid[6]);
+	recvData.ReadByteSeq(guid[4]);
+	recvData >> unk;
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
     if (!unit)
@@ -96,7 +117,7 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
 
     if (!_player->ResetTalents())
     {
-        WorldPacket data(MSG_TALENT_WIPE_CONFIRM, 8+4);    //you have not any talent
+        WorldPacket data(MSG_RESPEC_WIPE_CONFIRM, 8+4);    //you have not any talent
         data << uint64(0);
         data << uint32(0);
         SendPacket(&data);

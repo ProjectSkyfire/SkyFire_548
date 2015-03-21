@@ -444,7 +444,9 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
     data.WriteBit(corpseGuid[1]);
     data.WriteBit(corpseGuid[7]);
     data.WriteBit(corpseGuid[6]);
-
+	
+	data.FlushBits();
+	
     data.WriteByteSeq(corpseGuid[5]);
     data << float(z);
     data.WriteByteSeq(corpseGuid[1]);
@@ -649,24 +651,26 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
             }
             else
             {
-                poiData << uint32(questId);
-                poiData << uint32(0);
+				data.WriteBits(0, 18);
+				data.FlushBits();
 
-                data.WriteBits(0, 18);
+				poiData << uint32(questId);
+                poiData << uint32(0);
             }
         }
         else
         {
+			data.WriteBits(0, 18);
+			data.FlushBits();
+
             poiData << uint32(questId);
             poiData << uint32(0);
-
-            data.WriteBits(0, 18);
         }
     }
 
-    poiData << uint32(count);
-
     data.FlushBits();
+
+    poiData << uint32(count);
     data.append(poiData);
 
     SendPacket(&data);

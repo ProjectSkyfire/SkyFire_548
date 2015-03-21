@@ -894,6 +894,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
         data->WriteBit(0); // isAoELooting
         data->WriteBit(guid[5]);
         data->WriteBit(lootGuid[6]);
+		data->WriteBits(0, 19);
+		data->WriteBit(lootGuid[0]);
         data->WriteBit(guid[1]);
         data->WriteBit(guid[0]);
         data->WriteBit(lootGuid[5]);

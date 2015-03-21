@@ -9213,6 +9213,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     switch ((*i)->GetMiscValue())
                     {
                          // Shatter
+
                         case 911:
                             if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
@@ -13815,9 +13816,29 @@ void Unit::SendDurabilityLoss(Player* receiver, uint32 percent)
 
 void Unit::PlayOneShotAnimKit(uint32 id)
 {
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);
-    data.appendPackGUID(GetGUID());
+
+    data.WriteBit(guid[3]);  // 19
+    data.WriteBit(guid[1]);  // 17
+    data.WriteBit(guid[7]);  // 23
+    data.WriteBit(guid[6]);  // 22
+    data.WriteBit(guid[0]);  // 16
+    data.WriteBit(guid[4]);  // 20
+    data.WriteBit(guid[5]);  // 21
+    data.WriteBit(guid[2]);  // 18
+
+    data.WriteByteSeq(guid[3]);  // 19
+    data.WriteByteSeq(guid[6]);  // 22
+    data.WriteByteSeq(guid[1]);  // 17
+    data.WriteByteSeq(guid[4]);  // 20
     data << uint16(id);
+    data.WriteByteSeq(guid[2]);  // 18
+    data.WriteByteSeq(guid[7]);  // 23
+    data.WriteByteSeq(guid[5]);  // 21
+    data.WriteByteSeq(guid[0]);  // 16
+
     SendMessageToSet(&data, true);
 }
 

@@ -1130,10 +1130,34 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "Received opcode CMSG_WRAP_ITEM");
 
-    uint8 gift_bag, gift_slot, item_bag, item_slot;
+    uint8 gift_bag = 0, gift_slot = 0, item_bag = 0, item_slot = 0;
 
-    recvData >> gift_bag >> gift_slot;                     // paper
-    recvData >> item_bag >> item_slot;                     // item
+    uint8 item_count = uint8(recvData.ReadBits(2));
+
+    TC_LOG_DEBUG("network", "WRAP: receive item_count = %u", item_count);
+
+    bool hasBag[4];
+    bool hasSlot[4];
+    uint8 bag[4] = { 0 };
+    uint8 slot[4] = { 0 };
+    for (uint8 i = 0; i < item_count; i++)
+    {
+        hasBag[i] = !recvData.ReadBit();
+        hasSlot[i] = !recvData.ReadBit();
+    }
+    for (uint8 i = 0; i < item_count; i++)
+    {
+        if (hasSlot[i])
+            recvData >> slot[i];
+        if (hasBag[i])
+            recvData >> bag[i];
+    }
+
+    if (item_count != 2) // other not implemented
+        return;
+
+    gift_slot = slot[0]; gift_bag = bag[0];
+    item_slot = slot[1]; item_bag = bag[1];
 
     TC_LOG_DEBUG("network", "WRAP: receive gift_bag = %u, gift_slot = %u, item_bag = %u, item_slot = %u", gift_bag, gift_slot, item_bag, item_slot);
 

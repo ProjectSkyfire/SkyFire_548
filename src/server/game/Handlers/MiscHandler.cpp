@@ -1173,7 +1173,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
         return;
 
     if (decompressedSize == 0)                               // erase
-    {
+    {	
         SetAccountData(AccountDataType(type), 0, "");
 
         WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4+4);

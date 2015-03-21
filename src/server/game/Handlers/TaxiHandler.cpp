@@ -86,7 +86,7 @@ void WorldSession::SendTaxiStatus(uint64 guid)
     data.WriteBits(!GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc), 2);
     data.WriteBit(Guid[3]);
     data.WriteBit(Guid[0]);
-
+	data.FlushBits();
     data.WriteByteSeq(Guid[0]);
     data.WriteByteSeq(Guid[5]);
     data.WriteByteSeq(Guid[2]);
@@ -170,6 +170,7 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     data.WriteBit(Guid[6]);
     data.WriteBit(Guid[5]);
     data.WriteBits(TaxiMaskSize, 24);
+
     data.FlushBits();
 
     data.WriteByteSeq(Guid[0]);
@@ -262,10 +263,13 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_ACTIVATE_TAXI_EXPRESS");
 
     ObjectGuid Guid;
+	uint32 node_count;
 
     Guid[6] = recvData.ReadBit();
     Guid[7] = recvData.ReadBit();
+
     uint32 node_count = recvData.ReadBits(22);
+
     Guid[2] = recvData.ReadBit();
     Guid[0] = recvData.ReadBit();
     Guid[4] = recvData.ReadBit();
@@ -421,9 +425,32 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-    WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 1 + 1 + 8);
-    data.WriteBits(reply, 4);
+    ObjectGuid guid(_player->GetGUID());
+
+    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 1 + 1 + 8);
+
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(!reply);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+
+    data.FlushBits();
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[0]);
+
     SendPacket(&data);
 
-    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_ACTIVATE_TAXI_REPLY");
+    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_ACTIVATETAXIREPLY");
 }

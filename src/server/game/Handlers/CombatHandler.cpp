@@ -115,9 +115,50 @@ void WorldSession::HandleSetSheathedOpcode(WorldPacket& recvData)
 
 void WorldSession::SendAttackStop(Unit const* enemy)
 {
-    WorldPacket data(SMSG_ATTACKSTOP, (8+8+4));             // we guess size
-    data.append(GetPlayer()->GetPackGUID());
-    data.append(enemy ? enemy->GetPackGUID() : 0);          // must be packed guid
-    data << uint32(0);                                      // unk, can be 1 also
-    SendPacket(&data);
+    if (!GetPlayer())
+        return;
+
+    ObjectGuid attackerGuid = GetPlayer()->GetGUID();
+    ObjectGuid victimGuid = enemy ? enemy->GetGUID() : NULL;
+
+    WorldPacket data(SMSG_ATTACKSTOP, 8 + 8);
+
+    data.WriteBit(victimGuid[5]);
+    data.WriteBit(victimGuid[6]);
+    data.WriteBit(attackerGuid[3]);
+    data.WriteBit(attackerGuid[6]);
+    data.WriteBit(attackerGuid[7]);
+    data.WriteBit(attackerGuid[2]);
+    data.WriteBit(attackerGuid[5]);
+    data.WriteBit(victimGuid[4]);
+    data.WriteBit(1);
+    data.WriteBit(victimGuid[3]);
+    data.WriteBit(victimGuid[0]);
+    data.WriteBit(victimGuid[2]);
+    data.WriteBit(victimGuid[7]);
+    data.WriteBit(attackerGuid[4]);
+    data.WriteBit(attackerGuid[1]);
+    data.WriteBit(attackerGuid[0]);
+    data.WriteBit(victimGuid[1]);
+
+    data.FlushBits();
+
+    data.WriteByteSeq(victimGuid[0]);
+    data.WriteByteSeq(victimGuid[3]);
+    data.WriteByteSeq(victimGuid[5]);
+    data.WriteByteSeq(victimGuid[2]);
+    data.WriteByteSeq(attackerGuid[0]);
+    data.WriteByteSeq(attackerGuid[6]);
+    data.WriteByteSeq(attackerGuid[3]);
+    data.WriteByteSeq(victimGuid[4]);
+    data.WriteByteSeq(attackerGuid[1]);
+    data.WriteByteSeq(attackerGuid[4]);
+    data.WriteByteSeq(victimGuid[6]);
+    data.WriteByteSeq(attackerGuid[5]);
+    data.WriteByteSeq(attackerGuid[7]);
+    data.WriteByteSeq(attackerGuid[2]);
+    data.WriteByteSeq(victimGuid[1]);
+    data.WriteByteSeq(victimGuid[7]);
+
+    GetPlayer()->SendMessageToSet(&data, true);
 }
