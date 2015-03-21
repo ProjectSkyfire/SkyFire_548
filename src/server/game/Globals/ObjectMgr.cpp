@@ -8116,27 +8116,47 @@ void ObjectMgr::LoadGossipMenuItems()
         gMenuItem.OptionIndex           = fields[1].GetUInt16();
         gMenuItem.OptionIcon            = fields[2].GetUInt32();
         gMenuItem.OptionText            = fields[3].GetString();
-        gMenuItem.OptionType            = fields[4].GetUInt8();
-        gMenuItem.OptionNpcflag         = fields[5].GetUInt32();
-        gMenuItem.ActionMenuId          = fields[6].GetUInt32();
-        gMenuItem.ActionPoiId           = fields[7].GetUInt32();
-        gMenuItem.BoxCoded              = fields[8].GetBool();
-        gMenuItem.BoxMoney              = fields[9].GetUInt32();
-        gMenuItem.BoxText               = fields[10].GetString();
+        gMenuItem.OptionBroadcastTextId = fields[4].GetUInt32();
+        gMenuItem.OptionType            = fields[5].GetUInt8();
+        gMenuItem.OptionNpcflag         = fields[6].GetUInt32();
+        gMenuItem.ActionMenuId          = fields[7].GetUInt32();
+        gMenuItem.ActionPoiId           = fields[8].GetUInt32();
+        gMenuItem.BoxCoded              = fields[9].GetBool();
+        gMenuItem.BoxMoney              = fields[10].GetUInt32();
+        gMenuItem.BoxText               = fields[11].GetString();
+        gMenuItem.BoxBroadcastTextId    = fields[12].GetUInt32();
 
         if (gMenuItem.OptionIcon >= GOSSIP_ICON_MAX)
         {
-            TC_LOG_ERROR("sql.sql", "Table gossip_menu_option for menu %u, id %u has unknown icon id %u. Replacing with GOSSIP_ICON_CHAT", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionIcon);
+            TC_LOG_ERROR("sql.sql", "Table `gossip_menu_option` for menu %u, id %u has unknown icon id %u. Replacing with GOSSIP_ICON_CHAT", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionIcon);
             gMenuItem.OptionIcon = GOSSIP_ICON_CHAT;
         }
 
+        if (gMenuItem.OptionBroadcastTextId)
+        {
+            if (!GetBroadcastText(gMenuItem.OptionBroadcastTextId))
+            {
+                TC_LOG_ERROR("sql.sql", "Table `gossip_menu_option` for menu %u, id %u has non-existing or incompatible OptionBroadcastTextId %u, ignoring.", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionBroadcastTextId);
+                gMenuItem.OptionBroadcastTextId = 0;
+            }
+        }
+
         if (gMenuItem.OptionType >= GOSSIP_OPTION_MAX)
-            TC_LOG_ERROR("sql.sql", "Table gossip_menu_option for menu %u, id %u has unknown option id %u. Option will not be used", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionType);
+            TC_LOG_ERROR("sql.sql", "Table `gossip_menu_option` for menu %u, id %u has unknown option id %u. Option will not be used", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionType);
 
         if (gMenuItem.ActionPoiId && !GetPointOfInterest(gMenuItem.ActionPoiId))
         {
-            TC_LOG_ERROR("sql.sql", "Table gossip_menu_option for menu %u, id %u use non-existing action_poi_id %u, ignoring", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.ActionPoiId);
+            TC_LOG_ERROR("sql.sql", "Table `gossip_menu_option` for menu %u, id %u use non-existing action_poi_id %u, ignoring", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.ActionPoiId);
             gMenuItem.ActionPoiId = 0;
+        }
+
+        if (gMenuItem.BoxBroadcastTextId)
+        {
+            if (!GetBroadcastText(gMenuItem.BoxBroadcastTextId))
+            {
+                TC_LOG_ERROR("sql.sql", "Table `gossip_menu_option` for menu %u, id %u has non-existing or incompatible BoxBroadcastTextId %u, ignoring.", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.BoxBroadcastTextId);
+                gMenuItem.BoxBroadcastTextId = 0;
+            }
         }
 
         _gossipMenuItemsStore.insert(GossipMenuItemsContainer::value_type(gMenuItem.MenuId, gMenuItem));
@@ -8396,6 +8416,124 @@ bool LoadTrinityStrings(const char* table, int32 start_value, int32 end_value)
     }
 
     return sObjectMgr->LoadTrinityStrings(table, start_value, end_value);
+}
+
+void ObjectMgr::LoadBroadcastTexts()
+{
+    uint32 oldMSTime = getMSTime();
+    uint32 count = 0;
+
+    _broadcastTextStore.clear(); // for reload case
+
+    // Load missing texts from broadcast_text AND overwrite data from BroadcastText.db2 (broadcast_text is supposed to contain BroadcastText.adb data)
+    //                                               0   1         2         3           4         5         6         7            8            9            10       11           12
+    QueryResult result = WorldDatabase.Query("SELECT ID, Language, MaleText, FemaleText, EmoteID0, EmoteID1, EmoteID2, EmoteDelay0, EmoteDelay1, EmoteDelay2, SoundId, EndEmoteID, Type FROM broadcast_text");
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 broadcast texts. DB table `broadcast_text` is empty.");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        BroadcastText broadcastText;
+
+        broadcastText.Id                          = fields[0].GetUInt32();
+        broadcastText.Language                    = fields[1].GetUInt32();
+        broadcastText.MaleText[DEFAULT_LOCALE]    = fields[2].GetString();
+        broadcastText.FemaleText[DEFAULT_LOCALE]  = fields[3].GetString();
+
+        for (uint8 i = 0; i < MAX_GOSSIP_TEXT_EMOTES; i++)
+            broadcastText.Emotes[i]._Emote = uint32(fields[4 + i].GetUInt32());
+
+        for (int i = 0; i < MAX_GOSSIP_TEXT_EMOTES; i++)
+            broadcastText.Emotes[i]._Delay = uint32(fields[7 + i].GetUInt16());
+
+        broadcastText.SoundId                     = fields[10].GetUInt32();
+        broadcastText.EndEmoteId                  = fields[11].GetUInt32();
+        broadcastText.Type                        = fields[12].GetUInt32();
+
+        if (broadcastText.SoundId)
+        {
+            if (!sSoundEntriesStore.LookupEntry(broadcastText.SoundId))
+            {
+                TC_LOG_INFO("sql.sql", "BroadcastText (Id: %u) in table `broadcast_text` has SoundId %u but sound does not exist. Skipped.", broadcastText.Id, broadcastText.SoundId);
+                // don't load bct of higher expansions
+                continue;
+            }
+        }
+
+        if (!GetLanguageDescByID(broadcastText.Language))
+        {
+            TC_LOG_INFO("sql.sql", "BroadcastText (Id: %u) in table `broadcast_text` using Language %u but Language does not exist. Skipped.", broadcastText.Id, broadcastText.Language);
+            // don't load bct of higher expansions
+            continue;
+        }
+
+
+        for (uint8 i = 0; i < MAX_GOSSIP_TEXT_EMOTES; i++)
+        {
+            if (!sEmotesStore.LookupEntry(broadcastText.Emotes[i]._Emote))
+            {
+                TC_LOG_INFO("sql.sql", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId%u %u but emote does not exist. Skipped.", broadcastText.Id, i, broadcastText.Emotes[i]._Emote);
+                // don't load bct of higher expansions
+                continue;
+            }
+        }
+
+        _broadcastTextStore[broadcastText.Id] = broadcastText;
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u broadcast texts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadBroadcastTextLocales()
+{
+    uint32 oldMSTime = getMSTime();
+
+    //                                               0   1              2              3              4              5              6              7              8              9              10              11
+    QueryResult result = WorldDatabase.Query("SELECT Id, MaleText_loc1, MaleText_loc2, MaleText_loc3, MaleText_loc4, MaleText_loc5, MaleText_loc6, MaleText_loc7, MaleText_loc8, MaleText_loc9, MaleText_loc10, MaleText_loc11,"
+    //                                        12               13               14               15               16               17               18               19               20               21                22
+                                             "FemaleText_loc1, FemaleText_loc2, FemaleText_loc3, FemaleText_loc4, FemaleText_loc5, FemaleText_loc6, FemaleText_loc7, FemaleText_loc8, FemaleText_loc9, FemaleText_loc10, FemaleText_loc11 FROM locales_broadcast_text");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 broadcast text locales. DB table `locales_broadcast_text` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 id = fields[0].GetUInt32();
+        BroadcastTextContainer::iterator bct = _broadcastTextStore.find(id);
+        if (bct == _broadcastTextStore.end())
+        {
+            TC_LOG_INFO("sql.sql", "BroadcastText (Id: %u) in table `locales_broadcast_text` does not exist or is incompatible. Skipped!", id);
+            // don't load bct of higher expansions
+            continue;
+        }
+
+        for (uint8 i = TOTAL_LOCALES - 1; i > 0; --i)
+        {
+            LocaleConstant locale = LocaleConstant(i);
+            AddLocaleString(fields[1 + (i - 1)].GetString(), locale, bct->second.MaleText);
+            AddLocaleString(fields[12 + (i - 1)].GetString(), locale, bct->second.FemaleText);
+        }
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u broadcast text locales in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 CreatureBaseStats const* ObjectMgr::GetCreatureBaseStats(uint8 level, uint8 unitClass)

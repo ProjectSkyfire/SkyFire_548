@@ -1160,7 +1160,7 @@ void WorldSession::ProcessQueryCallbacks()
     {
         uint64 param = _sendStabledPetCallback.GetParam();
         _sendStabledPetCallback.GetResult(result);
-        SendStablePetCallback(result, param);
+        SendPetStableListCallback(result, param);
         _sendStabledPetCallback.FreeResult();
     }
 

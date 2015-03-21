@@ -318,7 +318,7 @@ class WorldSession
         // Pet
         void SendPetNameQuery(ObjectGuid guid, uint64 petNumber);
         void SendStablePet(uint64 guid);
-        void SendStablePetCallback(PreparedQueryResult result, uint64 guid);
+        void SendPetStableListCallback(PreparedQueryResult result, uint64 guid);
         void SendStableResult(uint8 guid);
         bool CheckStableMaster(uint64 guid);
 
@@ -624,7 +624,7 @@ class WorldSession
         void HandleSpiritHealerActivateOpcode(WorldPacket& recvPacket);
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
-        void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
+        void HandleRequestStabledPets(WorldPacket& recvPacket);
         void HandleStablePet(WorldPacket& recvPacket);
         void HandleStablePetCallback(PreparedQueryResult result);
         void HandleUnstablePet(WorldPacket& recvPacket);
@@ -702,7 +702,7 @@ class WorldSession
 
         void HandleLearnTalentOpcode(WorldPacket& recvPacket);
         void HandleLearnPreviewTalents(WorldPacket& recvPacket);
-        void HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket);
+        void HandleConfirmRespecWipe(WorldPacket& recvPacket);
         void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
 
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
@@ -781,8 +781,7 @@ class WorldSession
         void HandlePetCancelAuraOpcode(WorldPacket& recvPacket);
         void HandlePetSpellAutocastOpcode(WorldPacket& recvPacket);
         void HandlePetCastSpellOpcode(WorldPacket& recvPacket);
-        void HandlePetLearnTalent(WorldPacket& recvPacket);
-        void HandleLearnPreviewTalentsPet(WorldPacket& recvPacket);
+		void HandeLearnPetSpecializationGroup(WorldPacket& recvData);
 
         void HandleSetActionBarToggles(WorldPacket& recvData);
 
@@ -954,14 +953,6 @@ class WorldSession
         void HandleReforgeItemOpcode(WorldPacket& recvData);
         void SendReforgeResult(bool success);
 
-        // BlackMarket
-        void HandleBlackMarketHelloOpcode(WorldPacket& recvData);
-        void SendBlackMarketHello(uint64 guid);
-        void HandleBlackMarketRequestItemOpcode(WorldPacket& recvData);
-        void SendBlackMarketRequestItemsResult();
-        void HandleBlackMarketBidOpcode(WorldPacket& recvData);
-        void SendBlackMarketBidResult();
-
         // Miscellaneous
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
@@ -1004,6 +995,14 @@ class WorldSession
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
 
+		// BlackMarket
+		void HandleBlackMarketOpen(WorldPacket& recvData);
+		void SendBlackMarketOpenResult(uint64 guid);
+		void HandleBlackMarketRequestItems(WorldPacket& recvData);
+		void SendBlackMarketRequestItemsResult();
+		void HandleBlackMarketBid(WorldPacket& recvData);
+		void SendBlackMarketBidOnItemResult(uint32 itemEntry);
+		
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

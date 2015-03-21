@@ -22,6 +22,7 @@
 
 #include "Common.h"
 #include "ItemPrototype.h"
+#include "NPCHandler.h"
 
 // GCC has alternative #pragma pack(N) syntax and old gcc version does not support pack(push, N), also any gcc version does not support it at some platform
 #if defined(__GNUC__)
@@ -109,19 +110,15 @@ struct ItemToBattlePetEntry
 
 struct BroadcastTextEntry
 {
-    uint32   ID;                                             // 0
-    //uint32   Unk0;                                         // 1
-    LocalizedString* text_0;                                 // 2
-    LocalizedString* text_1;                                 // 3
-    //uint32   Unk1;                                         // 4
-    //uint32   Unk2;                                         // 5
-    //uint32   Unk3;                                         // 6
-    //uint32   Unk4;                                         // 7
-    //uint32   Unk5;                                         // 8
-    //uint32   Unk6;                                         // 9
-    uint32   SoundID;                                        // 10
-    //uint32   Unk7;                                         // 11
-    //uint32   Unk8;                                         // 12
+    uint32   Id;                                             // 0
+    uint32   Language;                                       // 1
+    LocalizedString* MaleText;                               // 2
+    LocalizedString* FemaleText;                             // 3
+    uint32   Emote[MAX_GOSSIP_TEXT_EMOTES];                  // 4-6
+    uint32   EmoteDelay[MAX_GOSSIP_TEXT_EMOTES];             // 7-9
+    uint32   SoundId;                                        // 10
+    uint32   EndEmoteId;                                     // 11
+    uint32   Type;                                           // 12
 };
 
 struct ItemEntry
@@ -254,6 +251,14 @@ struct QuestPackageItemEntry
     uint32      ItemID;                                     // 2
     uint32      Unk1;                                       // 3
     uint32      Unk2;                                       // 4
+};
+
+struct RulesetItemUpgradeEntry
+{
+    uint32      Id;
+    uint32      ItemUpgradeLevel;
+    uint32      ItemUpgradeId;
+    uint32      ItemEntry;
 };
 
 // SceneScript.db2

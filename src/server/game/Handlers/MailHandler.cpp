@@ -921,7 +921,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
 /// @todo Fix me! ... this void has probably bad condition, but good data are sent
 void WorldSession::HandleQueryNextMailTime(WorldPacket& /*recvData*/)
 {
-    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
+    WorldPacket data(SMSG_MAIL_QUERY_NEXT_TIME_RESULT, 8);
 
     if (!_player->m_mailsLoaded)
         _player->_LoadMail();
@@ -965,8 +965,10 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /*recvData*/)
     }
     else
     {
+		data.WriteBits(0, 20);
+		data.FlushBits();
+		
         data << float(-DAY);
-        data << uint32(0);
     }
 
     SendPacket(&data);

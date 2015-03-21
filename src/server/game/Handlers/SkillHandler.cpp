@@ -77,37 +77,36 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
 }
 
-void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvData)
+void WorldSession::HandleConfirmRespecWipe(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "MSG_RESPEC_WIPE_CONFIRM");
-    ObjectGuid guid;
-	uint8 specGroup;
-	uint32 unk;
+    TC_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
 
-	guid[5] = recvData.ReadBit();
-	guid[7] = recvData.ReadBit();
-	guid[3] = recvData.ReadBit();
-	guid[2] = recvData.ReadBit();
-	guid[1] = recvData.ReadBit();
-	guid[0] = recvData.ReadBit();
-	guid[4] = recvData.ReadBit();
-	guid[6] = recvData.ReadBit();
+    ObjectGuid respecMasterGUID;
+    RespecType respecType;
 
-	recvData.ReadByteSeq(guid[1]);
-	recvData.ReadByteSeq(guid[0]);
-	recvData >> specGroup;
-	recvData.ReadByteSeq(guid[7]);
-	recvData.ReadByteSeq(guid[3]);
-	recvData.ReadByteSeq(guid[2]);
-	recvData.ReadByteSeq(guid[5]);
-	recvData.ReadByteSeq(guid[6]);
-	recvData.ReadByteSeq(guid[4]);
-	recvData >> unk;
+    respecType = (RespecType)recvData.read<uint8>();
+    respecMasterGUID[7] = recvData.ReadBit();  // 23
+    respecMasterGUID[2] = recvData.ReadBit();  // 18
+    respecMasterGUID[6] = recvData.ReadBit();  // 22
+    respecMasterGUID[1] = recvData.ReadBit();  // 17
+    respecMasterGUID[4] = recvData.ReadBit();  // 20
+    respecMasterGUID[0] = recvData.ReadBit();  // 16
+    respecMasterGUID[3] = recvData.ReadBit();  // 19
+    respecMasterGUID[5] = recvData.ReadBit();  // 21
 
-    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
+    recvData.ReadByteSeq(respecMasterGUID[2]);  // 18
+    recvData.ReadByteSeq(respecMasterGUID[4]);  // 20
+    recvData.ReadByteSeq(respecMasterGUID[1]);  // 17
+    recvData.ReadByteSeq(respecMasterGUID[3]);  // 19
+    recvData.ReadByteSeq(respecMasterGUID[0]);  // 16
+    recvData.ReadByteSeq(respecMasterGUID[5]);  // 21
+    recvData.ReadByteSeq(respecMasterGUID[7]);  // 23
+    recvData.ReadByteSeq(respecMasterGUID[6]);  // 22
+
+    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(respecMasterGUID, UNIT_NPC_FLAG_TRAINER);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleTalentWipeConfirmOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));
+        TC_LOG_DEBUG("network", "WORLD: HandleTalentWipeConfirmOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(respecMasterGUID)));
         return;
     }
 
@@ -115,13 +114,21 @@ void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    if (!_player->ResetTalents())
+    if (respecType == RESPEC_TYPE_TALENT)
     {
-        WorldPacket data(MSG_RESPEC_WIPE_CONFIRM, 8+4);    //you have not any talent
-        data << uint64(0);
-        data << uint32(0);
-        SendPacket(&data);
-        return;
+        if (!_player->ResetTalents(false, true))
+        {
+            WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 8+4);    //you have not any talent
+            data << uint8(0);
+            data << uint8(0);
+            data << uint32(0);
+            SendPacket(&data);
+            return;
+        }
+    }
+    else
+    {
+        _player->ResetTalents(false, false, true);
     }
 
     _player->SendTalentsInfoData();

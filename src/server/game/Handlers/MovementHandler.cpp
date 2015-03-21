@@ -553,23 +553,23 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvData*/)
 
     WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 1 + 8);
 
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);  // 21
+    data.WriteBit(guid[7]);  // 23
+    data.WriteBit(guid[0]);  // 16
+    data.WriteBit(guid[3]);  // 19
+    data.WriteBit(guid[2]);  // 18
+    data.WriteBit(guid[1]);  // 17
+    data.WriteBit(guid[4]);  // 20
+    data.WriteBit(guid[6]);  // 22
 
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[7]);  // 23
+    data.WriteByteSeq(guid[2]);  // 18
+    data.WriteByteSeq(guid[0]);  // 16
+    data.WriteByteSeq(guid[4]);  // 20
+    data.WriteByteSeq(guid[5]);  // 21
+    data.WriteByteSeq(guid[6]);  // 22
+    data.WriteByteSeq(guid[1]);  // 17
+    data.WriteByteSeq(guid[3]);  // 19
 
     GetPlayer()->SendMessageToSet(&data, false);
 }
@@ -610,15 +610,8 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_MOVE_WATER_WALK_ACK");
 
-    uint64 guid;                                            // guid - unused
-    recvData.readPackGUID(guid);
-
-    recvData.read_skip<uint32>();                          // unk
-
     MovementInfo movementInfo;
     GetPlayer()->ReadMovementInfo(recvData, &movementInfo);
-
-    recvData.read_skip<uint32>();                          // unk2
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)
@@ -626,28 +619,29 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)
     if (!_player->IsAlive() || _player->IsInCombat())
         return;
 
-    ObjectGuid SummonerGUID;
+    ObjectGuid summonerGuid;
+    bool agree;
 
-    SummonerGUID[1] = recvData.ReadBit();
-    SummonerGUID[3] = recvData.ReadBit();
-    SummonerGUID[5] = recvData.ReadBit();
-    SummonerGUID[2] = recvData.ReadBit();
-    bool Accept = recvData.ReadBit();
-    SummonerGUID[7] = recvData.ReadBit();
-    SummonerGUID[0] = recvData.ReadBit();
-    SummonerGUID[4] = recvData.ReadBit();
-    SummonerGUID[6] = recvData.ReadBit();
+    summonerGuid[1] = recvData.ReadBit();  // 17
+    summonerGuid[3] = recvData.ReadBit();  // 19
+    summonerGuid[5] = recvData.ReadBit();  // 21
+    summonerGuid[2] = recvData.ReadBit();  // 18
+    agree = recvData.ReadBit();            // 24
+    summonerGuid[7] = recvData.ReadBit();  // 23
+    summonerGuid[0] = recvData.ReadBit();  // 16
+    summonerGuid[4] = recvData.ReadBit();  // 20
+    summonerGuid[6] = recvData.ReadBit();  // 22
 
-    recvData.ReadByteSeq(SummonerGUID[0]);
-    recvData.ReadByteSeq(SummonerGUID[1]);
-    recvData.ReadByteSeq(SummonerGUID[6]);
-    recvData.ReadByteSeq(SummonerGUID[3]);
-    recvData.ReadByteSeq(SummonerGUID[5]);
-    recvData.ReadByteSeq(SummonerGUID[4]);
-    recvData.ReadByteSeq(SummonerGUID[2]);
-    recvData.ReadByteSeq(SummonerGUID[7]);
+    recvData.ReadByteSeq(summonerGuid[0]);  // 16
+    recvData.ReadByteSeq(summonerGuid[1]);  // 17
+    recvData.ReadByteSeq(summonerGuid[6]);  // 22
+    recvData.ReadByteSeq(summonerGuid[3]);  // 19
+    recvData.ReadByteSeq(summonerGuid[5]);  // 21
+    recvData.ReadByteSeq(summonerGuid[4]);  // 20
+    recvData.ReadByteSeq(summonerGuid[2]);  // 18
+    recvData.ReadByteSeq(summonerGuid[7]);  // 23
 
-    _player->SummonIfPossible(Accept);
+    _player->SummonIfPossible(agree);
 }
 
 void WorldSession::HandleSetCollisionHeightAck(WorldPacket& recvPacket)

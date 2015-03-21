@@ -157,6 +157,12 @@ enum TalentTree // talent tabs
     TALENT_TREE_DRUID_RESTORATION    = 748
 };
 
+enum RespecType
+{
+    RESPEC_TYPE_TALENT               = 0,
+    RESPEC_TYPE_SPECIALIZATION       = 1
+	};
+
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -1685,8 +1691,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_mailsUpdated;
 
         void SetBindPoint(uint64 guid);
-        void SendTalentWipeConfirm(uint64 guid);
-        void ResetPetTalents();
+		void SendTalentWipeConfirm(uint64 guid, RespecType type);
         void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll();
         void Regenerate(Powers power);
@@ -1801,10 +1806,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetNextResetTalentsCost() const;
         void InitTalentForLevel();
         void BuildPlayerTalentsInfoData(WorldPacket* data);
-        void BuildPetTalentsInfoData(WorldPacket* data);
         void SendTalentsInfoData();
         bool LearnTalent(uint16 talentId);
-        void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
         uint32 CalculateTalentsPoints() const;

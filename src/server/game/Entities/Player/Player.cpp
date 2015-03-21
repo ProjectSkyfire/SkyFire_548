@@ -10223,32 +10223,37 @@ void Player::SetBindPoint(uint64 guid)
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendTalentWipeConfirm(uint64 guid)
+void Player::SendTalentWipeConfirm(uint64 guid, RespecType type)
 {
     // Needs redone in 5.x 
-    WorldPacket data(MSG_RESPEC_WIPE_CONFIRM, (8+4));
-    data << uint64(guid);
+    WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, (8+1+4));
+
+    ObjectGuid respecMasterGUID = guid;
+
+    data.WriteBit(respecMasterGUID[5]);  // 21
+    data.WriteBit(respecMasterGUID[7]);  // 23
+    data.WriteBit(respecMasterGUID[3]);  // 19
+    data.WriteBit(respecMasterGUID[2]);  // 18
+    data.WriteBit(respecMasterGUID[1]);  // 17
+    data.WriteBit(respecMasterGUID[0]);  // 16
+    data.WriteBit(respecMasterGUID[4]);  // 20
+    data.WriteBit(respecMasterGUID[6]);  // 22
+
+    data.FlushBits();
+
+    data.WriteByteSeq(respecMasterGUID[1]);  // 17
+    data.WriteByteSeq(respecMasterGUID[0]);  // 16
+    data << uint8(type);                     // RespecType
+    data.WriteByteSeq(respecMasterGUID[7]);  // 23
+    data.WriteByteSeq(respecMasterGUID[3]);  // 19
+    data.WriteByteSeq(respecMasterGUID[2]);  // 18
+    data.WriteByteSeq(respecMasterGUID[5]);  // 21
+    data.WriteByteSeq(respecMasterGUID[6]);  // 22
+    data.WriteByteSeq(respecMasterGUID[4]);  // 20
     uint32 cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
     data << cost;
+
     GetSession()->SendPacket(&data);
-}
-
-void Player::ResetPetTalents()
-{
-    // This needs another gossip option + NPC text as a confirmation.
-    // The confirmation gossip listid has the text: "Yes, please do."
-    Pet* pet = GetPet();
-
-    if (!pet || pet->getPetType() != HUNTER_PET || pet->m_usedTalentCount == 0)
-        return;
-
-    CharmInfo* charmInfo = pet->GetCharmInfo();
-    if (!charmInfo)
-    {
-        TC_LOG_ERROR("entities.player", "Object (GUID: %u TypeId: %u) is considered pet-like but doesn't have a charminfo!", pet->GetGUIDLow(), pet->GetTypeId());
-        return;
-    }
-    pet->resetTalents();
 }
 
 /*********************************************************/
@@ -14989,19 +14994,37 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
             }
         }
 
-        if (canTalk)
+if (canTalk)
         {
-            std::string strOptionText = itr->second.OptionText;
-            std::string strBoxText = itr->second.BoxText;
+            std::string strOptionText, strBoxText;
+            BroadcastText const* optionBroadcastText = sObjectMgr->GetBroadcastText(itr->second.OptionBroadcastTextId);
+            BroadcastText const* boxBroadcastText = sObjectMgr->GetBroadcastText(itr->second.BoxBroadcastTextId);
+            LocaleConstant locale = GetSession()->GetSessionDbLocaleIndex();
 
-            int32 locale = GetSession()->GetSessionDbLocaleIndex();
-            if (locale >= 0)
+            if (optionBroadcastText)
+                strOptionText = optionBroadcastText->GetText(locale, getGender());
+            else
+                strOptionText = itr->second.OptionText;
+
+            if (boxBroadcastText)
+                strBoxText = boxBroadcastText->GetText(locale, getGender());
+            else
+                strBoxText = itr->second.BoxText;
+
+            if (locale != DEFAULT_LOCALE)
             {
-                uint32 idxEntry = MAKE_PAIR32(menuId, itr->second.OptionIndex);
-                if (GossipMenuItemsLocale const* no = sObjectMgr->GetGossipMenuItemsLocale(idxEntry))
+                if (!optionBroadcastText)
                 {
-                    ObjectMgr::GetLocaleString(no->OptionText, locale, strOptionText);
-                    ObjectMgr::GetLocaleString(no->BoxText, locale, strBoxText);
+                    /// Find localizations from database.
+                    if (GossipMenuItemsLocale const* gossipMenuLocale = sObjectMgr->GetGossipMenuItemsLocale(MAKE_PAIR32(menuId, menuId)))
+                        ObjectMgr::GetLocaleString(gossipMenuLocale->OptionText, locale, strOptionText);
+                }
+
+                if (!boxBroadcastText)
+                {
+                    /// Find localizations from database.
+                    if (GossipMenuItemsLocale const* gossipMenuLocale = sObjectMgr->GetGossipMenuItemsLocale(MAKE_PAIR32(menuId, menuId)))
+                        ObjectMgr::GetLocaleString(gossipMenuLocale->BoxText, locale, strBoxText);
                 }
             }
 
@@ -20892,27 +20915,30 @@ void Player::SendAttackSwingBadFacingAttack()
 
 void Player::SendAutoRepeatCancel(Unit* target)
 {
-    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 8);
-    ObjectGuid Guid = target->GetGUID();
+    ObjectGuid guid = target->GetGUID();                    // may be it's target guid
 
-    data.WriteBit(Guid[1]);
-    data.WriteBit(Guid[3]);
-    data.WriteBit(Guid[0]);
-    data.WriteBit(Guid[4]);
-    data.WriteBit(Guid[6]);
-    data.WriteBit(Guid[7]);
-    data.WriteBit(Guid[5]);
-    data.WriteBit(Guid[2]);
+    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, target->GetPackGUID().size());
+    
+    data.WriteBit(guid[1]);  // 17
+    data.WriteBit(guid[3]);  // 19
+    data.WriteBit(guid[0]);  // 16
+    data.WriteBit(guid[4]);  // 20
+    data.WriteBit(guid[6]);  // 22
+    data.WriteBit(guid[7]);  // 23
+    data.WriteBit(guid[5]);  // 21
+    data.WriteBit(guid[2]);  // 18
 
-    data.WriteByteSeq(Guid[7]);
-    data.WriteByteSeq(Guid[6]);
-    data.WriteByteSeq(Guid[2]);
-    data.WriteByteSeq(Guid[5]);
-    data.WriteByteSeq(Guid[0]);
-    data.WriteByteSeq(Guid[4]);
-    data.WriteByteSeq(Guid[1]);
-    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(guid[7]);  // 23
+    data.WriteByteSeq(guid[6]);  // 22
+    data.WriteByteSeq(guid[2]);  // 18
+    data.WriteByteSeq(guid[5]);  // 21
+    data.WriteByteSeq(guid[0]);  // 16
+    data.WriteByteSeq(guid[4]);  // 20
+    data.WriteByteSeq(guid[1]);  // 17
+    data.WriteByteSeq(guid[3]);  // 19
+
     GetSession()->SendPacket(&data);
+}
 }
 
 void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
@@ -21377,6 +21403,7 @@ void Player::PetSpellInitialize()
     }
 
     data.PutBits(cooldownCountPos, cooldownCount, 20);
+
     data.WriteByteSeq(guid[2]);
 
     // Spell data loop
@@ -21390,21 +21417,31 @@ void Player::PetSpellInitialize()
             data << uint32(MAKE_UNIT_ACTION_BUTTON(itr->first, itr->second.active));
             ++spellCount;
         }
+
         data.PutBits(spellCountPos, spellCount, 22);
     }
 
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[3]);
-    data << uint16(pet->GetCreatureTemplate()->family); // Creature Family
-    data << uint16(0);                                  // Creature Specialization need implementation
+
+    data << uint16(pet->GetCreatureTemplate()->family);                     // CreatureFamily
+
+    /*for (uint32 i = 0; i < spellHistoryCount; i++)
+    {
+        data << uint32(recoveryTime);
+        data << uint8(consumedCharges);
+        data << uint32(categoryID);
+    }*/
+
+    data << uint16(pet->GetSpecialization());                               // Specialization
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[6]);
-    data << uint32(pet->GetDuration());
+    data << uint32(pet->GetDuration());                                     // guessed
     data.WriteByteSeq(guid[5]);
-    data << uint32(0);                                  // flags ??
-
+    data << uint32(0);                                                      // PetModeAndOrders (flags)
+    
     GetSession()->SendPacket(&data);
 }
 
@@ -23879,9 +23916,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // Homebind
     WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
-    data << m_homebindX;
-    data << m_homebindZ;
-    data << m_homebindY;
+	data << m_homebindX << m_homebindZ << m_homebindY;
     data << (uint32) m_homebindAreaId;
     data << (uint32) m_homebindMapId;
 
@@ -26542,99 +26577,6 @@ bool Player::LearnTalent(uint16 talentId)
     return true;
 }
 
-void Player::LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank)
-{
-    Pet* pet = GetPet();
-
-    if (!pet)
-        return;
-
-    if (petGuid != pet->GetGUID())
-        return;
-
-    uint32 CurTalentPoints = pet->GetFreeTalentPoints();
-
-    if (CurTalentPoints == 0)
-        return;
-
-    if (talentRank >= MAX_PET_TALENT_RANK)
-        return;
-
-    TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-
-    if (!talentInfo)
-        return;
-
-    //TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
-
-    //if (!talentTabInfo)
-        return;
-
-    CreatureTemplate const* ci = pet->GetCreatureTemplate();
-
-    if (!ci)
-        return;
-
-    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
-
-    if (!pet_family)
-        return;
-
-    if (pet_family->petTalentType < 0)                       // not hunter pet
-        return;
-
-    // prevent learn talent for different family (cheating)
-    /*if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
-        return;*/
-
-    // find current max talent rank (0~5)
-    uint8 curtalent_maxrank = 0; // 0 = not learned any rank
-    /*for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
-    {
-        if (talentInfo->RankID[rank] && pet->HasSpell(talentInfo->RankID[rank]))
-        {
-            curtalent_maxrank = (rank + 1);
-            break;
-        }
-    }*/
-
-    // we already have same or higher talent rank learned
-    if (curtalent_maxrank >= (talentRank + 1))
-        return;
-
-    // check if we have enough talent points
-    if (CurTalentPoints < (talentRank - curtalent_maxrank + 1))
-        return;
-
-    // Check if it requires another talent
-
-    // Find out how many points we have in this field
-    /*
-    // not have required min points spent in talent tree
-    if (spentPoints < (talentInfo->Row * MAX_PET_TALENT_RANK))
-        return;
-
-    // spell not set in talent.dbc
-    uint32 spellid = talentInfo->RankID[talentRank];
-    if (spellid == 0)
-    {
-        TC_LOG_ERROR("entities.player", "Talent.dbc have for talent: %u Rank: %u spell id = 0", talentId, talentRank);
-        return;
-    }
-
-    // already known
-    if (pet->HasSpell(spellid))
-        return;
-
-    // learn! (other talent ranks will unlearned at learning)
-    pet->learnSpell(spellid);
-    TC_LOG_INFO("entities.player", "PetTalentID: %u Rank: %u Spell: %u\n", talentId, talentRank, spellid);
-
-    // update free talent points
-    pet->SetFreeTalentPoints(CurTalentPoints - (talentRank - curtalent_maxrank + 1));
-    */
-}
-
 void Player::AddKnownCurrency(uint32 itemId)
 {
     if (CurrencyTypesEntry const* ctEntry = sCurrencyTypesStore.LookupEntry(itemId))
@@ -26754,85 +26696,6 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
     }
 
     delete [] wpos;
-}
-
-void Player::BuildPetTalentsInfoData(WorldPacket* data)
-{
-    uint32 unspentTalentPoints = 0;
-    size_t pointsPos = data->wpos();
-    *data << uint32(unspentTalentPoints);                   // [PH], unspentTalentPoints
-
-    uint8 talentIdCount = 0;
-    size_t countPos = data->wpos();
-    *data << uint8(talentIdCount);                          // [PH], talentIdCount
-
-    Pet* pet = GetPet();
-    if (!pet)
-        return;
-
-    unspentTalentPoints = pet->GetFreeTalentPoints();
-
-    data->put<uint32>(pointsPos, unspentTalentPoints);      // put real points
-
-    CreatureTemplate const* ci = pet->GetCreatureTemplate();
-    if (!ci)
-        return;
-
-    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
-    if (!pet_family || pet_family->petTalentType < 0)
-        return;
-        /*
-    for (uint32 talentTabId = 1; talentTabId < sTalentTabStore.GetNumRows(); ++talentTabId)
-    {
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentTabId);
-        if (!talentTabInfo)
-            continue;
-
-        if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
-            continue;
-
-        for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
-        {
-            TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-            if (!talentInfo)
-                continue;
-
-            // skip another tab talents
-            if (talentInfo->TalentTab != talentTabId)
-                continue;
-
-            // find max talent rank (0~4)
-            int8 curtalent_maxrank = -1;
-            for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
-            {
-                if (talentInfo->RankID[rank] && pet->HasSpell(talentInfo->RankID[rank]))
-                {
-                    curtalent_maxrank = rank;
-                    break;
-                }
-            }
-
-            // not learned talent
-            if (curtalent_maxrank < 0)
-                continue;
-
-            *data << uint32(talentInfo->TalentID);          // Talent.dbc
-            *data << uint8(curtalent_maxrank);              // talentMaxRank (0-4)
-
-            ++talentIdCount;
-        }
-
-        data->put<uint8>(countPos, talentIdCount);          // put real count
-
-        break;
-    }*/
-}
-
-void Player::SendTalentsInfoData()
-{
-    WorldPacket data(SMSG_TALENTS_INFO, 50);
-    BuildPlayerTalentsInfoData(&data);
-    GetSession()->SendPacket(&data);
 }
 
 void Player::BuildEnchantmentsInfoData(WorldPacket* data)
@@ -28058,7 +27921,6 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     {
         case SUMMON_PET:
             pet->InitPetCreateSpells();
-            pet->InitTalentForLevel();
             pet->SavePetToDB(PET_SAVE_AS_CURRENT);
             PetSpellInitialize();
             break;

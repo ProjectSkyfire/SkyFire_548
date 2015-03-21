@@ -706,7 +706,7 @@ enum NPCFlags
     UNIT_NPC_FLAG_REFORGER              = 0x08000000,       // reforging
     UNIT_NPC_FLAG_TRANSMOGRIFIER        = 0x10000000,       // transmogrification
     UNIT_NPC_FLAG_VAULTKEEPER           = 0x20000000,       // void storage
-    UNIT_NPC_FLAG_BLACKMARKET            = 0x80000000        // blackmarket auction
+    UNIT_NPC_FLAG_BLACKMARKET           = 0x80000000        // blackmarket auction
 };
 
 enum MovementFlags
@@ -1531,6 +1531,7 @@ class Unit : public WorldObject
         bool IsArmorer()      const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
         bool IsServiceProvider() const;
         bool IsSpiritService() const { return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
+		bool IsCritter()      const { return GetCreatureType() == CREATURE_TYPE_CRITTER; }
 
         bool IsInFlight()  const { return HasUnitState(UNIT_STATE_IN_FLIGHT); }
 
@@ -2058,9 +2059,9 @@ class Unit : public WorldObject
         void ClearComboPointHolders();
 
         ///----------Pet responses methods-----------------
-        void SendPetActionFeedback (uint8 msg);
-        void SendPetTalk (uint32 pettalk);
-        void SendPetAIReaction(ObjectGuid UnitGUID);
+		void SendPetActionFeedback(uint8 msg, uint32 spellId = 0);
+		void SendPetTalk(uint32 pettalk);
+        void SendPetAIReaction(uint64 guid);
         ///----------End of Pet responses methods----------
 
         void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }

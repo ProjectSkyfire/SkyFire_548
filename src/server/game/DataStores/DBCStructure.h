@@ -797,8 +797,8 @@ struct ChrSpecializationEntry
     uint32 PetTabPage;                                      // 6
     uint32 RoleMask;                                        // 7
     // uint32 iconId                                        // 8
-    // uint32 unk1                                          // 9
-    // uint32 unk2                                          // 10
+	// uint32 RaidBuffs                                     // 9
+	// uint32 Flags                                         // 10
     // char* name                                           // 11
     // char* definition                                     // 12
     // char* unkName2                                       // 13

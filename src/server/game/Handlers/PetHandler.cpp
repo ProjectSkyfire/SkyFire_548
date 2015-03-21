@@ -36,17 +36,34 @@
 
 void WorldSession::HandleDismissCritter(WorldPacket& recvData)
 {
-    uint64 guid;
-    recvData >> guid;
+    ObjectGuid guid;
 
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_DISMISS_CRITTER for GUID " UI64FMTD, guid);
+    guid[4] = recvData.ReadBit();  // 20
+    guid[6] = recvData.ReadBit();  // 22
+    guid[7] = recvData.ReadBit();  // 23
+    guid[5] = recvData.ReadBit();  // 21
+    guid[1] = recvData.ReadBit();  // 17
+    guid[0] = recvData.ReadBit();  // 16
+    guid[2] = recvData.ReadBit();  // 18
+    guid[3] = recvData.ReadBit();  // 19
 
-    Unit* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
+    recvData.ReadByteSeq(guid[2]);  // 18
+    recvData.ReadByteSeq(guid[4]);  // 20
+    recvData.ReadByteSeq(guid[5]);  // 21
+    recvData.ReadByteSeq(guid[0]);  // 16
+    recvData.ReadByteSeq(guid[1]);  // 17
+    recvData.ReadByteSeq(guid[7]);  // 23
+    recvData.ReadByteSeq(guid[3]);  // 19
+    recvData.ReadByteSeq(guid[6]);  // 22
+    
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_DISMISS_CRITTER for GUID " UI64FMTD, uint64(guid));
+
+    Unit* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, uint64(guid));
 
     if (!pet)
     {
         TC_LOG_DEBUG("network", "Vanitypet (guid: %u) does not exist - player '%s' (guid: %u / account: %u) attempted to dismiss it (possibly lagged out)",
-            uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow(), GetAccountId());
+            uint32(GUID_LOPART(uint64(guid))), GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow(), GetAccountId());
         return;
     }
 
@@ -59,70 +76,75 @@ void WorldSession::HandleDismissCritter(WorldPacket& recvData)
 
 void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 18291]
 {
-    ObjectGuid PetGUID, TargetGUID;
-    uint32 Action;
+    ObjectGuid guid1;
+    ObjectGuid guid2;
+    uint32 data;
     float x, y, z;
-    recvData >> Action;
+
+    // Data Comes Single
+    recvData >> data;
 
     // Position
-    recvData >> y >> z >> x;
+    recvData >> y;
+    recvData >> z;
+    recvData >> x;
 
-    PetGUID[1] = recvData.ReadBit();
-    PetGUID[0] = recvData.ReadBit();
-    PetGUID[6] = recvData.ReadBit();
-    PetGUID[7] = recvData.ReadBit();
-    PetGUID[5] = recvData.ReadBit();
-    TargetGUID[7] = recvData.ReadBit();
-    PetGUID[2] = recvData.ReadBit();
-    PetGUID[3] = recvData.ReadBit();
-    TargetGUID[6] = recvData.ReadBit();
-    TargetGUID[3] = recvData.ReadBit();
-    TargetGUID[0] = recvData.ReadBit();
-    TargetGUID[2] = recvData.ReadBit();
-    TargetGUID[5] = recvData.ReadBit();
-    PetGUID[4] = recvData.ReadBit();
-    TargetGUID[4] = recvData.ReadBit();
-    TargetGUID[1] = recvData.ReadBit();
+    guid1[1] = recvData.ReadBit();
+    guid1[0] = recvData.ReadBit();
+    guid1[6] = recvData.ReadBit();
+    guid1[7] = recvData.ReadBit();
+    guid1[5] = recvData.ReadBit();
+    guid2[7] = recvData.ReadBit();
+    guid1[2] = recvData.ReadBit();
+    guid1[3] = recvData.ReadBit();
+    guid2[6] = recvData.ReadBit();
+    guid2[3] = recvData.ReadBit();
+    guid2[0] = recvData.ReadBit();
+    guid2[2] = recvData.ReadBit();
+    guid2[5] = recvData.ReadBit();
+    guid1[4] = recvData.ReadBit();
+    guid2[4] = recvData.ReadBit();
+    guid2[1] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(PetGUID[7]);
-    recvData.ReadByteSeq(PetGUID[6]);
-    recvData.ReadByteSeq(PetGUID[1]);
-    recvData.ReadByteSeq(PetGUID[2]);
-    recvData.ReadByteSeq(PetGUID[5]);
-    recvData.ReadByteSeq(PetGUID[4]);
-    recvData.ReadByteSeq(TargetGUID[5]);
-    recvData.ReadByteSeq(PetGUID[3]);
-    recvData.ReadByteSeq(TargetGUID[0]);
-    recvData.ReadByteSeq(TargetGUID[1]);
-    recvData.ReadByteSeq(TargetGUID[7]);
-    recvData.ReadByteSeq(TargetGUID[4]);
-    recvData.ReadByteSeq(TargetGUID[6]);
-    recvData.ReadByteSeq(TargetGUID[2]);
-    recvData.ReadByteSeq(TargetGUID[3]);
-    recvData.ReadByteSeq(PetGUID[0]);
+    recvData.ReadByteSeq(guid1[7]);
+    recvData.ReadByteSeq(guid1[6]);
+    recvData.ReadByteSeq(guid1[1]);
+    recvData.ReadByteSeq(guid1[2]);
+    recvData.ReadByteSeq(guid1[5]);
+    recvData.ReadByteSeq(guid1[4]);
+    recvData.ReadByteSeq(guid2[5]);
+    recvData.ReadByteSeq(guid1[3]);
+    recvData.ReadByteSeq(guid2[0]);
+    recvData.ReadByteSeq(guid2[1]);
+    recvData.ReadByteSeq(guid2[7]);
+    recvData.ReadByteSeq(guid2[4]);
+    recvData.ReadByteSeq(guid2[6]);
+    recvData.ReadByteSeq(guid2[2]);
+    recvData.ReadByteSeq(guid2[3]);
+    recvData.ReadByteSeq(guid1[0]);
 
-    uint32 SpellID = UNIT_ACTION_BUTTON_ACTION(Action);
-    uint8 Flag = UNIT_ACTION_BUTTON_TYPE(Action);             //delete = 0x07 CastSpell = C1
+    uint32 spellid = UNIT_ACTION_BUTTON_ACTION(data);
+    uint8 flag = UNIT_ACTION_BUTTON_TYPE(data);             //delete = 0x07 CastSpell = C1
 
     // used also for charmed creature
-    Unit* pet = ObjectAccessor::GetUnit(*_player, PetGUID);
-    TC_LOG_DEBUG("network", "HandlePetAction: Pet (GUID: %u) - Flag: %u, SpellID: %u, Target: %u.", uint32(GUID_LOPART(PetGUID)), uint32(Flag), SpellID, uint32(GUID_LOPART(TargetGUID)));
+    Unit* pet= ObjectAccessor::GetUnit(*_player, guid1);
+    TC_LOG_INFO("network", "HandlePetAction: Pet %u - flag: %u, spellid: %u, target: %u.", uint32(GUID_LOPART(guid1)), uint32(flag), spellid, uint32(GUID_LOPART(guid2)));
 
     if (!pet)
     {
-        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) doesn't exist for player %s (GUID: %u)", uint32(GUID_LOPART(PetGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) doesn't exist for player %s (GUID: %u)", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
         return;
     }
 
     if (pet != GetPlayer()->GetFirstControlled())
     {
-        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) does not belong to player %s (GUID: %u)", uint32(GUID_LOPART(PetGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) does not belong to player %s (GUID: %u)", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
         return;
     }
 
     if (!pet->IsAlive())
     {
-        SpellInfo const* spell = (Flag == ACT_ENABLED || Flag == ACT_PASSIVE) ? sSpellMgr->GetSpellInfo(SpellID) : NULL;
+        SpellInfo const* spell = (flag == ACT_ENABLED || flag == ACT_PASSIVE) ? sSpellMgr->GetSpellInfo(spellid) : NULL;
         if (!spell)
             return;
         if (!(spell->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD))
@@ -130,11 +152,11 @@ void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 
     }
 
     /// @todo allow control charmed player?
-    if (pet->GetTypeId() == TYPEID_PLAYER && !(Flag == ACT_COMMAND && SpellID == COMMAND_ATTACK))
+    if (pet->GetTypeId() == TYPEID_PLAYER && !(flag == ACT_COMMAND && spellid == COMMAND_ATTACK))
         return;
 
     if (GetPlayer()->m_Controlled.size() == 1)
-        HandlePetActionHelper(pet, PetGUID, SpellID, Flag, TargetGUID, x, y, z);
+        HandlePetActionHelper(pet, guid1, spellid, flag, guid2, x, y, z);
     else
     {
         //If a pet is dismissed, m_Controlled will change
@@ -143,7 +165,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 
             if ((*itr)->GetEntry() == pet->GetEntry() && (*itr)->IsAlive())
                 controlled.push_back(*itr);
         for (std::vector<Unit*>::iterator itr = controlled.begin(); itr != controlled.end(); ++itr)
-            HandlePetActionHelper(*itr, PetGUID, SpellID, Flag, TargetGUID, x, y, z);
+            HandlePetActionHelper(*itr, guid1, spellid, flag, guid2, x, y, z);
     }
 }
 
@@ -151,38 +173,38 @@ void WorldSession::HandlePetStopAttack(WorldPacket &recvData)
 {
     ObjectGuid guid;
 
-    guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();  // 23
+    guid[5] = recvData.ReadBit();  // 21
+    guid[1] = recvData.ReadBit();  // 17
+    guid[6] = recvData.ReadBit();  // 22
+    guid[0] = recvData.ReadBit();  // 16
+    guid[2] = recvData.ReadBit();  // 18
+    guid[4] = recvData.ReadBit();  // 20
+    guid[3] = recvData.ReadBit();  // 19
 
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[2]);  // 18
+    recvData.ReadByteSeq(guid[5]);  // 21
+    recvData.ReadByteSeq(guid[0]);  // 16
+    recvData.ReadByteSeq(guid[4]);  // 20
+    recvData.ReadByteSeq(guid[1]);  // 17
+    recvData.ReadByteSeq(guid[7]);  // 23
+    recvData.ReadByteSeq(guid[6]);  // 22
+    recvData.ReadByteSeq(guid[3]);  // 19
 
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_PET_STOP_ATTACK for GUID " UI64FMTD "", (uint64)guid);
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_PET_STOP_ATTACK for GUID " UI64FMTD "", uint64(guid));
 
-    Unit* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
+    Unit* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, uint64(guid));
 
     if (!pet)
     {
-        TC_LOG_ERROR("network", "HandlePetStopAttack: Pet %u does not exist", uint32(GUID_LOPART(guid)));
+        TC_LOG_ERROR("network", "HandlePetStopAttack: Pet %u does not exist", uint32(GUID_LOPART(uint64(guid))));
         return;
     }
 
     if (pet != GetPlayer()->GetPet() && pet != GetPlayer()->GetCharm())
     {
         TC_LOG_ERROR("network", "HandlePetStopAttack: Pet GUID %u isn't a pet or charmed creature of player %s",
-            uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str());
+            uint32(GUID_LOPART(uint64(guid))), GetPlayer()->GetName().c_str());
         return;
     }
 
@@ -776,26 +798,8 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 
 void WorldSession::HandlePetAbandon(WorldPacket& recvData)
 {
-    ObjectGuid guid;
-
-    guid[7] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[3]);
-
+    uint64 guid;
+    recvData >> guid;                                      //pet guid
     TC_LOG_INFO("network", "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid));
 
     if (!_player->IsInWorld())
@@ -815,49 +819,49 @@ void WorldSession::HandlePetAbandon(WorldPacket& recvData)
 void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_INFO("network", "CMSG_PET_SPELL_AUTOCAST");
-    ObjectGuid PetGUID;
-    uint32 SpellID;
-    bool AutocastEnabled;
 
-    recvPacket >> SpellID;
+    ObjectGuid guid;
+    uint32 spellId;
+    bool enabled;
 
-    PetGUID[0] = recvPacket.ReadBit();
-    PetGUID[4] = recvPacket.ReadBit();
-    PetGUID[2] = recvPacket.ReadBit();
-    PetGUID[6] = recvPacket.ReadBit();
-    PetGUID[1] = recvPacket.ReadBit();
-    PetGUID[5] = recvPacket.ReadBit();
-    PetGUID[3] = recvPacket.ReadBit();
-    PetGUID[7] = recvPacket.ReadBit();
+    recvPacket >> spellId;
 
-    AutocastEnabled = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();  // 16
+    guid[4] = recvPacket.ReadBit();  // 20
+    guid[2] = recvPacket.ReadBit();  // 18
+    guid[6] = recvPacket.ReadBit();  // 22
+    guid[1] = recvPacket.ReadBit();  // 17
+    guid[5] = recvPacket.ReadBit();  // 21
+    guid[3] = recvPacket.ReadBit();  // 19
+    guid[7] = recvPacket.ReadBit();  // 23
+    enabled = recvPacket.ReadBit();  // 28 - AutocastEnabled
 
-    recvPacket.ReadByteSeq(PetGUID[5]);
-    recvPacket.ReadByteSeq(PetGUID[0]);
-    recvPacket.ReadByteSeq(PetGUID[4]);
-    recvPacket.ReadByteSeq(PetGUID[1]);
-    recvPacket.ReadByteSeq(PetGUID[7]);
-    recvPacket.ReadByteSeq(PetGUID[2]);
-    recvPacket.ReadByteSeq(PetGUID[3]);
-    recvPacket.ReadByteSeq(PetGUID[6]);
+    recvPacket.ReadByteSeq(guid[5]);  // 21
+    recvPacket.ReadByteSeq(guid[0]);  // 16
+    recvPacket.ReadByteSeq(guid[4]);  // 20
+    recvPacket.ReadByteSeq(guid[1]);  // 17
+    recvPacket.ReadByteSeq(guid[7]);  // 23
+    recvPacket.ReadByteSeq(guid[2]);  // 18
+    recvPacket.ReadByteSeq(guid[3]);  // 19
+    recvPacket.ReadByteSeq(guid[6]);  // 22
 
     if (!_player->GetGuardianPet() && !_player->GetCharm())
         return;
 
-    if (ObjectAccessor::FindPlayer(PetGUID))
+    if (ObjectAccessor::FindPlayer(guid))
         return;
 
-    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, PetGUID);
+    Creature* pet=ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
 
     if (!pet || (pet != _player->GetGuardianPet() && pet != _player->GetCharm()))
     {
-        TC_LOG_ERROR("network", "HandlePetSpellAutocastOpcode.Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(PetGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetSpellAutocastOpcode.Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
         return;
     }
 
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SpellID);
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     // do not add not learned spells/ passive spells
-    if (!pet->HasSpell(SpellID) || !spellInfo->IsAutocastable())
+    if (!pet->HasSpell(spellId) || !spellInfo->IsAutocastable())
         return;
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
@@ -868,52 +872,394 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     }
 
     if (pet->IsPet())
-        ((Pet*)pet)->ToggleAutocast(spellInfo, AutocastEnabled);
+        ((Pet*)pet)->ToggleAutocast(spellInfo, enabled);
     else
-        pet->GetCharmInfo()->ToggleCreatureAutocast(spellInfo, AutocastEnabled);
+        pet->GetCharmInfo()->ToggleCreatureAutocast(spellInfo, enabled);
 
-    charmInfo->SetSpellAutocast(spellInfo, AutocastEnabled);
+    charmInfo->SetSpellAutocast(spellInfo, enabled);
 }
 
 void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL");
 
-    uint64 guid;
-    uint8  castCount;
-    uint32 spellId;
-    uint8  castFlags;
+    ObjectGuid petGuid = 0;
 
-    recvPacket >> guid >> castCount >> spellId >> castFlags;
+    uint8 castCount = 0;
+    uint8 castFlags = 0;
+    uint32 spellId = 0;
+    uint32 glyphIndex = 0;
+    uint32 targetMask = 0;
+    uint32 targetStringLength = 0;
+    float elevation = 0.0f;
+    float missileSpeed = 0.0f;
+    ObjectGuid targetGuid = 0;
+    ObjectGuid itemTargetGuid = 0;
+    ObjectGuid destTransportGuid = 0;
+    ObjectGuid srcTransportGuid = 0;
+    Position srcPos;
+    Position destPos;
+    std::string targetString;
 
-    TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL, guid: " UI64FMTD ", castCount: %u, spellId %u, castFlags %u", guid, castCount, spellId, castFlags);
+    // Movement data
+    MovementInfo movementInfo;
+    ObjectGuid movementTransportGuid = 0;
+    ObjectGuid movementGuid = 0;
+    bool hasTransport = false;
+    bool hasTransportTime2 = false;
+    bool hasTransportTime3 = false;
+    bool hasFallData = false;
+    bool hasFallDirection = false;
+    bool hasTimestamp = false;
+    bool hasSplineElevation = false;
+    bool hasPitch = false;
+    bool hasOrientation = false;
+    bool hasUnkMovementField = false;
+    uint32 unkMovementLoopCounter = 0;
+    Unit* caster = _player->GetPet();
+
+    bool hasDestLocation = recvPacket.ReadBit();
+    petGuid[7] = recvPacket.ReadBit();
+    bool hasMissileSpeed = !recvPacket.ReadBit();
+    bool hasSrcLocation = recvPacket.ReadBit();
+    petGuid[1] = recvPacket.ReadBit();
+    uint8 researchDataCount = recvPacket.ReadBits(2);
+    bool hasTargetMask = !recvPacket.ReadBit();
+    petGuid[4] = recvPacket.ReadBit();
+    recvPacket.ReadBit(); // Fake bit
+    petGuid[6] = recvPacket.ReadBit();
+    bool hasTargetString = !recvPacket.ReadBit();
+    recvPacket.ReadBit(); // Fake Bit
+    bool hasMovement = recvPacket.ReadBit();
+    bool hasCastFlags = !recvPacket.ReadBit();
+    bool hasSpellId = !recvPacket.ReadBit();
+    petGuid[0] = recvPacket.ReadBit();
+    petGuid[5] = recvPacket.ReadBit();
+    petGuid[2] = recvPacket.ReadBit();
+
+    for (uint8 i = 0; i < researchDataCount; ++i)
+        recvPacket.ReadBits(2);
+
+    petGuid[3] = recvPacket.ReadBit();
+    bool hasGlyphIndex = !recvPacket.ReadBit();
+    bool hasCastCount = !recvPacket.ReadBit();
+    bool hasElevation = !recvPacket.ReadBit();
+
+    if (hasMovement)
+    {
+        hasOrientation = !recvPacket.ReadBit();
+        hasSplineElevation = !recvPacket.ReadBit();
+        recvPacket.ReadBit();
+        movementGuid[5] = recvPacket.ReadBit();
+        movementGuid[7] = recvPacket.ReadBit();
+        bool hasMovementFlags2 = !recvPacket.ReadBit();
+        hasTimestamp = !recvPacket.ReadBit();
+        hasFallData = recvPacket.ReadBit();
+        bool hasMovementFlags = !recvPacket.ReadBit();
+        hasUnkMovementField = !recvPacket.ReadBit();
+
+        if (hasMovementFlags)
+            movementInfo.flags = recvPacket.ReadBits(30);
+
+        recvPacket.ReadBit();
+        movementGuid[6] = recvPacket.ReadBit();
+        hasTransport = recvPacket.ReadBit();
+        movementGuid[0] = recvPacket.ReadBit();
+        unkMovementLoopCounter = recvPacket.ReadBits(22);
+
+        if (hasTransport)
+        {
+            hasTransportTime2 = recvPacket.ReadBit();
+            hasTransportTime3 = recvPacket.ReadBit();
+            movementTransportGuid[5] = recvPacket.ReadBit();
+            movementTransportGuid[6] = recvPacket.ReadBit();
+            movementTransportGuid[4] = recvPacket.ReadBit();
+            movementTransportGuid[0] = recvPacket.ReadBit();
+            movementTransportGuid[1] = recvPacket.ReadBit();
+            movementTransportGuid[2] = recvPacket.ReadBit();
+            movementTransportGuid[7] = recvPacket.ReadBit();
+            movementTransportGuid[3] = recvPacket.ReadBit();
+        }
+
+        movementGuid[1] = recvPacket.ReadBit();
+
+        if (hasMovementFlags2)
+            movementInfo.flags2 = recvPacket.ReadBits(13);
+
+        movementGuid[3] = recvPacket.ReadBit();
+        movementGuid[2] = recvPacket.ReadBit();
+        recvPacket.ReadBit();
+        hasPitch = !recvPacket.ReadBit();
+        movementGuid[4] = recvPacket.ReadBit();
+
+        if (hasFallData)
+            hasFallDirection = recvPacket.ReadBit();
+    }
+
+    if (hasDestLocation)
+    {
+        destTransportGuid[2] = recvPacket.ReadBit();
+        destTransportGuid[0] = recvPacket.ReadBit();
+        destTransportGuid[1] = recvPacket.ReadBit();
+        destTransportGuid[4] = recvPacket.ReadBit();
+        destTransportGuid[5] = recvPacket.ReadBit();
+        destTransportGuid[6] = recvPacket.ReadBit();
+        destTransportGuid[3] = recvPacket.ReadBit();
+        destTransportGuid[7] = recvPacket.ReadBit();
+    }
+
+    if (hasCastFlags)
+        castFlags = recvPacket.ReadBits(5);
+
+    targetGuid[2] = recvPacket.ReadBit();
+    targetGuid[4] = recvPacket.ReadBit();
+    targetGuid[7] = recvPacket.ReadBit();
+    targetGuid[0] = recvPacket.ReadBit();
+    targetGuid[6] = recvPacket.ReadBit();
+    targetGuid[1] = recvPacket.ReadBit();
+    targetGuid[5] = recvPacket.ReadBit();
+    targetGuid[3] = recvPacket.ReadBit();
+
+    if (hasTargetMask)
+        targetMask = recvPacket.ReadBits(20);
+
+    if (hasTargetString)
+        targetStringLength = recvPacket.ReadBits(7);
+
+    if (hasSrcLocation)
+    {
+        srcTransportGuid[2] = recvPacket.ReadBit();
+        srcTransportGuid[0] = recvPacket.ReadBit();
+        srcTransportGuid[3] = recvPacket.ReadBit();
+        srcTransportGuid[1] = recvPacket.ReadBit();
+        srcTransportGuid[6] = recvPacket.ReadBit();
+        srcTransportGuid[7] = recvPacket.ReadBit();
+        srcTransportGuid[4] = recvPacket.ReadBit();
+        srcTransportGuid[5] = recvPacket.ReadBit();
+    }
+
+    itemTargetGuid[6] = recvPacket.ReadBit();
+    itemTargetGuid[0] = recvPacket.ReadBit();
+    itemTargetGuid[3] = recvPacket.ReadBit();
+    itemTargetGuid[4] = recvPacket.ReadBit();
+    itemTargetGuid[2] = recvPacket.ReadBit();
+    itemTargetGuid[1] = recvPacket.ReadBit();
+    itemTargetGuid[5] = recvPacket.ReadBit();
+    itemTargetGuid[7] = recvPacket.ReadBit();
+
+
+    recvPacket.ReadByteSeq(petGuid[2]);
+    recvPacket.ReadByteSeq(petGuid[6]);
+    recvPacket.ReadByteSeq(petGuid[3]);
+
+    for (uint8 i = 0; i < researchDataCount; ++i)
+    {
+        recvPacket.read_skip<uint32>();
+        recvPacket.read_skip<uint32>();
+    }
+
+    recvPacket.ReadByteSeq(petGuid[1]);
+    recvPacket.ReadByteSeq(petGuid[7]);
+    recvPacket.ReadByteSeq(petGuid[0]);
+    recvPacket.ReadByteSeq(petGuid[4]);
+    recvPacket.ReadByteSeq(petGuid[5]);
+    
+    if (hasDestLocation)
+    {
+        float x, y, z;
+        recvPacket.ReadByteSeq(destTransportGuid[4]);
+        recvPacket.ReadByteSeq(destTransportGuid[1]);
+        recvPacket.ReadByteSeq(destTransportGuid[7]);
+        recvPacket >> z;
+        recvPacket >> y;
+        recvPacket.ReadByteSeq(destTransportGuid[6]);
+        recvPacket.ReadByteSeq(destTransportGuid[3]);
+        recvPacket >> x;
+        recvPacket.ReadByteSeq(destTransportGuid[2]);
+        recvPacket.ReadByteSeq(destTransportGuid[5]);
+        recvPacket.ReadByteSeq(destTransportGuid[0]);
+        destPos.Relocate(x, y, z);
+    }
+    else
+    {
+        destTransportGuid = caster->GetTransGUID();
+        if (destTransportGuid)
+            destPos.Relocate(caster->GetTransOffsetX(), caster->GetTransOffsetY(), caster->GetTransOffsetZ(), caster->GetTransOffsetO());
+        else
+            destPos.Relocate(caster);
+    }
+
+    if (hasMovement)
+    {
+        if (hasPitch)
+            movementInfo.pitch = G3D::wrap(recvPacket.read<float>(), float(-M_PI), float(M_PI));
+
+        if (hasTransport)
+        {
+            if (hasTransportTime3)
+                recvPacket >> movementInfo.transport.time3;
+            
+            if (hasTransportTime2)
+                recvPacket >> movementInfo.transport.time2;
+
+            recvPacket >> movementInfo.transport.seat;
+            movementInfo.transport.pos.SetOrientation(recvPacket.read<float>());
+            recvPacket >> movementInfo.transport.pos.m_positionZ;
+            recvPacket.ReadByteSeq(movementTransportGuid[2]);
+            recvPacket >> movementInfo.transport.time;
+            recvPacket.ReadByteSeq(movementTransportGuid[3]);
+            recvPacket >> movementInfo.transport.pos.m_positionX;
+            recvPacket.ReadByteSeq(movementTransportGuid[6]);
+            recvPacket.ReadByteSeq(movementTransportGuid[5]);
+            recvPacket.ReadByteSeq(movementTransportGuid[7]);
+            recvPacket.ReadByteSeq(movementTransportGuid[0]);
+            recvPacket >> movementInfo.transport.pos.m_positionY;
+            recvPacket.ReadByteSeq(movementTransportGuid[4]);
+            recvPacket.ReadByteSeq(movementTransportGuid[1]);
+        }
+
+        if (hasUnkMovementField)
+            recvPacket.read_skip<uint32>();
+
+        for (uint8 i = 0; i != unkMovementLoopCounter; i++)
+            recvPacket.read_skip<uint32>();
+
+        recvPacket.ReadByteSeq(movementGuid[3]);
+
+        if (hasOrientation)
+            movementInfo.pos.SetOrientation(recvPacket.read<float>());
+
+        recvPacket.ReadByteSeq(movementGuid[5]);
+
+        if (hasFallData)
+        {
+            recvPacket >> movementInfo.jump.zspeed;
+
+            if (hasFallDirection)
+            {
+                recvPacket >> movementInfo.jump.cosAngle;
+                recvPacket >> movementInfo.jump.xyspeed;
+                recvPacket >> movementInfo.jump.sinAngle;
+            }
+
+            recvPacket >> movementInfo.jump.fallTime;
+        }
+
+        if (hasTimestamp)
+            recvPacket >> movementInfo.time;
+
+        recvPacket.ReadByteSeq(movementGuid[6]);
+        recvPacket >> movementInfo.pos.m_positionX;
+        recvPacket.ReadByteSeq(movementGuid[1]);
+        recvPacket >> movementInfo.pos.m_positionZ;
+        recvPacket.ReadByteSeq(movementGuid[2]);
+        recvPacket.ReadByteSeq(movementGuid[7]);
+        recvPacket.ReadByteSeq(movementGuid[0]);
+        recvPacket >> movementInfo.pos.m_positionY;
+        recvPacket.ReadByteSeq(movementGuid[4]);
+        
+        if (hasSplineElevation)
+            recvPacket >> movementInfo.splineElevation;
+    }
+
+    if (hasSrcLocation)
+    {
+        float x, y, z;
+        recvPacket.ReadByteSeq(srcTransportGuid[3]);
+        recvPacket.ReadByteSeq(srcTransportGuid[4]);
+        recvPacket.ReadByteSeq(srcTransportGuid[2]);
+        recvPacket.ReadByteSeq(srcTransportGuid[1]);
+        recvPacket.ReadByteSeq(srcTransportGuid[0]);
+        recvPacket.ReadByteSeq(srcTransportGuid[7]);
+        recvPacket >> z;
+        recvPacket.ReadByteSeq(srcTransportGuid[6]);
+        recvPacket.ReadByteSeq(srcTransportGuid[5]);
+        recvPacket >> x;
+        recvPacket >> y;
+        srcPos.Relocate(x, y, z);
+    }
+    else
+    {
+        srcTransportGuid = caster->GetTransGUID();
+        if (srcTransportGuid)
+            srcPos.Relocate(caster->GetTransOffsetX(), caster->GetTransOffsetY(), caster->GetTransOffsetZ(), caster->GetTransOffsetO());
+        else
+            srcPos.Relocate(caster);
+    }
+
+    if (hasMissileSpeed)
+        recvPacket >> missileSpeed;
+
+    recvPacket.ReadByteSeq(targetGuid[1]);
+    recvPacket.ReadByteSeq(targetGuid[2]);
+    recvPacket.ReadByteSeq(targetGuid[5]);
+    recvPacket.ReadByteSeq(targetGuid[7]);
+    recvPacket.ReadByteSeq(targetGuid[4]);
+    recvPacket.ReadByteSeq(targetGuid[6]);
+    recvPacket.ReadByteSeq(targetGuid[3]);
+    recvPacket.ReadByteSeq(targetGuid[0]);
+
+    recvPacket.ReadByteSeq(itemTargetGuid[1]);
+    recvPacket.ReadByteSeq(itemTargetGuid[5]);
+    recvPacket.ReadByteSeq(itemTargetGuid[7]);
+    recvPacket.ReadByteSeq(itemTargetGuid[3]);
+    recvPacket.ReadByteSeq(itemTargetGuid[0]);
+    recvPacket.ReadByteSeq(itemTargetGuid[2]);
+    recvPacket.ReadByteSeq(itemTargetGuid[4]);
+    recvPacket.ReadByteSeq(itemTargetGuid[6]);
+
+    if (hasElevation)
+        recvPacket >> elevation;
+
+    if (hasCastCount)
+        recvPacket >> castCount;
+    
+    if (hasTargetString)
+        targetString = recvPacket.ReadString(targetStringLength);
+
+    if (hasGlyphIndex)
+        recvPacket >> glyphIndex;
+
+    if (hasSpellId)
+        recvPacket >> spellId;
+    
+    TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL, guid: " UI64FMTD ", castCount: %u, spellId %u, castFlags %u", uint64(petGuid), castCount, spellId, castFlags);
 
     // This opcode is also sent from charmed and possessed units (players and creatures)
     if (!_player->GetGuardianPet() && !_player->GetCharm())
+    {
+        recvPacket.rfinish(); // prevent spam at ignore packet
         return;
+    }
 
-    Unit* caster = ObjectAccessor::GetUnit(*_player, guid);
+    caster = ObjectAccessor::GetUnit(*_player, petGuid);
 
     if (!caster || (caster != _player->GetGuardianPet() && caster != _player->GetCharm()))
     {
-        TC_LOG_ERROR("network", "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(petGuid)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        recvPacket.rfinish(); // prevent spam at ignore packet
         return;
     }
+
+    TC_LOG_DEBUG("network", "WORLD: got cast pet spell packet, castCount: %u, spellId: %u, castFlags: %u, data length = %u", castCount, spellId, castFlags, (uint32)recvPacket.size());
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
-        TC_LOG_ERROR("network", "WORLD: unknown PET spell id %i", spellId);
+        TC_LOG_ERROR("network", "WORLD: unknown PET spell id %u", spellId);
+        recvPacket.rfinish(); // prevent spam at ignore packet
         return;
     }
 
     // do not cast not learned spells
     if (!caster->HasSpell(spellId) || spellInfo->IsPassive())
+    {
+        recvPacket.rfinish(); // prevent spam at ignore packet
         return;
+    }
 
-    SpellCastTargets targets;
-    targets.Read(recvPacket, caster);
-    HandleClientCastFlags(recvPacket, castFlags, targets);
+    // client provided targets
+    SpellCastTargets targets(caster, targetMask, targetGuid, itemTargetGuid, srcTransportGuid, destTransportGuid, srcPos, destPos, elevation, missileSpeed, targetString);
 
     caster->ClearUnitState(UNIT_STATE_FOLLOW);
 
@@ -935,7 +1281,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
                 if (pet->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
                     pet->SendPetTalk(PET_TALK_SPECIAL_SPELL);
                 else
-                    pet->SendPetAIReaction(guid);
+                    pet->SendPetAIReaction(petGuid);
             }
         }
 
@@ -974,12 +1320,82 @@ void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, Dec
     SendPacket(&data);
 }
 
-void WorldSession::HandlePetLearnTalent(WorldPacket& recvData)
+void WorldSession::HandeLearnPetSpecializationGroup(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_PET_LEARN_TALENT");
-}
+    TC_LOG_DEBUG("network", "CMSG_LEARN_PET_SPECIALIZATION_GROUP");
 
-void WorldSession::HandleLearnPreviewTalentsPet(WorldPacket& recvData)
-{
-    TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS_PET");
+    uint32 specGroupIndex;
+    ObjectGuid petGUID;
+
+    recvData >> specGroupIndex;
+
+    petGUID[5] = recvData.ReadBit();  // 21
+    petGUID[7] = recvData.ReadBit();  // 23
+    petGUID[3] = recvData.ReadBit();  // 19
+    petGUID[0] = recvData.ReadBit();  // 16
+    petGUID[6] = recvData.ReadBit();  // 22
+    petGUID[4] = recvData.ReadBit();  // 20
+    petGUID[1] = recvData.ReadBit();  // 17
+    petGUID[2] = recvData.ReadBit();  // 18
+
+    recvData.ReadByteSeq(petGUID[7]);  // 23
+    recvData.ReadByteSeq(petGUID[5]);  // 21
+    recvData.ReadByteSeq(petGUID[4]);  // 20
+    recvData.ReadByteSeq(petGUID[3]);  // 19
+    recvData.ReadByteSeq(petGUID[0]);  // 16
+    recvData.ReadByteSeq(petGUID[2]);  // 18
+    recvData.ReadByteSeq(petGUID[6]);  // 22
+    recvData.ReadByteSeq(petGUID[1]);  // 17
+
+    if (_player->GetPet()->GetGUID() != uint64(petGUID))
+    {
+        TC_LOG_DEBUG("network", "HandeLearnPetSpecializationGroup: Received wrong Pet GUID (%u) from Player %s (GUID: %u)", GUID_LOPART(petGUID), _player->GetName().c_str(), _player->GetGUID());
+        return;
+    }
+
+    Pet* pet = _player->GetPet();
+    if (!pet)
+        return;
+
+    if (_player->IsInCombat() || pet->getLevel() < 15)
+        return;
+
+    if (specGroupIndex > MAX_TALENT_TABS)
+        return;
+    
+    uint32 specId;
+    switch (specGroupIndex)
+    {
+        case 0: specId = SPEC_PET_FEROCITY; break;
+        case 1: specId = SPEC_PET_TENACITY; break;
+        case 2: specId = SPEC_PET_CUNNING;  break;
+        default: break;
+    }
+
+    if (pet->GetSpecialization() != SPEC_NONE)
+        pet->UnlearnSpecializationSpells();
+
+    TC_LOG_DEBUG("network", "HandeLearnPetSpecializationGroup: Pet GUID (%u) from Player %s (GUID: %u) wants to learn specialization %u", GUID_LOPART(petGUID), _player->GetName().c_str(), _player->GetGUID(), specId);
+
+    pet->SetSpecialization(specId);
+    pet->SendPetSpecialization();
+    pet->LearnSpecializationSpells();
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_PET_SPECIALIZATION);
+
+    std::ostringstream ss;
+    for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
+        ss << pet->GetSpecialization(i) << " ";
+    stmt->setString(0, ss.str());
+
+    stmt->setUInt8(1, pet->GetSpecializationCount());
+    stmt->setUInt8(2, pet->GetActiveSpecialization());
+
+    stmt->setUInt32(3, _player->GetGUIDLow());
+    stmt->setUInt32(4, pet->GetCharmInfo()->GetPetNumber());
+    trans->Append(stmt);
+
+    CharacterDatabase.CommitTransaction(trans);
 }

@@ -49,10 +49,10 @@ class Pet : public Guardian
 
         void SetDisplayId(uint32 modelId);
 
-        PetType getPetType() const { return m_petType; }
-        void setPetType(PetType type) { m_petType = type; }
+        PetType getPetType() const { return _petType; }
+        void setPetType(PetType type) { _petType = type; }
         bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
-        bool isTemporarySummoned() const { return m_duration > 0; }
+        bool isTemporarySummoned() const { return _duration > 0; }
 
         bool IsPermanentPetFor(Player* owner) const;        // pet have tab in character windows and set UNIT_FIELD_PET_NUMBER
 
@@ -61,7 +61,7 @@ class Pet : public Guardian
         bool CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit* owner);
         bool CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map, uint32 phaseMask);
         bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
-        bool isBeingLoaded() const { return m_loading;}
+        bool isBeingLoaded() const { return _loading;}
         void SavePetToDB(PetSaveMode mode);
         void Remove(PetSaveMode mode, bool returnreagent = false);
         static void DeleteFromDB(uint32 guidlow);
@@ -83,8 +83,22 @@ class Pet : public Guardian
         void SynchronizeLevelWithOwner();
         bool HaveInDiet(ItemTemplate const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel) const;
-        void SetDuration(int32 dur) { m_duration = dur; }
-        int32 GetDuration() const { return m_duration; }
+        void SetDuration(int32 dur) { _duration = dur; }
+        int32 GetDuration() const { return _duration; }
+
+        uint8 GetActiveSpecialization() const { return _activeSpecialization; }
+        void SetActiveSpecialization(uint8 spec){ _activeSpecialization = spec; }
+        uint8 GetSpecializationCount() const { return _specializationCount; }
+        void SetSpecializationCount(uint8 count) { _specializationCount = count; }
+        
+        uint32 GetSpecialization() { return GetSpecialization(GetActiveSpecialization()); }
+        uint32 GetSpecialization(uint8 specIdx) { return _specializations[specIdx]; }
+        void SetSpecialization(uint32 specGroup) { _specializations[GetActiveSpecialization()] = specGroup; };
+        void SetSpecialization(uint8 specIdx, uint32 specGroup) { _specializations[specIdx] = specGroup; };
+
+        void SendPetSpecialization();
+        void LearnSpecializationSpells();
+        void UnlearnSpecializationSpells();
 
         /*
         bool UpdateStats(Stats stat);
@@ -113,12 +127,13 @@ class Pet : public Guardian
         void _LoadSpells();
         void _SaveSpells(SQLTransaction& trans);
 
-        bool addSpell(uint32 spellId, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
-        bool learnSpell(uint32 spell_id);
-        void learnSpellHighRank(uint32 spellid);
+        bool AddSpell(uint32 spellId, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
+        bool LearnSpell(uint32 spellId);
+        void LearnSpells(std::list<uint32> learnSpells);
         void InitLevelupSpellsForLevel();
-        bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
-        bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        void UnlearnSpells(std::list<uint32> unlearnSpells, bool clear_ab = true);
+        bool UnlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        bool RemoveSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
         virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
 
@@ -127,34 +142,27 @@ class Pet : public Guardian
 
         void InitPetCreateSpells();
 
-        bool resetTalents();
-        static void resetTalentsForAllPetsOf(Player* owner, Pet* online_pet = NULL);
-        void InitTalentForLevel();
+        uint64 GetAuraUpdateMaskForRaid() const { return _auraRaidUpdateMask; }
+        void SetAuraUpdateMaskForRaid(uint8 slot) { _auraRaidUpdateMask |= (uint64(1) << slot); }
+        void ResetAuraUpdateMaskForRaid() { _auraRaidUpdateMask = 0; }
 
-        uint8 GetMaxTalentPointsForLevel(uint8 level);
-        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_ANIM_TIER, 1); }
-        void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_ANIM_TIER, 1, points); }
-
-        uint32  m_usedTalentCount;
-
-        uint64 GetAuraUpdateMaskForRaid() const { return m_auraRaidUpdateMask; }
-        void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
-        void ResetAuraUpdateMaskForRaid() { m_auraRaidUpdateMask = 0; }
-
-        DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
+        DeclinedName const* GetDeclinedNames() const { return _declinedname; }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
 
         Player* GetOwner() const;
 
     protected:
-        PetType m_petType;
-        int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
-        uint64  m_auraRaidUpdateMask;
-        bool    m_loading;
-        uint32  m_regenTimer;
+        PetType _petType;
+        int32   _duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
+        uint64  _auraRaidUpdateMask;
+        bool    _loading;
+        uint32  _regenTimer;
+        uint8   _specializationCount;
+        uint8   _activeSpecialization;
+        uint32  _specializations[MAX_TALENT_SPECS];
 
-        DeclinedName *m_declinedname;
+        DeclinedName *_declinedname;
 
     private:
         void SaveToDB(uint32, uint8, uint32)                // override of Creature::SaveToDB     - must not be called
@@ -167,3 +175,4 @@ class Pet : public Guardian
         }
 };
 #endif
+ 
