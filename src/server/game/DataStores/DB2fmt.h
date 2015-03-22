@@ -29,13 +29,14 @@ char const BattlePetSpeciesXAbilityfmt[] = "niiii";
 char const BattlePetStatefmt[] = "nxsi";
 char const ItemToBattlePetfmt[] = "ni";
 
-char const BroadcastTextfmt[] ="nxssxxxxxxixx";
+char const BroadcastTextfmt[] ="nissiiiiiiiii";
 char const Itemfmt[] ="niiiiiii";
 char const ItemCurrencyCostfmt[]="xn";
 char const ItemSparsefmt[]="niiiiffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisssssiiiiiiiiiiiiiiiiiiiiiifiiifii";
 char const ItemExtendedCostEntryfmt[]="nxxiiiiiiiiiiiixiiiiiiiiiiiiiii";
 char const KeyChainfmt[] = "nbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 char const QuestPackageItemfmt[] = "niiii";
+char const RulesetItemUpgradeEntryfmt[] = "niii";
 char const SceneScriptfmt[] = "nssii";
 char const SpellReagentsfmt[] = "diiiiiiiiiiiiiiiiii";
 

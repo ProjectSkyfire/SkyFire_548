@@ -30,6 +30,7 @@
 #    LOGGING SYSTEM SETTINGS
 #    CURRENCIES SETTINGS
 #    BATTLE PET SETTINGS
+#    BLACK MARKET SETTINGS
 #    PACKET SPOOF PROTECTION SETTINGS
 #
 ###################################################################################################
@@ -2925,6 +2926,44 @@ BattlePet.LoadoutUnlockCount = 1
 #
 
 BattlePet.InitialLevel = 1
+
+#
+###################################################################################################
+
+###################################################################################################
+# BLACK MARKET SETTINGS
+#
+#    BlackMarket.Open
+#        Description: 
+#        Default:     1 - (Open)
+#                     0 - (Closed)
+#
+
+BlackMarket.Open = 1
+
+#
+#    BlackMarket.MaxAuctions
+#        Description: Maximum amount of auctions appearing the same time
+#        Default:     12
+#
+
+BlackMarket.MaxAuctions = 12
+
+#
+#    BlackMarket.AuctionDelay
+#        Description: 
+#        Default:     12 (hours)
+#
+
+BlackMarket.AuctionDelay = 12
+
+#
+#    BlackMarket.AuctionDelayMod
+#        Description: 
+#        Default:     60
+#
+
+BlackMarket.AuctionDelayMod = 60
 
 #
 ###################################################################################################

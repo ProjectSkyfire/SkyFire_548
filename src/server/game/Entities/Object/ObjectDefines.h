@@ -33,7 +33,7 @@ enum HighGuid
     HIGHGUID_PET            = 0xF14,                       // blizz F140
     HIGHGUID_VEHICLE        = 0xF15,                       // blizz F550
     HIGHGUID_DYNAMICOBJECT  = 0xF10,                       // blizz F100
-    HIGHGUID_CORPSE         = 0xF101,                      // blizz F100
+    HIGHGUID_CORPSE         = 0xF0C0,                      // blizz F0C0
     HIGHGUID_AREATRIGGER    = 0xF102,                      // blizz F100
     HIGHGUID_BATTLEGROUND   = 0x1F1,                       // new 4.x
     HIGHGUID_MO_TRANSPORT   = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)

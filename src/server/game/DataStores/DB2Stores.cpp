@@ -38,13 +38,14 @@ DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore(ItemToBattlePetfmt);
 BattlePetBreedSet sBattlePetBreedSet;
 BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
-DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
+DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply);
 DB2Storage<ItemEntry> sItemStore(Itemfmt, &DB2Utilities::HasItemEntry, &DB2Utilities::WriteItemDbReply);
 DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
 DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DB2Storage<ItemSparseEntry> sItemSparseStore(ItemSparsefmt, &DB2Utilities::HasItemSparseEntry, &DB2Utilities::WriteItemSparseDbReply);
 DB2Storage<KeyChainEntry> sKeyChainStore(KeyChainfmt);
 DB2Storage<QuestPackageItemEntry> sQuestPackageItemStore(QuestPackageItemfmt);
+DB2Storage<RulesetItemUpgradeEntry> sRulesetItemUpgradeStore(RulesetItemUpgradeEntryfmt);
 DB2Storage<SceneScriptEntry> sSceneScriptStore(SceneScriptfmt);
 DB2Storage<SpellReagentsEntry> sSpellReagentsStore(SpellReagentsfmt);
 

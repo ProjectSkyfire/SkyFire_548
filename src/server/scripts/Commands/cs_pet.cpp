@@ -155,7 +155,7 @@ public:
             return false;
         }
 
-        pet->learnSpell(spellId);
+        pet->LearnSpell(spellId);
 
         handler->PSendSysMessage("Pet has learned spell %u", spellId);
         return true;
@@ -178,7 +178,7 @@ public:
         uint32 spellId = handler->extractSpellIdFromLink((char*)args);
 
         if (pet->HasSpell(spellId))
-            pet->removeSpell(spellId, false);
+            pet->RemoveSpell(spellId, false);
         else
             handler->PSendSysMessage("Pet doesn't have that spell");
 
@@ -190,3 +190,4 @@ void AddSC_pet_commandscript()
 {
     new pet_commandscript();
 }
+ 

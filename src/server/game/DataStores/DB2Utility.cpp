@@ -35,6 +35,47 @@ bool DB2Utilities::HasItemSparseEntry(DB2Storage<ItemSparseEntry> const& /*store
     return ItemExists(id);
 }
 
+bool DB2Utilities::HasBroadcastTextEntry(DB2Storage<BroadcastTextEntry> const& /*store*/, uint32 id)
+{
+    return sObjectMgr->GetBroadcastText(id) != NULL;
+}
+
+void DB2Utilities::WriteBroadcastTextDbReply(DB2Storage<BroadcastTextEntry> const& /*store*/, uint32 id, uint32 locale, ByteBuffer& buffer)
+{
+    BroadcastText const* broadcastText = sObjectMgr->GetBroadcastText(id);
+    ASSERT(broadcastText);
+
+    std::string maleText;
+    std::string femaleText;
+    ObjectMgr::GetLocaleString(broadcastText->MaleText, locale, maleText);
+    ObjectMgr::GetLocaleString(broadcastText->FemaleText, locale, femaleText);
+    
+    uint16 maleTextLength = maleText.length();
+    uint16 femaleTextLength = femaleText.length();
+    
+    buffer << uint32(broadcastText->Id);
+    buffer << uint32(broadcastText->Language);
+    buffer << uint16(maleTextLength);
+
+    if (maleTextLength > 0)
+        buffer << maleText;
+
+    buffer << uint16(femaleTextLength);
+
+    if (femaleTextLength > 0)
+        buffer << femaleText;
+
+    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+        buffer << uint32(broadcastText->Emotes[i]._Emote);
+
+    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+        buffer << uint32(broadcastText->Emotes[i]._Delay);
+
+    buffer << uint32(broadcastText->SoundId);
+    buffer << uint32(broadcastText->EndEmoteId);
+    buffer << uint32(broadcastText->Type);
+}
+
 void DB2Utilities::WriteItemDbReply(DB2Storage<ItemEntry> const& /*store*/, uint32 id, uint32 /*locale*/, ByteBuffer& buffer)
 {
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(id);

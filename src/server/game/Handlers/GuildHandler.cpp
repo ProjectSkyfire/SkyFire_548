@@ -822,23 +822,23 @@ void WorldSession::HandleGuildRequestPartyState(WorldPacket& recvPacket)
 
     ObjectGuid guildGuid;
 
-    guildGuid[1] = recvPacket.ReadBit();
-    guildGuid[5] = recvPacket.ReadBit();
-    guildGuid[7] = recvPacket.ReadBit();
-    guildGuid[2] = recvPacket.ReadBit();
-    guildGuid[6] = recvPacket.ReadBit();
-    guildGuid[3] = recvPacket.ReadBit();
-    guildGuid[0] = recvPacket.ReadBit();
-    guildGuid[4] = recvPacket.ReadBit();
+    guildGuid[1] = recvPacket.ReadBit();  // 17
+    guildGuid[5] = recvPacket.ReadBit();  // 21
+    guildGuid[7] = recvPacket.ReadBit();  // 23
+    guildGuid[2] = recvPacket.ReadBit();  // 18
+    guildGuid[6] = recvPacket.ReadBit();  // 22
+    guildGuid[3] = recvPacket.ReadBit();  // 19
+    guildGuid[0] = recvPacket.ReadBit();  // 16
+    guildGuid[4] = recvPacket.ReadBit();  // 20
 
-    recvPacket.ReadByteSeq(guildGuid[2]);
-    recvPacket.ReadByteSeq(guildGuid[5]);
-    recvPacket.ReadByteSeq(guildGuid[4]);
-    recvPacket.ReadByteSeq(guildGuid[6]);
-    recvPacket.ReadByteSeq(guildGuid[1]);
-    recvPacket.ReadByteSeq(guildGuid[0]);
-    recvPacket.ReadByteSeq(guildGuid[7]);
-    recvPacket.ReadByteSeq(guildGuid[3]);
+    recvPacket.ReadByteSeq(guildGuid[2]);  // 18
+    recvPacket.ReadByteSeq(guildGuid[5]);  // 21
+    recvPacket.ReadByteSeq(guildGuid[4]);  // 20
+    recvPacket.ReadByteSeq(guildGuid[6]);  // 22
+    recvPacket.ReadByteSeq(guildGuid[1]);  // 17
+    recvPacket.ReadByteSeq(guildGuid[0]);  // 16
+    recvPacket.ReadByteSeq(guildGuid[7]);  // 23
+    recvPacket.ReadByteSeq(guildGuid[3]);  // 19
 
     if (Guild* guild = sGuildMgr->GetGuildByGuid(guildGuid))
         guild->HandleGuildPartyRequest(this);

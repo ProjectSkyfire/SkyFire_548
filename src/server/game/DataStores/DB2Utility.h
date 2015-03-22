@@ -25,16 +25,19 @@
 template<class T>
 class DB2Storage;
 class ByteBuffer;
+struct BroadcastTextEntry;
 struct ItemEntry;
 struct ItemSparseEntry;
 
 namespace DB2Utilities
 {
     //
+	bool HasBroadcastTextEntry(DB2Storage<BroadcastTextEntry> const& store, uint32 id);
     bool HasItemEntry(DB2Storage<ItemEntry> const& store, uint32 id);
     bool HasItemSparseEntry(DB2Storage<ItemSparseEntry> const& store, uint32 id);
 
     //
+	void WriteBroadcastTextDbReply(DB2Storage<BroadcastTextEntry> const& store, uint32 id, uint32 locale, ByteBuffer& buffer);
     void WriteItemDbReply(DB2Storage<ItemEntry> const& store, uint32 id, uint32 locale, ByteBuffer& buffer);
     void WriteItemSparseDbReply(DB2Storage<ItemSparseEntry> const& store, uint32 id, uint32 locale, ByteBuffer& buffer);
 }

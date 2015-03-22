@@ -76,6 +76,7 @@ MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
 MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
 
 uint32 const* /*[MAX_TALENT_TABS]*/ GetClassSpecializations(uint8 classId);
+uint32 const* GetPetSpecializations();
 
 uint32 GetLiquidFlags(uint32 liquidType);
 

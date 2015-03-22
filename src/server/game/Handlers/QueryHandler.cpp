@@ -444,7 +444,9 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
     data.WriteBit(corpseGuid[1]);
     data.WriteBit(corpseGuid[7]);
     data.WriteBit(corpseGuid[6]);
-
+	
+	data.FlushBits();
+	
     data.WriteByteSeq(corpseGuid[5]);
     data << float(z);
     data.WriteByteSeq(corpseGuid[1]);
@@ -497,10 +499,8 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
         data << float(pGossip ? pGossip->Options[i].Probability : 0);
 
-    data << textID;                                     // should be a broadcast id
-
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS - 1; i++)
-        data << uint32(0);
+    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+        data << uint32(pGossip ? pGossip->Options[i].BroadcastTextID : 0);
 
     data.WriteBit(1);                                   // has data
     data.FlushBits();
@@ -649,25 +649,89 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
             }
             else
             {
-                poiData << uint32(questId);
-                poiData << uint32(0);
+				data.WriteBits(0, 18);
+				data.FlushBits();
 
-                data.WriteBits(0, 18);
+				poiData << uint32(questId);
+                poiData << uint32(0);
             }
         }
         else
         {
+			data.WriteBits(0, 18);
+			data.FlushBits();
+
             poiData << uint32(questId);
             poiData << uint32(0);
-
-            data.WriteBits(0, 18);
         }
     }
 
-    poiData << uint32(count);
-
     data.FlushBits();
+
+    poiData << uint32(count);
     data.append(poiData);
 
     SendPacket(&data);
+}
+
+void WorldSession::HandleDBQueryBulk(WorldPacket& recvPacket)
+{
+    uint32 type, count;
+    recvPacket >> type;
+
+    DB2StorageBase const* store = GetDB2Storage(type);
+    if (!store)
+    {
+        TC_LOG_ERROR("network", "CMSG_DB_QUERY_BULK: Received unknown hotfix type: %u", type);
+        recvPacket.rfinish();
+        return;
+    }
+
+    count = recvPacket.ReadBits(21);
+
+    ObjectGuid* guids = new ObjectGuid[count];
+    for (uint32 i = 0; i < count; ++i)
+    {
+        guids[i][6] = recvPacket.ReadBit();
+        guids[i][3] = recvPacket.ReadBit();
+        guids[i][0] = recvPacket.ReadBit();
+        guids[i][1] = recvPacket.ReadBit();
+        guids[i][4] = recvPacket.ReadBit();
+        guids[i][5] = recvPacket.ReadBit();
+        guids[i][7] = recvPacket.ReadBit();
+        guids[i][2] = recvPacket.ReadBit();
+    }
+
+    uint32 entry;
+    for (uint32 i = 0; i < count; ++i)
+    {
+        recvPacket.ReadByteSeq(guids[i][1]);
+        recvPacket >> entry;
+        recvPacket.ReadByteSeq(guids[i][0]);
+        recvPacket.ReadByteSeq(guids[i][5]);
+        recvPacket.ReadByteSeq(guids[i][6]);
+        recvPacket.ReadByteSeq(guids[i][4]);
+        recvPacket.ReadByteSeq(guids[i][7]);
+        recvPacket.ReadByteSeq(guids[i][2]);
+        recvPacket.ReadByteSeq(guids[i][3]);
+
+        if (!store->HasRecord(entry))
+            continue;
+
+        ByteBuffer record;
+        store->WriteRecord(entry, (uint32)GetSessionDbcLocale(), record);
+
+        WorldPacket data(SMSG_DB_REPLY);
+        data << uint32(entry);
+        data << uint32(time(NULL));
+        data << uint32(type);
+        data << uint32(record.size());
+        data.append(record);
+
+        SendPacket(&data);
+
+        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, type);
+    }
+
+    delete[] guids;
 }

@@ -38,6 +38,7 @@ struct CreatureTextEntry
     Emote emote;
     uint32 duration;
     uint32 sound;
+	uint32 BroadcastTextId;
 };
 
 enum CreatureTextRange

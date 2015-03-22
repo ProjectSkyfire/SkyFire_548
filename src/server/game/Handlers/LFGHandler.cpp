@@ -835,7 +835,7 @@ void WorldSession::SendLfgLfrList(bool update)
 {
     TC_LOG_DEBUG("lfg", "SMSG_LFG_LFR_LIST %s update: %u",
         GetPlayerInfo().c_str(), update ? 1 : 0);
-    WorldPacket data(SMSG_LFG_UPDATE_SEARCH, 1);
+    WorldPacket data(SMSG_LFG_SEARCH_RESULTS, 1);
     data << uint8(update);                                 // In Lfg Queue?
     SendPacket(&data);
 }

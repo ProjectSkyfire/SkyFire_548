@@ -1143,6 +1143,12 @@ uint32 const* GetClassSpecializations(uint8 classId)
     return sSpecializationClassStore[classId];
 }
 
+uint32 const* GetPetSpecializations()
+{
+	// Pet specializations have 0 as Class Id value
+    return sSpecializationClassStore[0];
+}
+
 uint32 GetLiquidFlags(uint32 liquidType)
 {
     if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquidType))

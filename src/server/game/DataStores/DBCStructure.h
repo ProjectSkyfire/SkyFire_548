@@ -533,7 +533,7 @@ struct AchievementCriteriaEntry
     //uint32 unk1;                                          // 16 only one value, still unknown
     //uint32 unk2;                                          // 17 all zeros
     uint32 additionalConditionType[MAX_ADDITIONAL_CRITERIA_CONDITIONS];      // 18-20
-    uint32 additionalConditionValue[MAX_ADDITIONAL_CRITERIA_CONDITIONS - 1]; // 21-22 WTF one column was cut off here in 4.3.4
+    uint32 additionalConditionValue[MAX_ADDITIONAL_CRITERIA_CONDITIONS - 1];     // 21-22
 };
 
 struct AreaTableEntry
@@ -797,8 +797,8 @@ struct ChrSpecializationEntry
     uint32 PetTabPage;                                      // 6
     uint32 RoleMask;                                        // 7
     // uint32 iconId                                        // 8
-    // uint32 unk1                                          // 9
-    // uint32 unk2                                          // 10
+	// uint32 RaidBuffs                                     // 9
+	// uint32 Flags                                         // 10
     // char* name                                           // 11
     // char* definition                                     // 12
     // char* unkName2                                       // 13
@@ -2074,7 +2074,7 @@ struct SpecializationSpellsEntry
 struct SpellEffectEntry
 {
     uint32    Id;                                           // 0         m_ID
-    //uint32    Unk0;                                       // 1         unk - Pandaria
+	uint32    EffectDifficulty;                             // 1         m_effectDifficulty
     uint32    Effect;                                       // 2         m_effect
     float     EffectValueMultiplier;                        // 3         m_effectValueMultiplier
     uint32    EffectApplyAuraName;                          // 4         m_effectAura
@@ -2083,7 +2083,7 @@ struct SpellEffectEntry
     float     EffectBonusMultiplier;                        // 7         m_effectBonusMultiplier
     float     EffectDamageMultiplier;                       // 8         m_effectDamageMultiplier
     uint32    EffectChainTarget;                            // 9         m_effectChainTargets
-    int32     EffectDieSides;                               // 10         m_effectDieSides
+	int32     EffectDieSides;                               // 10        m_effectDieSides
     uint32    EffectItemType;                               // 11        m_effectItemType
     uint32    EffectMechanic;                               // 12        m_effectMechanic
     int32     EffectMiscValue;                              // 13        m_effectMiscValue

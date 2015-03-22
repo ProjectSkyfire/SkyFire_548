@@ -598,6 +598,8 @@ void WorldSession::LogoutPlayer(bool save)
         data.WriteBit(guid[7]);
         data.WriteBit(guid[5]);
         data.WriteBit(guid[0]);
+		
+		data.FlushBits();
 
         data.WriteByteSeq(guid[6]);
         data.WriteByteSeq(guid[4]);
@@ -1158,7 +1160,7 @@ void WorldSession::ProcessQueryCallbacks()
     {
         uint64 param = _sendStabledPetCallback.GetParam();
         _sendStabledPetCallback.GetResult(result);
-        SendStablePetCallback(result, param);
+        SendPetStableListCallback(result, param);
         _sendStabledPetCallback.FreeResult();
     }
 

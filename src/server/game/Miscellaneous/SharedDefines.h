@@ -724,6 +724,48 @@ enum SpellAttr10
     SPELL_ATTR10_UNK31                            = 0x80000000  // 31
 };
 
+enum Specializations
+{
+    SPEC_NONE                           = 0,
+    SPEC_MAGE_ARCANE                    = 62,
+    SPEC_MAGE_FIRE                      = 63,
+    SPEC_MAGE_FROST                     = 64,
+    SPEC_PALADIN_HOLY                   = 65,
+    SPEC_PALADIN_PROTECTION             = 66,
+    SPEC_PALADIN_RETRIBUTION            = 70,
+    SPEC_WARRIOR_ARMS                   = 71,
+    SPEC_WARRIOR_FURY                   = 72,
+    SPEC_WARRIOR_PROTECTION             = 73,
+    SPEC_PET_FEROCITY                   = 74,
+    SPEC_PET_CUNNING                    = 79,
+    SPEC_PET_TENACITY                   = 81,
+    SPEC_DRUID_BALANCE                  = 102,
+    SPEC_DRUID_FERAL                    = 103,
+    SPEC_DRUID_GUARDIAN                 = 104,
+    SPEC_DRUID_RESTORATION              = 105,
+    SPEC_DEATH_KNIGHT_BLOOD             = 250,
+    SPEC_DEATH_KNIGHT_FROST             = 251,
+    SPEC_DEATH_KNIGHT_UNHOLY            = 252,
+    SPEC_HUNTER_BEAST_MASTERY           = 253,
+    SPEC_HUNTER_MARKSMANSHIP            = 254,
+    SPEC_HUNTER_SURVIVAL                = 255,
+    SPEC_PRIEST_DISCIPLINE              = 256,
+    SPEC_PRIEST_HOLY                    = 257,
+    SPEC_PRIEST_SHADOW                  = 258,
+    SPEC_ROGUE_ASSASSINATION            = 259,
+    SPEC_ROGUE_COMBAT                   = 260,
+    SPEC_ROGUE_SUBTLETY                 = 261,
+    SPEC_SHAMAN_ELEMENTAL               = 262,
+    SPEC_SHAMAN_ENHANCEMENT             = 263,
+    SPEC_SHAMAN_RESTORATION             = 264,
+    SPEC_WARLOCK_AFFLICTION             = 265,
+    SPEC_WARLOCK_DEMONOLOGY             = 266,
+    SPEC_WARLOCK_DESTRUCTION            = 267,
+    SPEC_MONK_BREWMASTER                = 268,
+    SPEC_MONK_WINDWALKER                = 269,
+    SPEC_MONK_MISTWEAVER                = 270
+};
+
 #define MIN_TALENT_SPEC         0
 #define MAX_TALENT_SPEC         1
 #define MIN_TALENT_SPECS        1
@@ -3982,32 +4024,32 @@ enum SpellFamilyNames
 
 enum TradeStatus
 {
-    TRADE_STATUS_FAILED                = 0,
-    TRADE_STATUS_TARGET_STUNNED        = 1,
-    TRADE_STATUS_INITIATED             = 2,
-    TRADE_STATUS_CURRENCY_NOT_TRADABLE = 3,
-    TRADE_STATUS_PLAYER_NOT_FOUND      = 4,
-    TRADE_STATUS_TOO_FAR_AWAY          = 5,
-    TRADE_STATUS_ACCEPTED              = 6,
-    TRADE_STATUS_DEAD                  = 7,
-    TRADE_STATUS_STATE_CHANGED         = 9,
-    TRADE_STATUS_WRONG_FACTION         = 10,
-    TRADE_STATUS_ALREADY_TRADING       = 11,
-    TRADE_STATUS_RESTRICTED_ACCOUNT    = 13,
-    TRADE_STATUS_COMPLETE              = 14,
-    TRADE_STATUS_LOGGING_OUT           = 15,
-    TRADE_STATUS_PLAYER_IGNORED        = 16,
-    TRADE_STATUS_TARGET_LOGGING_OUT    = 17,
-    TRADE_STATUS_PETITION              = 18,
-    TRADE_STATUS_STUNNED               = 20,
-    TRADE_STATUS_PLAYER_BUSY           = 21,
-    TRADE_STATUS_WRONG_REALM           = 22,
-    TRADE_STATUS_NOT_ENOUGH_CURRENCY   = 23,
-    TRADE_STATUS_PROPOSED              = 24,
-    TRADE_STATUS_UNACCEPTED            = 27,
-    TRADE_STATUS_TARGET_DEAD           = 28,
-    TRADE_STATUS_CANCELLED             = 30,
-    TRADE_STATUS_NOT_ON_TAPLIST        = 31,
+    TRADE_STATUS_FAILED                 = 0,
+    TRADE_STATUS_TARGET_STUNNED         = 1,
+    TRADE_STATUS_INITIATED              = 2,
+    TRADE_STATUS_CURRENCY_NOT_TRADABLE  = 3,
+    TRADE_STATUS_PLAYER_NOT_FOUND       = 4,
+    TRADE_STATUS_TOO_FAR_AWAY           = 5,
+    TRADE_STATUS_ACCEPTED               = 6,
+    TRADE_STATUS_DEAD                   = 7,
+    TRADE_STATUS_STATE_CHANGED          = 9,
+    TRADE_STATUS_WRONG_FACTION          = 10,
+    TRADE_STATUS_ALREADY_TRADING        = 11,
+    TRADE_STATUS_RESTRICTED_ACCOUNT     = 13, // not implemented
+    TRADE_STATUS_COMPLETE               = 14,
+    TRADE_STATUS_LOGGING_OUT            = 15,
+    TRADE_STATUS_PLAYER_IGNORED         = 16, // not implemented
+    TRADE_STATUS_TARGET_LOGGING_OUT     = 17,
+    TRADE_STATUS_PETITION               = 18, // not implemented
+    TRADE_STATUS_STUNNED                = 20,
+    TRADE_STATUS_PLAYER_BUSY            = 21, // not implemented
+    TRADE_STATUS_WRONG_REALM            = 22,
+    TRADE_STATUS_NOT_ENOUGH_CURRENCY    = 23,
+    TRADE_STATUS_PROPOSED               = 24,
+    TRADE_STATUS_UNACCEPTED             = 27,
+    TRADE_STATUS_TARGET_DEAD            = 28,
+    TRADE_STATUS_CANCELLED              = 30,
+    TRADE_STATUS_NOT_ON_TAPLIST         = 31,
 };
 
 enum XPColorChar

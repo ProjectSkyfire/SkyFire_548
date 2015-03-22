@@ -9213,6 +9213,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     switch ((*i)->GetMiscValue())
                     {
                          // Shatter
+
                         case 911:
                             if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
@@ -13040,14 +13041,25 @@ Player* Unit::GetSpellModOwner() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetActionFeedback(uint8 msg)
+void Unit::SendPetActionFeedback(uint8 msg, uint32 spellId)
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    bool hasSpellData = spellId != 0;
+
     WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1);
+    
+    data.WriteBit(!hasSpellData);
+
+    data.FlushBits();
+
     data << uint8(msg);
+
+    if (hasSpellData)
+        data << uint32(spellId);
+
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
@@ -13057,9 +13069,29 @@ void Unit::SendPetTalk(uint32 pettalk)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_PET_ACTION_SOUND, 8 + 4);
-    data << uint64(GetGUID());
+
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
+
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
     data << uint32(pettalk);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
@@ -13069,6 +13101,7 @@ void Unit::SendPetAIReaction(ObjectGuid UnitGUID)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
+	ObjectGuid oGUID = guid;
     WorldPacket data(SMSG_AI_REACTION, 8 + 4);
     
     data.WriteBit(UnitGUID[5]);
@@ -13815,9 +13848,29 @@ void Unit::SendDurabilityLoss(Player* receiver, uint32 percent)
 
 void Unit::PlayOneShotAnimKit(uint32 id)
 {
+    ObjectGuid guid = GetGUID();
+
     WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);
-    data.appendPackGUID(GetGUID());
+
+    data.WriteBit(guid[3]);  // 19
+    data.WriteBit(guid[1]);  // 17
+    data.WriteBit(guid[7]);  // 23
+    data.WriteBit(guid[6]);  // 22
+    data.WriteBit(guid[0]);  // 16
+    data.WriteBit(guid[4]);  // 20
+    data.WriteBit(guid[5]);  // 21
+    data.WriteBit(guid[2]);  // 18
+
+    data.WriteByteSeq(guid[3]);  // 19
+    data.WriteByteSeq(guid[6]);  // 22
+    data.WriteByteSeq(guid[1]);  // 17
+    data.WriteByteSeq(guid[4]);  // 20
     data << uint16(id);
+    data.WriteByteSeq(guid[2]);  // 18
+    data.WriteByteSeq(guid[7]);  // 23
+    data.WriteByteSeq(guid[5]);  // 21
+    data.WriteByteSeq(guid[0]);  // 16
+
     SendMessageToSet(&data, true);
 }
 
