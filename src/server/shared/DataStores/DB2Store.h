@@ -217,6 +217,9 @@ public:
 
         nCount = 0;
     }
+    
+    iterator begin() { return iterator(indexTable.AsT, nCount); }
+    iterator end() { return iterator(indexTable.AsT, nCount, nCount); }
 
     EntryChecker CheckEntry;
     PacketWriter WritePacket;
