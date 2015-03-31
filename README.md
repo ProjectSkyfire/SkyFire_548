@@ -1,4 +1,4 @@
-# ![logo](http://www.projectskyfire.org/public/style_images/9_1_s2QNl.png)
+# ![logo](http://i.imgur.com/XU18a76.png)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly in C++.
@@ -23,7 +23,10 @@ For further information on the SkyFire project, please visit our project website
 **MoP 5.4.8 Build 18414**
 
 ## Client Patch
-[SkyFire-Community-Tools](https://github.com/ProjectSkyfire/SkyFire-Community-Tools).
+[SkyFire-Community-Tools](https://github.com/ProjectSkyfire/SkyFire-Community-Tools)
+
+## Full Client
+[Mist Of Pandaria 5.4.8 Build 18414](https://wow.freakz.ro/wow/548/wow_freakz_548.torrent)
 
 ## Build Status
 # [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire.548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire.548)
