@@ -1,4 +1,4 @@
-# ![logo](http://www.projectskyfire.org/public/style_images/9_1_s2QNl.png)
+# ![logo](http://www.projectskyfire.org/public/style_images/15_14_skyfire_logo.png)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly in C++.
