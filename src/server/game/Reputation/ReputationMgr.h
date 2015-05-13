@@ -46,6 +46,7 @@ enum FactionFlags
     FACTION_FLAG_SPECIAL            = 0x80                  // horde and alliance home cities and their northrend allies have this flag
 };
 
+typedef uint8 FactionIndex;
 typedef uint32 RepListID;
 struct FactionState
 {
@@ -128,7 +129,8 @@ class ReputationMgr
 
         void SetVisible(FactionTemplateEntry const* factionTemplateEntry);
         void SetVisible(FactionEntry const* factionEntry);
-        void SetAtWar(RepListID repListID, bool on);
+        void SetAtWar(FactionIndex FactionIndexID);
+        void SetNotAtWar(FactionIndex FactionIndexID);
         void SetInactive(RepListID repListID, bool on);
 
         void ApplyForceReaction(uint32 faction_id, ReputationRank rank, bool apply);

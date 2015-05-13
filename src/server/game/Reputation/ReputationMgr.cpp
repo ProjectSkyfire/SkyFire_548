@@ -461,9 +461,9 @@ void ReputationMgr::SetVisible(FactionState* faction)
     SendVisible(faction);
 }
 
-void ReputationMgr::SetAtWar(RepListID repListID, bool on)
+void ReputationMgr::SetAtWar(FactionIndex FactionIndexID)
 {
-    FactionStateList::iterator itr = _factions.find(repListID);
+    FactionStateList::iterator itr = _factions.find(FactionIndexID);
     if (itr == _factions.end())
         return;
 
@@ -471,7 +471,20 @@ void ReputationMgr::SetAtWar(RepListID repListID, bool on)
     if (itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN))
         return;
 
-    SetAtWar(&itr->second, on);
+    SetAtWar(&itr->second, true);
+}
+
+void ReputationMgr::SetNotAtWar(FactionIndex FactionIndexID)
+{
+    FactionStateList::iterator itr = _factions.find(FactionIndexID);
+    if (itr == _factions.end())
+        return;
+
+    // always invisible or hidden faction can't change war state
+    if (itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))
+        return;
+
+    SetAtWar(&itr->second, false);
 }
 
 void ReputationMgr::SetAtWar(FactionState* faction, bool atWar) const
@@ -493,13 +506,15 @@ void ReputationMgr::SetAtWar(FactionState* faction, bool atWar) const
     faction->needSave = true;
 }
 
-void ReputationMgr::SetInactive(RepListID repListID, bool on)
+
+
+void ReputationMgr::SetInactive(RepListID FactionIndex, bool Status)
 {
-    FactionStateList::iterator itr = _factions.find(repListID);
+    FactionStateList::iterator itr = _factions.find(FactionIndex);
     if (itr == _factions.end())
         return;
 
-    SetInactive(&itr->second, on);
+    SetInactive(&itr->second, Status);
 }
 
 void ReputationMgr::SetInactive(FactionState* faction, bool inactive) const

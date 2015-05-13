@@ -498,6 +498,7 @@ class WorldSession
         void HandleAreaTriggerOpcode(WorldPacket& recvPacket);
 
         void HandleSetFactionAtWar(WorldPacket& recvData);
+        void HandleSetFactionNotAtWar(WorldPacket& recvData);
         void HandleSetFactionCheat(WorldPacket& recvData);
         void HandleSetWatchedFactionOpcode(WorldPacket& recvData);
         void HandleSetFactionInactiveOpcode(WorldPacket& recvData);
