@@ -1,4 +1,4 @@
---Human starting zone updates
+-- Human starting zone updates
 DELETE FROM creature_text WHERE entry=49869 AND groupid=1 LIMIT 5;
 INSERT INTO creature_text VALUES
 (49869,1,0,"Come, monsters! We will crush you!",14,0,100,0,0,0,"Stormwind Infantry - Yell"),
