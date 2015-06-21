@@ -1,11 +1,11 @@
 DROP TABLE IF EXISTS `blackmarket_auctions`;
 CREATE TABLE `blackmarket_auctions` (
-    `auctionId` MEDIUMINT(9) NOT NULL DEFAULT '0' DEFAULT '0',
-    `templateId` MEDIUMINT(9) NOT NULL DEFAULT '0',
-    `startTime` MEDIUMINT(9) NOT NULL DEFAULT '0',
-    `currentBidder` MEDIUMINT(9) NOT NULL DEFAULT '0',
-    `currentBid` INT(11) NOT NULL DEFAULT '0',
-    `minIncrement` MEDIUMINT(9) NOT NULL DEFAULT '0',
-    `numBids` MEDIUMINT(9) NOT NULL DEFAULT '0'
+  `auctionId` int(10) unsigned NOT NULL DEFAULT '0',
+  `templateId` int(10) unsigned NOT NULL DEFAULT '0',
+  `startTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `currentBidder` int(10) unsigned NOT NULL DEFAULT '0',
+  `currentBid` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `minIncrement` int(10) unsigned NOT NULL DEFAULT '0',
+  `numBids` int(10) unsigned NOT NULL DEFAULT '0',
 )
 ENGINE=InnoDB;
