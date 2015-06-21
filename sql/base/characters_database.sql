@@ -301,6 +301,35 @@ LOCK TABLES `banned_addons` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `blackmarket_auctions`
+--
+
+DROP TABLE IF EXISTS `blackmarket_auctions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `blackmarket_auctions` (
+  `auctionId` int(10) unsigned NOT NULL DEFAULT '0',
+  `templateId` int(10) unsigned NOT NULL DEFAULT '0',
+  `startTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `currentBidder` int(10) unsigned NOT NULL DEFAULT '0',
+  `currentBid` int(10) unsigned NOT NULL DEFAULT '0',
+  `minIncrement` int(10) unsigned NOT NULL DEFAULT '0',
+  `numBids` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`auctionId`),
+  UNIQUE KEY `templateId` (`templateId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `banned_addons`
+--
+
+LOCK TABLES `blackmarket_auctions` WRITE;
+/*!40000 ALTER TABLE `blackmarket_auctions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `blackmarket_auctions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `bugreport`
 --
 

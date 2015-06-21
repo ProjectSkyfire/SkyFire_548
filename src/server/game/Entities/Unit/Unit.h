@@ -706,7 +706,7 @@ enum NPCFlags
     UNIT_NPC_FLAG_REFORGER              = 0x08000000,       // reforging
     UNIT_NPC_FLAG_TRANSMOGRIFIER        = 0x10000000,       // transmogrification
     UNIT_NPC_FLAG_VAULTKEEPER           = 0x20000000,       // void storage
-    UNIT_NPC_FLAG_BLACKMARKET            = 0x80000000        // blackmarket auction
+    UNIT_NPC_FLAG_WILDPET_CAPTURABLE    = 0x80000000        // wild pet
 };
 
 enum MovementFlags

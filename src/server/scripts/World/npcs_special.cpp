@@ -2469,6 +2469,18 @@ public:
     }
 };
 
+class npc_madam_goya : public CreatureScript
+{
+public:
+    npc_madam_goya() : CreatureScript("npc_madam_goya") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        player->GetSession()->SendBlackMarketHello(creature->GetGUID());
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -2493,4 +2505,5 @@ void AddSC_npcs_special()
     new npc_firework();
     new npc_Spirit_of_Master_Shang_Xi();
     new npc_spring_rabbit();
+    new npc_madam_goya();
 }

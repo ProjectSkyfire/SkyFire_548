@@ -38,6 +38,7 @@
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AuctionHouseMgr.h"
+#include "BlackMarketMgr.h"
 #include "ObjectMgr.h"
 #include "ArenaTeamMgr.h"
 #include "GuildMgr.h"
@@ -1105,6 +1106,18 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_BATTLE_PET_INITIAL_LEVEL] = 1;
     }
 
+    // blackmarket
+    m_bool_configs[CONFIG_BLACK_MARKET_OPEN] = sConfigMgr->GetBoolDefault("BlackMarket.Open", false);
+    m_int_configs[CONFIG_BLACK_MARKET_MAX_AUCTIONS] = sConfigMgr->GetIntDefault("BlackMarket.MaxAuctions", 12);
+    if (m_int_configs[CONFIG_BLACK_MARKET_MAX_AUCTIONS] > CONFIG_BLACK_MARKET_MAX_AUCTIONS)
+        m_int_configs[CONFIG_BLACK_MARKET_MAX_AUCTIONS] = CONFIG_BLACK_MARKET_MAX_AUCTIONS;
+    m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY] = sConfigMgr->GetIntDefault("BlackMarket.AuctionDelay", 12);
+    if (m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY] > CONFIG_BLACK_MARKET_AUCTION_DELAY)
+        m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY] = CONFIG_BLACK_MARKET_AUCTION_DELAY;
+    m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD] = sConfigMgr->GetIntDefault("BlackMarket.AuctionDelayMod", 12);
+    if (m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD] > CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD)
+        m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD] = CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD;
+
     //visibility on continents
     m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);
     if (m_MaxVisibleDistanceOnContinents < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
@@ -1824,6 +1837,7 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_WEATHERS].SetInterval(1*IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
+    m_timers[WUPDATE_BLACK_MARKET].SetInterval(MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(m_int_configs[CONFIG_UPTIME_UPDATE]*MINUTE*IN_MILLISECONDS);
                                                             //Update "uptime" table based on configuration entry in minutes.
     m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
@@ -1921,6 +1935,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("misc", "Loading hotfix info...");
     sObjectMgr->LoadHotfixData();
+
+    TC_LOG_INFO("server.loading", "Loading BlackMarket Templates...");
+    sBlackMarketMgr->LoadFromDB();
 
     TC_LOG_INFO("server.loading", "Loading missing KeyChains...");
     sObjectMgr->LoadMissingKeyChains();
@@ -2047,6 +2064,23 @@ void World::Update(uint32 diff)
 
     if (m_gameTime > m_NextCurrencyReset)
         ResetCurrencyWeekCap();
+
+    /// <ul><li> Handle auctions when the timer has passed
+    if (m_timers[WUPDATE_BLACK_MARKET].Passed())
+    {
+        m_timers[WUPDATE_BLACK_MARKET].Reset();
+
+        ///- Update mails (return old mails with item, or delete them)
+        //(tested... works on win)
+        if (++mail_timer > mail_timer_expires)
+        {
+            mail_timer = 0;
+            sObjectMgr->ReturnOrDeleteOldMails(true);
+        }
+
+        ///- Handle expired Blackmarket auctions
+        sBlackMarketMgr->Update();
+    }
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
