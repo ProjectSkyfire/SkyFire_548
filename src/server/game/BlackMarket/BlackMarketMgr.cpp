@@ -60,8 +60,8 @@ void BlackMarketAuction::SaveToDB(SQLTransaction& trans)
     stmt->setUInt32(1, GetTemplateId());
     stmt->setUInt32(2, GetStartTime());
     stmt->setUInt32(3, GetCurrentBidder());
-    stmt->setUInt64(4, GetCurrentBid());
-    stmt->setUInt64(5, GetMinIncrement());
+    stmt->setUInt32(4, GetCurrentBid());
+    stmt->setUInt32(5, GetMinIncrement());
     stmt->setUInt32(6, GetNumBids());
     trans->Append(stmt);
 }
@@ -77,8 +77,8 @@ void BlackMarketAuction::UpdateToDB(SQLTransaction& trans)
 {
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_BLACKMARKET_AUCTION);
     stmt->setUInt32(0, GetCurrentBidder());
-    stmt->setUInt64(1, GetCurrentBid());
-    stmt->setUInt64(2, GetMinIncrement());
+    stmt->setUInt32(1, GetCurrentBid());
+    stmt->setUInt32(2, GetMinIncrement());
     stmt->setUInt32(3, GetNumBids());
     stmt->setUInt32(4, GetAuctionId());
     trans->Append(stmt);
@@ -109,7 +109,7 @@ void BlackMarketMgr::LoadFromDB()
             blackmarket_template->SellerNPCEntry = fields[2].GetUInt32();
             blackmarket_template->ItemEntry = fields[3].GetUInt32();
             blackmarket_template->Quantity = fields[4].GetUInt32();
-            blackmarket_template->MinBid = fields[5].GetUInt64();
+            blackmarket_template->MinBid = fields[5].GetUInt32();
             blackmarket_template->Duration = fields[6].GetUInt32();
             blackmarket_template->Chance = fields[7].GetFloat();
 
@@ -137,8 +137,8 @@ void BlackMarketMgr::LoadAuctions()
             uint32 templateId = fields[1].GetUInt32();
             uint32 startTime = fields[2].GetUInt32();
             uint32 currentBidder = fields[3].GetUInt32();
-            uint64 currentBid = fields[4].GetUInt64();
-            uint64 minIncrement = fields[5].GetUInt64();
+            uint32 currentBid = fields[4].GetUInt32();
+            uint32 minIncrement = fields[5].GetUInt32();
             uint32 numBids = fields[6].GetUInt32();
 
             BlackMarketAuction* auction = new BlackMarketAuction(auctionId, templateId, startTime, currentBidder, currentBid, minIncrement, numBids);
@@ -248,7 +248,7 @@ void BlackMarketMgr::BuildBlackMarketRequestItemsResult(WorldPacket& data, uint3
 {
     uint32 count = 0;
 
-    data.WriteBit(1);                                       // LastUpdateID
+    data << uint32(1);                                      // LastUpdateID
     data.WriteBits(count, 18);                              // ItemCount Placeholder
 
     for (BMAuctionStore::const_iterator itr = GetAuctionsBegin(); itr != GetAuctionsEnd(); ++itr)
