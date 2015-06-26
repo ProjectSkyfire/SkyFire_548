@@ -229,12 +229,14 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
 
         uint32 startTime = time(NULL) + sWorld->getIntConfig(CONFIG_BLACK_MARKET_AUCTION_DELAY) + urand(0, sWorld->getIntConfig(CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) * 2) - sWorld->getIntConfig(CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) / 2;
 
+        uint32 minIncrement = selTemplate->MinBid * 0.05f;
+
         BlackMarketAuction* auction = new BlackMarketAuction;
         auction->SetAuctionId(GetFreeAuctionId());
         auction->SetCurrentBid(selTemplate->MinBid);
         auction->SetCurrentBidder(0);
         auction->SetNumBids(0);
-        auction->SetMinIncrement(0); // todo
+        auction->SetMinIncrement(minIncrement);
         auction->SetStartTime(startTime);
         auction->SetTemplateId(selTemplate->Id);
 
@@ -289,14 +291,16 @@ void BlackMarketMgr::BuildBlackMarketRequestItemsResult(WorldPacket& data, uint3
 
 void BlackMarketMgr::UpdateAuction(BlackMarketAuction* auction, uint64 newPrice, uint64 requiredIncrement, Player* newBidder)
 {
+    uint64 currentBid = newPrice + requiredIncrement;
+    uint64 minIncrement = currentBid * 0.05f;
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     if (auction->GetCurrentBidder())
         SendAuctionOutbidded(auction, newPrice, newBidder, trans);
 
-    auction->SetCurrentBid(newPrice);
+    auction->SetCurrentBid(currentBid);
     auction->SetCurrentBidder(newBidder->GetGUIDLow());
-    auction->SetMinIncrement(requiredIncrement);
+    auction->SetMinIncrement(minIncrement);
     auction->SetNumBids(auction->GetNumBids() + 1);
 
     auction->UpdateToDB(trans);
@@ -343,16 +347,22 @@ std::string BlackMarketAuction::BuildAuctionMailBody(uint32 lowGuid)
 
 void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans)
 {
-    WorldPacket data(SMSG_BLACKMARKET_OUT_BID, 12);
+    uint64 bidder_guid = MAKE_NEW_GUID(auction->GetCurrentBidder(), 0, HIGHGUID_PLAYER);
+    Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
+    uint32 bidder_accId = sObjectMgr->GetPlayerAccountIdByGUID(bidder_guid);
 
-    data << uint32(1);
-    data << uint32(auction->GetTemplate()->ItemEntry);
-    data << uint32(1);
-
-    if (Player* bidder = sObjectAccessor->FindPlayer(MAKE_NEW_GUID(auction->GetCurrentBidder(), 0, HIGHGUID_PLAYER)))
+    if (bidder || bidder_accId)
     {
-        bidder->GetSession()->SendPacket(&data);
+        if (bidder)
+        {
+            WorldPacket data(SMSG_BLACKMARKET_OUT_BID, 12);
 
+            data << uint32(auction->GetTemplate()->ItemEntry);
+            data << uint32(1);
+            data << uint32(1);
+            bidder->GetSession()->SendPacket(&data);
+        }
+    
         MailDraft(auction->BuildAuctionMailSubject(BM_AUCTION_OUTBIDDED), auction->BuildAuctionMailBody(auction->GetTemplate()->SellerNPCEntry))
             .AddMoney(auction->GetCurrentBid())
             .SendMailTo(trans, MailReceiver(bidder, auction->GetCurrentBidder()), auction, MAIL_CHECK_MASK_COPIED);
@@ -361,14 +371,21 @@ void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, uint32 ne
 
 void BlackMarketMgr::SendAuctionWon(BlackMarketAuction* auction, SQLTransaction& trans)
 {
-    WorldPacket data(SMSG_BLACKMARKET_BID_WON, 12);
-    data << uint32(1);                                  // 6 - might be OK - 6 (win msg recvd)
-    data << uint32(1);                                  // 5 - might be OK - 5 (win msg recvd)
-    data << uint32(auction->GetTemplate()->ItemEntry);  // 4 - semms wrong ItemEntry
+    uint64 bidder_guid = MAKE_NEW_GUID(auction->GetCurrentBidder(), 0, HIGHGUID_PLAYER);
+    Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
+    uint32 bidder_accId = sObjectMgr->GetPlayerAccountIdByGUID(bidder_guid);
 
-    if (Player* bidder = sObjectAccessor->FindPlayer(MAKE_NEW_GUID(auction->GetCurrentBidder(), 0, HIGHGUID_PLAYER)))
+    if (bidder || bidder_accId)
     {
-        bidder->GetSession()->SendPacket(&data);
+        if (bidder)
+        {
+            WorldPacket data(SMSG_BLACKMARKET_BID_WON, 12);
+            data << uint32(1);                                  // 6 - might be OK - 6 (win msg recvd)
+            data << uint32(auction->GetTemplate()->ItemEntry);  // 4 - ItemEntry
+            data << uint32(1);                                  // 5 - might be OK - 5 (win msg recvd)
+
+            bidder->GetSession()->SendPacket(&data);
+        }
 
         ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(auction->GetTemplate()->ItemEntry);
         if (!itemTemplate)
@@ -376,8 +393,15 @@ void BlackMarketMgr::SendAuctionWon(BlackMarketAuction* auction, SQLTransaction&
 
         Item* pItem = Item::CreateItem(auction->GetTemplate()->ItemEntry, auction->GetTemplate()->Quantity, bidder);
 
-        MailDraft(auction->BuildAuctionMailSubject(BM_AUCTION_WON), auction->BuildAuctionMailBody(auction->GetCurrentBidder()))
-            .AddItem(pItem)
-            .SendMailTo(trans, MailReceiver(bidder, auction->GetCurrentBidder()), auction, MAIL_CHECK_MASK_COPIED);
+        MailDraft draft(auction->BuildAuctionMailSubject(BM_AUCTION_WON), auction->BuildAuctionMailBody(auction->GetCurrentBidder()));
+        
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        if (pItem)
+        {
+            pItem->SaveToDB(trans);
+            draft.AddItem(pItem);
+        }
+        draft.SendMailTo(trans, MailReceiver(bidder, auction->GetCurrentBidder()), MailSender(auction), MAIL_CHECK_MASK_COPIED);
+        CharacterDatabase.CommitTransaction(trans);
     }
 }

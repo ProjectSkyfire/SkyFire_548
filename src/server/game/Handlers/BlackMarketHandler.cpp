@@ -168,14 +168,14 @@ void WorldSession::HandleBlackMarketBidOnItem(WorldPacket& recvData)
         return;
     }
 
-    if (auction->GetCurrentBid() >= BidAmount && BidAmount != auction->GetTemplate()->MinBid)
+    if (auction->GetCurrentBid() > BidAmount && BidAmount != auction->GetTemplate()->MinBid)
     {
         TC_LOG_DEBUG("blackMarket", "HandleBlackMarketBid - Player (GUID: %u) could not bid. The current bid (%u) is higher than the given amount (%u).", GetPlayer()->GetGUIDLow(), auction->GetCurrentBid(), BidAmount);
         return;
     }
 
     uint64 currentRequiredIncrement = auction->GetCurrentBid() + auction->GetMinIncrement();
-    if (currentRequiredIncrement >= BidAmount)
+    if (currentRequiredIncrement > BidAmount)
     {
         TC_LOG_DEBUG("blackMarket", "HandleBlackMarketBid - Player (GUID: %u) could not bid. The BidAmount (%u) is lower than the current requiredIncrement (%u).", GetPlayer()->GetGUIDLow(), BidAmount, currentRequiredIncrement);
         return;

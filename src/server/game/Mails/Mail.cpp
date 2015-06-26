@@ -65,7 +65,7 @@ MailSender::MailSender(AuctionEntry* sender)
     : m_messageType(MAIL_AUCTION), m_senderId(sender->GetHouseId()), m_stationery(MAIL_STATIONERY_AUCTION) { }
 
 MailSender::MailSender(BlackMarketAuction* sender)
-    : m_messageType(MAIL_AUCTION), m_senderId(sender->GetAuctionId()), m_stationery(MAIL_STATIONERY_AUCTION) { }
+    : m_messageType(MAIL_BLACKMARKET), m_senderId(sender->GetTemplate()->SellerNPCEntry), m_stationery(MAIL_STATIONERY_AUCTION) { }
 
 MailSender::MailSender(Player* sender)
 {
