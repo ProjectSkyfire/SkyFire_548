@@ -311,6 +311,8 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_MOVE_SPLINE_DONE");
 
+    uint32 SplineID;
+    recvData >> SplineID;
     MovementInfo movementInfo;                              // used only for proper packet read
     _player->ReadMovementInfo(recvData, &movementInfo);
 
