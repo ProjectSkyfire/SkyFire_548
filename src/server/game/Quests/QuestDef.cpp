@@ -99,9 +99,9 @@ Quest::Quest(Field* questRecord)
     Objectives = questRecord[85].GetString();
     Details = questRecord[86].GetString();
     EndText = questRecord[87].GetString();
-    CompletedText = questRecord[88].GetString();
-    OfferRewardText = questRecord[89].GetString();
-    RequestItemsText = questRecord[90].GetString();
+    OfferRewardText = questRecord[88].GetString();
+    RequestItemsText = questRecord[89].GetString();
+    CompletedText = questRecord[90].GetString();
 
     for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
         RequiredSourceItemId[i] = questRecord[91+i].GetUInt32();
@@ -137,7 +137,7 @@ Quest::Quest(Field* questRecord)
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
         OfferRewardEmoteDelay[i] = questRecord[127+i].GetInt32();
 
-    // int32 WDBVerified = questRecord[131].GetInt32();
+    int32 WDBVerified = questRecord[131].GetInt32();
 
     if (SpecialFlags & QUEST_SPECIAL_FLAGS_AUTO_ACCEPT)
         Flags |= QUEST_FLAGS_AUTO_ACCEPT;
