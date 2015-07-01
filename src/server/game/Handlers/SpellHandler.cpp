@@ -228,23 +228,23 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (hasTargetString)
         targetStringLength = recvPacket.ReadBits(7);
 
-    itemTargetGuid[1] = recvPacket.ReadBit();
-    itemTargetGuid[0] = recvPacket.ReadBit();
-    itemTargetGuid[5] = recvPacket.ReadBit();
-    itemTargetGuid[3] = recvPacket.ReadBit();
-    itemTargetGuid[6] = recvPacket.ReadBit();
-    itemTargetGuid[4] = recvPacket.ReadBit();
-    itemTargetGuid[7] = recvPacket.ReadBit();
-    itemTargetGuid[2] = recvPacket.ReadBit();
-
-    targetGuid[4] = recvPacket.ReadBit();
-    targetGuid[5] = recvPacket.ReadBit();
-    targetGuid[0] = recvPacket.ReadBit();
     targetGuid[1] = recvPacket.ReadBit();
+    targetGuid[0] = recvPacket.ReadBit();
+    targetGuid[5] = recvPacket.ReadBit();
     targetGuid[3] = recvPacket.ReadBit();
-    targetGuid[7] = recvPacket.ReadBit();
     targetGuid[6] = recvPacket.ReadBit();
+    targetGuid[4] = recvPacket.ReadBit();
+    targetGuid[7] = recvPacket.ReadBit();
     targetGuid[2] = recvPacket.ReadBit();
+
+    itemTargetGuid[4] = recvPacket.ReadBit();
+    itemTargetGuid[5] = recvPacket.ReadBit();
+    itemTargetGuid[0] = recvPacket.ReadBit();
+    itemTargetGuid[1] = recvPacket.ReadBit();
+    itemTargetGuid[3] = recvPacket.ReadBit();
+    itemTargetGuid[7] = recvPacket.ReadBit();
+    itemTargetGuid[6] = recvPacket.ReadBit();
+    itemTargetGuid[2] = recvPacket.ReadBit();
 
     if (hasCastFlags)
         castFlags = recvPacket.ReadBits(5);
@@ -371,14 +371,14 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             destPos.Relocate(caster);
     }
 
-    recvPacket.ReadByteSeq(targetGuid[6]);
-    recvPacket.ReadByteSeq(targetGuid[7]);
-    recvPacket.ReadByteSeq(targetGuid[2]);
-    recvPacket.ReadByteSeq(targetGuid[0]);
-    recvPacket.ReadByteSeq(targetGuid[3]);
-    recvPacket.ReadByteSeq(targetGuid[4]);
-    recvPacket.ReadByteSeq(targetGuid[1]);
-    recvPacket.ReadByteSeq(targetGuid[5]);
+    recvPacket.ReadByteSeq(itemTargetGuid[6]);
+    recvPacket.ReadByteSeq(itemTargetGuid[7]);
+    recvPacket.ReadByteSeq(itemTargetGuid[2]);
+    recvPacket.ReadByteSeq(itemTargetGuid[0]);
+    recvPacket.ReadByteSeq(itemTargetGuid[3]);
+    recvPacket.ReadByteSeq(itemTargetGuid[4]);
+    recvPacket.ReadByteSeq(itemTargetGuid[1]);
+    recvPacket.ReadByteSeq(itemTargetGuid[5]);
 
     if (hasSrcLocation)
     {
@@ -410,14 +410,14 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (hasSpellId)
         recvPacket >> spellId;
 
-    recvPacket.ReadByteSeq(itemTargetGuid[1]);
-    recvPacket.ReadByteSeq(itemTargetGuid[4]);
-    recvPacket.ReadByteSeq(itemTargetGuid[3]);
-    recvPacket.ReadByteSeq(itemTargetGuid[6]);
-    recvPacket.ReadByteSeq(itemTargetGuid[2]);
-    recvPacket.ReadByteSeq(itemTargetGuid[0]);
-    recvPacket.ReadByteSeq(itemTargetGuid[7]);
-    recvPacket.ReadByteSeq(itemTargetGuid[5]);
+    recvPacket.ReadByteSeq(targetGuid[1]);
+    recvPacket.ReadByteSeq(targetGuid[4]);
+    recvPacket.ReadByteSeq(targetGuid[3]);
+    recvPacket.ReadByteSeq(targetGuid[6]);
+    recvPacket.ReadByteSeq(targetGuid[2]);
+    recvPacket.ReadByteSeq(targetGuid[0]);
+    recvPacket.ReadByteSeq(targetGuid[7]);
+    recvPacket.ReadByteSeq(targetGuid[5]);
 
     if (hasTargetString)
         targetString = recvPacket.ReadString(targetStringLength);
