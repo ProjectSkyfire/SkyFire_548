@@ -13815,9 +13815,28 @@ void Unit::SendDurabilityLoss(Player* receiver, uint32 percent)
 
 void Unit::PlayOneShotAnimKit(uint32 id)
 {
-    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);
-    data.appendPackGUID(GetGUID());
+    ObjectGuid Guid;
+    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7 + 2);
+
+    data.WriteBit(Guid[3]);
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[6]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(Guid[4]);
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[2]);
+    
+    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(Guid[6]);
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[4]);
     data << uint16(id);
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[7]);
+    data.WriteByteSeq(Guid[5]);
+    data.WriteByteSeq(Guid[0]);
+
     SendMessageToSet(&data, true);
 }
 
