@@ -132,19 +132,20 @@ enum InventoryResult
     EQUIP_ERR_ITEM_INVENTORY_FULL_SATCHEL                  = 91, // Your inventory is full. Your satchel has been delivered to your mailbox.
     EQUIP_ERR_SCALING_STAT_ITEM_LEVEL_TOO_LOW              = 92, // Your level is too low to use that item
     EQUIP_ERR_CANT_BUY_QUANTITY                            = 93, // You can't buy the specified quantity of that item.
+    EQUIP_ERR_ITEM_STILL_WAITING_TO_BE_UNLOCKED            = 94, // Your purchased item is still waiting to be unlocked.
 };
 
 enum BuyResult
 {
-    BUY_ERR_CANT_FIND_ITEM                      = 0,
-    BUY_ERR_ITEM_ALREADY_SOLD                   = 1,
-    BUY_ERR_NOT_ENOUGHT_MONEY                   = 2,
-    BUY_ERR_SELLER_DONT_LIKE_YOU                = 4,
-    BUY_ERR_DISTANCE_TOO_FAR                    = 5,
-    BUY_ERR_ITEM_SOLD_OUT                       = 7,
-    BUY_ERR_CANT_CARRY_MORE                     = 8,
-    BUY_ERR_RANK_REQUIRE                        = 11,
-    BUY_ERR_REPUTATION_REQUIRE                  = 12
+    BUY_ERR_CANT_FIND_ITEM                      = 0,  // The item was not found.
+    BUY_ERR_ITEM_ALREADY_SOLD                   = 1,  // That item is currently sold out.
+    BUY_ERR_NOT_ENOUGHT_MONEY                   = 2,  // You don't have enough money.
+    BUY_ERR_SELLER_DONT_LIKE_YOU                = 4,  // That merchant dosn't like u.
+    BUY_ERR_DISTANCE_TOO_FAR                    = 5,  // You are too far away.
+    BUY_ERR_ITEM_SOLD_OUT                       = 7,  // That item is currently sold out.
+    BUY_ERR_CANT_CARRY_MORE                     = 8,  // You can't carry any more of thouse items.
+    BUY_ERR_RANK_REQUIRE                        = 11, // You don't have the required rank for that item
+    BUY_ERR_REPUTATION_REQUIRE                  = 12  // You don't have the required reputation for that item
 };
 
 enum SellResult
