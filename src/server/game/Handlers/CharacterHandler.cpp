@@ -819,7 +819,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
     Player::DeleteFromDB(guid, accountId);
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
-    data << uint8(CHAR_DELETE_SUCCESS + 1);         // value different! Looks like all values have been offset by 1, needs more investigation.
+    data << uint8(CHAR_DELETE_SUCCESS);
     SendPacket(&data);
 }
 

@@ -1,0 +1,48 @@
+SET @LANG_PINFO_PLAYER := 453;
+SET @LANG_PINFO_GM_ACTIVE := 548;
+SET @LANG_PINFO_BANNED := 549;
+SET @LANG_PINFO_MUTED := 550;
+SET @LANG_PINFO_ACC_ACCOUNT := 714;
+SET @LANG_PINFO_ACC_LASTLOGIN := 716;
+SET @LANG_PINFO_ACC_OS := 749;
+SET @LANG_PINFO_ACC_IP := 752;
+SET @LANG_PINFO_CHR_LEVEL_LOW := 843;
+SET @LANG_PINFO_CHR_LEVEL_HIGH := 871;
+SET @LANG_PINFO_CHR_RACE := 844;
+SET @LANG_PINFO_CHR_ALIVE := 845;
+SET @LANG_PINFO_CHR_PHASE := 846;
+SET @LANG_PINFO_CHR_MONEY := 847;
+SET @LANG_PINFO_CHR_MAP := 848;
+SET @LANG_PINFO_CHR_GUILD := 849;
+SET @LANG_PINFO_CHR_GUILD_RANK := 850;
+SET @LANG_PINFO_CHR_GUILD_NOTE := 851;
+SET @LANG_PINFO_CHR_GUILD_ONOTE := 852;
+SET @LANG_PINFO_CHR_PLAYEDTIME := 853;
+SET @LANG_PINFO_CHR_MAILS := 854;
+
+UPDATE trinity_string SET content_default="Player %s %s (guid: %u)" WHERE entry=@LANG_PINFO_PLAYER;
+UPDATE trinity_string SET content_default="GM Mode active, Phase: -1" WHERE entry=@LANG_PINFO_GM_ACTIVE;
+UPDATE trinity_string SET content_default="Banned: (Type: %s, Reason: %s, Time: %s, By: %s)" WHERE entry=@LANG_PINFO_BANNED;
+UPDATE trinity_string SET content_default="Muted: (Time: %s, Reason: %s, By: %s)" WHERE entry=@LANG_PINFO_MUTED;
+UPDATE trinity_string SET content_default="Account: %s (ID: %u), GMLevel: %u" WHERE entry=@LANG_PINFO_ACC_ACCOUNT;
+UPDATE trinity_string SET content_default="Last Login: %s (Failed Logins: %u)" WHERE entry=@LANG_PINFO_ACC_LASTLOGIN;
+UPDATE trinity_string SET content_default="OS: %s - Latency: %u ms" WHERE entry=@LANG_PINFO_ACC_OS;
+UPDATE trinity_string SET content_default="Last IP: %s (Locked: %s)" WHERE entry=@LANG_PINFO_ACC_IP;
+UPDATE trinity_string SET content_default="Level: %u (%u/%u XP (%u XP left))" WHERE entry=@LANG_PINFO_CHR_LEVEL_LOW;
+UPDATE trinity_string SET content_default="Level: %u)" WHERE entry=@LANG_PINFO_CHR_LEVEL_HIGH;
+UPDATE trinity_string SET content_default="Race: %s %s, %s" WHERE entry=@LANG_PINFO_CHR_RACE;
+UPDATE trinity_string SET content_default="Alive ?: %s" WHERE entry=@LANG_PINFO_CHR_ALIVE;
+UPDATE trinity_string SET content_default="Phase: %u" WHERE entry=@LANG_PINFO_CHR_PHASE;
+UPDATE trinity_string SET content_default="Money: %ug, %us, %uc" WHERE entry=@LANG_PINFO_CHR_MONEY;
+UPDATE trinity_string SET content_default="Map: %s, Area: %s, Zone: %s" WHERE entry=@LANG_PINFO_CHR_MAP;
+UPDATE trinity_string SET content_default="Guild: %s (ID: %u)" WHERE entry=@LANG_PINFO_CHR_GUILD;
+UPDATE trinity_string SET content_default="Guild Rank: %s" WHERE entry=@LANG_PINFO_CHR_GUILD_RANK;
+UPDATE trinity_string SET content_default="Guild Note: %s" WHERE entry=@LANG_PINFO_CHR_GUILD_NOTE;
+UPDATE trinity_string SET content_default="Guild O. Note: %s" WHERE entry=@LANG_PINFO_CHR_GUILD_ONOTE;
+UPDATE trinity_string SET content_default="Played time: %s" WHERE entry=@LANG_PINFO_CHR_PLAYEDTIME;
+UPDATE trinity_string SET content_default="Mails: %d Read/%u Total" WHERE entry=@LANG_PINFO_CHR_MAILS;
+
+SET @LANG_PINFO_ACC_REGMAILS := 879;
+DELETE FROM `trinity_string` WHERE `entry` = @LANG_PINFO_ACC_REGMAILS;
+INSERT INTO `trinity_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES
+(@LANG_PINFO_ACC_REGMAILS, 'Registration Email: %s - Email: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
