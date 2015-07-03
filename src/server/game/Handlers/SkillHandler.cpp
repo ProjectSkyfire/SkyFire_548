@@ -116,7 +116,7 @@ void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
 
     if (!_player->ResetTalents())
     {
-        WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 8 + 4);    //you have not any talent
+        WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 8 + 1 + 4);    //you have not any talent
 
         data.WriteBit(guid[5]);
         data.WriteBit(guid[7]);

@@ -10245,7 +10245,7 @@ void Player::SendTalentWipeConfirm(uint64 guid)
     ObjectGuid Guid = guid;
     uint8 RespecType = 0;
     uint32 Cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
-    WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, (8 + 4));
+    WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, (8 + 1 + 4));
 
     data.WriteBit(Guid[5]);
     data.WriteBit(Guid[7]);
