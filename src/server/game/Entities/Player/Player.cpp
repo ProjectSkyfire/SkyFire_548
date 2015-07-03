@@ -10242,10 +10242,31 @@ void Player::SetBindPoint(uint64 guid)
 
 void Player::SendTalentWipeConfirm(uint64 guid)
 {
-    WorldPacket data(MSG_TALENT_WIPE_CONFIRM, (8+4));
-    data << uint64(guid);
-    uint32 cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
-    data << cost;
+    ObjectGuid Guid = guid;
+    uint8 RespecType = 0;
+    uint32 Cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
+    WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, (8 + 4));
+
+    data.WriteBit(Guid[5]);
+    data.WriteBit(Guid[7]);
+    data.WriteBit(Guid[3]);
+    data.WriteBit(Guid[2]);
+    data.WriteBit(Guid[1]);
+    data.WriteBit(Guid[0]);
+    data.WriteBit(Guid[4]);
+    data.WriteBit(Guid[6]);
+
+    data.WriteByteSeq(Guid[1]);
+    data.WriteByteSeq(Guid[0]);
+    data << uint8(RespecType);
+    data.WriteByteSeq(Guid[7]);
+    data.WriteByteSeq(Guid[3]);
+    data.WriteByteSeq(Guid[2]);
+    data.WriteByteSeq(Guid[5]);
+    data.WriteByteSeq(Guid[6]);
+    data.WriteByteSeq(Guid[4]);
+    data << uint32(Cost);
+
     GetSession()->SendPacket(&data);
 }
 

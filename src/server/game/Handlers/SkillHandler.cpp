@@ -77,16 +77,36 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
 }
 
-void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
+void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "MSG_TALENT_WIPE_CONFIRM");
-    uint64 guid;
-    recvData >> guid;
+    TC_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
+    ObjectGuid guid;
+    uint8 RespecType = 0;
+    uint32 Cost = 0;
+    //Find this opcode !
+    guid[5] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket >> RespecType;
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[4]);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleTalentWipeConfirmOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));
+        TC_LOG_DEBUG("network", "WORLD: HandleRespecWipeConfirmOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));
         return;
     }
 
@@ -96,9 +116,28 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recvData)
 
     if (!_player->ResetTalents())
     {
-        WorldPacket data(MSG_TALENT_WIPE_CONFIRM, 8+4);    //you have not any talent
-        data << uint64(0);
-        data << uint32(0);
+        WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 8 + 4);    //you have not any talent
+
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[6]);
+
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[0]);
+        data << uint8(RespecType);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[4]);
+        data << uint32(Cost);
+
         SendPacket(&data);
         return;
     }
