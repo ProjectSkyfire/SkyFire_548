@@ -6302,7 +6302,7 @@ void AuraEffect::HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) con
     float dmgMultiplier = GetSpellInfo()->Effects[GetEffIndex()].CalcValueMultiplier(caster);
 
     SpellInfo const* spellProto = GetSpellInfo();
-    // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
+    // maybe has to be sent different to client, but not by SMSG_SPELL_PERIODIC_AURA_LOG
     SpellNonMeleeDamage damageInfo(caster, target, spellProto->Id, spellProto->SchoolMask);
     // no SpellDamageBonus for burn mana
     caster->CalculateSpellDamageTaken(&damageInfo, int32(gain * dmgMultiplier), spellProto);
