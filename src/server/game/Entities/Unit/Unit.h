@@ -114,10 +114,14 @@ enum SpellModOp
     SPELLMOD_VALUE_MULTIPLIER       = 27,
     SPELLMOD_RESIST_DISPEL_CHANCE   = 28,
     SPELLMOD_CRIT_DAMAGE_BONUS_2    = 29, //one not used spell
-    SPELLMOD_SPELL_COST_REFUND_ON_FAIL = 30
+    SPELLMOD_SPELL_COST_REFUND_ON_FAIL = 30,
+    SPELLMOD_CHARGES2               = 31,
+    SPELLMOD_EFFECT4                = 32,
+    SPELLMOD_EFFECT5                = 33,
+    SPELLMOD_UNK_35                 = 35 // Bodyguard Visual
 };
 
-#define MAX_SPELLMOD 32
+#define MAX_SPELLMOD 36
 
 enum SpellValueMod
 {
