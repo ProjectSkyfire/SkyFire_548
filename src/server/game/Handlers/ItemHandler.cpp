@@ -322,12 +322,12 @@ void WorldSession::HandleReadItem(WorldPacket& recvData)
         InventoryResult msg = _player->CanUseItem(pItem);
         if (msg == EQUIP_ERR_OK)
         {
-            data.Initialize(SMSG_READ_ITEM_OK, 8);
+            data.Initialize(SMSG_READ_ITEM_RESULT_OK, 8);
             TC_LOG_INFO("network", "STORAGE: Item page sent");
         }
         else
         {
-            data.Initialize(SMSG_READ_ITEM_FAILED, 8);
+            data.Initialize(SMSG_READ_ITEM_RESULT_FAILED, 8);
             TC_LOG_INFO("network", "STORAGE: Unable to read item");
             _player->SendEquipError(msg, pItem, NULL);
         }
