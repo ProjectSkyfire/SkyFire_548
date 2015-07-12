@@ -639,6 +639,38 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
     GetPlayer()->RepopAtGraveyard();
 }
 
+void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
+{
+    uint32 zoneId = _player->GetZoneId();
+    uint32 team = _player->GetTeam();
+
+    std::vector<uint32> GraveyardIds;
+    auto range = sObjectMgr->GraveYardStore.equal_range(zoneId);
+
+    for (auto it = range.first; it != range.second && GraveyardIds.size() < 16; ++it) // client max
+    {
+        if (it->second.team == 0 || it->second.team == team)
+            GraveyardIds.push_back(it->first);
+    }
+
+    if (GraveyardIds.empty())
+    {
+        TC_LOG_DEBUG("network", "No graveyards found for zone %u for %s (team %u) in CMSG_REQUEST_CEMETERY_LIST", zoneId, m_GUIDLow, team);
+        return;
+    }
+
+    bool IsGossipTriggered = false;
+    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 4 + 4 * GraveyardIds.size());
+
+    data.WriteBits(GraveyardIds.size(), 22);
+    data << IsGossipTriggered;
+
+    for (uint32 i = 0; i < GraveyardIds.size(); ++i)
+        data << uint32(GraveyardIds[i]);
+
+    SendPacket(&data);
+}
+
 void WorldSession::HandleSetSelectionOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
