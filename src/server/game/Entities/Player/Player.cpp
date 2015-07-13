@@ -26806,29 +26806,77 @@ void Player::BuildEnchantmentsInfoData(WorldPacket* data)
 void Player::SendEquipmentSetList()
 {
     uint32 count = 0;
-    WorldPacket data(SMSG_EQUIPMENT_SET_LIST, 4);
-    size_t count_pos = data.wpos();
-    data << uint32(count);                                  // count placeholder
+    WorldPacket data(SMSG_LOAD_EQUIPMENT_SET);
+
+    data.WriteBits(count, 19);
+
     for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
     {
         if (itr->second.state == EQUIPMENT_SET_DELETED)
             continue;
-        data.appendPackGUID(itr->second.Guid);
-        data << uint32(itr->first);
-        data << itr->second.Name;
-        data << itr->second.IconName;
+
+        ObjectGuid setGuid = itr->second.Guid;
+
+        data.WriteBit(setGuid[4]);
+
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
-            // ignored slots stored in IgnoreMask, client wants "1" as raw GUID, so no HIGHGUID_ITEM
-            if (itr->second.IgnoreMask & (1 << i))
-                data.appendPackGUID(uint64(1));
-            else
-                data.appendPackGUID(MAKE_NEW_GUID(itr->second.Items[i], 0, HIGHGUID_ITEM));
+            ObjectGuid itemGuid = MAKE_NEW_GUID(itr->second.Items[i], 0, HIGHGUID_ITEM);
+
+            data.WriteBit(itemGuid[3]);
+            data.WriteBit(itemGuid[5]);
+            data.WriteBit(itemGuid[7]);
+            data.WriteBit(itemGuid[2]);
+            data.WriteBit(itemGuid[6]);
+            data.WriteBit(itemGuid[0]);
+            data.WriteBit(itemGuid[4]);
+            data.WriteBit(itemGuid[1]);
         }
 
-        ++count;                                            // client have limit but it checked at loading and set
+        data.WriteBit(setGuid[5]);
+        data.WriteBits(itr->second.IconName.size(), 9);
+        data.WriteBit(setGuid[1]);
+        data.WriteBit(setGuid[7]);
+        data.WriteBits(itr->second.Name.size(), 8);
+        data.WriteBit(setGuid[3]);
+        data.WriteBit(setGuid[2]);
+        data.WriteBit(setGuid[6]);
+        data.WriteBit(setGuid[0]);
     }
-    data.put<uint32>(count_pos, count);
+
+    for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
+    {
+        if (itr->second.state == EQUIPMENT_SET_DELETED)
+            continue;
+
+        ObjectGuid setGuid = itr->second.Guid;
+
+        for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
+        {
+            ObjectGuid itemGuid = MAKE_NEW_GUID(itr->second.Items[i], 0, HIGHGUID_ITEM);
+            data.WriteByteSeq(setGuid[2]);
+            data.WriteByteSeq(setGuid[3]);
+            data.WriteByteSeq(setGuid[7]);
+            data.WriteByteSeq(setGuid[1]);
+            data.WriteByteSeq(setGuid[6]);
+            data.WriteByteSeq(setGuid[5]);
+            data.WriteByteSeq(setGuid[0]);
+            data.WriteByteSeq(setGuid[4]);
+        }
+
+        data.WriteByteSeq(setGuid[7]);
+        data << uint32(itr->first);
+        data.append(itr->second.Name.c_str(), itr->second.Name.size());
+        data.WriteByteSeq(setGuid[2]);
+        data.WriteByteSeq(setGuid[6]);
+        data.WriteByteSeq(setGuid[0]);
+        data.WriteByteSeq(setGuid[3]);
+        data.WriteByteSeq(setGuid[1]);
+        data.WriteByteSeq(setGuid[5]);
+        data.WriteByteSeq(setGuid[4]);
+        data.append(itr->second.IconName.c_str(), itr->second.IconName.size());
+    }
+
     GetSession()->SendPacket(&data);
 }
 
@@ -26863,10 +26911,30 @@ void Player::SetEquipmentSet(uint32 index, EquipmentSet eqset)
     if (eqset.Guid == 0)
     {
         eqslot.Guid = sObjectMgr->GenerateEquipmentSetGuid();
+        ObjectGuid guid = eqslot.Guid;
 
-        WorldPacket data(SMSG_EQUIPMENT_SET_SAVED, 4 + 1);
+        WorldPacket data(SMSG_EQUIPMENT_SET_ID, 8 + 4);
+        
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[5]);
+
         data << uint32(index);
-        data.appendPackGUID(eqslot.Guid);
+
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[6]);
+
         GetSession()->SendPacket(&data);
     }
 
