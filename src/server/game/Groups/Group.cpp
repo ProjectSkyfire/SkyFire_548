@@ -222,6 +222,16 @@ void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, 
     sLFGMgr->SetupGroupMember(member.guid, GetGUID());
 }
 
+void Group::ChangeFlagEveryoneAssistant(bool apply)
+{
+    if (apply)
+        m_groupType = GroupType(m_groupType | GROUPTYPE_EVERYONE_IS_ASSISTANT);
+    else
+        m_groupType = GroupType(m_groupType &~GROUPTYPE_EVERYONE_IS_ASSISTANT);
+
+    this->SendUpdate();
+}
+
 void Group::ConvertToLFG()
 {
     m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
