@@ -4,7 +4,7 @@ INSERT INTO `creature_template` VALUES (69333, 0, 0, 0, 0, 0, 47465, 0, 0, 0, 'D
 INSERT INTO `creature_template` VALUES (70301, 0, 0, 0, 0, 0, 47982, 0, 0, 0, 'Softpaws', 'Riding Trainer', NULL, 0, 90, 90, 4, 0, 1735, 1735, 82, 1, 1, 1, 0, 56277, 393941, 0, 0, 1, 0, 0, 255, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 18414);
 
 DELETE FROM `gameobject_template` WHERE `entry` IN (215457);
-INSERT INTO `gameobject_template` VALUES (215424, 22, 12658, 'Portail vers Rosée de miel', 1735, 0, 1, 0, 0, 0, 0, 0, 0, 130698, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595);
+INSERT INTO `gameobject_template` VALUES (215424, 22, 12658, 'Portal to Honydew Village', 1735, 0, 1, 0, 0, 0, 0, 0, 0, 130698, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595);
 INSERT INTO `gameobject_template` VALUES (215457, 22, 12658, 'Portal to Paw don Village', 1819, 0, 1, 0, 0, 0, 0, 0, 0, 130703, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595);
 
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+37;
