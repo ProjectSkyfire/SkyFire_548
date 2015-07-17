@@ -1,11 +1,11 @@
 DELETE FROM `creature_template` WHERE `entry` IN (68869, 69333, 70301);
-INSERT INTO `creature_template` VALUES (68869, 0, 0, 0, 0, 0, 46986, 0, 0, 0, 'Luo Luo', NULL, NULL, 0, 1, 1, 4, 0, 1735, 1735, 0, 1, 1, 1, 0, 12, 84, 0, 0, 0, 0, 0, 0, 33536, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 0, 0, 1, 3, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 1, 1, 1, 18414);
-INSERT INTO `creature_template` VALUES (69333, 0, 0, 0, 0, 0, 47465, 0, 0, 0, 'Disciple Jusi', 'Huojin Quartermaster', NULL, 0, 90, 90, 4, 0, 35, 35, 127, 1, 1, 1, 0, 56277, 393941, 0, 0, 1, 0, 0, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
-INSERT INTO `creature_template` VALUES (70301, 0, 0, 0, 0, 0, 47982, 0, 0, 0, 'Softpaws', 'Riding Trainer', NULL, 0, 90, 90, 4, 0, 1735, 1735, 82, 1, 1, 1, 0, 56277, 393941, 0, 0, 1, 0, 0, 255, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 18414);
+INSERT INTO `creature_template` VALUES (68869, 0, 0, 0, 0, 0, 46986, 0, 0, 0, 'Luo Luo', NULL, NULL, 0, 1, 1, 4, 0, 1735, 1735, 0, 1, 1, 1, 0, 12, 84, 0, 0, 0, 0, 0, 0, 33536, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 0, 0, 1, 3, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 1, 1, 1, 18414);
+INSERT INTO `creature_template` VALUES (69333, 0, 0, 0, 0, 0, 47465, 0, 0, 0, 'Disciple Jusi', 'Huojin Quartermaster', NULL, 0, 90, 90, 4, 0, 35, 35, 127, 1, 1, 1, 0, 56277, 393941, 0, 0, 1, 0, 0, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 18414);
+INSERT INTO `creature_template` VALUES (70301, 0, 0, 0, 0, 0, 47982, 0, 0, 0, 'Softpaws', 'Riding Trainer', NULL, 0, 90, 90, 4, 0, 1735, 1735, 82, 1, 1, 1, 0, 56277, 393941, 0, 0, 1, 0, 0, 255, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 18414);
 
-DELETE FROM `gameobject_template` WHERE `entry` IN (215457);
-INSERT INTO `gameobject_template` VALUES (215424, 22, 12658, 'Portal to Honydew Village', 1735, 0, 1, 0, 0, 0, 0, 0, 0, 130698, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595);
-INSERT INTO `gameobject_template` VALUES (215457, 22, 12658, 'Portal to Paw don Village', 1819, 0, 1, 0, 0, 0, 0, 0, 0, 130703, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595);
+DELETE FROM `gameobject_template` WHERE `entry` IN (215457, 215424);
+INSERT INTO `gameobject_template` VALUES (215424, 22, 12658, 'Portal to Honydew Village', 1735, 0, 1, 0, 0, 0, 0, 0, 0, 130698, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595); 
+INSERT INTO `gameobject_template` VALUES (215457, 22, 12658, 'Portal to Paw don Village', 1819, 0, 1, 0, 0, 0, 0, 0, 0, 130703, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15595);
 
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+37;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
@@ -53,8 +53,8 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+0, 215424, 1, 1, 1, 2014.819, -4700.274, 28.62439, 5.751331, 0, 0, 0, 1, 120, 255, 1),
 (@OGUID+1, 215457, 0, 1, 1, -8194.479, 528.1129, 117.2901, 0, 0, 0, 0, 1, 120, 255, 1);
 
+DELETE FROM `npc_trainer` WHERE `entry` = 70301 AND `spell` IN (33389, 33392);
 INSERT INTO `npc_trainer` (`entry`, `spell`, `spellcost`, `reqskill`, `reqskillvalue`, `reqlevel`) VALUES
 -- 70301
 (70301, 33389, 40000, 0, 0, 20),
 (70301, 33392, 500000, 0, 0, 40);
-
