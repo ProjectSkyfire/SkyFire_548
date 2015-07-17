@@ -10135,12 +10135,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
         {
             if (CreateVehicleKit(VehicleId, creatureEntry))
             {
-                // Send others that we now have a vehicle
-                WorldPacket data(SMSG_PLAYER_VEHICLE_DATA, GetPackGUID().size()+4);
-                data.appendPackGUID(GetGUID());
-                data << uint32(VehicleId);
-                SendMessageToSet(&data, true);
-
                 player->SendOnCancelExpectedVehicleRideAura();
 
                 // mounts can also have accessories
@@ -10203,11 +10197,6 @@ void Unit::Dismount()
     // dismount as a vehicle
     if (GetTypeId() == TYPEID_PLAYER && GetVehicleKit())
     {
-        // Send other players that we are no longer a vehicle
-        data.Initialize(SMSG_PLAYER_VEHICLE_DATA, 8+4);
-        data.appendPackGUID(GetGUID());
-        data << uint32(0);
-        ToPlayer()->SendMessageToSet(&data, true);
         // Remove vehicle from player
         RemoveVehicleKit();
     }
