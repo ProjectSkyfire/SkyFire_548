@@ -817,7 +817,6 @@ class WorldSession
         void HandleSetDungeonDifficultyOpcode(WorldPacket& recvData);
         void HandleSetRaidDifficultyOpcode(WorldPacket& recvData);
         void HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData);
-        void HandleSetTitleOpcode(WorldPacket& recvData);
         void HandleRealmSplitOpcode(WorldPacket& recvData);
         void HandleTimeSyncResp(WorldPacket& recvData);
         void HandleWhoisOpcode(WorldPacket& recvData);
@@ -1004,6 +1003,11 @@ class WorldSession
         void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
+
+        // Titles
+        void HandleSetTitleOpcode(WorldPacket& recvData);
+        void SendTitleEarned(uint32 TitleIndex);
+        void SendTitleLost(uint32 TitleIndex);
 
     private:
         void InitializeQueryCallbackParameters();

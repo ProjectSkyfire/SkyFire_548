@@ -1759,6 +1759,20 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket& recvData)
     GetPlayer()->SetUInt32Value(PLAYER_FIELD_PLAYER_TITLE, title);
 }
 
+void WorldSession::SendTitleEarned(uint32 TitleIndex)
+{
+    WorldPacket data(SMSG_TITLE_EARNED, 4);
+    data << uint32(TitleIndex);
+    SendPacket(&data);
+}
+
+void WorldSession::SendTitleLost(uint32 TitleIndex)
+{
+    WorldPacket data(SMSG_TITLE_LOST, 4);
+    data << uint32(TitleIndex);
+    SendPacket(&data);
+}
+
 void WorldSession::HandleTimeSyncResp(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_TIME_SYNC_RESP");

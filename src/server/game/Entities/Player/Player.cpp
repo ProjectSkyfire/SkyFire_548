@@ -25778,6 +25778,7 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
             return;
 
         RemoveFlag(PLAYER_FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
+        GetSession()->SendTitleLost(title->bit_index);
     }
     else
     {
@@ -25785,12 +25786,9 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
             return;
 
         SetFlag(PLAYER_FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
+        GetSession()->SendTitleEarned(title->bit_index);
     }
 
-    WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
-    data << uint32(title->bit_index);
-    data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
-    GetSession()->SendPacket(&data);
 }
 
 bool Player::isTotalImmunity()
