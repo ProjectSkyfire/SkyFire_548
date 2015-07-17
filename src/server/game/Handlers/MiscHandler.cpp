@@ -2475,44 +2475,44 @@ void WorldSession::SendLoadCUFProfiles()
         if (!profile)
             continue;
 
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_1]); // 165
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_3_PLAYERS]); // 159
-        data.WriteBit(profile->BoolOptions[CUF_UNK_157]); // 157
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_10_PLAYERS]); // 161
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_40_PLAYERS]); // 164
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_BORDER]); // 141
-        data.WriteBit(profile->BoolOptions[CUF_USE_CLASS_COLORS]); // 142
-        data.WriteBit(profile->BoolOptions[CUF_KEEP_GROUPS_TOGETHER]); // 134
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_POWER_BAR]); // 140
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_1]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_3_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_UNK_157]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_10_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_40_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_BORDER]);
+        data.WriteBit(profile->BoolOptions[CUF_USE_CLASS_COLORS]);
+        data.WriteBit(profile->BoolOptions[CUF_KEEP_GROUPS_TOGETHER]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_POWER_BAR]);
         data.WriteBits(profile->ProfileName.size(), 8);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_PETS]); // 135
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_AGGRO_HIGHLIGHT]); // 138
-        data.WriteBit(profile->BoolOptions[CUF_UNK_145]); // 145
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVP]); // 167
-        data.WriteBit(profile->BoolOptions[CUF_UNK_156]); // 156
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_MAIN_TANK_AND_ASSIST]); // 136
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_NON_BOSS_DEBUFFS]); // 144
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HORIZONTAL_GROUPS]); // 143
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_2]); // 166
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HEAL_PREDICTION]); // 137
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS]); // 139
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_25_PLAYERS]); // 163
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVE]); // 168
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_5_PLAYERS]); // 160
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_15_PLAYERS]); // 162
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_2_PLAYERS]); // 158
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_PETS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_AGGRO_HIGHLIGHT]);
+        data.WriteBit(profile->BoolOptions[CUF_UNK_145]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVP]);
+        data.WriteBit(profile->BoolOptions[CUF_UNK_156]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_MAIN_TANK_AND_ASSIST]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_NON_BOSS_DEBUFFS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HORIZONTAL_GROUPS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_2]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HEAL_PREDICTION]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_25_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVE]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_5_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_15_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_2_PLAYERS]);
 
-        byteBuffer << uint16(profile->Unk152); // 152
-        byteBuffer << uint16(profile->Unk154); // 154
-        byteBuffer << uint8(profile->HealthText); // 133
+        byteBuffer << uint16(profile->Unk152);
+        byteBuffer << uint16(profile->Unk154);
+        byteBuffer << uint8(profile->HealthText);
         byteBuffer.WriteString(profile->ProfileName);
-        byteBuffer << uint8(profile->Unk147); // 147
-        byteBuffer << uint8(profile->Unk146); // 146
-        byteBuffer << uint16(profile->FrameHeight); // 128
-        byteBuffer << uint8(profile->Unk148); // 148
-        byteBuffer << uint8(profile->SortBy); // 132
-        byteBuffer << uint16(profile->FrameWidth); // 130
-        byteBuffer << uint16(profile->Unk150); // 150
+        byteBuffer << uint8(profile->Unk147);
+        byteBuffer << uint8(profile->Unk146);
+        byteBuffer << uint16(profile->FrameHeight);
+        byteBuffer << uint8(profile->Unk148);
+        byteBuffer << uint8(profile->SortBy);
+        byteBuffer << uint16(profile->FrameWidth);
+        byteBuffer << uint16(profile->Unk150);
     }
 
     data.FlushBits();
