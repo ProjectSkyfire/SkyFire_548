@@ -4672,7 +4672,7 @@ GameObject* Unit::GetGameObject(uint32 spellId) const
 
 void Unit::AddGameObject(GameObject* gameObj)
 {
-    if (!gameObj || !gameObj->GetOwnerGUID() == 0)
+    if (!gameObj || !(gameObj->GetOwnerGUID() == 0))
         return;
 
     m_gameObj.push_back(gameObj);
