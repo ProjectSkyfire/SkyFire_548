@@ -645,9 +645,12 @@ void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
     uint32 team = _player->GetTeam();
 
     std::vector<uint32> GraveyardIds;
-    auto range = sObjectMgr->GraveYardStore.equal_range(zoneId);
 
-    for (auto it = range.first; it != range.second && GraveyardIds.size() < 16; ++it) // client max
+    GraveYardContainer::const_iterator it;
+    std::pair<GraveYardContainer::const_iterator, GraveYardContainer::const_iterator> range;
+    range = sObjectMgr->GraveYardStore.equal_range(zoneId);
+        
+    for (it = range.first; it != range.second && GraveyardIds.size() < 16; ++it) // client max
     {
         if (it->second.team == 0 || it->second.team == team)
             GraveyardIds.push_back(it->first);
@@ -655,7 +658,7 @@ void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
 
     if (GraveyardIds.empty())
     {
-        TC_LOG_DEBUG("network", "No graveyards found for zone %u for %s (team %u) in CMSG_REQUEST_CEMETERY_LIST", zoneId, m_GUIDLow, team);
+        TC_LOG_DEBUG("network", "No graveyards found for zone %u for %u (team %u) in CMSG_REQUEST_CEMETERY_LIST", zoneId, m_GUIDLow, team);
         return;
     }
 
