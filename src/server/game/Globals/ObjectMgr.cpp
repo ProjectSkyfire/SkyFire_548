@@ -9191,7 +9191,7 @@ void ObjectMgr::LoadQuestObjectives()
 
                 if (amount <= 0)
                 {
-                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has invalid Pet Battle PvP win amount %u! Skipping.", id, objectId, amount);
+                    TC_LOG_ERROR("sql.sql", "Quest Objective %u has invalid Pet Battle PvP win amount %u! Skipping.", id, amount);
                     continue;
                 }
 
