@@ -37,11 +37,6 @@ enum DefiantTrollEnum
     SAY_WORK                           = 0
 };
 
-enum Quests
-{
-    QUEST_LIFE_SAVING                  = 14126
-};
-
 class npc_defiant_troll : public CreatureScript
 {
 public:
@@ -133,24 +128,7 @@ public:
     }
 };
 
-class npc_trade_prince_gallywix : public CreatureScript
-{
-public:
-    npc_trade_prince_gallywix() : CreatureScript("npc_trade_prince_gallywix") { }
-
-    bool OnQuestComplete(Player* player, Creature* /*creature*/, Quest const* quest) OVERRIDE
-    {
-        if (quest->GetQuestId() == QUEST_LIFE_SAVING)
-        {
-        player->SendMovieStart(22);
-        player->TeleportTo(648, 534.50f, 3273.40f, 0.23f, 4.79f, 0);
-        }
-        return true;
-    }
-};
-
 void AddSC_kezan()
 {
     new npc_defiant_troll();
-    new npc_trade_prince_gallywix();
 }

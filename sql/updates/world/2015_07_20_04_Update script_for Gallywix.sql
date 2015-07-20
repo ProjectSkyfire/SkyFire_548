@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `ScriptName`='npc_trade_prince_gallywix' WHERE  `entry`=35222;
