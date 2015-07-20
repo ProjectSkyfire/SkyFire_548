@@ -3,7 +3,7 @@ DELETE FROM `npc_vendor` WHERE `entry`=@VENDOR;
 INSERT INTO `npc_vendor` (`entry`, `item`, `slot`, `maxcount`, `ExtendedCost`, `Type`) VALUES
 (@VENDOR, 81402, 1, 0, 0, 1), -- 81402
 (@VENDOR, 81410, 2, 0, 0, 1), -- 81410
-(@VENDOR, 117, 3, 0, 0, 1, 0), -- 117
+(@VENDOR, 117, 3, 0, 0, 1), -- 117
 (@VENDOR, 19304, 4, 0, 0, 1), -- 19304
 (@VENDOR, 67230, 5, 0, 0, 1), -- 67230
 (@VENDOR, 83097, 6, 0, 0, 1), -- 83097
