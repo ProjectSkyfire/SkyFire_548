@@ -1,0 +1,22 @@
+DELETE FROM `npc_vendor` WHERE `Entry` = 36464 ;
+INSERT INTO `npc_vendor` VALUES ( '36464', '1', '49259', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '2', '49260', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '3', '49261', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '4', '49262', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '5', '49263', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '6', '49264', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '7', '49265', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '8', '49266', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '9', '49267', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '10', '49268', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '11', '49269', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '12', '49270', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '13', '49271', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '14', '49272', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '15', '49273', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '16', '49274', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '17', '49275', '0', '0', '0', '1');
+INSERT INTO `npc_vendor` VALUES ( '36464', '18', '49276', '0', '0', '0', '1');
+
+DELETE FROM `npc_vendor` WHERE `Entry` = 68989 ;
+INSERT INTO `npc_vendor` VALUES ( '68989', '1', '37460', '0', '0', '0', '1');
