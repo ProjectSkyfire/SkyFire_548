@@ -1,18 +1,64 @@
 -- REFERENCE_LOOT_TEMPLATE
-SET @REF_WORLD2      := 34380; -- Main World Reference Entry
--- Grey Entrys
-SET @REF_SC         := 34381; -- Scruffy Cloth Reference Entry
-SET @REF_SL         := 34382; -- Shabby Leather Reference Entry
-SET @REF_IM         := 34383; -- Inferior Mail Reference Entry
-SET @REF_DP         := 34384; -- Dingy Plate Reference Entry
-SET @REF_GREY2      := 34385; -- Higher Grey Reference Entry
--- Green Entrys
-SET @REF_BREWC      := 34386; -- Brewer's Cloth Reference Entry
-SET @REF_SWAML      := 34387; -- Swamp Leather Reference Entry
-SET @REF_WILLM      := 34388; -- Snake Mail Reference Entry
-SET @REF_SNOWP      := 34389; -- Miner Plate Reference Entry
-SET @REF_GREEN2     := 34390; -- Higher Green Reference Entry
+SET @REF_WORLD1     := 34380; -- Main World Reference 1 Entry
+SET @REF_WORLD2     := 34381; -- Main World Reference 2 Entry
 
+-- Grey High Entrys
+SET @REF_SC         := 34382; -- Scruffy Cloth Reference Entry
+SET @REF_SL         := 34383; -- Shabby Leather Reference Entry
+SET @REF_IM         := 34384; -- Inferior Mail Reference Entry
+SET @REF_DP         := 34385; -- Dingy Plate Reference Entry
+SET @REF_GREY2      := 34386; -- Higher Grey Reference Entry
+-- Green High Entrys
+SET @REF_BREWC      := 34387; -- Brewer's Cloth Reference Entry
+SET @REF_SWAML      := 34388; -- Swamp Leather Reference Entry
+SET @REF_WILLM      := 34389; -- Snake Mail Reference Entry
+SET @REF_SNOWP      := 34390; -- Miner Plate Reference Entry
+SET @REF_GREEN2     := 34391; -- Higher Green Reference Entry
+-- Grey Low Entrys
+SET @REF_VC         := 34392; -- Vermin-Gnawed Cloth Reference Entry
+SET @REF_ML         := 34393; -- Mudsoaked Leather Reference Entry
+SET @REF_MM         := 34394; -- Moist Mail Reference Entry
+SET @REF_SP         := 34395; -- Slipshod Plate Reference Entry
+
+-- Vermin-Gnawed Cloth ItemIDs
+SET @VC_HEAD      := 90774; -- Vermin-Gnawed Hat
+SET @VC_WAIST     := 90777; -- Vermin-Gnawed Cloth Belt
+SET @VC_HANDS     := 90783; -- Vermin-Gnawed Cloth Gloves
+SET @VC_LEGS      := 90784; -- Vermin-Gnawed Cloth Pants
+SET @VC_SHOULDERS := 90785; -- Vermin-Gnawed Cloth Shoulderpads
+SET @VC_CHEST     := 90786; -- Vermin-Gnawed Cloth Vest
+SET @VC_FEETS     := 90792; -- Vermin-Gnawed Cloth Boots
+SET @VC_WRISTS    := 90793; -- Vermin-Gnawed Cloth Bracers
+
+-- Mudsoaked Leather ItemIDs
+SET @ML_HEAD      := 90775; -- Mudsoaked Leather Helmet
+SET @ML_CHEST     := 90796; -- Mudsoaked Armor
+SET @ML_SHOULDERS := 90798; -- Mudsoaked Shoulderpads
+SET @ML_FEETS      := 90789; -- Mudsoaked Boots
+SET @ML_WRIST     := 90790; -- Mudsoaked Bracers
+SET @ML_LEGS      := 90795; -- Mudsoaked Pants
+SET @ML_HANDS     := 90791; -- Mudsoaked Gloves
+SET @ML_WAIST     := 90788; -- Mudsoaked Belt
+
+-- Moist Mail ItemIDs
+SET @MM_LEGS := 90778; -- Moist Mail Pants
+SET @MM_WAIST := 90781; -- Moist Mail Belt
+SET @MM_CHEST := 90780; -- Moist Mail Armor
+SET @MM_HEAD := 90776; -- Moist Mail Circlet
+SET @MM_SHOULDERS := 90779; -- Moist Mail Shoulderpads
+SET @MM_FEETS := 90794; -- Moist Mail Boots
+SET @MM_WRIST := 90803; -- Moist Mail Bracers
+SET @MM_HANDS := 90804; -- Moist Mail Gloves
+
+-- Slipshod Plate ItemIDs
+SET @SP_HEAD := 90773; -- Slipshod Plate Helmet
+SET @SP_SHOULDERS := 90802; -- Slipshod Plate Shoulderpads
+SET @SP_FEETS := 90797; -- Slipshod Plate Boots
+SET @SP_LEGS := 90801; -- Slipshod Plate Pants
+SET @SP_WAIST := 90787; -- Slipshod Plate Belt
+SET @SP_WRIST := 90782; -- Slipshod Plate Bracers
+SET @SP_CHEST := 90799; -- Slipshod Plate Chestpiece
+SET @SP_HANDS := 90800; -- Slipshod Plate Gloves
 
 -- Scruffy Cloth ItemIDs
 SET @SC_HEAD      := 90744; -- Scruffy Cloth Hat
@@ -94,10 +140,64 @@ SET @SNOWP_HANDS     := 82178; -- Snowy Gauntlets
 SET @SNOWP_LEGS      := 82181; -- Snowy Legplates
 SET @SNOWP_SHOULDERS := 82182; -- Snowy Pauldrons
 
-DELETE FROM `reference_loot_template` WHERE `entry` IN (@REF_WORLD2, @REF_GREY2, @REF_GREEN2, @REF_SC, @REF_SL, @REF_IM, @REF_DP, @REF_BREWC, @REF_SWAML, @REF_WILLM, @REF_SNOWP);
+DELETE FROM `reference_loot_template` WHERE `entry` IN (@REF_WORLD1, @REF_GREY1, @REF_GREEN1, @REF_VC, @REF_ML, @REF_MM, @REF_SP);
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_WORLD1, 1, 40, 1, 0, -@REF_GREY1, 1),
+--(@REF_WORLD1, 2, 20, 1, 0, -@REF_GREEN1, 1);
+
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_GREY1, 1, 25, 1, 0, -@REF_VC, 1),
+(@REF_GREY1, 1, 25, 1, 0, -@REF_ML, 1),
+(@REF_GREY1, 1, 25, 1, 0, -@REF_MM, 1),
+(@REF_GREY1, 1, 25, 1, 0, -@REF_SP, 1);
+
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_GREEN1, 1, 25, 1, 0, -@, 1),
+
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_VC, @VC_HEAD, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_CHEST, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_WAIST, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_FEETS, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_WRISTS, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_HANDS, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_LEGS, 0, 1, 1, 1, 1),
+(@REF_VC, @VC_SHOULDERS, 0, 1, 1, 1, 1);
+
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_ML, @ML_HEAD, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_CHEST, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_WAIST, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_FEETS, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_WRISTS, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_HANDS, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_LEGS, 0, 1, 1, 1, 1),
+(@REF_ML, @ML_SHOULDERS, 0, 1, 1, 1, 1);
+
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_MM, @MM_HEAD, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_CHEST, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_WAIST, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_FEETS, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_WRISTS, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_HANDS, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_LEGS, 0, 1, 1, 1, 1),
+(@REF_MM, @MM_SHOULDERS, 0, 1, 1, 1, 1);
+
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(@REF_SP, @SP_HEAD, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_CHEST, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_WAIST, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_FEETS, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_WRISTS, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_HANDS, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_LEGS, 0, 1, 1, 1, 1),
+(@REF_SP, @SP_SHOULDERS, 0, 1, 1, 1, 1);
+
+DELETE FROM `reference_loot_template` WHERE `entry` IN (@REF_WORLD2, @REF_GREY2, /*@REF_GREEN2,*/ @REF_SC, @REF_SL, @REF_IM, @REF_DP, @REF_BREWC, @REF_SWAML, @REF_WILLM, @REF_SNOWP);
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (@REF_WORLD2, 1, 40, 1, 0, -@REF_GREY2, 1),
-(@REF_WORLD2, 2, 20, 1, 0, -@REF_GREEN2, 1);
+--(@REF_WORLD2, 2, 20, 1, 0, -@REF_GREEN2, 1); -- NYA
 
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (@REF_GREY2, 1, 25, 1, 0, -@REF_SC, 1),
@@ -191,41 +291,6 @@ INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `
 (@REF_SNOWP, @SNOWP_LEGS, 0, 1, 1, 1, 1),
 (@REF_SNOWP, @SNOWP_SHOULDERS, 0, 1, 1, 1, 1);
 
--- MISSING IN CREATURE_TEMPLATE
-SET @SHANZEWARRIOR := 69833; -- Shan'ze Warrior
-SET @KORUNEMUTILATOR := 68401; -- Korune Mutilator
-SET @ENLISTEDCANNONEER := 67633; -- Enlisted Cannoneer
-SET @KORKRONREAVER := 68940; -- Kor'kron Reaver
-SET @SUNRAVERDUELIST := 68647; -- Sunreaver Duelist
-SET @SKUMBLADEBRUTE := 69338; -- Skumblade Brute
-SET @KORKRONSUBJUGATOR := 68044; -- Kor'kron Subjugator
-SET @ZANDALARIARCWEAVER := 70401; -- Zandalari Arcweaver
-SET @ANKI := 69531; -- Anki
-SET @SUNREAVERMAGE := 68050; -- Sunreaver Mage
-SET @SKUMBLADESCAVENGER := 69227; -- Skumblade Scavenger
-SET @SKUMBLADESEADRAGON := 69226; -- Skumblade Seadragon
-SET @ZANDALARISPIRITBINDER := 69225; -- Zandalari Spiritbinder
-SET @PYRESTARDEMOLISHER := 67933; -- Pyrestar Demolisher
-SET @SHAOLMARASPEARANGER := 70290; -- Shaol'mara Spearanger
-SET @SKUMBLADESCROUNGER := 67760; -- Skumblade Scrounger
-SET @SUNREAVERAEGIS := 68051; -- Sunreaver Aegis
-SET @SKUMBLADEFLESHRIPPER := 69210; -- Skumblade Fleshripper
-SET @SHANZEBRUTALIZER := 70588; -- Shan'ze Brutalizer
-SET @SILVERMOONSPELLBREAKER := 67991; -- Silvermoon Spellbreaker
-SET @ZANDALARIARCANITAL := 69281; -- Zandalari Arcanital <Harbinger of the Loa>
-SET @SHANZEELECTROCUTIONER := 69525; -- Shan'ze Electrocutioner
-SET @ZEBTULASTONESHIELD := 69517; -- Zeb'tula Stoneshield
-SET @ZANDALARISTONESHIELD := 69527; -- Zandalari Stoneshield
-SET @SKUMBLADEFILTHMONGER := 69228; -- Skumblade Filthmonger
-SET @ZANDALARICONSCRIPT := 69198; -- Zandalari Conscript
-SET @ZANDALARISOULTWISTER := 69296; -- Zandalari Soultwister
-SET @METALLORDMONOHAN := 69326; -- Metal Lord Mono-Han
-SET @SHAOLMARABEASTCALLER := 70286; -- Shaol'mara Beastcaller
-SET @KORUNEWARDEN := 67587; -- Korune Warden
-SET @ZANDALARIPROSPECT := 69269; -- Zandalari Prospect
-SET @ZANDALARIBEASTLORD := 69144; -- Zandalari Beastlord
-SET @SKUMBLADESHORTFANG := 69348; -- Skumblade Shortfang
-SET @ANIMATEDWARRIOR := 67473; -- Animated Warrior
 SET @ZANDALARIBLOODGUARD := 69294; -- Zandalari Bloodguard
 SET @SILVERCOVENANTASSASIN := 68045; -- Silver Covenant Assassin
 SET @ZEBTULABEASTCALLER := 69657; -- Zeb'tula Beastcaller
@@ -258,8 +323,40 @@ SET @KORKRONPARATROOPER := 67708; -- Kor'kron Paratrooper
 SET @SHANBU := 69534; -- Shan Bu
 SET @KORKRONGRUNT := 72412; -- Kor'kron Grunt
 SET @BEASTMASTERHORAKI := 69559; -- Beastmaster Horaki
-
--- CREATURE_TEMPLATE EXISTS
+SET @ZANDALARICONSCRIPT := 69198; -- Zandalari Conscript
+SET @ZANDALARISOULTWISTER := 69296; -- Zandalari Soultwister
+SET @METALLORDMONOHAN := 69326; -- Metal Lord Mono-Han
+SET @SHAOLMARABEASTCALLER := 70286; -- Shaol'mara Beastcaller
+SET @KORUNEWARDEN := 67587; -- Korune Warden
+SET @ZANDALARIPROSPECT := 69269; -- Zandalari Prospect
+SET @ZANDALARIBEASTLORD := 69144; -- Zandalari Beastlord
+SET @SKUMBLADESHORTFANG := 69348; -- Skumblade Shortfang
+SET @ANIMATEDWARRIOR := 67473; -- Animated Warrior
+SET @SHAOLMARASPEARANGER := 70290; -- Shaol'mara Spearanger
+SET @SKUMBLADESCROUNGER := 67760; -- Skumblade Scrounger
+SET @SUNREAVERAEGIS := 68051; -- Sunreaver Aegis
+SET @SKUMBLADEFLESHRIPPER := 69210; -- Skumblade Fleshripper
+SET @SHANZEBRUTALIZER := 70588; -- Shan'ze Brutalizer
+SET @SILVERMOONSPELLBREAKER := 67991; -- Silvermoon Spellbreaker
+SET @ZANDALARIARCANITAL := 69281; -- Zandalari Arcanital <Harbinger of the Loa>
+SET @SHANZEELECTROCUTIONER := 69525; -- Shan'ze Electrocutioner
+SET @ZEBTULASTONESHIELD := 69517; -- Zeb'tula Stoneshield
+SET @ZANDALARISTONESHIELD := 69527; -- Zandalari Stoneshield
+SET @SKUMBLADEFILTHMONGER := 69228; -- Skumblade Filthmonger
+SET @SUNRAVERDUELIST := 68647; -- Sunreaver Duelist
+SET @SKUMBLADEBRUTE := 69338; -- Skumblade Brute
+SET @KORKRONSUBJUGATOR := 68044; -- Kor'kron Subjugator
+SET @ZANDALARIARCWEAVER := 70401; -- Zandalari Arcweaver
+SET @ANKI := 69531; -- Anki
+SET @SUNREAVERMAGE := 68050; -- Sunreaver Mage
+SET @SKUMBLADESCAVENGER := 69227; -- Skumblade Scavenger
+SET @SKUMBLADESEADRAGON := 69226; -- Skumblade Seadragon
+SET @ZANDALARISPIRITBINDER := 69225; -- Zandalari Spiritbinder
+SET @PYRESTARDEMOLISHER := 67933; -- Pyrestar Demolisher
+SET @KORKRONREAVER := 68940; -- Kor'kron Reaver
+SET @ENLISTEDCANNONEER := 67633; -- Enlisted Cannoneer
+SET @KORUNEMUTILATOR := 68401; -- Korune Mutilator
+SET @SHANZEWARRIOR := 69833; -- Shan'ze Warrior
 SET @SHAOTIENSOULRENDER := 65978; -- Shao-Tien Soul-Render
 SET @SHAOTIENSURVEYOR := 59379; -- Shao-Tien Surveyor
 SET @SHAOTIENPRECURSOR := 59914; -- Shao-Tien Precursor
@@ -514,83 +611,26 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (@ELDERFREATTURTLE, 1, 100, 1, 0, -@REF_WORLD2, 1);
 
 -- CREATURE_TEMPLATE EXISTS
-UPDATE `creature_template` SET `lootid`=@SHAOTIENSOULRENDER WHERE `entry`=@SHAOTIENSOULRENDER;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENSURVEYOR WHERE `entry`=@SHAOTIENSURVEYOR;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENPRECURSOR WHERE `entry`=@SHAOTIENPRECURSOR;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENPILLAGER WHERE `entry`=@SHAOTIENPILLAGER;
-UPDATE `creature_template` SET `lootid`=@SLATESKINTROUBLEMAKER WHERE `entry`=@SLATESKINTROUBLEMAKER;
-UPDATE `creature_template` SET `lootid`=@OSULSHARPHORN WHERE `entry`=@OSULSHARPHORN;
-UPDATE `creature_template` SET `lootid`=@KORTHIKFLEETWING WHERE `entry`=@KORTHIKFLEETWING;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKSCENTLAYER WHERE `entry`=@KRIKTHIKSCENTLAYER;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKLOCUSGUARD WHERE `entry`=@KRIKTHIKLOCUSGUARD;
-UPDATE `creature_template` SET `lootid`=@DRAKKARIFROSTWEAVER WHERE `entry`=@DRAKKARIFROSTWEAVER;
-UPDATE `creature_template` SET `lootid`=@OOKINSHAMAN WHERE `entry`=@OOKINSHAMAN;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKDEEPSCOUT WHERE `entry`=@KRIKTHIKDEEPSCOUT;
-UPDATE `creature_template` SET `lootid`=@SILKTHIKVENOMSPITTER WHERE `entry`=@SILKTHIKVENOMSPITTER;
-UPDATE `creature_template` SET `lootid`=@SPITEFULSPIRIT WHERE `entry`=@SPITEFULSPIRIT;
-UPDATE `creature_template` SET `lootid`=@GLINTROKORACLE WHERE `entry`=@GLINTROKORACLE;
-UPDATE `creature_template` SET `lootid`=@GLINTROKSKULKER WHERE `entry`=@GLINTROKSKULKER;
-UPDATE `creature_template` SET `lootid`=@GLINTROKHEXXER WHERE `entry`=@GLINTROKHEXXER;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKBONESLICER WHERE `entry`=@KRIKTHIKBONESLICER;
-UPDATE `creature_template` SET `lootid`=@SHANZESTONEBENDER WHERE `entry`=@SHANZESTONEBENDER;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKWINDSHAPER WHERE `entry`=@KRIKTHIKWINDSHAPER;
-UPDATE `creature_template` SET `lootid`=@SIKTHIKBLADEDANCER WHERE `entry`=@SIKTHIKBLADEDANCER;
-UPDATE `creature_template` SET `lootid`=@SIKTHIKBUILDER WHERE `entry`=@SIKTHIKBUILDER;
-UPDATE `creature_template` SET `lootid`=@SIKTHIKVANGUARD WHERE `entry`=@SIKTHIKVANGUARD;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKRAGER WHERE `entry`=@KRIKTHIKRAGER;
-UPDATE `creature_template` SET `lootid`=@SIKTHIKENGINEER WHERE `entry`=@SIKTHIKENGINEER;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKSAPPER WHERE `entry`=@KRIKTHIKSAPPER;
-UPDATE `creature_template` SET `lootid`=@PALEBLADEFLESHEATER WHERE `entry`=@PALEBLADEFLESHEATER;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENCONQUEROR WHERE `entry`=@SHAOTIENCONQUEROR;
-UPDATE `creature_template` SET `lootid`=@SHEKZEERCLUTCHKEEPER WHERE `entry`=@SHEKZEERCLUTCHKEEPER;
-UPDATE `creature_template` SET `lootid`=@GAICHOYAUNGOL WHERE `entry`=@GAICHOYAUNGOL;
-UPDATE `creature_template` SET `lootid`=@SRATHIKREGENERATOR WHERE `entry`=@SRATHIKREGENERATOR;
-UPDATE `creature_template` SET `lootid`=@KORTHIKHAVOC WHERE `entry`=@KORTHIKHAVOC;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENFIST WHERE `entry`=@SHAOTIENFIST;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENDOMINATOR WHERE `entry`=@SHAOTIENDOMINATOR;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENANTIQUATOR WHERE `entry`=@SHAOTIENANTIQUATOR;
-UPDATE `creature_template` SET `lootid`=@KUNZENRITUALIST WHERE `entry`=@KUNZENRITUALIST;
-UPDATE `creature_template` SET `lootid`=@VORTHIKDREADWORN WHERE `entry`=@VORTHIKDREADWORN;
-UPDATE `creature_template` SET `lootid`=@IKTHIKGENEMANCER WHERE `entry`=@IKTHIKGENEMANCER;
-UPDATE `creature_template` SET `lootid`=@KUNZENSOUPMASTER WHERE `entry`=@KUNZENSOUPMASTER;
-UPDATE `creature_template` SET `lootid`=@DARKWOODSCHARMER WHERE `entry`=@DARKWOODSCHARMER;
-UPDATE `creature_template` SET `lootid`=@KORTHIKRESONATOR WHERE `entry`=@KORTHIKRESONATOR;
-UPDATE `creature_template` SET `lootid`=@KRIKTHIKNEEDLER WHERE `entry`=@KRIKTHIKNEEDLER;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENSORCERER WHERE `entry`=@SHAOTIENSORCERER;
-UPDATE `creature_template` SET `lootid`=@MISTBLADERIPPER WHERE `entry`=@MISTBLADERIPPER;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENSOULCALLER WHERE `entry`=@SHAOTIENSOULCALLER;
-UPDATE `creature_template` SET `lootid`=@IKTHIKHARVESTER WHERE `entry`=@IKTHIKHARVESTER;
-UPDATE `creature_template` SET `lootid`=@SLITHERSCALERIPPER WHERE `entry`=@SLITHERSCALERIPPER;
-UPDATE `creature_template` SET `lootid`=@GAICHOEARTHTALKER WHERE `entry`=@GAICHOEARTHTALKER;
-UPDATE `creature_template` SET `lootid`=@GAICHOPITCHTHROWER WHERE `entry`=@GAICHOPITCHTHROWER;
-UPDATE `creature_template` SET `lootid`=@MUCKSCALERIPPER WHERE `entry`=@MUCKSCALERIPPER;
-UPDATE `creature_template` SET `lootid`=@MUCKSCALESHAMAN WHERE `entry`=@MUCKSCALESHAMAN;
-UPDATE `creature_template` SET `lootid`=@MUCKSCALESKINFLAYER WHERE `entry`=@MUCKSCALESKINFLAYER;
-UPDATE `creature_template` SET `lootid`=@YONGQILOOTER WHERE `entry`=@YONGQILOOTER;
-UPDATE `creature_template` SET `lootid`=@MUCKSCALESLAYER WHERE `entry`=@MUCKSCALESLAYER;
-UPDATE `creature_template` SET `lootid`=@WILLYWOODLING WHERE `entry`=@WILLYWOODLING;
-UPDATE `creature_template` SET `lootid`=@SUNREAVERMAGUS WHERE `entry`=@SUNREAVERMAGUS;
-UPDATE `creature_template` SET `lootid`=@KUNZENHUNTER WHERE `entry`=@KUNZENHUNTER;
-UPDATE `creature_template` SET `lootid`=@SLITHERSCALEEGGDRINKER WHERE `entry`=@SLITHERSCALEEGGDRINKER;
-UPDATE `creature_template` SET `lootid`=@SHANZESERPENTBINDER WHERE `entry`=@SHANZESERPENTBINDER;
-UPDATE `creature_template` SET `lootid`=@SHAOTIENPAINWEAVER WHERE `entry`=@SHAOTIENPAINWEAVER;
-UPDATE `creature_template` SET `lootid`=@SRATHIKMUTILATOR WHERE `entry`=@SRATHIKMUTILATOR;
-UPDATE `creature_template` SET `lootid`=@SHEKZEERMANIPULATOR WHERE `entry`=@SHEKZEERMANIPULATOR;
-UPDATE `creature_template` SET `lootid`=@IKTHIKWARRIOR WHERE `entry`=@IKTHIKWARRIOR;
-UPDATE `creature_template` SET `lootid`=@BATAARIYAUNGOL WHERE `entry`=@BATAARIYAUNGOL;
-UPDATE `creature_template` SET `lootid`=@SRATHIKCACOPHYTE WHERE `entry`=@SRATHIKCACOPHYTE;
-UPDATE `creature_template` SET `lootid`=@OONAGOON WHERE `entry`=@OONAGOON;
-UPDATE `creature_template` SET `lootid`=@SILVERCOVENANTSPELLBLADE WHERE `entry`=@SILVERCOVENANTSPELLBLADE;
-UPDATE `creature_template` SET `lootid`=@KORTHIKWARCALLER WHERE `entry`=@KORTHIKWARCALLER;
-UPDATE `creature_template` SET `lootid`=@SIKTHIKBATTLEMENDER WHERE `entry`=@SIKTHIKBATTLEMENDER;
-UPDATE `creature_template` SET `lootid`=@ADJUNCTKREEZOT WHERE `entry`=@ADJUNCTKREEZOT;
-UPDATE `creature_template` SET `lootid`=@SRATHIKDEATHMIXER WHERE `entry`=@SRATHIKDEATHMIXER;
-UPDATE `creature_template` SET `lootid`=@ZANDALARIDINOMANCER WHERE `entry`=@ZANDALARIDINOMANCER;
-UPDATE `creature_template` SET `lootid`=@JUNGLESHREDER WHERE `entry`=@JUNGLESHREDER;
-UPDATE `creature_template` SET `lootid`=@SHANZEILLUSIONIST WHERE `entry`=@SHANZEILLUSIONIST;
-UPDATE `creature_template` SET `lootid`=@SHIELDWALLMECHAPOUNDER WHERE `entry`=@SHIELDWALLMECHAPOUNDER;
-UPDATE `creature_template` SET `lootid`=@DAMPSHAMBLER WHERE `entry`=@DAMPSHAMBLER;
-UPDATE `creature_template` SET `lootid`=@DEATHADDER WHERE `entry`=@DEATHADDER;
-UPDATE `creature_template` SET `lootid`=@PRIMALSTALKER WHERE `entry`=@PRIMALSTALKER;
-UPDATE `creature_template` SET `lootid`=@ERODEDCLIFFWELLER WHERE `entry`=@ERODEDCLIFFWELLER;
-UPDATE `creature_template` SET `lootid`=@ELDERFREATTURTLE WHERE `entry`=@ELDERFREATTURTLE;
+UPDATE `creature_template` SET `lootid`=`entry` WHERE `entry` IN (
+@SHANZEWARRIOR, @SHAOTIENSOULRENDER, @SHAOTIENSURVEYOR, @SHAOTIENPRECURSOR, @SHAOTIENPILLAGER, @SLATESKINTROUBLEMAKER,
+@KORUNEMUTILATOR,@OSULSHARPHORN, @KORTHIKFLEETWING, @KRIKTHIKSCENTLAYER, @KRIKTHIKLOCUSGUARD, @DRAKKARIFROSTWEAVER, @OOKINSHAMAN,
+@KRIKTHIKDEEPSCOUT, @SILKTHIKVENOMSPITTER, @SPITEFULSPIRIT, @GLINTROKORACLE, @GLINTROKSKULKER, @GLINTROKHEXXER, @KRIKTHIKBONESLICER,
+@SHANZESTONEBENDER, @KRIKTHIKWINDSHAPER, @SIKTHIKBLADEDANCER, @SIKTHIKBUILDER, @SIKTHIKVANGUARD, @KRIKTHIKRAGER, @SIKTHIKENGINEER,
+@KRIKTHIKSAPPER, @ENLISTEDCANNONEER, @KORKRONREAVER, @SUNRAVERDUELIST, @SKUMBLADEBRUTE, @KORKRONSUBJUGATOR, @ZANDALARIARCWEAVER, @ANKI,
+@SUNREAVERMAGE, @SKUMBLADESCAVENGER, @SKUMBLADESEADRAGON, @ZANDALARISPIRITBINDER, @PYRESTARDEMOLISHER, @SHAOLMARASPEARANGER,
+@PALEBLADEFLESHEATER, @SKUMBLADESCROUNGER, @SUNREAVERAEGIS, @SKUMBLADEFLESHRIPPER, @SHANZEBRUTALIZER, @SILVERMOONSPELLBREAKER,
+@ZANDALARIARCANITAL, @SHANZEELECTROCUTIONER, @ZEBTULASTONESHIELD, @ZANDALARISTONESHIELD, @SKUMBLADEFILTHMONGER, @ZANDALARICONSCRIPT,
+@ZANDALARISOULTWISTER, @METALLORDMONOHAN, @SHAOLMARABEASTCALLER, @KORUNEWARDEN, @ZANDALARIPROSPECT, @ZANDALARIBEASTLORD,
+@SKUMBLADESHORTFANG, @ANIMATEDWARRIOR, @SHAOTIENCONQUEROR, @ZANDALARIBLOODGUARD, @SHEKZEERCLUTCHKEEPER, @GAICHOYAUNGOL,
+@SRATHIKREGENERATOR, @KORTHIKHAVOC, @SILVERCOVENANTASSASIN, @ZEBTULABEASTCALLER, @SKUMBLADESLASHER, @SHAOTIENFIST, @SHAOTIENDOMINATOR,
+@SHANZEGRAVEKEEPER, @SHANZEANIMATOR, @SHANZEELECTROCUTIONER2, @SHAOTIENANTIQUATOR, @ZANDALARIJAGUARWARRIOR, @ZANDALARISTONESHIELD2,
+@KUNZENRITUALIST, @VORTHIKDREADWORN, @ZANDALARIBEASTCALLER, @SHANZETHUNDERCALLER, @IKTHIKGENEMANCER, @ZANDALARIACOLYTE,
+@KUNZENSOUPMASTER, @DARKWOODSCHARMER, @ZANDALARISTONESHIELD3, @KORTHIKRESONATOR, @KRIKTHIKNEEDLER, @ZANDALARIBEASTHANDLER,
+@SHAOTIENSORCERER, @MISTBLADERIPPER, @SHAOTIENSOULCALLER, @IKTHIKHARVESTER, @SLITHERSCALERIPPER, @SHANZESLAVER, @GAICHOEARTHTALKER,
+@SHANZEBLOODSEEKER, @GAICHOPITCHTHROWER, @ZANDALARICOMMONER, @MUCKSCALERIPPER, @SHANZESOULRIPPER, @MUCKSCALESHAMAN, @MUCKSCALESKINFLAYER,
+@YONGQILOOTER, @ZANDALARIBEASTCALLER2, @MUCKSCALESLAYER, @WILLYWOODLING, @SUNREAVERMAGUS, @ITOKA, @THANESTONEHEARTH, @SKUMBLADESAURPRIEST,
+@NURKALA, @KUNZENHUNTER, @SLITHERSCALEEGGDRINKER, @SHANZESERPENTBINDER, @SHAOTIENPAINWEAVER, @SRATHIKMUTILATOR, @SHEKZEERMANIPULATOR,
+@IKTHIKWARRIOR, @BATAARIYAUNGOL, @SRATHIKCACOPHYTE, @MASTERCALLER, @ZANDALARIHARUSPEX, @BLOODHILTGRUNT, @OONAGOON, 
+@SILVERCOVENANTSPELLBLADE, @ZANDALARIARCWEAVER2, @KORTHIKWARCALLER, @IRONFORGECABALIST, @SHANBU, @KORKRONGRUNT, @SIKTHIKBATTLEMENDER,
+@ADJUNCTKREEZOT, @SRATHIKDEATHMIXER, @KORKRONPARATROOPER, @ZANDALARIDINOMANCER, @JUNGLESHREDER, @BEASTMASTERHORAKI,
+@SHANZEILLUSIONIST, @SHIELDWALLMECHAPOUNDER, @DAMPSHAMBLER, @DEATHADDER, @PRIMALSTALKER, @ERODEDCLIFFWELLER, @ELDERFREATTURTLE);
