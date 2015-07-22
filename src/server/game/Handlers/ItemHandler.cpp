@@ -1053,7 +1053,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint32 itemId, uint32 enchantId)
 {
-    WorldPacket data(SMSG_ENCHANTMENTLOG, (8+8+4+4));
+    WorldPacket data(SMSG_ENCHANTMENT_LOG, (8+8+4+4));
     data.appendPackGUID(target);
     data.appendPackGUID(caster);
     data << uint32(itemId);
@@ -1061,14 +1061,48 @@ void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint32 itemI
     GetPlayer()->SendMessageToSet(&data, true);
 }
 
-void WorldSession::SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid, uint32 slot, uint32 Duration)
+void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint32 slot, uint32 Duration)
 {
-                                                            // last check 2.0.10
-    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8+4+4+8));
-    data << uint64(Itemguid);
+    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, 8 + 8 + 4 + 4);
+
+    data.WriteBit(Itemguid[4]);
+    data.WriteBit(Itemguid[0]);
+    data.WriteBit(Playerguid[3]);
+    data.WriteBit(Itemguid[3]);
+    data.WriteBit(Playerguid[2]);
+    data.WriteBit(Playerguid[6]);
+    data.WriteBit(Playerguid[7]);
+    data.WriteBit(Itemguid[1]);
+    data.WriteBit(Playerguid[4]);
+    data.WriteBit(Itemguid[6]);
+    data.WriteBit(Itemguid[5]);
+    data.WriteBit(Playerguid[0]);
+    data.WriteBit(Itemguid[2]);
+    data.WriteBit(Playerguid[5]);
+    data.WriteBit(Playerguid[1]);
+    data.WriteBit(Itemguid[7]);
+
+    data.FlushBits();
+
     data << uint32(slot);
+    data.WriteByteSeq(Playerguid[4]);
+    data.WriteByteSeq(Playerguid[2]);
+    data.WriteByteSeq(Itemguid[5]);
+    data.WriteByteSeq(Itemguid[4]);
+    data.WriteByteSeq(Playerguid[6]);
+    data.WriteByteSeq(Itemguid[1]);
+    data.WriteByteSeq(Playerguid[0]);
+    data.WriteByteSeq(Playerguid[1]);
+    data.WriteByteSeq(Itemguid[6]);
+    data.WriteByteSeq(Itemguid[2]);
+    data.WriteByteSeq(Playerguid[7]);
+    data.WriteByteSeq(Itemguid[0]);
+    data.WriteByteSeq(Itemguid[3]);
+    data.WriteByteSeq(Itemguid[7]);
+    data.WriteByteSeq(Playerguid[3]);
+    data.WriteByteSeq(Playerguid[5]);
     data << uint32(Duration);
-    data << uint64(Playerguid);
+
     SendPacket(&data);
 }
 
@@ -1739,14 +1773,6 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
         player->ModifyMoney(-cost);
 }
 
-void WorldSession::SendReforgeResult(bool success)
-{
-    WorldPacket data(SMSG_REFORGE_RESULT, 1);
-    data.WriteBit(success);
-    data.FlushBits();
-    SendPacket(&data);
-}
-
 void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
 {
     uint32 slot, reforgeEntry;
@@ -1833,4 +1859,37 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
 
     if (item->IsEquipped())
         player->ApplyReforgeEnchantment(item, true);
+}
+
+void WorldSession::SendReforgeResult(bool success)
+{
+    WorldPacket data(SMSG_REFORGE_RESULT, 1);
+    data.WriteBit(success);
+    data.FlushBits();
+    SendPacket(&data);
+}
+
+void WorldSession::SendItemExpirePurchaseRefund(ObjectGuid itemGuid)
+{
+    WorldPacket data(SMSG_ITEM_EXPIRE_PURCHASE_REFUND, 8);
+
+    data.WriteBit(itemGuid[7]);
+    data.WriteBit(itemGuid[4]);
+    data.WriteBit(itemGuid[2]);
+    data.WriteBit(itemGuid[6]);
+    data.WriteBit(itemGuid[5]);
+    data.WriteBit(itemGuid[3]);
+    data.WriteBit(itemGuid[1]);
+    data.WriteBit(itemGuid[0]);
+
+    data.WriteByteSeq(itemGuid[4]);
+    data.WriteByteSeq(itemGuid[0]);
+    data.WriteByteSeq(itemGuid[6]);
+    data.WriteByteSeq(itemGuid[7]);
+    data.WriteByteSeq(itemGuid[1]);
+    data.WriteByteSeq(itemGuid[2]);
+    data.WriteByteSeq(itemGuid[3]);
+    data.WriteByteSeq(itemGuid[5]);
+
+    SendPacket(&data);
 }
