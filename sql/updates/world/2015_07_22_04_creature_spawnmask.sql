@@ -1,0 +1,1 @@
+UPDATE `creature` SET `spawnMask`=6 WHERE `map`=962;
