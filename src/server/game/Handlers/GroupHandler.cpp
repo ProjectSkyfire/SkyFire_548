@@ -725,23 +725,41 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
     if (!group)
         return;
 
-    uint8 x;
-    recvData >> x;
+    uint8 Symbol, Index;
+    recvData >> Symbol >> Index;
 
     /** error handling **/
     /********************/
 
     // everything's fine, do it
-    if (x == 0xFF)                                           // target icon request
+    if (Symbol == 0xFF)                                     // target icon request
         group->SendTargetIconList(this);
     else                                                    // target icon update
     {
         if (!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
             return;
 
-        uint64 guid;
-        recvData >> guid;
-        group->SetTargetIcon(x, _player->GetGUID(), guid);
+        ObjectGuid targetGuid;
+
+        targetGuid[3] = recvData.ReadBit();
+        targetGuid[2] = recvData.ReadBit();
+        targetGuid[1] = recvData.ReadBit();
+        targetGuid[5] = recvData.ReadBit();
+        targetGuid[0] = recvData.ReadBit();
+        targetGuid[6] = recvData.ReadBit();
+        targetGuid[7] = recvData.ReadBit();
+        targetGuid[4] = recvData.ReadBit();
+
+        recvData.ReadByteSeq(targetGuid[2]);
+        recvData.ReadByteSeq(targetGuid[3]);
+        recvData.ReadByteSeq(targetGuid[0]);
+        recvData.ReadByteSeq(targetGuid[7]);
+        recvData.ReadByteSeq(targetGuid[5]);
+        recvData.ReadByteSeq(targetGuid[1]);
+        recvData.ReadByteSeq(targetGuid[6]);
+        recvData.ReadByteSeq(targetGuid[4]);
+
+        group->SetTargetIcon(Symbol, _player->GetGUID(), targetGuid, Index);
     }
 }
 
