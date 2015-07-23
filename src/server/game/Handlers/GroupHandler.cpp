@@ -1574,7 +1574,7 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleGroupInitiatePollRole(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_ROLE_POLL_BEGIN");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_GROUP_INITIATE_ROLE_POLL");
 
     uint8 Index = 0;
     recvData >> Index;
