@@ -1,0 +1,2 @@
+ALTER TABLE `creature_template`   
+  MODIFY COLUMN `family` SMALLINT(8) UNSIGNED NOT NULL DEFAULT '0';
