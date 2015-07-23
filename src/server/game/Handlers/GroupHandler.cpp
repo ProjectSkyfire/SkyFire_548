@@ -1571,3 +1571,45 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recvData)
 
     GetPlayer()->SetPassOnGroupLoot(passOnLoot);
 }
+
+void WorldSession::HandleGroupInitiatePollRole(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_ROLE_POLL_BEGIN");
+
+    uint8 Index = 0;
+    recvData >> Index;
+
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+        return;
+
+    SendRolePollInform(Index);
+}
+
+void WorldSession::SendRolePollInform(uint8 Index)
+{
+    ObjectGuid guid = GetPlayer()->GetGUID();
+
+    WorldPacket data(SMSG_GROUP_ROLE_POLL_INFORM, 8 + 1);
+
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
+
+    data.WriteByteSeq(guid[7]);
+    data << uint8(Index);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+
+    GetPlayer()->GetGroup()->BroadcastPacket(&data, false, -1);
+}
