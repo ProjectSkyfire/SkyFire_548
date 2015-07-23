@@ -1,0 +1,36 @@
+UPDATE `creature_template` SET `lootid` = 0 WHERE `entry` IN 
+(69, 103, 125, 193, 213, 215, 314, 335, 359, 390, 62541, 66368, 61442, 58737, 61910, 58787, 57301, 66514, 66479, 62619, 58633, 58888, 66418, 66891, 64444, 61183, 65478, 58738, 66451, 61610, 66801, 65280, 61174, 61423, 62535, 63920, 61427, 59238, 61414, 58892, 65474, 61333, 61565, 61429, 59756, 65774, 66284, 58448, 61427, 55550, 56401, 56762, 56766, 66593, 59200, 66881, 59404, 59632, 59775, 60160, 60573, 60928, 61445, 61156, 61421, 61421, 61423, 61429, 61444, 62231, 62254, 62637, 63425, 63520, 63998, 64004, 64323, 64349, 64353, 64358, 64479, 64965, 65304, 65501, 65520, 65614, 66471, 66686, 66772, 67149);
+
+UPDATE `creature_template` SET `lootid` = 3425 WHERE `entry` =3425;
+UPDATE `creature_template` SET `lootid` = 3475 WHERE `entry` =3475;
+UPDATE `creature_template` SET `lootid` = 4514 WHERE `entry` =4514;
+UPDATE `creature_template` SET `lootid` = 6250 WHERE `entry` =6250;
+UPDATE `creature_template` SET `lootid` = 6505 WHERE `entry` =6505;
+UPDATE `creature_template` SET `lootid` = 7395 WHERE `entry` =7395;
+UPDATE `creature_template` SET `lootid` = 7549 WHERE `entry` =7549;
+UPDATE `creature_template` SET `lootid` = 10741 WHERE `entry` =10741;
+UPDATE `creature_template` SET `lootid` = 15652 WHERE `entry` =15652;
+UPDATE `creature_template` SET `lootid` = 19349 WHERE `entry` =19349;
+UPDATE `creature_template` SET `lootid` = 25721 WHERE `entry` =25721;
+UPDATE `creature_template` SET `lootid` = 30164 WHERE `entry` =30164;
+UPDATE `creature_template` SET `lootid` = 71864 WHERE `entry` =71864;
+UPDATE `creature_template` SET `lootid` = 71908 WHERE `entry` =71908;
+UPDATE `creature_template` SET `lootid` = 71919 WHERE `entry` =71919;
+UPDATE `creature_template` SET `lootid` = 72033 WHERE `entry` =72033;
+UPDATE `creature_template` SET `lootid` = 72045 WHERE `entry` =72045;
+UPDATE `creature_template` SET `lootid` = 72048 WHERE `entry` =72048;
+UPDATE `creature_template` SET `lootid` = 72049 WHERE `entry` =72049;
+UPDATE `creature_template` SET `lootid` = 72193 WHERE `entry` =72193;
+UPDATE `creature_template` SET `lootid` = 72245 WHERE `entry` =72245;
+UPDATE `creature_template` SET `lootid` = 72970 WHERE `entry` =72970;
+UPDATE `creature_template` SET `lootid` = 73160 WHERE `entry` =73160;
+UPDATE `creature_template` SET `lootid` = 73161 WHERE `entry` =73161;
+UPDATE `creature_template` SET `lootid` = 73163 WHERE `entry` =73163;
+UPDATE `creature_template` SET `lootid` = 73166 WHERE `entry` =73166;
+UPDATE `creature_template` SET `lootid` = 73173 WHERE `entry` =73173;
+UPDATE `creature_template` SET `lootid` = 73279 WHERE `entry` =73279;
+UPDATE `creature_template` SET `lootid` = 73281 WHERE `entry` =73281;
+UPDATE `creature_template` SET `lootid` = 73282 WHERE `entry` =73282;
+UPDATE `creature_template` SET `lootid` = 73666 WHERE `entry` =73666;
+UPDATE `creature_template` SET `lootid` = 73703 WHERE `entry` =73703;
+UPDATE `creature_template` SET `lootid` = 73704 WHERE `entry` =73704;
