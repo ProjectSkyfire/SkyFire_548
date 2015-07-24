@@ -35,10 +35,10 @@ typedef std::set<uint64> GuidSet;
 class Vehicle : public TransportBase
 {
     protected:
-        friend bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry);
+        friend bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry, bool);
         Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry);
 
-        friend void Unit::RemoveVehicleKit();
+        friend void Unit::RemoveVehicleKit(bool);
         ~Vehicle();
 
     public:

@@ -12102,7 +12102,7 @@ void Unit::RemoveFromWorld()
     {
         m_duringRemoveFromWorld = true;
         if (IsVehicle())
-            RemoveVehicleKit();
+            RemoveVehicleKit(true);
 
         RemoveCharmAuras();
         RemoveBindSightAuras();
@@ -14658,7 +14658,7 @@ Unit* Unit::GetRedirectThreatTarget()
     return _redirectThreadInfo.GetTargetGUID() ? ObjectAccessor::GetUnit(*this, _redirectThreadInfo.GetTargetGUID()) : NULL;
 }
 
-bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry)
+bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry, bool loading /*= false*/)
 {
     VehicleEntry const* vehInfo = sVehicleStore.LookupEntry(id);
     if (!vehInfo)
@@ -14667,13 +14667,20 @@ bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry)
     m_vehicleKit = new Vehicle(this, vehInfo, creatureEntry);
     m_updateFlag |= UPDATEFLAG_VEHICLE;
     m_unitTypeMask |= UNIT_MASK_VEHICLE;
+
+    if (!loading)
+        SendSetVehicleRecId(id);
+
     return true;
 }
 
-void Unit::RemoveVehicleKit()
+void Unit::RemoveVehicleKit(bool remove /*= false*/)
 {
     if (!m_vehicleKit)
         return;
+
+    if (!remove)
+        SendSetVehicleRecId(0);
 
     m_vehicleKit->Uninstall();
     delete m_vehicleKit;
@@ -17137,4 +17144,58 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
     *data << uint8(0);
+}
+
+void Unit::SendSetVehicleRecId(uint32 vehicleId)
+{
+    if (Player* player = ToPlayer())
+    {
+        ObjectGuid moverGuid = GetGUID();
+        uint32 index = m_movementCounter++;
+        WorldPacket data(SMSG_MOVE_SET_VEHICLE_REC_ID, 8 + 4 + 4);
+        data.WriteBit(moverGuid[0]);
+        data.WriteBit(moverGuid[6]);
+        data.WriteBit(moverGuid[1]);
+        data.WriteBit(moverGuid[3]);
+        data.WriteBit(moverGuid[7]);
+        data.WriteBit(moverGuid[4]);
+        data.WriteBit(moverGuid[5]);
+        data.WriteBit(moverGuid[2]);
+
+        data.WriteByteSeq(moverGuid[6]);
+        data.WriteByteSeq(moverGuid[7]);
+        data.WriteByteSeq(moverGuid[0]);
+        data.WriteByteSeq(moverGuid[3]);
+        data << uint32(index);
+        data << uint32(vehicleId);
+        data.WriteByteSeq(moverGuid[1]);
+        data.WriteByteSeq(moverGuid[5]);
+        data.WriteByteSeq(moverGuid[2]);
+        data.WriteByteSeq(moverGuid[4]);
+
+        player->SendDirectMessage(&data);
+    }
+
+    ObjectGuid vehicleGuid = GetGUID();
+    WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 8 + 4);
+    data.WriteBit(vehicleGuid[5]);
+    data.WriteBit(vehicleGuid[7]);
+    data.WriteBit(vehicleGuid[2]);
+    data.WriteBit(vehicleGuid[1]);
+    data.WriteBit(vehicleGuid[4]);
+    data.WriteBit(vehicleGuid[0]);
+    data.WriteBit(vehicleGuid[3]);
+    data.WriteBit(vehicleGuid[6]);
+
+    data.WriteByteSeq(vehicleGuid[5]);
+    data.WriteByteSeq(vehicleGuid[7]);
+    data.WriteByteSeq(vehicleGuid[4]);
+    data.WriteByteSeq(vehicleGuid[6]);
+    data.WriteByteSeq(vehicleGuid[2]);
+    data.WriteByteSeq(vehicleGuid[1]);
+    data.WriteByteSeq(vehicleGuid[3]);
+    data.WriteByteSeq(vehicleGuid[0]);
+    data << uint32(vehicleId);
+
+    SendMessageToSet(&data, true);
 }
