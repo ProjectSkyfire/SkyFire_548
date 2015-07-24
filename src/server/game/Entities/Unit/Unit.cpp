@@ -17166,8 +17166,8 @@ void Unit::SendSetVehicleRecId(uint32 vehicleId)
         data.WriteByteSeq(moverGuid[7]);
         data.WriteByteSeq(moverGuid[0]);
         data.WriteByteSeq(moverGuid[3]);
-        data << uint32(index);
         data << uint32(vehicleId);
+        data << uint32(index);
         data.WriteByteSeq(moverGuid[1]);
         data.WriteByteSeq(moverGuid[5]);
         data.WriteByteSeq(moverGuid[2]);
