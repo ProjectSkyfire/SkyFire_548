@@ -27565,18 +27565,17 @@ void Player::SendRefundInfo(Item* item)
     }
 
     ObjectGuid guid = item->GetGUID();
-    WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 8+4+4+4+4*4+4*4+4+4);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
+    WorldPacket data(SMSG_SET_ITEM_PURCHASE_DATA, 8 + 4 + 4 + 4 + 4 * 4 + 4 * 4 + 4 + 4);
     data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
     data.FlushBits();
 
-    data.WriteByteSeq(guid[7]);
     data << uint32(GetTotalPlayedTime() - item->GetPlayedTime());
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)                             // item cost data
     {
@@ -27584,10 +27583,13 @@ void Player::SendRefundInfo(Item* item)
         data << uint32(iece->RequiredItem[i]);
     }
 
+    data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
+    data << uint32(0);          // Flags ?
+    data.WriteByteSeq(guid[5]);
+    data << uint32(item->GetPaidMoney());               // money cost
+
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)                       // currency cost data
     {
         if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
@@ -27604,11 +27606,11 @@ void Player::SendRefundInfo(Item* item)
         data << uint32(iece->RequiredCurrency[i]);
     }
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[5]);
-    data << uint32(0);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[0]);
-    data << uint32(item->GetPaidMoney());               // money cost
+
     GetSession()->SendPacket(&data);
 }
 
@@ -27638,18 +27640,21 @@ bool Player::AddItem(uint32 itemId, uint32 count)
 void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece, uint8 error)
 {
     ObjectGuid guid = item->GetGUID();
-    WorldPacket data(SMSG_ITEM_REFUND_RESULT, 1 + 1 + 8 + 4*8 + 4 + 4*8 + 1);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
+    WorldPacket data(SMSG_ITEM_PURCHASE_REFUND_RESULT, 1 + 1 + 8 + 4 * 8 + 4 + 4 * 8);
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[2]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
     data.WriteBit(!error);
+    data.WriteBit(guid[2]);
     data.WriteBit(item->GetPaidMoney() > 0);
     data.FlushBits();
+
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
     if (!error)
     {
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
@@ -27668,25 +27673,22 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
             data << uint32(iece->RequiredCurrency[i]);
         }
 
-        data << uint32(item->GetPaidMoney());               // money cost
-
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i) // item cost data
         {
             data << uint32(iece->RequiredItemCount[i]);
             data << uint32(iece->RequiredItem[i]);
         }
+
+        data << uint32(item->GetPaidMoney());               // money cost
     }
 
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[2]);
 
-    data << uint8(error);                              // error code
     GetSession()->SendPacket(&data);
 }
 
