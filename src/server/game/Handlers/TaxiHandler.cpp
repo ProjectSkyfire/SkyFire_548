@@ -423,8 +423,9 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-    WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 1 + 1 + 8);
+    WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 1);
     data.WriteBits(reply, 4);
+    data.FlushBits();
     SendPacket(&data);
 
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_ACTIVATE_TAXI_REPLY");
