@@ -16285,7 +16285,7 @@ void Unit::SendThreatListUpdate()
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_UPDATE Message");
 
         ObjectGuid Guid = GetGUID();
-        WorldPacket data(SMSG_THREAT_UPDATE);
+        WorldPacket data(SMSG_THREAT_UPDATE, 24);
 
         data.WriteBit(Guid[5]);
         data.WriteBit(Guid[6]);
@@ -16311,7 +16311,7 @@ void Unit::SendThreatListUpdate()
             data.WriteBit(unitGuid[7]);
         }
 
-        data.WriteByteSeq(Guid[2]);
+        data.WriteBit(Guid[2]);
 
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
