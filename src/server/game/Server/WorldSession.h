@@ -635,7 +635,7 @@ class WorldSession
         void HandleStableRevivePet(WorldPacket& recvPacket);
         void HandleStableSwapPet(WorldPacket& recvPacket);
         void HandleStableSwapPetCallback(PreparedQueryResult result, uint32 petId);
-        void SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 reason);
+        void SendTrainerBuyFailed(ObjectGuid guid, uint32 spellId, uint32 reason);
 
         void HandleDuelProposedOpcode(WorldPacket& recvPacket);
         void HandleDuelResponseOpcode(WorldPacket& recvPacket);

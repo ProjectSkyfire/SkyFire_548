@@ -374,19 +374,30 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
         _player->CastSpell(_player, trainer_spell->spell, true);
     else
         _player->learnSpell(spellId, false);
-
-    WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
-    data << uint64(guid);
-    data << uint32(spellId);
-    SendPacket(&data);
 }
 
-void WorldSession::SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 reason)
+void WorldSession::SendTrainerBuyFailed(ObjectGuid guid, uint32 spellId, uint32 reason)
 {
-    WorldPacket data(SMSG_TRAINER_BUY_FAILED, 16);
-    data << uint64(guid);
-    data << uint32(spellId);        // should be same as in packet from client
+    WorldPacket data(SMSG_TRAINER_BUY_FAILED, 8 + 4 + 4);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[2]);
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[4]);
     data << uint32(reason);         // 1 == "Not enough money for trainer service." 0 == "Trainer service %d unavailable."
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data << uint32(spellId);        // should be same as in packet from client
     SendPacket(&data);
 }
 
@@ -615,12 +626,7 @@ void WorldSession::SendBindPoint(Creature* npc)
 
     // send spell for homebinding (3286)
     npc->CastSpell(_player, bindspell, true);
-
-    WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
-    data << uint64(npc->GetGUID());
-    data << uint32(bindspell);
-    SendPacket(&data);
-
+    
     _player->PlayerTalkClass->SendCloseGossip();
 }
 
