@@ -2634,7 +2634,7 @@ void ObjectMgr::LoadItemTemplates()
 
             // cache item damage
             FillItemDamageFields(&itemTemplate.DamageMin, &itemTemplate.DamageMax, &itemTemplate.DPS, itemTemplate.ItemLevel,
-                                 itemTemplate.Class, itemTemplate.SubClass, itemTemplate.Quality, fields[71].GetUInt16(),
+                                 itemTemplate.Class, itemTemplate.SubClass, itemTemplate.Quality, fields[72].GetUInt16(),
                                  fields[131].GetFloat(), itemTemplate.InventoryType, itemTemplate.Flags2);
 
             itemTemplate.DamageType                = fields[71].GetUInt8();
