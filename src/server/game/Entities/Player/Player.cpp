@@ -17270,9 +17270,12 @@ void Player::SendQuestTimerFailed(uint32 quest_id)
 
 void Player::SendCanTakeQuestResponse(QuestFailedReason msg) const
 {
-    WorldPacket data(SMSG_QUESTGIVER_QUEST_INVALID, 4);
+    WorldPacket data(SMSG_QUESTGIVER_QUEST_INVALID, 5); 
+    data.WriteBit(1);
+    data.FlushBits();
     data << uint32(msg);
     GetSession()->SendPacket(&data);
+
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
 
