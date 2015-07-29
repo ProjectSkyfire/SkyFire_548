@@ -9812,6 +9812,26 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
     return false;
 }
 
+uint32 Unit::GetSchoolImmunityMask() const
+{
+    uint32 mask = 0;
+    SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+    for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        mask |= itr->type;
+
+    return mask;
+}
+
+uint32 Unit::GetMechanicImmunityMask() const
+{
+    uint32 mask = 0;
+    SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
+    for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        mask |= (1 << itr->type);
+
+    return mask;
+}
+
 uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType attType, SpellInfo const* spellProto)
 {
     if (!victim || pdamage == 0)
