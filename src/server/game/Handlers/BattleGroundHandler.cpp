@@ -846,13 +846,13 @@ void WorldSession::HandleRequestPvpOptions(WorldPacket& /*recvData*/)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PVP_OPTIONS_ENABLED");
 
-    /// @Todo: perfome research in this case
+    // triggers PVP_TYPES_ENABLED lua event
     WorldPacket data(SMSG_PVP_OPTIONS_ENABLED, 1);
     data.WriteBit(1);
-    data.WriteBit(1);       // WargamesEnabled
     data.WriteBit(1);
-    data.WriteBit(1);       // RatedBGsEnabled
-    data.WriteBit(1);       // RatedArenasEnabled
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(1);
 
     data.FlushBits();
 
