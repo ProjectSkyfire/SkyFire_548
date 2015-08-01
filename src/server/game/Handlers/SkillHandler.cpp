@@ -85,65 +85,45 @@ void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
     uint32 Cost = 0;
 
     recvPacket >> RespecType;
-    guid[2] = recvPacket.ReadBit();
-    guid[3] = recvPacket.ReadBit();
-    guid[1] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
     guid[7] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
     guid[6] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
     guid[5] = recvPacket.ReadBit();
 
-    recvPacket.ReadByteSeq(guid[0]);
-    recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[7]);
-    recvPacket.ReadByteSeq(guid[5]);
-    recvPacket.ReadByteSeq(guid[1]);
-    recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[3]);
     recvPacket.ReadByteSeq(guid[2]);
-
-    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
-    if (!unit)
-    {
-        TC_LOG_DEBUG("network", "WORLD: HandleRespecWipeConfirmOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));
-        return;
-    }
-
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[6]);
+    
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    if (!_player->ResetTalents())
+    if (!RespecType)
     {
-        WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 8 + 1 + 4);    //you have not any talent
-
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[7]);
-        data.WriteBit(guid[3]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[1]);
-        data.WriteBit(guid[0]);
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[6]);
-
-        data.WriteByteSeq(guid[1]);
-        data.WriteByteSeq(guid[0]);
-        data << uint8(RespecType);
-        data.WriteByteSeq(guid[7]);
-        data.WriteByteSeq(guid[3]);
-        data.WriteByteSeq(guid[2]);
-        data.WriteByteSeq(guid[5]);
-        data.WriteByteSeq(guid[6]);
-        data.WriteByteSeq(guid[4]);
-        data << uint32(Cost);
-
-        SendPacket(&data);
-        return;
+        if (!_player->ResetTalents(Cost, true, false))
+        {
+            GetPlayer()->SendTalentWipeConfirm(guid, false);
+            return;
+        }
+    }
+    else
+    {
+        _player->ResetTalents(Cost, false, true);
     }
 
     _player->SendTalentsInfoData();
-    unit->CastSpell(_player, 14867, true);                  //spell: "Untalent Visual Effect"
+
+    if (Unit* unit = _player->GetSelectedUnit())
+        unit->CastSpell(_player, 14867, true);                  //spell: "Untalent Visual Effect"
 }
 
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recvData)

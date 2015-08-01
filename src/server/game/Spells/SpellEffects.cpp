@@ -2544,7 +2544,7 @@ void Spell::EffectUntrainTalents(SpellEffIndex /*effIndex*/)
         return;
 
     if (uint64 guid = m_caster->GetGUID()) // the trainer is the caster
-        unitTarget->ToPlayer()->SendTalentWipeConfirm(guid);
+        unitTarget->ToPlayer()->SendTalentWipeConfirm(guid, false);
 }
 
 void Spell::EffectTeleUnitsFaceCaster(SpellEffIndex effIndex)

@@ -1249,6 +1249,7 @@ public:
 #define GOSSIP_HELLO_ROGUE1 "I wish to unlearn my talents"
 #define GOSSIP_HELLO_ROGUE2 "<Take the letter>"
 #define GOSSIP_HELLO_ROGUE3 "Purchase a Dual Talent Specialization."
+#define GOSSIP_HELLO_ROGUE4 "I wish to unlearn my specialization"
 
 class npc_rogue_trainer : public CreatureScript
 {
@@ -1265,6 +1266,9 @@ public:
 
         if (player->getClass() == CLASS_ROGUE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_UNLEARNTALENTS);
+
+        if (player->getClass() == CLASS_ROGUE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE4, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_UNLEARN_SPEC);
 
         if (player->GetSpecsCount() == 1 && player->getLevel() >= sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE3, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_LEARNDUALSPEC);
@@ -1293,7 +1297,11 @@ public:
                 break;
             case GOSSIP_OPTION_UNLEARNTALENTS:
                 player->CLOSE_GOSSIP_MENU();
-                player->SendTalentWipeConfirm(creature->GetGUID());
+                player->SendTalentWipeConfirm(creature->GetGUID(), false);
+                break;
+            case GOSSIP_OPTION_UNLEARN_SPEC:
+                player->CLOSE_GOSSIP_MENU();
+                player->SendTalentWipeConfirm(creature->GetGUID(), true);
                 break;
             case GOSSIP_OPTION_LEARNDUALSPEC:
                 if (player->GetSpecsCount() == 1 && !(player->getLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL)))

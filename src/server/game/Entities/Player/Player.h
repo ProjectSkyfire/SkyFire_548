@@ -1180,7 +1180,8 @@ private:
 
 struct PlayerTalentInfo
 {
-    PlayerTalentInfo() : UsedTalentCount(0), ResetTalentsCost(0), ResetTalentsTime(0), ActiveSpec(0), SpecsCount(1)
+    PlayerTalentInfo() : UsedTalentCount(0), ResetTalentsCost(0), ResetTalentsTime(0), 
+        ResetSpecializationCost(0), ActiveSpec(0), SpecsCount(1), ResetSpecializationTime(0)
     {
         for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
         {
@@ -1210,6 +1211,8 @@ struct PlayerTalentInfo
     uint32 UsedTalentCount;
     uint32 ResetTalentsCost;
     time_t ResetTalentsTime;
+    uint32 ResetSpecializationCost;
+    time_t ResetSpecializationTime;
     uint8 ActiveSpec;
     uint8 SpecsCount;
 
@@ -1681,7 +1684,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_mailsUpdated;
 
         void SetBindPoint(uint64 guid);
-        void SendTalentWipeConfirm(uint64 guid);
+        void SendTalentWipeConfirm(ObjectGuid guid, bool resetType);
         void ResetPetTalents();
         void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll();
@@ -1780,6 +1783,10 @@ class Player : public Unit, public GridObject<Player>
         void SetUsedTalentCount(uint32 talents) { _talentMgr->UsedTalentCount = talents; }
         uint32 GetTalentResetCost() const { return _talentMgr->ResetTalentsCost; }
         void SetTalentResetCost(uint32 cost)  { _talentMgr->ResetTalentsCost = cost; }
+        uint32 GetSpecializationResetCost() const { return _talentMgr->ResetSpecializationCost; }
+        void SetSpecializationResetCost(uint32 cost) { _talentMgr->ResetSpecializationCost = cost; }
+        uint32 GetSpecializationResetTime() const { return _talentMgr->ResetSpecializationTime; }
+        void SetSpecializationResetTime(time_t time_) { _talentMgr->ResetSpecializationTime = time_; }
         uint32 GetTalentResetTime() const { return _talentMgr->ResetTalentsTime; }
         void SetTalentResetTime(time_t time_)  { _talentMgr->ResetTalentsTime = time_; }
         uint32 GetTalentSpecialization(uint8 spec) const { return _talentMgr->SpecInfo[spec].TalentTree; }
@@ -1793,6 +1800,7 @@ class Player : public Unit, public GridObject<Player>
         bool RemoveTalent(uint32 talentId);
 
         uint32 GetNextResetTalentsCost() const;
+        uint32 GetNextResetSpecializationCost() const;
         void InitTalentForLevel();
         void BuildPlayerTalentsInfoData(WorldPacket* data);
         void BuildPetTalentsInfoData(WorldPacket* data);
