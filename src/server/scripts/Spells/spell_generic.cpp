@@ -1980,6 +1980,7 @@ class spell_gen_mounted_charge: public SpellScriptLoader
                         }
                         break;
                     }
+					default: break;
                 }
             }
 
