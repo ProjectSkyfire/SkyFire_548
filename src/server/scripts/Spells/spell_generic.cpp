@@ -1924,7 +1924,7 @@ class spell_gen_mounted_charge: public SpellScriptLoader
 
         class spell_gen_mounted_charge_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_gen_mounted_charge_SpellScript)
+            PrepareSpellScript(spell_gen_mounted_charge_SpellScript);
 
             void HandleScriptEffect(SpellEffIndex effIndex)
             {
@@ -1980,7 +1980,8 @@ class spell_gen_mounted_charge: public SpellScriptLoader
                         }
                         break;
                     }
-					default: break;
+                    default:
+                        break;
                 }
             }
 
