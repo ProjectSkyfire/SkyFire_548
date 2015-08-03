@@ -3094,7 +3094,7 @@ void Player::RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method /* =
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend, float /*group_rate*/)
 {
-    ObjectGuid victimGuid = victim ? victim->GetGUID() : NULL;
+    ObjectGuid victimGuid = victim ? victim->GetGUID() : 0;
 
     WorldPacket data(SMSG_LOG_XPGAIN, 1 + 1 + 8 + 4 + 4 + 4 + 1);
     data.WriteBit(0);                       // has XP
