@@ -51,7 +51,7 @@ struct PageTextLocale
 
 struct NpcTextLocale
 {
-    NpcTextLocale() { Text_0.resize(8); Text_1.resize(8); }
+    NpcTextLocale() { Text_0.resize(11); Text_1.resize(11); }
 
     std::vector<StringVector> Text_0;
     std::vector<StringVector> Text_1;
