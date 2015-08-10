@@ -151,7 +151,7 @@ struct ObjectGuid
 #endif
         }
 
-        operator uint64()
+        operator uint64() const
         {
             return _data.u64;
         }
