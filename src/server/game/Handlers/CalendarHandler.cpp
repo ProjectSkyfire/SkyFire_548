@@ -352,10 +352,11 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recvData)
 {
     uint64 guid = _player->GetGUID();
+    recvData.read_skip<uint64>(); // Skip InviteId
     uint64 eventId;
 
     recvData >> eventId;
-    recvData.rfinish(); // Skip flags & invite ID, we don't use them
+    recvData.rfinish(); // Skip flags
 
     sCalendarMgr->RemoveEvent(eventId, guid);
 }
