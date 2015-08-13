@@ -444,8 +444,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
 
     recvData >> eventId >> inviteId;
     isPreInvite = recvData.ReadBit();
-    length = recvData.ReadBits(8);
-    length = (length << 1) | (uint16)recvData.ReadBit();
+    length = recvData.ReadBits(9);
     isGuildEvent = recvData.ReadBit();
     name = recvData.ReadString(length);
 
