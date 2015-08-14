@@ -306,29 +306,65 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
     uint64 guid = _player->GetGUID();
     time_t oldEventTime;
 
-    uint64 eventId;
-    uint64 inviteId;
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
     std::string title;
     std::string description;
     uint8 type;
-    uint8 repetitionType;
     uint32 maxInvites;
     int32 dungeonId;
     uint32 eventPackedTime;
-    uint32 timeZoneTime;
     uint32 flags;
+    uint16 descriptionLength;
+    uint16 titleLength;
 
-    recvData >> eventId >> inviteId >> title >> description >> type >> repetitionType >> maxInvites >> dungeonId;
+    recvData >> maxInvites >> dungeonId;
     recvData.ReadPackedTime(eventPackedTime);
-    recvData.ReadPackedTime(timeZoneTime);
-    recvData >> flags;
+    recvData >> flags >> type;
+    eventId[4] = recvData.ReadBit();
+    eventId[5] = recvData.ReadBit();
+    eventId[2] = recvData.ReadBit();
+    inviteId[4] = recvData.ReadBit();
+    eventId[7] = recvData.ReadBit();
+    eventId[0] = recvData.ReadBit();
+    inviteId[5] = recvData.ReadBit();
+    inviteId[3] = recvData.ReadBit();
+    eventId[6] = recvData.ReadBit();
+    eventId[1] = recvData.ReadBit();
+    inviteId[6] = recvData.ReadBit();
+    inviteId[2] = recvData.ReadBit();
+    inviteId[7] = recvData.ReadBit();
+    inviteId[1] = recvData.ReadBit();
+    inviteId[0] = recvData.ReadBit();
+    descriptionLength = recvData.ReadBits(11);
+    titleLength = recvData.ReadBits(8);
+    eventId[3] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(inviteId[6]);
+    recvData.ReadByteSeq(eventId[0]);
+    recvData.ReadByteSeq(inviteId[7]);
+    recvData.ReadByteSeq(inviteId[3]);
+    recvData.ReadByteSeq(eventId[6]);
+    recvData.ReadByteSeq(inviteId[1]);
+    recvData.ReadByteSeq(eventId[2]);
+    title = recvData.ReadString(titleLength);
+    recvData.ReadByteSeq(inviteId[5]);
+    recvData.ReadByteSeq(inviteId[4]);
+    recvData.ReadByteSeq(eventId[5]);
+    recvData.ReadByteSeq(eventId[3]);
+    recvData.ReadByteSeq(inviteId[0]);
+    recvData.ReadByteSeq(eventId[4]);
+    description = recvData.ReadString(descriptionLength);
+    recvData.ReadByteSeq(eventId[1]);
+    recvData.ReadByteSeq(inviteId[2]);
+    recvData.ReadByteSeq(eventId[7]);
 
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_UPDATE_EVENT [" UI64FMTD "] EventId [" UI64FMTD
         "], InviteId [" UI64FMTD "] Title %s, Description %s, type %u "
-        "Repeatable %u, MaxInvites %u, Dungeon ID %d, Time %u "
-        "Time2 %u, Flags %u", guid, eventId, inviteId, title.c_str(),
-        description.c_str(), type, repetitionType, maxInvites, dungeonId,
-        eventPackedTime, timeZoneTime, flags);
+        "MaxInvites %u, Dungeon ID %d, Time %u, Flags %u",
+        guid, (uint64)eventId, (uint64)inviteId, title.c_str(),
+        description.c_str(), type, maxInvites, dungeonId,
+        eventPackedTime, flags);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
     {
@@ -337,7 +373,6 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
         calendarEvent->SetType(CalendarEventType(type));
         calendarEvent->SetFlags(flags);
         calendarEvent->SetEventTime(time_t(eventPackedTime));
-        //calendarEvent->SetTimeZoneTime(time_t(timeZoneTime)); // Not sure, seems constant from the little sniffs we have
         calendarEvent->SetDungeonId(dungeonId);
         calendarEvent->SetTitle(title);
         calendarEvent->SetDescription(description);
@@ -352,10 +387,11 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recvData)
 {
     uint64 guid = _player->GetGUID();
+    recvData.read_skip<uint64>(); // Skip InviteId
     uint64 eventId;
 
     recvData >> eventId;
-    recvData.rfinish(); // Skip flags & invite ID, we don't use them
+    recvData.rfinish(); // Skip flags
 
     sCalendarMgr->RemoveEvent(eventId, guid);
 }
@@ -398,6 +434,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     uint64 eventId;
     uint64 inviteId;
     std::string name;
+    uint16 length;
     bool isPreInvite;
     bool isGuildEvent;
 
@@ -405,7 +442,11 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     uint32 inviteeTeam = 0;
     uint32 inviteeGuildId = 0;
 
-    recvData >> eventId >> inviteId >> name >> isPreInvite >> isGuildEvent;
+    recvData >> eventId >> inviteId;
+    isPreInvite = recvData.ReadBit();
+    length = recvData.ReadBits(9);
+    isGuildEvent = recvData.ReadBit();
+    name = recvData.ReadString(length);
 
     if (Player* player = sObjectAccessor->FindPlayerByName(name.c_str()))
     {
