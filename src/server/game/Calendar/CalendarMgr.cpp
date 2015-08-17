@@ -445,20 +445,23 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const& invite)
 
 void CalendarMgr::SendCalendarEventUpdateAlert(CalendarEvent const& calendarEvent, time_t oldEventTime)
 {
-    WorldPacket data(SMSG_CALENDAR_EVENT_UPDATED_ALERT, 1 + 8 + 4 + 4 + 4 + 1 + 4 +
-        calendarEvent.GetTitle().size() + calendarEvent.GetDescription().size() + 1 + 4 + 4);
-    data << uint8(1);       // unk
-    data << uint64(calendarEvent.GetEventId());
-    data.AppendPackedTime(oldEventTime);
+    WorldPacket data(SMSG_CALENDAR_EVENT_UPDATED_ALERT, 4 + 1 + 4 + 4 + 8 + 4 + 4 + 3 +
+        calendarEvent.GetTitle().size() + calendarEvent.GetDescription().size());
+
     data << uint32(calendarEvent.GetFlags());
-    data.AppendPackedTime(calendarEvent.GetEventTime());
     data << uint8(calendarEvent.GetType());
+    data << uint32(0);      // Lock Date?
+    data.AppendPackedTime(oldEventTime);
+    data << uint64(calendarEvent.GetEventId());
+    data.AppendPackedTime(calendarEvent.GetEventTime());
     data << int32(calendarEvent.GetDungeonId());
-    data << calendarEvent.GetTitle();
-    data << calendarEvent.GetDescription();
-    data << uint8(CALENDAR_REPEAT_NEVER);   // repeatable
-    data << uint32(CALENDAR_MAX_INVITES);
-    data << uint32(0);      // unk
+    data.WriteBit(1);       // FIXME: Clear pendings
+    data.WriteBits(calendarEvent.GetDescription().size(), 11);
+    data.WriteBits(calendarEvent.GetTitle().size(), 8);
+    data.FlushBits();
+
+    data.WriteString(calendarEvent.GetTitle());
+    data.WriteString(calendarEvent.GetDescription());
 
     SendPacketToAllEventRelatives(data, calendarEvent);
 }
