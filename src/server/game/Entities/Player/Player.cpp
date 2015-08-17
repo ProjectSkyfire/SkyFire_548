@@ -1312,18 +1312,18 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     data.WriteBit(Guid[6]);
     data.WriteBit(Guid[3]);
 
-    data << uint32(damage);
+    data << uint32(absorb);
     data.WriteByteSeq(Guid[0]);
     data.WriteByteSeq(Guid[7]);
     data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
     data.WriteByteSeq(Guid[6]);
     data.WriteByteSeq(Guid[3]);
     data.WriteByteSeq(Guid[5]);
-    data << uint32(absorb);
+    data << uint32(resist);
     data.WriteByteSeq(Guid[1]);
     data.WriteByteSeq(Guid[2]);
     data.WriteByteSeq(Guid[4]);
-    data << uint32(resist);
+    data << uint32(damage);
     SendMessageToSet(&data, true);
 
     uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
