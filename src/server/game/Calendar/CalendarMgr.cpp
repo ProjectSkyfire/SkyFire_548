@@ -132,7 +132,7 @@ void CalendarMgr::AddInvite(CalendarEvent* calendarEvent, CalendarInvite* invite
     if (!calendarEvent->IsGuildAnnouncement())
         SendCalendarEventInvite(*invite);
 
-    if (!calendarEvent->IsGuildEvent() || invite->GetInviteeGUID() == calendarEvent->GetCreatorGUID())
+    if (invite->GetInviteeGUID() != invite->GetSenderGUID())
         SendCalendarEventInviteAlert(*calendarEvent, *invite);
 
     if (!calendarEvent->IsGuildAnnouncement())
@@ -413,7 +413,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const& invite)
 {
     CalendarEvent* calendarEvent = GetEvent(invite.GetEventId());
     time_t statusTime = invite.GetStatusTime();
-    bool hasStatusTime = statusTime != 946684800;   // 01/01/2000 00:00:00
+    bool hasStatusTime = statusTime != DEFAULT_STATUS_TIME;   // 01/01/2000 00:00:00
 
     ObjectGuid invitee = invite.GetInviteeGUID();
     Player* player = ObjectAccessor::FindPlayer(invitee);
@@ -487,16 +487,51 @@ void CalendarMgr::SendCalendarEventUpdateAlert(CalendarEvent const& calendarEven
 
 void CalendarMgr::SendCalendarEventStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
 {
-    WorldPacket data(SMSG_CALENDAR_EVENT_STATUS, 8 + 8 + 4 + 4 + 1 + 1 + 4);
-    data.appendPackGUID(invite.GetInviteeGUID());
+    ObjectGuid guid = invite.GetInviteeGUID();
+    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_STATUS, 8 + 8 + 4 + 4 + 1 + 4);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(1);       // FIXME: Clear pendings
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+    data.FlushBits();
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    if (invite.GetStatusTime() != DEFAULT_STATUS_TIME)
+        data.AppendPackedTime(invite.GetStatusTime());
+    else
+        data << uint32(0);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
     data << uint64(calendarEvent.GetEventId());
-    data.AppendPackedTime(calendarEvent.GetEventTime());
-    data << uint32(calendarEvent.GetFlags());
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
     data << uint8(invite.GetStatus());
-    data << uint8(invite.GetRank());
-    data.AppendPackedTime(invite.GetStatusTime());
+    data << uint32(calendarEvent.GetFlags());
+    data.AppendPackedTime(calendarEvent.GetEventTime());
 
     SendPacketToAllEventRelatives(data, calendarEvent);
+}
+
+void CalendarMgr::SendCalendarEventStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
+{
+    if (Player* player = ObjectAccessor::FindPlayer(invite.GetInviteeGUID()))
+    {
+        WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT, 8 + 4 + 4 + 1);
+        data << uint64(calendarEvent.GetEventId());
+        data << uint32(calendarEvent.GetFlags());
+        data << uint8(invite.GetStatus());
+        data.AppendPackedTime(calendarEvent.GetEventTime());
+
+        player->SendDirectMessage(&data);
+    }
 }
 
 void CalendarMgr::SendCalendarEventRemovedAlert(CalendarEvent const& calendarEvent)
@@ -570,86 +605,82 @@ void CalendarMgr::SendCalendarEventModeratorStatusAlert(CalendarEvent const& cal
 
 void CalendarMgr::SendCalendarEventInviteAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
 {
-    Guild* guild = sGuildMgr->GetGuildById(calendarEvent.GetGuildId());
-    ObjectGuid guildId = guild ? guild->GetGUID() : 0;
-    ObjectGuid guid = calendarEvent.GetCreatorGUID();
-    ObjectGuid guid2 = invite.GetSenderGUID();
-    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
-    data << uint64(calendarEvent.GetEventId());
-    data << int32(calendarEvent.GetDungeonId());
-    data << uint8(calendarEvent.GetType());
-    data << uint64(invite.GetInviteId());
-    data << uint32(calendarEvent.GetFlags());
-    data << uint8(invite.GetStatus());
-    data.AppendPackedTime(calendarEvent.GetEventTime());
-    data << uint8(invite.GetRank());
-
-    data.WriteBit(guildId[7]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guildId[4]);
-    data.WriteBit(guildId[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid2[1]);
-    data.WriteBit(guildId[5]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guildId[1]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guildId[6]);
-    data.WriteBit(guildId[3]);
-    data.WriteBit(guid2[6]);
-    data.WriteBit(guid2[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid2[3]);
-    data.WriteBit(guildId[2]);
-    data.WriteBit(guid2[0]);
-    data.WriteBits(calendarEvent.GetTitle().size(), 8);
-    data.WriteBit(guid2[5]);
-    data.WriteBit(guid2[7]);
-    data.FlushBits();
-
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guildId[6]);
-    data.WriteByteSeq(guildId[0]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid2[5]);
-    data.WriteByteSeq(guid2[4]);
-    data.WriteString(calendarEvent.GetTitle());
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guildId[2]);
-    data.WriteByteSeq(guildId[7]);
-    data.WriteByteSeq(guid2[6]);
-    data.WriteByteSeq(guildId[1]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid2[3]);
-    data.WriteByteSeq(guid2[7]);
-    data.WriteByteSeq(guid2[0]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid2[2]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guildId[5]);
-    data.WriteByteSeq(guildId[4]);
-    data.WriteByteSeq(guildId[3]);
-    data.WriteByteSeq(guid2[1]);
-    data.WriteByteSeq(guid[4]);
-
-    if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
+    if (Player* player = ObjectAccessor::FindPlayer(invite.GetInviteeGUID()))
     {
-        if (Guild* guild = sGuildMgr->GetGuildById(calendarEvent.GetGuildId()))
-            guild->BroadcastPacket(&data);
+        Guild* guild = sGuildMgr->GetGuildById(calendarEvent.GetGuildId());
+        ObjectGuid guildId = guild ? guild->GetGUID() : 0;
+        ObjectGuid guid = calendarEvent.GetCreatorGUID();
+        ObjectGuid guid2 = invite.GetSenderGUID();
+        WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
+        data << uint64(calendarEvent.GetEventId());
+        data << int32(calendarEvent.GetDungeonId());
+        data << uint8(calendarEvent.GetType());
+        data << uint64(invite.GetInviteId());
+        data << uint32(calendarEvent.GetFlags());
+        data << uint8(invite.GetStatus());
+        data.AppendPackedTime(calendarEvent.GetEventTime());
+        data << uint8(invite.GetRank());
+
+        data.WriteBit(guildId[7]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guildId[4]);
+        data.WriteBit(guildId[0]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid2[1]);
+        data.WriteBit(guildId[5]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guildId[1]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guildId[6]);
+        data.WriteBit(guildId[3]);
+        data.WriteBit(guid2[6]);
+        data.WriteBit(guid2[2]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid2[4]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid2[3]);
+        data.WriteBit(guildId[2]);
+        data.WriteBit(guid2[0]);
+        data.WriteBits(calendarEvent.GetTitle().size(), 8);
+        data.WriteBit(guid2[5]);
+        data.WriteBit(guid2[7]);
+        data.FlushBits();
+
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guildId[6]);
+        data.WriteByteSeq(guildId[0]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid2[5]);
+        data.WriteByteSeq(guid2[4]);
+        data.WriteString(calendarEvent.GetTitle());
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guildId[2]);
+        data.WriteByteSeq(guildId[7]);
+        data.WriteByteSeq(guid2[6]);
+        data.WriteByteSeq(guildId[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid2[3]);
+        data.WriteByteSeq(guid2[7]);
+        data.WriteByteSeq(guid2[0]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid2[2]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guildId[5]);
+        data.WriteByteSeq(guildId[4]);
+        data.WriteByteSeq(guildId[3]);
+        data.WriteByteSeq(guid2[1]);
+        data.WriteByteSeq(guid[4]);
+
+        player->SendDirectMessage(&data);
     }
-    else
-        if (Player* player = ObjectAccessor::FindPlayer(invite.GetInviteeGUID()))
-            player->SendDirectMessage(&data);
 }
 
-void CalendarMgr::SendCalendarEvent(uint64 guid, CalendarEvent const& calendarEvent, CalendarSendEventType sendType)
+void CalendarMgr::SendCalendarEvent(uint64 playerGuid, CalendarEvent const& calendarEvent, CalendarSendEventType sendType)
 {
-    Player* player = ObjectAccessor::FindPlayer(guid);
+    Player* player = ObjectAccessor::FindPlayer(playerGuid);
     if (!player)
         return;
 
@@ -680,7 +711,7 @@ void CalendarMgr::SendCalendarEvent(uint64 guid, CalendarEvent const& calendarEv
         data.WriteBits(invitee->GetText().size(), 8);
         data.WriteBit(guid[4]);
 
-        if (invitee->GetStatusTime() != 946684800)
+        if (invitee->GetStatusTime() != DEFAULT_STATUS_TIME)
             inviteeData.AppendPackedTime(invitee->GetStatusTime());
         else
             inviteeData << uint32(0);

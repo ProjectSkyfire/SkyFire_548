@@ -323,16 +323,16 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 
     if (calendarEvent->IsGuildAnnouncement())
     {
-        // 946684800 is 01/01/2000 00:00:00 - default response time
-        CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, 946684800, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
+        // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
+        CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->AddInvite(calendarEvent, invite);
     }
     else
     {
         for (std::list<CalendarInvitePacketInfo>::const_iterator iter = calendarInviteList.begin(); iter != calendarInviteList.end(); ++iter)
         {
-            // 946684800 is 01/01/2000 00:00:00 - default response time
-            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, 946684800, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
+            // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
+            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, DEFAULT_STATUS_TIME, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
             sCalendarMgr->AddInvite(calendarEvent, invite);
         }
     }
@@ -534,15 +534,8 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     {
         if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
         {
-            if (calendarEvent->IsGuildEvent() && calendarEvent->GetGuildId() == inviteeGuildId)
-            {
-                // we can't invite guild members to guild events
-                sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NO_GUILD_INVITES);
-                return;
-            }
-
-            // 946684800 is 01/01/2000 00:00:00 - default response time
-            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, 946684800, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
+            // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
+            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
             sCalendarMgr->AddInvite(calendarEvent, invite);
         }
         else
@@ -550,14 +543,8 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     }
     else
     {
-        if (isGuildEvent && inviteeGuildId == _player->GetGuildId())
-        {
-            sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NO_GUILD_INVITES);
-            return;
-        }
-
-        // 946684800 is 01/01/2000 00:00:00 - default response time
-        CalendarInvite invite(inviteId, 0, inviteeGuid, playerGuid, 946684800, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
+        // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
+        CalendarInvite invite(inviteId, 0, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->SendCalendarEventInvite(invite);
     }
 }
@@ -618,6 +605,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
 
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventStatus(*calendarEvent, *invite);
+            sCalendarMgr->SendCalendarEventStatusAlert(*calendarEvent, *invite);
             sCalendarMgr->SendCalendarClearPendingAction(guid);
         }
         else
@@ -712,11 +700,10 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recvData)
         if (CalendarInvite* invite = sCalendarMgr->GetInvite(inviteId))
         {
             invite->SetStatus((CalendarInviteStatus)status);
-            // not sure if we should set response time when moderator changes invite status
-            //invite->SetStatusTime(time(NULL));
 
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventStatus(*calendarEvent, *invite);
+            sCalendarMgr->SendCalendarEventStatusAlert(*calendarEvent, *invite);
             sCalendarMgr->SendCalendarClearPendingAction(invitee);
         }
         else

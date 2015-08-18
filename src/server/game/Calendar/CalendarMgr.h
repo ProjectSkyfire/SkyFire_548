@@ -127,6 +127,7 @@ enum CalendarError
 #define CALENDAR_MAX_EVENTS         30
 #define CALENDAR_MAX_GUILD_EVENTS   100
 #define CALENDAR_MAX_INVITES        100
+#define DEFAULT_STATUS_TIME         946684800
 
 struct CalendarInvitePacketInfo
 {
@@ -316,13 +317,14 @@ class CalendarMgr
         void RemoveAllPlayerEventsAndInvites(uint64 guid);
         void RemovePlayerGuildEventsAndSignups(uint64 guid, uint32 guildId);
 
-        void SendCalendarEvent(uint64 guid, CalendarEvent const& calendarEvent, CalendarSendEventType sendType);
+        void SendCalendarEvent(uint64 playerGuid, CalendarEvent const& calendarEvent, CalendarSendEventType sendType);
         void SendCalendarEventInvite(CalendarInvite const& invite);
         void SendCalendarEventInviteAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarEventInviteRemove(CalendarEvent const& calendarEvent, CalendarInvite const& invite, uint32 flags);
         void SendCalendarEventInviteRemoveAlert(uint64 guid, CalendarEvent const& calendarEvent, CalendarInviteStatus status);
         void SendCalendarEventUpdateAlert(CalendarEvent const& calendarEvent, time_t oldEventTime);
         void SendCalendarEventStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
+        void SendCalendarEventStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarEventRemovedAlert(CalendarEvent const& calendarEvent);
         void SendCalendarEventModeratorStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarClearPendingAction(uint64 guid);
