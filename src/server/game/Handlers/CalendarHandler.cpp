@@ -568,7 +568,9 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
     uint64 eventId;
     bool tentative;
 
-    recvData >> eventId >> tentative;
+    recvData >> eventId;
+    tentative = recvData.ReadBit();
+
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_SIGNUP [" UI64FMTD "] EventId [" UI64FMTD "] Tentative %u", guid, eventId, tentative);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
@@ -593,7 +595,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 inviteId;
-    uint32 status;
+    uint8 status;
 
     recvData >> eventId >> inviteId >> status;
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_RSVP [" UI64FMTD "] EventId ["

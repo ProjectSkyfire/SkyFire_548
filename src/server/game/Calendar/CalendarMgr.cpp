@@ -415,21 +415,40 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const& invite)
     time_t statusTime = invite.GetStatusTime();
     bool hasStatusTime = statusTime != 946684800;   // 01/01/2000 00:00:00
 
-    uint64 invitee = invite.GetInviteeGUID();
+    ObjectGuid invitee = invite.GetInviteeGUID();
     Player* player = ObjectAccessor::FindPlayer(invitee);
 
     uint8 level = player ? player->getLevel() : Player::GetLevelFromDB(invitee);
 
-    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE, 8 + 8 + 8 + 1 + 1 + 1 + (statusTime ? 4 : 0) + 1);
-    data.appendPackGUID(invitee);
-    data << uint64(invite.GetEventId());
+    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE, 8 + 8 + 8 + 1 + 1 + 1 + (hasStatusTime ? 4 : 0) + 1);
+    data << uint8(invite.GetSenderGUID() == invite.GetInviteeGUID()); // true only if the invite is sign-up
+    data << uint8(invite.GetStatus());
     data << uint64(invite.GetInviteId());
     data << uint8(level);
-    data << uint8(invite.GetStatus());
-    data << uint8(hasStatusTime);
+    data << uint64(invite.GetEventId());
+
+    data.WriteBit(invitee[6]);
+    data.WriteBit(invitee[4]);
+    data.WriteBit(invitee[1]);
+    data.WriteBit(invitee[3]);
+    data.WriteBit(invitee[7]);
+    data.WriteBit(invitee[0]);
+    data.WriteBit(invitee[2]);
+    data.WriteBit(invitee[5]);
+    data.WriteBit(!hasStatusTime);
+    data.WriteBit(1);   // FIXME: Clear pendings
+    data.FlushBits();
+
+    data.WriteByteSeq(invitee[7]);
+    data.WriteByteSeq(invitee[0]);
+    data.WriteByteSeq(invitee[5]);
     if (hasStatusTime)
         data.AppendPackedTime(statusTime);
-    data << uint8(invite.GetSenderGUID() != invite.GetInviteeGUID()); // false only if the invite is sign-up
+    data.WriteByteSeq(invitee[2]);
+    data.WriteByteSeq(invitee[3]);
+    data.WriteByteSeq(invitee[4]);
+    data.WriteByteSeq(invitee[1]);
+    data.WriteByteSeq(invitee[6]);
 
     if (!calendarEvent) // Pre-invite
     {
@@ -733,10 +752,10 @@ void CalendarMgr::SendCalendarEventInviteRemoveAlert(uint64 guid, CalendarEvent 
     if (Player* player = ObjectAccessor::FindPlayer(guid))
     {
         WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT, 8 + 4 + 4 + 1);
-        data << uint64(calendarEvent.GetEventId());
-        data.AppendPackedTime(calendarEvent.GetEventTime());
         data << uint32(calendarEvent.GetFlags());
         data << uint8(status);
+        data << uint64(calendarEvent.GetEventId());
+        data.AppendPackedTime(calendarEvent.GetEventTime());
 
         player->SendDirectMessage(&data);
     }
