@@ -680,7 +680,10 @@ void CalendarMgr::SendCalendarEvent(uint64 guid, CalendarEvent const& calendarEv
         data.WriteBits(invitee->GetText().size(), 8);
         data.WriteBit(guid[4]);
 
-        inviteeData << uint32(0); // Response Time? Always 0
+        if (invitee->GetStatusTime() != 946684800)
+            inviteeData.AppendPackedTime(invitee->GetStatusTime());
+        else
+            inviteeData << uint32(0);
         inviteeData.WriteByteSeq(guid[5]);
         inviteeData << uint8(calendarEvent.IsGuildEvent() && calendarEvent.GetGuildId() == inviteeGuildId ? 1 : 0);
         inviteeData.WriteByteSeq(guid[1]);
