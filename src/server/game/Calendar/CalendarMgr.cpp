@@ -808,22 +808,24 @@ void CalendarMgr::SendCalendarCommandResult(uint64 guid, CalendarError err, char
 {
     if (Player* player = ObjectAccessor::FindPlayer(guid))
     {
-        WorldPacket data(SMSG_CALENDAR_COMMAND_RESULT, 0);
-        data << uint32(0);
-        data << uint8(0);
+        size_t length = param ? std::strlen(param) : 0;
+        WorldPacket data(SMSG_CALENDAR_COMMAND_RESULT, 2 + 1 + 1 + length);
+        data.WriteBits(length / 2, 8);
+        data.WriteBit(length % 2);
+        data.FlushBits();
+
+        data << uint8(0);   // FIXME: Command
+        data << uint8(err);
         switch (err)
         {
-            case CALENDAR_ERROR_OTHER_INVITES_EXCEEDED:
-            case CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S:
-            case CALENDAR_ERROR_IGNORING_YOU_S:
-                data << param;
-                break;
-            default:
-                data << uint8(0);
-                break;
+        case CALENDAR_ERROR_OTHER_INVITES_EXCEEDED:
+        case CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S:
+        case CALENDAR_ERROR_IGNORING_YOU_S:
+            data.WriteString(param ? param : "");
+            break;
+        default:
+            break;
         }
-
-        data << uint32(err);
 
         player->SendDirectMessage(&data);
     }
