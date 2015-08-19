@@ -9,7 +9,6 @@
 * Instance Locking
 * Professions
 * Void Storage
-* Calendair & Events
 * Arenas - needs full rewrite O.o
 * Pets / Pet Battles
 * Scenarios
@@ -51,3 +50,4 @@
 * Auction House
 * Bank / Guild Bank
 * Transmogrify
+* Calendair & Events
