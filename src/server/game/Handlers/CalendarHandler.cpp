@@ -762,12 +762,30 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recvData)
 {
     uint64 guid = _player->GetGUID();
     uint64 eventId;
-    uint64 complainGUID;
+    ObjectGuid complainGUID;
     uint64 inviteId;
 
-    recvData >> complainGUID >> eventId >> inviteId;
+    recvData >> inviteId >> eventId;
+    complainGUID[4] = recvData.ReadBit();
+    complainGUID[6] = recvData.ReadBit();
+    complainGUID[2] = recvData.ReadBit();
+    complainGUID[7] = recvData.ReadBit();
+    complainGUID[1] = recvData.ReadBit();
+    complainGUID[5] = recvData.ReadBit();
+    complainGUID[3] = recvData.ReadBit();
+    complainGUID[0] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(complainGUID[6]);
+    recvData.ReadByteSeq(complainGUID[7]);
+    recvData.ReadByteSeq(complainGUID[1]);
+    recvData.ReadByteSeq(complainGUID[0]);
+    recvData.ReadByteSeq(complainGUID[4]);
+    recvData.ReadByteSeq(complainGUID[2]);
+    recvData.ReadByteSeq(complainGUID[3]);
+    recvData.ReadByteSeq(complainGUID[5]);
+
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_COMPLAIN [" UI64FMTD "] EventId ["
-        UI64FMTD "] guid [" UI64FMTD "] InviteId [" UI64FMTD "]", guid, eventId, complainGUID, inviteId);
+        UI64FMTD "] guid [" UI64FMTD "] InviteId [" UI64FMTD "]", guid, eventId, (uint64)complainGUID, inviteId);
 
     // what to do with complains?
 }

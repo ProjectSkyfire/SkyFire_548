@@ -131,7 +131,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BUY_ITEM,                           0x02E2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_ADD_EVENT,                 0x0A37, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarAddEvent             );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_ARENA_TEAM,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarArenaTeam            );
-    DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_COMPLAIN,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarComplain             );
+    DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_COMPLAIN,                  0x1F8F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarComplain             );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_COPY_EVENT,                0x1A97, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarCopyEvent            );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_EVENT_INVITE,              0x1D8E, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarEventInvite          );
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_EVENT_MODERATOR_STATUS,    0x0708, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarEventModeratorStatus );
