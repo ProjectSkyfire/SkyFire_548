@@ -28,7 +28,8 @@
 
 CalendarInvite::~CalendarInvite()
 {
-    sCalendarMgr->FreeInviteId(_inviteId);
+    if (_inviteId)
+        sCalendarMgr->FreeInviteId(_inviteId);
 }
 
 CalendarEvent::~CalendarEvent()
@@ -127,13 +128,12 @@ void CalendarMgr::AddEvent(CalendarEvent* calendarEvent, CalendarSendEventType s
     SendCalendarEvent(calendarEvent->GetCreatorGUID(), *calendarEvent, sendType);
 }
 
-void CalendarMgr::AddInvite(CalendarEvent* calendarEvent, CalendarInvite* invite)
+void CalendarMgr::AddInvite(CalendarEvent* calendarEvent, CalendarInvite* invite, bool sendEventInvitePacket /*= true*/)
 {
-    if (!calendarEvent->IsGuildAnnouncement())
+    if (sendEventInvitePacket)
         SendCalendarEventInvite(*invite);
 
-    if (invite->GetInviteeGUID() != invite->GetSenderGUID())
-        SendCalendarEventInviteAlert(*calendarEvent, *invite);
+    SendCalendarEventInviteAlert(*calendarEvent, *invite);
 
     if (!calendarEvent->IsGuildAnnouncement())
     {
@@ -574,10 +574,10 @@ void CalendarMgr::SendCalendarEventInviteRemove(CalendarEvent const& calendarEve
     SendPacketToAllEventRelatives(data, calendarEvent);
 }
 
-void CalendarMgr::SendCalendarEventModeratorStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
+void CalendarMgr::SendCalendarEventModeratorStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
 {
     ObjectGuid guid = invite.GetInviteeGUID();
-    WorldPacket data(SMSG_CALENDAR_EVENT_MODERATOR_STATUS_ALERT, 8 + 8 + 1 + 1);
+    WorldPacket data(SMSG_CALENDAR_EVENT_MODERATOR_STATUS, 8 + 8 + 1 + 1);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
