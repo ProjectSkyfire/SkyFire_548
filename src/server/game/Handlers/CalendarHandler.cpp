@@ -543,7 +543,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     else
     {
         // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
-        CalendarInvite invite(inviteId, 0, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
+        CalendarInvite invite(0, 0, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->SendCalendarEventInvite(invite);
     }
 }
