@@ -324,7 +324,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
     {
         // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
         CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
-        sCalendarMgr->AddInvite(calendarEvent, invite);
+        sCalendarMgr->AddInvite(calendarEvent, invite, false);
     }
     else
     {
@@ -332,7 +332,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
         {
             // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
             CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, DEFAULT_STATUS_TIME, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
-            sCalendarMgr->AddInvite(calendarEvent, invite);
+            sCalendarMgr->AddInvite(calendarEvent, invite, false);
         }
     }
 
