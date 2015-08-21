@@ -9,10 +9,6 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-# Set Policy
-cmake_minimum_required(VERSION 2.8.9)
-cmake_policy(SET CMP0043 OLD)
-
 if( CMAKE_COMPILER_IS_GNUCXX )
   add_definitions(--no-warnings)
 elseif( MSVC )
