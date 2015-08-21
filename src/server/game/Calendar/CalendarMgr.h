@@ -326,7 +326,7 @@ class CalendarMgr
         void SendCalendarEventStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarEventStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarEventRemovedAlert(CalendarEvent const& calendarEvent);
-        void SendCalendarEventModeratorStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
+        void SendCalendarEventModeratorStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarClearPendingAction(uint64 guid);
         void SendCalendarCommandResult(uint64 guid, CalendarError err, char const* param = NULL);
 

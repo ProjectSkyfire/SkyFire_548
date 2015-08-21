@@ -751,7 +751,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
         {
             invite->SetRank(CalendarModerationRank(rank));
             sCalendarMgr->UpdateInvite(invite);
-            sCalendarMgr->SendCalendarEventModeratorStatusAlert(*calendarEvent, *invite);
+            sCalendarMgr->SendCalendarEventModeratorStatus(*calendarEvent, *invite);
         }
         else
             sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE); // correct?

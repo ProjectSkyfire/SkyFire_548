@@ -574,10 +574,10 @@ void CalendarMgr::SendCalendarEventInviteRemove(CalendarEvent const& calendarEve
     SendPacketToAllEventRelatives(data, calendarEvent);
 }
 
-void CalendarMgr::SendCalendarEventModeratorStatusAlert(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
+void CalendarMgr::SendCalendarEventModeratorStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite)
 {
     ObjectGuid guid = invite.GetInviteeGUID();
-    WorldPacket data(SMSG_CALENDAR_EVENT_MODERATOR_STATUS_ALERT, 8 + 8 + 1 + 1);
+    WorldPacket data(SMSG_CALENDAR_EVENT_MODERATOR_STATUS, 8 + 8 + 1 + 1);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
