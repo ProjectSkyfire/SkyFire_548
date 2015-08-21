@@ -139,15 +139,15 @@ struct CalendarInvitePacketInfo
 struct CalendarInvite
 {
     public:
-        CalendarInvite(CalendarInvite const& calendarInvite, uint64 inviteId, uint64 eventId)
+        CalendarInvite(CalendarInvite const& calendarInvite, uint64 inviteId, uint64 eventId, uint64 creatorGuid)
         {
             _inviteId = inviteId;
             _eventId = eventId;
             _invitee = calendarInvite.GetInviteeGUID();
-            _senderGUID = calendarInvite.GetSenderGUID();
-            _statusTime = calendarInvite.GetStatusTime();
-            _status = calendarInvite.GetStatus();
-            _rank = calendarInvite.GetRank();
+            _senderGUID = creatorGuid;
+            _statusTime = DEFAULT_STATUS_TIME;
+            _status = creatorGuid == calendarInvite.GetInviteeGUID() ? CALENDAR_STATUS_CONFIRMED : CALENDAR_STATUS_INVITED;
+            _rank = creatorGuid == calendarInvite.GetInviteeGUID() ? CALENDAR_RANK_OWNER : (calendarInvite.GetRank() == CALENDAR_RANK_OWNER ? CALENDAR_RANK_MODERATOR : calendarInvite.GetRank());
             _text = calendarInvite.GetText();
         }
 
@@ -199,10 +199,10 @@ struct CalendarInvite
 struct CalendarEvent
 {
     public:
-        CalendarEvent(CalendarEvent const& calendarEvent, uint64 eventId)
+        CalendarEvent(CalendarEvent const& calendarEvent, uint64 eventId, uint64 newCreatorGuid)
         {
             _eventId = eventId;
-            _creatorGUID = calendarEvent.GetCreatorGUID();
+            _creatorGUID = newCreatorGuid;
             _guildId = calendarEvent.GetGuildId();
             _type = calendarEvent.GetType();
             _dungeonId = calendarEvent.GetDungeonId();

@@ -448,16 +448,14 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
 
     if (CalendarEvent* oldEvent = sCalendarMgr->GetEvent(eventId))
     {
-        CalendarEvent* newEvent = new CalendarEvent(*oldEvent, sCalendarMgr->GetFreeEventId());
+        CalendarEvent* newEvent = new CalendarEvent(*oldEvent, sCalendarMgr->GetFreeEventId(), guid);
         newEvent->SetEventTime(time_t(time));
-        sCalendarMgr->AddEvent(newEvent, CALENDAR_SENDTYPE_COPY);
-
         CalendarInviteStore invites = sCalendarMgr->GetEventInvites(eventId);
 
         for (CalendarInviteStore::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
-            sCalendarMgr->AddInvite(newEvent, new CalendarInvite(**itr, sCalendarMgr->GetFreeInviteId(), newEvent->GetEventId()));
+            sCalendarMgr->AddInvite(newEvent, new CalendarInvite(**itr, sCalendarMgr->GetFreeInviteId(), newEvent->GetEventId(), guid), false);
 
-        // should we change owner when somebody makes a copy of event owned by another person?
+        sCalendarMgr->AddEvent(newEvent, CALENDAR_SENDTYPE_COPY);
     }
     else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
