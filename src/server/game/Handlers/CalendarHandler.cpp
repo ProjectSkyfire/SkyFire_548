@@ -751,6 +751,12 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
     {
+        if (calendarEvent->IsGuildEvent())
+        {
+            sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_MODERATOR);
+            return;
+        }
+
         if (CalendarInvite* invite = sCalendarMgr->GetInvite(inviteId))
         {
             invite->SetRank(CalendarModerationRank(rank));
