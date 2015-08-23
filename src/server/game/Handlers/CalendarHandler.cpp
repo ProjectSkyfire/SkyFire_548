@@ -531,6 +531,12 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     {
         if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
         {
+            if (calendarEvent->GetEventTime() < time(NULL))
+            {
+                sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_EVENT_PASSED);
+                return;
+            }
+
             // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
             CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
             sCalendarMgr->AddInvite(calendarEvent, invite);
@@ -745,6 +751,12 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
     {
+        if (calendarEvent->IsGuildEvent())
+        {
+            sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_MODERATOR);
+            return;
+        }
+
         if (CalendarInvite* invite = sCalendarMgr->GetInvite(inviteId))
         {
             invite->SetRank(CalendarModerationRank(rank));
