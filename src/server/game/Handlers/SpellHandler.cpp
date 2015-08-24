@@ -1433,8 +1433,9 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         data.WriteBit(guid[2]);
         data.WriteBit(guildGuid[5]);
         data.WriteBit(guid[3]);
-        data.WriteBits(0, 22); // counter
+        data.WriteBits(11, 22);         // item slots count
         data.WriteBit(guid[6]);
+        data.FlushBits();
 
         data << uint8(creator->getGender());
         data << uint32(creator->GetDisplayId());
@@ -1445,9 +1446,7 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         data.WriteByteSeq(guid[7]);
         data.WriteByteSeq(guildGuid[1]);
         data.WriteByteSeq(guid[3]);
-
         data << uint8(creator->getRace());
-
         data.WriteByteSeq(guid[2]);
         data.WriteByteSeq(guid[0]);
 
