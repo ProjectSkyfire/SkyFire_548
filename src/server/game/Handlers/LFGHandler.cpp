@@ -90,17 +90,25 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         recvData.rfinish();
         return;
     }
+    uint32 numDungeons;
+    uint32 dungeon;
     uint32 roles;
-    bool unk1;
-    uint8 unk0;
+    uint8 commentLen = 0;
+    uint8 unk8 = 0;
+    bool unkbit = false;
 
-    recvData >> unk0;
-    for (int32 i = 0; i < 3; ++i)
+    recvData >> unk8;
+
+    for (int i = 0; i < 3; ++i)
         recvData.read_skip<uint32>();
+
     recvData >> roles;
-    uint32 numDungeons = recvData.ReadBits(22);
-    uint32 commentLen = recvData.ReadBits(8);
-    unk1 = recvData.ReadBit();
+
+    numDungeons = recvData.ReadBits(22);
+    commentLen = recvData.ReadBits(8);
+    unkbit = recvData.ReadBit();
+
+    recvData.FlushBits();
 
     if (!numDungeons)
     {
@@ -116,7 +124,8 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     {
         uint32 dungeon;
         recvData >> dungeon;
-        newDungeons.insert((dungeon & 0x00FFFFFF));        // remove the type from the dungeon entry
+        dungeon &= 0xFFFFFF;
+        newDungeons.insert((dungeon));        // remove the type from the dungeon entry
     }
 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
