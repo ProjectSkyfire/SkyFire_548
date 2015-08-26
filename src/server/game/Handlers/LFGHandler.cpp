@@ -509,39 +509,49 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
         GetPlayerInfo().c_str(), updateData.updateType, party ? "true" : "false");
 
     WorldPacket data(SMSG_LFG_UPDATE_STATUS, 1 + 8 + 3 + 2 + 1 + updateData.comment.length() + 4 + 4 + 1 + 1 + 1 + 4 + size);
-    data.WriteBit(guid[1]);
-    data.WriteBit(party);
-    data.WriteBits(size, 24);
-    data.WriteBit(guid[6]);
-    data.WriteBit(size > 0);                               // Extra info
-    data.WriteBits(updateData.comment.length(), 9);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(join);                                   // LFG Join
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[5]);
+    data.WriteBits(updateData.comment.length(), 8);
     data.WriteBit(queued);                                 // Join the queue
+    data.WriteBit(true); // ???
+    data.WriteBits(size, 22);
 
-    data << uint8(updateData.updateType);                  // Lfg Update type
-    data.WriteString(updateData.comment);
-    data << uint32(queueId);                               // Queue Id
-    data << uint32(joinTime);                              // Join date
-    data.WriteByteSeq(guid[6]);
-    for (uint8 i = 0; i < 3; ++i)
-        data << uint8(0);                                  // unk - Always 0
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(join);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(false);
+    data.WriteBit(true);       // Quit?
+    data.WriteBits(0, 24);     // if party members
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[3]);
+
+    for (int i = 0; i < 3; ++i)
+        data << uint8(0);
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+    
+    data.WriteBit(size > 0);                               // Extra info
+    data << uint32(queueId);                               // Queue Id ?? Role ?
+    data << uint32(0);
+
     data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[0]);
-    data << uint32(3);
-    data.WriteByteSeq(guid[7]);
+    data.WriteString(updateData.comment);
+    data.WriteByteSeq(guid[2]);
+
     for (lfg::LfgDungeonSet::const_iterator it = updateData.dungeons.begin(); it != updateData.dungeons.end(); ++it)
         data << uint32(*it);
+
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[1]);
+    data << uint32(joinTime);
+    data << uint8(updateData.updateType);
+    data << uint32(3);
+    data.WriteByteSeq(guid[7]);
 
     SendPacket(&data);
 }
