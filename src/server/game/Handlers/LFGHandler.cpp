@@ -31,9 +31,9 @@ void BuildPlayerLockDungeonBlock(WorldPacket& data, lfg::LfgLockMap const& lock)
     for (lfg::LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
     {
         data << uint32(it->first);                         // Dungeon entry (id + type)
+        data << uint32(0);                                 // Current itemLevel
         data << uint32(it->second);                        // Lock status
         data << uint32(0);                                 // Required itemLevel
-        data << uint32(0);                                 // Current itemLevel
     }
 }
 
@@ -290,7 +290,7 @@ void WorldSession::HandleLfgGetLockInfoOpcode(WorldPacket& recvData)
 
 void WorldSession::SendLfgPlayerLockInfo()
 {
-    uint64 guid = GetPlayer()->GetGUID();
+    ObjectGuid guid = GetPlayer()->GetGUID();
 
     // Get Random dungeons that can be done at a certain level and expansion
     uint8 level = GetPlayer()->getLevel();
@@ -301,11 +301,14 @@ void WorldSession::SendLfgPlayerLockInfo()
     lfg::LfgLockMap const& lock = sLFGMgr->GetLockedDungeons(guid);
     uint32 rsize = uint32(randomDungeons.size());
     uint32 lsize = uint32(lock.size());
+    bool hasPlayer = true;
 
     TC_LOG_DEBUG("lfg", "SMSG_LFG_PLAYER_INFO %s", GetPlayerInfo().c_str());
     WorldPacket data(SMSG_LFG_PLAYER_INFO, 1 + rsize * (4 + 1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4) + 4 + lsize * (1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4));
 
-    data << uint8(randomDungeons.size());                  // Random Dungeon count
+    data.WriteBits(randomDungeons.size(), 17);
+    data.WriteBit(hasPlayer);
+
     for (lfg::LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
     {
         data << uint32(*it);                               // Dungeon Entry (id + type)
@@ -323,36 +326,74 @@ void WorldSession::SendLfgPlayerLockInfo()
             }
         }
 
-        data << uint8(done);
-        data << uint32(0);                                              // currencyQuantity
-        data << uint32(0);                                              // some sort of overall cap/weekly cap
-        data << uint32(0);                                              // currencyID
-        data << uint32(0);                                              // tier1Quantity
-        data << uint32(0);                                              // tier1Limit
-        data << uint32(0);                                              // overallQuantity
-        data << uint32(0);                                              // overallLimit
-        data << uint32(0);                                              // periodPurseQuantity
-        data << uint32(0);                                              // periodPurseLimit
-        data << uint32(0);                                              // purseQuantity
-        data << uint32(0);                                              // purseLimit
-        data << uint32(0);                                              // some sort of reward for completion
-        data << uint32(0);                                              // completedEncounters
-        data << uint8(0);                                               // Call to Arms eligible
+        data.WriteBit(!done);
+        data.WriteBit(0);
+        data.WriteBits(0, 21); // reward currency count
 
-        for (uint32 i = 0; i < 3; ++i)
+        data.WriteBits(0, 19);
+        data.WriteBits(0, 20); // reward item count
+        data.WriteBits(0, 21);
+
+        if (hasPlayer)
         {
-            data << uint32(0);                                          // Call to Arms Role
-            //if (role)
-            //    BuildQuestReward(data, ctaRoleQuest, GetPlayer());
+            data.WriteBit(guid[5]);
+            data.WriteBit(guid[1]);
+            data.WriteBit(guid[2]);
+            data.WriteBit(guid[7]);
+            data.WriteBit(guid[3]);
+            data.WriteBit(guid[0]);
+            data.WriteBit(guid[6]);
+            data.WriteBit(guid[4]);
+
+            data.WriteByteSeq(guid[7]);
+            data.WriteByteSeq(guid[2]);
+            data.WriteByteSeq(guid[3]);
+            data.WriteByteSeq(guid[0]);
+            data.WriteByteSeq(guid[4]);
+            data.WriteByteSeq(guid[5]);
+            data.WriteByteSeq(guid[6]);
+            data.WriteByteSeq(guid[1]);
         }
 
-        if (quest)
-            BuildQuestReward(data, quest, GetPlayer());
-        else
+        for (lfg::LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
         {
-            data << uint32(0);                                          // Money
-            data << uint32(0);                                          // XP
-            data << uint8(0);                                           // Reward count
+            lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
+            Quest const* qRew = NULL;
+            uint8 done = 0;
+            if (reward)
+            {
+                qRew = sObjectMgr->GetQuestTemplate(reward->firstQuest);
+                if (qRew)
+                {
+                    done = !GetPlayer()->CanRewardQuest(qRew, false);
+                    if (done)
+                        qRew = sObjectMgr->GetQuestTemplate(reward->otherQuest);
+                }
+            }
+
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(qRew->XPValue(GetPlayer()));
+
+            // Item reward loop
+
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(1);
+            data << uint32(1);
+            data << uint32(0);
+            data << uint32(*it);
+
+            // Currency reward loop
+
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
         }
     }
 
