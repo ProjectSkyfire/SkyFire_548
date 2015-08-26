@@ -804,64 +804,58 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     dungeonEntry = sLFGMgr->GetLFGDungeonEntry(dungeonEntry);
 
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 +1));
-    data << uint32(joinTime);
-    data << uint32(proposal.encounters);                   // Encounters done
-    data << uint32(queueId);                               // Queue Id
-    data << uint32(3);                                     // Always 3
-    data << uint32(dungeonEntry);                          // Dungeon
-    data << uint32(proposal.id);                           // Proposal Id
-    data << uint8(proposal.state);                         // State
 
     ObjectGuid guid1 = guid;
     ObjectGuid guid2 = gguid;
 
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid1[3]);
+    data.WriteBit(guid2[6]);
+    data.WriteBit(guid2[0]);
+    data.WriteBit(guid1[1]);
     data.WriteBit(guid1[7]);
-    data.WriteBit(guid1[0]);
-    data.WriteBit(guid2[1]);
-    data.WriteBit(silent);
-    data.WriteBit(guid1[4]);
     data.WriteBit(guid1[5]);
+    data.WriteBit(guid2[5]);
+    data.WriteBit(guid1[4]);
+    data.WriteBit(silent);
+    data.WriteBit(guid2[2]);
+    data.WriteBit(guid1[6]);
     data.WriteBit(guid2[3]);
-    data.WriteBits(proposal.players.size(), 23);
     data.WriteBit(guid2[7]);
-
+    data.WriteBit(guid1[3]);
+    data.WriteBits(proposal.players.size(), 21);
+    
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
         lfg::LfgProposalPlayer const& player = it->second;
 
-        if (!player.group)
-        {
-            data.WriteBit(0);
-            data.WriteBit(0);
-        }
-        else
-        {
-            data.WriteBit(player.group == proposal.group);      // Is group in dungeon
-            data.WriteBit(player.group == gguid);               // Same group as the player
-        }
-
+        data.WriteBit(it->first == guid);
+        data.WriteBit(player.group == gguid);               // Same group as the player
         data.WriteBit(player.accept == lfg::LFG_ANSWER_AGREE);
         data.WriteBit(player.accept != lfg::LFG_ANSWER_PENDING);
-        data.WriteBit(it->first == guid);
+        data.WriteBit(player.group == proposal.group);      // Is group in dungeon
     }
 
-    data.WriteBit(guid2[5]);
-    data.WriteBit(guid1[6]);
-    data.WriteBit(guid2[2]);
-    data.WriteBit(guid2[6]);
     data.WriteBit(guid1[2]);
-    data.WriteBit(guid1[1]);
-    data.WriteBit(guid2[0]);
-
-    data.WriteByteSeq(guid1[5]);
-    data.WriteByteSeq(guid2[3]);
-    data.WriteByteSeq(guid2[6]);
-    data.WriteByteSeq(guid1[6]);
+    data.WriteBit(guid2[4]);
+    data.WriteBit(0); // unk
+    data.WriteBit(guid1[0]);
+    data.WriteBit(guid2[1]);
+    data.FlushBits();
+    data.WriteByteSeq(guid2[1]);
+    data.WriteByteSeq(guid1[4]);
+    data.WriteByteSeq(guid2[4]);
+    data.WriteByteSeq(guid1[7]);
+    data.WriteByteSeq(guid1[2]);
     data.WriteByteSeq(guid1[0]);
+    data << uint32(dungeonEntry);                          // Dungeon
+    data << uint8(proposal.state);                         // State
+    data << uint32(proposal.id);                           // Proposal Id
+    data.WriteByteSeq(guid2[6]);
+    data << uint32(queueId);                               // Queue Id
+    data.WriteByteSeq(guid1[5]);
+    data.WriteByteSeq(guid1[3]);
+    data << uint32(joinTime);
     data.WriteByteSeq(guid2[5]);
-    data.WriteByteSeq(guid1[1]);
+    data.WriteByteSeq(guid1[6]);
 
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
@@ -869,15 +863,13 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
         data << uint32(player.role);
     }
 
+    data << uint32(proposal.encounters);                   // Encounters done
     data.WriteByteSeq(guid2[7]);
-    data.WriteByteSeq(guid1[4]);
+    data.WriteByteSeq(guid1[1]);
     data.WriteByteSeq(guid2[0]);
-    data.WriteByteSeq(guid2[1]);
-    data.WriteByteSeq(guid1[2]);
-    data.WriteByteSeq(guid1[7]);
     data.WriteByteSeq(guid2[2]);
-    data.WriteByteSeq(guid1[3]);
-    data.WriteByteSeq(guid2[4]);
+    data << uint32(3);                                     // Always 3 flags?
+    data.WriteByteSeq(guid2[3]);
 
     SendPacket(&data);
 }
