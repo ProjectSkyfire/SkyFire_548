@@ -1446,11 +1446,10 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         data.WriteByteSeq(guid[7]);
         data.WriteByteSeq(guildGuid[1]);
         data.WriteByteSeq(guid[3]);
-        data << uint8(creator->getRace());
+        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 2));   // hair
         data.WriteByteSeq(guid[2]);
         data.WriteByteSeq(guid[0]);
-
-        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 0));   // skin
+        data << uint8(creator->getRace());
         data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 1));   // face
 
         data.WriteByteSeq(guildGuid[7]);
@@ -1485,11 +1484,9 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
         }
 
         data.WriteByteSeq(guid[4]);
-
-        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 2));   // hair
+        data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 0));   // skin
         data << uint8(player->GetByteValue(PLAYER_FIELD_HAIR_COLOR_ID, 3));   // haircolor
         data << uint8(player->GetByteValue(PLAYER_FIELD_REST_STATE, 0)); // facialhair
-
         data.WriteByteSeq(guid[5]);
         data.WriteByteSeq(guildGuid[3]);
         data.WriteByteSeq(guildGuid[2]);
