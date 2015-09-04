@@ -30,6 +30,7 @@
 enum MageSpells
 {
     SPELL_MAGE_CLONE_ME                 = 45204,
+    SPELL_MAGE_CLONE_WEAPONS            = 41054,
     SPELL_MAGE_MASTERS_THREAT_LIST      = 58838
 };
 
@@ -53,7 +54,8 @@ class npc_pet_mage_mirror_image : public CreatureScript
                 // here mirror image casts on summoner spell (not present in client dbc) 49866
                 // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
                 // Clone Me!
-                owner->CastSpell(me, SPELL_MAGE_CLONE_ME, false);
+                owner->CastSpell(me, SPELL_MAGE_CLONE_ME, true);
+                owner->CastSpell(me, SPELL_MAGE_CLONE_WEAPONS, true);
             }
 
             // Do not reload Creature templates on evade mode enter - prevent visual lost
