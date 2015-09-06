@@ -5047,8 +5047,8 @@ void Spell::SendResurrectRequest(Player* target)
     data << uint32(0);
 
     data.WriteBit(guid[3]);
-    data << uint8(0);                   // null terminator
     data.WriteBit(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1);
+    data.WriteBit(false);
     data.WriteBit(guid[1]);
     data.WriteBit(guid[5]);
     data.WriteBit(guid[2]);
@@ -5061,7 +5061,7 @@ void Spell::SendResurrectRequest(Player* target)
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[5]);
-    data << sentName;
+    data.WriteString(sentName);
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[1]);
