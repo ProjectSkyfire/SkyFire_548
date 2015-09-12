@@ -76,41 +76,148 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
             break;
         case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
         {
-            static MovementStatusElements const accessoryGuid[] =
+            // more research before enable it !!
+            float x, y, z;
+            int8 seatId;
+            ObjectGuid playerGUID;
+            ObjectGuid accessoryGUID;
+            ObjectGuid transportGUID;
+
+            recvData >> seatId >> y >> z >> x;
+
+            accessoryGUID[2] = recvData.ReadBit();
+            accessoryGUID[1] = recvData.ReadBit();
+            auto bit32 = !recvData.ReadBit();
+            playerGUID[6] = recvData.ReadBit();
+            playerGUID[0] = recvData.ReadBit();
+            playerGUID[2] = recvData.ReadBit();
+            accessoryGUID[7] = recvData.ReadBit();
+            playerGUID[7] = recvData.ReadBit();
+            playerGUID[1] = recvData.ReadBit();
+            accessoryGUID[5] = recvData.ReadBit();
+            accessoryGUID[3] = recvData.ReadBit();
+            auto hasTransport = recvData.ReadBit();
+            auto bit28 = !recvData.ReadBit();
+            accessoryGUID[6] = recvData.ReadBit();
+            accessoryGUID[4] = recvData.ReadBit();
+            playerGUID[4] = recvData.ReadBit();
+            uint32 unkcounter = recvData.ReadBits(22);
+            accessoryGUID[0] = recvData.ReadBit();
+
+            auto unkBit0 = !recvData.ReadBit();
+            playerGUID[5] = recvData.ReadBit();
+            auto bit172 = recvData.ReadBit();
+            auto bit148 = recvData.ReadBit();
+            auto unkBit1 = !recvData.ReadBit();
+            auto bit140 = recvData.ReadBit();
+            auto bit24 = !recvData.ReadBit();
+            auto bit168 = !recvData.ReadBit();
+            auto bit149 = recvData.ReadBit();
+            playerGUID[3] = recvData.ReadBit();
+            auto unkBit2 = !recvData.ReadBit();
+
+            auto bit92 = false;
+            auto bit100 = false;
+            if (hasTransport)
             {
-                MSEExtraInt8,
-                MSEHasGuidByte2,
-                MSEHasGuidByte4,
-                MSEHasGuidByte7,
-                MSEHasGuidByte6,
-                MSEHasGuidByte5,
-                MSEHasGuidByte0,
-                MSEHasGuidByte1,
-                MSEHasGuidByte3,
-                MSEGuidByte6,
-                MSEGuidByte1,
-                MSEGuidByte2,
-                MSEGuidByte5,
-                MSEGuidByte3,
-                MSEGuidByte0,
-                MSEGuidByte4,
-                MSEGuidByte7,
-            };
+                transportGUID[6] = recvData.ReadBit();
+                transportGUID[0] = recvData.ReadBit();
+                transportGUID[3] = recvData.ReadBit();
+                transportGUID[7] = recvData.ReadBit();
+                bit92 = recvData.ReadBit();
+                bit100 = recvData.ReadBit();
+                transportGUID[4] = recvData.ReadBit();
+                transportGUID[1] = recvData.ReadBit();
+                transportGUID[2] = recvData.ReadBit();
+                transportGUID[5] = recvData.ReadBit();
+            }
 
-            Movement::ExtraMovementStatusElement extra(accessoryGuid);
-            MovementInfo movementInfo;
-            GetPlayer()->ReadMovementInfo(recvData, &movementInfo, &extra);
-            vehicle_base->m_movementInfo = movementInfo;
+            if (bit24)
+                recvData.ReadBits(30);
 
-            uint64 accessory = extra.Data.guid;
-            int8 seatId = extra.Data.byteData;
+            if (bit28)
+                recvData.ReadBits(13);
 
-            if (vehicle_base->GetGUID() != movementInfo.guid)
-                return;
+            auto bit136 = false;
+            if (bit140)
+                bit136 = recvData.ReadBit();
 
-            if (!accessory)
+            recvData.read_skip(sizeof(uint32) * unkcounter);
+
+            recvData.ReadByteSeq(playerGUID[6]);
+            recvData.ReadByteSeq(accessoryGUID[5]);
+            recvData.ReadByteSeq(playerGUID[2]);
+            recvData.ReadByteSeq(playerGUID[5]);
+            recvData.ReadByteSeq(accessoryGUID[4]);
+            recvData.ReadByteSeq(accessoryGUID[7]);
+            recvData.ReadByteSeq(playerGUID[3]);
+            recvData.ReadByteSeq(playerGUID[7]);
+            recvData.ReadByteSeq(accessoryGUID[1]);
+            recvData.ReadByteSeq(accessoryGUID[3]);
+            recvData.ReadByteSeq(accessoryGUID[2]);
+            recvData.ReadByteSeq(playerGUID[4]);
+            recvData.ReadByteSeq(playerGUID[1]);
+            recvData.ReadByteSeq(accessoryGUID[6]);
+            recvData.ReadByteSeq(accessoryGUID[0]);
+            recvData.ReadByteSeq(playerGUID[0]);
+
+            if (bit168)
+                recvData.read_skip<uint32>();
+
+            if (bit140)
+            {
+                recvData.read_skip<float>();
+
+                if (bit136)
+                {
+                    recvData.read_skip<float>();
+                    recvData.read_skip<float>();
+                    recvData.read_skip<float>();
+                }
+                recvData.read_skip<uint32>();
+            }
+
+            if (hasTransport)
+            {
+                recvData.read_skip<uint32>();
+                recvData.ReadByteSeq(transportGUID[6]);
+                recvData.read_skip<float>();
+                recvData.ReadByteSeq(transportGUID[4]);
+                recvData.ReadByteSeq(transportGUID[7]);
+                recvData.read_skip<float>();
+                recvData.ReadByteSeq(transportGUID[5]);
+                recvData.read_skip<uint8>();
+                recvData.read_skip<float>();
+
+                if (bit100)
+                    recvData.read_skip<uint32>();
+
+                recvData.ReadByteSeq(transportGUID[1]);
+                recvData.ReadByteSeq(transportGUID[2]);
+                recvData.ReadByteSeq(transportGUID[0]);
+
+                if (bit92)
+                    recvData.read_skip<uint32>();
+
+                recvData.read_skip<float>();
+                recvData.ReadByteSeq(transportGUID[3]);
+            }
+
+            if (unkBit0)
+                recvData.read_skip<float>();
+
+            if (unkBit1)
+                recvData.read_skip<float>();
+
+            if (unkBit2)
+                recvData.read_skip<float>();
+
+            if (bit32)
+                recvData.read_skip<uint32>();
+            
+            if (!accessoryGUID)
                 GetPlayer()->ChangeSeat(-1, seatId > 0); // prev/next
-            else if (Unit* vehUnit = Unit::GetUnit(*GetPlayer(), accessory))
+            else if (Unit* vehUnit = Unit::GetUnit(*GetPlayer(), accessoryGUID))
             {
                 if (Vehicle* vehicle = vehUnit->GetVehicleKit())
                     if (vehicle->HasEmptySeat(seatId))
@@ -139,13 +246,28 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
     }
 }
 
-void WorldSession::HandleEnterPlayerVehicle(WorldPacket& data)
+void WorldSession::HandleEnterPlayerVehicle(WorldPacket& recvData)
 {
-    // Read guid
-    uint64 guid;
-    data >> guid;
+    ObjectGuid Guid;
+    Guid[5] = recvData.ReadBit();
+    Guid[7] = recvData.ReadBit();
+    Guid[3] = recvData.ReadBit();
+    Guid[0] = recvData.ReadBit();
+    Guid[2] = recvData.ReadBit();
+    Guid[4] = recvData.ReadBit();
+    Guid[6] = recvData.ReadBit();
+    Guid[1] = recvData.ReadBit();
 
-    if (Player* player = ObjectAccessor::FindPlayer(guid))
+    recvData.ReadByteSeq(Guid[5]);
+    recvData.ReadByteSeq(Guid[3]);
+    recvData.ReadByteSeq(Guid[1]);
+    recvData.ReadByteSeq(Guid[2]);
+    recvData.ReadByteSeq(Guid[7]);
+    recvData.ReadByteSeq(Guid[0]);
+    recvData.ReadByteSeq(Guid[6]);
+    recvData.ReadByteSeq(Guid[4]);
+
+    if (Player* player = ObjectAccessor::FindPlayer(Guid))
     {
         if (!player->GetVehicleKit())
             return;
