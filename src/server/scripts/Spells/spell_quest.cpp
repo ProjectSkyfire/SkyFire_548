@@ -2258,7 +2258,7 @@ public:
     {
         PrepareSpellScript(spell_q28813_get_our_boys_back_dummy_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_RENEWED_LIFE))
                 return false;
@@ -2276,13 +2276,13 @@ public:
             }
         }
 
-        void Register() override
+        void Register() OVERRIDE
         {
             OnCast += SpellCastFn(spell_q28813_get_our_boys_back_dummy_SpellScript::HandleDummyEffect);
         }
     };
 
-    SpellScript* GetSpellScript() const override
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_q28813_get_our_boys_back_dummy_SpellScript();
     }
