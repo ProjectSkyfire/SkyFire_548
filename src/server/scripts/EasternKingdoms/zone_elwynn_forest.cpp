@@ -21,12 +21,10 @@
 /* ScriptData
 SDName: Elwynn_Forest
 SD%Complete: 50
-SDComment: Quest support: 1786
 SDCategory: Elwynn Forest
 EndScriptData */
 
 /* ContentData
-npc_henze_faulk
 npc_blackrock_spy
 npc_blackrock_invader
 npc_stormwind_infantry
@@ -56,76 +54,6 @@ enum Northshire
     AI_HEALTH_MIN             = 85,         //Minimum health for AI staged fight between Blackrock Battle Worgs and Stormwind Infantry
     SAY_INFANTRY_YELL         = 1,          //Stormwind Infantry Yell phrase from Group 1
     INFANTRY_YELL_CHANCE      = 10           //% Chance for Stormwind Infantry to Yell - May need further adjustment... should be low chance
-};
-
-/*######
-## npc_henze_faulk
-######*/
-enum eHenzeFaulkData
-{
-    SAY_HEAL = -1000187,
-};
-
-class npc_henze_faulk : public CreatureScript
-{
-public:
-    npc_henze_faulk() : CreatureScript("npc_henze_faulk") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_henze_faulkAI (creature);
-    }
-
-    struct npc_henze_faulkAI : public ScriptedAI
-    {
-        uint32 lifeTimer;
-        bool spellHit;
-
-        npc_henze_faulkAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void Reset()
-        {
-            lifeTimer = 120000;
-			me->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-            me->SetStandState(UNIT_STAND_STATE_DEAD);   // lay down
-            spellHit = false;
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-        }
-
-        void MoveInLineOfSight(Unit* /*who*/)
-        {
-        }
-
-		void UpdateAI(uint32 diff) OVERRIDE
-        {
-            if (me->IsStandState())
-            {
-                if (lifeTimer <= diff)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-                else
-                    lifeTimer -= diff;
-            }
-        }
-
-        void SpellHit(Unit* /*who*/, const SpellInfo* spell) OVERRIDE
-        {
-			if (spell->Id == 8593 && !spellHit)
-            {
-                DoCast(me, 32343);
-                me->SetStandState(UNIT_STAND_STATE_STAND);
-				me->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, 0);
-                //me->RemoveAllAuras();
-                Talk(SAY_HEAL);
-                spellHit = true;
-            }
-        }
-    };
 };
 
 /*######
@@ -446,7 +374,6 @@ public:
 
 void AddSC_elwynn_forest()
 {
-    new npc_henze_faulk();
     new npc_blackrock_spy();
     new npc_goblin_assassin();
     new npc_blackrock_invader();
