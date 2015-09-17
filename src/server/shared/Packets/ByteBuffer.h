@@ -20,6 +20,14 @@
 #ifndef _BYTEBUFFER_H
 #define _BYTEBUFFER_H
 
+#ifndef SF_TIMEZONE
+#if _MSC_VER >= 1900
+#define SF_TIMEZONE _timezone
+#else
+#define SF_TIMEZONE timezone
+#endif
+#endif
+
 #include "Define.h"
 #include "Errors.h"
 #include "ByteConverter.h"
@@ -495,7 +503,7 @@ class ByteBuffer
             lt.tm_mon = (packedDate >> 20) & 0xF;
             lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
-            return uint32(mktime(&lt) + timezone);
+            return uint32(mktime(&lt) + SF_TIMEZONE);
         }
 
         ByteBuffer& ReadPackedTime(uint32& time)
