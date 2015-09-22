@@ -1259,12 +1259,12 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
         return;
     }
     WorldPacket data(SMSG_START_MIRROR_TIMER, 21);
-    data << (uint32)Type;
     data << MaxValue;
-    data << CurrentValue;
+    data << (uint32)0; // spell id
+    data << (uint32)Type;
     data << Regen;
-    data << (uint8)0;
-    data << (uint32)0;                                      // spell id
+    data << CurrentValue;
+    data.WriteBit(0); // Paused
     GetSession()->SendPacket(&data);
 }
 
