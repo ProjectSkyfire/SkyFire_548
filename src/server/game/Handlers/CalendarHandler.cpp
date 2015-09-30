@@ -322,16 +322,14 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 
     if (calendarEvent->IsGuildAnnouncement())
     {
-        // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
-        CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
+        CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, 0, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->AddInvite(calendarEvent, invite, false, true);
     }
     else
     {
         for (std::list<CalendarInvitePacketInfo>::const_iterator iter = calendarInviteList.begin(); iter != calendarInviteList.end(); ++iter)
         {
-            // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
-            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, DEFAULT_STATUS_TIME, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
+            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, 0, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
             sCalendarMgr->AddInvite(calendarEvent, invite, false, true);
         }
     }
@@ -538,23 +536,21 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
                 return;
             }
 
-            // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
-            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
-            sCalendarMgr->AddInvite(calendarEvent, invite);
             // we probably can invite them, but we have to send them some different info about that invite
             if (calendarEvent->IsGuildEvent() && calendarEvent->GetGuildId() == inviteeGuildId)
             {
                 sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NO_GUILD_INVITES);
                 return;
             }
+
+            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, 0, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
+            sCalendarMgr->AddInvite(calendarEvent, invite, true, player && player->GetGuildId() != calendarEvent->GetGuildId());
         }
         else
             sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_EVENT_INVALID);
     }
     else
     {
-        // DEFAULT_STATUS_TIME is 01/01/2000 00:00:00 - default response time
-        CalendarInvite invite(0, 0, inviteeGuid, playerGuid, DEFAULT_STATUS_TIME, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
         // we probably can invite them, but we have to send them some different info about that invite
         if (isGuildEvent && _player->GetGuildId() == inviteeGuildId)
         {
@@ -562,6 +558,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
             return;
         }
 
+        CalendarInvite invite(0, 0, inviteeGuid, playerGuid, 0, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->SendCalendarEventInvite(invite);
     }
 }

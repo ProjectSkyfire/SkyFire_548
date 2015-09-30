@@ -127,7 +127,6 @@ enum CalendarError
 #define CALENDAR_MAX_EVENTS         30
 #define CALENDAR_MAX_GUILD_EVENTS   100
 #define CALENDAR_MAX_INVITES        100
-#define DEFAULT_STATUS_TIME         946684800
 
 struct CalendarInvitePacketInfo
 {
@@ -145,7 +144,7 @@ struct CalendarInvite
             _eventId = eventId;
             _invitee = calendarInvite.GetInviteeGUID();
             _senderGUID = creatorGuid;
-            _statusTime = DEFAULT_STATUS_TIME;
+            _statusTime = 0;
             _status = creatorGuid == calendarInvite.GetInviteeGUID() ? CALENDAR_STATUS_CONFIRMED : CALENDAR_STATUS_INVITED;
             _rank = creatorGuid == calendarInvite.GetInviteeGUID() ? CALENDAR_RANK_OWNER : (calendarInvite.GetRank() == CALENDAR_RANK_OWNER ? CALENDAR_RANK_MODERATOR : calendarInvite.GetRank());
             _text = calendarInvite.GetText();

@@ -414,14 +414,13 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const& invite)
 {
     CalendarEvent* calendarEvent = GetEvent(invite.GetEventId());
     time_t statusTime = invite.GetStatusTime();
-    bool hasStatusTime = statusTime != DEFAULT_STATUS_TIME;   // 01/01/2000 00:00:00
 
     ObjectGuid invitee = invite.GetInviteeGUID();
     Player* player = ObjectAccessor::FindPlayer(invitee);
 
     uint8 level = player ? player->getLevel() : Player::GetLevelFromDB(invitee);
 
-    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE, 8 + 8 + 8 + 1 + 1 + 1 + (hasStatusTime ? 4 : 0) + 1);
+    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE, 8 + 8 + 8 + 1 + 1 + 1 + (statusTime ? 4 : 0) + 1);
     data << uint8(invite.GetSenderGUID() == invite.GetInviteeGUID()); // true only if the invite is sign-up
     data << uint8(invite.GetStatus());
     data << uint64(invite.GetInviteId());
@@ -436,14 +435,14 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const& invite)
     data.WriteBit(invitee[0]);
     data.WriteBit(invitee[2]);
     data.WriteBit(invitee[5]);
-    data.WriteBit(!hasStatusTime);
+    data.WriteBit(!statusTime);
     data.WriteBit(1);   // FIXME: Clear pendings
     data.FlushBits();
 
     data.WriteByteSeq(invitee[7]);
     data.WriteByteSeq(invitee[0]);
     data.WriteByteSeq(invitee[5]);
-    if (hasStatusTime)
+    if (statusTime)
         data.AppendPackedTime(statusTime);
     data.WriteByteSeq(invitee[2]);
     data.WriteByteSeq(invitee[3]);
@@ -504,7 +503,7 @@ void CalendarMgr::SendCalendarEventStatus(CalendarEvent const& calendarEvent, Ca
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[7]);
-    if (invite.GetStatusTime() != DEFAULT_STATUS_TIME)
+    if (invite.GetStatusTime())
         data.AppendPackedTime(invite.GetStatusTime());
     else
         data << uint32(0);
@@ -714,7 +713,7 @@ void CalendarMgr::SendCalendarEvent(uint64 playerGuid, CalendarEvent const& cale
         data.WriteBits(invitee->GetText().size(), 8);
         data.WriteBit(guid[4]);
 
-        if (invitee->GetStatusTime() != DEFAULT_STATUS_TIME)
+        if (invitee->GetStatusTime())
             inviteeData.AppendPackedTime(invitee->GetStatusTime());
         else
             inviteeData << uint32(0);
