@@ -1966,7 +1966,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         recvData >> srcbag[i] >> srcslot[i];
 
-    TC_LOG_DEBUG("entities.player.items", "Item " UI64FMTD ": srcbag %u, srcslot %u", itemGuid, srcbag, srcslot);
+    TC_LOG_DEBUG("entities.player.items", "Item " UI64FMTD ": srcbag %u, srcslot %u", (uint64)itemGuid, *srcbag, *srcslot);
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {

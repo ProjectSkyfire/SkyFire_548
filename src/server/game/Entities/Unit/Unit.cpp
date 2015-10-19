@@ -15521,7 +15521,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
     return modelid;
 }
 
-uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
+uint32 Unit::GetModelForTotem(uint32 totemType) const
 {
     if (totemType == 3211)
         totemType = SUMMON_TYPE_TOTEM_FIRE;
