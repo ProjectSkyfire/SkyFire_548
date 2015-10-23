@@ -11006,7 +11006,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
     static MovementStatusElements const speedVal = MSEExtraFloat;
     Movement::ExtraMovementStatusElement extra(&speedVal);
-    extra.Data.floatData = GetSpeed(mtype);
+    extra.Data.floatData.push_back(GetSpeed(mtype));
 
     Movement::PacketSender(this, moveTypeToOpcode[mtype][0], moveTypeToOpcode[mtype][1], moveTypeToOpcode[mtype][2], &extra).Send();
 }
@@ -15931,6 +15931,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
 {
     MovementInfo const& mi = m_movementInfo;
 
+    bool hasMountDisplayId = GetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID) != 0;
     bool hasMovementFlags = GetUnitMovementFlags() != 0;
     bool hasMovementFlags2 = GetExtraUnitMovementFlags() != 0;
     bool hasTimestamp = true;
@@ -16012,6 +16013,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         case MSEHasMovementFlags2:
             data.WriteBit(!hasMovementFlags2);
             break;
+        case MSEHasMountDisplayId:
+            data.WriteBit(!hasMountDisplayId);
+            break;
         case MSEHasTimestamp:
             data.WriteBit(!hasTimestamp);
             break;
@@ -16044,6 +16048,12 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             break;
         case MSEHasSpline:
             data.WriteBit(hasSpline);
+            break;
+        case MSEMountDisplayIdWithCheck: // Fallback here
+            if (!hasMountDisplayId)
+                break;
+        case MSEMountDisplayIdWithoutCheck:
+            data << GetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID);
             break;
         case MSEMovementFlags:
             if (hasMovementFlags)

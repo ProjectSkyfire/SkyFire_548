@@ -28046,9 +28046,9 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
 
 void Player::SendMovementSetCollisionHeight(float height)
 {
-    static MovementStatusElements const heightElement = MSEExtraFloat;
-    Movement::ExtraMovementStatusElement extra(&heightElement);
-    extra.Data.floatData = height;
+    static MovementStatusElements const heightElement[] = { MSEExtraFloat, MSEExtraFloat };
+    Movement::ExtraMovementStatusElement extra(heightElement);
+    extra.Data.floatData = { height, 1.f };
     Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &extra).Send();
 }
 
@@ -28271,6 +28271,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
         return;
     }
 
+    bool hasMountDisplayId = false;
     bool hasMovementFlags = false;
     bool hasMovementFlags2 = false;
     bool hasTimestamp = false;
@@ -28375,6 +28376,19 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEHasSpline:
                 data.ReadBit();
                 break;
+            case MSEHasMountDisplayId:
+                hasMountDisplayId = !data.ReadBit();
+                break;
+            case MSEMountDisplayIdWithCheck: // Fallback here
+                if (!hasMountDisplayId)
+                    break;
+            case MSEMountDisplayIdWithoutCheck:
+            {
+                uint32 mountDisplayId;
+                data >> mountDisplayId;
+                SetUInt32Value(UNIT_FIELD_MOUNT_DISPLAY_ID, mountDisplayId);
+                break;
+            }
             case MSEMovementFlags:
                 if (hasMovementFlags)
                     mi->flags = data.ReadBits(30);

@@ -38,6 +38,7 @@ enum MovementStatusElements
     MSEHasGuidByte5,
     MSEHasGuidByte6,
     MSEHasGuidByte7,
+    MSEHasMountDisplayId,
     MSEHasMovementFlags,
     MSEHasMovementFlags2,
     MSEHasTimestamp,
@@ -69,6 +70,8 @@ enum MovementStatusElements
     MSEGuidByte5,
     MSEGuidByte6,
     MSEGuidByte7,
+    MSEMountDisplayIdWithCheck,
+    MSEMountDisplayIdWithoutCheck,
     MSEMovementFlags,
     MSEMovementFlags2,
     MSETimestamp,
@@ -129,8 +132,8 @@ namespace Movement
         struct
         {
             ObjectGuid guid;
-            float floatData;
             int8  byteData;
+            std::list<float> floatData;
         } Data;
 
     protected:
