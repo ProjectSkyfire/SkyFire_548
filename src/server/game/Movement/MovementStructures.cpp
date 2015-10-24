@@ -4521,15 +4521,16 @@ MovementStatusElements const MoveSetCollisionHeight[] = //5.4.8 18414
     MSEHasGuidByte7,
     MSEHasGuidByte0,
     MSEHasGuidByte1,
-    MSEZeroBit,
+    MSEHasMountDisplayId,
     MSEHasGuidByte3,
+    MSEZeroBit,
     MSEZeroBit,
     MSEHasGuidByte2,
     MSEHasGuidByte6,
     MSEHasGuidByte5,
     MSEHasGuidByte4,
-    MSEZeroBit,
-    MSEZeroBit,
+    MSEExtraElement,
+    MSEMountDisplayIdWithCheck,
     MSEGuidByte3,
     MSEGuidByte2,
     MSEGuidByte5,
@@ -4540,7 +4541,7 @@ MovementStatusElements const MoveSetCollisionHeight[] = //5.4.8 18414
     MSEGuidByte1,
     MSEGuidByte4,
     MSEGuidByte0,
-    MSEEnd,
+    MSEEnd
 };
 
 MovementStatusElements const SplineMoveSetWalkMode[] = // 5.4.8 18414
@@ -5287,8 +5288,12 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
             packet.ReadByteSeq(Data.guid[element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
-            packet >> Data.floatData;
+        {
+            float floatData;
+            packet >> floatData;
+            Data.floatData.push_back(floatData);
             break;
+        }
         case MSEExtraInt8:
             packet >> Data.byteData;
             break;
@@ -5325,7 +5330,8 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
             packet.WriteByteSeq(Data.guid[element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
-            packet << Data.floatData;
+            packet << Data.floatData.front();
+            Data.floatData.pop_front();
             break;
         case MSEExtraInt8:
             packet << Data.byteData;

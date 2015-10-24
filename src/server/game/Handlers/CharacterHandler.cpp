@@ -1828,8 +1828,7 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "CMSG_EQUIPMENT_SET_SAVE");
 
     ObjectGuid setGuid;
-    ObjectGuid* itemGuid;
-    itemGuid = new ObjectGuid[EQUIPMENT_SLOT_END];
+    ObjectGuid itemGuid[EQUIPMENT_SLOT_END];
     uint32 index;
     EquipmentSet eqSet;
     uint8 iconNameLen, setNameLen;
@@ -1841,14 +1840,14 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        itemGuid[5] = recvData.ReadBit();
-        itemGuid[0] = recvData.ReadBit();
-        itemGuid[1] = recvData.ReadBit();
-        itemGuid[4] = recvData.ReadBit();
-        itemGuid[6] = recvData.ReadBit();
-        itemGuid[3] = recvData.ReadBit();
-        itemGuid[7] = recvData.ReadBit();
-        itemGuid[2] = recvData.ReadBit();
+        itemGuid[i][5] = recvData.ReadBit();
+        itemGuid[i][0] = recvData.ReadBit();
+        itemGuid[i][1] = recvData.ReadBit();
+        itemGuid[i][4] = recvData.ReadBit();
+        itemGuid[i][6] = recvData.ReadBit();
+        itemGuid[i][3] = recvData.ReadBit();
+        itemGuid[i][7] = recvData.ReadBit();
+        itemGuid[i][2] = recvData.ReadBit();
     }
 
     setGuid[7] = recvData.ReadBit();
@@ -1953,31 +1952,26 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_EQUIPMENT_SET_USE");
 
-    uint8* srcbag;
-    uint8* srcslot;
-    srcbag = new uint8[EQUIPMENT_SLOT_END];
-    srcslot = new uint8[EQUIPMENT_SLOT_END];
+    uint8 srcbag[EQUIPMENT_SLOT_END];
+    uint8 srcslot[EQUIPMENT_SLOT_END];
 
-    ObjectGuid* itemGuid = NULL;
-    itemGuid = new ObjectGuid[EQUIPMENT_SLOT_END];
+    ObjectGuid itemGuid[EQUIPMENT_SLOT_END];
 
     EquipmentSlots startSlot = _player->IsInCombat() ? EQUIPMENT_SLOT_MAINHAND : EQUIPMENT_SLOT_START;
 
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         recvData >> srcbag[i] >> srcslot[i];
 
-    TC_LOG_DEBUG("entities.player.items", "Item " UI64FMTD ": srcbag %u, srcslot %u", itemGuid, srcbag, srcslot);
-
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        itemGuid[2] = recvData.ReadBit();
-        itemGuid[0] = recvData.ReadBit();
-        itemGuid[6] = recvData.ReadBit();
-        itemGuid[3] = recvData.ReadBit();
-        itemGuid[4] = recvData.ReadBit();
-        itemGuid[5] = recvData.ReadBit();
-        itemGuid[7] = recvData.ReadBit();
-        itemGuid[1] = recvData.ReadBit();
+        itemGuid[i][2] = recvData.ReadBit();
+        itemGuid[i][0] = recvData.ReadBit();
+        itemGuid[i][6] = recvData.ReadBit();
+        itemGuid[i][3] = recvData.ReadBit();
+        itemGuid[i][4] = recvData.ReadBit();
+        itemGuid[i][5] = recvData.ReadBit();
+        itemGuid[i][7] = recvData.ReadBit();
+        itemGuid[i][1] = recvData.ReadBit();
     }
 
     uint8 InvItemCounter = recvData.ReadBits(2);

@@ -8976,7 +8976,7 @@ void ObjectMgr::LoadBattlePetQualityData()
 
 uint64 ObjectMgr::BattlePetGetNewId()
 {
-    ASSERT(m_battlePetId < 0xFFFFFFFFFFFFFFFE && "Battle Pet id overflow!");
+    ASSERT(m_battlePetId < 0xFFFFFFFE && "Battle Pet id overflow!");
     return m_battlePetId++;
 }
 
@@ -9281,7 +9281,7 @@ void ObjectMgr::LoadQuestObjectiveLocales()
 
         if (!QuestObjectiveExists(objectiveId))
         {
-            TC_LOG_ERROR("sql.sql", "Quest Objective locale has invalid Quest Objective %u! Skipping.", locale, objectiveId);
+            TC_LOG_ERROR("sql.sql", "Quest Objective locale %u has invalid Quest Objective %u! Skipping.", locale, objectiveId);
             continue;
         }
 

@@ -2092,7 +2092,7 @@ class Unit : public WorldObject
         void RemovePetAura(PetAura const* petSpell);
 
         uint32 GetModelForForm(ShapeshiftForm form) const;
-        uint32 GetModelForTotem(PlayerTotemType totemType);
+        uint32 GetModelForTotem(uint32 totemType) const;
 
         // Redirect Threat
         void SetRedirectThreat(uint64 guid, uint32 pct) { _redirectThreadInfo.Set(guid, pct); }

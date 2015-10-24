@@ -844,7 +844,7 @@ struct dummy_dragonAI : public ScriptedAI
             case NPC_TENEBRON:
             {
                 iTextId = WHISPER_HATCH_EGGS;
-                if (instance && !instance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                if (instance && instance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
                 {
                     for (uint32 i = 0; i < 6; ++i)
                         me->SummonCreature(NPC_TWILIGHT_EGG, TwilightEggs[i].x, TwilightEggs[i].y, TwilightEggs[i].z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
@@ -859,7 +859,7 @@ struct dummy_dragonAI : public ScriptedAI
             case NPC_SHADRON:
             {
                 iTextId = WHISPER_OPEN_PORTAL;
-                if (instance && !instance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                if (instance && instance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
                     me->SummonCreature(NPC_ACOLYTE_OF_SHADRON, AcolyteofShadron.x, AcolyteofShadron.y, AcolyteofShadron.z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 28000);
                 else
                     me->SummonCreature(NPC_ACOLYTE_OF_SHADRON, AcolyteofShadron2.x, AcolyteofShadron2.y, AcolyteofShadron2.z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 28000);
@@ -869,7 +869,7 @@ struct dummy_dragonAI : public ScriptedAI
             case NPC_VESPERON:
             {
                 iTextId = WHISPER_OPEN_PORTAL;
-                if (instance && !instance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                if (instance && instance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
                 {
                     if (Creature* Acolyte = me->SummonCreature(NPC_ACOLYTE_OF_VESPERON, AcolyteofVesperon.x, AcolyteofVesperon.y, AcolyteofVesperon.z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
                     {
@@ -1514,7 +1514,7 @@ public:
         {
             me->RemoveAllAuras();
 
-            if (!instance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+            if (instance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
                 me->SummonCreature(NPC_TWILIGHT_WHELP, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
             else
                 me->SummonCreature(NPC_SHARTHARION_TWILIGHT_WHELP, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);

@@ -497,7 +497,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     SendPacket(&data);
 
-    delete [] words, wordLens;
+    delete[] words;
+    delete[] wordLens;
 
     TC_LOG_DEBUG("network", "WORLD: Send SMSG_WHO Message");
 }
