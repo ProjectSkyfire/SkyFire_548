@@ -111,7 +111,7 @@ inline void LoadDB2(uint32& availableDb2Locales, DB2StoreProblemList& errlist, D
 
 void LoadDB2Stores(std::string const& dataPath)
 {
-    std::string db2Path = dataPath + "db2/";
+    std::string db2Path = dataPath + "dbc/";
 
     DB2StoreProblemList bad_db2_files;
     uint32 availableDb2Locales = 0xFF;
