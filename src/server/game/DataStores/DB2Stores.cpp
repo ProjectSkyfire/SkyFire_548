@@ -148,7 +148,7 @@ void LoadDB2Stores(std::string const& dataPath)
     // error checks
     if (bad_db2_files.size() >= DB2FilesCount)
     {
-        TC_LOG_ERROR("misc", "\nIncorrect DataDir value in worldserver.conf or ALL required *.db2 files (%d) not found by path: %sdb2", DB2FilesCount, dataPath.c_str());
+        TC_LOG_ERROR("misc", "\nIncorrect DataDir value in worldserver.conf or ALL required *.db2 files (%d) not found by path: %sdbc", DB2FilesCount, dataPath.c_str());
         exit(1);
     }
     else if (!bad_db2_files.empty())
