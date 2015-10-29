@@ -717,6 +717,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
 
     const float discountMod = _player->GetReputationPriceDiscount(vendor);
     uint8 count = 0;
+
     for (uint32 slot = 0; slot < rawItemCount; ++slot)
     {
         VendorItem const* vendorItem = vendorItems->GetItem(slot);
@@ -768,16 +769,16 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
 
             if (vendorItem->ExtendedCost)
             {
-                hasExtendedCost[slot] = true;
+                hasExtendedCost[count] = true;
                 itemsData << uint32(vendorItem->ExtendedCost);
             }
             else
-                hasExtendedCost[slot] = false;
+                hasExtendedCost[count] = false;
 
             itemsData << uint32(0);
-            itemsData << uint32(slot + 1); // client expects counting to start at 1
+            itemsData << uint32(++count); // client expects counting to start at 1
 
-            if (++count >= MAX_VENDOR_ITEMS)
+            if (count >= MAX_VENDOR_ITEMS)
                 break;
         }
 
@@ -798,13 +799,13 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             itemsData << uint32(0); // buy count
             itemsData << uint32(vendorItem->item);
 
-            hasExtendedCost[slot] = true;
+            hasExtendedCost[count] = true;
             itemsData << uint32(vendorItem->ExtendedCost);
 
             itemsData << uint32(0);
-            itemsData << uint32(slot + 1); // client expects counting to start at 1
+            itemsData << uint32(++count); // client expects counting to start at 1
 
-            if (++count >= MAX_VENDOR_ITEMS)
+            if (count >= MAX_VENDOR_ITEMS)
                 break;
         }
         // else error
