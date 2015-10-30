@@ -35,6 +35,7 @@ ByteBufferPositionException::ByteBufferPositionException(bool add, size_t pos,
        << ")\n\n" << trace.c_str();
 
     message().assign(ss.str());
+    printf("\nError Message => [%s]\n\n", message().c_str());
 }
 
 ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size,

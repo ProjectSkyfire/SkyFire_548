@@ -325,14 +325,14 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
         CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, 0, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->AddInvite(calendarEvent, invite, false, true);
     }
-    else
-    {
-        for (std::list<CalendarInvitePacketInfo>::const_iterator iter = calendarInviteList.begin(); iter != calendarInviteList.end(); ++iter)
-        {
-            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, 0, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
-            sCalendarMgr->AddInvite(calendarEvent, invite, false, true);
-        }
-    }
+    //else
+    //{
+    //    for (std::list<CalendarInvitePacketInfo>::const_iterator iter = calendarInviteList.begin(); iter != calendarInviteList.end(); ++iter)
+    //    {
+    //        CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), calendarEvent->GetEventId(), (uint64)iter->Guid, guid, 0, CalendarInviteStatus(iter->Status), CalendarModerationRank(iter->ModerationRank), "");
+    //        sCalendarMgr->AddInvite(calendarEvent, invite, false, true);
+    //    }
+    //}
 
     sCalendarMgr->AddEvent(calendarEvent, CALENDAR_SENDTYPE_ADD);
 }
