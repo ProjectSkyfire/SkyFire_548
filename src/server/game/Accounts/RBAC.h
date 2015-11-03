@@ -683,6 +683,20 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_MODIFY_CURRENCY                        = 775, // only 4.3.4
     RBAC_PERM_COMMAND_DEBUG_PHASE                            = 776, // Only 4.3.4
 
+
+    RBAC_PERM_COMMAND_SUPPORT_BUG                            = 777,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_ASSIGN                     = 778,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_CLOSE                      = 779,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_CLOSEDLIST                 = 780,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_COMMENT                    = 781,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_DELETE                     = 782,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_LIST                       = 783,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_UNASSIGN                   = 784,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_VIEW                       = 785,
+    RBAC_PERM_COMMAND_SUPPORT_BUG_RESET                      = 786,
+
+
+
     // custom permissions 1000+
     RBAC_PERM_MAX
 };

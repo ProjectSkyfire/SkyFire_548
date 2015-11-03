@@ -1074,12 +1074,20 @@ Server.LoginInfo = 0
 Command.LookupMaxResults = 0
 
 #
-#    AllowTickets
-#        Description: Allow/disallow sending new tickets.
+#    TicketSystem
+#        Description: Allow/disallow sending new GM tickets.
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 
-AllowTickets = 1
+TicketSystem.GMTickets = 1
+
+#
+#    FeedBackSystem
+#        Description: Allow/disallow sending new Bug , Suggestion , Complaint tickets.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+TicketSystem.FeedBackTickets = 1
 
 #
 #     DungeonFinder.OptionsMask
