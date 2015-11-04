@@ -153,9 +153,9 @@ public:
     bool IsCompleted() const { return _completed; }
     bool GetViewed(){ return _viewed; }
 
-    void  LoadFromDB(Field* fields) override;
-    void  SaveToDB(SQLTransaction& trans) const override;
-    void  DeleteFromDB() override;
+    void  LoadFromDB(Field* fields) OVERRIDE;
+    void  SaveToDB(SQLTransaction& trans) const OVERRIDE;
+    void  DeleteFromDB() OVERRIDE;
 
     std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const;
     std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const;
@@ -194,12 +194,12 @@ public:
     void SetOrientation(float Orientation) { _Orientation = Orientation; }
     void SetNote(std::string const& bugnote) { _bugnote = bugnote; }
 
-    void LoadFromDB(Field* fields) override;
-    void SaveToDB(SQLTransaction& trans) const override;
-    void DeleteFromDB() override;
+    void LoadFromDB(Field* fields) OVERRIDE;
+    void SaveToDB(SQLTransaction& trans) const OVERRIDE;
+    void DeleteFromDB() OVERRIDE;
 
     using TicketInfo::FormatMessageString;
-    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const override;
+    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const OVERRIDE;
 
 private:
     float _Orientation;
