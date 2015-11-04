@@ -11,7 +11,7 @@ INSERT INTO `rbac_permissions` (`id`, `name`) VALUES
 (785, 'Command: .ticket bug view'),
 (786, 'Command: .ticket bug reset');
 
-DELETE FROM `rbac_linked_permissions` WHERE `id` = 198 AND `linkedId` IN (777,778,779,780,782,783,784,785,786);
+DELETE FROM `rbac_linked_permissions` WHERE `id` = 198 AND `linkedId` IN (777,778,779,780,781,782,783,784,785,786);
 INSERT INTO `rbac_linked_permissions` (`id`, `linkedId`) VALUES
 (198, 777),
 (198, 778),
