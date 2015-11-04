@@ -37,7 +37,7 @@
 
 TicketInfo::TicketInfo() : _ticketId(0), _mapId(0), _ticketCreateTime(0), _closedBy(0), _assignedTo(0) { }
 
-TicketInfo::TicketInfo(Player* player) : _ticketId(0), _mapId(0), _ticketCreateTime(time(nullptr)), _closedBy(0), _assignedTo(0)
+TicketInfo::TicketInfo(Player* player) : _ticketId(0), _mapId(0), _ticketCreateTime(time(NULL)), _closedBy(0), _assignedTo(0)
 {
     _playerGuid = player->GetGUID();
 }
@@ -49,7 +49,7 @@ void TicketInfo::TeleportTo(Player* player) const
    player->TeleportTo(_mapId, _pos.x, _pos.y, _pos.z, 0.0f, 0);
 }
 
-std::string const& TicketInfo::GetAssignedToName()
+std::string TicketInfo::GetAssignedToName() const
 {
     std::string name;
     if (!_assignedTo)
@@ -70,7 +70,7 @@ void TicketInfo::SetPosition(uint32 MapID, G3D::Vector3 pos)
 GmTicket::GmTicket() : _lastModifiedTime(0), _completed(false), _escalatedStatus(TICKET_UNASSIGNED),
 _openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), _needResponse(false){ }
 
-GmTicket::GmTicket(Player* player) : TicketInfo(player), _lastModifiedTime(time(nullptr)),
+GmTicket::GmTicket(Player* player) : TicketInfo(player), _lastModifiedTime(time(NULL)),
 _completed(false), _escalatedStatus(TICKET_UNASSIGNED),_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), 
 _needResponse(false)
 {
@@ -199,7 +199,7 @@ std::string TicketInfo::FormatMessageString(ChatHandler& handler, const char* sz
 
 std::string GmTicket::FormatMessageString(ChatHandler& handler, bool detailed) const
 {
-    time_t curTime = time(nullptr);
+    time_t curTime = time(NULL);
     Player* player = GetPlayer();
 
     std::stringstream ss;
@@ -315,7 +315,7 @@ void BugTicket::DeleteFromDB()
 
 std::string BugTicket::FormatMessageString(ChatHandler& handler, bool detailed) const
 {
-    time_t curTime = time(nullptr);
+    time_t curTime = time(NULL);
     Player* player = GetPlayer();
 
     std::stringstream ss;

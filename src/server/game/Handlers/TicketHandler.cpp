@@ -182,7 +182,7 @@ void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket & /*recvData*/)
 
 void WorldSession::HandleGMTicketCaseStatusOpcode(WorldPacket & /*recvData*/)
 {
-    time_t UpdateTime = 0, OldestTicketTime = time(nullptr);
+    time_t UpdateTime = 0, OldestTicketTime = time(NULL);
     WorldPacket data(SMSG_GM_TICKET_CASE_STATUS, 4+4+3);
     data.WriteBits(0, 20);
     data.FlushBits();

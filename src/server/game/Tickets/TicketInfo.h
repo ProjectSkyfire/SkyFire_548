@@ -95,7 +95,7 @@ public:
 
     std::string const& GetComment() const { return _comment; }
     std::string const& GetPlayerName() const { return _playerName; }
-    std::string const& GetAssignedToName();
+    std::string GetAssignedToName() const;
 
     uint32 GetTicketId() const { return _ticketId; }
     uint32 GetMapId() const { return _mapId; }

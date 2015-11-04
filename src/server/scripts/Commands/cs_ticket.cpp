@@ -406,7 +406,7 @@ public:
 
         // If assigned to different player other than current, leave
         //! Console can override though
-        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : NULL;
         if (player && ticket->IsAssignedNotTo(player->GetGUID()))
         {
             handler->PSendSysMessage(LANG_COMMAND_TICKETALREADYASSIGNED, ticket->GetTicketId(), target.c_str());
@@ -414,7 +414,7 @@ public:
         }
 
         // Assign ticket
-        SQLTransaction trans = SQLTransaction(nullptr);
+        SQLTransaction trans = SQLTransaction(NULL);
         ticket->SetAssignedTo(targetGuid, AccountMgr::IsAdminAccount(AccountMgr::GetSecurity(accountId, realmID)));
          sTicketMgr->UpdateLastChange();
 
@@ -441,7 +441,7 @@ public:
 
         // Ticket should be assigned to the player who tries to close it.
         // Console can override though
-        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : NULL;
         if (player && ticket->IsAssignedNotTo(player->GetGUID()))
         {
             handler->PSendSysMessage(LANG_COMMAND_TICKETCANNOTCLOSE, ticket->GetTicketId());

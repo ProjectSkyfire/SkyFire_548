@@ -137,7 +137,7 @@ void TicketMgr::AddTicket(GmTicket* ticket)
     if (!ticket->IsClosed())
         ++_openGmTicketCount;
 
-    SQLTransaction trans = SQLTransaction(nullptr);
+    SQLTransaction trans = SQLTransaction(NULL);
     ticket->SaveToDB(trans);
 }
 
@@ -147,8 +147,18 @@ void TicketMgr::AddTicket(BugTicket* ticket)
     if (!ticket->IsClosed())
         ++_openBugTicketCount;
 
-    SQLTransaction trans = SQLTransaction(nullptr);
+    SQLTransaction trans = SQLTransaction(NULL);
     ticket->SaveToDB(trans);
+}
+
+template<> uint32 TicketMgr::GetOpenTicketCount<GmTicket>() const
+{
+    return _openGmTicketCount;
+}
+
+template<> uint32 TicketMgr::GetOpenTicketCount<BugTicket>() const
+{
+    return _openBugTicketCount;
 }
 
 template<> GmTicket* TicketMgr::GetTicket<GmTicket>(uint32 ticketId)

@@ -76,9 +76,6 @@ public:
         return NULL;
     }
 
-    template<> uint32 GetOpenTicketCount<GmTicket>() const { return _openGmTicketCount; }
-    template<> uint32 GetOpenTicketCount<BugTicket>() const { return _openBugTicketCount; }
-
     bool GetFeedBackSystemStatus() { return _feedbackSystemStatus; }
     bool GetGmTicketSystemStatus() { return _gmTicketSystemStatus; }
 
@@ -104,7 +101,7 @@ public:
     void SendGmTicket(WorldSession* session, GmTicket* ticket) const;
     void SendGmTicketUpdate(Opcodes opcode, GMTicketResponse response, Player* player) const;
     void SendGmResponsee(WorldSession* session, GmTicket* ticket) const;
-    void UpdateLastChange() { _lastChange = uint64(time(nullptr)); }
+    void UpdateLastChange() { _lastChange = uint64(time(NULL)); }
 
     uint32 GenerateGmTicketId() { return ++_lastGmTicketId; }
     uint32 GenerateBugId() { return ++_lastBugId; }
