@@ -1372,7 +1372,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
     ObjectGuid guid;
 
-    recvData.ReadBit(); // unk bit
+    recvData.read_skip<uint8>(); // flags
 
     guid[7] = recvData.ReadBit();
     guid[4] = recvData.ReadBit();

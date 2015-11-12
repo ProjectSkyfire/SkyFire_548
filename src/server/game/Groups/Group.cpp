@@ -920,24 +920,73 @@ void Group::SendLootAllPassed(Roll const& roll)
 }
 
 // notify group members which player is the allowed looter for the given creature
-void Group::SendLooter(Creature* creature, Player* groupLooter)
+void Group::SendLooter(Creature* creature, Player* pLooter)
 {
     ASSERT(creature);
 
     ObjectGuid creatureGuid = creature->GetGUID();
+    ObjectGuid looterGuid = pLooter ? pLooter->GetGUID() : 0;
+    ObjectGuid masterLooterGuid = GetLootMethod() == MASTER_LOOT ? GetLooterGuid() : 0;
     WorldPacket data(SMSG_LOOT_LIST);
 
     data.WriteBit(creatureGuid[5]);
-    data.WriteBit(0);
+    data.WriteBit(masterLooterGuid != (uint64)0);
+    if (masterLooterGuid)
+    {
+        data.WriteBit(masterLooterGuid[4]);
+        data.WriteBit(masterLooterGuid[6]);
+        data.WriteBit(masterLooterGuid[0]);
+        data.WriteBit(masterLooterGuid[7]);
+        data.WriteBit(masterLooterGuid[5]);
+        data.WriteBit(masterLooterGuid[2]);
+        data.WriteBit(masterLooterGuid[3]);
+        data.WriteBit(masterLooterGuid[1]);
+    }
     data.WriteBit(creatureGuid[1]);
-    data.WriteBit(0);
+    data.WriteBit(looterGuid != (uint64)0);
     data.WriteBit(creatureGuid[4]);
     data.WriteBit(creatureGuid[3]);
     data.WriteBit(creatureGuid[2]);
+    if (looterGuid)
+    {
+        data.WriteBit(looterGuid[2]);
+        data.WriteBit(looterGuid[3]);
+        data.WriteBit(looterGuid[4]);
+        data.WriteBit(looterGuid[5]);
+        data.WriteBit(looterGuid[6]);
+        data.WriteBit(looterGuid[0]);
+        data.WriteBit(looterGuid[1]);
+        data.WriteBit(looterGuid[7]);
+    }
     data.WriteBit(creatureGuid[7]);
     data.WriteBit(creatureGuid[0]);
     data.WriteBit(creatureGuid[6]);
-    
+    data.FlushBits();
+
+    if (looterGuid)
+    {
+        data.WriteByteSeq(looterGuid[7]);
+        data.WriteByteSeq(looterGuid[1]);
+        data.WriteByteSeq(looterGuid[0]);
+        data.WriteByteSeq(looterGuid[6]);
+        data.WriteByteSeq(looterGuid[5]);
+        data.WriteByteSeq(looterGuid[3]);
+        data.WriteByteSeq(looterGuid[4]);
+        data.WriteByteSeq(looterGuid[2]);
+    }
+
+    if (masterLooterGuid)
+    {
+        data.WriteByteSeq(masterLooterGuid[4]);
+        data.WriteByteSeq(masterLooterGuid[5]);
+        data.WriteByteSeq(masterLooterGuid[6]);
+        data.WriteByteSeq(masterLooterGuid[3]);
+        data.WriteByteSeq(masterLooterGuid[2]);
+        data.WriteByteSeq(masterLooterGuid[7]);
+        data.WriteByteSeq(masterLooterGuid[0]);
+        data.WriteByteSeq(masterLooterGuid[1]);
+    }
+
     data.WriteByteSeq(creatureGuid[5]);
     data.WriteByteSeq(creatureGuid[1]);
     data.WriteByteSeq(creatureGuid[6]);
