@@ -54,6 +54,7 @@ enum MovementStatusElements
     MSEHasTransportGuidByte7,
     MSEHasTransportTime2,
     MSEHasTransportTime3,
+    MSEHasTransportVehicleId,
     MSEHasPitch,
     MSEHasFallData,
     MSEHasFallDirection,
@@ -61,6 +62,7 @@ enum MovementStatusElements
     MSEHasSpline,
 
     MSEForces,
+    MSECount,
     MSECounter,
     MSEGuidByte0,
     MSEGuidByte1,
@@ -95,6 +97,7 @@ enum MovementStatusElements
     MSETransportTime,
     MSETransportTime2,
     MSETransportTime3,
+    MSETransportVehicleId,
     MSEPitch,
     MSEFallTime,
     MSEFallVerticalSpeed,
