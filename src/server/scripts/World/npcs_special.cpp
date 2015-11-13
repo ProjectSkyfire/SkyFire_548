@@ -58,6 +58,7 @@ EndContentData */
 #include "CellImpl.h"
 #include "SpellAuras.h"
 #include "Pet.h"
+#include "BlackMarketMgr.h"
 
 /*########
 # npc_air_force_bots
@@ -2484,7 +2485,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        player->GetSession()->SendBlackMarketHello(creature->GetGUID());
+        player->GetSession()->SendBlackMarketHello(creature->GetGUID(), sBlackMarketMgr->isBlackMarketOpen());
         return true;
     }
 };

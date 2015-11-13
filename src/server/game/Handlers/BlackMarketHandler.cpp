@@ -35,10 +35,8 @@ void WorldSession::HandleBlackMarketHelloOpcode(WorldPacket& recvData)
         
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
-
-    bool Open = sWorld->getBoolConfig(CONFIG_BLACK_MARKET_OPEN);
-
-    SendBlackMarketHello(NpcGUID, Open);
+    
+    SendBlackMarketHello(NpcGUID, sBlackMarketMgr->isBlackMarketOpen());
 }
 
 void WorldSession::SendBlackMarketHello(ObjectGuid NpcGUID, bool Open)

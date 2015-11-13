@@ -115,6 +115,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlefield/Zones
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds/Zones
+  ${CMAKE_SOURCE_DIR}/src/server/game/BlackMarket
   ${CMAKE_SOURCE_DIR}/src/server/game/Calendar
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat/Channels
