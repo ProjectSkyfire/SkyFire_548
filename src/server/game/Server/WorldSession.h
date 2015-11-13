@@ -961,7 +961,7 @@ class WorldSession
 
         // BlackMarket
         void HandleBlackMarketHelloOpcode(WorldPacket& recvData);
-        void SendBlackMarketHello(uint64 guid);
+        void SendBlackMarketHello(ObjectGuid NpcGUID, bool Open);
         void HandleBlackMarketRequestItemOpcode(WorldPacket& recvData);
         void SendBlackMarketRequestItemsResult();
 
