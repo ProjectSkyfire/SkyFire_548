@@ -1663,6 +1663,42 @@ void Guild::HandleSetEmblem(WorldSession* session, const EmblemInfo& emblemInfo)
     }
 }
 
+void Guild::_SendSetNewGuildMaster(Member const* guildMaster, Member const* newGuildMaster, bool replace) const
+{
+    ObjectGuid gumGuid = guildMaster->GetGUID();
+    ObjectGuid newGumGuid = newGuildMaster->GetGUID();
+
+    WorldPacket data(SMSG_GUILD_SET_GUILD_MASTER, guildMaster->GetName().size() + newGuildMaster->GetName().size() + 2 * 8);
+    data.WriteGuidMask(newGumGuid, 4, 2, 7);
+    data.WriteBit(gumGuid[4]);
+    data.WriteBits(guildMaster->GetName().size(), 6);
+    data.WriteBit(gumGuid[0]);
+    data.WriteGuidMask(newGumGuid, 6, 3);
+    data.WriteBit(replace);
+    data.WriteGuidMask(newGumGuid, 1, 0);
+    data.WriteGuidMask(gumGuid, 1, 7, 3, 6, 2);
+    data.WriteBits(newGuildMaster->GetName().size(), 6);
+    data.WriteBit(gumGuid[5]);
+    data.WriteBit(newGumGuid[5]);
+    data.FlushBits();
+
+    data.WriteGuidBytes(newGumGuid, 5, 6);
+    data.WriteString(guildMaster->GetName());
+    data.WriteString(newGuildMaster->GetName());
+    data.WriteGuidBytes(newGumGuid, 3, 4);
+    data << (int32)realmID;
+    data.WriteByteSeq(gumGuid[6]);
+    data.WriteByteSeq(newGumGuid[0]);
+    data.WriteByteSeq(gumGuid[5]);
+    data.WriteGuidBytes(newGumGuid, 2, 7);
+    data.WriteGuidBytes(gumGuid, 7, 4);
+    data << (int32)realmID;
+    data.WriteByteSeq(newGumGuid[1]);
+    data.WriteGuidBytes(gumGuid, 2, 1, 3, 0);
+
+    BroadcastPacket(&data);
+}
+
 void Guild::HandleSetNewGuildMaster(WorldSession* session, std::string const& name)
 {
     Player* player = session->GetPlayer();
@@ -1678,6 +1714,33 @@ void Guild::HandleSetNewGuildMaster(WorldSession* session, std::string const& na
             _SetLeaderGUID(newGuildMaster);
             oldGuildMaster->ChangeRank(GR_INITIATE);
             _BroadcastEvent(GE_LEADER_CHANGED, 0, player->GetName().c_str(), name.c_str());
+        }
+    }
+}
+
+void Guild::HandleReplaceGuildMaster(WorldSession* session)
+{
+    Player* player = session->GetPlayer();
+
+    if (Member* newGuildMaster = GetMember(player->GetGUID()))
+    {
+        if (newGuildMaster->GetRankId() > GR_MEMBER) // 3 ranks down from gum is the requirements
+        {
+            SendCommandResult(session, GUILD_COMMAND_CHANGE_LEADER, ERR_GUILD_PERMISSIONS);
+            return;
+        }
+
+        if (Member* oldGuildMaster = GetMember(m_leaderGuid))
+        {
+            if (oldGuildMaster->GetLogoutTime() > uint64(time(NULL) - (DAY * 90)))
+            {
+                SendCommandResult(session, GUILD_COMMAND_CHANGE_LEADER, ERR_GUILD_PERMISSIONS);
+                return;
+            }
+
+            _SetLeaderGUID(newGuildMaster);
+            oldGuildMaster->ChangeRank(_GetLowestRankId());
+            _SendSetNewGuildMaster(oldGuildMaster, newGuildMaster, true);
         }
     }
 }
