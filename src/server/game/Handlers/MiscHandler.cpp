@@ -1480,28 +1480,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recvData)
         return;
     }
 
-    uint32 talent_points = 41;
-    WorldPacket data(SMSG_INSPECT_RESULTS, 8 + 4 + 1 + 1 + talent_points + 8 + 4 + 8 + 4);
-    data << player->GetGUID();
-
-    if (sWorld->getBoolConfig(CONFIG_TALENTS_INSPECTING) || _player->IsGameMaster())
-        player->BuildPlayerTalentsInfoData(&data);
-    else
-    {
-        data << uint32(0);                                  // unspentTalentPoints
-        data << uint8(0);                                   // talentGroupCount
-        data << uint8(0);                                   // talentGroupIndex
-    }
-
-    player->BuildEnchantmentsInfoData(&data);
-    if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
-    {
-        data << uint64(guild->GetGUID());
-        data << uint32(guild->GetLevel());
-        data << uint64(0/*guild->GetXP()*/);
-        data << uint32(guild->GetMembersCount());
-    }
-    SendPacket(&data);
+    _player->SendInspectResult(player);
 }
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)

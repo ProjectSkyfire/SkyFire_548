@@ -27580,6 +27580,163 @@ std::string Player::GetGuildName()
     return GetGuildId() ? sGuildMgr->GetGuildById(GetGuildId())->GetName() : "";
 }
 
+void Player::SendInspectResult(Player const* player)
+{
+    if (!player)
+        return;
+
+    uint32 talentPoints = 41;
+    uint32 slotCount = 0;
+    uint32 glyphCount = 0;
+    uint32 talentCount = 0;
+    ObjectGuid guid = player->GetGUID();
+    Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId());
+    ObjectGuid guildGuid = guild ? guild->GetGUID() : 0;
+
+    ByteBuffer enchantData;
+    WorldPacket data(SMSG_INSPECT_RESULTS, 8 + 4 + 1 + 1 + talentPoints + 8 + 4 + 8 + 4);
+    data.WriteBit(guild ? 1 : 0);
+    data.WriteBit(guid[2]);
+    if (guild)
+    {
+        uint8 bitValues[] = { 7, 0, 5, 3, 2, 4, 6, 1 };
+        data.WriteBitInOrder(guildGuid, bitValues);
+    }
+
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
+    size_t slotCountBitPos = data.bitwpos();
+    data.WriteBits(0, 20); // slot count placeholder
+    data.WriteBit(guid[0]);
+    for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+
+        if (!item)
+            continue;
+
+        ++slotCount;
+
+        ObjectGuid creatorGuid = item->GetUInt64Value(ITEM_FIELD_CREATOR);
+        uint32 enchantCount = 0;
+
+        data.WriteBit(creatorGuid[1]);
+        data.WriteBit(0); // unk1
+        data.WriteBit(0);
+        data.WriteBit(creatorGuid[3]);
+        size_t enchCountBitPos = data.bitwpos();
+        data.WriteBits(0, 21); // enchant count placeholder
+        data.WriteBit(creatorGuid[2]);
+        data.WriteBit(creatorGuid[6]);
+        data.WriteBit(creatorGuid[4]);
+        data.WriteBit(0); // unk2
+        data.WriteBit(creatorGuid[0]);
+        data.WriteBit(creatorGuid[5]);
+        data.WriteBit(creatorGuid[7]);
+
+        // if (unk2)
+        // enchantData << uint16(0);
+        enchantData.WriteByteSeq(creatorGuid[3]);
+        enchantData << uint32(0);
+
+        for (uint8 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
+        {
+            uint32 enchId = item->GetEnchantmentId(EnchantmentSlot(j));
+
+            if (!enchId)
+                continue;
+
+            ++enchantCount;
+            enchantData << enchId;      // enchantmentId
+            enchantData << uint8(j);    // slot
+        }
+
+        data.PutBits(enchCountBitPos, enchantCount, 21);
+        enchantData << uint32(item->GetEntry());
+        enchantData.WriteByteSeq(creatorGuid[6]);
+        enchantData.WriteByteSeq(creatorGuid[4]);
+        enchantData.WriteByteSeq(creatorGuid[7]);
+        enchantData.WriteByteSeq(creatorGuid[2]);
+        // if (unk1)
+        // enchantData << uint32(0);
+        enchantData.WriteByteSeq(creatorGuid[5]);
+        enchantData << uint8(i); // slot
+        enchantData.WriteByteSeq(creatorGuid[0]);
+        enchantData.WriteByteSeq(creatorGuid[1]);
+    }
+
+    data.PutBits(slotCountBitPos, slotCount, 20);
+    size_t glyphCountBitPos = data.bitwpos();
+    data.WriteBits(0, 23); // glyph count placeholder
+    size_t talentCountBitPos = data.bitwpos();
+    data.WriteBits(0, 23); // talent count placeholder
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[1]);
+    data.FlushBits();
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[2]);
+
+    data.append(enchantData);
+    if (guild)
+    {
+        data.WriteByteSeq(guildGuid[6]);
+        data.WriteByteSeq(guildGuid[2]);
+        data.WriteByteSeq(guildGuid[5]);
+        data.WriteByteSeq(guildGuid[0]);
+        data << uint32(guild->GetMembersCount());
+        data.WriteByteSeq(guildGuid[4]);
+        data.WriteByteSeq(guildGuid[7]);
+        data << uint64(guild->GetExperience());
+        data.WriteByteSeq(guildGuid[1]);
+        data << uint32(guild->GetLevel());
+        data.WriteByteSeq(guildGuid[3]);
+    }
+
+    data.WriteByteSeq(guid[5]);
+
+    for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+    {
+        uint16 glyphId = uint16(player->GetGlyph(GetActiveSpec(), i)); // GlyphProperties.dbc
+        if (glyphId)
+        {
+            ++glyphCount;
+            data << glyphId;
+        }
+    }
+    
+    data.PutBits(glyphCountBitPos, glyphCount, 23);
+    data.WriteByteSeq(guid[0]);
+    data << uint32(player->GetTalentSpecialization(GetActiveSpec()));
+
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
+    {
+        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
+        if (!talentInfo)
+            continue;
+
+        if (talentInfo->playerClass != player->getClass())
+            continue;
+
+        if (!player->HasTalent(talentInfo->SpellId, GetActiveSpec()))
+            continue;
+
+        data << uint16(talentInfo->TalentID);  // Talent.dbc
+        ++talentCount;
+    }
+
+    data.PutBits(talentCountBitPos, talentCount, 23);
+
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+
+    SendDirectMessage(&data);
+}
+
 void Player::SendDuelCountdown(uint32 counter)
 {
     WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
