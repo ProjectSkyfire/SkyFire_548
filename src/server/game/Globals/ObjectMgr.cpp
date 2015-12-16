@@ -6489,11 +6489,21 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
 
 uint32 ObjectMgr::GeneratePetNumber()
 {
+	if (_hiPetNumber >= 0xFFFFFFFE)
+	{
+		TC_LOG_ERROR("misc", "_hiPetNumber Id overflow!! Can't continue, shutting down server. ");
+		World::StopNow(ERROR_EXIT_CODE);
+	}
     return ++_hiPetNumber;
 }
 
 uint64 ObjectMgr::GenerateVoidStorageItemId()
 {
+	if (_voidItemId >= uint64(0xFFFFFFFFFFFFFFFELL))
+	{
+		TC_LOG_ERROR("misc", "VoidStorageItem Id overflow!! Can't continue, shutting down server. ");
+		World::StopNow(ERROR_EXIT_CODE);
+	}
     return ++_voidItemId;
 }
 
