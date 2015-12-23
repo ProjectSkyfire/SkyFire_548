@@ -2728,6 +2728,30 @@ LOCK TABLES `reserved_name` WRITE;
 /*!40000 ALTER TABLE `reserved_name` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `ticket_bug`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ticket_bug` (
+  `ticketId` int(10) unsigned NOT NULL,
+  `playerGuid` bigint(20) unsigned NOT NULL,
+  `bugNote` text NOT NULL,
+  `ticketCreateTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `mapId` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `posX` float NOT NULL DEFAULT '0',
+  `posY` float NOT NULL DEFAULT '0',
+  `posZ` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `closedBy` bigint(20) NOT NULL DEFAULT '0',
+  `assignedTo` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'GUID of admin to whom ticket is assigned',
+  `comment` text NOT NULL,
+  PRIMARY KEY (`ticketId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ticket_bug` WRITE;
+/*!40000 ALTER TABLE `ticket_bug` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ticket_bug` ENABLE KEYS */;
+UNLOCK TABLES;
 --
 -- Table structure for table `warden_action`
 --
