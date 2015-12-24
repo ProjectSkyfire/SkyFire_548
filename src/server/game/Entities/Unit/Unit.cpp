@@ -15941,6 +15941,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
 
     bool hasTransportTime2 = hasTransportData && m_movementInfo.transport.time2 != 0;
     bool hasTransportTime3 = false;
+    bool hasTransportVehicleId = hasTransportData && m_movementInfo.transport.time3 != 0;
     bool hasPitch = HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     bool hasFallDirection = HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasFallData = hasFallDirection || m_movementInfo.jump.fallTime != 0;
@@ -16162,6 +16163,19 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             break;
         case MSEUintCount:
             data << uint32(0);
+            break;
+        case MSEHasTransportVehicleId:
+            data.WriteBit(hasTransportVehicleId);
+            break;
+        case MSETransportVehicleId:
+            if (hasTransportVehicleId)
+                data << mi.transport.time3; // this should be renamed
+            break;
+        case MSEForces:
+            /*
+            for (uint8 i = 0; i < forcesCount; ++i)
+                data << uint32(0);
+            */
             break;
         default:
             ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
