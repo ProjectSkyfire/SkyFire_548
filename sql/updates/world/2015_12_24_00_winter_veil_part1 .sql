@@ -1,7 +1,7 @@
 -- Winter Veil gameobject spawns Human starting area, Goldshire, Stormwind.
 
 SET @OGUID:=84081;
-DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+903;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+909;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
 (@OGUID+0, 178438, 0, 1, 1, -8978.43, 765.823, 103.212, 4.24115, 0, 0, 0, 1, 120, 255, 1),
 (@OGUID+1, 187235, 0, 1, 1, -8895.29, -178.141, 81.5776, 2.02358, 0, 0, 0, 1, 120, 255, 1),
@@ -906,9 +906,16 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+900, 178434, 0, 1, 1, -9084.7, 829.404, 114.636, 0.244346, 0, 0, 0, 1, 120, 255, 1),
 (@OGUID+901, 178436, 0, 1, 1, -9085.09, 830.369, 114.61, 0.366518, 0, 0, 0, 1, 120, 255, 1),
 (@OGUID+902, 178434, 0, 1, 1, -9082.4, 823.71, 114.635, 0.349065, 0, 0, 0, 1, 120, 255, 1),
-(@OGUID+903, 178436, 0, 1, 1, -9083.24, 825.79, 114.625, 0.401425, 0, 0, 0, 1, 120, 255, 1);
+(@OGUID+903, 178436, 0, 1, 1, -9083.24, 825.79, 114.625, 0.401425, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+904, 180844, 0, 1, 1, -9467.176, 25.03098, 62.56212, 2.234018, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+905, 180844, 0, 1, 1, -8865.121, 675.9921, 101.7225, 2.234018, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+906, 178554, 0, 1, 1, -9465.259, 36.7092, 61.5535, 2.460913, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+907, 178666, 0, 1, 1, -8805.49, 637.023, 94.4879, 2.216565, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+908, 178746, 0, 1, 1, -8822.4, 544.955, 96.4599, 1.815142, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+909, 178746, 0, 1, 1, -8808.21, 632.809, 94.4479, 3.769912, 0, 0, 0, 1, 120, 255, 1),
+(@OGUID+910, 180715, 0, 1, 1, -8802.55, 639.955, 94.488, 0.9948372, 0, 0, 0, 1, 120, 255, 1);
 
 SET @OGUID:=84081;
 SET @Event:=2;
-DELETE FROM `game_event_gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+903 AND `eventEntry`=@Event;
-INSERT INTO game_event_gameobject SELECT @Event, gameobject.guid FROM `gameobject` WHERE gameobject.guid BETWEEN @OGUID+0 AND @OGUID+903;
+DELETE FROM `game_event_gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+909 AND `eventEntry`=@Event;
+INSERT INTO game_event_gameobject SELECT @Event, gameobject.guid FROM `gameobject` WHERE gameobject.guid BETWEEN @OGUID+0 AND @OGUID+909;
