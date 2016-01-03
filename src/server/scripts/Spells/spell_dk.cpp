@@ -34,19 +34,26 @@ enum DeathKnightSpells
     SPELL_DK_BLACK_ICE_R1                       = 49140,
     SPELL_DK_BLOOD_BOIL_TRIGGERED               = 65658,
     SPELL_DK_BLOOD_GORGED_HEAL                  = 50454,
+	SPELL_DK_BLOOD_PLAGUE                       = 55078,
     SPELL_DK_BLOOD_PRESENCE                     = 48263,
     SPELL_DK_BLOOD_PRESENCE_TRIGGERED           = 61261,
     SPELL_DK_BLOOD_SHIELD_MASTERY               = 77513,
     SPELL_DK_BLOOD_SHIELD_ABSORB                = 77535,
     SPELL_DK_BUTCHERY                           = 50163,
     SPELL_DK_CORPSE_EXPLOSION_TRIGGERED         = 43999,
+	SPELL_DK_CORPSE_EXPLOSION_VISUAL            = 51270,
     SPELL_DK_DEATH_COIL_DAMAGE                  = 47632,
     SPELL_DK_DEATH_COIL_HEAL                    = 47633,
+	SPELL_DK_DEATH_GRIP_ONLY_JUMP               = 49575,
     SPELL_DK_DEATH_STRIKE_HEAL                  = 45470,
     SPELL_DK_DEATH_STRIKE_ENABLER               = 89832,
+	SPELL_DK_FROST_FEVER                        = 55095,
     SPELL_DK_FROST_PRESENCE                     = 48266,
     SPELL_DK_GHOUL_EXPLODE                      = 47496,
+	SPELL_DK_GHOUL_AS_GUARDIAN                  = 46585,
+    SPELL_DK_GHOUL_AS_PET                       = 52150,
     SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE        = 58625,
+	SPELL_DK_GOREFIENDS_GRASP_GRIP_VISUAL       = 114869,
     SPELL_DK_IMPROVED_BLOOD_PRESENCE_R1         = 50365,
     SPELL_DK_IMPROVED_DEATH_STRIKE              = 62905,
     SPELL_DK_IMPROVED_FROST_PRESENCE_R1         = 50384,
@@ -55,12 +62,240 @@ enum DeathKnightSpells
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
+	SPELL_DK_MASTER_OF_GHOULS                   = 52143,
+	SPELL_DK_RUNIC_CORRUPTION_REGEN             = 51460,
+	SPELL_DK_RUNIC_EMPOWERMENT                  = 81229,
     SPELL_DK_RUNIC_POWER_ENERGIZE               = 49088,
     SPELL_DK_RUNE_TAP                           = 48982,
     SPELL_DK_SCENT_OF_BLOOD                     = 50422,
     SPELL_DK_SCOURGE_STRIKE_TRIGGERED           = 70890,
     SPELL_DK_UNHOLY_PRESENCE                    = 48265,
     SPELL_DK_WILL_OF_THE_NECROPOLIS             = 96171
+};
+
+// Gorefiend's Grasp - 108199
+class spell_dk_gorefiends_grasp : public SpellScriptLoader
+{
+    public:
+        spell_dk_gorefiends_grasp() : SpellScriptLoader("spell_dk_gorefiends_grasp") { }
+
+        class spell_dk_gorefiends_grasp_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_gorefiends_grasp_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        std::list<Unit*> tempList;
+                        std::list<Unit*> gripList;
+
+                        target->GetAttackableUnitListInRange(tempList, 20.0f);
+
+                        for (auto itr : tempList)
+                        {
+                            if (itr->GetGUID())
+                                if (itr->GetGUID() == target->GetGUID())
+                                    continue;
+
+                            if (!_player->IsValidAttackTarget(itr))
+                                continue;
+
+                            if (itr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
+                                || itr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED)
+                                || itr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                                continue;
+
+                            if (itr->IsImmunedToSpell(sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_GRIP_ONLY_JUMP)))
+                                continue;
+
+                            if (_player->HasVisionObscured(itr))
+                                continue;
+
+                            if (!itr->IsWithinLOSInMap(target))
+                                continue;
+
+                            gripList.push_back(itr);
+                        }
+
+                        for (auto itr : gripList)
+                        {
+                            itr->CastSpell(target, SPELL_DK_DEATH_GRIP_ONLY_JUMP, true);
+                            itr->CombatStart(_player, true);
+                            target->CombatStart(_player, true);
+                            target->CastSpell(itr, SPELL_DK_GOREFIENDS_GRASP_GRIP_VISUAL, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_dk_gorefiends_grasp_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_gorefiends_grasp_SpellScript();
+        }
+};
+
+// Called by Death Coil (damage) - 47632, Frost Strike - 49143 and Runic Strike - 56815
+// Runic Empowerment - 81229
+class spell_dk_runic_empowerment : public SpellScriptLoader
+{
+    public:
+        spell_dk_runic_empowerment() : SpellScriptLoader("spell_dk_runic_empowerment") { }
+
+        class spell_dk_runic_empowerment_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_runic_empowerment_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (_player->HasAura(SPELL_DK_RUNIC_EMPOWERMENT))
+                    {
+                        if (roll_chance_i(45))
+                        {
+                            std::set<uint8> runes;
+                            for (uint8 i = 0; i < MAX_RUNES; i++)
+                                if (_player->GetRuneCooldown(i) == _player->GetRuneBaseCooldown(i))
+                                    runes.insert(i);
+                            if (!runes.empty())
+                            {
+                                std::set<uint8>::iterator itr = runes.begin();
+                                std::advance(itr, urand(0, runes.size()-1));
+                                _player->SetRuneCooldown((*itr), 0);
+                                _player->ResyncRunes(MAX_RUNES);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_dk_runic_empowerment_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_runic_empowerment_SpellScript();
+        }
+};
+
+// Called by Death Coil (damage) - 47632, Frost Strike - 49143 and Runic Strike - 56815
+// Runic Corruption - 51462
+class spell_dk_runic_corruption : public SpellScriptLoader
+{
+    public:
+        spell_dk_runic_corruption() : SpellScriptLoader("spell_dk_runic_corruption") { }
+
+        class spell_dk_runic_corruption_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_runic_corruption_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (AuraEffect* const runicCorruption = _player->GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 4068, 0))
+                    {
+                        if (roll_chance_i(45))
+                        {
+                            int32 basepoints0 = runicCorruption->GetAmount();
+                            if (Aura* aur = _player->GetAura(SPELL_DK_RUNIC_CORRUPTION_REGEN))
+                                aur->SetDuration(aur->GetDuration() + 3000);
+                            else
+                                _player->CastCustomSpell(_player, SPELL_DK_RUNIC_CORRUPTION_REGEN, &basepoints0, NULL, NULL, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_dk_runic_corruption_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_runic_corruption_SpellScript();
+        }
+};
+
+// Outbreak - 77575
+class spell_dk_outbreak : public SpellScriptLoader
+{
+    public:
+        spell_dk_outbreak() : SpellScriptLoader("spell_dk_outbreak") { }
+
+        class spell_dk_outbreak_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_outbreak_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        _player->CastSpell(target, SPELL_DK_BLOOD_PLAGUE, true);
+                        _player->CastSpell(target, SPELL_DK_FROST_FEVER, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_dk_outbreak_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_outbreak_SpellScript();
+        }
+};
+
+// Raise Dead - 46584
+class spell_dk_raise_dead : public SpellScriptLoader
+{
+    public:
+        spell_dk_raise_dead() : SpellScriptLoader("spell_dk_raise_dead") { }
+
+        class spell_dk_raise_dead_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_raise_dead_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (_player->HasAura(SPELL_DK_MASTER_OF_GHOULS))
+                        _player->CastSpell(_player, SPELL_DK_GHOUL_AS_PET, true);
+                    else
+                        _player->CastSpell(_player, SPELL_DK_GHOUL_AS_GUARDIAN, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_raise_dead_SpellScript();
+        }
 };
 
 // 50462 - Anti-Magic Shell (on raid member)
