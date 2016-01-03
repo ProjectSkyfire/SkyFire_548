@@ -80,7 +80,8 @@ class CreatureAI : public UnitAI
 
     public:
         void Talk(uint8 id, WorldObject const* whisperTarget = NULL);
-        explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false) { }
+        explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false), m_canSeeEvenInPassiveMode(false)
+        { }
 
         virtual ~CreatureAI() { }
 
@@ -89,6 +90,9 @@ class CreatureAI : public UnitAI
         // Called if IsVisible(Unit* who) is true at each who move, reaction at visibility zone enter
         void MoveInLineOfSight_Safe(Unit* who);
 
+		bool CanSeeEvenInPassiveMode() { return m_canSeeEvenInPassiveMode; }
+        void SetCanSeeEvenInPassiveMode(bool canSeeEvenInPassiveMode) { m_canSeeEvenInPassiveMode = canSeeEvenInPassiveMode; }
+		
         // Called in Creature::Update when deathstate = DEAD. Inherited classes may maniuplate the ability to respawn based on scripted events.
         virtual bool CanRespawn() { return true; }
 
@@ -180,6 +184,7 @@ class CreatureAI : public UnitAI
 
     private:
         bool m_MoveInLineOfSight_locked;
+        bool m_canSeeEvenInPassiveMode;
 };
 
 enum Permitions

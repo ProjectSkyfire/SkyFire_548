@@ -31,7 +31,7 @@ class InstanceScript;
 
 class SummonList
 {
-public:
+    public:
     typedef std::list<uint64> StorageType;
     typedef StorageType::iterator iterator;
     typedef StorageType::const_iterator const_iterator;
@@ -80,8 +80,14 @@ public:
         return storage_.size();
     }
 
-    void Summon(Creature const* summon) { storage_.push_back(summon->GetGUID()); }
-    void Despawn(Creature const* summon) { storage_.remove(summon->GetGUID()); }
+    void Summon(Creature const* summon)
+    {
+        storage_.push_back(summon->GetGUID());
+    }
+    void Despawn(Creature const* summon)
+    {
+        storage_.remove(summon->GetGUID());
+    }
     void DespawnEntry(uint32 entry);
     void DespawnAll();
 
@@ -97,7 +103,7 @@ public:
         // We need to use a copy of SummonList here, otherwise original SummonList would be modified
         StorageType listCopy = storage_;
         Trinity::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
-        for (StorageType::iterator i = listCopy.begin(); i != listCopy.end(); )
+        for (StorageType::iterator i = listCopy.begin(); i != listCopy.end();)
         {
             Creature* summon = Unit::GetCreature(*me, *i++);
             if (summon && summon->IsAIEnabled)
@@ -109,7 +115,7 @@ public:
     void RemoveNotExisting();
     bool HasEntry(uint32 entry) const;
 
-private:
+    private:
     Creature* me;
     StorageType storage_;
 };
@@ -117,23 +123,31 @@ private:
 class EntryCheckPredicate
 {
     public:
-        EntryCheckPredicate(uint32 entry) : _entry(entry) { }
-        bool operator()(uint64 guid) { return GUID_ENPART(guid) == _entry; }
+    EntryCheckPredicate(uint32 entry) : _entry(entry)
+    { }
+    bool operator()(uint64 guid)
+    {
+        return GUID_ENPART(guid) == _entry;
+    }
 
     private:
-        uint32 _entry;
+    uint32 _entry;
 };
 
 class DummyEntryCheckPredicate
 {
     public:
-        bool operator()(uint64) { return true; }
+    bool operator()(uint64)
+    {
+        return true;
+    }
 };
 
 struct ScriptedAI : public CreatureAI
 {
     explicit ScriptedAI(Creature* creature);
-    virtual ~ScriptedAI() { }
+    virtual ~ScriptedAI()
+    { }
 
     // *************
     //CreatureAI Functions
@@ -142,34 +156,43 @@ struct ScriptedAI : public CreatureAI
     void AttackStartNoMove(Unit* target);
 
     // Called at any Damage from any attacker (before damage apply)
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) { }
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+    { }
 
     //Called at World update tick
     virtual void UpdateAI(uint32 diff);
 
     //Called at creature death
-    void JustDied(Unit* /*killer*/) { }
+    void JustDied(Unit* /*killer*/)
+    { }
 
     //Called at creature killing another unit
-    void KilledUnit(Unit* /*victim*/) { }
+    void KilledUnit(Unit* /*victim*/)
+    { }
 
     // Called when the creature summon successfully other creature
-    void JustSummoned(Creature* /*summon*/) { }
+    void JustSummoned(Creature* /*summon*/)
+    { }
 
     // Called when a summoned creature is despawned
-    void SummonedCreatureDespawn(Creature* /*summon*/) { }
+    void SummonedCreatureDespawn(Creature* /*summon*/)
+    { }
 
     // Called when hit by a spell
-    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) { }
+    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/)
+    { }
 
     // Called when spell hits a target
-    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) { }
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/)
+    { }
 
     //Called at waypoint reached or PointMovement end
-    void MovementInform(uint32 /*type*/, uint32 /*id*/) { }
+    void MovementInform(uint32 /*type*/, uint32 /*id*/)
+    { }
 
     // Called when AI is temporarily replaced or put back when possess is applied or removed
-    void OnPossess(bool /*apply*/) { }
+    void OnPossess(bool /*apply*/)
+    { }
 
     // *************
     // Variables
@@ -186,10 +209,12 @@ struct ScriptedAI : public CreatureAI
     // *************
 
     //Called at creature reset either by death or evade
-    void Reset() { }
+    void Reset()
+    { }
 
     //Called at creature aggro either by MoveInLOS or Attack Start
-    void EnterCombat(Unit* /*victim*/) { }
+    void EnterCombat(Unit* /*victim*/)
+    { }
 
     // Called before EnterCombat even before the creature is in combat.
     void AttackStart(Unit* /*target*/);
@@ -220,7 +245,7 @@ struct ScriptedAI : public CreatureAI
     void DoModifyThreatPercent(Unit* unit, int32 pct);
 
     void DoTeleportTo(float x, float y, float z, uint32 time = 0);
-    void DoTeleportTo(float const pos[4]);
+    void DoTeleportTo(float const pos [4]);
 
     //Teleports a player without dropping threat (only teleports to same map)
     void DoTeleportPlayer(Unit* unit, float x, float y, float z, float o);
@@ -241,8 +266,14 @@ struct ScriptedAI : public CreatureAI
     //Spawns a creature relative to me
     Creature* DoSpawnCreature(uint32 entry, float offsetX, float offsetY, float offsetZ, float angle, uint32 type, uint32 despawntime);
 
-    bool HealthBelowPct(uint32 pct) const { return me->HealthBelowPct(pct); }
-    bool HealthAbovePct(uint32 pct) const { return me->HealthAbovePct(pct); }
+    bool HealthBelowPct(uint32 pct) const
+    {
+        return me->HealthBelowPct(pct);
+    }
+    bool HealthAbovePct(uint32 pct) const
+    {
+        return me->HealthAbovePct(pct);
+    }
 
     //Returns spells that meet the specified criteria from the creatures spell list
     SpellInfo const* SelectSpell(Unit* target, uint32 school, uint32 mechanic, SelectTargetType targets, uint32 powerCostMin, uint32 powerCostMax, float rangeMin, float rangeMax, SelectEffect effect);
@@ -255,7 +286,10 @@ struct ScriptedAI : public CreatureAI
     //       Remember that if you modified _isCombatMovementAllowed (e.g: using SetCombatMovement) it will not be reset at Reset().
     //       It will keep the last value you set.
     void SetCombatMovement(bool allowMovement);
-    bool IsCombatMovementAllowed() const { return _isCombatMovementAllowed; }
+    bool IsCombatMovementAllowed() const
+    {
+        return _isCombatMovementAllowed;
+    }
 
     bool EnterEvadeIfOutOfCombatArea(uint32 const diff);
 
@@ -264,16 +298,25 @@ struct ScriptedAI : public CreatureAI
     //   - for raid in mode 10-Heroic
     //   - for raid in mode 25-heroic
     // DO NOT USE to check raid in mode 25-normal.
-    bool IsHeroic() const { return _isHeroic; }
+    bool IsHeroic() const
+    {
+        return _isHeroic;
+    }
 
     // return the dungeon or raid difficulty
-    Difficulty GetDifficulty() const { return _difficulty; }
+    Difficulty GetDifficulty() const
+    {
+        return _difficulty;
+    }
 
     // return true for 25 man or 25 man heroic mode
-    bool Is25ManRaid() const { return _difficulty & RAID_DIFFICULTY_MASK_25MAN; }
+    bool Is25ManRaid() const
+    {
+        return _difficulty & RAID_DIFFICULTY_MASK_25MAN;
+    }
 
     template<class T> inline
-    const T& DUNGEON_MODE(const T& normal5, const T& heroic10) const
+        const T& DUNGEON_MODE(const T& normal5, const T& heroic10) const
     {
         switch (_difficulty)
         {
@@ -289,7 +332,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     template<class T> inline
-    const T& RAID_MODE(const T& normal10, const T& normal25) const
+        const T& RAID_MODE(const T& normal10, const T& normal25) const
     {
         switch (_difficulty)
         {
@@ -305,7 +348,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     template<class T> inline
-    const T& RAID_MODE(const T& normal10, const T& normal25, const T& flex, const T& lfr) const
+        const T& RAID_MODE(const T& normal10, const T& normal25, const T& flex, const T& lfr) const
     {
         switch (_difficulty)
         {
@@ -349,92 +392,123 @@ struct ScriptedAI : public CreatureAI
     }
 
     private:
-        Difficulty _difficulty;
-        uint32 _evadeCheckCooldown;
-        bool _isCombatMovementAllowed;
-        bool _isHeroic;
+    Difficulty _difficulty;
+    uint32 _evadeCheckCooldown;
+    bool _isCombatMovementAllowed;
+    bool _isHeroic;
 };
 
 class BossAI : public ScriptedAI
 {
     public:
-        BossAI(Creature* creature, uint32 bossId);
-        virtual ~BossAI() { }
+    BossAI(Creature* creature, uint32 bossId);
+    virtual ~BossAI()
+    { }
 
-        InstanceScript* const instance;
-        BossBoundaryMap const* GetBoundary() const { return _boundary; }
+    InstanceScript* const instance;
+    BossBoundaryMap const* GetBoundary() const
+    {
+        return _boundary;
+    }
 
-        void JustSummoned(Creature* summon);
-        void SummonedCreatureDespawn(Creature* summon);
+    void JustSummoned(Creature* summon);
+    void SummonedCreatureDespawn(Creature* summon);
 
-        virtual void UpdateAI(uint32 diff);
+    virtual void UpdateAI(uint32 diff);
 
-        // Hook used to execute events scheduled into EventMap without the need
-        // to override UpdateAI
-        // note: You must re-schedule the event within this method if the event
-        // is supposed to run more than once
-        virtual void ExecuteEvent(uint32 /*eventId*/) { }
+    // Hook used to execute events scheduled into EventMap without the need
+    // to override UpdateAI
+    // note: You must re-schedule the event within this method if the event
+    // is supposed to run more than once
+    virtual void ExecuteEvent(uint32 /*eventId*/)
+    { }
 
-        void Reset() { _Reset(); }
-        void EnterCombat(Unit* /*who*/) { _EnterCombat(); }
-        void JustDied(Unit* /*killer*/) { _JustDied(); }
-        void JustReachedHome() { _JustReachedHome(); }
+    void Reset()
+    {
+        _Reset();
+    }
+    void EnterCombat(Unit* /*who*/)
+    {
+        _EnterCombat();
+    }
+    void JustDied(Unit* /*killer*/)
+    {
+        _JustDied();
+    }
+    void JustReachedHome()
+    {
+        _JustReachedHome();
+    }
 
     protected:
-        void _Reset();
-        void _EnterCombat();
-        void _JustDied();
-        void _JustReachedHome() { me->setActive(false); }
-        void _DespawnAtEvade();
+    void _Reset();
+    void _EnterCombat();
+    void _JustDied();
+    void _JustReachedHome()
+    {
+        me->setActive(false);
+    }
+    void _DespawnAtEvade();
 
-        bool CheckInRoom()
-        {
-            if (CheckBoundary(me))
-                return true;
+    bool CheckInRoom()
+    {
+        if (CheckBoundary(me))
+            return true;
 
-            EnterEvadeMode();
-            return false;
-        }
+        EnterEvadeMode();
+        return false;
+    }
 
-        bool CheckBoundary(Unit* who);
-        void TeleportCheaters();
+    bool CheckBoundary(Unit* who);
+    void TeleportCheaters();
 
-        EventMap events;
-        SummonList summons;
+    EventMap events;
+    SummonList summons;
 
     private:
-        BossBoundaryMap const* const _boundary;
-        uint32 const _bossId;
+    BossBoundaryMap const* const _boundary;
+    uint32 const _bossId;
 };
 
 class WorldBossAI : public ScriptedAI
 {
     public:
-        WorldBossAI(Creature* creature);
-        virtual ~WorldBossAI() { }
+    WorldBossAI(Creature* creature);
+    virtual ~WorldBossAI()
+    { }
 
-        void JustSummoned(Creature* summon);
-        void SummonedCreatureDespawn(Creature* summon);
+    void JustSummoned(Creature* summon);
+    void SummonedCreatureDespawn(Creature* summon);
 
-        virtual void UpdateAI(uint32 diff);
+    virtual void UpdateAI(uint32 diff);
 
-        // Hook used to execute events scheduled into EventMap without the need
-        // to override UpdateAI
-        // note: You must re-schedule the event within this method if the event
-        // is supposed to run more than once
-        virtual void ExecuteEvent(uint32 /*eventId*/) { }
+    // Hook used to execute events scheduled into EventMap without the need
+    // to override UpdateAI
+    // note: You must re-schedule the event within this method if the event
+    // is supposed to run more than once
+    virtual void ExecuteEvent(uint32 /*eventId*/)
+    { }
 
-        void Reset() { _Reset(); }
-        void EnterCombat(Unit* /*who*/) { _EnterCombat(); }
-        void JustDied(Unit* /*killer*/) { _JustDied(); }
+    void Reset()
+    {
+        _Reset();
+    }
+    void EnterCombat(Unit* /*who*/)
+    {
+        _EnterCombat();
+    }
+    void JustDied(Unit* /*killer*/)
+    {
+        _JustDied();
+    }
 
     protected:
-        void _Reset();
-        void _EnterCombat();
-        void _JustDied();
+    void _Reset();
+    void _EnterCombat();
+    void _JustDied();
 
-        EventMap events;
-        SummonList summons;
+    EventMap events;
+    SummonList summons;
 };
 
 // SD2 grid searchers.
@@ -443,5 +517,6 @@ GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, flo
 void GetCreatureListWithEntryInGrid(std::list<Creature*>& list, WorldObject* source, uint32 entry, float maxSearchRange);
 void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& list, WorldObject* source, uint32 entry, float maxSearchRange);
 void GetPlayerListInGrid(std::list<Player*>& list, WorldObject* source, float maxSearchRange);
-
+void GetPositionWithDistInOrientation(Unit* pUnit, float dist, float orientation, float& x, float& y);
+void GetRandPosFromCenterInDist(float centerX, float centerY, float dist, float& x, float& y);
 #endif // SCRIPTEDCREATURE_H_
