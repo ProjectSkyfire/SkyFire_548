@@ -40,6 +40,7 @@ void WorldSession::HandeSetTalentSpecialization(WorldPacket& recvData)
         return;
 
     uint32 specializationId = GetClassSpecializations(_player->getClass())[specializationTabId];
+    uint32 specializationSpell = 0;
 
     _player->SetTalentSpecialization(_player->GetActiveSpec(), specializationId);
     _player->SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, specializationId);

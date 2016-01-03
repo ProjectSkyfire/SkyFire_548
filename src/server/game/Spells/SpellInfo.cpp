@@ -1044,6 +1044,31 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     for (uint8 i = 0; i < 2; ++i)
         Totem[i] = _totem ? _totem->Totem[i] : 0;
 
+    // SpecializationSpellsEntry
+    SpecializationSpellsEntry const* specializationInfo = NULL;
+    for (uint32 i = 0; i < sSpecializationSpellsStore.GetNumRows(); i++)
+    {
+        specializationInfo = sSpecializationSpellsStore.LookupEntry(i);
+        if (!specializationInfo)
+            continue;
+
+        if (specializationInfo->SpellId == Id)
+            SpecializationIdList.push_back(specializationInfo->SpecializationId);
+
+        if (specializationInfo->RemovesSpellId == Id)
+            OverrideSpellList.push_back(specializationInfo->SpellId);
+    }
+
+    switch (Id)
+    {
+        case 31801:
+            SpecializationIdList.push_back(70);
+            SpecializationIdList.push_back(66);
+        case 105361:
+            OverrideSpellList.push_back(31801);
+            break;
+    }
+
     ChainEntry = NULL;
 }
 

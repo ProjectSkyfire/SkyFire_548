@@ -1951,6 +1951,14 @@ struct QuestFactionRewEntry
   int32       QuestRewFactionValue[10];
 };
 
+struct QuestPOIPointEntry
+{
+    //uint32 Id;                                            // 0
+    int32 X;                                                // 1
+    int32 Y;                                                // 2
+    uint32 BlobId;                                          // 3
+};
+
 struct RandomPropertiesPointsEntry
 {
     //uint32  Id;                                           // 0 hidden key
@@ -1958,6 +1966,45 @@ struct RandomPropertiesPointsEntry
     uint32    EpicPropertiesPoints[5];                      // 2-6
     uint32    RarePropertiesPoints[5];                      // 7-11
     uint32    UncommonPropertiesPoints[5];                  // 12-16
+};
+
+struct ResearchBranchEntry
+{
+    uint32 Id;                                            // 0
+    //char* BranchName;                                   // 1
+    //uint32 ResearchFieldId;                             // 2 research field (from ResearchField.dbc)
+    //uint32 FragmentCurrencyId;                          // 3
+    //char* Icon;                                         // 4
+    //uint32 KeystoneItemId;                              // 5
+};
+
+//struct ResearchFieldEntry
+//{
+//    uint32 Id;                                            // 0
+//    char* FieldName;                                      // 1
+//    uint32 slot;                                          // 2
+//};
+
+struct ResearchProjectEntry
+{
+    uint32 Id;                                              // 0
+    //char* ProjectName;                                    // 1
+    //char* ProjectDescription;                             // 2
+    uint32 Rarity;                                          // 3 0-common, 1-rare
+    uint32 ResearchBranchId;                                // 4 branch id (from ResearchBranch.dbc)
+    //uint32 SpellId;                                       // 5
+    //uint32 KeystoneCount;                                 // 6
+    //char* ProjectIcon;                                    // 7
+    uint32 RequiredFragmentCount;                           // 8
+};
+
+struct ResearchSiteEntry
+{
+    uint32 Id;                                              // 0
+    uint32 MapId;                                           // 1
+    uint32 QuestPOIBlobId;                                  // 2 blob id (from QuestPOIBlob.dbc)
+    //char* SiteName;                                       // 3
+    //uint32 IconId;                                        // 4
 };
 
 struct ScalingStatDistributionEntry

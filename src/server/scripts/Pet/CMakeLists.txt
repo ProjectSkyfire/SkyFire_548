@@ -18,7 +18,7 @@ set(scripts_STAT_SRCS
   Pet/pet_monk.cpp
   Pet/pet_priest.cpp
   Pet/pet_shaman.cpp
-  Pet/pet_warlock.cpp
+  #Pet/pet_warlock.cpp
 )
 
 message("  -> Prepared: Pet")
