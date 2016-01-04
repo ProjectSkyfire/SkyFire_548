@@ -10,29 +10,23 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 language: cpp
+compiler:
+  - clang
 
 git:
   depth: 1
 
-branches:
-  only:
-    - master
-
-compiler:
-  - clang
-#  - gcc ## Uncomment when we are up to full c++11 standards.
-
 before_install:
-  - sudo add-apt-repository ppa:kalakris/cmake -y
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update -qq
-  - sudo apt-get install libace-dev
-  - sudo apt-get install libncurses5-dev
-  - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
-  - sudo apt-get install openssl libssl-dev mysql-server mysql-client libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
-  - if [ "$CXX" = "clang++" ]; then sudo apt-get install -qq libstdc++-4.8-dev; fi
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
+  - echo "yes" | sudo add-apt-repository ppa:boost-latest/ppa
+  - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - echo "yes" | sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
+  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake openssl clang-3.5
+  - sudo apt-get -qq install libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev libzmq3-dev
+  - sudo apt-get -qq install libboost1.55-dev libboost-thread1.55-dev libboost-filesystem1.55-dev libboost-system1.55-dev libboost-program-options1.55-dev libboost-iostreams1.55-dev libboost-regex1.55-dev
+  - export CC=clang-3.5 CXX=clang++-3.5
   
 script:
   - mkdir build
