@@ -1012,6 +1012,9 @@ class WorldSession
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
 
+        //Archaelogy
+        void HandleRequestResearchHistory(WorldPacket& recvPacket);
+
         // Titles
         void HandleSetTitleOpcode(WorldPacket& recvData);
         void SendTitleEarned(uint32 TitleIndex);

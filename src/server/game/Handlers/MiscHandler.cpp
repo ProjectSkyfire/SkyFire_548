@@ -2509,6 +2509,13 @@ void WorldSession::SendLoadCUFProfiles()
     SendPacket(&data);
 }
 
+void WorldSession::HandleRequestResearchHistory(WorldPacket& recvPacket)
+{
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_RESEARCH_HISTORY");
+
+    _player->SendResearchHistory();
+}
+
 #define JOIN_THE_ALLIANCE 1
 #define JOIN_THE_HORDE    0
 

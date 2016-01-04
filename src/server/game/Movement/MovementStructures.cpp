@@ -5597,8 +5597,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MovementUpdateKnockBack;
         //case SMSG_MOVE_UPDATE_RUN_BACK_SPEED:
         //    return MovementUpdateRunBackSpeed;
-        //case SMSG_MOVE_UPDATE_SWIM_SPEED:
-        //    return MovementUpdateSwimSpeed;
+        case SMSG_MOVE_UPDATE_SWIM_SPEED:
+            return MovementUpdateSwimSpeed;
         //case SMSG_MOVE_UPDATE_WALK_SPEED:
         //    return MovementUpdateWalkSpeed;
         case SMSG_SPLINE_MOVE_SET_WALK_SPEED:

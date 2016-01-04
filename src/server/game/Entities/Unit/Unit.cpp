@@ -16274,7 +16274,33 @@ void Unit::SendTeleportPacket(Position& pos)
     if (GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data2(SMSG_MOVE_TELEPORT, 1 + 8 + 1 + 8 + 1 + 4 + 4 + 4 + 4);
-        WriteMovementInfo(data2);
+        data2.WriteGuidMask(guid, 0, 6, 5, 7, 2);
+        data2.WriteBit(uint64(transGuid));
+        data2.WriteBit(guid [4]);
+
+        if (transGuid)
+        {
+            data2.WriteGuidMask(transGuid, 1, 3, 6, 4, 5, 2, 0, 7);
+        }
+
+        data2.WriteGuidMask(guid, 3, 1);
+        data2.WriteBit(0);
+        data2.FlushBits();
+
+        if (transGuid)
+        {
+            data2.WriteGuidBytes(transGuid, 4, 3, 7, 1, 6, 0, 2, 5);
+        }
+
+        data2.WriteGuidBytes(guid, 4, 7);
+        data2 << float(GetPositionZMinusOffset());
+        data2 << float(GetPositionY());
+        data2.WriteGuidBytes(guid, 2, 3, 5);
+        data2 << float(GetPositionX());
+        data2 << uint32(0); // counter
+        data2.WriteGuidBytes(guid, 0, 6, 1);
+        data2 << float(GetOrientation());
+
         ToPlayer()->SendDirectMessage(&data2); // Send the SMSG_MOVE_TELEPORT packet to self.
     }
 
