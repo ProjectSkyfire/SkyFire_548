@@ -211,6 +211,14 @@ enum SpellEffectHandleMode
     SPELL_EFFECT_HANDLE_HIT_TARGET
 };
 
+struct SpellResearchData
+{
+    uint32 keystoneItemId;
+    uint32 keystoneCount;
+    uint32 fragmentCurrencyId;
+    uint32 fragmentCount;
+};
+
 class Spell
 {
     friend void Unit::SetCurrentCastedSpell(Spell* pSpell);
@@ -463,6 +471,7 @@ class Spell
         SpellCastTargets m_targets;
         int8 m_comboPointGain;
         SpellCustomErrors m_customError;
+        SpellResearchData const* m_researchData;
 
         UsedSpellMods m_appliedMods;
 

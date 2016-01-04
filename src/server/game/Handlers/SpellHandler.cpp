@@ -1137,6 +1137,33 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE, 0, false);
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
+
+    if (castFlags & 0x8)   // Archaeology
+    {
+        SpellResearchData* researchData = new SpellResearchData();
+        memset(researchData, 0, sizeof(SpellResearchData*));
+        uint32 count;
+        uint8 type;
+        recvPacket >> count;
+        for (uint32 i = 0; i < count; ++i)
+        {
+            recvPacket >> type;
+            switch (type)
+            {
+                case 2: // Keystones
+                    recvPacket >> researchData->keystoneItemId;       // Item id
+                    recvPacket >> researchData->keystoneCount;        // Item count
+                    break;
+                case 1: // Fragments
+                    recvPacket >> researchData->fragmentCurrencyId;   // Currency id
+                    recvPacket >> researchData->fragmentCount;        // Currency count
+                    break;
+            }
+        }
+
+        spell->m_researchData = researchData;
+    }
+
     spell->prepare(&targets);
 }
 

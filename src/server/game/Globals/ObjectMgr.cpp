@@ -8898,6 +8898,135 @@ PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
     return info;
 }
 
+void ObjectMgr::LoadResearchDigsiteInfo()
+{
+    _researchDigsiteStore.clear();
+
+    uint32 oldMSTime = getMSTime();
+
+    //                                                   0       1                 3                      4
+    QueryResult result = WorldDatabase.Query("SELECT digsiteId, branchId, requiredSkillValue, requiredLevel FROM `research_digsite_data`");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 research digsite infos. DB table `research_digsite_data` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        ResearchDigsiteInfo digsiteInfo;
+        digsiteInfo.digsiteId = fields [0].GetUInt32();
+
+        ResearchSiteEntry const* siteEntry = sResearchSiteStore.LookupEntry(digsiteInfo.digsiteId);
+        if (!siteEntry)
+        {
+            sLog->outError("sql.sql", "Digsite %u defined in `research_digsite_data` does not exists in DBC, skipped.", digsiteInfo.digsiteId);
+            continue;
+        }
+
+        digsiteInfo.branchId = fields [1].GetUInt32();
+        digsiteInfo.requiredSkillValue = fields [2].GetUInt32();
+        digsiteInfo.requiredLevel = fields [3].GetUInt32();
+        _researchDigsiteStore [siteEntry->MapId].push_back(digsiteInfo);
+
+        ++count;
+    }
+    while (result->NextRow());
+    TC_LOG_INFO("server.loading", ">> Loaded %u research digsite infos in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadArchaeologyFindInfo()
+{
+    _archaeologyFindStore.clear();
+
+    uint32 oldMSTime = getMSTime();
+
+    //                                                0        1         2        3           4           5
+    QueryResult result = WorldDatabase.Query("SELECT guid, digsiteId, goEntry, position_x, position_y, position_z FROM `research_digsite_finds`");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 archaeology find infos. DB table `research_digsite_finds` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        ArchaeologyFindInfo findInfo;
+        findInfo.guid = fields [0].GetUInt32();
+        uint32 digsiteId = fields [1].GetUInt32();
+
+        if (!sResearchSiteStore.LookupEntry(digsiteId))
+        {
+            sLog->outError("sql.sql", "Digsite %u referenced in `research_digsite_finds` does not exists in DBC, skipped.", digsiteId);
+            continue;
+        }
+
+        findInfo.goEntry = fields [2].GetUInt32();
+        if (!GetGameObjectTemplate(findInfo.goEntry))
+        {
+            sLog->outError("sql.sql", "Table `research_digsite_finds` has archaeology find with non existing gameobject entry %u (Digsite Id: %u), skipped.", findInfo.goEntry, digsiteId);
+            continue;
+        }
+
+        findInfo.x = fields [3].GetFloat();
+        findInfo.y = fields [4].GetFloat();
+        findInfo.z = fields [5].GetFloat();
+
+        _archaeologyFindStore [digsiteId].push_back(findInfo);
+
+        ++count;
+    }
+    while (result->NextRow());
+    TC_LOG_INFO("server.loading", ">> Loaded %u archaeology find infos in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadResearchProjectRequirements()
+{
+    _researchProjectRequirementStore.clear();
+
+    uint32 oldMSTime = getMSTime();
+
+    //                                                   0              1              2
+    QueryResult result = WorldDatabase.Query("SELECT projectId, requiredSkillValue, chance FROM `research_project_requirements`");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 research project requirements. DB table `research_project_requirements` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 projectId = fields [0].GetUInt32();
+        if (!sResearchProjectStore.LookupEntry(projectId))
+        {
+            TC_LOG_ERROR("sql.sql", "Research project %u referenced in `research_project_requirements` does not exists in DBC, skipped.", projectId);
+            continue;
+        }
+
+        ResearchProjectRequirements requirements;
+        requirements.requiredSkillValue = fields [1].GetUInt32();
+        requirements.chance = fields [2].GetFloat();
+
+        _researchProjectRequirementStore [projectId] = requirements;
+
+        ++count;
+    }
+    while (result->NextRow());
+    TC_LOG_INFO("server.loading", ">> Loaded %u research project requirements in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 void ObjectMgr::LoadBattlePetBreedData()
 {
     uint32 oldMSTime = getMSTime();

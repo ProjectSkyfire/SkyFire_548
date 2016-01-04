@@ -1827,6 +1827,15 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Calendar data...");
     sCalendarMgr->LoadFromDB();
 
+    TC_LOG_INFO("server.loading", "Loading Research Digsite info...");
+    sObjectMgr->LoadResearchDigsiteInfo();
+
+    TC_LOG_INFO("server.loading", "Loading Archaeology Find info...");
+    sObjectMgr->LoadArchaeologyFindInfo();
+
+    TC_LOG_INFO("server.loading", "Loading Research Project requirements...");
+    sObjectMgr->LoadResearchProjectRequirements();
+
     TC_LOG_INFO("server.loading", "Loading Battle Pet breed data...");
     sObjectMgr->LoadBattlePetBreedData();
 
