@@ -20,7 +20,7 @@ branches:
 
 compiler:
   - clang
-  - gcc
+#  - gcc ## Uncomment when we are up to full c++11 standards.
 
 before_install:
   - sudo add-apt-repository ppa:kalakris/cmake -y
