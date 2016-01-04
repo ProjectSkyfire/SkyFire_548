@@ -298,17 +298,6 @@ Unit::~Unit()
 
     delete m_charmInfo;
     delete movespline;
-
-    ASSERT(!m_duringRemoveFromWorld);
-    ASSERT(!m_attacking);
-    ASSERT(m_attackers.empty());
-    ASSERT(m_sharedVision.empty());
-    ASSERT(m_Controlled.empty());
-    ASSERT(m_appliedAuras.empty());
-    ASSERT(m_ownedAuras.empty());
-    ASSERT(m_removedAuras.empty());
-    ASSERT(m_gameObj.empty());
-    ASSERT(m_dynObj.empty());
 }
 
 void Unit::Update(uint32 p_time)
@@ -325,7 +314,6 @@ void Unit::Update(uint32 p_time)
 
     // If this is set during update SetCantProc(false) call is missing somewhere in the code
     // Having this would prevent spells from being proced, so let's crash
-    ASSERT(!m_procDeep);
 
     if (CanHaveThreatList() && getThreatManager().isNeedUpdateToClient(p_time))
         SendThreatListUpdate();
@@ -833,8 +821,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (duel_hasEnded)
         {
             Player* he = duel_wasMounted ? victim->GetCharmer()->ToPlayer() : victim->ToPlayer();
-
-            ASSERT(he && he->duel);
 
             if (duel_wasMounted) // In this case victim==mount
                 victim->SetHealth(1);
@@ -2848,8 +2834,6 @@ void Unit::_UpdateAutoRepeatSpell()
 
 void Unit::SetCurrentCastedSpell(Spell* pSpell)
 {
-    ASSERT(pSpell);                                         // NULL may be never passed here, use InterruptSpell or InterruptNonMeleeSpells
-
     CurrentSpellTypes CSpellType = pSpell->GetCurrentContainer();
 
     if (pSpell == m_currentSpells [CSpellType])             // avoid breaking self
@@ -3100,8 +3084,6 @@ void Unit::DeMorph()
 
 Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount /*= NULL*/, Item* castItem /*= NULL*/, uint64 casterGUID /*= 0*/)
 {
-    ASSERT(casterGUID || caster);
-
     // Check if these can stack anyway
     if (!casterGUID && !newAura->IsStackableOnOneSlotWithDifferentCasters())
         casterGUID = caster->GetGUID();
@@ -3157,7 +3139,6 @@ Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
 
 void Unit::_AddAura(UnitAura* aura, Unit* caster)
 {
-    ASSERT(!m_cleanupDone);
     m_ownedAuras.insert(AuraMap::value_type(aura->GetId(), aura));
 
     _RemoveNoStackAurasDueToAura(aura);
@@ -3168,14 +3149,6 @@ void Unit::_AddAura(UnitAura* aura, Unit* caster)
     aura->SetIsSingleTarget(caster && (aura->GetSpellInfo()->IsSingleTarget() || aura->HasEffectType(SPELL_AURA_CONTROL_VEHICLE)));
     if (aura->IsSingleTarget())
     {
-        ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()) ||
-               (isBeingLoaded() && aura->HasEffectType(SPELL_AURA_CONTROL_VEHICLE)));
-        /* @HACK: Player is not in world during loading auras.
-         *        Single target auras are not saved or loaded from database
-         *        but may be created as a result of aura links (player mounts with passengers)
-         */
-
-        // register single target aura
         caster->GetSingleCastAuras().push_back(aura);
         // remove other single target auras
         Unit::AuraList& scAuras = caster->GetSingleCastAuras();
@@ -3197,14 +3170,6 @@ void Unit::_AddAura(UnitAura* aura, Unit* caster)
 // aura application effects are handled separately to prevent aura list corruption
 AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint32 effMask)
 {
-    // can't apply aura on unit which is going to be deleted - to not create a memory leak
-    ASSERT(!m_cleanupDone);
-    // aura musn't be removed
-    ASSERT(!aura->IsRemoved());
-
-    // aura mustn't be already applied on target
-    ASSERT(!aura->IsAppliedOnTarget(GetGUID()) && "Unit::_CreateAuraApplication: aura musn't be applied on target");
-
     SpellInfo const* aurSpellInfo = aura->GetSpellInfo();
     uint32 aurId = aurSpellInfo->Id;
 
@@ -3233,10 +3198,7 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint32 effMask)
 
 void Unit::_ApplyAuraEffect(Aura* aura, uint8 effIndex)
 {
-    ASSERT(aura);
-    ASSERT(aura->HasEffect(effIndex));
     AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
-    ASSERT(aurApp);
     if (!aurApp->GetEffectMask())
         _ApplyAura(aurApp, 1 << effIndex);
     else
@@ -3284,19 +3246,10 @@ void Unit::_ApplyAura(AuraApplication * aurApp, uint32 effMask)
 void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMode)
 {
     AuraApplication * aurApp = i->second;
-    ASSERT(aurApp);
-    ASSERT(!aurApp->GetRemoveMode());
-    ASSERT(aurApp->GetTarget() == this);
-
     aurApp->SetRemoveMode(removeMode);
     Aura* aura = aurApp->GetBase();
     TC_LOG_DEBUG("spells", "Aura %u now is remove mode %d", aura->GetId(), removeMode);
-
-    // dead loop is killing the server probably
-    ASSERT(m_removedAurasCount < 0xFFFFFFFF);
-
     ++m_removedAurasCount;
-
     Unit* caster = aura->GetCaster();
 
     // Remove all pointers from lists here to prevent possible pointer invalidation on spellcast/auraapply/auraremove
@@ -3339,7 +3292,6 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     }
 
     // all effect mustn't be applied
-    ASSERT(!aurApp->GetEffectMask());
 
     // Remove totem at next update if totem loses its aura
     if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && GetTypeId() == TYPEID_UNIT && ToCreature()->IsTotem() && ToTotem()->GetSummonerGUID() == aura->GetCasterGUID())
@@ -3361,9 +3313,6 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 
 void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
 {
-    // aura can be removed from unit only if it's applied on it, shouldn't happen
-    ASSERT(aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) == aurApp);
-
     uint32 spellId = aurApp->GetBase()->GetId();
     AuraApplicationMapBoundsNonConst range = m_appliedAuras.equal_range(spellId);
 
@@ -3377,7 +3326,6 @@ void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
         else
             ++iter;
     }
-    ASSERT(false);
 }
 
 void Unit::_RemoveNoStackAurasDueToAura(Aura* aura)
@@ -3419,9 +3367,7 @@ void Unit::_RegisterAuraEffect(AuraEffect* aurEff, bool apply)
 void Unit::RemoveOwnedAura(AuraMap::iterator &i, AuraRemoveMode removeMode)
 {
     Aura* aura = i->second;
-    ASSERT(!aura->IsRemoved());
 
-    // if unit currently update aura list then make safe update iterator shift to next
     if (m_auraUpdateIterator == i)
         ++m_auraUpdateIterator;
 
@@ -3454,8 +3400,6 @@ void Unit::RemoveOwnedAura(Aura* aura, AuraRemoveMode removeMode)
     if (aura->IsRemoved())
         return;
 
-    ASSERT(aura->GetOwner() == this);
-
     uint32 spellId = aura->GetId();
     AuraMapBoundsNonConst range = m_ownedAuras.equal_range(spellId);
 
@@ -3467,8 +3411,6 @@ void Unit::RemoveOwnedAura(Aura* aura, AuraRemoveMode removeMode)
             return;
         }
     }
-
-    ASSERT(false);
 }
 
 Aura* Unit::GetOwnedAura(uint32 spellId, uint64 casterGUID, uint64 itemCasterGUID, uint32 reqEffMask, Aura* except) const
@@ -8293,14 +8235,11 @@ void Unit::SetMinion(Minion *minion, bool apply)
                     if (GetGUID() == (*itr)->GetCharmerGUID())
                         continue;
 
-                    //ASSERT((*itr)->GetOwnerGUID() == GetGUID());
                     if ((*itr)->GetOwnerGUID() != GetGUID())
                     {
                         OutDebugInfo();
                         (*itr)->OutDebugInfo();
-                        ASSERT(false);
                     }
-                    ASSERT((*itr)->GetTypeId() == TYPEID_UNIT);
 
                     if (!(*itr)->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
                         continue;
@@ -10533,9 +10472,6 @@ bool Unit::IsValidAttackTarget(Unit const* target) const
 // function based on function Unit::CanAttack from 13850 client
 bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, WorldObject const* obj) const
 {
-    ASSERT(target);
-
-    // can't attack self
     if (this == target)
         return false;
 
@@ -10654,9 +10590,6 @@ bool Unit::IsValidAssistTarget(Unit const* target) const
 // function based on function Unit::CanAssist from 13850 client
 bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) const
 {
-    ASSERT(target);
-
-    // can assist to self
     if (this == target)
         return true;
 
@@ -11074,7 +11007,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
     static MovementStatusElements const speedVal = MSEExtraFloat;
     Movement::ExtraMovementStatusElement extra(&speedVal);
-    extra.Data.floatData.push_back(GetSpeed(mtype));
+    extra.Data.floatData = GetSpeed(mtype);
 
     Movement::PacketSender(this, moveTypeToOpcode [mtype] [0], moveTypeToOpcode [mtype] [1], moveTypeToOpcode [mtype] [2], &extra).Send();
 }
@@ -11092,8 +11025,6 @@ void Unit::setDeathState(DeathState s)
             InterruptNonMeleeSpells(false);
 
         ExitVehicle();                                      // Exit vehicle before calling RemoveAllControlled
-        // vehicles use special type of charm that is not removed by the next function
-        // triggering an assert
         UnsummonAllTotems();
         RemoveAllControlled();
         RemoveAllAurasOnDeath();
@@ -11197,8 +11128,6 @@ void Unit::DeleteThreatList()
 
 void Unit::TauntApply(Unit* taunter)
 {
-    ASSERT(GetTypeId() == TYPEID_UNIT);
-
     if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->IsGameMaster()))
         return;
 
@@ -11225,8 +11154,6 @@ void Unit::TauntApply(Unit* taunter)
 
 void Unit::TauntFadeOut(Unit* taunter)
 {
-    ASSERT(GetTypeId() == TYPEID_UNIT);
-
     if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->IsGameMaster()))
         return;
 
@@ -12184,9 +12111,6 @@ void Unit::AddToWorld()
 
 void Unit::RemoveFromWorld()
 {
-    // cleanup
-    ASSERT(GetGUID());
-
     if (IsInWorld())
     {
         m_duringRemoveFromWorld = true;
@@ -12209,7 +12133,6 @@ void Unit::RemoveFromWorld()
         if (GetCharmerGUID())
         {
             TC_LOG_FATAL("entities.unit", "Unit %u has charmer guid when removed from world", GetEntry());
-            ASSERT(false);
         }
 
         if (Unit* owner = GetOwner())
@@ -12217,7 +12140,6 @@ void Unit::RemoveFromWorld()
             if (owner->m_Controlled.find(this) != owner->m_Controlled.end())
             {
                 TC_LOG_FATAL("entities.unit", "Unit %u is in controlled list of %u when removed from world", GetEntry(), owner->GetEntry());
-                ASSERT(false);
             }
         }
 
@@ -12234,10 +12156,6 @@ void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup)
     if (IsInWorld())
         RemoveFromWorld();
 
-    ASSERT(GetGUID());
-
-    // A unit may be in removelist and not in world, but it is still in grid
-    // and may have some references during delete
     RemoveAllAuras();
     RemoveAllGameObjects();
 
@@ -12848,7 +12766,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     continue;
 
                 AuraEffect* triggeredByAura = i->aura->GetEffect(effIndex);
-                ASSERT(triggeredByAura);
 
                 bool prevented = i->aura->CallScriptEffectProcHandlers(triggeredByAura, aurApp, eventInfo);
                 if (prevented)
@@ -13038,7 +12955,6 @@ void Unit::GetProcAurasTriggeredOnEvent(std::list<AuraApplication*>& aurasTrigge
     {
         for (std::list<AuraApplication*>::iterator itr = procAuras->begin(); itr != procAuras->end(); ++itr)
         {
-            ASSERT((*itr)->GetTarget() == this);
             if (!(*itr)->GetRemoveMode())
                 if ((*itr)->GetBase()->IsProcTriggeredOnEvent(*itr, eventInfo))
                 {
@@ -13538,7 +13454,6 @@ void Unit::SetCantProc(bool apply)
         ++m_procDeep;
     else
     {
-        ASSERT(m_procDeep);
         --m_procDeep;
     }
 }
@@ -14475,9 +14390,6 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
     if (charmer->GetTypeId() == TYPEID_PLAYER)
         charmer->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
-    ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
-    ASSERT((type == CHARM_TYPE_VEHICLE) == IsVehicle());
-
     TC_LOG_DEBUG("entities.unit", "SetCharmedBy: charmer %u (GUID %u), charmed %u (GUID %u), type %u.", charmer->GetEntry(), charmer->GetGUIDLow(), GetEntry(), GetGUIDLow(), uint32(type));
 
     if (this == charmer)
@@ -14623,9 +14535,6 @@ void Unit::RemoveCharmedBy(Unit* charmer)
         charmer = GetCharmer();
     if (charmer != GetCharmer()) // one aura overrides another?
     {
-        //        TC_LOG_FATAL("entities.unit", "Unit::RemoveCharmedBy: this: " UI64FMTD " true charmer: " UI64FMTD " false charmer: " UI64FMTD,
-        //            GetGUID(), GetCharmerGUID(), charmer->GetGUID());
-        //        ASSERT(false);
         return;
     }
 
@@ -14668,9 +14577,6 @@ void Unit::RemoveCharmedBy(Unit* charmer)
     // If charmer still exists
     if (!charmer)
         return;
-
-    ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
-    ASSERT(type != CHARM_TYPE_VEHICLE || (GetTypeId() == TYPEID_UNIT && IsVehicle()));
 
     charmer->SetCharm(this, false);
 
@@ -15832,9 +15738,6 @@ void Unit::EnterVehicle(Unit* base, int8 seatId)
 
 void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp)
 {
-    // Must be called only from aura handler
-    ASSERT(aurApp);
-
     if (!IsAlive() || GetVehicleKit() == vehicle || vehicle->GetBase()->IsOnVehicle(this))
         return;
 
@@ -15861,7 +15764,6 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
         }
     }
 
-    ASSERT(!m_vehicle);
     (void) vehicle->AddPassenger(this, seatId);
 }
 
@@ -15885,14 +15787,8 @@ void Unit::ChangeSeat(int8 seatId, bool next)
     {
         if ((*itr)->GetCasterGUID() != GetGUID())
             continue;
-
-        // Make sure there is only one ride vehicle aura on target cast by the unit changing seat
-        ASSERT(!rideVehicleEffect);
         rideVehicleEffect = *itr;
     }
-
-    // Unit riding a vehicle must always have control vehicle aura on target
-    ASSERT(rideVehicleEffect);
 
     rideVehicleEffect->ChangeAmount(seat->first + 1);
 }
@@ -16010,8 +15906,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     bool hasSpline = IsSplineEnabled();
 
     bool hasTransportTime2 = hasTransportData && m_movementInfo.transport.time2 != 0;
-    bool hasTransportTime3 = false;
-    bool hasTransportVehicleId = hasTransportData && m_movementInfo.transport.time3 != 0;
+    bool hasTransportVehicleId = hasTransportData && m_movementInfo.transport.vehicleId != 0;
     bool hasPitch = HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     bool hasFallDirection = HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasFallData = hasFallDirection || m_movementInfo.jump.fallTime != 0;
@@ -16020,7 +15915,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
     {
-        TC_LOG_ERROR("network", "Unit::WriteMovementInfo: No movement sequence found for opcode %s", GetOpcodeNameForLogging(data.GetOpcode(), true).c_str());
+        TC_LOG_DEBUG("network", "Unit::WriteMovementInfo: No movement sequence found for opcode %s", GetOpcodeNameForLogging(data.GetOpcode(), true).c_str());
         return;
     }
 
@@ -16078,14 +15973,14 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             case MSEHasCounter:
                 data.WriteBit(!m_movementCounter);
                 break;
+            case MSEHasMountDisplayId:
+                data.WriteBit(!hasMountDisplayId);
+                break;
             case MSEHasMovementFlags:
                 data.WriteBit(!hasMovementFlags);
                 break;
             case MSEHasMovementFlags2:
                 data.WriteBit(!hasMovementFlags2);
-                break;
-            case MSEHasMountDisplayId:
-                data.WriteBit(!hasMountDisplayId);
                 break;
             case MSEHasTimestamp:
                 data.WriteBit(!hasTimestamp);
@@ -16100,9 +15995,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
                 if (hasTransportData)
                     data.WriteBit(hasTransportTime2);
                 break;
-            case MSEHasTransportTime3:
+            case MSEHasTransportVehicleId:
                 if (hasTransportData)
-                    data.WriteBit(hasTransportTime3);
+                    data.WriteBit(hasTransportVehicleId);
                 break;
             case MSEHasPitch:
                 data.WriteBit(!hasPitch);
@@ -16179,9 +16074,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
                 if (hasTransportData && hasTransportTime2)
                     data << mi.transport.time2;
                 break;
-            case MSETransportTime3:
-                if (hasTransportData && hasTransportTime3)
-                    data << mi.transport.time3;
+            case MSETransportVehicleId:
+                if (hasTransportData && hasTransportVehicleId)
+                    data << mi.transport.vehicleId;
                 break;
             case MSEPitch:
                 if (hasPitch)
@@ -16212,13 +16107,18 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
                     data << mi.splineElevation;
                 break;
             case MSEForcesCount:
+                // data.WriteBits(forcesCount, 22);
                 data.WriteBits(0, 22);
                 break;
-            case MSECounter:
-                if (m_movementCounter)
-                    data << m_movementCounter;
-                m_movementCounter++;
+            case MSEForces:
+                /*
+                for (uint8 i = 0; i < forcesCount; ++i)
+                data << uint32(0);
+                */
                 break;
+            case MSECounter:
+                if (!m_movementCounter)
+                    break;
             case MSECount:
                 data << m_movementCounter++;
                 break;
@@ -16234,21 +16134,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             case MSEUintCount:
                 data << uint32(0);
                 break;
-            case MSEHasTransportVehicleId:
-                data.WriteBit(hasTransportVehicleId);
-                break;
-            case MSETransportVehicleId:
-                if (hasTransportVehicleId)
-                    data << mi.transport.time3; // this should be renamed
-                break;
-            case MSEForces:
-                /*
-                for (uint8 i = 0; i < forcesCount; ++i)
-                data << uint32(0);
-                */
-                break;
             default:
-                ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
                 break;
         }
     }

@@ -301,6 +301,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         return;
     }
 
+    // stop some emotes at player move
+    if (plrMover && (plrMover->GetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE) != 0))
+        plrMover->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
     /* handle special cases */
     if (movementInfo.transport.guid)
     {
@@ -443,14 +447,15 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
         return;
     }
 
-    float newspeed = extras.Data.floatData.front();
+    float newspeed = extras.Data.floatData;
+
     /*----------------*/
 
     // client ACK send one packet for mounted/run case and need skip all except last from its
     // in other cases anti-cheat check can be fail in false case
     UnitMoveType move_type;
 
-    static char const* const move_type_name[MAX_MOVE_TYPE] =
+    static char const* const move_type_name [MAX_MOVE_TYPE] =
     {
         "Walk",
         "Run",
@@ -481,10 +486,10 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
 
     // skip all forced speed changes except last and unexpected
     // in run/mounted case used one ACK and it must be skipped. m_forced_speed_changes[MOVE_RUN] store both.
-    if (_player->m_forced_speed_changes[move_type] > 0)
+    if (_player->m_forced_speed_changes [move_type] > 0)
     {
-        --_player->m_forced_speed_changes[move_type];
-        if (_player->m_forced_speed_changes[move_type] > 0)
+        --_player->m_forced_speed_changes [move_type];
+        if (_player->m_forced_speed_changes [move_type] > 0)
             return;
     }
 
@@ -493,13 +498,13 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
         if (_player->GetSpeed(move_type) > newspeed)         // must be greater - just correct
         {
             TC_LOG_ERROR("network", "%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
-                move_type_name[move_type], _player->GetName().c_str(), _player->GetSpeed(move_type), newspeed);
+                         move_type_name [move_type], _player->GetName().c_str(), _player->GetSpeed(move_type), newspeed);
             _player->SetSpeed(move_type, _player->GetSpeedRate(move_type), true);
         }
         else                                                // must be lesser - cheating
         {
             TC_LOG_DEBUG("misc", "Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
-                _player->GetName().c_str(), _player->GetSession()->GetAccountId(), _player->GetSpeed(move_type), newspeed);
+                         _player->GetName().c_str(), _player->GetSession()->GetAccountId(), _player->GetSpeed(move_type), newspeed);
             _player->GetSession()->KickPlayer();
         }
     }
@@ -619,6 +624,112 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
     GetPlayer()->ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                          // unk2
+}
+
+void WorldSession::HandleMoveSetFly(WorldPacket& recvData)
+{
+    // TODO: find out what are unknown booleans and use ReadMovementInfo
+    TC_LOG_DEBUG("network", "CMSG_MOVE_SET_FLY");
+    ObjectGuid playerGuid;
+    ObjectGuid transportGuid;
+
+    recvData.read_skip<float>(); // position Y
+    recvData.read_skip<float>(); // position Z
+    recvData.read_skip<float>(); // position X
+    playerGuid [5] = recvData.ReadBit();
+    bool hasTransportData = recvData.ReadBit();
+    playerGuid [3] = recvData.ReadBit();
+    uint32 unkCounter = recvData.ReadBits(22);
+    bool unkBool2 = !recvData.ReadBit();
+    recvData.ReadBit();
+    bool unkBool3 = recvData.ReadBit();
+    playerGuid [6] = recvData.ReadBit();
+    recvData.ReadBit();
+    playerGuid [7] = recvData.ReadBit();
+    bool unkBool4 = !recvData.ReadBit();
+    recvData.ReadGuidMask(playerGuid, 0, 2);
+    bool unkBool5 = !recvData.ReadBit();
+    bool unkBool11 = !recvData.ReadBit();
+    playerGuid [1] = recvData.ReadBit();
+    recvData.ReadBit();
+    bool unkBool12 = !recvData.ReadBit();
+    bool unkBool6 = !recvData.ReadBit();
+    playerGuid [4] = recvData.ReadBit();
+    bool hasMovementFlag = !recvData.ReadBit();
+
+    bool unkBool8, unkBool9 = false;
+    if (hasTransportData)
+    {
+        recvData.ReadGuidMask(transportGuid, 1, 3, 5);
+        unkBool8 = recvData.ReadBit();
+        recvData.ReadGuidMask(transportGuid, 6, 7, 2, 4);
+        unkBool9 = recvData.ReadBit();
+        transportGuid [0] = recvData.ReadBit();
+    }
+
+    if (unkBool2)
+        recvData.ReadBits(13);
+
+    bool unkBool10 = false;
+    if (unkBool3)
+        unkBool10 = recvData.ReadBit();
+
+    if (hasMovementFlag)
+        _player->SetUnitMovementFlags(recvData.ReadBits(30));
+
+    recvData.ReadGuidBytes(playerGuid, 1, 6, 5, 2, 4, 0, 7, 3);
+
+    for (uint32 i = 0; i < unkCounter; i++)
+        recvData.read_skip<uint32>();
+
+    if (hasTransportData)
+    {
+        recvData.ReadGuidBytes(transportGuid, 7, 5, 1);
+        recvData.read_skip<uint32>();
+        recvData.read_skip<uint8>();
+
+        if (unkBool9)
+            recvData.read_skip<uint32>();
+
+        recvData.ReadGuidBytes(transportGuid, 0, 4);
+        recvData.read_skip<float>();
+        recvData.ReadByteSeq(transportGuid [3]);
+        recvData.read_skip<float>();
+        recvData.ReadGuidBytes(transportGuid, 2, 6);
+        recvData.read_skip<float>();
+        recvData.read_skip<float>();
+
+        if (unkBool8)
+            recvData.read_skip<uint32>();
+    }
+
+    if (unkBool3)
+    {
+        if (unkBool10)
+        {
+            recvData.read_skip<float>();
+            recvData.read_skip<float>();
+            recvData.read_skip<float>();
+        }
+
+        recvData.read_skip<float>();
+        recvData.read_skip<uint32>();
+    }
+
+    if (unkBool4)
+        recvData.read_skip<uint32>();
+
+    if (unkBool6)
+        recvData.read_skip<uint32>();
+
+    if (unkBool5)
+        recvData.read_skip<float>();
+
+    if (unkBool11)
+        recvData.read_skip<float>();
+
+    if (unkBool12)
+        recvData.read_skip<float>();
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)

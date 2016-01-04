@@ -5357,7 +5357,7 @@ MovementStatusElements const CastSpellEmbeddedMovement[] =
 
 void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
 {
-    MovementStatusElements const element = _elements[_index++];
+    MovementStatusElements const element = _elements [_index++];
 
     switch (element)
     {
@@ -5369,7 +5369,7 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
         case MSEHasGuidByte5:
         case MSEHasGuidByte6:
         case MSEHasGuidByte7:
-            Data.guid[element - MSEHasGuidByte0] = packet.ReadBit();
+            Data.guid [element - MSEHasGuidByte0] = packet.ReadBit();
             break;
         case MSEGuidByte0:
         case MSEGuidByte1:
@@ -5379,17 +5379,22 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
         case MSEGuidByte5:
         case MSEGuidByte6:
         case MSEGuidByte7:
-            packet.ReadByteSeq(Data.guid[element - MSEGuidByte0]);
+            packet.ReadByteSeq(Data.guid [element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
-        {
-            float floatData;
-            packet >> floatData;
-            Data.floatData.push_back(floatData);
+            packet >> Data.floatData;
             break;
-        }
+        case MSEExtraFloat2:
+            packet >> Data.floatData2;
+            break;
         case MSEExtraInt8:
             packet >> Data.byteData;
+            break;
+        case MSEExtraInt32:
+            packet >> Data.extraInt32Data;
+            break;
+        case MSEExtra2Bits:
+            Data.extra2BitsData = packet.ReadBits(2);
             break;
         default:
             ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
@@ -5399,8 +5404,8 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
 
 void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
 {
-    MovementStatusElements const element = _elements[_index++];
-
+    MovementStatusElements const element = _elements [_index++];
+    float data = 0;
     switch (element)
     {
         case MSEHasGuidByte0:
@@ -5411,7 +5416,7 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
         case MSEHasGuidByte5:
         case MSEHasGuidByte6:
         case MSEHasGuidByte7:
-            packet.WriteBit(Data.guid[element - MSEHasGuidByte0]);
+            packet.WriteBit(Data.guid [element - MSEHasGuidByte0]);
             break;
         case MSEGuidByte0:
         case MSEGuidByte1:
@@ -5421,14 +5426,22 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
         case MSEGuidByte5:
         case MSEGuidByte6:
         case MSEGuidByte7:
-            packet.WriteByteSeq(Data.guid[element - MSEGuidByte0]);
+            packet.WriteByteSeq(Data.guid [element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
-            packet << Data.floatData.front();
-            Data.floatData.pop_front();
+            packet << Data.floatData;
+            break;
+        case MSEExtraFloat2:
+            packet << Data.floatData2;
             break;
         case MSEExtraInt8:
             packet << Data.byteData;
+            break;
+        case MSEExtraInt32:
+            packet << Data.extraInt32Data;
+            break;
+        case MSEExtra2Bits:
+            packet.WriteBits(Data.extra2BitsData, 2);
             break;
         default:
             ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
@@ -5553,14 +5566,14 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MovementFallReset;
         //case CMSG_MOVE_FEATHER_FALL_ACK:
         //    return MovementFeatherFallAck;
-        //case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:
-        //    return MovementForceFlightSpeedChangeAck;
-        //case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
-        //    return MovementForceRunBackSpeedChangeAck;
-        //case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:
-        //    return MovementForceRunSpeedChangeAck;
-        //case CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK:
-        //    return MovementForceSwimSpeedChangeAck;
+        case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:
+            return MovementForceFlightSpeedChangeAck;
+        case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
+            return MovementForceRunBackSpeedChangeAck;
+        case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:
+            return MovementForceRunSpeedChangeAck;
+        case CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK:
+            return MovementForceSwimSpeedChangeAck;
         //case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:
         //    return MovementForceWalkSpeedChangeAck;
         //case CMSG_MOVE_GRAVITY_DISABLE_ACK:

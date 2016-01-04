@@ -440,6 +440,8 @@ class WorldSession
 
         void HandleMoveHoverAck(WorldPacket& recvData);
 
+        void HandleMoveSetFly(WorldPacket& recvData);
+
         void HandleMountSpecialAnimOpcode(WorldPacket& recvdata);
 
         // character view

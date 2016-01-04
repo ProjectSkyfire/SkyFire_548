@@ -1261,18 +1261,9 @@ struct CurrencyTypesEntry
     //uint32 quality                                        // 10 - Pandaria
     //char* description;                                    // 11
 
-    bool HasPrecision() const
-    {
-        return Flags & CURRENCY_FLAG_HIGH_PRECISION;
-    }
-    bool HasSeasonCount() const
-    {
-        return Flags & CURRENCY_FLAG_HAS_SEASON_COUNT;
-    }
-    float GetPrecision() const
-    {
-        return HasPrecision() ? 100.0f : 1.0f;
-    }
+    bool HasPrecision() const { return Flags & CURRENCY_FLAG_HIGH_PRECISION; }
+    bool HasSeasonCount() const { return Flags & CURRENCY_FLAG_COUNT_SEASON_TOTAL; }
+    float GetPrecision() const { return HasPrecision() ? 100.0f : 1.0f; }
 };
 
 struct DestructibleModelDataEntry
@@ -1367,10 +1358,7 @@ struct FactionEntry
     //uint      unk2                                        // 27 - Pandaria
 
     // helpers
-    bool CanHaveReputation() const
-    {
-        return reputationListID >= 0;
-    }
+    bool CanHaveReputation() const { return reputationListID >= 0; }
 };
 
 #define MAX_FACTION_RELATIONS 4

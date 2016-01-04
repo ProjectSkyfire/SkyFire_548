@@ -1375,15 +1375,15 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
     // no used
     recvData.rfinish();                       // prevent warnings spam
-/*
+    /*
     uint64 guid;
     recvData >> guid;
 
     // now can skip not our packet
     if (_player->GetGUID() != guid)
     {
-        recvData.rfinish();                   // prevent warnings spam
-        return;
+    recvData.rfinish();                   // prevent warnings spam
+    return;
     }
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
@@ -1394,7 +1394,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
     movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
     recvData.read_skip<float>();                           // unk2
-*/
+    */
 }
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)

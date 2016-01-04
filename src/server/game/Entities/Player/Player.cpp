@@ -7716,8 +7716,6 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog /*= true*/, bo
         return;
 
     CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    ASSERT(currency);
-
     if (!ignoreMultipliers)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
@@ -10492,7 +10490,6 @@ void Player::ResetPetTalents()
 
 void Player::SetVirtualItemSlot(uint8 i, Item* item)
 {
-    ASSERT(i < 3);
     if (i < 2 && item)
     {
         if (!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
@@ -14164,7 +14161,6 @@ void Player::UpdateSoulboundTradeItems()
     // also checks for garbage data
     for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
-        ASSERT(*itr);
         if ((*itr)->GetOwnerGUID() != GetGUID())
         {
             m_itemSoulboundTradeable.erase(itr++);
@@ -14211,7 +14207,6 @@ void Player::UpdateEnchantTime(uint32 time)
 {
     for (EnchantDurationList::iterator itr = m_enchantDuration.begin(), next; itr != m_enchantDuration.end(); itr=next)
     {
-        ASSERT(itr->item);
         next = itr;
         if (!itr->item->GetEnchantmentId(itr->slot))
         {
@@ -15469,7 +15464,6 @@ void Player::PrepareQuestMenu(uint64 guid)
         //we should obtain map pointer from GetMap() in 99% of cases. Special case
         //only for quests which cast teleport spells on player
         Map* _map = IsInWorld() ? GetMap() : sMapMgr->FindMap(GetMapId(), GetInstanceId());
-        ASSERT(_map);
         GameObject* gameObject = _map->GetGameObject(guid);
         if (gameObject)
         {
@@ -15615,7 +15609,6 @@ Quest const* Player::GetNextQuest(uint64 guid, Quest const* quest)
     switch (GUID_HIPART(guid))
     {
         case HIGHGUID_PLAYER:
-            ASSERT(quest->HasFlag(QUEST_FLAGS_AUTO_SUBMIT));
             return sObjectMgr->GetQuestTemplate(nextQuestID);
         case HIGHGUID_UNIT:
         case HIGHGUID_PET:
@@ -15632,7 +15625,6 @@ Quest const* Player::GetNextQuest(uint64 guid, Quest const* quest)
             //we should obtain map pointer from GetMap() in 99% of cases. Special case
             //only for quests which cast teleport spells on player
             Map* _map = IsInWorld() ? GetMap() : sMapMgr->FindMap(GetMapId(), GetInstanceId());
-            ASSERT(_map);
             if (GameObject* gameObject = _map->GetGameObject(guid))
                 objectQR = sObjectMgr->GetGOQuestRelationBounds(gameObject->GetEntry());
             else
@@ -17089,8 +17081,6 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
 
 void Player::KilledMonster(CreatureTemplate const* cInfo, uint64 guid)
 {
-    ASSERT(cInfo);
-
     if (cInfo->Entry)
         KilledMonsterCredit(cInfo->Entry, guid);
 
@@ -18109,7 +18099,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
             if (nodeEntry && nodeEntry->map_id == GetMapId())
             {
-                ASSERT(nodeEntry);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
                 mapId = nodeEntry->map_id;
                 Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f);
             }
@@ -21450,7 +21439,6 @@ void Player::StopCastingCharm()
         if (charm->GetCharmerGUID())
         {
             TC_LOG_FATAL("entities.player", "Charmed unit has charmer guid " UI64FMTD, charm->GetCharmerGUID());
-            ASSERT(false);
         }
         else
             SetCharm(charm, false);
@@ -21544,8 +21532,6 @@ Item* Player::GetMItem(uint32 id)
 
 void Player::AddMItem(Item* it)
 {
-    ASSERT(it);
-    //ASSERT deleted, because items can be added before loading
     mMitems[it->GetGUIDLow()] = it;
 }
 
@@ -28347,10 +28333,10 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
 
 void Player::SendMovementSetCollisionHeight(float height)
 {
-    static MovementStatusElements const heightElement[] = { MSEExtraFloat, MSEExtraFloat };
-    Movement::ExtraMovementStatusElement extra(heightElement);
-    extra.Data.floatData.push_back(height);
-    extra.Data.floatData.push_back(1.f);
+    static MovementStatusElements const extraElements [] = { MSEExtraFloat, MSEExtraFloat2 };
+    Movement::ExtraMovementStatusElement extra(extraElements);
+    extra.Data.floatData = height;
+    extra.Data.floatData2 = 1;
     Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &extra).Send();
 }
 
@@ -28573,19 +28559,19 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
         return;
     }
 
-    bool hasMountDisplayId = false;
     bool hasMovementFlags = false;
     bool hasMovementFlags2 = false;
     bool hasTimestamp = false;
     bool hasOrientation = false;
     bool hasTransportData = false;
     bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
+    bool hasTransportVehicleId = false;
     bool hasPitch = false;
     bool hasFallData = false;
     bool hasFallDirection = false;
     bool hasSplineElevation = false;
     bool hasCounter = false;
+    bool hasMountDisplayId = false;
     uint32 forcesCount = 0u;
 
     ObjectGuid guid;
@@ -28605,7 +28591,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEHasGuidByte5:
             case MSEHasGuidByte6:
             case MSEHasGuidByte7:
-                guid[element - MSEHasGuidByte0] = data.ReadBit();
+                guid [element - MSEHasGuidByte0] = data.ReadBit();
                 break;
             case MSEHasTransportGuidByte0:
             case MSEHasTransportGuidByte1:
@@ -28616,7 +28602,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEHasTransportGuidByte6:
             case MSEHasTransportGuidByte7:
                 if (hasTransportData)
-                    tguid[element - MSEHasTransportGuidByte0] = data.ReadBit();
+                    tguid [element - MSEHasTransportGuidByte0] = data.ReadBit();
                 break;
             case MSEGuidByte0:
             case MSEGuidByte1:
@@ -28626,7 +28612,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEGuidByte5:
             case MSEGuidByte6:
             case MSEGuidByte7:
-                data.ReadByteSeq(guid[element - MSEGuidByte0]);
+                data.ReadByteSeq(guid [element - MSEGuidByte0]);
                 break;
             case MSETransportGuidByte0:
             case MSETransportGuidByte1:
@@ -28637,7 +28623,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSETransportGuidByte6:
             case MSETransportGuidByte7:
                 if (hasTransportData)
-                    data.ReadByteSeq(tguid[element - MSETransportGuidByte0]);
+                    data.ReadByteSeq(tguid [element - MSETransportGuidByte0]);
                 break;
             case MSEHasMovementFlags:
                 hasMovementFlags = !data.ReadBit();
@@ -28658,9 +28644,9 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasTransportData)
                     hasTransportTime2 = data.ReadBit();
                 break;
-            case MSEHasTransportTime3:
+            case MSEHasTransportVehicleId:
                 if (hasTransportData)
-                    hasTransportTime3 = data.ReadBit();
+                    hasTransportVehicleId = data.ReadBit();
                 break;
             case MSEHasPitch:
                 hasPitch = !data.ReadBit();
@@ -28744,9 +28730,9 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasTransportData && hasTransportTime2)
                     data >> mi->transport.time2;
                 break;
-            case MSETransportTime3:
-                if (hasTransportData && hasTransportTime3)
-                    data >> mi->transport.time3;
+            case MSETransportVehicleId:
+                if (hasTransportData && hasTransportVehicleId)
+                    data >> mi->transport.vehicleId;
                 break;
             case MSEPitch:
                 if (hasPitch)
@@ -28787,8 +28773,10 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 hasCounter = !data.ReadBit();
                 break;
             case MSECounter:
-                if (hasCounter)
-                    data.read_skip<uint32>();
+                if (!hasCounter) // Fallback here
+                    break;
+            case MSECount:
+                data.read_skip<uint32>();
                 break;
             case MSEZeroBit:
             case MSEOneBit:
@@ -28798,7 +28786,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 extras->ReadNextElement(data);
                 break;
             default:
-                ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
+                //ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
                 break;
         }
     }
