@@ -3606,6 +3606,135 @@ enum WhisperGulchYoggSaronWhisper
     SPELL_YOGG_SARON_WHISPER_DUMMY  = 29072
 };
 
+enum SurveySpell
+{
+    GO_SURVEY_TOOL_RED = 206590,
+    GO_SURVEY_TOOL_YELLOW = 206589,
+    GO_SURVEY_TOOL_GREEN = 204272,
+
+    SURVEY_FAR_DIST = 80,
+    SURVEY_MEDIUM_DIST = 40,
+    SURVEY_CLOSE_DIST = 5
+};
+
+class spell_gen_survey : public SpellScriptLoader
+{
+    public:
+    spell_gen_survey() : SpellScriptLoader("spell_gen_survey")
+    { }
+
+    class spell_gen_survey_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_survey_SpellScript);
+
+        void HandleSurvey(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Player* player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+
+            if (GameObject* go = player->GetMap()->GetGameObject(player->m_ObjectSlot [1]))
+            {
+                if (GetSpellInfo()->Id == go->GetSpellId())
+                    go->SetSpellId(0);
+
+                player->RemoveGameObject(go, true);
+                player->m_ObjectSlot [1] = 0;
+            }
+
+            ResearchDigsite* digsite = player->GetCurrentResearchDigsite();
+            if (!digsite)
+                return;
+
+            ArchaeologyFindInfo const* find = digsite->GetArchaeologyFind();
+            if (!find)
+                return;
+
+            GameObject* go = NULL;
+            float dist = player->GetDistance(find->x, find->y, find->z);
+            if (dist <= SURVEY_CLOSE_DIST) // 5yd or less (archaeology find is dug)
+            {
+                digsite->SelectNewArchaeologyFind(false);
+
+                // save only if digsite is not empty (if digsite is empty, it will be removed in UpdateResearchDigsites and replaced by new digsite)
+                if (!digsite->IsEmptyDigsite())
+                    player->SaveResearchDigsiteToDB(digsite);
+
+                player->SendSurveryCastInfo(digsite, true); // needs to be send just before the digsite is removed
+                player->UpdateResearchDigsites();
+
+                go = player->SummonGameObject(find->goEntry, find->x, find->y, find->z, 0, 0, 0, 0, 1, 30); // TODO: verify despawn time
+            }
+            else
+            {
+                uint32 goEntry = 0;
+                if (dist > SURVEY_CLOSE_DIST && dist <= SURVEY_MEDIUM_DIST) // 6-40yd (green)
+                    goEntry = GO_SURVEY_TOOL_GREEN;
+                else if (dist > SURVEY_MEDIUM_DIST && dist <= SURVEY_FAR_DIST) // 41-80yd (yellow)
+                    goEntry = GO_SURVEY_TOOL_YELLOW;
+                else // more than 80yd (red)
+                    goEntry = GO_SURVEY_TOOL_RED;
+
+                Position pos;
+                player->GetNearPosition(pos, 3.0f, M_PI / 4);
+                float z = player->GetMap()->GetHeight(pos.m_positionX, pos.m_positionY, pos.m_positionZ + 2.0f);
+                float ang = pos.GetAngle(find->x, find->y);
+                go = player->SummonGameObject(goEntry, pos.m_positionX, pos.m_positionY, z, ang, 0, 0, 0, 0, 30); // TODO: verify despawn time
+
+                player->SendSurveryCastInfo(digsite, false);
+            }
+
+            if (go)
+            {
+                go->SetOwnerGUID(player->GetGUID());
+                go->SetSpellId(GetSpellInfo()->Id);
+                player->m_ObjectSlot [1] = go->GetGUID();
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gen_survey_SpellScript::HandleSurvey, EFFECT_0, SPELL_EFFECT_SURVEY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_survey_SpellScript();
+    }
+};
+
+class spell_gen_searching_for_artifacts : public SpellScriptLoader
+{
+    public:
+    spell_gen_searching_for_artifacts() : SpellScriptLoader("spell_gen_searching_for_artifacts")
+    { }
+
+    class spell_gen_searching_for_artifacts_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_searching_for_artifacts_SpellScript);
+
+        void HandleSkillUpdate(SpellEffIndex effIndex)
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+                if (GameObject* go = GetHitGObj())
+                    if (!go->IsInSkillupList(player->GetGUIDLow()) && player->UpdateCraftSkill(GetSpellInfo()->Id))
+                        go->AddToSkillupList(player->GetGUIDLow());
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gen_searching_for_artifacts_SpellScript::HandleSkillUpdate, EFFECT_0, SPELL_EFFECT_OPEN_LOCK);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_searching_for_artifacts_SpellScript();
+    }
+};
+
 class spell_gen_whisper_gulch_yogg_saron_whisper : public SpellScriptLoader
 {
     public:

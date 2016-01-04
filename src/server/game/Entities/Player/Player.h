@@ -1669,6 +1669,7 @@ class Player : public Unit, public GridObject<Player>
     void AddRefundReference(uint32 it);
     void DeleteRefundReference(uint32 it);
 
+    void ModifyCurrencyFlag(uint32 id, uint8 flag);
     /// send initialization of new currency for client
     void SendNewCurrency(uint32 id) const;
     /// send full data about all currencies to client
@@ -1688,15 +1689,15 @@ class Player : public Unit, public GridObject<Player>
     void ResetCurrencyWeekCap();
 
     /**
-      * @name   ModifyCurrency
-      * @brief  Change specific currency and send result to client
+    * @name   ModifyCurrency
+    * @brief  Change specific currency and send result to client
 
-      * @param  id currency entry from CurrencyTypes.dbc
-      * @param  count integer value for adding/removing curent currency
-      * @param  printLog used on SMSG_UPDATE_CURRENCY
-      * @param  ignore gain multipliers
-      */
-    void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false);
+    * @param  id currency entry from CurrencyTypes.dbc
+    * @param  count integer value for adding/removing curent currency
+    * @param  printLog used on SMSG_UPDATE_CURRENCY
+    * @param  ignore gain multipliers
+    */
+    void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false, bool ignoreLimit = false);
 
     void ApplyEquipCooldown(Item* pItem);
     void QuickEquipItem(uint16 pos, Item* pItem);
@@ -3466,7 +3467,6 @@ class Player : public Unit, public GridObject<Player>
     uint32 m_currentBuybackSlot;
 
     PlayerCurrenciesMap _currencyStorage;
-
     uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const;
 
     /// Updates weekly conquest point cap (dynamic cap)

@@ -1375,15 +1375,15 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
     // no used
     recvData.rfinish();                       // prevent warnings spam
-/*
+    /*
     uint64 guid;
     recvData >> guid;
 
     // now can skip not our packet
     if (_player->GetGUID() != guid)
     {
-        recvData.rfinish();                   // prevent warnings spam
-        return;
+    recvData.rfinish();                   // prevent warnings spam
+    return;
     }
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
@@ -1394,7 +1394,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
     movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
     recvData.read_skip<float>();                           // unk2
-*/
+    */
 }
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
@@ -2509,6 +2509,13 @@ void WorldSession::SendLoadCUFProfiles()
     SendPacket(&data);
 }
 
+void WorldSession::HandleRequestResearchHistory(WorldPacket& recvPacket)
+{
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_RESEARCH_HISTORY");
+
+    _player->SendResearchHistory();
+}
+
 #define JOIN_THE_ALLIANCE 1
 #define JOIN_THE_HORDE    0
 
@@ -2546,4 +2553,15 @@ void WorldSession::HandleSelectFactionOpcode(WorldPacket& recvPacket)
         _player->KilledMonsterCredit(64594);
 
     _player->SendMovieStart(116);
+}
+
+void WorldSession::HandleChangeCurrencyFlags(WorldPacket& recvPacket)
+{
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_CURRENCY_FLAGS");
+
+    uint32 currencyId, flags;
+    recvPacket >> flags >> currencyId;
+
+    if (GetPlayer())
+        GetPlayer()->ModifyCurrencyFlag(currencyId, uint8(flags));
 }

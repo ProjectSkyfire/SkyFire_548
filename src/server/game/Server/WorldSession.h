@@ -440,6 +440,8 @@ class WorldSession
 
         void HandleMoveHoverAck(WorldPacket& recvData);
 
+        void HandleMoveSetFly(WorldPacket& recvData);
+
         void HandleMountSpecialAnimOpcode(WorldPacket& recvdata);
 
         // character view
@@ -994,6 +996,7 @@ class WorldSession
         void HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket);
         void HandleSelectFactionOpcode(WorldPacket& recvPacket);
         void HandleRequestCategoryCooldowns(WorldPacket& recvPacket);
+        void HandleChangeCurrencyFlags(WorldPacket& recvPacket);
         void HandleRequestCemeteryList(WorldPacket& recvPacket);
 
         void SendBroadcastText(uint32 entry);
@@ -1011,6 +1014,9 @@ class WorldSession
         void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
+
+        //Archaelogy
+        void HandleRequestResearchHistory(WorldPacket& recvPacket);
 
         // Titles
         void HandleSetTitleOpcode(WorldPacket& recvData);

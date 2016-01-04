@@ -7483,22 +7483,25 @@ void Player::_LoadCurrency(PreparedQueryResult result)
 {
     if (!result)
         return;
+
     do
     {
         Field* fields = result->Fetch();
 
-        uint16 currencyID = fields[0].GetUInt16();
+        uint16 currencyID = fields [0].GetUInt16();
 
         CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(currencyID);
-        if (!currency)
+        if (!currencyID)
             continue;
 
         PlayerCurrency cur;
         cur.state = PLAYERCURRENCY_UNCHANGED;
-        cur.weekCount = fields[1].GetUInt32();
-        cur.totalCount = fields[2].GetUInt32();
+        cur.weekCount = fields [1].GetUInt32();
+        cur.totalCount = fields [2].GetUInt32();
         cur.seasonCount = fields [3].GetUInt32();
         cur.flags = fields [4].GetUInt8();
+
+        _currencyStorage.insert(PlayerCurrenciesMap::value_type(currencyID, cur));
 
         // load total conquest cap. should be after insert.
         if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
@@ -7507,9 +7510,9 @@ void Player::_LoadCurrency(PreparedQueryResult result)
             if (cap > _ConquestCurrencytotalWeekCap)
                 _ConquestCurrencytotalWeekCap = cap;
         }
-        _currencyStorage.insert(PlayerCurrenciesMap::value_type(currencyID, cur));
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 }
 
 void Player::_SaveCurrency(SQLTransaction& trans)
@@ -7537,8 +7540,8 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_PLAYER_CURRENCY);
                 stmt->setUInt32(0, itr->second.weekCount);
                 stmt->setUInt32(1, itr->second.totalCount);
-                stmt->setUInt32(2, GetGUIDLow());
-                stmt->setUInt16(3, itr->first);
+                stmt->setUInt32(2, itr->second.seasonCount);
+                stmt->setUInt8(3, itr->second.flags);
                 stmt->setUInt32(4, GetGUIDLow());
                 stmt->setUInt16(5, itr->first);
                 trans->Append(stmt);
@@ -7549,6 +7552,20 @@ void Player::_SaveCurrency(SQLTransaction& trans)
 
         itr->second.state = PLAYERCURRENCY_UNCHANGED;
     }
+}
+
+void Player::ModifyCurrencyFlag(uint32 id, uint8 flag)
+{
+    if (!id)
+        return;
+
+    if (_currencyStorage.find(id) == _currencyStorage.end())
+        return;
+
+    _currencyStorage [id].flags = flag;
+
+    if (_currencyStorage [id].state != PLAYERCURRENCY_NEW)
+        _currencyStorage [id].state = PLAYERCURRENCY_CHANGED;
 }
 
 void Player::SendNewCurrency(uint32 id) const
@@ -7562,28 +7579,32 @@ void Player::SendNewCurrency(uint32 id) const
     packet.WriteBits(1, 21);
 
     CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
-    if (!entry) // should never happen
+    if (!entry || entry->Category == CURRENCY_CATEGORY_META_CONQUEST)
         return;
 
     uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+
+    uint32 weekCap = _GetCurrencyWeekCap(entry) / precision;
     uint32 weekCount = itr->second.weekCount / precision;
-    uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-    uint32 seasonCount = 0;
+    uint32 seasonCount = itr->second.seasonCount / precision;
+    uint32 totalCount = itr->second.totalCount / precision;
 
-    packet.WriteBit(seasonCount);
-    packet.WriteBits(0, 5); // some flags
-    packet.WriteBit(weekCap);
+    bool sendSeason = seasonCount > 0 || entry->HasSeasonCount();
+
     packet.WriteBit(weekCount);
-
-    if (weekCount)
-        currencyData << uint32(weekCount);
-
-    currencyData << uint32(entry->ID);
+    packet.WriteBits(itr->second.flags, 5);
+    packet.WriteBit(weekCap);
+    packet.WriteBit(seasonCount);
 
     if (seasonCount)
         currencyData << uint32(seasonCount);
 
-    currencyData << uint32(itr->second.totalCount / precision);
+    currencyData << uint32(entry->ID);
+
+    if (weekCount)
+        currencyData << uint32(weekCount);
+
+    currencyData << uint32(totalCount);
 
     if (weekCap)
         currencyData << uint32(weekCap);
@@ -7644,16 +7665,18 @@ void Player::SendCurrencies() const
 void Player::SendPvpRewards() const
 {
     WorldPacket data(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
+
     data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, true);
     data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
     data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
-    data << uint32(0); // UnkMop
+    data << uint32(400); // Rated BG Victory Reward
     data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
-    data << uint32(0); // unkMop2
+    data << uint32(180); // Rated Arena Victory Reward
     data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << GetCurrencyOnWeek(CURRENCY_TYPE_CONQUEST_POINTS, true);
     data << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_ARENA, true);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -7687,20 +7710,19 @@ bool Player::HasCurrency(uint32 id, uint32 count) const
     return itr != _currencyStorage.end() && itr->second.totalCount >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/)
+void Player::ModifyCurrency(uint32 id, int32 count, bool printLog /*= true*/, bool ignoreMultipliers /* = false */, bool ignoreLimit /* = false */)
 {
     if (!count)
         return;
 
     CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    ASSERT(currency);
-
     if (!ignoreMultipliers)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
     int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
     uint32 oldTotalCount = 0;
     uint32 oldWeekCount = 0;
+    uint32 oldSeasonCount = 0;
     PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
     if (itr == _currencyStorage.end())
     {
@@ -7708,47 +7730,57 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         cur.state = PLAYERCURRENCY_NEW;
         cur.totalCount = 0;
         cur.weekCount = 0;
-        _currencyStorage[id] = cur;
+        cur.seasonCount = 0;
+        cur.flags = 0;
+        _currencyStorage [id] = cur;
         itr = _currencyStorage.find(id);
     }
     else
     {
         oldTotalCount = itr->second.totalCount;
         oldWeekCount = itr->second.weekCount;
+        oldSeasonCount = itr->second.seasonCount;
     }
 
     // count can't be more then weekCap if used (weekCap > 0)
-    uint32 weekCap = GetCurrencyWeekCap(currency);
-    if (weekCap && count > int32(weekCap))
+    uint32 weekCap = _GetCurrencyWeekCap(currency);
+    if (!ignoreLimit && weekCap && count > int32(weekCap))
         count = weekCap;
 
-    // count can't be more then totalCap if used (totalCap > 0)
-    uint32 totalCap = GetCurrencyTotalCap(currency);
-    if (totalCap && count > int32(totalCap))
-        count = totalCap;
-
     int32 newTotalCount = int32(oldTotalCount) + count;
-    if (newTotalCount < 0)
-        newTotalCount = 0;
+    int32 newWeekCount = 0;
+    uint32 newSeasonCount = 0;
 
-    int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count : 0);
+    if (!ignoreLimit && count > 0)
+    {
+        newWeekCount = int32(oldWeekCount) + count;
+        newSeasonCount = oldSeasonCount + count;
+    }
+    else
+    {
+        newSeasonCount = oldSeasonCount;
+        newWeekCount = int32(oldWeekCount);
+    }
+
+    if (!ignoreLimit)
+    {
+        if (weekCap && int32(weekCap) < newWeekCount)
+        {
+            newWeekCount = int32(weekCap);
+            newTotalCount = oldTotalCount + (weekCap - oldWeekCount);
+        }
+        if (currency->TotalCap && int32(currency->TotalCap) < newTotalCount)
+        {
+            newTotalCount = int32(currency->TotalCap);
+            newWeekCount = weekCap;
+        }
+    }
+
     if (newWeekCount < 0)
         newWeekCount = 0;
 
-    // if we get more then weekCap just set to limit
-    if (weekCap && int32(weekCap) < newWeekCount)
-    {
-        newWeekCount = int32(weekCap);
-        // weekCap - oldWeekCount always >= 0 as we set limit before!
-        newTotalCount = oldTotalCount + (weekCap - oldWeekCount);
-    }
-
-    // if we get more then totalCap set to maximum;
-    if (totalCap && int32(totalCap) < newTotalCount)
-    {
-        newTotalCount = int32(totalCap);
-        newWeekCount = weekCap;
-    }
+    if (newTotalCount < 0)
+        newTotalCount = 0;
 
     if (uint32(newTotalCount) != oldTotalCount)
     {
@@ -7757,6 +7789,12 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
         itr->second.totalCount = newTotalCount;
         itr->second.weekCount = newWeekCount;
+        itr->second.seasonCount = newSeasonCount;
+        bool sendSeason = itr->second.seasonCount > 0 || currency->HasSeasonCount();
+
+        newSeasonCount /= precision;
+        newWeekCount /= precision;
+        newTotalCount /= precision;
 
         if (count > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
@@ -7771,18 +7809,28 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
             return;
         }
 
+        // on new case just set init.
+        if (itr->second.state == PLAYERCURRENCY_NEW)
+        {
+            SendNewCurrency(id);
+            return;
+        }
+
         WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 
-        packet.WriteBit(weekCap != 0);
-        packet.WriteBit(0); // hasSeasonCount
-        packet.WriteBit(!printLog); // print in log
-
-        // if hasSeasonCount packet << uint32(seasontotalearned); TODO: save this in character DB and use it
-
-        packet << uint32(newTotalCount / precision);
         packet << uint32(id);
+        packet << uint32(0);
+        packet << uint32(newTotalCount);
+
+        packet.WriteBit(weekCap != 0);
+        packet.WriteBit(printLog ? 0 : 1);
+        packet.WriteBit(sendSeason);
+
         if (weekCap)
-            packet << uint32(newWeekCount / precision);
+            packet << uint32(newWeekCount);
+
+        if (sendSeason)
+            packet << uint32(newSeasonCount);
 
         GetSession()->SendPacket(&packet);
     }
@@ -10442,7 +10490,6 @@ void Player::ResetPetTalents()
 
 void Player::SetVirtualItemSlot(uint8 i, Item* item)
 {
-    ASSERT(i < 3);
     if (i < 2 && item)
     {
         if (!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
@@ -14114,7 +14161,6 @@ void Player::UpdateSoulboundTradeItems()
     // also checks for garbage data
     for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
-        ASSERT(*itr);
         if ((*itr)->GetOwnerGUID() != GetGUID())
         {
             m_itemSoulboundTradeable.erase(itr++);
@@ -14161,7 +14207,6 @@ void Player::UpdateEnchantTime(uint32 time)
 {
     for (EnchantDurationList::iterator itr = m_enchantDuration.begin(), next; itr != m_enchantDuration.end(); itr=next)
     {
-        ASSERT(itr->item);
         next = itr;
         if (!itr->item->GetEnchantmentId(itr->slot))
         {
@@ -15419,7 +15464,6 @@ void Player::PrepareQuestMenu(uint64 guid)
         //we should obtain map pointer from GetMap() in 99% of cases. Special case
         //only for quests which cast teleport spells on player
         Map* _map = IsInWorld() ? GetMap() : sMapMgr->FindMap(GetMapId(), GetInstanceId());
-        ASSERT(_map);
         GameObject* gameObject = _map->GetGameObject(guid);
         if (gameObject)
         {
@@ -15565,7 +15609,6 @@ Quest const* Player::GetNextQuest(uint64 guid, Quest const* quest)
     switch (GUID_HIPART(guid))
     {
         case HIGHGUID_PLAYER:
-            ASSERT(quest->HasFlag(QUEST_FLAGS_AUTO_SUBMIT));
             return sObjectMgr->GetQuestTemplate(nextQuestID);
         case HIGHGUID_UNIT:
         case HIGHGUID_PET:
@@ -15582,7 +15625,6 @@ Quest const* Player::GetNextQuest(uint64 guid, Quest const* quest)
             //we should obtain map pointer from GetMap() in 99% of cases. Special case
             //only for quests which cast teleport spells on player
             Map* _map = IsInWorld() ? GetMap() : sMapMgr->FindMap(GetMapId(), GetInstanceId());
-            ASSERT(_map);
             if (GameObject* gameObject = _map->GetGameObject(guid))
                 objectQR = sObjectMgr->GetGOQuestRelationBounds(gameObject->GetEntry());
             else
@@ -17039,8 +17081,6 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
 
 void Player::KilledMonster(CreatureTemplate const* cInfo, uint64 guid)
 {
-    ASSERT(cInfo);
-
     if (cInfo->Entry)
         KilledMonsterCredit(cInfo->Entry, guid);
 
@@ -18059,7 +18099,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
             if (nodeEntry && nodeEntry->map_id == GetMapId())
             {
-                ASSERT(nodeEntry);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
                 mapId = nodeEntry->map_id;
                 Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f);
             }
@@ -21400,7 +21439,6 @@ void Player::StopCastingCharm()
         if (charm->GetCharmerGUID())
         {
             TC_LOG_FATAL("entities.player", "Charmed unit has charmer guid " UI64FMTD, charm->GetCharmerGUID());
-            ASSERT(false);
         }
         else
             SetCharm(charm, false);
@@ -21494,8 +21532,6 @@ Item* Player::GetMItem(uint32 id)
 
 void Player::AddMItem(Item* it)
 {
-    ASSERT(it);
-    //ASSERT deleted, because items can be added before loading
     mMitems[it->GetGUIDLow()] = it;
 }
 
@@ -28297,10 +28333,10 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
 
 void Player::SendMovementSetCollisionHeight(float height)
 {
-    static MovementStatusElements const heightElement[] = { MSEExtraFloat, MSEExtraFloat };
-    Movement::ExtraMovementStatusElement extra(heightElement);
-    extra.Data.floatData.push_back(height);
-    extra.Data.floatData.push_back(1.f);
+    static MovementStatusElements const extraElements [] = { MSEExtraFloat, MSEExtraFloat2 };
+    Movement::ExtraMovementStatusElement extra(extraElements);
+    extra.Data.floatData = height;
+    extra.Data.floatData2 = 1;
     Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &extra).Send();
 }
 
@@ -28523,19 +28559,19 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
         return;
     }
 
-    bool hasMountDisplayId = false;
     bool hasMovementFlags = false;
     bool hasMovementFlags2 = false;
     bool hasTimestamp = false;
     bool hasOrientation = false;
     bool hasTransportData = false;
     bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
+    bool hasTransportVehicleId = false;
     bool hasPitch = false;
     bool hasFallData = false;
     bool hasFallDirection = false;
     bool hasSplineElevation = false;
     bool hasCounter = false;
+    bool hasMountDisplayId = false;
     uint32 forcesCount = 0u;
 
     ObjectGuid guid;
@@ -28555,7 +28591,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEHasGuidByte5:
             case MSEHasGuidByte6:
             case MSEHasGuidByte7:
-                guid[element - MSEHasGuidByte0] = data.ReadBit();
+                guid [element - MSEHasGuidByte0] = data.ReadBit();
                 break;
             case MSEHasTransportGuidByte0:
             case MSEHasTransportGuidByte1:
@@ -28566,7 +28602,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEHasTransportGuidByte6:
             case MSEHasTransportGuidByte7:
                 if (hasTransportData)
-                    tguid[element - MSEHasTransportGuidByte0] = data.ReadBit();
+                    tguid [element - MSEHasTransportGuidByte0] = data.ReadBit();
                 break;
             case MSEGuidByte0:
             case MSEGuidByte1:
@@ -28576,7 +28612,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSEGuidByte5:
             case MSEGuidByte6:
             case MSEGuidByte7:
-                data.ReadByteSeq(guid[element - MSEGuidByte0]);
+                data.ReadByteSeq(guid [element - MSEGuidByte0]);
                 break;
             case MSETransportGuidByte0:
             case MSETransportGuidByte1:
@@ -28587,7 +28623,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
             case MSETransportGuidByte6:
             case MSETransportGuidByte7:
                 if (hasTransportData)
-                    data.ReadByteSeq(tguid[element - MSETransportGuidByte0]);
+                    data.ReadByteSeq(tguid [element - MSETransportGuidByte0]);
                 break;
             case MSEHasMovementFlags:
                 hasMovementFlags = !data.ReadBit();
@@ -28608,9 +28644,9 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasTransportData)
                     hasTransportTime2 = data.ReadBit();
                 break;
-            case MSEHasTransportTime3:
+            case MSEHasTransportVehicleId:
                 if (hasTransportData)
-                    hasTransportTime3 = data.ReadBit();
+                    hasTransportVehicleId = data.ReadBit();
                 break;
             case MSEHasPitch:
                 hasPitch = !data.ReadBit();
@@ -28694,9 +28730,9 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 if (hasTransportData && hasTransportTime2)
                     data >> mi->transport.time2;
                 break;
-            case MSETransportTime3:
-                if (hasTransportData && hasTransportTime3)
-                    data >> mi->transport.time3;
+            case MSETransportVehicleId:
+                if (hasTransportData && hasTransportVehicleId)
+                    data >> mi->transport.vehicleId;
                 break;
             case MSEPitch:
                 if (hasPitch)
@@ -28737,8 +28773,10 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 hasCounter = !data.ReadBit();
                 break;
             case MSECounter:
-                if (hasCounter)
-                    data.read_skip<uint32>();
+                if (!hasCounter) // Fallback here
+                    break;
+            case MSECount:
+                data.read_skip<uint32>();
                 break;
             case MSEZeroBit:
             case MSEOneBit:
@@ -28748,7 +28786,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 extras->ReadNextElement(data);
                 break;
             default:
-                ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
+                //ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
                 break;
         }
     }

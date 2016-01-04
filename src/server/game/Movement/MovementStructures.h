@@ -115,7 +115,10 @@ enum MovementStatusElements
     MSEExtraElement,    // Used to signalize reading into ExtraMovementStatusElement, element sequence inside it is declared as separate array
                         // Allowed internal elements are: GUID markers (not transport), MSEExtraFloat, MSEExtraInt8
     MSEExtraFloat,
+    MSEExtraFloat2,
     MSEExtraInt8,
+    MSEExtraInt32,
+    MSEExtra2Bits,
 };
 
 namespace Movement
@@ -136,7 +139,10 @@ namespace Movement
         {
             ObjectGuid guid;
             int8  byteData;
-            std::list<float> floatData;
+            int32 extraInt32Data;
+            uint32 extra2BitsData;
+            float floatData;
+            float floatData2;
         } Data;
 
     protected:
