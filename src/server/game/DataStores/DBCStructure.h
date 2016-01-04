@@ -25,6 +25,7 @@
 #include "Define.h"
 #include "Path.h"
 #include "Util.h"
+#include "ItemPrototype.h"
 
 #include <map>
 #include <set>
@@ -87,6 +88,13 @@ struct AchievementCriteriaEntry
             uint32  bgMapID;                                // 3
             uint32  winCount;                               // 4
         } win_bg;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS = 3
+        struct
+        {
+            uint32 unused;                                  // 3
+            uint32 completeCount;                           // 4
+        } complete_research_projects;
 
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL      = 125
@@ -1244,14 +1252,27 @@ struct CurrencyTypesEntry
     uint32 Category;                                        // 1        may be category
     //char* name;                                           // 2
     //char* iconName;                                       // 3
-    //uint32 unk4;                                          // 4        all 0
+    //uint32 inventoryIcon;                                 // 4        all 0
     uint32 HasSubstitution;                                 // 5        archaeology-related (?)
     uint32 SubstitutionId;                                  // 6
     uint32 TotalCap;                                        // 7
     uint32 WeekCap;                                         // 8
     uint32 Flags;                                           // 9
-    //uint32 unk5                                           // 10 - Pandaria
+    //uint32 quality                                        // 10 - Pandaria
     //char* description;                                    // 11
+
+    bool HasPrecision() const
+    {
+        return Flags & CURRENCY_FLAG_HIGH_PRECISION;
+    }
+    bool HasSeasonCount() const
+    {
+        return Flags & CURRENCY_FLAG_HAS_SEASON_COUNT;
+    }
+    float GetPrecision() const
+    {
+        return HasPrecision() ? 100.0f : 1.0f;
+    }
 };
 
 struct DestructibleModelDataEntry

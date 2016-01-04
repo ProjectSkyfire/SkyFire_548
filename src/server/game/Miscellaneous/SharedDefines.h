@@ -990,7 +990,7 @@ enum SpellEffects
     SPELL_EFFECT_RESURRECT_PET                      = 109,
     SPELL_EFFECT_DESTROY_ALL_TOTEMS                 = 110,
     SPELL_EFFECT_DURABILITY_DAMAGE                  = 111,
-    SPELL_EFFECT_112                                = 112,
+    SPELL_EFFECT_SURVEY                             = 112,
     SPELL_EFFECT_RESURRECT_NEW                      = 113,
     SPELL_EFFECT_ATTACK_ME                          = 114,
     SPELL_EFFECT_DURABILITY_DAMAGE_PCT              = 115,
@@ -1061,6 +1061,15 @@ enum SpellEffects
     SPELL_EFFECT_180                                = 180, // Unused (4.3.4)
     SPELL_EFFECT_REMOVE_TALENT                      = 181, // Eg: Tome of the Clear Mind
     SPELL_EFFECT_182                                = 182,
+    SPELL_EFFECT_183                                = 183,
+    SPELL_EFFECT_REPUTATION_REWARD                  = 184, // add 400 (normal) 800 (10/25 player mode) Avengers of Hyjal (TDF ?) see 73843
+    SPELL_EFFECT_185                                = 185, // Scene related
+    SPELL_EFFECT_186                                = 186, // Scene related
+    SPELL_EFFECT_RANDOM_DIGSITE                     = 187, // 126957 only
+    SPELL_EFFECT_STAMPEDE                           = 188, // Stampede 121818
+    SPELL_EFFECT_LOOT_BONUS                         = 189, // Boss loot bonus ?
+    SPELL_EFFECT_190                                = 190, // 1 internal spell
+    SPELL_EFFECT_TELEPORT_TO_DIGSITE                = 191, // Teleport player to an random digsite (Archaeology)
     TOTAL_SPELL_EFFECTS                             = 214,
 };
 

@@ -2554,3 +2554,14 @@ void WorldSession::HandleSelectFactionOpcode(WorldPacket& recvPacket)
 
     _player->SendMovieStart(116);
 }
+
+void WorldSession::HandleChangeCurrencyFlags(WorldPacket& recvPacket)
+{
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_CURRENCY_FLAGS");
+
+    uint32 currencyId, flags;
+    recvPacket >> flags >> currencyId;
+
+    if (GetPlayer())
+        GetPlayer()->ModifyCurrencyFlag(currencyId, uint8(flags));
+}

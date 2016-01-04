@@ -45,7 +45,7 @@ enum eTradeskill
     TRADESKILL_SKINNING                 = 13,
     TRADESKILL_JEWLCRAFTING             = 14,
     TRADESKILL_INSCRIPTION              = 15,
-
+    TRADESKILL_ARCHAEOLOGY              = 16,
     TRADESKILL_LEVEL_NONE               = 0,
     TRADESKILL_LEVEL_APPRENTICE         = 1,
     TRADESKILL_LEVEL_JOURNEYMAN         = 2,

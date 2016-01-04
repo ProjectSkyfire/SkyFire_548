@@ -2062,6 +2062,15 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
 
 bool WorldObject::CanNeverSee(WorldObject const* obj) const
 {
+    // Archaeology Finds can be seen only by owner
+    if (obj->GetTypeId() == TYPEID_GAMEOBJECT && (obj->GetEntry() == 203071 || obj->GetEntry() == 203078 || obj->GetEntry() == 204282 || obj->GetEntry() == 202655 ||
+        obj->GetEntry() == 206836 || obj->GetEntry() == 207187 || obj->GetEntry() == 207188 || obj->GetEntry() == 207189 || obj->GetEntry() == 207190))
+    {
+        if (uint64 ownerGUID = obj->GetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY))
+            if (GetGUID() != ownerGUID)
+                return true;
+    }
+
     return GetMap() != obj->GetMap() || !InSamePhase(obj);
 }
 

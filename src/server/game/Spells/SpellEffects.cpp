@@ -183,7 +183,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
     &Spell::EffectDestroyAllTotems,                         //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
-    &Spell::EffectUnused,                                   //112 SPELL_EFFECT_112
+    &Spell::EffectSummonObject,                             //112 SPELL_EFFECT_SURVEY
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectTaunt,                                    //114 SPELL_EFFECT_ATTACK_ME
     &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
@@ -4454,6 +4454,8 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
 
     uint32 go_id = m_spellInfo->Effects[effIndex].MiscValue;
     uint8 slot = m_spellInfo->Effects[effIndex].Effect - SPELL_EFFECT_SUMMON_OBJECT_SLOT1;
+    if (m_spellInfo->Effects [effIndex].Effect == SPELL_EFFECT_SURVEY)
+        slot = 4;
 
     if (uint64 guid = m_caster->m_ObjectSlot[slot])
     {
@@ -5828,7 +5830,15 @@ void Spell::EffectGiveCurrency(SpellEffIndex effIndex)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    unitTarget->ToPlayer()->ModifyCurrency(m_spellInfo->Effects[effIndex].MiscValue, damage);
+    Player* player = unitTarget->ToPlayer();
+
+    uint32 currencyId = m_spellInfo->Effects [effIndex].MiscValue;
+    if (!sCurrencyTypesStore.LookupEntry(currencyId))
+        return;
+
+    int32 amount = m_spellInfo->Effects [effIndex].BasePoints;
+
+    player->ModifyCurrency(currencyId, amount);
 }
 
 void Spell::EffectDestroyItem(SpellEffIndex effIndex)

@@ -3746,6 +3746,11 @@ void Spell::finish(bool ok)
     // Stop Attack for some spells
     if (m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET)
         m_caster->AttackStop();
+
+    // handle archaeology research
+    if (m_researchData)
+        if (Player* player = m_caster->ToPlayer())
+            player->SolveResearchProject(this);
 }
 
 void Spell::SendCastResult(SpellCastResult result)
