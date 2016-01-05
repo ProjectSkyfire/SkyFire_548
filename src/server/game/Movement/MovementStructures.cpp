@@ -5379,17 +5379,22 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
         case MSEGuidByte5:
         case MSEGuidByte6:
         case MSEGuidByte7:
-            packet.ReadByteSeq(Data.guid[element - MSEGuidByte0]);
+            packet.ReadByteSeq(Data.guid [element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
-        {
-            float floatData;
-            packet >> floatData;
-            Data.floatData.push_back(floatData);
+            packet >> Data.floatData;
             break;
-        }
+        case MSEExtraFloat2:
+            packet >> Data.floatData2;
+            break;
         case MSEExtraInt8:
             packet >> Data.byteData;
+            break;
+        case MSEExtraInt32:
+            packet >> Data.extraInt32Data;
+            break;
+        case MSEExtra2Bits:
+            Data.extra2BitsData = packet.ReadBits(2);
             break;
         default:
             ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
@@ -5424,11 +5429,19 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
             packet.WriteByteSeq(Data.guid[element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
-            packet << Data.floatData.front();
-            Data.floatData.pop_front();
+            packet << Data.floatData;
+            break;
+        case MSEExtraFloat2:
+            packet << Data.floatData2;
             break;
         case MSEExtraInt8:
             packet << Data.byteData;
+            break;
+        case MSEExtraInt32:
+            packet << Data.extraInt32Data;
+            break;
+        case MSEExtra2Bits:
+            packet.WriteBits(Data.extra2BitsData, 2);
             break;
         default:
             ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));

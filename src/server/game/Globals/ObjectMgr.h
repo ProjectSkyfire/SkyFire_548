@@ -45,6 +45,7 @@
 #include <functional>
 #include "PhaseMgr.h"
 #include "DB2Stores.h"
+#include "Containers.h"
 
 class Item;
 class PhaseMgr;
@@ -1356,7 +1357,7 @@ class ObjectMgr
             if (itr->second.empty())
                 return NULL;
 
-            //return &Trinity::Containers::SelectRandomContainerElement(itr->second);
+            return &Trinity::Containers::SelectRandomContainerElement(itr->second);
         }
 
         ResearchProjectRequirements const* GetResearchProjectRequirements(uint32 projectId) const

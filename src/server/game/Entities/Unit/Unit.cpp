@@ -11074,7 +11074,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
     static MovementStatusElements const speedVal = MSEExtraFloat;
     Movement::ExtraMovementStatusElement extra(&speedVal);
-    extra.Data.floatData.push_back(GetSpeed(mtype));
+    extra.Data.floatData = GetSpeed(mtype);
 
     Movement::PacketSender(this, moveTypeToOpcode [mtype] [0], moveTypeToOpcode [mtype] [1], moveTypeToOpcode [mtype] [2], &extra).Send();
 }
