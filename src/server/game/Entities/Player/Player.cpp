@@ -28297,10 +28297,10 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
 
 void Player::SendMovementSetCollisionHeight(float height)
 {
-    static MovementStatusElements const heightElement[] = { MSEExtraFloat, MSEExtraFloat };
-    Movement::ExtraMovementStatusElement extra(heightElement);
-    extra.Data.floatData.push_back(height);
-    extra.Data.floatData.push_back(1.f);
+    static MovementStatusElements const extraElements [] = { MSEExtraFloat, MSEExtraFloat2 };
+    Movement::ExtraMovementStatusElement extra(extraElements);
+    extra.Data.floatData = height;
+    extra.Data.floatData2 = 1;
     Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &extra).Send();
 }
 
