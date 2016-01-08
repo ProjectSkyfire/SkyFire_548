@@ -12,7 +12,7 @@
 add_subdirectory(genrev)
 add_subdirectory(server)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(NOT MSVC)
   add_definitions(-std=c++11)
 endif()
 

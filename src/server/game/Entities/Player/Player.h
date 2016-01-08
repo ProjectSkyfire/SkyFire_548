@@ -1477,7 +1477,7 @@ class Player : public Unit, public GridObject<Player>
     void GiveLevel(uint8 level);
 
     void InitStatsForLevel(bool reapplyMods = false);
-    void RemoveSpecializationSpells();
+    //void RemoveSpecializationSpells();
 
     // .cheat command related
     bool GetCommandStatus(uint32 command) const

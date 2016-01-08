@@ -3338,7 +3338,7 @@ void Player::InitTalentForLevel()
     if (!GetSession()->PlayerLoading())
         SendTalentsInfoData();                         // update at client
 }
-
+/*
 void Player::RemoveSpecializationSpells()
 {
     std::list<uint32> spellToRemove;
@@ -3352,7 +3352,7 @@ void Player::RemoveSpecializationSpells()
 
     for (auto itr : spellToRemove)
         removeSpell(itr);
-}
+}*/
 
 void Player::InitStatsForLevel(bool reapplyMods)
 {
