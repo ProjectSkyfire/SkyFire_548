@@ -12,12 +12,11 @@
 add_subdirectory(genrev)
 add_subdirectory(server)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions(-std=c++11)
+endif()
+
 if(TOOLS)
-  if( MSVC )
-    add_subdirectory(tools)
-  else()
-    add_definitions(-std=c++11)
-    add_subdirectory(tools)
-  endif()
+  add_subdirectory(tools)
 endif(TOOLS)
 
