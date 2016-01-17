@@ -1,0 +1,18 @@
+-- Remove obsolete commands not used for 5.x.x
+-- talentpoints , modify talentpoints , 569
+-- currency , modify currency , 775
+-- group , rbac account group , 202
+-- group , rbac account group add , 203
+-- group , rbac account group remove , 204
+-- role , rbac account role', skip.205
+-- role , rbac account role grant , 206
+-- role , rbac account role deny , 207
+-- role , rbac account role revoke , 208
+-- permission , rbac account permission , 209
+-- permission , rbac account permission grant , 210
+-- permission , rbac account permission deny , 211
+-- permission , rbac account permission revoke , 212
+-- groups , rbac list groups , 214
+-- roles , rbac list roles , 215
+-- permissions , rbac list permissions , 216
+DELETE FROM `command` WHERE `permission` IN (202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 214, 215, 216, 569, 775);
