@@ -71,11 +71,12 @@ UPDATE `quest_template` SET `PrevQuestId` = 935, `NextQuestId` = 0, `ExclusiveGr
 UPDATE `quest_template` SET `PrevQuestId` = 14039, `NextQuestId` = 0, `ExclusiveGroup` = 26385, `NextQuestIdChain` = 0 WHERE `Id` = 26385;
 UPDATE `quest_template` SET `PrevQuestId` = 14039, `NextQuestId` = 0, `ExclusiveGroup` = 26385, `NextQuestIdChain` = 0 WHERE `Id` = 26383;
 
+SET @CGUID:=2573;
 DELETE FROM `creature` WHERE `id` = 2079;
 INSERT into `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(138526, 2079, 1, 1, 1, 0, 1, 10312, 831.302, 1326.5, 5.39306, 120, 0, 0, 1, 0, 0, 0, 0, 0);
+(@CGUID+0, 2079, 1, 1, 1, 0, 1, 10312, 831.302, 1326.5, 5.39306, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
-UPDATE `creature_addon` SET `auras` = '' WHERE `guid` in (138335, 138523, 138526, 138521, 138522);
+UPDATE `creature_addon` SET `auras` = '' WHERE `guid` in (2573, 138335, 138523, 138521, 138522);
 UPDATE `creature_template_addon` SET `auras` = '' WHERE `entry` in (49478, 49477);
 UPDATE `quest_template` SET `Flags` = 0 WHERE `Id` = 28713;
 UPDATE `quest_poi` SET `WorldMapAreaId` = 41, `unk4` = 1 WHERE `questId` = 28713;
