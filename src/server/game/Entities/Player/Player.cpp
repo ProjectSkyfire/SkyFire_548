@@ -29348,3 +29348,15 @@ void Player::UpdateResearchProjects()
         SetUInt16Value(PLAYER_FIELD_RESEARCHING, i % 2, projectIds [i]);
     }
 }
+
+void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecline /*= false*/)
+{
+    WorldPacket data(SMSG_GUILD_DECLINE, 5 + declinerName.length());
+    data.WriteBits(declinerName.length(), 6);
+    data.WriteBit(autoDecline);
+    data.WriteBit(0); // unk bool
+    data.FlushBits();
+    data.WriteString(declinerName);
+    data << (int32)0;
+    GetSession()->SendPacket(&data);
+}
