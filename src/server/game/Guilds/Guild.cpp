@@ -1908,11 +1908,11 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
     }
 
     // Invited player cannot be in another guild
-    /*if (pInvitee->GetGuildId())
+    if (pInvitee->GetGuildId())
     {
         SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_ALREADY_IN_GUILD_S, name);
         return;
-    }*/
+    }
 
     // Invited player cannot be invited
     if (pInvitee->GetGuildIdInvited())
@@ -1920,6 +1920,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
         SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_ALREADY_INVITED_TO_GUILD_S, name);
         return;
     }
+
     // Inviting player must have rights to invite
     if (!_HasRankRight(player, GR_RIGHT_INVITE))
     {
@@ -1931,7 +1932,16 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
 
     TC_LOG_DEBUG("guild", "Player %s invited %s to join his Guild", player->GetName().c_str(), name.c_str());
 
+    // Auto decline invite
+    if (pInvitee->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_AUTO_DECLINE_GUILD))
+    {
+        player->SendDeclineGuildInvitation(pInvitee->GetName(), true);
+        return;
+    }
+
     pInvitee->SetGuildIdInvited(m_id);
+    pInvitee->SetLastGuildInviterGUID(player->GetGUID());
+
     _LogEvent(GUILD_EVENT_LOG_INVITE_PLAYER, player->GetGUIDLow(), pInvitee->GetGUIDLow());
 
     ObjectGuid oldGuildGuid = MAKE_NEW_GUID(pInvitee->GetGuildId(), 0, pInvitee->GetGuildId() ? uint32(HIGHGUID_GUILD) : 0);
