@@ -425,7 +425,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_PET_CAST_SPELL,                     0x044D, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCastSpellOpcode           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PET_LEARN_TALENT,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetLearnTalent               );
     DEFINE_OPCODE_HANDLER(CMSG_PET_NAME_QUERY,                     0x1C62, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery                 ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_PET_RENAME,                         0x0A32, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetRename                    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_PET_RENAME,                         0x0A32, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetRename                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PET_SET_ACTION,                     0x12E9, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetSetAction                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PET_SPELL_AUTOCAST,                 0x06F0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetSpellAutocastOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PET_STOP_ATTACK,                    0x065B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetStopAttack                ); // 5.4.8 18414
