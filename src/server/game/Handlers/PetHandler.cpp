@@ -691,21 +691,27 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 {
     TC_LOG_INFO("network", "HandlePetRename. CMSG_PET_RENAME");
 
-    uint64 petguid;
-    uint8 isdeclined;
-
+    uint8 declinedNamesLength[MAX_DECLINED_NAME_CASES];
     std::string name;
-    DeclinedName declinedname;
+    DeclinedName declinedName;
 
-    recvData >> petguid;
-    recvData >> name;
-    recvData >> isdeclined;
+    recvData.read_skip<uint32>(); // pet number
+    bool hasName = !recvData.ReadBit();
+    bool hasDeclinedNames = recvData.ReadBit();
+    if (hasDeclinedNames)
+        for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            declinedNamesLength[i] = recvData.ReadBits(7);
+    if (hasName)
+        name = recvData.ReadString(recvData.ReadBits(8));
+    if (hasDeclinedNames)
+        for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            declinedName.name[i] = recvData.ReadBits(declinedNamesLength[i]);
 
-    Pet* pet = ObjectAccessor::FindPet(petguid);
-                                                            // check it!
-    if (!pet || !pet->IsPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET ||
+    Pet* pet = _player->GetPet();
+
+    if (!pet || pet->getPetType() != HUNTER_PET ||
         !pet->HasByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED) ||
-        pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
+        !pet->GetCharmInfo())
         return;
 
     PetNameInvalidReason res = ObjectMgr::CheckPetName(name);
@@ -723,32 +729,26 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 
     pet->SetName(name);
 
-    Player* owner = pet->GetOwner();
-    if (owner && owner->GetGroup())
-        owner->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
+    if (_player->GetGroup())
+        _player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
 
     pet->RemoveByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED);
 
-    if (isdeclined)
+    if (hasDeclinedNames)
     {
-        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-        {
-            recvData >> declinedname.name[i];
-        }
-
         std::wstring wname;
         if (!Utf8toWStr(name, wname))
             return;
 
-        if (!ObjectMgr::CheckDeclinedNames(wname, declinedname))
+        if (!ObjectMgr::CheckDeclinedNames(wname, declinedName))
         {
-            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedname);
+            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedName);
             return;
         }
     }
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    if (isdeclined)
+    if (hasDeclinedNames)
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_DECLINEDNAME);
         stmt->setUInt32(0, pet->GetCharmInfo()->GetPetNumber());
@@ -758,7 +758,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
         stmt->setUInt32(0, _player->GetGUIDLow());
 
         for (uint8 i = 0; i < 5; i++)
-            stmt->setString(i+1, declinedname.name[i]);
+            stmt->setString(i+1, declinedName.name[i]);
 
         trans->Append(stmt);
     }
