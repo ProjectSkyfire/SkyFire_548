@@ -694,10 +694,11 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
     TC_LOG_INFO("network", "HandlePetRename. CMSG_PET_RENAME");
 
     uint8 declinedNamesLength[MAX_DECLINED_NAME_CASES];
+    uint32 petNumber;
     std::string name;
     DeclinedName declinedName;
 
-    recvData.read_skip<uint32>(); // pet number
+    recvData >> petNumber;
     bool hasName = !recvData.ReadBit();
     bool hasDeclinedNames = recvData.ReadBit();
     if (hasDeclinedNames)
@@ -719,13 +720,13 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
     PetNameInvalidReason res = ObjectMgr::CheckPetName(name);
     if (res != PET_NAME_SUCCESS)
     {
-        SendPetNameInvalid(res, name, NULL);
+        SendPetNameInvalid(res, name, NULL, petNumber);
         return;
     }
 
     if (sObjectMgr->IsReservedName(name))
     {
-        SendPetNameInvalid(PET_NAME_RESERVED, name, NULL);
+        SendPetNameInvalid(PET_NAME_RESERVED, name, NULL, petNumber);
         return;
     }
 
@@ -744,7 +745,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 
         if (!ObjectMgr::CheckDeclinedNames(wname, declinedName))
         {
-            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedName);
+            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedName, petNumber);
             return;
         }
     }
@@ -948,15 +949,26 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
 }
 
-void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName)
+void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName, uint32 petNumber)
 {
-    WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1);
-    data << uint32(error);
-    data << name;
-    data << uint8(declinedName ? 1 : 0);
+    WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1 + 1 + 4);
+    data.WriteBit(1);
+    data.WriteBits(name.size(), 8);
+    data.WriteBit(declinedName ? 1 : 0);
+    data.FlushBits();
+
     if (declinedName)
+    {
         for (uint32 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << declinedName->name[i];
+            data.WriteBits(declinedName->name[i].size(), 7);
+
+        for (uint32 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteString(declinedName->name[i]);
+    }
+
+    data.WriteString(name);
+    data << uint8(error);
+    data << uint32(petNumber);
 
     SendPacket(&data);
 }
