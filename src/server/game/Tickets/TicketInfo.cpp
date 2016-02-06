@@ -129,16 +129,10 @@ void GmTicket::LoadFromDB(Field* fields)
     _lastModifiedTime = fields[++index].GetUInt32();
 
     int64 closedBy = fields[++index].GetInt64();
-    if (closedBy <= 0)
-        _closedBy = 0;
-    else
-        _closedBy = MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
+    int64 assignedTo = fields[++index].GetUInt64();
 
-    uint64 assignedTo = fields[++index].GetUInt64();
-    if (assignedTo <= 0)
-        _assignedTo = 0;
-    else
-        _assignedTo = MAKE_NEW_GUID(uint64(_assignedTo), 0, HIGHGUID_PLAYER);
+    _closedBy = closedBy < 0 ? 0 : MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
+    _assignedTo = assignedTo < 0 ? 0 : MAKE_NEW_GUID(assignedTo, 0, HIGHGUID_PLAYER);
 
     _comment = fields[++index].GetString();
     _response = fields[++index].GetString();
@@ -273,16 +267,10 @@ void BugTicket::LoadFromDB(Field* fields)
     _Orientation = fields[++index].GetFloat();
 
     int64 closedBy = fields[++index].GetInt64();
-    if (closedBy < 0)
-        _closedBy = 0;
-    else
-        _closedBy = MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
+    int64 assignedTo = fields[++index].GetUInt64();
 
-    uint64 assignedTo = fields[++index].GetUInt64();
-    if (assignedTo < 0)
-        _assignedTo = 0;
-    else
-        _assignedTo = MAKE_NEW_GUID(assignedTo, 0, HIGHGUID_PLAYER);
+    _closedBy = closedBy < 0 ? 0 : MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
+    _assignedTo = assignedTo < 0 ? 0 : MAKE_NEW_GUID(assignedTo, 0, HIGHGUID_PLAYER);
 
     _comment = fields[++index].GetString();
 }
@@ -330,6 +318,96 @@ std::string BugTicket::FormatMessageString(ChatHandler& handler, bool detailed) 
     if (detailed)
     {
         ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTMESSAGE, _bugnote.c_str());
+        if (!_comment.empty())
+            ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTCOMMENT, _comment.c_str());
+    }
+    return ss.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SuggestTicket System
+
+SuggestTicket::SuggestTicket() : _Orientation(0.0f) { }
+
+SuggestTicket::SuggestTicket(Player* player, WorldPacket& suggestPacket) : TicketInfo(player), _Orientation(0.0f)
+{
+    _ticketId = sTicketMgr->GenerateSuggestId();
+
+    suggestPacket >> _pos.x;
+    suggestPacket >> _pos.y;
+    suggestPacket >> _pos.z;
+    suggestPacket >> _Orientation;
+    suggestPacket >> _mapId;
+    uint8 lenNote = suggestPacket.ReadBits(10);
+    _suggestnote = suggestPacket.ReadString(lenNote);
+}
+
+SuggestTicket::~SuggestTicket() { }
+
+void SuggestTicket::LoadFromDB(Field* fields)
+{
+    uint8 index = 0;
+    _ticketId = fields[index].GetUInt32();
+    _playerGuid = MAKE_NEW_GUID(fields[++index].GetUInt64(), 0, HIGHGUID_PLAYER);
+    _suggestnote = fields[++index].GetString();
+    _ticketCreateTime = fields[++index].GetUInt32();
+    _mapId = fields[++index].GetUInt32();
+    _pos.x = fields[++index].GetFloat();
+    _pos.y = fields[++index].GetFloat();
+    _pos.z = fields[++index].GetFloat();
+    _Orientation = fields[++index].GetFloat();
+
+    int64 closedBy = fields[++index].GetInt64();
+    int64 assignedTo = fields[++index].GetUInt64();
+
+    _closedBy = closedBy < 0 ? 0: MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
+    _assignedTo = assignedTo < 0? 0: MAKE_NEW_GUID(assignedTo, 0, HIGHGUID_PLAYER);
+    _comment = fields[++index].GetString();
+}
+
+void SuggestTicket::SaveToDB(SQLTransaction& trans) const
+{
+    uint8 index = 0;
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GM_SUGGEST);
+    stmt->setUInt32(index, _ticketId);
+    stmt->setUInt32(++index, GUID_LOPART(_playerGuid));
+    stmt->setString(++index, _suggestnote);
+    stmt->setUInt32(++index, _mapId);
+    stmt->setFloat(++index, _pos.x);
+    stmt->setFloat(++index, _pos.y);
+    stmt->setFloat(++index, _pos.z);
+    stmt->setFloat(++index, _Orientation);
+    stmt->setUInt32(++index, GUID_LOPART(_closedBy));
+    stmt->setUInt32(++index, GUID_LOPART(_assignedTo));
+    stmt->setString(++index, _comment);
+
+    CharacterDatabase.ExecuteOrAppend(trans, stmt);
+}
+
+void SuggestTicket::DeleteFromDB()
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GM_SUGGEST);
+    stmt->setUInt32(0, _ticketId);
+    CharacterDatabase.Execute(stmt);
+}
+
+std::string SuggestTicket::FormatMessageString(ChatHandler& handler, bool detailed) const
+{
+    time_t curTime = time(NULL);
+    Player* player = GetPlayer();
+
+    std::stringstream ss;
+    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTGUID, _ticketId);
+    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTNAME, player ? player->GetName().c_str() : "NULL");
+    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(curTime - _ticketCreateTime, true, false)).c_str());
+
+    std::string name;
+    if (sObjectMgr->GetPlayerNameByGUID(_assignedTo, name))
+        ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, name.c_str());
+
+    if (detailed)
+    {
+        ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTMESSAGE, _suggestnote.c_str());
         if (!_comment.empty())
             ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTCOMMENT, _comment.c_str());
     }

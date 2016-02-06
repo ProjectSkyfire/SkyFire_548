@@ -293,3 +293,18 @@ void WorldSession::HandleSubmitBugOpcode(WorldPacket& recvPacket)
     if (BugTicket* ticket = new BugTicket(GetPlayer(), recvPacket))
         sTicketMgr->AddTicket(ticket);
 }
+
+void WorldSession::HandleSubmitSuggestOpcode(WorldPacket& recvPacket)
+{
+    if (!sTicketMgr->GetFeedBackSystemStatus())
+        return;
+
+    if (GetPlayer()->getLevel() < sWorld->getIntConfig(CONFIG_TICKET_LEVEL_REQ))
+    {
+        SendNotification(GetTrinityString(LANG_TICKET_REQ), sWorld->getIntConfig(CONFIG_TICKET_LEVEL_REQ));
+        return;
+    }
+
+    if (SuggestTicket* ticket = new SuggestTicket(GetPlayer(), recvPacket))
+        sTicketMgr->AddTicket(ticket);
+}

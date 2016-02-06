@@ -187,8 +187,6 @@ public:
     BugTicket(Player* player, WorldPacket& bugPacket);
     ~BugTicket();
 
-    void Initilize(uint32 mapId, G3D::Vector3 Position, std::string bugnote, float Orientation);
-
     std::string const& GetNote() const { return _bugnote; }
 
     void SetOrientation(float Orientation) { _Orientation = Orientation; }
@@ -204,6 +202,30 @@ public:
 private:
     float _Orientation;
     std::string _bugnote;
+};
+
+class SuggestTicket : public TicketInfo
+{
+public:
+    SuggestTicket();
+    SuggestTicket(Player* player, WorldPacket& bugPacket);
+    ~SuggestTicket();
+
+    std::string const& GetNote() const { return _suggestnote; }
+
+    void SetOrientation(float Orientation) { _Orientation = Orientation; }
+    void SetNote(std::string const& suggestnote) { _suggestnote = suggestnote; }
+
+    void LoadFromDB(Field* fields) OVERRIDE;
+    void SaveToDB(SQLTransaction& trans) const OVERRIDE;
+    void DeleteFromDB() OVERRIDE;
+
+    using TicketInfo::FormatMessageString;
+    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const OVERRIDE;
+
+private:
+    float _Orientation;
+    std::string _suggestnote;
 };
 
 #endif // SF_TICKETINFO_H
