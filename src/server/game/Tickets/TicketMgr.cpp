@@ -350,7 +350,7 @@ template<> void TicketMgr::ResetTickets<SuggestTicket>()
 
     _suggestTicketList.clear();
 
-    _lastBugId = 0;
+    _lastSuggestId = 0;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ALL_GM_SUGGESTS);
     CharacterDatabase.Execute(stmt);

@@ -368,7 +368,7 @@ void SuggestTicket::LoadFromDB(Field* fields)
 void SuggestTicket::SaveToDB(SQLTransaction& trans) const
 {
     uint8 index = 0;
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GM_SUGGESTS);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GM_SUGGEST);
     stmt->setUInt32(index, _ticketId);
     stmt->setUInt32(++index, GUID_LOPART(_playerGuid));
     stmt->setString(++index, _suggestnote);
@@ -386,7 +386,7 @@ void SuggestTicket::SaveToDB(SQLTransaction& trans) const
 
 void SuggestTicket::DeleteFromDB()
 {
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GM_SUGGESTS);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GM_SUGGEST);
     stmt->setUInt32(0, _ticketId);
     CharacterDatabase.Execute(stmt);
 }

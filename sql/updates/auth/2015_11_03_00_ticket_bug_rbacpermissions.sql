@@ -1,4 +1,4 @@
-DELETE FROM `rbac_permissions` WHERE `id` IN (777,778,779,780,782,783,784,785,786);
+DELETE FROM `rbac_permissions` WHERE `id` IN (777,778,779,780,781,782,783,784,785,786);
 INSERT INTO `rbac_permissions` (`id`, `name`) VALUES
 (777, 'Command: .ticket bug'),
 (778, 'Command: .ticket bug assign'),
@@ -19,7 +19,7 @@ INSERT INTO `rbac_linked_permissions` (`id`, `linkedId`) VALUES
 (198, 780),
 (198, 781),
 (198, 782),
-(197, 783),
+(198, 783),
 (198, 784),
 (198, 785),
 (198, 786);
