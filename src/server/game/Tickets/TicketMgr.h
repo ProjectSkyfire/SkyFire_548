@@ -28,6 +28,7 @@
 
 typedef std::map<uint32, BugTicket*> BugTicketList;
 typedef std::map<uint32, GmTicket*> GmTicketList;
+typedef std::map<uint32, SuggestTicket*> SuggestTicketList;
 
 class TicketMgr
 {
@@ -86,9 +87,11 @@ public:
 
     void LoadGmTickets();
     void LoadBugTickets();
+    void LoadSuggestTickets();
 
     void AddTicket(GmTicket* ticket);
     void AddTicket(BugTicket* ticket);
+    void AddTicket(SuggestTicket* ticket);
 
     template<typename T> void RemoveTicket(uint32 ticketId);
     template<typename T> void CloseTicket(uint32 ticketId, int64 closedBy);
@@ -105,17 +108,21 @@ public:
 
     uint32 GenerateGmTicketId() { return ++_lastGmTicketId; }
     uint32 GenerateBugId() { return ++_lastBugId; }
+    uint32 GenerateSuggestId() { return ++_lastSuggestId; }
 
 private:
     bool _feedbackSystemStatus;
     bool _gmTicketSystemStatus;
     GmTicketList _gmTicketList;
     BugTicketList _bugTicketList;
+    SuggestTicketList _suggestTicketList;
     uint32 _lastGmTicketId;
     uint32 _lastBugId;
+    uint32 _lastSuggestId;
     uint64 _lastChange;
     uint32 _openGmTicketCount;
     uint32 _openBugTicketCount;
+    uint32 _openSuggestTicketCount;
 };
 
 #define sTicketMgr ACE_Singleton<TicketMgr, ACE_Null_Mutex>::instance()

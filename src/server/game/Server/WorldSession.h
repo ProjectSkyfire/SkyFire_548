@@ -480,8 +480,9 @@ class WorldSession
         void HandleReportLag(WorldPacket& recvPacket);
         void HandleGMResponseResolve(WorldPacket& recvPacket);
 
-        // Gm Bug Ticket
+        // FeedBackSystem
         void HandleSubmitBugOpcode(WorldPacket& recvPacket);
+        void HandleSubmitSuggestOpcode(WorldPacket& recvPacket);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
         void HandleSetPvP(WorldPacket& recvPacket);

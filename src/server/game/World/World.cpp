@@ -1784,8 +1784,11 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading GM tickets...");
     sTicketMgr->LoadGmTickets();
 
-    TC_LOG_INFO("server.loading", "Loading GM bugs...");
+    TC_LOG_INFO("server.loading", "Loading Support bugs tickets...");
     sTicketMgr->LoadBugTickets();
+
+    TC_LOG_INFO("server.loading", "Loading Support suggest tickets...");
+    sTicketMgr->LoadSuggestTickets();
 
     TC_LOG_INFO("server.loading", "Loading client addons...");
     AddonMgr::LoadFromDB();
