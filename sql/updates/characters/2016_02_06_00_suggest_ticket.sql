@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS `ticket_suggest`;
-CREATE TABLE `ticket_bug` (
+CREATE TABLE `ticket_suggest` (
     `ticketId` INT(10) UNSIGNED NOT NULL,
     `playerGuid` BIGINT(20) UNSIGNED NOT NULL,
     `suggestNote` TEXT NOT NULL,
