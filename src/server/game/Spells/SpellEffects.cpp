@@ -274,7 +274,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //200 SPELL_EFFECT_200
     &Spell::EffectBattlePetsUnlock,                         //201 SPELL_EFFECT_BATTLE_PET_UNLOCK
     &Spell::EffectNULL,                                     //202 SPELL_EFFECT_202
-    &Spell::EffectNULL,                                     //203 SPELL_EFFECT_203
+    &Spell::EffectTriggerSpell,                             //203 SPELL_EFFECT_TRIGGER_MISSILE2
     &Spell::EffectNULL,                                     //204 SPELL_EFFECT_204
     &Spell::EffectNULL,                                     //205 SPELL_EFFECT_205
     &Spell::EffectNULL,                                     //206 SPELL_EFFECT_206
@@ -859,10 +859,27 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         if (spellInfo->NeedsToBeTriggeredByCaster(m_spellInfo) && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
 
-        if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
-            targets.SetDst(m_targets);
+        switch (triggered_spell_id)
+        {
+            case 58880:
+            case 122127:
+            {
+                SpellCastTargets targets;
+                float newz = m_caster->GetPositionZ();
+                float angle = m_caster->GetOrientation();
+                float newx = m_caster->GetPositionX() + 24 * cos(angle);
+                float newy = m_caster->GetPositionY() + 24 * sin(angle);
+                targets.SetDst(newx, newy, newz, angle);
+                m_caster->CastSpell(newx, newy, newz, triggered_spell_id, true);
+                return;
+            }
+            default:
+                if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
+                    targets.SetDst(m_targets);
 
-        targets.SetUnitTarget(m_caster);
+                targets.SetUnitTarget(m_caster);
+                break;
+        }
     }
 
     CustomSpellValues values;
