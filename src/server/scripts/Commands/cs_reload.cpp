@@ -27,6 +27,7 @@ EndScriptData */
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AuctionHouseMgr.h"
+#include "BlackMarketMgr.h"
 #include "Chat.h"
 #include "CreatureTextMgr.h"
 #include "DisableMgr.h"
@@ -76,6 +77,8 @@ public:
             { "areatrigger_tavern",            rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_TAVERN, true,  &HandleReloadAreaTriggerTavernCommand,          "", NULL },
             { "areatrigger_teleport",          rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_TELEPORT, true,  &HandleReloadAreaTriggerTeleportCommand,        "", NULL },
             { "autobroadcast",                 rbac::RBAC_PERM_COMMAND_RELOAD_AUTOBROADCAST, true,  &HandleReloadAutobroadcastCommand,              "", NULL },
+            { "bmauctions",                    rbac::RBAC_PERM_COMMAND_RELOAD_BLACKMARKET_AUCTIONS, true,  &HandleReloadBlackMarketAuctionsCommand, "", NULL },
+            { "blackmarket_template",          rbac::RBAC_PERM_COMMAND_RELOAD_BLACKMARKET_TEMPLATE, true,  &HandleReloadBlackMarketTemplateCommand, "", NULL },
             { "command",                       rbac::RBAC_PERM_COMMAND_RELOAD_COMMAND, true,  &HandleReloadCommandCommand,                    "", NULL },
             { "conditions",                    rbac::RBAC_PERM_COMMAND_RELOAD_CONDITIONS, true,  &HandleReloadConditions,                        "", NULL },
             { "config",                        rbac::RBAC_PERM_COMMAND_RELOAD_CONFIG, true,  &HandleReloadConfigCommand,                     "", NULL },
@@ -378,6 +381,14 @@ public:
         TC_LOG_INFO("misc", "Re-Loading Autobroadcasts...");
         sWorld->LoadAutobroadcasts();
         handler->SendGlobalGMSysMessage("DB table `autobroadcast` reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadBlackMarketTemplateCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        TC_LOG_INFO("misc", "Re-Loading BlackMarket Templates...");
+        sBlackMarketMgr->LoadBlackMarketTemplates();
+        handler->SendGlobalGMSysMessage("DB table `blackmarket_template` reloaded.");
         return true;
     }
 
@@ -1183,6 +1194,14 @@ public:
         sAuctionMgr->LoadAuctionItems();
         sAuctionMgr->LoadAuctions();
         handler->SendGlobalGMSysMessage("Auctions reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadBlackMarketAuctionsCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        TC_LOG_INFO("misc", "Re-Loading BlackMarket Auctions...");
+        sBlackMarketMgr->LoadBlackMarketAuctions();
+        handler->SendGlobalGMSysMessage("BlackMarket Auctions reloaded.");
         return true;
     }
 

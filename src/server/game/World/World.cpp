@@ -1955,7 +1955,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr->LoadHotfixData();
 
     TC_LOG_INFO("server.loading", "Loading BlackMarket Templates...");
-    sBlackMarketMgr->LoadFromDB();
+    sBlackMarketMgr->LoadBlackMarketTemplates();
 
     TC_LOG_INFO("server.loading", "Loading missing KeyChains...");
     sObjectMgr->LoadMissingKeyChains();
