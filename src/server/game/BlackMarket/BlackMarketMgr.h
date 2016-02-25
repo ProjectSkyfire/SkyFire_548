@@ -129,8 +129,8 @@ private:
 public:
     void Update();
 
-    void LoadFromDB();
-    void LoadAuctions();
+    void LoadBlackMarketTemplates();
+    void LoadBlackMarketAuctions();
 
     BlackMarketAuctionTemplate* GetTemplate(uint32 templateId) const;
     uint32 GetTemplatesCount() { return _templates.size(); }

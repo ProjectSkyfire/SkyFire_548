@@ -91,7 +91,7 @@ uint32 BlackMarketAuction::TimeLeft()
     return (endTime >= curTime) ? endTime - curTime : 0;
 }
 
-void BlackMarketMgr::LoadFromDB()
+void BlackMarketMgr::LoadBlackMarketTemplates()
 {
     uint32 count = 0;
     uint32 oldMSTime = getMSTime();
@@ -121,7 +121,7 @@ void BlackMarketMgr::LoadFromDB()
 
     TC_LOG_INFO("server.loading", ">> Loaded %u BlackMarket templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
-void BlackMarketMgr::LoadAuctions()
+void BlackMarketMgr::LoadBlackMarketAuctions()
 {
     uint32 count = 0;
     uint32 oldMSTime = getMSTime();
