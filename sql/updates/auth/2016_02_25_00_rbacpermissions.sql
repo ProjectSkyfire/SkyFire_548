@@ -4,7 +4,7 @@ INSERT INTO `rbac_permissions` (`id`, `name`) VALUES
 (801, 'Command: .reload quest_objective_effects'),
 (802, 'Command: .reload locales_quest_objective');
 
-DELETE FROM `rbac_linked_permissions` WHERE `id` = 198 AND `linkedId` IN (800, 801, 802);
+DELETE FROM `rbac_linked_permissions` WHERE `id` = 196 AND `linkedId` IN (800, 801, 802);
 INSERT INTO `rbac_linked_permissions` (`id`, `linkedId`) VALUES
 (196, 800),
 (196, 801),
