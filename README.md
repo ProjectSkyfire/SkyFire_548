@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/ProjectSkyfire/SkyFire.548.png?label=ready&title=Ready)](https://waffle.io/ProjectSkyfire/SkyFire.548)
 # ![logo](http://www.projectskyfire.org/public/style_images/15_14_skyfire_logo.png)
 
 ## Project Information

@@ -36,10 +36,12 @@
 
 void WorldSession::HandleDismissCritter(WorldPacket& recvData)
 {
-    uint64 guid;
-    recvData >> guid;
+    ObjectGuid guid;
 
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_DISMISS_CRITTER for GUID " UI64FMTD, guid);
+    recvData.ReadGuidMask(guid, 4, 6, 7, 5, 1, 0, 2, 3);
+    recvData.ReadGuidBytes(guid, 2, 4, 5, 0, 1, 7, 3, 6);
+
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_DISMISS_CRITTER for (guid: %u)", uint32(GUID_LOPART(guid)));
 
     Unit* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
 
@@ -691,64 +693,65 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 {
     TC_LOG_INFO("network", "HandlePetRename. CMSG_PET_RENAME");
 
-    uint64 petguid;
-    uint8 isdeclined;
-
+    uint8 declinedNamesLength[MAX_DECLINED_NAME_CASES];
+    uint32 petNumber;
     std::string name;
-    DeclinedName declinedname;
+    DeclinedName declinedName;
 
-    recvData >> petguid;
-    recvData >> name;
-    recvData >> isdeclined;
+    recvData >> petNumber;
+    bool hasName = !recvData.ReadBit();
+    bool hasDeclinedNames = recvData.ReadBit();
+    if (hasDeclinedNames)
+        for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            declinedNamesLength[i] = recvData.ReadBits(7);
+    if (hasName)
+        name = recvData.ReadString(recvData.ReadBits(8));
+    if (hasDeclinedNames)
+        for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            declinedName.name[i] = recvData.ReadBits(declinedNamesLength[i]);
 
-    Pet* pet = ObjectAccessor::FindPet(petguid);
-                                                            // check it!
-    if (!pet || !pet->IsPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET ||
+    Pet* pet = _player->GetPet();
+
+    if (!pet || pet->getPetType() != HUNTER_PET ||
         !pet->HasByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED) ||
-        pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
+        !pet->GetCharmInfo())
         return;
 
     PetNameInvalidReason res = ObjectMgr::CheckPetName(name);
     if (res != PET_NAME_SUCCESS)
     {
-        SendPetNameInvalid(res, name, NULL);
+        SendPetNameInvalid(res, name, NULL, petNumber);
         return;
     }
 
     if (sObjectMgr->IsReservedName(name))
     {
-        SendPetNameInvalid(PET_NAME_RESERVED, name, NULL);
+        SendPetNameInvalid(PET_NAME_RESERVED, name, NULL, petNumber);
         return;
     }
 
     pet->SetName(name);
 
-    Player* owner = pet->GetOwner();
-    if (owner && owner->GetGroup())
-        owner->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
+    if (_player->GetGroup())
+        _player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
 
     pet->RemoveByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED);
 
-    if (isdeclined)
+    if (hasDeclinedNames)
     {
-        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-        {
-            recvData >> declinedname.name[i];
-        }
-
         std::wstring wname;
         if (!Utf8toWStr(name, wname))
             return;
 
-        if (!ObjectMgr::CheckDeclinedNames(wname, declinedname))
+        if (!ObjectMgr::CheckDeclinedNames(wname, declinedName))
         {
-            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedname);
+            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedName, petNumber);
             return;
         }
     }
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    if (isdeclined)
+    if (hasDeclinedNames)
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_DECLINEDNAME);
         stmt->setUInt32(0, pet->GetCharmInfo()->GetPetNumber());
@@ -758,7 +761,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
         stmt->setUInt32(0, _player->GetGUIDLow());
 
         for (uint8 i = 0; i < 5; i++)
-            stmt->setString(i+1, declinedname.name[i]);
+            stmt->setString(i+1, declinedName.name[i]);
 
         trans->Append(stmt);
     }
@@ -815,47 +818,34 @@ void WorldSession::HandlePetAbandon(WorldPacket& recvData)
 void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_INFO("network", "CMSG_PET_SPELL_AUTOCAST");
-    ObjectGuid PetGUID;
-    uint32 SpellID;
-    uint32 State;
+    ObjectGuid petGUID;
+    uint32 spellId;
+    bool state;
 
-    recvPacket >> State >> SpellID;
+    recvPacket >> spellId;
+    uint8 bitOrder[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
+    recvPacket.ReadBitInOrder(petGUID, bitOrder);
+    state = recvPacket.ReadBit();
 
-    PetGUID[1] = recvPacket.ReadBit();
-    PetGUID[0] = recvPacket.ReadBit();
-    PetGUID[5] = recvPacket.ReadBit();
-    PetGUID[3] = recvPacket.ReadBit();
-    PetGUID[2] = recvPacket.ReadBit();
-    PetGUID[7] = recvPacket.ReadBit();
-    PetGUID[6] = recvPacket.ReadBit();
-    PetGUID[4] = recvPacket.ReadBit();
-
-    recvPacket.ReadByteSeq(PetGUID[5]);
-    recvPacket.ReadByteSeq(PetGUID[6]);
-    recvPacket.ReadByteSeq(PetGUID[7]);
-    recvPacket.ReadByteSeq(PetGUID[3]);
-    recvPacket.ReadByteSeq(PetGUID[2]);
-    recvPacket.ReadByteSeq(PetGUID[1]);
-    recvPacket.ReadByteSeq(PetGUID[4]);
-    recvPacket.ReadByteSeq(PetGUID[0]);
+    recvPacket.ReadGuidBytes(petGUID, 5, 0, 4, 1, 7, 2, 3, 6);
 
     if (!_player->GetGuardianPet() && !_player->GetCharm())
         return;
 
-    if (ObjectAccessor::FindPlayer(PetGUID))
+    if (ObjectAccessor::FindPlayer(petGUID))
         return;
 
-    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, PetGUID);
+    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, petGUID);
 
     if (!pet || (pet != _player->GetGuardianPet() && pet != _player->GetCharm()))
     {
-        TC_LOG_ERROR("network", "HandlePetSpellAutocastOpcode.Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(PetGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetSpellAutocastOpcode.Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(petGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
         return;
     }
 
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SpellID);
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     // do not add not learned spells/ passive spells
-    if (!pet->HasSpell(SpellID) || !spellInfo->IsAutocastable())
+    if (!pet->HasSpell(spellId) || !spellInfo->IsAutocastable())
         return;
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
@@ -866,11 +856,11 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     }
 
     if (pet->IsPet())
-        ((Pet*)pet)->ToggleAutocast(spellInfo, State);
+        ((Pet*)pet)->ToggleAutocast(spellInfo, state);
     else
-        pet->GetCharmInfo()->ToggleCreatureAutocast(spellInfo, State);
+        pet->GetCharmInfo()->ToggleCreatureAutocast(spellInfo, state);
 
-    charmInfo->SetSpellAutocast(spellInfo, State);
+    charmInfo->SetSpellAutocast(spellInfo, state);
 }
 
 void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
@@ -959,15 +949,26 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
 }
 
-void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName)
+void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName, uint32 petNumber)
 {
-    WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1);
-    data << uint32(error);
-    data << name;
-    data << uint8(declinedName ? 1 : 0);
+    WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1 + 1 + 4);
+    data.WriteBit(1);
+    data.WriteBits(name.size(), 8);
+    data.WriteBit(declinedName ? 1 : 0);
+    data.FlushBits();
+
     if (declinedName)
+    {
         for (uint32 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << declinedName->name[i];
+            data.WriteBits(declinedName->name[i].size(), 7);
+
+        for (uint32 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data.WriteString(declinedName->name[i]);
+    }
+
+    data.WriteString(name);
+    data << uint8(error);
+    data << uint32(petNumber);
 
     SendPacket(&data);
 }

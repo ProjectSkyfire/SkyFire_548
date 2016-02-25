@@ -95,38 +95,41 @@ class spell_dk_gorefiends_grasp : public SpellScriptLoader
 
                     target->GetAttackableUnitListInRange(tempList, 20.0f);
 
-                    for (auto itr : tempList)
+                    for (std::list<Unit*>::iterator itr = tempList.begin(); itr != tempList.end(); ++itr)
                     {
-                        if (itr->GetGUID())
-                            if (itr->GetGUID() == target->GetGUID())
+                        Unit* tlist = (*itr);
+						
+                        if (tlist->GetGUID())
+                            if (tlist->GetGUID() == target->GetGUID())
                                 continue;
 
-                        if (!_player->IsValidAttackTarget(itr))
+                        if (!_player->IsValidAttackTarget(tlist))
                             continue;
 
-                        if (itr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
-                            || itr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED)
-                            || itr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                        if (tlist->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
+                            || tlist->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED)
+                            || tlist->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
                             continue;
 
-                        if (itr->IsImmunedToSpell(sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_GRIP_ONLY_JUMP)))
+                        if (tlist->IsImmunedToSpell(sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_GRIP_ONLY_JUMP)))
                             continue;
 
-                        if (_player->HasVisionObscured(itr))
+                        if (_player->HasVisionObscured(tlist))
                             continue;
 
-                        if (!itr->IsWithinLOSInMap(target))
+                        if (!tlist->IsWithinLOSInMap(target))
                             continue;
 
-                        gripList.push_back(itr);
+                        gripList.push_back(tlist);
                     }
 
-                    for (auto itr : gripList)
+                    for (std::list<Unit*>::iterator itr = gripList.begin(); itr != gripList.end(); ++itr)
                     {
-                        itr->CastSpell(target, SPELL_DK_DEATH_GRIP_ONLY_JUMP, true);
-                        itr->CombatStart(_player, true);
+                        Unit* glist = (*itr);
+                        glist->CastSpell(target, SPELL_DK_DEATH_GRIP_ONLY_JUMP, true);
+                        glist->CombatStart(_player, true);
                         target->CombatStart(_player, true);
-                        target->CastSpell(itr, SPELL_DK_GOREFIENDS_GRASP_GRIP_VISUAL, true);
+                        target->CastSpell(glist, SPELL_DK_GOREFIENDS_GRASP_GRIP_VISUAL, true);
                     }
                 }
             }

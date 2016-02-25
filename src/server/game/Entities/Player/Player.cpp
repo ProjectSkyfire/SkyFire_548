@@ -3338,7 +3338,7 @@ void Player::InitTalentForLevel()
     if (!GetSession()->PlayerLoading())
         SendTalentsInfoData();                         // update at client
 }
-
+/*
 void Player::RemoveSpecializationSpells()
 {
     std::list<uint32> spellToRemove;
@@ -3352,7 +3352,7 @@ void Player::RemoveSpecializationSpells()
 
     for (auto itr : spellToRemove)
         removeSpell(itr);
-}
+}*/
 
 void Player::InitStatsForLevel(bool reapplyMods)
 {
@@ -29347,4 +29347,16 @@ void Player::UpdateResearchProjects()
         uint32 offset = i % 2;
         SetUInt16Value(PLAYER_FIELD_RESEARCHING, i % 2, projectIds [i]);
     }
+}
+
+void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecline /*= false*/)
+{
+    WorldPacket data(SMSG_GUILD_DECLINE, 5 + declinerName.length());
+    data.WriteBits(declinerName.length(), 6);
+    data.WriteBit(autoDecline);
+    data.WriteBit(0); // unk bool
+    data.FlushBits();
+    data.WriteString(declinerName);
+    data << (int32)0;
+    GetSession()->SendPacket(&data);
 }

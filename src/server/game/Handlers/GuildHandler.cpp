@@ -130,6 +130,14 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
 
     GetPlayer()->SetGuildIdInvited(0);
     GetPlayer()->SetInGuild(0);
+
+    if (GetPlayer()->GetLastGuildInviterGUID())
+    {
+        if (Player* inviter = ObjectAccessor::FindPlayer(GetPlayer()->GetLastGuildInviterGUID()))
+            inviter->SendDeclineGuildInvitation(GetPlayer()->GetName());
+
+        GetPlayer()->SetLastGuildInviterGUID(0);
+    }
 }
 
 void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)

@@ -364,6 +364,12 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_GM_BUG, "DELETE FROM ticket_bug WHERE ticketId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_ALL_GM_BUGS, "TRUNCATE TABLE ticket_bug", CONNECTION_ASYNC);
 
+    // GM suggest Tickets
+    PrepareStatement(CHAR_SEL_GM_SUGGESTS, "SELECT ticketId, playerGuid, suggestNote, ticketCreateTime, mapId, posX, posY, posZ, orientation, closedBy, assignedTo, comment FROM ticket_suggest", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_GM_SUGGEST, "REPLACE INTO ticket_suggest (ticketId, playerGuid, suggestNote, ticketCreateTime, mapId, posX, posY, posZ, orientation, closedBy, assignedTo, comment) VALUES (?, ?, ?, UNIX_TIMESTAMP(NOW()), ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_GM_SUGGEST, "DELETE FROM ticket_suggest WHERE ticketId = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_ALL_GM_SUGGESTS, "TRUNCATE TABLE ticket_suggest", CONNECTION_ASYNC);
+
     // GM Survey/subsurvey/lag report
     PrepareStatement(CHAR_INS_GM_SURVEY, "INSERT INTO gm_surveys (guid, surveyId, mainSurvey, overallComment, createTime) VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_GM_SUBSURVEY, "INSERT INTO gm_subsurveys (surveyId, subsurveyId, rank, comment) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);

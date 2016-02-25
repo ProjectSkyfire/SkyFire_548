@@ -664,7 +664,7 @@ public:
         lt.tm_mon = (packedDate >> 20) & 0xF;
         lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
-        return uint32(mktime(&lt) + timezone);
+        return uint32(mktime(&lt) + SF_TIMEZONE);
     }
 
     ByteBuffer& ReadPackedTime(uint32& time)

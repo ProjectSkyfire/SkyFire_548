@@ -54,6 +54,20 @@ public:
             { NULL, 0, false, NULL, "", NULL }
         };
 
+        static ChatCommand ticketSuggestCommandTable[] =
+        {
+            { "assign",     rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_ASSIGN,     true, &HandleTicketAssignToCommand<SuggestTicket>,   "", NULL },
+            { "close",      rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_CLOSE,      true, &HandleTicketCloseByIdCommand<SuggestTicket>,  "", NULL },
+            { "closedlist", rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_CLOSEDLIST, true, &HandleTicketListClosedCommand<SuggestTicket>, "", NULL },
+            { "comment",    rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_COMMENT,    true, &HandleTicketCommentCommand<SuggestTicket>,    "", NULL },
+            { "delete",     rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_DELETE,     true, &HandleTicketDeleteByIdCommand<SuggestTicket>, "", NULL },
+            { "list",       rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_LIST,       true, &HandleTicketListCommand<SuggestTicket>,       "", NULL },
+            { "unassign",   rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_UNASSIGN,   true, &HandleTicketUnAssignCommand<SuggestTicket>,   "", NULL },
+            { "view",       rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_VIEW,       true, &HandleTicketGetByIdCommand<SuggestTicket>,    "", NULL },
+            { "reset",      rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST_RESET,      true, &HandleTicketResetCommand<SuggestTicket>,      "", NULL },
+            { NULL, 0, false, NULL, "", NULL }
+        };
+
         static ChatCommand ticketResponseCommandTable[] =
         {
             { "append",     rbac::RBAC_PERM_COMMAND_TICKET_RESPONSE_APPEND,   true, &HandleGMTicketResponseAppendCommand,   "", NULL },
@@ -64,6 +78,7 @@ public:
         {
             { "assign",        rbac::RBAC_PERM_COMMAND_TICKET_ASSIGN,        true, &HandleGMTicketAssignToCommand,      "", NULL },
             { "bug",           rbac::RBAC_PERM_COMMAND_SUPPORT_BUG,          true, NULL, "", ticketBugCommandTable               },
+            { "suggest",       rbac::RBAC_PERM_COMMAND_SUPPORT_SUGGEST,      true, NULL, "", ticketSuggestCommandTable           },
             { "close",         rbac::RBAC_PERM_COMMAND_TICKET_CLOSE,         true, &HandleGMTicketCloseByIdCommand,     "", NULL },
             { "closedlist",    rbac::RBAC_PERM_COMMAND_TICKET_CLOSEDLIST,    true, &HandleGMTicketListClosedCommand,    "", NULL },
             { "comment",       rbac::RBAC_PERM_COMMAND_TICKET_COMMENT,       true, &HandleGMTicketCommentCommand,       "", NULL },
@@ -381,7 +396,7 @@ public:
         if (!normalizePlayerName(target))
             return false;
 
-        GmTicket* ticket = sTicketMgr->GetTicket<GmTicket>(ticketId);
+        T* ticket = sTicketMgr->GetTicket<T>(ticketId);
         if (!ticket || ticket->IsClosed())
         {
             handler->SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);

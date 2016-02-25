@@ -4710,60 +4710,32 @@ void Spell::SendSpellGo()
 
 void Spell::SendLogExecute()
 {
-    ObjectGuid guid = m_caster->GetGUID();
+    ObjectGuid CastergGuid = m_caster->GetGUID();
 
-    // TODO: Finish me
-    WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
-    /*
-    data.WriteBit(0);
-    data.WriteBit(guid[6]);
-    data.WriteBits(0, 19); // Count
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[3]);
+    WorldPacket data(SMSG_SPELLLOGEXECUTE, 8 + 4 + 4 + 4 + 4 + 8);
 
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[7]);
-    data << uint32(m_spellInfo->Id);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[4]);
-    */
-
-    data.append(m_caster->GetPackGUID());
-
+    data.WriteGuidMask(CastergGuid, 0, 6, 5, 7, 2);
+    data.WriteBits(0, 19); // effCount
+    data.WriteGuidMask(CastergGuid, 4, 1, 3);
+    data.WriteBit(0); // HasSpellCastLogData
+    data.FlushBits();
     data << uint32(m_spellInfo->Id);
 
-    uint8 effCount = 0;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-    {
-        if (m_effectExecuteData[i])
-            ++effCount;
-    }
-
-    if (!effCount)
-        return;
-
-    data << uint32(effCount);
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (!m_effectExecuteData[i])
             continue;
 
-        data << uint32(m_spellInfo->Effects[i].Effect);             // spell effect
+        data << uint32(m_spellInfo->Effects[i].Effect); // SpellID
 
         data.append(*m_effectExecuteData[i]);
 
         delete m_effectExecuteData[i];
         m_effectExecuteData[i] = NULL;
     }
+
+    data.WriteGuidBytes(CastergGuid, 5, 7, 1, 6, 2, 0, 4, 3);
+
     m_caster->SendMessageToSet(&data, true);
 }
 

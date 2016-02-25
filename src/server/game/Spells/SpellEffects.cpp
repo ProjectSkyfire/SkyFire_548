@@ -246,15 +246,15 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectResurrectWithAura,                        //172 SPELL_EFFECT_RESURRECT_WITH_AURA
     &Spell::EffectUnlockGuildVaultTab,                      //173 SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB
     &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174
-    &Spell::EffectUnused,                                   //175 SPELL_EFFECT_175  unused
+    &Spell::EffectNULL,                                     //175 SPELL_EFFECT_175          one spell: Wild Fixation (125570)
     &Spell::EffectNULL,                                     //176 SPELL_EFFECT_176
     &Spell::EffectNULL,                                     //177 SPELL_EFFECT_177
-    &Spell::EffectUnused,                                   //178 SPELL_EFFECT_178 unused
+    &Spell::EffectUnused,                                   //178 SPELL_EFFECT_178          unused
     &Spell::EffectCreateAreaTrigger,                        //179 SPELL_EFFECT_CREATE_AREATRIGGER
-    &Spell::EffectUnused,                                   //180 SPELL_EFFECT_180 unused
+    &Spell::EffectNULL,                                     //180 SPELL_EFFECT_180
     &Spell::EffectRemoveTalent,                             //181 SPELL_EFFECT_REMOVE_TALENT
     &Spell::EffectNULL,                                     //182 SPELL_EFFECT_182
-    &Spell::EffectNULL,                                     //183 SPELL_EFFECT_183
+    &Spell::EffectUnused,                                   //183 SPELL_EFFECT_183          unused
     &Spell::EffectNULL,                                     //184 SPELL_EFFECT_184
     &Spell::EffectNULL,                                     //185 SPELL_EFFECT_185
     &Spell::EffectNULL,                                     //186 SPELL_EFFECT_186
@@ -264,13 +264,13 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //190 SPELL_EFFECT_190
     &Spell::EffectNULL,                                     //191 SPELL_EFFECT_191
     &Spell::EffectNULL,                                     //192 SPELL_EFFECT_192
-    &Spell::EffectNULL,                                     //193 SPELL_EFFECT_193
-    &Spell::EffectNULL,                                     //194 SPELL_EFFECT_194
+    &Spell::EffectUnused,                                   //193 SPELL_EFFECT_193          unused
+    &Spell::EffectUnused,                                   //194 SPELL_EFFECT_194          unused
     &Spell::EffectNULL,                                     //195 SPELL_EFFECT_195
     &Spell::EffectNULL,                                     //196 SPELL_EFFECT_196
     &Spell::EffectNULL,                                     //197 SPELL_EFFECT_197
     &Spell::EffectNULL,                                     //198 SPELL_EFFECT_198
-    &Spell::EffectNULL,                                     //199 SPELL_EFFECT_199
+    &Spell::EffectUnused,                                   //199 SPELL_EFFECT_199          unused
     &Spell::EffectNULL,                                     //200 SPELL_EFFECT_200
     &Spell::EffectBattlePetsUnlock,                         //201 SPELL_EFFECT_BATTLE_PET_UNLOCK
     &Spell::EffectNULL,                                     //202 SPELL_EFFECT_202
@@ -278,13 +278,13 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //204 SPELL_EFFECT_204
     &Spell::EffectNULL,                                     //205 SPELL_EFFECT_205
     &Spell::EffectNULL,                                     //206 SPELL_EFFECT_206
-    &Spell::EffectNULL,                                     //207 SPELL_EFFECT_207
-    &Spell::EffectNULL,                                     //208 SPELL_EFFECT_208
-    &Spell::EffectNULL,                                     //209 SPELL_EFFECT_209
-    &Spell::EffectNULL,                                     //210 SPELL_EFFECT_210
-    &Spell::EffectNULL,                                     //211 SPELL_EFFECT_211
-    &Spell::EffectNULL,                                     //212 SPELL_EFFECT_212
-    &Spell::EffectNULL,                                     //213 SPELL_EFFECT_213
+    &Spell::EffectUnused,                                   //207 SPELL_EFFECT_207          unused
+    &Spell::EffectReputation,                               //208 SPELL_EFFECT_REPUTATION_2 one spell: Test Reputation Set (142250)
+    &Spell::EffectNULL,                                     //209 SPELL_EFFECT_209          one spell: QA Test Spell (150808)
+    &Spell::EffectUnused,                                   //210 SPELL_EFFECT_210          unused
+    &Spell::EffectUnused,                                   //211 SPELL_EFFECT_211          unused
+    &Spell::EffectUnused,                                   //212 SPELL_EFFECT_212          unused
+    &Spell::EffectJumpDest,                                 //213 SPELL_EFFECT_JUMP_DEST_2  one spell: Death Grip (49575)
 };
 
 void Spell::EffectNULL(SpellEffIndex /*effIndex*/)

@@ -1477,7 +1477,7 @@ class Player : public Unit, public GridObject<Player>
     void GiveLevel(uint8 level);
 
     void InitStatsForLevel(bool reapplyMods = false);
-    void RemoveSpecializationSpells();
+    //void RemoveSpecializationSpells();
 
     // .cheat command related
     bool GetCommandStatus(uint32 command) const
@@ -2368,10 +2368,10 @@ class Player : public Unit, public GridObject<Player>
     Guild* GetGuild();
     static uint32 GetGuildIdFromDB(uint64 guid);
     static uint8 GetRankFromDB(uint64 guid);
-    int GetGuildIdInvited()
-    {
-        return m_GuildIdInvited;
-    }
+    int GetGuildIdInvited() const { return m_GuildIdInvited; }
+    void SetLastGuildInviterGUID(uint64 guid) { m_lastGuildInviterGUID = guid; }
+    uint64 GetLastGuildInviterGUID() const { return m_lastGuildInviterGUID; }
+    void SendDeclineGuildInvitation(std::string declinerName, bool autoDecline = false);
     static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
     // Arena Team
@@ -3662,6 +3662,9 @@ class Player : public Unit, public GridObject<Player>
     uint8 m_MirrorTimerFlags;
     uint8 m_MirrorTimerFlagsLast;
     bool m_isInWater;
+
+    // Guid of player who invited player to guild as last
+    uint64 m_lastGuildInviterGUID;
 
     // Current teleport data
     WorldLocation m_teleport_dest;

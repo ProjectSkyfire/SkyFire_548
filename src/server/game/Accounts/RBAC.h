@@ -683,7 +683,6 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_MODIFY_CURRENCY                        = 775, // only 4.3.4
     RBAC_PERM_COMMAND_DEBUG_PHASE                            = 776, // Only 4.3.4
 
-
     RBAC_PERM_COMMAND_SUPPORT_BUG                            = 777,
     RBAC_PERM_COMMAND_SUPPORT_BUG_ASSIGN                     = 778,
     RBAC_PERM_COMMAND_SUPPORT_BUG_CLOSE                      = 779,
@@ -694,8 +693,20 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_SUPPORT_BUG_UNASSIGN                   = 784,
     RBAC_PERM_COMMAND_SUPPORT_BUG_VIEW                       = 785,
     RBAC_PERM_COMMAND_SUPPORT_BUG_RESET                      = 786,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST                        = 787,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_ASSIGN                 = 788,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_CLOSE                  = 789,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_CLOSEDLIST             = 790,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_COMMENT                = 791,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_DELETE                 = 792,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_LIST                   = 793,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_UNASSIGN               = 794,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_VIEW                   = 795,
+    RBAC_PERM_COMMAND_SUPPORT_SUGGEST_RESET                  = 796,
 
-
+    RBAC_PERM_COMMAND_RELOAD_QUEST_OBJECTIVES                = 800,
+    RBAC_PERM_COMMAND_RELOAD_QUEST_OBJECTIVE_EFFECTS         = 801,
+    RBAC_PERM_COMMAND_RELOAD_LOCALES_QUEST_OBJECTIVE         = 802,
 
     // custom permissions 1000+
     RBAC_PERM_MAX
