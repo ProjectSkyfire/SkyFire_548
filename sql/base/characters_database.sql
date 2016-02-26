@@ -1348,11 +1348,15 @@ CREATE TABLE `character_stats` (
   `parryPct` float unsigned NOT NULL DEFAULT '0',
   `critPct` float unsigned NOT NULL DEFAULT '0',
   `rangedCritPct` float unsigned NOT NULL DEFAULT '0',
+  `offhandCritPct` float unsigned NOT NULL DEFAULT '0',
   `spellCritPct` float unsigned NOT NULL DEFAULT '0',
   `attackPower` int(10) unsigned NOT NULL DEFAULT '0',
   `rangedAttackPower` int(10) unsigned NOT NULL DEFAULT '0',
   `spellPower` int(10) unsigned NOT NULL DEFAULT '0',
   `resilience` int(10) unsigned NOT NULL DEFAULT '0',
+  `mastery` int(10) unsigned NOT NULL DEFAULT '0',
+  `pvpDamage` int(10) unsigned NOT NULL DEFAULT '0',
+  `pvpHealing` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

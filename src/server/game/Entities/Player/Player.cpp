@@ -20906,16 +20906,21 @@ void Player::_SaveStats(SQLTransaction& trans)
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         stmt->setUInt32(index++, GetResistance(SpellSchools(i)));
 
-    stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_PLAYER_FLAGS));
+    stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_BLOCK_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_DODGE_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_PARRY_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_CRIT_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_RANGED_CRIT_PERCENTAGE));
+    stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_OFFHAND_CRIT_PERCENTAGE));
     stmt->setFloat(index++, GetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE));
     stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_ATTACK_POWER));
     stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER));
     stmt->setUInt32(index++, GetBaseSpellPowerBonus());
     stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATINGS + CR_RESILIENCE_PLAYER_DAMAGE_TAKEN));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_MASTERY));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PVP_POWER_DAMAGE));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PVP_POWER_HEALING));
+
 
     trans->Append(stmt);
 }

@@ -1,0 +1,5 @@
+ALTER TABLE `character_stats`
+  ADD COLUMN `offhandCritPct` FLOAT UNSIGNED NOT NULL DEFAULT '0' AFTER `rangedCritPct`,
+  ADD COLUMN `mastery` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `resilience`,
+  ADD COLUMN `pvpDamage` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `mastery`,
+  ADD COLUMN `pvpHealing` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `pvpDamage`;
