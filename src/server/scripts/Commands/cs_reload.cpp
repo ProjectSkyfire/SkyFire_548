@@ -621,6 +621,9 @@ public:
         sObjectMgr->LoadQuests();
         handler->SendGlobalGMSysMessage("DB table `quest_template` (quest definitions) reloaded.");
 
+        HandleReloadQuestObjectivesCommand(handler, "a");
+        HandleReloadQuestObjectiveEffectsCommand(handler, "a");
+
         /// dependent also from `gameobject` but this table not reloaded anyway
         TC_LOG_INFO("misc", "Re-Loading GameObjects for quests...");
         sObjectMgr->LoadGameObjectForQuests();
