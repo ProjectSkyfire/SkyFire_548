@@ -455,7 +455,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_QUESTGIVER_STATUS_QUERY,            0x036A, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleQuestgiverStatusQueryOpcode  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_QUESTLOG_REMOVE_QUEST,              0x0779, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestLogRemoveQuest          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_CONFIRM_ACCEPT,               0x124B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestConfirmAccept           ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_QUEST_NPC_QUERY,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_QUEST_NPC_QUERY,                    0x1DAE, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_POI_QUERY,                    0x10C2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPOIQuery                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_PUSH_RESULT,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushResult              );
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_QUERY,                        0x02D5, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestQueryOpcode             ); // 5.4.8 18414
