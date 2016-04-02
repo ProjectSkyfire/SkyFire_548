@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES UTF8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -319,11 +319,12 @@ CREATE TABLE `blackmarket_auctions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `banned_addons`
+-- Dumping data for table `blackmarket_auctions`
 --
 
 LOCK TABLES `blackmarket_auctions` WRITE;
 /*!40000 ALTER TABLE `blackmarket_auctions` DISABLE KEYS */;
+INSERT INTO `blackmarket_auctions` VALUES (1,9,1459637492,0,50000000,2500000,0),(2,4,1459637492,0,50000000,2500000,0),(3,30,1459637459,0,150000000,7500000,0);
 /*!40000 ALTER TABLE `blackmarket_auctions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -728,6 +729,8 @@ CREATE TABLE `character_currency` (
   `currency` smallint(5) unsigned NOT NULL,
   `total_count` int(10) unsigned NOT NULL,
   `week_count` int(10) unsigned NOT NULL,
+  `season_count` int(10) unsigned NOT NULL,
+  `flags` int(5) unsigned NOT NULL,
   PRIMARY KEY (`guid`,`currency`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1213,6 +1216,79 @@ CREATE TABLE `character_reputation` (
 LOCK TABLES `character_reputation` WRITE;
 /*!40000 ALTER TABLE `character_reputation` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_reputation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_research_digsites`
+--
+
+DROP TABLE IF EXISTS `character_research_digsites`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_research_digsites` (
+  `guid` int(11) NOT NULL COMMENT 'Global Unique Identifier',
+  `digsiteId` int(11) NOT NULL,
+  `currentFindGUID` int(11) NOT NULL DEFAULT '0',
+  `remainingFindCount` tinyint(3) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`digsiteId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_research_digsites`
+--
+
+LOCK TABLES `character_research_digsites` WRITE;
+/*!40000 ALTER TABLE `character_research_digsites` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_research_digsites` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_research_history`
+--
+
+DROP TABLE IF EXISTS `character_research_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_research_history` (
+  `guid` int(11) NOT NULL COMMENT 'Global Unique Identifier',
+  `projectId` int(11) NOT NULL,
+  `researchCount` int(11) NOT NULL,
+  `firstResearchTimestamp` int(11) NOT NULL,
+  PRIMARY KEY (`guid`,`projectId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_research_history`
+--
+
+LOCK TABLES `character_research_history` WRITE;
+/*!40000 ALTER TABLE `character_research_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_research_history` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_research_projects`
+--
+
+DROP TABLE IF EXISTS `character_research_projects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_research_projects` (
+  `guid` int(11) NOT NULL COMMENT 'Global Unique Identifier',
+  `projectId` int(11) NOT NULL,
+  PRIMARY KEY (`guid`,`projectId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_research_projects`
+--
+
+LOCK TABLES `character_research_projects` WRITE;
+/*!40000 ALTER TABLE `character_research_projects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_research_projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2291,6 +2367,7 @@ CREATE TABLE `instance_reset` (
 
 LOCK TABLES `instance_reset` WRITE;
 /*!40000 ALTER TABLE `instance_reset` DISABLE KEYS */;
+INSERT INTO `instance_reset` VALUES (33,2,1459656000),(36,2,1459656000),(249,3,1460174400),(249,4,1460174400),(269,2,1459656000),(409,9,1460174400),(469,9,1460174400),(509,3,1459828800),(531,9,1460174400),(532,3,1460174400),(533,3,1460174400),(533,4,1460174400),(534,4,1460174400),(540,2,1459656000),(542,2,1459656000),(543,2,1459656000),(544,4,1460174400),(545,2,1459656000),(546,2,1459656000),(547,2,1459656000),(548,4,1460174400),(550,4,1460174400),(552,2,1459656000),(553,2,1459656000),(554,2,1459656000),(555,2,1459656000),(556,2,1459656000),(557,2,1459656000),(558,2,1459656000),(560,2,1459656000),(564,4,1460174400),(565,4,1460174400),(568,2,1459656000),(574,2,1459656000),(575,2,1459656000),(576,2,1459656000),(578,2,1459656000),(580,4,1460174400),(585,2,1459656000),(595,2,1459656000),(598,2,1459656000),(599,2,1459656000),(600,2,1459656000),(601,2,1459656000),(602,2,1459656000),(603,3,1460174400),(603,4,1460174400),(604,2,1459656000),(608,2,1459656000),(615,3,1460174400),(615,4,1460174400),(616,3,1460174400),(616,4,1460174400),(619,2,1459656000),(624,3,1460174400),(624,4,1460174400),(631,3,1460174400),(631,4,1460174400),(631,5,1460174400),(631,6,1460174400),(632,2,1459656000),(643,2,1459656000),(644,2,1459656000),(645,2,1459656000),(649,3,1460174400),(649,4,1460174400),(649,5,1460174400),(649,6,1460174400),(650,2,1459656000),(657,2,1459656000),(658,2,1459656000),(668,2,1459656000),(669,3,1460174400),(669,4,1460174400),(669,5,1460174400),(669,6,1460174400),(670,2,1459656000),(671,3,1460174400),(671,4,1460174400),(671,5,1460174400),(671,6,1460174400),(720,3,1460174400),(720,4,1460174400),(720,5,1460174400),(720,6,1460174400),(724,3,1460174400),(724,4,1460174400),(724,5,1460174400),(724,6,1460174400),(725,2,1459656000),(754,3,1460174400),(754,4,1460174400),(754,5,1460174400),(754,6,1460174400),(755,2,1459656000),(757,3,1460174400),(757,4,1460174400),(757,5,1460174400),(757,6,1460174400),(859,2,1459656000),(938,2,1459656000),(939,2,1459656000),(940,2,1459656000),(959,2,1459656000),(960,2,1459656000),(961,2,1459656000),(962,2,1459656000),(967,3,1460174400),(967,4,1460174400),(967,5,1460174400),(967,6,1460174400),(994,2,1459656000),(996,3,1460174400),(996,4,1460174400),(996,5,1460174400),(996,6,1460174400),(1001,2,1459656000),(1004,2,1459656000),(1007,2,1459656000),(1008,3,1460174400),(1008,4,1460174400),(1008,5,1460174400),(1008,6,1460174400),(1009,3,1460174400),(1009,4,1460174400),(1009,5,1460174400),(1009,6,1460174400),(1011,2,1459656000),(1098,3,1460174400),(1098,4,1460174400),(1098,5,1460174400),(1098,6,1460174400),(1136,3,1460174400),(1136,4,1460174400),(1136,5,1460174400),(1136,6,1460174400);
 /*!40000 ALTER TABLE `instance_reset` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2707,6 +2784,7 @@ CREATE TABLE `pool_quest_save` (
 
 LOCK TABLES `pool_quest_save` WRITE;
 /*!40000 ALTER TABLE `pool_quest_save` DISABLE KEYS */;
+INSERT INTO `pool_quest_save` VALUES (349,14104),(350,13904),(351,13914),(352,11379),(353,11665),(354,13422),(356,11372),(357,11387),(358,25159),(359,25154),(360,29364),(361,26235),(362,29332),(363,26192),(364,29355),(365,29313),(366,26543),(367,29348),(368,29361),(369,26414),(370,29347),(371,29323),(372,28063),(372,28130),(373,27949),(373,28046),(374,27975),(374,27978),(375,27944),(375,27972),(376,28687),(376,28721),(377,28678),(377,28683),(378,28698),(378,28700),(379,28690),(379,28692),(380,12726),(381,12762),(382,12741),(383,12760),(5662,13673),(5663,13762),(5664,13769),(5665,13774),(5666,13779),(5667,13783),(5668,13669),(5669,13600),(5670,13741),(5671,13746),(5672,13759),(5673,13752),(5674,13101),(5675,13112),(5676,13834),(5677,12962),(5678,24584),(12001,31523),(12002,31706),(12003,31271);
 /*!40000 ALTER TABLE `pool_quest_save` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2732,6 +2810,10 @@ LOCK TABLES `reserved_name` WRITE;
 /*!40000 ALTER TABLE `reserved_name` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Table structure for table `ticket_bug`
+--
+
 DROP TABLE IF EXISTS `ticket_bug`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2752,10 +2834,48 @@ CREATE TABLE `ticket_bug` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `ticket_bug`
+--
+
 LOCK TABLES `ticket_bug` WRITE;
 /*!40000 ALTER TABLE `ticket_bug` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ticket_bug` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `ticket_suggest`
+--
+
+DROP TABLE IF EXISTS `ticket_suggest`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ticket_suggest` (
+  `ticketId` int(10) unsigned NOT NULL,
+  `playerGuid` bigint(20) unsigned NOT NULL,
+  `suggestNote` text NOT NULL,
+  `ticketCreateTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `mapId` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `posX` float NOT NULL DEFAULT '0',
+  `posY` float NOT NULL DEFAULT '0',
+  `posZ` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `closedBy` bigint(20) NOT NULL DEFAULT '0',
+  `assignedTo` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'GUID of admin to whom ticket is assigned',
+  `comment` text NOT NULL,
+  PRIMARY KEY (`ticketId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ticket_suggest`
+--
+
+LOCK TABLES `ticket_suggest` WRITE;
+/*!40000 ALTER TABLE `ticket_suggest` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ticket_suggest` ENABLE KEYS */;
+UNLOCK TABLES;
+
 --
 -- Table structure for table `warden_action`
 --
@@ -2800,7 +2920,7 @@ CREATE TABLE `worldstates` (
 
 LOCK TABLES `worldstates` WRITE;
 /*!40000 ALTER TABLE `worldstates` DISABLE KEYS */;
-INSERT INTO `worldstates` VALUES (20001,0,'NextArenaPointDistributionTime'),(20002,0,'NextWeeklyQuestResetTime'),(20003,0,'NextBGRandomDailyResetTime'),(20004,0,'cleaning_flags');
+INSERT INTO `worldstates` VALUES (3781,9000000,NULL),(3801,0,NULL),(3802,1,NULL),(20001,1460199600,'NextArenaPointDistributionTime'),(20002,1460242155,'NextWeeklyQuestResetTime'),(20003,1459681200,'NextBGRandomDailyResetTime'),(20004,0,'cleaning_flags'),(20006,1459681200,NULL),(20007,1462078800,NULL),(20050,1,NULL);
 /*!40000 ALTER TABLE `worldstates` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -2813,4 +2933,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-01-21 17:40:22
+-- Dump completed on 2016-04-02 17:51:06
