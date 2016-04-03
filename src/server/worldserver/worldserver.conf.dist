@@ -763,6 +763,14 @@ MinDualSpecLevel = 30
 StartPlayerLevel = 1
 
 #
+#    StartPetbarLevel
+#        Description: Select the level that pet bars appear.
+#        Range:       1-25
+#        Default:     10
+
+StartPetbarLevel = 10
+
+#
 #    StartHeroicPlayerLevel
 #        Description: Staring level for heroic class characters after creation.
 #        Range:       1-MaxPlayerLevel

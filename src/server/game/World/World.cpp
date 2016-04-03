@@ -782,6 +782,8 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_START_HEROIC_PLAYER_LEVEL] = m_int_configs[CONFIG_MAX_PLAYER_LEVEL];
     }
 
+	m_int_configs[CONFIG_START_PETBAR_LEVEL] = sConfigMgr->GetIntDefault("StartPetbarLevel", 10);
+
     m_int_configs[CONFIG_START_PLAYER_MONEY] = sConfigMgr->GetIntDefault("StartPlayerMoney", 0);
     if (int32(m_int_configs[CONFIG_START_PLAYER_MONEY]) < 0)
     {
