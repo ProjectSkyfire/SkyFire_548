@@ -107,13 +107,13 @@ void BlackMarketMgr::LoadBlackMarketTemplates()
             blackmarket_template->Id = fields[0].GetUInt32();
             blackmarket_template->MarketId = fields[1].GetUInt32();
             blackmarket_template->SellerNPCEntry = fields[2].GetUInt32();
-            if (!sObjectMgr->GetCreatureTemplate(SellerNPCEntry)) 
+            if (!sObjectMgr->GetCreatureTemplate(blackmarket_template->SellerNPCEntry)) 
             {
                 TC_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing creature template (Entry: %u), ignoring", blackmarket_template->MarketId, blackmarket_template->SellerNPCEntry); 
                 continue; 
             }
             blackmarket_template->ItemEntry = fields[3].GetUInt32();
-            if (!sObjectMgr->GetItemTemplate(ItemEntry)
+            if (!sObjectMgr->GetItemTemplate(blackmarket_template->ItemEntry)
             { 
                 TC_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing item template (Entry: %u), ignoring.", blackmarket_template->MarketId, blackmarket_template->ItemEntry); 
                 continue; 
