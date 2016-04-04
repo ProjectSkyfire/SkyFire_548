@@ -113,7 +113,7 @@ void BlackMarketMgr::LoadBlackMarketTemplates()
                 continue; 
             }
             blackmarket_template->ItemEntry = fields[3].GetUInt32();
-            if (!sObjectMgr->GetItemTemplate(blackmarket_template->ItemEntry)
+            if (!sObjectMgr->GetItemTemplate(blackmarket_template->ItemEntry))
             { 
                 TC_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing item template (Entry: %u), ignoring.", blackmarket_template->MarketId, blackmarket_template->ItemEntry); 
                 continue; 
