@@ -165,7 +165,7 @@ enum EPlayerFields
     PLAYER_FIELD_GUILD_TIME_STAMP                            = UNIT_END + 0x00A, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_QUEST_LOG                                   = UNIT_END + 0x00B, // Size: 750, Flags: UF_FLAG_PARTY
     PLAYER_FIELD_VISIBLE_ITEMS                               = UNIT_END + 0x2F9, // Size: 19, Flags: UF_FLAG_PUBLIC
-    PLAYER_FIELD_VISIBLE_ITEM_NCHANTMENTS                    = UNIT_END + 0x30D, // Size: 19, Flags: UF_FLAG_PARTY
+    PLAYER_FIELD_VISIBLE_ITEM_NCHANTMENTS                    = UNIT_END + 0x2FA, // Size: 19, Flags: UF_FLAG_PARTY
     PLAYER_FIELD_PLAYER_TITLE                                = UNIT_END + 0x31F, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_FAKE_INEBRIATION                            = UNIT_END + 0x320, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_VIRTUAL_PLAYER_REALM                        = UNIT_END + 0x321, // Size: 1, Flags: UF_FLAG_PUBLIC
