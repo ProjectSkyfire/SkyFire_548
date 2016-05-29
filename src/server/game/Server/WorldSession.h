@@ -138,9 +138,67 @@ enum BarberShopResult
     /*BARBER_SHOP_NOT_ENOUGH_MONEY = 3*/
 };
 
-#define DB2_REPLY_BROADCAST 35137211
-#define DB2_REPLY_SPARSE    2442913102
-#define DB2_REPLY_ITEM      1344507586
+enum DB2Hash : uint64
+{
+    DB2_REPLY_BattlePetAbility            = 3416538071,
+    DB2_REPLY_BattlePetAbilityEffect      = 3716901134,
+    DB2_REPLY_BattlePetAbilityState       = 1012231747,
+    DB2_REPLY_BattlePetAbilityTurn        = 3973639388,
+    DB2_REPLY_BattlePetBreedQuality       = 458903206,
+    DB2_REPLY_BattlePetBreedState         = 1794847238,
+    DB2_REPLY_BattlePetEffectProperties   = 1672791226,
+    DB2_REPLY_BattlePetNPCTeamMember      = 4060454394,
+    DB2_REPLY_BattlePetSpecies            = 1821637041,
+    DB2_REPLY_BattlePetSpeciesState       = 366509520,
+    DB2_REPLY_BattlePetSpeciesXAbility    = 1143173908,
+    DB2_REPLY_BattlePetState              = 2403627824,
+    DB2_REPLY_BattlePetVisual             = 3282955075,
+    DB2_REPLY_BroadcastText               = 35137211,
+    DB2_REPLY_Creature                    = 3386291891,
+    DB2_REPLY_CreatureDifficulty          = 3386943305, // MoP - 5.4.0
+    DB2_REPLY_Curve                       = 1272569722, // MoP - 5.4.0
+    DB2_REPLY_CurvePoint                  = 1880017466, // MoP - 5.4.0
+    DB2_REPLY_DeviceBlacklist             = 983446676,  // MoP - 5.4.2
+    DB2_REPLY_DriverBlacklist             = 1326512502, // MoP - 5.4.2
+    DB2_REPLY_GameObjects                 = 331613093,
+    DB2_REPLY_Item                        = 1344507586,
+    DB2_REPLY_Item_sparse                 = 2442913102,
+    DB2_REPLY_ItemCurrencyCost            = 1876974313,
+    DB2_REPLY_ItemExtendedCost            = 3146089301,
+    DB2_REPLY_ItemToBattlePet             = 1563357608, // MoP - 5.4.2 (replaced by ItemToBattlePetSpecies in WoD)
+    DB2_REPLY_ItemToMountSpell            = 1440631488, // MoP - 5.4.2
+    DB2_REPLY_ItemUpgrade                 = 1879459387,
+    DB2_REPLY_KeyChain                    = 1837770388,
+    DB2_REPLY_Locale                      = 1065724855,
+    DB2_REPLY_Location                    = 961296167,
+    DB2_REPLY_MapChallengeMode            = 943410215,
+    DB2_REPLY_MarketingPromotionsXLocale  = 2715021741,
+    DB2_REPLY_Path                        = 2499044245,
+    DB2_REPLY_PathNode                    = 1000230050,
+    DB2_REPLY_PathNodeProperty            = 4263624740,
+    DB2_REPLY_PathProperty                = 149245792,
+    DB2_REPLY_QuestPackageItem            = 3425666288,
+    DB2_REPLY_RulesetItemUpgrade          = 1840711788,
+    DB2_REPLY_RulesetRaidLootUpgrade      = 3978279757,
+    DB2_REPLY_SceneScript                 = 3568395212,
+    DB2_REPLY_SceneScriptPackage          = 3905641993,
+    DB2_REPLY_SceneScriptPackageMember    = 3830298396,
+    DB2_REPLY_SpellEffectCameraShakes     = 1939361897, // MoP - 5.4.0
+    DB2_REPLY_SpellMissile                = 1754233351, // MoP - 5.4.0
+    DB2_REPLY_SpellMissileMotion          = 930182777,  // MoP - 5.4.0
+    DB2_REPLY_SpellReagents               = 2875640223, // MoP - 5.2.0
+    DB2_REPLY_SpellVisual                 = 4146370265, // MoP - 5.4.0
+    DB2_REPLY_SpellVisualEffectName       = 48336690,   // MoP - 5.4.0
+    DB2_REPLY_SpellVisualKit              = 4102286043, // MoP - 5.4.0
+    DB2_REPLY_SpellVisualKitAreaModel     = 22642299461,// MoP - 5.4.0
+    DB2_REPLY_SpellVisualKitModelAttach   = 4033975491, // MoP - 5.4.0
+    DB2_REPLY_SpellVisualMissile          = 1369604944, // MoP - 5.4.0
+    DB2_REPLY_Vignette                    = 4021368146, // MoP - 5.4.0
+    DB2_REPLY_WbAccessControlList         = 1477136115, // MoP - 5.3.0
+    DB2_REPLY_WbCertBlacklist             = 3450573023, // MoP - 5.3.0
+    DB2_REPLY_WbCertWhitelist             = 2287306173, // MoP - 5.3.0
+    DB2_REPLY_WbPermissions               = 4163366139, // MoP - 5.3.0
+};
 
 //class to deal with packet processing
 //allows to determine if next packet is safe to be processed
