@@ -181,9 +181,11 @@ DBCStorage <QuestFactionRewEntry>  sQuestFactionRewardStore(QuestFactionRewardfm
 DBCStorage <QuestPOIPointEntry> sQuestPOIPointStore(QuestPOIPointfmt);
 DBCStorage <RandomPropertiesPointsEntry> sRandomPropertiesPointsStore(RandomPropertiesPointsfmt);
 
-DBCStorage <ResearchBranchEntry>  sResearchBranchStore(ResearchBranchfmt);
+DBCStorage <ResearchBranchEntry> sResearchBranchStore(ResearchBranchfmt);
+DBCStorage <ResearchSiteEntry> sResearchSiteStore(ResearchSitefmt);
+std::set<ResearchSiteEntry const*> sResearchSiteSet;
 DBCStorage <ResearchProjectEntry> sResearchProjectStore(ResearchProjectfmt);
-DBCStorage <ResearchSiteEntry>    sResearchSiteStore(ResearchSitefmt);
+std::set<ResearchProjectEntry const*> sResearchProjectSet;
 static DigsitePOIPolygonContainer sDigsitePOIPolygons;
 
 DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore(ScalingStatDistributionfmt);
@@ -534,7 +536,7 @@ void LoadDBCStores(const std::string& dataPath)
         ResearchProjectEntry const* rp = sResearchProjectStore.LookupEntry(i);
         if (!rp)
             continue;
-        if (rp->branchId == 29) // unused
+        if (rp->ResearchBranchId == 29) // unused
             continue;
         sResearchProjectSet.insert(rp);
     }
@@ -546,24 +548,24 @@ void LoadDBCStores(const std::string& dataPath)
         ResearchSiteEntry const* rs = sResearchSiteStore.LookupEntry(i);
         if (!rs)
             continue;
-        if (rs->ID == 140           // template
-            || rs->ID == 142        // template
-            || rs->ID == 161        // template
-            || rs->ID == 471        // vashj'ir
-            || rs->ID == 473        // vashj'ir
-            || rs->ID == 475)       // vashj'ir
+        if (rs->Id == 140           // template
+            || rs->Id == 142        // template
+            || rs->Id == 161        // template
+            || rs->Id == 471        // vashj'ir
+            || rs->Id == 473        // vashj'ir
+            || rs->Id == 475)       // vashj'ir
             continue;
         sResearchSiteSet.insert(rs);
     }
     //sResearchSiteStore.Clear();
     LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatDistributionStore, dbcPath, "ScalingStatDistribution.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatValuesStore,      dbcPath, "ScalingStatValues.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineStore,              dbcPath, "SkillLine.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineAbilityStore,       dbcPath, "SkillLineAbility.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSoundEntriesStore,           dbcPath, "SoundEntries.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore,                  dbcPath, "Spell.dbc"/*, &CustomSpellEntryfmt, &CustomSpellEntryIndex*/);//
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoriesStore,        dbcPath,"SpellCategories.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoryStore,          dbcPath, "SpellCategory.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatValuesStore,       dbcPath, "ScalingStatValues.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineStore,               dbcPath, "SkillLine.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineAbilityStore,        dbcPath, "SkillLineAbility.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSoundEntriesStore,            dbcPath, "SoundEntries.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore,                   dbcPath, "Spell.dbc"/*, &CustomSpellEntryfmt, &CustomSpellEntryIndex*/);//
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoriesStore,         dbcPath, "SpellCategories.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoryStore,           dbcPath, "SpellCategory.dbc");
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
         SpellEntry const* spell = sSpellStore.LookupEntry(i);

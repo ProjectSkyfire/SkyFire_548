@@ -2899,6 +2899,32 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                 if (referencePlayer->GetMapId() != reqValue)
                     return false;
                 break;
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_CLASS: // 33
+			{
+				ItemTemplate const* pItem = sObjectMgr->GetItemTemplate(miscValue1);
+				if (!pItem)
+					return false;
+
+				if (pItem->Class != reqValue)
+					return false;
+				break;
+			}
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_SUBCLASS: // 34
+			{
+				ItemTemplate const* pItem = sObjectMgr->GetItemTemplate(miscValue1);
+				if (!pItem)
+					return false;
+
+				if (pItem->SubClass != reqValue)
+					return false;
+				break;
+			}
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_MIN_PERSONAL_RATING: // 37
+			{
+				if (miscValue1 < reqValue)
+					return false;
+				break;
+			}
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TITLE_BIT_INDEX: // 38
                 // miscValue1 is title's bit index
                 if (miscValue1 != reqValue)
@@ -2919,11 +2945,87 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                 if (!unit || unit->GetHealthPct() >= reqValue)
                     return false;
                 break;
-            default:
-                break;
-        }
-    }
-    return true;
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_MIN_ACHIEVEMENT_POINTS: // 56
+				if (!referencePlayer || (referencePlayer->GetAchievementMgr().GetAchievementPoints() < reqValue))
+					return false;
+				break;
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_REQUIRES_GUILD_GROUP: // 61
+			{
+				if (!referencePlayer)
+					return false;
+
+				Group* pGroup = referencePlayer->GetGroup();
+				if (!pGroup)
+					return false;
+
+				break;
+			}
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_GUILD_REPUTATION: // 62
+			{
+				if (!referencePlayer)
+					return false;
+
+				if (uint32(referencePlayer->GetReputationMgr().GetReputation(1168)) < reqValue) // 1168 = Guild faction
+					return false;
+				break;
+			}
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_RATED_BATTLEGROUND: // 63
+			/*{
+				if (!referencePlayer)
+					return false;
+
+				if (!referencePlayer->GetBattleground())
+					return false;
+
+				if (!referencePlayer->GetBattleground()->IsRatedBg())
+					return false;
+
+				break;
+			}*/
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_PROJECT_RARITY: // 65
+			{
+				if (!miscValue1)
+					return false;
+
+				bool ok = false;
+				for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
+				{
+					if ((*itr)->Id == miscValue1)
+					{
+						ok = ((*itr)->rare == reqValue);
+						break;
+					}
+				}
+
+				if (!ok)
+					return false;
+
+				break;
+			}
+			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_PROJECT_RACE: // 66
+			{
+				if (!miscValue1)
+					return false;
+				bool ok = false;
+				for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
+				{
+					if ((*itr)->Id == miscValue1)
+					{
+						ok = ((*itr)->ResearchBranchId == reqValue);
+						break;
+					}
+				}
+
+				if (!ok)
+					return false;
+
+				break;
+			}
+			default:
+				break;
+		}
+	}
+	return true;
 }
 
 char const* AchievementGlobalMgr::GetCriteriaTypeString(uint32 type)

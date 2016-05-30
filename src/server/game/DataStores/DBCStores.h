@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "DBCStore.h"
 #include "DBCStructure.h"
+#include "SharedDefines.h"
 
 #include <list>
 
@@ -110,6 +111,7 @@ extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
 extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
 extern DBCStorage <ChrPowerTypesEntry>           sChrPowerTypesStore;
+extern uint32 sChrClassXPowerTypesStore[MAX_CLASSES][MAX_POWERS];
 extern DBCStorage <ChrSpecializationEntry>       sChrSpecializationStore;
 extern DBCStorage <CinematicSequencesEntry>      sCinematicSequencesStore;
 extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
@@ -194,6 +196,7 @@ extern DBCStorage <QuestPOIPointEntry>           sQuestPOIPointStore;
 extern DBCStorage <RandomPropertiesPointsEntry>  sRandomPropertiesPointsStore;
 extern DBCStorage <ResearchBranchEntry>          sResearchBranchStore;
 extern DBCStorage <ResearchProjectEntry>         sResearchProjectStore;
+extern std::set<ResearchProjectEntry const*>     sResearchProjectSet;
 extern DBCStorage <ResearchSiteEntry>            sResearchSiteStore;
 extern DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore;
 extern DBCStorage <ScalingStatValuesEntry>       sScalingStatValuesStore;

@@ -262,6 +262,28 @@ m_HostileRefManager(this), _lastDamagedTime(0)
 
     _lastLiquid = NULL;
     _isWalkingBeforeCharm = false;
+
+	/**/
+	_eclipsePower = 0;
+
+	// Don't send packet in constructor, it may cause crashes
+	SetEclipsePower(0, false); // Not sure of 0
+
+							   // Area Skip Update
+	_skipCount = 0;
+	_skipDiff = 0;
+
+	m_IsInKillingProcess = false;
+	m_VisibilityUpdScheduled = false;
+
+	m_SendTransportMoveTimer = 0;
+	m_lastVisibilityUpdPos = *this;
+
+	for (int i = 0; i < MAX_POWERS; ++i)
+		m_lastRegenTime[i] = getMSTime();
+
+	for (int i = 0; i < MAX_POWERS; ++i)
+		m_powers[i] = 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -9186,9 +9208,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
         // Base value
         DoneAdvertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
 
-        // Check if we are ever using mana - PaperDollFrame.lua
-        if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
-            DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+		// Check if we are ever using mana - PaperDollFrame.lua
+		if (GetPowerIndexByClass(POWER_MANA, getClass()) != MAX_POWERS)
+			DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10); // spellpower from intellect
 
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
@@ -12019,111 +12041,186 @@ void Unit::SetMaxHealth(uint32 val)
         SetHealth(val);
 }
 
+uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
+{
+	if (powerId == POWER_ENERGY)
+	{
+		if (ToPet() && ToPet()->IsWarlockPet())
+			return 0;
+
+		switch (this->GetEntry())
+		{
+		case 26125:
+		case 59915:
+		case 60043:
+		case 60047:
+		case 60051:
+			return 0;
+		default:
+			break;
+		}
+	}
+
+	if (Creature const* creature = ToCreature())
+	{
+		if (creature->GetCreatureTemplate())
+		{
+			if (creature->GetCreatureTemplate()->VehicleId)
+				return 0;
+		}
+	}
+
+	return sChrClassXPowerTypesStore[classId][powerId];
+};
+
 int32 Unit::GetPower(Powers power) const
 {
-    uint32 powerIndex = GetPowerIndex(power);
-    if (powerIndex == MAX_POWERS)
-        return 0;
+	if (power == POWER_HEALTH)
+		return GetHealth();
 
-    return GetUInt32Value(UNIT_FIELD_POWER + powerIndex);
+	uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+	if (powerIndex == MAX_POWERS)
+		return 0;
+
+	return m_powers[powerIndex];
 }
 
 int32 Unit::GetMaxPower(Powers power) const
 {
-    uint32 powerIndex = GetPowerIndex(power);
-    if (powerIndex == MAX_POWERS)
-        return 0;
+	if (power == POWER_HEALTH)
+		return GetMaxHealth();
 
-    return GetInt32Value(UNIT_FIELD_MAX_POWER + powerIndex);
+	uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+	if (powerIndex == MAX_POWERS)
+		return 0;
+
+	return GetInt32Value(UNIT_FIELD_MAXPOWER1 + powerIndex);
 }
 
-void Unit::SetPower(Powers power, int32 val)
+void Unit::SetPower(Powers power, int32 val, bool regen)
 {
-    uint32 powerIndex = GetPowerIndex(power);
-    if (powerIndex == MAX_POWERS)
-        return;
+	if (power == POWER_HEALTH)
+		return SetHealth(val >= 0 ? val : 0);
 
-    int32 maxPower = int32(GetMaxPower(power));
-    if (maxPower < val)
-        val = maxPower;
+	uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+	if (powerIndex == MAX_POWERS)
+		return;
 
-    SetInt32Value(UNIT_FIELD_POWER + powerIndex, val);
+	int32 maxPower = int32(GetMaxPower(power));
+	if (maxPower < val)
+		val = maxPower;
 
-    if (IsInWorld())
-    {
-        ObjectGuid guid = GetGUID();
+	m_powers[powerIndex] = val;
 
-        WorldPacket data(SMSG_POWER_UPDATE, 8 + 4 + 1 + 4);
-        data.WriteBit(guid [4]);
-        data.WriteBit(guid [6]);
-        data.WriteBit(guid [7]);
-        data.WriteBit(guid [5]);
-        data.WriteBit(guid [2]);
-        data.WriteBit(guid [3]);
-        data.WriteBit(guid [0]);
-        data.WriteBit(guid [1]);
-        data.WriteBits(1, 21); // 1 update
+	uint32 regen_diff = getMSTime() - m_lastRegenTime[powerIndex];
 
-        data.WriteByteSeq(guid [7]);
-        data.WriteByteSeq(guid [0]);
-        data.WriteByteSeq(guid [5]);
-        data.WriteByteSeq(guid [3]);
-        data.WriteByteSeq(guid [1]);
-        data.WriteByteSeq(guid [2]);
-        data.WriteByteSeq(guid [4]);
+	if (regen)
+		m_lastRegenTime[powerIndex] = getMSTime();
 
-        data << uint8(powerIndex);
-        data << int32(val);
+	if (!regen || regen_diff > 2000)
+		SetInt32Value(UNIT_FIELD_POWER1 + powerIndex, val);
 
-        data.WriteByteSeq(guid [6]);
+	if (IsInWorld() && (!regen || regen_diff > 2000))
+	{
+		WorldPacket data(SMSG_POWER_UPDATE, 8 + 4 + 1 + 4);
+		ObjectGuid guid = GetGUID();
 
-        SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
-    }
+		data.WriteBit(guid[3]);
+		data.WriteBit(guid[6]);
+		data.WriteBit(guid[4]);
+		int powerCounter = 1;
+		data.WriteBits(powerCounter, 21);
+		data.WriteBit(guid[2]);
+		data.WriteBit(guid[1]);
+		data.WriteBit(guid[7]);
+		data.WriteBit(guid[5]);
+		data.WriteBit(guid[0]);
 
-    // group update
-    if (Player* player = ToPlayer())
-    {
-        if (player->GetGroup())
-            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
-    }
-    else if (Pet* pet = ToCreature()->ToPet())
-    {
-        if (pet->isControlled())
-        {
-            Unit* owner = GetOwner();
-            if (owner && (owner->GetTypeId() == TYPEID_PLAYER) && owner->ToPlayer()->GetGroup())
-                owner->ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
-        }
-    }
+		data.WriteByteSeq(guid[3]);
+		data.WriteByteSeq(guid[5]);
+		data.WriteByteSeq(guid[7]);
+		data.WriteByteSeq(guid[1]);
+		data << uint8(power);
+		data << int32(val);
+		data.WriteByteSeq(guid[0]);
+		data.WriteByteSeq(guid[4]);
+		data.WriteByteSeq(guid[6]);
+		data.WriteByteSeq(guid[2]);
+
+		//ToPlayer()->GetSession()->SendPacket(&data);
+		SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
+	}
+
+	// Custom MoP Script
+	// Pursuit of Justice - 26023
+	if (Player* _player = ToPlayer())
+	{
+		if (_player->HasAura(26023))
+		{
+			AuraPtr aura = _player->GetAura(26023);
+			if (aura)
+			{
+				int32 holyPower = _player->GetPower(POWER_HOLY_POWER) >= 3 ? 3 : _player->GetPower(POWER_HOLY_POWER);
+				int32 AddValue = 5 * holyPower;
+
+				aura->GetEffect(0)->ChangeAmount(15 + AddValue);
+
+				AuraPtr aura2 = _player->AddAura(114695, _player);
+				if (aura2)
+					aura2->GetEffect(0)->ChangeAmount(AddValue);
+			}
+		}
+		else if (_player->HasAura(114695))
+			_player->RemoveAura(114695);
+	}
+
+	// group update
+	if (Player* player = ToPlayer())
+	{
+		if (player->GetGroup())
+			player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+	}
+	else if (Pet* pet = ToCreature()->ToPet())
+	{
+		if (pet->isControlled())
+		{
+			Unit* owner = GetOwner();
+			if (owner && (owner->GetTypeId() == TYPEID_PLAYER) && owner->ToPlayer()->GetGroup())
+				owner->ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+		}
+	}
 }
 
 void Unit::SetMaxPower(Powers power, int32 val)
 {
-    uint32 powerIndex = GetPowerIndex(power);
-    if (powerIndex == MAX_POWERS)
-        return;
+	if (power == POWER_HEALTH)
+		return SetMaxHealth(val >= 0 ? val : 0);
 
-    int32 cur_power = GetPower(power);
-    SetInt32Value(UNIT_FIELD_MAX_POWER + powerIndex, val);
+	uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+	if (powerIndex == MAX_POWERS)
+		return;
 
-    // group update
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        if (ToPlayer()->GetGroup())
-            ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
-    }
-    else if (Pet* pet = ToCreature()->ToPet())
-    {
-        if (pet->isControlled())
-        {
-            Unit* owner = GetOwner();
-            if (owner && (owner->GetTypeId() == TYPEID_PLAYER) && owner->ToPlayer()->GetGroup())
-                owner->ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
-        }
-    }
+	int32 cur_power = GetPower(power);
+	SetInt32Value(UNIT_FIELD_MAXPOWER1 + powerIndex, val);
 
-    if (val < cur_power)
-        SetPower(power, val);
+	// group update
+	if (GetTypeId() == TYPEID_PLAYER)
+	{
+		if (ToPlayer()->GetGroup())
+			ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+	}
+	else if (Pet* pet = ToCreature()->ToPet())
+	{
+		if (pet->isControlled())
+		{
+			Unit* owner = GetOwner();
+			if (owner && (owner->GetTypeId() == TYPEID_PLAYER) && owner->ToPlayer()->GetGroup())
+				owner->ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+		}
+	}
+
+	if (val < cur_power)
+		SetPower(power, val);
 }
 
 uint32 Unit::GetPowerIndex(uint32 powerType) const
@@ -17049,6 +17146,108 @@ bool Unit::IsSplineEnabled() const
     return movespline->Initialized() && !movespline->Finalized();
 }
 
+void Unit::SetEclipsePower(int32 power, bool send)
+{
+	if (power > 100)
+		power = 100;
+
+	if (power < -100)
+		power = -100;
+
+	if (power > 0)
+	{
+		if (HasAura(48518))
+			RemoveAurasDueToSpell(48518); // Eclipse (Lunar)
+		if (HasAura(107095))
+			RemoveAurasDueToSpell(107095);// Eclipse (Lunar) - SPELL_AURA_OVERRIDE_SPELLS
+	}
+
+	if (power == 0)
+	{
+		if (HasAura(48517))
+			RemoveAurasDueToSpell(48517); // Eclipse (Solar)
+		if (HasAura(48518))
+			RemoveAurasDueToSpell(48518); // Eclipse (Lunar)
+		if (HasAura(107095))
+			RemoveAurasDueToSpell(107095);// Eclipse (Lunar) - SPELL_AURA_OVERRIDE_SPELLS
+	}
+
+	if (power < 0)
+	{
+		if (HasAura(48517))
+			RemoveAurasDueToSpell(48517); // Eclipse (Solar)
+	}
+
+	const uint32 solarEclipseMarker = 67483;
+	const uint32 lunarEclipseMarker = 67484;
+
+	int diff = power - _eclipsePower;
+
+	if (diff < 0)
+	{
+		if (HasAura(solarEclipseMarker))
+		{
+			RemoveAurasDueToSpell(solarEclipseMarker);
+			CastSpell(this, lunarEclipseMarker, true);
+		}
+		else if (!HasAura(lunarEclipseMarker))
+		{
+			CastSpell(this, lunarEclipseMarker, true);
+		}
+	}
+	else if (diff > 0)
+	{
+		if (HasAura(lunarEclipseMarker))
+		{
+			RemoveAurasDueToSpell(lunarEclipseMarker);
+			CastSpell(this, solarEclipseMarker, true);
+		}
+		else if (!HasAura(solarEclipseMarker))
+		{
+			CastSpell(this, solarEclipseMarker, true);
+		}
+	}
+	else if (power == 0)
+	{
+		if (HasAura(lunarEclipseMarker))
+			RemoveAurasDueToSpell(lunarEclipseMarker);
+		if (HasAura(solarEclipseMarker))
+			RemoveAurasDueToSpell(solarEclipseMarker);
+	}
+
+	_eclipsePower = power;
+
+	if (send)
+	{
+		WorldPacket data(SMSG_POWER_UPDATE, 17);
+
+		ObjectGuid guid = GetGUID();
+
+		data.WriteBit(guid[3]);
+		data.WriteBit(guid[6]);
+		data.WriteBit(guid[4]);
+		int powerCounter = 1;
+		data.WriteBits(powerCounter, 21);
+		data.WriteBit(guid[2]);
+		data.WriteBit(guid[1]);
+		data.WriteBit(guid[7]);
+		data.WriteBit(guid[5]);
+		data.WriteBit(guid[0]);
+
+		data.WriteByteSeq(guid[3]);
+		data.WriteByteSeq(guid[5]);
+		data.WriteByteSeq(guid[7]);
+		data.WriteByteSeq(guid[1]);
+		data << uint8(POWER_ECLIPSE);
+		data << int32(_eclipsePower);
+		data.WriteByteSeq(guid[0]);
+		data.WriteByteSeq(guid[4]);
+		data.WriteByteSeq(guid[6]);
+		data.WriteByteSeq(guid[2]);
+
+		SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
+	}
+}
 
 void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
 {

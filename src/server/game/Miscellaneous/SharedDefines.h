@@ -245,6 +245,7 @@ enum Powers
 };
 
 #define MAX_POWERS_PER_CLASS            5
+#define INVALID_POWER_INDEX             MAX_POWERS
 
 enum SpellSchools
 {

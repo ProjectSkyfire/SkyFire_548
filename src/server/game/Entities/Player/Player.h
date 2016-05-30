@@ -20,22 +20,38 @@
 #ifndef SF_PLAYER_H
 #define SF_PLAYER_H
 
+#include "AchievementMgr.h"
+#include "ArchaeologyMgr.h"
+//#include "Arena.h"
+#include "Battleground.h"
+//#include "BattlePetMgr.h"
+#include "Bag.h"
+#include "Common.h"
+//#include "CUFProfiles.h"
+#include "DatabaseEnv.h"
+#include "DBCEnums.h"
 #include "DBCStores.h"
 #include "GroupReference.h"
-#include "MapReference.h"
-
+#include "ItemPrototype.h"
 #include "Item.h"
+#include "MapReference.h"
+#include "NPCHandler.h"
+#include "Pet.h"
 #include "PetDefines.h"
 #include "PhaseMgr.h"
 #include "QuestDef.h"
+#include "ReputationMgr.h"
 #include "SpellMgr.h"
+//#include "SpellChargesTracker.h"
 #include "Unit.h"
+#include "Util.h"
 #include "Opcodes.h"
 #include "WorldSession.h"
 #include "ObjectMgr.h"
 
 #include <string>
 #include <vector>
+#include <ace/Stack_Trace.h>
 
 struct CreatureTemplate;
 struct Mail;
@@ -63,6 +79,7 @@ class BattlePetMgr;
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           128
+#define DEFAULT_MAX_PRIMARY_TRADE_SKILL 2
 #define PLAYER_MAX_DAILY_QUESTS     750
 #define PLAYER_EXPLORED_ZONES_SIZE  200
 
@@ -1569,6 +1586,9 @@ class Player : public Unit, public GridObject<Player>
     /// Handles whispers from Addons and players based on sender, receiver's guid and language.
     void Whisper(std::string const& text, const uint32 language, uint64 receiver);
     void WhisperAddon(std::string const& text, std::string const& prefix, Player* receiver);
+	void BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix = NULL, const std::string& channel = "") const;
+
+	ArchaeologyMgr& GetArchaeologyMgr() { return m_archaeologyMgr; }
 
     /*********************************************************/
     /***                    STORAGE SYSTEM                 ***/
@@ -3700,6 +3720,8 @@ class Player : public Unit, public GridObject<Player>
     uint32 _maxPersonalArenaRate;
 
     PhaseMgr phaseMgr;
+
+	ArchaeologyMgr m_archaeologyMgr;
 
     uint32 _ConquestCurrencytotalWeekCap;
 

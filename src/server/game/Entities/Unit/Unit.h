@@ -1692,6 +1692,8 @@ class Unit : public WorldObject
     int32 ModifyPower(Powers power, int32 val);
     int32 ModifyPowerPct(Powers power, float pct, bool apply = true);
 
+	uint32 GetPowerIndexByClass(uint32 powerId, uint32 classId) const;
+
     uint32 GetAttackTime(WeaponAttackType att) const;
     void SetAttackTime(WeaponAttackType att, uint32 val)
     {
@@ -2944,10 +2946,23 @@ class Unit : public WorldObject
     uint32 m_unitTypeMask;
     LiquidTypeEntry const* _lastLiquid;
 
+	// Zone Skip Update
+	uint32 _skipCount;
+	uint32 _skipDiff;
+
+	bool m_IsInKillingProcess;
+	bool m_disableHealthRegen;
+	bool m_disableEnterEvadeMode;
+
     bool IsAlwaysVisibleFor(WorldObject const* seer) const;
     bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
     void DisableSpline();
+
+	uint32 m_SendTransportMoveTimer;
+
+	uint32 m_lastRegenTime[MAX_POWERS];
+	uint32 m_powers[MAX_POWERS];
 
     private:
     bool IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const* & spellProcEvent);

@@ -53,7 +53,10 @@
 #include "WaypointManager.h"
 #include "World.h"
 
+ScriptMapMap sQuestEndScripts;
+ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
+ScriptMapMap sGameObjectScripts;
 ScriptMapMap sEventScripts;
 ScriptMapMap sWaypointScripts;
 
@@ -8884,6 +8887,93 @@ VehicleAccessoryList const* ObjectMgr::GetVehicleAccessoryList(Vehicle* veh) con
     if (itr != _vehicleTemplateAccessoryStore.end())
         return &itr->second;
     return NULL;
+}
+
+void ObjectMgr::LoadResearchSiteZones()
+{
+	QueryResult result = WorldDatabase.Query("SELECT id, position_x, position_y, zone FROM research_site");
+	if (!result)
+	{
+		sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 research site zones. DB table `research_site` is empty.");
+		return;
+	}
+
+	uint32 counter = 0;
+
+	do
+	{
+		Field *fields = result->Fetch();
+
+		uint32 siteId = 0;
+		uint32 mapId = 0;
+		uint32 POIid = fields[0].GetUInt32();
+		uint32 zoneId = fields[3].GetUInt16();
+
+		bool bFound = false;
+		for (std::set<ResearchSiteEntry const*>::const_iterator itr = sResearchSiteSet.begin(); itr != sResearchSiteSet.end(); ++itr)
+			if ((*itr)->POIid == POIid)
+			{
+				bFound = true;
+				siteId = (*itr)->Id;
+				mapId = (*itr)->MapId;
+				break;
+			}
+		if (!bFound)
+			continue;
+
+		ResearchZoneEntry &ptr = _researchZoneMap[siteId];
+		ptr.coords.push_back(ResearchPOIPoint(fields[1].GetInt32(), fields[2].GetInt32()));
+		ptr.map = mapId;
+		ptr.zone = zoneId;
+		ptr.level = 0;
+		for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)
+		{
+			AreaTableEntry const* area = sAreaStore.LookupEntry(i);
+			if (!area)
+				continue;
+
+			if (area->mapid == ptr.map && area->zone == ptr.zone)
+			{
+				ptr.level = area->area_level;
+				break;
+			}
+		}
+		++counter;
+	} while (result->NextRow());
+
+	sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u research site zones.", counter);
+}
+
+void ObjectMgr::LoadResearchSiteLoot()
+{
+	QueryResult result = WorldDatabase.Query("SELECT site_id, x, y, z, race FROM research_loot");
+	if (!result)
+	{
+		sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 research loot. DB table `research_loot` is empty.");
+		return;
+	}
+
+	uint32 counter = 0;
+
+	do
+	{
+		ResearchLootEntry dg;
+		{
+			Field *fields = result->Fetch();
+
+			dg.id = uint16(fields[0].GetUInt32());
+			dg.x = fields[1].GetFloat();
+			dg.y = fields[2].GetFloat();
+			dg.z = fields[3].GetFloat();
+			dg.race = fields[4].GetUInt8();
+		}
+
+		_researchLoot.push_back(dg);
+
+		++counter;
+	} while (result->NextRow());
+
+	sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u research site loot.", counter);
 }
 
 PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const

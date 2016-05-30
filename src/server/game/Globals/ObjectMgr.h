@@ -650,8 +650,38 @@ struct HotfixInfo
     uint32 Entry;
 };
 
+struct ResearchPOIPoint
+{
+	ResearchPOIPoint(int32 _x, int32 _y) { x = _x; y = _y; }
+	int32 x;
+	int32 y;
+};
+
+struct ResearchZoneEntry
+{
+	uint32 POIid;
+	std::vector<ResearchPOIPoint> coords;
+	uint16 map;
+	uint16 zone;
+	uint8 level;
+};
+
+struct ResearchLootEntry
+{
+	uint16 id;
+	float x;
+	float y;
+	float z;
+	uint8 race;
+};
+
 typedef std::vector<HotfixInfo> HotfixData;
 typedef std::map<uint32, uint32> QuestObjectiveLookupMap;
+typedef std::map<uint32, bool> UpdateSkipData;
+
+typedef std::vector<ResearchLootEntry> ResearchLootVector;
+typedef std::vector<ResearchPOIPoint> ResearchPOIPoints;
+typedef std::map<uint32 /*site id*/, ResearchZoneEntry> ResearchZoneMap;
 
 struct ResearchDigsiteInfo
 {
@@ -1012,6 +1042,15 @@ class ObjectMgr
 
         void LoadPhaseDefinitions();
         void LoadSpellPhaseInfo();
+
+		void LoadItemExtendedCost();
+		void LoadGuildChallengeRewardInfo();
+
+		void LoadResearchSiteZones();
+		void LoadResearchSiteLoot();
+
+		ResearchZoneMap const& GetResearchZoneMap() const { return _researchZoneMap; }
+		ResearchLootVector const& GetResearchLoot() const { return _researchLoot; }
 
         PhaseDefinitionStore const* GetPhaseDefinitionStore() { return &_PhaseDefinitionStore; }
         SpellPhaseStore const* GetSpellPhaseStore() { return &_SpellPhaseStore; }
@@ -1445,6 +1484,12 @@ class ObjectMgr
 
         PhaseDefinitionStore _PhaseDefinitionStore;
         SpellPhaseStore _SpellPhaseStore;
+
+		uint32 _skipUpdateCount;
+		std::map<uint64, uint64> _lootViewGUID;
+
+		ResearchZoneMap _researchZoneMap;
+		ResearchLootVector _researchLoot;
 
         typedef std::set<uint8> BattleBetBreedSet;
         typedef UNORDERED_MAP<uint16, BattleBetBreedSet> BattlePetBreedXSpeciesMap;
