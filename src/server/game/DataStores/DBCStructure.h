@@ -2083,6 +2083,8 @@ struct SkillLineAbilityEntry
     uint32    max_value;                                    // 8        m_trivialSkillLineRankHigh
     uint32    min_value;                                    // 9        m_trivialSkillLineRankLow
     uint32    character_points;                             // 10       m_characterPoints - Pandaria - No longer an array
+    //uint32  unk_1                                         // 11       4.0.0 unk (increment id)
+    //uint32  unk_2                                         // 12       5.0.5
 };
 
 struct SoundEntriesEntry
@@ -2117,7 +2119,7 @@ struct SpecializationSpellsEntry
 struct SpellEffectEntry
 {
     uint32    Id;                                           // 0         m_ID
-    //uint32    Unk0;                                       // 1         unk - Pandaria
+    uint32    EffectDifficulty;                             // 1         m_effectDifficulty
     uint32    Effect;                                       // 2         m_effect
     float     EffectValueMultiplier;                        // 3         m_effectValueMultiplier
     uint32    EffectApplyAuraName;                          // 4         m_effectAura
@@ -2234,7 +2236,7 @@ struct SpellEntry
 struct SpellMiscEntry
 {
     uint32    Id;                                           // 0        m_ID
-    //uint32  SpellId                                       // 1
+    uint32    SpellId;                                      // 1        m_spellId
     //uint32  Unk                                           // 2
     uint32    Attributes;                                   // 3        m_attribute
     uint32    AttributesEx;                                 // 4        m_attributesEx

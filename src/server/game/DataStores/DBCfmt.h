@@ -24,8 +24,8 @@
 // n - index (included), l - bool, p - field present in sql dbc, a - field absent in sql dbc
 
 char const Achievementfmt[] = "niixsxiixixxiii";
-//const std::string CustomAchievementfmt = "pppaaaapapaappa";
-//const std::string CustomAchievementIndex = "ID";
+const std::string CustomAchievementfmt = "pppaaaapapaappa";
+const std::string CustomAchievementIndex = "ID";
 char const AchievementCriteriafmt[] = "niiiixiiiisiiiiixxiiiii";
 char const AreaTableEntryfmt[] = "iiinixxxxxxxisiiiiiffixxxxxxxx";
 char const AreaGroupEntryfmt[] = "niiiiiii";
@@ -134,13 +134,12 @@ char const SpellDifficultyfmt[] = "niiii";
 const std::string CustomSpellDifficultyfmt = "ppppp";
 const std::string CustomSpellDifficultyIndex = "id";
 char const SpellDurationfmt[] = "niii";
-//                                             0         10        20    26
-char const SpellEffectEntryfmt[] =            "nxifiiiffiiiiiifiifiiiiixiiiix";
+char const SpellEffectEntryfmt[] = "nxifiiiffiiiiiifiifiiiiixiiiix";
 const std::string CustomSpellEffectEntryfmt = "ppppppppppapppappppppppppp";
 const std::string CustomSpellEffectEntryIndex = "Id";
-char const SpellEntryfmt[] =            "nssxxixxiiiiiiiiiiiiiiiii";
-//const std::string CustomSpellEntryfmt = "ppppppppppppppapaaaaaaaaapaaaaaapapppaapppaaapa";
-//const std::string CustomSpellEntryIndex = "Id";
+char const SpellEntryfmt[] = "nssxxixxiiiiiiiiiiiiiiiii";
+const std::string CustomSpellEntryfmt = "papppppppppppapapaaaaaaaaaaapaaapapppppppaaaaapaapaaaaaaaaaaaaaaaaaappppppppppppppppppppppppppppppppppppaaaaaapppppppppaaapppppppppaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaappppppppapppaaaaappaaaaaaa";
+const std::string CustomSpellEntryIndex = "Id";
 char const SpellMiscfmt[] = "nxxiiiiiiiiiiiiiiiiifiiiii";
 char const SpellEffectScalingfmt[] = "nfffxi";
 char const SpellFocusObjectfmt[] = "nx";
