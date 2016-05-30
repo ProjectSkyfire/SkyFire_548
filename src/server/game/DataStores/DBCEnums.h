@@ -78,7 +78,8 @@ enum AchievementFlags
     ACHIEVEMENT_FLAG_SHOW_IN_GUILD_HEADER  = 0x00002000,    // Shows in guild news header
     ACHIEVEMENT_FLAG_GUILD                 = 0x00004000,    //
     ACHIEVEMENT_FLAG_SHOW_GUILD_MEMBERS    = 0x00008000,    //
-    ACHIEVEMENT_FLAG_SHOW_CRITERIA_MEMBERS = 0x00010000     //
+    ACHIEVEMENT_FLAG_SHOW_CRITERIA_MEMBERS = 0x00010000,    //
+    ACHIEVEMENT_FLAG_ACCOUNT               = 0x00020000     // achievement linked to account
 };
 
 enum AchievementCriteriaLimits
@@ -166,7 +167,7 @@ enum AchievementCriteriaTimedTypes
     ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET     = 6,    // Timer is started by being target of spell with entry in timerStartEvent
     ACHIEVEMENT_TIMED_TYPE_CREATURE         = 7,    // Timer is started by killing creature with entry in timerStartEvent
     ACHIEVEMENT_TIMED_TYPE_ITEM             = 9,    // Timer is started by using item with entry in timerStartEvent
-    ACHIEVEMENT_TIMED_TYPE_UNK              = 14,   // Unknown
+    ACHIEVEMENT_TIMED_TYPE_UNK              = 10,   // Unknown
 
     ACHIEVEMENT_TIMED_TYPE_MAX
 };
@@ -285,6 +286,17 @@ enum AchievementCriteriaTypes
     ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD      = 136,
     ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_GUILD_CHALLENGE_TYPE = 138, //struct { Flag flag; uint32 count; } 1: Guild Dungeon, 2:Guild Challenge, 3:Guild battlefield
     ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_GUILD_CHALLENGE      = 139  //struct { uint32 count; } Guild Challenge
+    ACHIEVEMENT_CRITERIA_TYPE_UNK140                        = 140, // only flag ACHIEVEMENT_FLAG_HIDDEN other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK141                        = 141, // only flag ACHIEVEMENT_FLAG_HIDDEN other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK142                        = 142, // only flag ACHIEVEMENT_FLAG_HIDDEN other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK143                        = 143, // only flag ACHIEVEMENT_FLAG_HIDDEN other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK144                        = 144, // only flag ACHIEVEMENT_FLAG_HIDDEN other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK145                        = 145, // achievement 6270 other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK146                        = 146, // achievement 6269 other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK147                        = 147, // achievement 6268 other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK148                        = 148, // achievement 6267 other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK149                        = 149, // achievement 6267 other fields = 0
+    ACHIEVEMENT_CRITERIA_TYPE_UNK150                        = 150, // achievement 6271 other fields = 0
 };
 
 #define ACHIEVEMENT_CRITERIA_TYPE_TOTAL 163

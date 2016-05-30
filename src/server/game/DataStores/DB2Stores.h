@@ -20,8 +20,11 @@
 #ifndef TRINITY_DB2STORES_H
 #define TRINITY_DB2STORES_H
 
+#include "Common.h"
 #include "DB2Store.h"
 #include "DB2Structure.h"
+
+#include <list>
 #include <string>
 
 extern DB2Storage<BattlePetAbilityEntry> sBattlePetAbilityStore;
