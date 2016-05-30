@@ -28,6 +28,9 @@
 #include "Timer.h"
 #include "ObjectDefines.h"
 
+#include <iostream>
+#include <fstream>
+
 #include <map>
 
 typedef std::map<uint16, uint32> AreaFlagByAreaID;
@@ -333,7 +336,7 @@ void LoadDBCStores(const std::string& dataPath)
     StoreProblemList bad_dbc_files;
     uint32 availableDbcLocales = 0xFFFFFFFF;
 
-    LoadDBC(availableDbcLocales, bad_dbc_files, sAreaStore,                   dbcPath, "AreaTable.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sAreaStore, dbcPath, "AreaTable.dbc");
 
     // must be after sAreaStore loading
     for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)           // areaflag numbered from 0
@@ -371,22 +374,31 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrRacesStore,               dbcPath, "ChrRaces.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrPowerTypesStore,          dbcPath, "ChrClassesXPowerTypes.dbc");//15595
     for (uint32 i = 0; i < MAX_CLASSES; ++i)
+    {
         for (uint32 j = 0; j < MAX_POWERS; ++j)
-            PowersByClass[i][j] = MAX_POWERS;
-
+            sChrClassXPowerTypesStore[i][j] = INVALID_POWER_INDEX;
+    }
     for (uint32 i = 0; i < sChrPowerTypesStore.GetNumRows(); ++i)
     {
-        if (ChrPowerTypesEntry const* power = sChrPowerTypesStore.LookupEntry(i))
+        ChrPowerTypesEntry const* entry = sChrPowerTypesStore.LookupEntry(i);
+        if (!entry)
+            continue;
+
+        ASSERT(entry->classId < MAX_CLASSES && "MAX_CLASSES not updated");
+        ASSERT(entry->power < MAX_POWERS && "MAX_POWERS not updated");
+
+        uint32 index = 0;
+
+        for (uint32 j = 0; j < MAX_POWERS; ++j)
         {
-            uint32 index = 0;
-            for (uint32 j = 0; j < MAX_POWERS; ++j)
-                if (PowersByClass[power->classId][j] != MAX_POWERS)
-                    ++index;
-
-            PowersByClass[power->classId][power->power] = index;
+            if (sChrClassXPowerTypesStore[entry->classId][j] != INVALID_POWER_INDEX)
+                ++index;
         }
-    }
 
+        ASSERT(index < MAX_POWERS_PER_CLASS && "MAX_POWERS_PER_CLASS not updated");
+
+        sChrClassXPowerTypesStore[entry->classId][entry->power] = index;
+    }
     LoadDBC(availableDbcLocales, bad_dbc_files, sCinematicSequencesStore,     dbcPath, "CinematicSequences.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureDisplayInfoStore,    dbcPath, "CreatureDisplayInfo.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureFamilyStore,         dbcPath, "CreatureFamily.dbc");//15595
@@ -517,20 +529,33 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sResearchBranchStore,         dbcPath, "ResearchBranch.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sResearchProjectStore,        dbcPath, "ResearchProject.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sResearchSiteStore,           dbcPath, "ResearchSite.dbc");//15595
-
-    // must be after sQuestPOIPointStore and sResearchSiteStore loading
-    for (uint32 i = 0; i < sResearchSiteStore.GetNumRows(); ++i)
+    for (uint32 i =0; i < sResearchProjectStore.GetNumRows(); ++i)
     {
-        if (ResearchSiteEntry const* siteEntry = sResearchSiteStore.LookupEntry(i))
-        {
-            for (uint32 j = 0; j < sQuestPOIPointStore.GetNumRows(); ++j)
-                if (QuestPOIPointEntry const* pointEntry = sQuestPOIPointStore.LookupEntry(j))
-                    if (siteEntry->QuestPOIBlobId == pointEntry->BlobId)
-                        sDigsitePOIPolygons [siteEntry->Id].push_back(std::make_pair(pointEntry->X, pointEntry->Y));
-        }
+        ResearchProjectEntry const* rp = sResearchProjectStore.LookupEntry(i);
+        if (!rp)
+            continue;
+        if (rp->branchId == 29) // unused
+            continue;
+        sResearchProjectSet.insert(rp);
     }
-
+    //sResearchProjectStore.Clear();
+    LoadDBC(availableDbcLocales, bad_dbc_files, sResearchSiteStore,           dbcPath, "ResearchSite.dbc");//15595
+    // must be after sQuestPOIPointStore and sResearchSiteStore loading
+    for (uint32 i =0; i < sResearchSiteStore.GetNumRows(); ++i)
+    {
+        ResearchSiteEntry const* rs = sResearchSiteStore.LookupEntry(i);
+        if (!rs)
+            continue;
+        if (rs->ID == 140           // template
+            || rs->ID == 142        // template
+            || rs->ID == 161        // template
+            || rs->ID == 471        // vashj'ir
+            || rs->ID == 473        // vashj'ir
+            || rs->ID == 475)       // vashj'ir
+            continue;
+        sResearchSiteSet.insert(rs);
+    }
+    //sResearchSiteStore.Clear();
     LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatDistributionStore, dbcPath, "ScalingStatDistribution.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatValuesStore,      dbcPath, "ScalingStatValues.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineStore,              dbcPath, "SkillLine.dbc");//15595
@@ -569,6 +594,47 @@ void LoadDBCStores(const std::string& dataPath)
     // DISABLED - needs more research
     //LoadDBC(availableDbcLocales, bad_dbc_files, sSpellItemEnchantmentStore,   dbcPath, "SpellItemEnchantment.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellMiscStore,              dbcPath, "SpellMisc.dbc");//17538
+
+    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
+    {
+        SpellCategoriesEntry const* spell = sSpellCategoriesStore.LookupEntry(i);
+        if (spell && spell->Category)
+            sSpellCategoryStore[spell->Category].insert(i);
+    }
+
+    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+
+        if (!skillLine)
+            continue;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+        SpellMiscEntry const* spellMisc = sSpellMiscStore.LookupEntry(spellInfo ? spellInfo->SpellMiscId : 0);
+        if (spellMisc && spellMisc->Attributes & SPELL_ATTR0_PASSIVE)
+        {
+            for (uint32 i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
+            {
+                SpellLevelsEntry const* levels = sSpellLevelsStore.LookupEntry(i);
+                if (!levels)
+                    continue;
+
+                CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(i);
+                if (!cFamily)
+                    continue;
+
+                if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
+                    continue;
+                if (levels->spellLevel)
+                    continue;
+
+                if (skillLine->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+                    continue;
+
+                sPetFamilySpellsStore[i].insert(spellInfo->Id);
+            }
+        }
+    }
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellEffectScalingStore,     dbcPath, "SpellEffectScaling.dbc");//17538
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellItemEnchantmentConditionStore, dbcPath, "SpellItemEnchantmentCondition.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellRadiusStore,            dbcPath, "SpellRadius.dbc");//15595
