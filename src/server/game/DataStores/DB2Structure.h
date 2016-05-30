@@ -21,7 +21,17 @@
 #define TRINITY_DB2STRUCTURE_H
 
 #include "Common.h"
+#include "DBCEnums.h"
+#include "Define.h"
+#include "Path.h"
+#include "Util.h"
+#include "Vehicle.h"
+#include "SharedDefines.h"
 #include "ItemPrototype.h"
+
+#include <map>
+#include <set>
+#include <vector>
 
 // GCC has alternative #pragma pack(N) syntax and old gcc version does not support pack(push, N), also any gcc version does not support it at some platform
 #if defined(__GNUC__)
@@ -214,6 +224,24 @@ struct ItemSparseEntry
     float      StatScalingFactor;                            // 131
     int32      CurrencySubstitutionId;                       // 132
     int32      CurrencySubstitutionCount;                    // 133
+};
+
+struct ItemUpgradeEntry
+{
+    uint32 Id;
+    uint32 itemUpgradePath;
+    uint32 itemLevelUpgrade;
+    uint32 precItemUpgradeId;
+    uint32 currencyId;
+    uint32 currencyCost;
+};
+
+struct RulesetItemUpgradeEntry
+{
+    uint32 Id;
+    uint32 unk;
+    uint32 itemUpgradeId;
+    uint32 itemid;
 };
 
 #define MAX_ITEM_EXT_COST_ITEMS         5
