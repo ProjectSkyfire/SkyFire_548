@@ -64,6 +64,7 @@
 #include "Pet.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
+#include "SharedDefines.h"
 #include "SkillDiscovery.h"
 #include "SocialMgr.h"
 #include "Spell.h"
@@ -84,6 +85,7 @@
 #include "WorldStateBuilder.h"
 #include "MovementStructures.h"
 #include "Config.h"
+#include <cmath>
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -678,6 +680,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
 
     m_speakTime = 0;
     m_speakCount = 0;
+
+	m_lastEclipseState = ECLIPSE_NONE;
 
     m_objectType |= TYPEMASK_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
@@ -2246,6 +2250,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (duel && GetMapId() != mapid && GetMap()->GetGameObject(GetUInt64Value(PLAYER_FIELD_DUEL_ARBITER)))
         DuelComplete(DUEL_FLED);
 
+	// Druids eclipse power == 0 after teleport, so we need to remove last eclipse power
+	if (getClass() == CLASS_DRUID && getLevel() > 20 && GetSpecializationId(GetActiveSpec()) == SPEC_DRUID_BALANCE)
+		RemoveLastEclipsePower();
+
     if (GetMapId() == mapid)
     {
         //lets reset far teleport flag if it wasn't reset during chained teleports
@@ -2440,6 +2448,9 @@ bool Player::TeleportToBGEntryPoint()
 
 void Player::ProcessDelayedOperations()
 {
+	if (!GetGroup())
+		Group::SendUpdatePlayerAtLeave(GetGUID(), 0, 0, 0, 0, 0, 0, 0);
+
     if (m_DelayedOperations == 0)
         return;
 
@@ -2824,27 +2835,62 @@ void Player::RegenerateHealth()
 
 void Player::ResetAllPowers()
 {
-    SetHealth(GetMaxHealth());
-    switch (getPowerType())
-    {
-        case POWER_MANA:
-            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-            break;
-        case POWER_RAGE:
-            SetPower(POWER_RAGE, 0);
-            break;
-        case POWER_ENERGY:
-            SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-            break;
-        case POWER_RUNIC_POWER:
-            SetPower(POWER_RUNIC_POWER, 0);
-            break;
-        case POWER_ECLIPSE:
-            SetPower(POWER_ECLIPSE, 0);
-            break;
-        default:
-            break;
-    }
+	SetHealth(GetMaxHealth());
+
+	// for shadow priest
+	if (getClass() == CLASS_PRIEST && GetSpecializationId(GetActiveSpec()) == SPEC_PRIEST_SHADOW)
+		SetPower(POWER_SHADOW_ORBS, 0);
+
+	// for warlocks
+	if (getClass() == CLASS_WARLOCK)
+	{
+		switch (GetSpecializationId(GetActiveSpec()))
+		{
+		case SPEC_WARLOCK_DEMONOLOGY:
+			SetPower(POWER_DEMONIC_FURY, 200);
+			break;
+		case SPEC_WARLOCK_DESTRUCTION:
+			SetPower(POWER_BURNING_EMBERS, 10);
+			break;
+		case SPEC_WARLOCK_AFFLICTION:
+			SetPower(POWER_SOUL_SHARDS, 100);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// for druids
+	if (getClass() == CLASS_DRUID && GetSpecializationId(GetActiveSpec()) == SPEC_DRUID_BALANCE)
+		SetPower(POWER_ECLIPSE, 0);
+
+	// for paladins
+	if (getClass() == CLASS_PALADIN)
+		SetPower(POWER_HOLY_POWER, 0);
+
+	switch (getPowerType())
+	{
+	case POWER_MANA:
+		SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+		break;
+	case POWER_RAGE:
+		SetPower(POWER_RAGE, 0);
+		break;
+	case POWER_ENERGY:
+		SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+		break;
+	case POWER_RUNIC_POWER:
+		SetPower(POWER_RUNIC_POWER, 0);
+		break;
+	case POWER_ALTERNATE_POWER:
+		SetPower(POWER_ALTERNATE_POWER, 0);
+		break;
+	case POWER_CHI:
+		SetPower(POWER_CHI, 0);
+		break;
+	default:
+		break;
+	}
 }
 
 bool Player::CanInteractWithQuestGiver(Object* questGiver)
@@ -3503,21 +3549,27 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // restore if need some important flags
     //SetUInt32Value(PLAYER_FIELD_LIFETIME_MAX_RANK2, 0);                 // flags empty by default
 
-    if (reapplyMods)                                        // reapply stats values only on .reset stats (level) command
-        _ApplyAllStatBonuses();
+	if (reapplyMods)                                        // reapply stats values only on .reset stats (level) command
+		_ApplyAllStatBonuses();
 
-    // set current level health and mana/energy to maximum after applying all mods.
-    SetFullHealth();
-    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-    SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-    if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
-        SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
-    SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
-    SetPower(POWER_RUNIC_POWER, 0);
+	// set current level health and mana/energy to maximum after applying all mods.
+	SetFullHealth();
+	SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+	SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+	if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
+		SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
+	SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
+	SetPower(POWER_RUNIC_POWER, 0);
+	SetPower(POWER_CHI, 0);
+	SetPower(POWER_SOUL_SHARDS, 100);
+	SetPower(POWER_DEMONIC_FURY, 200);
+	SetPower(POWER_BURNING_EMBERS, 10);
+	SetPower(POWER_SHADOW_ORBS, 0);
+	SetPower(POWER_ECLIPSE, 0);
 
-    // update level to hunter/summon pet
-    if (Pet* pet = GetPet())
-        pet->SynchronizeLevelWithOwner();
+	// update level to hunter/summon pet
+	if (Pet* pet = GetPet())
+		pet->SynchronizeLevelWithOwner();
 }
 
 void Player::SendInitialSpells()
@@ -5353,16 +5405,26 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     m_deathTimer = 0;
 
-    // set health/powers (0- will be set in caller)
-    if (restore_percent > 0.0f)
-    {
-        SetHealth(uint32(GetMaxHealth()*restore_percent));
-        SetPower(POWER_MANA, uint32(GetMaxPower(POWER_MANA)*restore_percent));
-        SetPower(POWER_RAGE, 0);
-        SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
-        SetPower(POWER_FOCUS, uint32(GetMaxPower(POWER_FOCUS)*restore_percent));
-        SetPower(POWER_ECLIPSE, 0);
-    }
+	// set health/powers (0- will be set in caller)
+	if (restore_percent > 0.0f)
+	{
+		// Percentage from SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER
+		AuraEffectList const& mResurrectedHealthByGuildMember = GetAuraEffectsByType(SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER);
+		for (AuraEffectList::const_iterator i = mResurrectedHealthByGuildMember.begin(); i != mResurrectedHealthByGuildMember.end(); ++i)
+			AddPct(restore_percent, (*i)->GetAmount());
+
+		SetHealth(uint32(GetMaxHealth()*restore_percent));
+		SetPower(POWER_MANA, uint32(GetMaxPower(POWER_MANA)*restore_percent));
+		SetPower(POWER_RAGE, 0);
+		SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
+		SetPower(POWER_FOCUS, uint32(GetMaxPower(POWER_FOCUS)*restore_percent));
+		SetPower(POWER_ECLIPSE, 0);
+		SetPower(POWER_DEMONIC_FURY, 200);
+		SetPower(POWER_BURNING_EMBERS, 10);
+		SetPower(POWER_SOUL_SHARDS, 100);
+		SetPower(POWER_CHI, 0);
+		SetPower(POWER_SHADOW_ORBS, 0);
+	}
 
     // trigger update zone for alive state zone updates
     uint32 newzone, newarea;
@@ -7442,40 +7504,40 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
 
     GetSession()->SendPacket(&data);
 
-    // add honor points
-    ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor));
+	// add honor points
+	ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor));
 
-    if (InBattleground() && honor > 0)
-    {
-        if (Battleground* bg = GetBattleground())
-        {
-            bg->UpdatePlayerScore(this, SCORE_BONUS_HONOR, honor, false); //false: prevent looping
-        }
-    }
+	if (InBattleground() && honor > 0)
+	{
+		if (Battleground* bg = GetBattleground())
+		{
+			bg->UpdatePlayerScore(this, NULL, SCORE_BONUS_HONOR, honor, false); //false: prevent looping
+		}
+	}
 
-    if (sWorld->getBoolConfig(CONFIG_PVP_TOKEN_ENABLE) && pvptoken)
-    {
-        if (!victim || victim == this || victim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
-            return true;
+	if (sWorld->getBoolConfig(CONFIG_PVP_TOKEN_ENABLE) && pvptoken)
+	{
+		if (!victim || victim == this || victim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
+			return true;
 
-        if (victim->GetTypeId() == TYPEID_PLAYER)
-        {
-            // Check if allowed to receive it in current map
-            uint8 MapType = sWorld->getIntConfig(CONFIG_PVP_TOKEN_MAP_TYPE);
-            if ((MapType == 1 && !InBattleground() && !HasByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 1, UNIT_BYTE2_FLAG_FFA_PVP))
-                || (MapType == 2 && !HasByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 1, UNIT_BYTE2_FLAG_FFA_PVP))
-                || (MapType == 3 && !InBattleground()))
-                return true;
+		if (victim->GetTypeId() == TYPEID_PLAYER)
+		{
+			// Check if allowed to receive it in current map
+			uint8 MapType = sWorld->getIntConfig(CONFIG_PVP_TOKEN_MAP_TYPE);
+			if ((MapType == 1 && !InBattleground() && !HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+				|| (MapType == 2 && !HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+				|| (MapType == 3 && !InBattleground()))
+				return true;
 
-            uint32 itemId = sWorld->getIntConfig(CONFIG_PVP_TOKEN_ID);
-            int32 count = sWorld->getIntConfig(CONFIG_PVP_TOKEN_COUNT);
+			uint32 itemId = sWorld->getIntConfig(CONFIG_PVP_TOKEN_ID);
+			int32 count = sWorld->getIntConfig(CONFIG_PVP_TOKEN_COUNT);
 
-            if (AddItem(itemId, count))
-                ChatHandler(GetSession()).PSendSysMessage("You have been awarded a token for slaying another player.");
-        }
-    }
+			if (AddItem(itemId, count))
+				ChatHandler(this).PSendSysMessage("You have been awarded a token for slaying another player.");
+		}
+	}
 
-    return true;
+	return true;
 }
 
 
@@ -24249,7 +24311,7 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     // manual send package (have code in HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true); that must not be re-applied.
     if (HasAuraType(SPELL_AURA_MOD_ROOT))
-        SetRooted(true, true);
+        SetRooted(true);
 
     SendAurasForTarget(this);
     SendEnchantmentDurations();                             // must be after add to map
@@ -25384,38 +25446,43 @@ bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
 
 void Player::ResurectUsingRequestData()
 {
-    /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
-    float x, y, z, o;
-    _resurrectionData->Location.GetPosition(x, y, z, o);
-    TeleportTo(_resurrectionData->Location.GetMapId(), x, y, z, o);
+	/// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
+	float x, y, z, o;
+	_resurrectionData->Location.GetPosition(x, y, z, o);
+	TeleportTo(_resurrectionData->Location.GetMapId(), x, y, z, o);
 
-    if (IsBeingTeleported())
-    {
-        ScheduleDelayedOperation(DELAYED_RESURRECT_PLAYER);
-        return;
-    }
+	if (IsBeingTeleported())
+	{
+		ScheduleDelayedOperation(DELAYED_RESURRECT_PLAYER);
+		return;
+	}
 
-    ResurrectPlayer(0.0f, false);
+	ResurrectPlayer(0.0f, false);
 
-    if (GetMaxHealth() > _resurrectionData->Health)
-        SetHealth(_resurrectionData->Health);
-    else
-        SetFullHealth();
+	if (GetMaxHealth() > _resurrectionData->Health)
+		SetHealth(_resurrectionData->Health);
+	else
+		SetFullHealth();
 
-    if (uint32(GetMaxPower(POWER_MANA)) > _resurrectionData->Mana)
-        SetPower(POWER_MANA, _resurrectionData->Mana);
-    else
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+	if (uint32(GetMaxPower(POWER_MANA)) > _resurrectionData->Mana)
+		SetPower(POWER_MANA, _resurrectionData->Mana);
+	else
+		SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
 
-    SetPower(POWER_RAGE, 0);
-    SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-    SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
-    SetPower(POWER_ECLIPSE, 0);
+	SetPower(POWER_RAGE, 0);
+	SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+	SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
+	SetPower(POWER_ECLIPSE, 0);
+	SetPower(POWER_BURNING_EMBERS, 10);
+	SetPower(POWER_SOUL_SHARDS, 100);
+	SetPower(POWER_DEMONIC_FURY, 200);
+	SetPower(POWER_SHADOW_ORBS, 0);
+	SetPower(POWER_CHI, 0);
 
-    if (uint32 aura = _resurrectionData->Aura)
-        CastSpell(this, aura, true, NULL, NULL, _resurrectionData->GUID);
+	if (uint32 aura = _resurrectionData->Aura)
+		CastSpell(this, aura, true, NULL, NULLAURA_EFFECT, _resurrectionData->GUID);
 
-    SpawnCorpseBones();
+	SpawnCorpseBones();
 }
 
 void Player::SetClientControl(Unit* target, uint8 allowMove)

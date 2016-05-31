@@ -524,10 +524,10 @@ bool processArgv(int argc, char ** argv, const char *versionString)
 // Arg2 - Listfile name
 //
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
     bool success=true;
-    const char *versionString = "V4.00 2012_02";
+    const char *versionString = "V4.00 2016_06_01";
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv, versionString))

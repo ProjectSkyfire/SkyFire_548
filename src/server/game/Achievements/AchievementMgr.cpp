@@ -2981,7 +2981,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
 					return false;
 
 				break;
-			}*/
+			}
 			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_PROJECT_RARITY: // 65
 			{
 				if (!miscValue1)
@@ -3001,7 +3001,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
 					return false;
 
 				break;
-			}
+			}*/
 			case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_PROJECT_RACE: // 66
 			{
 				if (!miscValue1)

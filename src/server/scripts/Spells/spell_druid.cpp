@@ -31,6 +31,7 @@
 
 enum DruidSpells
 {
+	SPELL_DRUID_ASTRAL_INSIGHT              = 127663,
     SPELL_DRUID_WRATH                       = 5176,
     SPELL_DRUID_STARFIRE                    = 2912,
     SPELL_DRUID_STARSURGE                   = 78674,
@@ -40,6 +41,8 @@ enum DruidSpells
     SPELL_DRUID_SOLAR_ECLIPSE_MARKER        = 67483, // Will make the yellow arrow on eclipse bar point to the yellow side (solar)
     SPELL_DRUID_SOLAR_ECLIPSE               = 48517,
     SPELL_DRUID_LUNAR_ECLIPSE               = 48518,
+	SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE      = 107095,
+	SPELL_DRUID_STARFALL = 48505,
     SPELL_DRUID_ENRAGE_MOD_DAMAGE           = 51185,
     SPELL_DRUID_FERAL_CHARGE_BEAR           = 16979,
     SPELL_DRUID_FERAL_CHARGE_CAT            = 49376,
@@ -1154,6 +1157,79 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
         }
 };
 
+// Astral Communion - 127663
+class spell_dru_astral_communion : public SpellScriptLoader
+{
+public:
+	spell_dru_astral_communion() : SpellScriptLoader("spell_dru_astral_communion") { }
+
+	class spell_dru_astral_communion_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_dru_astral_communion_AuraScript);
+
+		void OnTick(AuraEffect aurEff)
+		{
+			if (!GetCaster())
+				return;
+
+			if (Player* _player = GetTarget()->ToPlayer())
+			{
+				int32 eclipse = 25; // 25 Solar or Lunar energy
+
+				if (_player->HasAura(SPELL_DRUID_ASTRAL_INSIGHT))
+					eclipse = 100;
+
+				// Give Solar energy just if our last eclipse was lunar else, give Lunar energy
+				if (_player->GetLastEclipsePower() == SPELL_DRUID_LUNAR_ECLIPSE)
+					_player->SetEclipsePower(int32(_player->GetEclipsePower() + eclipse));
+				else
+					_player->SetEclipsePower(int32(_player->GetEclipsePower() - eclipse));
+
+				if (_player->HasAura(SPELL_DRUID_ASTRAL_INSIGHT))
+				{
+					_player->CastStop();
+					_player->RemoveAura(SPELL_DRUID_ASTRAL_INSIGHT);
+				}
+
+				if (_player->GetEclipsePower() == 100 && !_player->HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
+				{
+					_player->CastSpell(_player, SPELL_DRUID_SOLAR_ECLIPSE, true, 0); // Cast Solar Eclipse
+					_player->CastSpell(_player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
+					_player->CastSpell(_player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
+					_player->CastStop();
+
+					// Now our last eclipse is Solar
+					_player->SetLastEclipsePower(SPELL_DRUID_SOLAR_ECLIPSE);
+				}
+				else if (_player->GetEclipsePower() == -100 && !_player->HasAura(SPELL_DRUID_LUNAR_ECLIPSE))
+				{
+					_player->CastSpell(_player, SPELL_DRUID_LUNAR_ECLIPSE, true, 0); // Cast Lunar Eclipse
+					_player->CastSpell(_player, SPELL_DRUID_NATURES_GRACE, true); // Cast Nature's Grace
+					_player->CastSpell(_player, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, true); // Cast Eclipse - Give 35% of POWER_MANA
+					_player->CastSpell(_player, SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE, true);
+					_player->CastStop();
+
+					// Now our last eclipse is Lunar
+					_player->SetLastEclipsePower(SPELL_DRUID_LUNAR_ECLIPSE);
+
+					if (_player->HasSpellCooldown(SPELL_DRUID_STARFALL))
+						_player->RemoveSpellCooldown(SPELL_DRUID_STARFALL, true);
+				}
+			}
+		}
+
+		void Register()
+		{
+			OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_astral_communion_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+		}
+	};
+
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_dru_astral_communion_AuraScript();
+	}
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1181,4 +1257,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_tiger_s_fury();
     new spell_dru_typhoon();
     new spell_dru_t10_restoration_4p_bonus();
+	new spell_dru_astral_communion();
 }

@@ -2978,6 +2978,8 @@ class Player : public Unit, public GridObject<Player>
 
     WorldLocation GetStartPosition() const;
 
+	uint32 m_lastEclipseState;
+
     // currently visible objects at player client
     typedef std::set<uint64> ClientGUIDs;
     ClientGUIDs m_clientGUIDs;

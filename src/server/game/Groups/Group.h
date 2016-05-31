@@ -283,6 +283,7 @@ class Group
         void SendTargetIconList(WorldSession* session);
         void SendUpdate();
         void SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot = NULL);
+		static void SendUpdatePlayerAtLeave(uint64 playerGUID, ObjectGuid groupGuid, ObjectGuid looterGuid, uint8 lootMethod, uint8 lootThreshold, uint32 raidDifficulty, uint32 dungeonDifficulty, uint32 counter);
         void UpdatePlayerOutOfRange(Player* player);
         void SendReadyCheckCompleted();
                                                             // ignore: GUID of player that will be ignored

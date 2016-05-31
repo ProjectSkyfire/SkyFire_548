@@ -65,6 +65,40 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
     CREATURE_FLAG_EXTRA_GUARD)
 
+// Creature Pet entries
+// Warlock
+#define ENTRY_INFERNAL          89
+#define ENTRY_IMP               416
+#define ENTRY_VOIDWALKER        1860
+#define ENTRY_SUCCUBUS          1863
+#define ENTRY_FELHUNTER         417
+#define ENTRY_FELGUARD          17252
+#define ENTRY_FEL_IMP           58959
+#define ENTRY_VOIDLORD          58960
+#define ENTRY_SHIVARRA          58963
+#define ENTRY_OBSERVER          58964
+#define ENTRY_WRATHGUARD        58965
+
+// Mage
+#define ENTRY_WATER_ELEMENTAL   510
+
+// Druid
+#define ENTRY_TREANT_GUARDIAN   54985
+#define ENTRY_TREANT_FERAL      54984
+#define ENTRY_TREANT_RESTO      54983
+#define ENTRY_TREANT_BALANCE    1964
+
+// Shaman
+#define ENTRY_FIRE_ELEMENTAL    15438
+
+// Death Knight
+#define ENTRY_GHOUL             26125
+#define ENTRY_BLOODWORM         28017
+#define ENTRY_GARGOYLE          27829
+
+// Priest
+#define ENTRY_PSYFIEND          59190
+
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 
