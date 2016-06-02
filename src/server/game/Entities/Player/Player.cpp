@@ -25480,7 +25480,7 @@ void Player::ResurectUsingRequestData()
 	SetPower(POWER_CHI, 0);
 
 	if (uint32 aura = _resurrectionData->Aura)
-		CastSpell(this, aura, true, NULL, NULLAURA_EFFECT, _resurrectionData->GUID);
+		CastSpell(this, aura, true, NULL, NULL, _resurrectionData->GUID);
 
 	SpawnCorpseBones();
 }

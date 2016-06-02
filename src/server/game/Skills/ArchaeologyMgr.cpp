@@ -1,6 +1,15 @@
 #include "ArchaeologyMgr.h"
 #include "Common.h"
 #include "Containers.h"
+#include "DBCStores.h"
+#include "DBCStore.h"
+#include "Player.h"
+#include "WorldSession.h"
+#include "Unit.h"
+#include "Map.h"
+#include "ObjectAccessor.h"
+#include "Object.h"
+#include "ObjectMgr.h"
 
 const static uint16 _mapIds[4] = { 0, 1, 530, 571};
 
@@ -9,8 +18,7 @@ const static uint8 _races[9] = {1, 2, 3, 4, 5, 6, 7, 8, 27};
 const static int q_patt[2][2] = { {0,1}, {3,2} };
 
 
-
-namespace WoWSource
+namespace Trinity
 {
     bool IsPointInZone(const ResearchPOIPoint &test, const ResearchPOIPoints &polygon)
     {
@@ -192,7 +200,7 @@ uint16 ArchaeologyMgr::GetResearchSiteID()
     {
         if ((*itr).second.map == _player->GetMapId() && (*itr).second.zone == _player->GetZoneId())
         {
-            if (WoWSource::IsPointInZone(ResearchPOIPoint(_player->GetPositionX(), _player->GetPositionY()), itr->second.coords))
+            if (Trinity::IsPointInZone(ResearchPOIPoint(_player->GetPositionX(), _player->GetPositionY()), itr->second.coords))
                 return (*itr).first;
         }
     }
@@ -279,16 +287,16 @@ ResearchWithLevelResult ArchaeologyMgr::CanResearchWithLevel(uint32 siteId)
             switch ((*itr).second.map)
             {
                 case 0:
-                    if ((*itr).second.zone == 4922) // Twilight Hightlands
+                    if ((*itr).second.zone == 4922)
                         skill_cap = 450;
                     level_cap = (*itr).second.level;
                     if (skill_now < skill_cap || (cur_level + 29 < level_cap))
                         return RS_RESULT_FAIL;
                     break;
                 case 1:
-                    if ((*itr).second.zone == 616) // Hyjal
+                    if ((*itr).second.zone == 616)
                         skill_cap = 450;
-                    else if ((*itr).second.zone == 5034) // Uldum
+                    else if ((*itr).second.zone == 5034)
                         skill_cap = 450;
                     level_cap = (*itr).second.level;
                     if (skill_now < skill_cap || (cur_level + 29 < level_cap))
@@ -300,7 +308,7 @@ ResearchWithLevelResult ArchaeologyMgr::CanResearchWithLevel(uint32 siteId)
                     if (skill_now < skill_cap || (cur_level < level_cap))
                         return RS_RESULT_HIDE;
                     break;
-                case 571: // Northrend
+                case 571:
                     skill_cap = 350;
                     level_cap = 68;
                     if (skill_now < skill_cap || (cur_level < level_cap))
@@ -324,14 +332,14 @@ void ArchaeologyMgr::GenerateResearchSiteInMap(uint32 mapId, uint32 map)
 
     SiteSet tempSites;
 
-    for (std::set<ResearchSiteEntry const*>::const_iterator itr = sResearchSiteSet.begin(); itr != sResearchSiteSet.end(); ++itr)
-        if (!HasResearchSite((*itr)->ID, mapId) && (*itr)->mapId == mapId && CanResearchWithLevel((*itr)->ID))
-            tempSites.insert((*itr)->ID);
+	for (std::set<ResearchSiteEntry const*>::const_iterator itr = sResearchSiteSet.begin(); itr != sResearchSiteSet.end(); ++itr)
+		if (!HasResearchSite((*itr)->Id, mapId) && (*itr)->MapId == mapId && CanResearchWithLevel((*itr)->Id))
+            tempSites.insert((*itr)->Id);
 
     if (tempSites.empty())
         return;
 
-    _researchSites[map].insert(WoWSource::Containers::SelectRandomContainerElement(tempSites));
+    _researchSites[map].insert(Trinity::Containers::SelectRandomContainerElement(tempSites));
     _archaeologyChanged = true;
 
     ShowResearchSites();
@@ -347,20 +355,20 @@ void ArchaeologyMgr::GenerateResearchSites()
 
     Sites tempSites;
     for (std::set<ResearchSiteEntry const*>::const_iterator itr = sResearchSiteSet.begin(); itr != sResearchSiteSet.end(); ++itr)
-        if (CanResearchWithLevel((*itr)->ID))
+        if (CanResearchWithLevel((*itr)->Id))
         {
-            switch ((*itr)->mapId)
+            switch ((*itr)->MapId)
             {
-                case 0: _researchSites[0].insert((*itr)->ID); break;
-                case 1: _researchSites[1].insert((*itr)->ID); break;
-                case 530: _researchSites[2].insert((*itr)->ID); break;
-                case 571: _researchSites[3].insert((*itr)->ID); break;
+                case 0: _researchSites[0].insert((*itr)->Id); break;
+                case 1: _researchSites[1].insert((*itr)->Id); break;
+                case 530: _researchSites[2].insert((*itr)->Id); break;
+                case 571: _researchSites[3].insert((*itr)->Id); break;
                 default: break;
             }
         }
 
     for (uint8 i = 0; i < 4; ++i)
-        WoWSource::Containers::RandomResizeSet(_researchSites[i], RESEARCH_SITES_PER_MAP);
+		Trinity::Containers::RandomResizeSet(_researchSites[i], RESEARCH_SITES_PER_MAP);
 
     _archaeologyChanged = true;
 
@@ -384,10 +392,10 @@ void ArchaeologyMgr::GenerateResearchProjects()
     for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
     {
         ResearchProjectEntry const* entry = (*itr);
-        if ((entry->rare && !roll_chance_i(chance)) || IsCompletedProject(entry->ID))
+        if ((entry->Rarity && !roll_chance_i(chance)) || IsCompletedProject(entry->Id))
             continue;
 
-        tempProjects[entry->branchId].insert(entry->ID);
+        tempProjects[entry->ResearchBranchId].insert(entry->Id);
     }
 
     uint8 const* race = _races;
@@ -422,7 +430,7 @@ bool ArchaeologyMgr::SolveResearchProject(uint32 projectId)
     // Check for project id
     ResearchProjectEntry const* entry = NULL;
     for(std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
-        if ((*itr)->ID == projectId)
+        if ((*itr)->Id == projectId)
             entry = (*itr);
     
     if (!entry)
@@ -447,7 +455,7 @@ bool ArchaeologyMgr::SolveResearchProject(uint32 projectId)
 
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS, projectId, 1);
 
-    if (entry->rare)
+    if (entry->Rarity)
         _completedProjects.insert(projectId);
 
     // Add new project
@@ -456,16 +464,16 @@ bool ArchaeologyMgr::SolveResearchProject(uint32 projectId)
 
     for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
     {
-        if ((*itr)->branchId == entry->branchId)
+        if ((*itr)->ResearchBranchId == entry->ResearchBranchId)
         {
-            if (((*itr)->rare && !roll_chance_i(chance)) || IsCompletedProject((*itr)->ID))
+            if (((*itr)->Rarity && !roll_chance_i(chance)) || IsCompletedProject((*itr)->Id))
                 continue;
 
-            tempProjects.insert((*itr)->ID);
+            tempProjects.insert((*itr)->Id);
         }
     }
 
-    _researchProjects.insert(WoWSource::Containers::SelectRandomContainerElement(tempProjects));
+    _researchProjects.insert(Trinity::Containers::SelectRandomContainerElement(tempProjects));
     _archaeologyChanged = true;
 
     ShowResearchProjects();

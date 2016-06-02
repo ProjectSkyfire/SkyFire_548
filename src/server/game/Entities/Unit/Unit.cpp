@@ -48,6 +48,7 @@
 #include "Player.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
+#include "SmartAI.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
@@ -755,7 +756,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 		// in bg, count dmg if victim is also a player
 		if (victim->GetTypeId() == TYPEID_PLAYER)
 			if (Battleground* bg = killer->GetBattleground())
-				bg->UpdatePlayerScore(killer, victim->ToPlayer() != NULL ? victim->ToPlayer() : NULL, SCORE_DAMAGE_DONE, damage);
+				bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
 
 		killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, damage, 0, 0, victim);
 		killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_DEALT, damage);
@@ -768,7 +769,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
 			if (victim->GetTypeId() == TYPEID_PLAYER)
 				if (Battleground* bg = killerOwner->GetBattleground())
-					bg->UpdatePlayerScore(killerOwner, victim->ToPlayer() != NULL ? victim->ToPlayer() : NULL, SCORE_DAMAGE_DONE, damage);
+					bg->UpdatePlayerScore(killerOwner, SCORE_DAMAGE_DONE, damage);
 		}
 	}
 
@@ -5912,8 +5913,283 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             break;
         }
-        case SPELLFAMILY_DRUID:
+		case SPELLFAMILY_DRUID:
+		{
+			switch (dummySpell->Id)
+			{
+				// Glyph of Bloodletting
+			case 54815:case SPELLFAMILY_DRUID:
+        {
+            switch (dummySpell->Id)
+            {
+                // Glyph of Bloodletting
+                case 54815:
+                {
+                    if (!target)
+                        return false;
 
+                    // try to find spell Rip on the target
+                    if (AuraEffect const* AurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
+                    {
+                        // Rip's max duration, note: spells which modifies Rip's duration also counted
+                        uint32 CountMin = AurEff->GetBase()->GetMaxDuration();
+
+                        // just Rip's max duration without other spells
+                        uint32 CountMax = AurEff->GetSpellInfo()->GetMaxDuration();
+
+                        // add possible auras' and Glyph of Shred's max duration
+                        CountMax += 3 * triggerAmount * IN_MILLISECONDS;      // Glyph of Bloodletting        -> +6 seconds
+                        CountMax += HasAura(60141) ? 4 * IN_MILLISECONDS : 0; // Rip Duration/Lacerate Damage -> +4 seconds
+
+                        // if min < max -> that means caster didn't cast 3 shred yet
+                        // so set Rip's duration and max duration
+                        if (CountMin < CountMax)
+                        {
+                            AurEff->GetBase()->SetDuration(AurEff->GetBase()->GetDuration() + triggerAmount * IN_MILLISECONDS);
+                            AurEff->GetBase()->SetMaxDuration(CountMin + triggerAmount * IN_MILLISECONDS);
+                            return true;
+                        }
+                    }
+                    // if not found Rip
+                    return false;
+                }
+                // Leader of the Pack
+                case 24932:
+                {
+                    if (triggerAmount <= 0)
+                        return false;
+                    basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
+                    target = this;
+                    triggered_spell_id = 34299;
+                    // Regenerate 4% mana
+                    int32 mana = CalculatePct(GetCreateMana(), triggerAmount);
+                    CastCustomSpell(this, 68285, &mana, NULL, NULL, true, castItem, triggeredByAura);
+                    break;
+                }
+                // Healing Touch (Dreamwalker Raiment set)
+                case 28719:
+                {
+                    // mana back
+                    basepoints0 = int32(CalculatePct(procSpell->ManaCost, 30));
+                    target = this;
+                    triggered_spell_id = 28742;
+                    break;
+                }
+                // Healing Touch Refund (Idol of Longevity trinket)
+                case 28847:
+                {
+                    target = this;
+                    triggered_spell_id = 28848;
+                    break;
+                }
+                // Mana Restore (Malorne Raiment set / Malorne Regalia set)
+                case 37288:
+                case 37295:
+                {
+                    target = this;
+                    triggered_spell_id = 37238;
+                    break;
+                }
+                // Druid Tier 6 Trinket
+                case 40442:
+                {
+                    float  chance;
+
+                    // Starfire
+                    if (procSpell->SpellFamilyFlags [0] & 0x4)
+                    {
+                        triggered_spell_id = 40445;
+                        chance = 25.0f;
+                    }
+                    // Rejuvenation
+                    else if (procSpell->SpellFamilyFlags [0] & 0x10)
+                    {
+                        triggered_spell_id = 40446;
+                        chance = 25.0f;
+                    }
+                    // Mangle (Bear) and Mangle (Cat)
+                    else if (procSpell->SpellFamilyFlags [1] & 0x00000440)
+                    {
+                        triggered_spell_id = 40452;
+                        chance = 40.0f;
+                    }
+                    else
+                        return false;
+
+                    if (!roll_chance_f(chance))
+                        return false;
+
+                    target = this;
+                    break;
+                }
+                // Item - Druid T10 Balance 4P Bonus
+                case 70723:
+                {
+                    // Wrath & Starfire
+                    if ((procSpell->SpellFamilyFlags [0] & 0x5) && (procEx & PROC_EX_CRITICAL_HIT))
+                    {
+                        triggered_spell_id = 71023;
+                        SpellInfo const* triggeredSpell = sSpellMgr->GetSpellInfo(triggered_spell_id);
+                        if (!triggeredSpell)
+                            return false;
+                        basepoints0 = CalculatePct(int32(damage), triggerAmount) / (triggeredSpell->GetMaxDuration() / triggeredSpell->Effects [0].ApplyAuraTickCount);
+                        // Add remaining ticks to damage done
+                        basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                    }
+                    break;
+                }
+                // Item - Druid T10 Restoration 4P Bonus (Rejuvenation)
+                case 70664:
+                {
+                    // Proc only from normal Rejuvenation
+                    if (procSpell->SpellVisual [0] != 32)
+                        return false;
+
+                    Player* caster = ToPlayer();
+                    if (!caster)
+                        return false;
+                    if (!caster->GetGroup() && victim == this)
+                        return false;
+
+                    CastCustomSpell(70691, SPELLVALUE_BASE_POINT0, damage, victim, true);
+                    return true;
+                }
+            }
+            break;
+        }
+			{
+				if (!target)
+					return false;
+
+				// try to find spell Rip on the target
+				if (AuraEffect const* AurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
+				{
+					// Rip's max duration, note: spells which modifies Rip's duration also counted
+					uint32 CountMin = AurEff->GetBase()->GetMaxDuration();
+
+					// just Rip's max duration without other spells
+					uint32 CountMax = AurEff->GetSpellInfo()->GetMaxDuration();
+
+					// add possible auras' and Glyph of Shred's max duration
+					CountMax += 3 * triggerAmount * IN_MILLISECONDS;      // Glyph of Bloodletting        -> +6 seconds
+					CountMax += HasAura(60141) ? 4 * IN_MILLISECONDS : 0; // Rip Duration/Lacerate Damage -> +4 seconds
+
+																		  // if min < max -> that means caster didn't cast 3 shred yet
+																		  // so set Rip's duration and max duration
+					if (CountMin < CountMax)
+					{
+						AurEff->GetBase()->SetDuration(AurEff->GetBase()->GetDuration() + triggerAmount * IN_MILLISECONDS);
+						AurEff->GetBase()->SetMaxDuration(CountMin + triggerAmount * IN_MILLISECONDS);
+						return true;
+					}
+				}
+				// if not found Rip
+				return false;
+			}
+			// Leader of the Pack
+			case 24932:
+			{
+				if (triggerAmount <= 0)
+					return false;
+				basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
+				target = this;
+				triggered_spell_id = 34299;
+				// Regenerate 4% mana
+				int32 mana = CalculatePct(GetCreateMana(), triggerAmount);
+				CastCustomSpell(this, 68285, &mana, NULL, NULL, true, castItem, triggeredByAura);
+				break;
+			}
+			// Healing Touch (Dreamwalker Raiment set)
+			case 28719:
+			{
+				// mana back
+				basepoints0 = int32(CalculatePct(procSpell->ManaCost, 30));
+				target = this;
+				triggered_spell_id = 28742;
+				break;
+			}
+			// Healing Touch Refund (Idol of Longevity trinket)
+			case 28847:
+			{
+				target = this;
+				triggered_spell_id = 28848;
+				break;
+			}
+			// Mana Restore (Malorne Raiment set / Malorne Regalia set)
+			case 37288:
+			case 37295:
+			{
+				target = this;
+				triggered_spell_id = 37238;
+				break;
+			}
+			// Druid Tier 6 Trinket
+			case 40442:
+			{
+				float  chance;
+
+				// Starfire
+				if (procSpell->SpellFamilyFlags[0] & 0x4)
+				{
+					triggered_spell_id = 40445;
+					chance = 25.0f;
+				}
+				// Rejuvenation
+				else if (procSpell->SpellFamilyFlags[0] & 0x10)
+				{
+					triggered_spell_id = 40446;
+					chance = 25.0f;
+				}
+				// Mangle (Bear) and Mangle (Cat)
+				else if (procSpell->SpellFamilyFlags[1] & 0x00000440)
+				{
+					triggered_spell_id = 40452;
+					chance = 40.0f;
+				}
+				else
+					return false;
+
+				if (!roll_chance_f(chance))
+					return false;
+
+				target = this;
+				break;
+			}
+			// Item - Druid T10 Balance 4P Bonus
+			case 70723:
+			{
+				// Wrath & Starfire
+				if ((procSpell->SpellFamilyFlags[0] & 0x5) && (procEx & PROC_EX_CRITICAL_HIT))
+				{
+					triggered_spell_id = 71023;
+					SpellInfo const* triggeredSpell = sSpellMgr->GetSpellInfo(triggered_spell_id);
+					if (!triggeredSpell)
+						return false;
+					basepoints0 = CalculatePct(int32(damage), triggerAmount) / (triggeredSpell->GetMaxDuration() / triggeredSpell->Effects[0].ApplyAuraTickCount);
+					// Add remaining ticks to damage done
+					basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+				}
+				break;
+			}
+			// Item - Druid T10 Restoration 4P Bonus (Rejuvenation)
+			case 70664:
+			{
+				// Proc only from normal Rejuvenation
+				if (procSpell->SpellVisual[0] != 32)
+					return false;
+
+				Player* caster = ToPlayer();
+				if (!caster)
+					return false;
+				if (!caster->GetGroup() && victim == this)
+					return false;
+
+				CastCustomSpell(70691, SPELLVALUE_BASE_POINT0, damage, victim, true);
+				return true;
+			}
+			}
+			break;
+		}
         case SPELLFAMILY_PALADIN:
         {
             // Judgements of the Wise
@@ -12032,7 +12308,7 @@ void Unit::SetPower(Powers power, int32 val, bool regen)
 	{
 		if (_player->HasAura(26023))
 		{
-			Aura* aura = _player->GetAura(26023);
+			Aura* aura = _player->GetAura(26023); // This is now fixxed because old code was used AuraPtr but thats not actual
 			if (aura)
 			{
 				int32 holyPower = _player->GetPower(POWER_HOLY_POWER) >= 3 ? 3 : _player->GetPower(POWER_HOLY_POWER);

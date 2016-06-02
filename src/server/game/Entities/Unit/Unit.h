@@ -1669,9 +1669,9 @@ public:
 	int32 GetPower(Powers power) const;
 	int32 GetMinPower(Powers power) const	{ return power == POWER_ECLIPSE ? -100 : 0;	}
 	int32 GetMaxPower(Powers power) const;
-	void SetPower(Powers power, int32 val);
+	void SetPower(Powers power, int32 val, bool regen = false);
 	void SetMaxPower(Powers power, int32 val);
-	int32 CountPctFromMaxPower(Powers power, int32 pct) const	{ return CalculatePct(GetMaxPower(power), pct);	}
+	int32 CountPctFromMaxPower(Powers power, int32 pct) const { return CalculatePct(GetMaxPower(power), pct); }
 	SpellPowerEntry const* GetSpellPowerEntryBySpell(SpellInfo const* spell) const;
 
 	// returns the change in power

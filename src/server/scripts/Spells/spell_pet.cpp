@@ -48,17 +48,19 @@ enum WarlockPetCalculate
 {
      SPELL_PET_PASSIVE_CRIT             = 35695,
      SPELL_PET_PASSIVE_DAMAGE_TAKEN     = 35697,
+	 SPELL_WARLOCK_GLYPH_OF_VOIDWALKER  = 56247,
      SPELL_WARLOCK_PET_SCALING_01       = 34947,
      SPELL_WARLOCK_PET_SCALING_02       = 34956,
      SPELL_WARLOCK_PET_SCALING_03       = 34957,
      SPELL_WARLOCK_PET_SCALING_04       = 34958,
      SPELL_WARLOCK_PET_SCALING_05       = 61013,
-     ENTRY_FELGUARD                     = 17252,
+     /*
+	 ENTRY_FELGUARD                     = 17252,
      ENTRY_VOIDWALKER                   = 1860,
      ENTRY_FELHUNTER                    = 417,
      ENTRY_SUCCUBUS                     = 1863,
      ENTRY_IMP                          = 416,
-     SPELL_WARLOCK_GLYPH_OF_VOIDWALKER  = 56247,
+     */
 };
 
 enum DKPetCalculate

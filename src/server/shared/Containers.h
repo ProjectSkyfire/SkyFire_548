@@ -30,6 +30,20 @@ namespace Trinity
 {
     namespace Containers
     {
+		template<class T>
+		void RandomResizeSet(std::set<T> &t_set, uint32 size)
+		{
+			size_t set_size = t_set.size();
+
+			while (set_size > size)
+			{
+				typename std::set<T>::iterator itr = t_set.begin();
+				std::advance(itr, urand(0, set_size - 1));
+				t_set.erase(itr);
+				--set_size;
+			}
+		}
+
         template<class T>
         void RandomResizeList(std::list<T> &list, uint32 size)
         {

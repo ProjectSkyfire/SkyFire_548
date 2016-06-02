@@ -8894,7 +8894,7 @@ void ObjectMgr::LoadResearchSiteZones()
 	QueryResult result = WorldDatabase.Query("SELECT id, position_x, position_y, zone FROM research_site");
 	if (!result)
 	{
-		sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 research site zones. DB table `research_site` is empty.");
+		TC_LOG_INFO("archaelogy", "Loaded 0 research site zones. DB table `research_site` is empty.");
 		return;
 	}
 
@@ -8941,7 +8941,7 @@ void ObjectMgr::LoadResearchSiteZones()
 		++counter;
 	} while (result->NextRow());
 
-	sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u research site zones.", counter);
+	TC_LOG_INFO("archaelogy", "Loaded %u research site zones.", counter);
 }
 
 void ObjectMgr::LoadResearchSiteLoot()
@@ -8949,7 +8949,7 @@ void ObjectMgr::LoadResearchSiteLoot()
 	QueryResult result = WorldDatabase.Query("SELECT site_id, x, y, z, race FROM research_loot");
 	if (!result)
 	{
-		sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 research loot. DB table `research_loot` is empty.");
+		TC_LOG_INFO("archaelogy", "Loaded 0 research loot. DB table `research_loot` is empty.");
 		return;
 	}
 
@@ -8973,7 +8973,7 @@ void ObjectMgr::LoadResearchSiteLoot()
 		++counter;
 	} while (result->NextRow());
 
-	sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u research site loot.", counter);
+	TC_LOG_INFO("archaelogy", "Loaded %u research site loot.", counter);
 }
 
 PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
