@@ -138,67 +138,64 @@ enum BarberShopResult
     /*BARBER_SHOP_NOT_ENOUGH_MONEY = 3*/
 };
 
-enum DB2Hash : uint64
-{
-    DB2_REPLY_BattlePetAbility            = 3416538071,
-    DB2_REPLY_BattlePetAbilityEffect      = 3716901134,
-    DB2_REPLY_BattlePetAbilityState       = 1012231747,
-    DB2_REPLY_BattlePetAbilityTurn        = 3973639388,
-    DB2_REPLY_BattlePetBreedQuality       = 458903206,
-    DB2_REPLY_BattlePetBreedState         = 1794847238,
-    DB2_REPLY_BattlePetEffectProperties   = 1672791226,
-    DB2_REPLY_BattlePetNPCTeamMember      = 4060454394,
-    DB2_REPLY_BattlePetSpecies            = 1821637041,
-    DB2_REPLY_BattlePetSpeciesState       = 366509520,
-    DB2_REPLY_BattlePetSpeciesXAbility    = 1143173908,
-    DB2_REPLY_BattlePetState              = 2403627824,
-    DB2_REPLY_BattlePetVisual             = 3282955075,
-    DB2_REPLY_BroadcastText               = 35137211,
-    DB2_REPLY_Creature                    = 3386291891,
-    DB2_REPLY_CreatureDifficulty          = 3386943305, // MoP - 5.4.0
-    DB2_REPLY_Curve                       = 1272569722, // MoP - 5.4.0
-    DB2_REPLY_CurvePoint                  = 1880017466, // MoP - 5.4.0
-    DB2_REPLY_DeviceBlacklist             = 983446676,  // MoP - 5.4.2
-    DB2_REPLY_DriverBlacklist             = 1326512502, // MoP - 5.4.2
-    DB2_REPLY_GameObjects                 = 331613093,
-    DB2_REPLY_Item                        = 1344507586,
-    DB2_REPLY_Item_sparse                 = 2442913102,
-    DB2_REPLY_ItemCurrencyCost            = 1876974313,
-    DB2_REPLY_ItemExtendedCost            = 3146089301,
-    DB2_REPLY_ItemToBattlePet             = 1563357608, // MoP - 5.4.2 (replaced by ItemToBattlePetSpecies in WoD)
-    DB2_REPLY_ItemToMountSpell            = 1440631488, // MoP - 5.4.2
-    DB2_REPLY_ItemUpgrade                 = 1879459387,
-    DB2_REPLY_KeyChain                    = 1837770388,
-    DB2_REPLY_Locale                      = 1065724855,
-    DB2_REPLY_Location                    = 961296167,
-    DB2_REPLY_MapChallengeMode            = 943410215,
-    DB2_REPLY_MarketingPromotionsXLocale  = 2715021741,
-    DB2_REPLY_Path                        = 2499044245,
-    DB2_REPLY_PathNode                    = 1000230050,
-    DB2_REPLY_PathNodeProperty            = 4263624740,
-    DB2_REPLY_PathProperty                = 149245792,
-    DB2_REPLY_QuestPackageItem            = 3425666288,
-    DB2_REPLY_RulesetItemUpgrade          = 1840711788,
-    DB2_REPLY_RulesetRaidLootUpgrade      = 3978279757,
-    DB2_REPLY_SceneScript                 = 3568395212,
-    DB2_REPLY_SceneScriptPackage          = 3905641993,
-    DB2_REPLY_SceneScriptPackageMember    = 3830298396,
-    DB2_REPLY_SpellEffectCameraShakes     = 1939361897, // MoP - 5.4.0
-    DB2_REPLY_SpellMissile                = 1754233351, // MoP - 5.4.0
-    DB2_REPLY_SpellMissileMotion          = 930182777,  // MoP - 5.4.0
-    DB2_REPLY_SpellReagents               = 2875640223, // MoP - 5.2.0
-    DB2_REPLY_SpellVisual                 = 4146370265, // MoP - 5.4.0
-    DB2_REPLY_SpellVisualEffectName       = 48336690,   // MoP - 5.4.0
-    DB2_REPLY_SpellVisualKit              = 4102286043, // MoP - 5.4.0
-    DB2_REPLY_SpellVisualKitAreaModel     = 22642299461,// MoP - 5.4.0
-    DB2_REPLY_SpellVisualKitModelAttach   = 4033975491, // MoP - 5.4.0
-    DB2_REPLY_SpellVisualMissile          = 1369604944, // MoP - 5.4.0
-    DB2_REPLY_Vignette                    = 4021368146, // MoP - 5.4.0
-    DB2_REPLY_WbAccessControlList         = 1477136115, // MoP - 5.3.0
-    DB2_REPLY_WbCertBlacklist             = 3450573023, // MoP - 5.3.0
-    DB2_REPLY_WbCertWhitelist             = 2287306173, // MoP - 5.3.0
-    DB2_REPLY_WbPermissions               = 4163366139, // MoP - 5.3.0
-};
+#define DB2_REPLY_BATTLEPETABILITY             3416538071
+#define DB2_REPLY_BATTLEPETABILITYEFFECT       3716901134
+#define DB2_REPLY_BATTLEPETABILITYSTATE        1012231747
+#define DB2_REPLY_BATTLEPETABILITYTURN         3973639388
+#define DB2_REPLY_BATTLEPETBREEDQUALITY        458903206
+#define DB2_REPLY_BATTLEPETBREEDSTATE          1794847238
+#define DB2_REPLY_BATTLEPETEFFECTPROPERTIES    1672791226
+#define DB2_REPLY_BATTLEPETNPCTEAMMEMBER       4060454394
+#define DB2_REPLY_BATTLEPETSPECIES             1821637041
+#define DB2_REPLY_BATTLEPETSPECIESSTATE        366509520
+#define DB2_REPLY_BATTLEPETSPECIESXABILITY     1143173908
+#define DB2_REPLY_BATTLEPETSTATE               2403627824
+#define DB2_REPLY_BATTLEPETVISUAL              3282955075
+#define DB2_REPLY_BROADCASTTEXT                35137211
+#define DB2_REPLY_CREATURE                     3386291891
+#define DB2_REPLY_CREATUREDIFFICULTY           3386943305
+#define DB2_REPLY_CURVE                        1272569722
+#define DB2_REPLY_CURVEPOINT                   1880017466
+#define DB2_REPLY_DEVICEBLACKLIST              983446676
+#define DB2_REPLY_DRIVERBLACKLIST              1326512502
+#define DB2_REPLY_GAMEOBJECTS                  331613093
+#define DB2_REPLY_ITEM                         1344507586
+#define DB2_REPLY_ITEM_SPARSE                  2442913102
+#define DB2_REPLY_ITEMCURRENCYCOST             1876974313
+#define DB2_REPLY_ITEMEXTENDEDCOST             3146089301
+#define DB2_REPLY_ITEMTOBATTLEPET              1563357608
+#define DB2_REPLY_ITEMTOMOUNTSPELL             1440631488
+#define DB2_REPLY_ITEMUPGRADE                  1879459387
+#define DB2_REPLY_KEYCHAIN                     1837770388
+#define DB2_REPLY_LOCALE                       1065724855
+#define DB2_REPLY_LOCATION                     961296167
+#define DB2_REPLY_MAPCHALLENGEMODE             943410215
+#define DB2_REPLY_MARKETINGPROMOTIONSXLOCALE   2715021741
+#define DB2_REPLY_PATH                         2499044245
+#define DB2_REPLY_PATHNODE                     1000230050
+#define DB2_REPLY_PATHNODEPROPERTY             4263624740
+#define DB2_REPLY_PATHPROPERTY                 149245792
+#define DB2_REPLY_QUESTPACKAGEITEM             3425666288
+#define DB2_REPLY_RULESETITEMUPGRADE           1840711788
+#define DB2_REPLY_RULESETRAIDLOOTUPGRADE       3978279757
+#define DB2_REPLY_SCENESCRIPT                  3568395212
+#define DB2_REPLY_SCENESCRIPTPACKAGE           3905641993
+#define DB2_REPLY_SCENESCRIPTPACKAGEMEMBER     3830298396
+#define DB2_REPLY_SPELLEFFECTCAMERASHAKES      1939361897
+#define DB2_REPLY_SPELLMISSILE                 1754233351
+#define DB2_REPLY_SPELLMISSILEMOTION           930182777 
+#define DB2_REPLY_SPELLREAGENTS                2875640223
+#define DB2_REPLY_SPELLVISUAL                  4146370265
+#define DB2_REPLY_SPELLVISUALEFFECTNAME        48336690  
+#define DB2_REPLY_SPELLVISUALKIT               4102286043
+#define DB2_REPLY_SPELLVISUALKITAREAMODEL      22642299461
+#define DB2_REPLY_SPELLVISUALKITMODELATTACH    4033975491
+#define DB2_REPLY_SPELLVISUALMISSILE           1369604944
+#define DB2_REPLY_VIGNETTE                     4021368146
+#define DB2_REPLY_WBACCESSCONTROLLIST          1477136115
+#define DB2_REPLY_WBCERTBLACKLIST              3450573023
+#define DB2_REPLY_WBCERTWHITELIST              2287306173
+#define DB2_REPLY_WBPERMISSIONS                4163366139
 
 //class to deal with packet processing
 //allows to determine if next packet is safe to be processed
