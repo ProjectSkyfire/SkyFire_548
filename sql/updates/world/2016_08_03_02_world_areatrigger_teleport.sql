@@ -1,3 +1,4 @@
+DELETE FROM `areatrigger_teleport` WHERE `id` IN (7838, 7839, 8027, 8028, 8313, 8314, 8881, 8882);
 INSERT INTO `areatrigger_teleport` (`id`, `name`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
 (7838, 'Mogu\'shan Vaults (Entrance)', 1008, 3861.55, 1045.11, 490.17, 0),
 (7839, 'Mogu\'shan Vaults (Exit)', 870, 3982.09, 1111.19, 497.31, 0),
