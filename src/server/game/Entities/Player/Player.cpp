@@ -16781,12 +16781,13 @@ void Player::RemoveActiveQuest(uint32 quest_id)
     QuestStatusMap::iterator itr = m_QuestStatus.find(quest_id);
     if (itr != m_QuestStatus.end())
     {
-        if (auto const quest = sObjectMgr->GetQuestTemplate(quest_id))
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id))
         {
-            for (auto const questObjective : quest->m_questObjectives)
+            for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
             {
-                m_questObjectiveStatus.erase(questObjective->Id);
-                m_questObjectiveStatusSave[questObjective->Id] = false;
+                uint32 objectiveId = (*citr)->Id;
+                m_questObjectiveStatus.erase(objectiveId);
+                m_questObjectiveStatusSave[objectiveId] = false;
             }
         }
 
@@ -20662,24 +20663,24 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
 
 void Player::_SaveQuestObjectiveStatus(SQLTransaction& trans)
 {
-    for (auto const &objectiveSaveStatus : m_questObjectiveStatusSave)
+    for (QuestObjectiveStatusSaveMap::const_iterator citr = m_questObjectiveStatusSave.begin(); citr != m_questObjectiveStatusSave.end(); citr++)
     {
-        uint32 questId = sObjectMgr->GetQuestObjectiveQuestId(objectiveSaveStatus.first);
+        uint32 questId = sObjectMgr->GetQuestObjectiveQuestId(citr->first);
         ASSERT(questId);
 
-        if (objectiveSaveStatus.second)
+        if (citr->second)
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_QUESTSTATUS_OBJECTIVE);
             stmt->setUInt32(0, GetGUIDLow());
-            stmt->setUInt32(1, objectiveSaveStatus.first);
-            stmt->setUInt32(2, GetQuestObjectiveCounter(objectiveSaveStatus.first));
+            stmt->setUInt32(1, citr->first);
+            stmt->setUInt32(2, GetQuestObjectiveCounter(citr->first));
             trans->Append(stmt);
         }
         else
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE);
             stmt->setUInt32(0, GetGUIDLow());
-            stmt->setUInt32(1, objectiveSaveStatus.first);
+            stmt->setUInt32(1, citr->first);
             trans->Append(stmt);
         }
     }
