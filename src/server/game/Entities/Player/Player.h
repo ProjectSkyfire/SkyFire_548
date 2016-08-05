@@ -635,6 +635,7 @@ typedef std::set<uint32> RewardedQuestSet;
 
 //               quest,  keep
 typedef std::map<uint32, bool> QuestStatusSaveMap;
+typedef std::map<uint32, bool> QuestObjectiveStatusSaveMap;
 
 enum QuestSlotOffsets
 {
@@ -3492,6 +3493,7 @@ class Player : public Unit, public GridObject<Player>
     QuestStatusMap m_QuestStatus;
     QuestObjectiveStatusMap m_questObjectiveStatus;
     QuestStatusSaveMap m_QuestStatusSave;
+    QuestObjectiveStatusSaveMap m_questObjectiveStatusSave;
 
     RewardedQuestSet m_RewardedQuests;
     QuestStatusSaveMap m_RewardedQuestsSave;

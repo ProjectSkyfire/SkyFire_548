@@ -15871,6 +15871,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
             continue;
 
         m_questObjectiveStatus.insert(std::make_pair(questObjective->Id, uint32(0)));
+        m_questObjectiveStatusSave.insert(std::make_pair(questObjective->Id, true));
     }
 
     GiveQuestSourceItem(quest);
@@ -16780,6 +16781,15 @@ void Player::RemoveActiveQuest(uint32 quest_id)
     QuestStatusMap::iterator itr = m_QuestStatus.find(quest_id);
     if (itr != m_QuestStatus.end())
     {
+        if (auto const quest = sObjectMgr->GetQuestTemplate(quest_id))
+        {
+            for (auto const questObjective : quest->m_questObjectives)
+            {
+                m_questObjectiveStatus.erase(questObjective->Id);
+                m_questObjectiveStatusSave[questObjective->Id] = false;
+            }
+        }
+
         m_QuestStatus.erase(itr);
         m_QuestStatusSave[quest_id] = false;
 
@@ -16978,6 +16988,8 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
                 {
                     uint16 addCount = currentCounter + count <= requiredCounter ? count : requiredCounter - currentCounter;
                     m_questObjectiveStatus[questObjective->Id] += addCount;
+
+                    m_questObjectiveStatusSave[questObjective->Id] = true;
                     m_QuestStatusSave[questid] = true;
 
                     SendQuestUpdateAddCredit(qInfo, questObjective, ObjectGuid(0), currentCounter, addCount);
@@ -17022,8 +17034,9 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
                 if (currentCounter < requiredCounter)
                 {
                     uint16 remainingItems = currentCounter <= requiredCounter ? count : count + requiredCounter - currentCounter;
-
                     m_questObjectiveStatus[questObjective->Id] = (currentCounter <= remainingItems) ? 0 : currentCounter - remainingItems;
+
+                    m_questObjectiveStatusSave[questObjective->Id] = true;
                     m_QuestStatusSave[questid] = true;
 
                     IncompleteQuest(questid);
@@ -17091,6 +17104,8 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid /*= 0*/)
                     if (currentCounter < uint32(questObjective->Amount))
                     {
                         m_questObjectiveStatus[questObjective->Id] += addKillCount;
+
+                        m_questObjectiveStatusSave[questObjective->Id] = true;
                         m_QuestStatusSave[questId] = true;
 
                         SendQuestUpdateAddCredit(qInfo, questObjective, ObjectGuid(guid), currentCounter, addKillCount);
@@ -17136,6 +17151,8 @@ void Player::KilledPlayerCredit()
                     if (currentCounter < uint32(questObjective->Amount))
                     {
                         m_questObjectiveStatus[questObjective->ObjectId] = currentCounter + addKillCount;
+
+                        m_questObjectiveStatusSave[questObjective->Id] = true;
                         m_QuestStatusSave[questId] = true;
 
                         SendQuestUpdateAddPlayer(qInfo, questObjective, currentCounter, addKillCount);
@@ -17279,6 +17296,8 @@ void Player::QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type, u
                 uint32 addCounter = currentCounter + amount > requiredCounter ? requiredCounter - currentCounter : amount;
 
                 m_questObjectiveStatus[questObjective->Id] = addCounter;
+
+                m_questObjectiveStatusSave[questObjective->Id] = true;
                 m_QuestStatusSave[questId] = true;
 
                 SendQuestUpdateAddCredit(quest, questObjective, ObjectGuid(guid), currentCounter, amount);
@@ -20614,6 +20633,8 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
         }
     }
 
+    m_QuestStatusSave.clear();
+
     for (saveItr = m_RewardedQuestsSave.begin(); saveItr != m_RewardedQuestsSave.end(); ++saveItr)
     {
         if (saveItr->second)
@@ -20641,35 +20662,29 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
 
 void Player::_SaveQuestObjectiveStatus(SQLTransaction& trans)
 {
-    for (QuestObjectiveStatusMap::const_iterator citr = m_questObjectiveStatus.begin(); citr != m_questObjectiveStatus.end(); citr++)
+    for (auto const &objectiveSaveStatus : m_questObjectiveStatusSave)
     {
-        uint32 questId = sObjectMgr->GetQuestObjectiveQuestId(citr->first);
-        if (!questId)
-            continue;
+        uint32 questId = sObjectMgr->GetQuestObjectiveQuestId(objectiveSaveStatus.first);
+        ASSERT(questId);
 
-        QuestStatusSaveMap::const_iterator citrSave = m_QuestStatusSave.find(questId);
-        if (citrSave == m_QuestStatusSave.end())
-            continue;
-
-        if (citrSave->second)
+        if (objectiveSaveStatus.second)
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_QUESTSTATUS_OBJECTIVE);
             stmt->setUInt32(0, GetGUIDLow());
-            stmt->setUInt32(1, citr->first);
-            stmt->setUInt32(2, citr->second);
+            stmt->setUInt32(1, objectiveSaveStatus.first);
+            stmt->setUInt32(2, GetQuestObjectiveCounter(objectiveSaveStatus.first));
             trans->Append(stmt);
         }
         else
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE);
             stmt->setUInt32(0, GetGUIDLow());
-            stmt->setUInt32(1, citr->first);
+            stmt->setUInt32(1, objectiveSaveStatus.first);
             trans->Append(stmt);
         }
     }
 
-    m_questObjectiveStatus.clear();
-    m_QuestStatusSave.clear();
+    m_questObjectiveStatusSave.clear();
 }
 
 void Player::_SaveDailyQuestStatus(SQLTransaction& trans)
