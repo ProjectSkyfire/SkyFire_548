@@ -563,7 +563,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TRAINER_LIST,                       0x034B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTrainerListOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TRANSMOGRIFY_ITEMS,                 0x06D7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTransmogrifyItems            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TURN_IN_PETITION,                   0x0673, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTurnInPetitionOpcode         ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_CLEAR,                     0x1D36, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialClear                ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_CLEAR,                     0x0F23, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialClear                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_FLAG,                      0x1D36, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialFlag                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_TUTORIAL_RESET,                     0x0307, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTutorialReset                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_UNACCEPT_TRADE,                     0x0023, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUnacceptTradeOpcode          ); // 5.4.8 18414
