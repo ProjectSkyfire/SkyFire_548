@@ -87,7 +87,6 @@ enum MonkSpells
     SPELL_MONK_TIGER_STRIKES = 120273,
     SPELL_MONK_ZEN_PILGRIMAGE = 126892,
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN = 126895,
-    SPELL_MONK_HEALING_SPHERE = 115460,
 };
 
 // 117952 - Crackling Jade Lightning
@@ -1124,7 +1123,7 @@ class spell_monk_renewing_mist : public SpellScriptLoader
         void Register() OVERRIDE
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_renewing_mist_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
-            OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_monk_renewing_mist_AuraScript::Update, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+            //OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_monk_renewing_mist_AuraScript::Update, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
             OnEffectRemove += AuraEffectApplyFn(spell_monk_renewing_mist_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
         }
     };
@@ -1132,50 +1131,6 @@ class spell_monk_renewing_mist : public SpellScriptLoader
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_monk_renewing_mist_AuraScript();
-    }
-};
-
-// Healing Sphere 115460
-class spell_monk_healing_sphere : public SpellScriptLoader
-{
-    public:
-    spell_monk_healing_sphere() : SpellScriptLoader("spell_monk_healing_sphere")
-    { }
-
-    class spell_monk_healing_sphere_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_healing_sphere_SpellScript);
-
-        void Sphere(SpellEffIndex /*eff*/)
-        {
-            int32 count = GetCaster()->CountAreaTrigger(SPELL_MONK_HEALING_SPHERE);
-            if (count >= 3)
-            {
-                std::list<AreaTrigger*> sphereList;
-                GetCaster()->GetAreaTriggerList(sphereList, SPELL_MONK_HEALING_SPHERE);
-                if (!sphereList.empty())
-                {
-                    sphereList.sort(Trinity::AreaTriggerDurationPctOrderPred());
-                    for (auto itr : sphereList)
-                    {
-                        AreaTrigger* sphere = itr;
-                        sphere->SetDuration(0);
-                        break;
-                    }
-                }
-            }
-
-        }
-
-        void Register()
-        {
-            OnEffectHit += SpellEffectFn(spell_monk_healing_sphere_SpellScript::Sphere, EFFECT_0, SPELL_EFFECT_CREATE_AREATRIGGER);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_healing_sphere_SpellScript();
     }
 };
 
@@ -3747,5 +3702,4 @@ void AddSC_monk_spell_scripts()
     new spell_monk_provoke();
     new spell_monk_roll();
     new spell_monk_tigereye_brew_stacks();
-    new spell_monk_healing_sphere();
 }
