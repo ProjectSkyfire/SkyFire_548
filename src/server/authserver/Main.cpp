@@ -120,7 +120,7 @@ extern int main(int argc, char** argv)
     TC_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
     TC_LOG_INFO("server.authserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
     TC_LOG_INFO("server.authserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
-    TC_LOG_INFO("server.authserver", "  Project SkyFireEmu 2014(c) Open-sourced Game Emulation ");
+    TC_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2016(c) Open-sourced Game Emulation ");
     TC_LOG_INFO("server.authserver", "           <http://www.projectskyfire.org/> \n");
 
     TC_LOG_INFO("server.authserver", "Using configuration file %s.", configFile);

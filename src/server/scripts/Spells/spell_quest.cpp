@@ -2242,6 +2242,7 @@ class spell_q12919_gymers_throw : public SpellScriptLoader
             return new spell_q12919_gymers_throw_SpellScript();
         }
 };
+
 enum FearNoEvil
 {
     SPELL_RENEWED_LIFE = 93097,
@@ -2285,6 +2286,33 @@ public:
     SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_q28813_get_our_boys_back_dummy_SpellScript();
+    }
+};
+
+class spell_q28813_set_health_random : public SpellScriptLoader
+{
+public:
+    spell_q28813_set_health_random() : SpellScriptLoader("spell_q28813_set_health_random") { }
+
+    class spell_q28813_set_health_random_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q28813_set_health_random_SpellScript);
+
+        void HandleDummyEffect()
+        {
+            Unit* caster = GetCaster();
+            caster->SetHealth(caster->CountPctFromMaxHealth(urand(3, 5)*10));
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_q28813_set_health_random_SpellScript::HandleDummyEffect);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_q28813_set_health_random_SpellScript();
     }
 };
 
@@ -2343,4 +2371,5 @@ void AddSC_quest_spell_scripts()
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
     new spell_q28813_get_our_boys_back_dummy();
+    new spell_q28813_set_health_random();
 }
