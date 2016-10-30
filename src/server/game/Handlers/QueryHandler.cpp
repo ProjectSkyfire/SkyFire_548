@@ -41,7 +41,7 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     Player* player = ObjectAccessor::FindPlayer(guid);
     CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
 
-    WorldPacket data(SMSG_NAME_QUERY_RESPONSE, 500);
+    WorldPacket data(SMSG_QUERY_PLAYER_NAME_RESPONSE, 500);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[6]);
     data.WriteBit(guid[7]);
