@@ -2152,7 +2152,7 @@ float Unit::CalculateLevelPenalty(SpellInfo const* spellProto) const
 
 void Unit::SendMeleeAttackStart(Unit* victim)
 {
-    WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
+    WorldPacket data(SMSG_ATTACK_START, 8 + 8);
 
     ObjectGuid attackerGuid = victim->GetGUID();
     ObjectGuid victimGuid = GetGUID();

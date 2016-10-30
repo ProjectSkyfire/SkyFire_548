@@ -34,7 +34,7 @@
 //void called when player click on auctioneer npc
 void WorldSession::HandleAuctionHelloOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_HELLO");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_HELLO_REQUEST");
 
     ObjectGuid guid;                                            //NPC guid
 

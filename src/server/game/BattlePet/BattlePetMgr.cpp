@@ -593,7 +593,7 @@ void BattlePetMgr::SendBattlePetUpdate(BattlePet* battlePet, bool notification)
     if (!creatureTemplate)
         return;
 
-    WorldPacket data(SMSG_BATTLE_PET_UPDATE, 4 + 1 + 8 + battlePet->GetNickname().size() + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 1 + 2 + 2 + 4 + 2);
+    WorldPacket data(SMSG_BATTLE_PET_PET_UPDATES, 4 + 1 + 8 + battlePet->GetNickname().size() + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 1 + 2 + 2 + 4 + 2);
     data.WriteBits(1, 19);
     data.WriteBit(petEntry[4]);
     data.WriteBit(petEntry[1]);

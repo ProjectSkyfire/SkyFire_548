@@ -643,7 +643,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[5]);
     recvData.ReadByteSeq(guid[7]);
 
-    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
+    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAME_OBJ_REPORT_USE Message [guid=%u]", GUID_LOPART(guid));
 
     if (GameObject* obj = GetPlayer()->GetMap()->GetGameObject(guid))
     {
@@ -678,7 +678,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     recvPacket.ReadByteSeq(guid[2]);
     recvPacket.ReadByteSeq(guid[4]);
 
-    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAMEOBJ_REPORT_USE Message [in game guid: %u]", GUID_LOPART(guid));
+    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAME_OBJ_USE Message [in game guid: %u]", GUID_LOPART(guid));
 
     // ignore for remote control state
     if (_player->m_mover != _player)
@@ -1599,7 +1599,7 @@ void WorldSession::HandleRequestCategoryCooldowns(WorldPacket& /*recvPacket*/)
             cItr->second += (*itr)->GetAmount();
     }
 
-    WorldPacket data(SMSG_SPELL_CATEGORY_COOLDOWN, 11);
+    WorldPacket data(SMSG_CATEGORY_COOLDOWN, 11);
     data.WriteBits(categoryMods.size(), 21);
     data.FlushBits();
 

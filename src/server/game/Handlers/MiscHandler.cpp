@@ -702,7 +702,7 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleStandStateChangeOpcode(WorldPacket& recvData)
 {
-    // TC_LOG_DEBUG("network", "WORLD: Received CMSG_STANDSTATECHANGE"); -- too many spam in log at lags/debug stop
+    // TC_LOG_DEBUG("network", "WORLD: Received CMSG_STAND_STATE_CHANGE"); -- too many spam in log at lags/debug stop
     uint32 animstate;
     recvData >> animstate;
 
@@ -2013,7 +2013,7 @@ void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& /*recvData*/)
     // empty opcode
     TC_LOG_DEBUG("network", "WORLD: CMSG_WORLD_STATE_UI_TIMER_UPDATE");
 
-    WorldPacket data(SMSG_WORLD_STATE_UI_TIMER_UPDATE, 4);
+    WorldPacket data(SMSG_UI_TIME, 4);
     data << uint32(time(NULL));
     SendPacket(&data);
 }
