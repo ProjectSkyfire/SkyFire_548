@@ -460,7 +460,7 @@ class WorldSession
 
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
-		void Handle_EarlyProccessContinued(WorldPacked& recvPacket); //Found in sniffs
+		void Handle_EarlyProccessContinued(WorldPacket& recvPacket); //Found in sniffs
         void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
