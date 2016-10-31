@@ -68,20 +68,20 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_ADD_FRIEND,                         0x09A6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddFriendOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_ADD_IGNORE,                         0x0D20, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddIgnoreOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_ADD_VOICE_IGNORE,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_ALTER_APPEARANCE,                   0x07F0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAlterAppearance              ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_ALTER_APPEARANCE,                   0x07F0, STATUS_LOGGEDIN,  PROCESS_INPLACE, 	   &WorldSession::HandleAlterAppearance              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AREATRIGGER,                        0x1C44, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaTriggerOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AREA_SPIRIT_HEALER_QUERY,           0x03F1, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueryOpcode  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AREA_SPIRIT_HEALER_QUEUE,           0x12D8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueueOpcode  ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_ACCEPT,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamAcceptOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_CREATE,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamCreateOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_DECLINE,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamDeclineOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_DISBAND,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamDisbandOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_INVITE,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamInviteOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_LEADER,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamLeaderOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_LEAVE,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamLeaveOpcode         );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_QUERY,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamQueryOpcode         );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_REMOVE,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamRemoveOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_ROSTER,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamRosterOpcode        );
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_ACCEPT,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_CREATE,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_DECLINE,                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_DISBAND,                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_INVITE,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_LEADER,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_LEAVE,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_QUERY,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_REMOVE,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
+    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_ROSTER,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // Removed in 5.2
     DEFINE_OPCODE_HANDLER(CMSG_ATTACKSTOP,                         0x0345, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleAttackStopOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_ATTACKSWING,                        0x02E7, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleAttackSwingOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_HELLO_REQUEST,              0x0379, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionHelloOpcode           ); // 5.4.8 18414
@@ -104,9 +104,9 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BANKER_ACTIVATE,                    0x02E9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBankerActivateOpcode         ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LEAVE,                  0x0257, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBattlefieldLeaveOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LIST,                   0x1C41, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldListOpcode        ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE, 0x1806, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfEntryInviteResponse        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE, 0x1806, STATUS_LOGGEDIN,  PROCESS_INPLACE,   &WorldSession::HandleBfEntryInviteResponse        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_EXIT_REQUEST,       0x08B3, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfExitRequest                ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE, 0x0A97, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfQueueInviteResponse        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE, 0x0A97, STATUS_LOGGEDIN,  PROCESS_INPLACE,   &WorldSession::HandleBfQueueInviteResponse        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_REQUEST,      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_PORT,                   0x1379, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattleFieldPortOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_STATUS,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode      );
