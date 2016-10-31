@@ -111,7 +111,7 @@ namespace Movement
         unit->m_movementInfo.SetMovementFlags(moveFlags);
         move_spline.Initialize(args);
 
-        WorldPacket data(SMSG_MONSTER_MOVE, 64);
+        WorldPacket data(SMSG_ON_MONSTER_MOVE, 64);
         PacketBuilder::WriteMonsterMove(move_spline, data, unit);
         unit->SendMessageToSet(&data, true);
 
@@ -131,7 +131,7 @@ namespace Movement
         unit->m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_FORWARD);
         move_spline.Initialize(args);
 
-        WorldPacket data(SMSG_MONSTER_MOVE, 64);
+        WorldPacket data(SMSG_ON_MONSTER_MOVE, 64);
 
         PacketBuilder::WriteStopMovement(loc, args.splineId, data, unit);
         unit->SendMessageToSet(&data, true);
