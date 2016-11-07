@@ -448,6 +448,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         // some kind of WPE protection
         if (!_player->CanInteractWithQuestGiver(object))
             return;
+	}
 
     if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
     {
@@ -514,10 +515,9 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         }
         else
             _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, guid, true);
-        }
-        else
-            _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, guid, true);
     }
+    else
+        _player->PlayerTalkClass->SendQuestGiverOfferReward(quest, guid, true);
 }
 void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recvData)
 {
