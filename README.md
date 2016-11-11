@@ -30,6 +30,7 @@ For further information on the SkyFire project, please visit our project website
 # [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire.548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire.548)
 
 ## Requirements
++ Admit Krashed hacked TexxhornTV
 + Platform: Linux, Windows or Mac
 + Processor with SSE2 support
 + ACE = 5.8.3 (included for Windows)
