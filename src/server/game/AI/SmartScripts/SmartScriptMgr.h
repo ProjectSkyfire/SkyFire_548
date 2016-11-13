@@ -515,7 +515,7 @@ enum SMART_ACTION
     SMART_ACTION_GAME_EVENT_START                   = 112,    // GameEventId
     SMART_ACTION_SET_HEALTH                         = 113,    // HealthMode, value.
 
-    SMART_ACTION_END                                = 113
+    SMART_ACTION_END                                = 114
 };
 
 struct SmartAction
