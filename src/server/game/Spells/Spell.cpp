@@ -4712,7 +4712,7 @@ void Spell::SendLogExecute()
 {
     ObjectGuid CastergGuid = m_caster->GetGUID();
 
-    WorldPacket data(SMSG_SPELLLOGEXECUTE, 8 + 4 + 4 + 4 + 4 + 8);
+    WorldPacket data(SMSG_SPELL_EXECUTE_LOG, 8 + 4 + 4 + 4 + 4 + 8);
 
     data.WriteGuidMask(CastergGuid, 0, 6, 5, 7, 2);
     data.WriteBits(0, 19); // effCount

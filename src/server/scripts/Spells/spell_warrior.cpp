@@ -30,6 +30,7 @@
 
 enum WarriorSpells
 {
+    SPELL_WARRIOR_ALLOW_RAGING_BLOW                 = 131116,
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
     SPELL_WARRIOR_CHARGE                            = 34846,
@@ -43,6 +44,7 @@ enum WarriorSpells
     SPELL_WARRIOR_GLYPH_OF_EXECUTION                = 58367,
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976,
     SPELL_WARRIOR_MORTAL_STRIKE                     = 12294,
+    SPELL_WARRIOR_RAGING_BLOW                       = 85288,
     SPELL_WARRIOR_RALLYING_CRY                      = 97463,
     SPELL_WARRIOR_REND                              = 94009,
     SPELL_WARRIOR_RETALIATION_DAMAGE                = 22858,
@@ -1077,6 +1079,85 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
         }
 };
 
+class spell_warr_raging_blow : public SpellScriptLoader
+{
+    public:
+        spell_warr_raging_blow() : SpellScriptLoader("spell_warr_raging_blow") { }
+
+        class spell_warr_raging_blow_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_raging_blow_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RAGING_BLOW))
+                    return false;
+                return true;
+            }
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (_player->HasAura(SPELL_WARRIOR_ALLOW_RAGING_BLOW))
+                    {
+                        if (_player->GetAura(SPELL_WARRIOR_ALLOW_RAGING_BLOW))
+                        {
+                            int32 stacks = _player->GetAura(SPELL_WARRIOR_ALLOW_RAGING_BLOW)->GetStackAmount();
+
+                            if (stacks <= 1)
+                            {
+                                _player->RemoveAura(SPELL_WARRIOR_ALLOW_RAGING_BLOW);
+                            }
+                            else
+                            {
+                                _player->GetAura(SPELL_WARRIOR_ALLOW_RAGING_BLOW)->SetStackAmount(stacks - 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_warr_raging_blow_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warr_raging_blow_SpellScript();
+        }
+};
+
+class spell_warr_raging_blow_proc : public SpellScriptLoader
+{
+    public:
+        spell_warr_raging_blow_proc() : SpellScriptLoader("spell_warr_raging_blow_proc") {}
+
+        class spell_warr_raging_blow_proc_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_raging_blow_proc_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                    if (_player->GetSpecializationId(_player->GetActiveSpec()) == TALENT_TREE_WARRIOR_FURY && _player->getLevel() >= 30)
+                        _player->CastSpell(_player, SPELL_WARRIOR_ALLOW_RAGING_BLOW, true);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_warr_raging_blow_proc_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const	OVERRIDE
+        {
+            return new spell_warr_raging_blow_proc_SpellScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1091,6 +1172,8 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_lambs_to_the_slaughter();
     new spell_warr_last_stand();
     new spell_warr_overpower();
+	new spell_warr_raging_blow();
+	new spell_warr_raging_blow_proc();
     new spell_warr_rallying_cry();
     new spell_warr_rend();
     new spell_warr_retaliation();

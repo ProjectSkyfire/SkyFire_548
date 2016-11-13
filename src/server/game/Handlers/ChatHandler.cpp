@@ -78,7 +78,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_CHANNEL:
             type = CHAT_MSG_CHANNEL;
             break;
-        case CMSG_MESSAGECHAT_AFK:
+        case CMSG_CHAT_MESSAGE_AFK:
             type = CHAT_MSG_AFK;
             break;
         case CMSG_MESSAGECHAT_DND:

@@ -72,7 +72,7 @@ namespace Movement
             Mask_Final_Facing   = Final_Point | Final_Target | Final_Angle,
             // animation ids stored here, see AnimType enum, used with Animation flag
             Mask_Animations     = 0x7,
-            // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
+            // flags that shouldn't be appended into SMSG_ON_MONSTER_MOVE\SMSG_ON_MONSTER_MOVE_TRANSPORT packet, should be more probably
             Mask_No_Monster_Move = Mask_Final_Facing | Mask_Animations | Done,
             // Unused, not suported flags
             Mask_Unused         = No_Spline|Enter_Cycle|Frozen|Unknown0|Unknown2|Unknown3|Unknown4|Unknown6|Unknown7|Unknown8|Unknown9

@@ -277,7 +277,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         bitBuffer.FlushBits();
     }
 
-    WorldPacket data(SMSG_CHAR_ENUM, 7 + bitBuffer.size() + dataBuffer.size());
+    WorldPacket data(SMSG_ENUM_CHARACTERS_RESULT, 7 + bitBuffer.size() + dataBuffer.size());
 
     data.append(bitBuffer);
 
@@ -880,7 +880,7 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
 {
-    TC_LOG_INFO("general", "WORLD: Recvd CMSG_LOAD_SCREEN");
+    TC_LOG_INFO("general", "WORLD: Recvd CMSG_LOADING_SCREEN_NOTIFY");
     uint32 mapID;
 
     recvPacket >> mapID;
@@ -1033,7 +1033,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     HotfixData const& hotfix = sObjectMgr->GetHotfixData();
 
-    data.Initialize(SMSG_HOTFIX_INFO);
+    data.Initialize(SMSG_HOTFIX_NOTIFY_BLOB);
     data.WriteBits(hotfix.size(), 20);
     data.FlushBits();
 
