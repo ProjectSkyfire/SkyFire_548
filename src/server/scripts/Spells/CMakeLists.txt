@@ -1,5 +1,6 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
 # Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -22,7 +23,7 @@ set(scripts_STAT_SRCS
   Spells/spell_warlock.cpp
   Spells/spell_priest.cpp
   Spells/spell_mage.cpp
-  #Spells/spell_monk.cpp
+  Spells/spell_monk.cpp
   Spells/spell_mastery.cpp
   Spells/spell_paladin.cpp
   Spells/spell_item.cpp
