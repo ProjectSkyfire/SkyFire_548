@@ -12,10 +12,6 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
-if (NOT (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8))
-    message(FATAL_ERROR "GCC: Compiler doesnt support c++11, requires g++ 4.8 or greater.")
-endif ()
-
 if(PLATFORM EQUAL 32)
   # Required on 32-bit systems to enable SSE2 (standard on x64)
   set(SSE_FLAGS "-msse2 -mfpmath=sse")
