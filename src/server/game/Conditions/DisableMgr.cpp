@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -134,21 +134,12 @@ void LoadDisables()
                             isFlagInvalid = true;
                         break;
                     case MAP_INSTANCE:
-                        if (flags & DUNGEON_STATUSFLAG_HEROIC && !GetMapDifficultyData(entry, DUNGEON_DIFFICULTY_HEROIC))
-                            flags -= DUNGEON_STATUSFLAG_HEROIC;
-                        if (!flags)
-                            isFlagInvalid = true;
-                        break;
                     case MAP_RAID:
-                        if (flags & RAID_STATUSFLAG_10MAN_HEROIC && !GetMapDifficultyData(entry, RAID_DIFFICULTY_10MAN_HEROIC))
-                            flags -= RAID_STATUSFLAG_10MAN_HEROIC;
-                        if (flags & RAID_STATUSFLAG_25MAN_HEROIC && !GetMapDifficultyData(entry, RAID_DIFFICULTY_25MAN_HEROIC))
-                            flags -= RAID_STATUSFLAG_25MAN_HEROIC;
-                        if (flags & RAID_STATUSFLAG_10MAN_FLEX && !GetMapDifficultyData(entry, RAID_DIFFICULTY_10MAN_FLEX))
-                            flags -= RAID_STATUSFLAG_10MAN_FLEX;
-                        if (flags & RAID_STATUSFLAG_25MAN_LFR && !GetMapDifficultyData(entry, RAID_DIFFICULTY_25MAN_LFR))
-                            flags -= RAID_STATUSFLAG_25MAN_LFR;
-                        if (!flags)
+                        if (flags & DUNGEON_STATUSFLAG_HEROIC && !GetMapDifficultyData(entry, HEROIC_DIFFICULTY))
+                            isFlagInvalid = true;
+                        else if (flags & RAID_STATUSFLAG_10MAN_HEROIC && !GetMapDifficultyData(entry, MAN10_HEROIC_DIFFICULTY))
+                            isFlagInvalid = true;
+                        else if (flags & RAID_STATUSFLAG_25MAN_HEROIC && !GetMapDifficultyData(entry, MAN25_HEROIC_DIFFICULTY))
                             isFlagInvalid = true;
                         break;
                     case MAP_BATTLEGROUND:
@@ -356,7 +347,8 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
 
             break;
         }
-        case DISABLE_TYPE_MAP:
+       // Need to update
+       /* case DISABLE_TYPE_MAP:
             if (Player const* player = unit->ToPlayer())
             {
                 MapEntry const* mapEntry = sMapStore.LookupEntry(entry);
@@ -367,7 +359,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                     GetDownscaledMapDifficultyData(entry, targetDifficulty);
                     switch (targetDifficulty)
                     {
-                        case DUNGEON_DIFFICULTY_NORMAL:
+                        case NORMAL_DIFFICULTY:
                             return disabledModes & DUNGEON_STATUSFLAG_NORMAL;
                         case DUNGEON_DIFFICULTY_HEROIC:
                             return disabledModes & DUNGEON_STATUSFLAG_HEROIC;
@@ -384,7 +376,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                 else if (mapEntry->map_type == MAP_COMMON)
                     return true;
             }
-            return false;
+            return false; */ 
         case DISABLE_TYPE_QUEST:
             if (!unit)
                 return true;

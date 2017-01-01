@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -164,7 +164,7 @@ class InstanceSaveManager
             uint16 mapid;
             uint16 instanceId;
 
-            InstResetEvent() : type(0), difficulty(DUNGEON_DIFFICULTY_NORMAL), mapid(0), instanceId(0) { }
+            InstResetEvent() : type(0), difficulty(REGULAR_DIFFICULTY), mapid(0), instanceId(0) { }
             InstResetEvent(uint8 t, uint32 _mapid, Difficulty d, uint16 _instanceid)
                 : type(t), difficulty(d), mapid(_mapid), instanceId(_instanceid) { }
             bool operator == (const InstResetEvent& e) const { return e.instanceId == instanceId; }

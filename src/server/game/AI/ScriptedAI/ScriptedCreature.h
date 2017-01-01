@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -320,9 +320,9 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case DUNGEON_DIFFICULTY_NORMAL:
+            case REGULAR_DIFFICULTY:
                 return normal5;
-            case DUNGEON_DIFFICULTY_HEROIC:
+            case HEROIC_DIFFICULTY:
                 return heroic10;
             default:
                 break;
@@ -336,9 +336,9 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case MAN10_DIFFICULTY:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case MAN25_DIFFICULTY:
                 return normal25;
             default:
                 break;
@@ -352,14 +352,10 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case MAN10_DIFFICULTY:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case MAN25_DIFFICULTY:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
-                return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
-                return lfr;
             default:
                 break;
         }
@@ -372,18 +368,14 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case MAN10_DIFFICULTY:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case MAN25_DIFFICULTY:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_HEROIC:
+            case MAN10_HEROIC_DIFFICULTY:
                 return heroic10;
-            case RAID_DIFFICULTY_25MAN_HEROIC:
+            case MAN25_HEROIC_DIFFICULTY:
                 return heroic25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
-                return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
-                return lfr;
             default:
                 break;
         }
