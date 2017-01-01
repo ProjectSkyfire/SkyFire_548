@@ -815,8 +815,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
 
     m_HomebindTimer = 0;
     m_InstanceValid = true;
-    m_dungeonDifficulty = REGULAR_DIFFICULTY;
-    m_raidDifficulty = MAN10_DIFFICULTY;
+    m_dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
+    m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
 
     m_lastPotionId = 0;
     _talentMgr = new PlayerTalentInfo();
@@ -17910,10 +17910,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     uint32 dungeonDiff = fields[39].GetUInt8() & 0x0F;
     if (dungeonDiff >= MAX_DUNGEON_DIFFICULTY)
-        dungeonDiff = REGULAR_DIFFICULTY;
+        dungeonDiff = DUNGEON_DIFFICULTY_NORMAL;
     uint32 raidDiff = (fields[39].GetUInt8() >> 4) & 0x0F;
     if (raidDiff >= MAX_RAID_DIFFICULTY)
-        raidDiff = MAN10_DIFFICULTY;
+        raidDiff = RAID_DIFFICULTY_10MAN_NORMAL;
     SetDungeonDifficulty(Difficulty(dungeonDiff));          // may be changed in _LoadGroup
     SetRaidDifficulty(Difficulty(raidDiff));                // may be changed in _LoadGroup
 
@@ -19632,39 +19632,11 @@ void Player::SetPendingBind(uint32 instanceId, uint32 bindTimer)
 void Player::SendRaidInfo()
 {
     uint32 counter = 0;
-    WorldPacket data(SMSG_RAID_INSTANCE_INFO);
 
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-            if (itr->second.perm)
-                counter++;
+    WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
 
-    data.WriteBits(counter, 20);
-
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-    {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-        {
-            if (itr->second.perm)
-            {
-                InstanceSave* save = itr->second.save;
-                ObjectGuid instanceGUID = MAKE_NEW_GUID(save->GetInstanceId(), 0, HIGHGUID_INSTANCE_SAVE);
-
-                data.WriteBit(instanceGUID[1]);
-                data.WriteBit(1);
-                data.WriteBit(instanceGUID[0]);
-                data.WriteBit(instanceGUID[4]);
-                data.WriteBit(instanceGUID[2]);
-                data.WriteBit(instanceGUID[3]);
-                data.WriteBit(instanceGUID[5]);
-                data.WriteBit(instanceGUID[6]);
-                data.WriteBit(instanceGUID[7]);
-                data.WriteBit(0);
-            }
-        }
-    }
-
-    data.FlushBits();
+    size_t p_counter = data.wpos();
+    data << uint32(counter);                                // placeholder
 
     time_t now = time(NULL);
 
@@ -19675,24 +19647,26 @@ void Player::SendRaidInfo()
             if (itr->second.perm)
             {
                 InstanceSave* save = itr->second.save;
-                ObjectGuid instanceGUID = MAKE_NEW_GUID(save->GetInstanceId(), 0, HIGHGUID_INSTANCE_SAVE);
+                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+                uint32 completedEncounters = 0;
+                if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
+                    if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
+                        completedEncounters = instanceScript->GetCompletedEncounterMask();
 
-                data << uint32(save->GetResetTime() - now); // reset time
-                data.WriteByteSeq(instanceGUID[0]);
-                data.WriteByteSeq(instanceGUID[3]);
                 data << uint32(save->GetMapId());           // map id
-                data.WriteByteSeq(instanceGUID[2]);
-                data.WriteByteSeq(instanceGUID[4]);
                 data << uint32(save->GetDifficulty());      // difficulty
-                data.WriteByteSeq(instanceGUID[7]);
-                data << uint32(save->GetEncounterMask());   // mask boss killed
-                data.WriteByteSeq(instanceGUID[6]);
-                data.WriteByteSeq(instanceGUID[5]);
-                data.WriteByteSeq(instanceGUID[1]);                
+                data << uint32(isHeroic);                   // heroic
+                data << uint64(save->GetInstanceId());      // instance id
+                data << uint8(1);                           // expired = 0
+                data << uint8(0);                           // extended = 1
+                data << uint32(save->GetResetTime() - now); // reset time
+                data << uint32(completedEncounters);        // completed encounters mask
+                ++counter;
             }
         }
     }
 
+    data.put<uint32>(p_counter, counter);
     GetSession()->SendPacket(&data);
 }
 
@@ -21189,7 +21163,7 @@ void Player::ResetInstances(uint8 method, bool isRaid)
         if (method == INSTANCE_RESET_ALL)
         {
             // the "reset all instances" method can only reset normal maps
-            if (entry->map_type == MAP_RAID || diff == HEROIC_DIFFICULTY)
+            if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
             {
                 ++itr;
                 continue;

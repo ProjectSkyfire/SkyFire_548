@@ -320,9 +320,9 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case REGULAR_DIFFICULTY:
+            case DUNGEON_DIFFICULTY_NORMAL:
                 return normal5;
-            case HEROIC_DIFFICULTY:
+            case DUNGEON_DIFFICULTY_HEROIC:
                 return heroic10;
             default:
                 break;
@@ -336,9 +336,9 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case MAN10_DIFFICULTY:
+            case RAID_DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case MAN25_DIFFICULTY:
+            case RAID_DIFFICULTY_25MAN_NORMAL:
                 return normal25;
             default:
                 break;
@@ -352,10 +352,14 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case MAN10_DIFFICULTY:
+            case RAID_DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case MAN25_DIFFICULTY:
+            case RAID_DIFFICULTY_25MAN_NORMAL:
                 return normal25;
+            case RAID_DIFFICULTY_10MAN_FLEX:
+                return flex;
+            case RAID_DIFFICULTY_25MAN_LFR:
+                return lfr;
             default:
                 break;
         }
@@ -368,14 +372,18 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case MAN10_DIFFICULTY:
+            case RAID_DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case MAN25_DIFFICULTY:
+            case RAID_DIFFICULTY_25MAN_NORMAL:
                 return normal25;
-            case MAN10_HEROIC_DIFFICULTY:
+            case RAID_DIFFICULTY_10MAN_HEROIC:
                 return heroic10;
-            case MAN25_HEROIC_DIFFICULTY:
+            case RAID_DIFFICULTY_25MAN_HEROIC:
                 return heroic25;
+            case RAID_DIFFICULTY_10MAN_FLEX:
+                return flex;
+            case RAID_DIFFICULTY_25MAN_LFR:
+                return lfr;
             default:
                 break;
         }

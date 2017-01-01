@@ -396,7 +396,7 @@ void LFGMgr::InitializeLockedDungeons(Player* player, uint8 level /* = 0 */)
             lockData = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
-        else if (dungeon->difficulty > REGULAR_DIFFICULTY && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
+        else if (dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->minlevel > level)
             lockData = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
@@ -1457,7 +1457,7 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
         }
 
         // Update achievements
-        if (dungeon->difficulty == HEROIC_DIFFICULTY)
+        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS, 1);
 
         LfgReward const* reward = GetRandomDungeonReward(rDungeonId, player->getLevel());
