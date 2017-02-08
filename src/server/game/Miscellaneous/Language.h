@@ -1246,5 +1246,23 @@ enum TrinityStrings
     LANG_BG_TP_HORDE_FLAG_RESPAWNED     = 12014,
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2000010000-2147483647 (max index)
+
+    // Battle For Gilneas
+    LANG_BG_BFG_START_TWO_MINUTES       = 12015,
+    LANG_BG_BFG_START_ONE_MINUTE        = 12016,
+    LANG_BG_BFG_START_HALF_MINUTE       = 12017,
+    LANG_BG_BFG_HAS_BEGUN               = 12018,
+
+    LANG_BG_BFG_ALLY                    = 12019,
+    LANG_BG_BFG_HORDE                   = 12020,
+    LANG_BG_BFG_NODE_LIGHTHOUSE         = 12021,
+    LANG_BG_BFG_NODE_WATERWORKS         = 12022,
+    LANG_BG_BFG_NODE_MINE               = 12023,
+    LANG_BG_BFG_NODE_TAKEN              = 12024,
+    LANG_BG_BFG_NODE_DEFENDED           = 12025,
+    LANG_BG_BFG_NODE_ASSAULTED          = 12026,
+    LANG_BG_BFG_NODE_CLAIMED            = 12027,
+    LANG_BG_BFG_A_NEAR_VICTORY          = 12028,
+    LANG_BG_BFG_H_NEAR_VICTORY          = 12029,
 };
 #endif
