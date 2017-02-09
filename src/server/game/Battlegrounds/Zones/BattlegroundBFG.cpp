@@ -17,7 +17,6 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "AchievementMgr.h"
 #include "Battleground.h"
 #include "BattlegroundBFG.h"
 #include "BattlegroundMgr.h"
@@ -37,27 +36,6 @@ BattlegroundBFG::BattlegroundBFG()
     m_BuffChange = true;
     BgObjects.resize(GILNEAS_BG_OBJECT_MAX);
     BgCreatures.resize(GILNEAS_BG_ALL_NODES_COUNT + 3);
-
-    for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
-    {
-        m_Nodes[i] = 0;
-        m_prevNodes[i] = 0;
-        m_NodeTimers[i] = 0;
-        m_BannerTimers[i].timer = 0;
-        m_BannerTimers[i].type = 0;
-        m_BannerTimers[i].teamIndex = 0;
-    }
-
-    for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
-    {
-        m_lastTick[i] = 0;
-        m_HonorScoreTics[i] = 0;
-        m_ReputationScoreTics[i] = 0;
-        m_TeamScores500Disadvantage[i] = false;
-    }
-
-    m_HonorTics = 0;
-    m_ReputationTics = 0;
 
     StartMessageIds[BG_STARTING_EVENT_FIRST] = LANG_BG_BFG_START_TWO_MINUTES;
     StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_BFG_START_ONE_MINUTE;
@@ -96,7 +74,7 @@ void BattlegroundBFG::PostUpdateImpl(uint32 diff)
                 else
                 {
                     m_NodeTimers[node] = 0;
-                    uint8 teamIndex = m_Nodes[node] - 1;
+                    uint8 teamIndex = m_Nodes[node]-1;
                     m_prevNodes[node] = m_Nodes[node];
                     m_Nodes[node] += 2;
                     _DelBanner(node, GILNEAS_BG_NODE_TYPE_CONTESTED, teamIndex);
@@ -541,14 +519,14 @@ bool BattlegroundBFG::SetupBattleground()
 {
     for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
-        if (!AddObject(GILNEAS_BG_OBJECT_BANNER_NEUTRAL + 8 * i, GILNEAS_BG_OBJECTID_NODE_BANNER_0 + i, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_A + 8 * i, GILNEAS_BG_OBJECTID_BANNER_CONT_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_H + 8 * i, GILNEAS_BG_OBJECTID_BANNER_CONT_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_ALLY + 8 * i, GILNEAS_BG_OBJECTID_BANNER_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_HORDE + 8 * i, GILNEAS_BG_OBJECTID_BANNER_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_AURA_ALLY + 8 * i, GILNEAS_BG_OBJECTID_AURA_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_AURA_HORDE + 8 * i, GILNEAS_BG_OBJECTID_AURA_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_AURA_CONTESTED + 8 * i, GILNEAS_BG_OBJECTID_AURA_C, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3] / 2), std::cos(GILNEAS_BG_NodePositions[i][3] / 2), RESPAWN_ONE_DAY)) {
+        if (!AddObject(GILNEAS_BG_OBJECT_BANNER_NEUTRAL + 8*i, GILNEAS_BG_OBJECTID_NODE_BANNER_0 + i, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_A + 8*i, GILNEAS_BG_OBJECTID_BANNER_CONT_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_H + 8*i, GILNEAS_BG_OBJECTID_BANNER_CONT_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_ALLY + 8*i, GILNEAS_BG_OBJECTID_BANNER_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_HORDE + 8*i, GILNEAS_BG_OBJECTID_BANNER_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_AURA_ALLY + 8*i, GILNEAS_BG_OBJECTID_AURA_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_AURA_HORDE + 8*i, GILNEAS_BG_OBJECTID_AURA_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_AURA_CONTESTED + 8*i, GILNEAS_BG_OBJECTID_AURA_C, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, std::sin(GILNEAS_BG_NodePositions[i][3]/2), std::cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)) {
             TC_LOG_ERROR("sql.sql", "BatteGroundBGF: Failed to spawn some object Battleground not created!");
             return false;
         }
@@ -564,9 +542,9 @@ bool BattlegroundBFG::SetupBattleground()
     // Buffs
     for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
-        if (!AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3] / 2), std::cos(GILNEAS_BG_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3] / 2), std::cos(GILNEAS_BG_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3] / 2), std::cos(GILNEAS_BG_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY))
+        if (!AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3]/2), std::cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3]/2), std::cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3]/2), std::cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY))
             TC_LOG_ERROR("sql.sql", "BatteGroundBGF: Failed to spawn buff object!");
     }
 
@@ -578,15 +556,15 @@ void BattlegroundBFG::Reset()
     //call parent's class reset
     Battleground::Reset();
 
-    m_TeamScores[TEAM_ALLIANCE] = 0;
-    m_TeamScores[TEAM_HORDE] = 0;
-    m_lastTick[TEAM_ALLIANCE] = 0;
-    m_lastTick[TEAM_HORDE] = 0;
-    m_HonorScoreTics[TEAM_ALLIANCE] = 0;
-    m_HonorScoreTics[TEAM_HORDE] = 0;
+    m_TeamScores[TEAM_ALLIANCE]          = 0;
+    m_TeamScores[TEAM_HORDE]             = 0;
+    m_lastTick[TEAM_ALLIANCE]            = 0;
+    m_lastTick[TEAM_HORDE]               = 0;
+    m_HonorScoreTics[TEAM_ALLIANCE]      = 0;
+    m_HonorScoreTics[TEAM_HORDE]         = 0;
     m_ReputationScoreTics[TEAM_ALLIANCE] = 0;
-    m_ReputationScoreTics[TEAM_HORDE] = 0;
-    m_IsInformedNearVictory = false;
+    m_ReputationScoreTics[TEAM_HORDE]    = 0;
+    m_IsInformedNearVictory              = false;
     bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
     m_HonorTics = (isBGWeekend) ? GILNEAS_BG_BGWeekendHonorTicks : GILNEAS_BG_NotBGWeekendHonorTicks;
     m_ReputationTics = (isBGWeekend) ? GILNEAS_BG_BGWeekendRepTicks : GILNEAS_BG_NotBGWeekendRepTicks;
@@ -692,9 +670,11 @@ bool BattlegroundBFG::IsAllNodesControlledByTeam(uint32 team) const
     return count == GILNEAS_BG_DYNAMIC_NODES_COUNT;
 }
 
-bool BattlegroundBFG::CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* player, Unit const* target, uint32 miscvalue) {
-    switch (criteriaId) {
-    case BG_CRITERIA_CHECK_RESILIENT_VICTORY:
+bool BattlegroundBFG::CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* player, Unit const* target, uint32 miscvalue)
+{
+    switch (criteriaId)
+    {
+        case BG_CRITERIA_CHECK_RESILIENT_VICTORY:
         return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(player->GetTeam())];
     }
     return Battleground::CheckAchievementCriteriaMeet(criteriaId, player, target, miscvalue);
