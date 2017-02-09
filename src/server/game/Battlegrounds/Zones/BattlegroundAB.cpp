@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2017 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -34,7 +34,7 @@ BattlegroundAB::BattlegroundAB()
     m_IsInformedNearVictory = false;
     m_BuffChange = true;
     BgObjects.resize(BG_AB_OBJECT_MAX);
-    BgCreatures.resize(BG_AB_ALL_NODES_COUNT + 5);//+5 for aura triggers
+    BgCreatures.resize(BG_AB_ALL_NODES_COUNT + 5);
 
     StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_AB_START_TWO_MINUTES;
     StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AB_START_ONE_MINUTE;
@@ -42,7 +42,10 @@ BattlegroundAB::BattlegroundAB()
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_AB_HAS_BEGUN;
 }
 
-BattlegroundAB::~BattlegroundAB() { }
+BattlegroundAB::~BattlegroundAB()
+{
+
+}
 
 void BattlegroundAB::PostUpdateImpl(uint32 diff)
 {
@@ -52,7 +55,6 @@ void BattlegroundAB::PostUpdateImpl(uint32 diff)
 
         for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
         {
-            // 3 sec delay to spawn new banner instead previous despawned one
             if (m_BannerTimers[node].timer)
             {
                 if (m_BannerTimers[node].timer > diff)
@@ -64,7 +66,6 @@ void BattlegroundAB::PostUpdateImpl(uint32 diff)
                 }
             }
 
-            // 1-minute to occupy a node from contested state
             if (m_NodeTimers[node])
             {
                 if (m_NodeTimers[node] > diff)
@@ -72,17 +73,13 @@ void BattlegroundAB::PostUpdateImpl(uint32 diff)
                 else
                 {
                     m_NodeTimers[node] = 0;
-                    // Change from contested to occupied !
                     uint8 teamIndex = m_Nodes[node]-1;
                     m_prevNodes[node] = m_Nodes[node];
                     m_Nodes[node] += 2;
-                    // burn current contested banner
                     _DelBanner(node, BG_AB_NODE_TYPE_CONTESTED, teamIndex);
-                    // create new occupied banner
                     _CreateBanner(node, BG_AB_NODE_TYPE_OCCUPIED, teamIndex, true);
                     _SendNodeUpdate(node);
                     _NodeOccupied(node, (teamIndex == 0) ? ALLIANCE:HORDE);
-                    // Message to chatlog
 
                     if (teamIndex == 0)
                     {
