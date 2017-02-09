@@ -23,6 +23,9 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"
+#include "WorldPacket.h"
+#include "Object.h"
+#include "GameObject.h"
 #include "WorldStateBuilder.h"
 
 class Creature;
@@ -30,6 +33,7 @@ class GameObject;
 class Group;
 class Player;
 class Unit;
+class WorldObject;
 class WorldPacket;
 class BattlegroundMap;
 
@@ -128,7 +132,8 @@ enum BattlegroundTimeIntervals
     RESPAWN_IMMEDIATELY             = 0,                    // secs
     BUFF_RESPAWN_TIME               = 180,                  // secs
     BATTLEGROUND_COUNTDOWN_MAX      = 120,                  // secs
-    ARENA_COUNTDOWN_MAX             = 60                    // secs
+    ARENA_COUNTDOWN_MAX             = 60,                   // secs
+    PLAYER_POSITION_UPDATE_INTERVAL = 5                     // secs
 };
 
 enum BattlegroundStartTimeIntervals
@@ -162,6 +167,7 @@ struct BattlegroundPlayer
 {
     time_t  OfflineRemoveTime;                              // for tracking and removing offline players from queue after 5 minutes
     uint32  Team;                                           // Player's team
+    int32   ActiveSpec;                                     // Player's active spec
 };
 
 struct BattlegroundObjectInfo
@@ -171,6 +177,13 @@ struct BattlegroundObjectInfo
     GameObject  *object;
     int32       timer;
     uint32      spellid;
+};
+
+enum ArenaType 
+{
+    ARENA_TYPE_2v2 = 2,
+    ARENA_TYPE_3v3 = 3,
+    ARENA_TYPE_5v5 = 5
 };
 
 enum ScoreType
@@ -201,12 +214,7 @@ enum ScoreType
     SCORE_DESTROYED_WALL        = 19
 };
 
-enum ArenaType
-{
-    ARENA_TYPE_2v2          = 2,
-    ARENA_TYPE_3v3          = 3,
-    ARENA_TYPE_5v5          = 5
-};
+
 
 enum BattlegroundType
 {
@@ -241,6 +249,13 @@ enum BattlegroundStartingEventsIds
 };
 #define BG_STARTING_EVENT_COUNT 4
 
+enum BGHonorMode 
+{
+    BG_NORMAL = 0,
+    BG_HOLIDAY,
+    BG_HONOR_MODE_NUM
+};
+
 struct BattlegroundScore
 {
     BattlegroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0), BonusHonor(0),
@@ -255,13 +270,6 @@ struct BattlegroundScore
     uint32 BonusHonor;
     uint32 DamageDone;
     uint32 HealingDone;
-};
-
-enum BGHonorMode
-{
-    BG_NORMAL = 0,
-    BG_HOLIDAY,
-    BG_HONOR_MODE_NUM
 };
 
 #define BG_AWARD_ARENA_POINTS_MIN_LEVEL 71
