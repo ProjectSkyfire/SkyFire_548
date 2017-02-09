@@ -250,8 +250,6 @@ void BattlegroundAB::HandleAreaTrigger(Player* player, uint32 trigger)
     }
 }
 
-/*  type: 0-neutral, 1-contested, 3-occupied
-    teamIndex: 0-ally, 1-horde                        */
 void BattlegroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay)
 {
     // Just put it into the queue
