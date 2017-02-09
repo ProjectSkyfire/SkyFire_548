@@ -1241,7 +1241,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     ByteBuffer dest;
     dest.resize(destSize);
 
-    if (size && compress(dest.contents(), &destSize, (uint8 const*)adata->Data.c_str(), size) != Z_OK)
+    if (size && compress(const_cast<uint8*>(dest.contents()), &destSize, (uint8*)adata->Data.c_str(), size) != Z_OK)
     {
         TC_LOG_DEBUG("network", "RAD: Failed to compress account data");
         return;
@@ -1266,6 +1266,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
     data << uint32(size);         // decompressed length
     data << uint32(destSize);
     data.append(dest);
@@ -1274,6 +1275,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
     data << uint32(adata->Time); // unix time
     
     SendPacket(&data);
