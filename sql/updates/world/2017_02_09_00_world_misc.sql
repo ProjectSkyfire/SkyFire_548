@@ -1,0 +1,1 @@
+ALTER TABLE `gameobject` CHANGE COLUMN `phaseMask` `phaseMask` INT UNSIGNED NOT NULL DEFAULT '1' AFTER `spawnMask`;
