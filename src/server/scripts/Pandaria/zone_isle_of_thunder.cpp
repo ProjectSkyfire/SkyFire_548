@@ -30,6 +30,18 @@ EndContentData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 
+enum NalakTalk
+{
+	SAY_INTRO = 0, // "I am born of thunder!"
+	SAY_AGGRO = 1, // "Can you feel the chill windblow? The storm is comming."
+
+	SAY_SPELL1 = 2, // ARC_NOVA "The clouds arc with vengeance!"
+	SAY_SPELL2 = 3, // LIGHTNING_TETHER "The air crackles with anger!"
+
+	SAY_KILL = 4, // "The sky weeps for your demise!"
+	SAY_DEATH = 5, // "I am but... The darkness... Before the storm..."
+};
+
 enum Nalak
 {
 	TIMER_ARC_NOVA = 10000,
@@ -41,19 +53,19 @@ enum Nalak
 	SPELL_STORMCLOUD = 136340
 };
 
-class npc_nalak : public CreatureScript
+class boss_nalak : public CreatureScript
 {
 public:
-	npc_nalak() : CreatureScript("npc_nalak") { }
+	boss_nalak() : CreatureScript("boss_nalak") { }
 
 	CreatureAI* GetAI(Creature* creature) const OVERRIDE
 	{
-		return new npc_nalakAI(creature);
+		return new boss_nalakAI(creature);
 	}
 
-	struct npc_nalakAI : public ScriptedAI
+	struct boss_nalakAI : public ScriptedAI
 	{
-		npc_nalakAI(Creature* creature) : ScriptedAI(creature) { }
+		boss_nalakAI(Creature* creature) : ScriptedAI(creature) { }
 
 		uint32 Arc_Nova_Timer;
 		uint32 Lightning_Tether_Timer;
@@ -66,6 +78,26 @@ public:
 			Stormcloud_Timer = TIMER_STORMCLOUD;
 		}
 
+		void JustRespawned() override
+		{
+			Talk(SAY_INTRO);
+		}
+
+		void EnterCombat(Unit* /*who*/) override
+		{
+			Talk(SAY_AGGRO);
+		}
+
+		void KilledUnit(Unit* victim) override
+		{
+			Talk(SAY_KILL);
+		}
+
+		void JustDied(Unit* /*killer*/) override
+		{
+			Talk(SAY_DEATH);
+		}
+
 		void UpdateAI(uint32 diff) OVERRIDE
 		{
 			if (!UpdateVictim())
@@ -73,6 +105,7 @@ public:
 
 			if (Arc_Nova_Timer <= diff)
 			{
+				Talk(SAY_SPELL1);
 				DoCastVictim(SPELL_ARC_NOVA);
 				Arc_Nova_Timer = TIMER_ARC_NOVA;
 			}
@@ -80,6 +113,7 @@ public:
 
 			if (Lightning_Tether_Timer <= diff)
 			{
+				Talk(SAY_SPELL2);
 				DoCastVictim(SPELL_LIGHTNING_TETHER);
 				Lightning_Tether_Timer = TIMER_LIGHTNING_TETHER;
 			}
@@ -99,5 +133,5 @@ public:
 
 void AddSC_isle_of_thunder()
 {
-	new npc_nalak();
+	new boss_nalak();
 }
