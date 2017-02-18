@@ -30,7 +30,74 @@ EndContentData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 
-/*void AddSC_isle_of_thunder()
+enum Nalak
 {
-Script* newscript;
-}*/
+	TIMER_ARC_NOVA = 10000,
+	TIMER_LIGHTNING_TETHER = 25000,
+	TIMER_STORMCLOUD = 15000,
+
+	SPELL_ARC_NOVA = 136338,
+	SPELL_LIGHTNING_TETHER = 136339,
+	SPELL_STORMCLOUD = 136340
+};
+
+class npc_nalak : public CreatureScript
+{
+public:
+	npc_nalak() : CreatureScript("npc_nalak") { }
+
+	CreatureAI* GetAI(Creature* creature) const OVERRIDE
+	{
+		return new npc_nalakAI(creature);
+	}
+
+	struct npc_nalakAI : public ScriptedAI
+	{
+		npc_nalakAI(Creature* creature) : ScriptedAI(creature) { }
+
+		uint32 Arc_Nova_Timer;
+		uint32 Lightning_Tether_Timer;
+		uint32 Stormcloud_Timer;
+
+		void Reset() OVERRIDE
+		{
+			Arc_Nova_Timer = TIMER_ARC_NOVA;
+			Lightning_Tether_Timer = TIMER_LIGHTNING_TETHER;
+			Stormcloud_Timer = TIMER_STORMCLOUD;
+		}
+
+		void UpdateAI(uint32 diff) OVERRIDE
+		{
+			if (!UpdateVictim())
+				return;
+
+			if (Arc_Nova_Timer <= diff)
+			{
+				DoCastVictim(SPELL_ARC_NOVA);
+				Arc_Nova_Timer = TIMER_ARC_NOVA;
+			}
+			else Arc_Nova_Timer -= diff;
+
+			if (Lightning_Tether_Timer <= diff)
+			{
+				DoCastVictim(SPELL_LIGHTNING_TETHER);
+				Lightning_Tether_Timer = TIMER_LIGHTNING_TETHER;
+			}
+			else Lightning_Tether_Timer -= diff;
+
+			if (Stormcloud_Timer <= diff)
+			{
+				DoCastVictim(SPELL_STORMCLOUD);
+				Stormcloud_Timer = TIMER_STORMCLOUD;
+			}
+			else Stormcloud_Timer -= diff;
+
+			DoMeleeAttackIfReady();
+		}
+	};
+};
+
+void AddSC_isle_of_thunder()
+{
+	new npc_nalak();
+}

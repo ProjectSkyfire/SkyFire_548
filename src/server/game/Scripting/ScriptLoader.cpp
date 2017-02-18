@@ -1411,7 +1411,7 @@ void AddPandariaScripts()
     AddSC_boss_ordos();
     //AddSC_dread_wastes();
     //AddSC_isle_of_giants();
-    //AddSC_isle_of_thunder();
+    AddSC_isle_of_thunder();
     //AddSC_krasarang_wilds();
     //AddSC_kun_lai_summit();
     //AddSC_the_jade_forest();
