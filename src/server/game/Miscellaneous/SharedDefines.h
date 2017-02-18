@@ -63,6 +63,14 @@ enum SpellEffIndex
     EFFECT_31 = 31
 };
 
+enum Roles
+{
+    ROLES_DEFAULT = 0,
+    ROLES_HEALER = 1,
+    ROLES_DPS = 2,
+    ROLES_TANK = 3,
+};
+
 // used in script definitions
 #define EFFECT_FIRST_FOUND 254
 #define EFFECT_ALL 255

@@ -2296,9 +2296,9 @@ bool Unit::CanUseAttackType(uint8 attacktype) const
         case BASE_ATTACK:
             return !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED);
         case OFF_ATTACK:
-            return !HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_DISARM_OFFHAND);
+            return !HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DISARM_OFFHAND);
         case RANGED_ATTACK:
-            return !HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_DISARM_RANGED);
+            return !HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DISARM_RANGED);
         default:
             return true;
     }
@@ -4669,6 +4669,11 @@ void Unit::_UnregisterDynObject(DynamicObject* dynObj)
     m_dynObj.remove(dynObj);
 }
 
+void Unit::_UnregisterAreaTrigger(AreaTrigger* areaTrigger)
+{
+    m_AreaTrigger.remove(areaTrigger);
+}
+
 DynamicObject* Unit::GetDynObject(uint32 spellId)
 {
     if (m_dynObj.empty())
@@ -4680,6 +4685,68 @@ DynamicObject* Unit::GetDynObject(uint32 spellId)
             return dynObj;
     }
     return NULL;
+}
+
+AreaTrigger* Unit::GetAreaTrigger(uint32 spellId)
+{
+    if (m_AreaTrigger.empty())
+        return NULL;
+    for (AreaTriggerList::const_iterator i = m_AreaTrigger.begin(); i != m_AreaTrigger.end();++i) {
+        AreaTrigger* areaTrigger = *i;
+        if (areaTrigger->GetSpellId() == spellId)
+            return areaTrigger;
+    }
+    return NULL;
+}
+
+int32 Unit::CountDynObject(uint32 spellId)
+{
+    int32 count = 0;
+
+    if (m_dynObj.empty())
+        return 0;
+    for (DynObjectList::const_iterator i = m_dynObj.begin(); i != m_dynObj.end();++i) {
+        DynamicObject* dynObj = *i;
+        if (dynObj->GetSpellId() == spellId)
+            count++;
+    }
+    return count;
+}
+
+int32 Unit::CountAreaTrigger(uint32 spellId)
+{
+    int32 count = 0;
+
+    if (m_AreaTrigger.empty())
+        return 0;
+    for (AreaTriggerList::const_iterator i = m_AreaTrigger.begin(); i != m_AreaTrigger.end();++i) {
+        AreaTrigger* areaTrigger = *i;
+        if (areaTrigger->GetSpellId() == spellId)
+            count++;
+    }
+    return count;
+}
+
+void Unit::GetDynObjectList(std::list<DynamicObject*> &list, uint32 spellId)
+{
+    if (m_dynObj.empty())
+        return;
+    for (DynObjectList::const_iterator i = m_dynObj.begin(); i != m_dynObj.end();++i) {
+        DynamicObject* dynObj = *i;
+        if (dynObj->GetSpellId() == spellId)
+            list.push_back(dynObj);
+    }
+}
+
+void Unit::GetAreaTriggerList(std::list<AreaTrigger*> &list, uint32 spellId)
+{
+    if (m_AreaTrigger.empty())
+        return;
+    for (AreaTriggerList::const_iterator i = m_AreaTrigger.begin(); i != m_AreaTrigger.end();++i) {
+        AreaTrigger* areaTrigger = *i;
+        if (areaTrigger->GetSpellId() == spellId)
+            list.push_back(areaTrigger);
+    }
 }
 
 void Unit::RemoveDynObject(uint32 spellId)
@@ -4699,10 +4766,41 @@ void Unit::RemoveDynObject(uint32 spellId)
     }
 }
 
+void Unit::RemoveAreaTrigger(uint32 spellId)
+{
+    if (m_AreaTrigger.empty())
+        return;
+    for (AreaTriggerList::iterator i = m_AreaTrigger.begin(); i != m_AreaTrigger.end();) {
+        AreaTrigger* areaTrigger = *i;
+        if (areaTrigger->GetSpellId() == spellId) {
+            areaTrigger->Remove();
+            i = m_AreaTrigger.begin();
+        }
+        else
+            ++i;
+    }
+}
+
 void Unit::RemoveAllDynObjects()
 {
     while (!m_dynObj.empty())
         m_dynObj.front()->Remove();
+}
+
+void Unit::_RegisterAreaTrigger(AreaTrigger* areaTrigger)
+{
+    m_AreaTrigger.push_back(areaTrigger);
+}
+
+void Unit::_UnregisterDynObject(DynamicObject* dynObj)
+{
+    m_dynObj.remove(dynObj);
+}
+
+void Unit::RemoveAllAreaTriggers() 
+{
+    while (!m_AreaTrigger.empty())
+        m_AreaTrigger.front()->Remove();
 }
 
 GameObject* Unit::GetGameObject(uint32 spellId) const
@@ -7046,10 +7144,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         switch (GetShapeshiftForm())
                         {
                             case FORM_NONE:     trigger_spell_id = 37344; break;
-                            case FORM_CAT:      trigger_spell_id = 37341; break;
-                            case FORM_BEAR:     trigger_spell_id = 37340; break;
-                            case FORM_TREE:     trigger_spell_id = 37342; break;
-                            case FORM_MOONKIN:  trigger_spell_id = 37343; break;
+                            case FORM_CAT_FORM:      trigger_spell_id = 37341; break;
+                            case FORM_BEAR_FORM:     trigger_spell_id = 37340; break;
+                            case FORM_TREE_OF_LIFE:     trigger_spell_id = 37342; break;
+                            case FORM_MOONKIN_FORM:  trigger_spell_id = 37343; break;
                             default:
                                 return false;
                         }
@@ -7060,8 +7158,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     {
                         switch (GetShapeshiftForm())
                         {
-                            case FORM_CAT:      trigger_spell_id = 67355; break;
-                            case FORM_BEAR:     trigger_spell_id = 67354; break;
+                            case FORM_CAT_FORM:      trigger_spell_id = 67355; break;
+                            case FORM_BEAR_FORM:     trigger_spell_id = 67354; break;
                             default:
                                 return false;
                         }
@@ -7624,7 +7722,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
                 {
                     if (ReputationRank const* repRank = selfPlayerOwner->GetReputationMgr().GetForcedRankIfAny(targetFactionTemplateEntry))
                         return *repRank;
-                    if (!selfPlayerOwner->HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_IGNORE_REPUTATION))
+                    if (!selfPlayerOwner->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
                     {
                         if (FactionEntry const* targetFactionEntry = sFactionStore.LookupEntry(targetFactionTemplateEntry->faction))
                         {
@@ -7668,7 +7766,7 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
             return REP_HOSTILE;
         if (ReputationRank const* repRank = targetPlayerOwner->GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry))
             return *repRank;
-        if (!target->HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_IGNORE_REPUTATION))
+        if (!target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
         {
             if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
             {
@@ -11733,14 +11831,14 @@ void Unit::SetShapeshiftForm(ShapeshiftForm form)
 bool Unit::IsInFeralForm() const
 {
     ShapeshiftForm form = GetShapeshiftForm();
-    return form == FORM_CAT || form == FORM_BEAR;
+    return form == FORM_CAT_FORM || form == FORM_BEAR_FORM;
 }
 
 bool Unit::IsInDisallowedMountForm() const
 {
     ShapeshiftForm form = GetShapeshiftForm();
-    return form != FORM_NONE && form != FORM_BATTLESTANCE && form != FORM_BERSERKERSTANCE && form != FORM_DEFENSIVESTANCE &&
-        form != FORM_SHADOW && form != FORM_STEALTH && form != FORM_UNDEAD && form != FORM_WISE_SERPENT && form != FORM_STURDY_OX && form != FORM_FIERCE_TIGER && form != FORM_MOONKIN;
+    return form != FORM_NONE && form != FORM_BATTLE_STANCE && form != FORM_BERSERKER_STANCE && form != FORM_DEFENSIVE_STANCE &&
+        form != FORM_SHADOW_FORM && form != FORM_STEALTH && form != FORM_UNDEAD && form != FORM_SERPENT_STANCE && form != FORM_OX_STANCE && form != FORM_TIGER_STANCE && form != FORM_MOONKIN_FORM;
 }
 
 /*#######################################
@@ -12199,6 +12297,7 @@ void Unit::RemoveFromWorld()
 
         RemoveAllGameObjects();
         RemoveAllDynObjects();
+        RemoveAllAreaTriggers();
 
         ExitVehicle();  // Remove applied auras with SPELL_AURA_CONTROL_VEHICLE
         UnsummonAllTotems();
@@ -15249,7 +15348,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
     {
         switch (form)
         {
-            case FORM_CAT:
+            case FORM_CAT_FORM:
                 // Based on Hair color
                 if (getRace() == RACE_NIGHTELF)
                 {
@@ -15397,7 +15496,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 892;
                 else
                     return 8571;
-            case FORM_BEAR:
+            case FORM_BEAR_FORM:
                 // Based on Hair color
                 if (getRace() == RACE_NIGHTELF)
                 {
@@ -15545,22 +15644,22 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 2281;
                 else
                     return 2289;
-            case FORM_FLIGHT:
+            case FORM_FLIGHT_FORM:
                 if (Player::TeamForRace(getRace()) == ALLIANCE)
                     return 20857;
                 return 20872;
-            case FORM_FLIGHT_EPIC:
+            case FORM_FLIGHT_FORM_EPIC:
                 if (Player::TeamForRace(getRace()) == ALLIANCE)
                     return (getRace() == RACE_WORGEN ? 37729 : 21243);
                 if (getRace() == RACE_TROLL)
                     return 37730;
                 return 21244;
-            case FORM_MOONKIN:
+            case FORM_MOONKIN_FORM:
                 if (getRace() == RACE_TROLL)
                     return 37174;
                 if (getRace() == RACE_WORGEN)
                     return 37173;
-            case FORM_GHOSTWOLF:
+            case FORM_GHOST_WOLF:
                 if (HasAura(58135)) //! Glyph of Arctic Wolf
                     return 27312;
             default:
