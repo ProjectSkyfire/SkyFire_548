@@ -669,7 +669,7 @@ void AddSC_event_childrens_week();
 void AddSC_boss_ordos();
 //void AddSC_dread_wastes();
 //void AddSC_isle_of_giants();
-//void AddSC_isle_of_thunder();
+void AddSC_isle_of_thunder();
 //void AddSC_krasarang_wilds();
 //void AddSC_kun_lai_summit();
 //void AddSC_the_jade_forest();
