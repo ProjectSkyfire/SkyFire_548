@@ -129,12 +129,12 @@ extern int main(int argc, char** argv)
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
     if (confVersion < SKYFIREAUTH_CONFIG_VERSION)
     {
-     SF_LOG_INFO("server.authserver", "*****************************************************************************");
-     SF_LOG_INFO("server.authserver", " WARNING: Your authserver.conf version indicates your conf file is out of date!");
-     SF_LOG_INFO("server.authserver", "          Please check for updates, as your current default values may cause");
-     SF_LOG_INFO("server.authserver", "          strange behavior.");
-     SF_LOG_INFO("server.authserver", "*****************************************************************************");
-     }
+        SF_LOG_INFO("server.authserver", "*****************************************************************************");
+        SF_LOG_INFO("server.authserver", " WARNING: Your authserver.conf version indicates your conf file is out of date!");
+        SF_LOG_INFO("server.authserver", "          Please check for updates, as your current default values may cause");
+        SF_LOG_INFO("server.authserver", "          strange behavior.");
+        SF_LOG_INFO("server.authserver", "*****************************************************************************");
+    }
 
     SF_LOG_WARN("server.authserver", "%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 

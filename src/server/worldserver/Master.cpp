@@ -139,6 +139,16 @@ int Master::Run()
     SF_LOG_INFO("server.worldserver", "  Project SkyFireEmu 2011 - 2014(c) Open-sourced Game Emulation ");
     SF_LOG_INFO("server.worldserver", "           <http://www.projectskyfire.org/> \n");
 
+    ///- Check the version of the configuration file
+    uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
+    if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
+    {
+         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
+         SF_LOG_INFO("server.worldserver", " WARNING: Your authserver.conf version indicates your conf file is out of date!");
+         SF_LOG_INFO("server.worldserver", "          Please check for updates, as your current default values may cause");
+         SF_LOG_INFO("server.worldserver", "          strange behavior.");
+         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
+    }
 
     /// worldserver PID file creation
     std::string pidFile = sConfigMgr->GetStringDefault("PidFile", "");
