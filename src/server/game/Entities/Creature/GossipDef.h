@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_GOSSIP_H
-#define TRINITYCORE_GOSSIP_H
+#ifndef SKYFIRESERVER_GOSSIP_H
+#define SKYFIRESERVER_GOSSIP_H
 
 #include "Common.h"
 #include "QuestDef.h"

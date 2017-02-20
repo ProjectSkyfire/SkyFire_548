@@ -31,7 +31,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     if (!classResult || !raceResult)
     {
-        TC_LOG_ERROR("network", "Unable to retrieve class or race data.");
+        SF_LOG_ERROR("network", "Unable to retrieve class or race data.");
         return;
     }
 
@@ -39,7 +39,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     if (iter != realmNameStore.end()) // Add local realm
         realmNamesToSend[realmID] = iter->second;
 
-    TC_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
+    SF_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
 
     packet.WriteBit(code == AUTH_OK);

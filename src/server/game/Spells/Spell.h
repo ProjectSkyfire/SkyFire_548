@@ -704,7 +704,7 @@ class Spell
 #endif
 };
 
-namespace Trinity
+namespace Skyfire
 {
     struct WorldObjectSpellTargetCheck
     {

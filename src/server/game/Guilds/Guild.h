@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_GUILD_H
-#define TRINITYCORE_GUILD_H
+#ifndef SKYFIRESERVER_GUILD_H
+#define SKYFIRESERVER_GUILD_H
 
 #include "AchievementMgr.h"
 #include "World.h"

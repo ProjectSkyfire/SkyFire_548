@@ -218,14 +218,14 @@ class boss_festergut : public CreatureScript
                                 if (melee.empty())
                                     break;
 
-                                Unit* target = Trinity::Containers::SelectRandomContainerElement(melee);
+                                Unit* target = Skyfire::Containers::SelectRandomContainerElement(melee);
                                 ranged.push_back(target);
                                 melee.remove(target);
                             }
 
                             if (!ranged.empty())
                             {
-                                Trinity::Containers::RandomResizeList(ranged, RAID_MODE<uint32>(1, 3, 1, 3));
+                                Skyfire::Containers::RandomResizeList(ranged, RAID_MODE<uint32>(1, 3, 1, 3));
                                 for (std::list<Unit*>::iterator itr = ranged.begin(); itr != ranged.end(); ++itr)
                                     DoCast(*itr, SPELL_VILE_GAS);
                             }

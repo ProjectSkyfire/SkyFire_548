@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_TIMER_H
-#define TRINITY_TIMER_H
+#ifndef SKYFIRE_TIMER_H
+#define SKYFIRE_TIMER_H
 
 #include "ace/OS_NS_sys_time.h"
 #include "Common.h"

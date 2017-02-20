@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_PET_H
-#define TRINITYCORE_PET_H
+#ifndef SKYFIRESERVER_PET_H
+#define SKYFIRESERVER_PET_H
 
 #include "PetDefines.h"
 #include "TemporarySummon.h"

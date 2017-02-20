@@ -459,7 +459,7 @@ public:
             }
             if (targets.empty())
                 return; // No targets added for some reason. No point continuing.
-            targets.sort(Trinity::ObjectDistanceOrderPred(me)); // Sort players by distance.
+            targets.sort(Skyfire::ObjectDistanceOrderPred(me)); // Sort players by distance.
             targets.resize(1); // Only need closest target.
             Unit* target = targets.front(); // Get the first target.
             if (target)

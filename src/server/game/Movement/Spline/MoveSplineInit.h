@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_MOVESPLINEINIT_H
-#define TRINITYSERVER_MOVESPLINEINIT_H
+#ifndef SKYFIRESERVER_MOVESPLINEINIT_H
+#define SKYFIRESERVER_MOVESPLINEINIT_H
 
 #include "MoveSplineInitArgs.h"
 #include "PathGenerator.h"
@@ -206,4 +206,4 @@ namespace Movement
 
     inline void MoveSplineInit::DisableTransportPathTransformations() { args.TransformForTransport = false; }
 }
-#endif // TRINITYSERVER_MOVESPLINEINIT_H
+#endif // SKYFIRESERVER_MOVESPLINEINIT_H

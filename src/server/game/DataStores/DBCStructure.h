@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_DBCSTRUCTURE_H
-#define TRINITY_DBCSTRUCTURE_H
+#ifndef SKYFIRE_DBCSTRUCTURE_H
+#define SKYFIRE_DBCSTRUCTURE_H
 
 #include "Common.h"
 #include "DBCEnums.h"

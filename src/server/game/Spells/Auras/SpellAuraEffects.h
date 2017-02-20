@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SPELLAURAEFFECTS_H
-#define TRINITY_SPELLAURAEFFECTS_H
+#ifndef SKYFIRE_SPELLAURAEFFECTS_H
+#define SKYFIRE_SPELLAURAEFFECTS_H
 
 class Unit;
 class AuraEffect;
@@ -304,7 +304,7 @@ class AuraEffect
         void HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
 };
 
-namespace Trinity
+namespace Skyfire
 {
     // Binary predicate for sorting the priority of absorption aura effects
     class AbsorbAuraOrderPred

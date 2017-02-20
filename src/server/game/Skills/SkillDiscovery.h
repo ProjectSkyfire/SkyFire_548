@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SKILLDISCOVERY_H
-#define TRINITY_SKILLDISCOVERY_H
+#ifndef SKYFIRE_SKILLDISCOVERY_H
+#define SKYFIRE_SKILLDISCOVERY_H
 
 #include "Common.h"
 

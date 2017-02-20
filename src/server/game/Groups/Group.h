@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_GROUP_H
-#define TRINITYCORE_GROUP_H
+#ifndef SKYFIRESERVER_GROUP_H
+#define SKYFIRESERVER_GROUP_H
 
 #include "DBCEnums.h"
 #include "GroupRefManager.h"

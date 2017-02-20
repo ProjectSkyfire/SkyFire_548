@@ -226,7 +226,7 @@ class instance_ahnkahet : public InstanceMapScript
                         if (vInitiands.empty())
                             return 0;
 
-                        return Trinity::Containers::SelectRandomContainerElement(vInitiands);
+                        return Skyfire::Containers::SelectRandomContainerElement(vInitiands);
                     }
                     case DATA_ADD_JEDOGA_OPFER:
                         return JedogaSacrifices;

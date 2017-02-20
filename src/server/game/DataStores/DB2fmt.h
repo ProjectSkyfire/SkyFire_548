@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_DB2SFRM_H
-#define TRINITY_DB2SFRM_H
+#ifndef SKYFIRE_DB2SFRM_H
+#define SKYFIRE_DB2SFRM_H
 
 char const BattlePetAbilityEffectfmt[] = "nxxxxxxxxxxx";
 char const BattlePetAbilityfmt[] = "niiixxss";

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_DYNAMICOBJECT_H
-#define TRINITYCORE_DYNAMICOBJECT_H
+#ifndef SKYFIRESERVER_DYNAMICOBJECT_H
+#define SKYFIRESERVER_DYNAMICOBJECT_H
 
 #include "Object.h"
 

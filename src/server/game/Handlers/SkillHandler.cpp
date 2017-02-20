@@ -75,12 +75,12 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
+    SF_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
 }
 
 void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
+    SF_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
     ObjectGuid guid;
     uint8 RespecType = 0;
     uint32 Cost = 0;

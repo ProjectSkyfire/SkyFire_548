@@ -17,14 +17,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TCSoap.h"
+#include "SFSoap.h"
 #include "soapH.h"
 #include "soapStub.h"
 #include "World.h"
 #include "AccountMgr.h"
 #include "Log.h"
 
-void TCSoapRunnable::run()
+void SFSoapRunnable::run()
 {
     struct soap soap;
     soap_init(&soap);
@@ -37,18 +37,18 @@ void TCSoapRunnable::run()
     soap.send_timeout = 5;
     if (!soap_valid_socket(soap_bind(&soap, _host.c_str(), _port, 100)))
     {
-        TC_LOG_ERROR("network.soap", "Couldn't bind to %s:%d", _host.c_str(), _port);
+        SF_LOG_ERROR("network.soap", "Couldn't bind to %s:%d", _host.c_str(), _port);
         exit(-1);
     }
 
-    TC_LOG_INFO("network.soap", "Bound to http://%s:%d", _host.c_str(), _port);
+    SF_LOG_INFO("network.soap", "Bound to http://%s:%d", _host.c_str(), _port);
 
     while (!World::IsStopped())
     {
         if (!soap_valid_socket(soap_accept(&soap)))
             continue;   // ran into an accept timeout
 
-        TC_LOG_DEBUG("network.soap", "Accepted connection from IP=%d.%d.%d.%d", (int)(soap.ip>>24)&0xFF, (int)(soap.ip>>16)&0xFF, (int)(soap.ip>>8)&0xFF, (int)soap.ip&0xFF);
+        SF_LOG_DEBUG("network.soap", "Accepted connection from IP=%d.%d.%d.%d", (int)(soap.ip>>24)&0xFF, (int)(soap.ip>>16)&0xFF, (int)(soap.ip>>8)&0xFF, (int)soap.ip&0xFF);
         struct soap* thread_soap = soap_copy(&soap);// make a safe copy
 
         ACE_Message_Block* mb = new ACE_Message_Block(sizeof(struct soap*));
@@ -59,7 +59,7 @@ void TCSoapRunnable::run()
     soap_done(&soap);
 }
 
-void TCSoapRunnable::process_message(ACE_Message_Block* mb)
+void SFSoapRunnable::process_message(ACE_Message_Block* mb)
 {
     ACE_TRACE (ACE_TEXT ("SOAPWorkingThread::process_message"));
 
@@ -83,33 +83,33 @@ int ns1__executeCommand(soap* soap, char* command, char** result)
     // security check
     if (!soap->userid || !soap->passwd)
     {
-        TC_LOG_INFO("network.soap", "Client didn't provide login information");
+        SF_LOG_INFO("network.soap", "Client didn't provide login information");
         return 401;
     }
 
     uint32 accountId = AccountMgr::GetId(soap->userid);
     if (!accountId)
     {
-        TC_LOG_INFO("network.soap", "Client used invalid username '%s'", soap->userid);
+        SF_LOG_INFO("network.soap", "Client used invalid username '%s'", soap->userid);
         return 401;
     }
 
     if (!AccountMgr::CheckPassword(accountId, soap->passwd))
     {
-        TC_LOG_INFO("network.soap", "Invalid password for account '%s'", soap->userid);
+        SF_LOG_INFO("network.soap", "Invalid password for account '%s'", soap->userid);
         return 401;
     }
 
     if (AccountMgr::GetSecurity(accountId) < SEC_ADMINISTRATOR)
     {
-        TC_LOG_INFO("network.soap", "%s's gmlevel is too low", soap->userid);
+        SF_LOG_INFO("network.soap", "%s's gmlevel is too low", soap->userid);
         return 403;
     }
 
     if (!command || !*command)
         return soap_sender_fault(soap, "Command can not be empty", "The supplied command was an empty string");
 
-    TC_LOG_INFO("network.soap", "Received command '%s'", command);
+    SF_LOG_INFO("network.soap", "Received command '%s'", command);
     SOAPCommand connection;
 
     // commands are executed in the world thread. We have to wait for them to be completed
@@ -123,7 +123,7 @@ int ns1__executeCommand(soap* soap, char* command, char** result)
 
     int acc = connection.pendingCommands.acquire();
     if (acc)
-        TC_LOG_ERROR("network.soap", "Error while acquiring lock, acc = %i, errno = %u", acc, errno);
+        SF_LOG_ERROR("network.soap", "Error while acquiring lock, acc = %i, errno = %u", acc, errno);
 
     // alright, command finished
 

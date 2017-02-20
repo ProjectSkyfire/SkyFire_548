@@ -69,7 +69,7 @@ void TicketMgr::LoadGmTickets()
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 GM tickets. DB table `gm_ticket` is empty!");
+        SF_LOG_INFO("server.loading", ">> Loaded 0 GM tickets. DB table `gm_ticket` is empty!");
         return;
     }
 
@@ -91,7 +91,7 @@ void TicketMgr::LoadGmTickets()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u GM tickets in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    SF_LOG_INFO("server.loading", ">> Loaded %u GM tickets in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void TicketMgr::LoadBugTickets()
@@ -110,7 +110,7 @@ void TicketMgr::LoadBugTickets()
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 ticket bugs. DB table `ticket_bug` is empty!");
+        SF_LOG_INFO("server.loading", ">> Loaded 0 ticket bugs. DB table `ticket_bug` is empty!");
         return;
     }
 
@@ -132,7 +132,7 @@ void TicketMgr::LoadBugTickets()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u ticket bugs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    SF_LOG_INFO("server.loading", ">> Loaded %u ticket bugs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void TicketMgr::LoadSuggestTickets()
@@ -151,7 +151,7 @@ void TicketMgr::LoadSuggestTickets()
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 ticket suggests. DB table `ticket_suggest` is empty!");
+        SF_LOG_INFO("server.loading", ">> Loaded 0 ticket suggests. DB table `ticket_suggest` is empty!");
         return;
     }
 
@@ -173,7 +173,7 @@ void TicketMgr::LoadSuggestTickets()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u ticket suggests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    SF_LOG_INFO("server.loading", ">> Loaded %u ticket suggests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void TicketMgr::AddTicket(GmTicket* ticket)

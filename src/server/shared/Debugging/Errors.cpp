@@ -23,7 +23,7 @@
 #include <ace/OS_NS_unistd.h>
 #include <cstdlib>
 
-namespace Trinity {
+namespace Skyfire {
 
 void Assert(char const* file, int line, char const* function, char const* message)
 {
@@ -57,4 +57,4 @@ void Warning(char const* file, int line, char const* function, char const* messa
                    file, line, function, message);
 }
 
-} // namespace Trinity
+} // namespace Skyfire

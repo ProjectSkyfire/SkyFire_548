@@ -169,7 +169,7 @@ public:
             else
             {
                 //Madrigosa not found, end intro
-                TC_LOG_ERROR("scripts", "Madrigosa was not found");
+                SF_LOG_ERROR("scripts", "Madrigosa was not found");
                 EndIntro();
             }
         }

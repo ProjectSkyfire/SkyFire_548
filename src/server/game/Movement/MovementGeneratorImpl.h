@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_MOVEMENTGENERATOR_IMPL_H
-#define TRINITY_MOVEMENTGENERATOR_IMPL_H
+#ifndef SKYFIRE_MOVEMENTGENERATOR_IMPL_H
+#define SKYFIRE_MOVEMENTGENERATOR_IMPL_H
 
 #include "MovementGenerator.h"
 

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_CORPSE_H
-#define TRINITYCORE_CORPSE_H
+#ifndef SKYFIRESERVER_CORPSE_H
+#define SKYFIRESERVER_CORPSE_H
 
 #include "Object.h"
 #include "DatabaseEnv.h"

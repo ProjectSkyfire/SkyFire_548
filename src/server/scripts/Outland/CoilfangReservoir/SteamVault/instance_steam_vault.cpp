@@ -140,7 +140,7 @@ class instance_steam_vault : public InstanceMapScript
                             if (GetBossState(DATA_MEKGINEER_STEAMRIGGER) == SPECIAL)
                                 HandleGameObject(MainChambersDoorGUID, true);
 
-                            TC_LOG_DEBUG("scripts", "Instance Steamvault: Access panel used.");
+                            SF_LOG_DEBUG("scripts", "Instance Steamvault: Access panel used.");
                         }
                         break;
                     case DATA_MEKGINEER_STEAMRIGGER:
@@ -149,7 +149,7 @@ class instance_steam_vault : public InstanceMapScript
                             if (GetBossState(DATA_HYDROMANCER_THESPIA) == SPECIAL)
                                 HandleGameObject(MainChambersDoorGUID, true);
 
-                            TC_LOG_DEBUG("scripts", "Instance Steamvault: Access panel used.");
+                            SF_LOG_DEBUG("scripts", "Instance Steamvault: Access panel used.");
                         }
                         break;
                     default:

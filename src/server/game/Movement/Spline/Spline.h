@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_SPLINE_H
-#define TRINITYSERVER_SPLINE_H
+#ifndef SKYFIRESERVER_SPLINE_H
+#define SKYFIRESERVER_SPLINE_H
 
 #include "MovementTypedefs.h"
 #include <G3D/Vector3.h>
@@ -210,4 +210,4 @@ public:
 
 #include "SplineImpl.h"
 
-#endif // TRINITYSERVER_SPLINE_H
+#endif // SKYFIRESERVER_SPLINE_H

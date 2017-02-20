@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_PACKET_BUILDER_H
-#define TRINITYSERVER_PACKET_BUILDER_H
+#ifndef SKYFIRESERVER_PACKET_BUILDER_H
+#define SKYFIRESERVER_PACKET_BUILDER_H
 
 #include "Define.h" // for uint32
 #include "Unit.h"
@@ -52,4 +52,4 @@ namespace Movement
         static MonsterMoveType GetMonsterMoveType(MoveSpline const& moveSpline);
     };
 }
-#endif // TRINITYSERVER_PACKET_BUILDER_H
+#endif // SKYFIRESERVER_PACKET_BUILDER_H

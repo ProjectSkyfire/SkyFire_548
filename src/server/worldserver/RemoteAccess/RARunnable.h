@@ -21,8 +21,8 @@
 /// @{
 /// \file
 
-#ifndef _TRINITY_RARUNNABLE_H_
-#define _TRINITY_RARUNNABLE_H_
+#ifndef _SKYFIRE_RARUNNABLE_H_
+#define _SKYFIRE_RARUNNABLE_H_
 
 #include "Common.h"
 
@@ -40,6 +40,6 @@ private:
 
 };
 
-#endif /* _TRINITY_RARUNNABLE_H_ */
+#endif /* _SKYFIRE_RARUNNABLE_H_ */
 
 /// @}

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GAMEOBJECTAI_H
-#define TRINITY_GAMEOBJECTAI_H
+#ifndef SKYFIRE_GAMEOBJECTAI_H
+#define SKYFIRE_GAMEOBJECTAI_H
 
 #include "Define.h"
 #include <list>

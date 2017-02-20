@@ -85,7 +85,7 @@ public:
     {
         ASSERT(index < sizeof(uint64));
 
-#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+#if SKYFIRE_ENDIAN == SKYFIRE_LITTLEENDIAN
         return _data.byte[index];
 #else
         return _data.byte[7 - index];
@@ -96,7 +96,7 @@ public:
     {
         ASSERT(index < sizeof(uint64));
 
-#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+#if SKYFIRE_ENDIAN == SKYFIRE_LITTLEENDIAN
         return _data.byte[index];
 #else
         return _data.byte[7 - index];

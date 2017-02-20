@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_POOLHANDLER_H
-#define TRINITY_POOLHANDLER_H
+#ifndef SKYFIRE_POOLHANDLER_H
+#define SKYFIRE_POOLHANDLER_H
 
 #include "Define.h"
 #include <ace/Singleton.h>

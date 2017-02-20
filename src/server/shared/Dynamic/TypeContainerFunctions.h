@@ -30,7 +30,7 @@
 #include "Dynamic/TypeList.h"
 #include <map>
 
-namespace Trinity
+namespace Skyfire
 {
     /* ContainerMapList Helpers */
     // count functions

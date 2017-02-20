@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_TOTEM_H
-#define TRINITYCORE_TOTEM_H
+#ifndef SKYFIRESERVER_TOTEM_H
+#define SKYFIRESERVER_TOTEM_H
 
 #include "TemporarySummon.h"
 

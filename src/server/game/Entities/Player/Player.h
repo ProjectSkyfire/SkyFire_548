@@ -79,7 +79,7 @@ enum SpellModType
     SPELLMOD_PCT = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
 };
 
-// 2^n values, Player::m_isunderwater is a bitmask. These are Trinity internal values, they are never send to any client
+// 2^n values, Player::m_isunderwater is a bitmask. These are Skyfire internal values, they are never send to any client
 enum PlayerUnderwaterState
 {
     UNDERWATER_NONE = 0x00,

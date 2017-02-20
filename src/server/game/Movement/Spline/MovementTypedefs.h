@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_TYPEDEFS_H
-#define TRINITYSERVER_TYPEDEFS_H
+#ifndef SKYFIRESERVER_TYPEDEFS_H
+#define SKYFIRESERVER_TYPEDEFS_H
 
 #include "Common.h"
 
@@ -84,4 +84,4 @@ namespace Movement
     extern std::string MovementFlagsExtra_ToString(uint32 flags);
 }
 
-#endif // TRINITYSERVER_TYPEDEFS_H
+#endif // SKYFIRESERVER_TYPEDEFS_H

@@ -98,7 +98,7 @@ int MapUpdater::deactivate()
 
 int MapUpdater::wait()
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, m_mutex);
+    SKYFIRE_GUARD(ACE_Thread_Mutex, m_mutex);
 
     while (pending_requests > 0)
         m_condition.wait();
@@ -108,7 +108,7 @@ int MapUpdater::wait()
 
 int MapUpdater::schedule_update(Map& map, ACE_UINT32 diff)
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, m_mutex);
+    SKYFIRE_GUARD(ACE_Thread_Mutex, m_mutex);
 
     ++pending_requests;
 
@@ -130,7 +130,7 @@ bool MapUpdater::activated()
 
 void MapUpdater::update_finished()
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, m_mutex);
+    SKYFIRE_GUARD(ACE_Thread_Mutex, m_mutex);
 
     if (pending_requests == 0)
     {

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GRID_H
-#define TRINITY_GRID_H
+#ifndef SKYFIRE_GRID_H
+#define SKYFIRE_GRID_H
 
 /*
   @class Grid

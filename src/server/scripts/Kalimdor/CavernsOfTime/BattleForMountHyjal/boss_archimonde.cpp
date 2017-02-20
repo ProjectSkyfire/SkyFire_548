@@ -379,7 +379,7 @@ public:
             if (targets.empty())
                 return false;
 
-            targets.sort(Trinity::ObjectDistanceOrderPred(me));
+            targets.sort(Skyfire::ObjectDistanceOrderPred(me));
             Unit* target = targets.front();
             if (target)
             {

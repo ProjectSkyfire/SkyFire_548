@@ -2998,7 +2998,7 @@ class Unit : public WorldObject
     time_t _lastDamagedTime; // Part of Evade mechanics
 };
 
-namespace Trinity
+namespace Skyfire
 {
     // Binary predicate for sorting Units based on percent value of a power
     class PowerPctOrderPred

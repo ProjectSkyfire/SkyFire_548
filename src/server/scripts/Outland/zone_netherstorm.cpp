@@ -307,7 +307,7 @@ public:
 ## go_manaforge_control_console
 ######*/
 
-/// @todo clean up this workaround when Trinity adds support to do it properly (with gossip selections instead of instant summon)
+/// @todo clean up this workaround when Skyfire adds support to do it properly (with gossip selections instead of instant summon)
 class go_manaforge_control_console : public GameObjectScript
 {
 public:
@@ -504,7 +504,7 @@ public:
                 return true;
             }
 
-            TC_LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
+            SF_LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
             return false;
         }
 
@@ -815,7 +815,7 @@ public:
                 }
                 if (!UnitsWithMana.empty())
                 {
-                    DoCast(Trinity::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
+                    DoCast(Skyfire::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
                     ManaBurnTimer = 8000 + (rand() % 10 * 1000); // 8-18 sec cd
                 }
                 else

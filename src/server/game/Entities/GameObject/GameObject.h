@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_GAMEOBJECT_H
-#define TRINITYCORE_GAMEOBJECT_H
+#ifndef SKYFIRESERVER_GAMEOBJECT_H
+#define SKYFIRESERVER_GAMEOBJECT_H
 
 #include "Common.h"
 #include "SharedDefines.h"

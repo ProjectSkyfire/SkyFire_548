@@ -456,7 +456,7 @@ class spell_devourer_of_souls_mirrored_soul_target_selector : public SpellScript
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Skyfire::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }

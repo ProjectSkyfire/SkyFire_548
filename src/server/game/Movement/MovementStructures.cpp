@@ -5451,7 +5451,7 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
 
 bool Movement::PrintInvalidSequenceElement(MovementStatusElements const element, char const* function)
 {
-    TC_LOG_ERROR("entities.unit", "Incorrect sequence element %d detected at %s", element, function);
+    SF_LOG_ERROR("entities.unit", "Incorrect sequence element %d detected at %s", element, function);
     return false;
 }
 

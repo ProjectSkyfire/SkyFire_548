@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_CHAT_H
-#define TRINITYCORE_CHAT_H
+#ifndef SKYFIRESERVER_CHAT_H
+#define SKYFIRESERVER_CHAT_H
 
 #include "SharedDefines.h"
 #include "WorldSession.h"
@@ -66,7 +66,7 @@ class ChatHandler
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = NULL; return start; }
 
         // function with different implementation for chat/console
-        virtual const char *GetTrinityString(int32 entry) const;
+        virtual const char *GetSkyFireString(int32 entry) const;
         virtual void SendSysMessage(const char *str);
 
         void SendSysMessage(int32     entry);
@@ -147,7 +147,7 @@ class CliHandler : public ChatHandler
         explicit CliHandler(void* callbackArg, Print* zprint) : m_callbackArg(callbackArg), m_print(zprint) { }
 
         // overwrite functions
-        const char *GetTrinityString(int32 entry) const;
+        const char *GetSkyFireString(int32 entry) const;
         bool isAvailable(ChatCommand const& cmd) const;
         bool HasPermission(uint32 /*permission*/) const { return true; }
         void SendSysMessage(const char *str);

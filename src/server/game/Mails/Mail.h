@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_MAIL_H
-#define TRINITY_MAIL_H
+#ifndef SKYFIRE_MAIL_H
+#define SKYFIRE_MAIL_H
 
 #include "Common.h"
 #include <map>

@@ -273,4 +273,4 @@ class GuildFinderMgr
 
 #define sGuildFinderMgr ACE_Singleton<GuildFinderMgr, ACE_Null_Mutex>::instance()
 
-#endif // __TRINITY_GUILDFINDER_H
+#endif // __SKYFIRE_GUILDFINDER_H

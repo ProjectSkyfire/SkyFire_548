@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_AREATRIGGER_H
-#define TRINITYCORE_AREATRIGGER_H
+#ifndef SKYFIRESERVER_AREATRIGGER_H
+#define SKYFIRESERVER_AREATRIGGER_H
 
 #include "Object.h"
 

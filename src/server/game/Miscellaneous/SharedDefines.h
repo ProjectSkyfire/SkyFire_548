@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SHAREDDEFINES_H
-#define TRINITY_SHAREDDEFINES_H
+#ifndef SKYFIRE_SHAREDDEFINES_H
+#define SKYFIRE_SHAREDDEFINES_H
 
 #include "DetourNavMesh.h"
 #include "Define.h"
@@ -3568,40 +3568,40 @@ enum SkillCategory
 
 enum TotemCategory
 {
-    TC_SKINNING_SKIFE_OLD          = 1,
-    TC_EARTH_TOTEM                 = 2,
-    TC_AIR_TOTEM                   = 3,
-    TC_FIRE_TOTEM                  = 4,
-    TC_WATER_TOTEM                 = 5,
-    TC_COPPER_ROD                  = 6,
-    TC_SILVER_ROD                  = 7,
-    TC_GOLDEN_ROD                  = 8,
-    TC_TRUESILVER_ROD              = 9,
-    TC_ARCANITE_ROD                = 10,
-    TC_MINING_PICK_OLD             = 11,
-    TC_PHILOSOPHERS_STONE          = 12,
-    TC_BLACKSMITH_HAMMER_OLD       = 13,
-    TC_ARCLIGHT_SPANNER            = 14,
-    TC_GYROMATIC_MA                = 15,
-    TC_MASTER_TOTEM                = 21,
-    TC_FEL_IRON_ROD                = 41,
-    TC_ADAMANTITE_ROD              = 62,
-    TC_ETERNIUM_ROD                = 63,
-    TC_HOLLOW_QUILL                = 81,
-    TC_RUNED_AZURITE_ROD           = 101,
-    TC_VIRTUOSO_INKING_SET         = 121,
-    TC_DRUMS                       = 141,
-    TC_GNOMISH_ARMY_KNIFE          = 161,
-    TC_BLACKSMITH_HAMMER           = 162,
-    TC_MINING_PICK                 = 165,
-    TC_SKINNING_KNIFE              = 166,
-    TC_HAMMER_PICK                 = 167,
-    TC_BLADED_PICKAXE              = 168,
-    TC_FLINT_AND_TINDER            = 169,
-    TC_RUNED_COBALT_ROD            = 189,
-    TC_RUNED_TITANIUM_ROD          = 190,
-    TC_RUNED_ELEMENTIUM_ROD        = 209,
-    TC_HIGH_POWERED_BOLT_GUN       = 210,
+    SF_SKINNING_SKIFE_OLD          = 1,
+    SF_EARTH_TOTEM                 = 2,
+    SF_AIR_TOTEM                   = 3,
+    SF_FIRE_TOTEM                  = 4,
+    SF_WATER_TOTEM                 = 5,
+    SF_COPPER_ROD                  = 6,
+    SF_SILVER_ROD                  = 7,
+    SF_GOLDEN_ROD                  = 8,
+    SF_TRUESILVER_ROD              = 9,
+    SF_ARCANITE_ROD                = 10,
+    SF_MINING_PICK_OLD             = 11,
+    SF_PHILOSOPHERS_STONE          = 12,
+    SF_BLACKSMITH_HAMMER_OLD       = 13,
+    SF_ARCLIGHT_SPANNER            = 14,
+    SF_GYROMATIC_MA                = 15,
+    SF_MASTER_TOTEM                = 21,
+    SF_FEL_IRON_ROD                = 41,
+    SF_ADAMANTITE_ROD              = 62,
+    SF_ETERNIUM_ROD                = 63,
+    SF_HOLLOW_QUILL                = 81,
+    SF_RUNED_AZURITE_ROD           = 101,
+    SF_VIRTUOSO_INKING_SET         = 121,
+    SF_DRUMS                       = 141,
+    SF_GNOMISH_ARMY_KNIFE          = 161,
+    SF_BLACKSMITH_HAMMER           = 162,
+    SF_MINING_PICK                 = 165,
+    SF_SKINNING_KNIFE              = 166,
+    SF_HAMMER_PICK                 = 167,
+    SF_BLADED_PICKAXE              = 168,
+    SF_FLINT_AND_TINDER            = 169,
+    SF_RUNED_COBALT_ROD            = 189,
+    SF_RUNED_TITANIUM_ROD          = 190,
+    SF_RUNED_ELEMENTIUM_ROD        = 209,
+    SF_HIGH_POWERED_BOLT_GUN       = 210,
 };
 
 enum UnitDynFlags

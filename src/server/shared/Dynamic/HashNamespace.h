@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_HASH_NAMESPACE_H
-#define TRINITY_HASH_NAMESPACE_H
+#ifndef SKYFIRE_HASH_NAMESPACE_H
+#define SKYFIRE_HASH_NAMESPACE_H
 
 #include "Define.h"
 

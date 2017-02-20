@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CONDITIONMGR_H
-#define TRINITY_CONDITIONMGR_H
+#ifndef SKYFIRE_CONDITIONMGR_H
+#define SKYFIRE_CONDITIONMGR_H
 
 #include "Define.h"
 #include "Errors.h"

@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SF_TRINITY_VEHICLE_H
-#define SF_TRINITY_VEHICLE_H
+#ifndef SF_SKYFIRE_VEHICLE_H
+#define SF_SKYFIRE_VEHICLE_H
 
 #include "ObjectDefines.h"
 #include "Object.h"

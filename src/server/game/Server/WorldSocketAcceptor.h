@@ -46,7 +46,7 @@ protected:
 
     virtual int handle_timeout(const ACE_Time_Value& /*current_time*/, const void* /*act = 0*/)
     {
-        TC_LOG_DEBUG("misc", "Resuming acceptor");
+        SF_LOG_DEBUG("misc", "Resuming acceptor");
         reactor()->cancel_timer(this, 1);
         return reactor()->register_handler(this, ACE_Event_Handler::ACCEPT_MASK);
     }
@@ -56,7 +56,7 @@ protected:
 #if defined(ENFILE) && defined(EMFILE)
         if (errno == ENFILE || errno == EMFILE)
         {
-            TC_LOG_ERROR("misc", "Out of file descriptors, suspending incoming connections for 10 seconds");
+            SF_LOG_ERROR("misc", "Out of file descriptors, suspending incoming connections for 10 seconds");
             reactor()->remove_handler(this, ACE_Event_Handler::ACCEPT_MASK | ACE_Event_Handler::DONT_CALL);
             reactor()->schedule_timer(this, NULL, ACE_Time_Value(10));
         }

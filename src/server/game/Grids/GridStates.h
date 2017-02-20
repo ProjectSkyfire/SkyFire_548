@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GRIDSTATES_H
-#define TRINITY_GRIDSTATES_H
+#ifndef SKYFIRE_GRIDSTATES_H
+#define SKYFIRE_GRIDSTATES_H
 
 #include "GridDefines.h"
 #include "NGrid.h"
@@ -28,7 +28,7 @@ class Map;
 class GridState
 {
     public:
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
 #define MAGIC_TESTVAL 0xFBE823BA
         GridState() { i_Magic = MAGIC_TESTVAL; }
         bool checkMagic();

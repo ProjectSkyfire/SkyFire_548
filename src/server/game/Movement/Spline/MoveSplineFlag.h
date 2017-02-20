@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_MOVESPLINEFLAG_H
-#define TRINITYSERVER_MOVESPLINEFLAG_H
+#ifndef SKYFIRESERVER_MOVESPLINEFLAG_H
+#define SKYFIRESERVER_MOVESPLINEFLAG_H
 #include "MovementTypedefs.h"
 
 #include <string>
@@ -152,4 +152,4 @@ namespace Movement
 #endif
 }
 
-#endif // TRINITYSERVER_MOVESPLINEFLAG_H
+#endif // SKYFIRESERVER_MOVESPLINEFLAG_H

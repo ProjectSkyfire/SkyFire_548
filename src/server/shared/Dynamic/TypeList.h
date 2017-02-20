@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_TYPELIST_H
-#define TRINITY_TYPELIST_H
+#ifndef SKYFIRE_TYPELIST_H
+#define SKYFIRE_TYPELIST_H
 
 /*
   @struct TypeList

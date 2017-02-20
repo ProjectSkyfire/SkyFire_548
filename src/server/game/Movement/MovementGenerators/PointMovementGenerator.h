@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_POINTMOVEMENTGENERATOR_H
-#define TRINITY_POINTMOVEMENTGENERATOR_H
+#ifndef SKYFIRE_POINTMOVEMENTGENERATOR_H
+#define SKYFIRE_POINTMOVEMENTGENERATOR_H
 
 #include "MovementGenerator.h"
 #include "FollowerReference.h"

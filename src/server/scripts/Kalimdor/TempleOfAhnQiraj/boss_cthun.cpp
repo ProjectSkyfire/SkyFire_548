@@ -164,7 +164,7 @@ public:
         {
             instance = creature->GetInstanceScript();
             if (!instance)
-                TC_LOG_ERROR("scripts", "No Instance eye_of_cthunAI");
+                SF_LOG_ERROR("scripts", "No Instance eye_of_cthunAI");
 
             SetCombatMovement(false);
         }
@@ -472,7 +472,7 @@ public:
 
             instance = creature->GetInstanceScript();
             if (!instance)
-                TC_LOG_ERROR("scripts", "No Instance eye_of_cthunAI");
+                SF_LOG_ERROR("scripts", "No Instance eye_of_cthunAI");
         }
 
         InstanceScript* instance;

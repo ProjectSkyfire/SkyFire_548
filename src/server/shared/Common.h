@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_COMMON_H
-#define TRINITYCORE_COMMON_H
+#ifndef SKYFIRESERVER_COMMON_H
+#define SKYFIRESERVER_COMMON_H
 
 // config.h needs to be included 1st
 /// @todo this thingy looks like hack, but its not, need to
@@ -218,20 +218,20 @@ struct LocalizedString
 
 #define MAX_QUERY_LEN 32*1024
 
-#define TRINITY_GUARD(MUTEX, LOCK) \
-  ACE_Guard< MUTEX > TRINITY_GUARD_OBJECT (LOCK); \
-    if (TRINITY_GUARD_OBJECT.locked() == 0) ASSERT(false);
+#define SKYFIRE_GUARD(MUTEX, LOCK) \
+  ACE_Guard< MUTEX > SKYFIRE_GUARD_OBJECT (LOCK); \
+    if (SKYFIRE_GUARD_OBJECT.locked() == 0) ASSERT(false);
 
 //! For proper implementation of multiple-read, single-write pattern, use
 //! ACE_RW_Mutex as underlying @MUTEX
-# define TRINITY_WRITE_GUARD(MUTEX, LOCK) \
-  ACE_Write_Guard< MUTEX > TRINITY_GUARD_OBJECT (LOCK); \
-    if (TRINITY_GUARD_OBJECT.locked() == 0) ASSERT(false);
+# define SKYFIRE_WRITE_GUARD(MUTEX, LOCK) \
+  ACE_Write_Guard< MUTEX > SKYFIRE_GUARD_OBJECT (LOCK); \
+    if (SKYFIRE_GUARD_OBJECT.locked() == 0) ASSERT(false);
 
 //! For proper implementation of multiple-read, single-write pattern, use
 //! ACE_RW_Mutex as underlying @MUTEX
-# define TRINITY_READ_GUARD(MUTEX, LOCK) \
-  ACE_Read_Guard< MUTEX > TRINITY_GUARD_OBJECT (LOCK); \
-    if (TRINITY_GUARD_OBJECT.locked() == 0) ASSERT(false);
+# define SKYFIRE_READ_GUARD(MUTEX, LOCK) \
+  ACE_Read_Guard< MUTEX > SKYFIRE_GUARD_OBJECT (LOCK); \
+    if (SKYFIRE_GUARD_OBJECT.locked() == 0) ASSERT(false);
 
 #endif

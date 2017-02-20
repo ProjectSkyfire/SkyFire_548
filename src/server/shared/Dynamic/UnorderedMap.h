@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_UNORDERED_MAP_H
-#define TRINITY_UNORDERED_MAP_H
+#ifndef SKYFIRE_UNORDERED_MAP_H
+#define SKYFIRE_UNORDERED_MAP_H
 
 #include "HashNamespace.h"
 
