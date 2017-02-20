@@ -17,7 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// THIS FILE IS DEPRECATED
+// Core configuration options
 
 #ifndef SKYFIRE_SYSTEMCONFIG_H
 #define SKYFIRE_SYSTEMCONFIG_H
@@ -26,6 +26,15 @@
 #include "revision.h"
 
 #define _PACKAGENAME "SkyFire 5.x.x"
+
+// Format is YYYYMMDDRR where RR is the change in the conf file
+// for that day.
+#ifndef SKYFIREWORLD_CONFIG_VERSION
+# define SKYFIREWORLD_CONFIG_VERSION 2017021900
+#endif
+#ifndef SKYFIREAUTH_CONFIG_VERSION
+# define SKYFIREAUTH_CONFIG_VERSION 2017021900
+#endif
 
 #if SKYFIRE_ENDIAN == SKYFIRE_BIGENDIAN
 # define _ENDIAN_STRING "big-endian"
