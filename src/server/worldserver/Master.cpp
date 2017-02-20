@@ -144,7 +144,7 @@ int Master::Run()
     if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
     {
          SF_LOG_INFO("server.worldserver", "*****************************************************************************");
-         SF_LOG_INFO("server.worldserver", " WARNING: Your authserver.conf version indicates your conf file is out of date!");
+         SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
          SF_LOG_INFO("server.worldserver", "          Please check for updates, as your current default values may cause");
          SF_LOG_INFO("server.worldserver", "          strange behavior.");
          SF_LOG_INFO("server.worldserver", "*****************************************************************************");
