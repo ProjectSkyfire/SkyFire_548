@@ -1,3 +1,5 @@
+DELETE FROM `trinity_string` WHERE `entry` IN (12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029);
+
 INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
 (12015, 'The Battle for Gilneas begins in 2 minutes.'),
 (12016, 'The Battle for Gilneas begins in 1 minute.'),
