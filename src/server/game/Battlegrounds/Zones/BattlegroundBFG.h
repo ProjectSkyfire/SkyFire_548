@@ -23,7 +23,8 @@
 #include "Battleground.h"
 #include "Object.h"
 
-enum GILNEAS_BG_WorldStates {
+enum GILNEAS_BG_WorldStates
+{
     GILNEAS_BG_OP_OCCUPIED_BASES_HORDE = 1778,
     GILNEAS_BG_OP_OCCUPIED_BASES_ALLY = 1779,
     GILNEAS_BG_OP_RESOURCES_ALLY = 1776,
@@ -54,13 +55,15 @@ const uint32 GILNEAS_BG_OP_NODESTATES[3] = { 1767, 1772, 1782 };
 
 const uint32 GILNEAS_BG_OP_NODEICONS[3] = { 1842, 1845, 1846 };
 
-enum GILNEAS_BG_NodeObjectId {
+enum GILNEAS_BG_NodeObjectId
+{
     GILNEAS_BG_OBJECTID_NODE_BANNER_0 = 208779,       // Lighthouse banner
     GILNEAS_BG_OBJECTID_NODE_BANNER_1 = 208780,       // Waterworks banner
     GILNEAS_BG_OBJECTID_NODE_BANNER_2 = 208781,       // Mines banner
 };
 
-enum GILNEAS_BG_ObjectType {
+enum GILNEAS_BG_ObjectType
+{
     GILNEAS_BG_OBJECT_BANNER_NEUTRAL = 0,
     GILNEAS_BG_OBJECT_BANNER_CONT_A = 1,
     GILNEAS_BG_OBJECT_BANNER_CONT_H = 2,
@@ -86,7 +89,8 @@ enum GILNEAS_BG_ObjectType {
     GILNEAS_BG_OBJECT_MAX = 37,
 };
 
-enum GILNEAS_BG_ObjectTypes {
+enum GILNEAS_BG_ObjectTypes
+{
     GILNEAS_BG_OBJECTID_BANNER_A = 180058,
     GILNEAS_BG_OBJECTID_BANNER_CONT_A = 180059,
     GILNEAS_BG_OBJECTID_BANNER_H = 180060,
@@ -102,16 +106,19 @@ enum GILNEAS_BG_ObjectTypes {
     GILNEAS_BG_OBJECTID_GATE_H_2 = 180322,
 };
 
-enum GILNEAS_BG_Timers {
+enum GILNEAS_BG_Timers
+{
     GILNEAS_BG_FLAG_CAPTURING_TIME = 60000,
 };
 
-enum GILNEAS_BG_Score {
+enum GILNEAS_BG_Score
+{
     GILNEAS_BG_WARNING_NEAR_VICTORY_SCORE = 1800,
     GILNEAS_BG_MAX_TEAM_SCORE = 2000
 };
 
-enum GILNEAS_BG_BattlegroundNodes {
+enum GILNEAS_BG_BattlegroundNodes
+{
     GILNEAS_BG_NODE_LIGHTHOUSE = 0,
     GILNEAS_BG_NODE_WATERWORKS = 1,
     GILNEAS_BG_NODE_MINE = 2,
@@ -124,7 +131,8 @@ enum GILNEAS_BG_BattlegroundNodes {
     GILNEAS_BG_ALL_NODES_COUNT = 5,                        // All nodes (dynamic and static)
 };
 
-enum GILNEAS_BG_NodeStatus {
+enum GILNEAS_BG_NodeStatus
+{
     GILNEAS_BG_NODE_TYPE_NEUTRAL = 0,
     GILNEAS_BG_NODE_TYPE_CONTESTED = 1,
     GILNEAS_BG_NODE_STATUS_ALLY_CONTESTED = 1,
@@ -134,7 +142,8 @@ enum GILNEAS_BG_NodeStatus {
     GILNEAS_BG_NODE_STATUS_HORDE_OCCUPIED = 4
 };
 
-enum GILNEAS_BG_Sounds {
+enum GILNEAS_BG_Sounds
+{
     GILNEAS_BG_SOUND_NODE_CLAIMED = 8192,
     GILNEAS_BG_SOUND_NODE_CAPTURED_ALLIANCE = 8173,
     GILNEAS_BG_SOUND_NODE_CAPTURED_HORDE = 8213,
@@ -143,7 +152,8 @@ enum GILNEAS_BG_Sounds {
     GILNEAS_BG_SOUND_NEAR_VICTORY = 8456
 };
 
-enum GILNEAS_BG_Objectives {
+enum GILNEAS_BG_Objectives
+{
     BG_OBJECTIVE_ASSAULT_BASE = 370,
     BG_OBJECTIVE_DEFEND_BASE = 371
 };
@@ -193,20 +203,23 @@ const float GILNEAS_BG_BuffPositions[GILNEAS_BG_DYNAMIC_NODES_COUNT][4] =
     {1193.09f, 1017.46f, 7.98f, 0.24f}         // Mine
 };
 
-struct GILNEAS_BG_BannerTimer {
+struct GILNEAS_BG_BannerTimer
+{
     uint32 timer;
     uint8  type;
     uint8  teamIndex;
 };
 
-struct BattlegroundBFGScore : public BattlegroundScore {
+struct BattlegroundBFGScore : public BattlegroundScore
+{
     BattlegroundBFGScore() : BasesAssaulted(0), BasesDefended(0) {}
     ~BattlegroundBFGScore() {}
     uint32 BasesAssaulted;
     uint32 BasesDefended;
 };
 
-class BattlegroundBFG : public Battleground {
+class BattlegroundBFG : public Battleground
+{
 public:
     BattlegroundBFG();
     ~BattlegroundBFG();
@@ -266,4 +279,5 @@ private:
     // need for achievements
     bool                     m_TeamScores500Disadvantage[BG_TEAMS_COUNT];
 };
+
 #endif
