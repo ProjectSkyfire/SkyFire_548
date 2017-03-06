@@ -221,7 +221,15 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
         OpcodeHandler const* handler = serverOpcodeTable[packet->GetOpcode()];
         if (!handler || handler->Status == STATUS_UNHANDLED)
         {
-            SF_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode(), true).c_str(), GetPlayerInfo().c_str());
+            if (packet->GetOpcode() == NULL_OPCODE)
+            {
+                SF_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode(), true).c_str(), GetPlayerInfo().c_str());
+
+            }
+            else
+            {
+                SF_LOG_ERROR("network.opcode", "Disabled opcode %s have opcode value, but is disabled missing structure update?", GetOpcodeNameForLogging(packet->GetOpcode(), true).c_str());
+            }
             return;
         }
     }
