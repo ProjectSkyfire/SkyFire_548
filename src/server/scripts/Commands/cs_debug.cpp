@@ -36,8 +36,6 @@ EndScriptData */
 #include "Transport.h"
 #include "Language.h"
 
-#include <fstream>
-
 class debug_commandscript : public CommandScript
 {
 public:
@@ -59,7 +57,6 @@ public:
             { "chatmessage",   rbac::RBAC_PERM_COMMAND_DEBUG_SEND_CHATMESSAGE,   false, &HandleDebugSendChatMsgCommand,         "", NULL },
             { "equiperror",    rbac::RBAC_PERM_COMMAND_DEBUG_SEND_EQUIPERROR,    false, &HandleDebugSendEquipErrorCommand,      "", NULL },
             { "largepacket",   rbac::RBAC_PERM_COMMAND_DEBUG_SEND_LARGEPACKET,   false, &HandleDebugSendLargePacketCommand,     "", NULL },
-            { "opcode",        rbac::RBAC_PERM_COMMAND_DEBUG_SEND_OPCODE,        false, &HandleDebugSendOpcodeCommand,          "", NULL },
             { "qpartymsg",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_QPARTYMSG,     false, &HandleDebugSendQuestPartyMsgCommand,   "", NULL },
             { "qinvalidmsg",   rbac::RBAC_PERM_COMMAND_DEBUG_SEND_QINVALIDMSG,   false, &HandleDebugSendQuestInvalidMsgCommand, "", NULL },
             { "sellerror",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SELLERROR,     false, &HandleDebugSendSellErrorCommand,       "", NULL },
@@ -253,177 +250,6 @@ public:
 
         BuyResult msg = BuyResult(atoi(args));
         handler->GetSession()->GetPlayer()->SendBuyError(msg, 0, 0, 0);
-        return true;
-    }
-
-    static bool HandleDebugSendOpcodeCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Unit* unit = handler->getSelectedUnit();
-        Player* player = NULL;
-        if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
-            player = handler->GetSession()->GetPlayer();
-        else
-            player = unit->ToPlayer();
-
-        if (!unit)
-            unit = player;
-
-        std::ifstream ifs("opcode.txt");
-        if (ifs.fail())
-            return false;
-
-        // remove comments from file
-        std::stringstream parsedStream;
-        while (!ifs.eof())
-        {
-            char commentToken[2];
-            ifs.get(commentToken[0]);
-            if (commentToken[0] == '/' && !ifs.eof())
-            {
-                ifs.get(commentToken[1]);
-                // /* comment
-                if (commentToken[1] == '*')
-                {
-                    while (!ifs.eof())
-                    {
-                        ifs.get(commentToken[0]);
-                        if (commentToken[0] == '*' && !ifs.eof())
-                        {
-                            ifs.get(commentToken[1]);
-                            if (commentToken[1] == '/')
-                                break;
-                            else
-                                ifs.putback(commentToken[1]);
-                        }
-                    }
-                    continue;
-                }
-                // line comment
-                else if (commentToken[1] == '/')
-                {
-                    std::string str;
-                    getline(ifs, str);
-                    continue;
-                }
-                // regular data
-                else
-                    ifs.putback(commentToken[1]);
-            }
-            parsedStream.put(commentToken[0]);
-        }
-        ifs.close();
-
-        uint32 opcode;
-        parsedStream >> opcode;
-
-        WorldPacket data(Opcodes(opcode), 0);
-
-        while (!parsedStream.eof())
-        {
-            std::string type;
-            parsedStream >> type;
-
-            if (type == "")
-                break;
-
-            if (type == "uint8")
-            {
-                uint16 val1;
-                parsedStream >> val1;
-                data << uint8(val1);
-            }
-            else if (type == "uint16")
-            {
-                uint16 val2;
-                parsedStream >> val2;
-                data << val2;
-            }
-            else if (type == "uint32")
-            {
-                uint32 val3;
-                parsedStream >> val3;
-                data << val3;
-            }
-            else if (type == "uint64")
-            {
-                uint64 val4;
-                parsedStream >> val4;
-                data << val4;
-            }
-            else if (type == "float")
-            {
-                float val5;
-                parsedStream >> val5;
-                data << val5;
-            }
-            else if (type == "string")
-            {
-                std::string val6;
-                parsedStream >> val6;
-                data << val6;
-            }
-            else if (type == "appitsguid")
-            {
-                data.append(unit->GetPackGUID());
-            }
-            else if (type == "appmyguid")
-            {
-                data.append(player->GetPackGUID());
-            }
-            else if (type == "appgoguid")
-            {
-                GameObject* obj = handler->GetNearbyGameObject();
-                if (!obj)
-                {
-                    handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
-                    handler->SetSentErrorMessage(true);
-                    ifs.close();
-                    return false;
-                }
-                data.append(obj->GetPackGUID());
-            }
-            else if (type == "goguid")
-            {
-                GameObject* obj = handler->GetNearbyGameObject();
-                if (!obj)
-                {
-                    handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
-                    handler->SetSentErrorMessage(true);
-                    ifs.close();
-                    return false;
-                }
-                data << uint64(obj->GetGUID());
-            }
-            else if (type == "myguid")
-            {
-                data << uint64(player->GetGUID());
-            }
-            else if (type == "itsguid")
-            {
-                data << uint64(unit->GetGUID());
-            }
-            else if (type == "itspos")
-            {
-                data << unit->GetPositionX();
-                data << unit->GetPositionY();
-                data << unit->GetPositionZ();
-            }
-            else if (type == "mypos")
-            {
-                data << player->GetPositionX();
-                data << player->GetPositionY();
-                data << player->GetPositionZ();
-            }
-            else
-            {
-                SF_LOG_ERROR("misc", "Sending opcode that has unknown type '%s'", type.c_str());
-                break;
-            }
-        }
-        SF_LOG_DEBUG("network", "Sending opcode %u", data.GetOpcode());
-        data.hexlike();
-        player->GetSession()->SendPacket(&data, true);
-        handler->PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName().c_str());
         return true;
     }
 
