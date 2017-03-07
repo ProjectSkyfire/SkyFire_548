@@ -35,8 +35,8 @@ before_install:
   - sudo apt-get install openssl libssl-dev mysql-server mysql-client libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
   - if [ "$CXX" = "clang++" ]; then sudo apt-get install -qq libstdc++-6-dev; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-7; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-6; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
   
 script:
   - mkdir build
