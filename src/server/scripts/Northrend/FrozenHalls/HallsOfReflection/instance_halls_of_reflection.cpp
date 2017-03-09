@@ -520,7 +520,7 @@ public:
             return saveStream.str();
         }
 
-        void Load(char const* in) OVERRIDE OVERRIDE
+        void Load(char const* in) OVERRIDE
         {
             if (!in)
             {
