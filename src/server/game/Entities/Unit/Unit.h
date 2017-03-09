@@ -1418,11 +1418,11 @@ class Unit : public WorldObject
         i_AI = newAI;
     }
 
-    void AddToWorld();
-    void RemoveFromWorld();
+    void AddToWorld() override;
+    void RemoveFromWorld() override;
 
     void CleanupBeforeRemoveFromMap(bool finalCleanup);
-    void CleanupsBeforeDelete(bool finalCleanup = true);                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
+    void CleanupsBeforeDelete(bool finalCleanup = true) override;                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
     DiminishingLevels GetDiminishing(DiminishingGroup  group);
     void IncrDiminishing(DiminishingGroup group);
@@ -1437,7 +1437,7 @@ class Unit : public WorldObject
     float GetSpellMaxRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
     float GetSpellMinRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
 
-    virtual void Update(uint32 time);
+    virtual void Update(uint32 time) override;
 
     void setAttackTimer(WeaponAttackType type, uint32 time)
     {

@@ -2556,6 +2556,15 @@ void Player::RemoveFromWorld()
     }
 }
 
+void Player::SetObjectScale(float scale)
+{
+    Unit::SetObjectScale(scale);
+    SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, scale * DEFAULT_WORLD_OBJECT_SIZE);
+    SetFloatValue(UNIT_FIELD_COMBAT_REACH, scale * DEFAULT_COMBAT_REACH);
+    if (IsInWorld())
+        SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()));
+}
+
 void Player::RegenerateAll()
 {
     //if (m_regenTimer <= 500)
