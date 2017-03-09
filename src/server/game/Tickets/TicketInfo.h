@@ -144,7 +144,7 @@ public:
     void AppendResponse(std::string const& response) { _response += response; }
     void SetEscalatedStatus(GMTicketEscalationStatus escalatedStatus) { _escalatedStatus = escalatedStatus; }
     void SetViewed() { _viewed = true; }
-    void SetUnassigned();
+    void SetUnassigned() override;
     void SetChatLog(std::list<uint32> time, std::string const& log);
     void SetCompleted() { _completed = true; }
     void SetMessage(std::string const& message);
@@ -157,8 +157,8 @@ public:
     void  SaveToDB(SQLTransaction& trans) const OVERRIDE;
     void  DeleteFromDB() OVERRIDE;
 
-    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const;
-    std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const;
+    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const override;
+    std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const override;
 
     std::string const& GetMessage() const { return _message; }
     std::string const& GetChatLog() const { return _chatLog; }

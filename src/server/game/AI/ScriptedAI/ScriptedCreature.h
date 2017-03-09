@@ -169,7 +169,6 @@ struct ScriptedAI : public CreatureAI
 
     // Called when the creature summon successfully other creature
     void JustSummoned(Creature* /*summon*/) override { }
-    { }
 
     // Called when a summoned creature is despawned
     void SummonedCreatureDespawn(Creature* /*summon*/) override { }
