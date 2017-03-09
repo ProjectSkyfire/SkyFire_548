@@ -156,8 +156,7 @@ struct ScriptedAI : public CreatureAI
     void AttackStartNoMove(Unit* target);
 
     // Called at any Damage from any attacker (before damage apply)
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-    { }
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override { }
 
     //Called at World update tick
     virtual void UpdateAI(uint32 diff);
@@ -209,12 +208,10 @@ struct ScriptedAI : public CreatureAI
     // *************
 
     //Called at creature reset either by death or evade
-    void Reset()
-    { }
+    void Reset() override { }
 
     //Called at creature aggro either by MoveInLOS or Attack Start
-    void EnterCombat(Unit* /*victim*/)
-    { }
+    void EnterCombat(Unit* /*victim*/) override { }
 
     // Called before EnterCombat even before the creature is in combat.
     void AttackStart(Unit* /*target*/);

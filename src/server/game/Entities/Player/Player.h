@@ -2538,7 +2538,7 @@ class Player : public Unit, public GridObject<Player>
     void SendMessageToSet(WorldPacket* data, bool self) override { SendMessageToSetInRange(data, GetVisibilityRange(), self); };// overwrite Object::SendMessageToSet
     void SendMessageToSetInRange(WorldPacket* data, float fist, bool self) override;// overwrite Object::SendMessageToSetInRange
     void SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only);
-    void SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr);
+    void SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr) override;
 
     Corpse* GetCorpse() const;
     void SpawnCorpseBones();
