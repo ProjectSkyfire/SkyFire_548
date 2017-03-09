@@ -43,21 +43,21 @@
 template<class T>
 void HashMapHolder<T>::Insert(T* o)
 {
-    std::unique_lock<std::shared_mutex> writeGuard(i_lock);
+    SF_UNIQUE_GUARD writeGuard(i_lock);
     GetContainer()[o->GetGUID()] = o;
 }
 
 template<class T>
 void HashMapHolder<T>::Remove(T* o)
 {
-    std::unique_lock<std::shared_mutex> writeGuard(i_lock);
+    SF_UNIQUE_GUARD writeGuard(i_lock);
     GetContainer().erase(o->GetGUID());
 }
 
 template<class T>
 T* HashMapHolder<T>::Find(uint64 guid)
 {
-    std::shared_lock<std::shared_mutex> readGuard(i_lock);
+    SF_SHARED_GUARD readGuard(i_lock);
     typename MapType::iterator itr = GetContainer().find(guid);
     return (itr != GetContainer().end()) ? itr->second : NULL;
 }
@@ -249,7 +249,7 @@ Unit* ObjectAccessor::FindUnit(uint64 guid)
 
 Player* ObjectAccessor::FindPlayerByName(std::string const& name)
 {
-    std::shared_lock<std::shared_mutex> readGuard(*HashMapHolder<Player>::GetLock());
+    SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     std::string nameStr = name;
     std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
     HashMapHolder<Player>::MapType const& m = GetPlayers();
@@ -268,26 +268,26 @@ Player* ObjectAccessor::FindPlayerByName(std::string const& name)
 
 void ObjectAccessor::SaveAllPlayers()
 {
-    std::shared_lock<std::shared_mutex> readGuard(*HashMapHolder<Player>::GetLock());
+    SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = GetPlayers();
     for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
         itr->second->SaveToDB();
 }
 void ObjectAccessor::AddUpdateObject(Object* obj)
 {
-    std::shared_lock<std::shared_mutex> readGuard(i_objectLock);
+    SF_SHARED_GUARD readGuard(i_objectLock);
     i_objects.insert(obj);
 }
 
 void ObjectAccessor::RemoveUpdateObject(Object* obj)
 {
-    std::shared_lock<std::shared_mutex> readGuard(i_objectLock);
+    SF_SHARED_GUARD readGuard(i_objectLock);
     i_objects.erase(obj);
 }
 
 Corpse* ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 {
-    std::shared_lock<std::shared_mutex> readGuard(i_corpseLock);
+    SF_SHARED_GUARD readGuard(i_corpseLock);
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
     if (iter == i_player2corpse.end())
@@ -320,7 +320,7 @@ void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 
     // Critical section
     {
-        std::shared_lock<std::shared_mutex> writeGuard(i_corpseLock);
+        SF_SHARED_GUARD writeGuard(i_corpseLock);
         Player2CorpsesMapType::iterator iter = i_player2corpse.find(corpse->GetOwnerGUID());
         if (iter == i_player2corpse.end()) /// @todo Fix this
             return;
@@ -339,7 +339,7 @@ void ObjectAccessor::AddCorpse(Corpse* corpse)
 
     // Critical section
     {
-        std::shared_lock<std::shared_mutex> writeGuard(i_corpseLock);
+        SF_SHARED_GUARD writeGuard(i_corpseLock);
 
         ASSERT(i_player2corpse.find(corpse->GetOwnerGUID()) == i_player2corpse.end());
         i_player2corpse[corpse->GetOwnerGUID()] = corpse;
@@ -353,7 +353,7 @@ void ObjectAccessor::AddCorpse(Corpse* corpse)
 void ObjectAccessor::AddCorpsesToGrid(GridCoord const& gridpair, GridType& grid, Map* map)
 {
 
-    std::shared_lock<std::shared_mutex> readGuard(i_corpseLock);
+    SF_SHARED_GUARD readGuard(i_corpseLock);
 
     for (Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
     {
@@ -487,7 +487,7 @@ void ObjectAccessor::UnloadAll()
 /// Define the static members of HashMapHolder
 
 template <class T> UNORDERED_MAP< uint64, T* > HashMapHolder<T>::m_objectMap;
-template <class T> typename std::shared_mutex HashMapHolder<T>::i_lock;
+template <class T> typename SF_SHARED_MUTEX HashMapHolder<T>::i_lock;
 
 
 template Player* ObjectAccessor::GetObjectInWorld<Player>(uint32 mapid, float x, float y, uint64 guid, Player* /*fake*/);

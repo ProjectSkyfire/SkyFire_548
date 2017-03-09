@@ -123,7 +123,7 @@ public:
         bool footer = false;
 
 
-        std::shared_lock<std::shared_mutex> readGuard(*HashMapHolder<Player>::GetLock());
+        SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
         for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
         {

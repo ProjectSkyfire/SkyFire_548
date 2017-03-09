@@ -1602,14 +1602,14 @@ void GameEventMgr::RunSmartAIScripts(uint16 event_id, bool activate)
     //! Iterate over every supported source type (creature and gameobject)
     //! Not entirely sure how this will affect units in non-loaded grids.
     {
-        std::shared_lock<std::shared_mutex> readGuard(*HashMapHolder<Creature>::GetLock());
+        SF_SHARED_GUARD readGuard(*HashMapHolder<Creature>::GetLock());
         HashMapHolder<Creature>::MapType const& m = ObjectAccessor::GetCreatures();
         for (HashMapHolder<Creature>::MapType::const_iterator iter = m.begin(); iter != m.end(); ++iter)
             if (iter->second->IsInWorld())
                 iter->second->AI()->sOnGameEvent(activate, event_id);
     }
     {
-        std::shared_lock<std::shared_mutex> readGuard(*HashMapHolder<GameObject>::GetLock());
+        SF_SHARED_GUARD readGuard(*HashMapHolder<GameObject>::GetLock());
         HashMapHolder<GameObject>::MapType const& m = ObjectAccessor::GetGameObjects();
         for (HashMapHolder<GameObject>::MapType::const_iterator iter = m.begin(); iter != m.end(); ++iter)
             if (iter->second->IsInWorld())

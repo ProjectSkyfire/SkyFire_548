@@ -28,8 +28,8 @@
 #include "GridDefines.h"
 #include "Object.h"
 
-#include <mutex>
-#include <shared_mutex>
+
+# include "SharedMutex.h"
 #include <set>
 
 class Creature;
@@ -58,14 +58,14 @@ class HashMapHolder
 
         static MapType& GetContainer() { return m_objectMap; }
 
-        static std::shared_mutex* GetLock() { return &i_lock; }
+        static SF_SHARED_MUTEX* GetLock() { return &i_lock; }
 
         
     private:
 
         //Non instanceable only static
         HashMapHolder() { }
-        static std::shared_mutex i_lock;
+        static SF_SHARED_MUTEX i_lock;
         static MapType m_objectMap;
 };
 
@@ -214,8 +214,8 @@ class ObjectAccessor
         std::set<Object*> i_objects;
         Player2CorpsesMapType i_player2corpse;
 
-        std::shared_mutex i_objectLock;
-        std::shared_mutex i_corpseLock;
+        SF_SHARED_MUTEX i_objectLock;
+        SF_SHARED_MUTEX i_corpseLock;
 };
 
 #define sObjectAccessor ObjectAccessor::instance()
