@@ -12,6 +12,7 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"$(CONFIGURATION)"')
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v")
 # Check C++14 compiler support
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)

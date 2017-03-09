@@ -294,7 +294,7 @@ class spell_mage_blizzard : public SpellScriptLoader
                }
            }
 
-           void Register()
+           void Register() override
            {
                OnEffectHitTarget += SpellEffectFn(spell_mage_blizzard_SpellScript::AddChillEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
            }
@@ -599,7 +599,7 @@ class spell_mage_frostbolt : public SpellScriptLoader
                }
            }
 
-           void Register()
+           void Register() override
            {
                OnEffectHitTarget += SpellEffectFn(spell_mage_frostbolt_SpellScript::RecalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
            }
@@ -1192,7 +1192,7 @@ class spell_mage_replenish_mana : public SpellScriptLoader
                }
            }
 
-           void Register()
+           void Register() override
            {
                AfterCast += SpellCastFn(spell_mage_replenish_mana_SpellScript::HandleImprovedManaGem);
            }
@@ -1390,7 +1390,7 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
                }
            }
 
-           void Register()
+           void Register() override
            {
                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_water_elemental_freeze_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
                AfterCast += SpellCastFn(spell_mage_water_elemental_freeze_SpellScript::HandleImprovedFreeze);
