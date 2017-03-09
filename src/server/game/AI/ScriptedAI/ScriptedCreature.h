@@ -159,35 +159,29 @@ struct ScriptedAI : public CreatureAI
     void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override { }
 
     //Called at World update tick
-    virtual void UpdateAI(uint32 diff);
+    virtual void UpdateAI(uint32 diff) override;
 
     //Called at creature death
-    void JustDied(Unit* /*killer*/)
-    { }
+    void JustDied(Unit* /*killer*/) override { }
 
     //Called at creature killing another unit
-    void KilledUnit(Unit* /*victim*/)
-    { }
+    void KilledUnit(Unit* /*victim*/) override { }
 
     // Called when the creature summon successfully other creature
-    void JustSummoned(Creature* /*summon*/)
+    void JustSummoned(Creature* /*summon*/) override { }
     { }
 
     // Called when a summoned creature is despawned
-    void SummonedCreatureDespawn(Creature* /*summon*/)
-    { }
+    void SummonedCreatureDespawn(Creature* /*summon*/) override { }
 
     // Called when hit by a spell
-    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/)
-    { }
+    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) override { }
 
     // Called when spell hits a target
-    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/)
-    { }
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) override { }
 
     //Called at waypoint reached or PointMovement end
-    void MovementInform(uint32 /*type*/, uint32 /*id*/)
-    { }
+    void MovementInform(uint32 /*type*/, uint32 /*id*/) override { }
 
     // Called when AI is temporarily replaced or put back when possess is applied or removed
     void OnPossess(bool /*apply*/)
@@ -214,7 +208,7 @@ struct ScriptedAI : public CreatureAI
     void EnterCombat(Unit* /*victim*/) override { }
 
     // Called before EnterCombat even before the creature is in combat.
-    void AttackStart(Unit* /*target*/);
+    void AttackStart(Unit* /*target*/) override;
 
     // *************
     //AI Helper Functions
