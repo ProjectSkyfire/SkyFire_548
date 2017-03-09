@@ -21,8 +21,6 @@
 #define SKYFIRE_MAP_H
 
 #include "Define.h"
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
 
 #include "DBCStructure.h"
 #include "GridDefines.h"
@@ -35,6 +33,7 @@
 #include "GameObjectModel.h"
 
 #include <bitset>
+#include <mutex>
 #include <list>
 
 class Unit;
@@ -542,8 +541,8 @@ class Map : public GridRefManager<NGridType>
     protected:
         void SetUnloadReferenceLock(const GridCoord &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
-        ACE_Thread_Mutex Lock;
-        ACE_Thread_Mutex GridLock;
+        std::mutex Lock;
+        std::mutex GridLock;
 
         MapEntry const* i_mapEntry;
         uint8 i_spawnMode;

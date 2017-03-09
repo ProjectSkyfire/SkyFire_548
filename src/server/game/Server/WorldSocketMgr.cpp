@@ -110,7 +110,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         int AddSocket (WorldSocket* sock)
         {
-            SKYFIRE_GUARD(ACE_Thread_Mutex, m_NewSockets_Lock);
+            std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
             ++m_Connections;
             sock->AddReference();
@@ -131,7 +131,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         void AddNewSockets()
         {
-            SKYFIRE_GUARD(ACE_Thread_Mutex, m_NewSockets_Lock);
+            std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
             if (m_NewSockets.empty())
                 return;
@@ -209,7 +209,7 @@ class ReactorRunnable : protected ACE_Task_Base
         SocketSet m_Sockets;
 
         SocketSet m_NewSockets;
-        ACE_Thread_Mutex m_NewSockets_Lock;
+        std::mutex m_NewSockets_Lock;
 };
 
 WorldSocketMgr::WorldSocketMgr() :

@@ -26,7 +26,7 @@
 #include "MapUpdater.h"
 
 #include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
+#include <mutex>
 
 
 class Transport;
@@ -147,7 +147,7 @@ class MapManager
         MapManager(const MapManager &);
         MapManager& operator=(const MapManager &);
 
-        ACE_Thread_Mutex Lock;
+        std::mutex Lock;
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;

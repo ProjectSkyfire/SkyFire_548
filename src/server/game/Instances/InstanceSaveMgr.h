@@ -22,8 +22,8 @@
 
 #include "Define.h"
 #include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
 #include <list>
+#include <mutex>
 #include <map>
 #include "UnorderedMap.h"
 #include "DatabaseEnv.h"
@@ -81,13 +81,13 @@ class InstanceSave
 
         /* online players bound to the instance (perm/solo)
            does not include the members of the group unless they have permanent saves */
-        void AddPlayer(Player* player) { SKYFIRE_GUARD(ACE_Thread_Mutex, _lock); m_playerList.push_back(player); }
+        void AddPlayer(Player* player) { std::lock_guard<std::mutex> guard(_lock); m_playerList.push_back(player); }
         bool RemovePlayer(Player* player)
         {
-            _lock.acquire();
+            _lock.lock();
             m_playerList.remove(player);
             bool isStillValid = UnloadIfEmpty();
-            _lock.release();
+            _lock.unlock();
 
             //delete here if needed, after releasing the lock
             if (m_toDelete)
@@ -138,7 +138,7 @@ class InstanceSave
         bool m_canReset;
         bool m_toDelete;
 
-        ACE_Thread_Mutex _lock;
+        std::mutex _lock;
 };
 
 typedef UNORDERED_MAP<uint32 /*PAIR32(map, difficulty)*/, time_t /*resetTime*/> ResetTimeByMapDifficultyMap;

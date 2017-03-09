@@ -387,7 +387,7 @@ void Map::DeleteFromWorld(Player* player)
 
 void Map::EnsureGridCreated(const GridCoord &p)
 {
-    SKYFIRE_GUARD(ACE_Thread_Mutex, GridLock);
+    std::lock_guard<std::mutex> guard(GridLock);
     EnsureGridCreated_i(p);
 }
 
@@ -2715,7 +2715,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
     // Is it needed?
 
     {
-        SKYFIRE_GUARD(ACE_Thread_Mutex, Lock);
+        std::lock_guard<std::mutex> guard(Lock);
         // Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
         //if (!CanEnter(player))
             //return false;
@@ -3063,7 +3063,8 @@ bool BattlegroundMap::CanEnter(Player* player)
 bool BattlegroundMap::AddPlayerToMap(Player* player)
 {
     {
-        SKYFIRE_GUARD(ACE_Thread_Mutex, Lock);
+
+        std::lock_guard<std::mutex> guard(Lock);
         //Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
         //if (!CanEnter(player))
             //return false;

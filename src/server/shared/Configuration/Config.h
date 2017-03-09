@@ -24,8 +24,8 @@
 #include <list>
 #include <ace/Singleton.h>
 #include <ace/Configuration_Import_Export.h>
-#include <ace/Thread_Mutex.h>
 #include <AutoPtr.h>
+#include <mutex>
 
 typedef Skyfire::AutoPtr<ACE_Configuration_Heap, ACE_Null_Mutex> Config;
 
@@ -63,8 +63,8 @@ private:
     bool GetValueHelper(const char* name, ACE_TString &result);
     bool LoadData(char const* file);
 
-    typedef ACE_Thread_Mutex LockType;
-    typedef ACE_Guard<LockType> GuardType;
+    typedef std::mutex LockType;
+    typedef std::lock_guard<std::mutex> GuardType;
 
     std::string _filename;
     Config _config;
