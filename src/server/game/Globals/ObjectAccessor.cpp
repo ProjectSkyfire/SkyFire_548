@@ -43,23 +43,37 @@
 template<class T>
 void HashMapHolder<T>::Insert(T* o)
 {
-    SF_UNIQUE_GUARD writeGuard(i_lock);
+    SF_UNIQUE_GUARD writeGuard(*GetLock());
     GetContainer()[o->GetGUID()] = o;
 }
 
 template<class T>
 void HashMapHolder<T>::Remove(T* o)
 {
-    SF_UNIQUE_GUARD writeGuard(i_lock);
+    SF_UNIQUE_GUARD writeGuard(*GetLock());
     GetContainer().erase(o->GetGUID());
 }
 
 template<class T>
 T* HashMapHolder<T>::Find(uint64 guid)
 {
-    SF_SHARED_GUARD readGuard(i_lock);
+    SF_SHARED_GUARD readGuard(*GetLock());
     typename MapType::iterator itr = GetContainer().find(guid);
     return (itr != GetContainer().end()) ? itr->second : NULL;
+}
+
+template<class T>
+auto HashMapHolder<T>::GetContainer() -> MapType&
+{
+    static MapType m_objectMap;
+    return m_objectMap;
+}
+
+template<class T>
+SF_SHARED_MUTEX* HashMapHolder<T>::GetLock()
+{
+    static SF_SHARED_MUTEX i_lock;
+    return &i_lock;
 }
 
 /// Global definitions for the hashmap storage

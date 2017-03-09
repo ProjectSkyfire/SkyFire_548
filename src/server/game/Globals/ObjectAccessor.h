@@ -56,9 +56,9 @@ class HashMapHolder
 
         static T* Find(uint64 guid);
 
-        static MapType& GetContainer() { return m_objectMap; }
+        static MapType& GetContainer();
 
-        static SF_SHARED_MUTEX* GetLock() { return &i_lock; }
+        static SF_SHARED_MUTEX* GetLock();
 
         
     private:
