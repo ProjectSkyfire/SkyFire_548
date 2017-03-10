@@ -1020,6 +1020,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     SetFloatValue(UNIT_FIELD_HOVER_HEIGHT, 1.0f);            // default for players in 3.0.3
 
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));  // -1 is default value
+    SetInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID, 0);
 
     SetUInt32Value(PLAYER_FIELD_HAIR_COLOR_ID, (createInfo->Skin | (createInfo->Face << 8) | (createInfo->HairStyle << 16) | (createInfo->HairColor << 24)));
     SetUInt32Value(PLAYER_FIELD_REST_STATE, (createInfo->FacialHair |
@@ -17797,8 +17798,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     //"totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, "
     // 46      47      48      49      50      51      52           53         54          55             56
     //"health, power1, power2, power3, power4, power5, instance_id, speccount, activespec, exploredZones, equipmentCache, "
-    // 57           58          59
-    //"knownTitles, actionBars, grantableLevels FROM characters WHERE guid = '%u'", guid);
+    // 57           58          59               60
+    //"knownTitles, actionBars, grantableLevels, lfgbonusfaction FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
     if (!result)
     {
@@ -17879,6 +17880,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SetByteValue(PLAYER_FIELD_ARENA_FACTION, 1, fields[45].GetUInt8());
     SetUInt32Value(PLAYER_FIELD_PLAYER_FLAGS, fields[11].GetUInt32());
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[44].GetUInt32());
+    SetInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID, fields[60].GetUInt32());
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
 
     // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
@@ -19999,6 +20001,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE));
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID));
         stmt->setUInt8(index++, GetDrunkValue());
         stmt->setUInt32(index++, GetHealth());
 
@@ -20119,6 +20122,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE));
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID));
         stmt->setUInt8(index++, GetDrunkValue());
         stmt->setUInt32(index++, GetHealth());
 

@@ -562,6 +562,7 @@ class WorldSession
         void HandleSetFactionAtWar(WorldPacket& recvData);
         void HandleSetFactionNotAtWar(WorldPacket& recvData);
         void HandleSetFactionCheat(WorldPacket& recvData);
+        void HandleSetLfgBonusFactionID(WorldPacket& recvData);
         void HandleSetWatchedFactionOpcode(WorldPacket& recvData);
         void HandleSetFactionInactiveOpcode(WorldPacket& recvData);
 

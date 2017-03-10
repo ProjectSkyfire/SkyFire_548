@@ -1235,6 +1235,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     sScriptMgr->OnPlayerLogin(pCurrChar);
     delete holder;
 }
+void WorldSession::HandleSetLfgBonusFactionID(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_SET_LFG_BONUS_FACTION_ID");
+    uint32 FactionID = 0;
+    recvData >> FactionID;
+    GetPlayer()->SetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID, FactionID);
+}
 
 void WorldSession::HandleSetFactionAtWar(WorldPacket& recvData)
 {
