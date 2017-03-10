@@ -376,11 +376,15 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     if (itr != _factions.end())
     {
         int32 BaseRep = GetBaseReputation(factionEntry);
+        float bonusLFG = sWorld->getRate(RATE_REPUTATION_LFG_BONUS);
+
+        if (factionEntry->ID != 0 || factionEntry->ID == _player->GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID))
+            float bonusLFG = sWorld->getRate(RATE_REPUTATION_LFG_BONUS) * 2.0f;
 
         if (incremental)
         {
             // int32 *= float cause one point loss?
-            standing = int32(floor((float)standing * sWorld->getRate(RATE_REPUTATION_GAIN) + 0.5f));
+            standing = int32(floor(((float)standing * sWorld->getRate(RATE_REPUTATION_GAIN) + 0.5f) * bonusLFG));
             standing += itr->second.Standing + BaseRep;
         }
 

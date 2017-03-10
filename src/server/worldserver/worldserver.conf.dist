@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2017021900
+ConfVersion=2017031000
 
 ###################################################################################################
 # SECTION INDEX
@@ -1845,6 +1845,13 @@ Rate.Talent = 1
 #        Default:     1
 
 Rate.Reputation.Gain = 1
+
+#
+#    Rate.Reputation.LFGBonus
+#        Description: Reputation LFGBonus rate.
+#        Default:     1
+
+Rate.Reputation.LFGBonus = 1
 
 #
 #    Rate.Reputation.LowLevel.Kill
