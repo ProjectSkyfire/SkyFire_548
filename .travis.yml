@@ -14,9 +14,15 @@ matrix:
     - os: linux
       dist: trusty
       sudo: required
+      compiler:
+          - clang
+          - gcc
     - os: linux
       dist: xenial
       sudo: required
+      compiler:
+          - clang
+          - gcc
 sudo: required
 
 language: cpp
@@ -27,10 +33,6 @@ git:
 branches:
   only:
     - master
-
-compiler:
-  - clang
-  - gcc ## Uncomment when we are up to full c++11 standards.
 
 before_install:
   - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
