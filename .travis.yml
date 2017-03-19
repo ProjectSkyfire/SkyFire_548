@@ -9,7 +9,14 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-dist: xenial
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+    - os: linux
+      dist: xenial
+      sudo: required
 sudo: required
 
 language: cpp
