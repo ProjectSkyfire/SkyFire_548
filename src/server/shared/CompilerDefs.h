@@ -72,4 +72,10 @@
 #  define COMPILER_HAS_CPP14_SUPPORT 0
 #endif
 
+#ifdef __clang__
+#  if !defined (ACE_HAS_GCC_ATOMIC_BUILTINS)
+#    define ACE_HAS_GCC_ATOMIC_BUILTINS 1
+#  endif
+#endif
+
 #endif
