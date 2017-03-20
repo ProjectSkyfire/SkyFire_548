@@ -1245,7 +1245,7 @@ class spell_mage_ring_of_frost : public SpellScriptLoader
                 GetTarget()->GetAllMinionsByEntry(MinionList, GetSpellInfo()->Effects[EFFECT_0].MiscValue);
 
                 // Get the last summoned RoF, save it and despawn older ones
-                for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); itr++)
+                for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); ++itr)
                 {
                     TempSummon* summon = (*itr)->ToTempSummon();
 

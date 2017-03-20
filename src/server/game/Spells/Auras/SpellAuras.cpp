@@ -563,7 +563,7 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
     UnitList targetsToRemove;
 
     // mark all auras as ready to remove
-    for (ApplicationMap::iterator appIter = m_applications.begin(); appIter != m_applications.end();appIter++)
+    for (ApplicationMap::iterator appIter = m_applications.begin(); appIter != m_applications.end();++appIter)
     {
         std::map<Unit*, uint32>::iterator existing = targets.find(appIter->second->GetTarget());
         // not found in current area - remove the aura

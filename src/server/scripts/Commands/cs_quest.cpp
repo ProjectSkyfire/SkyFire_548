@@ -184,7 +184,7 @@ public:
             return false;
         }
 
-        for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
+        for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
         {
             QuestObjective const* questObjective = *citr;
             switch (questObjective->Type)

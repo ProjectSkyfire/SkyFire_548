@@ -544,7 +544,7 @@ void GuildMgr::LoadGuildRewards()
         {
             Tokenizer tokenizer(achivements, ' ');
 
-            for (Tokenizer::const_iterator iter = tokenizer.begin(); iter != tokenizer.end(); iter++)
+            for (Tokenizer::const_iterator iter = tokenizer.begin(); iter != tokenizer.end(); ++iter)
             {
                 uint32 achivementId = atoi(*iter);
 

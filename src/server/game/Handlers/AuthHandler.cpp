@@ -48,7 +48,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     {
         packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
 
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
         {
             packet.WriteBits(itr->second.size(), 8);
             packet.WriteBits(itr->second.size(), 8);
@@ -77,7 +77,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     if (code == AUTH_OK)
     {
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
         {
             packet << uint32(itr->first);
             packet.WriteString(itr->second);

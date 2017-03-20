@@ -2933,13 +2933,13 @@ void Group::ReadyCheckMemberHasResponded(uint64 guid)
 
 void Group::ReadyCheckResetResponded()
 {
-    for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); itr++)
+    for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
         itr->readyCheckHasResponded = false;
 }
 
 bool Group::ReadyCheckAllResponded() const
 {
-    for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); itr++)
+    for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
         if (!itr->readyCheckHasResponded)
             return false;
 

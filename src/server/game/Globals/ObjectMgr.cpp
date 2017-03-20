@@ -9121,7 +9121,7 @@ uint64 ObjectMgr::BattlePetGetNewId()
 
 uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
 {
-    for (BattlePetBreedXSpeciesMap::const_iterator mapCitr = sBattlePetBreedXSpeciesStore.begin(); mapCitr != sBattlePetBreedXSpeciesStore.end(); mapCitr++)
+    for (BattlePetBreedXSpeciesMap::const_iterator mapCitr = sBattlePetBreedXSpeciesStore.begin(); mapCitr != sBattlePetBreedXSpeciesStore.end(); ++mapCitr)
     {
         if (mapCitr->first == speciesId)
         {
@@ -9137,7 +9137,7 @@ uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
 
 uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const
 {
-    for (BattlePetQualityXSpeciesMap::const_iterator mapCitr = sBattlePetQualityXSpeciesStore.begin(); mapCitr != sBattlePetQualityXSpeciesStore.end(); mapCitr++)
+    for (BattlePetQualityXSpeciesMap::const_iterator mapCitr = sBattlePetQualityXSpeciesStore.begin(); mapCitr != sBattlePetQualityXSpeciesStore.end(); ++mapCitr)
     {
         if (mapCitr->first == speciesId)
         {

@@ -296,10 +296,10 @@ void ReadLiquidTypeTableDBC()
     LiqType = new uint16[LiqType_maxid + 1];
     memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
 
-    for (uint32 x = 0; x < LiqType_count; ++x)
+    for (size_t x = 0; x < LiqType_count; ++x)
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
-    printf("Done! (%lu LiqTypes loaded)\n", LiqType_count);
+    printf("Done! (%zu LiqTypes loaded)\n", LiqType_count);
 }
 
 bool ExtractWmo()

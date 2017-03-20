@@ -467,7 +467,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
     ByteBuffer objData;
-    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
+    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
     {
         QuestObjective const* objective = *citr;
         objData << uint8(objective->Type);
@@ -692,7 +692,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data.WriteBits(questObjectives.size(), 12);
 
     ByteBuffer objData;
-    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
+    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
     {
         QuestObjective const* questObjective = *citr;
 
@@ -712,7 +712,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
         objData << uint8(questObjective->Type);
         objData << uint32(questObjective->ObjectId);
 
-        for (VisualEffectVec::const_iterator citrEffects = questObjective->VisualEffects.begin(); citrEffects != questObjective->VisualEffects.end(); citrEffects++)
+        for (VisualEffectVec::const_iterator citrEffects = questObjective->VisualEffects.begin(); citrEffects != questObjective->VisualEffects.end(); ++citrEffects)
             objData << uint32(*citrEffects);
     }
 
@@ -1017,7 +1017,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGuid, 
     uint32 requiredMoney = 0;
     ByteBuffer currencyData, itemData;
 
-    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); citr++)
+    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
     {
         QuestObjective const* questObjective = *citr;
         switch (questObjective->Type)

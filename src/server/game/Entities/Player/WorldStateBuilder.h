@@ -37,7 +37,7 @@ class WorldStateBuilder
             data.WriteBits(_wstateList.size(), 21);
             data.FlushBits();
 
-            for (std::map<uint32, uint32>::const_iterator iter = _wstateList.begin(); iter != _wstateList.end(); iter++)
+            for (std::map<uint32, uint32>::const_iterator iter = _wstateList.begin(); iter != _wstateList.end(); ++iter)
                 data << uint32(iter->second) << uint32(iter->first);
 
             session->SendPacket(&data);

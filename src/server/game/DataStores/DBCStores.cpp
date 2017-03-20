@@ -1120,7 +1120,7 @@ uint32 GetClassBySkillId(uint32 skillId)
 
 uint32 GetSkillIdByClass(uint32 classId)
 {
-    for (ClassBySkillIdStore::const_iterator iter = sClassBySkillIdStore.begin(); iter != sClassBySkillIdStore.end(); iter++)
+    for (ClassBySkillIdStore::const_iterator iter = sClassBySkillIdStore.begin(); iter != sClassBySkillIdStore.end(); ++iter)
         if (iter->second == classId)
             return iter->first;
     return 0;
@@ -1136,7 +1136,7 @@ std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 spe
         if (classIter != sSpellsPerClassStore.end())
         {
             const std::list<SkillLineAbilityEntry const*>& learnSpellList = classIter->second;
-            for (std::list<SkillLineAbilityEntry const*>::const_iterator iter = learnSpellList.begin(); iter != learnSpellList.end(); iter++)
+            for (std::list<SkillLineAbilityEntry const*>::const_iterator iter = learnSpellList.begin(); iter != learnSpellList.end(); ++iter)
             {
                 SkillLineAbilityEntry const* skillLine = *iter;
                 if (!skillLine)

@@ -1424,7 +1424,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
         }
 
         AchievementCriteriaTreeList achievementCriteriaTreeList = sAchievementMgr->GetAchievementCriteriaTreeList(achievementCriteria);
-        for (AchievementCriteriaTreeList::const_iterator iter = achievementCriteriaTreeList.begin(); iter != achievementCriteriaTreeList.end(); iter++)
+        for (AchievementCriteriaTreeList::const_iterator iter = achievementCriteriaTreeList.begin(); iter != achievementCriteriaTreeList.end(); ++iter)
         {
             AchievementEntry const* achievement = sAchievementMgr->GetAchievementEntryByCriteriaTree(*iter);
 
@@ -1452,7 +1452,7 @@ template<class T>
 bool AchievementMgr<T>::IsCompletedCriteria(CriteriaEntry const* criteria)
 {
     AchievementCriteriaTreeList const& criteriaTreeList = sAchievementMgr->GetAchievementCriteriaTreeList(criteria);
-    for (AchievementCriteriaTreeList::const_iterator iter = criteriaTreeList.begin(); iter != criteriaTreeList.end(); iter++)
+    for (AchievementCriteriaTreeList::const_iterator iter = criteriaTreeList.begin(); iter != criteriaTreeList.end(); ++iter)
     {
         CriteriaTreeEntry const* criteriaTree = *iter;
         AchievementEntry const* achievement = sAchievementMgr->GetAchievementEntryByCriteriaTree(criteriaTree);
@@ -1479,7 +1479,7 @@ bool AchievementMgr<T>::IsCompletedCriteriaForAchievement(CriteriaEntry const* c
 
     if (treeList)
     {
-        for (AchievementCriteriaTreeList::const_iterator iter = treeList->begin(); iter != treeList->end(); iter++)
+        for (AchievementCriteriaTreeList::const_iterator iter = treeList->begin(); iter != treeList->end(); ++iter)
         {
             if ((*iter)->criteriaID == criteria->ID)
             {
@@ -1637,7 +1637,7 @@ bool AchievementMgr<T>::IsCompletedAchievement(AchievementEntry const* entry)
 
     AchievementCriteriaEntryList cList;
     AchievementCriteriaTreeList const* list = sAchievementMgr->GetSubCriteriaTreeById(entry->criteriaTreeID);
-    for (AchievementCriteriaTreeList::const_iterator iter = list->begin(); iter != list->end(); iter++)
+    for (AchievementCriteriaTreeList::const_iterator iter = list->begin(); iter != list->end(); ++iter)
     {
         CriteriaTreeEntry const* criteriaTree = *iter;
         if (CriteriaEntry const* criteria = sCriteriaStore.LookupEntry(criteriaTree->criteriaID))
@@ -1761,7 +1761,7 @@ void AchievementMgr<T>::SetCriteriaProgress(CriteriaEntry const* entry, uint64 c
     uint32 timeElapsed = 0; // @todo : Fix me
 
     AchievementCriteriaTreeList criteriaList = sAchievementMgr->GetAchievementCriteriaTreeList(entry);
-    for (AchievementCriteriaTreeList::const_iterator iter = criteriaList.begin(); iter != criteriaList.end(); iter++)
+    for (AchievementCriteriaTreeList::const_iterator iter = criteriaList.begin(); iter != criteriaList.end(); ++iter)
     {
         AchievementEntry const* achievement = sAchievementMgr->GetAchievementEntryByCriteriaTree(*iter);
 
@@ -2793,7 +2793,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
     if (!list)
         return true;
 
-    for (ModifierTreeEntryList::const_iterator iter = list->begin(); iter != list->end(); iter++)
+    for (ModifierTreeEntryList::const_iterator iter = list->begin(); iter != list->end(); ++iter)
     {
         ModifierTreeEntry const* tree = (*iter);
         uint32 reqType =  tree->conditionType;

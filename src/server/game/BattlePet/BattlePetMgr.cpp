@@ -31,7 +31,7 @@
 
 BattlePetMgr::~BattlePetMgr()
 {
-    for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); itr++)
+    for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); ++itr)
         delete *itr;
 
     m_battlePetSet.clear();
@@ -187,7 +187,7 @@ void BattlePetMgr::LoadSlotsFromDb(PreparedQueryResult result)
     if ((!HasLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_3) || !GetBattlePet(slot3)) && slot3 != 0)
         slotErrors.insert(BATTLE_PET_LOADOUT_SLOT_3);
 
-    for (std::set<uint8>::const_iterator citr = slotErrors.begin(); citr != slotErrors.end(); citr++)
+    for (std::set<uint8>::const_iterator citr = slotErrors.begin(); citr != slotErrors.end(); ++citr)
     {
         SF_LOG_ERROR("sql.sql", "Battle Pet slot %u in `account_battle_pet_slots` for account %u is invalid!",
             *citr, m_owner->GetSession()->GetAccountId());
@@ -224,7 +224,7 @@ void BattlePetMgr::SaveSlotsToDb(SQLTransaction& trans)
 
 BattlePet* BattlePetMgr::GetBattlePet(uint64 id) const
 {
-    for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); itr++)
+    for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); ++itr)
         if ((*itr)->GetId() == id)
             return *itr;
 
@@ -235,7 +235,7 @@ uint8 BattlePetMgr::GetBattlePetCount(uint16 speciesId) const
 {
     uint8 counter = 0;
 
-    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
+    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); ++citr)
         if ((*citr)->GetSpecies() == speciesId)
             counter++;
 
@@ -443,7 +443,7 @@ void BattlePetMgr::SendBattlePetJournal()
     size_t writePos = data.bitwpos();
     data.WriteBits(petCount, 19);               // placeholder
     
-    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
+    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); ++citr)
     {
         BattlePet const* battlePet = *citr;
         if (battlePet->GetDbState() == BATTLE_PET_DB_STATE_DELETE)
