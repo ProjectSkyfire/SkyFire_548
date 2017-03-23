@@ -226,6 +226,7 @@ class AuraEffect
         void HandleAuraModIncreaseHealthPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraIncreaseBaseHealthPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         //   fight
+        void HandleAuraMastery(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModParryPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModDodgePercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModBlockPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -278,7 +279,6 @@ class AuraEffect
         void HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandlePreventResurrection(AuraApplication const* aurApp, uint8 mode, bool apply) const;
-        void HandleMastery(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleEnableAltPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraOverrideAutoattackWithSpell(AuraApplication const* aurApp, uint8 mode, bool apply) const;
