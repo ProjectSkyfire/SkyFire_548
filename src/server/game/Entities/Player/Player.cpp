@@ -3458,6 +3458,11 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // Static 30% damage blocked
     SetUInt32Value(PLAYER_FIELD_SHIELD_BLOCK, 30);
 
+    // reset mastery & pvp power fields
+    SetFloatValue(PLAYER_FIELD_MASTERY, 0.0f);
+    SetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE, 0.0f);
+    SetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING, 0.0f);
+
     // set armor (resistance 0) to original value (create_agility*2)
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));
     SetResistanceBuffMods(SpellSchools(0), true, 0.0f);
@@ -20971,6 +20976,8 @@ void Player::outDebugValues() const
     SF_LOG_DEBUG("entities.unit", "MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MIN_OFF_HAND_DAMAGE), GetFloatValue(UNIT_FIELD_MAX_OFF_HAND_DAMAGE));
     SF_LOG_DEBUG("entities.unit", "MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MIN_RANGED_DAMAGE), GetFloatValue(UNIT_FIELD_MAX_RANGED_DAMAGE));
     SF_LOG_DEBUG("entities.unit", "ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u", GetAttackTime(BASE_ATTACK), GetAttackTime(RANGED_ATTACK));
+    SF_LOG_DEBUG("entities.unit", "PVP_POWER_DAMAGE is: \t%f\tPVP_POWER_HEALING is: \t%f", GetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE), GetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING));
+    SF_LOG_DEBUG("entities.unit", "MASTERY is: \t%f", GetFloatValue(PLAYER_FIELD_MASTERY));
 }
 
 /*********************************************************/

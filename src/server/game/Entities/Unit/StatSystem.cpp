@@ -180,6 +180,9 @@ bool Player::UpdateAllStats()
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
 
+    UpdateMastery();
+    UpdatePvpPower();
+
     return true;
 }
 
