@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,7 +23,7 @@
 #include <ace/OS_NS_unistd.h>
 #include <cstdlib>
 
-namespace Trinity {
+namespace Skyfire {
 
 void Assert(char const* file, int line, char const* function, char const* message)
 {
@@ -57,4 +57,4 @@ void Warning(char const* file, int line, char const* function, char const* messa
                    file, line, function, message);
 }
 
-} // namespace Trinity
+} // namespace Skyfire

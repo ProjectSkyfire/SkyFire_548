@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -307,7 +307,7 @@ public:
 ## go_manaforge_control_console
 ######*/
 
-/// @todo clean up this workaround when Trinity adds support to do it properly (with gossip selections instead of instant summon)
+/// @todo clean up this workaround when Skyfire adds support to do it properly (with gossip selections instead of instant summon)
 class go_manaforge_control_console : public GameObjectScript
 {
 public:
@@ -504,7 +504,7 @@ public:
                 return true;
             }
 
-            TC_LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
+            SF_LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
             return false;
         }
 
@@ -815,7 +815,7 @@ public:
                 }
                 if (!UnitsWithMana.empty())
                 {
-                    DoCast(Trinity::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
+                    DoCast(Skyfire::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
                     ManaBurnTimer = 8000 + (rand() % 10 * 1000); // 8-18 sec cd
                 }
                 else

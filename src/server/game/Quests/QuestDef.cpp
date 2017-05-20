@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -282,7 +282,7 @@ uint32 Quest::GetRewChoiceItemCount(uint32 itemId) const
 
 QuestObjective const* Quest::GetQuestObjective(uint32 objectiveId) const
 {
-    for (QuestObjectiveSet::const_iterator citr = m_questObjectives.begin(); citr != m_questObjectives.end(); citr++)
+    for (QuestObjectiveSet::const_iterator citr = m_questObjectives.begin(); citr != m_questObjectives.end(); ++citr)
         if ((*citr)->Id == objectiveId)
             return *citr;
 
@@ -291,7 +291,7 @@ QuestObjective const* Quest::GetQuestObjective(uint32 objectiveId) const
 
 QuestObjective const* Quest::GetQuestObjectiveXIndex(uint8 index) const
 {
-    for (QuestObjectiveSet::const_iterator citr = m_questObjectives.begin(); citr != m_questObjectives.end(); citr++)
+    for (QuestObjectiveSet::const_iterator citr = m_questObjectives.begin(); citr != m_questObjectives.end(); ++citr)
         if ((*citr)->Index == index)
             return *citr;
 
@@ -300,7 +300,7 @@ QuestObjective const* Quest::GetQuestObjectiveXIndex(uint8 index) const
 
 QuestObjective const* Quest::GetQuestObjectiveXObjectId(uint32 objectId) const
 {
-    for (QuestObjectiveSet::const_iterator citr = m_questObjectives.begin(); citr != m_questObjectives.end(); citr++)
+    for (QuestObjectiveSet::const_iterator citr = m_questObjectives.begin(); citr != m_questObjectives.end(); ++citr)
         if ((*citr)->ObjectId == objectId)
             return *citr;
 

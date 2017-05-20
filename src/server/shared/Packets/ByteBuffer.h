@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -85,7 +85,7 @@ public:
     {
         ASSERT(index < sizeof(uint64));
 
-#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+#if SKYFIRE_ENDIAN == SKYFIRE_LITTLEENDIAN
         return _data.byte[index];
 #else
         return _data.byte[7 - index];
@@ -96,7 +96,7 @@ public:
     {
         ASSERT(index < sizeof(uint64));
 
-#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+#if SKYFIRE_ENDIAN == SKYFIRE_LITTLEENDIAN
         return _data.byte[index];
 #else
         return _data.byte[7 - index];
@@ -733,7 +733,7 @@ public:
         WriteBits(buffer._curbitval >> buffer._bitpos, 8 - buffer._bitpos);
     }
 
-    // can be used in SMSG_MONSTER_MOVE opcode
+    // can be used in SMSG_ON_MONSTER_MOVE opcode
     void appendPackXYZ(float x, float y, float z)
     {
         uint32 packed = 0;

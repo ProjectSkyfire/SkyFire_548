@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -55,16 +55,16 @@ void WardenMac::Init(WorldSession* pClient, BigNumber* K)
 
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
-    TC_LOG_DEBUG("warden", "Server side warden for client %u initializing...", pClient->GetAccountId());
-    TC_LOG_DEBUG("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
-    TC_LOG_DEBUG("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
-    TC_LOG_DEBUG("warden", "  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
-    TC_LOG_DEBUG("warden", "Loading Module...");
+    SF_LOG_DEBUG("warden", "Server side warden for client %u initializing...", pClient->GetAccountId());
+    SF_LOG_DEBUG("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
+    SF_LOG_DEBUG("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
+    SF_LOG_DEBUG("warden", "  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
+    SF_LOG_DEBUG("warden", "Loading Module...");
 
     _module = GetModuleForClient();
 
-    TC_LOG_DEBUG("warden", "Module Key: %s", ByteArrayToHexStr(_module->Key, 16).c_str());
-    TC_LOG_DEBUG("warden", "Module ID: %s", ByteArrayToHexStr(_module->Id, 16).c_str());
+    SF_LOG_DEBUG("warden", "Module Key: %s", ByteArrayToHexStr(_module->Key, 16).c_str());
+    SF_LOG_DEBUG("warden", "Module ID: %s", ByteArrayToHexStr(_module->Id, 16).c_str());
     RequestModule();
 }
 
@@ -91,12 +91,12 @@ ClientWardenModule* WardenMac::GetModuleForClient()
 
 void WardenMac::InitializeModule()
 {
-    TC_LOG_DEBUG("warden", "Initialize module");
+    SF_LOG_DEBUG("warden", "Initialize module");
 }
 
 void WardenMac::RequestHash()
 {
-    TC_LOG_DEBUG("warden", "Request hash");
+    SF_LOG_DEBUG("warden", "Request hash");
 
     // Create packet structure
     WardenHashRequest Request;
@@ -164,11 +164,11 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     // Verify key
     if (memcmp(buff.contents() + 1, sha1.GetDigest(), 20) != 0)
     {
-        TC_LOG_WARN("warden", "%s failed hash reply. Action: %s", _session->GetPlayerInfo().c_str(), Penalty().c_str());
+        SF_LOG_WARN("warden", "%s failed hash reply. Action: %s", _session->GetPlayerInfo().c_str(), Penalty().c_str());
         return;
     }
 
-    TC_LOG_DEBUG("warden", "Request hash reply: succeed");
+    SF_LOG_DEBUG("warden", "Request hash reply: succeed");
 
     // client 7F96EEFDA5B63D20A4DF8E00CBF48304
     //const uint8 client_key[16] = { 0x7F, 0x96, 0xEE, 0xFD, 0xA5, 0xB6, 0x3D, 0x20, 0xA4, 0xDF, 0x8E, 0x00, 0xCB, 0xF4, 0x83, 0x04 };
@@ -190,7 +190,7 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
 
 void WardenMac::RequestData()
 {
-    TC_LOG_DEBUG("warden", "Request data");
+    SF_LOG_DEBUG("warden", "Request data");
 
     ByteBuffer buff;
     buff << uint8(WARDEN_SMSG_CHEAT_CHECKS_REQUEST);
@@ -214,7 +214,7 @@ void WardenMac::RequestData()
 
 void WardenMac::HandleData(ByteBuffer &buff)
 {
-    TC_LOG_DEBUG("warden", "Handle data");
+    SF_LOG_DEBUG("warden", "Handle data");
 
     _dataSent = false;
     _clientResponseTimer = 0;
@@ -247,7 +247,7 @@ void WardenMac::HandleData(ByteBuffer &buff)
 
     if (memcmp(sha1Hash, sha1.GetDigest(), 20))
     {
-        TC_LOG_DEBUG("warden", "Handle data failed: SHA1 hash is wrong!");
+        SF_LOG_DEBUG("warden", "Handle data failed: SHA1 hash is wrong!");
         //found = true;
     }
 
@@ -262,7 +262,7 @@ void WardenMac::HandleData(ByteBuffer &buff)
 
     if (memcmp(ourMD5Hash, theirsMD5Hash, 16))
     {
-        TC_LOG_DEBUG("warden", "Handle data failed: MD5 hash is wrong!");
+        SF_LOG_DEBUG("warden", "Handle data failed: MD5 hash is wrong!");
         //found = true;
     }
 

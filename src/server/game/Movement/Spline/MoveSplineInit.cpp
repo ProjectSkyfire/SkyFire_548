@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -111,7 +111,7 @@ namespace Movement
         unit->m_movementInfo.SetMovementFlags(moveFlags);
         move_spline.Initialize(args);
 
-        WorldPacket data(SMSG_MONSTER_MOVE, 64);
+        WorldPacket data(SMSG_ON_MONSTER_MOVE, 64);
         PacketBuilder::WriteMonsterMove(move_spline, data, unit);
         unit->SendMessageToSet(&data, true);
 
@@ -131,7 +131,7 @@ namespace Movement
         unit->m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_FORWARD);
         move_spline.Initialize(args);
 
-        WorldPacket data(SMSG_MONSTER_MOVE, 64);
+        WorldPacket data(SMSG_ON_MONSTER_MOVE, 64);
 
         PacketBuilder::WriteStopMovement(loc, args.splineId, data, unit);
         unit->SendMessageToSet(&data, true);

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1029,7 +1029,7 @@ class ProcEventInfo
 };
 
 // Struct for use in Unit::CalculateMeleeDamage
-// Need create structure like in SMSG_ATTACKERSTATEUPDATE opcode
+// Need create structure like in SMSG_ATTACKER_STATE_UPDATE opcode
 struct CalcDamageInfo
 {
     Unit  *attacker;             // Attacker
@@ -1050,7 +1050,7 @@ struct CalcDamageInfo
     MeleeHitOutcome hitOutCome;  /// @todo remove this field (need use TargetState)
 };
 
-// Spell damage info structure based on structure sending in SMSG_SPELLNONMELEEDAMAGELOG opcode
+// Spell damage info structure based on structure sending in SMSG_SPELL_NON_MELEE_DAMAGE_LOG opcode
 struct SpellNonMeleeDamage
 {
     SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, uint32 _schoolMask)
@@ -1420,11 +1420,11 @@ class Unit : public WorldObject
         i_AI = newAI;
     }
 
-    void AddToWorld();
-    void RemoveFromWorld();
+    void AddToWorld() override;
+    void RemoveFromWorld() override;
 
     void CleanupBeforeRemoveFromMap(bool finalCleanup);
-    void CleanupsBeforeDelete(bool finalCleanup = true);                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
+    void CleanupsBeforeDelete(bool finalCleanup = true) override;                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
     DiminishingLevels GetDiminishing(DiminishingGroup  group);
     void IncrDiminishing(DiminishingGroup group);
@@ -1439,7 +1439,7 @@ class Unit : public WorldObject
     float GetSpellMaxRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
     float GetSpellMinRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
 
-    virtual void Update(uint32 time);
+    virtual void Update(uint32 time) override;
 
     void setAttackTimer(WeaponAttackType type, uint32 time)
     {
@@ -1550,10 +1550,7 @@ class Unit : public WorldObject
     {
         return uint8(GetUInt32Value(UNIT_FIELD_LEVEL));
     }
-    uint8 getLevelForTarget(WorldObject const* /*target*/) const
-    {
-        return getLevel();
-    }
+    uint8 getLevelForTarget(WorldObject const* /*target*/) const override { return getLevel(); }
     void SetLevel(uint8 lvl);
 
     uint8 getRace() const
@@ -2453,8 +2450,8 @@ class Unit : public WorldObject
     void SetVisible(bool x);
 
     // common function for visibility checks for player/creatures with detection code
-    void SetPhaseMask(uint32 newPhaseMask, bool update);// overwrite WorldObject::SetPhaseMask
-    void UpdateObjectVisibility(bool forced = true);
+    void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
+    void UpdateObjectVisibility(bool forced = true) override;
 
     SpellImmuneList m_spellImmune [MAX_SPELL_IMMUNITY];
     uint32 m_lastSanctuaryTime;
@@ -2764,7 +2761,7 @@ class Unit : public WorldObject
     bool IsOnVehicle(const Unit* vehicle) const;
     Unit* GetVehicleBase()  const;
     Creature* GetVehicleCreatureBase() const;
-    uint64 GetTransGUID()   const;
+    uint64 GetTransGUID() const override;
     /// Returns the transport this unit is on directly (if on vehicle and transport, return vehicle)
     TransportBase* GetDirectTransport() const;
 
@@ -2875,7 +2872,7 @@ class Unit : public WorldObject
     protected:
     explicit Unit(bool isWorldObject);
 
-    void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
+    void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const override;
 
     UnitAI* i_AI, *i_disabledAI;
 
@@ -2946,8 +2943,8 @@ class Unit : public WorldObject
     uint32 m_unitTypeMask;
     LiquidTypeEntry const* _lastLiquid;
 
-    bool IsAlwaysVisibleFor(WorldObject const* seer) const;
-    bool IsAlwaysDetectableFor(WorldObject const* seer) const;
+    bool IsAlwaysVisibleFor(WorldObject const* seer) const override;
+    bool IsAlwaysDetectableFor(WorldObject const* seer) const override;
 
     void DisableSpline();
 
@@ -3000,7 +2997,7 @@ class Unit : public WorldObject
     time_t _lastDamagedTime; // Part of Evade mechanics
 };
 
-namespace Trinity
+namespace Skyfire
 {
     // Binary predicate for sorting Units based on percent value of a power
     class PowerPctOrderPred

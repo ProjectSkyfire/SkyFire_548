@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -18,10 +18,10 @@ set(ACE_LIBRARY "ace")
 set(BZIP2_LIBRARIES "bzip2")
 set(ZLIB_LIBRARIES "zlib")
 
-if(MSVC_VERSION EQUAL 1900)
+if((MSVC_VERSION EQUAL 1900) OR (MSVC_VERSION GREATER 1900))
   set( USE_MYSQL_SOURCES 0 )
   message(STATUS "MySQL: Disabled supplied MySQL sources")
-endif(MSVC_VERSION EQUAL 1900)
+endif((MSVC_VERSION EQUAL 1900) OR (MSVC_VERSION GREATER 1900))
 
 if( USE_MYSQL_SOURCES )
   set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/mysqllite/include)

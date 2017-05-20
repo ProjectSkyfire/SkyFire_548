@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_TYPEDEFS_H
-#define TRINITYSERVER_TYPEDEFS_H
+#ifndef SKYFIRESERVER_TYPEDEFS_H
+#define SKYFIRESERVER_TYPEDEFS_H
 
 #include "Common.h"
 
@@ -84,4 +84,4 @@ namespace Movement
     extern std::string MovementFlagsExtra_ToString(uint32 flags);
 }
 
-#endif // TRINITYSERVER_TYPEDEFS_H
+#endif // SKYFIRESERVER_TYPEDEFS_H

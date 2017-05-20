@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GRIDNOTIFIERSIMPL_H
-#define TRINITY_GRIDNOTIFIERSIMPL_H
+#ifndef SKYFIRE_GRIDNOTIFIERSIMPL_H
+#define SKYFIRE_GRIDNOTIFIERSIMPL_H
 
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
@@ -30,7 +30,7 @@
 #include "Opcodes.h"
 
 template<class T>
-inline void Trinity::VisibleNotifier::Visit(GridRefManager<T> &m)
+inline void Skyfire::VisibleNotifier::Visit(GridRefManager<T> &m)
 {
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -44,7 +44,7 @@ inline void Trinity::VisibleNotifier::Visit(GridRefManager<T> &m)
 // WorldObject searchers & workers
 
 template<class Check>
-void Trinity::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
+void Skyfire::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_GAMEOBJECT))
         return;
@@ -67,7 +67,7 @@ void Trinity::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_PLAYER))
         return;
@@ -90,7 +90,7 @@ void Trinity::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CREATURE))
         return;
@@ -113,7 +113,7 @@ void Trinity::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
+void Skyfire::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CORPSE))
         return;
@@ -136,7 +136,7 @@ void Trinity::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
+void Skyfire::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_DYNAMICOBJECT))
         return;
@@ -159,7 +159,7 @@ void Trinity::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectSearcher<Check>::Visit(AreaTriggerMapType &m)
+void Skyfire::WorldObjectSearcher<Check>::Visit(AreaTriggerMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_AREATRIGGER))
         return;
@@ -182,7 +182,7 @@ void Trinity::WorldObjectSearcher<Check>::Visit(AreaTriggerMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
+void Skyfire::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_GAMEOBJECT))
         return;
@@ -198,7 +198,7 @@ void Trinity::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectLastSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::WorldObjectLastSearcher<Check>::Visit(PlayerMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_PLAYER))
         return;
@@ -214,7 +214,7 @@ void Trinity::WorldObjectLastSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectLastSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::WorldObjectLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CREATURE))
         return;
@@ -230,7 +230,7 @@ void Trinity::WorldObjectLastSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectLastSearcher<Check>::Visit(CorpseMapType &m)
+void Skyfire::WorldObjectLastSearcher<Check>::Visit(CorpseMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CORPSE))
         return;
@@ -246,7 +246,7 @@ void Trinity::WorldObjectLastSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType &m)
+void Skyfire::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_DYNAMICOBJECT))
         return;
@@ -262,7 +262,7 @@ void Trinity::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectLastSearcher<Check>::Visit(AreaTriggerMapType &m)
+void Skyfire::WorldObjectLastSearcher<Check>::Visit(AreaTriggerMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_AREATRIGGER))
         return;
@@ -278,7 +278,7 @@ void Trinity::WorldObjectLastSearcher<Check>::Visit(AreaTriggerMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_PLAYER))
         return;
@@ -289,7 +289,7 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CREATURE))
         return;
@@ -300,7 +300,7 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
+void Skyfire::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_CORPSE))
         return;
@@ -311,7 +311,7 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
+void Skyfire::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_GAMEOBJECT))
         return;
@@ -322,7 +322,7 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
+void Skyfire::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_DYNAMICOBJECT))
         return;
@@ -333,7 +333,7 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::WorldObjectListSearcher<Check>::Visit(AreaTriggerMapType &m)
+void Skyfire::WorldObjectListSearcher<Check>::Visit(AreaTriggerMapType &m)
 {
     if (!(i_mapTypeMask & GRID_MAP_TYPE_MASK_AREATRIGGER))
         return;
@@ -346,7 +346,7 @@ void Trinity::WorldObjectListSearcher<Check>::Visit(AreaTriggerMapType &m)
 // Gameobject searchers
 
 template<class Check>
-void Trinity::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
+void Skyfire::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
     if (i_object)
@@ -366,7 +366,7 @@ void Trinity::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
+void Skyfire::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 {
     for (GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -379,7 +379,7 @@ void Trinity::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void Trinity::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
+void Skyfire::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
     for (GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if (itr->GetSource()->InSamePhase(i_phaseMask))
@@ -390,7 +390,7 @@ void Trinity::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 // Unit searchers
 
 template<class Check>
-void Trinity::UnitSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::UnitSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if (i_object)
@@ -410,7 +410,7 @@ void Trinity::UnitSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::UnitSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::UnitSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if (i_object)
@@ -430,7 +430,7 @@ void Trinity::UnitSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -443,7 +443,7 @@ void Trinity::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
 {
     for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -456,7 +456,7 @@ void Trinity::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::UnitListSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::UnitListSearcher<Check>::Visit(PlayerMapType &m)
 {
     for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if (itr->GetSource()->InSamePhase(i_phaseMask))
@@ -465,7 +465,7 @@ void Trinity::UnitListSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::UnitListSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::UnitListSearcher<Check>::Visit(CreatureMapType &m)
 {
     for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if (itr->GetSource()->InSamePhase(i_phaseMask))
@@ -476,7 +476,7 @@ void Trinity::UnitListSearcher<Check>::Visit(CreatureMapType &m)
 // Creature searchers
 
 template<class Check>
-void Trinity::CreatureSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::CreatureSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if (i_object)
@@ -496,7 +496,7 @@ void Trinity::CreatureSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -509,7 +509,7 @@ void Trinity::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
+void Skyfire::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
 {
     for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if (itr->GetSource()->InSamePhase(i_phaseMask))
@@ -518,7 +518,7 @@ void Trinity::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void Trinity::PlayerListSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::PlayerListSearcher<Check>::Visit(PlayerMapType &m)
 {
     for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if (itr->GetSource()->InSamePhase(i_phaseMask))
@@ -527,7 +527,7 @@ void Trinity::PlayerListSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::PlayerSearcher<Check>::Visit(PlayerMapType &m)
+void Skyfire::PlayerSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if (i_object)
@@ -547,7 +547,7 @@ void Trinity::PlayerSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void Trinity::PlayerLastSearcher<Check>::Visit(PlayerMapType& m)
+void Skyfire::PlayerLastSearcher<Check>::Visit(PlayerMapType& m)
 {
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
@@ -560,7 +560,7 @@ void Trinity::PlayerLastSearcher<Check>::Visit(PlayerMapType& m)
 }
 
 template<class Builder>
-void Trinity::LocalizedPacketDo<Builder>::operator()(Player* p)
+void Skyfire::LocalizedPacketDo<Builder>::operator()(Player* p)
 {
     LocaleConstant loc_idx = p->GetSession()->GetSessionDbLocaleIndex();
     uint32 cache_idx = loc_idx + 1;
@@ -587,7 +587,7 @@ void Trinity::LocalizedPacketDo<Builder>::operator()(Player* p)
 }
 
 template<class Builder>
-void Trinity::LocalizedPacketListDo<Builder>::operator()(Player* p)
+void Skyfire::LocalizedPacketListDo<Builder>::operator()(Player* p)
 {
     LocaleConstant loc_idx = p->GetSession()->GetSessionDbLocaleIndex();
     uint32 cache_idx = loc_idx+1;
@@ -610,4 +610,4 @@ void Trinity::LocalizedPacketListDo<Builder>::operator()(Player* p)
         p->SendDirectMessage((*data_list)[i]);
 }
 
-#endif                                                      // TRINITY_GRIDNOTIFIERSIMPL_H
+#endif                                                      // SKYFIRE_GRIDNOTIFIERSIMPL_H

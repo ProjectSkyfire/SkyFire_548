@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -29,9 +29,9 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   if(TOOLS)
     add_subdirectory(bzip2)
   endif()
-  add_subdirectory(zlib)
 endif()
 
+add_subdirectory(zlib)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)
 

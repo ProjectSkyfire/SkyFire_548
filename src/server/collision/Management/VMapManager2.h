@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +24,7 @@
 #include "Dynamic/UnorderedMap.h"
 #include "Define.h"
 #include <ace/Thread_Mutex.h>
+#include <mutex>
 
 //===========================================================
 
@@ -74,7 +75,7 @@ namespace VMAP
             ModelFileMap iLoadedModelFiles;
             InstanceTreeMap iInstanceMapTrees;
             // Mutex for iLoadedModelFiles
-            ACE_Thread_Mutex LoadedModelFilesLock;
+            std::mutex LoadedModelFilesLock;
 
             bool _loadMap(uint32 mapId, const std::string& basePath, uint32 tileX, uint32 tileY);
             /* void _unloadMap(uint32 pMapId, uint32 x, uint32 y); */

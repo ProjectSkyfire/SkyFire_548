@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,7 +18,7 @@
  */
 
 /** \file
-    \ingroup Trinityd
+    \ingroup Skyfired
  */
 
 #include "Common.h"
@@ -69,11 +69,11 @@ void RARunnable::run()
 
     if (acceptor.open(listenAddress, m_Reactor) == -1)
     {
-        TC_LOG_ERROR("server.worldserver", "Trinity RA can not bind to port %d on %s", raPort, stringIp.c_str());
+        SF_LOG_ERROR("server.worldserver", "Skyfire RA can not bind to port %d on %s", raPort, stringIp.c_str());
         return;
     }
 
-    TC_LOG_INFO("server.worldserver", "Starting Trinity RA on port %d on %s", raPort, stringIp.c_str());
+    SF_LOG_INFO("server.worldserver", "Starting Skyfire RA on port %d on %s", raPort, stringIp.c_str());
 
     while (!World::IsStopped())
     {
@@ -82,5 +82,5 @@ void RARunnable::run()
             break;
     }
 
-    TC_LOG_DEBUG("server.worldserver", "Trinity RA thread exiting");
+    SF_LOG_DEBUG("server.worldserver", "Skyfire RA thread exiting");
 }

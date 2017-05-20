@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -230,7 +230,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_DEBUG_SEND_CHATMESSAGE                 = 322,
     RBAC_PERM_COMMAND_DEBUG_SEND_EQUIPERROR                  = 323,
     RBAC_PERM_COMMAND_DEBUG_SEND_LARGEPACKET                 = 324,
-    RBAC_PERM_COMMAND_DEBUG_SEND_OPCODE                      = 325,
+    //325 = 325,
     RBAC_PERM_COMMAND_DEBUG_SEND_QINVALIDMSG                 = 326,
     RBAC_PERM_COMMAND_DEBUG_SEND_QPARTYMSG                   = 327,
     RBAC_PERM_COMMAND_DEBUG_SEND_SELLERROR                   = 328,
@@ -609,7 +609,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_RELOAD_SPELL_TARGET_POSITION           = 701,
     RBAC_PERM_COMMAND_RELOAD_SPELL_THREATS                   = 702,
     RBAC_PERM_COMMAND_RELOAD_SPILLOVER_TEMPLATE              = 703,
-    RBAC_PERM_COMMAND_RELOAD_TRINITY_STRING                  = 704,
+    RBAC_PERM_COMMAND_RELOAD_SKYFIRE_STRING                  = 704,
     RBAC_PERM_COMMAND_RELOAD_VEHICLE_ACCESORY                = 705,
     RBAC_PERM_COMMAND_RELOAD_VEHICLE_TEMPLATE_ACCESSORY      = 706,
     RBAC_PERM_COMMAND_RELOAD_WARDEN_ACTION                   = 707,
@@ -816,7 +816,7 @@ class RBACData
          * // previously defined "RBACData* rbac" with proper initialization
          * uint32 permissionId = 2;
          * if (rbac->GrantRole(permissionId) == RBAC_IN_DENIED_LIST)
-         *     TC_LOG_DEBUG("entities.player", "Failed to grant permission %u, already denied", permissionId);
+         *     SF_LOG_DEBUG("entities.player", "Failed to grant permission %u, already denied", permissionId);
          * @endcode
          */
         RBACCommandResult GrantPermission(uint32 permissionId, int32 realmId = 0);
@@ -839,7 +839,7 @@ class RBACData
          * // previously defined "RBACData* rbac" with proper initialization
          * uint32 permissionId = 2;
          * if (rbac->DenyRole(permissionId) == RBAC_ID_DOES_NOT_EXISTS)
-         *     TC_LOG_DEBUG("entities.player", "Role Id %u does not exists", permissionId);
+         *     SF_LOG_DEBUG("entities.player", "Role Id %u does not exists", permissionId);
          * @endcode
          */
         RBACCommandResult DenyPermission(uint32 permissionId, int32 realmId = 0);
@@ -863,7 +863,7 @@ class RBACData
          * // previously defined "RBACData* rbac" with proper initialization
          * uint32 permissionId = 2;
          * if (rbac->RevokeRole(permissionId) == RBAC_OK)
-         *     TC_LOG_DEBUG("entities.player", "Permission %u succesfully removed", permissionId);
+         *     SF_LOG_DEBUG("entities.player", "Permission %u succesfully removed", permissionId);
          * @endcode
          */
         RBACCommandResult RevokePermission(uint32 permissionId, int32 realmId = 0);

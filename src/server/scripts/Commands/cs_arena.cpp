@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -145,10 +145,10 @@ public:
         std::string name = arena->GetName();
         arena->Disband();
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s [GUID: %u] disbanded arena team type: %u [Id: %u].",
+            SF_LOG_DEBUG("bg.arena", "GameMaster: %s [GUID: %u] disbanded arena team type: %u [Id: %u].",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow(), arena->GetType(), teamId);
         else
-            TC_LOG_DEBUG("bg.arena", "Console: disbanded arena team type: %u [Id: %u].", arena->GetType(), teamId);
+            SF_LOG_DEBUG("bg.arena", "Console: disbanded arena team type: %u [Id: %u].", arena->GetType(), teamId);
 
         delete(arena);
 
@@ -210,10 +210,10 @@ public:
 
         handler->PSendSysMessage(LANG_ARENA_RENAME, arena->GetId(), oldArenaStr, newArenaStr);
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s [GUID: %u] rename arena team \"%s\"[Id: %u] to \"%s\"",
+            SF_LOG_DEBUG("bg.arena", "GameMaster: %s [GUID: %u] rename arena team \"%s\"[Id: %u] to \"%s\"",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow(), oldArenaStr, arena->GetId(), newArenaStr);
         else
-            TC_LOG_DEBUG("bg.arena", "Console: rename arena team \"%s\"[Id: %u] to \"%s\"", oldArenaStr, arena->GetId(), newArenaStr);
+            SF_LOG_DEBUG("bg.arena", "Console: rename arena team \"%s\"[Id: %u] to \"%s\"", oldArenaStr, arena->GetId(), newArenaStr);
 
         return true;
     }
@@ -286,10 +286,10 @@ public:
 
         handler->PSendSysMessage(LANG_ARENA_CAPTAIN, arena->GetName().c_str(), arena->GetId(), oldCaptainNameData->m_name.c_str(), target->GetName().c_str());
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s [GUID: %u] promoted player: %s [GUID: %u] to leader of arena team \"%s\"[Id: %u]",
+            SF_LOG_DEBUG("bg.arena", "GameMaster: %s [GUID: %u] promoted player: %s [GUID: %u] to leader of arena team \"%s\"[Id: %u]",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow(), target->GetName().c_str(), target->GetGUIDLow(), arena->GetName().c_str(), arena->GetId());
         else
-            TC_LOG_DEBUG("bg.arena", "Console: promoted player: %s [GUID: %u] to leader of arena team \"%s\"[Id: %u]",
+            SF_LOG_DEBUG("bg.arena", "Console: promoted player: %s [GUID: %u] to leader of arena team \"%s\"[Id: %u]",
                 target->GetName().c_str(), target->GetGUIDLow(), arena->GetName().c_str(), arena->GetId());
 
         return true;

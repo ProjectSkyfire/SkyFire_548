@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,6 +40,54 @@
 
 #include <cmath>
 
+template<class T>
+void HashMapHolder<T>::Insert(T* o)
+{
+    SF_UNIQUE_GUARD writeGuard(*GetLock());
+    GetContainer()[o->GetGUID()] = o;
+}
+
+template<class T>
+void HashMapHolder<T>::Remove(T* o)
+{
+    SF_UNIQUE_GUARD writeGuard(*GetLock());
+    GetContainer().erase(o->GetGUID());
+}
+
+template<class T>
+T* HashMapHolder<T>::Find(uint64 guid)
+{
+    SF_SHARED_GUARD readGuard(*GetLock());
+    typename MapType::iterator itr = GetContainer().find(guid);
+    return (itr != GetContainer().end()) ? itr->second : NULL;
+}
+
+template<class T>
+auto HashMapHolder<T>::GetContainer() -> MapType&
+{
+    static MapType m_objectMap;
+    return m_objectMap;
+}
+
+template<class T>
+SF_SHARED_MUTEX* HashMapHolder<T>::GetLock()
+{
+    static SF_SHARED_MUTEX i_lock;
+    return &i_lock;
+}
+
+/// Global definitions for the hashmap storage
+
+template class HashMapHolder<Player>;
+template class HashMapHolder<Pet>;
+template class HashMapHolder<GameObject>;
+template class HashMapHolder<DynamicObject>;
+template class HashMapHolder<Creature>;
+template class HashMapHolder<Corpse>;
+template class HashMapHolder<AreaTrigger>;
+
+
+
 ObjectAccessor::ObjectAccessor() { }
 
 ObjectAccessor::~ObjectAccessor() { }
@@ -50,17 +98,17 @@ template<class T> T* ObjectAccessor::GetObjectInWorld(uint32 mapid, float x, flo
     if (!obj || obj->GetMapId() != mapid)
         return NULL;
 
-    CellCoord p = Trinity::ComputeCellCoord(x, y);
+    CellCoord p = Skyfire::ComputeCellCoord(x, y);
     if (!p.IsCoordValid())
     {
-        TC_LOG_ERROR("misc", "ObjectAccessor::GetObjectInWorld: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+        SF_LOG_ERROR("misc", "ObjectAccessor::GetObjectInWorld: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
         return NULL;
     }
 
-    CellCoord q = Trinity::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY());
+    CellCoord q = Skyfire::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY());
     if (!q.IsCoordValid())
     {
-        TC_LOG_ERROR("misc", "ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
+        SF_LOG_ERROR("misc", "ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
         return NULL;
     }
 
@@ -215,7 +263,7 @@ Unit* ObjectAccessor::FindUnit(uint64 guid)
 
 Player* ObjectAccessor::FindPlayerByName(std::string const& name)
 {
-    TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+    SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     std::string nameStr = name;
     std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
     HashMapHolder<Player>::MapType const& m = GetPlayers();
@@ -234,15 +282,26 @@ Player* ObjectAccessor::FindPlayerByName(std::string const& name)
 
 void ObjectAccessor::SaveAllPlayers()
 {
-    TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+    SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = GetPlayers();
     for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
         itr->second->SaveToDB();
 }
+void ObjectAccessor::AddUpdateObject(Object* obj)
+{
+    SF_SHARED_GUARD readGuard(i_objectLock);
+    i_objects.insert(obj);
+}
+
+void ObjectAccessor::RemoveUpdateObject(Object* obj)
+{
+    SF_SHARED_GUARD readGuard(i_objectLock);
+    i_objects.erase(obj);
+}
 
 Corpse* ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 {
-    TRINITY_READ_GUARD(ACE_RW_Thread_Mutex, i_corpseLock);
+    SF_SHARED_GUARD readGuard(i_corpseLock);
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
     if (iter == i_player2corpse.end())
@@ -275,14 +334,13 @@ void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 
     // Critical section
     {
-        TRINITY_WRITE_GUARD(ACE_RW_Thread_Mutex, i_corpseLock);
-
+        SF_SHARED_GUARD writeGuard(i_corpseLock);
         Player2CorpsesMapType::iterator iter = i_player2corpse.find(corpse->GetOwnerGUID());
         if (iter == i_player2corpse.end()) /// @todo Fix this
             return;
 
         // build mapid*cellid -> guid_set map
-        CellCoord cellCoord = Trinity::ComputeCellCoord(corpse->GetPositionX(), corpse->GetPositionY());
+        CellCoord cellCoord = Skyfire::ComputeCellCoord(corpse->GetPositionX(), corpse->GetPositionY());
         sObjectMgr->DeleteCorpseCellData(corpse->GetMapId(), cellCoord.GetId(), GUID_LOPART(corpse->GetOwnerGUID()));
 
         i_player2corpse.erase(iter);
@@ -295,20 +353,21 @@ void ObjectAccessor::AddCorpse(Corpse* corpse)
 
     // Critical section
     {
-        TRINITY_WRITE_GUARD(ACE_RW_Thread_Mutex, i_corpseLock);
+        SF_SHARED_GUARD writeGuard(i_corpseLock);
 
         ASSERT(i_player2corpse.find(corpse->GetOwnerGUID()) == i_player2corpse.end());
         i_player2corpse[corpse->GetOwnerGUID()] = corpse;
 
         // build mapid*cellid -> guid_set map
-        CellCoord cellCoord = Trinity::ComputeCellCoord(corpse->GetPositionX(), corpse->GetPositionY());
+        CellCoord cellCoord = Skyfire::ComputeCellCoord(corpse->GetPositionX(), corpse->GetPositionY());
         sObjectMgr->AddCorpseCellData(corpse->GetMapId(), cellCoord.GetId(), GUID_LOPART(corpse->GetOwnerGUID()), corpse->GetInstanceId());
     }
 }
 
 void ObjectAccessor::AddCorpsesToGrid(GridCoord const& gridpair, GridType& grid, Map* map)
 {
-    TRINITY_READ_GUARD(ACE_RW_Thread_Mutex, i_corpseLock);
+
+    SF_SHARED_GUARD readGuard(i_corpseLock);
 
     for (Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
     {
@@ -340,7 +399,7 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia
         return NULL;
     }
 
-    TC_LOG_DEBUG("misc", "Deleting Corpse and spawned bones.");
+    SF_LOG_DEBUG("misc", "Deleting Corpse and spawned bones.");
 
     // Map can be NULL
     Map* map = corpse->FindMap();
@@ -442,16 +501,8 @@ void ObjectAccessor::UnloadAll()
 /// Define the static members of HashMapHolder
 
 template <class T> UNORDERED_MAP< uint64, T* > HashMapHolder<T>::m_objectMap;
-template <class T> typename HashMapHolder<T>::LockType HashMapHolder<T>::i_lock;
+template <class T> typename SF_SHARED_MUTEX HashMapHolder<T>::i_lock;
 
-/// Global definitions for the hashmap storage
-
-template class HashMapHolder<Player>;
-template class HashMapHolder<Pet>;
-template class HashMapHolder<GameObject>;
-template class HashMapHolder<DynamicObject>;
-template class HashMapHolder<Creature>;
-template class HashMapHolder<Corpse>;
 
 template Player* ObjectAccessor::GetObjectInWorld<Player>(uint32 mapid, float x, float y, uint64 guid, Player* /*fake*/);
 template Pet* ObjectAccessor::GetObjectInWorld<Pet>(uint32 mapid, float x, float y, uint64 guid, Pet* /*fake*/);

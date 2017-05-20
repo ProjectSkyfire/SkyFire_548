@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -96,7 +96,7 @@ namespace FactorySelector
         // select NullCreatureAI if not another cases
         ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->key();
 
-        TC_LOG_DEBUG("scripts", "Creature %s (Entry: %u GUID: %u DB GUID: %u) is using AI type: %s.", creature->GetName().c_str(), creature->GetEntry(), creature->GetGUIDLow(), creature->GetDBTableGUIDLow(), ainame.c_str());
+        SF_LOG_DEBUG("scripts", "Creature %s (Entry: %u GUID: %u DB GUID: %u) is using AI type: %s.", creature->GetName().c_str(), creature->GetEntry(), creature->GetGUIDLow(), creature->GetDBTableGUIDLow(), ainame.c_str());
         return (ai_factory == NULL ? new NullCreatureAI(creature) : ai_factory->Create(creature));
     }
 
@@ -143,7 +143,7 @@ namespace FactorySelector
 
         std::string ainame = (ai_factory == NULL || go->GetScriptId()) ? "NullGameObjectAI" : ai_factory->key();
 
-        TC_LOG_DEBUG("scripts", "GameObject %u used AI is %s.", go->GetGUIDLow(), ainame.c_str());
+        SF_LOG_DEBUG("scripts", "GameObject %u used AI is %s.", go->GetGUIDLow(), ainame.c_str());
 
         return (ai_factory == NULL ? new NullGameObjectAI(go) : ai_factory->Create(go));
     }

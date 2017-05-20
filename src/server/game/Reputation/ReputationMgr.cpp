@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -48,7 +48,7 @@ bool ReputationMgr::IsAtWar(uint32 faction_id) const
 
     if (!factionEntry)
     {
-        TC_LOG_ERROR("misc", "ReputationMgr::IsAtWar: Can't get AtWar flag of %s for unknown faction (faction id) #%u.", _player->GetName().c_str(), faction_id);
+        SF_LOG_ERROR("misc", "ReputationMgr::IsAtWar: Can't get AtWar flag of %s for unknown faction (faction id) #%u.", _player->GetName().c_str(), faction_id);
         return 0;
     }
 
@@ -71,7 +71,7 @@ int32 ReputationMgr::GetReputation(uint32 faction_id) const
 
     if (!factionEntry)
     {
-        TC_LOG_ERROR("misc", "ReputationMgr::GetReputation: Can't get reputation of %s for unknown faction (faction id) #%u.", _player->GetName().c_str(), faction_id);
+        SF_LOG_ERROR("misc", "ReputationMgr::GetReputation: Can't get reputation of %s for unknown faction (faction id) #%u.", _player->GetName().c_str(), faction_id);
         return 0;
     }
 
@@ -376,11 +376,15 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     if (itr != _factions.end())
     {
         int32 BaseRep = GetBaseReputation(factionEntry);
+        float bonusLFG = sWorld->getRate(RATE_REPUTATION_LFG_BONUS);
+
+        if (factionEntry->ID != 0 || factionEntry->ID == _player->GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID))
+            float bonusLFG = sWorld->getRate(RATE_REPUTATION_LFG_BONUS) * 2.0f;
 
         if (incremental)
         {
             // int32 *= float cause one point loss?
-            standing = int32(floor((float)standing * sWorld->getRate(RATE_REPUTATION_GAIN) + 0.5f));
+            standing = int32(floor(((float)standing * sWorld->getRate(RATE_REPUTATION_GAIN) + 0.5f) * bonusLFG));
             standing += itr->second.Standing + BaseRep;
         }
 

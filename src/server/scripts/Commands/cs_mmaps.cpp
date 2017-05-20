@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -260,15 +260,15 @@ public:
         float radius = 40.0f;
         WorldObject* object = handler->GetSession()->GetPlayer();
 
-        CellCoord pair(Trinity::ComputeCellCoord(object->GetPositionX(), object->GetPositionY()));
+        CellCoord pair(Skyfire::ComputeCellCoord(object->GetPositionX(), object->GetPositionY()));
         Cell cell(pair);
         cell.SetNoCreate();
 
         std::list<Creature*> creatureList;
 
-        Trinity::AnyUnitInObjectRangeCheck go_check(object, radius);
-        Trinity::CreatureListSearcher<Trinity::AnyUnitInObjectRangeCheck> go_search(object, creatureList, go_check);
-        TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AnyUnitInObjectRangeCheck>, GridTypeMapContainer> go_visit(go_search);
+        Skyfire::AnyUnitInObjectRangeCheck go_check(object, radius);
+        Skyfire::CreatureListSearcher<Skyfire::AnyUnitInObjectRangeCheck> go_search(object, creatureList, go_check);
+        TypeContainerVisitor<Skyfire::CreatureListSearcher<Skyfire::AnyUnitInObjectRangeCheck>, GridTypeMapContainer> go_visit(go_search);
 
         // Get Creatures
         cell.Visit(pair, go_visit, *(object->GetMap()), *object, radius);

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -75,8 +75,8 @@ void TotemAI::UpdateAI(uint32 /*diff*/)
         me->IsFriendlyTo(victim) || !me->CanSeeOrDetect(victim))
     {
         victim = NULL;
-        Trinity::NearestAttackableUnitInObjectRangeCheck u_check(me, me, max_range);
-        Trinity::UnitLastSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> checker(me, victim, u_check);
+        Skyfire::NearestAttackableUnitInObjectRangeCheck u_check(me, me, max_range);
+        Skyfire::UnitLastSearcher<Skyfire::NearestAttackableUnitInObjectRangeCheck> checker(me, victim, u_check);
         me->VisitNearbyObject(max_range, checker);
     }
 

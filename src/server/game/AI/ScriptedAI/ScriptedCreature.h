@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -102,7 +102,7 @@ class SummonList
     {
         // We need to use a copy of SummonList here, otherwise original SummonList would be modified
         StorageType listCopy = storage_;
-        Trinity::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
+        Skyfire::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
         for (StorageType::iterator i = listCopy.begin(); i != listCopy.end();)
         {
             Creature* summon = Unit::GetCreature(*me, *i++);
@@ -156,39 +156,31 @@ struct ScriptedAI : public CreatureAI
     void AttackStartNoMove(Unit* target);
 
     // Called at any Damage from any attacker (before damage apply)
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-    { }
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override { }
 
     //Called at World update tick
-    virtual void UpdateAI(uint32 diff);
+    virtual void UpdateAI(uint32 diff) override;
 
     //Called at creature death
-    void JustDied(Unit* /*killer*/)
-    { }
+    void JustDied(Unit* /*killer*/) override { }
 
     //Called at creature killing another unit
-    void KilledUnit(Unit* /*victim*/)
-    { }
+    void KilledUnit(Unit* /*victim*/) override { }
 
     // Called when the creature summon successfully other creature
-    void JustSummoned(Creature* /*summon*/)
-    { }
+    void JustSummoned(Creature* /*summon*/) override { }
 
     // Called when a summoned creature is despawned
-    void SummonedCreatureDespawn(Creature* /*summon*/)
-    { }
+    void SummonedCreatureDespawn(Creature* /*summon*/) override { }
 
     // Called when hit by a spell
-    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/)
-    { }
+    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) override { }
 
     // Called when spell hits a target
-    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/)
-    { }
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) override { }
 
     //Called at waypoint reached or PointMovement end
-    void MovementInform(uint32 /*type*/, uint32 /*id*/)
-    { }
+    void MovementInform(uint32 /*type*/, uint32 /*id*/) override { }
 
     // Called when AI is temporarily replaced or put back when possess is applied or removed
     void OnPossess(bool /*apply*/)
@@ -209,15 +201,13 @@ struct ScriptedAI : public CreatureAI
     // *************
 
     //Called at creature reset either by death or evade
-    void Reset()
-    { }
+    void Reset() override { }
 
     //Called at creature aggro either by MoveInLOS or Attack Start
-    void EnterCombat(Unit* /*victim*/)
-    { }
+    void EnterCombat(Unit* /*victim*/) override { }
 
     // Called before EnterCombat even before the creature is in combat.
-    void AttackStart(Unit* /*target*/);
+    void AttackStart(Unit* /*target*/) override;
 
     // *************
     //AI Helper Functions

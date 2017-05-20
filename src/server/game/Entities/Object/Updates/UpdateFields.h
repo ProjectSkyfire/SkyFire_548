@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -164,8 +164,7 @@ enum EPlayerFields
     PLAYER_FIELD_DUEL_TEAM                                   = UNIT_END + 0x009, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_GUILD_TIME_STAMP                            = UNIT_END + 0x00A, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_QUEST_LOG                                   = UNIT_END + 0x00B, // Size: 750, Flags: UF_FLAG_PARTY
-    PLAYER_FIELD_VISIBLE_ITEMS                               = UNIT_END + 0x2F9, // Size: 19, Flags: UF_FLAG_PUBLIC
-    PLAYER_FIELD_VISIBLE_ITEM_NCHANTMENTS                    = UNIT_END + 0x30D, // Size: 19, Flags: UF_FLAG_PARTY
+    PLAYER_FIELD_VISIBLE_ITEMS                               = UNIT_END + 0x2F9, // Size: 38, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_PLAYER_TITLE                                = UNIT_END + 0x31F, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_FAKE_INEBRIATION                            = UNIT_END + 0x320, // Size: 1, Flags: UF_FLAG_PUBLIC
     PLAYER_FIELD_VIRTUAL_PLAYER_REALM                        = UNIT_END + 0x321, // Size: 1, Flags: UF_FLAG_PUBLIC

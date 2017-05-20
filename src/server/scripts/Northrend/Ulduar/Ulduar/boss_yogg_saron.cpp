@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -477,7 +477,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
                 bool clockwise = false;
                 std::list<TempSummon*> clouds;
                 me->SummonCreatureGroup(CREATURE_GROUP_CLOUDS, &clouds);
-                clouds.sort(Trinity::ObjectDistanceOrderPred(me, true));
+                clouds.sort(Skyfire::ObjectDistanceOrderPred(me, true));
                 for (std::list<TempSummon*>::const_iterator itr = clouds.begin(); itr != clouds.end(); ++itr)
                 {
                     (*itr)->AI()->DoAction(int32(clockwise));
@@ -2002,7 +2002,7 @@ class spell_yogg_saron_psychosis : public SpellScriptLoader      // 63795, 65301
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(HighSanityTargetSelector());
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_ILLUSION_ROOM));
+                targets.remove_if(Skyfire::UnitAuraCheck(true, SPELL_ILLUSION_ROOM));
             }
 
             void Register() OVERRIDE
@@ -2034,7 +2034,7 @@ class spell_yogg_saron_malady_of_the_mind : public SpellScriptLoader    // 63830
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(HighSanityTargetSelector());
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_ILLUSION_ROOM));
+                targets.remove_if(Skyfire::UnitAuraCheck(true, SPELL_ILLUSION_ROOM));
             }
 
             void Register() OVERRIDE
@@ -2104,7 +2104,7 @@ class spell_yogg_saron_brain_link : public SpellScriptLoader    // 63802
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_ILLUSION_ROOM));
+                targets.remove_if(Skyfire::UnitAuraCheck(true, SPELL_ILLUSION_ROOM));
 
                 if (targets.size() != 2)
                 {

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     if (!classResult || !raceResult)
     {
-        TC_LOG_ERROR("network", "Unable to retrieve class or race data.");
+        SF_LOG_ERROR("network", "Unable to retrieve class or race data.");
         return;
     }
 
@@ -39,7 +39,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     if (iter != realmNameStore.end()) // Add local realm
         realmNamesToSend[realmID] = iter->second;
 
-    TC_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
+    SF_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
 
     packet.WriteBit(code == AUTH_OK);
@@ -48,7 +48,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     {
         packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
 
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
         {
             packet.WriteBits(itr->second.size(), 8);
             packet.WriteBits(itr->second.size(), 8);
@@ -77,7 +77,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
     if (code == AUTH_OK)
     {
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
         {
             packet << uint32(itr->first);
             packet.WriteString(itr->second);

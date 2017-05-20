@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1511,8 +1511,8 @@ class spell_q11010_q11102_q11023_choose_loc : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 // Check for player that is in 65 y range
                 std::list<Player*> playerList;
-                Trinity::AnyPlayerInObjectRangeCheck checker(caster, 65.0f);
-                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(caster, playerList, checker);
+                Skyfire::AnyPlayerInObjectRangeCheck checker(caster, 65.0f);
+                Skyfire::PlayerListSearcher<Skyfire::AnyPlayerInObjectRangeCheck> searcher(caster, playerList, checker);
                 caster->VisitNearbyWorldObject(65.0f, searcher);
                     for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     // Check if found player target is on fly mount or using flying form
@@ -2242,6 +2242,7 @@ class spell_q12919_gymers_throw : public SpellScriptLoader
             return new spell_q12919_gymers_throw_SpellScript();
         }
 };
+
 enum FearNoEvil
 {
     SPELL_RENEWED_LIFE = 93097,
@@ -2285,6 +2286,33 @@ public:
     SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_q28813_get_our_boys_back_dummy_SpellScript();
+    }
+};
+
+class spell_q28813_set_health_random : public SpellScriptLoader
+{
+public:
+    spell_q28813_set_health_random() : SpellScriptLoader("spell_q28813_set_health_random") { }
+
+    class spell_q28813_set_health_random_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q28813_set_health_random_SpellScript);
+
+        void HandleDummyEffect()
+        {
+            Unit* caster = GetCaster();
+            caster->SetHealth(caster->CountPctFromMaxHealth(urand(3, 5)*10));
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_q28813_set_health_random_SpellScript::HandleDummyEffect);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_q28813_set_health_random_SpellScript();
     }
 };
 
@@ -2343,4 +2371,5 @@ void AddSC_quest_spell_scripts()
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
     new spell_q28813_get_our_boys_back_dummy();
+    new spell_q28813_set_health_random();
 }

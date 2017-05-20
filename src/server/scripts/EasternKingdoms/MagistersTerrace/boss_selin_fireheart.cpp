@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -86,7 +86,7 @@ public:
                 {
                     instance->SetData64(DATA_FEL_CRYSTAL, i);
                     uint64 guid = instance->GetData64(DATA_FEL_CRYSTAL);
-                    TC_LOG_DEBUG("scripts", "Selin: Adding Fel Crystal " UI64FMTD " to list", guid);
+                    SF_LOG_DEBUG("scripts", "Selin: Adding Fel Crystal " UI64FMTD " to list", guid);
                     Crystals.push_back(guid);
                 }
             }
@@ -127,7 +127,7 @@ public:
 
                 // Set Inst data for encounter
                 instance->SetData(DATA_SELIN_EVENT, NOT_STARTED);
-            } else TC_LOG_ERROR("scripts", ERROR_INST_DATA);
+            } else SF_LOG_ERROR("scripts", ERROR_INST_DATA);
 
             DrainLifeTimer = urand(3000, 7000);
             DrainManaTimer = DrainLifeTimer + 5000;
@@ -227,7 +227,7 @@ public:
                 else
                 {
                     // Make an error message in case something weird happened here
-                    TC_LOG_ERROR("scripts", "Selin Fireheart unable to drain crystal as the crystal is either dead or despawned");
+                    SF_LOG_ERROR("scripts", "Selin Fireheart unable to drain crystal as the crystal is either dead or despawned");
                     DrainingCrystal = false;
                 }
             }
@@ -363,7 +363,7 @@ public:
                         }
                     }
                 }
-            } else TC_LOG_ERROR("scripts", ERROR_INST_DATA);
+            } else SF_LOG_ERROR("scripts", ERROR_INST_DATA);
         }
     };
 };

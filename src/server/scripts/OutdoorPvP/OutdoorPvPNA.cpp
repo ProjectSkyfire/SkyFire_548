@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -138,9 +138,9 @@ void OPvPCapturePointNA::FactionTakeOver(uint32 team)
     if (m_ControllingFaction)
         sObjectMgr->RemoveGraveYardLink(NA_HALAA_GRAVEYARD, NA_HALAA_GRAVEYARD_ZONE, m_ControllingFaction, false);
     if (m_ControllingFaction == ALLIANCE)
-        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetTrinityStringForDBCLocale(LANG_OPVP_NA_LOSE_A));
+        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetSkyFireStringForDBCLocale(LANG_OPVP_NA_LOSE_A));
     else if (m_ControllingFaction == HORDE)
-        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetTrinityStringForDBCLocale(LANG_OPVP_NA_LOSE_H));
+        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetSkyFireStringForDBCLocale(LANG_OPVP_NA_LOSE_H));
 
     m_ControllingFaction = team;
     if (m_ControllingFaction)
@@ -162,7 +162,7 @@ void OPvPCapturePointNA::FactionTakeOver(uint32 team)
         m_PvP->SendUpdateWorldState(NA_UI_HORDE_GUARDS_SHOW, 0);
         m_PvP->SendUpdateWorldState(NA_UI_ALLIANCE_GUARDS_SHOW, 1);
         m_PvP->SendUpdateWorldState(NA_UI_GUARDS_LEFT, m_GuardsAlive);
-        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetTrinityStringForDBCLocale(LANG_OPVP_NA_CAPTURE_A));
+        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetSkyFireStringForDBCLocale(LANG_OPVP_NA_CAPTURE_A));
     }
     else
     {
@@ -174,7 +174,7 @@ void OPvPCapturePointNA::FactionTakeOver(uint32 team)
         m_PvP->SendUpdateWorldState(NA_UI_HORDE_GUARDS_SHOW, 1);
         m_PvP->SendUpdateWorldState(NA_UI_ALLIANCE_GUARDS_SHOW, 0);
         m_PvP->SendUpdateWorldState(NA_UI_GUARDS_LEFT, m_GuardsAlive);
-        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetTrinityStringForDBCLocale(LANG_OPVP_NA_CAPTURE_H));
+        sWorld->SendZoneText(NA_HALAA_GRAVEYARD_ZONE, sObjectMgr->GetSkyFireStringForDBCLocale(LANG_OPVP_NA_CAPTURE_H));
     }
     UpdateWyvernRoostWorldState(NA_ROOST_S);
     UpdateWyvernRoostWorldState(NA_ROOST_N);

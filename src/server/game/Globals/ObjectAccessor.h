@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,12 +17,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_OBJECTACCESSOR_H
-#define TRINITY_OBJECTACCESSOR_H
+#ifndef SKYFIRE_OBJECTACCESSOR_H
+#define SKYFIRE_OBJECTACCESSOR_H
 
 #include "Define.h"
-#include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
 #include "UnorderedMap.h"
 
 #include "UpdateData.h"
@@ -30,6 +28,8 @@
 #include "GridDefines.h"
 #include "Object.h"
 
+
+# include "SharedMutex.h"
 #include <set>
 
 class Creature;
@@ -49,42 +49,28 @@ class HashMapHolder
     public:
 
         typedef UNORDERED_MAP<uint64, T*> MapType;
-        typedef ACE_RW_Thread_Mutex LockType;
 
-        static void Insert(T* o)
-        {
-            TRINITY_WRITE_GUARD(LockType, i_lock);
-            m_objectMap[o->GetGUID()] = o;
-        }
+        static void Insert(T* o);
 
-        static void Remove(T* o)
-        {
-            TRINITY_WRITE_GUARD(LockType, i_lock);
-            m_objectMap.erase(o->GetGUID());
-        }
+        static void Remove(T* o);
 
-        static T* Find(uint64 guid)
-        {
-            TRINITY_READ_GUARD(LockType, i_lock);
-            typename MapType::iterator itr = m_objectMap.find(guid);
-            return (itr != m_objectMap.end()) ? itr->second : NULL;
-        }
+        static T* Find(uint64 guid);
 
-        static MapType& GetContainer() { return m_objectMap; }
+        static MapType& GetContainer();
 
-        static LockType* GetLock() { return &i_lock; }
+        static SF_SHARED_MUTEX* GetLock();
 
+        
     private:
+
         //Non instanceable only static
         HashMapHolder() { }
-
-        static LockType i_lock;
+        static SF_SHARED_MUTEX i_lock;
         static MapType m_objectMap;
 };
 
 class ObjectAccessor
 {
-    friend class ACE_Singleton<ObjectAccessor, ACE_Null_Mutex>;
     private:
         ObjectAccessor();
         ~ObjectAccessor();
@@ -92,6 +78,13 @@ class ObjectAccessor
         ObjectAccessor& operator=(const ObjectAccessor&);
 
     public:
+
+        static ObjectAccessor* instance()
+        {
+            static ObjectAccessor *instance = new ObjectAccessor();
+            return instance;
+        }
+
         /// @todo: Override these template functions for each holder type and add assertions
 
         template<class T> static T* GetObjectInOrOutOfWorld(uint64 guid, T* /*typeSpecifier*/)
@@ -160,7 +153,7 @@ class ObjectAccessor
         // ACCESS LIKE THAT IS NOT THREAD SAFE
         static Pet* FindPet(uint64);
         static Player* FindPlayer(uint64);
-        static Creature* FindCreature(uint64);
+        //static Creature* FindCreature(uint64);
         static Unit* FindUnit(uint64);
         static Player* FindPlayerByName(std::string const& name);
 
@@ -195,18 +188,9 @@ class ObjectAccessor
         static void SaveAllPlayers();
 
         //non-static functions
-        void AddUpdateObject(Object* obj)
-        {
-            TRINITY_GUARD(ACE_Thread_Mutex, i_objectLock);
-            i_objects.insert(obj);
-        }
-
-        void RemoveUpdateObject(Object* obj)
-        {
-            TRINITY_GUARD(ACE_Thread_Mutex, i_objectLock);
-            i_objects.erase(obj);
-        }
-
+        void AddUpdateObject(Object* obj);
+        void RemoveUpdateObject(Object* obj);
+        
         //Thread safe
         Corpse* GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse* corpse);
@@ -230,9 +214,9 @@ class ObjectAccessor
         std::set<Object*> i_objects;
         Player2CorpsesMapType i_player2corpse;
 
-        ACE_Thread_Mutex i_objectLock;
-        ACE_RW_Thread_Mutex i_corpseLock;
+        SF_SHARED_MUTEX i_objectLock;
+        SF_SHARED_MUTEX i_corpseLock;
 };
 
-#define sObjectAccessor ACE_Singleton<ObjectAccessor, ACE_Null_Mutex>::instance()
+#define sObjectAccessor ObjectAccessor::instance()
 #endif

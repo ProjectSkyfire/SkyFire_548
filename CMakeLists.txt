@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -13,7 +13,7 @@
 project(Project_Skyfire)
 
 # CMake policies (can not be handled elsewhere)
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 2.8.7)
 cmake_policy(SET CMP0005 OLD)
 if(POLICY CMP0043)
   cmake_policy(SET CMP0043 OLD) # Disable 'Ignore COMPILE_DEFINITIONS_<Config> properties'

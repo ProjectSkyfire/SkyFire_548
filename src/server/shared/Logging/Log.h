@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_LOG_H
-#define TRINITYCORE_LOG_H
+#ifndef SKYFIRESERVER_LOG_H
+#define SKYFIRESERVER_LOG_H
 
 #include "Define.h"
 #include "Appender.h"
@@ -116,13 +116,13 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
 #define sLog ACE_Singleton<Log, ACE_Thread_Mutex>::instance()
 
 #if COMPILER != COMPILER_MICROSOFT
-#define TC_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
+#define SF_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
         do {                                                        \
             if (sLog->ShouldLog(filterType__, level__))             \
                 sLog->call__(filterType__, __VA_ARGS__);            \
         } while (0)
 #else
-#define TC_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
+#define SF_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
         __pragma(warning(push))                                     \
         __pragma(warning(disable:4127))                             \
         do {                                                        \
@@ -132,22 +132,22 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
         __pragma(warning(pop))
 #endif
 
-#define TC_LOG_TRACE(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(LOG_LEVEL_TRACE, outTrace, filterType__, __VA_ARGS__)
+#define SF_LOG_TRACE(filterType__, ...) \
+    SF_LOG_MESSAGE_BODY(LOG_LEVEL_TRACE, outTrace, filterType__, __VA_ARGS__)
 
-#define TC_LOG_DEBUG(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(LOG_LEVEL_DEBUG, outDebug, filterType__, __VA_ARGS__)
+#define SF_LOG_DEBUG(filterType__, ...) \
+    SF_LOG_MESSAGE_BODY(LOG_LEVEL_DEBUG, outDebug, filterType__, __VA_ARGS__)
 
-#define TC_LOG_INFO(filterType__, ...)  \
-    TC_LOG_MESSAGE_BODY(LOG_LEVEL_INFO, outInfo, filterType__, __VA_ARGS__)
+#define SF_LOG_INFO(filterType__, ...)  \
+    SF_LOG_MESSAGE_BODY(LOG_LEVEL_INFO, outInfo, filterType__, __VA_ARGS__)
 
-#define TC_LOG_WARN(filterType__, ...)  \
-    TC_LOG_MESSAGE_BODY(LOG_LEVEL_WARN, outWarn, filterType__, __VA_ARGS__)
+#define SF_LOG_WARN(filterType__, ...)  \
+    SF_LOG_MESSAGE_BODY(LOG_LEVEL_WARN, outWarn, filterType__, __VA_ARGS__)
 
-#define TC_LOG_ERROR(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(LOG_LEVEL_ERROR, outError, filterType__, __VA_ARGS__)
+#define SF_LOG_ERROR(filterType__, ...) \
+    SF_LOG_MESSAGE_BODY(LOG_LEVEL_ERROR, outError, filterType__, __VA_ARGS__)
 
-#define TC_LOG_FATAL(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(LOG_LEVEL_FATAL, outFatal, filterType__, __VA_ARGS__)
+#define SF_LOG_FATAL(filterType__, ...) \
+    SF_LOG_MESSAGE_BODY(LOG_LEVEL_FATAL, outFatal, filterType__, __VA_ARGS__)
 
 #endif

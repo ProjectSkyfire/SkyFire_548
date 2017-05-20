@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -256,7 +256,7 @@ public:
                     return true;
                 }
 
-                char const* active = activeEvents.find(id) != activeEvents.end() ? handler->GetTrinityString(LANG_ACTIVE) : "";
+                char const* active = activeEvents.find(id) != activeEvents.end() ? handler->GetSkyFireString(LANG_ACTIVE) : "";
 
                 if (handler->GetSession())
                     handler->PSendSysMessage(LANG_EVENT_ENTRY_LIST_CHAT, id, id, eventData.description.c_str(), active);
@@ -325,25 +325,25 @@ public:
                 if (factionState) // and then target != NULL also
                 {
                     uint32 index = target->GetReputationMgr().GetReputationRankStrIndex(factionEntry);
-                    std::string rankName = handler->GetTrinityString(index);
+                    std::string rankName = handler->GetSkyFireString(index);
 
                     ss << ' ' << rankName << "|h|r (" << target->GetReputationMgr().GetReputation(factionEntry) << ')';
 
                     if (factionState->Flags & FACTION_FLAG_VISIBLE)
-                        ss << handler->GetTrinityString(LANG_FACTION_VISIBLE);
+                        ss << handler->GetSkyFireString(LANG_FACTION_VISIBLE);
                     if (factionState->Flags & FACTION_FLAG_AT_WAR)
-                        ss << handler->GetTrinityString(LANG_FACTION_ATWAR);
+                        ss << handler->GetSkyFireString(LANG_FACTION_ATWAR);
                     if (factionState->Flags & FACTION_FLAG_PEACE_FORCED)
-                        ss << handler->GetTrinityString(LANG_FACTION_PEACE_FORCED);
+                        ss << handler->GetSkyFireString(LANG_FACTION_PEACE_FORCED);
                     if (factionState->Flags & FACTION_FLAG_HIDDEN)
-                        ss << handler->GetTrinityString(LANG_FACTION_HIDDEN);
+                        ss << handler->GetSkyFireString(LANG_FACTION_HIDDEN);
                     if (factionState->Flags & FACTION_FLAG_INVISIBLE_FORCED)
-                        ss << handler->GetTrinityString(LANG_FACTION_INVISIBLE_FORCED);
+                        ss << handler->GetSkyFireString(LANG_FACTION_INVISIBLE_FORCED);
                     if (factionState->Flags & FACTION_FLAG_INACTIVE)
-                        ss << handler->GetTrinityString(LANG_FACTION_INACTIVE);
+                        ss << handler->GetSkyFireString(LANG_FACTION_INACTIVE);
                 }
                 else
-                    ss << handler->GetTrinityString(LANG_FACTION_NOREPUTATION);
+                    ss << handler->GetSkyFireString(LANG_FACTION_NOREPUTATION);
 
                 handler->SendSysMessage(ss.str().c_str());
 
@@ -622,13 +622,13 @@ public:
                                 switch (status)
                                 {
                                     case QUEST_STATUS_COMPLETE:
-                                        statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
+                                        statusStr = handler->GetSkyFireString(LANG_COMMAND_QUEST_COMPLETE);
                                         break;
                                     case QUEST_STATUS_INCOMPLETE:
-                                        statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_ACTIVE);
+                                        statusStr = handler->GetSkyFireString(LANG_COMMAND_QUEST_ACTIVE);
                                         break;
                                     case QUEST_STATUS_REWARDED:
-                                        statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_REWARDED);
+                                        statusStr = handler->GetSkyFireString(LANG_COMMAND_QUEST_REWARDED);
                                         break;
                                     default:
                                         break;
@@ -670,13 +670,13 @@ public:
                     switch (status)
                     {
                         case QUEST_STATUS_COMPLETE:
-                            statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
+                            statusStr = handler->GetSkyFireString(LANG_COMMAND_QUEST_COMPLETE);
                             break;
                         case QUEST_STATUS_INCOMPLETE:
-                            statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_ACTIVE);
+                            statusStr = handler->GetSkyFireString(LANG_COMMAND_QUEST_ACTIVE);
                             break;
                         case QUEST_STATUS_REWARDED:
-                            statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_REWARDED);
+                            statusStr = handler->GetSkyFireString(LANG_COMMAND_QUEST_REWARDED);
                             break;
                         default:
                             break;
@@ -743,13 +743,13 @@ public:
                 char const* knownStr = "";
                 if (target && target->HasSkill(id))
                 {
-                    knownStr = handler->GetTrinityString(LANG_KNOWN);
+                    knownStr = handler->GetSkyFireString(LANG_KNOWN);
                     uint32 curValue = target->GetPureSkillValue(id);
                     uint32 maxValue  = target->GetPureMaxSkillValue(id);
                     uint32 permValue = target->GetSkillPermBonusValue(id);
                     uint32 tempValue = target->GetSkillTempBonusValue(id);
 
-                    char const* valFormat = handler->GetTrinityString(LANG_SKILL_VALUES);
+                    char const* valFormat = handler->GetSkyFireString(LANG_SKILL_VALUES);
                     snprintf(valStr, 50, valFormat, curValue, maxValue, permValue, tempValue);
                 }
 
@@ -833,21 +833,21 @@ public:
 
                 // include rank in link name
                 if (rank)
-                    ss << handler->GetTrinityString(LANG_SPELL_RANK) << rank;
+                    ss << handler->GetSkyFireString(LANG_SPELL_RANK) << rank;
 
                 if (handler->GetSession())
                     ss << "]|h|r";
 
                 if (talent)
-                    ss << handler->GetTrinityString(LANG_TALENT);
+                    ss << handler->GetSkyFireString(LANG_TALENT);
                 if (passive)
-                    ss << handler->GetTrinityString(LANG_PASSIVE);
+                    ss << handler->GetSkyFireString(LANG_PASSIVE);
                 if (learn)
-                    ss << handler->GetTrinityString(LANG_LEARN);
+                    ss << handler->GetSkyFireString(LANG_LEARN);
                 if (known)
-                    ss << handler->GetTrinityString(LANG_KNOWN);
+                    ss << handler->GetSkyFireString(LANG_KNOWN);
                 if (active)
-                    ss << handler->GetTrinityString(LANG_ACTIVE);
+                    ss << handler->GetSkyFireString(LANG_ACTIVE);
 
                 handler->SendSysMessage(ss.str().c_str());
 
@@ -905,7 +905,7 @@ public:
 
                 // include rank in link name
                 if (rank)
-                    ss << handler->GetTrinityString(LANG_SPELL_RANK) << rank;
+                    ss << handler->GetSkyFireString(LANG_SPELL_RANK) << rank;
 
                 if (handler->GetSession())
                     ss << ' ' << localeNames[locale] << "]|h|r";
@@ -913,15 +913,15 @@ public:
                     ss << ' ' << localeNames[locale];
 
                 if (talent)
-                    ss << handler->GetTrinityString(LANG_TALENT);
+                    ss << handler->GetSkyFireString(LANG_TALENT);
                 if (passive)
-                    ss << handler->GetTrinityString(LANG_PASSIVE);
+                    ss << handler->GetSkyFireString(LANG_PASSIVE);
                 if (learn)
-                    ss << handler->GetTrinityString(LANG_LEARN);
+                    ss << handler->GetSkyFireString(LANG_LEARN);
                 if (known)
-                    ss << handler->GetTrinityString(LANG_KNOWN);
+                    ss << handler->GetSkyFireString(LANG_KNOWN);
                 if (active)
-                    ss << handler->GetTrinityString(LANG_ACTIVE);
+                    ss << handler->GetSkyFireString(LANG_ACTIVE);
 
                 handler->SendSysMessage(ss.str().c_str());
         }
@@ -1087,10 +1087,10 @@ public:
                     return true;
                 }
 
-                char const* knownStr = target && target->HasTitle(titleInfo) ? handler->GetTrinityString(LANG_KNOWN) : "";
+                char const* knownStr = target && target->HasTitle(titleInfo) ? handler->GetSkyFireString(LANG_KNOWN) : "";
 
                 char const* activeStr = target && target->GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE) == titleInfo->bit_index
-                    ? handler->GetTrinityString(LANG_ACTIVE)
+                    ? handler->GetSkyFireString(LANG_ACTIVE)
                     : "";
 
                 char titleNameStr[80];
@@ -1149,24 +1149,24 @@ public:
                     ss << id << " - [" << name << ']';
 
                     if (mapInfo->IsContinent())
-                        ss << handler->GetTrinityString(LANG_CONTINENT);
+                        ss << handler->GetSkyFireString(LANG_CONTINENT);
 
                     switch (mapInfo->map_type)
                     {
                         case MAP_INSTANCE:
-                            ss << handler->GetTrinityString(LANG_INSTANCE);
+                            ss << handler->GetSkyFireString(LANG_INSTANCE);
                             break;
                         case MAP_RAID:
-                            ss << handler->GetTrinityString(LANG_RAID);
+                            ss << handler->GetSkyFireString(LANG_RAID);
                             break;
                         case MAP_BATTLEGROUND:
-                            ss << handler->GetTrinityString(LANG_BATTLEGROUND);
+                            ss << handler->GetSkyFireString(LANG_BATTLEGROUND);
                             break;
                         case MAP_ARENA:
-                            ss << handler->GetTrinityString(LANG_ARENA);
+                            ss << handler->GetSkyFireString(LANG_ARENA);
                             break;
                         case MAP_SCENARIO:
-                            ss << handler->GetTrinityString(LANG_SCENARIO);
+                            ss << handler->GetSkyFireString(LANG_SCENARIO);
                             break;
                     }
 

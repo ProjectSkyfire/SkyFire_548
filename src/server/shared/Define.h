@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_DEFINE_H
-#define TRINITY_DEFINE_H
+#ifndef SKYFIRE_DEFINE_H
+#define SKYFIRE_DEFINE_H
 
 #include "CompilerDefs.h"
 
@@ -27,19 +27,19 @@
 
 #include <cstddef>
 
-#define TRINITY_LITTLEENDIAN 0
-#define TRINITY_BIGENDIAN    1
+#define SKYFIRE_LITTLEENDIAN 0
+#define SKYFIRE_BIGENDIAN    1
 
-#if !defined(TRINITY_ENDIAN)
+#if !defined(SKYFIRE_ENDIAN)
 #  if defined (ACE_BIG_ENDIAN)
-#    define TRINITY_ENDIAN TRINITY_BIGENDIAN
+#    define SKYFIRE_ENDIAN SKYFIRE_BIGENDIAN
 #  else //ACE_BYTE_ORDER != ACE_BIG_ENDIAN
-#    define TRINITY_ENDIAN TRINITY_LITTLEENDIAN
+#    define SKYFIRE_ENDIAN SKYFIRE_LITTLEENDIAN
 #  endif //ACE_BYTE_ORDER
-#endif //TRINITY_ENDIAN
+#endif //SKYFIRE_ENDIAN
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define TRINITY_PATH_MAX MAX_PATH
+#  define SKYFIRE_PATH_MAX MAX_PATH
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif //DECLSPEC_NORETURN
@@ -47,18 +47,18 @@
 #    define DECLSPEC_DEPRECATED __declspec(deprecated)
 #  endif //DECLSPEC_DEPRECATED
 #else //PLATFORM != PLATFORM_WINDOWS
-#  define TRINITY_PATH_MAX PATH_MAX
+#  define SKYFIRE_PATH_MAX PATH_MAX
 #  define DECLSPEC_NORETURN
 #  define DECLSPEC_DEPRECATED
 #endif //PLATFORM
 
 #if !defined(COREDEBUG)
-#  define TRINITY_INLINE inline
+#  define SKYFIRE_INLINE inline
 #else //COREDEBUG
-#  if !defined(TRINITY_DEBUG)
-#    define TRINITY_DEBUG
-#  endif //TRINITY_DEBUG
-#  define TRINITY_INLINE
+#  if !defined(SKYFIRE_DEBUG)
+#    define SKYFIRE_DEBUG
+#  endif //SKYFIRE_DEBUG
+#  define SKYFIRE_INLINE
 #endif //!COREDEBUG
 
 #if COMPILER == COMPILER_GNU
@@ -71,13 +71,10 @@
 #  define ATTR_DEPRECATED
 #endif //COMPILER == COMPILER_GNU
 
-#if COMPILER_HAS_CPP11_SUPPORT
-#  define OVERRIDE override
-#  define FINAL final
-#else
-#  define OVERRIDE
-#  define FINAL
-#endif //COMPILER_HAS_CPP11_SUPPORT
+
+#define OVERRIDE override
+#define FINAL final
+
 
 #define UI64FMTD ACE_UINT64_FORMAT_SPECIFIER
 #define UI64LIT(N) ACE_UINT64_LITERAL(N)
@@ -110,4 +107,4 @@ enum DBCFormer
     FT_SQL_ABSENT='a'                                       //Used in sql format to mark column absent in sql dbc
 };
 
-#endif //TRINITY_DEFINE_H
+#endif //SKYFIRE_DEFINE_H

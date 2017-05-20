@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,7 @@ void WorldSession::HandeSetTalentSpecialization(WorldPacket& recvData)
     _player->SendTalentsInfoData();
 
     std::list<uint32> learnList = GetSpellsForLevels(0, _player->getRaceMask(), _player->GetTalentSpecialization(_player->GetActiveSpec()), 0, _player->getLevel());
-    for (std::list<uint32>::const_iterator iter = learnList.begin(); iter != learnList.end(); iter++)
+    for (std::list<uint32>::const_iterator iter = learnList.begin(); iter != learnList.end(); ++iter)
     {
         if (!_player->HasSpell(*iter))
             _player->learnSpell(*iter, true);
@@ -75,12 +75,12 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
+    SF_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS");
 }
 
 void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
+    SF_LOG_DEBUG("network", "CMSG_CONFIRM_RESPEC_WIPE");
     ObjectGuid guid;
     uint8 RespecType = 0;
     uint32 Cost = 0;
