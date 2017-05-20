@@ -33,13 +33,10 @@ enum WarriorSpells
     SPELL_WARRIOR_ALLOW_RAGING_BLOW                 = 131116,
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
+    SPELL_WARRIOR_BLOODTHIRST_HEAL                  = 117313,
     SPELL_WARRIOR_CHARGE                            = 34846,
     SPELL_WARRIOR_CHARGE_STUN                       = 7922,
     SPELL_WARRIOR_COLOSSUS_SMASH                    = 86346,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_1                = 12162,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_2                = 12850,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_3                = 12868,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC         = 12721,
     SPELL_WARRIOR_EXECUTE                           = 20647,
     SPELL_WARRIOR_GLYPH_OF_EXECUTION                = 58367,
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976,
@@ -65,7 +62,15 @@ enum WarriorSpells
     SPELL_WARRIOR_VENGEANCE                         = 76691,
     SPELL_WARRIOR_WARBRINGER                        = 103828,
     SPELL_WARRIOR_WARBRINGER_ROOT                   = 105771,
-    SPELL_WARRIOR_WARBRINGER_SLOW                   = 137637
+    SPELL_WARRIOR_WARBRINGER_SLOW                   = 137637,
+    SPELL_WARRIOR_BLOODSURGE                        = 46915,
+    SPELL_WARRIOR_BLOODSURGE_EFFECT                 = 46916,
+    SPELL_WARRIOR_THUNDER_CLAP                      = 6343,
+    SPELL_WARRIOR_BLOOD_AND_THUNDER                 = 84615,
+    SPELL_WARRIOR_DEEP_WOUNDS                       = 115767,
+    SPELL_WARRIOR_MORTAL_STRIKE_AURA                = 12294,
+    SPELL_WARRIOR_T16_DPS_4P_BONUS                  = 144441,
+    SPELL_WARRIOR_T16_DPS_4P_BONUS_PROC             = 144442
 };
 
 enum WarriorSpellIcons
@@ -81,7 +86,7 @@ enum MiscSpells
     SPELL_PRIEST_RENEWED_HOPE                       = 63944
 };
 
-/// Updated 4.3.4
+// Bloodthirst - 23881
 class spell_warr_bloodthirst : public SpellScriptLoader
 {
     public:
@@ -91,63 +96,34 @@ class spell_warr_bloodthirst : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
 
-            void HandleDamage(SpellEffIndex /*effIndex*/)
+            bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                int32 damage = GetEffectValue();
-                ApplyPct(damage, GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK));
-
-                if (Unit* target = GetHitUnit())
-                {
-                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
-                    damage = target->SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
-                }
-                SetHitDamage(damage);
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST))
+                    return false;
+                return true;
+            }
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                    if (Unit* target = GetHitUnit())
+                        if (GetHitDamage())
+                        {
+                            _player->CastSpell(_player, SPELL_WARRIOR_BLOODTHIRST_HEAL, true);
+                            if (_player->HasAura(SPELL_WARRIOR_BLOODSURGE))
+                                if(roll_chance_i(20))
+                                    _player->CastSpell(_player,SPELL_WARRIOR_BLOODSURGE_EFFECT, true);
+                        }
             }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void Register()
             {
-                int32 damage = GetEffectValue();
-                GetCaster()->CastCustomSpell(GetCaster(), SPELL_WARRIOR_BLOODTHIRST, &damage, NULL, NULL, true, NULL);
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-                OnEffectHit += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnHit += SpellHitFn(spell_warr_bloodthirst_SpellScript::HandleOnHit);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const
         {
             return new spell_warr_bloodthirst_SpellScript();
-        }
-};
-
-/// Updated 4.3.4
-class spell_warr_bloodthirst_heal : public SpellScriptLoader
-{
-    public:
-        spell_warr_bloodthirst_heal() : SpellScriptLoader("spell_warr_bloodthirst_heal") { }
-
-        class spell_warr_bloodthirst_heal_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warr_bloodthirst_heal_SpellScript);
-
-            void HandleHeal(SpellEffIndex /*effIndex*/)
-            {
-                if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
-                    SetHitHeal(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 100);
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_warr_bloodthirst_heal_SpellScript();
         }
 };
 
@@ -235,7 +211,8 @@ class spell_warr_concussion_blow : public SpellScriptLoader
         }
 };
 
-// -12162 - Deep Wounds
+// Called By Thunder Clap - 6343, Mortal Strike - 12294, Bloodthirst - 23881 and Devastate - 20243
+// Deep Wounds - 115767
 class spell_warr_deep_wounds : public SpellScriptLoader
 {
     public:
@@ -245,49 +222,35 @@ class spell_warr_deep_wounds : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_deep_wounds_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            void HandleOnHit()
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_1) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_2) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_3) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                int32 damage = GetEffectValue();
-                Unit* caster = GetCaster();
-                if (Unit* target = GetHitUnit())
+                if (Player* _player = GetCaster()->ToPlayer())
                 {
-                    // apply percent damage mods
-                    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (target->GetGUID() == _player->GetGUID())
+                            return;
 
-                    ApplyPct(damage, 16 * GetSpellInfo()->GetRank());
+                        if (_player->getLevel() >= 32)
+                            if (GetSpellInfo()->Id != SPELL_WARRIOR_THUNDER_CLAP || _player->HasAura(SPELL_WARRIOR_BLOOD_AND_THUNDER))
+                                _player->CastSpell(target, SPELL_WARRIOR_DEEP_WOUNDS, true);
 
-                    damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
-
-                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC);
-                    uint32 ticks = spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].ApplyAuraTickCount;
-
-                    // Add remaining ticks to damage done
-                    if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, EFFECT_0, caster->GetGUID()))
-                        damage += aurEff->GetAmount() * (ticks - aurEff->GetTickNumber());
-
-                    damage /= ticks;
-
-                    caster->CastCustomSpell(target, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, &damage, NULL, NULL, true);
+                        // Item - Warrior T16 DPS 4P Bonus - 144441
+                        if (GetSpellInfo()->Id == SPELL_WARRIOR_MORTAL_STRIKE_AURA || GetSpellInfo()->Id == SPELL_WARRIOR_BLOODTHIRST)
+                            if (_player->HasAura(SPELL_WARRIOR_T16_DPS_4P_BONUS))
+                                if (roll_chance_i(10))
+                                    _player->CastSpell(_player, SPELL_WARRIOR_T16_DPS_4P_BONUS_PROC, true);
+                    }
                 }
             }
 
-            void Register() OVERRIDE
+            void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_deep_wounds_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnHit += SpellHitFn(spell_warr_deep_wounds_SpellScript::HandleOnHit);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const
         {
             return new spell_warr_deep_wounds_SpellScript();
         }
@@ -1161,7 +1124,6 @@ class spell_warr_raging_blow_proc : public SpellScriptLoader
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
-    new spell_warr_bloodthirst_heal();
     new spell_warr_charge();
     new spell_warr_concussion_blow();
     new spell_warr_deep_wounds();
@@ -1172,8 +1134,8 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_lambs_to_the_slaughter();
     new spell_warr_last_stand();
     new spell_warr_overpower();
-	new spell_warr_raging_blow();
-	new spell_warr_raging_blow_proc();
+    new spell_warr_raging_blow();
+    new spell_warr_raging_blow_proc();
     new spell_warr_rallying_cry();
     new spell_warr_rend();
     new spell_warr_retaliation();
