@@ -2117,7 +2117,7 @@ struct SpecializationSpellsEntry
 struct SpellEffectEntry
 {
     uint32    Id;                                           // 0         m_ID
-    //uint32    Unk0;                                       // 1         unk - Pandaria
+    uint32    EffectDifficulty;                             // 1         m_effectDifficulty
     uint32    Effect;                                       // 2         m_effect
     float     EffectValueMultiplier;                        // 3         m_effectValueMultiplier
     uint32    EffectApplyAuraName;                          // 4         m_effectAura
@@ -2126,7 +2126,7 @@ struct SpellEffectEntry
     float     EffectBonusMultiplier;                        // 7         m_effectBonusMultiplier
     float     EffectDamageMultiplier;                       // 8         m_effectDamageMultiplier
     uint32    EffectChainTarget;                            // 9         m_effectChainTargets
-    int32     EffectDieSides;                               // 10         m_effectDieSides
+    int32     EffectDieSides;                               // 10        m_effectDieSides
     uint32    EffectItemType;                               // 11        m_effectItemType
     uint32    EffectMechanic;                               // 12        m_effectMechanic
     int32     EffectMiscValue;                              // 13        m_effectMiscValue
@@ -2137,12 +2137,12 @@ struct SpellEffectEntry
     float     EffectRealPointsPerLevel;                     // 18        m_effectRealPointsPerLevel
     flag128   EffectSpellClassMask;                         // 19 20 21 22 m_effectSpellClassMask1(2/3), effect 0
     uint32    EffectTriggerSpell;                           // 23        m_effectTriggerSpell
-    //uint32  Unk0                                          // 24        unk - Pandaria
+    float     EffectPosFacing;                              // 24
     uint32    EffectImplicitTargetA;                        // 25        m_implicitTargetA
     uint32    EffectImplicitTargetB;                        // 26        m_implicitTargetB
     uint32    EffectSpellId;                                // 27        new 4.0.0
     uint32    EffectIndex;                                  // 28        new 4.0.0
-    //uint32  Unk0                                          // 29        4.2.0 only 0 or 1
+    uint32    EffectAttributes;                             // 29        4.2.0 only 0 or 1
 };
 
 #define MAX_SPELL_EFFECTS 32
