@@ -26,7 +26,7 @@ endif()
 set(MSVC_EXPECTED_VERSION 18.0)
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
-  message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2013) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
+  message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2017) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 
 # set up output paths ofr static libraries etc (commented out - shown here as an example only)

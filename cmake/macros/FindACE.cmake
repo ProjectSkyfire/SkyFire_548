@@ -81,7 +81,7 @@ if ( UNIX )
       include(EnsureVersion)
       ENSURE_VERSION( "${ACE_EXPECTED_VERSION}" "${ACE_VERSION}" ACE_FOUND)
       if (NOT ACE_FOUND)
-        message(FATAL_ERROR "TrinityCore needs ACE version ${ACE_EXPECTED_VERSION} but found version ${ACE_VERSION}")
+        message(FATAL_ERROR "SkyFireEMU needs ACE version ${ACE_EXPECTED_VERSION} but found version ${ACE_VERSION}")
       endif()
 
       message( STATUS "Found ACE library: ${ACE_LIBRARY}")
