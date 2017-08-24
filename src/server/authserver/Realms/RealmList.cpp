@@ -101,7 +101,8 @@ void RealmList::UpdateRealms(bool init)
             uint32 build                = fields[11].GetUInt32();
             
             UpdateRealm(realmId, name, externalAddress, localAddress, localSubmask, port, icon, flag, timezone, 
- 
+                (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), pop, build);
+            
             if (init)
                 SF_LOG_INFO("server.authserver", "Added realm \"%s\" at %s:%u.", name.c_str(), m_realms[name].ExternalAddress.to_string(), port);
         }
