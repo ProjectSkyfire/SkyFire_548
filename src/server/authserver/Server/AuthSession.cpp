@@ -746,11 +746,11 @@ tcp::endpoint const GetAddressForClient(Realm const& realm, ip::address const& c
 {
     ip::address realmIp;
 
-	// Attempt to send best address for client
-	if (clientAddr.is_loopback())
-	{
-		// Try guessing if realm is also connected locally
-		if (realm.LocalAddress.is_loopback() || realm.ExternalAddress.is_loopback())
+    // Attempt to send best address for client
+    if (clientAddr.is_loopback())
+    {
+        // Try guessing if realm is also connected locally
+        if (realm.LocalAddress.is_loopback() || realm.ExternalAddress.is_loopback())
             realmIp = clientAddr;
         else
         {
@@ -769,12 +769,12 @@ tcp::endpoint const GetAddressForClient(Realm const& realm, ip::address const& c
         }
         else
             realmIp = realm.ExternalAddress;
-	}
+    }
 
-        tcp::endpoint endpoint(realmIp, realm.port);
+    tcp::endpoint endpoint(realmIp, realm.port);
 
-	// Return external IP
-	return realm.endpoint;
+    // Return external IP
+    return endpoint;
 }
 
 bool AuthSession::_HandleRealmList()
