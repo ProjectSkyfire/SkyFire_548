@@ -18,8 +18,8 @@ matrix:
     #  compiler: clang
     - os: linux
       dist: trusty
-      sudo: required
-      compiler: gcc
+      sudo: false
+      compiler: clang
   # ENABLE AFTER ACE 6.4.3 is available.
     #- os: linux
     #  dist: xenial
@@ -36,25 +36,41 @@ language: cpp
 git:
   depth: 1
 
+addons:
+  apt:
+    packages:
+      - libboost1.55-dev
+      - libboost-filesystem1.55-dev
+      - libboost-iostreams1.55-dev
+      - libboost-program-options1.55-dev
+      - libboost-regex1.55-dev
+      - libboost-system1.55-dev
+      - libboost-thread1.55-dev
+      - libssl-dev
+      - libmysqlclient-dev
+      - libreadline6-dev
+      - zlib1g-dev
+      - libbz2-dev
+      
+services:
+  - mysql
+  
 branches:
   only:
     - master
 
+
 before_install:
-  - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+  - git config user.email "travis@build.bot" && git config user.name "Travis CI"
+  - git tag -a -m "Travis build" init
+   - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.9 main'
   - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-  - sudo apt-get update -qq
-  - sudo apt-get install clang-3.9
-  - sudo apt-get install libace-dev
-  - sudo apt-get install libncurses5-dev
-  - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
-  - sudo apt-get install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
-  - if [ "$CXX" = "clang++" ]; then sudo apt-get install -qq libstdc++-6-dev; fi
-  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.9" CC="clang-3.9"; fi
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-6; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+  - apt-get update -qq
+  - apt-get install libace-dev
+  - apt-get install libncurses5-dev
+  - apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
   
 script:
   - mkdir build
