@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,30 +19,31 @@
 #ifndef SF_REALMLIST_H
 #define SF_REALMLIST_H
 
-#include <ace/Singleton.h>
-#include <ace/Null_Mutex.h>
-#include <ace/INET_Addr.h>
+#include <boost/asio.hpp>
 #include "Common.h"
+
+using namespace boost::asio;
 
 enum RealmFlags
 {
-    REALM_FLAG_NONE                              = 0x00,
-    REALM_FLAG_INVALID                           = 0x01,
-    REALM_FLAG_OFFLINE                           = 0x02,
-    REALM_FLAG_SPECIFYBUILD                      = 0x04,
-    REALM_FLAG_UNK1                              = 0x08,
-    REALM_FLAG_UNK2                              = 0x10,
-    REALM_FLAG_RECOMMENDED                       = 0x20,
-    REALM_FLAG_NEW                               = 0x40,
-    REALM_FLAG_FULL                              = 0x80
+    REALM_FLAG_NONE = 0x00,
+    REALM_FLAG_INVALID = 0x01,
+    REALM_FLAG_OFFLINE = 0x02,
+    REALM_FLAG_SPECIFYBUILD = 0x04,
+    REALM_FLAG_UNK1 = 0x08,
+    REALM_FLAG_UNK2 = 0x10,
+    REALM_FLAG_RECOMMENDED = 0x20,
+    REALM_FLAG_NEW = 0x40,
+    REALM_FLAG_FULL = 0x80
 };
 
 // Storage object for a realm
 struct Realm
 {
-    ACE_INET_Addr ExternalAddress;
-    ACE_INET_Addr LocalAddress;
-    ACE_INET_Addr LocalSubnetMask;
+    ip::address ExternalAddress;
+    ip::address LocalAddress;
+    ip::address LocalSubnetMask;
+    uint16 port;
     std::string name;
     uint8 icon;
     RealmFlags flag;
@@ -60,8 +60,11 @@ class RealmList
 public:
     typedef std::map<std::string, Realm> RealmMap;
 
-    RealmList();
-    ~RealmList() { }
+    static RealmList& instance()
+    {
+        static RealmList *instance = new RealmList();
+        return *instance;
+    }
 
     void Initialize(uint32 updateInterval);
 
@@ -74,13 +77,16 @@ public:
     uint32 size() const { return m_realms.size(); }
 
 private:
-    void UpdateRealms(bool init=false);
-    void UpdateRealm(uint32 id, const std::string& name, ACE_INET_Addr const& address, ACE_INET_Addr const& localAddr, ACE_INET_Addr const& localSubmask, uint8 icon, RealmFlags flag, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, uint32 build);
+    RealmList();
+
+    void UpdateRealms(bool init = false);
+    void UpdateRealm(uint32 id, const std::string& name, ip::address const& address, ip::address const& localAddr,
+        ip::address const& localSubmask, uint16 port, uint8 icon, RealmFlags flag, uint8 timezone, AccountTypes allowedSecurityLevel, float population, uint32 build);
 
     RealmMap m_realms;
     uint32   m_UpdateInterval;
     time_t   m_NextUpdateTime;
 };
 
-#define sRealmList ACE_Singleton<RealmList, ACE_Null_Mutex>::instance()
+#define sRealmList RealmList::instance()
 #endif
