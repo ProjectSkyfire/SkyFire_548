@@ -109,3 +109,4 @@ void RealmList::UpdateRealms(bool init)
         while (result->NextRow());
     }
 }
+
