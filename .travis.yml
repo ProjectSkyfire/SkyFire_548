@@ -1,37 +1,9 @@
-# Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
-#
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-matrix:
-  include:
-  # ENABLE AFTER ACE 6.4.3 is available.
-    #- os: linux
-    #  dist: trusty
-    #  sudo: required
-    #  compiler: clang
-    - os: linux
-      dist: trusty
-      sudo: false
-      compiler: clang
-  # ENABLE AFTER ACE 6.4.3 is available.
-    #- os: linux
-    #  dist: xenial
-    #  sudo: required
-    #  compiler: clang
-    - os: linux
-      dist: xenial
-      sudo: required
-      compiler: gcc
-sudo: required
+sudo: false
+dist: trusty
 
 language: cpp
+compiler:
+  - clang
 
 git:
   depth: 1
@@ -51,26 +23,27 @@ addons:
       - libreadline6-dev
       - zlib1g-dev
       - libbz2-dev
-      
+      - libace-dev
+      - libncurses5-dev
+      - build-essential
+      - autoconf
+      - libtool
+      - make
+      - cmake
+      - git-core
+      - patch
+      - wget
+      - links
+      - zip
+      - unzip
+      - unrar
+
 services:
   - mysql
-  
-branches:
-  only:
-    - master
-
 
 before_install:
   - git config user.email "travis@build.bot" && git config user.name "Travis CI"
   - git tag -a -m "Travis build" init
-   - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.9 main'
-  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-  - apt-get update -qq
-  - apt-get install libace-dev
-  - apt-get install libncurses5-dev
-  - apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
   
 script:
   - mkdir build
