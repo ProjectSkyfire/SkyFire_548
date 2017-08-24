@@ -48,8 +48,8 @@
 #define PROCESS_HIGH_PRIORITY -15 // [-20, 19], default is 0
 #endif
 
-#ifndef _TRINITY_REALM_CONFIG
-# define _TRINITY_REALM_CONFIG  "authserver.conf"
+#ifndef _SKYFIRE_REALM_CONFIG
+# define _SKYFIRE_REALM_CONFIG  "authserver.conf"
 #endif
 
 bool StartDB();
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     int32 port = sConfigMgr->GetIntDefault("RealmServerPort", 3724);
     if (port < 0 || port > 0xFFFF)
     {
-        TC_LOG_ERROR("server.authserver", "Specified port out of allowed range (1-65535)");
+        SF_LOG_ERROR("server.authserver", "Specified port out of allowed range (1-65535)");
         return 1;
     }
 
@@ -203,7 +203,7 @@ bool StartDB()
     std::string dbstring = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
     if (dbstring.empty())
     {
-        TC_LOG_ERROR("server.authserver", "Database not specified");
+        SF_LOG_ERROR("server.authserver", "Database not specified");
         return false;
     }
 
