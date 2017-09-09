@@ -118,7 +118,7 @@ bool preciseVectorData = false;
 
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAP041";
+const char* szRawVMAPMagic = "VMAP050";
 
 bool LoadLocaleMPQFile(int locale)
 {
@@ -416,7 +416,7 @@ void ParsMapFiles()
     char id[10];
     for (unsigned int i=0; i<map_count; ++i)
     {
-        sprintf(id,"%03u",map_ids[i].id);
+        sprintf(id,"%04u",map_ids[i].id);
         sprintf(fn,"World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
         WDTFile WDT(fn,map_ids[i].name);
         if(WDT.init(id, map_ids[i].id))
@@ -527,7 +527,7 @@ bool processArgv(int argc, char ** argv, const char *versionString)
 int main(int argc, char ** argv)
 {
     bool success=true;
-    const char *versionString = "V4.00 2012_02";
+    const char *versionString = "V5.00 2017_09";
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv, versionString))
