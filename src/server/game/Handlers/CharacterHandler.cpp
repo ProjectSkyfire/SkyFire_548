@@ -21,6 +21,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
+#include "Boost.h"
 #include "CalendarMgr.h"
 #include "Chat.h"
 #include "Common.h"
@@ -238,6 +239,11 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
     ByteBuffer bitBuffer;
     ByteBuffer dataBuffer;
 
+    // Sended before SMSG_ENUM_CHARACTERS_RESULT
+    // must be procceded before BuildEnumData, because of unsetting bosted character guid
+    if (m_charBooster->GetCurrentAction() == CHARACTER_BOOST_APPLIED)
+        m_charBooster->HandleCharacterBoost();
+
     if (result)
     {
         _legitCharacters.clear();
@@ -255,7 +261,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             SF_LOG_INFO("network", "Loading char guid %u from account %u.", guidLow, GetAccountId());
 
-            Player::BuildEnumData(result, &dataBuffer, &bitBuffer);
+            Player::BuildEnumData(result, &dataBuffer, &bitBuffer, m_charBooster->IsBoosting(guidLow));
 
             // Do not allow banned characters to log in
             if (!(*result)[20].GetUInt32())
@@ -285,6 +291,10 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         data.append(dataBuffer);
 
     SendPacket(&data);
+
+    // Sended after SMSG_ENUM_CHARACTERS_RESULT
+    if (m_charBooster->GetCurrentAction() == CHARACTER_BOOST_ITEMS)
+        m_charBooster->HandleCharacterBoost();
 }
 
 

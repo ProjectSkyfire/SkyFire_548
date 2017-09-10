@@ -57,6 +57,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "DB2Stores.h"
+#include "Boost.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)
 {

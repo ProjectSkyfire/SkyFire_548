@@ -306,9 +306,13 @@ enum SkyFireStrings
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
     LANG_COMMAND_CREATGUIDNOTFOUND      = 287,
-      // TICKET STRINGS NEED REWRITE // 288-296 FREE
+    LANG_USE_BOOST                      = 288,
+    LANG_COMMAND_BOOST_ADD              = 289,
+    LANG_COMMAND_BOOST_DEL              = 290,
 
-      // END
+    // 291-296 FREE
+
+    // END
     LANG_COMMAND_SPAWNDIST              = 297,
     LANG_COMMAND_SPAWNTIME              = 298,
     LANG_COMMAND_MODIFY_HONOR           = 299,

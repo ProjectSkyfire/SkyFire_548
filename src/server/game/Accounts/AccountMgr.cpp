@@ -57,6 +57,15 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_REALM_CHARACTERS_INIT);
     LoginDatabase.Execute(stmt);
 
+    if (sWorld->getBoolConfig(CONFIG_BOOST_NEW_ACCOUNT))
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_BOOST);
+        stmt->setBool(0, true);
+        stmt->setUInt32(1, GetId(username));
+
+        LoginDatabase.Execute(stmt);
+    }
+
     return AOR_OK;                                          // everything's fine
 }
 

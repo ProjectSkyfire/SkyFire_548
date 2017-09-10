@@ -57,9 +57,16 @@ public:
             { "ip",             rbac::RBAC_PERM_COMMAND_ACCOUNT_LOCK_IP,         true,  &HandleAccountLockIpCommand,       "", NULL },
             { NULL,             0,                                         false, NULL,                              "", NULL }
         };
+        static ChatCommand accountBoostCommandTable[] =
+        {
+            { "add",            rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST_ADD,       true,  &HandleAccountBoostAddCommand,     "", NULL },
+            { "delete",         rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST_DEL,       true,  &HandleAccountBoostDelCommand,     "", NULL },
+            { NULL,             0,                                         false, NULL,                              "", NULL }
+        };
         static ChatCommand accountCommandTable[] =
         {
             { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_ADDON,           false, &HandleAccountAddonCommand,        "", NULL },
+            { "boost",          rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST,           false, NULL,          "", accountBoostCommandTable },
             { "create",         rbac::RBAC_PERM_COMMAND_ACCOUNT_CREATE,          true,  &HandleAccountCreateCommand,       "", NULL },
             { "delete",         rbac::RBAC_PERM_COMMAND_ACCOUNT_DELETE,          true,  &HandleAccountDeleteCommand,       "", NULL },
             { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_EMAIL,           false, &HandleAccountEmailCommand,        "", NULL },
@@ -939,6 +946,108 @@ public:
                 handler->SetSentErrorMessage(true);
                 return false;
         }
+
+        return true;
+    }
+
+    static bool HandleAccountBoostAddCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        ///- Get the account name from the command line
+        char* account = strtok((char*)args, " ");
+        if (!account)
+            return false;
+
+        std::string accountName = account;
+        if (!AccountMgr::normalizeString(accountName))
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 accountId = AccountMgr::GetId(accountName);
+        if (!accountId)
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        // Check if accounts exists
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BY_ID);
+        stmt->setUInt32(0, accountId);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        SQLTransaction trans = LoginDatabase.BeginTransaction();
+
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_BOOST);
+        stmt->setBool(0, true);
+        stmt->setUInt32(1, accountId);
+
+        LoginDatabase.Execute(stmt);
+
+        handler->PSendSysMessage(LANG_COMMAND_BOOST_ADD, accountName.c_str());
+
+        return true;
+    }
+
+    static bool HandleAccountBoostDelCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        ///- Get the account name from the command line
+        char* account = strtok((char*)args, " ");
+        if (!account)
+            return false;
+
+        std::string accountName = account;
+        if (!AccountMgr::normalizeString(accountName))
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 accountId = AccountMgr::GetId(accountName);
+        if (!accountId)
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        // Check if accounts exists
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BY_ID);
+        stmt->setUInt32(0, accountId);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        SQLTransaction trans = LoginDatabase.BeginTransaction();
+
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_BOOST);
+        stmt->setBool(0, false);
+        stmt->setUInt32(1, accountId);
+
+        LoginDatabase.Execute(stmt);
+
+        handler->PSendSysMessage(LANG_COMMAND_BOOST_DEL, accountName.c_str());
 
         return true;
     }
