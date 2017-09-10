@@ -992,6 +992,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     uint32 recruiter = fields[7].GetUInt32();
     std::string os = fields[8].GetString();
+    bool hasBoost = fields[9].GetBool();
 
     // Must be done before WorldSession is created
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED) && os != "Win" && os != "OSX")
@@ -1087,7 +1088,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     LoginDatabase.Execute(stmt);
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter), -1);
+    ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, hasBoost), -1);
 
     m_Crypt.Init(&k);
 

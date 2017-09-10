@@ -122,6 +122,22 @@ struct PlayerTalent
     uint8 spec : 8;
 };
 
+uint32 const pandarenLanguageSpellsAlliance[] =
+{
+    668,    // Common
+    143368, // Pandaren, Common
+    108130  // Pandaren Alliance
+};
+
+uint32 const pandarenLanguageSpellsHorde[] =
+{
+    669,    // Orcish
+    143369, // Pandaren, Orcish.
+    108131  // Pandaren Horde
+};
+
+#define PANDAREN_FACTION_LANGUAGE_COUNT 3
+
 extern uint32 const MasterySpells [MAX_CLASSES];
 
 enum TalentTree // talent tabs
@@ -1381,7 +1397,7 @@ class Player : public Unit, public GridObject<Player>
 
     void Update(uint32 time) override;
 
-    static bool BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, ByteBuffer* bitBuffer);
+    static bool BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, ByteBuffer* bitBuffer, bool boosted = false);
 
     void SetInWater(bool apply);
 

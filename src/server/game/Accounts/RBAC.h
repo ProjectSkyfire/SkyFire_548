@@ -710,6 +710,10 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_RELOAD_BLACKMARKET_AUCTIONS            = 803,
     RBAC_PERM_COMMAND_RELOAD_BLACKMARKET_TEMPLATE            = 804,
 
+    RBAC_PERM_COMMAND_ACCOUNT_BOOST                          = 805,
+    RBAC_PERM_COMMAND_ACCOUNT_BOOST_ADD                      = 806,
+    RBAC_PERM_COMMAND_ACCOUNT_BOOST_DEL                      = 807,
+
     // custom permissions 1000+
     RBAC_PERM_MAX
 };
