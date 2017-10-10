@@ -76,16 +76,16 @@ struct ActionButtonPACKET
 enum SpellModType
 {
     SPELLMOD_FLAT = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
-    SPELLMOD_PCT = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
+    SPELLMOD_PCT  = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
 };
 
 // 2^n values, Player::m_isunderwater is a bitmask. These are Skyfire internal values, they are never send to any client
 enum PlayerUnderwaterState
 {
-    UNDERWATER_NONE = 0x00,
-    UNDERWATER_INWATER = 0x01,             // terrain type is water and player is afflicted by it
-    UNDERWATER_INLAVA = 0x02,             // terrain type is lava and player is afflicted by it
-    UNDERWATER_INSLIME = 0x04,             // terrain type is lava and player is afflicted by it
+    UNDERWATER_NONE        = 0x00,
+    UNDERWATER_INWATER     = 0x01,             // terrain type is water and player is afflicted by it
+    UNDERWATER_INLAVA      = 0x02,             // terrain type is lava and player is afflicted by it
+    UNDERWATER_INSLIME     = 0x04,             // terrain type is lava and player is afflicted by it
     UNDERWARER_INDARKWATER = 0x08,             // terrain type is dark water and player is afflicted by it
 
     UNDERWATER_EXIST_TIMERS = 0x10
@@ -93,27 +93,27 @@ enum PlayerUnderwaterState
 
 enum BuyBankSlotResult
 {
-    ERR_BANKSLOT_FAILED_TOO_MANY = 0,
+    ERR_BANKSLOT_FAILED_TOO_MANY    = 0,
     ERR_BANKSLOT_INSUFFICIENT_FUNDS = 1,
-    ERR_BANKSLOT_NOTBANKER = 2,
-    ERR_BANKSLOT_OK = 3
+    ERR_BANKSLOT_NOTBANKER          = 2,
+    ERR_BANKSLOT_OK                 = 3
 };
 
 enum PlayerSpellState
 {
     PLAYERSPELL_UNCHANGED = 0,
-    PLAYERSPELL_CHANGED = 1,
-    PLAYERSPELL_NEW = 2,
-    PLAYERSPELL_REMOVED = 3,
+    PLAYERSPELL_CHANGED   = 1,
+    PLAYERSPELL_NEW       = 2,
+    PLAYERSPELL_REMOVED   = 3,
     PLAYERSPELL_TEMPORARY = 4
 };
 
 struct PlayerSpell
 {
     PlayerSpellState state : 8;
-    bool active : 1;                             // show in spellbook
-    bool dependent : 1;                             // learned as result another spell learn, skill grow, quest reward, etc
-    bool disabled : 1;                             // first rank has been learned in result talent learn but currently talent unlearned, save max learned ranks
+    bool active : 1;                          // show in spellbook
+    bool dependent : 1;                       // learned as result another spell learn, skill grow, quest reward, etc
+    bool disabled : 1;                        // first rank has been learned in result talent learn but currently talent unlearned, save max learned ranks
 };
 
 struct PlayerTalent
@@ -142,39 +142,39 @@ extern uint32 const MasterySpells [MAX_CLASSES];
 
 enum TalentTree // talent tabs
 {
-    TALENT_TREE_WARRIOR_ARMS = 746,
-    TALENT_TREE_WARRIOR_FURY = 815,
-    TALENT_TREE_WARRIOR_PROTECTION = 845,
-    TALENT_TREE_PALADIN_HOLY = 831,
-    TALENT_TREE_PALADIN_PROTECTION = 839,
-    TALENT_TREE_PALADIN_RETRIBUTION = 855,
+    TALENT_TREE_WARRIOR_ARMS         = 746,
+    TALENT_TREE_WARRIOR_FURY         = 815,
+    TALENT_TREE_WARRIOR_PROTECTION   = 845,
+    TALENT_TREE_PALADIN_HOLY         = 831,
+    TALENT_TREE_PALADIN_PROTECTION   = 839,
+    TALENT_TREE_PALADIN_RETRIBUTION  = 855,
     TALENT_TREE_HUNTER_BEAST_MASTERY = 811,
-    TALENT_TREE_HUNTER_MARKSMANSHIP = 807,
-    TALENT_TREE_HUNTER_SURVIVAL = 809,
-    TALENT_TREE_ROGUE_ASSASSINATION = 182,
-    TALENT_TREE_ROGUE_COMBAT = 181,
-    TALENT_TREE_ROGUE_SUBTLETY = 183,
-    TALENT_TREE_PRIEST_DISCIPLINE = 760,
-    TALENT_TREE_PRIEST_HOLY = 813,
-    TALENT_TREE_PRIEST_SHADOW = 795,
-    TALENT_TREE_DEATH_KNIGHT_BLOOD = 398,
-    TALENT_TREE_DEATH_KNIGHT_FROST = 399,
-    TALENT_TREE_DEATH_KNIGHT_UNHOLY = 400,
-    TALENT_TREE_SHAMAN_ELEMENTAL = 261,
-    TALENT_TREE_SHAMAN_ENHANCEMENT = 263,
-    TALENT_TREE_SHAMAN_RESTORATION = 262,
-    TALENT_TREE_MAGE_ARCANE = 799,
-    TALENT_TREE_MAGE_FIRE = 851,
-    TALENT_TREE_MAGE_FROST = 823,
-    TALENT_TREE_WARLOCK_AFFLICTION = 871,
-    TALENT_TREE_WARLOCK_DEMONOLOGY = 867,
-    TALENT_TREE_WARLOCK_DESTRUCTION = 865,
-    TALENT_TREE_DRUID_BALANCE = 752,
-    TALENT_TREE_DRUID_FERAL_COMBAT = 750,
-    TALENT_TREE_DRUID_RESTORATION = 748,
-    TALENT_TREE_MONK_BREWMASTER = 268,
-    TALENT_TREE_MONK_MISTWEAVER = 270,
-    TALENT_TREE_MONK_WINDWALKER = 269
+    TALENT_TREE_HUNTER_MARKSMANSHIP  = 807,
+    TALENT_TREE_HUNTER_SURVIVAL      = 809,
+    TALENT_TREE_ROGUE_ASSASSINATION  = 182,
+    TALENT_TREE_ROGUE_COMBAT         = 181,
+    TALENT_TREE_ROGUE_SUBTLETY       = 183,
+    TALENT_TREE_PRIEST_DISCIPLINE    = 760,
+    TALENT_TREE_PRIEST_HOLY          = 813,
+    TALENT_TREE_PRIEST_SHADOW        = 795,
+    TALENT_TREE_DEATH_KNIGHT_BLOOD   = 398,
+    TALENT_TREE_DEATH_KNIGHT_FROST   = 399,
+    TALENT_TREE_DEATH_KNIGHT_UNHOLY  = 400,
+    TALENT_TREE_SHAMAN_ELEMENTAL     = 261,
+    TALENT_TREE_SHAMAN_ENHANCEMENT   = 263,
+    TALENT_TREE_SHAMAN_RESTORATION   = 262,
+    TALENT_TREE_MAGE_ARCANE          = 799,
+    TALENT_TREE_MAGE_FIRE            = 851,
+    TALENT_TREE_MAGE_FROST           = 823,
+    TALENT_TREE_WARLOCK_AFFLICTION   = 871,
+    TALENT_TREE_WARLOCK_DEMONOLOGY   = 867,
+    TALENT_TREE_WARLOCK_DESTRUCTION  = 865,
+    TALENT_TREE_DRUID_BALANCE        = 752,
+    TALENT_TREE_DRUID_FERAL_COMBAT   = 750,
+    TALENT_TREE_DRUID_RESTORATION    = 748,
+    TALENT_TREE_MONK_BREWMASTER      = 268,
+    TALENT_TREE_MONK_MISTWEAVER      = 270,
+    TALENT_TREE_MONK_WINDWALKER      = 269
 };
 
 // Spell modifier (used for modify other spells)
@@ -194,9 +194,9 @@ struct SpellModifier
 enum PlayerCurrencyState
 {
     PLAYERCURRENCY_UNCHANGED = 0,
-    PLAYERCURRENCY_CHANGED = 1,
-    PLAYERCURRENCY_NEW = 2,
-    PLAYERCURRENCY_REMOVED = 3     //not removed just set count == 0
+    PLAYERCURRENCY_CHANGED   = 1,
+    PLAYERCURRENCY_NEW       = 2,
+    PLAYERCURRENCY_REMOVED   = 3     //not removed just set count == 0
 };
 
 struct PlayerCurrency
@@ -319,9 +319,9 @@ typedef UNORDERED_MAP<uint32 /*instanceId*/, time_t/*releaseTime*/> InstanceTime
 
 enum TrainerSpellState
 {
-    TRAINER_SPELL_GRAY = 0,
-    TRAINER_SPELL_GREEN = 1,
-    TRAINER_SPELL_RED = 2,
+    TRAINER_SPELL_GRAY           = 0,
+    TRAINER_SPELL_GREEN          = 1,
+    TRAINER_SPELL_RED            = 2,
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
@@ -496,10 +496,10 @@ enum RuneCooldowns
 
 enum RuneType
 {
-    RUNE_BLOOD = 0,
-    RUNE_UNHOLY = 1,
-    RUNE_FROST = 2,
-    RUNE_DEATH = 3,
+    RUNE_BLOOD     = 0,
+    RUNE_UNHOLY    = 1,
+    RUNE_FROST     = 2,
+    RUNE_DEATH     = 3,
     NUM_RUNE_TYPES = 4
 };
 
@@ -546,9 +546,9 @@ typedef std::list<Item*> ItemDurationList;
 
 enum DrunkenState
 {
-    DRUNKEN_SOBER = 0,
-    DRUNKEN_TIPSY = 1,
-    DRUNKEN_DRUNK = 2,
+    DRUNKEN_SOBER   = 0,
+    DRUNKEN_TIPSY   = 1,
+    DRUNKEN_DRUNK   = 2,
     DRUNKEN_SMASHED = 3
 };
 
@@ -556,38 +556,38 @@ enum DrunkenState
 
 enum PlayerFlags
 {
-    PLAYER_FLAGS_GROUP_LEADER = 0x00000001,
-    PLAYER_FLAGS_AFK = 0x00000002,
-    PLAYER_FLAGS_DND = 0x00000004,
-    PLAYER_FLAGS_GM = 0x00000008,
-    PLAYER_FLAGS_GHOST = 0x00000010,
-    PLAYER_FLAGS_RESTING = 0x00000020,
-    PLAYER_FLAGS_UNK6 = 0x00000040,
-    PLAYER_FLAGS_UNK7 = 0x00000080,       // pre-3.0.3 PLAYER_FLAGS_FFA_PVP flag for FFA PVP state
-    PLAYER_FLAGS_CONTESTED_PVP = 0x00000100,       // Player has been involved in a PvP combat and will be attacked by contested guards
-    PLAYER_FLAGS_IN_PVP = 0x00000200,
-    PLAYER_FLAGS_HIDE_HELM = 0x00000400,
-    PLAYER_FLAGS_HIDE_CLOAK = 0x00000800,
-    PLAYER_FLAGS_PLAYED_LONG_TIME = 0x00001000,       // played long time
-    PLAYER_FLAGS_PLAYED_TOO_LONG = 0x00002000,       // played too long time
-    PLAYER_FLAGS_IS_OUT_OF_BOUNDS = 0x00004000,
-    PLAYER_FLAGS_DEVELOPER = 0x00008000,       // <Dev> prefix for something?
-    PLAYER_FLAGS_UNK16 = 0x00010000,       // pre-3.0.3 PLAYER_FLAGS_SANCTUARY flag for player entered sanctuary
-    PLAYER_FLAGS_TAXI_BENCHMARK = 0x00020000,       // taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_FLAGS_PVP_TIMER = 0x00040000,       // 3.0.2, pvp timer active (after you disable pvp manually)
-    PLAYER_FLAGS_UBER = 0x00080000,
-    PLAYER_FLAGS_UNK20 = 0x00100000,
-    PLAYER_FLAGS_UNK21 = 0x00200000,
-    PLAYER_FLAGS_COMMENTATOR2 = 0x00400000,
-    PLAYER_FLAGS_ALLOW_ONLY_ABILITY = 0x00800000,       // used by bladestorm and killing spree, allowed only spells with SPELL_ATTR0_REQ_AMMO, SPELL_EFFECT_ATTACK, checked only for active player
-    PLAYER_FLAGS_BATTLE_PET_ENABLED = 0x01000000,
-    PLAYER_FLAGS_NO_XP_GAIN = 0x02000000,
-    PLAYER_FLAGS_UNK26 = 0x04000000,
-    PLAYER_FLAGS_AUTO_DECLINE_GUILD = 0x08000000,       // Automatically declines guild invites
+    PLAYER_FLAGS_GROUP_LEADER        = 0x00000001,
+    PLAYER_FLAGS_AFK                 = 0x00000002,
+    PLAYER_FLAGS_DND                 = 0x00000004,
+    PLAYER_FLAGS_GM                  = 0x00000008,
+    PLAYER_FLAGS_GHOST               = 0x00000010,
+    PLAYER_FLAGS_RESTING             = 0x00000020,
+    PLAYER_FLAGS_UNK6                = 0x00000040,
+    PLAYER_FLAGS_UNK7                = 0x00000080,       // pre-3.0.3 PLAYER_FLAGS_FFA_PVP flag for FFA PVP state
+    PLAYER_FLAGS_CONTESTED_PVP       = 0x00000100,       // Player has been involved in a PvP combat and will be attacked by contested guards
+    PLAYER_FLAGS_IN_PVP              = 0x00000200,
+    PLAYER_FLAGS_HIDE_HELM           = 0x00000400,
+    PLAYER_FLAGS_HIDE_CLOAK          = 0x00000800,
+    PLAYER_FLAGS_PLAYED_LONG_TIME    = 0x00001000,       // played long time
+    PLAYER_FLAGS_PLAYED_TOO_LONG     = 0x00002000,       // played too long time
+    PLAYER_FLAGS_IS_OUT_OF_BOUNDS    = 0x00004000,
+    PLAYER_FLAGS_DEVELOPER           = 0x00008000,       // <Dev> prefix for something?
+    PLAYER_FLAGS_UNK16               = 0x00010000,       // pre-3.0.3 PLAYER_FLAGS_SANCTUARY flag for player entered sanctuary
+    PLAYER_FLAGS_TAXI_BENCHMARK      = 0x00020000,       // taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_FLAGS_PVP_TIMER           = 0x00040000,       // 3.0.2, pvp timer active (after you disable pvp manually)
+    PLAYER_FLAGS_UBER                = 0x00080000,
+    PLAYER_FLAGS_UNK20               = 0x00100000,
+    PLAYER_FLAGS_UNK21               = 0x00200000,
+    PLAYER_FLAGS_COMMENTATOR2        = 0x00400000,
+    PLAYER_FLAGS_ALLOW_ONLY_ABILITY  = 0x00800000,       // used by bladestorm and killing spree, allowed only spells with SPELL_ATTR0_REQ_AMMO, SPELL_EFFECT_ATTACK, checked only for active player
+    PLAYER_FLAGS_BATTLE_PET_ENABLED  = 0x01000000,
+    PLAYER_FLAGS_NO_XP_GAIN          = 0x02000000,
+    PLAYER_FLAGS_UNK26               = 0x04000000,
+    PLAYER_FLAGS_AUTO_DECLINE_GUILD  = 0x08000000,       // Automatically declines guild invites
     PLAYER_FLAGS_GUILD_LEVEL_ENABLED = 0x10000000,       // Lua_GetGuildLevelEnabled() - enables guild leveling related UI
-    PLAYER_FLAGS_VOID_UNLOCKED = 0x20000000,       // void storage
-    PLAYER_FLAGS_UNK30 = 0x40000000,
-    PLAYER_FLAGS_UNK31 = 0x80000000
+    PLAYER_FLAGS_VOID_UNLOCKED       = 0x20000000,       // void storage
+    PLAYER_FLAGS_UNK30               = 0x40000000,
+    PLAYER_FLAGS_UNK31               = 0x80000000
 };
 
 #define KNOWN_TITLES_SIZE   4
@@ -596,24 +596,24 @@ enum PlayerFlags
 // used in PLAYER_FIELD_LIFETIME_MAX_RANK values
 enum PlayerFieldByteFlags
 {
-    PLAYER_FIELD_BYTE_TRACK_STEALTHED = 0x00000002,
-    PLAYER_FIELD_BYTE_RELEASE_TIMER = 0x00000008,       // Display time till auto release spirit
+    PLAYER_FIELD_BYTE_TRACK_STEALTHED   = 0x00000002,
+    PLAYER_FIELD_BYTE_RELEASE_TIMER     = 0x00000008,       // Display time till auto release spirit
     PLAYER_FIELD_BYTE_NO_RELEASE_WINDOW = 0x00000010        // Display no "release spirit" window at all
 };
 
 // used in UNIT_FIELD_SHAPESHIFT_FORM values
 enum PlayerFieldByte2Flags
 {
-    PLAYER_FIELD_BYTE2_NONE = 0x00,
-    PLAYER_FIELD_BYTE2_STEALTH = 0x20,
+    PLAYER_FIELD_BYTE2_NONE              = 0x00,
+    PLAYER_FIELD_BYTE2_STEALTH           = 0x20,
     PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW = 0x40
 };
 
 enum MirrorTimerType
 {
     FATIGUE_TIMER = 0,
-    BREATH_TIMER = 1,
-    FIRE_TIMER = 2 // feign death
+    BREATH_TIMER  = 1,
+    FIRE_TIMER    = 2 // feign death
 };
 #define MAX_TIMERS      3
 #define DISABLED_MIRROR_TIMER   -1
@@ -622,28 +622,28 @@ enum MirrorTimerType
 enum PlayerExtraFlags
 {
     // gm abilities
-    PLAYER_EXTRA_GM_ON = 0x0001,
+    PLAYER_EXTRA_GM_ON           = 0x0001,
     PLAYER_EXTRA_ACCEPT_WHISPERS = 0x0004,
-    PLAYER_EXTRA_TAXICHEAT = 0x0008,
-    PLAYER_EXTRA_GM_INVISIBLE = 0x0010,
-    PLAYER_EXTRA_GM_CHAT = 0x0020,               // Show GM badge in chat messages
+    PLAYER_EXTRA_TAXICHEAT       = 0x0008,
+    PLAYER_EXTRA_GM_INVISIBLE    = 0x0010,
+    PLAYER_EXTRA_GM_CHAT         = 0x0020,               // Show GM badge in chat messages
 
     // other states
-    PLAYER_EXTRA_PVP_DEATH = 0x0100                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_PVP_DEATH       = 0x0100                // store PvP death status until corpse creating.
 };
 
 // 2^n values
 enum AtLoginFlags
 {
-    AT_LOGIN_NONE = 0x00,
-    AT_LOGIN_RENAME = 0x01,
-    AT_LOGIN_RESET_SPELLS = 0x02,
-    AT_LOGIN_RESET_TALENTS = 0x04,
-    AT_LOGIN_CUSTOMIZE = 0x08,
+    AT_LOGIN_NONE              = 0x00,
+    AT_LOGIN_RENAME            = 0x01,
+    AT_LOGIN_RESET_SPELLS      = 0x02,
+    AT_LOGIN_RESET_TALENTS     = 0x04,
+    AT_LOGIN_CUSTOMIZE         = 0x08,
     AT_LOGIN_RESET_PET_TALENTS = 0x10,
-    AT_LOGIN_FIRST = 0x20,
-    AT_LOGIN_CHANGE_FACTION = 0x40,
-    AT_LOGIN_CHANGE_RACE = 0x80
+    AT_LOGIN_FIRST             = 0x20,
+    AT_LOGIN_CHANGE_FACTION    = 0x40,
+    AT_LOGIN_CHANGE_RACE       = 0x80
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -656,27 +656,27 @@ typedef std::map<uint32, bool> QuestObjectiveStatusSaveMap;
 
 enum QuestSlotOffsets
 {
-    QUEST_ID_OFFSET = 0,
-    QUEST_STATE_OFFSET = 1,
+    QUEST_ID_OFFSET     = 0,
+    QUEST_STATE_OFFSET  = 1,
     QUEST_COUNTS_OFFSET = 2,
-    QUEST_TIME_OFFSET = 4
+    QUEST_TIME_OFFSET   = 4
 };
 
 #define MAX_QUEST_OFFSET 15
 
 enum QuestSlotStateMask
 {
-    QUEST_STATE_NONE = 0x0000,
+    QUEST_STATE_NONE     = 0x0000,
     QUEST_STATE_COMPLETE = 0x0001,
-    QUEST_STATE_FAIL = 0x0002
+    QUEST_STATE_FAIL     = 0x0002
 };
 
 enum SkillUpdateState
 {
     SKILL_UNCHANGED = 0,
-    SKILL_CHANGED = 1,
-    SKILL_NEW = 2,
-    SKILL_DELETED = 3
+    SKILL_CHANGED   = 1,
+    SKILL_NEW       = 2,
+    SKILL_DELETED   = 3
 };
 
 struct SkillStatusData
@@ -697,9 +697,9 @@ class WorldSession;
 enum PlayerSlots
 {
     // first slot for item stored (in any way in player m_items data)
-    PLAYER_SLOT_START = 0,
+    PLAYER_SLOT_START  = 0,
     // last+1 slot for item stored (in any way in player m_items data)
-    PLAYER_SLOT_END = 86,
+    PLAYER_SLOT_END    = 86,
     PLAYER_SLOTS_COUNT = (PLAYER_SLOT_END - PLAYER_SLOT_START)
 };
 
@@ -707,66 +707,66 @@ enum PlayerSlots
 
 enum EquipmentSlots                                         // 19 slots
 {
-    EQUIPMENT_SLOT_START = 0,
-    EQUIPMENT_SLOT_HEAD = 0,
-    EQUIPMENT_SLOT_NECK = 1,
+    EQUIPMENT_SLOT_START     = 0,
+    EQUIPMENT_SLOT_HEAD      = 0,
+    EQUIPMENT_SLOT_NECK      = 1,
     EQUIPMENT_SLOT_SHOULDERS = 2,
-    EQUIPMENT_SLOT_BODY = 3,
-    EQUIPMENT_SLOT_CHEST = 4,
-    EQUIPMENT_SLOT_WAIST = 5,
-    EQUIPMENT_SLOT_LEGS = 6,
-    EQUIPMENT_SLOT_FEET = 7,
-    EQUIPMENT_SLOT_WRISTS = 8,
-    EQUIPMENT_SLOT_HANDS = 9,
-    EQUIPMENT_SLOT_FINGER1 = 10,
-    EQUIPMENT_SLOT_FINGER2 = 11,
-    EQUIPMENT_SLOT_TRINKET1 = 12,
-    EQUIPMENT_SLOT_TRINKET2 = 13,
-    EQUIPMENT_SLOT_BACK = 14,
-    EQUIPMENT_SLOT_MAINHAND = 15,
-    EQUIPMENT_SLOT_OFFHAND = 16,
-    //EQUIPMENT_SLOT_RANGED       = 17,
-    EQUIPMENT_SLOT_TABARD = 18,
-    EQUIPMENT_SLOT_END = 19
+    EQUIPMENT_SLOT_BODY      = 3,
+    EQUIPMENT_SLOT_CHEST     = 4,
+    EQUIPMENT_SLOT_WAIST     = 5,
+    EQUIPMENT_SLOT_LEGS      = 6,
+    EQUIPMENT_SLOT_FEET      = 7,
+    EQUIPMENT_SLOT_WRISTS    = 8,
+    EQUIPMENT_SLOT_HANDS     = 9,
+    EQUIPMENT_SLOT_FINGER1   = 10,
+    EQUIPMENT_SLOT_FINGER2   = 11,
+    EQUIPMENT_SLOT_TRINKET1  = 12,
+    EQUIPMENT_SLOT_TRINKET2  = 13,
+    EQUIPMENT_SLOT_BACK      = 14,
+    EQUIPMENT_SLOT_MAINHAND  = 15,
+    EQUIPMENT_SLOT_OFFHAND   = 16,
+    //EQUIPMENT_SLOT_RANGED    = 17,
+    EQUIPMENT_SLOT_TABARD    = 18,
+    EQUIPMENT_SLOT_END       = 19
 };
 
 enum InventorySlots                                         // 4 slots
 {
     INVENTORY_SLOT_BAG_START = 19,
-    INVENTORY_SLOT_BAG_END = 23
+    INVENTORY_SLOT_BAG_END   = 23
 };
 
 enum InventoryPackSlots                                     // 16 slots
 {
     INVENTORY_SLOT_ITEM_START = 23,
-    INVENTORY_SLOT_ITEM_END = 39
+    INVENTORY_SLOT_ITEM_END   = 39
 };
 
 enum BankItemSlots                                          // 28 slots
 {
     BANK_SLOT_ITEM_START = 39,
-    BANK_SLOT_ITEM_END = 67
+    BANK_SLOT_ITEM_END   = 67
 };
 
 enum BankBagSlots                                           // 7 slots
 {
     BANK_SLOT_BAG_START = 67,
-    BANK_SLOT_BAG_END = 74
+    BANK_SLOT_BAG_END   = 74
 };
 
 enum BuyBackSlots                                           // 12 slots
 {
     // stored in m_buybackitems
     BUYBACK_SLOT_START = 74,
-    BUYBACK_SLOT_END = 86
+    BUYBACK_SLOT_END   = 86
 };
 
 enum EquipmentSetUpdateState
 {
     EQUIPMENT_SET_UNCHANGED = 0,
-    EQUIPMENT_SET_CHANGED = 1,
-    EQUIPMENT_SET_NEW = 2,
-    EQUIPMENT_SET_DELETED = 3
+    EQUIPMENT_SET_CHANGED   = 1,
+    EQUIPMENT_SET_NEW       = 2,
+    EQUIPMENT_SET_DELETED   = 3
 };
 
 struct EquipmentSet
@@ -801,72 +801,72 @@ typedef std::vector<ItemPosCount> ItemPosCountVec;
 
 enum TradeSlots
 {
-    TRADE_SLOT_COUNT = 7,
+    TRADE_SLOT_COUNT        = 7,
     TRADE_SLOT_TRADED_COUNT = 6,
-    TRADE_SLOT_NONTRADED = 6,
-    TRADE_SLOT_INVALID = -1
+    TRADE_SLOT_NONTRADED    = 6,
+    TRADE_SLOT_INVALID      = -1
 };
 
 enum TransferAbortReason
 {
-    TRANSFER_ABORT_NONE = 0x00,
-    TRANSFER_ABORT_ERROR = 0x01,
-    TRANSFER_ABORT_MAX_PLAYERS = 0x02,         // Transfer Aborted: instance is full
-    TRANSFER_ABORT_NOT_FOUND = 0x03,         // Transfer Aborted: instance not found
-    TRANSFER_ABORT_TOO_MANY_INSTANCES = 0x04,         // You have entered too many instances recently.
-    TRANSFER_ABORT_ZONE_IN_COMBAT = 0x06,         // Unable to zone in while an encounter is in progress.
-    TRANSFER_ABORT_INSUF_EXPAN_LVL = 0x07,         // You must have <TBC, WotLK> expansion installed to access this area.
-    TRANSFER_ABORT_DIFFICULTY = 0x08,         // <Normal, Heroic, Epic> difficulty mode is not available for %s.
-    TRANSFER_ABORT_UNIQUE_MESSAGE = 0x09,         // Until you've escaped TLK's grasp, you cannot leave this place!
-    TRANSFER_ABORT_TOO_MANY_REALM_INSTANCES = 0x0A,         // Additional instances cannot be launched, please try again later.
-    TRANSFER_ABORT_NEED_GROUP = 0x0B,         // 3.1
-    TRANSFER_ABORT_NOT_FOUND1 = 0x0C,         // 3.1
-    TRANSFER_ABORT_NOT_FOUND2 = 0x0D,         // 3.1
-    TRANSFER_ABORT_NOT_FOUND3 = 0x0E,         // 3.2
-    TRANSFER_ABORT_REALM_ONLY = 0x0F,         // All players on party must be from the same realm.
-    TRANSFER_ABORT_MAP_NOT_ALLOWED = 0x10,         // Map can't be entered at this time.
+    TRANSFER_ABORT_NONE                         = 0x00,
+    TRANSFER_ABORT_ERROR                        = 0x01,
+    TRANSFER_ABORT_MAX_PLAYERS                  = 0x02,         // Transfer Aborted: instance is full
+    TRANSFER_ABORT_NOT_FOUND                    = 0x03,         // Transfer Aborted: instance not found
+    TRANSFER_ABORT_TOO_MANY_INSTANCES           = 0x04,         // You have entered too many instances recently.
+    TRANSFER_ABORT_ZONE_IN_COMBAT               = 0x06,         // Unable to zone in while an encounter is in progress.
+    TRANSFER_ABORT_INSUF_EXPAN_LVL              = 0x07,         // You must have <TBC, WotLK> expansion installed to access this area.
+    TRANSFER_ABORT_DIFFICULTY                   = 0x08,         // <Normal, Heroic, Epic> difficulty mode is not available for %s.
+    TRANSFER_ABORT_UNIQUE_MESSAGE               = 0x09,         // Until you've escaped TLK's grasp, you cannot leave this place!
+    TRANSFER_ABORT_TOO_MANY_REALM_INSTANCES     = 0x0A,         // Additional instances cannot be launched, please try again later.
+    TRANSFER_ABORT_NEED_GROUP                   = 0x0B,         // 3.1
+    TRANSFER_ABORT_NOT_FOUND1                   = 0x0C,         // 3.1
+    TRANSFER_ABORT_NOT_FOUND2                   = 0x0D,         // 3.1
+    TRANSFER_ABORT_NOT_FOUND3                   = 0x0E,         // 3.2
+    TRANSFER_ABORT_REALM_ONLY                   = 0x0F,         // All players on party must be from the same realm.
+    TRANSFER_ABORT_MAP_NOT_ALLOWED              = 0x10,         // Map can't be entered at this time.
     TRANSFER_ABORT_LOCKED_TO_DIFFERENT_INSTANCE = 0x12,         // 4.2.2
-    TRANSFER_ABORT_ALREADY_COMPLETED_ENCOUNTER = 0x13         // 4.2.2
+    TRANSFER_ABORT_ALREADY_COMPLETED_ENCOUNTER  = 0x13          // 4.2.2
 };
 
 enum InstanceResetWarningType
 {
-    RAID_INSTANCE_WARNING_HOURS = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
-    RAID_INSTANCE_WARNING_MIN = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
+    RAID_INSTANCE_WARNING_HOURS    = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
+    RAID_INSTANCE_WARNING_MIN      = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
     RAID_INSTANCE_WARNING_MIN_SOON = 3,                    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
-    RAID_INSTANCE_WELCOME = 4,                    // Welcome to %s. This raid instance is scheduled to reset in %s.
-    RAID_INSTANCE_EXPIRED = 5
+    RAID_INSTANCE_WELCOME          = 4,                    // Welcome to %s. This raid instance is scheduled to reset in %s.
+    RAID_INSTANCE_EXPIRED          = 5
 };
 
 // PLAYER_FIELD_PVP_INFO offsets
 enum ArenaTeamInfoType
 {
-    ARENA_TEAM_ID = 0,
-    ARENA_TEAM_TYPE = 1,                       // new in 3.2 - team type?
-    ARENA_TEAM_MEMBER = 2,                       // 0 - captain, 1 - member
-    ARENA_TEAM_GAMES_WEEK = 3,
-    ARENA_TEAM_GAMES_SEASON = 4,
-    ARENA_TEAM_WINS_SEASON = 5,
+    ARENA_TEAM_ID              = 0,
+    ARENA_TEAM_TYPE            = 1,                       // new in 3.2 - team type?
+    ARENA_TEAM_MEMBER          = 2,                       // 0 - captain, 1 - member
+    ARENA_TEAM_GAMES_WEEK      = 3,
+    ARENA_TEAM_GAMES_SEASON    = 4,
+    ARENA_TEAM_WINS_SEASON     = 5,
     ARENA_TEAM_PERSONAL_RATING = 6,
-    ARENA_TEAM_END = 7
+    ARENA_TEAM_END             = 7
 };
 
 class InstanceSave;
 
 enum RestType
 {
-    REST_TYPE_NO = 0,
+    REST_TYPE_NO        = 0,
     REST_TYPE_IN_TAVERN = 1,
-    REST_TYPE_IN_CITY = 2
+    REST_TYPE_IN_CITY   = 2
 };
 
 enum TeleportToOptions
 {
-    TELE_TO_GM_MODE = 0x01,
+    TELE_TO_GM_MODE             = 0x01,
     TELE_TO_NOT_LEAVE_TRANSPORT = 0x02,
-    TELE_TO_NOT_LEAVE_COMBAT = 0x04,
-    TELE_TO_NOT_UNSUMMON_PET = 0x08,
-    TELE_TO_SPELL = 0x10
+    TELE_TO_NOT_LEAVE_COMBAT    = 0x04,
+    TELE_TO_NOT_UNSUMMON_PET    = 0x08,
+    TELE_TO_SPELL               = 0x10
 };
 
 /// Type of environmental damages
