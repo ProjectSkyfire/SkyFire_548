@@ -327,21 +327,22 @@ enum TrainerSpellState
 
 enum ActionButtonUpdateState
 {
-    ACTIONBUTTON_UNCHANGED = 0,
-    ACTIONBUTTON_CHANGED = 1,
-    ACTIONBUTTON_NEW = 2,
-    ACTIONBUTTON_DELETED = 3
+    ACTIONBUTTON_UNCHANGED  = 0,
+    ACTIONBUTTON_CHANGED    = 1,
+    ACTIONBUTTON_NEW        = 2,
+    ACTIONBUTTON_DELETED    = 3
 };
 
 enum ActionButtonType
 {
-    ACTION_BUTTON_SPELL = 0x00,
-    ACTION_BUTTON_C = 0x01,                         // click?
-    ACTION_BUTTON_EQSET = 0x20,
+    ACTION_BUTTON_SPELL    = 0x00,
+    ACTION_BUTTON_C        = 0x01,
+    ACTION_BUTTON_EQSET    = 0x20,
     ACTION_BUTTON_DROPDOWN = 0x30,
-    ACTION_BUTTON_MACRO = 0x40,
-    ACTION_BUTTON_CMACRO = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
-    ACTION_BUTTON_ITEM = 0x80
+    ACTION_BUTTON_MACRO    = 0x40,
+    ACTION_BUTTON_CMACRO   = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
+    ACTION_BUTTON_MOUNT    = 0x60,
+    ACTION_BUTTON_ITEM     = 0x80
 };
 
 enum ReputationSource
@@ -355,30 +356,30 @@ enum ReputationSource
     REPUTATION_SOURCE_SPELL
 };
 
-#define ACTION_BUTTON_ACTION(X) (uint32(X) & 0x00FFFFFF)
-#define ACTION_BUTTON_TYPE(X)   ((uint32(X) & 0xFF000000) >> 24)
-#define MAX_ACTION_BUTTON_ACTION_VALUE (0x00FFFFFF+1)
+#define ACTION_BUTTON_ACTION(X) (uint64(X) & 0x00000000FFFFFFFF)
+#define ACTION_BUTTON_TYPE(X)   ((uint64(X) & 0xFFFFFFFF00000000) >> 56)
+#define MAX_ACTION_BUTTON_ACTION_VALUE (0xFFFFFFFF)
 
 struct ActionButton
 {
-    ActionButton() : packedData(0), uState(ACTIONBUTTON_NEW)
-    { }
+    ActionButton() : packedData(0), uState(ACTIONBUTTON_NEW) { }
 
-    uint32 packedData;
+    uint64 packedData;
     ActionButtonUpdateState uState;
 
     // helpers
-    ActionButtonType GetType() const
-    {
-        return ActionButtonType(ACTION_BUTTON_TYPE(packedData));
+    ActionButtonType GetType() const 
+    { 
+        return ActionButtonType(ACTION_BUTTON_TYPE(packedData)); 
     }
-    uint32 GetAction() const
-    {
-        return ACTION_BUTTON_ACTION(packedData);
+    uint32 GetAction() const 
+    { 
+        return ACTION_BUTTON_ACTION(packedData); 
     }
+
     void SetActionAndType(uint32 action, ActionButtonType type)
     {
-        uint32 newData = action | (uint32(type) << 24);
+        uint64 newData = uint64(action) | (uint64(type) << 56);
         if (newData != packedData || uState == ACTIONBUTTON_DELETED)
         {
             packedData = newData;
@@ -388,7 +389,7 @@ struct ActionButton
     }
 };
 
-#define  MAX_ACTION_BUTTONS 132                             //checked in 3.2.0
+#define MAX_ACTION_BUTTONS 132
 
 typedef std::map<uint8, ActionButton> ActionButtonList;
 
