@@ -1,5 +1,5 @@
 [![Stories in Ready](https://badge.waffle.io/ProjectSkyfire/SkyFire.548.png?label=ready&title=Ready)](https://waffle.io/ProjectSkyfire/SkyFire.548)
-# ![logo](http://www.projectskyfire.org/public/style_images/15_14_skyfire_logo.png)
+# ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly in C++.
@@ -68,8 +68,8 @@ Read file [THANKS](THANKS.md)
 Read File [TO-DO](TODO.md)
 
 ## Links
-Forum [http://www.projectskyfire.org](http://www.projectskyfire.org)
+Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
 
-Database [http://www.projectskyfire.org/index.php?/files/](http://www.projectskyfire.org/index.php?/files/)
+Database [https://forum.projectskyfire.org/index.php?/files/](https://forum.projectskyfire.org/index.php?/files/)
 
 Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
