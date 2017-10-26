@@ -164,7 +164,7 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void MapBuilder::buildAllMaps(int threads)
+    void MapBuilder::buildAllMaps(unsigned int threads)
     {
         std::vector<BuilderThread*> _threads;
 
@@ -182,9 +182,13 @@ namespace MMAP
             }
         }
 
-        for (int i = 0; i < threads; ++i)
-            _threads.push_back(new BuilderThread(this, pool->Queue()));
-
+		printf("Using %u threads to extract mmaps\n", threads);
+		
+		for (unsigned int i = 0; i < threads; ++i)
+		{
+			_threads.push_back(new BuilderThread(this, pool->Queue()));
+		}
+            
         // Free memory
         for (std::vector<BuilderThread*>::iterator _th = _threads.begin(); _th != _threads.end(); ++_th)
         {
