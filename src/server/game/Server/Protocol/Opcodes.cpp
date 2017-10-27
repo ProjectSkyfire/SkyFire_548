@@ -236,6 +236,15 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                            0x1259, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT_HONOR_STATS,                0x0882, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GET_ITEM_PURCHASE_DATA,             0x1258, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefundInfoRequest        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_PURCHASE_DENIED,     0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_PARENTAL_CONTROLS_NO_PURCHASE, 0x0000, STATUS_LOGGEDIN, PROCESS_INPLACE, &WorldSession::Handle_NULL                    ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_ALREADY_OWNED,       0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_OTHER,               0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_INSUFFICIENT_BALANCE, 0x0000, STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_BATTLEPAY_DISABLED,  0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_WRONG_CURRENCY,      0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_PAYMENT_FAILED,      0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_LE_STORE_ERROR_INVALID_PAYMENT_METHOD, 0x0000, STATUS_LOGGEDIN, PROCESS_INPLACE,    &WorldSession::Handle_NULL                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_TALENT,                       0x02A7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLearnTalentOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LEAVE_CHANNEL,                      0x042A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLeaveChannel                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS,                     0x0000, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus                 );
@@ -376,6 +385,13 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SPIRIT_HEALER_ACTIVATE,             0x0340, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSpiritHealerActivateOpcode   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                         0x02EC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_STAND_STATE_CHANGE,                 0x03E6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleStandStateChangeOpcode       ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_ORDER_INITIATION_FAILED,      0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_PURCHASE_ERROR,               0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_PURCHASE_LIST_UPDATED,        0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_PRODUCT_DELIVERED,            0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_STATUS_CHANGED,               0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_CONFIRM_PURCHASE,             0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
+	DEFINE_OPCODE_HANDLER(CMSG_STORE_PRODUCTS_UPDATED,             0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUBMIT_BUG,                         0x0861, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSubmitBugOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUGGESTION_SUBMIT,                  0x0A12, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSubmitSuggestOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUMMON_RESPONSE,                    0x0A33, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSummonResponseOpcode         ); // 5.4.8 18414
