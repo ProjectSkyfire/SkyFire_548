@@ -68,4 +68,12 @@ notifications:
       - "irc.rizon.net#project_skyfire"
     on_success: always
     on_failure: always
-  webhooks: http://87.106.181.7/travis-ci.php
+
+  webhooks:
+    urls:
+      - http://87.106.181.7/travis-ci.php
+    on_success: always
+    on_failure: always
+    on_start: always
+    on_cancel: always
+    on_error: always
