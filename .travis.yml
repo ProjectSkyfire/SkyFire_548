@@ -21,17 +21,7 @@ matrix:
       dist: trusty
       group: deprecated-2017Q4
       compiler: gcc
-  # ENABLE AFTER ACE 6.4.3 is available.
-    #- os: linux
-    #  dist: xenial
-    #  sudo: required
-    #  compiler: clang
-    - os: linux
-      dist: xenial
-      group: deprecated-2017Q4
       sudo: required
-      compiler: gcc
-sudo: required
 
 language: cpp
 
