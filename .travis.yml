@@ -17,8 +17,9 @@ matrix:
     #  sudo: required
     #  compiler: clang
     - os: linux
-      dist: trusty
       sudo: required
+      dist: trusty
+      group: deprecated-2017Q4
       compiler: gcc
   # ENABLE AFTER ACE 6.4.3 is available.
     #- os: linux
@@ -27,6 +28,7 @@ matrix:
     #  compiler: clang
     - os: linux
       dist: xenial
+      group: deprecated-2017Q4
       sudo: required
       compiler: gcc
 sudo: required
