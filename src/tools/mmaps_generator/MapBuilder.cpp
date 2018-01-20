@@ -877,12 +877,14 @@ namespace MMAP
                 case 605:   // development_nonweighted.wdt
                 case 606:   // QA_DVD.wdt
                 case 627:   // unused.wdt
+                case 651:   // ElevatorSpawnTest.wdt
                 case 930:   // (UNUSED) Scenario: Alcaz Island
                 case 995:   // The Depths [UNUSED]
                 case 1014:  // (UNUSED) Peak of Serenity Scenario
                 case 1028:  // (UNUSED) Scenario: Mogu Ruins
                 case 1029:  // (UNUSED) Scenario: Mogu Crypt
                 case 1049:  // (UNUSED) Scenario: Black Ox Temple
+                case 1060:  // LevelDesignLand-DevOnly.wdt
                     return true;
                 default:
                     if (isTransportMap(mapID))
@@ -893,22 +895,22 @@ namespace MMAP
         if (m_skipBattlegrounds)
             switch (mapID)
             {
-                case 30:    // AV
-                case 37:    // AC
-                case 489:   // WSG
-                case 529:   // AB
-                case 566:   // EotS
-                case 607:   // SotA
-                case 628:   // IoC
-                case 726:   // TP
-                case 727:   // SM
-                case 728:   // BfG
-                case 761:   // BfG2
-                case 968:   // EotS2
-                case 998:   // VOP
-                case 1010:  // CTF3
-                case 1101:  // DOTA
-                case 1105:  // GR
+                case 30:    // Alterac Valley
+                case 37:    // Azshara Crater
+                case 489:   // Warsong Gulch
+                case 529:   // Arathi Basin
+                case 566:   // Eye of the Storm
+                case 607:   // Strand of the Ancients
+                case 628:   // Isle of Conquest
+                case 726:   // Twin Peaks
+                case 727:   // Silvershard Mines
+                case 728:   // The Battle for Gilneas (Old Map)
+                case 761:   // The Battle for Gilneas
+                case 968:   // Rated Eye of the Storm
+                case 998:   // Temple of Kotmogu
+                case 1010:  // Mists of Pandaria CTF3
+                case 1101:  // DefenseOfTheAleHouseBG
+                case 1105:  // Deepwind Gorge
                     return true;
                 default:
                     break;
@@ -922,7 +924,7 @@ namespace MMAP
     {
         switch (mapID)
         {
-            // transport maps
+            // Transport maps
             case 582:  // Transport: Rut'theran to Auberdine
             case 584:  // Transport: Menethil to Theramore
             case 586:  // Transport: Exodar to Auberdine
@@ -972,6 +974,8 @@ namespace MMAP
             case 1113: // Transport: DarkmoonCarousel
             case 1132: // Transport218599 - The Skybag (Brawl'gar Arena)
             case 1133: // Transport218600 - Zandalari Ship (Mogu Island)
+            case 1172: // Transport_Siege_of_Orgrimmar_Alliance - Transport: Siege of Orgrimmar (Alliance)
+            case 1173: // Transport_Siege_of_Orgrimmar_Horde - Transport: Siege of Orgrimmar (Horde)
                 return true;
             default:
                 return false;
