@@ -3640,6 +3640,50 @@ class spell_gen_whisper_gulch_yogg_saron_whisper : public SpellScriptLoader
         }
 };
 
+class spell_gen_override_display_power : public SpellScriptLoader
+{
+    public:
+        spell_gen_override_display_power() : SpellScriptLoader("spell_gen_override_display_power") { }
+
+        class spell_gen_override_display_power_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_override_display_power_AuraScript);
+
+            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                    target->SetUInt32Value(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, aurEff->GetMiscValue());
+            }
+
+            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                    target->SetUInt32Value(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 0);
+            }
+
+            void Register() override
+            {
+			    if (m_scriptSpellId == 123933 || m_scriptSpellId == 145627 || m_scriptSpellId == 145628)
+                    OnEffectApply += AuraEffectApplyFn(spell_gen_override_display_power_AuraScript::OnApply, EFFECT_1, SPELL_AURA_402, AURA_EFFECT_HANDLE_REAL);
+				else if (m_scriptSpellId == 145044)
+					OnEffectApply += AuraEffectApplyFn(spell_gen_override_display_power_AuraScript::OnApply, EFFECT_4, SPELL_AURA_402, AURA_EFFECT_HANDLE_REAL);
+				else
+					OnEffectApply += AuraEffectApplyFn(spell_gen_override_display_power_AuraScript::OnApply, EFFECT_0, SPELL_AURA_402, AURA_EFFECT_HANDLE_REAL);
+				if (m_scriptSpellId == 123933 || m_scriptSpellId == 145627 || m_scriptSpellId == 145628)
+                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_override_display_power_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_402, AURA_EFFECT_HANDLE_REAL);
+				else if (m_scriptSpellId == 145044)
+					OnEffectRemove += AuraEffectRemoveFn(spell_gen_override_display_power_AuraScript::OnRemove, EFFECT_4, SPELL_AURA_402, AURA_EFFECT_HANDLE_REAL);
+				else
+					OnEffectRemove += AuraEffectRemoveFn(spell_gen_override_display_power_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_402, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new spell_gen_override_display_power_AuraScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3723,4 +3767,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_vendor_bark_trigger();
     new spell_gen_wg_water();
     new spell_gen_whisper_gulch_yogg_saron_whisper();
+	new spell_generic_override_display_power();
 }
