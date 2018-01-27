@@ -3767,5 +3767,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_vendor_bark_trigger();
     new spell_gen_wg_water();
     new spell_gen_whisper_gulch_yogg_saron_whisper();
-	new spell_generic_override_display_power();
+	new spell_gen_override_display_power();
 }
