@@ -76,7 +76,7 @@ enum CreatureFlagsExtra
 struct CreatureTemplate
 {
     uint32  Entry;
-    uint32  DifficultyEntry[MAX_DIFFICULTY - 1];
+    uint32  DifficultyEntry[4 - 1];
     uint32  KillCredit[MAX_KILL_CREDIT];
     uint32  Modelid1;
     uint32  Modelid2;
@@ -171,6 +171,29 @@ struct CreatureTemplate
         // if can tame exotic then can tame any tameable
         return canTameExotic || !IsExotic();
     }
+
+    static int32 DiffToDiffIndex(uint32 difficulty)
+    {
+        switch (difficulty)
+        {
+        case DIFFICULTY_NONE:
+        case DIFFICULTY_NORMAL:
+        case DIFFICULTY_10MAN_NORMAL:
+        case DIFFICULTY_40MAN:
+            return -1;
+        case DIFFICULTY_HEROIC:
+        case DIFFICULTY_25MAN_NORMAL:
+            return 0;
+        case DIFFICULTY_10MAN_HEROIC:
+        case DIFFICULTY_CHALLENGE:
+            return 1;
+        case DIFFICULTY_25MAN_HEROIC:
+            return 2;
+        case DIFFICULTY_25MAN_LFR:
+        default:
+            return -1;
+        }
+    }
 };
 
 // Benchmarked: Faster than std::map (insert/find)
@@ -261,7 +284,7 @@ struct CreatureData
     uint32 curhealth;
     uint32 curmana;
     uint8 movementType;
-    uint8 spawnMask;
+    uint32 spawnMask;
     uint32 npcflag;
     uint32 unit_flags;                                      // enum UnitFlags mask values
     uint32 dynamicflags;
@@ -530,7 +553,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         bool LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap = true);
         void SaveToDB();
                                                             // overriden in Pet
-        virtual void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
+        virtual void SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask);
         virtual void DeleteFromDB();                        // overriden in Pet
 
         Loot loot;

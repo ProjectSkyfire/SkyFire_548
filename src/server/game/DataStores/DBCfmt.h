@@ -54,6 +54,7 @@ char const Criteriafmt[] = "niiiiixxiiii";
 char const CriteriaTreefmt[] = "niixiiis";
 char const ChrSpecializationfmt[] = "nxiixiiixxxxxx";
 char const DestructibleModelDatafmt[] = "ixxixxxixxxixxxixxxxxxxx";
+char const Difficultyfmt[] = "niixxxixxxxx";
 char const DungeonEncounterfmt[] = "iiixisxxx";
 char const DurabilityCostsfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 char const DurabilityQualityfmt[] = "nf";

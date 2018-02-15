@@ -265,12 +265,11 @@ class Group
         void SetMemberRole(uint64 guid, uint32 role);
         uint32 GetMemberRole(uint64 guid) const;
 
-        Difficulty GetDifficulty(bool isRaid) const;
-        Difficulty GetDungeonDifficulty() const;
-        Difficulty GetRaidDifficulty() const;
-        void SetDungeonDifficulty(Difficulty difficulty);
-        void SetRaidDifficulty(Difficulty difficulty);
-        uint16 InInstance();
+        DifficultyID GetDifficulty(MapEntry const* mapEntry) const;
+        DifficultyID GetDungeonDifficulty() const { return m_dungeonDifficulty; }
+        DifficultyID GetRaidDifficulty() const { return m_raidDifficulty; }
+        void SetDungeonDifficulty(DifficultyID difficulty);
+        void SetRaidDifficulty(DifficultyID difficulty);
         bool InCombatToInstance(uint32 instanceId);
         void ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo);
 
@@ -321,8 +320,8 @@ class Group
         InstanceGroupBind* GetBoundInstance(Player* player);
         InstanceGroupBind* GetBoundInstance(Map* aMap);
         InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry);
-        InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
-        BoundInstancesMap& GetBoundInstances(Difficulty difficulty);
+        InstanceGroupBind* GetBoundInstance(DifficultyID difficulty, uint32 mapId);
+        BoundInstancesMap& GetBoundInstances(DifficultyID difficulty);
 
         // FG: evil hacks
         void BroadcastGroupUpdate(void);
@@ -344,8 +343,8 @@ class Group
         uint64              m_leaderGuid;
         std::string         m_leaderName;
         GroupType           m_groupType;
-        Difficulty          m_dungeonDifficulty;
-        Difficulty          m_raidDifficulty;
+        DifficultyID        m_dungeonDifficulty;
+        DifficultyID        m_raidDifficulty;
         Battleground*       m_bgGroup;
         Battlefield*        m_bfGroup;
         uint64              m_targetIcons[TARGETICONCOUNT];
@@ -353,7 +352,7 @@ class Group
         ItemQualities       m_lootThreshold;
         uint64              m_looterGuid;
         Rolls               RollId;
-        BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
+        BoundInstancesMap   m_boundInstances[15];
         uint8*              m_subGroupsCounts;
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST

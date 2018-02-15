@@ -471,9 +471,9 @@ uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) con
         return spellId;
 
     uint32 mode = uint32(caster->GetMap()->GetSpawnMode());
-    if (mode >= MAX_DIFFICULTY)
+    if (mode >= 14)
     {
-        SF_LOG_ERROR("spells", "SpellMgr::GetSpellIdForDifficulty: Incorrect Difficulty for spell %u.", spellId);
+        SF_LOG_ERROR("spells", "SpellMgr::GetSpellIdForDifficulty: Incorrect DifficultyID for spell %u.", spellId);
         return spellId; //return source spell
     }
 
@@ -488,7 +488,7 @@ uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) con
         return spellId; //return source spell
     }
 
-    if (difficultyEntry->SpellID[mode] <= 0 && mode > DUNGEON_DIFFICULTY_HEROIC)
+    if (difficultyEntry->SpellID[mode] <= 0 && mode > DIFFICULTY_HEROIC)
     {
         SF_LOG_DEBUG("spells", "SpellMgr::GetSpellIdForDifficulty: spell %u mode %u spell is NULL, using mode %u", spellId, mode, mode - 2);
         mode -= 2;

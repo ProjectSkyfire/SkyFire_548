@@ -69,9 +69,9 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
     size_t lockoutPos = data.bitwpos();
     data.WriteBits(0, 20);  // Lockout placeholder
 
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    for (uint8 i = 0; i < 15; ++i)
     {
-        Player::BoundInstancesMap boundInstances = _player->GetBoundInstances(Difficulty(i));
+        Player::BoundInstancesMap boundInstances = _player->GetBoundInstances(DifficultyID(i));
         for (Player::BoundInstancesMap::const_iterator itr = boundInstances.begin(); itr != boundInstances.end(); ++itr)
         {
             if (itr->second.perm)
@@ -840,7 +840,7 @@ void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recvData)
     uint32 mapId, difficulty;
     uint8 toggleExtend;
     recvData >> mapId >> difficulty>> toggleExtend;
-    SF_LOG_DEBUG("network", "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
+    SF_LOG_DEBUG("network", "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, DifficultyID: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
 
     /*
     InstancePlayerBind* instanceBind = _player->GetBoundInstance(mapId, Difficulty(difficulty));
@@ -925,7 +925,7 @@ void WorldSession::SendCalendarRaidLockoutUpdated(InstanceSave const* save)
 
     uint64 guid = _player->GetGUID();
     SF_LOG_DEBUG("network", "SMSG_CALENDAR_RAID_LOCKOUT_UPDATED [" UI64FMTD
-        "] Map: %u, Difficulty %u", guid, save->GetMapId(), save->GetDifficulty());
+        "] Map: %u, DifficultyID %u", guid, save->GetMapId(), save->GetDifficulty());
 
     time_t currTime = time(NULL);
 

@@ -81,7 +81,7 @@ enum Shadowmourne
     SPELL_THIRST_QUENCHED                   = 72154,
 };
 
-uint32 const vampireAuras[3][MAX_DIFFICULTY] =
+uint32 const vampireAuras[3][4] =
 {
     {70867, 71473, 71532, 71533},
     {70879, 71525, 71530, 71531},

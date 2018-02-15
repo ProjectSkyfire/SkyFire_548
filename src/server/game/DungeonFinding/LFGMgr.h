@@ -271,11 +271,11 @@ struct LfgPlayerBoot
 struct LFGDungeonData
 {
     LFGDungeonData(): id(0), name(""), map(0), type(0), expansion(0), group(0), minlevel(0),
-        maxlevel(0), difficulty(REGULAR_DIFFICULTY), seasonal(false), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
+        maxlevel(0), difficulty(DIFFICULTY_NONE), seasonal(false), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
     LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->ID), name(dbc->name), map(dbc->map),
         type(dbc->type), expansion(dbc->expansion), group(dbc->grouptype),
-        minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(Difficulty(dbc->difficulty)),
+        minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(DifficultyID(dbc->difficulty)),
         seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
 
@@ -287,7 +287,7 @@ struct LFGDungeonData
     uint8 group;
     uint8 minlevel;
     uint8 maxlevel;
-    Difficulty difficulty;
+    DifficultyID difficulty;
     bool seasonal;
     float x, y, z, o;
 
@@ -319,7 +319,7 @@ class LFGMgr
         /// Check if given guid applied for random dungeon
         bool selectedRandomLfgDungeon(uint64 guid);
         /// Check if given guid applied for given map and difficulty. Used to know
-        bool inLfgDungeonMap(uint64 guid, uint32 map, Difficulty difficulty);
+        bool inLfgDungeonMap(uint64 guid, uint32 map, DifficultyID difficulty);
         /// Get selected dungeons
         LfgDungeonSet const& GetSelectedDungeons(uint64 guid);
         /// Get current lfg state

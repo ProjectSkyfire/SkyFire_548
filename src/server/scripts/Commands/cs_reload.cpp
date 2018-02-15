@@ -447,7 +447,7 @@ public:
 
             Field* fields = result->Fetch();
 
-            for (uint8 i = 0; i < MAX_DIFFICULTY - 1; ++i)
+            for (uint8 i = 0; i < 4; ++i)
                 cInfo->DifficultyEntry[i] = fields[0 + i].GetUInt32();
 
             for (uint8 i = 0; i < MAX_KILL_CREDIT; ++i)
