@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -245,6 +245,23 @@ enum Powers
 };
 
 #define MAX_POWERS_PER_CLASS            5
+
+enum BattlePayDistribution
+{
+    // character boost
+    CHARACTER_BOOST                     = 2,
+    CHARACTER_BOOST_ALLOW               = 1,
+    CHARACTER_BOOST_CHOOSED             = 2,
+    CHARACTER_BOOST_ITEMS               = 3,
+    CHARACTER_BOOST_APPLIED             = 4,
+    CHARACTER_BOOST_TEXT_ID             = 88,
+    CHARACTER_BOOST_SPEC_MASK           = 0xFFF,
+    CHARACTER_BOOST_FACTION_ALLIANCE    = 0x1000000
+
+};
+
+#define CHARACTER_BOOST_BONUS_TEXT      "Boost your character to level 90!"
+#define CHARACTER_BOOST_BONUS_TEXT2     "Level 90 Character Boost"
 
 enum SpellSchools
 {
@@ -4253,7 +4270,7 @@ enum PartyResult
 };
 
 const uint32 MMAP_MAGIC = 0x4d4d4150; // 'MMAP'
-#define MMAP_VERSION 4
+#define MMAP_VERSION 5
 
 struct MmapTileHeader
 {

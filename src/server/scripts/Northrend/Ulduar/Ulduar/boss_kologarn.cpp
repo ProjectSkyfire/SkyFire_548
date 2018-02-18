@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -458,10 +458,10 @@ class spell_ulduar_cancel_stone_grip : public SpellScriptLoader
 
                 switch (target->GetMap()->GetDifficulty())
                 {
-                    case RAID_DIFFICULTY_10MAN_NORMAL:
+                    case DIFFICULTY_10MAN_NORMAL:
                         target->RemoveAura(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
                         break;
-                    case RAID_DIFFICULTY_25MAN_NORMAL:
+                    case DIFFICULTY_25MAN_NORMAL:
                         target->RemoveAura(GetSpellInfo()->Effects[EFFECT_1].CalcValue());
                         break;
                     default:
@@ -538,7 +538,7 @@ class spell_ulduar_stone_grip_absorb : public SpellScriptLoader
                 if (!GetOwner()->ToCreature())
                     return;
 
-                uint32 rubbleStalkerEntry = (GetOwner()->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL ? 33809 : 33942);
+                uint32 rubbleStalkerEntry = (GetOwner()->GetMap()->GetDifficulty() == DIFFICULTY_NORMAL ? 33809 : 33942);
                 Creature* rubbleStalker = GetOwner()->FindNearestCreature(rubbleStalkerEntry, 200.0f, true);
                 if (rubbleStalker)
                     rubbleStalker->CastSpell(rubbleStalker, SPELL_STONE_GRIP_CANCEL, true);

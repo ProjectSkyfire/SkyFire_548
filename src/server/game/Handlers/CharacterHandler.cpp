@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,6 +21,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
+#include "Boost.h"
 #include "CalendarMgr.h"
 #include "Chat.h"
 #include "Common.h"
@@ -238,6 +239,11 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
     ByteBuffer bitBuffer;
     ByteBuffer dataBuffer;
 
+    // Sended before SMSG_ENUM_CHARACTERS_RESULT
+    // must be procceded before BuildEnumData, because of unsetting bosted character guid
+    if (m_charBooster->GetCurrentAction() == CHARACTER_BOOST_APPLIED)
+        m_charBooster->HandleCharacterBoost();
+
     if (result)
     {
         _legitCharacters.clear();
@@ -255,7 +261,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             SF_LOG_INFO("network", "Loading char guid %u from account %u.", guidLow, GetAccountId());
 
-            Player::BuildEnumData(result, &dataBuffer, &bitBuffer);
+            Player::BuildEnumData(result, &dataBuffer, &bitBuffer, m_charBooster->IsBoosting(guidLow));
 
             // Do not allow banned characters to log in
             if (!(*result)[20].GetUInt32())
@@ -285,6 +291,10 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         data.append(dataBuffer);
 
     SendPacket(&data);
+
+    // Sended after SMSG_ENUM_CHARACTERS_RESULT
+    if (m_charBooster->GetCurrentAction() == CHARACTER_BOOST_ITEMS)
+        m_charBooster->HandleCharacterBoost();
 }
 
 
@@ -909,7 +919,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     pCurrChar->GetMotionMaster()->Initialize();
-    pCurrChar->SendDungeonDifficulty(false);
+    pCurrChar->SendDungeonDifficulty();
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 4 + 4 + 4 + 4 + 4);
     data << pCurrChar->GetPositionX();

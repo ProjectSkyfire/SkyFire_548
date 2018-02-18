@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
-# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+# Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -59,10 +59,7 @@ find_package(PCHSupport)
 find_package(ACE REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
-
-if( NOT USE_MYSQL_SOURCES )
-  find_package(MySQL REQUIRED)
-endif()
+find_package(MySQL REQUIRED)
 
 if( UNIX )
   find_package(Readline)

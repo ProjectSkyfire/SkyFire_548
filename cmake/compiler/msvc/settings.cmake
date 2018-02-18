@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -26,7 +26,7 @@ endif()
 set(MSVC_EXPECTED_VERSION 18.0)
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
-  message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2013) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
+  message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2017) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 
 # set up output paths ofr static libraries etc (commented out - shown here as an example only)

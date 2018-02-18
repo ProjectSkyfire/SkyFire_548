@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -56,6 +56,15 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
 
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_REALM_CHARACTERS_INIT);
     LoginDatabase.Execute(stmt);
+
+    if (sWorld->getBoolConfig(CONFIG_BOOST_NEW_ACCOUNT))
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_BOOST);
+        stmt->setBool(0, true);
+        stmt->setUInt32(1, GetId(username));
+
+        LoginDatabase.Execute(stmt);
+    }
 
     return AOR_OK;                                          // everything's fine
 }

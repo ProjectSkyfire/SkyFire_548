@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,8 +25,8 @@
 
 namespace VMAP
 {
-    const char VMAP_MAGIC[] = "VMAP_4.1";
-    const char RAW_VMAP_MAGIC[] = "VMAP041";                // used in extracted vmap files with raw data
+    const char VMAP_MAGIC[] = "VMAP_5.0";
+    const char RAW_VMAP_MAGIC[] = "VMAP050";                // used in extracted vmap files with raw data
     const char GAMEOBJECT_MODELS[] = "GameObjectModels.dtree";
 
     // defined in TileAssembler.cpp currently...

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -216,11 +216,13 @@ class Item : public Object
 {
     public:
         static Item* CreateItem(uint32 itemEntry, uint32 count, Player const* player = NULL);
+        static Item* CreateItem(uint32 itemEntry, uint32 count, uint64 playerGuid);
         Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
+        virtual bool Create(uint32 guidlow, uint32 itemid, uint64 playerGuid);
 
         ItemTemplate const* GetTemplate() const;
 

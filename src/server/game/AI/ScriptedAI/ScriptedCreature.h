@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -294,7 +294,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     // return the dungeon or raid difficulty
-    Difficulty GetDifficulty() const
+    DifficultyID GetDifficulty() const
     {
         return _difficulty;
     }
@@ -302,23 +302,23 @@ struct ScriptedAI : public CreatureAI
     // return true for 25 man or 25 man heroic mode
     bool Is25ManRaid() const
     {
-        return _difficulty & RAID_DIFFICULTY_MASK_25MAN;
+        return _difficulty & (DIFFICULTY_25MAN_NORMAL || DIFFICULTY_25MAN_HEROIC || DIFFICULTY_25MAN_LFR);
     }
 
     template<class T> inline
-        const T& DUNGEON_MODE(const T& normal5, const T& heroic10) const
+        const T& DUNGEON_MODE(const T& normal5, const T& heroic5) const
     {
         switch (_difficulty)
         {
-            case DUNGEON_DIFFICULTY_NORMAL:
+            case DIFFICULTY_NORMAL:
                 return normal5;
-            case DUNGEON_DIFFICULTY_HEROIC:
-                return heroic10;
+            case DIFFICULTY_HEROIC:
+                return heroic5;
             default:
                 break;
         }
 
-        return heroic10;
+        return heroic5;
     }
 
     template<class T> inline
@@ -326,9 +326,9 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_NORMAL:
                 return normal25;
             default:
                 break;
@@ -342,13 +342,13 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_NORMAL:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
+            case DIFFICULTY_FLEX:
                 return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
+            case DIFFICULTY_25MAN_LFR:
                 return lfr;
             default:
                 break;
@@ -362,17 +362,17 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_NORMAL:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_HEROIC:
+            case DIFFICULTY_10MAN_HEROIC:
                 return heroic10;
-            case RAID_DIFFICULTY_25MAN_HEROIC:
+            case DIFFICULTY_25MAN_HEROIC:
                 return heroic25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
+            case DIFFICULTY_FLEX:
                 return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
+            case DIFFICULTY_25MAN_LFR:
                 return lfr;
             default:
                 break;
@@ -382,7 +382,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     private:
-    Difficulty _difficulty;
+    DifficultyID _difficulty;
     uint32 _evadeCheckCooldown;
     bool _isCombatMovementAllowed;
     bool _isHeroic;

@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2017031000
+ConfVersion=2017091000
 
 ###################################################################################################
 # SECTION INDEX
@@ -33,6 +33,7 @@ ConfVersion=2017031000
 #    BATTLE PET SETTINGS
 #    BLACK MARKET SETTINGS
 #    PACKET SPOOF PROTECTION SETTINGS
+#    CHARACTER BOOST SETTINGS
 #
 ###################################################################################################
 
@@ -3031,6 +3032,37 @@ PacketSpoof.BanMode = 0
 #
 
 PacketSpoof.BanDuration = 86400
+
+#
+###################################################################################################
+
+###################################################################################################
+# CHARACTER BOOST SETTINGS
+#
+#    Boost.NewAccounts
+#        Description: Add boost for new accounts.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
+
+Boost.NewAccounts = 0
+
+#
+#    Boost.StartMoney
+#        Description: Amount of money (in Copper) that a character has after boost.
+#        Default:     1500000 - (150 Gold)
+#                     100 - (1 Silver)
+#
+
+Boost.StartMoney = 1500000
+
+#
+#    Boost.StartLevel
+#        Description: Character boost starting level.
+#        Default:     90
+#
+
+Boost.StartLevel = 90
 
 #
 ###################################################################################################

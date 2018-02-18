@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -273,15 +273,20 @@ Item::Item()
     }
 }
 
-bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
+inline bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
+{
+    return Create(guidlow, itemid, owner ? owner->GetGUID() : 0);
+}
+
+bool Item::Create(uint32 guidlow, uint32 itemid, uint64 owner)
 {
     Object::_Create(guidlow, 0, HIGHGUID_ITEM);
 
     SetEntry(itemid);
     SetObjectScale(1.0f);
 
-    SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
-    SetUInt64Value(ITEM_FIELD_CONTAINED_IN, owner ? owner->GetGUID() : 0);
+    SetUInt64Value(ITEM_FIELD_OWNER, owner);
+    SetUInt64Value(ITEM_FIELD_CONTAINED_IN, owner);
 
     ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(itemid);
     if (!itemProto)
@@ -1067,6 +1072,11 @@ void Item::SendTimeUpdate(Player* owner)
 }
 
 Item* Item::CreateItem(uint32 itemEntry, uint32 count, Player const* player)
+{ 
+    return CreateItem(itemEntry, count, player ? player->GetGUID() : 0); 
+}
+
+Item* Item::CreateItem(uint32 itemEntry, uint32 count, uint64 playerGuid)
 {
     if (count < 1)
         return NULL;                                        //don't create item at zero count
@@ -1080,7 +1090,7 @@ Item* Item::CreateItem(uint32 itemEntry, uint32 count, Player const* player)
         ASSERT(count != 0 && "pProto->Stackable == 0 but checked at loading already");
 
         Item* item = NewItemOrBag(proto);
-        if (item->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), itemEntry, player))
+        if (item->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), itemEntry, playerGuid))
         {
             item->SetCount(count);
             return item;

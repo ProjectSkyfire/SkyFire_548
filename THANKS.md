@@ -1,6 +1,6 @@
-= TrinityCore -- Thanks/credits file =
+= Project SkyFire -- Thanks/credits file =
 
-TrinityCore is a derivation/rewrite of MaNGOS, which was originally written
+Project SkyFire is a derivation/rewrite of MaNGOS & TrinityCore, which was originally written
 by Team Python and the WoW Daemon Team. Many people further helped Trinity Core
 by submitting bug reports, code patches, and suggestions. Thanks to the
 community!

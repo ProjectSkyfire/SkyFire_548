@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -215,16 +215,16 @@ bool Quest::IsAutoComplete() const
     return sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_AUTO_COMPLETE) ? false : (Method == 0 || HasFlag(QUEST_FLAGS_AUTOCOMPLETE));
 }
 
-bool Quest::IsRaidQuest(Difficulty difficulty) const
+bool Quest::IsRaidQuest(DifficultyID difficulty) const
 {
     switch (Type)
     {
         case QUEST_TYPE_RAID:
             return true;
         case QUEST_TYPE_RAID_10:
-            return !(difficulty & RAID_DIFFICULTY_MASK_25MAN);
+            return difficulty & (DIFFICULTY_10MAN_NORMAL || DIFFICULTY_10MAN_HEROIC);
         case QUEST_TYPE_RAID_25:
-            return difficulty & RAID_DIFFICULTY_MASK_25MAN;
+            return difficulty & (DIFFICULTY_25MAN_NORMAL || DIFFICULTY_25MAN_HEROIC);
         default:
             break;
     }
@@ -232,7 +232,7 @@ bool Quest::IsRaidQuest(Difficulty difficulty) const
     return false;
 }
 
-bool Quest::IsAllowedInRaid(Difficulty difficulty) const
+bool Quest::IsAllowedInRaid(DifficultyID difficulty) const
 {
     if (IsRaidQuest(difficulty))
         return true;

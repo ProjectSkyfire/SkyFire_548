@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -38,7 +38,7 @@
 #include "VMapFactory.h"
 
 u_map_magic MapMagic        = { {'M', 'A', 'P', 'S'} };
-u_map_magic MapVersionMagic = { {'v', '1', '.', '3'} };
+u_map_magic MapVersionMagic = { {'v', '1', '.', '4'} };
 u_map_magic MapAreaMagic    = { {'A', 'R', 'E', 'A'} };
 u_map_magic MapHeightMagic  = { {'M', 'H', 'G', 'T'} };
 u_map_magic MapLiquidMagic  = { {'M', 'L', 'I', 'Q'} };
@@ -85,9 +85,9 @@ Map::~Map()
 
 bool Map::ExistMap(uint32 mapid, int gx, int gy)
 {
-    int len = sWorld->GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
+    int len = sWorld->GetDataPath().length() + strlen("maps/%04u_%02u_%02u.map") + 1;
     char* fileName = new char[len];
-    snprintf(fileName, len, (char *)(sWorld->GetDataPath() + "maps/%03u%02u%02u.map").c_str(), mapid, gx, gy);
+    snprintf(fileName, len, (char *)(sWorld->GetDataPath() + "maps/%04u_%02u_%02u.map").c_str(), mapid, gx, gy);
 
     bool ret = false;
     FILE* pf = fopen(fileName, "rb");
@@ -190,9 +190,9 @@ void Map::LoadMap(int gx, int gy, bool reload)
 
     // map file name
     char* tmp = NULL;
-    int len = sWorld->GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
+    int len = sWorld->GetDataPath().length() + strlen("maps/%04u_%02u_%02u.map") + 1;
     tmp = new char[len];
-    snprintf(tmp, len, (char *)(sWorld->GetDataPath() + "maps/%03u%02u%02u.map").c_str(), GetId(), gx, gy);
+    snprintf(tmp, len, (char *)(sWorld->GetDataPath() + "maps/%04u_%02u_%02u.map").c_str(), GetId(), gx, gy);
     SF_LOG_INFO("maps", "Loading map %s", tmp);
     // loading data
     GridMaps[gx][gy] = new GridMap();
@@ -2734,13 +2734,13 @@ bool InstanceMap::AddPlayerToMap(Player* player)
             if (!mapSave)
             {
                 SF_LOG_INFO("maps", "InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
-                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
+                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), DifficultyID(GetSpawnMode()), 0, true);
             }
 
             ASSERT(mapSave);
 
             // check for existing instance binds
-            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), DifficultyID(GetSpawnMode()));
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently
@@ -2972,7 +2972,7 @@ void InstanceMap::UnloadAll()
 void InstanceMap::SendResetWarnings(uint32 timeLeft) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        itr->GetSource()->SendInstanceResetWarning(GetId(), itr->GetSource()->GetDifficulty(IsRaid()), timeLeft);
+        itr->GetSource()->SendInstanceResetWarning(GetId(), itr->GetSource()->GetDifficulty(GetEntry()), timeLeft);
 }
 
 void InstanceMap::SetResetSchedule(bool on)
@@ -2983,16 +2983,35 @@ void InstanceMap::SetResetSchedule(bool on)
     if (IsDungeon() && !HavePlayers() && !IsRaidOrHeroicDungeon())
     {
         if (InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId()))
-            sInstanceSaveMgr->ScheduleReset(on, save->GetResetTime(), InstanceSaveManager::InstResetEvent(0, GetId(), Difficulty(GetSpawnMode()), GetInstanceId()));
+            sInstanceSaveMgr->ScheduleReset(on, save->GetResetTime(), InstanceSaveManager::InstResetEvent(0, GetId(), DifficultyID(GetSpawnMode()), GetInstanceId()));
         else
             SF_LOG_ERROR("maps", "InstanceMap::SetResetSchedule: cannot turn schedule %s, there is no save information for instance (map [id: %u, name: %s], instance id: %u, difficulty: %u)",
-                on ? "on" : "off", GetId(), GetMapName(), GetInstanceId(), Difficulty(GetSpawnMode()));
+                on ? "on" : "off", GetId(), GetMapName(), GetInstanceId(), DifficultyID(GetSpawnMode()));
     }
 }
 
 MapDifficulty const* Map::GetMapDifficulty() const
 {
     return GetMapDifficultyData(GetId(), GetDifficulty());
+}
+
+bool Map::IsHeroic() const
+{
+    if (DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(i_spawnMode))
+    {
+        SF_LOG_DEBUG("maps", "Difficulty Check: Difficulty: %u, SpawnMode: %u", difficulty, i_spawnMode);
+        switch (i_spawnMode)
+        {
+            case DIFFICULTY_10MAN_HEROIC:
+            case DIFFICULTY_25MAN_HEROIC:
+            case DIFFICULTY_HEROIC:
+                return true;
+            default:
+                return false;
+                break;
+        }
+    }
+    return false;
 }
 
 uint32 InstanceMap::GetMaxPlayers() const
@@ -3003,7 +3022,7 @@ uint32 InstanceMap::GetMaxPlayers() const
             return mapDiff->maxPlayers;
         else                                                // DBC have 0 maxplayers for heroic instances with expansion < 2
         {                                                   // The heroic entry exists, so we don't have to check anything, simply return normal max players
-            MapDifficulty const* normalDiff = GetMapDifficultyData(GetId(), REGULAR_DIFFICULTY);
+            MapDifficulty const* normalDiff = GetMapDifficultyData(GetId(), DIFFICULTY_NONE);
             return normalDiff ? normalDiff->maxPlayers : 0;
         }
     }

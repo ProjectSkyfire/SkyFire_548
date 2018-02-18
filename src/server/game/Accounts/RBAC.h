@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -709,6 +709,10 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_RELOAD_LOCALES_QUEST_OBJECTIVE         = 802,
     RBAC_PERM_COMMAND_RELOAD_BLACKMARKET_AUCTIONS            = 803,
     RBAC_PERM_COMMAND_RELOAD_BLACKMARKET_TEMPLATE            = 804,
+
+    RBAC_PERM_COMMAND_ACCOUNT_BOOST                          = 805,
+    RBAC_PERM_COMMAND_ACCOUNT_BOOST_ADD                      = 806,
+    RBAC_PERM_COMMAND_ACCOUNT_BOOST_DEL                      = 807,
 
     // custom permissions 1000+
     RBAC_PERM_MAX

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -257,7 +257,7 @@ class boss_gothik : public CreatureScript
 
             void DoGothikSummon(uint32 entry)
             {
-                if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                if (GetDifficulty() == DIFFICULTY_25MAN_NORMAL)
                 {
                     switch (entry)
                     {
@@ -420,9 +420,9 @@ class boss_gothik : public CreatureScript
                         case EVENT_SUMMON:
                             if (waves[waveCount].entry)
                             {
-                                if ((waves[waveCount].mode == 2) && (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL))
+                                if ((waves[waveCount].mode == 2) && (GetDifficulty() == DIFFICULTY_25MAN_NORMAL))
                                    DoGothikSummon(waves[waveCount].entry);
-                                else if ((waves[waveCount].mode == 0) && (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL))
+                                else if ((waves[waveCount].mode == 0) && (GetDifficulty() == DIFFICULTY_10MAN_NORMAL))
                                     DoGothikSummon(waves[waveCount].entry);
                                 else if (waves[waveCount].mode == 1)
                                     DoGothikSummon(waves[waveCount].entry);
@@ -443,9 +443,9 @@ class boss_gothik : public CreatureScript
 
                                 if (waves[waveCount].mode == 1)
                                     events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
-                                else if ((waves[waveCount].mode == 2) && (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL))
+                                else if ((waves[waveCount].mode == 2) && (GetDifficulty() == DIFFICULTY_25MAN_NORMAL))
                                     events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
-                                else if ((waves[waveCount].mode == 0) && (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL))
+                                else if ((waves[waveCount].mode == 0) && (GetDifficulty() == DIFFICULTY_10MAN_NORMAL))
                                     events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
                                 else
                                     events.ScheduleEvent(EVENT_SUMMON, 0);
