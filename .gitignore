@@ -1,5 +1,7 @@
 
 build*/
+Win32*/
+x64*/
 .directory
 .mailmap
 *.orig
@@ -16,3 +18,5 @@ CMakeLists.txt.user
 *.BACKUP.*
 *.BASE.*
 *.LOCAL.*
+/Win32/*
+/x64/*

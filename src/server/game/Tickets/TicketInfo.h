@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
-* Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
-* Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
 *
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
@@ -144,7 +144,7 @@ public:
     void AppendResponse(std::string const& response) { _response += response; }
     void SetEscalatedStatus(GMTicketEscalationStatus escalatedStatus) { _escalatedStatus = escalatedStatus; }
     void SetViewed() { _viewed = true; }
-    void SetUnassigned();
+    void SetUnassigned() override;
     void SetChatLog(std::list<uint32> time, std::string const& log);
     void SetCompleted() { _completed = true; }
     void SetMessage(std::string const& message);
@@ -157,8 +157,8 @@ public:
     void  SaveToDB(SQLTransaction& trans) const OVERRIDE;
     void  DeleteFromDB() OVERRIDE;
 
-    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const;
-    std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const;
+    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const override;
+    std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const override;
 
     std::string const& GetMessage() const { return _message; }
     std::string const& GetChatLog() const { return _chatLog; }

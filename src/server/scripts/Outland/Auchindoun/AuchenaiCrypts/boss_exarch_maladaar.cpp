@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -215,7 +215,7 @@ public:
         {
             if (summoned->GetEntry() == ENTRY_STOLEN_SOUL)
             {
-                //SPELL_STOLEN_SOUL_VISUAL has shapeshift effect, but not implemented feature in Trinity for this spell.
+                //SPELL_STOLEN_SOUL_VISUAL has shapeshift effect, but not implemented feature in Skyfire for this spell.
                 summoned->CastSpell(summoned, SPELL_STOLEN_SOUL_VISUAL, false);
                 summoned->SetDisplayId(soulmodel);
                 summoned->setFaction(me->getFaction());

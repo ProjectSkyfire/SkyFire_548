@@ -510,9 +510,9 @@ void AddSC_boss_vizier_zorlock()
 {
     new boss_vizier_zorlock();
     new mob_sonic_ring();
-    new sat_pheromon_of_zeal());
+    new sat_pheromon_of_zeal();
     new sat_noise_cancelling());
-    new spell_force_and_verve_damage());
-    new spell_zorlock_sonic_ring());
-    new spell_zorlock_convert());
+    new spell_force_and_verve_damage();
+    new spell_zorlock_sonic_ring();
+    new spell_zorlock_convert();
 }

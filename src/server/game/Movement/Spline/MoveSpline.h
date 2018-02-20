@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_MOVEPLINE_H
-#define TRINITYSERVER_MOVEPLINE_H
+#ifndef SKYFIRESERVER_MOVEPLINE_H
+#define SKYFIRESERVER_MOVEPLINE_H
 
 #include "Spline.h"
 #include "MoveSplineInitArgs.h"
@@ -126,4 +126,4 @@ namespace Movement
         std::string ToString() const;
     };
 }
-#endif // TRINITYSERVER_MOVEPLINE_H
+#endif // SKYFIRESERVER_MOVEPLINE_H

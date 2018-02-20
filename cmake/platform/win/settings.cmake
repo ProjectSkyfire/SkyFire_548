@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -9,26 +9,16 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-# Platform-specfic options
-option(USE_MYSQL_SOURCES "Use included MySQL-sources to build libraries" 1)
-
 # Package overloads
 set(ACE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/acelite)
 set(ACE_LIBRARY "ace")
 set(BZIP2_LIBRARIES "bzip2")
 set(ZLIB_LIBRARIES "zlib")
-
-if(MSVC_VERSION EQUAL 1900)
-  set( USE_MYSQL_SOURCES 0 )
-  message(STATUS "MySQL: Disabled supplied MySQL sources")
-endif(MSVC_VERSION EQUAL 1900)
-
-if( USE_MYSQL_SOURCES )
-  set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/mysqllite/include)
-  set(MYSQL_LIBRARY "libmysql")
-  set( MYSQL_FOUND 1 )
-  message(STATUS "Using supplied MySQL sources")
-endif()
+ 	
+# We require at least Visual Studio 15 2017(aka 14.0) which has version nr 1900.		
+IF(NOT FORCE_UNSUPPORTED_COMPILER AND MSVC_VERSION LESS 1900)		
+  MESSAGE(FATAL_ERROR "Visual Studio 15 2017 or newer is required!")		
+ENDIF()
 
 # check the CMake preload parameters (commented out by default)
 

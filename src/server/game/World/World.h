@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -173,6 +173,7 @@ enum WorldBoolConfigs
     CONFIG_BLACK_MARKET_OPEN,
     CONFIG_TICKETS_GM_ENABLED,
     CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED,
+    CONFIG_BOOST_NEW_ACCOUNT,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -224,6 +225,7 @@ enum WorldIntConfigs
     CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER,
     CONFIG_SKIP_CINEMATICS,
     CONFIG_MAX_PLAYER_LEVEL,
+    CONFIG_START_PETBAR_LEVEL,
     CONFIG_MIN_DUALSPEC_LEVEL,
     CONFIG_START_PLAYER_LEVEL,
     CONFIG_START_HEROIC_PLAYER_LEVEL,
@@ -364,6 +366,8 @@ enum WorldIntConfigs
     CONFIG_BLACK_MARKET_MAX_AUCTIONS,
     CONFIG_BLACK_MARKET_AUCTION_DELAY,
     CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD,
+    CONFIG_BOOST_START_MONEY,
+    CONFIG_BOOST_START_LEVEL,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -396,6 +400,7 @@ enum Rates
     RATE_XP_EXPLORE,
     RATE_REPAIRCOST,
     RATE_REPUTATION_GAIN,
+    RATE_REPUTATION_LFG_BONUS,
     RATE_REPUTATION_LOWLEVEL_KILL,
     RATE_REPUTATION_LOWLEVEL_QUEST,
     RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS,

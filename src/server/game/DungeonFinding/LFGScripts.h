@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,7 +40,7 @@ class LFGPlayerScript : public PlayerScript
         void OnLevelChanged(Player* player, uint8 oldLevel);
         void OnLogout(Player* player);
         void OnLogin(Player* player);
-        void OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent);
+        void OnBindToInstance(Player* player, DifficultyID difficulty, uint32 mapId, bool permanent);
         void OnMapChanged(Player* player);
 };
 

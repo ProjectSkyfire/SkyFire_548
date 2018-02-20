@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,12 +17,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_ERRORS_H
-#define TRINITYCORE_ERRORS_H
+#ifndef SKYFIRESERVER_ERRORS_H
+#define SKYFIRESERVER_ERRORS_H
 
 #include "Define.h"
 
-namespace Trinity
+namespace Skyfire
 {
 
     DECLSPEC_NORETURN void Assert(char const* file, int line, char const* function, char const* message) ATTR_NORETURN;
@@ -33,12 +33,12 @@ namespace Trinity
 
     void Warning(char const* file, int line, char const* function, char const* message);
 
-} // namespace Trinity
+} // namespace Skyfire
 
-#define WPAssert(cond) do { if (!(cond)) Trinity::Assert(__FILE__, __LINE__, __FUNCTION__, #cond); } while (0)
-#define WPFatal(cond, msg) do { if (!(cond)) Trinity::Fatal(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
-#define WPError(cond, msg) do { if (!(cond)) Trinity::Error(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
-#define WPWarning(cond, msg) do { if (!(cond)) Trinity::Warning(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
+#define WPAssert(cond) do { if (!(cond)) Skyfire::Assert(__FILE__, __LINE__, __FUNCTION__, #cond); } while (0)
+#define WPFatal(cond, msg) do { if (!(cond)) Skyfire::Fatal(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
+#define WPError(cond, msg) do { if (!(cond)) Skyfire::Error(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
+#define WPWarning(cond, msg) do { if (!(cond)) Skyfire::Warning(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
 
 #define ASSERT WPAssert
 

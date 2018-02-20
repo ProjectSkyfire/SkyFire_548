@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+# Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -79,7 +79,7 @@ add_dependencies(authserver revision.h)
 
 if( NOT WIN32 )
   set_target_properties(authserver PROPERTIES
-    COMPILE_DEFINITIONS _TRINITY_REALM_CONFIG="${CONF_DIR}/authserver.conf"
+    COMPILE_DEFINITIONS _SKYFIRE_REALM_CONFIG="${CONF_DIR}/authserver.conf"
   )
 endif()
 

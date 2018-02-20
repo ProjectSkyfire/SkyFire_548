@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -669,7 +669,7 @@ void AddSC_event_childrens_week();
 void AddSC_boss_ordos();
 //void AddSC_dread_wastes();
 //void AddSC_isle_of_giants();
-//void AddSC_isle_of_thunder();
+void AddSC_isle_of_thunder();
 //void AddSC_krasarang_wilds();
 //void AddSC_kun_lai_summit();
 //void AddSC_the_jade_forest();
@@ -1411,7 +1411,7 @@ void AddPandariaScripts()
     AddSC_boss_ordos();
     //AddSC_dread_wastes();
     //AddSC_isle_of_giants();
-    //AddSC_isle_of_thunder();
+    AddSC_isle_of_thunder();
     //AddSC_krasarang_wilds();
     //AddSC_kun_lai_summit();
     //AddSC_the_jade_forest();

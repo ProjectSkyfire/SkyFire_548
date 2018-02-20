@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,12 +17,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_MAP_H
-#define TRINITY_MAP_H
+#ifndef SKYFIRE_MAP_H
+#define SKYFIRE_MAP_H
 
 #include "Define.h"
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
 
 #include "DBCStructure.h"
 #include "GridDefines.h"
@@ -35,6 +33,7 @@
 #include "GameObjectModel.h"
 
 #include <bitset>
+#include <mutex>
 #include <list>
 
 class Unit;
@@ -54,7 +53,7 @@ class Battleground;
 class MapInstanced;
 class InstanceMap;
 class Transport;
-namespace Trinity { struct ObjectUpdater; }
+namespace Skyfire { struct ObjectUpdater; }
 
 struct ScriptAction
 {
@@ -271,7 +270,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> bool AddToMap(T *);
         template<class T> void RemoveFromMap(T *, bool);
 
-        void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
+        void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Skyfire::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Skyfire::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
         virtual void Update(const uint32);
 
         float GetVisibilityRange() const { return m_VisibleDistance; }
@@ -286,13 +285,13 @@ class Map : public GridRefManager<NGridType>
 
         bool IsRemovalGrid(float x, float y) const
         {
-            GridCoord p = Trinity::ComputeGridCoord(x, y);
+            GridCoord p = Skyfire::ComputeGridCoord(x, y);
             return !getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL;
         }
 
         bool IsGridLoaded(float x, float y) const
         {
-            return IsGridLoaded(Trinity::ComputeGridCoord(x, y));
+            return IsGridLoaded(Skyfire::ComputeGridCoord(x, y));
         }
 
         bool GetUnloadLock(const GridCoord &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
@@ -370,17 +369,18 @@ class Map : public GridRefManager<NGridType>
         const char* GetMapName() const;
 
         // have meaning only for instanced map (that have set real difficulty)
-        Difficulty GetDifficulty() const { return Difficulty(GetSpawnMode()); }
-        bool IsRegularDifficulty() const { return GetDifficulty() == REGULAR_DIFFICULTY; }
+        DifficultyID GetDifficulty() const { return DifficultyID(GetSpawnMode()); }
+        bool IsRegularDifficulty() const { return GetDifficulty() == 0; }
         MapDifficulty const* GetMapDifficulty() const;
 
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
         bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
         bool IsNonRaidDungeon() const { return i_mapEntry && i_mapEntry->IsNonRaidDungeon(); }
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
-        bool IsRaidOrHeroicDungeon() const { return IsRaid() || i_spawnMode > DUNGEON_DIFFICULTY_NORMAL; }
-        bool IsHeroic() const { return IsRaid() ? i_spawnMode >= RAID_DIFFICULTY_10MAN_HEROIC : i_spawnMode >= DUNGEON_DIFFICULTY_HEROIC; }
-        bool Is25ManRaid() const { return IsRaid() && i_spawnMode & RAID_DIFFICULTY_MASK_25MAN; }   // since 25man difficulties are 1 and 3, we can check them like that
+        bool IsRaidOrHeroicDungeon() const { return IsRaid() || i_spawnMode == DIFFICULTY_HEROIC; }
+        //bool IsHeroic() const { return IsRaid() ? i_spawnMode == (DIFFICULTY_10MAN_HEROIC || DIFFICULTY_25MAN_HEROIC) : i_spawnMode == DIFFICULTY_HEROIC; }
+        bool IsHeroic() const;
+        bool Is25ManRaid() const { return IsRaid() && i_spawnMode & (DIFFICULTY_25MAN_NORMAL || DIFFICULTY_25MAN_HEROIC || DIFFICULTY_25MAN_LFR); }   // since 25man difficulties are 1 and 3, we can check them like that
         bool IsBattleground() const { return i_mapEntry && i_mapEntry->IsBattleground(); }
         bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
         bool IsBattlegroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattlegroundOrArena(); }
@@ -542,8 +542,8 @@ class Map : public GridRefManager<NGridType>
     protected:
         void SetUnloadReferenceLock(const GridCoord &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
-        ACE_Thread_Mutex Lock;
-        ACE_Thread_Mutex GridLock;
+        std::mutex Lock;
+        std::mutex GridLock;
 
         MapEntry const* i_mapEntry;
         uint8 i_spawnMode;
@@ -707,7 +707,7 @@ inline void Map::Visit(Cell const& cell, TypeContainerVisitor<T, CONTAINER>& vis
 template<class NOTIFIER>
 inline void Map::VisitAll(float const& x, float const& y, float radius, NOTIFIER& notifier)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Skyfire::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();
 
@@ -721,7 +721,7 @@ inline void Map::VisitAll(float const& x, float const& y, float radius, NOTIFIER
 template<class NOTIFIER>
 inline void Map::VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Skyfire::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();
 
@@ -737,7 +737,7 @@ inline void Map::VisitFirstFound(const float &x, const float &y, float radius, N
 template<class NOTIFIER>
 inline void Map::VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Skyfire::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();
 
@@ -748,7 +748,7 @@ inline void Map::VisitWorld(const float &x, const float &y, float radius, NOTIFI
 template<class NOTIFIER>
 inline void Map::VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Skyfire::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();
 

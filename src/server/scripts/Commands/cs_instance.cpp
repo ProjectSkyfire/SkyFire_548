@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -76,9 +76,9 @@ public:
             player = handler->GetSession()->GetPlayer();
 
         uint32 counter = 0;
-        for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        for (uint8 i = 0; i < 15; ++i)
         {
-            Player::BoundInstancesMap &binds = player->GetBoundInstances(Difficulty(i));
+            Player::BoundInstancesMap &binds = player->GetBoundInstances(DifficultyID(i));
             for (Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
             {
                 InstanceSave* save = itr->second.save;
@@ -92,9 +92,9 @@ public:
         counter = 0;
         if (Group* group = player->GetGroup())
         {
-            for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+            for (uint8 i = 0; i < 15; ++i)
             {
-                Group::BoundInstancesMap &binds = group->GetBoundInstances(Difficulty(i));
+                Group::BoundInstancesMap &binds = group->GetBoundInstances(DifficultyID(i));
                 for (Group::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
                 {
                     InstanceSave* save = itr->second.save;
@@ -133,9 +133,9 @@ public:
                 return false;
         }
 
-        for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        for (uint8 i = 0; i < 15; ++i)
         {
-            Player::BoundInstancesMap &binds = player->GetBoundInstances(Difficulty(i));
+            Player::BoundInstancesMap &binds = player->GetBoundInstances(DifficultyID(i));
             for (Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
             {
                 InstanceSave* save = itr->second.save;
@@ -143,7 +143,7 @@ public:
                 {
                     std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
                     handler->PSendSysMessage("unbinding map: %d inst: %d perm: %s diff: %d canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                    player->UnbindInstance(itr, Difficulty(i));
+                    player->UnbindInstance(itr, DifficultyID(i));
                     counter++;
                 }
                 else

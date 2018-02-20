@@ -184,5 +184,5 @@ class instance_heart_of_fear : public InstanceMapScript
 
 void AddSC_instance_heart_of_fear()
 {
-    new instance_heart_of_fear());
+    new instance_heart_of_fear();
 }

@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+# Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -12,7 +12,7 @@
 file(GLOB_RECURSE sources_CommandLine CommandLine/*.cpp CommandLine/*.h)
 file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
 file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
-file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)
+file(GLOB_RECURSE sources_SFSoap SFSoap/*.cpp SFSoap/*.h)
 file(GLOB_RECURSE sources_WorldThread WorldThread/*.cpp WorldThread/*.h)
 file(GLOB sources_localdir *.cpp *.h)
 
@@ -20,7 +20,7 @@ source_group(CMake FILES CMakeLists.txt)
 source_group(CommandLine FILES ${sources_CommandLine})
 source_group(PrecompiledHeaders FILES ${sources_PrecompiledHeaders})
 source_group(RemoteAcces FILES ${sources_RemoteAccess})
-source_group(TCSoap FILES ${sources_TCSoap})
+source_group(SFSoap FILES ${sources_SFSoap})
 source_group(WorldThread FILES ${sources_WorldThread})
 source_group(localdir FILES ${sources_localdir})
 
@@ -33,7 +33,7 @@ set(worldserver_SRCS
   ${worldserver_SRCS}
   ${sources_CommandLine}
   ${sources_RemoteAccess}
-  ${sources_TCSoap}
+  ${sources_SFSoap}
   ${sources_WorldThread}
   ${sources_localdir}
 )
@@ -86,6 +86,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse/AuctionHouseBot
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds/Zones
+  ${CMAKE_SOURCE_DIR}/src/server/game/Boost
   ${CMAKE_SOURCE_DIR}/src/server/game/Calendar
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat/Channels
@@ -147,7 +148,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
   ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
-  ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap
+  ${CMAKE_CURRENT_SOURCE_DIR}/SFSoap
   ${CMAKE_CURRENT_SOURCE_DIR}/WorldThread
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
@@ -161,7 +162,7 @@ add_executable(worldserver
 
 if( NOT WIN32 )
   set_target_properties(worldserver PROPERTIES
-    COMPILE_DEFINITIONS _TRINITY_CORE_CONFIG="${CONF_DIR}/worldserver.conf"
+    COMPILE_DEFINITIONS _SKYFIRE_CORE_CONFIG="${CONF_DIR}/worldserver.conf"
   )
 endif()
 

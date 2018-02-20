@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,7 +61,7 @@ void LoadSkillExtraItemTable()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
+        SF_LOG_ERROR("server.loading", ">> Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
         return;
     }
 
@@ -75,28 +75,28 @@ void LoadSkillExtraItemTable()
 
         if (!sSpellMgr->GetSpellInfo(spellId))
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has non-existent spell id in `skill_extra_item_template`!", spellId);
+            SF_LOG_ERROR("sql.sql", "Skill specialization %u has non-existent spell id in `skill_extra_item_template`!", spellId);
             continue;
         }
 
         uint32 requiredSpecialization = fields[1].GetUInt32();
         if (!sSpellMgr->GetSpellInfo(requiredSpecialization))
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u have not existed required specialization spell id %u in `skill_extra_item_template`!", spellId, requiredSpecialization);
+            SF_LOG_ERROR("sql.sql", "Skill specialization %u have not existed required specialization spell id %u in `skill_extra_item_template`!", spellId, requiredSpecialization);
             continue;
         }
 
         float additionalCreateChance = fields[2].GetFloat();
         if (additionalCreateChance <= 0.0f)
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has too low additional create chance in `skill_extra_item_template`!", spellId);
+            SF_LOG_ERROR("sql.sql", "Skill specialization %u has too low additional create chance in `skill_extra_item_template`!", spellId);
             continue;
         }
 
         uint8 additionalMaxNum = fields[3].GetUInt8();
         if (!additionalMaxNum)
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has 0 max number of extra items in `skill_extra_item_template`!", spellId);
+            SF_LOG_ERROR("sql.sql", "Skill specialization %u has 0 max number of extra items in `skill_extra_item_template`!", spellId);
             continue;
         }
 
@@ -110,7 +110,7 @@ void LoadSkillExtraItemTable()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    SF_LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 bool CanCreateExtraItems(Player* player, uint32 spellId, float &additionalChance, uint8 &additionalMax)

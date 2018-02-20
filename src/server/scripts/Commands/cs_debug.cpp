@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -36,8 +36,6 @@ EndScriptData */
 #include "Transport.h"
 #include "Language.h"
 
-#include <fstream>
-
 class debug_commandscript : public CommandScript
 {
 public:
@@ -59,7 +57,6 @@ public:
             { "chatmessage",   rbac::RBAC_PERM_COMMAND_DEBUG_SEND_CHATMESSAGE,   false, &HandleDebugSendChatMsgCommand,         "", NULL },
             { "equiperror",    rbac::RBAC_PERM_COMMAND_DEBUG_SEND_EQUIPERROR,    false, &HandleDebugSendEquipErrorCommand,      "", NULL },
             { "largepacket",   rbac::RBAC_PERM_COMMAND_DEBUG_SEND_LARGEPACKET,   false, &HandleDebugSendLargePacketCommand,     "", NULL },
-            { "opcode",        rbac::RBAC_PERM_COMMAND_DEBUG_SEND_OPCODE,        false, &HandleDebugSendOpcodeCommand,          "", NULL },
             { "qpartymsg",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_QPARTYMSG,     false, &HandleDebugSendQuestPartyMsgCommand,   "", NULL },
             { "qinvalidmsg",   rbac::RBAC_PERM_COMMAND_DEBUG_SEND_QINVALIDMSG,   false, &HandleDebugSendQuestInvalidMsgCommand, "", NULL },
             { "sellerror",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SELLERROR,     false, &HandleDebugSendSellErrorCommand,       "", NULL },
@@ -253,177 +250,6 @@ public:
 
         BuyResult msg = BuyResult(atoi(args));
         handler->GetSession()->GetPlayer()->SendBuyError(msg, 0, 0, 0);
-        return true;
-    }
-
-    static bool HandleDebugSendOpcodeCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Unit* unit = handler->getSelectedUnit();
-        Player* player = NULL;
-        if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
-            player = handler->GetSession()->GetPlayer();
-        else
-            player = unit->ToPlayer();
-
-        if (!unit)
-            unit = player;
-
-        std::ifstream ifs("opcode.txt");
-        if (ifs.fail())
-            return false;
-
-        // remove comments from file
-        std::stringstream parsedStream;
-        while (!ifs.eof())
-        {
-            char commentToken[2];
-            ifs.get(commentToken[0]);
-            if (commentToken[0] == '/' && !ifs.eof())
-            {
-                ifs.get(commentToken[1]);
-                // /* comment
-                if (commentToken[1] == '*')
-                {
-                    while (!ifs.eof())
-                    {
-                        ifs.get(commentToken[0]);
-                        if (commentToken[0] == '*' && !ifs.eof())
-                        {
-                            ifs.get(commentToken[1]);
-                            if (commentToken[1] == '/')
-                                break;
-                            else
-                                ifs.putback(commentToken[1]);
-                        }
-                    }
-                    continue;
-                }
-                // line comment
-                else if (commentToken[1] == '/')
-                {
-                    std::string str;
-                    getline(ifs, str);
-                    continue;
-                }
-                // regular data
-                else
-                    ifs.putback(commentToken[1]);
-            }
-            parsedStream.put(commentToken[0]);
-        }
-        ifs.close();
-
-        uint32 opcode;
-        parsedStream >> opcode;
-
-        WorldPacket data(Opcodes(opcode), 0);
-
-        while (!parsedStream.eof())
-        {
-            std::string type;
-            parsedStream >> type;
-
-            if (type == "")
-                break;
-
-            if (type == "uint8")
-            {
-                uint16 val1;
-                parsedStream >> val1;
-                data << uint8(val1);
-            }
-            else if (type == "uint16")
-            {
-                uint16 val2;
-                parsedStream >> val2;
-                data << val2;
-            }
-            else if (type == "uint32")
-            {
-                uint32 val3;
-                parsedStream >> val3;
-                data << val3;
-            }
-            else if (type == "uint64")
-            {
-                uint64 val4;
-                parsedStream >> val4;
-                data << val4;
-            }
-            else if (type == "float")
-            {
-                float val5;
-                parsedStream >> val5;
-                data << val5;
-            }
-            else if (type == "string")
-            {
-                std::string val6;
-                parsedStream >> val6;
-                data << val6;
-            }
-            else if (type == "appitsguid")
-            {
-                data.append(unit->GetPackGUID());
-            }
-            else if (type == "appmyguid")
-            {
-                data.append(player->GetPackGUID());
-            }
-            else if (type == "appgoguid")
-            {
-                GameObject* obj = handler->GetNearbyGameObject();
-                if (!obj)
-                {
-                    handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
-                    handler->SetSentErrorMessage(true);
-                    ifs.close();
-                    return false;
-                }
-                data.append(obj->GetPackGUID());
-            }
-            else if (type == "goguid")
-            {
-                GameObject* obj = handler->GetNearbyGameObject();
-                if (!obj)
-                {
-                    handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
-                    handler->SetSentErrorMessage(true);
-                    ifs.close();
-                    return false;
-                }
-                data << uint64(obj->GetGUID());
-            }
-            else if (type == "myguid")
-            {
-                data << uint64(player->GetGUID());
-            }
-            else if (type == "itsguid")
-            {
-                data << uint64(unit->GetGUID());
-            }
-            else if (type == "itspos")
-            {
-                data << unit->GetPositionX();
-                data << unit->GetPositionY();
-                data << unit->GetPositionZ();
-            }
-            else if (type == "mypos")
-            {
-                data << player->GetPositionX();
-                data << player->GetPositionY();
-                data << player->GetPositionZ();
-            }
-            else
-            {
-                TC_LOG_ERROR("misc", "Sending opcode that has unknown type '%s'", type.c_str());
-                break;
-            }
-        }
-        TC_LOG_DEBUG("network", "Sending opcode %u", data.GetOpcode());
-        data.hexlike();
-        player->GetSession()->SendPacket(&data, true);
-        handler->PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName().c_str());
         return true;
     }
 
@@ -883,8 +709,8 @@ public:
         else
         {
             Creature* passenger = NULL;
-            Trinity::AllCreaturesOfEntryInRange check(handler->GetSession()->GetPlayer(), entry, 20.0f);
-            Trinity::CreatureSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(handler->GetSession()->GetPlayer(), passenger, check);
+            Skyfire::AllCreaturesOfEntryInRange check(handler->GetSession()->GetPlayer(), entry, 20.0f);
+            Skyfire::CreatureSearcher<Skyfire::AllCreaturesOfEntryInRange> searcher(handler->GetSession()->GetPlayer(), passenger, check);
             handler->GetSession()->GetPlayer()->VisitNearbyObject(30.0f, searcher);
             if (!passenger || passenger == target)
                 return false;
@@ -1357,7 +1183,7 @@ public:
     {
         Player* player = handler->GetSession()->GetPlayer();
 
-        TC_LOG_INFO("sql.dev", "(@PATH, XX, %.3f, %.3f, %.5f, 0, 0, 0, 100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+        SF_LOG_INFO("sql.dev", "(@PATH, XX, %.3f, %.3f, %.5f, 0, 0, 0, 100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
 
         handler->PSendSysMessage("Waypoint SQL written to SQL Developer log");
         return true;

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -110,7 +110,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         int AddSocket (WorldSocket* sock)
         {
-            TRINITY_GUARD(ACE_Thread_Mutex, m_NewSockets_Lock);
+            std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
             ++m_Connections;
             sock->AddReference();
@@ -131,7 +131,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         void AddNewSockets()
         {
-            TRINITY_GUARD(ACE_Thread_Mutex, m_NewSockets_Lock);
+            std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
             if (m_NewSockets.empty())
                 return;
@@ -156,7 +156,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         virtual int svc()
         {
-            TC_LOG_DEBUG("misc", "Network Thread Starting");
+            SF_LOG_DEBUG("misc", "Network Thread Starting");
 
             ACE_ASSERT (m_Reactor);
 
@@ -193,7 +193,7 @@ class ReactorRunnable : protected ACE_Task_Base
                 }
             }
 
-            TC_LOG_DEBUG("misc", "Network Thread exits");
+            SF_LOG_DEBUG("misc", "Network Thread exits");
 
             return 0;
         }
@@ -209,7 +209,7 @@ class ReactorRunnable : protected ACE_Task_Base
         SocketSet m_Sockets;
 
         SocketSet m_NewSockets;
-        ACE_Thread_Mutex m_NewSockets_Lock;
+        std::mutex m_NewSockets_Lock;
 };
 
 WorldSocketMgr::WorldSocketMgr() :
@@ -235,7 +235,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 
     if (num_threads <= 0)
     {
-        TC_LOG_ERROR("misc", "Network.Threads is wrong in your config file");
+        SF_LOG_ERROR("misc", "Network.Threads is wrong in your config file");
         return -1;
     }
 
@@ -243,7 +243,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 
     m_NetThreads = new ReactorRunnable[m_NetThreadsCount];
 
-    TC_LOG_DEBUG("misc", "Max allowed socket connections %d", ACE::max_handles());
+    SF_LOG_DEBUG("misc", "Max allowed socket connections %d", ACE::max_handles());
 
     // -1 means use default
     m_SockOutKBuff = sConfigMgr->GetIntDefault ("Network.OutKBuff", -1);
@@ -252,7 +252,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 
     if (m_SockOutUBuff <= 0)
     {
-        TC_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
+        SF_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
         return -1;
     }
 
@@ -262,7 +262,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 
     if (m_Acceptor->open(listen_addr, m_NetThreads[0].GetReactor(), ACE_NONBLOCK) == -1)
     {
-        TC_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
+        SF_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
         return -1;
     }
 
@@ -326,7 +326,7 @@ WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
             (void*) & m_SockOutKBuff,
             sizeof (int)) == -1 && errno != ENOTSUP)
         {
-            TC_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
+            SF_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
             return -1;
         }
     }
@@ -341,7 +341,7 @@ WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
             (void*)&ndoption,
             sizeof (int)) == -1)
         {
-            TC_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror (errno));
+            SF_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror (errno));
             return -1;
         }
     }

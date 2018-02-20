@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1190,7 +1190,7 @@ struct BfWGGameObjectBuilding
                 if (m_WG->GetRelic())
                     m_WG->GetRelic()->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
                 else
-                    TC_LOG_ERROR("misc", "BattlefieldWG: Relic not found.");
+                    SF_LOG_ERROR("misc", "BattlefieldWG: Relic not found.");
                 break;
         }
 
@@ -1545,8 +1545,8 @@ struct WintergraspWorkshopData
     uint32 m_WorldState;
     uint32 m_TeamControl;                                   // Team witch control the workshop
     GuidSet m_CreatureOnPoint[2];                           // Contain all Creature associate to this point
-    GuidSet m_GameObjectOnPoint[2];                     // Contain all Gameobject associate to this point
-    uint32 m_NameId;                                        // Id of trinity_string witch contain name of this node, using for alert message
+    GuidSet m_GameObjectOnPoint[2];                         // Contain all Gameobject associate to this point
+    uint32 m_NameId;                                        // Id of skyfire_string witch contain name of this node, using for alert message
 
     WintergraspWorkshopData(BattlefieldWG* WG)
     {

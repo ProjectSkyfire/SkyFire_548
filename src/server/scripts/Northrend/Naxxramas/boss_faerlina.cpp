@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -200,7 +200,7 @@ class npc_faerlina_add : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                if (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) {
+                if (GetDifficulty() == DIFFICULTY_10MAN_NORMAL) {
                     me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_BIND, true);
                     me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_CHARM, true);
                 }
@@ -208,7 +208,7 @@ class npc_faerlina_add : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (_instance && GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+                if (_instance && GetDifficulty() == DIFFICULTY_10MAN_NORMAL)
                     if (Creature* faerlina = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_FAERLINA)))
                         DoCast(faerlina, SPELL_WIDOWS_EMBRACE);
             }

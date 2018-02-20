@@ -1,5 +1,5 @@
 [![Stories in Ready](https://badge.waffle.io/ProjectSkyfire/SkyFire.548.png?label=ready&title=Ready)](https://waffle.io/ProjectSkyfire/SkyFire.548)
-# ![logo](http://www.projectskyfire.org/public/style_images/15_14_skyfire_logo.png)
+# ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly in C++.
@@ -33,12 +33,12 @@ For further information on the SkyFire project, please visit our project website
 + Admit Krashed hacked TexxhornTV
 + Platform: Linux, Windows or Mac
 + Processor with SSE2 support
-+ ACE = 5.8.3 (included for Windows)
-+ MySQL = 5.1.0 (included for Windows)
-+ CMake = 2.8.11.2 / 2.8.9 (Windows / Linux)
-+ OpenSSL = 0.9.8o
++ ACE = 6.1.4  (Windows / Linux)
++ MySQL = 5.6.36 (Windows / Linux)
++ CMake = 3.8.1/2.8.11 (Windows / Linux)
++ OpenSSL = 1.0.2L
 + GCC = 4.7.2 (Linux only)
-+ MS Visual Studio = 12 (2013) (Windows only)
++ MS Visual Studio = 15 (2017) (Windows only)
 
 ## Install
 Detailed installation guides are available in the wiki for
@@ -69,8 +69,8 @@ Read file [THANKS](THANKS.md)
 Read File [TO-DO](TODO.md)
 
 ## Links
-Forum [http://www.projectskyfire.org](http://www.projectskyfire.org)
+Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
 
-Database [http://www.projectskyfire.org/index.php?/files/](http://www.projectskyfire.org/index.php?/files/)
+Database [https://forum.projectskyfire.org/index.php?/files/](https://forum.projectskyfire.org/index.php?/files/)
 
 Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)

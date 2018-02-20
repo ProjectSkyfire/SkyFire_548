@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,7 +22,6 @@
 #include "Map.h"
 #include "DatabaseEnv.h"
 
-#include <ace/Guard_T.h>
 #include <ace/Method_Request.h>
 
 class WDBThreadStartReq1 : public ACE_Method_Request
@@ -77,7 +76,7 @@ class MapUpdateRequest : public ACE_Method_Request
 };
 
 MapUpdater::MapUpdater():
-m_executor(), m_mutex(), m_condition(m_mutex), pending_requests(0) { }
+m_executor(), pending_requests(0) { }
 
 MapUpdater::~MapUpdater()
 {
@@ -98,17 +97,19 @@ int MapUpdater::deactivate()
 
 int MapUpdater::wait()
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, m_mutex);
+    std::unique_lock<std::mutex> ulock(Lock);
 
     while (pending_requests > 0)
-        m_condition.wait();
+        condition.wait(ulock);
+
+    ulock.unlock();
 
     return 0;
 }
 
 int MapUpdater::schedule_update(Map& map, ACE_UINT32 diff)
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, m_mutex);
+    std::lock_guard<std::mutex> guard(Lock);
 
     ++pending_requests;
 
@@ -130,7 +131,7 @@ bool MapUpdater::activated()
 
 void MapUpdater::update_finished()
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, m_mutex);
+    std::lock_guard<std::mutex> guard(Lock);
 
     if (pending_requests == 0)
     {
@@ -140,5 +141,5 @@ void MapUpdater::update_finished()
 
     --pending_requests;
 
-    m_condition.broadcast();
+    condition.notify_all();
 }

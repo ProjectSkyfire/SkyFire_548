@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -37,7 +37,7 @@ class WorldStateBuilder
             data.WriteBits(_wstateList.size(), 21);
             data.FlushBits();
 
-            for (std::map<uint32, uint32>::const_iterator iter = _wstateList.begin(); iter != _wstateList.end(); iter++)
+            for (std::map<uint32, uint32>::const_iterator iter = _wstateList.begin(); iter != _wstateList.end(); ++iter)
                 data << uint32(iter->second) << uint32(iter->first);
 
             session->SendPacket(&data);

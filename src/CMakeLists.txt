@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -11,10 +11,6 @@
 
 add_subdirectory(genrev)
 add_subdirectory(server)
-
-if(NOT MSVC)
-  add_definitions(-std=c++11)
-endif()
 
 if(TOOLS)
   add_subdirectory(tools)

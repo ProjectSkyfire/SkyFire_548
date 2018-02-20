@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -85,7 +85,7 @@ public:
     {
         ASSERT(index < sizeof(uint64));
 
-#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+#if SKYFIRE_ENDIAN == SKYFIRE_LITTLEENDIAN
         return _data.byte[index];
 #else
         return _data.byte[7 - index];
@@ -96,7 +96,7 @@ public:
     {
         ASSERT(index < sizeof(uint64));
 
-#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+#if SKYFIRE_ENDIAN == SKYFIRE_LITTLEENDIAN
         return _data.byte[index];
 #else
         return _data.byte[7 - index];

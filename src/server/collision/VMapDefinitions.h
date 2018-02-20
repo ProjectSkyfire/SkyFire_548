@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,8 +25,8 @@
 
 namespace VMAP
 {
-    const char VMAP_MAGIC[] = "VMAP_4.1";
-    const char RAW_VMAP_MAGIC[] = "VMAP041";                // used in extracted vmap files with raw data
+    const char VMAP_MAGIC[] = "VMAP_5.0";
+    const char RAW_VMAP_MAGIC[] = "VMAP050";                // used in extracted vmap files with raw data
     const char GAMEOBJECT_MODELS[] = "GameObjectModels.dtree";
 
     // defined in TileAssembler.cpp currently...
@@ -35,9 +35,9 @@ namespace VMAP
 
 // Set of helper macros for extractors (VMAP and MMAP)
 #ifndef NO_CORE_FUNCS
-#define VMAP_ERROR_LOG(FILTER, ...) TC_LOG_ERROR(FILTER, __VA_ARGS__)
-#define VMAP_DEBUG_LOG(FILTER, ...) TC_LOG_DEBUG(FILTER, __VA_ARGS__)
-#define VMAP_INFO_LOG(FILTER, ...) TC_LOG_INFO(FILTER, __VA_ARGS__)
+#define VMAP_ERROR_LOG(FILTER, ...) SF_LOG_ERROR(FILTER, __VA_ARGS__)
+#define VMAP_DEBUG_LOG(FILTER, ...) SF_LOG_DEBUG(FILTER, __VA_ARGS__)
+#define VMAP_INFO_LOG(FILTER, ...) SF_LOG_INFO(FILTER, __VA_ARGS__)
 #else
 #define VMAP_ERROR_LOG(FILTER, ...) (void)sizeof(FILTER)
 #define VMAP_DEBUG_LOG(FILTER, ...) (void)sizeof(FILTER)

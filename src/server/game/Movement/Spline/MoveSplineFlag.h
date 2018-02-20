@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_MOVESPLINEFLAG_H
-#define TRINITYSERVER_MOVESPLINEFLAG_H
+#ifndef SKYFIRESERVER_MOVESPLINEFLAG_H
+#define SKYFIRESERVER_MOVESPLINEFLAG_H
 #include "MovementTypedefs.h"
 
 #include <string>
@@ -152,4 +152,4 @@ namespace Movement
 #endif
 }
 
-#endif // TRINITYSERVER_MOVESPLINEFLAG_H
+#endif // SKYFIRESERVER_MOVESPLINEFLAG_H

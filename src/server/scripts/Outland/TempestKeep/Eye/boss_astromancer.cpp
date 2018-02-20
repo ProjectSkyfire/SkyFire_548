@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -314,10 +314,10 @@ class boss_high_astromancer_solarian : public CreatureScript
                                 Portals[i][2] = PORTAL_Z;
                             }
                         }
-                        if ((abs(Portals[2][0] - Portals[1][0]) < 7) && (abs(Portals[2][1] - Portals[1][1]) < 7))
+                        if ((std::abs(Portals[2][0] - Portals[1][0]) < 7) && (std::abs(Portals[2][1] - Portals[1][1]) < 7))
                         {
                             int i=1;
-                            if (abs(CENTER_X + 26.0f - Portals[2][0]) < 7)
+                            if (std::abs(CENTER_X + 26.0f - Portals[2][0]) < 7)
                                 i = -1;
                             Portals[2][0] = Portals[2][0]+7*i;
                             Portals[2][1] = Portal_Y(Portals[2][0], LARGE_PORTAL_RADIUS);

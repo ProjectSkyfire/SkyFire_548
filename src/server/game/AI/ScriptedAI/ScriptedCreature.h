@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -102,7 +102,7 @@ class SummonList
     {
         // We need to use a copy of SummonList here, otherwise original SummonList would be modified
         StorageType listCopy = storage_;
-        Trinity::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
+        Skyfire::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
         for (StorageType::iterator i = listCopy.begin(); i != listCopy.end();)
         {
             Creature* summon = Unit::GetCreature(*me, *i++);
@@ -156,39 +156,31 @@ struct ScriptedAI : public CreatureAI
     void AttackStartNoMove(Unit* target);
 
     // Called at any Damage from any attacker (before damage apply)
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-    { }
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override { }
 
     //Called at World update tick
-    virtual void UpdateAI(uint32 diff);
+    virtual void UpdateAI(uint32 diff) override;
 
     //Called at creature death
-    void JustDied(Unit* /*killer*/)
-    { }
+    void JustDied(Unit* /*killer*/) override { }
 
     //Called at creature killing another unit
-    void KilledUnit(Unit* /*victim*/)
-    { }
+    void KilledUnit(Unit* /*victim*/) override { }
 
     // Called when the creature summon successfully other creature
-    void JustSummoned(Creature* /*summon*/)
-    { }
+    void JustSummoned(Creature* /*summon*/) override { }
 
     // Called when a summoned creature is despawned
-    void SummonedCreatureDespawn(Creature* /*summon*/)
-    { }
+    void SummonedCreatureDespawn(Creature* /*summon*/) override { }
 
     // Called when hit by a spell
-    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/)
-    { }
+    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) override { }
 
     // Called when spell hits a target
-    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/)
-    { }
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) override { }
 
     //Called at waypoint reached or PointMovement end
-    void MovementInform(uint32 /*type*/, uint32 /*id*/)
-    { }
+    void MovementInform(uint32 /*type*/, uint32 /*id*/) override { }
 
     // Called when AI is temporarily replaced or put back when possess is applied or removed
     void OnPossess(bool /*apply*/)
@@ -209,15 +201,13 @@ struct ScriptedAI : public CreatureAI
     // *************
 
     //Called at creature reset either by death or evade
-    void Reset()
-    { }
+    void Reset() override { }
 
     //Called at creature aggro either by MoveInLOS or Attack Start
-    void EnterCombat(Unit* /*victim*/)
-    { }
+    void EnterCombat(Unit* /*victim*/) override { }
 
     // Called before EnterCombat even before the creature is in combat.
-    void AttackStart(Unit* /*target*/);
+    void AttackStart(Unit* /*target*/) override;
 
     // *************
     //AI Helper Functions
@@ -304,7 +294,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     // return the dungeon or raid difficulty
-    Difficulty GetDifficulty() const
+    DifficultyID GetDifficulty() const
     {
         return _difficulty;
     }
@@ -312,23 +302,23 @@ struct ScriptedAI : public CreatureAI
     // return true for 25 man or 25 man heroic mode
     bool Is25ManRaid() const
     {
-        return _difficulty & RAID_DIFFICULTY_MASK_25MAN;
+        return _difficulty & (DIFFICULTY_25MAN_NORMAL || DIFFICULTY_25MAN_HEROIC || DIFFICULTY_25MAN_LFR);
     }
 
     template<class T> inline
-        const T& DUNGEON_MODE(const T& normal5, const T& heroic10) const
+        const T& DUNGEON_MODE(const T& normal5, const T& heroic5) const
     {
         switch (_difficulty)
         {
-            case DUNGEON_DIFFICULTY_NORMAL:
+            case DIFFICULTY_NORMAL:
                 return normal5;
-            case DUNGEON_DIFFICULTY_HEROIC:
-                return heroic10;
+            case DIFFICULTY_HEROIC:
+                return heroic5;
             default:
                 break;
         }
 
-        return heroic10;
+        return heroic5;
     }
 
     template<class T> inline
@@ -336,9 +326,9 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_NORMAL:
                 return normal25;
             default:
                 break;
@@ -352,13 +342,13 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_NORMAL:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
+            case DIFFICULTY_FLEX:
                 return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
+            case DIFFICULTY_25MAN_LFR:
                 return lfr;
             default:
                 break;
@@ -372,17 +362,17 @@ struct ScriptedAI : public CreatureAI
     {
         switch (_difficulty)
         {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
+            case DIFFICULTY_10MAN_NORMAL:
                 return normal10;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_NORMAL:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_HEROIC:
+            case DIFFICULTY_10MAN_HEROIC:
                 return heroic10;
-            case RAID_DIFFICULTY_25MAN_HEROIC:
+            case DIFFICULTY_25MAN_HEROIC:
                 return heroic25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
+            case DIFFICULTY_FLEX:
                 return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
+            case DIFFICULTY_25MAN_LFR:
                 return lfr;
             default:
                 break;
@@ -392,7 +382,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     private:
-    Difficulty _difficulty;
+    DifficultyID _difficulty;
     uint32 _evadeCheckCooldown;
     bool _isCombatMovementAllowed;
     bool _isHeroic;

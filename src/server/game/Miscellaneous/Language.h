@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2016 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2016 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,7 +20,7 @@
 #ifndef SF_LANGUAGE_H
 #define SF_LANGUAGE_H
 
-enum TrinityStrings
+enum SkyFireStrings
 {
     // for chat commands
     LANG_SELECT_CHAR_OR_CREATURE        = 1,
@@ -306,9 +306,13 @@ enum TrinityStrings
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
     LANG_COMMAND_CREATGUIDNOTFOUND      = 287,
-      // TICKET STRINGS NEED REWRITE // 288-296 FREE
+    LANG_USE_BOOST                      = 288,
+    LANG_COMMAND_BOOST_ADD              = 289,
+    LANG_COMMAND_BOOST_DEL              = 290,
 
-      // END
+    // 291-296 FREE
+
+    // END
     LANG_COMMAND_SPAWNDIST              = 297,
     LANG_COMMAND_SPAWNTIME              = 298,
     LANG_COMMAND_MODIFY_HONOR           = 299,
@@ -1055,7 +1059,7 @@ enum TrinityStrings
     LANG_COMMAND_TICKETRESET            = 2028,
     LANG_COMMAND_TICKETLISTRESPONSE     = 2029,
 
-    // Trinity strings                    5000-9999
+    // Skyfire strings                    5000-9999
     LANG_COMMAND_FREEZE                 = 5000,
     LANG_COMMAND_FREEZE_ERROR           = 5001,
     LANG_COMMAND_FREEZE_WRONG           = 5002,
@@ -1096,7 +1100,7 @@ enum TrinityStrings
     LANG_NPCINFO_EQUIPMENT              = 5036,
     LANG_NPCINFO_MECHANIC_IMMUNE        = 5037,
     LANG_NPCINFO_UNIT_FIELD_FLAGS       = 5038,
-    // Room for more Trinity strings      5039-9999
+    // Room for more Skyfire strings      5039-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,
@@ -1246,5 +1250,23 @@ enum TrinityStrings
     LANG_BG_TP_HORDE_FLAG_RESPAWNED     = 12014,
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2000010000-2147483647 (max index)
+
+    // Battle For Gilneas
+    LANG_BG_BFG_START_TWO_MINUTES       = 12015,
+    LANG_BG_BFG_START_ONE_MINUTE        = 12016,
+    LANG_BG_BFG_START_HALF_MINUTE       = 12017,
+    LANG_BG_BFG_HAS_BEGUN               = 12018,
+
+    LANG_BG_BFG_ALLY                    = 12019,
+    LANG_BG_BFG_HORDE                   = 12020,
+    LANG_BG_BFG_NODE_LIGHTHOUSE         = 12021,
+    LANG_BG_BFG_NODE_WATERWORKS         = 12022,
+    LANG_BG_BFG_NODE_MINE               = 12023,
+    LANG_BG_BFG_NODE_TAKEN              = 12024,
+    LANG_BG_BFG_NODE_DEFENDED           = 12025,
+    LANG_BG_BFG_NODE_ASSAULTED          = 12026,
+    LANG_BG_BFG_NODE_CLAIMED            = 12027,
+    LANG_BG_BFG_A_NEAR_VICTORY          = 12028,
+    LANG_BG_BFG_H_NEAR_VICTORY          = 12029,
 };
 #endif
