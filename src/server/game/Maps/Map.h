@@ -374,11 +374,12 @@ class Map : public GridRefManager<NGridType>
         MapDifficulty const* GetMapDifficulty() const;
 
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
+        bool IsInstance() const {  return IsRaid() || IsDungeon() || IsScenario(); }
         bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
-        bool IsNonRaidDungeon() const { return i_mapEntry && i_mapEntry->IsNonRaidDungeon(); }
+        bool IsScenario() const { return i_mapEntry && i_mapEntry->IsScenario(); }
+        bool IsNonRaidInstance() const { return i_mapEntry && i_mapEntry->IsNonRaidInstance(); }
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
         bool IsRaidOrHeroicDungeon() const { return IsRaid() || i_spawnMode == DIFFICULTY_HEROIC; }
-        //bool IsHeroic() const { return IsRaid() ? i_spawnMode == (DIFFICULTY_10MAN_HEROIC || DIFFICULTY_25MAN_HEROIC) : i_spawnMode == DIFFICULTY_HEROIC; }
         bool IsHeroic() const;
         bool Is25ManRaid() const { return IsRaid() && i_spawnMode & (DIFFICULTY_25MAN_NORMAL || DIFFICULTY_25MAN_HEROIC || DIFFICULTY_25MAN_LFR); }   // since 25man difficulties are 1 and 3, we can check them like that
         bool IsBattleground() const { return i_mapEntry && i_mapEntry->IsBattleground(); }

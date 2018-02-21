@@ -1807,7 +1807,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (difficultyEntry->maptype != MAP_INSTANCE)
+    if (difficultyEntry->maptype != MAP_DUNGEON)
     {
         SF_LOG_DEBUG("network", "%d sent an non-dungeon instance mode %d!",
             _player->GetGUIDLow(), difficultyEntry->DiffID);
@@ -1841,7 +1841,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
                 if (!groupGuy->IsInMap(groupGuy))
                     return;
 
-                if (groupGuy->GetMap()->IsNonRaidDungeon())
+                if (groupGuy->GetMap()->IsNonRaidInstance())
                 {
                     SF_LOG_DEBUG("network", "player %d tried to reset the instance while group member (Name: %s, GUID: %u) is inside!",
                         _player->GetGUIDLow(), groupGuy->GetName().c_str(), groupGuy->GetGUIDLow());

@@ -387,9 +387,9 @@ enum FactionMasks
 enum MapTypes                                               // Lua_IsInInstance
 {
     MAP_COMMON          = 0,                                // none
-    MAP_INSTANCE        = 1,                                // party
+    MAP_DUNGEON         = 1,                                // dungeon
     MAP_RAID            = 2,                                // raid
-    MAP_BATTLEGROUND    = 3,                                // pvp
+    MAP_BATTLEGROUND    = 3,                                // battleground
     MAP_ARENA           = 4,                                // arena
     MAP_SCENARIO        = 5                                 // scenario
 };

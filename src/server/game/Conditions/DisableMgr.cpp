@@ -133,7 +133,7 @@ void LoadDisables()
                         if (flags)
                             isFlagInvalid = true;
                         break;
-                    case MAP_INSTANCE:
+                    case MAP_DUNGEON:
                         if (flags & DUNGEON_STATUSFLAG_HEROIC && !GetMapDifficultyData(entry, DIFFICULTY_HEROIC))
                             flags -= DUNGEON_STATUSFLAG_HEROIC;
                         if (!flags)
@@ -206,7 +206,7 @@ void LoadDisables()
                         if (flags & VMAP_DISABLE_LIQUIDSTATUS)
                             SF_LOG_INFO("misc", "Liquid status disabled for world map %u.", entry);
                         break;
-                    case MAP_INSTANCE:
+                    case MAP_DUNGEON:
                         if (flags & VMAP_DISABLE_HEIGHT)
                             SF_LOG_INFO("misc", "Height disabled for instance map %u.", entry);
                         if (flags & VMAP_DISABLE_LOS)
@@ -248,7 +248,7 @@ void LoadDisables()
                     case MAP_COMMON:
                         SF_LOG_INFO("misc", "Pathfinding disabled for world map %u.", entry);
                         break;
-                    case MAP_INSTANCE:
+                    case MAP_DUNGEON:
                     case MAP_RAID:
                         SF_LOG_INFO("misc", "Pathfinding disabled for instance map %u.", entry);
                         break;

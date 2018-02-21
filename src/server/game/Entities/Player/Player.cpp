@@ -7236,7 +7236,7 @@ void Player::RewardReputation(Unit* victim, float rate)
     {
         // support for: Championing - http://www.wowwiki.com/Championing
         Map const* map = GetMap();
-        if (map && map->IsNonRaidDungeon())
+        if (map && map->IsNonRaidInstance())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
                 if (dungeon->reclevel == 80)
                     ChampioningFaction = GetChampioningFaction();
@@ -24303,7 +24303,7 @@ void Player::SendInitialPacketsAfterAddToMap()
         DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(GetMap()->GetDifficulty());
         SendRaidDifficulty(GetMap()->GetDifficulty());
     }
-    else if (GetMap()->IsNonRaidDungeon())
+    else if (GetMap()->IsNonRaidInstance())
         SendDungeonDifficulty();
 
     m_battlePetMgr->SendBattlePetJournal();
@@ -26392,7 +26392,7 @@ DifficultyID Player::CheckLoadedDungeonDifficultyID(DifficultyID difficulty)
     if (!difficultyEntry)
         return DIFFICULTY_NORMAL;
 
-    if (difficultyEntry->maptype != MAP_INSTANCE)
+    if (difficultyEntry->maptype != MAP_DUNGEON)
         return DIFFICULTY_NORMAL;
 
     return difficulty;
