@@ -1153,7 +1153,7 @@ public:
 
                     switch (mapInfo->map_type)
                     {
-                        case MAP_INSTANCE:
+                        case MAP_DUNGEON:
                             ss << handler->GetSkyFireString(LANG_INSTANCE);
                             break;
                         case MAP_RAID:

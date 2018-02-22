@@ -3258,6 +3258,9 @@ void Player::GiveLevel(uint8 level)
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
 
+	if (getLevel() >= sWorld->getIntConfig(CONFIG_START_PETBAR_LEVEL))
+		PetSpellInitialize();
+
     SetCreateHealth(basehp);
     SetCreateMana(basemana);
 
@@ -7233,7 +7236,7 @@ void Player::RewardReputation(Unit* victim, float rate)
     {
         // support for: Championing - http://www.wowwiki.com/Championing
         Map const* map = GetMap();
-        if (map && map->IsNonRaidDungeon())
+        if (map && map->IsNonRaidInstance())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
                 if (dungeon->reclevel == 80)
                     ChampioningFaction = GetChampioningFaction();
@@ -21586,41 +21589,44 @@ void Player::PetSpellInitialize()
     data.FlushBits();
 
     // action bar loop
-    charmInfo->BuildActionBar(&data);
-
-    time_t curTime = time(NULL);
-
-    for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
-    {
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-        if (!spellInfo)
+    if (getLevel() >= sWorld->getIntConfig(CONFIG_START_PETBAR_LEVEL))
         {
-            data << uint32(0);
-            data << uint32(0);
-            data << uint16(0);
-            data << uint32(0);
-            continue;
-        }
+        charmInfo->BuildActionBar(&data);
 
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
+        time_t curTime = time(NULL);
 
-        CreatureSpellCooldowns::const_iterator categoryitr = pet->m_CreatureCategoryCooldowns.find(spellInfo->GetCategory());
-        if (categoryitr != pet->m_CreatureCategoryCooldowns.end())
+        for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
         {
-            time_t categoryCooldown = (categoryitr->second > curTime) ? (categoryitr->second - curTime) * IN_MILLISECONDS : 0;
-            data << uint32(categoryCooldown);           // category cooldown
-            data << uint32(itr->first);                 // spell ID
-            data << uint16(spellInfo->GetCategory());   // spell category
-            data << uint32(cooldown);                   // spell cooldown
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
+            if (!spellInfo)
+            {
+                data << uint32(0);
+                data << uint32(0);
+                data << uint16(0);
+                data << uint32(0);
+                continue;
+            }
+
+            time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
+
+            CreatureSpellCooldowns::const_iterator categoryitr = pet->m_CreatureCategoryCooldowns.find(spellInfo->GetCategory());
+            if (categoryitr != pet->m_CreatureCategoryCooldowns.end())
+            {
+                time_t categoryCooldown = (categoryitr->second > curTime) ? (categoryitr->second - curTime) * IN_MILLISECONDS : 0;
+                data << uint32(categoryCooldown);           // category cooldown
+                data << uint32(itr->first);                 // spell ID
+                data << uint16(spellInfo->GetCategory());   // spell category
+                data << uint32(cooldown);                   // spell cooldown
+            }
+            else
+            {
+                data << uint32(0);
+                data << uint32(itr->first);                 // spell ID
+                data << uint16(0);
+                data << uint32(cooldown);
+            }
+            ++cooldownCount;
         }
-        else
-        {
-            data << uint32(0);
-            data << uint32(itr->first);                 // spell ID
-            data << uint16(0);
-            data << uint32(cooldown);
-        }
-        ++cooldownCount;
     }
 
     data.PutBits(cooldownCountPos, cooldownCount, 20);
@@ -24297,7 +24303,7 @@ void Player::SendInitialPacketsAfterAddToMap()
         DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(GetMap()->GetDifficulty());
         SendRaidDifficulty(GetMap()->GetDifficulty());
     }
-    else if (GetMap()->IsNonRaidDungeon())
+    else if (GetMap()->IsNonRaidInstance())
         SendDungeonDifficulty();
 
     m_battlePetMgr->SendBattlePetJournal();
@@ -26386,7 +26392,7 @@ DifficultyID Player::CheckLoadedDungeonDifficultyID(DifficultyID difficulty)
     if (!difficultyEntry)
         return DIFFICULTY_NORMAL;
 
-    if (difficultyEntry->maptype != MAP_INSTANCE)
+    if (difficultyEntry->maptype != MAP_DUNGEON)
         return DIFFICULTY_NORMAL;
 
     return difficulty;
