@@ -407,23 +407,13 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-    guid[2] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
+    uint8 bitsOrder[8] = { 2, 4, 0, 3, 6, 7, 5, 1 };
+    recvData.ReadBitInOrder(guid, bitsOrder);
 
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData.FlushBits();
+
+    uint8 bytesOrder[8] = { 4, 7, 1, 0, 5, 3, 6, 2 };
+    recvData.ReadBytesSeq(guid, bytesOrder);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
