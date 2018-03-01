@@ -52,7 +52,8 @@ endif()
 include(CheckPlatform)
 
 # basic packagesearching and setup (further support will be needed, this is a preliminary release!)
-set(OPENSSL_EXPECTED_VERSION 1.0.0)
+# OpenSSL Version 1.0.2 LTS - supported until 2020
+set(OPENSSL_EXPECTED_VERSION 1.0.2)
 set(ACE_EXPECTED_VERSION 5.8.3)
 
 find_package(PCHSupport)
