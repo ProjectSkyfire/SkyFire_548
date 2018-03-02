@@ -80,7 +80,7 @@ char* GetExtension(char* FileName)
 
 extern HANDLE WorldMpq;
 
-ADTFile::ADTFile(char* filename) : ADT(WorldMpq, filename, false)
+ADTFile::ADTFile(char* filename) : ADT(WorldMpq, filename, false), nWMO(0), nMDX(0)
 {
     Adtfilename.append(filename);
 }
@@ -139,8 +139,6 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
                 char* buf = new char[size];
                 ADT.read(buf, size);
                 char* p = buf;
-                int t = 0;
-                ModelInstanceNames = new std::string[size];
                 while (p < buf + size)
                 {
                     std::string path(p);
@@ -149,7 +147,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
                     FixNameCase(s, strlen(s));
                     FixNameSpaces(s, strlen(s));
 
-                    ModelInstanceNames[t++] = s;
+                    ModelInstanceNames.push_back(s);
 
                     ExtractSingleModel(path);
 
@@ -165,15 +163,13 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
                 char* buf = new char[size];
                 ADT.read(buf, size);
                 char* p = buf;
-                int q = 0;
-                WmoInstanceNames = new std::string[size];
                 while (p < buf + size)
                 {
                     char* s = GetPlainName(p);
                     FixNameCase(s, strlen(s));
                     FixNameSpaces(s, strlen(s));
 
-                    WmoInstanceNames[q++] = s;
+                    WmoInstanceNames.push_back(s);
 
                     p += strlen(p) + 1;
                 }
@@ -192,8 +188,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
                     ADT.read(&id, 4);
                     ModelInstance inst(ADT, ModelInstanceNames[id].c_str(), map_num, tileX, tileY, dirfile);
                 }
-                delete[] ModelInstanceNames;
-                ModelInstanceNames = NULL;
+                ModelInstanceNames.clear();
             }
         }
         else if (!strcmp(fourcc,"MODF"))
@@ -207,9 +202,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY)
                     ADT.read(&id, 4);
                     WMOInstance inst(ADT, WmoInstanceNames[id].c_str(), map_num, tileX, tileY, dirfile);
                 }
-
-                delete[] WmoInstanceNames;
-                WmoInstanceNames = NULL;
+                WmoInstanceNames.clear();
             }
         }
 

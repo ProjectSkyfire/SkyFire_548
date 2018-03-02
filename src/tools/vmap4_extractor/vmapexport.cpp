@@ -79,7 +79,7 @@ uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844,
 #define LAST_DBC_IN_DATA_BUILD 15595    // after this build mpqs with dbc are back to locale folder
 #define NEW_BASE_SET_BUILD 16016 // 15211
 
-#define LOCALES_COUNT 12
+#define LOCALES_COUNT 15
 
 char const* Locales[LOCALES_COUNT] =
 {
@@ -88,7 +88,9 @@ char const* Locales[LOCALES_COUNT] =
     "frFR", "koKR",
     "zhCN", "zhTW",
     "enCN", "enTW",
-    "esMX", "ruRU"
+    "esMX", "ruRU",
+    "ptBR", "ptPT",
+    "itIT"
 };
 
 TCHAR const* LocalesT[LOCALES_COUNT] =
@@ -99,6 +101,8 @@ TCHAR const* LocalesT[LOCALES_COUNT] =
     _T("zhCN"), _T("zhTW"),
     _T("enCN"), _T("enTW"),
     _T("esMX"), _T("ruRU"),
+    _T("ptBR"), _T("ptPT"),
+    _T("itIT"),
 };
 
 typedef struct
@@ -118,7 +122,7 @@ bool preciseVectorData = false;
 
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAP050";
+const char* szRawVMAPMagic = "VMAP051";
 
 bool LoadLocaleMPQFile(int locale)
 {
@@ -380,7 +384,7 @@ bool ExtractSingleWmo(std::string& fname)
         for (uint32 i = 0; i < froot.nGroups; ++i)
         {
             char temp[1024];
-            strcpy(temp, fname.c_str());
+            strncpy(temp, fname.c_str(), 1024);
             temp[fname.length()-4] = 0;
             char groupFileName[1024];
             sprintf(groupFileName, "%s_%03u.wmo", temp, i);
@@ -467,8 +471,10 @@ bool processArgv(int argc, char ** argv, const char *versionString)
             if((i+1)<argc)
             {
                 hasInputPathParam = true;
-                strcpy(input_path, argv[i+1]);
-                if (input_path[strlen(input_path) - 1] != '\\' || input_path[strlen(input_path) - 1] != '/')
+                strncpy(input_path, argv[i + 1], sizeof(input_path));
+                input_path[sizeof(input_path) - 1] = '\0';
+
+                if (input_path[strlen(input_path) - 1] != '\\' && input_path[strlen(input_path) - 1] != '/')
                     strcat(input_path, "/");
                 ++i;
             }
@@ -527,7 +533,7 @@ bool processArgv(int argc, char ** argv, const char *versionString)
 int main(int argc, char ** argv)
 {
     bool success=true;
-    const char *versionString = "V5.00 2017_09";
+    const char *versionString = "V5.01 2018_03";
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv, versionString))
@@ -596,7 +602,17 @@ int main(int argc, char ** argv)
         for (unsigned int x=0;x<map_count;++x)
         {
             map_ids[x].id=dbc->getRecord (x).getUInt(0);
-            strcpy(map_ids[x].name,dbc->getRecord(x).getString(1));
+            const char* map_name = dbc->getRecord(x).getString(1);
+            size_t max_map_name_length = sizeof(map_ids[x].name);
+            if (strlen(map_name) >= max_map_name_length)
+            {
+                delete dbc;
+                delete[] map_ids;
+                printf("FATAL ERROR: Map name too long.\n");
+                return 1;
+            }
+            strncpy(map_ids[x].name, map_name, max_map_name_length);
+            map_ids[x].name[max_map_name_length - 1] = '\0';
             printf("Map - %s\n",map_ids[x].name);
         }
 
