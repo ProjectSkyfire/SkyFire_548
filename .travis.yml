@@ -9,17 +9,10 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-matrix:
-  include:
-  # ENABLE AFTER ACE 6.4.3 is available.
-    #- os: linux
-    #  dist: trusty
-    #  sudo: required
-    #  compiler: clang
-    - os: linux
-      sudo: required
-      dist: xenial
-      compiler: gcc
+os: linux
+dist: xenial
+sudo: required
+compiler: gcc
 
 language: cpp
 
@@ -45,7 +38,7 @@ script:
   - mkdir build
   - cd build
   - cmake ../ -DSCRIPTS=0 -DTOOLS=1
-  - make -j8
+  - make -j16
 
 notifications:
   irc:
