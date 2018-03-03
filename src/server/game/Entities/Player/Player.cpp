@@ -3258,8 +3258,8 @@ void Player::GiveLevel(uint8 level)
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
 
-	if (getLevel() >= sWorld->getIntConfig(CONFIG_START_PETBAR_LEVEL))
-		PetSpellInitialize();
+    if (getLevel() >= sWorld->getIntConfig(CONFIG_START_PETBAR_LEVEL))
+        PetSpellInitialize();
 
     SetCreateHealth(basehp);
     SetCreateMana(basemana);
@@ -7114,6 +7114,7 @@ uint32 Player::TeamForRace(uint8 race)
         {
             case 1: return HORDE;
             case 7: return ALLIANCE;
+            case 42: return PANDAREN_NEUTRAL;
         }
         SF_LOG_ERROR("entities.player", "Race (%u) has wrong teamid (%u) in DBC: wrong DBC files?", uint32(race), rEntry->TeamID);
     }

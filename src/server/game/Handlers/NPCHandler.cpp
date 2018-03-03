@@ -410,8 +410,6 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
     uint8 bitsOrder[8] = { 2, 4, 0, 3, 6, 7, 5, 1 };
     recvData.ReadBitInOrder(guid, bitsOrder);
 
-    recvData.FlushBits();
-
     uint8 bytesOrder[8] = { 4, 7, 1, 0, 5, 3, 6, 2 };
     recvData.ReadBytesSeq(guid, bytesOrder);
 
