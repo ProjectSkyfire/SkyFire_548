@@ -4,8 +4,6 @@
 /**
  *  @file    Timer_Hash.h
  *
- *  $Id: Timer_Hash.h 95335 2011-12-15 13:13:17Z msmit $
- *
  *  @author Darrell Brunsch <brunsch@cs.wustl.edu>
  */
 //=============================================================================

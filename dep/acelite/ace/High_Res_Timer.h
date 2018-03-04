@@ -4,8 +4,6 @@
 /**
  *  @file    High_Res_Timer.h
  *
- *  $Id: High_Res_Timer.h 95798 2012-05-31 07:58:55Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
@@ -248,14 +246,14 @@ public:
   static void hrtime_to_tv (ACE_Time_Value &tv,
                             const ACE_hrtime_t hrt);
 
-#if defined (ACE_LINUX)
+#if defined (ACE_LINUX) && !defined (ACE_LACKS_SSCANF)
   /**
    * This is used to find out the Mhz of the machine for the scale
    * factor.  If there are any problems getting it, we just return 1
    * (the default).
    */
   static ACE_UINT32 get_cpuinfo (void);
-#endif /* defined (ACE_LINUX) */
+#endif /* defined (ACE_LINUX) && !ACE_LACKS_SSCANF */
 
 private:
   /**

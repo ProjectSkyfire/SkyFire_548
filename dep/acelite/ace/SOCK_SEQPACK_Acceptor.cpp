@@ -1,9 +1,7 @@
-// $Id: SOCK_SEQPACK_Acceptor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/SOCK_SEQPACK_Acceptor.h"
 
 #include "ace/Auto_Ptr.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_Memory.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_sys_socket.h"
@@ -335,8 +333,13 @@ ACE_SOCK_SEQPACK_Acceptor::shared_open (const ACE_Multihomed_INET_Addr &local_sa
           // representations of the primary and secondary
           // addresses.
           sockaddr_in*  local_inet_addrs = 0;
+#if defined(ACE_HAS_ALLOC_HOOKS)
+          ACE_ALLOCATOR_NORETURN (local_inet_addrs,
+                                  static_cast<sockaddr_in*>(ACE_Allocator::instance()->malloc(sizeof(sockaddr_in) * num_addresses)));
+#else
           ACE_NEW_NORETURN (local_inet_addrs,
                             sockaddr_in[num_addresses]);
+#endif
 
           if (!local_inet_addrs)
             error = 1;
@@ -400,7 +403,11 @@ ACE_SOCK_SEQPACK_Acceptor::shared_open (const ACE_Multihomed_INET_Addr &local_sa
 #endif /* ACE_HAS_LKSCTP */
             }
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free(local_inet_addrs);
+#else
           delete [] local_inet_addrs;
+#endif /* ACE_HAS_ALLOC_HOOKS */
         }
     }
   else if (ACE_OS::bind (this->get_handle (),
@@ -470,7 +477,7 @@ ACE_SOCK_SEQPACK_Acceptor::ACE_SOCK_SEQPACK_Acceptor (const ACE_Addr &local_sap,
                   protocol_family,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_SEQPACK_Acceptor")));
 }
@@ -563,7 +570,7 @@ ACE_SOCK_SEQPACK_Acceptor::ACE_SOCK_SEQPACK_Acceptor (const ACE_Addr &local_sap,
                   protocol_family,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_SEQPACK_Acceptor")));
 }
@@ -582,7 +589,7 @@ ACE_SOCK_SEQPACK_Acceptor::ACE_SOCK_SEQPACK_Acceptor (const ACE_Multihomed_INET_
                   protocol_family,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_SEQPACK_Acceptor")));
 }

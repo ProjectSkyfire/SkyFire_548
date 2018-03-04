@@ -4,8 +4,6 @@
 /**
  *  @file     Shared_Memory_Pool.h
  *
- *  $Id: Shared_Memory_Pool.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Dougls C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  */
@@ -142,7 +140,7 @@ protected:
 
   /**
    * Commits a new shared memory segment if necessary after an
-   * <acquire> or a signal.  @a offset is set to the new offset into
+   * acquire() or a signal.  @a offset is set to the new offset into
    * the backing store.
    */
   virtual int commit_backing_store_name (size_t rounded_bytes,
@@ -198,7 +196,7 @@ protected:
 
   /// Handle SIGSEGV and SIGBUS signals to remap shared memory
   /// properly.
-  virtual int handle_signal (int signum, siginfo_t *, ucontext_t *);
+  virtual int handle_signal (int, siginfo_t *siginfo, ucontext_t *);
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

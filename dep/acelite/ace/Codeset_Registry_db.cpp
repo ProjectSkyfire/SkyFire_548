@@ -1,4 +1,4 @@
-/* $Id: Codeset_Registry_db.cpp 81756 2008-05-22 09:47:33Z johnnyw $
+/*
  * Codeset registry DB, generated Fri Feb 28 21:01:30 2003
  * source: code_set_registry1.2g.txt
  *

@@ -4,8 +4,6 @@
 /**
  *  @file    Local_Tokens.h
  *
- *  $Id: Local_Tokens.h 93792 2011-04-07 11:48:50Z mcorino $
- *
  *  @author Karl-Heinz Dorn <kdorn@erlh.siemens.de>
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Tim Harrison <harrison@cs.wustl.edu>
@@ -36,8 +34,6 @@
  *  ACE_Thread_Semaphore, etc., that are defined in
  *  $ACE_ROOT/ace/Synch.h or the
  *  ACE_Token that's defined in $ACE_ROOT/ace/Token.h.
- *
- *
  */
 //=============================================================================
 
@@ -59,7 +55,7 @@
 #include "ace/Containers.h"
 #include "ace/Synch_Options.h"
 #include "ace/Map_Manager.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_string.h"
 #include "ace/os_include/os_netdb.h"
 

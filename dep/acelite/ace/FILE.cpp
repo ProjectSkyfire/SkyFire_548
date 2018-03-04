@@ -1,5 +1,3 @@
-// $Id: FILE.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 /* Defines the member functions for the base class of the ACE_IO_SAP
    ACE_FILE abstraction. */
 
@@ -7,6 +5,10 @@
 
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_sys_stat.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/FILE.inl"

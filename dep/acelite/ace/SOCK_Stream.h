@@ -4,8 +4,6 @@
 /**
  *  @file    SOCK_Stream.h
  *
- *  $Id: SOCK_Stream.h 92956 2010-12-29 16:12:31Z shuston $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================

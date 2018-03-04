@@ -1,7 +1,5 @@
 // -*- C++ -*-
 //
-//$Id: Refcountable_T.inl 81407 2008-04-24 05:59:30Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class ACE_LOCK>

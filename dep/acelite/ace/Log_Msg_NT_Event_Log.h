@@ -4,8 +4,6 @@
 /**
  *  @file    Log_Msg_NT_Event_Log.h
  *
- *  $Id: Log_Msg_NT_Event_Log.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Christopher Kohlhoff <chris@kohlhoff.com>
  */
 //=============================================================================

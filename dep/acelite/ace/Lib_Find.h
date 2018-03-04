@@ -6,8 +6,6 @@
  *
  *  All the static function calls needed to search and open shared
  *  libraries.
- *
- *  $Id: Lib_Find.h 93359 2011-02-11 11:33:12Z mcorino $
  */
 //=============================================================================
 

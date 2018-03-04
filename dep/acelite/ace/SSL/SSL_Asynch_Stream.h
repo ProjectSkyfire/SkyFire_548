@@ -4,8 +4,6 @@
 /**
  *  @file   SSL_Asynch_Stream.h
  *
- *  $Id: SSL_Asynch_Stream.h 91743 2010-09-13 18:24:51Z johnnyw $
- *
  *  @author Alexander Libman <alibman@baltimore.com>
  */
 //=============================================================================

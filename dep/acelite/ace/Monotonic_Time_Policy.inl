@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Monotonic_Time_Policy.inl 96095 2012-08-23 06:36:25Z johnnyw $
-
 #include "ace/OS_NS_sys_time.h"
 #include "ace/High_Res_Timer.h"
 

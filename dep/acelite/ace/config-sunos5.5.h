@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-sunos5.5.h 94454 2011-09-08 17:36:56Z johnnyw $
-
 // This configuration file is designed to work for SunOS 5.5 platforms
 // using the following compilers:
 //   * Sun C++ 4.2 and later (including 5.x), patched as noted below

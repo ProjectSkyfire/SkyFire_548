@@ -1,5 +1,3 @@
-// $Id: Time_Policy_T.cpp 96061 2012-08-16 09:36:07Z mcorino $
-
 #ifndef ACE_TIME_POLICY_T_CPP
 #define ACE_TIME_POLICY_T_CPP
 

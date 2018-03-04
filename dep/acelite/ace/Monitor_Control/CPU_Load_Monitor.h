@@ -4,8 +4,6 @@
 /**
  * @file CPU_Load_Monitor.h
  *
- * $Id: CPU_Load_Monitor.h 95533 2012-02-14 22:59:17Z wotte $
- *
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================

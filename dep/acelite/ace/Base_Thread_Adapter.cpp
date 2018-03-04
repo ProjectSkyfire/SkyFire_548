@@ -1,5 +1,3 @@
-// $Id: Base_Thread_Adapter.cpp 95595 2012-03-07 13:33:25Z johnnyw $
-
 #include "ace/Base_Thread_Adapter.h"
 
 #if !defined (ACE_HAS_INLINED_OSCALLS)

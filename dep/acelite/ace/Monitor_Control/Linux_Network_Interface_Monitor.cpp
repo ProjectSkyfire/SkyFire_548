@@ -1,10 +1,8 @@
-// $Id: Linux_Network_Interface_Monitor.cpp 95533 2012-02-14 22:59:17Z wotte $
-
 #include "ace/Monitor_Control/Linux_Network_Interface_Monitor.h"
 
 #if defined (ACE_LINUX) || defined (AIX)
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_stdio.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -31,7 +29,7 @@ namespace ACE
 
       if (fp == 0)
         {
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("bytes sent - opening ")
                       ACE_TEXT ("/proc/net/dev failed\n")));
           return;
@@ -90,7 +88,7 @@ namespace ACE
 
       if (fp == 0)
         {
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("bytes sent - opening ")
                       ACE_TEXT ("/proc/net/dev failed\n")));
           return;

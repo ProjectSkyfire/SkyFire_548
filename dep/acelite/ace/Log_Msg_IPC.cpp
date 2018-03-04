@@ -1,5 +1,3 @@
-// $Id: Log_Msg_IPC.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Log_Msg_IPC.h"
 #include "ace/Log_Record.h"
 #include "ace/CDR_Stream.h"
@@ -17,6 +15,8 @@ ACE_Log_Msg_IPC::~ACE_Log_Msg_IPC (void)
 {
   (void) this->close ();
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Log_Msg_IPC)
 
 int
 ACE_Log_Msg_IPC::open (const ACE_TCHAR *logger_key)

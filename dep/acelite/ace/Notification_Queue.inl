@@ -1,5 +1,3 @@
-// $Id: Notification_Queue.inl 94385 2011-08-10 12:19:36Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE ACE_Notification_Queue_Node::

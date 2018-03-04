@@ -4,8 +4,6 @@
 /**
  *  @file    Event_Handler.h
  *
- *  $Id: Event_Handler.h 92345 2010-10-24 12:39:33Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
@@ -22,6 +20,7 @@
 
 #include "ace/os_include/os_signal.h"
 #include "ace/Atomic_Op.h"
+#include "ace/OS_NS_Thread.h"
 #include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -316,9 +315,7 @@ private:
  */
 class ACE_Export ACE_Event_Handler_var
 {
-
 public:
-
   /// Default constructor.
   ACE_Event_Handler_var (void);
 
@@ -349,16 +346,55 @@ public:
   /// Reset the handler.
   void reset (ACE_Event_Handler *p = 0);
 
+#if defined (ACE_HAS_CPP11)
+  /// Bool operator to check if the ACE_Event_Handler_var has a value
+  explicit operator bool() const;
+  /// Equality operator to compare with nullptr_t
+  bool operator ==(std::nullptr_t) const;
+  /// Not equal operator to compare with nullptr_t
+  bool operator !=(std::nullptr_t) const;
+#endif
+
 private:
 
   /// Handler.
   ACE_Event_Handler *ptr_;
 };
 
+#if defined ACE_HAS_CPP11
+
+/// Define that we can use in user code to check if this
+/// helper factory method is there
+#define ACE_HAS_ACE_MAKE_EVENT_HANDLER
+
+namespace ACE
+{
+  /// With C++11 it is common to not use C++ new and delete, but
+  /// use std::make_shared and std::make_unique. This will not
+  /// work for ACE event handlers so we introduce a new
+  /// ACE::make_event_handler which can be used in user code to
+  /// allocate a new ACE event handler instance and directly assign
+  /// it to a ACE_Event_Handler_var
+  /// As user this now makes it for example possible to implement
+  /// the following when Simple_Handler is derived from ACE_Event_Handler
+  /// ACE_Event_Handler_var v =
+  ///   ACE::make_event_handler<Simple_Handler> (reactor.get());
+  template<class T,
+           typename = typename
+             std::enable_if<std::is_base_of<ACE_Event_Handler, T>::value>::type,
+           typename ...Args> inline
+  ACE_Event_Handler_var make_event_handler (Args&& ...args)
+  {
+    return ACE_Event_Handler_var (new T (std::forward<Args> (args)...));
+  }
+}
+
+#endif
+
 /**
  * @class ACE_Notification_Buffer
  *
- * @brief Simple wrapper for passing <ACE_Event_Handler *>s and
+ * @brief Simple wrapper for passing ACE_Event_Handler *s and
  * ACE_Reactor_Masks between threads.
  */
 class ACE_Export ACE_Notification_Buffer

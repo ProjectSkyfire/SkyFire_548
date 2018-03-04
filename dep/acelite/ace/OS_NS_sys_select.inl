@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_sys_select.inl 95761 2012-05-15 18:23:04Z johnnyw $
-
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_macros.h"
 #include "ace/Time_Value.h"

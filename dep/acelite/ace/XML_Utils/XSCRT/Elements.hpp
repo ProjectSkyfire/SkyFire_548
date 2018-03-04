@@ -1,7 +1,5 @@
 // file      : XSCRT/Elements.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Elements.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 #ifndef XSCRT_ELEMENTS_HPP
 #define XSCRT_ELEMENTS_HPP
 

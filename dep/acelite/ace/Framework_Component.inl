@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Framework_Component.inl 92208 2010-10-13 06:20:39Z johnnyw $
-
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 

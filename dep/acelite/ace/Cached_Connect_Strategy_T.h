@@ -4,8 +4,6 @@
 /**
  *  @file    Cached_Connect_Strategy_T.h
  *
- *  $Id: Cached_Connect_Strategy_T.h 92097 2010-09-30 05:41:49Z msmit $
- *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
 //=============================================================================
@@ -103,6 +101,9 @@ public:
 
   // = Accessor.
   CACHING_STRATEGY &caching_strategy (void);
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
 
@@ -224,11 +225,11 @@ public:
                                        MUTEX *lock = 0,
                                        int delete_lock = 0);
 
-   /// Destructor
-   virtual ~ACE_Bounded_Cached_Connect_Strategy (void);
+  /// Destructor
+  virtual ~ACE_Bounded_Cached_Connect_Strategy (void);
 
-   /// Declare the dynamic allocation hooks.
-   ACE_ALLOC_HOOK_DECLARE;
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
 

@@ -1,5 +1,3 @@
-// $Id: config-WinCE.h 93622 2011-03-22 15:45:57Z johnnyw $
-
 // Note: For WinCE build, simply use: #include "ace/config-win32.h"
 //       It is same as config.h for Windows NT/2k so that you can
 //       share same files and directories for both WinCE and NT/2k

@@ -4,8 +4,6 @@
 /**
  *  @file    Service_Object.h
  *
- *  $Id: Service_Object.h 84170 2009-01-15 13:31:50Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -58,6 +56,9 @@ public:
 
   /// Re-enable a previously suspended service.
   virtual int resume (void);
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 };
 
 // Forward decl.

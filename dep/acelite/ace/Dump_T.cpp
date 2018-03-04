@@ -1,7 +1,4 @@
 // Dump_T.cpp
-//
-// $Id: Dump_T.cpp 80826 2008-03-04 14:51:23Z wotte $
-
 #ifndef ACE_DUMP_T_CPP
 #define ACE_DUMP_T_CPP
 

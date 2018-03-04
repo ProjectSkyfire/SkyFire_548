@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SSL_SOCK_Connector.inl 82728 2008-09-16 10:22:28Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE

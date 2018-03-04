@@ -1,12 +1,13 @@
-// $Id: SOCK_Acceptor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/SOCK_Acceptor.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_Errno.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_sys_socket.h"
 #include "ace/os_include/os_fcntl.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SOCK_Acceptor.inl"
@@ -242,6 +243,19 @@ ACE_SOCK_Acceptor::shared_open (const ACE_Addr &local_sap,
       else
         local_inet6_addr = *reinterpret_cast<sockaddr_in6 *> (local_sap.get_addr ());
 
+# if defined (ACE_WIN32)
+      // on windows vista and later, Winsock can support dual stack sockets
+      // but this must be explicitly set prior to the bind. Since this
+      // behavior is the default on *nix platforms, it should be benigh to
+      // just do it here. On older platforms the setsockopt will fail, but
+      // that should be OK.
+      int zero = 0;
+      ACE_OS::setsockopt (this->get_handle (),
+                          IPPROTO_IPV6,
+                          IPV6_V6ONLY,
+                          (char *)&zero,
+                          sizeof (zero));
+# endif /* ACE_WIN32 */
       // We probably don't need a bind_port written here.
       // There are currently no supported OS's that define
       // ACE_LACKS_WILDCARD_BIND.
@@ -340,7 +354,7 @@ ACE_SOCK_Acceptor::ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
                   protocol_family,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_Acceptor")));
 }
@@ -392,7 +406,7 @@ ACE_SOCK_Acceptor::ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
                   protocol_family,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_Acceptor")));
 }

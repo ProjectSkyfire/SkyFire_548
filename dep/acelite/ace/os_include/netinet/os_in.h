@@ -7,8 +7,6 @@
  *
  *  Internet address family
  *
- *  $Id: os_in.h 85438 2009-05-26 06:56:46Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -19,7 +17,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include /**/ "ace/config-all.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -95,7 +93,7 @@ extern "C"
   };
 # endif /* ACE_LACKS_IP_MREQ */
 
-#if !defined (IPPORT_RESERVED)
+#if !defined (ACE_HAS_IPPORT_RESERVED) && !defined (IPPORT_RESERVED)
 #  define IPPORT_RESERVED       1024
 #endif /* !IPPORT_RESERVED */
 

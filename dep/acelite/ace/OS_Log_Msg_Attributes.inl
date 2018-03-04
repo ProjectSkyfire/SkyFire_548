@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_Log_Msg_Attributes.inl 84184 2009-01-19 10:18:31Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE

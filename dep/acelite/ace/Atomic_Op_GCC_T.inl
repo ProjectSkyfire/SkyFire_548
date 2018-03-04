@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Atomic_Op_GCC_T.inl 95225 2011-12-05 20:25:15Z shuston $
-
 #if defined (ACE_HAS_GCC_ATOMIC_BUILTINS) && (ACE_HAS_GCC_ATOMIC_BUILTINS == 1)
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

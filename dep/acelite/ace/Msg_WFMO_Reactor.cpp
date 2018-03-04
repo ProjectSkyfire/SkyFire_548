@@ -1,5 +1,3 @@
-// $Id: Msg_WFMO_Reactor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Msg_WFMO_Reactor.h"
 
 

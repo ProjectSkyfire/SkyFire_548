@@ -4,8 +4,6 @@
 /**
  *  @file    TLI_Stream.h
  *
- *  $Id: TLI_Stream.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -15,7 +13,7 @@
 #define ACE_TLI_STREAM_H
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

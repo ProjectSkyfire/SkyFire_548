@@ -6,8 +6,6 @@
  *
  *  sockets local interfaces
  *
- *  $Id: os_if.h 91688 2010-09-09 11:21:50Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -26,6 +24,9 @@
 
 #if !defined (ACE_LACKS_NET_IF_H)
 #  include /**/ <net/if.h>
+#  if defined (m_flags)
+#    undef m_flags
+#  endif /* m_flags */
 #  if defined (ACE_HAS_NET_IF_DL_H)
 #    include /**/ <net/if_dl.h>
 #  endif /* ACE_HAS_NET_IF_DL_H */

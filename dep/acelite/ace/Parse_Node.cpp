@@ -1,4 +1,3 @@
-// $Id: Parse_Node.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
 #include "ace/Parse_Node.h"
 
 #if (ACE_USES_CLASSIC_SVC_CONF == 1)
@@ -48,14 +47,20 @@ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
   // reverse order from the way they should be pushed onto the stream.
   // So traverse mods_ and and reverse the list, then iterate over it to push
   // the modules in the stream in the correct order.
-  std::list<const ACE_Static_Node *> mod_list;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  typedef std::list<const ACE_Static_Node *,
+                    ACE_Allocator_Std_Adapter<const ACE_Static_Node *> > list_t;
+#else
+  typedef std::list<const ACE_Static_Node *> list_t;
+#endif /* ACE_HAS_ALLOC_HOOKS */
+  list_t mod_list;
   const ACE_Static_Node *module;
   for (module = dynamic_cast<const ACE_Static_Node*> (this->mods_);
        module != 0;
        module = dynamic_cast<ACE_Static_Node*> (module->link()))
     mod_list.push_front (module);
 
-  std::list<const ACE_Static_Node *>::const_iterator iter;
+  list_t::const_iterator iter;
   for (iter = mod_list.begin (); iter != mod_list.end (); ++iter)
     {
       module = *iter;
@@ -69,7 +74,7 @@ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
         {
           if (ACE::debug ())
             {
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                           ACE_TEXT ("dynamic initialization failed for Module %s\n"),
                           module->name ()));
             }
@@ -86,7 +91,7 @@ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
         {
           if (ACE::debug ())
             {
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                           ACE_TEXT ("dynamic initialization failed for Stream %s\n"),
                           this->node_->name ()));
             }
@@ -97,7 +102,7 @@ ACE_Stream_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("(%P|%t) Did stream on %s, error = %d\n"),
                 this->node_->name (),
                 yyerrno));
@@ -181,7 +186,7 @@ ACE_Parse_Node::print (void) const
 {
   ACE_TRACE ("ACE_Parse_Node::print");
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("svc = %s\n"),
               this->name ()));
 
@@ -193,7 +198,11 @@ ACE_Parse_Node::print (void) const
 ACE_Parse_Node::~ACE_Parse_Node (void)
 {
   ACE_TRACE ("ACE_Parse_Node::~ACE_Parse_Node");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(const_cast<ACE_TCHAR*> (this->name_));
+#else
   delete[] const_cast<ACE_TCHAR*> (this->name_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   delete this->next_;
 }
 
@@ -247,7 +256,7 @@ ACE_Suspend_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("did suspend on %s, error = %d\n"),
                 this->name (),
                 yyerrno));
@@ -264,7 +273,7 @@ ACE_Resume_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("did resume on %s, error = %d\n"),
                 this->name (),
                 yyerrno));
@@ -301,7 +310,7 @@ ACE_Remove_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) Remove_Node::apply")
                 ACE_TEXT (" - did remove on %s, error = %d\n"),
                 this->name (),
@@ -329,7 +338,7 @@ ACE_Dynamic_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) Dynamic_Node::apply")
                 ACE_TEXT (" - Did dynamic on %s (yyerrno=%d)\n"),
                 this->name (),
@@ -399,7 +408,7 @@ ACE_Static_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) Static_Node::apply -")
                 ACE_TEXT (" Did static on %s (yyerrno=%d)\n"),
                 this->name (),
@@ -410,7 +419,11 @@ ACE_Static_Node::apply (ACE_Service_Gestalt *config, int &yyerrno)
 ACE_Static_Node::~ACE_Static_Node (void)
 {
   ACE_TRACE ("ACE_Static_Node::~ACE_Static_Node");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->parameters_);
+#else
   delete[] this->parameters_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 
@@ -426,6 +439,7 @@ ACE_Location_Node::dump (void) const
 
 ACE_Location_Node::ACE_Location_Node (void)
   : pathname_ (0),
+    must_delete_ (0),
     dll_ (),
     symbol_ (0)
 {
@@ -471,7 +485,7 @@ ACE_Location_Node::open_dll (int & yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) LN::open_dll - path=%s\n"),
                 this->pathname ()));
 #endif /* ACE_NLOGGING */
@@ -484,7 +498,7 @@ ACE_Location_Node::open_dll (int & yyerrno)
       if (ACE::debug ())
         {
           ACE_TCHAR *errmsg = this->dll_.error ();
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("ACE (%P|%t) LN::open_dll - Failed to open %s: %s\n"),
                       this->pathname (),
                       errmsg ? errmsg : ACE_TEXT ("no error reported")));
@@ -543,7 +557,7 @@ ACE_Object_Node::symbol (ACE_Service_Gestalt *,
           if (ACE::debug ())
             {
               ACE_TCHAR *errmsg = this->dll_.error ();
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                           ACE_TEXT ("ACE (%P|%t) DLL::symbol -")
                           ACE_TEXT (" Failed for object %s: %s\n"),
                           object_name,
@@ -563,7 +577,11 @@ ACE_Object_Node::symbol (ACE_Service_Gestalt *,
 ACE_Object_Node::~ACE_Object_Node (void)
 {
   ACE_TRACE ("ACE_Object_Node::~ACE_Object_Node");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(const_cast<ACE_TCHAR *> (this->object_name_));
+#else
   delete[] const_cast<ACE_TCHAR *> (this->object_name_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 ACE_ALLOC_HOOK_DEFINE (ACE_Function_Node)
@@ -672,7 +690,7 @@ ACE_Function_Node::symbol (ACE_Service_Gestalt *,
           if (ACE::debug ())
             {
               ACE_TCHAR * const errmsg = this->dll_.error ();
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                           ACE_TEXT ("DLL::symbol failed for function %s: ")
                           ACE_TEXT ("%s\n"),
                           function_name,
@@ -700,7 +718,7 @@ ACE_Function_Node::symbol (ACE_Service_Gestalt *,
           ++yyerrno;
           if (ACE::debug ())
             {
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                          ACE_TEXT ("%p\n"),
                          this->function_name_));
             }
@@ -713,8 +731,13 @@ ACE_Function_Node::symbol (ACE_Service_Gestalt *,
 ACE_Function_Node::~ACE_Function_Node (void)
 {
   ACE_TRACE ("ACE_Function_Node::~ACE_Function_Node");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(const_cast<ACE_TCHAR *> (function_name_));
+  ACE_Allocator::instance()->free(const_cast<ACE_TCHAR *> (pathname_));
+#else
   delete[] const_cast<ACE_TCHAR *> (function_name_);
   delete[] const_cast<ACE_TCHAR *> (pathname_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 ACE_ALLOC_HOOK_DEFINE (ACE_Dummy_Node)
@@ -743,7 +766,7 @@ ACE_Dummy_Node::apply (ACE_Service_Gestalt *, int &yyerrno)
 
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("did operations on stream %s, error = %d\n"),
                 this->name (),
                 yyerrno));
@@ -796,7 +819,7 @@ ACE_Static_Function_Node::symbol (ACE_Service_Gestalt *config,
       ++yyerrno;
       if (ACE::debug ())
         {
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                      ACE_TEXT ("(%P|%t) No static service ")
                      ACE_TEXT ("registered for function %s\n"),
                      this->function_name_));
@@ -814,7 +837,7 @@ ACE_Static_Function_Node::symbol (ACE_Service_Gestalt *config,
 
           if (ACE::debug ())
             {
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                           ACE_TEXT ("(%P|%t) No static service factory ")
                           ACE_TEXT ("function registered for function %s\n"),
                           this->function_name_));
@@ -831,7 +854,7 @@ ACE_Static_Function_Node::symbol (ACE_Service_Gestalt *config,
       ++yyerrno;
       if (ACE::debug ())
         {
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("%p\n"),
                       this->function_name_));
         }
@@ -844,7 +867,11 @@ ACE_Static_Function_Node::symbol (ACE_Service_Gestalt *config,
 ACE_Static_Function_Node::~ACE_Static_Function_Node (void)
 {
   ACE_TRACE ("ACE_Static_Function_Node::~ACE_Static_Function_Node");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(const_cast<ACE_TCHAR *> (function_name_));
+#else
   delete[] const_cast<ACE_TCHAR *> (this->function_name_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 ACE_ALLOC_HOOK_DEFINE (ACE_Service_Type_Factory)
@@ -903,7 +930,7 @@ ACE_Service_Type_Factory::make_service_type (ACE_Service_Gestalt *cfg) const
 #ifndef ACE_NLOGGING
   if (ACE::debug ())
     {
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("ACE (%P|%t) Unable to create ")
                   ACE_TEXT ("service object for %s\n"),
                   this->name ()));

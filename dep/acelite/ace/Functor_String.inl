@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Functor_String.inl 93411 2011-02-18 22:21:16Z hillj $
-
 #include "ace/ACE.h"
 #include "ace/String_Base.h"
 

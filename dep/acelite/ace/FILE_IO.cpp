@@ -1,11 +1,12 @@
-// $Id: FILE_IO.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/FILE_IO.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_Memory.h"
 #include "ace/Truncate.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/FILE_IO.inl"
@@ -23,9 +24,9 @@ ACE_FILE_IO::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_FILE_IO::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
   this->addr_.dump ();
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -45,15 +46,26 @@ ssize_t
 ACE_FILE_IO::send (size_t n, ...) const
 {
   ACE_TRACE ("ACE_FILE_IO::send");
+#ifdef ACE_LACKS_VA_FUNCTIONS
+  ACE_UNUSED_ARG (n);
+  ACE_NOTSUP_RETURN (-1);
+#else
   va_list argp;
   int total_tuples = ACE_Utils::truncate_cast<int> (n / 2);
   iovec *iovp = 0;
 #if defined (ACE_HAS_ALLOCA)
   iovp = (iovec *) alloca (total_tuples * sizeof (iovec));
 #else
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_ALLOCATOR_RETURN (iovp, (iovec *)
+                        ACE_Allocator::instance ()->malloc (total_tuples *
+                                                            sizeof (iovec)),
+                        -1);
+# else
   ACE_NEW_RETURN (iovp,
                   iovec[total_tuples],
                   -1);
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
 
   va_start (argp, n);
@@ -68,10 +80,15 @@ ACE_FILE_IO::send (size_t n, ...) const
                                    iovp,
                                    total_tuples);
 #if !defined (ACE_HAS_ALLOCA)
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_Allocator::instance ()->free (iovp);
+# else
   delete [] iovp;
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
   va_end (argp);
   return result;
+#endif // ACE_LACKS_VA_FUNCTIONS
 }
 
 // This is basically an interface to ACE_OS::readv, that doesn't use
@@ -84,15 +101,26 @@ ssize_t
 ACE_FILE_IO::recv (size_t n, ...) const
 {
   ACE_TRACE ("ACE_FILE_IO::recv");
+#ifdef ACE_LACKS_VA_FUNCTIONS
+  ACE_UNUSED_ARG (n);
+  ACE_NOTSUP_RETURN (-1);
+#else
   va_list argp;
   int total_tuples = ACE_Utils::truncate_cast<int> (n / 2);
   iovec *iovp = 0;
 #if defined (ACE_HAS_ALLOCA)
   iovp = (iovec *) alloca (total_tuples * sizeof (iovec));
 #else
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_ALLOCATOR_RETURN (iovp, (iovec *)
+                        ACE_Allocator::instance ()->malloc (total_tuples *
+                                                            sizeof (iovec)),
+                        -1);
+# else
   ACE_NEW_RETURN (iovp,
                   iovec[total_tuples],
                   -1);
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
 
   va_start (argp, n);
@@ -107,10 +135,15 @@ ACE_FILE_IO::recv (size_t n, ...) const
                                         iovp,
                                         total_tuples);
 #if !defined (ACE_HAS_ALLOCA)
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_Allocator::instance ()->free (iovp);
+# else
   delete [] iovp;
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
   va_end (argp);
   return result;
+#endif // ACE_LACKS_VA_FUNCTIONS
 }
 
 // Allows a client to read from a file without having to provide a
@@ -124,16 +157,23 @@ ACE_FILE_IO::recvv (iovec *io_vec)
   ACE_TRACE ("ACE_FILE_IO::recvv");
 
   io_vec->iov_base = 0;
-  size_t const length =
-    static_cast <size_t> (ACE_OS::filesize (this->get_handle ()));
+  ACE_OFF_T const length = ACE_OS::filesize (this->get_handle ());
 
   if (length > 0)
     {
+      // Restrict to max size we can record in iov_len.
+      size_t len = ACE_Utils::truncate_cast<u_long> (length);
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_ALLOCATOR_RETURN (io_vec->iov_base,
+                            static_cast<char*>(ACE_Allocator::instance()->malloc(sizeof(char) * len)),
+                            -1);
+#else
       ACE_NEW_RETURN (io_vec->iov_base,
-                      char[length],
+                      char[len],
                       -1);
-      io_vec->iov_len = this->recv_n (io_vec->iov_base,
-                                      length);
+#endif /* ACE_HAS_ALLOC_HOOKS */
+      io_vec->iov_len = static_cast<u_long> (this->recv_n (io_vec->iov_base,
+                                                           len));
       return io_vec->iov_len;
     }
   else

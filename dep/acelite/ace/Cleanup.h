@@ -4,8 +4,6 @@
 /**
  *  @file   Cleanup.h
  *
- *  $Id: Cleanup.h 84163 2009-01-15 07:57:27Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
@@ -89,6 +87,9 @@ public:
   ACE_CLEANUP_FUNC cleanup_hook (void);
 
   void *param (void);
+
+  ACE_ALLOC_HOOK_DECLARE;
+
 private:
   /// Point to object that gets passed into the <cleanup_hook_>.
   void *object_;

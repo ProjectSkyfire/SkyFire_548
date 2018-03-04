@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Event_Handler_T.inl 91626 2010-09-07 10:59:20Z johnnyw $
-
 #include "ace/Global_Macros.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

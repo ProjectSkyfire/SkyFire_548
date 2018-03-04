@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-macosx-panther.h 87167 2009-10-19 19:33:53Z olli $
-
 // This configuration file is designed to work with the MacOS X operating system.
 
 #ifndef ACE_CONFIG_MACOSX_H

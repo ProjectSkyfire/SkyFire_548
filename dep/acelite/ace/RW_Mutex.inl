@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: RW_Mutex.inl 83934 2008-12-01 13:47:06Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE const ACE_rwlock_t &

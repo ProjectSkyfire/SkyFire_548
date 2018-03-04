@@ -4,8 +4,6 @@
 /**
  *  @file  UUID.h
  *
- *  $Id: UUID.h 88604 2010-01-18 18:01:19Z hillj $
- *
  *  @author Andrew T. Finnel <andrew@activesol.net>
  *  @author Yamuna Krishnmaurthy <yamuna@oomworks.com>
  */
@@ -90,8 +88,10 @@ namespace ACE_Utils
     /// Constructor
     UUID (void);
 
+#ifndef ACE_LACKS_SSCANF
     /// Constructs a UUID from a string representation.
     UUID (const ACE_CString& uuidString);
+#endif
 
     UUID (const UUID &right);
 
@@ -127,8 +127,10 @@ namespace ACE_Utils
     /// Returns a string representation of the UUID
     const ACE_CString* to_string (void) const;
 
+#ifndef ACE_LACKS_SSCANF
     /// Set the value using a string
     void from_string (const ACE_CString& uuid_string);
+#endif
 
     /// NIL UUID
     static const UUID NIL_UUID;
@@ -143,6 +145,8 @@ namespace ACE_Utils
     /// Assign an existing UUID to this UUID.
     const UUID & operator = (const UUID & rhs);
 
+    ACE_ALLOC_HOOK_DECLARE;
+
   private:
     /// Initialize the UUID
     void init (void);
@@ -152,7 +156,9 @@ namespace ACE_Utils
      *
      * @param[in]        uuid_string        String version of UUID.
      */
+#ifndef ACE_LACKS_SSCANF
     void from_string_i (const ACE_CString& uuid_string);
+#endif
 
     /// Data Members for Class Attributes
     struct data
@@ -279,4 +285,3 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif // ACE_UUID_H
-

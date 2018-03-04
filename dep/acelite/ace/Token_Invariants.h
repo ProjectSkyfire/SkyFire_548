@@ -4,15 +4,11 @@
 /**
  *  @file    Token_Invariants.h
  *
- *  $Id: Token_Invariants.h 91688 2010-09-09 11:21:50Z johnnyw $
- *
  *  @author Tim Harrison (harrison@cs.wustl.edu)
  *
  *   Allows applications to test that invariants are always
  *   satisfied.  Can test mutexes and readers/writer locks.  Does
  *   not test recursive acquisition.
- *
- *
  */
 //=============================================================================
 

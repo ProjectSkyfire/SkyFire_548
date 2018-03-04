@@ -1,5 +1,3 @@
-// $Id: Map_T.cpp 92097 2010-09-30 05:41:49Z msmit $
-
 #ifndef ACE_MAP_T_CPP
 #define ACE_MAP_T_CPP
 

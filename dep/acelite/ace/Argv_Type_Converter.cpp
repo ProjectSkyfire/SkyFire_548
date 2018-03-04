@@ -1,5 +1,3 @@
-// $Id: Argv_Type_Converter.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Argv_Type_Converter.h"
 
 #if !defined (__ACE_INLINE__)

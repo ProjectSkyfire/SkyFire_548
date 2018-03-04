@@ -4,8 +4,6 @@
 /**
  *  @file    DLL.h
  *
- *  $Id: DLL.h 95913 2012-06-21 17:14:36Z johnnyw $
- *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
 //=============================================================================
@@ -22,6 +20,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/os_include/os_dlfcn.h"
+#include "ace/SString.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -50,7 +49,7 @@ public:
    * @param close_handle_on_destruction  Indicates whether or not the
    *        close() method will be called to close an open DLL when this
    *        object is destroyed. By default, close() will be called.
-   *        Set this parameter to 0 for situations where the DLL's lifetime
+   *        Set this parameter to false for situations where the DLL's lifetime
    *        is controlled in a scope other than that of this ACE_DLL object.
    *        For example, termination by ACE_DLL_Manager via ACE::fini().
    */
@@ -155,18 +154,18 @@ public:
    */
   void *symbol (const ACE_TCHAR *symbol_name, int ignore_errors = 0);
 
-  /// Returns a pointer to a string explaining that an error occured.  You
+  /// Returns a pointer to a string explaining that an error occurred.  You
   /// will need to consult the error log for the actual error string
   /// returned by the OS.
   ACE_TCHAR *error (void) const;
 
   /**
-   * Return the handle to the caller.  If @a become_owner is non-0 then
+   * Return the handle to the caller.  If @a become_owner is true then
    * caller assumes ownership of the handle and the ACE_DLL object
    * won't call close() when it goes out of scope, even if
    * @c close_handle_on_destruction is set.
    */
-  ACE_SHLIB_HANDLE get_handle (int become_owner = 0) const;
+  ACE_SHLIB_HANDLE get_handle (bool become_owner = false) const;
 
   /// Set the handle for the DLL object. By default, the close()
   /// operation on / the object will be invoked before it is destroyed.
@@ -201,6 +200,8 @@ public:
   /// Flag to record if the last operation had an error.
   bool error_;
 
+  /// Any error messages encountered during last operation.
+  ACE_TString errmsg_;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

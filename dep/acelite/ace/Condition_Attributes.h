@@ -4,8 +4,6 @@
 /**
  *  @file    Condition_Attributes.h
  *
- *  $Id: Condition_Attributes.h 96077 2012-08-20 08:13:23Z johnnyw $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
@@ -23,10 +21,6 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/OS_NS_Thread.h"
-
-#if defined (ACE_HAS_THREADS)
-
-// ACE platform supports some form of threading.
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -94,8 +88,6 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #if defined (__ACE_INLINE__)
 #include "ace/Condition_Attributes.inl"
 #endif /* __ACE_INLINE__ */
-
-#endif /* !ACE_HAS_THREADS */
 
 #include /**/ "ace/post.h"
 #endif /* ACE_CONDITION_ATTRIBUTES_H */

@@ -1,12 +1,13 @@
-// $Id: LSOCK_Acceptor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/LSOCK_Acceptor.h"
 
 #if !defined (ACE_LACKS_UNIX_DOMAIN_SOCKETS)
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_sys_socket.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 
 
@@ -34,9 +35,9 @@ ACE_LSOCK_Acceptor::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_LSOCK_Acceptor::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
   this->local_addr_.dump ();
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -74,7 +75,7 @@ ACE_LSOCK_Acceptor::ACE_LSOCK_Acceptor (const ACE_Addr &remote_sap,
                   protocol_family,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 "ACE_LSOCK_Acceptor::ACE_LSOCK_Acceptor"));
 }
 

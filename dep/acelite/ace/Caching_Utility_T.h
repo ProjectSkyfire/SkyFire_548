@@ -4,8 +4,6 @@
 /**
  *  @file    Caching_Utility_T.h
  *
- *  $Id: Caching_Utility_T.h 92085 2010-09-29 12:23:13Z johnnyw $
- *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
 //=============================================================================
@@ -33,7 +31,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * @brief Defines a helper class for the Caching Strategies.
  *
  * This class defines the methods commonly used by the different
- * caching strategies. For instance: <clear_cache> method which
+ * caching strategies. For instance: clear_cache() method which
  * decides and purges the entry from the container.  @note This
  * class helps in the caching_strategies using a container
  * containing entries of <KEY, ACE_Pair<VALUE, attributes>>
@@ -82,7 +80,7 @@ protected:
  * @brief Defines a helper class for the Caching Strategies.
  *
  * This class defines the methods commonly used by the different
- * caching strategies. For instance: <clear_cache> method which
+ * caching strategies. For instance: clear_cache() method which
  * decides and purges the entry from the container.  @note This
  * class helps in the caching_strategies using a container
  * containing entries of <KEY, Svc_Handler> kind. The attributes
@@ -107,7 +105,7 @@ public:
   ~ACE_Recyclable_Handler_Caching_Utility (void);
 
   /**
-   * Purge entries from the <container>. The Cleanup_Strategy will do
+   * Purge entries from the @a container. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided.
    */
@@ -158,7 +156,7 @@ public:
   ~ACE_Refcounted_Recyclable_Handler_Caching_Utility (void);
 
   /**
-   * Purge entries from the <container>. The Cleanup_Strategy will do
+   * Purge entries from the @a container. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided.
    */
@@ -192,7 +190,7 @@ protected:
  * @brief Defines a helper class for the Caching Strategies.
  *
  * This class defines the methods commonly used by the different
- * caching strategies. For instance: <clear_cache> method which
+ * caching strategies. For instance: clear_cache() method which
  * decides and purges the entry from the container.  @note This
  * class helps in the caching_strategies using a container
  * containing entries of <KEY, HANDLER> kind where the HANDLER
@@ -216,7 +214,7 @@ public:
   ~ACE_Handler_Caching_Utility (void);
 
   /**
-   * Purge entries from the <container>. The Cleanup_Strategy will do
+   * Purge entries from the @a container. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided.
    */
@@ -249,7 +247,7 @@ protected:
  * @brief Defines a dummy helper class for the Caching Strategies.
  *
  * This class defines the methods commonly used by the different
- * caching strategies. For instance: <clear_cache> method which
+ * caching strategies. For instance: clear_cache() method which
  * decides and purges the entry from the container.  @note This
  * class is be used with the Null_Caching_Strategy. The
  * Cleanup_Strategy is the callback class to which the entries to
@@ -271,7 +269,7 @@ public:
   ~ACE_Null_Caching_Utility (void);
 
   /**
-   * Purge entries from the <container>. The Cleanup_Strategy will do
+   * Purge entries from the @a container. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided. @note Here it is a no-op.
    */

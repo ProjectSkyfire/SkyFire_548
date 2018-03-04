@@ -4,8 +4,6 @@
 /**
  *  @file    Bound_Ptr.h
  *
- *  $Id: Bound_Ptr.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Christopher Kohlhoff <chris@kohlhoff.com>
  *  @author Boris Kolpackov <boris@codesynthesis.com>
  */
@@ -381,7 +379,17 @@ private:
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+#if defined (__ACE_INLINE__)
 #include "ace/Bound_Ptr.inl"
+#endif /* __ACE_INLINE__ */
+
+#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
+#include "ace/Bound_Ptr.cpp"
+#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
+
+#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
+#pragma implementation ("Bound_Ptr.cpp")
+#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #include /**/ "ace/post.h"
 

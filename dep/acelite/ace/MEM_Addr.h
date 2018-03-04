@@ -4,8 +4,6 @@
 /**
  *  @file    MEM_Addr.h
  *
- *  $Id: MEM_Addr.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //==========================================================================
@@ -71,14 +69,14 @@ public:
   int set (u_short port_number, int encode = 1);
 
   /// Uses <getservbyname> to initialize an ACE_MEM_Addr from a
-  /// <port_name>, the remote <host_name>, and the <protocol>.
+  /// @a port_name, the remote <host_name>, and the <protocol>.
   int set (const ACE_TCHAR port_name[]);
 
   /// Return a pointer to the underlying network address.
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (void *, int len);
+  virtual void set_addr (const void *, int len);
 
   /// Transform the external ACE_MEM_Addr address into string
   /// format.

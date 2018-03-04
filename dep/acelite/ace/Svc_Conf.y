@@ -1,6 +1,4 @@
 %{
-// $Id: Svc_Conf.y 94034 2011-05-09 19:11:03Z johnnyw $
-
 #include "ace/Svc_Conf.h"
 
 #if (ACE_USES_CLASSIC_SVC_CONF == 1)

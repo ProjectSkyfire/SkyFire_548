@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Pagefile_Memory_Pool.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #if defined (ACE_WIN32) && !defined (ACE_HAS_PHARLAP)
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

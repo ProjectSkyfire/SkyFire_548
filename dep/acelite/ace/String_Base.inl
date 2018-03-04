@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: String_Base.inl 88793 2010-02-01 17:50:34Z cleeland $
-
 #include "ace/Malloc_Base.h"
 #include "ace/Min_Max.h"
 #include "ace/OS_NS_string.h"

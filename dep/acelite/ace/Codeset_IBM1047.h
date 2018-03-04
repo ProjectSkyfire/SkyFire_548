@@ -4,8 +4,6 @@
 /**
  *  @file    Codeset_IBM1047.h
  *
- *  $Id: Codeset_IBM1047.h 81388 2008-04-23 14:02:05Z johnnyw $
- *
  *  Declares the arrays required to convert between ISO8859 (aka
  *  Latin/1) and IBM1047 (aka EBCDIC).
  *

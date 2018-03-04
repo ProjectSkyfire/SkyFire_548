@@ -1,5 +1,3 @@
-// $Id: Local_Name_Space.cpp 91287 2010-08-05 10:30:49Z johnnyw $
-
 #include "ace/Local_Name_Space.h"
 #include "ace/ACE.h"
 #include "ace/RW_Process_Mutex.h"
@@ -12,7 +10,11 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_NS_String::~ACE_NS_String (void)
 {
   if (this->delete_rep_)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    ACE_Allocator::instance()->free(this->rep_);
+#else
     delete [] this->rep_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 ACE_WCHAR_T *

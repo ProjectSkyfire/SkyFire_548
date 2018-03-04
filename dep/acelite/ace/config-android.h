@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: config-android.h 94491 2011-09-12 11:17:33Z johnnyw $
-
 // The following configuration file is designed to work for Android
 // platforms using GNU C++.
 
@@ -15,6 +13,8 @@
 #if !defined (__ANDROID_API__)
 # error __ANDROID_API__ must be defined
 #endif
+
+#define ACE_ANDROID
 
 #define ACE_HAS_SSIZE_T
 
@@ -45,25 +45,24 @@
 #define ACE_LACKS_SYS_MSG_H
 #define ACE_LACKS_SYS_SHM_H
 #define ACE_LACKS_SYS_SYSCTL_H
-#define ACE_LACKS_UCONTEXT_H
 
 #define ACE_LACKS_CUSERID
-#define ACE_LACKS_FD_MASK
 #define ACE_LACKS_GETHOSTENT
 #define ACE_LACKS_GETLOADAVG
 #define ACE_LACKS_ISCTYPE
 #define ACE_LACKS_LOG2
+#define ACE_LACKS_LOCALECONV
 #define ACE_LACKS_NETDB_REENTRANT_FUNCTIONS
 #define ACE_LACKS_PWD_FUNCTIONS
 #define ACE_LACKS_PTHREAD_CANCEL
 #define ACE_LACKS_SEEKDIR
 #define ACE_LACKS_SEMBUF_T
 #define ACE_LACKS_SETINHERITSCHED
-#define ACE_LACKS_STD_WSTRING
 #define ACE_LACKS_STRRECVFD
 #define ACE_LACKS_SWAB
 #define ACE_LACKS_SYSV_SHMEM
 #define ACE_LACKS_TELLDIR
+#define ACE_LACKS_WCHAR_STD_NAMESPACE
 #define ACE_LACKS_WCSTOLL
 #define ACE_LACKS_WCSTOULL
 
@@ -86,34 +85,13 @@
 // Needed to differentiate between libc 5 and libc 6 (aka glibc).
 #include <features.h>
 
-#if (defined _XOPEN_SOURCE && (_XOPEN_SOURCE - 0) >= 500)
-#  define ACE_HAS_PTHREADS_UNIX98_EXT
-#endif /* _XOPEN_SOURCE - 0 >= 500 */
+#define ACE_HAS_PTHREADS_UNIX98_EXT
 
-# include "ace/config-posix.h"
+#include "ace/config-posix.h"
 
-#if !defined (ACE_LACKS_LINUX_NPTL)
-
-  // Temporary fix because NPTL kernels do have shm_open but there is a problem
-  // with shm_open/shm_unlink pairing in ACE which needs to be fixed when I have time.
-# if defined (ACE_HAS_SHM_OPEN)
-#   undef ACE_HAS_SHM_OPEN
-# endif /* ACE_HAS_SHM_OPEN */
-
-# if defined (ACE_USES_FIFO_SEM)
-    // Don't use this for Linux NPTL since this has complete
-    // POSIX semaphores which are more efficient
-#   undef ACE_USES_FIFO_SEM
-# endif /* ACE_USES_FIFO_SEM */
-
-# if defined (ACE_HAS_POSIX_SEM)
-    // Linux NPTL may not define the right POSIX macro
-    // but they have the actual runtime support for this stuff
-#   if !defined (ACE_HAS_POSIX_SEM_TIMEOUT) && (((_POSIX_C_SOURCE - 0) >= 200112L) || (_XOPEN_SOURCE >= 600))
-#     define ACE_HAS_POSIX_SEM_TIMEOUT
-#   endif /* !ACE_HAS_POSIX_SEM_TIMEOUT && (((_POSIX_C_SOURCE - 0) >= 200112L) || (_XOPEN_SOURCE >= 600)) */
-# endif /* ACE_HAS_POSIX_SEM */
-#endif /* !ACE_LACKS_LINUX_NPTL */
+// @todo JW, test if this works
+// #define ACE_HAS_POSIX_SEM
+// #define ACE_HAS_POSIX_SEM_TIMEOUT
 
 // AIO support pulls in the rt library, which pulls in the pthread
 // library.  Disable AIO in single-threaded builds.
@@ -124,16 +102,9 @@
 #endif
 
 // First the machine specific part
-
 #if defined (__powerpc__) || defined (__x86_64__)
 # if !defined (ACE_DEFAULT_BASE_ADDR)
 #   define ACE_DEFAULT_BASE_ADDR ((char *) 0x40000000)
-# endif /* ! ACE_DEFAULT_BASE_ADDR */
-#elif defined (__ia64)
-# if !defined (ACE_DEFAULT_BASE_ADDR)
-// Zero base address should work fine for Linux of IA-64: it just lets
-// the kernel to choose the right value.
-#   define ACE_DEFAULT_BASE_ADDR ((char *) 0x0000000000000000)
 # endif /* ! ACE_DEFAULT_BASE_ADDR */
 #endif /* ! __powerpc__  && ! __ia64 */
 
@@ -153,6 +124,8 @@
 # define ACE_HAS_ISASTREAM_PROTOTYPE
 # define ACE_HAS_PTHREAD_SIGMASK_PROTOTYPE
 # define ACE_HAS_CPU_SET_T
+#elif __ANDROID_API__ >= 21
+# define ACE_HAS_CPU_SET_T
 #endif /* __GLIBC__ > 2 || __GLIBC__ === 2 && __GLIBC_MINOR__ >= 3) */
 
 // Then the compiler specific parts
@@ -162,6 +135,13 @@
   // this must appear before its #include.
 # define ACE_HAS_STRING_CLASS
 # include "ace/config-g++-common.h"
+
+# define ACE_HAS_CUSTOM_EXPORT_MACROS
+# define ACE_Proper_Export_Flag
+# define ACE_IMPORT_SINGLETON_DECLARATION(T) __extension__ extern template class T
+# define ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) __extension__ extern template class SINGLETON_TYPE<CLASS, LOCK>;
+# define ACE_HAS_EXPLICIT_TEMPLATE_CLASS_INSTANTIATION
+
 #elif defined (__GNUC__)
 /**
  * GNU C compiler.
@@ -220,10 +200,7 @@
 #define ACE_HAS_BYTESWAP_H
 #define ACE_HAS_BSWAP_16
 #define ACE_HAS_BSWAP_32
-
-#if defined (__GNUC__)
-#  define ACE_HAS_BSWAP_64
-#endif
+#define ACE_HAS_BSWAP_64
 
 #define ACE_HAS_CONSISTENT_SIGNAL_PROTOTYPES
 
@@ -303,14 +280,6 @@
 
 #define ACE_SIZEOF_WCHAR 4
 
-#if defined (__powerpc__) && !defined (ACE_SIZEOF_LONG_DOUBLE)
-// 32bit PowerPC Linux uses 128bit long double
-# define ACE_SIZEOF_LONG_DOUBLE 16
-#endif
-
-#define ACE_LACKS_GETIPNODEBYADDR
-#define ACE_LACKS_GETIPNODEBYNAME
-
 // Platform has POSIX terminal interface.
 #define ACE_HAS_TERMIOS
 
@@ -321,6 +290,8 @@
 
 #define ACE_HAS_VASPRINTF
 
+#define ACE_LACKS_PTHREAD_SCOPE_PROCESS
+
 // According to man pages Linux uses different (compared to UNIX systems) types
 // for setting IP_MULTICAST_TTL and IPV6_MULTICAST_LOOP / IP_MULTICAST_LOOP
 // in setsockopt/getsockopt.
@@ -328,11 +299,8 @@
 #define ACE_HAS_IPV6_MULTICAST_LOOP_AS_BOOL 1
 #define ACE_HAS_IP_MULTICAST_LOOP_AS_INT 1
 
-#if defined (ACE_LACKS_NETWORKING)
-# include "ace/config-posix-nonetworking.h"
-#else
-# define ACE_HAS_NETLINK
-#endif
+#define ACE_HAS_NETLINK
+#define ACE_HAS_SIOCGIFCONF
 
 #if !defined (ACE_GETNAME_RETURNS_RANDOM_SIN_ZERO)
 // Detect if getsockname() and getpeername() returns random values in
@@ -363,14 +331,83 @@
 #define ACE_HAS_2_PARAM_ASCTIME_R_AND_CTIME_R
 #define ACE_HAS_REENTRANT_FUNCTIONS
 
-#if __ANDROID_API__ == 8
+#if __ANDROID_API__ < 21
+# define ACE_LACKS_UCONTEXT_H
+#else
+# define ACE_HAS_CLOCK_SETTIME
+# define ACE_HAS_UCONTEXT_T
+#endif
+
+#define ACE_LACKS_FD_MASK
+
+#if __ANDROID_API__ >= 9
+# define ACE_HAS_TIMEZONE
+#endif
+
+#if __ANDROID_API__ < 14
+# define ACE_LACKS_STD_WSTRING
+# define ACE_LACKS_GETIPNODEBYADDR
+# define ACE_LACKS_GETIPNODEBYNAME
+#endif
+
+#if __ANDROID_API__ == 3
+# error Unsupported Android release 3
+#elif __ANDROID_API__ == 8
 # define ACE_LACKS_REGEX_H 1
 # define ACE_LACKS_CONDATTR 1
-#elif __ANDROID_API__ == 9
-# define ACE_HAS_TIMEZONE
-#else
-# error Unsupported Android release
 #endif
+
+#if !defined ACE_DEFAULT_TEMP_DIR
+# define ACE_DEFAULT_TEMP_DIR "/data/tmp"
+#endif
+
+#if !defined TEST_DIR
+# define TEST_DIR "/data"
+#endif
+
+#if !defined (ACE_AS_STATIC_LIBS)
+# if (__GNUC__ == 4 && __GNUC_MINOR__ == 4)
+#  error Shared library support is not possible with GCC 4.4.x
+# endif
+#endif
+
+// The defines listed below might give compile issues when
+// users declare one letter (IDL) methods. To prevent this,
+// these defines are undefined here.
+// The defines are declared in ctype.h and are used in
+// ctype_base.h as well. That's why <ostream> is included
+// as well.
+#include "ctype.h"
+#include <ostream>
+
+#if defined (_U)
+# undef _U
+#endif
+#if defined (_L)
+# undef _L
+#endif
+#if defined (_N)
+# undef _N
+#endif
+#if defined (_S)
+# undef _S
+#endif
+#if defined (_P)
+# undef _P
+#endif
+#if defined (_C)
+# undef _C
+#endif
+#if defined (_X)
+# undef _X
+#endif
+#if defined (_B)
+# undef _B
+#endif
+
+// Disable newer features, result in runtime failures on Android
+#define ACE_LACKS_GETADDRINFO
+#define ACE_LACKS_GETNAMEINFO
 
 #include /**/ "ace/post.h"
 

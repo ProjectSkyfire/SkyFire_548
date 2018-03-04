@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-posix.h 82517 2008-08-05 19:36:26Z shuston $
-
 #ifndef ACE_CONFIG_POSIX_H
 #define ACE_CONFIG_POSIX_H
 

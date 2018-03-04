@@ -4,8 +4,6 @@
 /**
  * @file    Versioned_Namespace.h
  *
- * $Id: Versioned_Namespace.h 92286 2010-10-20 18:22:07Z johnnyw $
- *
  * Versioned namespace support.
  *
  * Useful for preventing conflicts when using a third party library.
@@ -31,9 +29,9 @@
 // concatenated.  Force the preprocessor to expand them during the
 // argument prescan by calling a macro that itself calls another that
 // performs the actual concatenation.
-#  define ACE_MAKE_VERSIONED_NAMESPACE_NAME_IMPL(MAJOR,MINOR,BETA) ACE_ ## MAJOR ## _ ## MINOR ## _ ## BETA
-#  define ACE_MAKE_VERSIONED_NAMESPACE_NAME(MAJOR,MINOR,BETA) ACE_MAKE_VERSIONED_NAMESPACE_NAME_IMPL(MAJOR,MINOR,BETA)
-#  define ACE_VERSIONED_NAMESPACE_NAME ACE_MAKE_VERSIONED_NAMESPACE_NAME(ACE_MAJOR_VERSION,ACE_MINOR_VERSION,ACE_BETA_VERSION)
+#  define ACE_MAKE_VERSIONED_NAMESPACE_NAME_IMPL(MAJOR,MINOR,MICRO) ACE_ ## MAJOR ## _ ## MINOR ## _ ## MICRO
+#  define ACE_MAKE_VERSIONED_NAMESPACE_NAME(MAJOR,MINOR,MICRO) ACE_MAKE_VERSIONED_NAMESPACE_NAME_IMPL(MAJOR,MINOR,MICRO)
+#  define ACE_VERSIONED_NAMESPACE_NAME ACE_MAKE_VERSIONED_NAMESPACE_NAME(ACE_MAJOR_VERSION,ACE_MINOR_VERSION,ACE_MICRO_VERSION)
 # endif  /* !ACE_VERSIONED_NAMESPACE_NAME */
 
 # define ACE_BEGIN_VERSIONED_NAMESPACE_DECL namespace ACE_VERSIONED_NAMESPACE_NAME {

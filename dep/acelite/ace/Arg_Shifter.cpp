@@ -1,5 +1,3 @@
-// $Id: Arg_Shifter.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #ifndef ACE_ARG_SHIFTER_T_CPP
 #define ACE_ARG_SHIFTER_T_CPP
 
@@ -8,6 +6,9 @@
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_Errno.h"
 #include "ace/OS_Memory.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -47,9 +48,13 @@ ACE_Arg_Shifter_T<CHAR_TYPE>::init (void)
 {
   // If not provided with one, allocate a temporary array.
   if (this->temp_ == 0)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    this->temp_ = reinterpret_cast<const CHAR_TYPE **>
+      (ACE_Allocator::instance ()->malloc (sizeof (CHAR_TYPE*) * this->total_size_));
+#else
     ACE_NEW (this->temp_,
              const CHAR_TYPE *[this->total_size_]);
-
+#endif /* ACE_HAS_ALLOC_HOOKS */
   if (this->temp_ != 0)
     {
       // Fill the temporary array.
@@ -72,7 +77,12 @@ template <typename CHAR_TYPE>
 ACE_Arg_Shifter_T<CHAR_TYPE>::~ACE_Arg_Shifter_T (void)
 {
   // Delete the temporary vector.
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  if (this->temp_)
+    ACE_Allocator::instance ()->free (this->temp_);
+#else
   delete [] temp_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 template <typename CHAR_TYPE>

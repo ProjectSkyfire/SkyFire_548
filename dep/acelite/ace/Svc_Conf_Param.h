@@ -4,8 +4,6 @@
 /**
  *  @file    Svc_Conf_Param.h
  *
- *  $Id: Svc_Conf_Param.h 81312 2008-04-09 21:01:34Z iliyan $
- *
  *  @author Iliyan Jeliazkov <iliyan@ociweb.com>
  *  @author Based on code originally found in Svc_Conf.h by Doug
             Schmidt and Ossama Othman.
@@ -47,7 +45,7 @@ extern void ace_yy_delete_buffer (ace_yy_buffer_state *buffer);
  * This class retains the state for a given parse/scan.  It primarily
  * makes it possible to hold the static object lock in the scanner
  * for as short a period of time as possible.  The resulting finer
- * grained locking prevents deadlocks from occuring when scanning a
+ * grained locking prevents deadlocks from occurring when scanning a
  * `svc.conf' file and activating an ACE_Task, for example, as a
  * result of processing the directives in that file.
  */

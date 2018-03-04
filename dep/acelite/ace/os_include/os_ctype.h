@@ -6,8 +6,6 @@
  *
  *  character types
  *
- *  $Id: os_ctype.h 83520 2008-11-03 08:54:08Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */

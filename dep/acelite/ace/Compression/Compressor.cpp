@@ -1,5 +1,3 @@
-// $Id: Compressor.cpp 95556 2012-02-24 09:14:51Z johnnyw $
-
 #include "Compressor.h"
 
 #if !defined (__ACE_INLINE__)

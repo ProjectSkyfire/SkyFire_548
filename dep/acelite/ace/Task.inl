@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Task.inl 80826 2008-03-04 14:51:23Z wotte $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // Get the current group id.
@@ -9,7 +6,6 @@ ACE_INLINE int
 ACE_Task_Base::grp_id (void) const
 {
   ACE_TRACE ("ACE_Task_Base::grp_id");
-  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, const_cast <ACE_Thread_Mutex&>(this->lock_), -1));
   return this->grp_id_;
 }
 
@@ -61,7 +57,7 @@ ACE_INLINE size_t
 ACE_Task_Base::thr_count (void) const
 {
   ACE_TRACE ("ACE_Task_Base::thr_count");
-  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, const_cast <ACE_Thread_Mutex&>(this->lock_), 0));
+  ACE_MT (ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, 0));
 
   return this->thr_count_;
 }

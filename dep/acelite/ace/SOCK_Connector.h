@@ -4,8 +4,6 @@
 /**
  *  @file    SOCK_Connector.h
  *
- *  $Id: SOCK_Connector.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
  *  @author Doug Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================

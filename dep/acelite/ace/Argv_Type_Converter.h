@@ -4,8 +4,6 @@
 /**
  *  @file    Argv_Type_Converter.h
  *
- *  $Id: Argv_Type_Converter.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author Si Mong Park <spark@ociweb.com>
  */
 //=============================================================================

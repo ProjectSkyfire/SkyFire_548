@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SOCK_Dgram_Mcast.inl 96014 2012-08-08 15:30:01Z sma $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE int

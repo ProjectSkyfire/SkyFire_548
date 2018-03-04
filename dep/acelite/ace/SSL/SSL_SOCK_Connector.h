@@ -4,8 +4,6 @@
 /**
  *  @file    SSL_SOCK_Connector.h
  *
- *  $Id: SSL_SOCK_Connector.h 84816 2009-03-13 08:16:32Z johnnyw $
- *
  *  @author Ossama Othman <ossama@uci.edu>
  *  @author Carlos O'Ryan <coryan@uci.edu>
  *  @author John Heitmann

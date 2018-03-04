@@ -1,10 +1,8 @@
-// $Id: FreeBSD_Network_Interface_Monitor.cpp 86518 2009-08-18 12:30:56Z olli $
-
 #include "ace/Monitor_Control/FreeBSD_Network_Interface_Monitor.h"
 
 #if defined (__FreeBSD__) || defined (__Lynx__)
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_stdio.h"
 
 #include <sys/types.h>
@@ -66,7 +64,7 @@ namespace ACE
 
       if (::sysctl(req_name, 5, &ifcount, &ifcount_len, (void *)0, 0) == -1)
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %p\n"),
+        ACELIB_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %p\n"),
                   ACE_TEXT("sysctl failed")));
 
         return;
@@ -87,7 +85,7 @@ namespace ACE
 
         if(::sysctl(name, 6, &ifmd, &len, (void *)0, 0) == -1)
         {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %p\n"),
+          ACELIB_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %p\n"),
                ACE_TEXT("sysctl failed")));
 
           break;

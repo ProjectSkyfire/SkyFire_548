@@ -1,6 +1,5 @@
 // file      : XMLSchema/TypeInfo.tpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: TypeInfo.tpp 91814 2010-09-17 08:33:40Z johnnyw $
 
 namespace XMLSchema
 {

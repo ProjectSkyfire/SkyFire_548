@@ -1,6 +1,5 @@
 
 // -*- C++ -*-
-// $Id: ace_etcl_export.h 81458 2008-04-28 11:31:49Z johnnyw $
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl
 // ------------------------------

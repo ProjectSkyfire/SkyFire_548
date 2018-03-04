@@ -1,9 +1,7 @@
-// $Id: CE_Screen_Output.cpp 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/CE_Screen_Output.h"
 #if defined (ACE_HAS_WINCE)
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

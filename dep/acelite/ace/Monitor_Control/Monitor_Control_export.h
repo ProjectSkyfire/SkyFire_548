@@ -4,8 +4,6 @@
 /**
  *  @file    Monitor_Control_export.h
  *
- *  $Id: Monitor_Control_export.h 81753 2008-05-21 19:02:47Z parsons $
- *
  *  @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================

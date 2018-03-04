@@ -1,7 +1,5 @@
 // -*- C++ -*-
 //
-//$Id: Cache_Map_Manager_T.inl 92097 2010-09-30 05:41:49Z msmit $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class KEY, class VALUE, class CMAP_TYPE, class ITERATOR_IMPL, class REVERSE_ITERATOR_IMPL, class CACHING_STRATEGY, class ATTRIBUTES> ACE_INLINE int

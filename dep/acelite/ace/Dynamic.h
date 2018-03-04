@@ -4,8 +4,6 @@
 /**
  *  @file    Dynamic.h
  *
- *  $Id: Dynamic.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Doug Schmidt
  *  @author Irfan Pyarali.
  */
@@ -55,6 +53,8 @@ public:
   void reset (void);
 
   static ACE_Dynamic *instance (void);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /**

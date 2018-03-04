@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Reactor.inl 82723 2008-09-16 09:35:44Z johnnyw $
-
 #include "ace/Reactor_Impl.h"
 
 /*

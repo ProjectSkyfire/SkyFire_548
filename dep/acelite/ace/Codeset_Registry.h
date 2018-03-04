@@ -3,8 +3,6 @@
 /**
  *  @file   Codeset_Registry.h
  *
- *  $Id: Codeset_Registry.h 93651 2011-03-28 08:49:11Z johnnyw $
- *
  * ACE wrapper around access functions for the OSF's DCE codeset registry
  * access functions
  *

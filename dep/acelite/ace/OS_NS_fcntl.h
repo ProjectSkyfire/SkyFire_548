@@ -4,8 +4,6 @@
 /**
  *  @file   OS_NS_fcntl.h
  *
- *  $Id: OS_NS_fcntl.h 87487 2009-11-12 07:54:39Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...

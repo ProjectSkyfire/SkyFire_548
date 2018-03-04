@@ -4,8 +4,6 @@
 /**
  *  @file    Vector_T.h
  *
- *  $Id: Vector_T.h 92069 2010-09-28 11:38:59Z johnnyw $
- *
  *  @author Craig L. Ching <cching@mqsoftware.com>
  *  @author Gonzalo Diethelm <gonzalo.diethelm@aditiva.com>
  */
@@ -91,6 +89,9 @@ public:
    * Destructor.
    */
   ~ACE_Vector ();
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
   /**
    * Returns the current vector capacity, that is, the currently

@@ -4,10 +4,7 @@
 /**
  *  @file    Date_Time.h
  *
- *  $Id: Date_Time.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Tim Harrison (harrison@cs.wustl.edu) (and he's darn proud of this ;-))
- *
  */
 //==========================================================================
 

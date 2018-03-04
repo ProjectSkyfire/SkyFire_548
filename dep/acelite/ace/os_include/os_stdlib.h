@@ -6,8 +6,6 @@
  *
  *  standard library definitions
  *
- *  $Id: os_stdlib.h 93573 2011-03-17 07:53:03Z olli $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -18,13 +16,14 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/os_include/os_stddef.h"
+#include "ace/os_include/os_stdint.h"
 #include "ace/os_include/sys/os_wait.h"
 
 #if defined (ACE_HAS_ALLOCA_H)

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Time_Policy.inl 96061 2012-08-16 09:36:07Z mcorino $
-
 #include "ace/OS_NS_sys_time.h"
 #include "ace/High_Res_Timer.h"
 

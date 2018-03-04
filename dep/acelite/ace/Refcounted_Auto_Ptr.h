@@ -4,8 +4,6 @@
 /**
  *  @file    Refcounted_Auto_Ptr.h
  *
- *  $Id: Refcounted_Auto_Ptr.h 81179 2008-03-31 19:00:29Z iliyan $
- *
  *  @author John Tucker <JTucker@infoglide.com>
  */
 //=============================================================================

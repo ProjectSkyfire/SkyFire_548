@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-sunos5.8.h 80826 2008-03-04 14:51:23Z wotte $
-
 // The following configuration file is designed to work for SunOS 5.8
 // (Solaris 8) platforms using the SunC++ 4.x, 5.x, 6.x, or g++ compilers.
 

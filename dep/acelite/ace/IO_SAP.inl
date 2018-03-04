@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: IO_SAP.inl 93736 2011-04-05 12:38:35Z johnnyw $
-
 #include "ace/OS_NS_stropts.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

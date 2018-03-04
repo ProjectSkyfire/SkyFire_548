@@ -1,5 +1,3 @@
-// $Id: Thread_Adapter.cpp 92682 2010-11-23 23:41:19Z shuston $
-
 #include "ace/Thread_Adapter.h"
 #include "ace/Thread_Manager.h"
 #include "ace/Thread_Exit.h"
@@ -43,6 +41,8 @@ ACE_Thread_Adapter::ACE_Thread_Adapter (ACE_THR_FUNC user_func,
 ACE_Thread_Adapter::~ACE_Thread_Adapter (void)
 {
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Thread_Adapter);
 
 ACE_THR_FUNC_RETURN
 ACE_Thread_Adapter::invoke (void)

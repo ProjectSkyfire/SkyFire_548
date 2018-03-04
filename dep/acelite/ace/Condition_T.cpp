@@ -1,5 +1,3 @@
-// $Id: Condition_T.cpp 96077 2012-08-20 08:13:23Z johnnyw $
-
 #ifndef ACE_CONDITION_T_CPP
 #define ACE_CONDITION_T_CPP
 
@@ -11,7 +9,10 @@
 
 #if defined (ACE_HAS_THREADS)
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Condition_T.inl"
@@ -20,7 +21,8 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Condition)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Condition)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Thread_Condition)
 
 template <class MUTEX> void
 ACE_Condition<MUTEX>::dump (void) const
@@ -28,9 +30,9 @@ ACE_Condition<MUTEX>::dump (void) const
 #if defined (ACE_HAS_DUMP)
 // ACE_TRACE ("ACE_Condition<MUTEX>::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\n")));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\n")));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -67,7 +69,7 @@ ACE_Condition<MUTEX>::ACE_Condition (MUTEX &m,
                          (short) type,
                          name,
                          arg) != 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Condition::ACE_Condition")));
 }
@@ -83,7 +85,7 @@ ACE_Condition<MUTEX>::ACE_Condition (MUTEX &m,
   if (ACE_OS::cond_init (&this->cond_,
                          const_cast<ACE_condattr_t &> (attributes.attributes ()),
                          name, arg) != 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Condition::ACE_Condition")));
 }
@@ -94,7 +96,7 @@ ACE_Condition<MUTEX>::~ACE_Condition (void)
   // ACE_TRACE ("ACE_Condition<MUTEX>::~ACE_Condition");
 
   if (this->remove () == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Condition::~ACE_Condition")));
 }

@@ -4,8 +4,6 @@
 /**
  * @file Null_Network_Interface_Monitor.h
  *
- * $Id: Null_Network_Interface_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
- *
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================

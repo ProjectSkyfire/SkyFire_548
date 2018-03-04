@@ -1,9 +1,6 @@
 // -*- C++ -*-
-//
-// $Id: Intrusive_Auto_Ptr.inl 81219 2008-04-02 20:23:32Z iliyan $
-
 #include "ace/Guard_T.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -83,7 +80,7 @@ ACE_Intrusive_Auto_Ptr<X>::operator = (const ACE_Intrusive_Auto_Ptr<X> &rhs)
   // assign a zero
   if (rhs.rep_  == 0)
     {
-      X::intrusive_remove_ref (rhs.rep_);
+      X::intrusive_remove_ref (this->rep_);
       this->rep_ = 0;
       return;
     }

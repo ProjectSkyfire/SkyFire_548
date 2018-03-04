@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Thread_Control.inl 91730 2010-09-13 09:31:11Z johnnyw $
-
 #include "ace/OS_NS_macros.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

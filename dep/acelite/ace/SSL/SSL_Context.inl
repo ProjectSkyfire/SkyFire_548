@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SSL_Context.inl 96087 2012-08-21 12:26:44Z sma $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE

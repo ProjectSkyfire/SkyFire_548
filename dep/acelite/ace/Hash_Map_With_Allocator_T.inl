@@ -1,7 +1,5 @@
 // -*- C++ -*-
 
-// $Id: Hash_Map_With_Allocator_T.inl 80826 2008-03-04 14:51:23Z wotte $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class EXT_ID, class INT_ID> ACE_INLINE int

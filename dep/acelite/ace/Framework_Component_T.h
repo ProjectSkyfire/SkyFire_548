@@ -4,8 +4,6 @@
 /**
  *  @file    Framework_Component_T.h
  *
- *  $Id: Framework_Component_T.h 92208 2010-10-13 06:20:39Z johnnyw $
- *
  *  @author Don Hinton <dhinton@ieee.org>
  */
 //=============================================================================
@@ -48,6 +46,8 @@ public:
 
   /// Close the contained singleton.
   void close_singleton (void);
+
+  ACE_ALLOC_HOOK_DECLARE;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

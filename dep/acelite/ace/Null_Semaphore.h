@@ -4,8 +4,6 @@
 /**
  *  @file    Null_Semaphore.h
  *
- *  $Id: Null_Semaphore.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>

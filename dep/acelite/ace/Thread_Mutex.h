@@ -4,8 +4,6 @@
 /**
  *  @file    Thread_Mutex.h
  *
- *  $Id: Thread_Mutex.h 96061 2012-08-16 09:36:07Z mcorino $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>

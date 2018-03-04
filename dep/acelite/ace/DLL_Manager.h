@@ -4,8 +4,6 @@
 /**
  *  @file    DLL_Manager.h
  *
- *  $Id: DLL_Manager.h 95913 2012-06-21 17:14:36Z johnnyw $
- *
  *  @author Don Hinton <dhinton@ieee.org>
  */
 //=============================================================================
@@ -20,9 +18,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Auto_Ptr.h"
 #include "ace/Containers_T.h"
-#include "ace/SStringfwd.h"
+#include "ace/SString.h"
 #include "ace/os_include/os_dlfcn.h"
 
 #if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
@@ -52,11 +49,13 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * Most of this class came from the original ACE_DLL class.  ACE_DLL
  * is now just an interface that passed all it's calls either directly
  * or via ACE_DLL_Manager to this class for execution.
- *
  */
 class ACE_Export ACE_DLL_Handle
 {
 public:
+
+  /// Error stack. Fixed size should suffice. Ignores any errors exceeding the size.
+  typedef ACE_Fixed_Stack < ACE_TString, 10 >  ERROR_STACK;
 
   /// Default construtor.
   ACE_DLL_Handle (void);
@@ -104,12 +103,15 @@ public:
    * @param handle If a value other than @c ACE_INVALID_HANDLE is supplied,
    *        this object is assigned the specified handle instead of attempting
    *        to open the specified @a dll_name.
+   * @param errors Optional address of an error stack to collect any errors
+   *        encountered.
    * @retval -1 On failure
    * @retval 0 On success.
    */
   int open (const ACE_TCHAR *dll_name,
             int open_mode,
-            ACE_SHLIB_HANDLE handle);
+            ACE_SHLIB_HANDLE handle,
+            ERROR_STACK *errors = 0);
 
   /// Call to close the DLL object.  If unload = 0, it only decrements
   /// the refcount, but if unload = 1, then it will actually unload
@@ -124,21 +126,27 @@ public:
   /// ignore_errors flag to supress logging errors if symbol_name isn't
   /// found.  This is nice if you just want to probe a dll to see what's
   /// available, since missing functions in that case aren't really errors.
-  void *symbol (const ACE_TCHAR *symbol_name, int ignore_errors = 0);
+  void *symbol (const ACE_TCHAR *symbol_name, bool ignore_errors = false);
+
+  /// Resolves and returns any error encountered.
+  void *symbol (const ACE_TCHAR *symbol_name, bool ignore_errors,
+                ACE_TString &error);
 
   /**
-   * Return the handle to the caller.  If @a become_owner is non-0 then
+   * Return the handle to the caller.  If @a become_owner is true then
    * caller assumes ownership of the handle so we decrement the retcount.
    */
-  ACE_SHLIB_HANDLE get_handle (int become_owner = 0);
+  ACE_SHLIB_HANDLE get_handle (bool become_owner = false);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
 
-  /// Returns a pointer to a string explaining why <symbol> or <open>
-  /// failed.  This is used internal to print out the error to the log,
+  /// Returns a string explaining why <symbol> or <open>
+  /// failed in @a err.  This is used internal to print out the error to the log,
   /// but since this object is shared, we can't store or return the error
   /// to the caller.
-  auto_ptr <ACE_TString> error (void);
+  ACE_TString& error (ACE_TString& err);
 
   /// Builds array of DLL names to try to dlopen, based on platform
   /// and configured DLL prefixes/suffixes.
@@ -207,7 +215,6 @@ class ACE_Framework_Repository;
  *
  *  ACE_DLL_UNLOAD_POLICY_DEFAULT - Default policy allows dlls to control
  *  their own destinies, but will unload those that don't make a choice eagerly.
- *
  */
 class ACE_Export ACE_DLL_Manager
 {
@@ -227,7 +234,8 @@ public:
   /// its refcount is incremented.
   ACE_DLL_Handle *open_dll (const ACE_TCHAR *dll_name,
                             int openmode,
-                            ACE_SHLIB_HANDLE handle);
+                            ACE_SHLIB_HANDLE handle,
+                            ACE_DLL_Handle::ERROR_STACK *errors = 0);
 
   /// Close the underlying dll.  Decrements the refcount.
   int close_dll (const ACE_TCHAR *dll_name);
@@ -239,6 +247,8 @@ public:
   /// LAZY to EAGER, then it will also unload any dlls with zero
   /// refcounts.
   void unload_policy (u_long unload_policy);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
 

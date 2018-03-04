@@ -4,8 +4,6 @@
 /**
  * @file Copy_Disabled.h
  *
- * $Id: Copy_Disabled.h 80826 2008-03-04 14:51:23Z wotte $
- *
  * @author Carlos O'Ryan <coryan@uci.edu>
  */
 //===========================================================================
@@ -44,7 +42,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * {
  * // code here
  * };
- *
  */
 class ACE_Export ACE_Copy_Disabled
 {

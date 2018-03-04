@@ -4,8 +4,6 @@
 /**
  *  @file    TTY_IO.h
  *
- *  $Id: TTY_IO.h 95212 2011-12-05 12:29:55Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@uci.edu>
  */
 //=============================================================================
@@ -36,6 +34,8 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_TTY_IO : public ACE_DEV_IO
 {
 public:
+  ACE_TTY_IO (void);
+
   enum Control_Mode
   {
     SETPARAMS,              ///< Set control parameters.

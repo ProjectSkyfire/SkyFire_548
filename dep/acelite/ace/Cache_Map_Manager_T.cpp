@@ -1,5 +1,3 @@
-// $Id: Cache_Map_Manager_T.cpp 95790 2012-05-24 15:06:21Z shuston $
-
 #ifndef ACE_CACHE_MAP_MANAGER_T_CPP
 #define ACE_CACHE_MAP_MANAGER_T_CPP
 
@@ -9,7 +7,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Malloc_Base.h"
 
 #if !defined (__ACE_INLINE__)
@@ -18,11 +16,9 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Cache_Map_Manager)
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Cache_Map_Iterator)
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Cache_Map_Reverse_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tc7(ACE_Cache_Map_Manager)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Cache_Map_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Cache_Map_Reverse_Iterator)
 
 template <class KEY, class VALUE, class CMAP_TYPE, class ITERATOR_IMPL, class REVERSE_ITERATOR_IMPL, class CACHING_STRATEGY, class ATTRIBUTES>
 ACE_Cache_Map_Manager<KEY, VALUE, CMAP_TYPE, ITERATOR_IMPL, REVERSE_ITERATOR_IMPL, CACHING_STRATEGY, ATTRIBUTES>::ACE_Cache_Map_Manager (CACHING_STRATEGY &caching_s,
@@ -31,7 +27,7 @@ ACE_Cache_Map_Manager<KEY, VALUE, CMAP_TYPE, ITERATOR_IMPL, REVERSE_ITERATOR_IMP
   : caching_strategy_ (caching_s)
 {
   if (this->open (size, alloc) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Cache_Map_Manager::ACE_Cache_Map_Manager")));
 

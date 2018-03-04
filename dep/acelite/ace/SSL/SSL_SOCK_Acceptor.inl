@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SSL_SOCK_Acceptor.inl 84619 2009-02-26 12:26:16Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE

@@ -3,8 +3,6 @@
 /**
  *  @file    Basic_Stats.h
  *
- *  $Id: Basic_Stats.h 95743 2012-05-13 12:29:28Z johnnyw $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================

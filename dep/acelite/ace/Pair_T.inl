@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Pair_T.inl 92097 2010-09-30 05:41:49Z msmit $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class T1, class T2> ACE_INLINE

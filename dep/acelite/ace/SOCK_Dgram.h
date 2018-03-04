@@ -4,8 +4,6 @@
 /**
  *  @file    SOCK_Dgram.h
  *
- *  $Id: SOCK_Dgram.h 92580 2010-11-15 09:48:02Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================

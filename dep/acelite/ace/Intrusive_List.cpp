@@ -1,5 +1,3 @@
-// $Id: Intrusive_List.cpp 92069 2010-09-28 11:38:59Z johnnyw $
-
 #ifndef ACE_INTRUSIVE_LIST_CPP
 #define ACE_INTRUSIVE_LIST_CPP
 

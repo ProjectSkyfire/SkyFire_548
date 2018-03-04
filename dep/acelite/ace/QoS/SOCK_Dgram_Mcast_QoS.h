@@ -4,8 +4,6 @@
 /**
  *  @file    SOCK_Dgram_Mcast_QoS.h
  *
- *  $Id: SOCK_Dgram_Mcast_QoS.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Vishal Kachroo <vishal@cs.wustl.edu>
  */
 //=============================================================================

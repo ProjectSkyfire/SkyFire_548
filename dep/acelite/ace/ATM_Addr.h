@@ -4,8 +4,6 @@
 /**
  *  @file    ATM_Addr.h
  *
- *  $Id: ATM_Addr.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Joe Hoffert <joeh@cs.wustl.edu>
  */
 //==========================================================================
@@ -150,7 +148,7 @@ public:
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (void *, int);
+  virtual void set_addr (const void *, int);
 
   /// Return the selector for network address.
   u_char get_selector (void) const;

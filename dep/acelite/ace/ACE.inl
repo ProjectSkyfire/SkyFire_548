@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: ACE.inl 95761 2012-05-15 18:23:04Z johnnyw $
-
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_Thread.h"
 #include "ace/OS_NS_ctype.h"
@@ -258,7 +255,11 @@ ACE::handle_exception_ready (ACE_HANDLE handle, const ACE_Time_Value *timeout)
 ACE_INLINE void
 ACE::strdelete (char *s)
 {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(s);
+#else
   delete [] s;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 #if defined (ACE_HAS_WCHAR)

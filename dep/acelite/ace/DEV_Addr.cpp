@@ -1,12 +1,13 @@
-// $Id: DEV_Addr.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #include "ace/DEV_Addr.h"
 #if !defined (__ACE_INLINE__)
 #include "ace/DEV_Addr.inl"
 #endif /* __ACE_INLINE__ */
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_string.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -39,9 +40,9 @@ ACE_DEV_Addr::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_DEV_Addr::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("devname_ = %s"), this->devname_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("devname_ = %s"), this->devname_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Thread_Manager.inl 85341 2009-05-14 11:07:37Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE

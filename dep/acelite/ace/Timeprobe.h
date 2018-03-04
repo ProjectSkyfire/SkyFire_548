@@ -4,8 +4,6 @@
 /**
  *  @file    Timeprobe.h
  *
- *  $Id: Timeprobe.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Irfan Pyarali
  *
  * If users want to use time probes, the ACE_COMPILE_TIMEPROBES
@@ -39,7 +37,7 @@
 #define ACE_TIMEPROBE_H
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 #include /**/ "ace/ACE_export.h"
 #include "ace/Malloc_Allocator.h"
 

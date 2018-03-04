@@ -1,5 +1,3 @@
-// $Id: Monitor_Query.cpp 86518 2009-08-18 12:30:56Z olli $
-
 #include "ace/Monitor_Point_Registry.h"
 #include "ace/Monitor_Base.h"
 #include "ace/Monitor_Control_Action.h"
@@ -16,6 +14,10 @@ namespace ACE
 {
   namespace Monitor_Control
   {
+    Monitor_Point_Auto_Query::Monitor_Point_Auto_Query ()
+    {
+    }
+
     int
     Monitor_Point_Auto_Query::handle_timeout (
       const ACE_Time_Value& /* current */,
@@ -41,7 +43,7 @@ namespace ACE
 
       if (this->monitor_ == 0)
         {
-          ACE_ERROR ((LM_ERROR, "Monitor_Query - monitor lookup failed\n"));
+          ACELIB_ERROR ((LM_ERROR, "Monitor_Query - monitor lookup failed\n"));
         }
     }
 
@@ -50,7 +52,7 @@ namespace ACE
     {
       if (this->monitor_ == 0)
         {
-          ACE_ERROR ((LM_ERROR, "Monitor_Query::query - null monitor\n"));
+          ACELIB_ERROR ((LM_ERROR, "Monitor_Query::query - null monitor\n"));
           return;
         }
 

@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: TLI.inl 93359 2011-02-11 11:33:12Z mcorino $
-
 #include "ace/TLI.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

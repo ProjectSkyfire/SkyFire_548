@@ -4,8 +4,6 @@
 /**
  *  @file    Capabilities.h
  *
- *  $Id: Capabilities.h 91077 2010-07-13 14:33:08Z johnnyw $
- *
  *  @author Arturo Montes <mitosys@colomsat.net.co>
  */
 //=============================================================================
@@ -26,11 +24,6 @@
 #include "ace/Containers.h"
 #include "ace/SString.h"
 #include "ace/Functor_String.h"
-
-#if defined (ACE_IS_SPLITTING)
-# include "ace/OS_NS_ctype.h"
-#endif  /* ACE_IS_SPLITTING */
-
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -80,6 +73,7 @@ class ACE_Export ACE_IntCapEntry : public ACE_CapEntry
 public:
   ACE_IntCapEntry (int val);
   int getval (void) const;
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   int val_;
@@ -98,6 +92,7 @@ class ACE_Export ACE_StringCapEntry : public ACE_CapEntry
 public:
   ACE_StringCapEntry (const ACE_TString &val);
   ACE_TString getval (void) const;
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   ACE_TString val_;
@@ -116,6 +111,7 @@ class ACE_Export ACE_BoolCapEntry : public ACE_CapEntry
 public:
   ACE_BoolCapEntry (int val);
   int getval (void) const;
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   int val_;
@@ -190,26 +186,6 @@ private:
   /// This is the set of ACE_CapEntry.
   CAPABILITIES_MAP caps_;
 };
-
-#if defined (ACE_IS_SPLITTING)
-int
-is_empty (const ACE_TCHAR *line)
-{
-  while (*line && ACE_OS::ace_isspace (*line))
-    ++line;
-
-  return *line == ACE_TEXT ('\0') || *line == ACE_TEXT ('#');
-}
-
-int
-is_line (const ACE_TCHAR *line)
-{
-  while (*line && ACE_OS::ace_isspace (*line))
-    ++line;
-
-  return *line != ACE_TEXT ('\0');
-}
-#endif /* ACE_IS_SPLITTING */
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

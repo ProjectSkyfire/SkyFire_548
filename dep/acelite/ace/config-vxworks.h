@@ -1,6 +1,4 @@
 //* -*- C++ -*- */
-// $Id: config-vxworks.h 95534 2012-02-17 23:19:33Z mitza $
-
 // The following configuration file is designed to work for VxWorks
 // Based on ACE_VXWORKS it will select the correct config file
 
@@ -36,6 +34,8 @@
 #   elif (_WRS_VXWORKS_MINOR == 9)
 #    define ACE_VXWORKS 0x690
 #   endif
+#  elif (_WRS_VXWORKS_MAJOR == 7)
+#   define ACE_VXWORKS 0x700
 #  endif
 # endif
 #endif /* ! ACE_VXWORKS */
@@ -52,8 +52,29 @@
 # include "ace/config-vxworks6.8.h"
 #elif (ACE_VXWORKS == 0x690)
 # include "ace/config-vxworks6.9.h"
+#elif (ACE_VXWORKS == 0x700)
+# include "ace/config-vxworks7.0.h"
 #else
-#error Unknown or unsupported VxWorks version
+# error Unknown or unsupported VxWorks version
+#endif
+
+// Adapt to system argument changes added at VxWorks 6.9 and 64-bit.
+// It would be nicer to typedef the data types, but without including the
+// applicable VxWorks headers here, that doesn't work.
+#if (ACE_VXWORKS < 0x690)
+#  define ACE_VX_USR_ARG_T int
+#  define ACE_VX_TASK_ID int
+#  define ACE_VX_ARG_FORMAT "%x"
+#  define ACE_VX_TASK_ID_ERROR ERROR
+#else
+#  define ACE_VX_USR_ARG_T _Vx_usr_arg_t
+#  define ACE_VX_TASK_ID TASK_ID
+#  ifdef _WRS_CONFIG_LP64
+#    define ACE_VX_ARG_FORMAT "%lx"
+#  else
+#    define ACE_VX_ARG_FORMAT "%x"
+#  endif
+#  define ACE_VX_TASK_ID_ERROR TASK_ID_ERROR
 #endif
 
 #include /**/ "ace/post.h"

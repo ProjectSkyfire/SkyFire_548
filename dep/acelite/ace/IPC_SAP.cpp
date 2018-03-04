@@ -1,12 +1,13 @@
-// $Id: IPC_SAP.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/IPC_SAP.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_unistd.h"
 #include "ace/os_include/os_signal.h"
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_fcntl.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/IPC_SAP.inl"
@@ -24,15 +25,11 @@ ACE_IPC_SAP::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_IPC_SAP::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("handle_ = %d"), this->handle_));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\npid_ = %d"), this->pid_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("handle_ = %d"), this->handle_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
-
-// Cache for the process ID.
-pid_t ACE_IPC_SAP::pid_ = 0;
 
 // This is the do-nothing constructor.  It does not perform a
 // ACE_OS::socket system call.
@@ -47,10 +44,6 @@ int
 ACE_IPC_SAP::enable (int value) const
 {
   ACE_TRACE ("ACE_IPC_SAP::enable");
-
-  // First-time in initialization.
-  if (ACE_IPC_SAP::pid_ == 0)
-    ACE_IPC_SAP::pid_ = ACE_OS::getpid ();
 
 #if defined (ACE_WIN32) || defined (ACE_VXWORKS)
   switch (value)
@@ -76,7 +69,7 @@ ACE_IPC_SAP::enable (int value) const
 #if defined (F_SETOWN)
       return ACE_OS::fcntl (this->handle_,
                             F_SETOWN,
-                            ACE_IPC_SAP::pid_);
+                            ACE_OS::getpid ());
 #else
       ACE_NOTSUP_RETURN (-1);
 #endif /* F_SETOWN */
@@ -87,7 +80,7 @@ ACE_IPC_SAP::enable (int value) const
 #if defined (F_SETOWN) && defined (FASYNC)
       if (ACE_OS::fcntl (this->handle_,
                          F_SETOWN,
-                         ACE_IPC_SAP::pid_) == -1
+                         ACE_OS::getpid ()) == -1
           || ACE::set_flags (this->handle_,
                                         FASYNC) == -1)
         return -1;

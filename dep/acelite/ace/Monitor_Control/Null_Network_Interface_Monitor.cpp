@@ -1,5 +1,3 @@
-// $Id: Null_Network_Interface_Monitor.cpp 91813 2010-09-17 07:52:52Z johnnyw $
-
 #include "ace/Monitor_Control/Null_Network_Interface_Monitor.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -4,8 +4,6 @@
 /**
  *  @file    Containers_T.h
  *
- *  $Id: Containers_T.h 91995 2010-09-24 12:45:24Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -72,7 +70,6 @@ class ACE_Allocator;
  *       -# Default constructor
  *       -# Copy constructor
  *       -# operator=
- *
  */
 template <class T>
 class ACE_Bounded_Stack
@@ -203,7 +200,6 @@ private:
  *       -# Default constructor
  *       -# Copy constructor
  *       -# operator=
- *
  */
 template <class T, size_t ACE_SIZE>
 class ACE_Fixed_Stack
@@ -318,6 +314,9 @@ public:
   /// This isn't necessary, but it keeps some compilers happy.
   ~ACE_DNode (void);
 
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
+
 private:
 
   // = Initialization methods
@@ -368,7 +367,6 @@ private:
  *       -# Default constructor
  *       -# Copy constructor
  *       -# operator=
- *
  */
 template <class T>
 class ACE_Unbounded_Stack
@@ -817,7 +815,6 @@ public:
  *       -# Default constructor
  *       -# Copy constructor
  *       -# operator=
- *
  */
 template <class T>
 class ACE_Double_Linked_List
@@ -966,7 +963,7 @@ protected:
   /**
    * Insert a @a new_item into the list.  It will be added before
    * or after @a old_item.  Default is to insert the new item *after*
-   * {head_}.  Return 0 if succeed, -1 if error occured.
+   * {head_}.  Return 0 if succeed, -1 if error occurred.
    */
   int insert_element (T *new_item,
                       int before = 0,
@@ -1396,7 +1393,6 @@ public:
  *       -# Copy constructor
  *       -# operator=
  *       -# operator==
- *
  */
 template <class T, size_t ACE_SIZE>
 class ACE_Fixed_Set
@@ -1589,7 +1585,6 @@ private:
  *       -# Copy constructor
  *       -# operator=
  *       -# operator==
- *
  */
 template <class T>
 class ACE_Bounded_Set
@@ -1786,7 +1781,6 @@ private:
  * does not impose any restriction on how that ordering operator is
  * implemented.  The set is implemented as a linked list.
  *
- *
  * <b> Requirements and Performance Characteristics</b>
  *   - Internal Structure
  *       Double linked list
@@ -1810,8 +1804,6 @@ private:
  *       -# operator=
  *       -# operator==
  *       -# operator<
- *
- *
  */
 template <class T>
 class ACE_Ordered_MultiSet

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Token.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/config-macros.h"
 
 #if defined (ACE_HAS_THREADS)

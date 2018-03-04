@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: UTF16_Encoding_Converter.inl 80826 2008-03-04 14:51:23Z wotte $
-
 // ======================================================================
 //
 // The actual conversion methods are covered by the copyright information

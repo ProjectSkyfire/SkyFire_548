@@ -1,5 +1,3 @@
-// $Id: Asynch_IO.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Asynch_IO.h"
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)

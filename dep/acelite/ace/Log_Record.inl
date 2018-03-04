@@ -1,11 +1,12 @@
 // -*- C++ -*-
-//
-// $Id: Log_Record.inl 91764 2010-09-14 13:04:37Z johnnyw $
-
 #include "ace/Global_Macros.h"
 #include "ace/os_include/arpa/os_inet.h"
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_string.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -13,7 +14,11 @@ ACE_INLINE
 ACE_Log_Record::~ACE_Log_Record (void)
 {
   if (this->msg_data_)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    ACE_Allocator::instance()->free(this->msg_data_);
+#else
     delete [] this->msg_data_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 ACE_INLINE ACE_UINT32
@@ -21,6 +26,21 @@ ACE_Log_Record::type (void) const
 {
   ACE_TRACE ("ACE_Log_Record::type");
   return this->type_;
+}
+
+ACE_INLINE void
+ACE_Log_Record::category (ACE_Log_Category_TSS* t)
+{
+  ACE_TRACE ("ACE_Log_Record::category");
+  this->category_ = t;
+}
+
+
+ACE_INLINE ACE_Log_Category_TSS*
+ACE_Log_Record::category (void) const
+{
+  ACE_TRACE ("ACE_Log_Record::category");
+  return this->category_;
 }
 
 ACE_INLINE void

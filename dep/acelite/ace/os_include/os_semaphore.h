@@ -6,8 +6,6 @@
  *
  *  semaphores (REALTIME)
  *
- *  $Id: os_semaphore.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -51,6 +49,11 @@ extern "C"
      /// Name of the semaphore (if this is non-NULL then this is a named
      /// POSIX semaphore, else its an unnamed POSIX semaphore).
      char *name_;
+
+     /// Do not unlink the named semaphore.  This lets the logical entity
+     /// of the semaphore outlive any one process that opens it.  The semaphore
+     /// must be manually unlinked with ACE_OS::sema_unlink().
+     bool avoid_unlink_;
 
 #  if defined (ACE_LACKS_NAMED_POSIX_SEM)
      /// this->sema_ doesn't always get created dynamically if a platform

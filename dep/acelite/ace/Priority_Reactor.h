@@ -4,8 +4,6 @@
 /**
  *  @file    Priority_Reactor.h
  *
- *  $Id: Priority_Reactor.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================

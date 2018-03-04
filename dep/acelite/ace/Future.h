@@ -4,8 +4,6 @@
 /**
  *  @file    Future.h
  *
- *  $Id: Future.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
  *  @author Andres Kruse <Andres.Kruse@cern.ch>
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Per Andersson <Per.Andersson@hfera.ericsson.se> and

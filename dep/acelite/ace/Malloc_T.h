@@ -4,8 +4,6 @@
 /**
  *  @file    Malloc_T.h
  *
- *  $Id: Malloc_T.h 92085 2010-09-29 12:23:13Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu> and
  *          Irfan Pyarali <irfan@cs.wustl.edu>
  */
@@ -52,6 +50,8 @@ public:
 
   /// Set the next ACE_Cached_Mem_Pool_Node.
   void set_next (ACE_Cached_Mem_Pool_Node<T> *ptr);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /**
@@ -120,6 +120,8 @@ public:
 
   /// Return the number of chunks available in the cache.
   size_t pool_depth (void);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /// Remember how we allocate the memory in the first place so
@@ -345,6 +347,8 @@ public:
 
   /// Dump the state of the object.
   virtual void dump (void) const;
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /// ALLOCATOR instance, which is owned by the adapter.
@@ -673,7 +677,6 @@ private:
  * specialization to create a version that matches the lock strategy's ctor
  * signature.  See ACE_Process_Semaphore and ACE_Thread_Semaphore for
  * examples.
- *
  */
 /*****************************************************************************/
 

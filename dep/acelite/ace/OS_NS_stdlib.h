@@ -4,8 +4,6 @@
 /**
  *  @file   OS_NS_stdlib.h
  *
- *  $Id: OS_NS_stdlib.h 93571 2011-03-17 07:37:11Z olli $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
@@ -48,11 +46,6 @@ extern "C" {
 }
 #endif /* ACE_WIN32 && _MSC_VER */
 
-// FreeBSD has atop macro (not related to ACE_OS::atop)
-#if defined (atop)
-# undef atop
-#endif
-
 /*
  * We inline and undef some functions that may be implemented
  * as macros on some platforms. This way macro definitions will
@@ -83,6 +76,18 @@ inline ACE_INT64 ace_strtoull_helper (const char *s, char **ptr, int base)
 # endif /* strtoull */
 }
 #endif /* !ACE_LACKS_STRTOULL && !ACE_STRTOULL_EQUIVALENT */
+
+#if !defined (ACE_LACKS_RAND_R)
+inline int ace_rand_r_helper (unsigned *seed)
+{
+#  if defined (rand_r)
+  return rand_r (seed);
+#  undef rand_r
+#  else
+  return ACE_STD_NAMESPACE::rand_r (seed);
+#  endif /* rand_r */
+}
+#endif /* !ACE_LACKS_RAND_R */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -231,18 +236,20 @@ namespace ACE_OS {
   ACE_HANDLE mkstemp_emulation (ACE_TCHAR * s);
 #endif /* ACE_LACKS_MKSTEMP */
 
-#if !defined (ACE_LACKS_MKTEMP)
+#if !defined (ACE_DISABLE_MKTEMP)
+#  if !defined (ACE_LACKS_MKTEMP)
   ACE_NAMESPACE_INLINE_FUNCTION
   char *mktemp (char *s);
 
-#  if defined (ACE_HAS_WCHAR)
+#    if defined (ACE_HAS_WCHAR)
   ACE_NAMESPACE_INLINE_FUNCTION
   wchar_t *mktemp (wchar_t *s);
-#  endif /* ACE_HAS_WCHAR */
-#else
+#    endif /* ACE_HAS_WCHAR */
+#  else
   extern ACE_Export
   ACE_TCHAR *mktemp (ACE_TCHAR *s);
-#endif /* !ACE_LACKS_MKTEMP */
+#  endif /* !ACE_LACKS_MKTEMP */
+#endif /* !ACE_DISABLE_MKTEMP */
 
   ACE_NAMESPACE_INLINE_FUNCTION
   int putenv (const char *string);

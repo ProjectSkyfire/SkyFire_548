@@ -5,13 +5,10 @@
  *
  *  @file    SOCK_SEQPACK_Association.h
  *
- *  $Id: SOCK_SEQPACK_Association.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author  Patrick J. Lardieri <plardier@atl.lmco.com>
  *  @author  Gaurav Naik, Lockheed Martin ATL
  *  @author  based on SOCK_Stream
  *            by Douglas C. Schmidt <schmidt@cs.wustl.edu>
- *
  */
 //=============================================================================
 

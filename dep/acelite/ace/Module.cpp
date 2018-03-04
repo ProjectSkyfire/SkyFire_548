@@ -1,5 +1,3 @@
-// $Id: Module.cpp 96080 2012-08-20 09:04:14Z johnnyw $
-
 #ifndef ACE_MODULE_CPP
 #define ACE_MODULE_CPP
 
@@ -15,9 +13,13 @@
 #include "ace/Module.inl"
 #endif /* __ACE_INLINE__ */
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Module)
+ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Module)
 
 template <ACE_SYNCH_DECL, class TIME_POLICY> void
 ACE_Module<ACE_SYNCH_USE, TIME_POLICY>::dump (void) const
@@ -185,7 +187,8 @@ ACE_Module<ACE_SYNCH_USE, TIME_POLICY>::ACE_Module (const ACE_TCHAR *module_name
                                        ACE_Task<ACE_SYNCH_USE, TIME_POLICY> *reader_q,
                                        void *args,
                                        int flags /* = M_DELETE */)
-  : flags_ (M_FLAGS_NOT_SET)
+  : next_ (0),
+    flags_ (M_FLAGS_NOT_SET)
 {
   ACE_TRACE ("ACE_Module<ACE_SYNCH_USE, TIME_POLICY>::ACE_Module");
 
@@ -193,7 +196,7 @@ ACE_Module<ACE_SYNCH_USE, TIME_POLICY>::ACE_Module (const ACE_TCHAR *module_name
   this->q_pair_[1] = 0;
 
   if (this->open (module_name, writer_q, reader_q, args, flags) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Module")));
 }

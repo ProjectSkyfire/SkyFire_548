@@ -1,6 +1,4 @@
 //* -*- C++ -*- */
-// $Id: config-vxworks6.4.h 93571 2011-03-17 07:37:11Z olli $
-
 // The following configuration file is designed to work for VxWorks
 // 6.4 platforms using one of these compilers:
 // 1) The GNU g++ compiler that is shipped with VxWorks 6.4
@@ -17,6 +15,14 @@
 #if ! defined (ACE_VXWORKS)
 # define ACE_VXWORKS 0x640
 #endif /* ! ACE_VXWORKS */
+
+#ifndef ACE_LACKS_RAND_R
+# define ACE_LACKS_RAND_R 1
+#endif
+
+#ifndef __RTP__
+# define ACE_LACKS_STD_WSTRING
+#endif
 
 #if !defined (__RTP__)
   // Fix for wrong typedef of time_t in kernel mode
@@ -82,6 +88,7 @@
 // OS-specific configuration
 #define ACE_HAS_4_4BSD_SENDMSG_RECVMSG
 #define ACE_HAS_3_PARAM_READDIR_R
+#define ACE_HAS_NET_IF_DL_H
 #define ACE_HAS_NONCONST_GETBY
 #define ACE_HAS_NONCONST_INET_ADDR
 #define ACE_HAS_NONCONST_SWAB
@@ -202,6 +209,8 @@
 #define ACE_LACKS_SYMLINKS
 #define ACE_LACKS_ISCTYPE
 
+#define ACE_LACKS_PTHREAD_SCOPE_PROCESS
+
 #if defined __RTP__
   // We are building for RTP mode
   #if !defined (ACE_AS_STATIC_LIBS)
@@ -261,6 +270,7 @@
   #define ACE_LACKS_WCSNCPY
   #define ACE_LACKS_WCSPBRK
   #define ACE_LACKS_WCSRCHR
+  #define ACE_LACKS_WCSRTOMBS
   #define ACE_LACKS_WCSSPN
   #define ACE_LACKS_WCSSTR
   #define ACE_LACKS_WCSTOK

@@ -3,8 +3,6 @@
 /**
  *  @file   config-win32-msvc-10.h
  *
- *  $Id: config-win32-msvc-10.h 95719 2012-05-01 12:54:01Z johnnyw $
- *
  *  @brief  Microsoft Visual C++ 10.0 configuration file.
  *
  *  This file is the ACE configuration file for Microsoft Visual C++ version 10.
@@ -137,11 +135,12 @@
 # define ACE_NEEDS_FUNC_DEFINITIONS
 
 // Windows Vista and Windows Server 2008 and newer do have native condition
-// variables
-#if defined (WIN32_WINNT) && (WIN32_WINNT >= 0x0600)
-# define ACE_HAS_WTHREADS_CONDITION_VARIABLE
-# undef ACE_LACKS_COND_T
-#endif
+// variables, but this is commented out because the support in ACE hasn't
+// been completed
+// #if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+// # define ACE_HAS_WTHREADS_CONDITION_VARIABLE
+// # undef ACE_LACKS_COND_T
+// #endif
 
 #include /**/ "ace/post.h"
 #endif /* ACE_CONFIG_WIN32_MSVC_10_H */

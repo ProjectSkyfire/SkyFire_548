@@ -4,8 +4,6 @@
 /**
  *  @file    Task.h
  *
- *  $Id: Task.h 91688 2010-09-09 11:21:50Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -281,7 +279,7 @@ protected:
 #if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
   /// Protect the state of a Task during concurrent operations, but
   /// only if we're configured as MT safe...
-  ACE_Thread_Mutex lock_;
+  mutable ACE_Thread_Mutex lock_;
 #endif /* ACE_MT_SAFE */
 
   /// Holds the thread ID of the last thread to exit svc() in this object.

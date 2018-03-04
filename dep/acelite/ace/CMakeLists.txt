@@ -37,6 +37,7 @@ set(ace_STAT_SRCS
   Based_Pointer_Repository.cpp
   Basic_Stats.cpp
   Basic_Types.cpp
+  Bound_Ptr.cpp
   Capabilities.cpp
   CDR_Base.cpp
   CDR_Size.cpp
@@ -72,6 +73,7 @@ set(ace_STAT_SRCS
   Encoding_Converter.cpp
   Encoding_Converter_Factory.cpp
   Event.cpp
+  Event_Base.cpp
   Event_Handler.cpp
   Event_Handler_Handle_Timeout_Upcall.cpp
   FIFO.cpp
@@ -106,6 +108,7 @@ set(ace_STAT_SRCS
   Local_Name_Space.cpp
   Local_Tokens.cpp
   Lock.cpp
+  Log_Category.cpp
   Log_Msg.cpp
   Log_Msg_Backend.cpp
   Log_Msg_Callback.cpp
@@ -154,14 +157,17 @@ set(ace_STAT_SRCS
   Notification_Queue.cpp
   Notification_Strategy.cpp
   NT_Service.cpp
+  Null_Mutex.cpp
   Obchunk.cpp
   Object_Manager.cpp
   Object_Manager_Base.cpp
+  Obstack.cpp
   OS_Errno.cpp
   OS_Log_Msg_Attributes.cpp
   OS_main.cpp
   OS_NS_arpa_inet.cpp
   OS_NS_ctype.cpp
+  OS_NS_devctl.cpp
   OS_NS_dirent.cpp
   OS_NS_dlfcn.cpp
   OS_NS_errno.cpp

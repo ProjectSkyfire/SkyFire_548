@@ -1,5 +1,3 @@
-// $Id: Mem_Map.cpp 95716 2012-05-01 07:49:04Z johnnyw $
-
 // Defines the member functions for the memory mapping facility.
 
 #include "ace/Mem_Map.h"
@@ -11,8 +9,11 @@
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_NS_fcntl.h"
 #include "ace/OS_NS_string.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Truncate.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,14 +25,14 @@ ACE_Mem_Map::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Mem_Map::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("base_addr_ = %x"), this->base_addr_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nfilename_ = %s"), this->filename_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nlength_ = %d"), this->length_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nhandle_ = %d"), this->handle_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nfile_mapping_ = %d"), this->file_mapping_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nclose_handle_ = %d"), this->close_handle_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("base_addr_ = %x"), this->base_addr_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nfilename_ = %s"), this->filename_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nlength_ = %d"), this->length_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nhandle_ = %d"), this->handle_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nfile_mapping_ = %d"), this->file_mapping_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nclose_handle_ = %d"), this->close_handle_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -273,7 +274,7 @@ ACE_Mem_Map::ACE_Mem_Map (const ACE_TCHAR *file_name,
                  addr,
                  offset,
                  sa) < 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Mem_Map::ACE_Mem_Map")));
 }
@@ -306,7 +307,7 @@ ACE_Mem_Map::ACE_Mem_Map (ACE_HANDLE handle,
                  addr,
                  offset,
                  sa) < 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Mem_Map::ACE_Mem_Map")));
 }

@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Compressor.inl 95545 2012-02-23 07:57:08Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE ACE_CompressorId

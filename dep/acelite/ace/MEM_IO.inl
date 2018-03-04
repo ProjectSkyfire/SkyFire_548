@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: MEM_IO.inl 91813 2010-09-17 07:52:52Z johnnyw $
-
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 

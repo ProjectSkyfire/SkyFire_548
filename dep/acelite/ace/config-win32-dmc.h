@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: config-win32-dmc.h 92102 2010-09-30 08:14:15Z johnnyw $
-
 // The following configuration file contains defines for Digital Mars compilers.
 
 #ifndef ACE_CONFIG_WIN32_DMC_H
@@ -44,7 +42,6 @@
 #define ACE_WCSDUP_EQUIVALENT ::_wcsdup
 //  This section above was extracted from config-win32-msvc
 
-#define ACE_EXPORT_NESTED_CLASSES 1
 #define ACE_HAS_CPLUSPLUS_HEADERS 1
 #define ACE_HAS_NONCONST_SELECT_TIMEVAL 1
 #define ACE_HAS_SIG_ATOMIC_T 1

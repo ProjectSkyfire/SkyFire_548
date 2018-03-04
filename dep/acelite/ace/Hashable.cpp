@@ -1,5 +1,3 @@
-//$Id: Hashable.cpp 93736 2011-04-05 12:38:35Z johnnyw $
-
 #include "ace/Hashable.h"
 
 #if !defined (__ACE_INLINE__)

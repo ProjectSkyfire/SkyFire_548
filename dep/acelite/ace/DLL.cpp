@@ -1,8 +1,6 @@
-// $Id: DLL.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/DLL.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/ACE.h"
 #include "ace/DLL_Manager.h"
 #include "ace/OS_NS_string.h"
@@ -43,7 +41,7 @@ ACE_DLL::ACE_DLL (const ACE_DLL &rhs)
                      rhs.open_mode_,
                      rhs.close_handle_on_destruction_) != 0
       && ACE::debug ())
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
     ACE_TEXT ("ACE_DLL::copy_ctor: error: %s\n"),
     this->error ()));
 }
@@ -84,7 +82,7 @@ ACE_DLL::ACE_DLL (const ACE_TCHAR *dll_name,
 
   if (this->open (dll_name, this->open_mode_, close_handle_on_destruction) != 0
       && ACE::debug ())
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("ACE_DLL::open: error calling open: %s\n"),
                 this->error ()));
 }
@@ -103,7 +101,11 @@ ACE_DLL::~ACE_DLL (void)
   // occur if full ACE_DLL initialization is interrupted due to errors
   // (e.g. attempting to open a DSO/DLL that does not exist).  Make
   // sure this->dll_name_ is deallocated.
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free (this->dll_name_);
+#else
   delete [] this->dll_name_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 // This method opens the library based on the mode specified using the
@@ -136,11 +138,12 @@ ACE_DLL::open_i (const ACE_TCHAR *dll_filename,
   ACE_TRACE ("ACE_DLL::open_i");
 
   this->error_ = 0;
+  this->errmsg_.clear (true);
 
   if (!dll_filename)
     {
       if (ACE::debug ())
-        ACE_ERROR ((LM_ERROR,
+        ACELIB_ERROR ((LM_ERROR,
                     ACE_TEXT ("ACE_DLL::open_i: dll_name is %s\n"),
                     this->dll_name_ == 0 ? ACE_TEXT ("(null)")
         : this->dll_name_));
@@ -162,12 +165,24 @@ ACE_DLL::open_i (const ACE_TCHAR *dll_filename,
   this->open_mode_ = open_mode;
   this->close_handle_on_destruction_ = close_handle_on_destruction;
 
+  ACE_DLL_Handle::ERROR_STACK errors;
   this->dll_handle_ = ACE_DLL_Manager::instance()->open_dll (this->dll_name_,
                                                              this->open_mode_,
-                                                             handle);
+                                                             handle,
+                                                             &errors);
 
   if (!this->dll_handle_)
-    this->error_ = 1;
+    {
+      ACE_TString errtmp;
+      while (!errors.is_empty ())
+        {
+          errors.pop (errtmp);
+          if (this->errmsg_.length () > 0)
+            this->errmsg_ += ACE_TEXT ("\n");
+          this->errmsg_ += errtmp;
+        }
+      this->error_ = 1;
+    }
 
   return this->error_ ? -1 : 0;
 }
@@ -180,10 +195,11 @@ ACE_DLL::symbol (const ACE_TCHAR *sym_name, int ignore_errors)
   ACE_TRACE ("ACE_DLL::symbol");
 
   this->error_ = 0;
+  this->errmsg_.clear (true);
 
   void *sym = 0;
   if (this->dll_handle_)
-    sym = this->dll_handle_->symbol (sym_name, ignore_errors);
+    sym = this->dll_handle_->symbol (sym_name, ignore_errors, this->errmsg_);
 
   if (!sym)
     this->error_ = 1;
@@ -209,7 +225,11 @@ ACE_DLL::close (void)
 
   // Even if close_dll() failed, go ahead and cleanup.
   this->dll_handle_ = 0;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free (this->dll_name_);
+#else
   delete [] this->dll_name_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
   this->dll_name_ = 0;
   this->close_handle_on_destruction_ = false;
 
@@ -224,7 +244,7 @@ ACE_DLL::error (void) const
   ACE_TRACE ("ACE_DLL::error");
   if (this->error_)
     {
-      return ACE_OS::dlerror ();
+      return const_cast<ACE_TCHAR*> (this->errmsg_.c_str ());
     }
 
   return 0;
@@ -235,7 +255,7 @@ ACE_DLL::error (void) const
 // means the user temporarily wants to take the handle.
 
 ACE_SHLIB_HANDLE
-ACE_DLL::get_handle (int become_owner) const
+ACE_DLL::get_handle (bool become_owner) const
 {
   ACE_TRACE ("ACE_DLL::get_handle");
 

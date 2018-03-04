@@ -1,4 +1,3 @@
-// $Id: Init_ACE.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
 #include "ace/Init_ACE.h"
 
 #include "ace/Object_Manager.h"

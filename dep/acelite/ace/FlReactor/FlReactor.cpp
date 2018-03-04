@@ -1,5 +1,3 @@
-// $Id: FlReactor.cpp 95511 2012-01-27 09:40:38Z johnnyw $
-
 #include "ace/FlReactor/FlReactor.h"
 
 #include /**/ <FL/Fl.H>

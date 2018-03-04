@@ -1,6 +1,5 @@
 // file      : XSCRT/Traversal.tpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Traversal.tpp 95833 2012-06-06 14:53:45Z johnnyw $
 
 namespace XSCRT
 {

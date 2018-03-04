@@ -4,8 +4,6 @@
 /**
  *  @file    MEM_IO.h
  *
- *  $Id: MEM_IO.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //=============================================================================
@@ -117,6 +115,8 @@ public:
   virtual int init (ACE_HANDLE handle,
                     const ACE_TCHAR *name,
                     MALLOC_OPTIONS *options);
+
+  int fini ();
 
   /**
    * Fetch location of next available data into <recv_buffer_>.

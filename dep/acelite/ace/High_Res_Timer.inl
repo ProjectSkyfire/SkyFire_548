@@ -1,6 +1,4 @@
 // -*- C++ -*- */
-// $Id: High_Res_Timer.inl 95798 2012-05-31 07:58:55Z johnnyw $
-
 #include "ace/Global_Macros.h"
 
 #if defined (ACE_WIN32)

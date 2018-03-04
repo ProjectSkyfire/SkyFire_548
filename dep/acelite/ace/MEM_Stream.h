@@ -4,8 +4,6 @@
 /**
  *  @file    MEM_Stream.h
  *
- *  $Id: MEM_Stream.h 94448 2011-09-08 08:20:29Z johnnyw $
- *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //=============================================================================

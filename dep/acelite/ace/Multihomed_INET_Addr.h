@@ -4,8 +4,6 @@
 /**
  *  @file    Multihomed_INET_Addr.h
  *
- *  $Id: Multihomed_INET_Addr.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
  *  @author Edward R. Mulholland <emulholl@atl.lmco.com>
  */
 //=============================================================================
@@ -181,6 +179,9 @@ public:
   /// IPV6 version of the above.
   void get_addresses(sockaddr_in6 *addrs, size_t size) const;
 #endif /* ACE_HAS_IPV6 */
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   ACE_Array<ACE_INET_Addr> secondaries_;

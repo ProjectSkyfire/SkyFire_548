@@ -4,8 +4,6 @@
 /**
  *  @file    Thread_Semaphore.h
  *
- *  $Id: Thread_Semaphore.h 95807 2012-06-01 12:44:19Z johnnyw $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>

@@ -2,10 +2,7 @@
 /**
  *  @file   Codeset_Registry.cpp
  *
- *  $Id: Codeset_Registry.cpp 91286 2010-08-05 09:04:31Z johnnyw $
- *
  *  emulated codset regstry functions
- *
  *
  *  @author Phil Mesnier <mesnier_p@ociweb.com>
  */
@@ -14,8 +11,6 @@
 #include "ace/Codeset_Registry.h"
 #include "ace/OS_Memory.h"
 #include "ace/OS_NS_string.h"
-
-// $Id: Codeset_Registry.cpp 91286 2010-08-05 09:04:31Z johnnyw $
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Codeset_Registry.inl"
@@ -40,7 +35,11 @@ ACE_Codeset_Registry::locale_to_registry_i (const ACE_CString &locale,
     *num_sets = element->num_sets_;
   if (char_sets != 0)
     {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_ALLOCATOR_RETURN (*char_sets,static_cast<ACE_CDR::UShort*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::UShort) * (element->num_sets_))),0);
+#else
       ACE_NEW_RETURN (*char_sets,ACE_CDR::UShort[element->num_sets_],0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
       ACE_OS::memcpy (*char_sets, element->char_sets_,
                       element->num_sets_ * sizeof (ACE_CDR::UShort));
     }
@@ -64,7 +63,11 @@ ACE_Codeset_Registry::registry_to_locale_i (ACE_CDR::ULong codeset_id,
     *num_sets = element->num_sets_;
   if (char_sets != 0)
     {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_ALLOCATOR_RETURN (*char_sets,static_cast<ACE_CDR::UShort*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::UShort) * (element->num_sets_))),0);
+#else
       ACE_NEW_RETURN (*char_sets,ACE_CDR::UShort[element->num_sets_],0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
       ACE_OS::memcpy (*char_sets, element->char_sets_,
                       element->num_sets_ * sizeof (ACE_CDR::UShort));
     }

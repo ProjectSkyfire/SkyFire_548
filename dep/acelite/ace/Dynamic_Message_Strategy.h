@@ -4,8 +4,6 @@
 /**
  *  @file    Dynamic_Message_Strategy.h
  *
- *  $Id: Dynamic_Message_Strategy.h 95839 2012-06-07 10:13:33Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
@@ -15,7 +13,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 #include /**/ "ace/ACE_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Mem_Map.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_sys_mman.h"
 #include "ace/OS_NS_sys_stat.h"
@@ -122,7 +119,7 @@ ACE_Mem_Map::unmap (ssize_t len)
   if (this->base_addr_ != MAP_FAILED)
     {
       int const result = ACE_OS::munmap (this->base_addr_,
-                                         len < 0 ? this->length_ : len);
+                                         len < 0 ? this->length_ : (size_t)len);
       this->base_addr_ = MAP_FAILED;
       return result;
     }
@@ -140,7 +137,7 @@ ACE_Mem_Map::unmap (void *addr, ssize_t len)
   this->close_filemapping_handle ();
 
   return ACE_OS::munmap (addr,
-                         len < 0 ? this->length_ : len);
+                         len < 0 ? this->length_ : (size_t)len);
 }
 
 // Sync <len> bytes of the memory region to the backing store starting

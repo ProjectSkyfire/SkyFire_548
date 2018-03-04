@@ -4,8 +4,6 @@
 /**
  * @file Monitor_Control_Types.h
  *
- * $Id: Monitor_Control_Types.h 83306 2008-10-17 12:19:53Z johnnyw $
- *
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================
@@ -102,7 +100,12 @@ namespace ACE
       /**
        * @brief Holder for a monitor point's constraints.
        */
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      typedef ACE_Array_Map<long, Constraint, std::equal_to<long>, ACE_Allocator_Std_Adapter<std::pair<long, Constraint> > > ConstraintList;
+#else
       typedef ACE_Array_Map<long, Constraint> ConstraintList;
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
     };
   }
 }

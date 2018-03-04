@@ -4,8 +4,6 @@
 /**
  *  @file    Registry.h
  *
- *  $Id: Registry.h 85110 2009-04-20 09:18:43Z msmit $
- *
  *  @author Irfan Pyarali (irfan@cs.wustl.edu)
  */
 //=============================================================================

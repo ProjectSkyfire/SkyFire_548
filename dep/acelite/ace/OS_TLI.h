@@ -4,8 +4,6 @@
 /**
  *  @file   OS_TLI.h
  *
- *  $Id: OS_TLI.h 91688 2010-09-09 11:21:50Z johnnyw $
- *
  *  @author Doug Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -156,7 +154,6 @@ typedef struct t_bind  ACE_TBIND;
  * @namespace ACE_OS
  *
  * @brief This class is a wrapper for the XTI/TLI operations
- *
  */
 namespace ACE_OS
 {

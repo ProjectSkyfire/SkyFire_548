@@ -1,7 +1,5 @@
 // file      : XSCRT/XMLSchema.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: XMLSchema.hpp 95802 2012-05-31 12:37:36Z johnnyw $
-
 #ifndef XSCRT_XMLSCHEMA_HPP
 #define XSCRT_XMLSCHEMA_HPP
 
@@ -514,7 +512,6 @@ namespace XMLSchema
 
 // Traversal
 //
-//
 
 #include "ace/XML_Utils/XSCRT/Traversal.hpp"
 
@@ -568,7 +565,6 @@ namespace XMLSchema
 
 
 // ExtendedTypeInfo for XML Schema types
-//
 //
 
 #include "ace/XML_Utils/XSCRT/ExtendedTypeInfo.hpp"

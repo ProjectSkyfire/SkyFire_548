@@ -3,8 +3,6 @@
 /**
  * @file ETCL_Constraint_Visitor.h
  *
- * $Id: ETCL_Constraint_Visitor.h 81653 2008-05-08 21:08:49Z parsons $
- *
  * @author Carlos O'Ryan <coryan@cs.wustl.edu>
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
@@ -43,6 +41,7 @@ class ETCL_Preference;
 class ACE_ETCL_Export ETCL_Constraint_Visitor
 {
 public:
+  ETCL_Constraint_Visitor (void);
   virtual ~ETCL_Constraint_Visitor (void);
 
   virtual int visit_literal (ETCL_Literal_Constraint *);

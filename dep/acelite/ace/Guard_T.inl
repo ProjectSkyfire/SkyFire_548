@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Guard_T.inl 93736 2011-04-05 12:38:35Z johnnyw $
-
 // FUZZ: disable check_for_ACE_Guard
 
 #include "ace/RW_Thread_Mutex.h"

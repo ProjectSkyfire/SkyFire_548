@@ -4,8 +4,6 @@
 /**
  *  @file    Log_Record.h
  *
- *  $Id: Log_Record.h 91764 2010-09-14 13:04:37Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -32,6 +30,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
+class ACE_Log_Category_TSS;
 
 /// Defines the structure of an ACE logging record.
 class ACE_Export ACE_Log_Record
@@ -75,7 +74,7 @@ public:
   /// FILE if the corresponding type is enabled.
   int print (const ACE_TCHAR host_name[],
              u_long verbose_flag,
-#if !defined (ACE_HAS_WINCE)
+#if !defined (ACE_HAS_WINCE) && !defined (ACE_LACKS_STDERR)
              FILE *fp = stderr);
 #else
              FILE *fp);
@@ -91,7 +90,8 @@ public:
 
   int format_msg (const ACE_TCHAR host_name[],
                   u_long verbose_flag,
-                  ACE_TCHAR *verbose_msg);
+                  ACE_TCHAR *verbose_msg,
+                  size_t verbose_msg_size);
 
   /**
    * Returns a character array with the string form of the
@@ -108,6 +108,11 @@ public:
 
   /// Set the type of the Log_Record.
   void type (ACE_UINT32);
+
+  /// Get the category of the Log_Record.
+  ACE_Log_Category_TSS* category (void) const;
+  /// Set the category of the Log_Record.
+  void category (ACE_Log_Category_TSS*);
 
   /**
    * Get the priority of the Log_Record <type_>.  This is computed
@@ -185,6 +190,9 @@ private:
 
   /// Allocated size of msg_data_ in ACE_TCHARs
   size_t msg_data_size_;
+
+  ///
+  ACE_Log_Category_TSS* category_;
 
   /// disallow copying...
   ACE_Log_Record (const ACE_Log_Record& rhs);

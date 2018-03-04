@@ -1,5 +1,3 @@
-// $Id: Timer_Queue_T.cpp 95690 2012-04-09 22:00:03Z shuston $
-
 #ifndef ACE_TIMER_QUEUE_T_CPP
 #define ACE_TIMER_QUEUE_T_CPP
 
@@ -17,7 +15,7 @@
 #include "ace/Timer_Queue_T.h"
 #include "ace/Guard_T.h"
 #include "ace/Reverse_Lock_T.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Null_Mutex.h"
 #include "ace/OS_NS_sys_time.h"
 #include "ace/Functor.h"
@@ -169,10 +167,10 @@ ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Timer_Queue_T::dump");
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
   this->timeout_.dump ();
   this->timer_skew_.dump ();
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -248,6 +246,16 @@ ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::schedule (const TYPE &t
 
   // Return result;
   return result;
+}
+
+template <class TYPE, class FUNCTOR, class ACE_LOCK, typename TIME_POLICY> int
+ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::expire (void)
+{
+  // We can't check here is the timer queue is empty, in some
+  // implementations (like the timer heap) calling is_empty()
+  // would at that moment access member variables without having
+  // locked ourself for thread safety
+  return this->expire (this->gettimeofday_static () + timer_skew_);
 }
 
 // Run the <handle_timeout> method for all Timers whose values are <=

@@ -1,7 +1,5 @@
 // file      : XSCRT/Traversal.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Traversal.hpp 95833 2012-06-06 14:53:45Z johnnyw $
-
 #ifndef XSCRT_TRAVERSAL_HPP
 #define XSCRT_TRAVERSAL_HPP
 

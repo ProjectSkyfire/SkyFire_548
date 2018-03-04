@@ -1,8 +1,6 @@
 /**
  *  @file Notification_Queue.h
  *
- *  $Id: Notification_Queue.h 95425 2012-01-09 11:09:43Z johnnyw $
- *
  *  @author Carlos O'Ryan <coryan@atdesk.com>
  */
 
@@ -58,6 +56,8 @@ public:
    * @brief Clear the notifications specified by @c mask
    */
   void clear_mask(ACE_Reactor_Mask mask);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   ACE_Notification_Buffer contents_;

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: INET_Addr.inl 96017 2012-08-08 22:18:09Z mitza $
-
 
 #include "ace/OS_NS_string.h"
 #include "ace/Global_Macros.h"
@@ -10,7 +7,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE void
-ACE_INET_Addr::reset (void)
+ACE_INET_Addr::reset_i (void)
 {
   ACE_OS::memset (&this->inet_addr_, 0, sizeof (this->inet_addr_));
   if (this->get_type() == AF_INET)
@@ -29,6 +26,9 @@ ACE_INET_Addr::reset (void)
       this->inet_addr_.in6_.sin6_family = AF_INET6;
     }
 #endif  /* ACE_HAS_IPV6 */
+  this->inet_addrs_.clear ();
+  this->inet_addrs_iter_ = this->inet_addrs_.end ();
+
 }
 
 ACE_INLINE int

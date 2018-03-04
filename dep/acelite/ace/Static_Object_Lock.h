@@ -4,8 +4,6 @@
 /**
  *  @file    Static_Object_Lock.h
  *
- *  $Id: Static_Object_Lock.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author David L. Levine <levine@cs.wustl.edu>
  *  @author Matthias Kerkhoff
  *  @author Per Andersson
@@ -48,27 +46,6 @@ public:
   /// what dynamically allocated.
   static void cleanup_lock (void);
 };
-
-ACE_END_VERSIONED_NAMESPACE_DECL
-
-#endif /* ACE_HAS_THREADS */
-
-// hack to get around errors while compiling using split-cpp
-#if defined (ACE_HAS_THREADS)
-
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-
-# if defined (ACE_IS_SPLITTING)
-typedef ACE_Cleanup_Adapter<ACE_Recursive_Thread_Mutex> ACE_Static_Object_Lock_Type;
-
-#  if defined (__GNUC__)
-// With g++, suppress the warning that this is unused.
-static ACE_Static_Object_Lock_Type *ACE_Static_Object_Lock_lock __attribute__ ((unused)) = 0;
-#  else
-static ACE_Static_Object_Lock_Type *ACE_Static_Object_Lock_lock = 0;
-#  endif /* __GNUC__ */
-
-# endif /* ACE_IS_SPLITTING */
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

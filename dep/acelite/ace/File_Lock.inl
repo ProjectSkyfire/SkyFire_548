@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: File_Lock.inl 87213 2009-10-23 13:11:34Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE int

@@ -1,7 +1,5 @@
 // file      : XMLSchema/Types.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Types.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 #ifndef XMLSCHEMA_TYPES_HPP
 #define XMLSCHEMA_TYPES_HPP
 

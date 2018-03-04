@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Service_Repository.inl 84170 2009-01-15 13:31:50Z johnnyw $
-
 // Returns a count of the number of currently valid entries (counting
 // both resumed and suspended entries).
 
@@ -20,6 +17,12 @@ ACE_Service_Repository::current_size (void) const
                             ace_mon,
                             (ACE_Recursive_Thread_Mutex &) this->lock_, 0));
   return this->service_array_.size ();
+}
+
+ACE_INLINE ACE_SYNCH_RECURSIVE_MUTEX&
+ACE_Service_Repository::lock (void) const
+{
+  return this->lock_;
 }
 
 ACE_INLINE int

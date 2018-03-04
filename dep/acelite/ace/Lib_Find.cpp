@@ -1,7 +1,5 @@
-// $Id: Lib_Find.cpp 95630 2012-03-22 13:04:47Z johnnyw $
-
 #include "ace/Lib_Find.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_stdio.h"
@@ -9,6 +7,10 @@
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_Memory.h"
 #include "ace/OS_NS_fcntl.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if defined (ACE_WIN32)
 #  include "ace/OS_NS_strings.h"
@@ -75,13 +77,13 @@ ACE_LD_Symbol_Registry::register_symbol (const ACE_TCHAR* symname,
   int const result = symbol_registry_.bind (symname, symaddr);
   if (result == 1)
     {
-      ACE_DEBUG((LM_INFO, ACE_TEXT ("ACE_LD_Symbol_Registry:")
+      ACELIB_DEBUG((LM_INFO, ACE_TEXT ("ACE_LD_Symbol_Registry:")
                           ACE_TEXT (" duplicate symbol %s registered\n"),
                           ACE_TEXT_ALWAYS_CHAR (symname)));
     }
   else if (result == -1)
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT ("ACE_LD_Symbol_Registry:")
+      ACELIB_ERROR((LM_ERROR, ACE_TEXT ("ACE_LD_Symbol_Registry:")
                            ACE_TEXT (" failed to register symbol %s\n"),
                            ACE_TEXT_ALWAYS_CHAR (symname)));
     }
@@ -104,10 +106,9 @@ ACE_SINGLETON_DECLARE (ACE_Singleton,
 typedef ACE_Singleton<ACE_LD_Symbol_Registry, ACE_Thread_Mutex>
         ACE_LD_SYMBOL_REGISTRY;
 
-#if defined (ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION)
-template ACE_Singleton<ACE_LD_Symbol_Registry, ACE_Thread_Mutex> *
-  ACE_Singleton<ACE_LD_Symbol_Registry, ACE_Thread_Mutex>::singleton_;
-#endif /* ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION */
+ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, ACE_LD_Symbol_Registry, ACE_SYNCH_MUTEX);
+
+
 #endif
 
 
@@ -121,72 +122,72 @@ ACE::ldfind (const ACE_TCHAR* filename,
 {
   ACE_TRACE ("ACE::ldfind");
 #if defined (ACE_OPENVMS)
-  if (ACE_OS::strlen(filename) >= maxpathnamelen)
-  {
-    errno = ENOMEM;
-    return -1;
-  }
+  if (ACE_OS::strlen (filename) >= maxpathnamelen)
+    {
+      errno = ENOMEM;
+      return -1;
+    }
 
   dsc$descriptor nameDsc;
   nameDsc.dsc$b_class = DSC$K_CLASS_S;
   nameDsc.dsc$b_dtype = DSC$K_DTYPE_T;
-  nameDsc.dsc$w_length = ACE_OS::strlen(filename);
+  nameDsc.dsc$w_length = ACE_OS::strlen (filename);
   nameDsc.dsc$a_pointer = (char*)filename;
 
   char symbol[] = "NULL";
   dsc$descriptor symbolDsc;
   symbolDsc.dsc$b_class = DSC$K_CLASS_S;
   symbolDsc.dsc$b_dtype = DSC$K_DTYPE_T;
-  symbolDsc.dsc$w_length = ACE_OS::strlen(symbol);
+  symbolDsc.dsc$w_length = ACE_OS::strlen (symbol);
   symbolDsc.dsc$a_pointer = symbol;
 
   int symbolValue;
   int result;
   try
-  {
-    result = LIB$FIND_IMAGE_SYMBOL(&nameDsc, &symbolDsc, &symbolValue, 0, 0);
-  }
-  catch (chf$signal_array& sig)
-  {
-    result = sig.chf$l_sig_name;
-  }
+    {
+      result = LIB$FIND_IMAGE_SYMBOL (&nameDsc, &symbolDsc, &symbolValue, 0, 0);
+    }
+  catch (chf$signal_array &sig)
+    {
+      result = sig.chf$l_sig_name;
+    }
 
   int severity = result & STS$M_SEVERITY;
   int conditionId = result & STS$M_COND_ID;
   if (severity == STS$K_SUCCESS || severity == STS$K_WARNING || severity == STS$K_INFO ||
       (severity == STS$K_ERROR && conditionId == (LIB$_KEYNOTFOU & STS$M_COND_ID)))
-  {
-    ACE_OS::strcpy(pathname, filename);
-    return 0;
-  }
+    {
+      ACE_OS::strcpy (pathname, filename);
+      return 0;
+    }
 
-  if (ACE_OS::strlen(filename) + ACE_OS::strlen(ACE_DLL_PREFIX) >= maxpathnamelen)
-  {
-    errno = ENOMEM;
-    return -1;
-  }
+  if (ACE_OS::strlen (filename) + ACE_OS::strlen (ACE_DLL_PREFIX) >= maxpathnamelen)
+    {
+      errno = ENOMEM;
+      return -1;
+    }
 
 
-  ACE_OS::strcpy(pathname, ACE_DLL_PREFIX);
-  ACE_OS::strcat(pathname, filename);
-  nameDsc.dsc$w_length = ACE_OS::strlen(pathname);
+  ACE_OS::strcpy (pathname, ACE_DLL_PREFIX);
+  ACE_OS::strcat (pathname, filename);
+  nameDsc.dsc$w_length = ACE_OS::strlen (pathname);
   nameDsc.dsc$a_pointer = pathname;
   try
-  {
-    result = LIB$FIND_IMAGE_SYMBOL(&nameDsc, &symbolDsc, &symbolValue, 0, 0);
-  }
-  catch (chf$signal_array& sig)
-  {
-    result = sig.chf$l_sig_name;
-  }
+    {
+      result = LIB$FIND_IMAGE_SYMBOL (&nameDsc, &symbolDsc, &symbolValue, 0, 0);
+    }
+  catch (chf$signal_array &sig)
+    {
+      result = sig.chf$l_sig_name;
+    }
 
   severity = result & STS$M_SEVERITY;
   conditionId = result & STS$M_COND_ID;
   if (severity == STS$K_SUCCESS || severity == STS$K_WARNING || severity == STS$K_INFO ||
       (severity == STS$K_ERROR && conditionId == (LIB$_KEYNOTFOU & STS$M_COND_ID)))
-  {
-    return 0;
-  }
+    {
+      return 0;
+    }
   errno = ENOENT;
   return -1;
 #endif /* ACE_OPENVMS */
@@ -268,7 +269,7 @@ ACE::ldfind (const ACE_TCHAR* filename,
       if (ACE_OS::strcmp (s, dll_suffix) != 0)
 #endif /* ACE_WIN32 */
         {
-          ACE_ERROR ((LM_WARNING,
+          ACELIB_ERROR ((LM_WARNING,
                       ACE_TEXT ("Warning: improper suffix for a ")
                       ACE_TEXT ("shared library on this platform: %s\n"),
                       s));
@@ -315,21 +316,21 @@ ACE::ldfind (const ACE_TCHAR* filename,
 #endif /* ACE_DIRECTORY_SEPARATOR_CHAR */
               // First, try matching the filename *without* adding a
               // prefix.
-              ACE_OS::sprintf (pathname,
-                               ACE_TEXT ("%s%s%s"),
-                               searchpathname,
-                               searchfilename,
-                               has_suffix ? ACE_TEXT ("") : dll_suffix);
+              ACE_OS::snprintf (pathname, maxpathnamelen,
+                                ACE_TEXT ("%s%s%s"),
+                                searchpathname,
+                                searchfilename,
+                                has_suffix ? ACE_TEXT ("") : dll_suffix);
               if (ACE_OS::access (pathname, F_OK) == 0)
                 return 0;
 
               // Second, try matching the filename *with* adding a prefix.
-              ACE_OS::sprintf (pathname,
-                               ACE_TEXT ("%s%s%s%s"),
-                               searchpathname,
-                               ACE_DLL_PREFIX,
-                               searchfilename,
-                               has_suffix ? ACE_TEXT ("") : dll_suffix);
+              ACE_OS::snprintf (pathname, maxpathnamelen,
+                                ACE_TEXT ("%s%s%s%s"),
+                                searchpathname,
+                                ACE_DLL_PREFIX,
+                                searchfilename,
+                                has_suffix ? ACE_TEXT ("") : dll_suffix);
               if (ACE_OS::access (pathname, F_OK) == 0)
                 return 0;
             }
@@ -349,12 +350,12 @@ ACE::ldfind (const ACE_TCHAR* filename,
                                  pathname,
                                  &file_component);
           if (pathlen >= maxpathnamelen)
-          {
+            {
               errno = ENOMEM;
               return -1;
-          }
+            }
           else if (pathlen > 0)
-              return 0;
+            return 0;
 
           // In case not found we should try again with the ACE_DLL_PREFIX
           // prefixed
@@ -368,16 +369,16 @@ ACE::ldfind (const ACE_TCHAR* filename,
                                  pathname,
                                  &file_component);
           if (pathlen >= maxpathnamelen)
-          {
+            {
               errno = ENOMEM;
               return -1;
-          }
+            }
           else if (pathlen > 0)
-              return 0;
+            return 0;
 #else
           ACE_TCHAR *ld_path = 0;
 #  if defined ACE_DEFAULT_LD_SEARCH_PATH
-          ld_path = const_cast <ACE_TCHAR*> (ACE_DEFAULT_LD_SEARCH_PATH);
+          ld_path = const_cast<ACE_TCHAR*> (ACE_DEFAULT_LD_SEARCH_PATH);
 #  else
 #    if defined (ACE_WIN32) || !defined (ACE_USES_WCHAR)
           ld_path = ACE_OS::getenv (ACE_LD_SEARCH_PATH);
@@ -465,24 +466,24 @@ ACE::ldfind (const ACE_TCHAR* filename,
 
                   // First, try matching the filename *without* adding a
                   // prefix.
-                  ACE_OS::sprintf (pathname,
-                                   ACE_TEXT ("%s%c%s%s"),
-                                   path_entry,
-                                   ACE_DIRECTORY_SEPARATOR_CHAR,
-                                   searchfilename,
-                                   has_suffix ? ACE_TEXT ("") : dll_suffix);
+                  ACE_OS::snprintf (pathname, maxpathnamelen,
+                                    ACE_TEXT ("%s%c%s%s"),
+                                    path_entry,
+                                    ACE_DIRECTORY_SEPARATOR_CHAR,
+                                    searchfilename,
+                                    has_suffix ? ACE_TEXT ("") : dll_suffix);
                   if (ACE_OS::access (pathname, F_OK) == 0)
                     break;
 
                   // Second, try matching the filename *with* adding a
                   // prefix.
-                  ACE_OS::sprintf (pathname,
-                                   ACE_TEXT ("%s%c%s%s%s"),
-                                   path_entry,
-                                   ACE_DIRECTORY_SEPARATOR_CHAR,
-                                   ACE_DLL_PREFIX,
-                                   searchfilename,
-                                   has_suffix ? ACE_TEXT ("") : dll_suffix);
+                  ACE_OS::snprintf (pathname, maxpathnamelen,
+                                    ACE_TEXT ("%s%c%s%s%s"),
+                                    path_entry,
+                                    ACE_DIRECTORY_SEPARATOR_CHAR,
+                                    ACE_DLL_PREFIX,
+                                    searchfilename,
+                                    has_suffix ? ACE_TEXT ("") : dll_suffix);
                   if (ACE_OS::access (pathname, F_OK) == 0)
                     break;
 
@@ -497,11 +498,15 @@ ACE::ldfind (const ACE_TCHAR* filename,
               if (ld_path_temp != 0)
                 ACE_OS::free (ld_path_temp);
 #endif /* ACE_HAS_WINCE */
+#if defined (ACE_HAS_ALLOC_HOOKS)
+              ACE_Allocator::instance()->free ((void *) ld_path);
+#else
               ACE_OS::free ((void *) ld_path);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 #if defined (ACE_LD_DECORATOR_STR) && !defined (ACE_DISABLE_DEBUG_DLL_CHECK)
-               if (result == 0 || tag == 0)
+              if (result == 0 || tag == 0)
 #endif /* ACE_LD_DECORATOR_STR && !ACE_DISABLE_DEBUG_DLL_CHECK */
-              return result;
+                return result;
             }
 #endif /* ACE_WIN32 && !ACE_HAS_WINCE */
         }
@@ -554,9 +559,15 @@ ACE::ldname (const ACE_TCHAR *entry_point)
     + 1;
 
   ACE_TCHAR *new_name;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (new_name,
+                        static_cast<ACE_TCHAR *>(ACE_Allocator::instance()->malloc(sizeof(ACE_TCHAR) * size)),
+                        0);
+#else
   ACE_NEW_RETURN (new_name,
                   ACE_TCHAR[size],
                   0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   ACE_OS::strcpy (new_name, entry_point);
   return new_name;

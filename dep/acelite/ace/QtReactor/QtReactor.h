@@ -4,8 +4,6 @@
 /**
  *  @file    QtReactor.h
  *
- *  $Id: QtReactor.h 94053 2011-05-11 13:44:41Z mhengstmengel $
- *
  *  @author Hamish Friedlander <ullexco@wave.co.nz>
  *  @author Balachandran Natarajan <bala@cs.wustl.edu>
  */

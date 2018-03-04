@@ -3,8 +3,6 @@
 /**
  *  @file    Hash_Map_Manager_T.cpp
  *
- *  $Id: Hash_Map_Manager_T.cpp 84477 2009-02-16 13:30:38Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cse.wustl.edu>
  */
 //=============================================================================
@@ -26,6 +24,14 @@
 #include "ace/Malloc_Base.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Manager_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Iterator_Base_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Iterator_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Const_Iterator_Base_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Const_Iterator_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Reverse_Iterator_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tc5(ACE_Hash_Map_Const_Reverse_Iterator_Ex)
 
 template <class EXT_ID, class INT_ID>
 ACE_Hash_Map_Entry<EXT_ID, INT_ID>::ACE_Hash_Map_Entry (ACE_Hash_Map_Entry<EXT_ID, INT_ID> *next,
@@ -80,10 +86,10 @@ template <class EXT_ID, class INT_ID> void
 ACE_Hash_Map_Entry<EXT_ID, INT_ID>::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("next_ = %d"), this->next_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("prev_ = %d"), this->prev_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("next_ = %d"), this->next_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("prev_ = %d"), this->prev_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -91,13 +97,13 @@ template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class 
 ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("total_size_ = %d\n"), this->total_size_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("cur_size_ = %d\n"), this->cur_size_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("total_size_ = %d\n"), this->total_size_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("cur_size_ = %d\n"), this->cur_size_));
   this->table_allocator_->dump ();
   this->entry_allocator_->dump ();
   this->lock_.dump ();
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -277,7 +283,7 @@ template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class 
 ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::unbind_i (const EXT_ID &ext_id,
                                                                                      INT_ID &int_id)
 {
-  ACE_Hash_Map_Entry<EXT_ID, INT_ID> *temp;
+  ACE_Hash_Map_Entry<EXT_ID, INT_ID> *temp = 0;
 
   size_t loc = 0;
   if (this->shared_find (ext_id, temp, loc) == -1)
@@ -391,17 +397,15 @@ ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::rebin
 
 // ------------------------------------------------------------
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Hash_Map_Iterator_Base_Ex)
-
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> void
 ACE_Hash_Map_Iterator_Base_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump_i (void) const
 {
   ACE_TRACE ("ACE_Hash_Map_Iterator_Base_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump_i");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("index_ = %d "), this->index_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("next_ = %x"), this->next_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("index_ = %d "), this->index_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("next_ = %x"), this->next_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 }
 
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> int
@@ -465,17 +469,15 @@ ACE_Hash_Map_Iterator_Base_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>:
 
 // ------------------------------------------------------------
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Hash_Map_Const_Iterator_Base_Ex)
-
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> void
 ACE_Hash_Map_Const_Iterator_Base_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump_i (void) const
 {
   ACE_TRACE ("ACE_Hash_Map_Const_Iterator_Base_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump_i");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("index_ = %d "), this->index_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("next_ = %x"), this->next_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("index_ = %d "), this->index_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("next_ = %x"), this->next_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 }
 
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> int

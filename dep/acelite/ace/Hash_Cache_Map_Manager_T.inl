@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Hash_Cache_Map_Manager_T.inl 93359 2011-02-11 11:33:12Z mcorino $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class KEY, class VALUE, class HASH_KEY, class COMPARE_KEYS, class CACHING_STRATEGY, class ATTRIBUTES>

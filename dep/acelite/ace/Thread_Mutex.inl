@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Thread_Mutex.inl 91813 2010-09-17 07:52:52Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE const ACE_thread_mutex_t &

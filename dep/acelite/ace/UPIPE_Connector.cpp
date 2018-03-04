@@ -1,5 +1,3 @@
-// $Id: UPIPE_Connector.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/UPIPE_Connector.h"
 
 
@@ -70,7 +68,7 @@ ACE_UPIPE_Connector::connect (ACE_UPIPE_Stream &new_stream,
                                       (const char *) &ustream,
                                       sizeof ustream);
       if (result == -1)
-        ACE_ERROR ((LM_ERROR,
+        ACELIB_ERROR ((LM_ERROR,
                     ACE_TEXT ("ACE_UPIPE_Connector %p\n"),
                     ACE_TEXT ("write to pipe failed")));
 
@@ -83,7 +81,7 @@ ACE_UPIPE_Connector::connect (ACE_UPIPE_Stream &new_stream,
       // Do *not* coalesce the following two checks for result == -1.
       // They perform different checks and cannot be merged.
       if (result == -1)
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("ACE_UPIPE_Connector %p\n"),
                       ACE_TEXT ("no confirmation from server")));
       else

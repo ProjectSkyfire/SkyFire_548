@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Service_Object.inl 81388 2008-04-23 14:02:05Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE ACE_Service_Object_Ptr::ACE_Service_Object_Ptr (ACE_Service_Object *so)

@@ -1,4 +1,3 @@
-// $Id: TkReactor.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
 #include "ace/TkReactor/TkReactor.h"
 
 #include "ace/SOCK_Acceptor.h"

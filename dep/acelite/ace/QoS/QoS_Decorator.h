@@ -4,8 +4,6 @@
 /**
  *  @file    QoS_Decorator.h
  *
- *  $Id: QoS_Decorator.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Vishal Kachroo <vishal@cs.wustl.edu>
  */
 //=============================================================================

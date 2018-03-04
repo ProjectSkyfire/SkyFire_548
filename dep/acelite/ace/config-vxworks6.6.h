@@ -1,6 +1,4 @@
 //* -*- C++ -*- */
-// $Id: config-vxworks6.6.h 85143 2009-04-22 09:15:08Z johnnyw $
-
 // The following configuration file is designed to work for VxWorks
 // 6.6 platforms using one of these compilers:
 // 1) The GNU g++ compiler that is shipped with VxWorks 6.6

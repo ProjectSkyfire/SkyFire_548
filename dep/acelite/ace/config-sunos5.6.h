@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-sunos5.6.h 93117 2011-01-20 12:11:28Z mcorino $
-
 // The following configuration file is designed to work for SunOS 5.6
 // platforms using the SunC++ 4.x or g++ compilers.
 

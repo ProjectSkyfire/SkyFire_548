@@ -4,8 +4,6 @@
 /**
  *  @file    SSL_SOCK.h
  *
- *  $Id: SSL_SOCK.h 91685 2010-09-09 09:35:14Z johnnyw $
- *
  *  @author Ossama Othman <ossama@ece.uci.edu>
  */
 //=============================================================================

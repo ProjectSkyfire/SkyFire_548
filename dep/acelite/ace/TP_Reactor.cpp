@@ -1,10 +1,8 @@
-// $Id: TP_Reactor.cpp 95332 2011-12-15 11:09:41Z mcorino $
-
 #include "ace/TP_Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Timer_Queue.h"
 #include "ace/Sig_Handler.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Functor_T.h"
 #include "ace/OS_NS_sys_time.h"
 
@@ -317,7 +315,7 @@ int
 ACE_TP_Reactor::handle_notify_events (int & /*event_count*/,
                                       ACE_TP_Token_Guard &guard)
 {
-  // Get the handle on which notify calls could have occured
+  // Get the handle on which notify calls could have occurred
   ACE_HANDLE notify_handle = this->get_notify_handle ();
 
   int result = 0;
@@ -625,7 +623,7 @@ ACE_TP_Reactor::notify_handle (ACE_HANDLE,
                                ACE_Event_Handler *eh,
                                ACE_EH_PTMF)
 {
-  ACE_ERROR ((LM_ERROR,
+  ACELIB_ERROR ((LM_ERROR,
               ACE_TEXT ("ACE_TP_Reactor::notify_handle: ")
               ACE_TEXT ("Wrong version of notify_handle() got called\n")));
 

@@ -1,5 +1,3 @@
-// $Id: Event_Handler_Handle_Timeout_Upcall.cpp 95586 2012-03-03 20:45:57Z johnnyw $
-
 #include "ace/Event_Handler_Handle_Timeout_Upcall.h"
 #include "ace/Reactor_Timer_Interface.h"
 #include "ace/Abstract_Timer_Queue.h"
@@ -9,6 +7,8 @@
 #endif /* __ACE_INLINE__ */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Event_Handler_Handle_Timeout_Upcall)
 
 ACE_Event_Handler_Handle_Timeout_Upcall::
 ACE_Event_Handler_Handle_Timeout_Upcall (void) :

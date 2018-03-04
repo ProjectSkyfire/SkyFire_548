@@ -4,8 +4,6 @@
 /**
  *  @file    Dirent_Selector.h
  *
- *  $Id: Dirent_Selector.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  Define a portable C++ interface to the <ACE_OS_Dirent::scandir> method.
  *
  *  @author Rich Newman <RNewman@directv.com>

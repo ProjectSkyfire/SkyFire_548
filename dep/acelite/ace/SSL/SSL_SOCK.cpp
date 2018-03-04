@@ -1,5 +1,3 @@
-// $Id: SSL_SOCK.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #include "SSL_SOCK.h"
 
 #if !defined (__ACE_INLINE__)

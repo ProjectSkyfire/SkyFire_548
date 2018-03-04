@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: MEM_Stream.inl 92069 2010-09-28 11:38:59Z johnnyw $
-
 #include "ace/MEM_Stream.h"
 #include "ace/OS_NS_sys_socket.h"
 

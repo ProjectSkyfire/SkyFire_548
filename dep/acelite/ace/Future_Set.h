@@ -4,8 +4,6 @@
 /**
  *  @file    Future_Set.h
  *
- *  $Id: Future_Set.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
  *  @author John Tucker <jtucker@infoglide.com>
  */
 //=============================================================================

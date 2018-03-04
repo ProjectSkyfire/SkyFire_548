@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_dirent.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/OS_Memory.h"
 
 #if defined (ACE_LACKS_ALPHASORT)

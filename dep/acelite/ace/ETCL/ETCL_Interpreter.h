@@ -4,8 +4,6 @@
 /**
  *  @file    ETCL_Interpreter.h
  *
- *  $Id: ETCL_Interpreter.h 82434 2008-07-28 11:40:36Z johnnyw $
- *
  *  @author Jeff Parsons <parsons@cs.wustl.edu> based on previous work by
  *  @author Seth Widoff <sbw1@cs.wustl.edu>
  */

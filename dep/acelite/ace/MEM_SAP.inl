@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: MEM_SAP.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/RW_Thread_Mutex.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Handle_Gobbler.inl 90388 2010-06-02 15:27:59Z vzykov $
-
 // Since this is only included in Handle_Gobbler.h, these should be
 // inline, not ACE_INLINE.
 // FUZZ: disable check_for_inline

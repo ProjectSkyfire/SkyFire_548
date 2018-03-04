@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: ATM_Connector.inl 84565 2009-02-23 08:20:39Z johnnyw $
-
 // Open versioned namespace, if enabled by the user.
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,7 +32,7 @@ ACE_ATM_Connector::ACE_ATM_Connector (ACE_ATM_Stream &new_stream,
                                  flags,
                                  perms) == ACE_INVALID_HANDLE
       && timeout != 0 && !(errno == EWOULDBLOCK || errno == ETIME))
-    ACE_ERROR ((LM_ERROR,  ACE_TEXT ("%p\n"),
+    ACELIB_ERROR ((LM_ERROR,  ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_ATM_Stream::ACE_ATM_Stream")));
 }
 

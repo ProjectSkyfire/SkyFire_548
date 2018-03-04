@@ -4,8 +4,6 @@
 /**
  *  @file    Asynch_Acceptor.h
  *
- *  $Id: Asynch_Acceptor.h 91693 2010-09-09 12:57:54Z johnnyw $
- *
  *  @author Irfan Pyarali (irfan@cs.wustl.edu)
  */
 //=============================================================================
@@ -173,7 +171,7 @@ public:
    * another accept should be initiated. If the method returns a non-zero
    * value, another accept is initiated.
    *
-   * The default implemenation always returns the value passed as the
+   * The default implementation always returns the value passed as the
    * @c open() method's @a reissue_accept argument. That value can also
    * be changed using the @c reissue_accept() method.
    */

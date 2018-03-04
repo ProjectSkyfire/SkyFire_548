@@ -6,8 +6,6 @@
  *
  *  dynamic linking
  *
- *  $Id: os_dlfcn.h 94379 2011-08-09 17:18:49Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */

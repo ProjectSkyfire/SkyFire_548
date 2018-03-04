@@ -4,8 +4,6 @@
 /**
  *  @file    RB_Tree.h
  *
- *  $Id: RB_Tree.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author  Chris Gill
  */
 //=============================================================================
@@ -126,7 +124,7 @@ public:
    *       inlining is disabled and on platforms where
    *       @c ACE_TEMPLATES_REQUIRE_SOURCE is defined.  In those
    *       platform/configuration combinations, multiple definitions
-   *       of this method occured.  Placing the definition inline in
+   *       of this method occurred.  Placing the definition inline in
    *       the header avoids such errors.
    */
   ACE_Allocator * allocator (void) const { return this->allocator_; }
@@ -439,6 +437,9 @@ public:
   /// @deprecated
   /// Destroys all nodes and sets the root pointer null.
   void clear (void);
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Reinitialize constructor.
