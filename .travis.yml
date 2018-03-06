@@ -25,9 +25,8 @@ branches:
     - master
 
 before_install:
-  - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  
+  - sudo apt-get update
   - sudo apt-get install libncurses5-dev libace-dev
   - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
   - sudo apt-get install openssl libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
