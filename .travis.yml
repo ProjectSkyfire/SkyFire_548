@@ -27,11 +27,13 @@ branches:
 before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
+  - sudo rm -rf /var/lib/dpkg/lock
+  - sudo apt-get install gcc-6 g++-6
+  - export CXX=g++-6 CC=gcc-6
   - sudo apt-get install libncurses5-dev libace-dev
   - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
   - sudo apt-get install openssl libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install g++-6; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+
   
 script:
   - mkdir build
