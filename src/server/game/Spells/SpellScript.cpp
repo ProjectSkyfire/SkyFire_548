@@ -23,6 +23,16 @@
 #include "SpellScript.h"
 #include "SpellMgr.h"
 
+#define MEASURE_TIME_VOID(function, script, name, step, ...) uint32 _time = getMSTime(); function(__VA_ARGS__); _time = getMSTime() - _time; if (_time > step) SF_LOG_INFO("%s of %u take more than %u ms to execute - %u ms", name, script->GetId(), step, _time);
+#define MEASURE_TIME(function, script, name, step, result, ...) uint32 _time = getMSTime(); result = function(__VA_ARGS__); _time = getMSTime() - _time; if (_time > step) SF_LOG_INFO("%s of %u take more than %u ms to execute - %u ms", name, script->GetId(), step, _time);
+
+#define MEASURE_AURA_VOID(function, name, step, ...) MEASURE_TIME_VOID(function, auraScript, name, step, __VA_ARGS__)
+#define MEASURE_AURA(function, name, step, result, ...) MEASURE_TIME(function, auraScript, name, step, result, __VA_ARGS__)
+
+#define MEASURE_SPELL_VOID(function, name, step, ...) MEASURE_TIME_VOID(function, spellScript, name, step, __VA_ARGS__)
+#define MEASURE_SPELL(function, name, step, result, ...) MEASURE_TIME(function, spellScript, name, step, result, __VA_ARGS__)
+
+
 bool _SpellScript::_Validate(SpellInfo const* entry)
 {
     if (!Validate(entry))
@@ -748,6 +758,27 @@ AuraScript::EffectPeriodicHandler::EffectPeriodicHandler(AuraEffectPeriodicFnTyp
 void AuraScript::EffectPeriodicHandler::Call(AuraScript* auraScript, AuraEffect const* _aurEff)
 {
     (auraScript->*pEffectHandlerScript)(_aurEff);
+}
+
+AuraScript::AuraUpdateHandler::AuraUpdateHandler(AuraUpdateFnType _pEffectHandlerScript)
+{
+	pEffectHandlerScript = _pEffectHandlerScript;
+}
+
+void AuraScript::AuraUpdateHandler::Call(AuraScript* auraScript, uint32 diff)
+{
+	MEASURE_AURA_VOID((auraScript->*pEffectHandlerScript), "AuraScript::AuraUpdateHandler", 2, diff);
+}
+
+AuraScript::EffectUpdateHandler::EffectUpdateHandler(AuraEffectUpdateFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)
+	: AuraScript::EffectBase(_effIndex, _effName)
+{
+	pEffectHandlerScript = _pEffectHandlerScript;
+}
+
+void AuraScript::EffectUpdateHandler::Call(AuraScript* auraScript, uint32 diff, AuraEffect* aurEff)
+{
+	MEASURE_AURA_VOID((auraScript->*pEffectHandlerScript), "AuraScript::EffectUpdateHandler", 2, diff, aurEff);
 }
 
 AuraScript::EffectUpdatePeriodicHandler::EffectUpdatePeriodicHandler(AuraEffectUpdatePeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)

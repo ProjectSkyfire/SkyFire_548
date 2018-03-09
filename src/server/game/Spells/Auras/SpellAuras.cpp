@@ -746,6 +746,72 @@ void Aura::UpdateOwner(uint32 diff, WorldObject* owner)
 
 void Aura::Update(uint32 diff, Unit* caster)
 {
+	CallScriptAuraUpdateHandlers(diff);
+
+	if (m_duration > 0)
+	{
+		m_duration -= diff;
+		if (m_duration < 0)
+			m_duration = 0;
+
+		for (auto itr : m_spellInfo->GetSpellPower)
+		{
+			if (!caster && itr &&
+				(itr->SpellId == 128432 || itr->SpellId == 90309 ||
+					itr->SpellId == 24604 || itr->SpellId == 93435 ||
+					itr->SpellId == 128433 || itr->SpellId == 126373 ||
+					itr->SpellId == 128997 || itr->SpellId == 97229))
+			{
+				Remove();
+				return;
+			}
+		}
+	}
+
+	// handle manaPerSecond/manaPerSecondPercentage
+	if (m_timeCla && (m_duration > 0 || m_duration == -1)) // m_duration = -1 - infinity
+	{
+		if (m_timeCla > int32(diff))
+			m_timeCla -= diff;
+		else if (caster)
+		{
+			for (auto itr : m_spellInfo->GetSpellPower)
+			{
+				if (itr->RequiredAuraSpellId && !caster->HasAura(itr->RequiredAuraSpellId))
+					continue;
+
+				Powers powerType = Powers(itr->powerType);
+				if (int32 powerPerSecond = itr->CostPerSecond + int32(itr->CostPerSecondPercentage * caster->GetCreatePowers(powerType) / 100))
+				{
+					m_timeCla += 1000 - diff;
+
+					if (powerType == POWER_HEALTH)
+					{
+						if (int32(caster->GetHealth()) > powerPerSecond)
+							caster->ModifyHealth(-powerPerSecond);
+						else
+						{
+							Remove();
+							return;
+						}
+					}
+					else
+					{
+						if (int32(caster->GetPower(powerType)) >= powerPerSecond)
+							caster->ModifyPower(powerType, -powerPerSecond);
+						else
+						{
+							Remove();
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+void Aura::Update(uint32 diff, Unit* caster)
+{
     if (m_duration > 0)
     {
         m_duration -= diff;
@@ -1996,6 +2062,33 @@ bool Aura::CallScriptEffectPeriodicHandlers(AuraEffect const* aurEff, AuraApplic
     }
 
     return preventDefault;
+}
+
+void Aura::CallScriptAuraUpdateHandlers(uint32 diff)
+{
+	for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+	{
+		(*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_ON_UPDATE);
+		std::list<AuraScript::AuraUpdateHandler>::iterator hookItrEnd = (*scritr)->OnAuraUpdate.end(), hookItr = (*scritr)->OnAuraUpdate.begin();
+		for (; hookItr != hookItrEnd; ++hookItr)
+			(*hookItr).Call(*scritr, diff);
+		(*scritr)->_FinishScriptCall();
+	}
+}
+
+void Aura::CallScriptEffectUpdateHandlers(uint32 diff, AuraEffect* aurEff)
+{
+	for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+	{
+		(*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_UPDATE);
+		std::list<AuraScript::EffectUpdateHandler>::iterator effEndItr = (*scritr)->OnEffectUpdate.end(), effItr = (*scritr)->OnEffectUpdate.begin();
+		for (; effItr != effEndItr; ++effItr)
+		{
+			if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+				(*effItr).Call(*scritr, diff, aurEff);
+		}
+		(*scritr)->_FinishScriptCall();
+	}
 }
 
 void Aura::CallScriptEffectUpdatePeriodicHandlers(AuraEffect* aurEff)

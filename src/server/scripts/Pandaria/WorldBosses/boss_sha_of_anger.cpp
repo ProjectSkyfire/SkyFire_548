@@ -1,6 +1,32 @@
+/*
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+Pandaria
+World boss
+*/
+#include "PassiveAI.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Unit.h"
 
 enum eBosses
 {
@@ -51,7 +77,7 @@ class boss_sha_of_anger : public CreatureScript
     public:
         boss_sha_of_anger() : CreatureScript("boss_sha_of_anger") { }
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_sha_of_anger_AI(creature);
         }
@@ -65,21 +91,20 @@ class boss_sha_of_anger : public CreatureScript
             int _maxTargetCount;
             uint8 _dominateMindCount;
             uint32 timer;
-            bool phase1;
-            bool range;
 			EventMap events;
 			SummonList summons;
+            bool phase1;
+            bool range;
 
             std::list<uint64> targetedDominationPlayerGuids;
 
             void Reset()
             {
+
                 me->setPowerType(POWER_RAGE);
                 me->SetPower(POWER_RAGE, 0);
 
                 me->SetFloatValue(UNIT_FIELD_COMBAT_REACH, 5.0f);
-
-                summons.DespawnAll();
 
                 phase1 = true;
                 range = false;
@@ -105,6 +130,10 @@ class boss_sha_of_anger : public CreatureScript
 
                 for (auto itr : playerList)
                     itr->RemoveAura(SPELL_DOMINATE_MIND);
+
+				events.Reset();
+				summons.DespawnAll();
+
             }
 
             void KilledUnit(Unit* u)
@@ -135,8 +164,10 @@ class boss_sha_of_anger : public CreatureScript
                 summons.Despawn(summon);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(const uint32 diff)
             {
+                EnterEvadeIfOutOfCombatArea(diff);
+
                 if (!UpdateVictim())
                     return;
 
@@ -198,11 +229,11 @@ class boss_sha_of_anger : public CreatureScript
                         }
                         case EVENT_GROWING_ANGER:
                         {
-                            if (!targetedDominationPlayerGuids.empty())
+                            /*if (!targetedDominationPlayerGuids.empty())
                                 for (auto guid : targetedDominationPlayerGuids)
                                     if (Player* target = ObjectAccessor::GetPlayer(*me, guid))
-                                        if (!me->GetVictim() || target != me->GetVictim())
-                                            me->CastSpell(target, SPELL_DOMINATE_MIND, false);
+                                        if (!me->getVictim() || target != me->getVictim())
+                                            me->CastSpell(target, SPELL_DOMINATE_MIND, false);*/
 
                             events.ScheduleEvent(EVENT_GROWING_ANGER_WARNING, 19000);
                             break;
@@ -279,6 +310,9 @@ class mob_sha_of_anger_bunny : public CreatureScript
                 me->GetMotionMaster()->Clear();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
+                if (me->AI())
+                    me->AI()->SetCanSeeEvenInPassiveMode(true);
             }
 
             void MoveInLineOfSight(Unit* who)
@@ -286,17 +320,20 @@ class mob_sha_of_anger_bunny : public CreatureScript
                 if (who->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                if (!who->IsWithinDist(me, 30.0f))
-                    return;
-
                 if (who->IsWithinDist(me, 20.0f))
-                    who->AddAura(SPELL_OVERCOME_BY_ANGER, who);
-                else if (who->HasAura(SPELL_OVERCOME_BY_ANGER))
+                {
+                    if (!who->HasAura(SPELL_OVERCOME_BY_ANGER))
+                        me->CastSpell(who, SPELL_OVERCOME_BY_ANGER, true);
+                }
+                else
                     who->RemoveAura(SPELL_OVERCOME_BY_ANGER);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff)
             {
+                if (me->AI() && !me->AI()->CanSeeEvenInPassiveMode())
+                    me->AI()->SetCanSeeEvenInPassiveMode(true);
+
                 if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 
@@ -320,7 +357,7 @@ class spell_sha_of_anger_aggressive_behaviour : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sha_of_anger_aggressive_behaviour_AuraScript);
 
-            void HandlePeriodicTick(AuraEffect* /*aurEff*/)
+            void HandlePeriodicTick(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
                 if (Unit* target = GetTarget())
@@ -328,7 +365,7 @@ class spell_sha_of_anger_aggressive_behaviour : public SpellScriptLoader
                         this->Remove(AURA_REMOVE_BY_DEFAULT);
             }
 
-            void OnApply(AuraEffect* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                 {
@@ -342,7 +379,7 @@ class spell_sha_of_anger_aggressive_behaviour : public SpellScriptLoader
 
             }
 
-            void OnRemove(AuraEffect* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                 {
@@ -353,10 +390,9 @@ class spell_sha_of_anger_aggressive_behaviour : public SpellScriptLoader
 
             void Register()
             {
-				// #todo
-                //OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_of_anger_aggressive_behaviour_AuraScript::HandlePeriodicTick, EFFECT_5, SPELL_AURA_PERIODIC_DUMMY);
-                //OnEffectApply += AuraEffectApplyFn(spell_sha_of_anger_aggressive_behaviour_AuraScript::OnApply, EFFECT_5, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                //OnEffectRemove += AuraEffectRemoveFn(spell_sha_of_anger_aggressive_behaviour_AuraScript::OnRemove, EFFECT_5, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_of_anger_aggressive_behaviour_AuraScript::HandlePeriodicTick, EFFECT_5, SPELL_AURA_PERIODIC_DUMMY);
+                OnEffectApply += AuraEffectApplyFn(spell_sha_of_anger_aggressive_behaviour_AuraScript::OnApply, EFFECT_5, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_sha_of_anger_aggressive_behaviour_AuraScript::OnRemove, EFFECT_5, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
@@ -380,12 +416,13 @@ class spell_sha_of_anger_overcome_by_anger : public SpellScriptLoader
             {
                 if (Unit* target = GetTarget())
                 {
-                    if (Unit* caster = GetCaster())
+                    if (Unit* sha = GetCaster())
                     {
-                        if (target->GetMapId() != caster->GetMapId() ||
-                            !target->IsWithinDist(caster, 30.0f))
+                        if (target->GetMapId() != sha->GetMapId() || !target->IsWithinDist(sha, 20.0f))
                             target->RemoveAura(SPELL_OVERCOME_BY_ANGER);
                     }
+                    else
+                        target->RemoveAura(SPELL_OVERCOME_BY_ANGER);
                 }
             }
 

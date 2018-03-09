@@ -1,11 +1,26 @@
+/*
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
-
-/*
-    todo: Salyis's Warband
-*/
 
 enum eBosses
 {
@@ -70,7 +85,7 @@ public:
             events.ScheduleEvent(EVENT_BERSERK,900000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -92,23 +107,14 @@ public:
                         events.ScheduleEvent(EVENT_CANNON, 60000);
                         break;
                     }
-             /*       case EVENT_FIRE_SHOT:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        me->CastSpell(target, SPELL_FIRE_SHOT, false);
-
-                        events.ScheduleEvent(EVENT_FIRE_SHOT, 5000);
-                        break;
-                    }*/
                     case EVENT_SPAWN:
                     {
                         for (uint8 i=0; i<6;++i)
-                                me->SummonCreature(CREATURE_GALION,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
+                             me->SummonCreature(CREATURE_GALION, me->GetPositionX()+rand()%5, me->GetPositionY()+3+rand()%5, me->GetPositionZ()+2, 10.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
 
                         events.ScheduleEvent(EVENT_SPAWN, 60000);
                         break;
                     }
-
                     case EVENT_BERSERK:
                     {
                         me->CastSpell(me,SPELL_BERSERK,false);
@@ -140,7 +146,7 @@ class npc_galion : public CreatureScript
         {
             events.ScheduleEvent(EVENT_EMPALLING, 50000);
         }
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -153,7 +159,7 @@ class npc_galion : public CreatureScript
                 {
                     case EVENT_EMPALLING:
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                             me->CastSpell(target,SPELL_EMPALLING_PULL,true);
                         events.ScheduleEvent(EVENT_EMPALLING, 60000);
                         break;
