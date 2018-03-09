@@ -12,7 +12,7 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   #World Boss Scripts
-  Pandaria/WorldBosses/boss_galion.cpp
+  Pandaria/WorldBosses/boss_galleon.cpp
   Pandaria/WorldBosses/boss_nalak.cpp
   Pandaria/WorldBosses/boss_oondasta.cpp
   Pandaria/WorldBosses/boss_sha_of_anger.cpp

@@ -24,7 +24,7 @@
 
 enum eBosses
 {
-    BOSS_GALION,
+    BOSS_GALLEON = 62346,
 };
 
 enum eSpells
@@ -48,23 +48,23 @@ enum eEvents
 
 enum eCreatures
 {
-    CREATURE_GALION = 62351,
+    CREATURE_GALLEON = 62351,
 };
 
 
-class boss_galion : public CreatureScript
+class boss_galleon : public CreatureScript
 {
 public:
-    boss_galion() : CreatureScript("boss_galion") { }
+    boss_galleon() : CreatureScript("boss_galleon") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_galion_AI(creature);
+        return new boss_galleon_AI(creature);
     }
 
-    struct boss_galion_AI : public BossAI
+    struct boss_galleon_AI : public BossAI
     {
-        boss_galion_AI(Creature* creature) : BossAI(creature, BOSS_GALION)
+        boss_galleon_AI(Creature* creature) : BossAI(creature, BOSS_GALLEON)
         {}
         void Reset()
         {
@@ -110,7 +110,7 @@ public:
                 case EVENT_SPAWN:
                 {
                     for (uint8 i = 0; i < 6; ++i)
-                        me->SummonCreature(CREATURE_GALION, me->GetPositionX() + rand() % 5, me->GetPositionY() + 3 + rand() % 5, me->GetPositionZ() + 2, 10.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                        me->SummonCreature(CREATURE_GALLEON, me->GetPositionX() + rand() % 5, me->GetPositionY() + 3 + rand() % 5, me->GetPositionZ() + 2, 10.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
 
                     events.ScheduleEvent(EVENT_SPAWN, 60000);
                     break;
@@ -127,10 +127,10 @@ public:
     };
 };
 
-class npc_galion : public CreatureScript
+class npc_galleon : public CreatureScript
 {
 public:
-    npc_galion() : CreatureScript("npc_galion") { }
+    npc_galleon() : CreatureScript("npc_galleon") { }
 
     struct npc_galionAI : public ScriptedAI
     {
@@ -176,8 +176,8 @@ public:
     }
 };
 
-void AddSC_boss_galion()
+void AddSC_boss_galleon()
 {
-    new boss_galion();
-    new npc_galion();
+    new boss_galleon();
+    new npc_galleon();
 }
