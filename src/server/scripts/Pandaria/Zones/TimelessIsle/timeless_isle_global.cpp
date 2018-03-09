@@ -37,18 +37,18 @@
 enum TimeLostShrine
 {
     // Says
-    SAY_BLESSING_NIUZAO                 = 0,
-    SAY_BLESSING_YULON                  = 1,
-    SAY_BLESSING_CHI_JI                 = 2,
-    SAY_BLESSING_XUEN                   = 3,
-    SAY_CORRUPTION_ORDOS                = 4,
+    SAY_BLESSING_NIUZAO = 0,
+    SAY_BLESSING_YULON = 1,
+    SAY_BLESSING_CHI_JI = 2,
+    SAY_BLESSING_XUEN = 3,
+    SAY_CORRUPTION_ORDOS = 4,
 
     // Spells
-    SPELL_FORTITUDE_OF_NIUZAO           = 147281,
-    SPELL_WISDOM_OF_YULON               = 147282,
-    SPELL_CHI_JIS_HOPE                  = 147283,
-    SPELL_XUENS_STRENGTH                = 147284,
-    SPELL_ORDOS_BURNING_SACRIFICE       = 147285,
+    SPELL_FORTITUDE_OF_NIUZAO = 147281,
+    SPELL_WISDOM_OF_YULON = 147282,
+    SPELL_CHI_JIS_HOPE = 147283,
+    SPELL_XUENS_STRENGTH = 147284,
+    SPELL_ORDOS_BURNING_SACRIFICE = 147285,
 };
 
 class go_time_lost_shrine_ti : public GameObjectScript
@@ -62,33 +62,33 @@ public:
 
         bool OnGossipHello(Player* player, GameObject* go)
         {
-        	if (used == false)
-        	{
+            if (used == false)
+            {
                 go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
 
-            	used = true;
+                used = true;
 
-        		Choice = urand(1, 5);
-        	}
+                Choice = urand(1, 5);
+            }
 
-        	if (player->HasAura(SPELL_FORTITUDE_OF_NIUZAO))
-        		player->RemoveAurasDueToSpell(SPELL_FORTITUDE_OF_NIUZAO);
+            if (player->HasAura(SPELL_FORTITUDE_OF_NIUZAO))
+                player->RemoveAurasDueToSpell(SPELL_FORTITUDE_OF_NIUZAO);
 
-        	if (player->HasAura(SPELL_WISDOM_OF_YULON))
-            	player->RemoveAurasDueToSpell(SPELL_WISDOM_OF_YULON);
+            if (player->HasAura(SPELL_WISDOM_OF_YULON))
+                player->RemoveAurasDueToSpell(SPELL_WISDOM_OF_YULON);
 
-        	if (player->HasAura(SPELL_CHI_JIS_HOPE))
-            	player->RemoveAurasDueToSpell(SPELL_CHI_JIS_HOPE);
+            if (player->HasAura(SPELL_CHI_JIS_HOPE))
+                player->RemoveAurasDueToSpell(SPELL_CHI_JIS_HOPE);
 
-        	if (player->HasAura(SPELL_XUENS_STRENGTH))
-            	player->RemoveAurasDueToSpell(SPELL_XUENS_STRENGTH);
+            if (player->HasAura(SPELL_XUENS_STRENGTH))
+                player->RemoveAurasDueToSpell(SPELL_XUENS_STRENGTH);
 
-        	Creature* trigger = go->FindNearestCreature(NPC_TIME_LOST_SHRINE_TRIGGER, 5.0f); // An npc needs to be spawned in the same coordinates for the shrine
+            Creature* trigger = go->FindNearestCreature(NPC_TIME_LOST_SHRINE_TRIGGER, 5.0f); // An npc needs to be spawned in the same coordinates for the shrine
 
             return true;
         }
 
-		void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (used == false)
                 return;
@@ -100,18 +100,18 @@ public:
             }
 
             else
-            	BackToUse -= diff;
+                BackToUse -= diff;
         }
 
     private:
-    	uint32 BackToUse;
+        uint32 BackToUse;
 
-    	uint8 Choice;
+        uint8 Choice;
 
-    	bool used;
+        bool used;
     };
 
-	GameObjectAI* GetAI(GameObject* go) const 
+    GameObjectAI* GetAI(GameObject* go) const
     {
         return new go_time_lost_shrine_tiAI(go);
     }
@@ -129,7 +129,7 @@ public:
         uint64 playerGUID;
         uint32 WingsTimer;
 
-		bool OnGossipHello(Player* player, GameObject* go)
+        bool OnGossipHello(Player* player, GameObject* go)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Touch the statue.", GOSSIP_SENDER_MAIN, 1);
 
@@ -138,41 +138,41 @@ public:
             return true;
         }
 
-		bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
+        bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
         {
-        	player->PlayerTalkClass->ClearMenus();
-        	player->CLOSE_GOSSIP_MENU();
+            player->PlayerTalkClass->ClearMenus();
+            player->CLOSE_GOSSIP_MENU();
 
-        	switch (action)
-        	{
-        		case 1:
-        			player->CastSpell(player, 144387, true); // knockback in the air
-        			playerGUID = player->GetGUID();
-        			used = true;
-        			WingsTimer = 6000;
-        			break;
-        		default:
-        			break;
-        	}
+            switch (action)
+            {
+            case 1:
+                player->CastSpell(player, 144387, true); // knockback in the air
+                playerGUID = player->GetGUID();
+                used = true;
+                WingsTimer = 6000;
+                break;
+            default:
+                break;
+            }
 
-        	return true;
+            return true;
         }
 
-		void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (used == false)
-            	return;
+                return;
 
             if (WingsTimer <= diff)
             {
                 if (Player* player = ObjectAccessor::GetPlayer(*go, playerGUID))
                 {
-                	player->CastSpell(player, 144385, true);
-                	used = false;
+                    player->CastSpell(player, 144385, true);
+                    used = false;
                 }
             }
 
-            else 
+            else
                 WingsTimer -= diff;
         }
 
@@ -180,7 +180,7 @@ public:
         bool used;
     };
 
-	GameObjectAI* GetAI(GameObject* go) const 
+    GameObjectAI* GetAI(GameObject* go) const
     {
         return new go_gleaming_crane_statue_tiAI(go);
     }
@@ -198,23 +198,23 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-             	caster->CastSpell(caster, 144391, true);
+                caster->CastSpell(caster, 144391, true);
         }
 
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-            	caster->CastSpell(caster, 148162, true);
+                caster->CastSpell(caster, 148162, true);
         }
 
-		void Register()
+        void Register()
         {
             OnEffectApply += AuraEffectApplyFn(spell_timeless_isle_crane_wings_AuraScript::OnApply, EFFECT_0, SPELL_AURA_FEATHER_FALL, AURA_EFFECT_HANDLE_REAL);
             OnEffectRemove += AuraEffectRemoveFn(spell_timeless_isle_crane_wings_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-	AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const
     {
         return new spell_timeless_isle_crane_wings_AuraScript();
     }
@@ -234,13 +234,13 @@ public:
             GetCaster()->SetMaxHealth(GetCaster()->GetHealthPct() - 1.0f);
         }
 
-		void Register()
+        void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_timeless_isle_cauterize_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-	AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const
     {
         return new spell_timeless_isle_cauterize_AuraScript();
     }
@@ -260,13 +260,13 @@ public:
             GetCaster()->DealDamage(GetCaster(), 50000, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
         }
 
-		void Register()
+        void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_timeless_isle_burning_fury_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-	AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const
     {
         return new spell_timeless_isle_burning_fury_AuraScript();
     }
@@ -307,18 +307,18 @@ public:
         {
             switch (action)
             {
-                case ACTION_XUEN:
-                    _xuen = true;
-                    break;
-                case ACTION_CHIJI:
-                    _chiji = true;
-                    break;
-                case ACTION_NIUZAO:
-                    _niuzao = true;
-                    break;
-                case ACTION_YULON:
-                    _yulon = true;
-                    break;
+            case ACTION_XUEN:
+                _xuen = true;
+                break;
+            case ACTION_CHIJI:
+                _chiji = true;
+                break;
+            case ACTION_NIUZAO:
+                _niuzao = true;
+                break;
+            case ACTION_YULON:
+                _yulon = true;
+                break;
             }
 
             events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 8500);
@@ -330,71 +330,71 @@ public:
 
             switch (events.ExecuteEvent())
             {
-                case EVENT_EMPEROR_ARRANGE_BOSS:
+            case EVENT_EMPEROR_ARRANGE_BOSS:
+            {
+                if (_yulon)
                 {
-                    if (_yulon)
+                    if (Creature* yulon = me->FindNearestCreature(BOSS_YU_LON, 300.0f, true))
                     {
-                        if (Creature* yulon = me->FindNearestCreature(BOSS_YU_LON, 300.0f, true))
-                        {
-                            yulon->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_YULON);
-                        }
-                        else
-                            _xuen = true;
-
-                        _yulon = false;
+                        yulon->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
+                        me->AI()->Talk(EMPEROR_TALK_INTRO_YULON);
                     }
-                    if (_xuen)
-                    {
-                        if (Creature* xuen = me->FindNearestCreature(BOSS_XUEN, 300.0f, true))
-                        {
-                            xuen->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_XUEN);
-                        }
-                        else
-                            _chiji = true;
+                    else
+                        _xuen = true;
 
-                        _xuen = false;
-                    }
-                    if (_chiji)
-                    {
-                        if (Creature* chiji = me->FindNearestCreature(BOSS_CHI_JI, 300.0f, true))
-                        {
-                            chiji->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_CHIJI);
-                        }
-                        else
-                            _niuzao = true;
-
-                        _chiji = false;
-                    }
-                    if (_niuzao)
-                    {
-                        if (Creature* niuzao = me->FindNearestCreature(BOSS_NIUZAO, 300.0f, true))
-                        {
-                            niuzao->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_NIUZAO);
-                        }
-                        else
-                            _yulon = true;
-
-                        _niuzao = false;
-                    }
-
-                    events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 5000);
-                    break;
+                    _yulon = false;
                 }
-                default:
-                    break;
+                if (_xuen)
+                {
+                    if (Creature* xuen = me->FindNearestCreature(BOSS_XUEN, 300.0f, true))
+                    {
+                        xuen->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
+                        me->AI()->Talk(EMPEROR_TALK_INTRO_XUEN);
+                    }
+                    else
+                        _chiji = true;
+
+                    _xuen = false;
+                }
+                if (_chiji)
+                {
+                    if (Creature* chiji = me->FindNearestCreature(BOSS_CHI_JI, 300.0f, true))
+                    {
+                        chiji->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
+                        me->AI()->Talk(EMPEROR_TALK_INTRO_CHIJI);
+                    }
+                    else
+                        _niuzao = true;
+
+                    _chiji = false;
+                }
+                if (_niuzao)
+                {
+                    if (Creature* niuzao = me->FindNearestCreature(BOSS_NIUZAO, 300.0f, true))
+                    {
+                        niuzao->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
+                        me->AI()->Talk(EMPEROR_TALK_INTRO_NIUZAO);
+                    }
+                    else
+                        _yulon = true;
+
+                    _niuzao = false;
+                }
+
+                events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 5000);
+                break;
+            }
+            default:
+                break;
             }
         }
 
-        private:
-            EventMap events;
-            bool _yulon;
-            bool _xuen;
-            bool _chiji;
-            bool _niuzao;
+    private:
+        EventMap events;
+        bool _yulon;
+        bool _xuen;
+        bool _chiji;
+        bool _niuzao;
     };
 };
 
@@ -420,11 +420,11 @@ public:
         uint32 uiShellSpinTimer;
         uint32 uiSnappingBiteTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiGeyserTimer = 8*IN_MILLISECONDS;
-            uiShellSpinTimer = 10*IN_MILLISECONDS;
-            uiSnappingBiteTimer = 6*IN_MILLISECONDS;
+            uiGeyserTimer = 8 * IN_MILLISECONDS;
+            uiShellSpinTimer = 10 * IN_MILLISECONDS;
+            uiSnappingBiteTimer = 6 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -439,124 +439,124 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72045:
+            case 72045:
+            {
+                if (uiGeyserTimer <= diff)
                 {
-                    if (uiGeyserTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GEYSER_1);
-                        uiGeyserTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiGeyserTimer -= diff;
-
-                    if (uiShellSpinTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_1);
-                        uiShellSpinTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiShellSpinTimer -= diff;
-
-                    if (uiSnappingBiteTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_1);
-                        uiSnappingBiteTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSnappingBiteTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_GEYSER_1);
+                    uiGeyserTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiGeyserTimer -= diff;
 
-                case 73161:
+                if (uiShellSpinTimer <= diff)
                 {
-                    if (uiGeyserTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GEYSER_1);
-                        uiGeyserTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiGeyserTimer -= diff;
-
-                    if (uiShellSpinTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_1);
-                        uiShellSpinTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiShellSpinTimer -= diff;
-
-                    if (uiSnappingBiteTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_1);
-                        uiSnappingBiteTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSnappingBiteTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_1);
+                    uiShellSpinTimer = 10 * IN_MILLISECONDS;
                 }
+                else uiShellSpinTimer -= diff;
 
-                case 72765:
+                if (uiSnappingBiteTimer <= diff)
                 {
-                    if (uiGeyserTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GEYSER_2);
-                        uiGeyserTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiGeyserTimer -= diff;
-
-                    if (uiShellSpinTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_2);
-                        uiShellSpinTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiShellSpinTimer -= diff;
-
-                    if (uiSnappingBiteTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_2);
-                        uiSnappingBiteTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSnappingBiteTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_1);
+                    uiSnappingBiteTimer = 6 * IN_MILLISECONDS;
                 }
+                else uiSnappingBiteTimer -= diff;
 
-                case 72764:
+                break;
+            }
+
+            case 73161:
+            {
+                if (uiGeyserTimer <= diff)
                 {
-                    if (uiShellSpinTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_1);
-                        uiShellSpinTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiShellSpinTimer -= diff;
-
-                    if (uiSnappingBiteTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_3);
-                        uiSnappingBiteTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSnappingBiteTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_GEYSER_1);
+                    uiGeyserTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiGeyserTimer -= diff;
 
-                case 72763:
+                if (uiShellSpinTimer <= diff)
                 {
-                    if (uiSnappingBiteTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_3);
-                        uiSnappingBiteTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSnappingBiteTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_1);
+                    uiShellSpinTimer = 10 * IN_MILLISECONDS;
                 }
+                else uiShellSpinTimer -= diff;
 
-                default:
-                    break;
+                if (uiSnappingBiteTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_1);
+                    uiSnappingBiteTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiSnappingBiteTimer -= diff;
+
+                break;
+            }
+
+            case 72765:
+            {
+                if (uiGeyserTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_GEYSER_2);
+                    uiGeyserTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiGeyserTimer -= diff;
+
+                if (uiShellSpinTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_2);
+                    uiShellSpinTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiShellSpinTimer -= diff;
+
+                if (uiSnappingBiteTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_2);
+                    uiSnappingBiteTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiSnappingBiteTimer -= diff;
+
+                break;
+            }
+
+            case 72764:
+            {
+                if (uiShellSpinTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SHELL_SPINE_1);
+                    uiShellSpinTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiShellSpinTimer -= diff;
+
+                if (uiSnappingBiteTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_3);
+                    uiSnappingBiteTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiSnappingBiteTimer -= diff;
+
+                break;
+            }
+
+            case 72763:
+            {
+                if (uiSnappingBiteTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAPPING_BITE_3);
+                    uiSnappingBiteTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiSnappingBiteTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_turtlesAI(creature);
     }
@@ -583,12 +583,12 @@ public:
         uint32 uiNetTimer;
         uint32 uiSnapKickTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiIncapacitatingShoutTimer = 9*IN_MILLISECONDS;
-            uiMortalStrikeTimer = 4*IN_MILLISECONDS;
-            uiNetTimer = 1*IN_MILLISECONDS;
-            uiSnapKickTimer = 7*IN_MILLISECONDS;
+            uiIncapacitatingShoutTimer = 9 * IN_MILLISECONDS;
+            uiMortalStrikeTimer = 4 * IN_MILLISECONDS;
+            uiNetTimer = 1 * IN_MILLISECONDS;
+            uiSnapKickTimer = 7 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -603,199 +603,199 @@ public:
 
             switch (me->GetEntry())
             {
-                case 73361:
+            case 73361:
+            {
+                if (uiIncapacitatingShoutTimer <= diff)
                 {
-                    if (uiIncapacitatingShoutTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
-                        uiIncapacitatingShoutTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiIncapacitatingShoutTimer -= diff;
-
-                    if (uiMortalStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
-                        uiMortalStrikeTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiMortalStrikeTimer -= diff;
-
-                    if (uiNetTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_NET);
-                        uiNetTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiNetTimer -= diff;
-
-                    if (uiSnapKickTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
-                        uiSnapKickTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiSnapKickTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
+                    uiIncapacitatingShoutTimer = 25 * IN_MILLISECONDS;
                 }
+                else uiIncapacitatingShoutTimer -= diff;
 
-                case 73362:
+                if (uiMortalStrikeTimer <= diff)
                 {
-                    if (uiIncapacitatingShoutTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
-                        uiIncapacitatingShoutTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiIncapacitatingShoutTimer -= diff;
-
-                    if (uiMortalStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
-                        uiMortalStrikeTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiMortalStrikeTimer -= diff;
-
-                    if (uiNetTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_NET);
-                        uiNetTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiNetTimer -= diff;
-
-                    if (uiSnapKickTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
-                        uiSnapKickTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiSnapKickTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                    uiMortalStrikeTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiMortalStrikeTimer -= diff;
 
-                case 71940:
+                if (uiNetTimer <= diff)
                 {
-                    if (uiMortalStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
-                        uiMortalStrikeTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiMortalStrikeTimer -= diff;
-
-                    if (uiNetTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_NET);
-                        uiNetTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiNetTimer -= diff;
-
-                    if (uiSnapKickTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
-                        uiSnapKickTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiSnapKickTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_NET);
+                    uiNetTimer = 15 * IN_MILLISECONDS;
                 }
+                else uiNetTimer -= diff;
 
-                case 71939:
+                if (uiSnapKickTimer <= diff)
                 {
-                    if (uiMortalStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
-                        uiMortalStrikeTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiMortalStrikeTimer -= diff;
-
-                    if (uiNetTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_NET);
-                        uiNetTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiNetTimer -= diff;
-
-                    if (uiSnapKickTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
-                        uiSnapKickTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiSnapKickTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
+                    uiSnapKickTimer = 20 * IN_MILLISECONDS;
                 }
+                else uiSnapKickTimer -= diff;
 
-                case 73343:
+                break;
+            }
+
+            case 73362:
+            {
+                if (uiIncapacitatingShoutTimer <= diff)
                 {
-                    if (uiIncapacitatingShoutTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
-                        uiIncapacitatingShoutTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiIncapacitatingShoutTimer -= diff;
-
-                    if (uiMortalStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
-                        uiMortalStrikeTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiMortalStrikeTimer -= diff;
-
-                    if (uiNetTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_NET);
-                        uiNetTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiNetTimer -= diff;
-
-                    if (uiSnapKickTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
-                        uiSnapKickTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiSnapKickTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
+                    uiIncapacitatingShoutTimer = 25 * IN_MILLISECONDS;
                 }
+                else uiIncapacitatingShoutTimer -= diff;
 
-                case 73347:
+                if (uiMortalStrikeTimer <= diff)
                 {
-                    if (uiIncapacitatingShoutTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
-                        uiIncapacitatingShoutTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiIncapacitatingShoutTimer -= diff;
-
-                    if (uiMortalStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
-                        uiMortalStrikeTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiMortalStrikeTimer -= diff;
-
-                    if (uiNetTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_NET);
-                        uiNetTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiNetTimer -= diff;
-
-                    if (uiSnapKickTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
-                        uiSnapKickTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiSnapKickTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                    uiMortalStrikeTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiMortalStrikeTimer -= diff;
 
-                default:
-                    break;
+                if (uiNetTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_NET);
+                    uiNetTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiNetTimer -= diff;
+
+                if (uiSnapKickTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
+                    uiSnapKickTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiSnapKickTimer -= diff;
+
+                break;
+            }
+
+            case 71940:
+            {
+                if (uiMortalStrikeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                    uiMortalStrikeTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiMortalStrikeTimer -= diff;
+
+                if (uiNetTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_NET);
+                    uiNetTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiNetTimer -= diff;
+
+                if (uiSnapKickTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
+                    uiSnapKickTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiSnapKickTimer -= diff;
+
+                break;
+            }
+
+            case 71939:
+            {
+                if (uiMortalStrikeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                    uiMortalStrikeTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiMortalStrikeTimer -= diff;
+
+                if (uiNetTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_NET);
+                    uiNetTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiNetTimer -= diff;
+
+                if (uiSnapKickTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
+                    uiSnapKickTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiSnapKickTimer -= diff;
+
+                break;
+            }
+
+            case 73343:
+            {
+                if (uiIncapacitatingShoutTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
+                    uiIncapacitatingShoutTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiIncapacitatingShoutTimer -= diff;
+
+                if (uiMortalStrikeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                    uiMortalStrikeTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiMortalStrikeTimer -= diff;
+
+                if (uiNetTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_NET);
+                    uiNetTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiNetTimer -= diff;
+
+                if (uiSnapKickTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
+                    uiSnapKickTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiSnapKickTimer -= diff;
+
+                break;
+            }
+
+            case 73347:
+            {
+                if (uiIncapacitatingShoutTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_INCAPACITATING_SHOUT);
+                    uiIncapacitatingShoutTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiIncapacitatingShoutTimer -= diff;
+
+                if (uiMortalStrikeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                    uiMortalStrikeTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiMortalStrikeTimer -= diff;
+
+                if (uiNetTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_NET);
+                    uiNetTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiNetTimer -= diff;
+
+                if (uiSnapKickTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SNAP_KICK);
+                    uiSnapKickTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiSnapKickTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_faction_sentriesAI(creature);
     }
@@ -818,9 +818,9 @@ public:
 
         uint32 uiHugeFangTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiHugeFangTimer = 1*IN_MILLISECONDS;
+            uiHugeFangTimer = 1 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -835,39 +835,39 @@ public:
 
             switch (me->GetEntry())
             {
-                case 73163:
+            case 73163:
+            {
+                if (uiHugeFangTimer <= diff)
                 {
-                    if (uiHugeFangTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_HUGE_FANG_1);
-                        uiHugeFangTimer = 1*IN_MILLISECONDS;
-                    }
-                    else uiHugeFangTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_HUGE_FANG_1);
+                    uiHugeFangTimer = 1 * IN_MILLISECONDS;
                 }
+                else uiHugeFangTimer -= diff;
 
-                case 72841:
+                break;
+            }
+
+            case 72841:
+            {
+                if (uiHugeFangTimer <= diff)
                 {
-                    if (uiHugeFangTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_HUGE_FANG_2);
-                        uiHugeFangTimer = 1*IN_MILLISECONDS;
-                    }
-                    else uiHugeFangTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_HUGE_FANG_2);
+                    uiHugeFangTimer = 1 * IN_MILLISECONDS;
                 }
+                else uiHugeFangTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_addersAI(creature);
     }
@@ -895,13 +895,13 @@ public:
         uint32 uiOxChargeTriggerTimer;
         bool oxCharge;
 
-        void Reset() 
+        void Reset()
         {
             oxCharge = false;
-            uiHeadbuttTimer = 8*IN_MILLISECONDS;
-            uiIronFurTimer = 5*IN_MILLISECONDS;
-            uiOxChargeTimer = 10*IN_MILLISECONDS;
-            uiOxChargeTriggerTimer = 11*IN_MILLISECONDS;
+            uiHeadbuttTimer = 8 * IN_MILLISECONDS;
+            uiIronFurTimer = 5 * IN_MILLISECONDS;
+            uiOxChargeTimer = 10 * IN_MILLISECONDS;
+            uiOxChargeTriggerTimer = 11 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -913,118 +913,118 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             switch (me->GetEntry())
             {
-                case 73160:
-                {
-                    if (!oxCharge)
-                    {
-                        if (uiHeadbuttTimer <= diff)
-                        {
-                            me->CastSpell(me->GetVictim(), SPELL_HEADBUTT_1);
-                            uiHeadbuttTimer = 8*IN_MILLISECONDS;
-                        }
-                        else uiHeadbuttTimer -= diff;
-
-                        if (uiIronFurTimer <= diff)
-                        {
-                            me->CastSpell(me, SPELL_IRON_FUR);
-                            uiIronFurTimer = 25*IN_MILLISECONDS;
-                        }
-                        else uiIronFurTimer -= diff;
-                    }
-
-                    if (uiOxChargeTimer <= diff)
-                    {
-                        oxCharge = true;
-                        me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_OX_CHARGE);
-                        uiOxChargeTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiOxChargeTimer -= diff;
-
-                    if (uiOxChargeTriggerTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_OX_CHARGE_TRIGGER);
-                        oxCharge = false;
-                        uiOxChargeTriggerTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiOxChargeTriggerTimer -= diff;
-
-                    break;
-                }
-
-                case 72842:
+            case 73160:
+            {
+                if (!oxCharge)
                 {
                     if (uiHeadbuttTimer <= diff)
                     {
-                        me->CastSpell(me->GetVictim(), SPELL_HEADBUTT_2);
-                        uiHeadbuttTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiHeadbuttTimer -= diff;
-
-                    break;
-                }
-
-                case 72843:
-                {
-                    if (uiHeadbuttTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_HEADBUTT_3);
-                        uiHeadbuttTimer = 8*IN_MILLISECONDS;
+                        me->CastSpell(me->GetVictim(), SPELL_HEADBUTT_1);
+                        uiHeadbuttTimer = 8 * IN_MILLISECONDS;
                     }
                     else uiHeadbuttTimer -= diff;
 
                     if (uiIronFurTimer <= diff)
                     {
                         me->CastSpell(me, SPELL_IRON_FUR);
-                        uiIronFurTimer = 16*IN_MILLISECONDS;
+                        uiIronFurTimer = 25 * IN_MILLISECONDS;
                     }
                     else uiIronFurTimer -= diff;
-
-                    break;
                 }
 
-                case 72844:
+                if (uiOxChargeTimer <= diff)
                 {
-                    if (!oxCharge)
-                    {
-                        if (uiIronFurTimer <= diff)
-                        {
-                            me->CastSpell(me, SPELL_IRON_FUR);
-                            uiIronFurTimer = 25*IN_MILLISECONDS;
-                        }
-                        else uiIronFurTimer -= diff;
-                    }
+                    oxCharge = true;
+                    me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_OX_CHARGE);
+                    uiOxChargeTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiOxChargeTimer -= diff;
 
-                    if (uiOxChargeTimer <= diff)
-                    {
-                        oxCharge = true;
-                        me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_OX_CHARGE);
-                        uiOxChargeTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiOxChargeTimer -= diff;
+                if (uiOxChargeTriggerTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_OX_CHARGE_TRIGGER);
+                    oxCharge = false;
+                    uiOxChargeTriggerTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiOxChargeTriggerTimer -= diff;
 
-                    if (uiOxChargeTriggerTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_OX_CHARGE_TRIGGER);
-                        oxCharge = false;
-                        uiOxChargeTriggerTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiOxChargeTriggerTimer -= diff;
+                break;
+            }
 
-                    break;
+            case 72842:
+            {
+                if (uiHeadbuttTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_HEADBUTT_2);
+                    uiHeadbuttTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiHeadbuttTimer -= diff;
+
+                break;
+            }
+
+            case 72843:
+            {
+                if (uiHeadbuttTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_HEADBUTT_3);
+                    uiHeadbuttTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiHeadbuttTimer -= diff;
+
+                if (uiIronFurTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_IRON_FUR);
+                    uiIronFurTimer = 16 * IN_MILLISECONDS;
+                }
+                else uiIronFurTimer -= diff;
+
+                break;
+            }
+
+            case 72844:
+            {
+                if (!oxCharge)
+                {
+                    if (uiIronFurTimer <= diff)
+                    {
+                        me->CastSpell(me, SPELL_IRON_FUR);
+                        uiIronFurTimer = 25 * IN_MILLISECONDS;
+                    }
+                    else uiIronFurTimer -= diff;
                 }
 
-                default:
-                    break;
+                if (uiOxChargeTimer <= diff)
+                {
+                    oxCharge = true;
+                    me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_OX_CHARGE);
+                    uiOxChargeTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiOxChargeTimer -= diff;
+
+                if (uiOxChargeTriggerTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_OX_CHARGE_TRIGGER);
+                    oxCharge = false;
+                    uiOxChargeTriggerTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiOxChargeTriggerTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_yaksAI(creature);
     }
@@ -1050,11 +1050,11 @@ public:
         uint32 uiHealingSongTimer;
         uint32 uiWindfeatherTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiGustOfWindTimer = 8*IN_MILLISECONDS;
-            uiHealingSongTimer = 15*IN_MILLISECONDS;
-            uiWindfeatherTimer = 1*IN_MILLISECONDS;
+            uiGustOfWindTimer = 8 * IN_MILLISECONDS;
+            uiHealingSongTimer = 15 * IN_MILLISECONDS;
+            uiWindfeatherTimer = 1 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -1069,96 +1069,96 @@ public:
 
             switch (me->GetEntry())
             {
-                case 73158:
+            case 73158:
+            {
+                if (uiGustOfWindTimer <= diff)
                 {
-                    if (uiGustOfWindTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GUST_OF_WIND);
-                        uiGustOfWindTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiGustOfWindTimer -= diff;
-
-                    if (uiHealingSongTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_HEALING_SONG);
-                        uiHealingSongTimer = 18*IN_MILLISECONDS;
-                    }
-                    else uiHealingSongTimer -= diff;
-
-                    if (uiWindfeatherTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_WINDFEATHER);
-                        uiWindfeatherTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiWindfeatherTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_GUST_OF_WIND);
+                    uiGustOfWindTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiGustOfWindTimer -= diff;
 
-                case 72762:
+                if (uiHealingSongTimer <= diff)
                 {
-                    if (uiGustOfWindTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GUST_OF_WIND);
-                        uiGustOfWindTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiGustOfWindTimer -= diff;
-
-                    if (uiWindfeatherTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_WINDFEATHER);
-                        uiWindfeatherTimer = 13*IN_MILLISECONDS;
-                    }
-                    else uiWindfeatherTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_HEALING_SONG);
+                    uiHealingSongTimer = 18 * IN_MILLISECONDS;
                 }
+                else uiHealingSongTimer -= diff;
 
-                case 71143:
+                if (uiWindfeatherTimer <= diff)
                 {
-                    if (uiWindfeatherTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_WINDFEATHER);
-                        uiWindfeatherTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiWindfeatherTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_WINDFEATHER);
+                    uiWindfeatherTimer = 15 * IN_MILLISECONDS;
                 }
+                else uiWindfeatherTimer -= diff;
 
-                case 72095:
+                break;
+            }
+
+            case 72762:
+            {
+                if (uiGustOfWindTimer <= diff)
                 {
-                    if (uiWindfeatherTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_WINDFEATHER);
-                        uiWindfeatherTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiWindfeatherTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_GUST_OF_WIND);
+                    uiGustOfWindTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiGustOfWindTimer -= diff;
 
-                case 72761:
+                if (uiWindfeatherTimer <= diff)
                 {
-                    if (uiHealingSongTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_HEALING_SONG);
-                        uiHealingSongTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiHealingSongTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_WINDFEATHER);
+                    uiWindfeatherTimer = 13 * IN_MILLISECONDS;
                 }
+                else uiWindfeatherTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 71143:
+            {
+                if (uiWindfeatherTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_WINDFEATHER);
+                    uiWindfeatherTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiWindfeatherTimer -= diff;
+
+                break;
+            }
+
+            case 72095:
+            {
+                if (uiWindfeatherTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_WINDFEATHER);
+                    uiWindfeatherTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiWindfeatherTimer -= diff;
+
+                break;
+            }
+
+            case 72761:
+            {
+                if (uiHealingSongTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_HEALING_SONG);
+                    uiHealingSongTimer = 10 * IN_MILLISECONDS;
+                }
+                else uiHealingSongTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_cranesAI(creature);
     }
@@ -1182,9 +1182,9 @@ public:
         uint32 uiVenomSpitTimer;
         uint32 uiPoisonSpitTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiVenomSpitTimer = 7*IN_MILLISECONDS;
+            uiVenomSpitTimer = 7 * IN_MILLISECONDS;
             uiPoisonSpitTimer = urand(7, 12)*IN_MILLISECONDS;
         }
 
@@ -1200,39 +1200,39 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72909:
+            case 72909:
+            {
+                if (uiVenomSpitTimer <= diff)
                 {
-                    if (uiVenomSpitTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_VENOM_SPIT);
-                        uiVenomSpitTimer = 10*IN_MILLISECONDS;
-                    }
-                    else uiVenomSpitTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_VENOM_SPIT);
+                    uiVenomSpitTimer = 10 * IN_MILLISECONDS;
                 }
+                else uiVenomSpitTimer -= diff;
 
-                case 72908:
+                break;
+            }
+
+            case 72908:
+            {
+                if (uiPoisonSpitTimer <= diff)
                 {
-                    if (uiPoisonSpitTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POISON_SPIT);
-                        uiPoisonSpitTimer = urand(7, 12)*IN_MILLISECONDS;
-                    }
-                    else uiPoisonSpitTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_POISON_SPIT);
+                    uiPoisonSpitTimer = urand(7, 12)*IN_MILLISECONDS;
                 }
+                else uiPoisonSpitTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_silkwormsAI(creature);
     }
@@ -1255,9 +1255,9 @@ public:
 
         uint32 uiClawFlurry;
 
-        void Reset() 
+        void Reset()
         {
-            uiClawFlurry = 5*IN_MILLISECONDS;
+            uiClawFlurry = 5 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -1272,39 +1272,39 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72766:
+            case 72766:
+            {
+                if (uiClawFlurry <= diff)
                 {
-                    if (uiClawFlurry <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_CLAW_FLURRY_1);
-                        uiClawFlurry = 8*IN_MILLISECONDS;
-                    }
-                    else uiClawFlurry -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_CLAW_FLURRY_1);
+                    uiClawFlurry = 8 * IN_MILLISECONDS;
                 }
+                else uiClawFlurry -= diff;
 
-                case 73166:
+                break;
+            }
+
+            case 73166:
+            {
+                if (uiClawFlurry <= diff)
                 {
-                    if (uiClawFlurry <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_CLAW_FLURRY_2);
-                        uiClawFlurry = 8*IN_MILLISECONDS;
-                    }
-                    else uiClawFlurry -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_CLAW_FLURRY_2);
+                    uiClawFlurry = 8 * IN_MILLISECONDS;
                 }
+                else uiClawFlurry -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_crabsAI(creature);
     }
@@ -1328,11 +1328,11 @@ public:
         uint32 uiSpecSpellTimer;
         bool alementalNear;
 
-        void Reset() 
+        void Reset()
         {
             me->CastSpell(me, SPELL_GHOST_VISUAL);
 
-            uiSpecSpellTimer = 6*IN_MILLISECONDS;
+            uiSpecSpellTimer = 6 * IN_MILLISECONDS;
             alementalNear = false;
         }
 
@@ -1354,51 +1354,51 @@ public:
 
             switch (me->GetEntry())
             {
-                case 73021:
+            case 73021:
+            {
+                if (uiSpecSpellTimer <= diff)
                 {
-                    if (uiSpecSpellTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_CHI_BURST);
-                        uiSpecSpellTimer = urand(6, 8)*IN_MILLISECONDS;
-                    }
-                    else uiSpecSpellTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_CHI_BURST);
+                    uiSpecSpellTimer = urand(6, 8)*IN_MILLISECONDS;
                 }
+                else uiSpecSpellTimer -= diff;
 
-                case 73025:
+                break;
+            }
+
+            case 73025:
+            {
+                if (uiSpecSpellTimer <= diff)
                 {
-                    if (uiSpecSpellTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_HEALING_MISTS);
-                        uiSpecSpellTimer = urand(13, 15)*IN_MILLISECONDS;
-                    }
-                    else uiSpecSpellTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_HEALING_MISTS);
+                    uiSpecSpellTimer = urand(13, 15)*IN_MILLISECONDS;
                 }
+                else uiSpecSpellTimer -= diff;
 
-                case 73018:
+                break;
+            }
+
+            case 73018:
+            {
+                if (uiSpecSpellTimer <= diff)
                 {
-                    if (uiSpecSpellTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SPINNING_CRANE_KICK);
-                        uiSpecSpellTimer = urand(9, 12)*IN_MILLISECONDS;
-                    }
-                    else uiSpecSpellTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SPINNING_CRANE_KICK);
+                    uiSpecSpellTimer = urand(9, 12)*IN_MILLISECONDS;
                 }
+                else uiSpecSpellTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_spectralsAI(creature);
     }
@@ -1425,12 +1425,12 @@ public:
         uint32 uiPounceStunTimer;
         bool pounce;
 
-        void Reset() 
+        void Reset()
         {
-            uiDefensiveLeapTimer = 8*IN_MILLISECONDS;
-            uiSwipeTimer = 2*IN_MILLISECONDS;
-            uiPounceChargeTimer = 9*IN_MILLISECONDS;
-            uiPounceStunTimer = 10*IN_MILLISECONDS;
+            uiDefensiveLeapTimer = 8 * IN_MILLISECONDS;
+            uiSwipeTimer = 2 * IN_MILLISECONDS;
+            uiPounceChargeTimer = 9 * IN_MILLISECONDS;
+            uiPounceStunTimer = 10 * IN_MILLISECONDS;
             pounce = false;
         }
 
@@ -1443,132 +1443,132 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             switch (me->GetEntry())
             {
-                case 72807:
+            case 72807:
+            {
+                if (!pounce)
                 {
-                    if (!pounce)
+                    if (uiSwipeTimer <= diff)
                     {
-                        if (uiSwipeTimer <= diff)
-                        {
-                            me->CastSpell(me->GetVictim(), SPELL_RENDING_SWIPE);
-                            uiSwipeTimer = 4*IN_MILLISECONDS;
-                        }
-                        else uiSwipeTimer -= diff;
+                        me->CastSpell(me->GetVictim(), SPELL_RENDING_SWIPE);
+                        uiSwipeTimer = 4 * IN_MILLISECONDS;
                     }
-
-                    if (uiDefensiveLeapTimer <= diff)
-                    {
-                        pounce = true;
-                        me->CastSpell(me, SPELL_DEFENSIVE_LEAP);
-                        uiDefensiveLeapTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiDefensiveLeapTimer -= diff;
-
-                    if (uiPounceChargeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POUNCE_CHARGE);
-                        uiPounceChargeTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiPounceChargeTimer -= diff;
-
-                    if (uiPounceStunTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POUNCE_STUN);
-                        pounce = false;
-                        uiPounceStunTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiPounceStunTimer -= diff;
-
-                    break;
+                    else uiSwipeTimer -= diff;
                 }
 
-                case 72805:
+                if (uiDefensiveLeapTimer <= diff)
                 {
-                    if (!pounce)
-                    {
-                        if (uiSwipeTimer <= diff)
-                        {
-                            me->CastSpell(me->GetVictim(), SPELL_GREATER_SWIPE);
-                            uiSwipeTimer = 4*IN_MILLISECONDS;
-                        }
-                        else uiSwipeTimer -= diff;
-                    }
+                    pounce = true;
+                    me->CastSpell(me, SPELL_DEFENSIVE_LEAP);
+                    uiDefensiveLeapTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiDefensiveLeapTimer -= diff;
 
-                    if (uiDefensiveLeapTimer <= diff)
-                    {
-                        pounce = true;
-                        me->CastSpell(me, SPELL_DEFENSIVE_LEAP);
-                        uiDefensiveLeapTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiDefensiveLeapTimer -= diff;
+                if (uiPounceChargeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POUNCE_CHARGE);
+                    uiPounceChargeTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiPounceChargeTimer -= diff;
 
-                    if (uiPounceChargeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POUNCE_CHARGE);
-                        uiPounceChargeTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiPounceChargeTimer -= diff;
+                if (uiPounceStunTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POUNCE_STUN);
+                    pounce = false;
+                    uiPounceStunTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiPounceStunTimer -= diff;
 
-                    if (uiPounceStunTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POUNCE_STUN);
-                        pounce = false;
-                        uiPounceStunTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiPounceStunTimer -= diff;
+                break;
+            }
 
-                    break;
+            case 72805:
+            {
+                if (!pounce)
+                {
+                    if (uiSwipeTimer <= diff)
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_GREATER_SWIPE);
+                        uiSwipeTimer = 4 * IN_MILLISECONDS;
+                    }
+                    else uiSwipeTimer -= diff;
                 }
 
-                case 72808:
+                if (uiDefensiveLeapTimer <= diff)
                 {
-                    if (!pounce)
-                    {
-                        if (uiSwipeTimer <= diff)
-                        {
-                            me->CastSpell(me->GetVictim(), SPELL_GREATER_SWIPE);
-                            uiSwipeTimer = 4*IN_MILLISECONDS;
-                        }
-                        else uiSwipeTimer -= diff;
-                    }
+                    pounce = true;
+                    me->CastSpell(me, SPELL_DEFENSIVE_LEAP);
+                    uiDefensiveLeapTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiDefensiveLeapTimer -= diff;
 
-                    if (uiDefensiveLeapTimer <= diff)
-                    {
-                        pounce = true;
-                        me->CastSpell(me, SPELL_DEFENSIVE_LEAP);
-                        uiDefensiveLeapTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiDefensiveLeapTimer -= diff;
+                if (uiPounceChargeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POUNCE_CHARGE);
+                    uiPounceChargeTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiPounceChargeTimer -= diff;
 
-                    if (uiPounceChargeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POUNCE_CHARGE);
-                        uiPounceChargeTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiPounceChargeTimer -= diff;
+                if (uiPounceStunTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POUNCE_STUN);
+                    pounce = false;
+                    uiPounceStunTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiPounceStunTimer -= diff;
 
-                    if (uiPounceStunTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POUNCE_STUN);
-                        pounce = false;
-                        uiPounceStunTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiPounceStunTimer -= diff;
+                break;
+            }
 
-                    break;
+            case 72808:
+            {
+                if (!pounce)
+                {
+                    if (uiSwipeTimer <= diff)
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_GREATER_SWIPE);
+                        uiSwipeTimer = 4 * IN_MILLISECONDS;
+                    }
+                    else uiSwipeTimer -= diff;
                 }
 
-                default:
-                    break;
+                if (uiDefensiveLeapTimer <= diff)
+                {
+                    pounce = true;
+                    me->CastSpell(me, SPELL_DEFENSIVE_LEAP);
+                    uiDefensiveLeapTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiDefensiveLeapTimer -= diff;
+
+                if (uiPounceChargeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POUNCE_CHARGE);
+                    uiPounceChargeTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiPounceChargeTimer -= diff;
+
+                if (uiPounceStunTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POUNCE_STUN);
+                    pounce = false;
+                    uiPounceStunTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiPounceStunTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_catsAI(creature);
     }
@@ -1593,11 +1593,11 @@ public:
         uint32 uiRainOfSkunkyAleTimer;
         uint32 uiSkunkyAleCrashTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiBrewBoltTimer = 1*IN_MILLISECONDS;
-            uiRainOfSkunkyAleTimer = 14*IN_MILLISECONDS;
-            uiSkunkyAleCrashTimer = 6*IN_MILLISECONDS;
+            uiBrewBoltTimer = 1 * IN_MILLISECONDS;
+            uiRainOfSkunkyAleTimer = 14 * IN_MILLISECONDS;
+            uiSkunkyAleCrashTimer = 6 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -1613,21 +1613,21 @@ public:
             if (uiBrewBoltTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_BREW_BOLT);
-                uiBrewBoltTimer = 3*IN_MILLISECONDS;
+                uiBrewBoltTimer = 3 * IN_MILLISECONDS;
             }
             else uiBrewBoltTimer -= diff;
 
             if (uiRainOfSkunkyAleTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_RAIN_OF_SKUNKY_ALE);
-                uiRainOfSkunkyAleTimer = 14*IN_MILLISECONDS;
+                uiRainOfSkunkyAleTimer = 14 * IN_MILLISECONDS;
             }
             else uiRainOfSkunkyAleTimer -= diff;
 
             if (uiSkunkyAleCrashTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_SKUNKY_ALE_CRASH);
-                uiSkunkyAleCrashTimer = 6*IN_MILLISECONDS;
+                uiSkunkyAleCrashTimer = 6 * IN_MILLISECONDS;
             }
             else uiSkunkyAleCrashTimer -= diff;
 
@@ -1635,7 +1635,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_elementalsAI(creature);
     }
@@ -1659,10 +1659,10 @@ public:
         uint32 uiFireBoltTimer;
         uint32 uiFlameStrikeTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiFireBoltTimer = 1*IN_MILLISECONDS;
-            uiFlameStrikeTimer = 10*IN_MILLISECONDS;
+            uiFireBoltTimer = 1 * IN_MILLISECONDS;
+            uiFlameStrikeTimer = 10 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -1674,56 +1674,56 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             switch (me->GetEntry())
             {
-                case 73162:
+            case 73162:
+            {
+                if (uiFireBoltTimer <= diff)
                 {
-                    if (uiFireBoltTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SPIRITFIRE_BOLT);
-                        uiFireBoltTimer = 5*IN_MILLISECONDS;
-                    }
-                    else uiFireBoltTimer -= diff;
-
-                    if (uiFlameStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SPIRITFLAME_STRIKE);
-                        uiFlameStrikeTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiFlameStrikeTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SPIRITFIRE_BOLT);
+                    uiFireBoltTimer = 5 * IN_MILLISECONDS;
                 }
+                else uiFireBoltTimer -= diff;
 
-                case 72769:
+                if (uiFlameStrikeTimer <= diff)
                 {
-                    if (uiFireBoltTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_JADEFIRE_BOLT);
-                        uiFireBoltTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiFireBoltTimer -= diff;
-
-                    if (uiFlameStrikeTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_JADEFLAME_STRIKE);
-                        uiFlameStrikeTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiFlameStrikeTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_SPIRITFLAME_STRIKE);
+                    uiFlameStrikeTimer = 12 * IN_MILLISECONDS;
                 }
+                else uiFlameStrikeTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 72769:
+            {
+                if (uiFireBoltTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_JADEFIRE_BOLT);
+                    uiFireBoltTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiFireBoltTimer -= diff;
+
+                if (uiFlameStrikeTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_JADEFLAME_STRIKE);
+                    uiFlameStrikeTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiFlameStrikeTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_spiritsAI(creature);
     }
@@ -1749,11 +1749,11 @@ public:
         uint32 uiFrenzyTimer;
         bool boulderOrStomp;
 
-        void Reset() 
+        void Reset()
         {
-            uiBoulderTimer = 0*IN_MILLISECONDS;
-            uiStompTimer = 1*IN_MILLISECONDS;
-            uiFrenzyTimer = 9*IN_MILLISECONDS;
+            uiBoulderTimer = 0 * IN_MILLISECONDS;
+            uiStompTimer = 1 * IN_MILLISECONDS;
+            uiFrenzyTimer = 9 * IN_MILLISECONDS;
             boulderOrStomp = false; // false = Boulder, true = Stomp
         }
 
@@ -1775,85 +1775,85 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72809:
+            case 72809:
+            {
+                if (!boulderOrStomp)
                 {
-                    if (!boulderOrStomp)
+                    if (uiBoulderTimer <= diff)
                     {
-                        if (uiBoulderTimer <= diff)
-                        {
-                            me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_BOULDER);
-                            uiBoulderTimer = 0*IN_MILLISECONDS;
-                        }
-                        else uiBoulderTimer -= diff;
+                        me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_BOULDER);
+                        uiBoulderTimer = 0 * IN_MILLISECONDS;
                     }
-                    else
+                    else uiBoulderTimer -= diff;
+                }
+                else
+                {
+                    if (uiStompTimer <= diff)
                     {
-                        if (uiStompTimer <= diff)
-                        {
-                            if (me->HasAura(SPELL_FRENZY))
-                                me->CastSpell(me->GetVictim(), SPELL_FRENZY_STOMP);
-                            else
-                                me->CastSpell(me->GetVictim(), SPELL_STOMP);
+                        if (me->HasAura(SPELL_FRENZY))
+                            me->CastSpell(me->GetVictim(), SPELL_FRENZY_STOMP);
+                        else
+                            me->CastSpell(me->GetVictim(), SPELL_STOMP);
 
-                            uiStompTimer = 1*IN_MILLISECONDS;
-                        }
-                        else uiStompTimer -= diff;
+                        uiStompTimer = 1 * IN_MILLISECONDS;
                     }
-
-                    if (uiFrenzyTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_FRENZY);
-                        uiFrenzyTimer = 16*IN_MILLISECONDS;
-                    }
-                    else uiFrenzyTimer -= diff;
-
-                    break;
+                    else uiStompTimer -= diff;
                 }
 
-                case 72970:
+                if (uiFrenzyTimer <= diff)
                 {
-                    if (!boulderOrStomp)
-                    {
-                        if (uiBoulderTimer <= diff)
-                        {
-                            me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_BOULDER);
-                            uiBoulderTimer = 0*IN_MILLISECONDS;
-                        }
-                        else uiBoulderTimer -= diff;
-                    }
-                    else
-                    {
-                        if (uiStompTimer <= diff)
-                        {
-                            if (me->HasAura(SPELL_FRENZY))
-                                me->CastSpell(me->GetVictim(), SPELL_FRENZY_STOMP);
-                            else
-                                me->CastSpell(me->GetVictim(), SPELL_STOMP);
+                    me->CastSpell(me, SPELL_FRENZY);
+                    uiFrenzyTimer = 16 * IN_MILLISECONDS;
+                }
+                else uiFrenzyTimer -= diff;
 
-                            uiStompTimer = 1*IN_MILLISECONDS;
-                        }
-                        else uiStompTimer -= diff;
-                    }
+                break;
+            }
 
-                    if (uiFrenzyTimer <= diff)
+            case 72970:
+            {
+                if (!boulderOrStomp)
+                {
+                    if (uiBoulderTimer <= diff)
                     {
-                        me->CastSpell(me, SPELL_FRENZY);
-                        uiFrenzyTimer = 16*IN_MILLISECONDS;
+                        me->CastSpell(SelectTarget(SELECT_TARGET_RANDOM), SPELL_BOULDER);
+                        uiBoulderTimer = 0 * IN_MILLISECONDS;
                     }
-                    else uiFrenzyTimer -= diff;
+                    else uiBoulderTimer -= diff;
+                }
+                else
+                {
+                    if (uiStompTimer <= diff)
+                    {
+                        if (me->HasAura(SPELL_FRENZY))
+                            me->CastSpell(me->GetVictim(), SPELL_FRENZY_STOMP);
+                        else
+                            me->CastSpell(me->GetVictim(), SPELL_STOMP);
 
-                    break;
+                        uiStompTimer = 1 * IN_MILLISECONDS;
+                    }
+                    else uiStompTimer -= diff;
                 }
 
-                default:
-                    break;
+                if (uiFrenzyTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_FRENZY);
+                    uiFrenzyTimer = 16 * IN_MILLISECONDS;
+                }
+                else uiFrenzyTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_giantsAI(creature);
     }
@@ -1874,7 +1874,7 @@ public:
         {
         }
 
-        void Reset() 
+        void Reset()
         {
             me->CastSpell(me, SPELL_TOXIC_SKIN);
         }
@@ -1890,7 +1890,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_frogsAI(creature);
     }
@@ -1909,26 +1909,26 @@ public:
     {
         npc_timeless_dragonsAI(Creature* creature) : ScriptedAI(creature)
         {
-			//me->SetUnitMovementFlags
-			me->SetCanFly(true);
-			me->SetDisableGravity(true);
+            //me->SetUnitMovementFlags
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
         }
 
         uint32 uiBreathTimer;
         uint32 uiBlossomTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiBreathTimer = 4*IN_MILLISECONDS;
-            uiBlossomTimer = 10*IN_MILLISECONDS;
-			me->SetCanFly(true);
-			me->SetDisableGravity(true);
+            uiBreathTimer = 4 * IN_MILLISECONDS;
+            uiBlossomTimer = 10 * IN_MILLISECONDS;
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
         }
 
-        void EnterCombat(Unit* /*who*/) 
+        void EnterCombat(Unit* /*who*/)
         {
-			me->SetCanFly(true);
-			me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1938,56 +1938,56 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             switch (me->GetEntry())
             {
-                case 72876:
+            case 72876:
+            {
+                if (uiBreathTimer <= diff)
                 {
-                    if (uiBreathTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_FLAME_BREATH);
-                        uiBreathTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiBreathTimer -= diff;
-
-                    if (uiBlossomTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_FIRE_BLOSSOM);
-                        uiBlossomTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiBlossomTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_FLAME_BREATH);
+                    uiBreathTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiBreathTimer -= diff;
 
-                case 73167:
+                if (uiBlossomTimer <= diff)
                 {
-                    if (uiBreathTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_LIGHTNING_BREATH);
-                        uiBreathTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiBreathTimer -= diff;
-
-                    if (uiBlossomTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_STORM_BLOSSOM);
-                        uiBlossomTimer = 12*IN_MILLISECONDS;
-                    }
-                    else uiBlossomTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_FIRE_BLOSSOM);
+                    uiBlossomTimer = 12 * IN_MILLISECONDS;
                 }
+                else uiBlossomTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 73167:
+            {
+                if (uiBreathTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_LIGHTNING_BREATH);
+                    uiBreathTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiBreathTimer -= diff;
+
+                if (uiBlossomTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_STORM_BLOSSOM);
+                    uiBlossomTimer = 12 * IN_MILLISECONDS;
+                }
+                else uiBlossomTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_timeless_dragonsAI(creature);
     }
@@ -2015,29 +2015,29 @@ public:
         uint32 uiGreaterPyroblastTimer;
         uint32 uiBlazingBlowTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiCauterizeTimer = 15*IN_MILLISECONDS;
-            uiConjureTimer = 8*IN_MILLISECONDS;
-            uiFireStormTimer = 20*IN_MILLISECONDS;
-            uiGreaterPyroblastTimer = 1*IN_MILLISECONDS;
-            uiBlazingBlowTimer = 5*IN_MILLISECONDS;
+            uiCauterizeTimer = 15 * IN_MILLISECONDS;
+            uiConjureTimer = 8 * IN_MILLISECONDS;
+            uiFireStormTimer = 20 * IN_MILLISECONDS;
+            uiGreaterPyroblastTimer = 1 * IN_MILLISECONDS;
+            uiBlazingBlowTimer = 5 * IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/) 
+        void EnterCombat(Unit* /*who*/)
         {
             switch (me->GetEntry())
             {
-                case 72896:
-                    me->CastSpell(me->GetVictim(), SPELL_FIERY_CHARGE);
-                    break;
+            case 72896:
+                me->CastSpell(me->GetVictim(), SPELL_FIERY_CHARGE);
+                break;
 
-                case 73172:
-                    me->CastSpell(me->GetVictim(), SPELL_FIERY_CHARGE);
-                    break;
+            case 73172:
+                me->CastSpell(me->GetVictim(), SPELL_FIERY_CHARGE);
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
@@ -2051,185 +2051,185 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72897:
+            case 72897:
+            {
+                if (uiCauterizeTimer <= diff)
                 {
-                    if (uiCauterizeTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CAUTERIZE);
-                        uiCauterizeTimer = 35*IN_MILLISECONDS;
-                    }
-                    else uiCauterizeTimer -= diff;
-                    
-                    if (uiConjureTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CONJURE_FLARECORE_GOLEM);
-                        uiConjureTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiConjureTimer -= diff;
-
-                    if (uiFireStormTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
-                        uiFireStormTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiFireStormTimer -= diff;
-
-                    if (uiGreaterPyroblastTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GREATER_PYROBLAST);
-                        uiGreaterPyroblastTimer = 1500;
-                    }
-                    else uiGreaterPyroblastTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_CAUTERIZE);
+                    uiCauterizeTimer = 35 * IN_MILLISECONDS;
                 }
+                else uiCauterizeTimer -= diff;
 
-                case 72896:
+                if (uiConjureTimer <= diff)
                 {
-                    if (uiBlazingBlowTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_BLAZING_BLOW);
-                        uiBlazingBlowTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiBlazingBlowTimer -= diff;
-
-                    if (uiConjureTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CONJURE_ETERNAL_KILN);
-                        uiConjureTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiConjureTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_CONJURE_FLARECORE_GOLEM);
+                    uiConjureTimer = 25 * IN_MILLISECONDS;
                 }
+                else uiConjureTimer -= diff;
 
-                case 72898:
+                if (uiFireStormTimer <= diff)
                 {
-                    if (uiCauterizeTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CAUTERIZE);
-                        uiCauterizeTimer = 35*IN_MILLISECONDS;
-                    }
-                    else uiCauterizeTimer -= diff;
-                    
-                    if (uiConjureTimer <= diff)
-                    {
-                        me->CastSpell(me, RAND(SPELL_CONJURE_FLARECORE_GOLEM, SPELL_CONJURE_ETERNAL_KILN));
-                        uiConjureTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiConjureTimer -= diff;
-
-                    if (uiFireStormTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
-                        uiFireStormTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiFireStormTimer -= diff;
-
-                    if (uiBlazingBlowTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_BLAZING_BLOW);
-                        uiBlazingBlowTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiBlazingBlowTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
+                    uiFireStormTimer = 25 * IN_MILLISECONDS;
                 }
+                else uiFireStormTimer -= diff;
 
-                case 73172:
+                if (uiGreaterPyroblastTimer <= diff)
                 {
-                    if (uiBlazingBlowTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_BLAZING_BLOW);
-                        uiBlazingBlowTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiBlazingBlowTimer -= diff;
-
-                    if (uiConjureTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CONJURE_ETERNAL_KILN);
-                        uiConjureTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiConjureTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_GREATER_PYROBLAST);
+                    uiGreaterPyroblastTimer = 1500;
                 }
+                else uiGreaterPyroblastTimer -= diff;
 
-                case 73173:
+                break;
+            }
+
+            case 72896:
+            {
+                if (uiBlazingBlowTimer <= diff)
                 {
-                    if (uiCauterizeTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CAUTERIZE);
-                        uiCauterizeTimer = 35*IN_MILLISECONDS;
-                    }
-                    else uiCauterizeTimer -= diff;
-                    
-                    if (uiConjureTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CONJURE_FLARECORE_GOLEM);
-                        uiConjureTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiConjureTimer -= diff;
-
-                    if (uiFireStormTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
-                        uiFireStormTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiFireStormTimer -= diff;
-
-                    if (uiGreaterPyroblastTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GREATER_PYROBLAST);
-                        uiGreaterPyroblastTimer = 1500;
-                    }
-                    else uiGreaterPyroblastTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_BLAZING_BLOW);
+                    uiBlazingBlowTimer = 8 * IN_MILLISECONDS;
                 }
+                else uiBlazingBlowTimer -= diff;
 
-                case 73666:
+                if (uiConjureTimer <= diff)
                 {
-                    if (uiCauterizeTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_CAUTERIZE);
-                        uiCauterizeTimer = 35*IN_MILLISECONDS;
-                    }
-                    else uiCauterizeTimer -= diff;
-                    
-                    if (uiConjureTimer <= diff)
-                    {
-                        me->CastSpell(me, RAND(SPELL_CONJURE_FLARECORE_GOLEM, SPELL_CONJURE_ETERNAL_KILN));
-                        uiConjureTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiConjureTimer -= diff;
-
-                    if (uiFireStormTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
-                        uiFireStormTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiFireStormTimer -= diff;
-
-                    if (uiBlazingBlowTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_BLAZING_BLOW);
-                        uiBlazingBlowTimer = 8*IN_MILLISECONDS;
-                    }
-                    else uiBlazingBlowTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_CONJURE_ETERNAL_KILN);
+                    uiConjureTimer = 25 * IN_MILLISECONDS;
                 }
+                else uiConjureTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 72898:
+            {
+                if (uiCauterizeTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_CAUTERIZE);
+                    uiCauterizeTimer = 35 * IN_MILLISECONDS;
+                }
+                else uiCauterizeTimer -= diff;
+
+                if (uiConjureTimer <= diff)
+                {
+                    me->CastSpell(me, RAND(SPELL_CONJURE_FLARECORE_GOLEM, SPELL_CONJURE_ETERNAL_KILN));
+                    uiConjureTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiConjureTimer -= diff;
+
+                if (uiFireStormTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
+                    uiFireStormTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiFireStormTimer -= diff;
+
+                if (uiBlazingBlowTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_BLAZING_BLOW);
+                    uiBlazingBlowTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiBlazingBlowTimer -= diff;
+
+                break;
+            }
+
+            case 73172:
+            {
+                if (uiBlazingBlowTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_BLAZING_BLOW);
+                    uiBlazingBlowTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiBlazingBlowTimer -= diff;
+
+                if (uiConjureTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_CONJURE_ETERNAL_KILN);
+                    uiConjureTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiConjureTimer -= diff;
+
+                break;
+            }
+
+            case 73173:
+            {
+                if (uiCauterizeTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_CAUTERIZE);
+                    uiCauterizeTimer = 35 * IN_MILLISECONDS;
+                }
+                else uiCauterizeTimer -= diff;
+
+                if (uiConjureTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_CONJURE_FLARECORE_GOLEM);
+                    uiConjureTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiConjureTimer -= diff;
+
+                if (uiFireStormTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
+                    uiFireStormTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiFireStormTimer -= diff;
+
+                if (uiGreaterPyroblastTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_GREATER_PYROBLAST);
+                    uiGreaterPyroblastTimer = 1500;
+                }
+                else uiGreaterPyroblastTimer -= diff;
+
+                break;
+            }
+
+            case 73666:
+            {
+                if (uiCauterizeTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_CAUTERIZE);
+                    uiCauterizeTimer = 35 * IN_MILLISECONDS;
+                }
+                else uiCauterizeTimer -= diff;
+
+                if (uiConjureTimer <= diff)
+                {
+                    me->CastSpell(me, RAND(SPELL_CONJURE_FLARECORE_GOLEM, SPELL_CONJURE_ETERNAL_KILN));
+                    uiConjureTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiConjureTimer -= diff;
+
+                if (uiFireStormTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_FIRE_STORM);
+                    uiFireStormTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiFireStormTimer -= diff;
+
+                if (uiBlazingBlowTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_BLAZING_BLOW);
+                    uiBlazingBlowTimer = 8 * IN_MILLISECONDS;
+                }
+                else uiBlazingBlowTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_ordos_minionsAI(creature);
     }
@@ -2253,7 +2253,7 @@ public:
 
         bool kilnFire;
 
-        void Reset() 
+        void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
@@ -2263,7 +2263,7 @@ public:
             kilnFire = false;
         }
 
-        void JustDied(Unit* /*killer*/) 
+        void JustDied(Unit* /*killer*/)
         {
             me->DespawnOrUnsummon();
         }
@@ -2284,7 +2284,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_eternal_kilnAI(creature);
     }
@@ -2309,14 +2309,14 @@ public:
         uint32 uiRenewingMistsTimer;
         uint32 uiPoisonBreathTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiMurkyCloudTimer = 5*IN_MILLISECONDS;
-            uiRenewingMistsTimer = 10*IN_MILLISECONDS;
-            uiPoisonBreathTimer = 8*IN_MILLISECONDS;
+            uiMurkyCloudTimer = 5 * IN_MILLISECONDS;
+            uiRenewingMistsTimer = 10 * IN_MILLISECONDS;
+            uiPoisonBreathTimer = 8 * IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/) 
+        void EnterCombat(Unit* /*who*/)
         {
             if (me->GetEntry() == 72896)
                 me->CastSpell(me->GetVictim(), SPELL_FIERY_CHARGE);
@@ -2332,79 +2332,79 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72771:
+            case 72771:
+            {
+                if (uiMurkyCloudTimer <= diff)
                 {
-                    if (uiMurkyCloudTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MURKY_CLOUD);
-                        uiMurkyCloudTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiMurkyCloudTimer -= diff;
-                    
-                    if (uiRenewingMistsTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_RENEWING_MISTS);
-                        uiRenewingMistsTimer = 18*IN_MILLISECONDS;
-                    }
-                    else uiRenewingMistsTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_MURKY_CLOUD);
+                    uiMurkyCloudTimer = 20 * IN_MILLISECONDS;
                 }
+                else uiMurkyCloudTimer -= diff;
 
-                case 73157:
+                if (uiRenewingMistsTimer <= diff)
                 {
-                    if (uiMurkyCloudTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MURKY_CLOUD);
-                        uiMurkyCloudTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiMurkyCloudTimer -= diff;
-                    
-                    if (uiRenewingMistsTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_RENEWING_MISTS);
-                        uiRenewingMistsTimer = 18*IN_MILLISECONDS;
-                    }
-                    else uiRenewingMistsTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_RENEWING_MISTS);
+                    uiRenewingMistsTimer = 18 * IN_MILLISECONDS;
                 }
+                else uiRenewingMistsTimer -= diff;
 
-                case 71864:
+                break;
+            }
+
+            case 73157:
+            {
+                if (uiMurkyCloudTimer <= diff)
                 {
-                    if (uiMurkyCloudTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_MURKY_CLOUD);
-                        uiMurkyCloudTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiMurkyCloudTimer -= diff;
-                    
-                    if (uiRenewingMistsTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_RENEWING_MISTS);
-                        uiRenewingMistsTimer = 18*IN_MILLISECONDS;
-                    }
-                    else uiRenewingMistsTimer -= diff;
-
-                    if (uiPoisonBreathTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_POISON_BREATH);
-                        uiPoisonBreathTimer = 13*IN_MILLISECONDS;
-                    }
-                    else uiPoisonBreathTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_MURKY_CLOUD);
+                    uiMurkyCloudTimer = 20 * IN_MILLISECONDS;
                 }
+                else uiMurkyCloudTimer -= diff;
 
-                default:
-                    break;
+                if (uiRenewingMistsTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_RENEWING_MISTS);
+                    uiRenewingMistsTimer = 18 * IN_MILLISECONDS;
+                }
+                else uiRenewingMistsTimer -= diff;
+
+                break;
+            }
+
+            case 71864:
+            {
+                if (uiMurkyCloudTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_MURKY_CLOUD);
+                    uiMurkyCloudTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiMurkyCloudTimer -= diff;
+
+                if (uiRenewingMistsTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_RENEWING_MISTS);
+                    uiRenewingMistsTimer = 18 * IN_MILLISECONDS;
+                }
+                else uiRenewingMistsTimer -= diff;
+
+                if (uiPoisonBreathTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_POISON_BREATH);
+                    uiPoisonBreathTimer = 13 * IN_MILLISECONDS;
+                }
+                else uiPoisonBreathTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_damp_shamblersAI(creature);
     }
@@ -2429,10 +2429,10 @@ public:
         uint32 uiDefensiveShieldTimer;
         bool oathOfGuardianship;
 
-        void Reset() 
+        void Reset()
         {
-            uiCrackingBlowTimer = 4*IN_MILLISECONDS;
-            uiDefensiveShieldTimer = 10*IN_MILLISECONDS;
+            uiCrackingBlowTimer = 4 * IN_MILLISECONDS;
+            uiDefensiveShieldTimer = 10 * IN_MILLISECONDS;
             oathOfGuardianship = false;
         }
 
@@ -2445,7 +2445,7 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             if (!oathOfGuardianship && HealthBelowPct(20))
             {
                 if (!me->HasAura(SPELL_OATH_OF_GUARDIANSHIP))
@@ -2456,53 +2456,53 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72892:
+            case 72892:
+            {
+                if (uiCrackingBlowTimer <= diff)
                 {
-                    if (uiCrackingBlowTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_CRACKING_BLOW);
-                        uiCrackingBlowTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiCrackingBlowTimer -= diff;
-                    
-                    if (uiDefensiveShieldTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_DEFENSIVE_SHIELD);
-                        uiDefensiveShieldTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiDefensiveShieldTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_CRACKING_BLOW);
+                    uiCrackingBlowTimer = 6 * IN_MILLISECONDS;
                 }
+                else uiCrackingBlowTimer -= diff;
 
-                case 73169:
+                if (uiDefensiveShieldTimer <= diff)
                 {
-                    if (uiCrackingBlowTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_CRACKING_BLOW);
-                        uiCrackingBlowTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiCrackingBlowTimer -= diff;
-                    
-                    if (uiDefensiveShieldTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_DEFENSIVE_SHIELD);
-                        uiDefensiveShieldTimer = 25*IN_MILLISECONDS;
-                    }
-                    else uiDefensiveShieldTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_DEFENSIVE_SHIELD);
+                    uiDefensiveShieldTimer = 25 * IN_MILLISECONDS;
                 }
+                else uiDefensiveShieldTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 73169:
+            {
+                if (uiCrackingBlowTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_CRACKING_BLOW);
+                    uiCrackingBlowTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiCrackingBlowTimer -= diff;
+
+                if (uiDefensiveShieldTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_DEFENSIVE_SHIELD);
+                    uiDefensiveShieldTimer = 25 * IN_MILLISECONDS;
+                }
+                else uiDefensiveShieldTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_ordon_guardsAI(creature);
     }
@@ -2527,14 +2527,14 @@ public:
         uint32 uiBlazingCleaveTimer;
         uint32 uiBurningFuryTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiForageTimer = 5*IN_MILLISECONDS;
-            uiBlazingCleaveTimer = 4*IN_MILLISECONDS;
-            uiBurningFuryTimer = 10*IN_MILLISECONDS;
+            uiForageTimer = 5 * IN_MILLISECONDS;
+            uiBlazingCleaveTimer = 4 * IN_MILLISECONDS;
+            uiBurningFuryTimer = 10 * IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/) 
+        void EnterCombat(Unit* /*who*/)
         {
             me->CastSpell(me->GetVictim(), SPELL_FIERY_CHARGE);
         }
@@ -2546,7 +2546,7 @@ public:
                 if (uiForageTimer <= diff)
                 {
                     me->CastSpell(me, SPELL_FORAGE);
-                    uiForageTimer = 25*IN_MILLISECONDS;
+                    uiForageTimer = 25 * IN_MILLISECONDS;
                 }
                 else uiForageTimer -= diff;
             }
@@ -2556,56 +2556,56 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             switch (me->GetEntry())
             {
-                case 72895:
+            case 72895:
+            {
+                if (uiBlazingCleaveTimer <= diff)
                 {
-                    if (uiBlazingCleaveTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_BLAZING_CLEAVE);
-                        uiBlazingCleaveTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiBlazingCleaveTimer -= diff;
-
-                    if (uiBurningFuryTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_BURNING_FURY);
-                        uiBurningFuryTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiBurningFuryTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_BLAZING_CLEAVE);
+                    uiBlazingCleaveTimer = 6 * IN_MILLISECONDS;
                 }
+                else uiBlazingCleaveTimer -= diff;
 
-                case 73171:
+                if (uiBurningFuryTimer <= diff)
                 {
-                    if (uiBlazingCleaveTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_BLAZING_CLEAVE);
-                        uiBlazingCleaveTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiBlazingCleaveTimer -= diff;
-
-                    if (uiBurningFuryTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_BURNING_FURY);
-                        uiBurningFuryTimer = 20*IN_MILLISECONDS;
-                    }
-                    else uiBurningFuryTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_BURNING_FURY);
+                    uiBurningFuryTimer = 20 * IN_MILLISECONDS;
                 }
+                else uiBurningFuryTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 73171:
+            {
+                if (uiBlazingCleaveTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_BLAZING_CLEAVE);
+                    uiBlazingCleaveTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiBlazingCleaveTimer -= diff;
+
+                if (uiBurningFuryTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_BURNING_FURY);
+                    uiBurningFuryTimer = 20 * IN_MILLISECONDS;
+                }
+                else uiBurningFuryTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_ordos_warriorsAI(creature);
     }
@@ -2629,10 +2629,10 @@ public:
         uint32 uiFallingFlamesTimer;
         uint32 uiPyroblastTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiFallingFlamesTimer = 4*IN_MILLISECONDS;
-            uiPyroblastTimer = 1*IN_MILLISECONDS;
+            uiFallingFlamesTimer = 4 * IN_MILLISECONDS;
+            uiPyroblastTimer = 1 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -2647,53 +2647,53 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72894:
+            case 72894:
+            {
+                if (uiFallingFlamesTimer <= diff)
                 {
-                    if (uiFallingFlamesTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_FALLING_FLAMES);
-                        uiFallingFlamesTimer = 4*IN_MILLISECONDS;
-                    }
-                    else uiFallingFlamesTimer -= diff;
-
-                    if (uiPyroblastTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_PYROBLAST);
-                        uiPyroblastTimer = 2*IN_MILLISECONDS;
-                    }
-                    else uiPyroblastTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_FALLING_FLAMES);
+                    uiFallingFlamesTimer = 4 * IN_MILLISECONDS;
                 }
+                else uiFallingFlamesTimer -= diff;
 
-                case 73170:
+                if (uiPyroblastTimer <= diff)
                 {
-                    if (uiFallingFlamesTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_FALLING_FLAMES);
-                        uiFallingFlamesTimer = 4*IN_MILLISECONDS;
-                    }
-                    else uiFallingFlamesTimer -= diff;
-
-                    if (uiPyroblastTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_PYROBLAST);
-                        uiPyroblastTimer = 2*IN_MILLISECONDS;
-                    }
-                    else uiPyroblastTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_PYROBLAST);
+                    uiPyroblastTimer = 2 * IN_MILLISECONDS;
                 }
+                else uiPyroblastTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            case 73170:
+            {
+                if (uiFallingFlamesTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_FALLING_FLAMES);
+                    uiFallingFlamesTimer = 4 * IN_MILLISECONDS;
+                }
+                else uiFallingFlamesTimer -= diff;
+
+                if (uiPyroblastTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_PYROBLAST);
+                    uiPyroblastTimer = 2 * IN_MILLISECONDS;
+                }
+                else uiPyroblastTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_ordon_watchersAI(creature);
     }
@@ -2717,10 +2717,10 @@ public:
         uint32 uiMoltenInfernoTimer;
         uint8 spellRotation;
 
-        void Reset() 
+        void Reset()
         {
             spellRotation = 0;
-            uiMoltenInfernoTimer = 6*IN_MILLISECONDS;
+            uiMoltenInfernoTimer = 6 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -2735,85 +2735,85 @@ public:
 
             switch (me->GetEntry())
             {
-                case 72888:
+            case 72888:
+            {
+                if (uiMoltenInfernoTimer <= diff)
                 {
-                    if (uiMoltenInfernoTimer <= diff)
+                    switch (spellRotation)
                     {
-                        switch (spellRotation)
-                        {
-                            case 0:
-                            {
-                                me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_1);
-                                spellRotation++;
-                                break;
-                            }
-
-                            case 1:
-                            {
-                                me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_2);
-                                spellRotation++;
-                                break;
-                            }
-
-                            case 2:
-                            {
-                                me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_3);
-                                spellRotation = 0;
-                                break;
-                            }
-                        }
-
-                        uiMoltenInfernoTimer = 10*IN_MILLISECONDS;
+                    case 0:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_1);
+                        spellRotation++;
+                        break;
                     }
-                    else uiMoltenInfernoTimer -= diff;
 
-                    break;
+                    case 1:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_2);
+                        spellRotation++;
+                        break;
+                    }
+
+                    case 2:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_3);
+                        spellRotation = 0;
+                        break;
+                    }
+                    }
+
+                    uiMoltenInfernoTimer = 10 * IN_MILLISECONDS;
                 }
+                else uiMoltenInfernoTimer -= diff;
 
-                case 73175:
+                break;
+            }
+
+            case 73175:
+            {
+                if (uiMoltenInfernoTimer <= diff)
                 {
-                    if (uiMoltenInfernoTimer <= diff)
+                    switch (spellRotation)
                     {
-                        switch (spellRotation)
-                        {
-                            case 0:
-                            {
-                                me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_1);
-                                spellRotation++;
-                                break;
-                            }
-
-                            case 1:
-                            {
-                                me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_2);
-                                spellRotation++;
-                                break;
-                            }
-
-                            case 2:
-                            {
-                                me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_3);
-                                spellRotation = 0;
-                                break;
-                            }
-                        }
-
-                        uiMoltenInfernoTimer = 10*IN_MILLISECONDS;
+                    case 0:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_1);
+                        spellRotation++;
+                        break;
                     }
-                    else uiMoltenInfernoTimer -= diff;
 
-                    break;
+                    case 1:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_2);
+                        spellRotation++;
+                        break;
+                    }
+
+                    case 2:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_MOLTEN_INFERNO_3);
+                        spellRotation = 0;
+                        break;
+                    }
+                    }
+
+                    uiMoltenInfernoTimer = 10 * IN_MILLISECONDS;
                 }
+                else uiMoltenInfernoTimer -= diff;
 
-                default:
-                    break;
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_molten_guardsAI(creature);
     }
@@ -2838,11 +2838,11 @@ public:
         uint32 uiHealingTouchTimer;
         uint32 uiSunWorshipTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiGreathWrathTimer = 1*IN_MILLISECONDS;
-            uiHealingTouchTimer = 10*IN_MILLISECONDS;
-            uiSunWorshipTimer = 6*IN_MILLISECONDS;
+            uiGreathWrathTimer = 1 * IN_MILLISECONDS;
+            uiHealingTouchTimer = 10 * IN_MILLISECONDS;
+            uiSunWorshipTimer = 6 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -2857,67 +2857,67 @@ public:
 
             switch (me->GetEntry())
             {
-                case 73277:
+            case 73277:
+            {
+                if (uiGreathWrathTimer <= diff)
                 {
-                    if (uiGreathWrathTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GREAT_WRATH);
-                        uiGreathWrathTimer = 2*IN_MILLISECONDS;
-                    }
-                    else uiGreathWrathTimer -= diff;
-
-                    if (uiHealingTouchTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_HEALING_TOUCH);
-                        uiHealingTouchTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiHealingTouchTimer -= diff;
-
-                    if (uiSunWorshipTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SUN_WORSHIP);
-                        uiSunWorshipTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSunWorshipTimer -= diff;
-
-                    break;
+                    me->CastSpell(me->GetVictim(), SPELL_GREAT_WRATH);
+                    uiGreathWrathTimer = 2 * IN_MILLISECONDS;
                 }
+                else uiGreathWrathTimer -= diff;
 
-                case 72877:
+                if (uiHealingTouchTimer <= diff)
                 {
-                    if (uiGreathWrathTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GREAT_WRATH);
-                        uiGreathWrathTimer = 2*IN_MILLISECONDS;
-                    }
-                    else uiGreathWrathTimer -= diff;
-
-                    if (uiHealingTouchTimer <= diff)
-                    {
-                        me->CastSpell(me, SPELL_HEALING_TOUCH);
-                        uiHealingTouchTimer = 15*IN_MILLISECONDS;
-                    }
-                    else uiHealingTouchTimer -= diff;
-
-                    if (uiSunWorshipTimer <= diff)
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_SUN_WORSHIP);
-                        uiSunWorshipTimer = 6*IN_MILLISECONDS;
-                    }
-                    else uiSunWorshipTimer -= diff;
-
-                    break;
+                    me->CastSpell(me, SPELL_HEALING_TOUCH);
+                    uiHealingTouchTimer = 15 * IN_MILLISECONDS;
                 }
+                else uiHealingTouchTimer -= diff;
 
-                default:
-                    break;
+                if (uiSunWorshipTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SUN_WORSHIP);
+                    uiSunWorshipTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiSunWorshipTimer -= diff;
+
+                break;
+            }
+
+            case 72877:
+            {
+                if (uiGreathWrathTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_GREAT_WRATH);
+                    uiGreathWrathTimer = 2 * IN_MILLISECONDS;
+                }
+                else uiGreathWrathTimer -= diff;
+
+                if (uiHealingTouchTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_HEALING_TOUCH);
+                    uiHealingTouchTimer = 15 * IN_MILLISECONDS;
+                }
+                else uiHealingTouchTimer -= diff;
+
+                if (uiSunWorshipTimer <= diff)
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_SUN_WORSHIP);
+                    uiSunWorshipTimer = 6 * IN_MILLISECONDS;
+                }
+                else uiSunWorshipTimer -= diff;
+
+                break;
+            }
+
+            default:
+                break;
             }
 
             DoMeleeAttackIfReady();
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_leaf_spritesAI(creature);
     }
@@ -2940,9 +2940,9 @@ public:
 
         uint32 uiSteamBlastTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiSteamBlastTimer = 6*IN_MILLISECONDS;
+            uiSteamBlastTimer = 6 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -2958,7 +2958,7 @@ public:
             if (uiSteamBlastTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_STEAM_BLAST);
-                uiSteamBlastTimer = 10*IN_MILLISECONDS;
+                uiSteamBlastTimer = 10 * IN_MILLISECONDS;
             }
             else uiSteamBlastTimer -= diff;
 
@@ -2966,7 +2966,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_jademist_dancerAI(creature);
     }
@@ -2990,10 +2990,10 @@ public:
         uint32 uiNatureSWrathTimer;
         uint32 uiStickySapTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiNatureSWrathTimer = 1*IN_MILLISECONDS;
-            uiStickySapTimer = 3*IN_MILLISECONDS;
+            uiNatureSWrathTimer = 1 * IN_MILLISECONDS;
+            uiStickySapTimer = 3 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -3009,14 +3009,14 @@ public:
             if (uiNatureSWrathTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_NATURE_S_WRATH);
-                uiNatureSWrathTimer = 1*IN_MILLISECONDS;
+                uiNatureSWrathTimer = 1 * IN_MILLISECONDS;
             }
             else uiNatureSWrathTimer -= diff;
 
             if (uiStickySapTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_STICKY_SAP);
-                uiStickySapTimer = 2*IN_MILLISECONDS;
+                uiStickySapTimer = 2 * IN_MILLISECONDS;
             }
             else uiStickySapTimer -= diff;
 
@@ -3024,7 +3024,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_nice_spriteAI(creature);
     }
@@ -3047,9 +3047,9 @@ public:
 
         uint32 uiBreathOfFireTimer;
 
-        void Reset() 
+        void Reset()
         {
-            uiBreathOfFireTimer = 1*IN_MILLISECONDS;
+            uiBreathOfFireTimer = 1 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -3068,7 +3068,7 @@ public:
             if (uiBreathOfFireTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_BREATH_OF_FIRE);
-                uiBreathOfFireTimer = 2*IN_MILLISECONDS;
+                uiBreathOfFireTimer = 2 * IN_MILLISECONDS;
             }
             else uiBreathOfFireTimer -= diff;
 
@@ -3076,7 +3076,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const 
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_ordon_candlekeeperAI(creature);
     }
@@ -3084,7 +3084,7 @@ public:
 
 void AddSC_timeless_isle()
 {
-	// creatures
+    // creatures
     new npc_timeless_turtles();
     new npc_timeless_faction_sentries();
     new npc_timeless_adders();
@@ -3111,12 +3111,12 @@ void AddSC_timeless_isle()
     new npc_nice_sprite();
     new npc_ordon_candlekeeper();
     new npc_emperor_shaohao();
-	
-	// gameobject
+
+    // gameobject
     new go_time_lost_shrine_ti();
     new go_gleaming_crane_statue_ti();
-	
-	// spells
+
+    // spells
     new spell_timeless_isle_crane_wings();
     new spell_timeless_isle_cauterize();
     new spell_timeless_isle_burning_fury();

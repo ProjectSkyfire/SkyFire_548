@@ -94,11 +94,11 @@ public:
 
         void Reset() override
         {
-            uiCrushTimer =          30*IN_MILLISECONDS;
-            uiFrillBlastTimer =     40*IN_MILLISECONDS;
-            uiGrowingFuryTimer =    15*IN_MILLISECONDS;
-            uiPiercingRoarTimer =   20*IN_MILLISECONDS;
-            uiSpiritfireBeamTimer = 12*IN_MILLISECONDS;
+            uiCrushTimer = 30 * IN_MILLISECONDS;
+            uiFrillBlastTimer = 40 * IN_MILLISECONDS;
+            uiGrowingFuryTimer = 15 * IN_MILLISECONDS;
+            uiPiercingRoarTimer = 20 * IN_MILLISECONDS;
+            uiSpiritfireBeamTimer = 12 * IN_MILLISECONDS;
 
             me->RemoveAurasDueToSpell(SPELL_ALPHA_MALE);
 
@@ -129,7 +129,7 @@ public:
                         dohaman->AI()->Talk(SAY_DOHAMAN_AGGRO);
 
                     me->Kill(dohaman);
-                    dohaman->DespawnOrUnsummon(10*IN_MILLISECONDS);
+                    dohaman->DespawnOrUnsummon(10 * IN_MILLISECONDS);
                 }
             }
         }
@@ -145,7 +145,7 @@ public:
             if (uiCrushTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_CRUSH_1);
-                uiCrushTimer = 26*IN_MILLISECONDS;
+                uiCrushTimer = 26 * IN_MILLISECONDS;
             }
             else uiCrushTimer -= diff;
 
@@ -159,14 +159,14 @@ public:
             if (uiGrowingFuryTimer <= diff)
             {
                 me->CastSpell(me, SPELL_GROWING_FURY);
-                uiGrowingFuryTimer = 25*IN_MILLISECONDS;
+                uiGrowingFuryTimer = 25 * IN_MILLISECONDS;
             }
             else uiGrowingFuryTimer -= diff;
 
             if (uiPiercingRoarTimer <= diff)
             {
                 me->CastSpell(me, SPELL_PIERCING_ROAR_1);
-                uiPiercingRoarTimer =  urand(20, 55)*IN_MILLISECONDS;
+                uiPiercingRoarTimer = urand(20, 55)*IN_MILLISECONDS;
             }
             else uiPiercingRoarTimer -= diff;
 
@@ -207,8 +207,8 @@ public:
 
         void Reset() override
         {
-            uiCrushTimer = 5*IN_MILLISECONDS;
-            uiPiercingRoarTimer = 20*IN_MILLISECONDS;
+            uiCrushTimer = 5 * IN_MILLISECONDS;
+            uiPiercingRoarTimer = 20 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) override {}
@@ -221,14 +221,14 @@ public:
             if (uiCrushTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_CRUSH_2);
-                uiCrushTimer = 5*IN_MILLISECONDS;
+                uiCrushTimer = 5 * IN_MILLISECONDS;
             }
             else uiCrushTimer -= diff;
 
             if (uiPiercingRoarTimer <= diff)
             {
                 me->CastSpell(me, SPELL_PIERCING_ROAR_2);
-                uiPiercingRoarTimer =  8*IN_MILLISECONDS;
+                uiPiercingRoarTimer = 8 * IN_MILLISECONDS;
             }
             else uiPiercingRoarTimer -= diff;
 
@@ -264,7 +264,7 @@ public:
         {
             SetEquipmentSlots(true);
 
-            uiDinoMendingTimer = 10*IN_MILLISECONDS;
+            uiDinoMendingTimer = 10 * IN_MILLISECONDS;
             dinoForm = false;
         }
 
@@ -285,7 +285,7 @@ public:
             if (uiDinoMendingTimer <= diff)
             {
                 me->CastSpell(me, SPELL_DINO_MENDING);
-                uiDinoMendingTimer = 15*IN_MILLISECONDS;
+                uiDinoMendingTimer = 15 * IN_MILLISECONDS;
             }
             else uiDinoMendingTimer -= diff;
 
@@ -318,7 +318,7 @@ public:
 
         void Reset() override
         {
-            uiSkycallTimer = 2*IN_MILLISECONDS;
+            uiSkycallTimer = 2 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) override {}
@@ -334,7 +334,7 @@ public:
             if (uiSkycallTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_SKYCALL);
-                uiSkycallTimer = 6*IN_MILLISECONDS;
+                uiSkycallTimer = 6 * IN_MILLISECONDS;
             }
             else uiSkycallTimer -= diff;
 
@@ -367,7 +367,7 @@ public:
 
         void Reset() override
         {
-            uiCrushTimer = 2*IN_MILLISECONDS;
+            uiCrushTimer = 2 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) override {}
@@ -380,7 +380,7 @@ public:
             if (uiCrushTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_CRUSH_2);
-                uiCrushTimer = 6*IN_MILLISECONDS;
+                uiCrushTimer = 6 * IN_MILLISECONDS;
             }
             else uiCrushTimer -= diff;
 
@@ -414,8 +414,8 @@ public:
 
         void Reset() override
         {
-            uiDoubleSwipeTimer = 8*IN_MILLISECONDS;
-            uiTriplePunctureTimer = 3*IN_MILLISECONDS;
+            uiDoubleSwipeTimer = 8 * IN_MILLISECONDS;
+            uiTriplePunctureTimer = 3 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -434,14 +434,14 @@ public:
             if (uiDoubleSwipeTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_DOUBLE_SWIPE);
-                uiDoubleSwipeTimer = 10*IN_MILLISECONDS;
+                uiDoubleSwipeTimer = 10 * IN_MILLISECONDS;
             }
             else uiDoubleSwipeTimer -= diff;
 
             if (uiTriplePunctureTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_TRIPLE_PUNCTURE);
-                uiTriplePunctureTimer = 8*IN_MILLISECONDS;
+                uiTriplePunctureTimer = 8 * IN_MILLISECONDS;
             }
             else uiTriplePunctureTimer -= diff;
 
@@ -474,7 +474,7 @@ public:
 
         void Reset() override
         {
-            uiTriplePunctureTimer = 3*IN_MILLISECONDS;
+            uiTriplePunctureTimer = 3 * IN_MILLISECONDS;
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -493,7 +493,7 @@ public:
             if (uiTriplePunctureTimer <= diff)
             {
                 me->CastSpell(me->GetVictim(), SPELL_TRIPLE_PUNCTURE);
-                uiTriplePunctureTimer = 8*IN_MILLISECONDS;
+                uiTriplePunctureTimer = 8 * IN_MILLISECONDS;
             }
             else uiTriplePunctureTimer -= diff;
 
@@ -510,40 +510,40 @@ public:
 // Trihorn Charge - 138769
 class spell_trihorn_charge : public SpellScriptLoader
 {
-    public:
-        spell_trihorn_charge() : SpellScriptLoader("spell_trihorn_charge") { }
+public:
+    spell_trihorn_charge() : SpellScriptLoader("spell_trihorn_charge") { }
 
-        class spell_trihorn_charge_SpellScript : public SpellScript
+    class spell_trihorn_charge_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_trihorn_charge_SpellScript);
+
+        bool Validate(SpellInfo const* /*SpellEntry*/)
         {
-            PrepareSpellScript(spell_trihorn_charge_SpellScript);
+            if (!sSpellMgr->GetSpellInfo(SPELL_TRIHORN_CHARGE))
+                return false;
 
-            bool Validate(SpellInfo const* /*SpellEntry*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_TRIHORN_CHARGE))
-                    return false;
-
-                return true;
-            }
-
-            void HandleOnHit()
-            {
-                if (!GetHitUnit())
-                    return;
-
-                if (GetCaster())
-                    GetCaster()->CastSpell(GetHitUnit(), SPELL_TRIHORN_CHARGE_TRIGGER);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_trihorn_charge_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_trihorn_charge_SpellScript();
+            return true;
         }
+
+        void HandleOnHit()
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (GetCaster())
+                GetCaster()->CastSpell(GetHitUnit(), SPELL_TRIHORN_CHARGE_TRIGGER);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_trihorn_charge_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_trihorn_charge_SpellScript();
+    }
 };
 
 

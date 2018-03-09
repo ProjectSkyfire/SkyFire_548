@@ -48,63 +48,63 @@ enum eActions
 
 class rare_mob_spirit_of_jadefire : public CreatureScript
 {
-    public:
-        rare_mob_spirit_of_jadefire() : CreatureScript("rare_mob_spirit_of_jadefire") { }
+public:
+    rare_mob_spirit_of_jadefire() : CreatureScript("rare_mob_spirit_of_jadefire") { }
 
-        struct rare_mob_spirit_of_jadefireAI : public BossAI
+    struct rare_mob_spirit_of_jadefireAI : public BossAI
+    {
+        rare_mob_spirit_of_jadefireAI(Creature* creature) : BossAI(creature, 0) { }
+
+        EventMap events;
+
+        void Reset()
         {
-            rare_mob_spirit_of_jadefireAI(Creature* creature) : BossAI(creature, 0) { }
+            events.Reset();
+            _Reset();
 
-            EventMap events;
-
-            void Reset()
-            {
-                events.Reset();
-                _Reset();
-
-                //events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
-            }
-
-            void KilledUnit(Unit* who)
-            {
-            }
-
-            void EnterCombat(Unit* /*attacker*/)
-            {
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                events.Update(diff);
-                switch (events.ExecuteEvent())
-                {
-                    case EVENT_XXXX:
-                    {
-                        events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
-                        break;
-                    }
-                    default:
-                        break;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new rare_mob_spirit_of_jadefireAI(creature);
+            //events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
         }
+
+        void KilledUnit(Unit* who)
+        {
+        }
+
+        void EnterCombat(Unit* /*attacker*/)
+        {
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_XXXX:
+            {
+                events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
+                break;
+            }
+            default:
+                break;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new rare_mob_spirit_of_jadefireAI(creature);
+    }
 };
 
 void AddSC_rare_mob_spirit_of_jadefire()

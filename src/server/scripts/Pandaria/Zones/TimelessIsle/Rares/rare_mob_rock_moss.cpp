@@ -48,63 +48,63 @@ enum eActions
 
 class rare_mob_rock_moss : public CreatureScript
 {
-    public:
-        rare_mob_rock_moss() : CreatureScript("rare_mob_rock_moss") { }
+public:
+    rare_mob_rock_moss() : CreatureScript("rare_mob_rock_moss") { }
 
-        struct rare_mob_rock_mossAI : public BossAI
+    struct rare_mob_rock_mossAI : public BossAI
+    {
+        rare_mob_rock_mossAI(Creature* creature) : BossAI(creature, 0) { }
+
+        EventMap events;
+
+        void Reset()
         {
-            rare_mob_rock_mossAI(Creature* creature) : BossAI(creature, 0) { }
+            events.Reset();
+            _Reset();
 
-            EventMap events;
-
-            void Reset()
-            {
-                events.Reset();
-                _Reset();
-
-                //events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
-            }
-
-            void KilledUnit(Unit* who)
-            {
-            }
-
-            void EnterCombat(Unit* /*attacker*/)
-            {
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                events.Update(diff);
-                switch (events.ExecuteEvent())
-                {
-                    case EVENT_XXXX:
-                    {
-                        events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
-                        break;
-                    }
-                    default:
-                        break;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new rare_mob_rock_mossAI(creature);
+            //events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
         }
+
+        void KilledUnit(Unit* who)
+        {
+        }
+
+        void EnterCombat(Unit* /*attacker*/)
+        {
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_XXXX:
+            {
+                events.ScheduleEvent(EVENT_XXXX, urand(7500, 15000));
+                break;
+            }
+            default:
+                break;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new rare_mob_rock_mossAI(creature);
+    }
 };
 
 void AddSC_rare_mob_rock_moss()

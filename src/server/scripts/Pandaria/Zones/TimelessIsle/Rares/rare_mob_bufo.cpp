@@ -27,74 +27,74 @@
 
 enum eSpells
 {
-    SPELL_TOXIC_SKIN              = 147654,
-    SPELL_GULP_FROG_TOXIN         = 147655,
+    SPELL_TOXIC_SKIN = 147654,
+    SPELL_GULP_FROG_TOXIN = 147655,
 };
 
 enum eEvents
 {
-    EVENT_TOXIC_SKIN              = 1,
-    EVENT_GULP_FROG_TOXIN         = 2,
+    EVENT_TOXIC_SKIN = 1,
+    EVENT_GULP_FROG_TOXIN = 2,
 };
 
 class rare_mob_bufo : public CreatureScript
 {
-    public:
-        rare_mob_bufo() : CreatureScript("rare_mob_bufo") { }
+public:
+    rare_mob_bufo() : CreatureScript("rare_mob_bufo") { }
 
-        struct rare_mob_bufoAI : public BossAI
+    struct rare_mob_bufoAI : public BossAI
+    {
+        rare_mob_bufoAI(Creature* creature) : BossAI(creature, 0) { }
+
+        EventMap events;
+
+        void Reset()
         {
-            rare_mob_bufoAI(Creature* creature) : BossAI(creature, 0) { }
-
-            EventMap events;
-
-            void Reset()
-            {
-                events.Reset();
-                _Reset();
-            }
-
-            void EnterCombat(Unit* attacker)
-            {
-                events.ScheduleEvent(EVENT_TOXIC_SKIN, urand(10000, 15000));
-                events.ScheduleEvent(EVENT_GULP_FROG_TOXIN, urand(10000, 15000));
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                events.Update(diff);
-                switch (events.ExecuteEvent())
-                {
-                    case EVENT_TOXIC_SKIN:
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_TOXIC_SKIN);
-                        events.ScheduleEvent(EVENT_TOXIC_SKIN, urand(7500, 15000));
-                        break;
-                    }
-                    case EVENT_GULP_FROG_TOXIN:
-                    {
-                        me->CastSpell(me->GetVictim(), SPELL_GULP_FROG_TOXIN);
-                        events.ScheduleEvent(EVENT_GULP_FROG_TOXIN, urand(7500, 15000));
-                        break;
-                    }
-                    default:
-                        break;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new rare_mob_bufoAI(creature);
+            events.Reset();
+            _Reset();
         }
+
+        void EnterCombat(Unit* attacker)
+        {
+            events.ScheduleEvent(EVENT_TOXIC_SKIN, urand(10000, 15000));
+            events.ScheduleEvent(EVENT_GULP_FROG_TOXIN, urand(10000, 15000));
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_TOXIC_SKIN:
+            {
+                me->CastSpell(me->GetVictim(), SPELL_TOXIC_SKIN);
+                events.ScheduleEvent(EVENT_TOXIC_SKIN, urand(7500, 15000));
+                break;
+            }
+            case EVENT_GULP_FROG_TOXIN:
+            {
+                me->CastSpell(me->GetVictim(), SPELL_GULP_FROG_TOXIN);
+                events.ScheduleEvent(EVENT_GULP_FROG_TOXIN, urand(7500, 15000));
+                break;
+            }
+            default:
+                break;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new rare_mob_bufoAI(creature);
+    }
 };
 
 void AddSC_rare_mob_bufo()
