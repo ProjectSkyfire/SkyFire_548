@@ -744,7 +744,7 @@ void Aura::UpdateOwner(uint32 diff, WorldObject* owner)
     _DeleteRemovedApplications();
 }
 
-void Aura::Update(uint32 diff, Unit* caster)
+/*void Aura::Update(uint32 diff, Unit* caster)
 {
 	CallScriptAuraUpdateHandlers(diff);
 
@@ -809,7 +809,8 @@ void Aura::Update(uint32 diff, Unit* caster)
 			}
 		}
 	}
-}
+}*/
+
 void Aura::Update(uint32 diff, Unit* caster)
 {
     if (m_duration > 0)

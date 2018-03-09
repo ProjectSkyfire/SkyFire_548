@@ -67,6 +67,11 @@ set(scripts_STAT_SRCS
   Pandaria/Zones/TimelessIsle/Rares/rare_mob_watcher_osu.cpp
   Pandaria/Zones/TimelessIsle/Rares/rare_mob_zesqua.cpp
   Pandaria/Zones/TimelessIsle/Rares/rare_mob_zhu_gon_the_sour.cpp
+  #Sub-Zone WanderingIslands
+  Pandaria/Zones/WanderingIsland/WanderingIsland_East.cpp
+  Pandaria/Zones/WanderingIsland/WanderingIsland_North.cpp
+  Pandaria/Zones/WanderingIsland/WanderingIsland_South.cpp
+  Pandaria/Zones/WanderingIsland/WanderingIsland_West.cpp
 )
 
 message("  -> Prepared: Pandaria")

@@ -666,20 +666,33 @@ void AddSC_kezan();
 void AddSC_event_childrens_week();
 
 // Pandaria
-void AddSC_boss_ordos();
-//void AddSC_dread_wastes();
-//void AddSC_isle_of_giants();
+/*Zones*/
+void AddSC_dread_wastes();
+void AddSC_isle_of_giants();
 void AddSC_isle_of_thunder();
-//void AddSC_krasarang_wilds();
-//void AddSC_kun_lai_summit();
-//void AddSC_the_jade_forest();
-//void AddSC_the_situation_in_dalaran();
-//void AddSC_the_veiled_stair();
-//void AddSC_timeless_isle();
-//void AddSC_townlong_steppes();
-//void AddSC_vale_of_eternal_blossoms();
-//void AddSC_valley_of_the_four_winds();
-void AddSC_zone_wandering_island();
+void AddSC_krasarang_wilds();
+void AddSC_kun_lai_summit();
+void AddSC_jade_forest();
+void AddSC_the_veiled_stair();
+void AddSC_townlong_steppes();
+void AddSC_vale_of_eternal_blossoms();
+void AddSC_valley_of_the_four_winds();
+/*Sub-Zones TimelessIsle*/
+void AddSC_boss_chi_ji();
+void AddSC_boss_niuzao();
+void AddSC_boss_ordos();
+void AddSC_boss_xuen();
+void AddSC_boss_yu_lon();
+void AddSC_timeless_isle();
+/*Sub-Zones TimelessIsle Rares*/
+void AddSC_rare_mob_archereus_of_flame();
+void AddSC_rare_mob_bufo();
+void AddSC_rare_mob_chelon();
+/*Sub-Zones WanderingIslands*/
+void AddSC_WanderingIsland_East();
+void AddSC_WanderingIsland_North();
+void AddSC_WanderingIsland_South();
+void AddSC_WanderingIsland_West();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1408,20 +1421,33 @@ void AddEventScripts()
 void AddPandariaScripts()
 {
 #ifdef SCRIPTS
-    AddSC_boss_ordos();
-    //AddSC_dread_wastes();
-    //AddSC_isle_of_giants();
-    AddSC_isle_of_thunder();
-    //AddSC_krasarang_wilds();
-    //AddSC_kun_lai_summit();
-    //AddSC_the_jade_forest();
-    //AddSC_the_situation_in_dalaran();
-    //AddSC_the_veiled_stair();
-    //AddSC_timeless_isle();
-    //AddSC_townlong_steppes();
-    //AddSC_vale_of_eternal_blossoms();
-    //AddSC_valley_of_the_four_winds();
-    AddSC_zone_wandering_island();
+	/*Zones*/
+	AddSC_dread_wastes();
+	AddSC_isle_of_giants();
+	AddSC_isle_of_thunder();
+	AddSC_krasarang_wilds();
+	AddSC_kun_lai_summit();
+	AddSC_jade_forest();
+	AddSC_the_veiled_stair();
+	AddSC_townlong_steppes();
+	AddSC_vale_of_eternal_blossoms();
+	AddSC_valley_of_the_four_winds();
+	/*Sub-Zones TimelessIsle*/
+	AddSC_boss_chi_ji();
+	AddSC_boss_niuzao();
+	AddSC_boss_ordos();
+	AddSC_boss_xuen();
+	AddSC_boss_yu_lon();
+	AddSC_timeless_isle();
+	/*Sub-Zones TimelessIsle Rares*/
+	AddSC_rare_mob_archereus_of_flame();
+	AddSC_rare_mob_bufo();
+	AddSC_rare_mob_chelon();
+	/*Sub-Zones WanderingIslands*/
+	AddSC_WanderingIsland_East();
+	AddSC_WanderingIsland_North();
+	AddSC_WanderingIsland_South();
+	AddSC_WanderingIsland_West();
 #endif
 }
 

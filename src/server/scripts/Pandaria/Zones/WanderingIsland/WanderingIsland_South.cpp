@@ -1,3 +1,22 @@
+/*
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -896,7 +915,7 @@ class npc_shang_xi_choose_faction : public CreatureScript
         bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
         {
             if (action == GOSSIP_ACTION_INFO_DEF + 1)
-				player->SendPandarenChooseFactionPacket(); // #todo moje da ne e tova??
+				player->ShowNeutralPlayerFactionSelectUI(); // #todo moje da ne e tova??
             else if (action == GOSSIP_ACTION_INFO_DEF + 2)
                 player->TeleportTo(0, -8866.55f, 671.93f, 97.90f, 5.31f);
             else if (action == GOSSIP_ACTION_INFO_DEF + 3)
