@@ -693,6 +693,8 @@ void AddSC_WanderingIsland_East();
 void AddSC_WanderingIsland_North();
 void AddSC_WanderingIsland_South();
 void AddSC_WanderingIsland_West();
+/*bosses*/
+void AddSC_boss_nalak();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1448,6 +1450,8 @@ void AddPandariaScripts()
 	AddSC_WanderingIsland_North();
 	AddSC_WanderingIsland_South();
 	AddSC_WanderingIsland_West();
+    /*bosses*/
+    AddSC_boss_nalak();
 #endif
 }
 

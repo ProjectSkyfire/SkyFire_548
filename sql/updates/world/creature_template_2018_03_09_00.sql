@@ -9,6 +9,21 @@ INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`,
 DELETE FROM `creature_template` WHERE `entry`=69099;
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (69099, 0, 0, 0, 0, 0, 47227, 0, 0, 0, 'Nalak', 'The Storm Lord', NULL, 0, 93, 93, 4, 0, 14, 14, 2, 1.14286, 1.14286, 1, 3, 120000, 160000, 0, 150, 2, 2000, 2000, 2, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2097260, 0, 69099, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 5, 4, 700, 700, 4, 1, 0, 0, 0, 0, 0, 0, 0, 144, 1, 786382847, 0, 'boss_nalak', 17614);
 
+-- Nalak Database Text
+DELETE FROM `creature_text` WHERE `entry`=69099 AND `groupid`=0 AND `id`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (69099, 0, 0, 'I am born of thunder!', 14, 0, 100, 0, 0, 35732, 'NALAK - INTRO');
+DELETE FROM `creature_text` WHERE `entry`=69099 AND `groupid`=1 AND `id`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (69099, 1, 0, 'Can you feel a chill wind blow? The storm is coming...', 14, 0, 100, 0, 0, 35730, 'NALAK - AGGRO');
+DELETE FROM `creature_text` WHERE `entry`=69099 AND `groupid`=2 AND `id`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (69099, 2, 0, 'I am but... The darkness... Before the storm...', 14, 0, 100, 0, 0, 35731, 'NALAK - DEATH');
+DELETE FROM `creature_text` WHERE `entry`=69099 AND `groupid`=3 AND `id`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (69099, 3, 0, 'The sky weeps for your demise!', 14, 0, 100, 0, 0, 35733, 'NALAK - KILL');
+DELETE FROM `creature_text` WHERE `entry`=69099 AND `groupid`=4 AND `id`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (69099, 4, 0, 'The clouds arc with vengeance!', 14, 0, 100, 0, 0, 35734, 'NALAK - NOVA');
+DELETE FROM `creature_text` WHERE `entry`=69099 AND `groupid`=5 AND `id`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (69099, 5, 0, 'The air crackles with anger!', 14, 0, 100, 0, 0, 35735, 'NALAK - TORM CLOUD');
+
+
 -- Ordos Database Text
 DELETE FROM `creature_text` WHERE `entry`=72057 AND `groupid`=0 AND `id`=0;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (72057, 0, 0, 'You will take my place on the eternal brazier.', 14, 0, 100, 0, 0, 38971, 'ORDOS - SAY_AGGRO');
@@ -24,3 +39,7 @@ DELETE FROM `creature_text` WHERE `entry`=72057 AND `groupid`=5 AND `id`=0;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (72057, 5, 0, 'You will feel but a fraction of my agony.', 14, 0, 100, 0, 0, 38980, 'ORDOS - SAY_POOL_OF_FIRE');
 DELETE FROM `creature_text` WHERE `entry`=72057 AND `groupid`=6 AND `id`=0;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (72057, 6, 0, 'Burn!', 14, 0, 100, 0, 0, 38981, 'ORDOS - SAY_BURNING_SOUL');
+
+-- Database insert Error Fix
+ALTER TABLE `creature`
+	CHANGE COLUMN `phaseMask` `phaseMask` TINYINT UNSIGNED NOT NULL DEFAULT '1' AFTER `spawnMask`;

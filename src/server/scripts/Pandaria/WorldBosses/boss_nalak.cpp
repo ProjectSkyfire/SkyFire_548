@@ -69,19 +69,23 @@ class boss_nalak : public CreatureScript
 public:
     boss_nalak() : CreatureScript("boss_nalak") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_nalakAI(creature);
-    }
+
 
     struct boss_nalakAI : public ScriptedAI
     {
-        boss_nalakAI(Creature* creature) : ScriptedAI(creature), summons(creature) { introDone = false; }
+        boss_nalakAI(Creature* creature) : ScriptedAI(creature), summons(creature)
+        {
+            pInstance = creature->GetInstanceScript();
+            introDone = false;
+        }
+
+        InstanceScript* pInstance;
+        bool introDone;
 
         EventMap events;
         SummonList summons;
 
-        void Reset() OVERRIDE
+        void Reset()
         {
 
             me->SetCanFly(true);
@@ -96,7 +100,7 @@ public:
             summons.DespawnAll();
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who)
         {
             if (!introDone && me->IsWithinDistInMap(who, 40) && who->GetTypeId() == TYPEID_PLAYER)
             {
@@ -105,7 +109,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/)
         {
             Talk(SAY_AGGRO);
 
@@ -116,13 +120,13 @@ public:
             events.ScheduleEvent(EVENT_STORMCLOUD, urand(13000, 17000)); // 13-17s
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim)
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
 
@@ -132,7 +136,7 @@ public:
             CompleteQuests();
         }
 
-        void UpdateAI(const uint32 diff) OVERRIDE
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -194,11 +198,12 @@ public:
             }
 
         }
-
-    private:
-
-        bool introDone;
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_nalakAI(creature);
+    }
 };
 
 // Lightning Tether / Static Shield / StormCloud player check.
