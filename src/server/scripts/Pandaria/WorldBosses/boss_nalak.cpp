@@ -17,7 +17,9 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include "CreatureTextMgr.h"
+#include "CombatAI.h"
 #include "ObjectMgr.h"
 #include "PassiveAI.h"
 #include "Player.h"
@@ -28,40 +30,39 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Unit.h"
-#include "Vehicle.h"
-
-enum Texts
-{
-    SAY_INTRO = 0, // I am born of thunder!
-    SAY_AGGRO = 1, // Can you feel a chill wind blow? The storm is coming...
-    SAY_DEATH = 2, // I am but... The darkness... Before the storm...
-    SAY_SLAY = 3, // The sky weeps for your demise!
-    SAY_ARC_NOVA = 4, // The clouds arc with vengeance!
-    SAY_STORM_CLOUD = 5  // The air crackles with anger!
-};
 
 enum Spells
 {
-    SPELL_ARC_NOVA = 136338, // 39s, every 42 s.
+    SPELL_ARC_NOVA            = 136338, // 39s, every 42 s.
 
-    SPELL_LIGHTNING_TET_A = 136339, // 28s, every 35 s.
-    SPELL_LIGHTNING_TET_S = 136350, // Scripting spell. 0 - SE SPELL_LIGHTNING_TET_D +30yd; 1 - Dummy close dmg. SPELL_LITHGNING_TET_N.
-    SPELL_LIGHTNING_TET_D = 136349, // Damage for over 30y.
-    SPELL_LITHGNING_TET_N = 136353, // Normal damage.
+    SPELL_LIGHTNING_TET_A     = 136339, // 28s, every 35 s.
+    SPELL_LIGHTNING_TET_S     = 136350, // Scripting spell. 0 - SE SPELL_LIGHTNING_TET_D +30yd; 1 - Dummy close dmg. SPELL_LITHGNING_TET_N.
+    SPELL_LIGHTNING_TET_D     = 136349, // Damage for over 30y.
+    SPELL_LITHGNING_TET_N     = 136353, // Normal damage.
 
-    SPELL_STATIC_SHIELD = 136341, // As aggro, whole fight, triggers dmg each sec.
+    SPELL_STATIC_SHIELD       = 136341, // As aggro, whole fight, triggers dmg each sec.
     SPELL_STATIC_SHIELD_DUMMY = 136342,
-    SPELL_STATIC_SHIELD_DMG = 136343,
+    SPELL_STATIC_SHIELD_DMG   = 136343,
 
-    SPELL_STORMCLOUD = 136340, // 15s, every 24 s.
-    SPELL_STORMCLOUD_DMG = 136345,
+    SPELL_STORMCLOUD          = 136340, // 15s, every 24 s.
+    SPELL_STORMCLOUD_DMG      = 136345
 };
 
 enum Events
 {
-    EVENT_ARC_NOVA = 1,
-    EVENT_LIGHTNING_TET = 2,
-    EVENT_STORMCLOUD = 3
+    EVENT_ARC_NOVA            = 1,
+    EVENT_LIGHTNING_TET       = 2,
+    EVENT_STORMCLOUD          = 3
+};
+
+enum Texts
+{
+    SAY_INTRO                 = 0, // I am born of thunder!
+    SAY_AGGRO                 = 1, // Can you feel a chill wind blow? The storm is coming...
+    SAY_DEATH                 = 2, // I am but... The darkness... Before the storm...
+    SAY_SLAY                  = 3, // The sky weeps for your demise!
+    SAY_ARC_NOVA              = 4, // The clouds arc with vengeance!
+    SAY_STORM_CLOUD           = 5  // The air crackles with anger!
 };
 
 class boss_nalak : public CreatureScript
@@ -69,38 +70,25 @@ class boss_nalak : public CreatureScript
 public:
     boss_nalak() : CreatureScript("boss_nalak") { }
 
-
-
     struct boss_nalakAI : public ScriptedAI
     {
-        boss_nalakAI(Creature* creature) : ScriptedAI(creature), summons(creature)
+        boss_nalakAI(Creature* creature) : ScriptedAI(creature), _summons(me), introDone(false)
         {
-            pInstance = creature->GetInstanceScript();
-            introDone = false;
-        }
-
-        InstanceScript* pInstance;
-        bool introDone;
-
-        EventMap events;
-        SummonList summons;
-
-        void Reset()
-        {
-
             me->SetCanFly(true);
             me->SetDisableGravity(true);
-
             me->SetFloatValue(UNIT_FIELD_HOVER_HEIGHT, 10.0f);
-            //me->SetHover(true);
+            me->SetHover(true);
             me->AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
             me->SetByteFlag(UNIT_FIELD_ANIM_TIER, 3, UNIT_BYTE1_FLAG_HOVER);
-
-            events.Reset();
-            summons.DespawnAll();
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void Reset() override
+        {
+            _events.Reset();
+            _summons.DespawnAll();
+        }
+
+        void MoveInLineOfSight(Unit* who) override
         {
             if (!introDone && me->IsWithinDistInMap(who, 40) && who->GetTypeId() == TYPEID_PLAYER)
             {
@@ -109,78 +97,70 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
             DoCast(me, SPELL_STATIC_SHIELD);
 
-            events.ScheduleEvent(EVENT_ARC_NOVA, urand(37000, 41000)); // 37-41s
-            events.ScheduleEvent(EVENT_LIGHTNING_TET, urand(28000, 35000)); // 28-35s
-            events.ScheduleEvent(EVENT_STORMCLOUD, urand(13000, 17000)); // 13-17s
+            _events.ScheduleEvent(EVENT_ARC_NOVA, urand(37000, 41000)); // 37-41s
+            _events.ScheduleEvent(EVENT_LIGHTNING_TET, urand(28000, 35000)); // 28-35s
+            _events.ScheduleEvent(EVENT_STORMCLOUD, urand(13000, 17000)); // 13-17s
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* who) override
         {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TYPEID_PLAYER)
                 Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
 
-            events.Reset();
-            summons.DespawnAll();
+            _events.Reset();
+            _summons.DespawnAll();
 
             CompleteQuests();
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
 
-            events.Update(diff);
-
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            if (uint32 eventId = events.ExecuteEvent())
-            {
-                ExecuteEvent(eventId);
-            }
+            _events.Update(diff);
 
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_ARC_NOVA:
+                    Talk(SAY_ARC_NOVA);
+                    DoCast(me, SPELL_ARC_NOVA);
+                    _events.ScheduleEvent(EVENT_ARC_NOVA, urand(41000, 43000));
+                    break;
+
+                case EVENT_LIGHTNING_TET:
+                    DoCast(me, SPELL_LIGHTNING_TET_A);
+                    _events.ScheduleEvent(EVENT_LIGHTNING_TET, urand(37000, 39000));
+                    break;
+
+                case EVENT_STORMCLOUD:
+                    Talk(SAY_STORM_CLOUD);
+                    DoCast(me, SPELL_STORMCLOUD);
+                    _events.ScheduleEvent(EVENT_STORMCLOUD, urand(33000, 37000));
+                    break;
+
+                default:
+                    break;
+                }
+            }
             DoMeleeAttackIfReady();
         }
-
-        void ExecuteEvent(const uint32 eventId)
-        {
-            switch (eventId)
-            {
-            case EVENT_ARC_NOVA:
-                Talk(SAY_ARC_NOVA);
-                DoCast(me, SPELL_ARC_NOVA);
-                events.ScheduleEvent(EVENT_ARC_NOVA, urand(41000, 43000));
-                break;
-
-            case EVENT_LIGHTNING_TET:
-                DoCast(me, SPELL_LIGHTNING_TET_A);
-                events.ScheduleEvent(EVENT_LIGHTNING_TET, urand(37000, 39000));
-                break;
-
-            case EVENT_STORMCLOUD:
-                Talk(SAY_STORM_CLOUD);
-                DoCast(me, SPELL_STORMCLOUD);
-                events.ScheduleEvent(EVENT_STORMCLOUD, urand(33000, 37000));
-                break;
-
-            default:
-                break;
-            }
-        }
-
-    private:
 
         void CompleteQuests()
         {
@@ -196,11 +176,15 @@ public:
                     player->KilledMonsterCredit(70456, 0);
                 }
             }
-
         }
+
+    private:
+        EventMap _events;
+        SummonList _summons;
+        bool introDone;
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_nalakAI(creature);
     }
@@ -239,7 +223,7 @@ public:
             targets.remove_if(PlayerCheck(GetCaster()));
         }
 
-        void Register()
+        void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_static_shield_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
         }
