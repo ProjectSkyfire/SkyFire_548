@@ -1998,6 +1998,33 @@ bool Aura::CallScriptEffectPeriodicHandlers(AuraEffect const* aurEff, AuraApplic
     return preventDefault;
 }
 
+void Aura::CallScriptAuraUpdateHandlers(uint32 diff)
+{
+	for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+	{
+		(*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_ON_UPDATE);
+		std::list<AuraScript::AuraUpdateHandler>::iterator hookItrEnd = (*scritr)->OnAuraUpdate.end(), hookItr = (*scritr)->OnAuraUpdate.begin();
+		for (; hookItr != hookItrEnd; ++hookItr)
+			(*hookItr).Call(*scritr, diff);
+		(*scritr)->_FinishScriptCall();
+	}
+}
+
+void Aura::CallScriptEffectUpdateHandlers(uint32 diff, AuraEffect* aurEff)
+{
+	for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+	{
+		(*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_UPDATE);
+		std::list<AuraScript::EffectUpdateHandler>::iterator effEndItr = (*scritr)->OnEffectUpdate.end(), effItr = (*scritr)->OnEffectUpdate.begin();
+		for (; effItr != effEndItr; ++effItr)
+		{
+			if ((*effItr).IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+				(*effItr).Call(*scritr, diff, aurEff);
+		}
+		(*scritr)->_FinishScriptCall();
+	}
+}
+
 void Aura::CallScriptEffectUpdatePeriodicHandlers(AuraEffect* aurEff)
 {
     for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)

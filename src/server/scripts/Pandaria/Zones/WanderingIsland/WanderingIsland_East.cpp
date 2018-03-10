@@ -1,3 +1,22 @@
+/*
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -6,26 +25,26 @@
 
 class AreaTrigger_at_bassin_curse : public AreaTriggerScript
 {
-    public:
-        AreaTrigger_at_bassin_curse() : AreaTriggerScript("AreaTrigger_at_bassin_curse") {}
+public:
+    AreaTrigger_at_bassin_curse() : AreaTriggerScript("AreaTrigger_at_bassin_curse") {}
 
     enum eTriggers
     {
-        AREA_CRANE              = 6991,
-        AREA_SKUNK              = 6988,
-        AREA_FROG               = 6987,
-        AREA_FROG_EXIT          = 6986,
-        AREA_TURTLE             = 7012,
-        AREA_CROCODILE          = 6990
+        AREA_CRANE = 6991,
+        AREA_SKUNK = 6988,
+        AREA_FROG = 6987,
+        AREA_FROG_EXIT = 6986,
+        AREA_TURTLE = 7012,
+        AREA_CROCODILE = 6990
     };
 
     enum eSpells
     {
-        SPELL_FROG              = 102938,
-        SPELL_SKUNK             = 102939,
-        SPELL_TURTLE            = 102940,
-        SPELL_CRANE             = 102941,
-        SPELL_CROCODILE         = 102942
+        SPELL_FROG = 102938,
+        SPELL_SKUNK = 102939,
+        SPELL_TURTLE = 102940,
+        SPELL_CRANE = 102941,
+        SPELL_CROCODILE = 102942
     };
 
     void AddOrRemoveSpell(Player* player, uint32 spellId)
@@ -34,9 +53,9 @@ class AreaTrigger_at_bassin_curse : public AreaTriggerScript
 
         if (!player->HasAura(spellId))
         {
-			// #todo
+            // #todo
             // if (!player->IsOnVehicle())
-                player->AddAura(spellId, player);
+            player->AddAura(spellId, player);
         }
         else
             player->RemoveAurasDueToSpell(spellId);
@@ -44,7 +63,7 @@ class AreaTrigger_at_bassin_curse : public AreaTriggerScript
 
     void RemoveAllSpellsExcept(Player* player, uint32 spellId)
     {
-        uint32 spellTable[5] = {SPELL_FROG, SPELL_SKUNK, SPELL_TURTLE, SPELL_CRANE, SPELL_CROCODILE};
+        uint32 spellTable[5] = { SPELL_FROG, SPELL_SKUNK, SPELL_TURTLE, SPELL_CRANE, SPELL_CROCODILE };
 
         for (uint8 i = 0; i < 5; ++i)
             if (spellId != spellTable[i])
@@ -53,7 +72,7 @@ class AreaTrigger_at_bassin_curse : public AreaTriggerScript
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        switch(trigger->id)
+        switch (trigger->id)
         {
         case AREA_CRANE:     AddOrRemoveSpell(player, SPELL_CRANE);     break;
         case AREA_SKUNK:     AddOrRemoveSpell(player, SPELL_SKUNK);     break;
@@ -91,9 +110,9 @@ public:
                 return;
             }
 
-            Trinity::Containers::RandomResizeList(poleList, 1);
+            Skyfire::Containers::RandomResizeList(poleList, 1);
 
-            for (auto creature: poleList)
+            for (auto creature : poleList)
                 me->EnterVehicle(creature);
 
             me->setFaction(2357);
@@ -108,7 +127,7 @@ public:
 };
 
 // Rock Jump - 103069 / 103070 / 103077
-class spell_rock_jump: public SpellScriptLoader
+class spell_rock_jump : public SpellScriptLoader
 {
 public:
     spell_rock_jump() : SpellScriptLoader("spell_rock_jump") { }
@@ -178,19 +197,19 @@ public:
 
         enum eShuSpells
         {
-            SPELL_WATER_SPOUT_SUMMON    = 116810,
-            SPELL_WATER_SPOUT_WARNING   = 116695,
-            SPELL_WATER_SPOUT_EJECT     = 116696,
-            SPELL_WATER_SPOUT_VISUAL    = 117057
+            SPELL_WATER_SPOUT_SUMMON = 116810,
+            SPELL_WATER_SPOUT_WARNING = 116695,
+            SPELL_WATER_SPOUT_EJECT = 116696,
+            SPELL_WATER_SPOUT_VISUAL = 117057
         };
 
         enum eEvents
         {
-            EVENT_CHANGE_PLACE          = 1,
-            EVENT_SUMMON_WATER_SPOUT    = 2,
-            EVENT_WATER_SPOUT_VISUAL    = 3,
-            EVENT_WATER_SPOUT_EJECT     = 4,
-            EVENT_WATER_SPOUT_DESPAWN   = 5
+            EVENT_CHANGE_PLACE = 1,
+            EVENT_SUMMON_WATER_SPOUT = 2,
+            EVENT_WATER_SPOUT_VISUAL = 3,
+            EVENT_WATER_SPOUT_EJECT = 4,
+            EVENT_WATER_SPOUT_DESPAWN = 5
         };
 
         void Reset()
@@ -233,71 +252,70 @@ public:
             switch (_events.ExecuteEvent())
             {
             case EVENT_CHANGE_PLACE:
-                {
-                    uint8 newPlace = 0;
-                    
-                    do
-                    {
-                        newPlace = urand(0, 3);
-                    }
-                    while (newPlace == actualPlace);
+            {
+                uint8 newPlace = 0;
 
-                    me->GetMotionMaster()->MoveJump(rocksPos[newPlace].GetPositionX(), rocksPos[newPlace].GetPositionY(), rocksPos[newPlace].GetPositionZ(), 10.0f, 10.0f, 1);
-                    me->AddAura(SPELL_WATER_SPOUT_WARNING, me); // Just visual
-                    actualPlace = newPlace;
-                    break;
-                }
+                do
+                {
+                    newPlace = urand(0, 3);
+                } while (newPlace == actualPlace);
+
+                me->GetMotionMaster()->MoveJump(rocksPos[newPlace].GetPositionX(), rocksPos[newPlace].GetPositionY(), rocksPos[newPlace].GetPositionZ(), 10.0f, 10.0f, 1);
+                me->AddAura(SPELL_WATER_SPOUT_WARNING, me); // Just visual
+                actualPlace = newPlace;
+                break;
+            }
             case EVENT_SUMMON_WATER_SPOUT:
-                {
-                    float x = 0.0f, y = 0.0f;
-                    GetPositionWithDistInOrientation(me, 5.0f, me->GetOrientation() + frand(-M_PI, M_PI), x, y);
-                    waterSpoutGUID = 0;
+            {
+                float x = 0.0f, y = 0.0f;
+                GetPositionWithDistInOrientation(me, 5.0f, me->GetOrientation() + frand(-M_PI, M_PI), x, y);
+                waterSpoutGUID = 0;
 
-                    if (Creature* waterSpout = me->SummonCreature(60488, x, y, 92.189629f))
-                        waterSpoutGUID = waterSpout->GetGUID();
+                if (Creature* waterSpout = me->SummonCreature(60488, x, y, 92.189629f))
+                    waterSpoutGUID = waterSpout->GetGUID();
 
-                    _events.ScheduleEvent(EVENT_WATER_SPOUT_VISUAL, 500);
-                    _events.ScheduleEvent(EVENT_WATER_SPOUT_EJECT, 7500);
-                    break;
-                }
+                _events.ScheduleEvent(EVENT_WATER_SPOUT_VISUAL, 500);
+                _events.ScheduleEvent(EVENT_WATER_SPOUT_EJECT, 7500);
+                break;
+            }
             case EVENT_WATER_SPOUT_VISUAL:
-                {
-                    if (Creature* waterSpout = getWaterSpout())
-                        waterSpout->CastSpell(waterSpout, SPELL_WATER_SPOUT_WARNING, true);
-                    break;
-                }
+            {
+                if (Creature* waterSpout = getWaterSpout())
+                    waterSpout->CastSpell(waterSpout, SPELL_WATER_SPOUT_WARNING, true);
+                break;
+            }
             case EVENT_WATER_SPOUT_EJECT:
+            {
+                if (Creature* waterSpout = getWaterSpout())
                 {
-                    if (Creature* waterSpout = getWaterSpout())
-                    {
-                        std::list<Player*> playerList;
-                        GetPlayerListInGrid(playerList, waterSpout, 1.0f);
+                    std::list<Player*> playerList;
+                    GetPlayerListInGrid(playerList, waterSpout, 1.0f);
 
-                        for (auto player: playerList)
-                            player->CastSpell(player, SPELL_WATER_SPOUT_EJECT, true);
+                    for (auto player : playerList)
+                        player->CastSpell(player, SPELL_WATER_SPOUT_EJECT, true);
 
-                        waterSpout->CastSpell(waterSpout, SPELL_WATER_SPOUT_VISUAL, true);
-                    }
-                    _events.ScheduleEvent(EVENT_WATER_SPOUT_DESPAWN, 3000);
-                    break;
+                    waterSpout->CastSpell(waterSpout, SPELL_WATER_SPOUT_VISUAL, true);
                 }
+                _events.ScheduleEvent(EVENT_WATER_SPOUT_DESPAWN, 3000);
+                break;
+            }
             case EVENT_WATER_SPOUT_DESPAWN:
-                {
-                    if (Creature* waterSpout = getWaterSpout())
-                        waterSpout->DespawnOrUnsummon();
+            {
+                if (Creature* waterSpout = getWaterSpout())
+                    waterSpout->DespawnOrUnsummon();
 
-                    waterSpoutGUID = 0;
+                waterSpoutGUID = 0;
 
-                    _events.ScheduleEvent(EVENT_CHANGE_PLACE, 2000);
-                    break;
-                }
+                _events.ScheduleEvent(EVENT_CHANGE_PLACE, 2000);
+                break;
+            }
             }
         }
     };
 };
 
 // Shu Benediction - 103245
-class spell_shu_benediction: public SpellScriptLoader
+class spell_shu_benediction : public SpellScriptLoader
 {
 public:
     spell_shu_benediction() : SpellScriptLoader("spell_shu_benediction") { }
@@ -316,7 +334,7 @@ public:
             std::list<Creature*> shuList;
             GetCreatureListWithEntryInGrid(shuList, target, 55213, 20.0f);
 
-            for (auto shu: shuList)
+            for (auto shu : shuList)
                 if (shu->ToTempSummon())
                     if (shu->ToTempSummon()->GetOwnerGUID() == target->GetGUID())
                         return;
@@ -338,7 +356,7 @@ public:
             std::list<Creature*> shuList;
             GetCreatureListWithEntryInGrid(shuList, target, 55213, 20.0f);
 
-            for (auto shu: shuList)
+            for (auto shu : shuList)
                 if (shu->ToTempSummon())
                     if (shu->ToTempSummon()->GetOwnerGUID() == target->GetGUID())
                         shu->DespawnOrUnsummon();
@@ -346,7 +364,7 @@ public:
 
         void Register()
         {
-			// #todo
+            // #todo
             //OnEffectApply  += AuraEffectApplyFn (spell_shu_benediction_AuraScript::OnApply,  EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             //OnEffectRemove += AuraEffectRemoveFn(spell_shu_benediction_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
@@ -359,7 +377,7 @@ public:
 };
 
 // Grab Carriage - 115904
-class spell_grab_carriage: public SpellScriptLoader
+class spell_grab_carriage : public SpellScriptLoader
 {
 public:
     spell_grab_carriage() : SpellScriptLoader("spell_grab_carriage") { }
@@ -376,22 +394,22 @@ public:
                 return;
 
             Creature* carriage = NULL;
-            Creature* yak      = NULL;
+            Creature* yak = NULL;
 
             if (caster->GetAreaId() == 5826) // Bassins chantants
             {
                 carriage = caster->SummonCreature(57208, 979.06f, 2863.87f, 87.88f, 4.7822f, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                yak      = caster->SummonCreature(57207, 979.37f, 2860.29f, 88.22f, 4.4759f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                yak = caster->SummonCreature(57207, 979.37f, 2860.29f, 88.22f, 4.4759f, TEMPSUMMON_MANUAL_DESPAWN, 0);
             }
             else if (caster->GetAreaId() == 5881) // Ferme Dai-Lo
             {
                 carriage = caster->SummonCreature(57208, 588.70f, 3165.63f, 88.86f, 4.4156f, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                yak      = caster->SummonCreature(59499, 587.61f, 3161.91f, 89.31f, 4.3633f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                yak = caster->SummonCreature(59499, 587.61f, 3161.91f, 89.31f, 4.3633f, TEMPSUMMON_MANUAL_DESPAWN, 0);
             }
             else if (caster->GetAreaId() == 5833) // Epave du Chercheciel
             {
                 carriage = caster->SummonCreature(57208, 264.37f, 3867.60f, 73.56f, 0.9948f, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                yak      = caster->SummonCreature(57743, 268.38f, 3872.36f, 74.50f, 0.8245f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                yak = caster->SummonCreature(57743, 268.38f, 3872.36f, 74.50f, 0.8245f, TEMPSUMMON_MANUAL_DESPAWN, 0);
             }
 
             if (!carriage || !yak)
@@ -420,7 +438,7 @@ public:
     npc_nourished_yak() : CreatureScript("npc_nourished_yak") { }
 
     struct npc_nourished_yakAI : public npc_escortAI
-    {        
+    {
         npc_nourished_yakAI(Creature* creature) : npc_escortAI(creature) { }
 
         uint32 IntroTimer;
@@ -493,7 +511,7 @@ public:
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(29774) == QUEST_STATUS_INCOMPLETE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Can you please help us to wake up Wugou ?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Can you please help us to wake up Wugou ?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
 
@@ -503,7 +521,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
             player->CLOSE_GOSSIP_MENU();
             player->KilledMonsterCredit(55548);
@@ -531,9 +549,9 @@ public:
 
         void Reset()
         {
-            eventTimer      = 0;
-            eventProgress   = 0;
-            playerGuid      = 0;
+            eventTimer = 0;
+            eventProgress = 0;
+            playerGuid = 0;
         }
 
         void DoAction(int32 actionId) override
@@ -564,7 +582,7 @@ public:
             case 3:
                 if (Creature* wugou = GetClosestCreatureWithEntry(me, 60916, 20.0f))
                     me->SetFacingToObject(wugou);
-				// #todo
+                // #todo
                 // me->SetUInt32Value(UNIT_NPC_EMOTE_STATE, EMOTE_STATE_READY_UNARMED); // ima li takuv flag izobshto??
                 eventTimer = 2000;
                 ++eventProgress;
@@ -597,7 +615,7 @@ public:
                     case 3:
                         if (Creature* wugou = GetClosestCreatureWithEntry(me, 60916, 20.0f))
                             wugou->CastSpell(wugou, 118027, false);
-						// #todo
+                        // #todo
                         // me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE); // ima li takuv flag izobshto??
                         eventTimer = 3000;
                         ++eventProgress;

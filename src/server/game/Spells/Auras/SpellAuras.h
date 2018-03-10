@@ -219,6 +219,8 @@ class Aura
         void CallScriptAfterEffectApplyHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp, AuraEffectHandleModes mode);
         void CallScriptAfterEffectRemoveHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp, AuraEffectHandleModes mode);
         bool CallScriptEffectPeriodicHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp);
+		void CallScriptAuraUpdateHandlers(uint32 diff);
+		void CallScriptEffectUpdateHandlers(uint32 diff, AuraEffect* aurEff);
         void CallScriptEffectUpdatePeriodicHandlers(AuraEffect* aurEff);
         void CallScriptEffectCalcAmountHandlers(AuraEffect const* aurEff, int32 & amount, bool & canBeRecalculated);
         void CallScriptEffectCalcPeriodicHandlers(AuraEffect const* aurEff, bool & isPeriodic, int32 & amplitude);

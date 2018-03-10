@@ -1,3 +1,22 @@
+/*
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -8,53 +27,53 @@
 
 class mob_master_shang_xi_temple : public CreatureScript
 {
-    public:
-        mob_master_shang_xi_temple() : CreatureScript("mob_master_shang_xi_temple") { }
+public:
+    mob_master_shang_xi_temple() : CreatureScript("mob_master_shang_xi_temple") { }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 29776) // Brise du matin
         {
-            if (quest->GetQuestId() == 29776) // Brise du matin
+            /*if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation()))
             {
-                /*if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation()))
-                {
-                    player->AddAura(99385, vehicle);
-                    player->EnterVehicle(vehicle);
-                }*/
-                player->NearTeleportTo(926.58f, 3605.33f, 251.63f, 3.114f);
-            }
-
-            return true;
+                player->AddAura(99385, vehicle);
+                player->EnterVehicle(vehicle);
+            }*/
+            player->NearTeleportTo(926.58f, 3605.33f, 251.63f, 3.114f);
         }
 
-        bool OnGossipHello(Player* player, Creature* creature)
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(29776) != QUEST_STATUS_NONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WIND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->PlayerTalkClass->SendGossipMenu(1, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
+    {
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
-            if (creature->IsQuestGiver())
-                player->PrepareQuestMenu(creature->GetGUID());
-
-            if (player->GetQuestStatus(29776) != QUEST_STATUS_NONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WIND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-            player->PlayerTalkClass->SendGossipMenu(1, creature->GetGUID());
-            return true;
-        }
-
-        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
-        {
-            if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            /* The vehicle bug for now on TaranZhu, too much lags
+             *if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation()))
             {
-                /* The vehicle bug for now on TaranZhu, too much lags
-                 *if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation()))
-                {
-                    player->AddAura(99385, vehicle);
-                    player->EnterVehicle(vehicle);
-                }*/
+                player->AddAura(99385, vehicle);
+                player->EnterVehicle(vehicle);
+            }*/
 
-                player->NearTeleportTo(926.58f, 3605.33f, 251.63f, 3.114f);
-            }
-
-            player->PlayerTalkClass->SendCloseGossip();
-            return true;
+            player->NearTeleportTo(926.58f, 3605.33f, 251.63f, 3.114f);
         }
+
+        player->PlayerTalkClass->SendCloseGossip();
+        return true;
+    }
 };
 
 class npc_wind_vehicle : public CreatureScript
@@ -63,7 +82,7 @@ public:
     npc_wind_vehicle() : CreatureScript("npc_wind_vehicle") { }
 
     struct npc_wind_vehicleAI : public npc_escortAI
-    {        
+    {
         npc_wind_vehicleAI(Creature* creature) : npc_escortAI(creature)
         {}
 
@@ -101,42 +120,42 @@ public:
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_wind_vehicleAI(creature);
     }
-    
+
 };
 
 class AreaTrigger_at_wind_temple_entrance : public AreaTriggerScript
 {
-    public:
-        AreaTrigger_at_wind_temple_entrance() : AreaTriggerScript("AreaTrigger_at_wind_temple_entrance")
-        {}
+public:
+    AreaTrigger_at_wind_temple_entrance() : AreaTriggerScript("AreaTrigger_at_wind_temple_entrance")
+    {}
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->GetQuestStatus(29785) == QUEST_STATUS_INCOMPLETE)
         {
-            if (player->GetQuestStatus(29785) == QUEST_STATUS_INCOMPLETE)
-            {
-                if (Creature* aysa = player->SummonCreature(55744, 665.60f, 4220.66f, 201.93f, 1.93f, TEMPSUMMON_MANUAL_DESPAWN, 0))
-                    aysa->AI()->SetGUID(player->GetGUID());
-            }
-
-            return true;
+            if (Creature* aysa = player->SummonCreature(55744, 665.60f, 4220.66f, 201.93f, 1.93f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                aysa->AI()->SetGUID(player->GetGUID());
         }
+
+        return true;
+    }
 };
 
 class mob_aysa_wind_temple_escort : public CreatureScript
 {
-    public:
-        mob_aysa_wind_temple_escort() : CreatureScript("mob_aysa_wind_temple_escort") { }
+public:
+    mob_aysa_wind_temple_escort() : CreatureScript("mob_aysa_wind_temple_escort") { }
 
     struct mob_aysa_wind_temple_escortAI : public npc_escortAI
-    {        
+    {
         mob_aysa_wind_temple_escortAI(Creature* creature) : npc_escortAI(creature)
         {}
-        
+
         uint32 IntroTimer;
 
         uint64 playerGuid;
@@ -161,19 +180,19 @@ class mob_aysa_wind_temple_escort : public CreatureScript
         {
             switch (waypointId)
             {
-                case 1:
-                    SetEscortPaused(true);
-                    me->SetFacingTo(2.38f);
-                    break;
-                case 6:
-                    SetEscortPaused(true);
-                    break;
-                case 8:
-                    if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
-                        player->KilledMonsterCredit(55666);
-                    break;
-                default:
-                    break;
+            case 1:
+                SetEscortPaused(true);
+                me->SetFacingTo(2.38f);
+                break;
+            case 6:
+                SetEscortPaused(true);
+                break;
+            case 8:
+                if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
+                    player->KilledMonsterCredit(55666);
+                break;
+            default:
+                break;
             }
         }
 
@@ -193,7 +212,7 @@ class mob_aysa_wind_temple_escort : public CreatureScript
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_aysa_wind_temple_escortAI(creature);
@@ -219,7 +238,7 @@ public:
 
         enum Spells
         {
-            SPELL_TORNADE    = 107278,
+            SPELL_TORNADE = 107278,
         };
 
         void Reset()
@@ -239,7 +258,7 @@ public:
                     std::list<Creature*> aysaList;
                     GetCreatureListWithEntryInGrid(aysaList, me, 55744, 35.0f);
 
-                    for (auto aysa: aysaList)
+                    for (auto aysa : aysaList)
                         aysa->AI()->DoAction(1);
                 }
                 tornadeTimer = 8 * IN_MILLISECONDS;
@@ -252,39 +271,39 @@ public:
 
 class npc_aysa_in_wind_temple : public CreatureScript
 {
-    public:
-        npc_aysa_in_wind_temple() : CreatureScript("npc_aysa_in_wind_temple") { }
+public:
+    npc_aysa_in_wind_temple() : CreatureScript("npc_aysa_in_wind_temple") { }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 29786) // Bataille Pyrotechnique
         {
-            if (quest->GetQuestId() == 29786) // Bataille Pyrotechnique
-            {
-                if (Creature* aysa = player->SummonCreature(64543, 543.94f, 4317.31f, 212.24f, 1.675520f, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                    aysa->GetMotionMaster()->MovePoint(1, 643.45f, 4228.66f, 202.90f);
-                
-                if (Creature* dafeng = player->SummonCreature(64532, 543.56f, 4320.97f, 212.24f, 5.445430f, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                    dafeng->GetMotionMaster()->MovePoint(1, 643.45f, 4228.66f, 202.90f);
-            }
+            if (Creature* aysa = player->SummonCreature(64543, 543.94f, 4317.31f, 212.24f, 1.675520f, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                aysa->GetMotionMaster()->MovePoint(1, 643.45f, 4228.66f, 202.90f);
 
-            return true;
+            if (Creature* dafeng = player->SummonCreature(64532, 543.56f, 4320.97f, 212.24f, 5.445430f, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                dafeng->GetMotionMaster()->MovePoint(1, 643.45f, 4228.66f, 202.90f);
         }
+
+        return true;
+    }
 };
 
 enum Enums
 {
     NPC_ROCKET_LAUNCHER = 64507,
     SPELL_ROCKET_LAUNCH = 104855,
-            
+
     EVENT_NEXT_MOVEMENT = 1,
-    EVENT_STUNNED       = 2,
-    EVENT_LIGHTNING     = 3,
+    EVENT_STUNNED = 2,
+    EVENT_LIGHTNING = 3,
 
     SPELL_SERPENT_SWEEP = 125990,
-    SPELL_STUNNED       = 125992,
-    SPELL_LIGHTNING     = 126006,
+    SPELL_STUNNED = 125992,
+    SPELL_LIGHTNING = 126006,
 };
 
-Position ZhaoPos[] = 
+Position ZhaoPos[] =
 {
     {719.36f, 4164.60f, 216.06f}, // Center
     {745.91f, 4154.35f, 223.48f},
@@ -345,7 +364,7 @@ public:
                 }
             }
         }
-        
+
         bool checkPlayers()
         {
             std::list<Player*> playerList;
@@ -375,7 +394,7 @@ public:
             if (playerList.empty())
                 return NULL;
 
-            Trinity::Containers::RandomResizeList(playerList, 1);
+            Skyfire::Containers::RandomResizeList(playerList, 1);
 
             return *playerList.begin();
         }
@@ -425,29 +444,29 @@ public:
 
             switch (_events.ExecuteEvent())
             {
-                case EVENT_NEXT_MOVEMENT:
-                {
-                    if (me->HasAura(SPELL_STUNNED))
-                        _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 2000);
+            case EVENT_NEXT_MOVEMENT:
+            {
+                if (me->HasAura(SPELL_STUNNED))
+                    _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 2000);
 
-                    GoToNextPos();
-                    break;
-                }
-                case EVENT_STUNNED:
-                {
-                    me->RemoveAurasDueToSpell(SPELL_STUNNED);
-                    me->CastSpell(me, SPELL_SERPENT_SWEEP, false);
-                    _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 3000);
-                    break;
-                }
-                case EVENT_LIGHTNING:
-                {
-                    if (Player* player = GetRandomPlayer())
-                        me->CastSpell(player, SPELL_LIGHTNING, false);
+                GoToNextPos();
+                break;
+            }
+            case EVENT_STUNNED:
+            {
+                me->RemoveAurasDueToSpell(SPELL_STUNNED);
+                me->CastSpell(me, SPELL_SERPENT_SWEEP, false);
+                _events.ScheduleEvent(EVENT_NEXT_MOVEMENT, 3000);
+                break;
+            }
+            case EVENT_LIGHTNING:
+            {
+                if (Player* player = GetRandomPlayer())
+                    me->CastSpell(player, SPELL_LIGHTNING, false);
 
-                    _events.ScheduleEvent(EVENT_LIGHTNING, 5000);
-                    break;
-                }
+                _events.ScheduleEvent(EVENT_LIGHTNING, 5000);
+                break;
+            }
             }
         }
     };
@@ -460,7 +479,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_rocket_launcherAI (creature);
+        return new npc_rocket_launcherAI(creature);
     }
 
     struct npc_rocket_launcherAI : public ScriptedAI
@@ -475,7 +494,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
 
-		void OnSpellClick(Unit* /*clicker*/, bool& result) override
+        void OnSpellClick(Unit* /*clicker*/, bool& result) override
         {
             if (cooldown)
                 return;
@@ -510,29 +529,29 @@ public:
 
 class mob_master_shang_xi_after_zhao : public CreatureScript
 {
-    public:
-        mob_master_shang_xi_after_zhao() : CreatureScript("mob_master_shang_xi_after_zhao") { }
+public:
+    mob_master_shang_xi_after_zhao() : CreatureScript("mob_master_shang_xi_after_zhao") { }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
-        {
-            if (quest->GetQuestId() == 29787) // Digne de passer
-                if (Creature* master = player->SummonCreature(56159, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
-                    master->AI()->SetGUID(player->GetGUID());
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 29787) // Digne de passer
+            if (Creature* master = player->SummonCreature(56159, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
+                master->AI()->SetGUID(player->GetGUID());
 
-            return true;
-        }
+        return true;
+    }
 };
 
 class mob_master_shang_xi_after_zhao_escort : public CreatureScript
 {
-    public:
-        mob_master_shang_xi_after_zhao_escort() : CreatureScript("mob_master_shang_xi_after_zhao_escort") { }
+public:
+    mob_master_shang_xi_after_zhao_escort() : CreatureScript("mob_master_shang_xi_after_zhao_escort") { }
 
     struct mob_master_shang_xi_after_zhao_escortAI : public npc_escortAI
-    {        
+    {
         mob_master_shang_xi_after_zhao_escortAI(Creature* creature) : npc_escortAI(creature)
         {}
-        
+
         uint32 IntroTimer;
 
         uint64 playerGuid;
@@ -552,22 +571,22 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
         {
             switch (waypointId)
             {
-                case 6:
-                    me->SummonCreature(56274, 845.89f, 4372.62f, 223.98f, 4.78f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    break;
-                case 12:
-                    me->SetFacingTo(0.0f);
-                    SetEscortPaused(true);
-                    break;
-                case 17:
-                    me->SetFacingTo(4.537860f);
-                    me->DespawnOrUnsummon(1000);
+            case 6:
+                me->SummonCreature(56274, 845.89f, 4372.62f, 223.98f, 4.78f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                break;
+            case 12:
+                me->SetFacingTo(0.0f);
+                SetEscortPaused(true);
+                break;
+            case 17:
+                me->SetFacingTo(4.537860f);
+                me->DespawnOrUnsummon(1000);
 
-                    if (Player* owner = ObjectAccessor::GetPlayer(*me, playerGuid))
-                        owner->AddAura(59074, owner);
-                    break;
-                default:
-                    break;
+                if (Player* owner = ObjectAccessor::GetPlayer(*me, playerGuid))
+                    owner->AddAura(59074, owner);
+                break;
+            default:
+                break;
             }
         }
 
@@ -593,7 +612,7 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_master_shang_xi_after_zhao_escortAI(creature);
@@ -602,29 +621,29 @@ class mob_master_shang_xi_after_zhao_escort : public CreatureScript
 
 class mob_master_shang_xi_thousand_staff : public CreatureScript
 {
-    public:
-        mob_master_shang_xi_thousand_staff() : CreatureScript("mob_master_shang_xi_thousand_staff") { }
+public:
+    mob_master_shang_xi_thousand_staff() : CreatureScript("mob_master_shang_xi_thousand_staff") { }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
-        {
-            if (quest->GetQuestId() == 29790) // Digne de passer
-                if (Creature* master = player->SummonCreature(56686, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
-                    master->AI()->SetGUID(player->GetGUID());
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 29790) // Digne de passer
+            if (Creature* master = player->SummonCreature(56686, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
+                master->AI()->SetGUID(player->GetGUID());
 
-            return true;
-        }
+        return true;
+    }
 };
 
 class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
 {
-    public:
-        mob_master_shang_xi_thousand_staff_escort() : CreatureScript("mob_master_shang_xi_thousand_staff_escort") { }
+public:
+    mob_master_shang_xi_thousand_staff_escort() : CreatureScript("mob_master_shang_xi_thousand_staff_escort") { }
 
     struct mob_master_shang_xi_thousand_staff_escortAI : public npc_escortAI
-    {        
+    {
         mob_master_shang_xi_thousand_staff_escortAI(Creature* creature) : npc_escortAI(creature)
         {}
-        
+
         uint32 IntroTimer;
         uint32 DespawnTimer;
 
@@ -647,13 +666,13 @@ class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
         {
             switch (waypointId)
             {
-                case 4:
-                    SetEscortPaused(true);
-                    me->SetFacingTo(4.522332f);
-                    DespawnTimer = 3000;
-                    break;
-                default:
-                    break;
+            case 4:
+                SetEscortPaused(true);
+                me->SetFacingTo(4.522332f);
+                DespawnTimer = 3000;
+                break;
+            default:
+                break;
             }
         }
 
@@ -689,7 +708,7 @@ class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_master_shang_xi_thousand_staff_escortAI(creature);
@@ -697,40 +716,40 @@ class mob_master_shang_xi_thousand_staff_escort : public CreatureScript
 };
 
 // Grab Air Balloon - 95247
-class spell_grab_air_balloon: public SpellScriptLoader
+class spell_grab_air_balloon : public SpellScriptLoader
 {
-    public:
-        spell_grab_air_balloon() : SpellScriptLoader("spell_grab_air_balloon") { }
+public:
+    spell_grab_air_balloon() : SpellScriptLoader("spell_grab_air_balloon") { }
 
-        class spell_grab_air_balloon_SpellScript : public SpellScript
+    class spell_grab_air_balloon_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_grab_air_balloon_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex effIndex)
         {
-            PrepareSpellScript(spell_grab_air_balloon_SpellScript);
+            PreventHitAura();
 
-            void HandleScriptEffect(SpellEffIndex effIndex)
-            {
-                PreventHitAura();
-
-                if (Unit* caster = GetCaster())
-                    if (Creature* balloon = caster->SummonCreature(55649, 915.55f, 4563.66f, 230.68f, 2.298090f, TEMPSUMMON_MANUAL_DESPAWN, 0))
-                        caster->EnterVehicle(balloon, 0);
-            }
-
-            void Register()
-            {
-                OnEffectLaunch += SpellEffectFn(spell_grab_air_balloon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_grab_air_balloon_SpellScript();
+            if (Unit* caster = GetCaster())
+                if (Creature* balloon = caster->SummonCreature(55649, 915.55f, 4563.66f, 230.68f, 2.298090f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                    caster->EnterVehicle(balloon, 0);
         }
+
+        void Register()
+        {
+            OnEffectLaunch += SpellEffectFn(spell_grab_air_balloon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_grab_air_balloon_SpellScript();
+    }
 };
 
 class mob_shang_xi_air_balloon : public VehicleScript
 {
-    public:
-        mob_shang_xi_air_balloon() : VehicleScript("mob_shang_xi_air_balloon") { }
+public:
+    mob_shang_xi_air_balloon() : VehicleScript("mob_shang_xi_air_balloon") { }
 
     void OnAddPassenger(Vehicle* /*veh*/, Unit* passenger, int8 seatId)
     {
@@ -740,10 +759,10 @@ class mob_shang_xi_air_balloon : public VehicleScript
     }
 
     struct mob_shang_xi_air_balloonAI : public npc_escortAI
-    {        
+    {
         mob_shang_xi_air_balloonAI(Creature* creature) : npc_escortAI(creature)
         {}
-        
+
         uint32 IntroTimer;
 
         void Reset()
@@ -757,23 +776,23 @@ class mob_shang_xi_air_balloon : public VehicleScript
         {
             switch (waypointId)
             {
-                case 19:
-                    if (me->GetVehicleKit())
-                    {
-                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
-                            if (Player* player = passenger->ToPlayer())
-                            {
-                                player->KilledMonsterCredit(55939);
-                                player->AddAura(50550, player);
-                            }
+            case 19:
+                if (me->GetVehicleKit())
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                        if (Player* player = passenger->ToPlayer())
+                        {
+                            player->KilledMonsterCredit(55939);
+                            player->AddAura(50550, player);
+                        }
 
-                        me->GetVehicleKit()->RemoveAllPassengers();
-                    }
+                    me->GetVehicleKit()->RemoveAllPassengers();
+                }
 
-                    me->DespawnOrUnsummon();
-                    break;
-                default:
-                    break;
+                me->DespawnOrUnsummon();
+                break;
+            default:
+                break;
             }
         }
 
@@ -793,7 +812,7 @@ class mob_shang_xi_air_balloon : public VehicleScript
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_shang_xi_air_balloonAI(creature);

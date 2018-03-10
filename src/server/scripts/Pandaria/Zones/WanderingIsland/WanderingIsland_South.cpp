@@ -1,58 +1,77 @@
+/*
+* Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 
 class AreaTrigger_at_mandori : public AreaTriggerScript
 {
-    public:
-        AreaTrigger_at_mandori() : AreaTriggerScript("AreaTrigger_at_mandori")
-        {}
+public:
+    AreaTrigger_at_mandori() : AreaTriggerScript("AreaTrigger_at_mandori")
+    {}
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
-        {
-           if (player->GetPositionX() < 710.0f)
-               return true;
-
-           if (player->GetQuestStatus(29792) != QUEST_STATUS_INCOMPLETE)
-               return true;
-
-           uint64 playerGuid = player->GetGUID();
-
-            Creature* Aysa = player->SummonCreature(59986, 698.04f, 3601.79f, 142.82f, 3.254830f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Aysa
-            Creature* Ji   = player->SummonCreature(59988, 698.06f, 3599.34f, 142.62f, 2.668790f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Ji
-            Creature* Jojo = player->SummonCreature(59989, 702.78f, 3603.58f, 142.01f, 3.433610f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Jojo
-
-            if (!Aysa || !Ji || !Jojo)
-                return true;
-            
-            Aysa->AI()->SetGUID(playerGuid);
-              Ji->AI()->SetGUID(playerGuid);
-            Jojo->AI()->SetGUID(playerGuid);
-
-            player->RemoveAurasDueToSpell(59073);
-            player->RemoveAurasDueToSpell(59074);
-
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->GetPositionX() < 710.0f)
             return true;
-        }
+
+        if (player->GetQuestStatus(29792) != QUEST_STATUS_INCOMPLETE)
+            return true;
+
+        uint64 playerGuid = player->GetGUID();
+
+        Creature* Aysa = player->SummonCreature(59986, 698.04f, 3601.79f, 142.82f, 3.254830f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Aysa
+        Creature* Ji = player->SummonCreature(59988, 698.06f, 3599.34f, 142.62f, 2.668790f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Ji
+        Creature* Jojo = player->SummonCreature(59989, 702.78f, 3603.58f, 142.01f, 3.433610f, TEMPSUMMON_MANUAL_DESPAWN, 0); // Jojo
+
+        if (!Aysa || !Ji || !Jojo)
+            return true;
+
+        Aysa->AI()->SetGUID(playerGuid);
+        Ji->AI()->SetGUID(playerGuid);
+        Jojo->AI()->SetGUID(playerGuid);
+
+        player->RemoveAurasDueToSpell(59073);
+        player->RemoveAurasDueToSpell(59074);
+
+        return true;
+    }
 };
 
 class mob_mandori_escort : public CreatureScript
 {
-    public:
-        mob_mandori_escort() : CreatureScript("mob_mandori_escort") { }
+public:
+    mob_mandori_escort() : CreatureScript("mob_mandori_escort") { }
 
     struct mob_mandori_escortAI : public npc_escortAI
-    {        
+    {
         mob_mandori_escortAI(Creature* creature) : npc_escortAI(creature)
         {}
 
         enum escortEntry
         {
-            NPC_AYSA    = 59986,
-            NPC_JI      = 59988,
-            NPC_JOJO    = 59989
+            NPC_AYSA = 59986,
+            NPC_JI = 59988,
+            NPC_JOJO = 59989
         };
-        
+
         uint32 IntroTimer;
         uint32 doorEventTimer;
 
@@ -60,21 +79,21 @@ class mob_mandori_escort : public CreatureScript
         uint8  doorEventState;
 
         uint64 playerGuid;
-        
+
         uint64 mandoriDoorGuid;
         uint64 peiwuDoorGuid;
 
         void Reset()
         {
-            IntroTimer      = 250;
-            doorEventTimer  = 0;
+            IntroTimer = 250;
+            doorEventTimer = 0;
 
-            IntroState      = 0;
-            doorEventState  = 0;
+            IntroState = 0;
+            doorEventState = 0;
 
-            playerGuid      = 0;
+            playerGuid = 0;
             mandoriDoorGuid = 0;
-            peiwuDoorGuid   = 0;
+            peiwuDoorGuid = 0;
 
             me->SetReactState(REACT_PASSIVE);
         }
@@ -102,17 +121,17 @@ class mob_mandori_escort : public CreatureScript
         {
             switch (waypointId)
             {
-                case 5:
-                    SetEscortPaused(true);
+            case 5:
+                SetEscortPaused(true);
 
-                    // Jojo reach the waypoint 1 sec after the others
-                    if (!Is(NPC_JOJO))
-                        doorEventTimer = 2000;
-                    else
-                        doorEventTimer = 1000;
-                    break;
-                default:
-                    break;
+                // Jojo reach the waypoint 1 sec after the others
+                if (!Is(NPC_JOJO))
+                    doorEventTimer = 2000;
+                else
+                    doorEventTimer = 1000;
+                break;
+            default:
+                break;
             }
         }
 
@@ -121,7 +140,7 @@ class mob_mandori_escort : public CreatureScript
             if (Is(NPC_JI))
                 if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
                     player->AddAura(68482, player); // Phase 8192
-            
+
             if (Is(NPC_AYSA))
             {
                 if (GameObject* mandoriDoor = me->GetMap()->GetGameObject(mandoriDoorGuid))
@@ -139,26 +158,26 @@ class mob_mandori_escort : public CreatureScript
                 {
                     switch (++IntroState)
                     {
-                        case 1:
-                            if (Is(NPC_AYSA))
-                                me->MonsterYell("Let's go !", LANG_UNIVERSAL, 0);
-                            IntroTimer = 1000;
-                            break;
-                        case 2:
-                            if (Is(NPC_AYSA))
-                            {
-                                if (GameObject* mandoriDoor = me->GetMap()->GetGameObject(mandoriDoorGuid))
-                                    mandoriDoor->SetGoState(GO_STATE_ACTIVE);
+                    case 1:
+                        if (Is(NPC_AYSA))
+                            me->MonsterYell("Let's go !", LANG_UNIVERSAL, 0);
+                        IntroTimer = 1000;
+                        break;
+                    case 2:
+                        if (Is(NPC_AYSA))
+                        {
+                            if (GameObject* mandoriDoor = me->GetMap()->GetGameObject(mandoriDoorGuid))
+                                mandoriDoor->SetGoState(GO_STATE_ACTIVE);
 
-                                if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
-                                    player->KilledMonsterCredit(59946);
-                            }
-                            IntroTimer = 1000;
-                            break;
-                        case 3:
-                            Start(false, true);
-                            IntroTimer = 0;
-                            break;
+                            if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
+                                player->KilledMonsterCredit(59946);
+                        }
+                        IntroTimer = 1000;
+                        break;
+                    case 3:
+                        Start(false, true);
+                        IntroTimer = 0;
+                        break;
                     }
                 }
                 else
@@ -171,44 +190,44 @@ class mob_mandori_escort : public CreatureScript
                 {
                     switch (++doorEventState)
                     {
-                        case 1:
-                            if (Is(NPC_AYSA))
-                                me->MonsterSay("The door is blocked!", LANG_UNIVERSAL, 0);
-                            doorEventTimer = 2500;
-                            break;
-                        case 2:
-                            if (Is(NPC_JI))
-                                me->MonsterSay("They blocked it with a rock on the other side, I can't open it!", LANG_UNIVERSAL, 0);
-                            doorEventTimer = 4000;
-                            break;
-                        case 3:
-                            if (Is(NPC_JOJO))
-                                me->GetMotionMaster()->MoveCharge(567.99f, 3583.41f, 94.74f);
-                            doorEventTimer = 150;
-                            break;
-                        case 4:
-                            if (Is(NPC_AYSA))
-                                if (GameObject* peiwuDoor = me->GetMap()->GetGameObject(peiwuDoorGuid))
-                                    peiwuDoor->SetGoState(GO_STATE_ACTIVE);
-                            doorEventTimer = 2000;
-                            break;
-                       case 5:
-                            if (Is(NPC_AYSA))
-                            {
-                                me->MonsterSay("Well done, Jojo!", LANG_UNIVERSAL, 0);
+                    case 1:
+                        if (Is(NPC_AYSA))
+                            me->MonsterSay("The door is blocked!", LANG_UNIVERSAL, 0);
+                        doorEventTimer = 2500;
+                        break;
+                    case 2:
+                        if (Is(NPC_JI))
+                            me->MonsterSay("They blocked it with a rock on the other side, I can't open it!", LANG_UNIVERSAL, 0);
+                        doorEventTimer = 4000;
+                        break;
+                    case 3:
+                        if (Is(NPC_JOJO))
+                            me->GetMotionMaster()->MoveCharge(567.99f, 3583.41f, 94.74f);
+                        doorEventTimer = 150;
+                        break;
+                    case 4:
+                        if (Is(NPC_AYSA))
+                            if (GameObject* peiwuDoor = me->GetMap()->GetGameObject(peiwuDoorGuid))
+                                peiwuDoor->SetGoState(GO_STATE_ACTIVE);
+                        doorEventTimer = 2000;
+                        break;
+                    case 5:
+                        if (Is(NPC_AYSA))
+                        {
+                            me->MonsterSay("Well done, Jojo!", LANG_UNIVERSAL, 0);
 
-                                if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
-                                    player->KilledMonsterCredit(59947);
-                            }
-                           if (!Is(NPC_JOJO))
-                               SetEscortPaused(false);
-                            doorEventTimer = 2000;
-                            break;
-                       case 6:
-                           if (Is(NPC_JOJO))
-                               SetEscortPaused(false);
-                            doorEventTimer = 0;
-                            break;
+                            if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
+                                player->KilledMonsterCredit(59947);
+                        }
+                        if (!Is(NPC_JOJO))
+                            SetEscortPaused(false);
+                        doorEventTimer = 2000;
+                        break;
+                    case 6:
+                        if (Is(NPC_JOJO))
+                            SetEscortPaused(false);
+                        doorEventTimer = 0;
+                        break;
                     }
                 }
                 else
@@ -218,7 +237,7 @@ class mob_mandori_escort : public CreatureScript
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_mandori_escortAI(creature);
@@ -227,17 +246,17 @@ class mob_mandori_escort : public CreatureScript
 
 class npc_korga : public CreatureScript
 {
-    public:
-        npc_korga() : CreatureScript("npc_korga") { }
+public:
+    npc_korga() : CreatureScript("npc_korga") { }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
-        {
-            if (quest->GetQuestId() == 30589) // Détruire l'épave
-                if (Creature* jiEscort = player->SummonCreature(60900, 424.71f, 3635.59f, 92.70f, 2.498430f, TEMPSUMMON_MANUAL_DESPAWN, 0))
-                    jiEscort->AI()->SetGUID(player->GetGUID());
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 30589) // Détruire l'épave
+            if (Creature* jiEscort = player->SummonCreature(60900, 424.71f, 3635.59f, 92.70f, 2.498430f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                jiEscort->AI()->SetGUID(player->GetGUID());
 
-            return true;
-        }
+        return true;
+    }
 };
 
 class mob_ji_forest_escort : public CreatureScript
@@ -246,7 +265,7 @@ public:
     mob_ji_forest_escort() : CreatureScript("mob_ji_forest_escort") { }
 
     struct mob_ji_forest_escortAI : public npc_escortAI
-    {        
+    {
         mob_ji_forest_escortAI(Creature* creature) : npc_escortAI(creature)
         {}
 
@@ -256,16 +275,16 @@ public:
 
         void Reset()
         {
-            playerGuid      = 0;
+            playerGuid = 0;
 
-            IntroTimer      = 100;
+            IntroTimer = 100;
         }
 
         void SetGUID(uint64 guid, int32 type)
         {
             playerGuid = guid;
         }
-        
+
         void WaypointReached(uint32 waypointId)
         {}
 
@@ -291,33 +310,33 @@ public:
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_ji_forest_escortAI(creature);
     }
-    
+
 };
 
 class AreaTrigger_at_rescue_soldiers : public AreaTriggerScript
 {
-    public:
-        AreaTrigger_at_rescue_soldiers() : AreaTriggerScript("AreaTrigger_at_rescue_soldiers")
-        {}
+public:
+    AreaTrigger_at_rescue_soldiers() : AreaTriggerScript("AreaTrigger_at_rescue_soldiers")
+    {}
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
-        {
-           if (player->GetQuestStatus(29794) != QUEST_STATUS_INCOMPLETE)
-               return true;
-
-           if (!player->HasAura(129340))
-               return true;
-
-           player->RemoveAurasDueToSpell(129340);
-           player->KilledMonsterCredit(55999);
-
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->GetQuestStatus(29794) != QUEST_STATUS_INCOMPLETE)
             return true;
-        }
+
+        if (!player->HasAura(129340))
+            return true;
+
+        player->RemoveAurasDueToSpell(129340);
+        player->KilledMonsterCredit(55999);
+
+        return true;
+    }
 };
 
 class npc_hurted_soldier : public CreatureScript
@@ -327,7 +346,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_hurted_soldierAI (creature);
+        return new npc_hurted_soldierAI(creature);
     }
 
     struct npc_hurted_soldierAI : public ScriptedAI
@@ -393,13 +412,13 @@ public:
 
         enum eEnums
         {
-            QUEST_ANCIEN_MAL        = 29798,
+            QUEST_ANCIEN_MAL = 29798,
 
-            EVENT_DEEP_ATTACK       = 1,
-            EVENT_DEEP_SEA_RUPTURE  = 2,
+            EVENT_DEEP_ATTACK = 1,
+            EVENT_DEEP_SEA_RUPTURE = 2,
 
-            SPELL_DEEP_ATTACK       = 117287,
-            SPELL_DEEP_SEA_RUPTURE  = 117456,
+            SPELL_DEEP_ATTACK = 117287,
+            SPELL_DEEP_SEA_RUPTURE = 117456,
         };
 
         void Reset()
@@ -425,22 +444,22 @@ public:
 
             switch (_events.ExecuteEvent())
             {
-                case EVENT_DEEP_ATTACK:
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, true))
-                        me->CastSpell(target, SPELL_DEEP_ATTACK, false);
+            case EVENT_DEEP_ATTACK:
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, true))
+                    me->CastSpell(target, SPELL_DEEP_ATTACK, false);
 
-                    _events.ScheduleEvent(EVENT_DEEP_ATTACK, 10000);
-                    break;
-                }
-                case EVENT_DEEP_SEA_RUPTURE:
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, true))
-                        me->CastSpell(target, SPELL_DEEP_SEA_RUPTURE, false);
+                _events.ScheduleEvent(EVENT_DEEP_ATTACK, 10000);
+                break;
+            }
+            case EVENT_DEEP_SEA_RUPTURE:
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, true))
+                    me->CastSpell(target, SPELL_DEEP_SEA_RUPTURE, false);
 
-                    _events.ScheduleEvent(EVENT_DEEP_ATTACK, 10000);
-                    break;
-                }
+                _events.ScheduleEvent(EVENT_DEEP_ATTACK, 10000);
+                break;
+            }
             }
         }
     };
@@ -448,34 +467,34 @@ public:
 
 class mob_aysa_gunship_crash : public CreatureScript
 {
-    public:
-        mob_aysa_gunship_crash() : CreatureScript("mob_aysa_gunship_crash") { }
+public:
+    mob_aysa_gunship_crash() : CreatureScript("mob_aysa_gunship_crash") { }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 30767) // Tout risquer
+            if (Creature* aysa = player->SummonCreature(60729, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
+                aysa->AI()->SetGUID(player->GetGUID());
+
+        return true;
+    }
+
+    struct mob_aysa_gunship_crashAI : public ScriptedAI
+    {
+        mob_aysa_gunship_crashAI(Creature* creature) : ScriptedAI(creature)
+        {}
+
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (quest->GetQuestId() == 30767) // Tout risquer
-                if (Creature* aysa = player->SummonCreature(60729, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
-                    aysa->AI()->SetGUID(player->GetGUID());
-
-            return true;
+            if (HealthBelowPct(70))
+                damage = 0;
         }
+    };
 
-        struct mob_aysa_gunship_crashAI : public ScriptedAI
-        {        
-            mob_aysa_gunship_crashAI(Creature* creature) : ScriptedAI(creature)
-            {}
-
-            void DamageTaken(Unit* attacker, uint32& damage)
-            {
-                if (HealthBelowPct(70))
-                    damage = 0;
-            }
-        };
-    
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_aysa_gunship_crashAI(creature);
-        }
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_aysa_gunship_crashAI(creature);
+    }
 };
 
 class mob_aysa_gunship_crash_escort : public CreatureScript
@@ -484,7 +503,7 @@ public:
     mob_aysa_gunship_crash_escort() : CreatureScript("mob_aysa_gunship_crash_escort") { }
 
     struct mob_aysa_gunship_crash_escortAI : public npc_escortAI
-    {        
+    {
         mob_aysa_gunship_crash_escortAI(Creature* creature) : npc_escortAI(creature)
         {}
 
@@ -499,14 +518,14 @@ public:
 
         void Reset()
         {
-            playerGuid      = 0;
-            jiGuid          = 0;
-            fireGuid        = 0;
+            playerGuid = 0;
+            jiGuid = 0;
+            fireGuid = 0;
 
-            IntroTimer      = 100;
-            discussTimer    = 0;
+            IntroTimer = 100;
+            discussTimer = 0;
 
-            discussEvent    = 0;
+            discussEvent = 0;
         }
 
         void SetGUID(uint64 guid, int32 type)
@@ -546,65 +565,65 @@ public:
                 else
                     IntroTimer -= diff;
             }
-            
+
             if (discussTimer)
             {
                 if (discussTimer <= diff)
                 {
                     switch (++discussEvent)
                     {
-                        case 1:
-                            me->MonsterSay("Ji, what are you doing ?! You can't do that !", LANG_UNIVERSAL, 0);
-                            if (Creature* ji = getJi())
-                                ji->SetFacingToObject(me);
-                            discussTimer = 3000;
-                            break;
-                        case 2:
-                            if (Creature* ji = getJi())
-                                ji->MonsterSay("We have no choice Aysa.", LANG_UNIVERSAL, 0);
-                            discussTimer = 3000;
-                            break;
-                        case 3:
-                            me->MonsterSay("You are going to kill him !", LANG_UNIVERSAL, 0);
-                            discussTimer = 3000;
-                            break;
-                        case 4:
-                            if (Creature* ji = getJi())
-                                ji->MonsterSay("In our situation, inaction would be the greatest danger.", LANG_UNIVERSAL, 0);
-                            discussTimer = 3000;
-                            break;
-                        case 5:
-                            me->MonsterSay("I hope you know what you're doing, Ji...", LANG_UNIVERSAL, 0);
-                            discussTimer = 5000;
-                            break;
-                        case 6:
-                            SetEscortPaused(false);
-                            
-                            if (Creature* ji = getJi())
-                                ji->GetMotionMaster()->MovePoint(0, 227.21f, 3981.09f, 85.92f);
+                    case 1:
+                        me->MonsterSay("Ji, what are you doing ?! You can't do that !", LANG_UNIVERSAL, 0);
+                        if (Creature* ji = getJi())
+                            ji->SetFacingToObject(me);
+                        discussTimer = 3000;
+                        break;
+                    case 2:
+                        if (Creature* ji = getJi())
+                            ji->MonsterSay("We have no choice Aysa.", LANG_UNIVERSAL, 0);
+                        discussTimer = 3000;
+                        break;
+                    case 3:
+                        me->MonsterSay("You are going to kill him !", LANG_UNIVERSAL, 0);
+                        discussTimer = 3000;
+                        break;
+                    case 4:
+                        if (Creature* ji = getJi())
+                            ji->MonsterSay("In our situation, inaction would be the greatest danger.", LANG_UNIVERSAL, 0);
+                        discussTimer = 3000;
+                        break;
+                    case 5:
+                        me->MonsterSay("I hope you know what you're doing, Ji...", LANG_UNIVERSAL, 0);
+                        discussTimer = 5000;
+                        break;
+                    case 6:
+                        SetEscortPaused(false);
 
-                            discussTimer = 1000;
-                            break;
-                        case 7:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
-                            {
-                                player->KilledMonsterCredit(60727);
-                                player->SendMovieStart(117);
-                            }
-                            discussTimer = 500;
-                            break;
-                        case 8:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
-                                player->NearTeleportTo(249.38f, 3939.55f, 65.61f, 1.501471f);
-                            
-                            if (Creature* ji = getJi())
-                                ji->DespawnOrUnsummon();
+                        if (Creature* ji = getJi())
+                            ji->GetMotionMaster()->MovePoint(0, 227.21f, 3981.09f, 85.92f);
 
-                            if (GameObject* gob = me->GetMap()->GetGameObject(fireGuid))
-                                gob->Delete();
+                        discussTimer = 1000;
+                        break;
+                    case 7:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
+                        {
+                            player->KilledMonsterCredit(60727);
+                            player->SendMovieStart(117);
+                        }
+                        discussTimer = 500;
+                        break;
+                    case 8:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGuid))
+                            player->NearTeleportTo(249.38f, 3939.55f, 65.61f, 1.501471f);
 
-                            discussTimer = 0;
-                            break;
+                        if (Creature* ji = getJi())
+                            ji->DespawnOrUnsummon();
+
+                        if (GameObject* gob = me->GetMap()->GetGameObject(fireGuid))
+                            gob->Delete();
+
+                        discussTimer = 0;
+                        break;
                     }
                 }
                 else
@@ -614,12 +633,12 @@ public:
             npc_escortAI::UpdateAI(diff);
         }
     };
-    
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new mob_aysa_gunship_crash_escortAI(creature);
     }
-    
+
 };
 
 #define MAX_ENNEMIES_POS   2
@@ -634,22 +653,22 @@ Position ennemiesPositions[MAX_ENNEMIES_POS] =
 
 enum eEnums
 {
-    QUEST_HEALING_SHEN      = 29799,
-            
-    NPC_HEALER_A            = 60878,
-    NPC_HEALER_H            = 60896,
-    NPC_ENNEMY              = 60858,
+    QUEST_HEALING_SHEN = 29799,
 
-    NPC_SHEN_HEAL_CREDIT    = 56011,
+    NPC_HEALER_A = 60878,
+    NPC_HEALER_H = 60896,
+    NPC_ENNEMY = 60858,
 
-    EVENT_CHECK_PLAYERS     = 1,
-    EVENT_UPDATE_POWER      = 2,
-    EVENT_SUMMON_ENNEMY     = 3,
-    EVENT_SUMMON_HEALER     = 4,
+    NPC_SHEN_HEAL_CREDIT = 56011,
 
-    SPELL_SHEN_HEALING      = 117783,
-    SPELL_HEALER_A          = 117784,
-    SPELL_HEALER_H          = 117932,
+    EVENT_CHECK_PLAYERS = 1,
+    EVENT_UPDATE_POWER = 2,
+    EVENT_SUMMON_ENNEMY = 3,
+    EVENT_SUMMON_HEALER = 4,
+
+    SPELL_SHEN_HEALING = 117783,
+    SPELL_HEALER_A = 117784,
+    SPELL_HEALER_H = 117932,
 };
 
 class npc_ji_end_event : public CreatureScript
@@ -679,9 +698,9 @@ public:
         {
             _summons.DespawnAll();
 
-            healerCount   = 0;
+            healerCount = 0;
             ennemiesCount = 0;
-            actualPower   = 0;
+            actualPower = 0;
 
             inProgress = false;
 
@@ -704,7 +723,7 @@ public:
 
         void UpdatePower()
         {
-            actualPower = (actualPower + healerCount <= 700) ? actualPower + healerCount: 700;
+            actualPower = (actualPower + healerCount <= 700) ? actualPower + healerCount : 700;
 
             std::list<Player*> playerList;
             GetPlayerListInGrid(playerList, me, 100.0f);
@@ -749,7 +768,7 @@ public:
 
         void SummonHealer()
         {
-            uint32 entry = rand() % 2 ? NPC_HEALER_A: NPC_HEALER_H;
+            uint32 entry = rand() % 2 ? NPC_HEALER_A : NPC_HEALER_H;
             float posX = frand(228.0f, 270.0f);
             float posY = frand(3949.0f, 3962.0f);
 
@@ -762,13 +781,13 @@ public:
 
             switch (summon->GetEntry())
             {
-                case NPC_HEALER_A:
-                case NPC_HEALER_H:
-                    ++healerCount;
-                    break;
-                case NPC_ENNEMY:
-                    ++ennemiesCount;
-                    break;
+            case NPC_HEALER_A:
+            case NPC_HEALER_H:
+                ++healerCount;
+                break;
+            case NPC_ENNEMY:
+                ++ennemiesCount;
+                break;
             }
         }
 
@@ -778,13 +797,13 @@ public:
 
             switch (summon->GetEntry())
             {
-                case NPC_HEALER_A:
-                case NPC_HEALER_H:
-                    --healerCount;
-                    break;
-                case NPC_ENNEMY:
-                    --ennemiesCount;
-                    break;
+            case NPC_HEALER_A:
+            case NPC_HEALER_H:
+                --healerCount;
+                break;
+            case NPC_ENNEMY:
+                --ennemiesCount;
+                break;
             }
         }
 
@@ -794,44 +813,44 @@ public:
 
             switch (_events.ExecuteEvent())
             {
-                case EVENT_CHECK_PLAYERS:
+            case EVENT_CHECK_PLAYERS:
+            {
+                bool playerNearWithQuest = CheckPlayers();
+
+                if (inProgress && !playerNearWithQuest)
                 {
-                    bool playerNearWithQuest = CheckPlayers();
-
-                    if (inProgress && !playerNearWithQuest)
-                    {
-                        inProgress = false;
-                        Reset();
-                    }
-                    else if (!inProgress && playerNearWithQuest)
-                    {
-                        inProgress = true;
-                        _events.ScheduleEvent(EVENT_UPDATE_POWER,  UPDATE_POWER_TIMER);
-                        _events.ScheduleEvent(EVENT_SUMMON_ENNEMY, 5000);
-                        _events.ScheduleEvent(EVENT_SUMMON_HEALER, 5000);
-                    }
-                    _events.ScheduleEvent(EVENT_CHECK_PLAYERS, 5000);
-                    break;
+                    inProgress = false;
+                    Reset();
                 }
-                case EVENT_UPDATE_POWER:
-                    UpdatePower();
+                else if (!inProgress && playerNearWithQuest)
+                {
+                    inProgress = true;
                     _events.ScheduleEvent(EVENT_UPDATE_POWER, UPDATE_POWER_TIMER);
-                    break;
-                case EVENT_SUMMON_ENNEMY:
-                    if (ennemiesCount < (healerCount / 2))
-                    {
-                        SummonEnnemy();
-                        _events.ScheduleEvent(EVENT_SUMMON_ENNEMY, 5000);
-                    }
-                    else
-                        _events.ScheduleEvent(EVENT_SUMMON_ENNEMY, 7500);
-                    break;
-                case EVENT_SUMMON_HEALER:
-                    if (healerCount < MAX_HEALER_COUNT)
-                        SummonHealer();
+                    _events.ScheduleEvent(EVENT_SUMMON_ENNEMY, 5000);
+                    _events.ScheduleEvent(EVENT_SUMMON_HEALER, 5000);
+                }
+                _events.ScheduleEvent(EVENT_CHECK_PLAYERS, 5000);
+                break;
+            }
+            case EVENT_UPDATE_POWER:
+                UpdatePower();
+                _events.ScheduleEvent(EVENT_UPDATE_POWER, UPDATE_POWER_TIMER);
+                break;
+            case EVENT_SUMMON_ENNEMY:
+                if (ennemiesCount < (healerCount / 2))
+                {
+                    SummonEnnemy();
+                    _events.ScheduleEvent(EVENT_SUMMON_ENNEMY, 5000);
+                }
+                else
+                    _events.ScheduleEvent(EVENT_SUMMON_ENNEMY, 7500);
+                break;
+            case EVENT_SUMMON_HEALER:
+                if (healerCount < MAX_HEALER_COUNT)
+                    SummonHealer();
 
-                    _events.ScheduleEvent(EVENT_SUMMON_HEALER, 12500);
-                    break;
+                _events.ScheduleEvent(EVENT_SUMMON_HEALER, 12500);
+                break;
             }
         }
     };
@@ -839,30 +858,30 @@ public:
 
 class npc_shen_healer : public CreatureScript
 {
-    public:
-        npc_shen_healer() : CreatureScript("npc_shen_healer") { }
+public:
+    npc_shen_healer() : CreatureScript("npc_shen_healer") { }
 
-        struct npc_shen_healerAI : public ScriptedAI
-        {        
-            npc_shen_healerAI(Creature* creature) : ScriptedAI(creature)
-            {}
+    struct npc_shen_healerAI : public ScriptedAI
+    {
+        npc_shen_healerAI(Creature* creature) : ScriptedAI(creature)
+        {}
 
-            void Reset()
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->CastSpell(me, me->GetEntry() == NPC_HEALER_A ? SPELL_HEALER_A: SPELL_HEALER_H, true);
-            }
-
-            void EnterCombat(Unit*)
-            {
-                return;
-            }
-        };
-    
-        CreatureAI* GetAI(Creature* creature) const
+        void Reset()
         {
-            return new npc_shen_healerAI(creature);
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, me->GetEntry() == NPC_HEALER_A ? SPELL_HEALER_A : SPELL_HEALER_H, true);
         }
+
+        void EnterCombat(Unit*)
+        {
+            return;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_shen_healerAI(creature);
+    }
 };
 
 #define GOSSIP_CHOOSE_FACTION     "I'm ready to choose my destiny."
@@ -871,40 +890,40 @@ class npc_shen_healer : public CreatureScript
 
 class npc_shang_xi_choose_faction : public CreatureScript
 {
-    public:
-        npc_shang_xi_choose_faction() : CreatureScript("npc_shang_xi_choose_faction") { }
+public:
+    npc_shang_xi_choose_faction() : CreatureScript("npc_shang_xi_choose_faction") { }
 
-        bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->getRace() == RACE_PANDAREN_NEUTRAL)
         {
-            if (creature->IsQuestGiver())
-                player->PrepareQuestMenu(creature->GetGUID());
-
-            if (player->getRace() == RACE_PANDAREN_NEUTRAL)
-            {
-                if (player->GetQuestStatus(31450) == QUEST_STATUS_INCOMPLETE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_CHOOSE_FACTION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            }
-            else if (player->getRace() == RACE_PANDAREN_ALLIANCE)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TP_STORMIND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            else if (player->getRace() == RACE_PANDAREN_HORDE)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TP_ORGRI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-
-            player->PlayerTalkClass->SendGossipMenu(1, creature->GetGUID());
-            return true;
+            if (player->GetQuestStatus(31450) == QUEST_STATUS_INCOMPLETE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_CHOOSE_FACTION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
+        else if (player->getRace() == RACE_PANDAREN_ALLIANCE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TP_STORMIND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        else if (player->getRace() == RACE_PANDAREN_HORDE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TP_ORGRI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
 
-        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
-        {
-            if (action == GOSSIP_ACTION_INFO_DEF + 1)
-				player->SendPandarenChooseFactionPacket(); // #todo moje da ne e tova??
-            else if (action == GOSSIP_ACTION_INFO_DEF + 2)
-                player->TeleportTo(0, -8866.55f, 671.93f, 97.90f, 5.31f);
-            else if (action == GOSSIP_ACTION_INFO_DEF + 3)
-                player->TeleportTo(1, 1577.30f, -4453.64f, 15.68f, 1.84f);
+        player->PlayerTalkClass->SendGossipMenu(1, creature->GetGUID());
+        return true;
+    }
 
-            player->PlayerTalkClass->SendCloseGossip();
-            return true;
-        }
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
+    {
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            player->ShowNeutralPlayerFactionSelectUI(); // #todo moje da ne e tova??
+        else if (action == GOSSIP_ACTION_INFO_DEF + 2)
+            player->TeleportTo(0, -8866.55f, 671.93f, 97.90f, 5.31f);
+        else if (action == GOSSIP_ACTION_INFO_DEF + 3)
+            player->TeleportTo(1, 1577.30f, -4453.64f, 15.68f, 1.84f);
+
+        player->PlayerTalkClass->SendCloseGossip();
+        return true;
+    }
 };
 
 void AddSC_WanderingIsland_South()
