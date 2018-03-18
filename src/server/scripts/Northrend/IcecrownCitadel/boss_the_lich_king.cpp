@@ -1098,10 +1098,11 @@ class boss_the_lich_king : public CreatureScript
         private:
             void SendMusicToPlayers(uint32 musicId) const
             {
-                WorldPacket data(SMSG_PLAY_MUSIC, 4);
-                data << uint32(musicId);
-                data << uint64(me->GetGUID());
-                SendPacketToPlayers(&data);
+                ///@TODO: Wrong Packet, Send correct one.
+                //WorldPacket data(SMSG_PLAY_MUSIC, 4);
+                //data << uint32(musicId);
+                //data << uint64(me->GetGUID());
+                //SendPacketToPlayers(&data);
             }
 
             void SendLightOverride(uint32 overrideId, uint32 fadeInTime) const

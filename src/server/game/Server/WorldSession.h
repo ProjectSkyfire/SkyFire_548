@@ -1084,6 +1084,8 @@ class WorldSession
         void SendTitleEarned(uint32 TitleIndex);
         void SendTitleLost(uint32 TitleIndex);
 
+        void SendPlayMusic(uint32 SoundKitID);
+
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();
