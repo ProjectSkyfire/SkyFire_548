@@ -15036,11 +15036,11 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
     data.WriteByteSeq(itemGuid[2]);
     data.WriteByteSeq(playerGuid[0]);
     data << uint32(count);                                  // count of items
-    data.WriteByteSeq(playerGuid[5]);
+    data.WriteByteSeq(playerGuid[7]);
     data.WriteByteSeq(itemGuid[5]);
     data.WriteByteSeq(playerGuid[4]);
-    data << uint8(item->GetBagSlot());                      // bag slot
     data << uint32(itemSlot);                               // item slot, but when added to stack: 0xFFFFFFFF
+    data << uint8(item->GetBagSlot());                      // bag slot
     data.WriteByteSeq(playerGuid[3]);
     data.WriteByteSeq(playerGuid[6]);
     data << uint32(0);                                      // battle pet level
