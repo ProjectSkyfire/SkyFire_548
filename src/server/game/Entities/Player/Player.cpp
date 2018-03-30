@@ -14993,59 +14993,52 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 
     uint32 itemSlot = (item->GetCount() == count) ? item->GetSlot() : -1;
 
-    ObjectGuid playerGuid = GetGUID();
-    ObjectGuid itemGuid = item->GetGUID();
+    ObjectGuid PlayerGUID = GetGUID();
+    ObjectGuid ItemGUID = item->GetGUID();
 
     WorldPacket data(SMSG_ITEM_PUSH_RESULT, 1 + 8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4);
-    data.WriteBit(itemGuid[2]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(itemGuid[5]);
+    data.WriteGuidMask(ItemGUID, 2);
+    data.WriteGuidMask(PlayerGUID, 4);
+    data.WriteGuidMask(ItemGUID, 5);
     data.WriteBit(1);                                       // display in chat
-    data.WriteBit(playerGuid[1]);
+    data.WriteGuidMask(PlayerGUID, 1);
     data.WriteBit(received);                                // 0 = looted, 1 = npc
-    data.WriteBit(itemGuid[4]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(itemGuid[0]);
-    data.WriteBit(itemGuid[7]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(itemGuid[6]);
+    data.WriteGuidMask(ItemGUID, 4);
+    data.WriteGuidMask(PlayerGUID, 6, 5, 7, 0);
+    data.WriteGuidMask(ItemGUID, 0, 7);
+    data.WriteGuidMask(PlayerGUID, 2);
+    data.WriteGuidMask(ItemGUID, 6);
     data.WriteBit(0);                                       // bonus loot
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(itemGuid[1]);
+    data.WriteGuidMask(PlayerGUID, 3);
+    data.WriteGuidMask(ItemGUID, 1);
     data.WriteBit(created);                                 // 0 = received. 1 = created
-    data.WriteBit(itemGuid[3]);
+    data.WriteGuidMask(ItemGUID, 3);
     data.FlushBits();
 
-    data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(itemGuid[1]);
+    data.WriteGuidBytes(PlayerGUID, 1);
+    data.WriteGuidBytes(ItemGUID, 1);
     data << uint32(0);                                      // battle pet species
-    data.WriteByteSeq(itemGuid[0]);
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(playerGuid[2]);
+    data.WriteGuidBytes(ItemGUID, 0);
+    data.WriteGuidBytes(PlayerGUID, 5, 2);
     data << uint32(item->GetItemSuffixFactor());            // suffix factor
-    data.WriteByteSeq(itemGuid[7]);
+    data.WriteGuidBytes(ItemGUID, 7);
     data << uint32(0);                                      // battle pet quality
     data << uint32(item->GetEntry());                       // item id
     data << int32(item->GetItemRandomPropertyId());         // random item property id
-    data.WriteByteSeq(itemGuid[6]);
+    data.WriteGuidBytes(ItemGUID, 6);
     data << uint32(0);                                      // battle pet breed
     data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
-    data.WriteByteSeq(itemGuid[2]);
-    data.WriteByteSeq(playerGuid[0]);
+    data.WriteGuidBytes(ItemGUID, 2);
+    data.WriteGuidBytes(PlayerGUID, 0);
     data << uint32(count);                                  // count of items
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(itemGuid[5]);
-    data.WriteByteSeq(playerGuid[4]);
-    data << uint8(item->GetBagSlot());                      // bag slot
+    data.WriteGuidBytes(PlayerGUID, 7);
+    data.WriteGuidBytes(ItemGUID, 5);
+    data.WriteGuidBytes(PlayerGUID, 4);
     data << uint32(itemSlot);                               // item slot, but when added to stack: 0xFFFFFFFF
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[6]);
+    data << uint8(item->GetBagSlot());                      // bag slot
+    data.WriteGuidBytes(PlayerGUID, 3, 6);
     data << uint32(0);                                      // battle pet level
-    data.WriteByteSeq(itemGuid[3]);
-    data.WriteByteSeq(itemGuid[4]);
+    data.WriteGuidBytes(ItemGUID, 3, 4);
 
     if (broadcast && GetGroup())
         GetGroup()->BroadcastPacket(&data, true);
