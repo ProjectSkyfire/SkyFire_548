@@ -1928,9 +1928,9 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
     }
 }
 
-void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recvData*/)
+void WorldSession::HandleDismountOpcode(WorldPacket& /*recvData*/)
 {
-    SF_LOG_DEBUG("network", "WORLD: CMSG_CANCEL_MOUNT_AURA");
+    SF_LOG_DEBUG("network", "WORLD: CMSG_DISMOUNT");
 
     //If player is not mounted, so go out :)
     if (!_player->IsMounted())                              // not blizz like; no any messages on blizz
