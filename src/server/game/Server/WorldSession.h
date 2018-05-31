@@ -951,7 +951,7 @@ class WorldSession
 
         void HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData);
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData);
-        void HandleCancelMountAuraOpcode(WorldPacket& recvData);
+        void HandleDismountOpcode(WorldPacket& recvData);
         void HandleSelfResOpcode(WorldPacket& recvData);
         void HandleComplainOpcode(WorldPacket& recvData);
         void HandleRequestPetInfoOpcode(WorldPacket& recvData);
