@@ -44,6 +44,9 @@
 #elif COMPILER_HAS_CPP11_SUPPORT
 #    define UNORDERED_MAP std::unordered_map
 #    define UNORDERED_MULTIMAP std::unordered_multimap
+#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1910
+#    define UNORDERED_MAP std::unordered_map
+#    define UNORDERED_MULTIMAP std::unordered_multimap
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1600 // VS100
 #    define UNORDERED_MAP std::tr1::unordered_map
 #    define UNORDERED_MULTIMAP std::tr1::unordered_multimap
