@@ -34,7 +34,7 @@ For further information on the SkyFire project, please visit our project website
 + Platform: Linux, Windows or Mac
 + Processor with SSE2 support
 + ACE = 6.3.3  (Linux only)
-+ MySQL = 5.6.36 (Windows / Linux)
++ MySQL = 8.0 (Windows / Linux)
 + CMake = 3.8.1/3.5.1 (Windows / Linux)
 + OpenSSL = 1.0.2G
 + GCC = 6.3.0 (Linux only)
