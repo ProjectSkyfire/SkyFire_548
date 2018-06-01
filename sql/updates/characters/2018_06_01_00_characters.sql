@@ -70,7 +70,7 @@ CREATE TABLE `parties` (
   `icon6` int(10) unsigned NOT NULL,
   `icon7` int(10) unsigned NOT NULL,
   `icon8` int(10) unsigned NOT NULL,
-  `groupType` tinyint(3) unsigned NOT NULL,
+  `partyType` tinyint(3) unsigned NOT NULL,
   `difficulty` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `raidDifficulty` tinyint(3) unsigned NOT NULL DEFAULT '14',
   PRIMARY KEY (`guid`),
