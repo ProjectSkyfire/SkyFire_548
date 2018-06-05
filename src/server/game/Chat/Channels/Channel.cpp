@@ -988,7 +988,7 @@ void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFla
     else
     { 
         data.WriteGuidMask(UserGUID, 2, 6, 3, 7, 5, 1, 0);
-        data.WriteBits(GetName().size(), 7);
+        data.WriteBits(ChannelName.size(), 7);
         data.WriteGuidMask(UserGUID, 4);
         data.FlushBits();
         data.WriteGuidBytes(UserGUID, 0, 2, 6, 5);
