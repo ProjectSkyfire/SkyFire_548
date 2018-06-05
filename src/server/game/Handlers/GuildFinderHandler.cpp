@@ -164,30 +164,15 @@ void WorldSession::HandleGuildFinderDeclineRecruit(WorldPacket& recvPacket)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_LF_GUILD_DECLINE_RECRUIT");
 
-    ObjectGuid playerGuid;
+    ObjectGuid RecruitGUID;
 
-    playerGuid[1] = recvPacket.ReadBit();
-    playerGuid[4] = recvPacket.ReadBit();
-    playerGuid[5] = recvPacket.ReadBit();
-    playerGuid[2] = recvPacket.ReadBit();
-    playerGuid[6] = recvPacket.ReadBit();
-    playerGuid[7] = recvPacket.ReadBit();
-    playerGuid[0] = recvPacket.ReadBit();
-    playerGuid[3] = recvPacket.ReadBit();
-
-    recvPacket.ReadByteSeq(playerGuid[5]);
-    recvPacket.ReadByteSeq(playerGuid[7]);
-    recvPacket.ReadByteSeq(playerGuid[2]);
-    recvPacket.ReadByteSeq(playerGuid[3]);
-    recvPacket.ReadByteSeq(playerGuid[4]);
-    recvPacket.ReadByteSeq(playerGuid[1]);
-    recvPacket.ReadByteSeq(playerGuid[0]);
-    recvPacket.ReadByteSeq(playerGuid[6]);
-
-    if (!IS_PLAYER_GUID(playerGuid))
+    recvPacket.ReadGuidMask(RecruitGUID, 6, 7, 3, 1, 2, 0, 4, 5);
+    recvPacket.ReadGuidBytes(RecruitGUID, 0, 7, 1, 6, 4, 3, 5, 2);
+    
+    if (!IS_PLAYER_GUID(RecruitGUID))
         return;
 
-    sGuildFinderMgr->RemoveMembershipRequest(GUID_LOPART(playerGuid), GetPlayer()->GetGuildId());
+    sGuildFinderMgr->RemoveMembershipRequest(GUID_LOPART(RecruitGUID), GetPlayer()->GetGuildId());
 }
 
 void WorldSession::HandleGuildFinderGetApplications(WorldPacket& /*recvPacket*/)
