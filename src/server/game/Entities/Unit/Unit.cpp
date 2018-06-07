@@ -1511,6 +1511,13 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
         if ((*j)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
             armor = floor(AddPct(armor, -(*j)->GetAmount()));
     }
+    
+    AuraEffectList const& ArPenAuras = GetAuraEffectsByType(SPELL_AURA_MOD_ARMOR_PENETRATION_PCT);
+    for (AuraEffectList::const_iterator k = ArPenAuras.begin(); k != ArPenAuras.end(); ++k)
+    {
+        if ((*k)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
+            armor = floor(AddPct(armor, -(*k)->GetAmount()));
+    }
 
     if (armor < 0.0f)
         armor = 0.0f;
