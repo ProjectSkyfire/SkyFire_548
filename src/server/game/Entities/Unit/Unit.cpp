@@ -15585,10 +15585,13 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 37730;
                 return 21244;
             case FORM_MOONKIN:
-                if (getRace() == RACE_TROLL)
-                    return 37174;
-                if (getRace() == RACE_WORGEN)
+                if (Player::TeamForRace(getRace()) == ALLIANCE)
                     return 37173;
+                return 37174;
+            case FORM_TRAVEL:
+                if (Player::TeamForRace(getRace()) == ALLIANCE)
+                    return 40816;
+                return 45339;
             case FORM_GHOSTWOLF:
                 if (HasAura(58135)) //! Glyph of Arctic Wolf
                     return 27312;
