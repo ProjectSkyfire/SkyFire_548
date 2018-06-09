@@ -11,15 +11,23 @@
 
 # NOTE: Do not use glob here, it would include files we don't want
 set(ace_STAT_SRCS
+  Abstract_Timer_Queue.cpp
+  Acceptor.cpp
   ACE.cpp
-  ACE_crc32.cpp
   ACE_crc_ccitt.cpp
+  ACE_crc32.cpp
   ace_wchar.cpp
   Activation_Queue.cpp
   Active_Map_Manager.cpp
+  Active_Map_Manager_T.cpp
   Addr.cpp
+  Arg_Shifter.cpp
   Argv_Type_Converter.cpp
+  Array_Base.cpp
+  Array_Map.cpp
   Assert.cpp
+  Asynch_Acceptor.cpp
+  Asynch_Connector.cpp
   Asynch_IO.cpp
   Asynch_IO_Impl.cpp
   Asynch_Pseudo_Task.cpp
@@ -30,31 +38,46 @@ set(ace_STAT_SRCS
   ATM_QoS.cpp
   ATM_Stream.cpp
   Atomic_Op.cpp
+  Atomic_Op_GCC_T.cpp
   Atomic_Op_Sparc.c
-  Auto_Event.cpp
+  Atomic_Op_T.cpp
+  Auto_Functor.cpp
+  Auto_IncDec_T.cpp
+  Auto_Ptr.cpp
   Barrier.cpp
   Base_Thread_Adapter.cpp
   Based_Pointer_Repository.cpp
+  Based_Pointer_T.cpp
   Basic_Stats.cpp
   Basic_Types.cpp
   Bound_Ptr.cpp
+  Cache_Map_Manager_T.cpp
+  Cached_Connect_Strategy_T.cpp
+  Caching_Strategies_T.cpp
+  Caching_Utility_T.cpp
   Capabilities.cpp
   CDR_Base.cpp
   CDR_Size.cpp
   CDR_Stream.cpp
+  CE_Screen_Output.cpp
   Cleanup.cpp
+  Cleanup_Strategies_T.cpp
   Codecs.cpp
   Codeset_IBM1047.cpp
   Codeset_Registry.cpp
   Codeset_Registry_db.cpp
   Condition_Attributes.cpp
   Condition_Recursive_Thread_Mutex.cpp
+  Condition_T.cpp
   Condition_Thread_Mutex.cpp
   Configuration.cpp
   Configuration_Import_Export.cpp
   Connection_Recycling_Strategy.cpp
+  Connector.cpp
   Containers.cpp
+  Containers_T.cpp
   Copy_Disabled.cpp
+  Countdown_Time_T.cpp
   Date_Time.cpp
   DEV.cpp
   DEV_Addr.cpp
@@ -66,16 +89,19 @@ set(ace_STAT_SRCS
   DLL.cpp
   DLL_Manager.cpp
   Dump.cpp
+  Dump_T.cpp
   Dynamic.cpp
   Dynamic_Message_Strategy.cpp
+  Dynamic_Service.cpp
   Dynamic_Service_Base.cpp
   Dynamic_Service_Dependency.cpp
   Encoding_Converter.cpp
   Encoding_Converter_Factory.cpp
-  Event.cpp
+  Env_Value_T.cpp
   Event_Base.cpp
   Event_Handler.cpp
   Event_Handler_Handle_Timeout_Upcall.cpp
+  Event_Handler_T.cpp
   FIFO.cpp
   FIFO_Recv.cpp
   FIFO_Recv_Msg.cpp
@@ -89,25 +115,42 @@ set(ace_STAT_SRCS
   Filecache.cpp
   Flag_Manip.cpp
   Framework_Component.cpp
+  Framework_Component_T.cpp
+  Free_List.cpp
   Functor.cpp
   Functor_String.cpp
+  Functor_T.cpp
+  Future.cpp
+  Future_Set.cpp
   Get_Opt.cpp
+  Guard_T.cpp
   Handle_Ops.cpp
   Handle_Set.cpp
+  Hash_Cache_Map_Manager_T.cpp
+  Hash_Map_Manager_T.cpp
+  Hash_Map_With_Allocator_T.cpp
+  Hash_Multi_Map_Manager_T.cpp
   Hashable.cpp
   High_Res_Timer.cpp
   ICMP_Socket.cpp
   INET_Addr.cpp
   Init_ACE.cpp
+  Intrusive_Auto_Ptr.cpp
+  Intrusive_List.cpp
+  Intrusive_List_Node.cpp
   IO_Cntl_Msg.cpp
   IO_SAP.cpp
   IOStream.cpp
-  IPC_SAP.cpp
+  IOStream_T.cpp
+  IPC_SAP
   Lib_Find.cpp
   Local_Memory_Pool.cpp
   Local_Name_Space.cpp
+  Local_Name_Space_T.cpp
   Local_Tokens.cpp
   Lock.cpp
+  Lock_Adapter_T.cpp
+  LOCK_SOCK_Acceptor.cpp
   Log_Category.cpp
   Log_Msg.cpp
   Log_Msg_Backend.cpp
@@ -125,7 +168,10 @@ set(ace_STAT_SRCS
   LSOCK_Stream.cpp
   Malloc.cpp
   Malloc_Allocator.cpp
-  Manual_Event.cpp
+  Malloc_T.cpp
+  Managed_Object.cpp
+  Map_Manager.cpp
+  Map_T.cpp
   MEM_Acceptor.cpp
   MEM_Addr.cpp
   MEM_Connector.cpp
@@ -134,11 +180,15 @@ set(ace_STAT_SRCS
   MEM_SAP.cpp
   MEM_Stream.cpp
   Message_Block.cpp
+  Message_Block_T.cpp
   Message_Queue.cpp
   Message_Queue_NT.cpp
+  Message_Queue_T.cpp
   Message_Queue_Vx.cpp
   Method_Request.cpp
+  Metrics_Cache_T.cpp
   MMAP_Memory_Pool.cpp
+  Module.cpp
   Monitor_Admin.cpp
   Monitor_Admin_Manager.cpp
   Monitor_Base.cpp
@@ -146,6 +196,7 @@ set(ace_STAT_SRCS
   Monitor_Control_Types.cpp
   Monitor_Point_Registry.cpp
   Monitor_Size.cpp
+  Monotonic_Time_Policy.cpp
   Msg_WFMO_Reactor.cpp
   Multihomed_INET_Addr.cpp
   Mutex.cpp
@@ -154,6 +205,7 @@ set(ace_STAT_SRCS
   Name_Space.cpp
   Naming_Context.cpp
   Netlink_Addr.cpp
+  Node.cpp
   Notification_Queue.cpp
   Notification_Strategy.cpp
   NT_Service.cpp
@@ -162,6 +214,7 @@ set(ace_STAT_SRCS
   Object_Manager.cpp
   Object_Manager_Base.cpp
   Obstack.cpp
+  Obstack_T.cpp
   OS_Errno.cpp
   OS_Log_Msg_Attributes.cpp
   OS_main.cpp
@@ -199,10 +252,12 @@ set(ace_STAT_SRCS
   OS_NS_time.cpp
   OS_NS_unistd.cpp
   OS_NS_wchar.cpp
+  OS_NS_wctype.cpp
   OS_QoS.cpp
   OS_Thread_Adapter.cpp
   OS_TLI.cpp
   Pagefile_Memory_Pool.cpp
+  Pair_T.cpp
   Parse_Node.cpp
   PI_Malloc.cpp
   Ping_Socket.cpp
@@ -218,6 +273,7 @@ set(ace_STAT_SRCS
   Process_Mutex.cpp
   Process_Semaphore.cpp
   Profile_Timer.cpp
+  RB_Tree.cpp
   Reactor.cpp
   Reactor_Impl.cpp
   Reactor_Notification_Strategy.cpp
@@ -225,10 +281,13 @@ set(ace_STAT_SRCS
   Read_Buffer.cpp
   Recursive_Thread_Mutex.cpp
   Recyclable.cpp
+  Refcountable_T.cpp
+  Refcounted_Auto_Ptr.cpp
   Registry.cpp
   Registry_Name_Space.cpp
   Remote_Name_Space.cpp
   Remote_Tokens.cpp
+  Reverse_Lock_T.cpp
   Rtems_init.c
   RW_Mutex.cpp
   RW_Process_Mutex.cpp
@@ -237,6 +296,7 @@ set(ace_STAT_SRCS
   Sbrk_Memory_Pool.cpp
   Sched_Params.cpp
   Select_Reactor_Base.cpp
+  Select_Reactor_T.cpp
   Semaphore.cpp
   Service_Config.cpp
   Service_Gestalt.cpp
@@ -252,6 +312,7 @@ set(ace_STAT_SRCS
   Sig_Adapter.cpp
   Sig_Handler.cpp
   Signal.cpp
+  Singleton.cpp
   SOCK.cpp
   SOCK_Acceptor.cpp
   SOCK_CODgram.cpp
@@ -259,7 +320,6 @@ set(ace_STAT_SRCS
   SOCK_Connector.cpp
   SOCK_Dgram.cpp
   SOCK_Dgram_Bcast.cpp
-  SOCK_Dgram_Mcast.cpp
   SOCK_IO.cpp
   SOCK_Netlink.cpp
   SOCK_SEQPACK_Acceptor.cpp
@@ -274,6 +334,10 @@ set(ace_STAT_SRCS
   SString.cpp
   Stack_Trace.cpp
   Stats.cpp
+  Strategies_T.cpp
+  Stream.cpp
+  Stream_Modules.cpp
+  String_Base.cpp
   String_Base_Const.cpp
   SUN_Proactor.cpp
   SV_Message.cpp
@@ -283,9 +347,13 @@ set(ace_STAT_SRCS
   SV_Shared_Memory.cpp
   Svc_Conf_Lexer.cpp
   Svc_Conf_y.cpp
+  Svc_Handler.cpp
   Synch_Options.cpp
   System_Time.cpp
   Task.cpp
+  Task_Ex_T.cpp
+  Task_T.cpp
+  Test_and_Set.cpp
   Thread.cpp
   Thread_Adapter.cpp
   Thread_Control.cpp
@@ -296,8 +364,18 @@ set(ace_STAT_SRCS
   Thread_Semaphore.cpp
   Throughput_Stats.cpp
   Time_Policy.cpp
+  Time_Policy_T.cpp
   Time_Value.cpp
+  Time_Value_T.cpp
   Timeprobe.cpp
+  Timeprobe_T.cpp
+  Timer_Hash_T.cpp
+  Timer_Heap_T.cpp
+  Timer_List_T.cpp
+  Timer_Queue_Adapters.cpp
+  Timer_Queue_Iterator.cpp
+  Timer_Queue_T.cpp
+  Timer_Wheel_T.cpp
   TLI.cpp
   TLI_Acceptor.cpp
   TLI_Connector.cpp
@@ -310,15 +388,22 @@ set(ace_STAT_SRCS
   TP_Reactor.cpp
   Trace.cpp
   TSS_Adapter.cpp
+  TSS_T.cpp
   TTY_IO.cpp
+  Typed_SV_Message.cpp
+  Typed_SV_Message_Queue.cpp
+  Unbounded_Queue.cpp
+  Unbounded_Set.cpp
+  Unbounded_Set_Ex.cpp
   UNIX_Addr.cpp
   UPIPE_Acceptor.cpp
   UPIPE_Connector.cpp
   UPIPE_Stream.cpp
+  UTF8_Encoding_Converter.cpp
   UTF16_Encoding_Converter.cpp
   UTF32_Encoding_Converter.cpp
-  UTF8_Encoding_Converter.cpp
   UUID.cpp
+  Vector_T.cpp
   WFMO_Reactor.cpp
   WIN32_Asynch_IO.cpp
   WIN32_Proactor.cpp
@@ -333,7 +418,20 @@ endif()
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/dep/acelite
+  ${CMAKE_CURRENT_SOURCE_DIR}/Compression
+  ${CMAKE_CURRENT_SOURCE_DIR}/Compression/rle
+  ${CMAKE_CURRENT_SOURCE_DIR}/ETCL
+  ${CMAKE_CURRENT_SOURCE_DIR}/FIReactor
+  ${CMAKE_CURRENT_SOURCE_DIR}/FoxReactor
+  ${CMAKE_CURRENT_SOURCE_DIR}/Monitor_Control
+  ${CMAKE_CURRENT_SOURCE_DIR}/ETCL
   ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
+  ${CMAKE_CURRENT_SOURCE_DIR}/QoS
+  ${CMAKE_CURRENT_SOURCE_DIR}/QtReactor
+  ${CMAKE_CURRENT_SOURCE_DIR}/SSL
+  ${CMAKE_CURRENT_SOURCE_DIR}/TkReactor
+  ${CMAKE_CURRENT_SOURCE_DIR}/XML_Utils
+  ${CMAKE_CURRENT_SOURCE_DIR}/XtReactor
   ${CMAKE_SOURCE_DIR}/dep/zlib
 )
 

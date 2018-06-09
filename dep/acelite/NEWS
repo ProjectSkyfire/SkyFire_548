@@ -1,3 +1,51 @@
+USER VISIBLE CHANGES BETWEEN ACE-6.4.7 and ACE-6.4.8
+====================================================
+
+. Enhanced Embarcadero C++ Builder support
+
+. ACE XML_Utils enhancements
+
+. Debian packaging enhancements
+
+. Support for clang6 and gcc8
+
+. Enhanced Android support
+
+. Remove addr_any restriction from ipv6_only UDP
+
+USER VISIBLE CHANGES BETWEEN ACE-6.4.6 and ACE-6.4.7
+====================================================
+
+. Added a new, optional argument named ipv6_only to:
+    ACE_Acceptor::ACE_Acceptor
+    ACE_Acceptor::open
+    ACE_SOCK_Dgram::ACE_SOCK_Dgram
+    ACE_SOCK_Dgram::open
+  If ipv6_only is 0/false (the default) the socket will accept
+  both IPv6 and IPv4 connections/datagrams. If ipv6_only is
+  1/true the socket will only accept IPv6.
+  This behavior only applies when ACE_HAS_IPV6 is true and the
+  local-side IP address is the generic localhost IP address.
+
+. Integrated some changes from XSC into XML Utils
+
+. Enable ACE_HAS_CPP11 when we have clang with C++11 enabled
+
+. Added support for cross compiling using MinGW on a Linux host
+
+. Added support for FreeBSD 11
+
+. Fixed issue ACE_Singleton was broken after ACE::fini, ACE::init (GitHub #554)
+
+USER VISIBLE CHANGES BETWEEN ACE-6.4.5 and ACE-6.4.6
+====================================================
+
+. Fixed some Codacy and C++ Core guidelines reported issues
+
+. VxWorks 7 (SR0510) support
+
+. Support make install on newer Apple MacOS versions
+
 USER VISIBLE CHANGES BETWEEN ACE-6.4.4 and ACE-6.4.5
 ====================================================
 
