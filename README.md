@@ -36,7 +36,7 @@ For further information on the SkyFire project, please visit our project website
 + ACE = 6.3.3  (Linux only)
 + MySQL = 8.0 (Windows / Linux)
 + CMake = 3.8.1/3.5.1 (Windows / Linux)
-+ OpenSSL = 1.0.2G
++ OpenSSL = 1.1.0G
 + GCC = 6.3.0 (Linux only)
 + MS Visual Studio = 15 (2017) (Windows only)
 

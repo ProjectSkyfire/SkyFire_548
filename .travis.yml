@@ -25,6 +25,7 @@ branches:
     - master
 
 before_install:
+  - sudo add-apt-repository ppa:aridev/xenial -y
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
   - sudo rm -rf /var/lib/dpkg/lock
