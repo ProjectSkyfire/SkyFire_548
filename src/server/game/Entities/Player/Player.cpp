@@ -15816,6 +15816,17 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     if (!CanRewardQuest(quest, msg))
         return false;
 
+    if (quest->GetRewardPackageItemId() > 0)
+    {
+        ItemPosCountVec dest;
+        InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, reward, 1);
+        if (res != EQUIP_ERR_OK)
+        {
+            SendEquipError(res, NULL, NULL, reward);
+            return false;
+        }
+    }
+
     if (quest->GetRewChoiceItemsCount() > 0)
     {
         if (!quest->IsRewChoiceItemValid(reward))
@@ -16016,6 +16027,16 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     }
 
     RemoveTimedQuest(quest_id);
+
+    if (quest->GetRewardPackageItemId() > 0)
+    {
+        ItemPosCountVec dest;
+        if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, reward, 1) == EQUIP_ERR_OK)
+        {
+            Item* item = StoreNewItem(dest, reward, true, Item::GenerateItemRandomPropertyId(reward));
+            SendNewItem(item, 1, true, false);
+        }
+    }
 
     if (quest->GetRewChoiceItemsCount() > 0)
     {
