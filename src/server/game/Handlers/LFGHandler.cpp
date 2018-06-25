@@ -247,31 +247,33 @@ void WorldSession::HandleLfgSetCommentOpcode(WorldPacket&  recvData)
     sLFGMgr->SetComment(GetPlayer()->GetGUID(), comment);
 }
 
-void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recvData)
+void WorldSession::HandleLFDSetBootVoteOpcode(WorldPacket& recvData)
 {
     bool agree;                                            // Agree to kick player
     recvData >> agree;
 
     uint64 guid = GetPlayer()->GetGUID();
-    SF_LOG_DEBUG("lfg", "CMSG_LFG_SET_BOOT_VOTE %s agree: %u",
+    SF_LOG_DEBUG("lfg", "CMSG_LFD_SET_BOOT_VOTE %s agree: %u",
         GetPlayerInfo().c_str(), agree ? 1 : 0);
     sLFGMgr->UpdateBoot(guid, agree);
 }
 
-void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recvData)
+void WorldSession::HandleLFDTeleportOpcode(WorldPacket& recvData)
 {
     bool out;
     recvData >> out;
 
-    SF_LOG_DEBUG("lfg", "CMSG_LFG_TELEPORT %s out: %u",
+    SF_LOG_DEBUG("lfg", "CMSG_LFD_TELEPORT %s out: %u",
         GetPlayerInfo().c_str(), out ? 1 : 0);
     sLFGMgr->TeleportPlayer(GetPlayer(), out, true);
 }
 
-void WorldSession::HandleLfgGetLockInfoOpcode(WorldPacket& recvData)
+void WorldSession::HandleLFDGetLockInfoOpcode(WorldPacket& recvData)
 {
+    uint8 partyIndex = 0;
+    recvData >> partyIndex; // partyIndex NYI
     bool forPlayer = recvData.ReadBit();
-    SF_LOG_DEBUG("lfg", "CMSG_LFG_LOCK_INFO_REQUEST %s for %s", GetPlayerInfo().c_str(), (forPlayer ? "player" : "party"));
+    SF_LOG_DEBUG("lfg", "CMSG_LFD_LOCK_INFO_REQUEST %s for %s", GetPlayerInfo().c_str(), (forPlayer ? "player" : "party"));
 
     if (forPlayer)
         SendLfgPlayerLockInfo();
@@ -849,19 +851,19 @@ void WorldSession::SendLfgDisabled()
 
 void WorldSession::SendLfgOfferContinue(uint32 dungeonEntry)
 {
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_OFFER_CONTINUE %s dungeon entry: %u",
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_OFFER_CONTINUE %s dungeon entry: %u",
         GetPlayerInfo().c_str(), dungeonEntry);
-    WorldPacket data(SMSG_LFG_OFFER_CONTINUE, 4);
+    WorldPacket data(SMSG_LFD_OFFER_CONTINUE, 4);
     data << uint32(dungeonEntry);
     SendPacket(&data);
 }
 
 void WorldSession::SendLfgTeleportError(uint8 err)
 {
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_TELEPORT_DENIED %s reason: %u",
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_TELEPORT_DENIED %s reason: %u",
         GetPlayerInfo().c_str(), err);
-    WorldPacket data(SMSG_LFG_TELEPORT_DENIED, 4);
-    data << uint32(err);                                   // Error
+    WorldPacket data(SMSG_LFD_TELEPORT_DENIED, 4);
+    data.WriteBits(err, 4);                                   // Error
     SendPacket(&data);
 }
 
