@@ -2493,23 +2493,23 @@ public:
 class npc_training_target : public CreatureScript
 {
 public:
-	npc_training_target() : CreatureScript("npc_training_target") { }
+    npc_training_target() : CreatureScript("npc_training_target") { }
 
-	struct npc_training_targetAI : ScriptedAI
-	{
-		npc_training_targetAI(Creature* creature) : ScriptedAI(creature)
-		{
-			SetCombatMovement(false);
-			entry = creature->GetEntry();
-		}
+    struct npc_training_targetAI : ScriptedAI
+    {
+        npc_training_targetAI(Creature* creature) : ScriptedAI(creature)
+        {
+            SetCombatMovement(false);
+            entry = creature->GetEntry();
+        }
 
-		uint32 entry;
-	};
+        uint32 entry;
+    };
 
-	CreatureAI* GetAI(Creature* creature) const OVERRIDE
-	{
-		return new npc_training_targetAI(creature);
-	}
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_training_targetAI(creature);
+    }
 };
 
 
@@ -2538,5 +2538,5 @@ void AddSC_npcs_special()
     new npc_Spirit_of_Master_Shang_Xi();
     new npc_spring_rabbit();
     new npc_madam_goya();
-	new npc_training_target();
+    new npc_training_target();
 }
