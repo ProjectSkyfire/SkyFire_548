@@ -34,6 +34,10 @@
     #define ERROR_PATH_NOT_FOUND ERROR_FILE_NOT_FOUND
 #endif
 
+#ifndef _sntprintf
+#define _sntprintf snprintf;
+#endif
+
 #undef min
 #undef max
 
