@@ -958,6 +958,7 @@ class WorldSession
 
         // Socket gem
         void HandleSocketOpcode(WorldPacket& recvData);
+        void SendUpdateSockets(ObjectGuid ItemGUID, Item* item);
 
         void HandleCancelTempEnchantmentOpcode(WorldPacket& recvData);
 

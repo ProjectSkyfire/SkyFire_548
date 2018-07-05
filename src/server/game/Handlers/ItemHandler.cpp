@@ -1514,7 +1514,22 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
     _player->RemoveTradeableItem(itemTarget);
     itemTarget->ClearSoulboundTradeable(_player);           // clear tradeable flag
 
-    itemTarget->SendUpdateSockets();
+    SendUpdateSockets(itemTarget->GetGUID(), itemTarget);
+}
+
+void WorldSession::SendUpdateSockets(ObjectGuid ItemGUID, Item* item)
+{
+    WorldPacket data(SMSG_SOCKET_GEMS_RESULT, 8 + 4 + 4 + 4 + 4);
+    data.WriteGuidMask(ItemGUID, 2, 5, 7, 6, 0, 1, 3, 4);
+    data.WriteGuidBytes(ItemGUID, 2);
+    data << uint32(item->GetEnchantmentId(EnchantmentSlot(BONUS_ENCHANTMENT_SLOT)));
+    data.WriteGuidBytes(ItemGUID, 3, 7, 4);
+
+    for (uint32 i = SOCK_ENCHANTMENT_SLOT; i <= SOCK_ENCHANTMENT_SLOT_3; ++i)
+        data << uint32(item->GetEnchantmentId(EnchantmentSlot(i)));
+
+    data.WriteGuidBytes(5, 0, 1, 6);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleCancelTempEnchantmentOpcode(WorldPacket& recvData)
