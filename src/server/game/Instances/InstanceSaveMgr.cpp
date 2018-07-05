@@ -184,7 +184,7 @@ void InstanceSave::SaveToDB()
     Map* map = sMapMgr->FindMap(GetMapId(), m_instanceid);
     if (map)
     {
-        ASSERT(map->IsDungeon());
+        ASSERT(map->IsInstance());
         if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
         {
             data = instanceScript->GetSaveData();
@@ -541,7 +541,7 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 
     Map* iMap = ((MapInstanced*)map)->FindInstanceMap(instanceId);
 
-    if (iMap && iMap->IsDungeon())
+    if (iMap && iMap->IsInstance())
         ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
 
     if (iMap)
@@ -631,7 +631,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
     for (mitr = instMaps.begin(); mitr != instMaps.end(); ++mitr)
     {
         Map* map2 = mitr->second;
-        if (!map2->IsDungeon())
+        if (!map2->IsInstance())
             continue;
 
         if (warn)

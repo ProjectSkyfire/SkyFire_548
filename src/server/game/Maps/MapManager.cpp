@@ -158,7 +158,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     if (!entry)
        return false;
 
-    if (!entry->IsDungeon())
+    if (!entry->IsInstance())
         return true;
 
     InstanceTemplate const* instance = sObjectMgr->GetInstanceTemplate(mapid);
@@ -252,7 +252,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     }
 
     // players are only allowed to enter 5 instances per hour
-    if (entry->IsDungeon() && (!player->GetGroup() || (player->GetGroup() && !player->GetGroup()->isLFGGroup())))
+    if (entry->IsInstance() && (!player->GetGroup() || (player->GetGroup() && !player->GetGroup()->isLFGGroup())))
     {
         uint32 instaceIdToCheck = 0;
         if (InstanceSave* save = player->GetInstanceSave(mapid))
@@ -314,7 +314,7 @@ bool MapManager::IsValidMAP(uint32 mapid, bool startUp)
     if (startUp)
         return mEntry ? true : false;
     else
-        return mEntry && (!mEntry->IsDungeon() || sObjectMgr->GetInstanceTemplate(mapid));
+        return mEntry && (!mEntry->IsInstance() || sObjectMgr->GetInstanceTemplate(mapid));
 
     /// @todo add check for battleground template
 }
@@ -346,7 +346,7 @@ uint32 MapManager::GetNumInstances()
             continue;
         MapInstanced::InstancedMaps &maps = ((MapInstanced*)map)->GetInstancedMaps();
         for (MapInstanced::InstancedMaps::iterator mitr = maps.begin(); mitr != maps.end(); ++mitr)
-            if (mitr->second->IsDungeon()) ret++;
+            if (mitr->second->IsInstance()) ret++;
     }
     return ret;
 }
@@ -363,7 +363,7 @@ uint32 MapManager::GetNumPlayersInInstances()
             continue;
         MapInstanced::InstancedMaps &maps = ((MapInstanced*)map)->GetInstancedMaps();
         for (MapInstanced::InstancedMaps::iterator mitr = maps.begin(); mitr != maps.end(); ++mitr)
-            if (mitr->second->IsDungeon())
+            if (mitr->second->IsInstance())
                 ret += ((InstanceMap*)mitr->second)->GetPlayers().getSize();
     }
     return ret;

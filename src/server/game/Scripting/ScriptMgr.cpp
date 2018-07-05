@@ -527,7 +527,7 @@ void ScriptMgr::OnCreateMap(Map* map)
         itr->second->OnCreate(map);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnCreate((InstanceMap*)map);
     SCR_MAP_END;
 
@@ -544,7 +544,7 @@ void ScriptMgr::OnDestroyMap(Map* map)
         itr->second->OnDestroy(map);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnDestroy((InstanceMap*)map);
     SCR_MAP_END;
 
@@ -562,7 +562,7 @@ void ScriptMgr::OnLoadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy)
         itr->second->OnLoadGridMap(map, gmap, gx, gy);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnLoadGridMap((InstanceMap*)map, gmap, gx, gy);
     SCR_MAP_END;
 
@@ -580,7 +580,7 @@ void ScriptMgr::OnUnloadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy)
         itr->second->OnUnloadGridMap(map, gmap, gx, gy);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnUnloadGridMap((InstanceMap*)map, gmap, gx, gy);
     SCR_MAP_END;
 
@@ -600,7 +600,7 @@ void ScriptMgr::OnPlayerEnterMap(Map* map, Player* player)
         itr->second->OnPlayerEnter(map, player);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnPlayerEnter((InstanceMap*)map, player);
     SCR_MAP_END;
 
@@ -618,7 +618,7 @@ void ScriptMgr::OnPlayerLeaveMap(Map* map, Player* player)
         itr->second->OnPlayerLeave(map, player);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnPlayerLeave((InstanceMap*)map, player);
     SCR_MAP_END;
 
@@ -635,7 +635,7 @@ void ScriptMgr::OnMapUpdate(Map* map, uint32 diff)
         itr->second->OnUpdate(map, diff);
     SCR_MAP_END;
 
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
+    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsInstance);
         itr->second->OnUpdate((InstanceMap*)map, diff);
     SCR_MAP_END;
 
@@ -1432,7 +1432,7 @@ WorldMapScript::WorldMapScript(const char* name, uint32 mapId)
 InstanceMapScript::InstanceMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<InstanceMap>(mapId)
 {
-    if (GetEntry() && !GetEntry()->IsDungeon())
+    if (GetEntry() && !GetEntry()->IsInstance())
         SF_LOG_ERROR("scripts", "InstanceMapScript for map %u is invalid.", mapId);
 
     ScriptRegistry<InstanceMapScript>::AddScript(this);

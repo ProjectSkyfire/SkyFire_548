@@ -84,7 +84,7 @@ void LFGPlayerScript::OnLogin(Player* player)
 void LFGPlayerScript::OnBindToInstance(Player* player, DifficultyID difficulty, uint32 mapId, bool /*permanent*/)
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-    if (mapEntry->IsDungeon() && difficulty > DIFFICULTY_NORMAL)
+    if (mapEntry->IsInstance() && difficulty > DIFFICULTY_NORMAL)
         sLFGMgr->InitializeLockedDungeons(player);
 }
 
@@ -196,7 +196,7 @@ void LFGGroupScript::OnRemoveMember(Group* group, uint64 guid, RemoveMethod meth
             // Update internal kick cooldown of kicked
 
         player->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_LEADER_UNK1), true);
-        if (isLFG && player->GetMap()->IsDungeon())            // Teleport player out the dungeon
+        if (isLFG && player->GetMap()->IsInstance())            // Teleport player out the dungeon
             sLFGMgr->TeleportPlayer(player, true);
     }
 

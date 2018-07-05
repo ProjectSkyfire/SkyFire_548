@@ -4771,7 +4771,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         }
                         case 44191:                                     // Flame Strike
                         {
-                            if (target->GetMap()->IsDungeon())
+                            if (target->GetMap()->IsInstance())
                             {
                                 uint32 spellId = target->GetMap()->IsHeroic() ? 46163 : 44190;
 

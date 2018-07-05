@@ -319,7 +319,7 @@ void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o
 void ScriptedAI::DoTeleportAll(float x, float y, float z, float o)
 {
     Map* map = me->GetMap();
-    if (!map->IsDungeon())
+    if (!map->IsInstance())
         return;
 
     Map::PlayerList const& PlayerList = map->GetPlayers();

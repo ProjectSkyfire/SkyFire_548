@@ -181,7 +181,7 @@ namespace Skyfire
                 if (gain != 0 && u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->isElite())
                 {
                     // Elites in instances have a 2.75x XP bonus instead of the regular 2x world bonus.
-                    if (u->GetMap() && u->GetMap()->IsDungeon())
+                    if (u->GetMap() && u->GetMap()->IsInstance())
                        gain = uint32(gain * 2.75);
                     else
                         gain *= 2;

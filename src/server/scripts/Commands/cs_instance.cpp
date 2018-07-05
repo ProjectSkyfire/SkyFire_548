@@ -168,9 +168,9 @@ public:
     {
         Player* player = handler->GetSession()->GetPlayer();
         Map* map = player->GetMap();
-        if (!map->IsDungeon())
+        if (!map->IsInstance())
         {
-            handler->PSendSysMessage("Map is not a dungeon.");
+            handler->PSendSysMessage("Map is not an instance.");
             handler->SetSentErrorMessage(true);
             return false;
         }

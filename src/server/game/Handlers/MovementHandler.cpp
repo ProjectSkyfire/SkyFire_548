@@ -145,14 +145,14 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     Corpse* corpse = GetPlayer()->GetCorpse();
     if (corpse && corpse->GetType() != CORPSE_BONES && corpse->GetMapId() == GetPlayer()->GetMapId())
     {
-        if (mEntry->IsDungeon())
+        if (mEntry->IsInstance())
         {
             GetPlayer()->ResurrectPlayer(0.5f, false);
             GetPlayer()->SpawnCorpseBones();
         }
     }
 
-    bool allowMount = !mEntry->IsDungeon() || mEntry->IsBattlegroundOrArena();
+    bool allowMount = !mEntry->IsInstance() || mEntry->IsBattlegroundOrArena();
     if (mInstance)
     {
         DifficultyID diff = GetPlayer()->GetDifficulty(mEntry);

@@ -158,7 +158,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_INSTANCE_INFO:
         {
             Map* map = object->GetMap();
-            if (map && map->IsDungeon())
+            if (map && map->IsInstance())
             {
                 if (InstanceScript const* instance = ((InstanceMap*)map)->GetInstanceScript())
                 {

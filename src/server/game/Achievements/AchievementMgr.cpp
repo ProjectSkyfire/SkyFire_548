@@ -346,7 +346,7 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
             if (!source->IsInWorld())
                 return false;
             Map* map = source->GetMap();
-            if (!map->IsDungeon())
+            if (!map->IsInstance())
             {
                 SF_LOG_ERROR("achievement", "Achievement system call ACHIEVEMENT_CRITERIA_DATA_INSTANCE_SCRIPT (%u) for achievement criteria %u for non-dungeon/non-raid map %u",
                     ACHIEVEMENT_CRITERIA_DATA_INSTANCE_SCRIPT, criteria_id, map->GetId());

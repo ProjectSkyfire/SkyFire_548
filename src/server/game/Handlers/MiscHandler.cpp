@@ -1157,7 +1157,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
             return;
 
         if (Group* group = player->GetGroup())
-            if (group->isLFGGroup() && player->GetMap()->IsDungeon())
+            if (group->isLFGGroup() && player->GetMap()->IsInstance())
                 teleported = player->TeleportToBGEntryPoint();
     }
 
@@ -1820,7 +1820,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
 
     // cannot reset while in an instance
     Map* map = _player->FindMap();
-    if (map && map->IsDungeon())
+    if (map && map->IsNonRaidInstance())
     {
         SF_LOG_DEBUG("network", "player (Name: %s, GUID: %u) tried to reset the instance while player is inside!",
             _player->GetName().c_str(), _player->GetGUIDLow());
@@ -1889,7 +1889,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
 
     // cannot reset while in an instance
     Map* map = _player->FindMap();
-    if (map && map->IsDungeon())
+    if (map && map->IsRaid())
     {
         SF_LOG_DEBUG("network", "player %d tried to reset the raid while inside!", _player->GetGUIDLow());
         return;

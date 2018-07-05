@@ -360,7 +360,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
             if (Player const* player = unit->ToPlayer())
             {
                 MapEntry const* mapEntry = sMapStore.LookupEntry(entry);
-                if (mapEntry->IsDungeon())
+                if (mapEntry->IsInstance())
                 {
                     uint8 disabledModes = itr->second.flags;
                     DifficultyID targetDifficulty = player->GetDifficulty(mapEntry);
@@ -371,8 +371,12 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                             return disabledModes & DUNGEON_STATUSFLAG_NORMAL;
                         case DIFFICULTY_HEROIC:
                             return disabledModes & DUNGEON_STATUSFLAG_HEROIC;
+                        case DIFFICULTY_10MAN_NORMAL:
+                            return disabledModes & RAID_STATUSFLAG_10MAN_NORMAL;
                         case DIFFICULTY_10MAN_HEROIC:
                             return disabledModes & RAID_STATUSFLAG_10MAN_HEROIC;
+                        case DIFFICULTY_25MAN_NORMAL:
+                            return disabledModes & RAID_STATUSFLAG_25MAN_NORMAL;
                         case DIFFICULTY_25MAN_HEROIC:
                             return disabledModes & RAID_STATUSFLAG_25MAN_HEROIC;
                         //case DIFFICULTY_10MAN_FLEX:

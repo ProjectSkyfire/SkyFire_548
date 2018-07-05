@@ -605,7 +605,7 @@ void KillRewarder::_RewardGroup()
         // (battleground rewards only XP, that's why).
         if (!_isBattleGround || _xp)
         {
-            const bool isDungeon = !_isPvP && sMapStore.LookupEntry(_killer->GetMapId())->IsDungeon();
+            const bool isDungeon = !_isPvP && sMapStore.LookupEntry(_killer->GetMapId())->IsInstance();
             if (!_isBattleGround)
             {
                 // 3.1.2. Alter group rate if group is in raid (not for battlegrounds).
@@ -19483,7 +19483,7 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
             MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
             std::string mapname = mapEntry ? mapEntry->name : "Unknown";
 
-            if (!mapEntry || !mapEntry->IsDungeon())
+            if (!mapEntry || !mapEntry->IsInstance())
             {
                 SF_LOG_ERROR("entities.player", "_LoadBoundInstances: player %s(%d) has bind to not existed or not dungeon map %d (%s)", GetName().c_str(), GetGUIDLow(), mapId, mapname.c_str());
                 deleteInstance = true;
@@ -19843,7 +19843,7 @@ bool Player::CheckInstanceLoginValid()
     if (!FindMap())
         return false;
 
-    if (!GetMap()->IsDungeon() || IsGameMaster())
+    if (!GetMap()->IsInstance() || IsGameMaster())
         return true;
 
     if (GetMap()->IsRaid())
@@ -21210,7 +21210,7 @@ void Player::ResetInstances(uint8 method, bool isRaid)
 
         // if the map is loaded, reset it
         Map* map = sMapMgr->FindMap(p->GetMapId(), p->GetInstanceId());
-        if (map && map->IsDungeon())
+        if (map && map->IsInstance())
             if (!((InstanceMap*)map)->Reset(method))
             {
                 ++itr;
@@ -23649,7 +23649,7 @@ void Player::SetBattlegroundEntryPoint()
             m_bgData.mountSpell = 0;
 
         // If map is dungeon find linked graveyard
-        if (GetMap()->IsDungeon())
+        if (GetMap()->IsInstance())
         {
             if (const WorldSafeLocsEntry* entry = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
                 m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);

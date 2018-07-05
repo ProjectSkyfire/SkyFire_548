@@ -142,7 +142,7 @@ class boss_ossirian : public CreatureScript
                 if (instance)
                 {
                     Map* map = me->GetMap();
-                    if (!map->IsDungeon())
+                    if (!map->IsRaid())
                         return;
 
                     WorldPacket data(SMSG_WEATHER, (4+4+4));

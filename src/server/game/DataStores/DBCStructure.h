@@ -1872,6 +1872,8 @@ struct MapEntry
     bool IsBattlegroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
     bool IsWorldMap() const { return map_type == MAP_COMMON; }
 
+    bool IsInstance() const { return map_type == MAP_DUNGEON || map_type == MAP_RAID; }
+
     bool GetEntrancePos(int32 &mapid, float &x, float &y) const
     {
         if (entrance_map < 0)

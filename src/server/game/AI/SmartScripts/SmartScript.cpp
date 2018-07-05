@@ -3312,7 +3312,7 @@ void SmartScript::FillScript(SmartAIEventList e, WorldObject* obj, AreaTriggerEn
 
         if ((*i).event.event_flags & SMART_EVENT_FLAG_DIFFICULTY_ALL)//if has instance flag add only if in it
         {
-            if (obj && obj->GetMap()->IsDungeon())
+            if (obj && obj->GetMap()->IsInstance())
             {
                 if ((1 << (obj->GetMap()->GetSpawnMode()+1)) & (*i).event.event_flags)
                 {

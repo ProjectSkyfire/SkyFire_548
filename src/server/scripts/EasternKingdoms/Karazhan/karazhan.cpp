@@ -314,7 +314,7 @@ public:
                     if (WipeTimer <= diff)
                     {
                         Map* map = me->GetMap();
-                        if (!map->IsDungeon())
+                        if (!map->IsRaid())
                             return;
 
                         Map::PlayerList const &PlayerList = map->GetPlayers();
@@ -602,7 +602,7 @@ public:
                 me->SetVisible(false);
                 me->ClearInCombat();
 
-                if (map->IsDungeon())
+                if (map->IsRaid())
                 {
                     InstanceMap::PlayerList const &PlayerList = map->GetPlayers();
                     for (InstanceMap::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)

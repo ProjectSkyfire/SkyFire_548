@@ -125,7 +125,7 @@ void npc_escortAI::MoveInLineOfSight(Unit* who)
                     who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                     AttackStart(who);
                 }
-                else if (me->GetMap()->IsDungeon())
+                else if (me->GetMap()->IsInstance())
                 {
                     who->SetInCombatWith(me);
                     me->AddThreat(who, 0.0f);

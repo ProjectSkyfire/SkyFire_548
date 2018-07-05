@@ -14216,7 +14216,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
             Player* creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
             /// @todo do instance binding anyway if the charmer/owner is offline
 
-            if (instanceMap->IsDungeon() && creditedPlayer)
+            if (instanceMap->IsInstance() && creditedPlayer)
             {
                 if (instanceMap->IsRaidOrHeroicDungeon())
                 {

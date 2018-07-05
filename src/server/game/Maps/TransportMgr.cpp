@@ -345,7 +345,7 @@ Transport* TransportMgr::CreateTransport(uint32 entry, uint32 guid /*= 0*/, Map*
     if (map)
     {
         // SetZoneScript() is called after adding to map, so fetch the script using map
-        if (map->IsDungeon())
+        if (map->IsInstance())
             if (InstanceScript* instance = static_cast<InstanceMap*>(map)->GetInstanceScript())
                 entry = instance->GetGameObjectEntry(0, entry);
 
@@ -391,7 +391,7 @@ Transport* TransportMgr::CreateTransport(uint32 entry, uint32 guid /*= 0*/, Map*
 
     // use preset map for instances (need to know which instance)
     trans->SetMap(map ? map : sMapMgr->CreateMap(mapId, NULL));
-    if (map && map->IsDungeon())
+    if (map && map->IsInstance())
         trans->m_zoneScript = map->ToInstanceMap()->GetInstanceScript();
 
     // Passengers will be loaded once a player is near

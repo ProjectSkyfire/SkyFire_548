@@ -2721,7 +2721,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
             //return false;
 
         // Dungeon only code
-        if (IsDungeon())
+        if (IsInstance())
         {
             Group* group = player->GetGroup();
 
@@ -2925,7 +2925,7 @@ bool InstanceMap::Reset(uint8 method)
 
 void InstanceMap::PermBindAllPlayers(Player* source)
 {
-    if (!IsDungeon())
+    if (!IsInstance())
         return;
 
     InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
@@ -2980,7 +2980,7 @@ void InstanceMap::SetResetSchedule(bool on)
     // only for normal instances
     // the reset time is only scheduled when there are no payers inside
     // it is assumed that the reset time will rarely (if ever) change while the reset is scheduled
-    if (IsDungeon() && !HavePlayers() && !IsRaidOrHeroicDungeon())
+    if (IsInstance() && !HavePlayers() && !IsRaidOrHeroicDungeon())
     {
         if (InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId()))
             sInstanceSaveMgr->ScheduleReset(on, save->GetResetTime(), InstanceSaveManager::InstResetEvent(0, GetId(), DifficultyID(GetSpawnMode()), GetInstanceId()));

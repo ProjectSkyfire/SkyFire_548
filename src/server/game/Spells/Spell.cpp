@@ -6066,9 +6066,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!target || m_caster->ToPlayer() == target || (!target->IsInSameRaidWith(m_caster->ToPlayer()) && m_spellInfo->Id != 48955)) // refer-a-friend spell
                     return SPELL_FAILED_BAD_TARGETS;
 
-                // check if our map is dungeon
+                // check if our map is dungeon or raid
                 MapEntry const* map = sMapStore.LookupEntry(m_caster->GetMapId());
-                if (map->IsDungeon())
+                if (map->IsInstance())
                 {
                     uint32 mapId = m_caster->GetMap()->GetId();
                     DifficultyID difficulty = m_caster->GetMap()->GetDifficulty();
@@ -6205,7 +6205,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
-                bool allowMount = !m_caster->GetMap()->IsDungeon() || m_caster->GetMap()->IsBattlegroundOrArena();
+                bool allowMount = !m_caster->GetMap()->IsInstance() || m_caster->GetMap()->IsBattlegroundOrArena();
                 InstanceTemplate const* it = sObjectMgr->GetInstanceTemplate(m_caster->GetMapId());
                 if (it)
                     allowMount = it->AllowMount;

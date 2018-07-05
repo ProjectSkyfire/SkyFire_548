@@ -1368,7 +1368,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
             }
         }
 
-        if (!player->GetMap()->IsDungeon())
+        if (!player->GetMap()->IsInstance())
             player->SetBattlegroundEntryPoint();
 
         if (player->IsInFlight())

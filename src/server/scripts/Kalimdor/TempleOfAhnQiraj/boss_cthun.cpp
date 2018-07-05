@@ -593,7 +593,7 @@ public:
                 if (WisperTimer <= diff)
                 {
                     Map* map = me->GetMap();
-                    if (!map->IsDungeon())
+                    if (!map->IsRaid())
                         return;
 
                     //Play random sound to the zone

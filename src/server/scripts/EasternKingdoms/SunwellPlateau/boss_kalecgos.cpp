@@ -548,7 +548,7 @@ public:
     bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
     {
         Map* map = go->GetMap();
-        if (!map->IsDungeon())
+        if (!map->IsRaid())
             return true;
 
 #if MAX_PLAYERS_IN_SPECTRAL_REALM > 0
@@ -685,7 +685,7 @@ public:
         void TeleportAllPlayersBack()
         {
             Map* map = me->GetMap();
-            if (!map->IsDungeon())
+            if (!map->IsRaid())
                 return;
 
             Map::PlayerList const &PlayerList = map->GetPlayers();

@@ -520,7 +520,7 @@ public:
         void SendFlameTsunami()
         {
             if (Map* map = me->GetMap())
-                if (map->IsDungeon())
+                if (map->IsRaid())
                 {
                     Map::PlayerList const &PlayerList = map->GetPlayers();
 

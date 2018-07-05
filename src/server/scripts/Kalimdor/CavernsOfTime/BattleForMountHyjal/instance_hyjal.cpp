@@ -177,7 +177,7 @@ public:
                                 Creature* unit = creature->SummonCreature(NPC_WORLD_TRIGGER_TINY, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
 
                                 Map* map = creature->GetMap();
-                                if (map->IsDungeon() && unit)
+                                if (map->IsRaid() && unit)
                                 {
                                     unit->SetVisible(false);
                                     Map::PlayerList const &PlayerList = map->GetPlayers();
