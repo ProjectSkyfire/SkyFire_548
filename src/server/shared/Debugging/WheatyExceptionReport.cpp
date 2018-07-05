@@ -88,7 +88,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
     ++pos;
 
     TCHAR crash_folder_path[MAX_PATH];
-    sprintf(crash_folder_path, "%s\\%s", module_folder_name, CrashFolder);
+    snprintf(crash_folder_path, sizeof(crash_folder_path), "%s\\%s", module_folder_name, CrashFolder);
     if (!CreateDirectory(crash_folder_path, NULL))
     {
         if (GetLastError() != ERROR_ALREADY_EXISTS)
@@ -97,10 +97,10 @@ PEXCEPTION_POINTERS pExceptionInfo)
 
     SYSTEMTIME systime;
     GetLocalTime(&systime);
-    sprintf(m_szDumpFileName, "%s\\%s_%s_[%u-%u_%u-%u-%u].dmp",
+    snprintf(m_szDumpFileName, sizeof(m_szDumpFileName), "%s\\%s_%s_[%u-%u_%u-%u-%u].dmp",
         crash_folder_path, _HASH, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
-    sprintf(m_szLogFileName, "%s\\%s_%s_[%u-%u_%u-%u-%u].txt",
+    snprintf(m_szLogFileName, sizeof(m_szLogFileName), "%s\\%s_%s_[%u-%u_%u-%u-%u].txt",
         crash_folder_path, _HASH, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
     m_hDumpFile = CreateFile(m_szDumpFileName,
@@ -777,9 +777,9 @@ unsigned /*cbBuffer*/)
 
     // Indicate if the variable is a local or parameter
     if (pSym->Flags & IMAGEHLP_SYMBOL_INFO_PARAMETER)
-        pszCurrBuffer += sprintf(pszCurrBuffer, "Parameter ");
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszBuffer), "Parameter ");
     else if (pSym->Flags & IMAGEHLP_SYMBOL_INFO_LOCAL)
-        pszCurrBuffer += sprintf(pszCurrBuffer, "Local ");
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszBuffer), "Local ");
 
     // If it's a function, don't do anything.
     if (pSym->Tag == 5)                                   // SymTagFunction from CVCONST.H from the DIA SDK
@@ -818,10 +818,10 @@ unsigned /*cbBuffer*/)
         // variable.  Based on the size, we're assuming it's a char, WORD, or
         // DWORD.
         BasicType basicType = GetBasicType(pSym->TypeIndex, pSym->ModBase);
-        pszCurrBuffer += sprintf(pszCurrBuffer, rgBaseType[basicType]);
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszBuffer), rgBaseType[basicType]);
 
         // Emit the variable name
-        pszCurrBuffer += sprintf(pszCurrBuffer, "\'%s\'", pSym->Name);
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszBuffer), "\'%s\'", pSym->Name);
 
         pszCurrBuffer = FormatOutputValue(pszCurrBuffer, basicType, pSym->Size,
             (PVOID)pVariable);
@@ -852,7 +852,7 @@ char* /*Name*/)
     if (SymGetTypeInfo(m_hProcess, modBase, dwTypeIndex, TI_GET_SYMNAME,
         &pwszTypeName))
     {
-        pszCurrBuffer += sprintf(pszCurrBuffer, " %ls", pwszTypeName);
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " %ls", pwszTypeName);
         LocalFree(pwszTypeName);
     }
 
@@ -884,19 +884,19 @@ char* /*Name*/)
     }
 
     // Append a line feed
-    pszCurrBuffer += sprintf(pszCurrBuffer, "\r\n");
+    pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), "\r\n");
 
     // Iterate through each of the children
     for (unsigned i = 0; i < dwChildrenCount; i++)
     {
         // Add appropriate indentation level (since this routine is recursive)
         for (unsigned j = 0; j <= nestingLevel+1; j++)
-            pszCurrBuffer += sprintf(pszCurrBuffer, "\t");
+            pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), "\t");
 
         // Recurse for each of the child types
         bool bHandled2;
         BasicType basicType = GetBasicType(children.ChildId[i], modBase);
-        pszCurrBuffer += sprintf(pszCurrBuffer, rgBaseType[basicType]);
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), rgBaseType[basicType]);
 
         pszCurrBuffer = DumpTypeIndex(pszCurrBuffer, modBase,
             children.ChildId[i], nestingLevel+1,
@@ -933,7 +933,7 @@ char* /*Name*/)
             pszCurrBuffer = FormatOutputValue(pszCurrBuffer, basicType,
                 length, (PVOID)dwFinalOffset);
 
-            pszCurrBuffer += sprintf(pszCurrBuffer, "\r\n");
+            pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), "\r\n");
         }
     }
 
@@ -948,38 +948,38 @@ PVOID pAddress)
 {
     // Format appropriately (assuming it's a 1, 2, or 4 bytes (!!!)
     if (length == 1)
-        pszCurrBuffer += sprintf(pszCurrBuffer, " = %X", *(PBYTE)pAddress);
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %X", *(PBYTE)pAddress);
     else if (length == 2)
-        pszCurrBuffer += sprintf(pszCurrBuffer, " = %X", *(PWORD)pAddress);
+        pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %X", *(PWORD)pAddress);
     else if (length == 4)
     {
         if (basicType == btFloat)
         {
-            pszCurrBuffer += sprintf(pszCurrBuffer, " = %f", *(PFLOAT)pAddress);
+            pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %f", *(PFLOAT)pAddress);
         }
         else if (basicType == btChar)
         {
             if (!IsBadStringPtr(*(PSTR*)pAddress, 32))
             {
-                pszCurrBuffer += sprintf(pszCurrBuffer, " = \"%.31s\"",
+                pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = \"%.31s\"",
                     *(PSTR*)pAddress);
             }
             else
-                pszCurrBuffer += sprintf(pszCurrBuffer, " = %X",
+                pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %X",
                     *(PDWORD)pAddress);
         }
         else
-            pszCurrBuffer += sprintf(pszCurrBuffer, " = %X", *(PDWORD)pAddress);
+            pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %X", *(PDWORD)pAddress);
     }
     else if (length == 8)
     {
         if (basicType == btFloat)
         {
-            pszCurrBuffer += sprintf(pszCurrBuffer, " = %lf",
+            pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %lf",
                 *(double *)pAddress);
         }
         else
-            pszCurrBuffer += sprintf(pszCurrBuffer, " = %I64X",
+            pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %I64X",
                 *(DWORD64*)pAddress);
     }
 

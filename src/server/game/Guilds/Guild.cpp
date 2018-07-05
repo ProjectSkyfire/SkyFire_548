@@ -1844,7 +1844,7 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, std::string c
             _SetRankBankTabRightsAndSlots(rankId, *itr);
 
         char aux[2];
-        sprintf(aux, "%u", rankId);
+        snprintf(aux, sizeof(aux), "%u", rankId);
         _BroadcastEvent(GE_RANK_UPDATED, 0, aux);
     }
 }

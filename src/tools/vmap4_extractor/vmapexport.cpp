@@ -265,7 +265,7 @@ void ReadLiquidTypeTableDBC()
     HANDLE localeFile;
     char localMPQ[512];
 
-    sprintf(localMPQ, "%smisc.MPQ", input_path);
+    snprintf(localMPQ, sizeof(localMPQ), "%smisc.MPQ", input_path);
     if (FileExists(localMPQ)==false)
     {   // Use misc.mpq
         printf(localMPQ, "%s/Data/%s/locale-%s.MPQ", input_path);
@@ -338,7 +338,7 @@ bool ExtractSingleWmo(std::string& fname)
 
     char szLocalFile[1024];
     const char * plain_name = GetPlainName(fname.c_str());
-    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
+    snprintf(szLocalFile, sizeof(szLocalFile), "%s/%s", szWorkDirWmo, plain_name);
     FixNameCase(szLocalFile,strlen(szLocalFile));
 
     if (FileExists(szLocalFile))
@@ -387,7 +387,7 @@ bool ExtractSingleWmo(std::string& fname)
             strncpy(temp, fname.c_str(), 1024);
             temp[fname.length()-4] = 0;
             char groupFileName[1024];
-            sprintf(groupFileName, "%s_%03u.wmo", temp, i);
+            snprintf(groupFileName, sizeof(groupFileName), "%s_%03u.wmo", temp, i);
             //printf("Trying to open groupfile %s\n",groupFileName);
 
             std::string s = groupFileName;
@@ -420,8 +420,8 @@ void ParsMapFiles()
     char id[10];
     for (unsigned int i=0; i<map_count; ++i)
     {
-        sprintf(id,"%04u",map_ids[i].id);
-        sprintf(fn,"World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
+        snprintf(id, sizeof(id), "%04u", map_ids[i].id);
+        snprintf(fn, sizeof(fn), "World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
         WDTFile WDT(fn,map_ids[i].name);
         if(WDT.init(id, map_ids[i].id))
         {
