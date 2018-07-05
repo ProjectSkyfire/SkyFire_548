@@ -90,7 +90,7 @@ ACE_OS::dlerror (void)
 # elif defined (ACE_WIN32)
   static ACE_TCHAR buf[128];
 #   if defined (ACE_HAS_PHARLAP)
-  ACE_OS::snprintf (buf, "error code %d", GetLastError());
+  ACE_OS::sprintf (buf, "error code %d", GetLastError());
 #   else
   ACE_TEXT_FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
                           0,
