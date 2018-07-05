@@ -1,5 +1,3 @@
-// $Id: Pair_T.cpp 80826 2008-03-04 14:51:23Z wotte $
-
 #ifndef ACE_PAIR_T_CPP
 #define ACE_PAIR_T_CPP
 

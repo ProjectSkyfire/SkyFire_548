@@ -1,5 +1,3 @@
-// $Id: SSL_Initializer.cpp 93497 2011-03-07 09:43:36Z vzykov $
-
 #include "SSL_Initializer.h"
 #include "SSL_Context.h"
 
@@ -27,7 +25,7 @@ int
 ACE_SSL_Initializer::fini (void)
 {
   // Explicitly close the ACE_SSL_Context singleton.
-  ACE_Unmanaged_Singleton<ACE_SSL_Context, ACE_SYNCH_MUTEX>::close();
+  ACE_SSL_Context::close ();
 
   return 0;
 }

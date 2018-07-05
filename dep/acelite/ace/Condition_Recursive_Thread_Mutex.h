@@ -4,8 +4,6 @@
 /**
  *  @file    Condition_Recursive_Thread_Mutex.h
  *
- *  $Id: Condition_Recursive_Thread_Mutex.h 96073 2012-08-17 13:39:55Z mcorino $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>

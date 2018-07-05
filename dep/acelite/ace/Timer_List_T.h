@@ -4,8 +4,6 @@
 /**
  *  @file    Timer_List_T.h
  *
- *  $Id: Timer_List_T.h 95368 2011-12-19 13:38:49Z mcorino $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -127,8 +125,8 @@ public:
                               const ACE_Time_Value& interval);
 
   /**
-   * Cancel all timers associated with @a type.  If dont_call_handle_close is 0
-   * then the @a functor will be invoked.  Returns the number of timers
+   * Cancel all timers associated with @a type.  If @a dont_call_handle_close
+   * is 0 then the @a functor will be invoked.  Returns the number of timers
    * cancelled.
    */
   virtual int cancel (const TYPE& type,
@@ -176,8 +174,8 @@ private:
    * in as the value to the <functor>.  If @a interval is != to
    * ACE_Time_Value::zero then it is used to reschedule the @a type
    * automatically, using relative time to the current <gettimeofday>.
-   * This method returns a <timer_id> that uniquely identifies the the
-   * @a type entry in an internal list.  This <timer_id> can be used to
+   * This method returns a timer_id that uniquely identifies the the
+   * @a type entry in an internal list.  This timer_id can be used to
    * cancel the timer before it expires.  The cancellation ensures
    * that <timer_ids> are unique up to values of greater than 2
    * billion timers.  As long as timers don't stay around longer than

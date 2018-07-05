@@ -4,8 +4,6 @@
 /**
  *  @file    Select_Reactor_T.h
  *
- *  $Id: Select_Reactor_T.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================

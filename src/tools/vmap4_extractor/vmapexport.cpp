@@ -122,7 +122,7 @@ bool preciseVectorData = false;
 
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAP051";
+const char* szRawVMAPMagic = "VMAP052";
 
 bool LoadLocaleMPQFile(int locale)
 {
@@ -533,7 +533,7 @@ bool processArgv(int argc, char ** argv, const char *versionString)
 int main(int argc, char ** argv)
 {
     bool success=true;
-    const char *versionString = "V5.01 2018_03";
+    const char *versionString = "V5.02 2018_03_14";
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv, versionString))
@@ -581,7 +581,8 @@ int main(int argc, char ** argv)
     }
 
     ReadLiquidTypeTableDBC();
-
+    ExtractGameobjectModels();
+    
     // extract data
     if (success)
         success = ExtractWmo();
@@ -621,8 +622,6 @@ int main(int argc, char ** argv)
         ParsMapFiles();
         delete [] map_ids;
         //nError = ERROR_SUCCESS;
-        // Extract models, listed in GameObjectDisplayInfo.dbc
-        ExtractGameobjectModels();
     }
 
     SFileCloseArchive(LocaleMpq);

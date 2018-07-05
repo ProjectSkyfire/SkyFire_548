@@ -1,7 +1,8 @@
-// $Id: SV_Shared_Memory.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/SV_Shared_Memory.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SV_Shared_Memory.inl"
@@ -53,7 +54,7 @@ ACE_SV_Shared_Memory::ACE_SV_Shared_Memory (key_t external_id,
   ACE_TRACE ("ACE_SV_Shared_Memory::ACE_SV_Shared_Memory");
   if (this->open_and_attach (external_id, sz, create,
                              perms, virtual_addr, flags) == -1)
-    ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p\n"),
+    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SV_Shared_Memory::ACE_SV_Shared_Memory")));
 }
 
@@ -81,7 +82,7 @@ ACE_SV_Shared_Memory::ACE_SV_Shared_Memory (ACE_HANDLE int_id,
 {
   ACE_TRACE ("ACE_SV_Shared_Memory::ACE_SV_Shared_Memory");
   if (this->attach (0, flags) == -1)
-    ACE_ERROR ((LM_ERROR, ACE_TEXT ("%p\n"),
+    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SV_Shared_Memory::ACE_SV_Shared_Memory")));
 }
 

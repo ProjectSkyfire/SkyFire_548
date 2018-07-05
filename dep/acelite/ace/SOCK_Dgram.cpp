@@ -1,8 +1,6 @@
-// $Id: SOCK_Dgram.cpp 95533 2012-02-14 22:59:17Z wotte $
-
 #include "ace/SOCK_Dgram.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/INET_Addr.h"
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
@@ -10,6 +8,9 @@
 #include "ace/OS_NS_ctype.h"
 #include "ace/os_include/net/os_if.h"
 #include "ace/Truncate.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #  include "ace/SOCK_Dgram.inl"
@@ -65,9 +66,16 @@ ACE_SOCK_Dgram::recv (iovec *io_vec,
     return -1;
   else if (inlen > 0)
     {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_ALLOCATOR_RETURN (io_vec->iov_base,
+                            static_cast<char*>(ACE_Allocator::instance()->malloc(sizeof(char) * inlen)),
+                            -1);
+#else
       ACE_NEW_RETURN (io_vec->iov_base,
                       char[inlen],
                       -1);
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
       ssize_t rcv_len = ACE_OS::recvfrom (this->get_handle (),
                                           (char *) io_vec->iov_base,
                                           inlen,
@@ -76,7 +84,11 @@ ACE_SOCK_Dgram::recv (iovec *io_vec,
                                           &addr_len);
       if (rcv_len < 0)
         {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free(io_vec->iov_base);
+#else
           delete [] (char *)io_vec->iov_base;
+#endif /* ACE_HAS_ALLOC_HOOKS */
           io_vec->iov_base = 0;
         }
       else
@@ -104,10 +116,26 @@ ACE_SOCK_Dgram::recv (iovec *io_vec,
 
 int
 ACE_SOCK_Dgram::shared_open (const ACE_Addr &local,
-                             int protocol_family)
+                             int protocol_family,
+                             int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Dgram::shared_open");
   bool error = false;
+#if defined (ACE_HAS_IPV6)
+  int setting = !!ipv6_only;
+  if (protocol_family == PF_INET6 &&
+      -1 == ACE_OS::setsockopt (this->get_handle (),
+                                IPPROTO_IPV6,
+                                IPV6_V6ONLY,
+                                (char *)&setting,
+                                sizeof (setting)))
+    {
+      this->close();
+      return -1;
+    }
+#else
+  ACE_UNUSED_ARG (ipv6_only);
+#endif /* defined (ACE_HAS_IPV6) */
 
   if (local == ACE_Addr::sap_any)
     {
@@ -141,7 +169,8 @@ ACE_SOCK_Dgram::open (const ACE_Addr &local,
                       ACE_Protocol_Info *protocolinfo,
                       ACE_SOCK_GROUP g,
                       u_long flags,
-                      int reuse_addr)
+                      int reuse_addr,
+                      int ipv6_only)
 {
   if (ACE_SOCK::open (SOCK_DGRAM,
                       protocol_family,
@@ -152,7 +181,8 @@ ACE_SOCK_Dgram::open (const ACE_Addr &local,
                       reuse_addr) == -1)
     return -1;
   else if (this->shared_open (local,
-                              protocol_family) == -1)
+                              protocol_family,
+                              ipv6_only) == -1)
     return -1;
   else
     return 0;
@@ -164,7 +194,8 @@ int
 ACE_SOCK_Dgram::open (const ACE_Addr &local,
                       int protocol_family,
                       int protocol,
-                      int reuse_addr)
+                      int reuse_addr,
+                      int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Dgram::open");
 
@@ -186,7 +217,8 @@ ACE_SOCK_Dgram::open (const ACE_Addr &local,
     return -1;
   else
     return this->shared_open (local,
-                              protocol_family);
+                              protocol_family,
+                              ipv6_only);
 }
 
 // Here's the general-purpose constructor used by a connectionless
@@ -195,15 +227,17 @@ ACE_SOCK_Dgram::open (const ACE_Addr &local,
 ACE_SOCK_Dgram::ACE_SOCK_Dgram (const ACE_Addr &local,
                                 int protocol_family,
                                 int protocol,
-                                int reuse_addr)
+                                int reuse_addr,
+                                int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Dgram::ACE_SOCK_Dgram");
 
   if (this->open (local,
                   protocol_family,
                   protocol,
-                  reuse_addr) == -1)
-    ACE_ERROR ((LM_ERROR,
+                  reuse_addr,
+                  ipv6_only) == -1)
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_Dgram")));
 }
@@ -214,7 +248,8 @@ ACE_SOCK_Dgram::ACE_SOCK_Dgram (const ACE_Addr &local,
                                 ACE_Protocol_Info *protocolinfo,
                                 ACE_SOCK_GROUP g,
                                 u_long flags,
-                                int reuse_addr)
+                                int reuse_addr,
+                                int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Dgram::ACE_SOCK_Dgram");
   if (this->open (local,
@@ -223,8 +258,9 @@ ACE_SOCK_Dgram::ACE_SOCK_Dgram (const ACE_Addr &local,
                   protocolinfo,
                   g,
                   flags,
-                  reuse_addr) == -1)
-    ACE_ERROR ((LM_ERROR,
+                  reuse_addr,
+                  ipv6_only) == -1)
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_Dgram")));
 }
@@ -255,7 +291,7 @@ ACE_SOCK_Dgram::send (const iovec iov[],
   send_msg.msg_control = 0;
   send_msg.msg_controllen = 0;
   send_msg.msg_flags = 0;
-#else
+#elif !defined ACE_LACKS_SENDMSG
   send_msg.msg_accrights    = 0;
   send_msg.msg_accrightslen = 0;
 #endif /* ACE_HAS_4_4BSD_SENDMSG_RECVMSG */
@@ -289,7 +325,7 @@ ACE_SOCK_Dgram::recv (iovec iov[],
 #if defined (ACE_HAS_4_4BSD_SENDMSG_RECVMSG)
   recv_msg.msg_control = 0 ;
   recv_msg.msg_controllen = 0 ;
-#else
+#elif !defined ACE_LACKS_SENDMSG
   recv_msg.msg_accrights = 0;
   recv_msg.msg_accrightslen = 0;
 #endif /* ACE_HAS_4_4BSD_SENDMSG_RECVMSG */
@@ -334,9 +370,14 @@ ACE_SOCK_Dgram::send (const iovec iov[],
 #if defined (ACE_HAS_ALLOCA)
   buf = alloca (length);
 #else
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_ALLOCATOR_RETURN (buf, (buf *)
+                        ACE_Allocator::instance ()->malloc (length), -1);
+# else
   ACE_NEW_RETURN (buf,
                   char[length],
                   -1);
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
 
   char *ptr = buf;
@@ -349,7 +390,11 @@ ACE_SOCK_Dgram::send (const iovec iov[],
 
   ssize_t result = ACE_SOCK_Dgram::send (buf, length, addr, flags);
 #if !defined (ACE_HAS_ALLOCA)
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_Allocator::instance ()->free (buf);
+# else
   delete [] buf;
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
   return result;
 }
@@ -383,9 +428,14 @@ ACE_SOCK_Dgram::recv (iovec iov[],
 #if defined (ACE_HAS_ALLOCA)
   buf = alloca (length);
 #else
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_ALLOCATOR_RETURN (buf, (buf *)
+                        ACE_Allocator::instance ()->malloc (length), -1);
+# else
   ACE_NEW_RETURN (buf,
                   char[length],
                   -1);
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
 
   length = ACE_SOCK_Dgram::recv (buf, length, addr, flags);
@@ -410,7 +460,11 @@ ACE_SOCK_Dgram::recv (iovec iov[],
     }
 
 #if !defined (ACE_HAS_ALLOCA)
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_Allocator::instance ()->free (buf);
+# else
   delete [] buf;
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
   return length;
 }
@@ -530,7 +584,7 @@ ACE_SOCK_Dgram::set_nic (const ACE_TCHAR *net_if,
   // a non-null interface parameter in this function.)
   ACE_UNUSED_ARG (net_if);
   ACE_UNUSED_ARG (addr_family);
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Send interface specification not ")
               ACE_TEXT ("supported - IGNORED.\n")));
 #endif /* !IP_MULTICAST_IF */
@@ -543,7 +597,7 @@ ACE_SOCK_Dgram::make_multicast_ifaddr (ip_mreq *ret_mreq,
                                        const ACE_INET_Addr &mcast_addr,
                                        const ACE_TCHAR *net_if)
 {
-  ACE_TRACE ("ACE_SOCK_Dgram_Mcast::make_multicast_ifaddr");
+  ACE_TRACE ("ACE_SOCK_Dgram::make_multicast_ifaddr");
   ip_mreq  lmreq;       // Scratch copy.
   if (net_if != 0)
     {
@@ -556,17 +610,29 @@ ACE_SOCK_Dgram::make_multicast_ifaddr (ip_mreq *ret_mreq,
         ACE_HTONL (interface_addr.get_ip_address ());
 #else
       ifreq if_address;
-
       ACE_OS::strcpy (if_address.ifr_name, ACE_TEXT_ALWAYS_CHAR (net_if));
-
       if (ACE_OS::ioctl (this->get_handle (),
                          SIOCGIFADDR,
                          &if_address) == -1)
-        return -1;
-
-      sockaddr_in *socket_address =
-        reinterpret_cast<sockaddr_in*> (&if_address.ifr_addr);
-      lmreq.imr_interface.s_addr = socket_address->sin_addr.s_addr;
+        {
+          // The net_if name failed to be found. It seems that older linux
+          // kernals only support the actual interface name (eg. "eth0"),
+          // not the IP address string of the interface (eg. "192.168.0.1"),
+          // which newer kernals seem to automatically translate.
+          // So assume that we have been given an IP Address and translate
+          // that instead, similar to the above for windows.
+          ACE_INET_Addr interface_addr;
+          if (interface_addr.set (mcast_addr.get_port_number (), net_if) == -1)
+            return -1;  // Still doesn't work, unknown device specified.
+          lmreq.imr_interface.s_addr =
+            ACE_HTONL (interface_addr.get_ip_address ());
+        }
+      else
+        {
+          sockaddr_in *socket_address =
+            reinterpret_cast<sockaddr_in*> (&if_address.ifr_addr);
+          lmreq.imr_interface.s_addr = socket_address->sin_addr.s_addr;
+        }
 #endif /* ACE_WIN32 || __INTERIX */
     }
   else
@@ -589,7 +655,7 @@ ACE_SOCK_Dgram::make_multicast_ifaddr6 (ipv6_mreq *ret_mreq,
                                         const ACE_INET_Addr &mcast_addr,
                                         const ACE_TCHAR *net_if)
 {
-  ACE_TRACE ("ACE_SOCK_Dgram_Mcast::make_multicast_ifaddr6");
+  ACE_TRACE ("ACE_SOCK_Dgram::make_multicast_ifaddr6");
   ipv6_mreq  lmreq;       // Scratch copy.
 
   ACE_OS::memset (&lmreq,

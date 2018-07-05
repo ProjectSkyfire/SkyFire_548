@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-sunos5.7.h 93543 2011-03-14 08:25:46Z johnnyw $
-
 // The following configuration file is designed to work for SunOS 5.7
 // (Solaris 7) platforms using the SunC++ 4.x, 5.x, or g++ compilers.
 
@@ -51,7 +49,9 @@
 #define ACE_HAS_SOCKLEN_T
 
 #if defined (__sparcv9)
-#define _LP64
+#if !defined (_LP64)
+# define _LP64
+#endif /* _LP64 */
 #define ACE_SIZEOF_LONG 8 /* Needed to circumvent compiler bug #4294969 */
 #endif /* __sparcv9 */
 

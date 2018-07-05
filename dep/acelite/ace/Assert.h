@@ -4,8 +4,6 @@
 /**
  *  @file    Assert.h
  *
- *  $Id: Assert.h 82808 2008-09-23 11:27:27Z smcqueen $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================

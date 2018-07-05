@@ -1,8 +1,9 @@
-// $Id: Service_Object.cpp 93539 2011-03-13 09:40:44Z vzykov $
-
 #include "ace/config-all.h"
 
 #include "ace/Service_Object.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Service_Object.inl"
@@ -12,7 +13,7 @@
 #include "ace/Service_Types.h"
 #include "ace/DLL.h"
 #include "ace/ACE.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #if defined (ACE_OPENVMS)
 # include "ace/Lib_Find.h"
 #endif
@@ -34,6 +35,7 @@ ACE_Service_Type::dump (void) const
   // initialized yet. Using a "//" prefix, in case the executable
   // happens to be a code generator and the output gets embedded in
   // the generated C++ code.
+#ifndef ACE_LACKS_STDERR
   ACE_OS::fprintf(stderr,
                   "// [ST] dump, this=%p, name=%s, type=%p, so=%p, active=%d\n",
                   static_cast<void const *> (this),
@@ -41,7 +43,7 @@ ACE_Service_Type::dump (void) const
                   static_cast<void const *> (this->type_),
                   (this->type_ != 0) ? this->type_->object () : 0,
                   this->active_);
-
+#endif
 }
 
 ACE_Service_Type::ACE_Service_Type (const ACE_TCHAR *n,
@@ -77,14 +79,18 @@ ACE_Service_Type::~ACE_Service_Type (void)
   ACE_TRACE ("ACE_Service_Type::~ACE_Service_Type");
   this->fini ();
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(const_cast <ACE_TCHAR *> (this->name_));
+#else
   delete [] const_cast <ACE_TCHAR *> (this->name_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 int
 ACE_Service_Type::fini (void)
 {
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) ST::fini - destroying name=%s, dll=%s\n"),
                 this->name_,
                 this->dll_.dll_name_));
@@ -163,7 +169,12 @@ ACE_Service_Type::name (const ACE_TCHAR *n)
 {
   ACE_TRACE ("ACE_Service_Type::name");
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(const_cast <ACE_TCHAR *> (this->name_));
+#else
   delete [] const_cast <ACE_TCHAR *> (this->name_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
   this->name_ = ACE::strnew (n);
 }
 

@@ -4,8 +4,6 @@
 /**
  * @file Monitor_Admin.h
  *
- * $Id: Monitor_Admin.h 85297 2009-05-07 01:40:41Z parsons $
- *
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================

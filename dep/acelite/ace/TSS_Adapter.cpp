@@ -1,14 +1,16 @@
 /**
  * @file TSS_Adapter.cpp
  *
- * $Id: TSS_Adapter.cpp 93792 2011-04-07 11:48:50Z mcorino $
- *
  * Originally in Synch.cpp
  *
  * @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 
 #include "ace/TSS_Adapter.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -17,6 +19,8 @@ ACE_TSS_Adapter::ACE_TSS_Adapter (void *object, ACE_THR_DEST f)
     func_ (f)
 {
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_TSS_Adapter);
 
 void
 ACE_TSS_Adapter::cleanup (void)

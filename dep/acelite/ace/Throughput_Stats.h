@@ -4,8 +4,6 @@
 /**
  *  @file    Throughput_Stats.h
  *
- *  $Id: Throughput_Stats.h 95743 2012-05-13 12:29:28Z johnnyw $
- *
  *  @author David L. Levine
  */
 //==========================================================================

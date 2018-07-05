@@ -1,5 +1,3 @@
-// $Id: WFMO_Reactor.cpp 95368 2011-12-19 13:38:49Z mcorino $
-
 #include "ace/WFMO_Reactor.h"
 
 #if defined (ACE_WIN32)
@@ -14,8 +12,6 @@
 #include "ace/WFMO_Reactor.inl"
 #endif /* __ACE_INLINE__ */
 
-
-
 #include "ace/Auto_Ptr.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -29,7 +25,7 @@ int
 ACE_WFMO_Reactor_Handler_Repository::open (size_t size)
 {
   if (size > MAXIMUM_WAIT_OBJECTS)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%d exceeds MAXIMUM_WAIT_OBJECTS (%d)\n"),
                        size,
                        MAXIMUM_WAIT_OBJECTS),
@@ -175,7 +171,7 @@ ACE_WFMO_Reactor_Handler_Repository::bit_ops (long &existing_masks,
     case ACE_Reactor::GET_MASK:
 
       // The work for this operation is done in all cases at the
-      // begining of the function.
+      // beginning of the function.
 
       ACE_UNUSED_ARG (change_masks);
 
@@ -991,59 +987,59 @@ ACE_WFMO_Reactor_Handler_Repository::dump (void) const
 
   ACE_TRACE ("ACE_WFMO_Reactor_Handler_Repository::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Max size = %d\n"),
               this->max_size_));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Current info table\n\n")));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\tSize = %d\n"),
               this->max_handlep1_));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\tHandles to be suspended = %d\n"),
               this->handles_to_be_suspended_));
 
   for (i = 0; i < this->max_handlep1_; ++i)
     this->current_info_[i].dump (this->current_handles_[i]);
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\n")));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("To-be-added info table\n\n")));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\tSize = %d\n"),
               this->handles_to_be_added_));
 
   for (i = 0; i < this->handles_to_be_added_; ++i)
     this->to_be_added_info_[i].dump ();
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\n")));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Suspended info table\n\n")));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\tSize = %d\n"),
               this->suspended_handles_));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\tHandles to be resumed = %d\n"),
               this->handles_to_be_resumed_));
 
   for (i = 0; i < this->suspended_handles_; ++i)
     this->current_suspended_info_[i].dump ();
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\n")));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Total handles to be deleted = %d\n"),
               this->handles_to_be_deleted_));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
@@ -1086,7 +1082,7 @@ ACE_WFMO_Reactor::ACE_WFMO_Reactor (ACE_Sig_Handler *sh,
     deactivated_ (0)
 {
   if (this->open (ACE_WFMO_Reactor::DEFAULT_SIZE, 0, sh, tq, 0, notify) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("WFMO_Reactor")));
 }
@@ -1121,7 +1117,7 @@ ACE_WFMO_Reactor::ACE_WFMO_Reactor (size_t size,
   ACE_UNUSED_ARG (unused);
 
   if (this->open (size, 0, sh, tq, 0, notify) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("WFMO_Reactor")));
 }
@@ -1208,7 +1204,7 @@ ACE_WFMO_Reactor::open (size_t size,
   // Open the handle repository.  Two additional handles for internal
   // purposes
   if (this->handler_rep_.open (size + 2) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("%p\n"),
+    ACELIB_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("%p\n"),
                        ACE_TEXT ("opening handler repository")),
                       -1);
   else
@@ -1236,7 +1232,7 @@ ACE_WFMO_Reactor::open (size_t size,
 
   // Open the notification handler
   if (this->notify_handler_->open (this, this->timer_queue_) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%p\n"),
                        ACE_TEXT ("opening notify handler ")),
                       -1);
@@ -1244,7 +1240,7 @@ ACE_WFMO_Reactor::open (size_t size,
   // Register for <wakeup_all_threads> event
   if (this->register_handler (&this->wakeup_all_threads_handler_,
                               this->wakeup_all_threads_.handle ()) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%p\n"),
                        ACE_TEXT ("registering thread wakeup handler")),
                       -1);
@@ -1313,19 +1309,9 @@ ACE_WFMO_Reactor::close (void)
   // This will unregister all handles
   this->handler_rep_.close ();
 
-  return 0;
-}
-
-ACE_WFMO_Reactor::~ACE_WFMO_Reactor (void)
-{
-  // Assumption: No threads are left in the Reactor when this method
-  // is called (i.e., active_threads_ == 0)
-
-  // Close down
-  this->close ();
-
   // Make necessary changes to the handler repository that we caused
-  // by <close>.
+  // by the above actions. Someone who called close() is expecting that
+  // things will be tidied up upon return.
   this->handler_rep_.make_changes ();
 
   if (this->delete_timer_queue_)
@@ -1353,6 +1339,17 @@ ACE_WFMO_Reactor::~ACE_WFMO_Reactor (void)
       this->notify_handler_ = 0;
       this->delete_notify_handler_ = false;
     }
+
+  return 0;
+}
+
+ACE_WFMO_Reactor::~ACE_WFMO_Reactor (void)
+{
+  // Assumption: No threads are left in the Reactor when this method
+  // is called (i.e., active_threads_ == 0)
+
+  // Close down
+  this->close ();
 }
 
 int
@@ -2342,13 +2339,13 @@ ACE_WFMO_Reactor::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_WFMO_Reactor::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Count of currently active threads = %d\n"),
               this->active_threads_));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("ID of owner thread = %d\n"),
               this->owner_));
 
@@ -2356,7 +2353,7 @@ ACE_WFMO_Reactor::dump (void) const
   this->signal_handler_->dump ();
   this->timer_queue_->dump ();
 
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -2437,7 +2434,7 @@ ACE_WFMO_Reactor_Notify::handle_signal (int signum,
 
   // This will get called when <WFMO_Reactor->wakeup_one_thread_> event
   // is signaled.
-  //  ACE_DEBUG ((LM_DEBUG,
+  //  ACELIB_DEBUG ((LM_DEBUG,
   //             ACE_TEXT ("(%t) waking up to handle internal notifications\n")));
 
   for (int i = 1; ; ++i)
@@ -2493,7 +2490,7 @@ ACE_WFMO_Reactor_Notify::handle_signal (int signum,
                   result = event_handler->handle_group_qos (ACE_INVALID_HANDLE);
                   break;
                 default:
-                  ACE_ERROR ((LM_ERROR,
+                  ACELIB_ERROR ((LM_ERROR,
                               ACE_TEXT ("invalid mask = %d\n"),
                               buffer->mask_));
                   break;
@@ -2692,12 +2689,12 @@ ACE_WFMO_Reactor_Notify::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_WFMO_Reactor_Notify::dump");
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
   this->timer_queue_->dump ();
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Max. iteration: %d\n"),
               this->max_notify_iterations_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 

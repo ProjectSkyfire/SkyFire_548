@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Time_Value_T.inl 96061 2012-08-16 09:36:07Z mcorino $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class TIME_POLICY>

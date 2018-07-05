@@ -1,5 +1,3 @@
-// $Id: Notification_Queue.cpp 85236 2009-05-01 11:43:56Z johnnyw $
-
 #include "ace/Notification_Queue.h"
 
 #if !defined (__ACE_INLINE__)
@@ -9,6 +7,8 @@
 #include "ace/Guard_T.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Notification_Queue_Node)
 
 ACE_Notification_Queue::
 ACE_Notification_Queue()

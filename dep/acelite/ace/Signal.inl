@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Signal.inl 92069 2010-09-28 11:38:59Z johnnyw $
-
 #include "ace/OS_NS_signal.h"
 #include "ace/config-all.h"
 #include "ace/Trace.h"

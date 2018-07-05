@@ -208,7 +208,7 @@ void Channel::JoinChannel(Player* player, std::string const& pass)
     MakeYouJoined(&data);
     SendToOne(&data, guid);
 
-    JoinNotify(guid);
+    JoinNotify(guid, GetChannelId(), GetFlags(), GetPlayerFlags(guid), GetName());
 
     // Custom channel handling
     if (!IsConstant())
@@ -260,7 +260,7 @@ void Channel::LeaveChannel(Player* player, bool send)
         SendToAll(&data);
     }
 
-    LeaveNotify(guid);
+    LeaveNotify(guid, GetChannelId(), GetFlags(), GetName());
 
     if (!IsConstant())
     {
@@ -969,31 +969,56 @@ void Channel::MakeVoiceOff(WorldPacket* data, uint64 guid)
     *data << uint64(guid);
 }
 
-void Channel::JoinNotify(uint64 guid)
+void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, uint8 UserFlags, const std::string ChannelName)
 {
-    WorldPacket data(IsConstant() ? SMSG_USERLIST_ADD : SMSG_USERLIST_UPDATE, 8 + 1 + 1 + 4 + GetName().size());
-    data << uint64(guid);
-    data << uint8(GetPlayerFlags(guid));
-    data << uint8(GetFlags());
-    data << uint32(GetNumPlayers());
-    data << GetName();
-
+    WorldPacket data(IsConstant() ? SMSG_USERLIST_ADD : SMSG_USERLIST_UPDATE, 8 + 1 + 1 + 4 + ChannelName.size());
     if (IsConstant())
-        SendToAllButOne(&data, guid);
+    {
+        data << uint32(ChannelID);
+        data << uint8(ChannelFlags);
+        data << uint8(UserFlags);
+        data.WriteGuidMask(UserGUID, 7);
+        data.WriteBits(ChannelName.size(), 7);
+        data.WriteGuidMask(UserGUID, 0, 5, 4, 6, 1, 3, 2);
+        data.FlushBits();
+        data.WriteGuidBytes(UserGUID, 4, 5, 7, 1, 2, 3, 6, 0);
+        data << ChannelName;
+        SendToAllButOne(&data, UserGUID);
+    }
     else
+    { 
+        data.WriteGuidMask(UserGUID, 2, 6, 3, 7, 5, 1, 0);
+        data.WriteBits(ChannelName.size(), 7);
+        data.WriteGuidMask(UserGUID, 4);
+        data.FlushBits();
+        data.WriteGuidBytes(UserGUID, 0, 2, 6, 5);
+        data << uint8(ChannelFlags);
+        data.WriteGuidBytes(UserGUID, 7, 3);
+        data << uint32(ChannelID);
+        data << GetName();
+        data.WriteGuidBytes(UserGUID, 1, 4);
+        data << uint8(UserFlags);
         SendToAll(&data);
+    }
 }
 
-void Channel::LeaveNotify(uint64 guid)
+void Channel::LeaveNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, const std::string ChannelName)
 {
-    WorldPacket data(SMSG_USERLIST_REMOVE, 8 + 1 + 4 + GetName().size());
-    data << uint64(guid);
-    data << uint8(GetFlags());
-    data << uint32(GetNumPlayers());
-    data << GetName();
+    WorldPacket data(SMSG_USERLIST_REMOVE, 8 + 1 + 4 + ChannelName.size());
+
+    data.WriteBits(ChannelName.size(), 7);
+    data.WriteGuidMask(UserGUID, 6, 0, 5, 4, 3, 1, 7, 2);
+    data.FlushBits();
+    data.WriteGuidBytes(UserGUID, 1, 4);
+    data << uint8(ChannelFlags);
+    data.WriteGuidBytes(UserGUID, 6, 5);
+    data << uint32(ChannelID);
+    data.WriteGuidBytes(UserGUID, 2, 7, 0);
+    data << ChannelName;
+    data.WriteGuidBytes(UserGUID, 3);
 
     if (IsConstant())
-        SendToAllButOne(&data, guid);
+        SendToAllButOne(&data, UserGUID);
     else
         SendToAll(&data);
 }

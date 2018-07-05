@@ -4,8 +4,6 @@
 /**
  *  @file    Guard_T.h
  *
- *  $Id: Guard_T.h 93792 2011-04-07 11:48:50Z mcorino $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
@@ -243,7 +241,7 @@ public:
  * is released even if a thread exits via <thr_exit>!
  */
 template <class ACE_LOCK>
-class ACE_TSS_Guard : private ACE_Copy_Disabled
+class ACE_TSS_Guard
 {
 public:
   // = Initialization and termination methods.
@@ -273,8 +271,8 @@ public:
   /// Dump the state of an object.
   void dump (void) const;
 
-  // ACE_ALLOC_HOOK_DECLARE;
-  // Declare the dynamic allocation hooks.
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Helper, meant for subclass only.
@@ -293,6 +291,9 @@ private:
   // FUZZ: disable check_for_ACE_Guard
   typedef ACE_Guard<ACE_LOCK> Guard_Type;
   // FUZZ: enable check_for_ACE_Guard
+
+  ACE_UNIMPLEMENTED_FUNC (void operator= (const ACE_TSS_Guard<ACE_LOCK> &))
+  ACE_UNIMPLEMENTED_FUNC (ACE_TSS_Guard (const ACE_TSS_Guard<ACE_LOCK> &))
 };
 
 /**

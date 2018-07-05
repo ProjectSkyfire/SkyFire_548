@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: config-icc-common.h 91685 2010-09-09 09:35:14Z johnnyw $
-
 #ifndef ACE_LINUX_ICC_COMMON_H
 #define ACE_LINUX_ICC_COMMON_H
 #include /**/ "ace/pre.h"
@@ -79,11 +76,6 @@
 # define ACE_HAS_INTEL_ASSEMBLY
 #endif
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-  // We define it with a -D with make depend.
-# define ACE_LACKS_PRAGMA_ONCE
-#endif /* ! ACE_LACKS_PRAGMA_ONCE */
-
 #define ACE_TEMPLATES_REQUIRE_SOURCE
 
 #if (__INTEL_COMPILER >= 910)
@@ -95,6 +87,22 @@
 # define ACE_HAS_INTRINSIC_INTERLOCKED
 #else
 # define ACE_HAS_IA32INTRIN_H
+#endif
+
+// We assume that Intel C++ 15 and higher do have correct C++11 support when
+// it runs with GCC 4.7 or higher emulation mode
+#if (__INTEL_COMPILER > 1400) && defined (__INTEL_CXX11_MODE__)
+# if (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+#  define ACE_HAS_CPP11
+# endif
+#endif
+
+// Intel C++ 14 Update 2 has correct C++11 support when it runs with GCC 4.7
+// or higher emulation mode
+#if (__INTEL_COMPILER == 1400) && (__INTEL_COMPILER_UPDATE >= 2) && defined (__INTEL_CXX11_MODE__)
+# if (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+#  define ACE_HAS_CPP11
+# endif
 #endif
 
 #include /**/ "ace/post.h"

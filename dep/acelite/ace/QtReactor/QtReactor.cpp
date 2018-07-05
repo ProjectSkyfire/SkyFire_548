@@ -1,5 +1,3 @@
-//$Id: QtReactor.cpp 82723 2008-09-16 09:35:44Z johnnyw $
-
 #include "ace/QtReactor/QtReactor.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

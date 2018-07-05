@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: Atomic_Op_Sparc.h 80826 2008-03-04 14:51:23Z wotte $
-
 #ifndef ACE_ATOMIC_OP_SPARC_H
 #define ACE_ATOMIC_OP_SPARC_H
 

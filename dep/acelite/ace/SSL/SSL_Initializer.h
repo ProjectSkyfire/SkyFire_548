@@ -4,8 +4,6 @@
 /**
  *  @file    SSL_Initializer.h
  *
- *  $Id: SSL_Initializer.h 93497 2011-03-07 09:43:36Z vzykov $
- *
  *  @author Vladimir Zykov <vz@prismtech.com>
  */
 //=============================================================================

@@ -4,8 +4,6 @@
 /**
  *  @file    Malloc.h
  *
- *  $Id: Malloc.h 81796 2008-05-28 13:46:21Z sma $
- *
  *  @author Doug Schmidt and Irfan Pyarali
  */
 //==========================================================================
@@ -21,7 +19,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 #if defined (ACE_HAS_MALLOC_STATS)
 #  include "ace/Atomic_Op.h"

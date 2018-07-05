@@ -1,5 +1,3 @@
-// $Id: Bytes_Sent_Monitor.cpp 95533 2012-02-14 22:59:17Z wotte $
-
 #include "ace/Monitor_Control/Bytes_Sent_Monitor.h"
 
 #if defined (ACE_HAS_MONITOR_FRAMEWORK) && (ACE_HAS_MONITOR_FRAMEWORK == 1)

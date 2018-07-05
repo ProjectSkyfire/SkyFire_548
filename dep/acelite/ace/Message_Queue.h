@@ -4,8 +4,6 @@
 /**
  *  @file    Message_Queue.h
  *
- *  $Id: Message_Queue.h 96061 2012-08-16 09:36:07Z mcorino $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -190,19 +188,16 @@ public:
   /// and 0 if the queue's state is ACTIVATED or PULSED.
   virtual int deactivated (void) = 0;
 
-  /// Get the notification strategy for the <Message_Queue>
+  /// Get the notification strategy for the Message_Queue
   virtual ACE_Notification_Strategy *notification_strategy (void) = 0;
 
-  /// Set the notification strategy for the <Message_Queue>
+  /// Set the notification strategy for the Message_Queue
   virtual void notification_strategy (ACE_Notification_Strategy *s) = 0;
 
   // = Notification hook.
 
   /// Dump the state of an object.
   virtual void dump (void) const = 0;
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   // = Disallow copying and assignment.
@@ -213,7 +208,6 @@ protected:
   /// Indicates the state of the queue, which can be
   /// <ACTIVATED>, <DEACTIVATED>, or <PULSED>.
   int state_;
-
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

@@ -1,5 +1,3 @@
-//$Id: Timer_Queue_Iterator.h 95334 2011-12-15 12:52:50Z msmit $
-
 #ifndef ACE_TIMER_QUEUE_ITERATOR_H
 #define ACE_TIMER_QUEUE_ITERATOR_H
 
@@ -19,7 +17,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * @class ACE_Timer_Node_Dispatch_Info_T
  *
  * @brief Maintains generated dispatch information for Timer nodes.
- *
  */
 template <class TYPE>
 class ACE_Timer_Node_Dispatch_Info_T
@@ -115,14 +112,17 @@ public:
   void set_timer_id (long timer_id);
 
   /// Get the dispatch info. The dispatch information is got
-  /// through <info>. This form helps us in preventing allocation and
+  /// through @a info. This form helps us in preventing allocation and
   /// deleting data along the criticl path.
-  /// @@TODO: We may want to have a copying version too, so that our
+  /// @todo We may want to have a copying version too, so that our
   /// interface will be complete..
   void get_dispatch_info (ACE_Timer_Node_Dispatch_Info_T <TYPE> &info);
 
   /// Dump the state of an TYPE.
   void dump (void) const;
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /// Type of object stored in the Queue

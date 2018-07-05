@@ -73,6 +73,10 @@
 #  define COMPILER_HAS_CPP14_SUPPORT 0
 #endif
 
+#if COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1910 && _HAS_CXX17
+#define ACE_LACKS_AUTO_PTR 1
+#endif
+
 #ifdef __clang__
 #  if !defined (ACE_HAS_GCC_ATOMIC_BUILTINS)
 #    define ACE_HAS_GCC_ATOMIC_BUILTINS 1

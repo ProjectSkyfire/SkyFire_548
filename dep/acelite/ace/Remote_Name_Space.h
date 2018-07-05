@@ -4,8 +4,6 @@
 /**
  *  @file    Remote_Name_Space.h
  *
- *  $Id: Remote_Name_Space.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author Prashant Jain
  */
 //==========================================================================
@@ -134,6 +132,8 @@ public:
 
   /// Dump the state of the object.
   virtual void dump (void) const;
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /// Interface to Name server process for NET_LOCAL namespace.

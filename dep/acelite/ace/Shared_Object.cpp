@@ -1,5 +1,3 @@
-// $Id: Shared_Object.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Shared_Object.h"
 #include "ace/Global_Macros.h"
 #include "ace/config-all.h"

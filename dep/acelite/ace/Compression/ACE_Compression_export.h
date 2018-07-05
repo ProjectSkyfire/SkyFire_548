@@ -1,6 +1,5 @@
 
 // -*- C++ -*-
-// $Id: ACE_Compression_export.h 95545 2012-02-23 07:57:08Z johnnyw $
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl ACE_Compression
 // ------------------------------

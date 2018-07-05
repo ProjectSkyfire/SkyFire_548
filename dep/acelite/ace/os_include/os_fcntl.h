@@ -6,8 +6,6 @@
  *
  *  file control options
  *
- *  $Id: os_fcntl.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */

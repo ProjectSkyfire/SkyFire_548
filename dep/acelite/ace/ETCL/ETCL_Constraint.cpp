@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: ETCL_Constraint.cpp 92173 2010-10-07 12:36:17Z olli $
-
 #include "ace/ACE.h"
 
 #include "ace/ETCL/ETCL_Constraint.h"
@@ -9,6 +7,8 @@
 #if ! defined (__ACE_INLINE__)
 #include "ace/ETCL/ETCL_Constraint.inl"
 #endif /* __ACE_INLINE__ */
+
+#include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

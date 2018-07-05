@@ -1,8 +1,6 @@
 // QoS_Manager.cpp
-// $Id: QoS_Manager.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #include "QoS_Manager.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,7 +19,7 @@ int
 ACE_QoS_Manager::join_qos_session (ACE_QoS_Session *qos_session)
 {
   if (this->qos_session_set ().insert (qos_session) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("Error in adding a new session to the ")
                        ACE_TEXT ("socket session set\n")),
                       -1);

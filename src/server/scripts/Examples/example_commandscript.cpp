@@ -45,12 +45,11 @@ class example_commandscript : public CommandScript
             return true;
         }
 
-        ChatCommand* GetCommands() const OVERRIDE
+        std::vector<ChatCommand> GetCommands() const OVERRIDE
         {
-            static ChatCommand HelloWorldCommandTable[] =
+            static std::vector<ChatCommand> HelloWorldCommandTable =
             {
-                { "hello",          SEC_PLAYER,         true,   &HandleHelloWorldCommand,        "", NULL },
-                { NULL,             0,                  false,  NULL,                            "", NULL }
+                { "hello",          SEC_PLAYER,         true,   &HandleHelloWorldCommand,        "", },
             };
             return HelloWorldCommandTable;
         }

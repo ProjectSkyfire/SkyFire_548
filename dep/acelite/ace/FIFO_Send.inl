@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: FIFO_Send.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/ACE.h"
 #include "ace/OS_NS_unistd.h"
 

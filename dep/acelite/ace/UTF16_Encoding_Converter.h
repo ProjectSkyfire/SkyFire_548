@@ -4,8 +4,6 @@
 /**
  * @file UTF16_Encoding_Converter.h
  *
- * $Id: UTF16_Encoding_Converter.h 80826 2008-03-04 14:51:23Z wotte $
- *
  * This class contains declarations for methods that convert between
  * UTF-16 (both BE and LE) and UTF-8
  *

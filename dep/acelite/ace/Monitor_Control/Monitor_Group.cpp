@@ -1,5 +1,3 @@
-// $Id: Monitor_Group.cpp 93390 2011-02-15 14:44:58Z johnnyw $
-
 #include "ace/Monitor_Control/Monitor_Group.h"
 
 #if defined (ACE_HAS_MONITOR_FRAMEWORK) && (ACE_HAS_MONITOR_FRAMEWORK == 1)

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SString.inl 80826 2008-03-04 14:51:23Z wotte $
-
 // Include ACE.h only if it hasn't already been included, e.g., if
 // ACE_TEMPLATES_REQUIRE_SOURCE, ACE.h won't have been pulled in by
 // String_Base.cpp.
@@ -249,7 +246,11 @@ ACE_Auto_String_Free::ACE_Auto_String_Free (ACE_Auto_String_Free& rhs)
 ACE_INLINE void
 ACE_Auto_String_Free::reset (char* p)
 {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free (this->p_);
+#else
   ACE_OS::free (this->p_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   this->p_ = p;
 }
 

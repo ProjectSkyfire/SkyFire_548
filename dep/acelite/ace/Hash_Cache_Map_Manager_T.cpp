@@ -1,5 +1,3 @@
-// $Id: Hash_Cache_Map_Manager_T.cpp 93359 2011-02-11 11:33:12Z mcorino $
-
 #ifndef ACE_HASH_CACHE_MAP_MANAGER_T_CPP
 #define ACE_HASH_CACHE_MAP_MANAGER_T_CPP
 
@@ -15,7 +13,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Hash_Cache_Map_Manager)
+ACE_ALLOC_HOOK_DEFINE_Tc6(ACE_Hash_Cache_Map_Manager)
 
 template <class KEY, class VALUE, class HASH_KEY, class COMPARE_KEYS, class CACHING_STRATEGY, class ATTRIBUTES>
 ACE_Hash_Cache_Map_Manager<KEY, VALUE,  HASH_KEY, COMPARE_KEYS, CACHING_STRATEGY, ATTRIBUTES>::ACE_Hash_Cache_Map_Manager (CACHING_STRATEGY &caching_s,

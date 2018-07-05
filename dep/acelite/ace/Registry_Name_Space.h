@@ -4,8 +4,6 @@
 /**
  *  @file    Registry_Name_Space.h
  *
- *  $Id: Registry_Name_Space.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author Irfan Pyarali (irfan@cs.wustl.edu)
  */
 //=============================================================================

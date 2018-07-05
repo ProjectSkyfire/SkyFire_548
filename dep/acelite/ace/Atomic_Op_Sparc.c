@@ -1,4 +1,4 @@
-/* $Id: Atomic_Op_Sparc.c 80826 2008-03-04 14:51:23Z wotte $
+/*
  *
  * This is a C file for a reason.  The Sun C++ compiler does not accept
  * inline assembler.

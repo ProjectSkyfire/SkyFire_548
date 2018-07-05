@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-macosx-tiger.h 91693 2010-09-09 12:57:54Z johnnyw $
-
 // This configuration file is designed to work with the MacOS X operating system.
 
 #ifndef ACE_CONFIG_MACOSX_TIGER_H

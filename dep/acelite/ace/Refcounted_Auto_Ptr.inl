@@ -1,9 +1,6 @@
 // -*- C++ -*-
-//
-// $Id: Refcounted_Auto_Ptr.inl 81179 2008-03-31 19:00:29Z iliyan $
-
 #include "ace/Guard_T.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

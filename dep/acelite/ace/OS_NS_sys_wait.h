@@ -4,8 +4,6 @@
 /**
  *  @file   OS_NS_sys_wait.h
  *
- *  $Id: OS_NS_sys_wait.h 83735 2008-11-14 09:41:52Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...

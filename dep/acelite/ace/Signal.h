@@ -4,8 +4,6 @@
 /**
  *  @file    Signal.h
  *
- *  $Id: Signal.h 94454 2011-09-08 17:36:56Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -14,7 +12,7 @@
 #define ACE_SIGNAL_H
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if defined (ACE_DONT_INCLUDE_ACE_SIGNAL_H)
 # error ace/Signal.h was #included instead of signal.h by ace/OS_NS_signal.h:  fix!!!!
@@ -28,7 +26,7 @@
 
 #include "ace/OS_NS_signal.h"
 
-// Type of the extended signal handler.
+/// Type of the extended signal handler.
 typedef void (*ACE_Sig_Handler_Ex) (int, siginfo_t *siginfo, ucontext_t *ucontext);
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

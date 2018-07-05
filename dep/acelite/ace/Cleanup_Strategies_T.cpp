@@ -1,5 +1,3 @@
-//$Id: Cleanup_Strategies_T.cpp 92097 2010-09-30 05:41:49Z msmit $
-
 #ifndef ACE_CLEANUP_STRATEGIES_T_CPP
 #define ACE_CLEANUP_STRATEGIES_T_CPP
 

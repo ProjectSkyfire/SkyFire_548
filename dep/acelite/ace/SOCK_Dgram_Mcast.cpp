@@ -1,5 +1,3 @@
-// $Id: SOCK_Dgram_Mcast.cpp 95679 2012-04-03 22:55:46Z shuston $
-
 #include "ace/SOCK_Dgram_Mcast.h"
 
 #include "ace/OS_Memory.h"
@@ -7,6 +5,9 @@
 #include "ace/OS_NS_errno.h"
 #include "ace/os_include/net/os_if.h"
 #include "ace/os_include/arpa/os_inet.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if defined (ACE_LINUX) && defined (ACE_HAS_IPV6)
 #include "ace/OS_NS_sys_socket.h"
@@ -28,7 +29,7 @@
 #include "ace/SOCK_Dgram_Mcast.inl"
 #endif /* __ACE_INLINE__ */
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 // This is a workaround for platforms with non-standard
 // definitions of the ip_mreq structure
@@ -74,12 +75,12 @@ ACE_SOCK_Dgram_Mcast::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_SOCK_Dgram_Mcast::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 
 # if defined (ACE_SOCK_DGRAM_MCAST_DUMPABLE)
   ACE_TCHAR addr_string[MAXNAMELEN + 1];
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\nOptions: bindaddr=%s, nulliface=%s\n"),
               ACE_BIT_ENABLED (this->opts_, OPT_BINDADDR_YES) ?
                 ACE_TEXT ("<Bound>") : ACE_TEXT ("<Not Bound>"),
@@ -89,14 +90,14 @@ ACE_SOCK_Dgram_Mcast::dump (void) const
   // Show default send addr, port#, and interface.
   ACE_SDM_helpers::addr_to_string (this->send_addr_, addr_string,
                                    sizeof addr_string, 0);
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
               ACE_TEXT ("Send addr=%s iface=%s\n"),
               addr_string,
               this->send_net_if_ ? this->send_net_if_
                                  : ACE_TEXT ("<default>")));
 
   // Show list of subscribed addresses.
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("Subscription list:\n")));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("Subscription list:\n")));
 
   ACE_MT (ACE_GUARD (ACE_SDM_LOCK, guard, this->subscription_list_lock_));
   subscription_list_iter_t  iter (this->subscription_list_);
@@ -122,13 +123,13 @@ ACE_SOCK_Dgram_Mcast::dump (void) const
         ACE_OS::strcpy (iface_string, ACE_TEXT ("<default>"));
 
       // Dump info.
-      ACE_DEBUG ((LM_DEBUG,
+      ACELIB_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("\taddr=%s iface=%s\n"),
                   addr_string,
                   iface_string));
     }
 # endif /* ACE_SOCK_DGRAM_MCAST_DUMPABLE */
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -147,7 +148,11 @@ ACE_SOCK_Dgram_Mcast::~ACE_SOCK_Dgram_Mcast (void)
   ACE_TRACE ("ACE_SOCK_Dgram_Mcast::~ACE_SOCK_Dgram_Mcast");
 
   // Free memory and optionally unsubscribe from currently subscribed group(s).
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->send_net_if_);
+#else
   delete [] this->send_net_if_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
   this->clear_subs_list ();
 }
 
@@ -243,8 +248,11 @@ ACE_SOCK_Dgram_Mcast::open_i (const ACE_INET_Addr &mcast_addr,
     {
       if (this->set_nic (net_if, mcast_addr.get_type ()))
         return -1;
-
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      this->send_net_if_ = static_cast<ACE_TCHAR*>(ACE_Allocator::instance()->malloc(sizeof(ACE_TCHAR) * (ACE_OS::strlen (net_if) + 1)));
+#else
       this->send_net_if_ = new ACE_TCHAR[ACE_OS::strlen (net_if) + 1];
+#endif /* ACE_HAS_ALLOC_HOOKS */
       ACE_OS::strcpy (this->send_net_if_, net_if);
     }
 
@@ -484,7 +492,7 @@ ACE_SOCK_Dgram_Mcast::join (const ACE_INET_Addr &mcast_addr,
       && def_port_number != 0
       && sub_port_number != def_port_number)
     {
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("Subscribed port# (%u) different than bound ")
                   ACE_TEXT ("port# (%u).\n"),
                   (u_int) sub_port_number,
@@ -507,7 +515,7 @@ ACE_SOCK_Dgram_Mcast::join (const ACE_INET_Addr &mcast_addr,
                                        sizeof sub_addr_string, 1);
       ACE_SDM_helpers::addr_to_string (this->send_addr_, bound_addr_string,
                                        sizeof bound_addr_string, 1);
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("Subscribed address (%s) different than ")
                   ACE_TEXT ("bound address (%s).\n"),
                   sub_addr_string,

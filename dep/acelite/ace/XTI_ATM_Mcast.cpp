@@ -1,5 +1,3 @@
-// $Id: XTI_ATM_Mcast.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/XTI_ATM_Mcast.h"
 
 

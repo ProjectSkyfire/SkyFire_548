@@ -1,5 +1,3 @@
-// $Id: Event_Handler_Handle_Timeout_Upcall.inl 95336 2011-12-15 13:22:33Z msmit $
-
 #include "ace/Event_Handler.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

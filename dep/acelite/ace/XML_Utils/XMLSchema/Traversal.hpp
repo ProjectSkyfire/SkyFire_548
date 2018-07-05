@@ -1,7 +1,5 @@
 // file      : XMLSchema/Traversal.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Traversal.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 #ifndef XMLSCHEMA_TRAVERSAL_HPP
 #define XMLSCHEMA_TRAVERSAL_HPP
 
@@ -70,7 +68,5 @@ namespace XMLSchema
     };
   }
 }
-
-#include <ace/XML_Utils/XMLSchema/Traversal.ipp>
 
 #endif  // XMLSCHEMA_TRAVERSAL_HPP

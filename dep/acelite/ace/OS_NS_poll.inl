@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_poll.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_errno.h"
 

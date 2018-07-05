@@ -1,5 +1,3 @@
-// $Id: Lock_Adapter_T.cpp 93359 2011-02-11 11:33:12Z mcorino $
-
 #ifndef ACE_LOCK_ADAPTER_T_CPP
 #define ACE_LOCK_ADAPTER_T_CPP
 

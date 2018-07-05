@@ -1,11 +1,13 @@
-// $Id: OS_Thread_Adapter.cpp 92682 2010-11-23 23:41:19Z shuston $
-
 #include "ace/OS_Thread_Adapter.h"
 
 #include "ace/Thread_Hook.h"
 #include "ace/Object_Manager_Base.h"
 #include "ace/Global_Macros.h"
 #include "ace/OS_NS_Thread.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -33,6 +35,8 @@ ACE_OS_Thread_Adapter::ACE_OS_Thread_Adapter (
 ACE_OS_Thread_Adapter::~ACE_OS_Thread_Adapter (void)
 {
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_OS_Thread_Adapter)
 
 ACE_THR_FUNC_RETURN
 ACE_OS_Thread_Adapter::invoke (void)

@@ -53,51 +53,27 @@ bool ExtractSingleModel(std::string& fname)
     return mdl.ConvertToVMAPModel(output.c_str());
 }
 
-extern HANDLE LocaleMpq;
+extern HANDLE WorldMpq;
 
 void ExtractGameobjectModels()
 {
     printf("Extracting GameObject models...");
-    DBCFile dbc(LocaleMpq, "DBFilesClient\\GameObjectDisplayInfo.dbc");
+    DBCFile dbc(WorldMpq, "DBFilesClient\\GameObjectDisplayInfo.dbc");
     if(!dbc.open())
     {
         printf("Fatal error: Invalid GameObjectDisplayInfo.dbc file format!\n");
         exit(1);
     }
-
-    DBCFile fileData(LocaleMpq, "DBFilesClient\\FileData.dbc");
-    if (!fileData.open())
-    {
-        printf("Fatal error: Invalid FileData.dbc file format!\n");
-        exit(1);
-    }
-
+    
     std::string basepath = szWorkDirWmo;
     basepath += "/";
     std::string path;
 
     FILE * model_list = fopen((basepath + "temp_gameobject_models").c_str(), "wb");
 
-    size_t maxFileId = fileData.getMaxId() + 1;
-    uint32* fileDataIndex = new uint32[maxFileId];
-    memset(fileDataIndex, 0, maxFileId * sizeof(uint32));
-    size_t files = fileData.getRecordCount();
-    for (uint32 i = 0; i < files; ++i)
-        fileDataIndex[fileData.getRecord(i).getUInt(0)] = i;
-
     for (DBCFile::Iterator it = dbc.begin(); it != dbc.end(); ++it)
     {
-        uint32 fileId = it->getUInt(1);
-        if (!fileId)
-            continue;
-
-        uint32 fileIndex = fileDataIndex[fileId];
-        if (!fileIndex)
-            continue;
-
-        std::string filename = fileData.getRecord(fileIndex).getString(1);
-        std::string filepath = fileData.getRecord(fileIndex).getString(2);
-        path = filepath + filename;
+        path = it->getString(1);
 
         if (path.length() < 4)
             continue;
@@ -131,6 +107,5 @@ void ExtractGameobjectModels()
     }
 
     fclose(model_list);
-    delete[] fileDataIndex;
     printf("Done!\n");
 }

@@ -1,7 +1,8 @@
-// $Id: SOCK.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/SOCK.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SOCK.inl"
@@ -122,7 +123,7 @@ ACE_SOCK::ACE_SOCK (int type,
                   protocol_family,
                   protocol,
                   reuse_addr) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK::ACE_SOCK")));
 }
@@ -177,7 +178,7 @@ ACE_SOCK::ACE_SOCK (int type,
                   g,
                   flags,
                   reuse_addr) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK::ACE_SOCK")));
 }

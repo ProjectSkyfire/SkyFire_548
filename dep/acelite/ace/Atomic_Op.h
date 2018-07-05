@@ -4,8 +4,6 @@
 /**
  *  @file    Atomic_Op.h
  *
- *  $Id: Atomic_Op.h 95225 2011-12-05 20:25:15Z shuston $
- *
  *  @author Douglas C. Schmidt <schmidt@uci.edu>
  */
 //=============================================================================
@@ -311,6 +309,31 @@ public:
   ACE_Atomic_Op (const ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> &c);
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> &operator= (unsigned long rhs);
 };
+
+// The long long intrinsics are not available on PPC
+#if !defined (__powerpc__)
+template<>
+class ACE_Export ACE_Atomic_Op<ACE_Thread_Mutex, long long>
+: public ACE_Atomic_Op_GCC<long long>
+{
+public:
+  ACE_Atomic_Op (void);
+  ACE_Atomic_Op (long long c);
+  ACE_Atomic_Op (const ACE_Atomic_Op<ACE_Thread_Mutex, long long> &c);
+  ACE_Atomic_Op<ACE_Thread_Mutex, long long> &operator= (long long rhs);
+};
+
+template<>
+class ACE_Export ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long long>
+: public ACE_Atomic_Op_GCC<unsigned long long>
+{
+public:
+  ACE_Atomic_Op (void);
+  ACE_Atomic_Op (unsigned long long c);
+  ACE_Atomic_Op (const ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long long> &c);
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long long> &operator= (unsigned long long rhs);
+};
+#endif /* !__powerpc__ */
 
 #if !defined (ACE_LACKS_GCC_ATOMIC_BUILTINS_2)
 template<>

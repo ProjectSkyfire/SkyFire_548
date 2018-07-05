@@ -2,7 +2,7 @@
 ///**
 // *  @file   OS_QoS.cpp
 // *
-// *  $Id: OS_QoS.cpp 86508 2009-08-14 13:32:40Z johnnyw $
+// *
 // *
 // *  @brief  Contains OS specific data structures for QoS networking.
 // *

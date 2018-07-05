@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Date_Time.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/Global_Macros.h"
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_sys_time.h"

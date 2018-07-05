@@ -2,8 +2,6 @@
  * @file XML_Schema_Resolver.h
  * @author Will Otte <wotte@dre.vanderbilt.edu>
  *
- * $Id: XML_Schema_Resolver.h 95801 2012-05-31 09:14:36Z johnnyw $
- *
  * Resolves schema locations.
  */
 

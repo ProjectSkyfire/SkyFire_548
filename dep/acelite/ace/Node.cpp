@@ -1,9 +1,11 @@
-// $Id: Node.cpp 81624 2008-05-06 17:14:57Z wotte $
-
 #ifndef ACE_NODE_CPP
 #define ACE_NODE_CPP
 
 #include "ace/Node.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -11,7 +13,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Node)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Node)
 
 template <class T, class C>
 ACE_Node<T, C>::~ACE_Node (void)

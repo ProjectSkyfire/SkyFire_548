@@ -4,8 +4,6 @@
 /**
  *  @file    Timer_Hash_T.h
  *
- *  $Id: Timer_Hash_T.h 95807 2012-06-01 12:44:19Z johnnyw $
- *
  *  @author Darrell Brunsch <brunsch@cs.wustl.edu>
  */
 //=============================================================================
@@ -29,6 +27,7 @@ template <class TYPE, class FUNCTOR, class ACE_LOCK, class BUCKET, typename TIME
 class ACE_Timer_Hash_T;
 template <typename TYPE>
 class Hash_Token;
+class ACE_Event_Handler;
 
 /**
  * @class ACE_Timer_Hash_Upcall
@@ -232,11 +231,11 @@ public:
    * was returned from the <schedule> method).  If act is non-NULL
    * then it will be set to point to the ``magic cookie'' argument
    * passed in when the timer was registered.  This makes it possible
-   * to free up the memory and avoid memory leaks.  If <dont_call> is
-   * 0 then the <functor> will be invoked.  Returns 1 if cancellation
-   * succeeded and 0 if the @a timer_id wasn't found.  If any valid
-   * timer is not cancelled before destruction of this instance of
-   * ACE_Timer_Hash_T then user will get a memory leak.
+   * to free up the memory and avoid memory leaks.  If
+   * @a dont_call_handle_close is 0 then the <functor> will be invoked.
+   * Returns 1 if cancellation succeeded and 0 if the @a timer_id wasn't
+   * found.  If any valid timer is not cancelled before destruction of
+   * this instance of ACE_Timer_Hash_T then user will get a memory leak.
    */
   virtual int cancel (long timer_id,
                       const void **act = 0,

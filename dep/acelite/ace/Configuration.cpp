@@ -1,4 +1,3 @@
-// $Id: Configuration.cpp 92828 2010-12-08 09:38:57Z mcorino $
 #include "ace/Configuration.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/SString.h"
@@ -13,6 +12,10 @@
 #if !defined (__ACE_INLINE__)
 #include "ace/Configuration.inl"
 #endif /* __ACE_INLINE__ */
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -334,8 +337,13 @@ ACE_Configuration::operator== (const ACE_Configuration& rhs) const
                               rc = (* (thisCharData + count) == * (rhsCharData + count));
                             }
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+                          ACE_Allocator::instance()->free(thisCharData);
+                          ACE_Allocator::instance()->free(rhsCharData);
+#else
                           delete [] thisCharData;
                           delete [] rhsCharData;
+#endif /* ACE_HAS_ALLOC_HOOKS */
                         }// end if the length's match
                     }
                   // We should never have valueTypes of INVALID, therefore
@@ -1212,8 +1220,14 @@ ACE_Configuration_Section_Key_Heap::~ACE_Configuration_Section_Key_Heap ()
 {
   delete value_iter_;
   delete section_iter_;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free (path_);
+#else
   ACE_OS::free (path_);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Configuration_Section_Key_Heap)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1289,7 +1303,7 @@ ACE_Configuration_Heap::open (const ACE_TCHAR* file_name,
 #if !defined (ACE_LACKS_ACCESS)
   // Now check if the backing store has been created successfully.
   if (ACE_OS::access (file_name, F_OK) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("create_index\n")),
                       -1);
 #endif /* ACE_LACKS_ACCESS */
@@ -1320,7 +1334,7 @@ ACE_Configuration_Heap::create_index (void)
                                      section_index) == -1)
         {
           // Attempt to clean up.
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("create_index failed\n")));
           this->allocator_->remove ();
           return -1;
@@ -1608,15 +1622,15 @@ ACE_Configuration_Heap::remove_section (const ACE_Configuration_Section_Key& key
 
   if (recursive)
     {
-      ACE_Configuration_Section_Key section;
-      if (open_section (key, sub_section, 0, section))
+      ACE_Configuration_Section_Key recursive_section;
+      if (open_section (key, sub_section, 0, recursive_section))
         return -1;
 
       int index = 0;
       ACE_TString name;
-      while (!enumerate_sections (section, index, name))
+      while (!enumerate_sections (recursive_section, index, name))
         {
-          if (remove_section (section, name.fast_rep (), true))
+          if (remove_section (recursive_section, name.fast_rep (), true))
             return -1;
 
           ++index;
@@ -1808,9 +1822,9 @@ ACE_Configuration_Heap::set_string_value (const ACE_Configuration_Section_Key& k
       ACE_TCHAR* pers_value =
  (ACE_TCHAR *) allocator_->malloc ((value.length () + 1) * sizeof (ACE_TCHAR));
       ACE_OS::strcpy (pers_value, value.fast_rep ());
-      ACE_Configuration_ExtId item_name (pers_name);
+      ACE_Configuration_ExtId new_item_name (pers_name);
       ACE_Configuration_Value_IntId item_value (pers_value);
-      if (section_int.value_hash_map_->bind (item_name, item_value, allocator_))
+      if (section_int.value_hash_map_->bind (new_item_name, item_value, allocator_))
         {
           allocator_->free (pers_value);
           allocator_->free (pers_name);
@@ -2055,7 +2069,11 @@ ACE_Configuration_Heap::get_binary_value (
     }
 
   // Make a copy
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (data, static_cast<char*> (ACE_Allocator::instance()->malloc(sizeof(char) * VIntId.length_)), -1);
+#else
   ACE_NEW_RETURN (data, char[VIntId.length_], -1);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   ACE_OS::memcpy (data, VIntId.data_.ptr_, VIntId.length_);
   length = VIntId.length_;
   return 0;

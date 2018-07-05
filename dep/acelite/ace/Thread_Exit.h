@@ -4,8 +4,6 @@
 /**
  *  @file    Thread_Exit.h
  *
- *  $Id: Thread_Exit.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================
@@ -58,6 +56,8 @@ public:
   /// Cleanup method, used by the ACE_Object_Manager to destroy the
   /// singleton.
   static void cleanup (void *instance);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /// Automatically add/remove the thread from the

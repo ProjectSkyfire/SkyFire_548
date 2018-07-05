@@ -4,12 +4,10 @@
 /**
  *  @file    Functor_String.h
  *
- *  $Id: Functor_String.h 93411 2011-02-18 22:21:16Z hillj $
- *
  *   Class template specializations for ACE_*String types implementing
  *   function objects that are used in  various places in ATC. They
  *   could be placed in Functor.h. But we don't want to couple string
- *   types to the rest of ACE+TAO. Hence they are placed in a seperate
+ *   types to the rest of ACE+TAO. Hence they are placed in a separate
  *   file.
  */
 //==========================================================================

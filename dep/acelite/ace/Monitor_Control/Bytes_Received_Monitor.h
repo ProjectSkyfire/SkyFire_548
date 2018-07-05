@@ -4,8 +4,6 @@
 /**
  * @file Bytes_Received_Monitor.h
  *
- * $Id: Bytes_Received_Monitor.h 95533 2012-02-14 22:59:17Z wotte $
- *
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Auto_Functor.inl 92386 2010-10-28 07:44:37Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template<typename X, typename Functor> ACE_INLINE

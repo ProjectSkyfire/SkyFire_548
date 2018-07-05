@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Timer_Queue_Adapters.inl 95368 2011-12-19 13:38:49Z mcorino $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template<class TQ, class TYPE> ACE_INLINE TQ *

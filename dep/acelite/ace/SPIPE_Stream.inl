@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SPIPE_Stream.inl 93061 2011-01-12 21:06:07Z wotte $
-
 #include "ace/OS_NS_sys_uio.h"
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_unistd.h"

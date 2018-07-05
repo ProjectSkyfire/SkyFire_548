@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_fcntl.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/OS_NS_errno.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

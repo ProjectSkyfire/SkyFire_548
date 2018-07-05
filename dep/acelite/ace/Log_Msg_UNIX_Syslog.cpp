@@ -1,11 +1,9 @@
-// $Id: Log_Msg_UNIX_Syslog.cpp 92791 2010-12-04 16:25:22Z shuston $
-
 #include "ace/config-all.h"
 
 #if !defined (ACE_LACKS_UNIX_SYSLOG)
 
 #include "ace/ACE.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Log_Msg_UNIX_Syslog.h"
 #include "ace/Log_Record.h"
 #include "ace/OS_NS_string.h"
@@ -43,15 +41,20 @@ ACE_Log_Msg_UNIX_Syslog::open (const ACE_TCHAR * logger_key)
   // options LOG_CONS and LOG_PID to be set.  There really should be a
   // logging strategy option to control the syslog log options,
   // however, we'll take the easy way out for now.
-#if defined (ACE_USES_WCHAR)
+#if defined (ACE_LACKS_OPENLOG)
+  ACE_UNUSED_ARG (logger_key);
+  ACE_NOTSUP_RETURN (-1);
+#else
+# if defined (ACE_USES_WCHAR)
   openlog (ACE_TEXT_ALWAYS_CHAR (logger_key),
            LOG_CONS|LOG_PID,
            ACE_DEFAULT_SYSLOG_FACILITY);
-#else
+# else
   openlog (const_cast<char *> (logger_key),
            LOG_CONS|LOG_PID,
            ACE_DEFAULT_SYSLOG_FACILITY);
-#endif /* ACE_USES_WCHAR */
+# endif /* ACE_USES_WCHAR */
+#endif /* ACE_LACKS_OPENLOG */
 
   // Enable logging of all syslog priorities.  If logging of all
   // priorities is not desired, use the ACE_Log_Msg::priority_mask()

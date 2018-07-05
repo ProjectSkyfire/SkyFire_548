@@ -3,8 +3,6 @@
 /**
  *  @file   config-win32-msvc-8.h
  *
- *  $Id: config-win32-msvc-8.h 95719 2012-05-01 12:54:01Z johnnyw $
- *
  *  @brief  Microsoft Visual C++ 8.0 configuration file.
  *
  *  This file is the ACE configuration file for Microsoft Visual C++ version 8.

@@ -4,8 +4,6 @@
 /**
  *  @file    Barrier.h
  *
- *  $Id: Barrier.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>

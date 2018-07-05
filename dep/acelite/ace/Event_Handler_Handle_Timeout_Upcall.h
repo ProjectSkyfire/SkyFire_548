@@ -1,5 +1,3 @@
-//$Id: Event_Handler_Handle_Timeout_Upcall.h 95334 2011-12-15 12:52:50Z msmit $
-
 #ifndef ACE_EVENT_HANDLER_HANDLE_TIMEOUT_UPCALL_H
 #define ACE_EVENT_HANDLER_HANDLE_TIMEOUT_UPCALL_H
 
@@ -85,6 +83,9 @@ public:
   int deletion (ACE_Timer_Queue &timer_queue,
                 ACE_Event_Handler *handler,
                 const void *arg);
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
 

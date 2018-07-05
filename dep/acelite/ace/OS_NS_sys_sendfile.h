@@ -4,8 +4,6 @@
 /**
  *  @file    OS_NS_sys_sendfile.h
  *
- *  $Id: OS_NS_sys_sendfile.h 84216 2009-01-22 18:34:40Z johnnyw $
- *
  *  @author Ossama Othman <ossama@dre.vanderbilt.edu>
  */
 //=============================================================================

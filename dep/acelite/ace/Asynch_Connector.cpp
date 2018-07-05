@@ -1,5 +1,3 @@
-// $Id: Asynch_Connector.cpp 92069 2010-09-28 11:38:59Z johnnyw $
-
 #ifndef ACE_ASYNCH_CONNECTOR_CPP
 #define ACE_ASYNCH_CONNECTOR_CPP
 
@@ -15,7 +13,7 @@
 #include "ace/OS_NS_sys_socket.h"
 #include "ace/OS_Memory.h"
 #include "ace/Flag_Manip.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Message_Block.h"
 #include "ace/INET_Addr.h"
 
@@ -48,7 +46,7 @@ ACE_Asynch_Connector<HANDLER>::open (bool pass_addresses,
                                   ACE_INVALID_HANDLE,
                                   0,
                                   this->proactor ()) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%p\n"),
                        ACE_TEXT ("ACE_Asynch_Connect::open")),
                       -1);
@@ -67,7 +65,7 @@ ACE_Asynch_Connector<HANDLER>::connect (const ACE_INET_Addr & remote_sap,
                                      local_sap,
                                      reuse_addr,
                                      act) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%p\n"),
                        ACE_TEXT ("ACE_Asynch_Connect::connect")),
                       -1);
@@ -98,7 +96,7 @@ ACE_Asynch_Connector<HANDLER>::handle_connect (const ACE_Asynch_Connect::Result 
         (result.connect_handle (), ACE_NONBLOCK) != 0)
     {
       error = 1;
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("%p\n"),
                   ACE_TEXT ("ACE_Asynch_Connector::handle_connect : Set blocking mode")));
     }
@@ -128,7 +126,7 @@ ACE_Asynch_Connector<HANDLER>::handle_connect (const ACE_Asynch_Connect::Result 
       if (new_handler == 0)
         {
           error = 1;
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("%p\n"),
                       ACE_TEXT ("ACE_Asynch_Connector::handle_connect : Making of new handler failed")));
         }
@@ -203,7 +201,7 @@ ACE_Asynch_Connector<HANDLER>::parse_address (const ACE_Asynch_Connect::Result &
   if (ACE_OS::getsockname (result.connect_handle (),
                            reinterpret_cast<sockaddr *> (&local_addr),
                            &local_size) < 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT("%p\n"),
                 ACE_TEXT("ACE_Asynch_Connector::<getsockname> failed")));
 
@@ -211,7 +209,7 @@ ACE_Asynch_Connector<HANDLER>::parse_address (const ACE_Asynch_Connect::Result &
   if (ACE_OS::getpeername (result.connect_handle (),
                            reinterpret_cast<sockaddr *> (&remote_addr),
                            &remote_size) < 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT("%p\n"),
                 ACE_TEXT("ACE_Asynch_Connector::<getpeername> failed")));
 

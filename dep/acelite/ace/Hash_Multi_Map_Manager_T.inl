@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Hash_Multi_Map_Manager_T.inl 94520 2011-09-22 14:55:20Z johnnyw $
-
 #include "ace/Guard_T.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -17,7 +14,7 @@ ACE_Hash_Multi_Map_Manager<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::AC
     cur_size_ (0)
 {
   if (this->open (size, table_alloc, entry_alloc) == -1)
-    ACE_ERROR ((LM_ERROR, ACE_TEXT ("ACE_Hash_Multi_Map_Manager\n")));
+    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("ACE_Hash_Multi_Map_Manager\n")));
 }
 
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> ACE_INLINE
@@ -30,7 +27,7 @@ ACE_Hash_Multi_Map_Manager<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::AC
     cur_size_ (0)
 {
   if (this->open (ACE_DEFAULT_MAP_SIZE, table_alloc, entry_alloc) == -1)
-    ACE_ERROR ((LM_ERROR, ACE_TEXT ("ACE_Hash_Multi_Map_Manager\n")));
+    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("ACE_Hash_Multi_Map_Manager\n")));
 }
 
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> ACE_INLINE int
@@ -658,8 +655,6 @@ ACE_Hash_Multi_Map_Const_Iterator_Base<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, A
     || this->map_man_ != rhs.map_man_;
 }
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Hash_Multi_Map_Iterator)
-
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> ACE_INLINE void
 ACE_Hash_Multi_Map_Iterator<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump (void) const
 {
@@ -729,8 +724,6 @@ ACE_Hash_Multi_Map_Iterator<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::o
   --*this;
   return retv;
 }
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Hash_Multi_Map_Const_Iterator)
 
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> ACE_INLINE void
 ACE_Hash_Multi_Map_Const_Iterator<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump (void) const
@@ -921,7 +914,6 @@ ACE_Hash_Multi_Map_Bucket_Iterator<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_L
     || this->map_man_ != rhs.map_man_;
 }
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Hash_Multi_Map_Reverse_Iterator)
 
 template <class EXT_ID, class INT_ID, class HASH_KEY, class COMPARE_KEYS, class ACE_LOCK> ACE_INLINE void
 ACE_Hash_Multi_Map_Reverse_Iterator<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK>::dump (void) const

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: MEM_Connector.inl 91688 2010-09-09 11:21:50Z johnnyw $
-
 // Establish a connection.
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

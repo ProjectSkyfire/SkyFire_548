@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Unbounded_Set.inl 91813 2010-09-17 07:52:52Z johnnyw $
-
 #include "ace/Global_Macros.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

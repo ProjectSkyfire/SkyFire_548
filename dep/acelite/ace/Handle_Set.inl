@@ -1,8 +1,5 @@
 // -*- C++ -*-
-//
-// $Id: Handle_Set.inl 96017 2012-08-08 22:18:09Z mitza $
-
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 // AIX defines bzero() in this odd file... used by FD_ZERO
 #if defined (ACE_HAS_STRINGS)
@@ -68,19 +65,16 @@ ACE_INLINE int
 ACE_Handle_Set::is_set (ACE_HANDLE handle) const
 {
   ACE_TRACE ("ACE_Handle_Set::is_set");
+
+  fd_set *set = const_cast<fd_set*> (&this->mask_);
+  int ret = FD_ISSET (handle, set);
+
 #if defined (ACE_HAS_BIG_FD_SET)
-  return FD_ISSET (handle,
-                   &this->mask_)
-    && this->size_ > 0;
-#elif defined (ACE_HAS_NONCONST_FD_ISSET)
-  return FD_ISSET (handle,
-                   const_cast<fd_set*> (&this->mask_));
+  ret = ret && this->size_ > 0;
 #elif defined (ACE_VXWORKS) && ACE_VXWORKS >= 0x690
-  return static_cast<int> (FD_ISSET (handle, &this->mask_));
-#else
-  return FD_ISSET (handle,
-                   &this->mask_);
-#endif /* ACE_HAS_BIG_FD_SET */
+  ret = ret != 0;
+#endif
+  return ret;
 }
 
 // Enables the handle.

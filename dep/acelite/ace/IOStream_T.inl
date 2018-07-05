@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: IOStream_T.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/Handle_Set.h"
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_sys_select.h"

@@ -1,5 +1,3 @@
-// $Id: Reactor_Notification_Strategy.cpp 91287 2010-08-05 10:30:49Z johnnyw $
-
 #include "ace/Reactor_Notification_Strategy.h"
 #include "ace/Reactor.h"
 

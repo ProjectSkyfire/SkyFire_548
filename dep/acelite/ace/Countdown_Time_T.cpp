@@ -1,5 +1,3 @@
-// $Id: Countdown_Time_T.cpp 95332 2011-12-15 11:09:41Z mcorino $
-
 #ifndef ACE_COUNTDOWN_TIME_T_CPP
 #define ACE_COUNTDOWN_TIME_T_CPP
 
@@ -16,6 +14,7 @@ ACE_Countdown_Time_T<TIME_POLICY>::ACE_Countdown_Time_T (ACE_Time_Value *max_wai
                                                          TIME_POLICY const & time_policy)
   : time_policy_ (time_policy),
     max_wait_time_ (max_wait_time),
+    max_wait_value_ (ACE_Time_Value::zero),
     stopped_ (false)
 {
   this->start ();
@@ -32,6 +31,7 @@ ACE_Countdown_Time_T<TIME_POLICY>::start (void)
 {
   if (this->max_wait_time_ != 0)
     {
+      this->max_wait_value_ = *this->max_wait_time_;
       this->start_time_ = this->time_policy_ ();
       this->stopped_ = false;
     }
@@ -46,9 +46,9 @@ ACE_Countdown_Time_T<TIME_POLICY>::stop (void)
           this->time_policy_ () - this->start_time_;
 
       if (elapsed_time >= ACE_Time_Value::zero &&
-          *this->max_wait_time_ > elapsed_time)
+          this->max_wait_value_ > elapsed_time)
         {
-          *this->max_wait_time_ -= elapsed_time;
+          *this->max_wait_time_ = this->max_wait_value_ - elapsed_time;
         }
       else
         {

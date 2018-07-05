@@ -4,8 +4,6 @@
 /**
  *  @file    Message_Queue_Vx.h
  *
- *  $Id: Message_Queue_Vx.h 91743 2010-09-13 18:24:51Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -198,9 +196,8 @@ private:
   ACE_Message_Queue_Vx (const ACE_Message_Queue_Vx &);
   void operator= (const ACE_Message_Queue_Vx &);
 
-  ACE_UNIMPLEMENTED_FUNC (virtual int peek_dequeue_head
-                            (ACE_Message_Block *&first_item,
-                             ACE_Time_Value *tv = 0))
+  virtual int peek_dequeue_head (ACE_Message_Block *&first_item,
+                                 ACE_Time_Value *tv = 0);
 
 private:
   /// Maximum number of messages that can be queued.

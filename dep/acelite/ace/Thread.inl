@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Thread.inl 95376 2011-12-20 15:39:02Z shuston $
-
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

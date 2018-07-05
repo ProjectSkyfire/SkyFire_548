@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_errno.inl 94454 2011-09-08 17:36:56Z johnnyw $
-
 #include "ace/config-all.h"    /* Need ACE_TRACE */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

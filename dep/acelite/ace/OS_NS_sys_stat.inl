@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_sys_stat.inl 84373 2009-02-10 18:21:50Z johnnyw $
-
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_fcntl.h"
 #include "ace/OS_NS_errno.h"
@@ -151,7 +148,11 @@ namespace ACE_OS
                           int, -1);
 #elif defined (ACE_MKDIR_LACKS_MODE)
     ACE_UNUSED_ARG (mode);
+#  if defined (ACE_MKDIR_EQUIVALENT)
+    ACE_OSCALL_RETURN (ACE_MKDIR_EQUIVALENT (path), int, -1);
+#  else
     ACE_OSCALL_RETURN (::mkdir (path), int, -1);
+#  endif
 #else
     ACE_OSCALL_RETURN (::mkdir (path, mode), int, -1);
 #endif
@@ -199,6 +200,7 @@ namespace ACE_OS
 #elif defined (ACE_HAS_WINCE)
     ACE_TEXT_WIN32_FIND_DATA fdata;
 
+    int rc = 0;
     HANDLE fhandle;
 
     fhandle = ::FindFirstFile (ACE_TEXT_CHAR_TO_TCHAR (file), &fdata);
@@ -210,7 +212,7 @@ namespace ACE_OS
     else if (fdata.nFileSizeHigh != 0)
       {
         errno = EINVAL;
-        return -1;
+        rc = -1;
       }
     else
       {
@@ -220,7 +222,9 @@ namespace ACE_OS
         stp->st_mtime = ACE_Time_Value (fdata.ftLastWriteTime).sec ();
         stp->st_ctime = ACE_Time_Value (fdata.ftCreationTime).sec ();
       }
-    return 0;
+
+    ::FindClose (fhandle);
+    return rc;
 #elif defined (ACE_HAS_X86_STAT_MACROS)
     // Solaris for intel uses an macro for stat(), this macro is a
     // wrapper for _xstat().
@@ -238,6 +242,7 @@ namespace ACE_OS
 #if defined (ACE_HAS_WINCE)
     WIN32_FIND_DATAW fdata;
 
+    int rc = 0;
     HANDLE fhandle;
 
     fhandle = ::FindFirstFileW (file, &fdata);
@@ -249,7 +254,7 @@ namespace ACE_OS
     else if (fdata.nFileSizeHigh != 0)
       {
         errno = EINVAL;
-        return -1;
+        rc = -1;
       }
     else
       {
@@ -259,10 +264,12 @@ namespace ACE_OS
         stp->st_mtime = ACE_Time_Value (fdata.ftLastWriteTime).sec ();
         stp->st_ctime = ACE_Time_Value (fdata.ftCreationTime).sec ();
       }
-    return 0;
+
+    ::FindClose (fhandle);
+    return rc;
 #elif defined (__BORLANDC__) \
       || defined (_MSC_VER) \
-      || defined (__MINGW32__)
+      || (defined (__MINGW32__) && !defined (__MINGW64_VERSION_MAJOR))
     ACE_OSCALL_RETURN (ACE_WSTAT_FUNC_NAME (file, stp), int, -1);
 #else /* ACE_HAS_WINCE */
     ACE_Wide_To_Ascii nfile (file);

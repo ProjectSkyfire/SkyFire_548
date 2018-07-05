@@ -4,8 +4,6 @@
 /**
  *  @file    Name_Request_Reply.h
  *
- *  $Id: Name_Request_Reply.h 84316 2009-02-03 19:46:05Z johnnyw $
- *
  *   Define the format used to exchange messages between the
  *   ACE_Name Server and its clients.
  *

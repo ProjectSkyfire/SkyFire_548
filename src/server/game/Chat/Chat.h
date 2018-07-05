@@ -38,13 +38,17 @@ struct GameTele;
 
 class ChatCommand
 {
+    typedef bool(*pHandler)(ChatHandler*, char const*);
+
     public:
+        ChatCommand(char const* name, uint32 permission, bool allowConsole, pHandler handler, std::string help, std::vector<ChatCommand> childCommands = std::vector<ChatCommand>())
+            : Name(name), Permission(permission), AllowConsole(allowConsole), Handler(handler), Help(std::move(help)), ChildCommands(std::move(childCommands)) { }
         const char *       Name;
         uint32             Permission;                   // function pointer required correct align (use uint32)
         bool               AllowConsole;
-        bool (*Handler)(ChatHandler*, const char* args);
+        pHandler Handler;
         std::string        Help;
-        ChatCommand*      ChildCommands;
+        std::vector<ChatCommand> ChildCommands;
 };
 
 class ChatHandler
@@ -76,7 +80,7 @@ class ChatHandler
 
         bool ParseCommands(const char* text);
 
-        static ChatCommand* getCommandTable();
+        static std::vector<ChatCommand> const& getCommandTable();
 
         bool isValidChatMessage(const char* msg);
         void SendGlobalSysMessage(const char *str);
@@ -125,12 +129,12 @@ class ChatHandler
         static bool LoadCommandTable() { return load_command_table; }
         static void SetLoadCommandTable(bool val) { load_command_table = val; }
 
-        bool ShowHelpForCommand(ChatCommand* table, const char* cmd);
+        bool ShowHelpForCommand(std::vector<ChatCommand> const& table, const char* cmd);
     protected:
         explicit ChatHandler() : m_session(NULL), sentErrorMessage(false) { }     // for CLI subclass
-        static bool SetDataForCommandInTable(ChatCommand* table, const char* text, uint32 permission, std::string const& help, std::string const& fullcommand);
-        bool ExecuteCommandInTable(ChatCommand* table, const char* text, std::string const& fullcmd);
-        bool ShowHelpForSubCommands(ChatCommand* table, char const* cmd, char const* subcmd);
+        static bool SetDataForCommandInTable(std::vector<ChatCommand>& table, const char* text, uint32 permission, std::string const& help, std::string const& fullcommand);
+        bool ExecuteCommandInTable(std::vector<ChatCommand> const& table, const char* text, std::string const& fullcmd);
+        bool ShowHelpForSubCommands(std::vector<ChatCommand> const& table, char const* cmd, char const* subcmd);
 
     private:
         WorldSession* m_session;                           // != NULL for chat command call and NULL for CLI command

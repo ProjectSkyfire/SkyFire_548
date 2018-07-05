@@ -4,8 +4,6 @@
 /**
  *  @file    Parse_Node.h
  *
- *  $Id: Parse_Node.h 81239 2008-04-04 22:28:48Z iliyan $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -24,6 +22,7 @@
 
 #if (ACE_USES_CLASSIC_SVC_CONF == 1)
 
+#include "ace/Auto_Ptr.h"
 #include "ace/DLL.h"
 #include "ace/SString.h"
 #include "ace/Svc_Conf.h"

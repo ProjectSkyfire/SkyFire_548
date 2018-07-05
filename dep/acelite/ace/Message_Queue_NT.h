@@ -4,8 +4,6 @@
 /**
  *  @file    Message_Queue_NT.h
  *
- *  $Id: Message_Queue_NT.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Lock_Adapter_T.inl 93385 2011-02-14 20:21:20Z mitza $
-
 #include "ace/OS_Memory.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

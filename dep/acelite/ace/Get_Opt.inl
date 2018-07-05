@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Get_Opt.inl 93736 2011-04-05 12:38:35Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE bool

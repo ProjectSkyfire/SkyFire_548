@@ -430,6 +430,8 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
 {
     uint32 opcode = recvData.GetOpcode();
 
+    recvData.read_skip<uint32>(); // SplineID?
+
     /* extract packet */
     MovementInfo movementInfo;
     static MovementStatusElements const speedElement = MSEExtraFloat;

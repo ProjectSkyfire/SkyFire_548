@@ -4,8 +4,6 @@
 /**
  *  @file    Filecache.h
  *
- *  $Id: Filecache.h 91066 2010-07-12 11:05:04Z johnnyw $
- *
  *  @author James Hu
  */
 //=============================================================================
@@ -146,8 +144,6 @@ private:
 
   /// A dup'd version of the one from file_.
   ACE_HANDLE handle_;
-
-  int mapit_;
 };
 
 typedef ACE_Hash_Map_Manager_Ex<const ACE_TCHAR *, ACE_Filecache_Object *, ACE_Hash<const ACE_TCHAR *>, ACE_Equal_To<const ACE_TCHAR *>, ACE_Null_Mutex>
@@ -189,6 +185,8 @@ public:
   /// Release an acquired Filecache_Object, returns it again or NULL if it
   /// was deleted.
   ACE_Filecache_Object *finish (ACE_Filecache_Object *&new_file);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   ACE_Filecache_Object *insert_i (const ACE_TCHAR *filename,
@@ -284,6 +282,8 @@ public:
 
   /// True if file on disk is newer than cached file.
   int update (void) const;
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Prevent from being called.

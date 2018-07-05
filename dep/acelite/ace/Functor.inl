@@ -4,12 +4,9 @@
 /**
  *  @file    Functor.inl
  *
- *  $Id: Functor.inl 95763 2012-05-16 06:43:51Z johnnyw $
- *
  *  Inlinable method definitions for non-templatized classes
  *  and template specializations implementing the GOF Command Pattern,
  *  and STL-style functors.
- *
  *
  *  @author Chris Gill           <cdgill@cs.wustl.edu>
  *

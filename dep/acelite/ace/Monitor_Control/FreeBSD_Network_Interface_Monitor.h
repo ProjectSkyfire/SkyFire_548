@@ -4,8 +4,6 @@
 /**
  * @file FreeBSD_Network_Interface_Monitor.h
  *
- * $Id: FreeBSD_Network_Interface_Monitor.h 86518 2009-08-18 12:30:56Z olli $
- *
  * @author Boyan Kasarov
  */
 //=============================================================================

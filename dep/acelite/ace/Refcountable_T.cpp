@@ -1,5 +1,3 @@
-// $Id: Refcountable_T.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #ifndef ACE_REFCOUNTABLE_T_CPP
 #define ACE_REFCOUNTABLE_T_CPP
 

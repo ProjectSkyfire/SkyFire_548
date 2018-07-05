@@ -1,9 +1,7 @@
-// $Id: Service_Manager.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Service_Manager.h"
 
 #include "ace/Get_Opt.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Service_Repository.h"
 #include "ace/Service_Config.h"
 #include "ace/Service_Types.h"
@@ -80,11 +78,11 @@ ACE_Service_Manager::info (ACE_TCHAR **strp, size_t length) const
       return -1;
     }
 
-  ACE_OS::sprintf (buf,
-                   ACE_TEXT ("%d/%s %s"),
-                   sa.get_port_number (),
-                   ACE_TEXT ("tcp"),
-                   ACE_TEXT ("# lists all services in the daemon\n"));
+  ACE_OS::snprintf (buf, BUFSIZ,
+                    ACE_TEXT ("%d/%s %s"),
+                    sa.get_port_number (),
+                    ACE_TEXT ("tcp"),
+                    ACE_TEXT ("# lists all services in the daemon\n"));
 
   if (*strp == 0 && (*strp = ACE_OS::strdup (buf)) == 0)
     {
@@ -127,7 +125,7 @@ ACE_Service_Manager::init (int argc, ACE_TCHAR *argv[])
   if (this->get_handle () == ACE_INVALID_HANDLE &&
       this->open (local_addr) == -1)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
+      ACELIB_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT ("%p\n"),
                          ACE_TEXT ("open")), -1);
     }
@@ -135,7 +133,7 @@ ACE_Service_Manager::init (int argc, ACE_TCHAR *argv[])
            (this,
             ACE_Event_Handler::ACCEPT_MASK) == -1)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
+      ACELIB_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT ("registering service with ACE_Reactor\n")),
                         -1);
     }
@@ -213,7 +211,7 @@ ACE_Service_Manager::list_services (void)
 
       if (this->debug_)
         {
-          ACE_DEBUG ((LM_DEBUG,
+          ACELIB_DEBUG ((LM_DEBUG,
                       ACE_TEXT ("len = %d, info = %s%s"),
                       len,
                       buf,
@@ -226,7 +224,7 @@ ACE_Service_Manager::list_services (void)
 
           if (n <= 0 && errno != EPIPE)
             {
-              ACE_ERROR ((LM_ERROR,
+              ACELIB_ERROR ((LM_ERROR,
                           ACE_TEXT ("%p\n"),
                           ACE_TEXT ("send_n")));
             }
@@ -326,7 +324,7 @@ ACE_Service_Manager::handle_input (ACE_HANDLE)
 
   if (this->debug_)
     {
-      ACE_DEBUG ((LM_DEBUG,
+      ACELIB_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("client_stream fd = %d\n"),
                  this->client_stream_.get_handle ()));
       ACE_INET_Addr sa;
@@ -336,7 +334,7 @@ ACE_Service_Manager::handle_input (ACE_HANDLE)
           return -1;
         }
 
-      ACE_DEBUG ((LM_DEBUG,
+      ACELIB_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("accepted from host %C at port %d\n"),
                   sa.get_host_name (),
                   sa.get_port_number ()));
@@ -372,7 +370,7 @@ ACE_Service_Manager::handle_input (ACE_HANDLE)
         {
           if ((remaining -= result) <= 0)
             {
-              ACE_DEBUG ((LM_ERROR,
+              ACELIB_DEBUG ((LM_ERROR,
                           ACE_TEXT ("Request buffer overflow.\n")));
               result = 0;
               break;
@@ -395,7 +393,7 @@ ACE_Service_Manager::handle_input (ACE_HANDLE)
     case -1:
       if (this->debug_)
         {
-          ACE_DEBUG ((LM_ERROR,
+          ACELIB_DEBUG ((LM_ERROR,
                       ACE_TEXT ("%p\n"),
                       ACE_TEXT ("recv")));
         }
@@ -422,7 +420,7 @@ ACE_Service_Manager::handle_input (ACE_HANDLE)
 
   if (this->client_stream_.close () == -1 && this->debug_)
     {
-      ACE_DEBUG ((LM_ERROR,
+      ACELIB_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%p\n"),
                   ACE_TEXT ("close")));
     }

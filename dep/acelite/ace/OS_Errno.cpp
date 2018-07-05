@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: OS_Errno.cpp 91809 2010-09-17 07:20:41Z johnnyw $
-
 #include "ace/OS_Errno.h"
 
 // Inlining this class on debug builds with gcc on Solaris can cause

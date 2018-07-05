@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Stream.inl 96061 2012-08-16 09:36:07Z mcorino $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <ACE_SYNCH_DECL, class TIME_POLICY> ACE_INLINE ACE_Module<ACE_SYNCH_USE, TIME_POLICY> *

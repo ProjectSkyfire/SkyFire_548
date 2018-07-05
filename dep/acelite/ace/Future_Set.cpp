@@ -1,5 +1,3 @@
-// $Id: Future_Set.cpp 92900 2010-12-17 14:45:11Z mcorino $
-
 #ifndef ACE_FUTURE_SET_CPP
 #define ACE_FUTURE_SET_CPP
 
@@ -12,6 +10,8 @@
 #if defined (ACE_HAS_THREADS)
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Future_Set)
 
 template <class T>
 ACE_Future_Set<T>::ACE_Future_Set (ACE_Message_Queue<ACE_SYNCH> *new_queue)

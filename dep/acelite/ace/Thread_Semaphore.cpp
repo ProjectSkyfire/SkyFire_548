@@ -1,8 +1,6 @@
 /**
  * @file Thread_Semaphore.cpp
  *
- * $Id: Thread_Semaphore.cpp 91286 2010-08-05 09:04:31Z johnnyw $
- *
  * Originally in Synch.cpp
  *
  * @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
@@ -11,6 +9,10 @@
 #include "ace/Thread_Semaphore.h"
 
 #if defined (ACE_HAS_THREADS)
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Thread_Semaphore.inl"
@@ -22,6 +24,8 @@
 
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Thread_Semaphore)
 
 void
 ACE_Thread_Semaphore::dump (void) const

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: CDR_Size.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -113,6 +110,13 @@ ACE_SizeCDR::write_longdouble (const ACE_CDR::LongDouble &x)
 {
   const void *temp = &x;
   return this->write_16 (reinterpret_cast<const ACE_CDR::LongDouble*> (temp));
+}
+
+ACE_INLINE ACE_CDR::Boolean
+ACE_SizeCDR::write_fixed (const ACE_CDR::Fixed &x)
+{
+  return this->write_array (&x, ACE_CDR::OCTET_SIZE, ACE_CDR::OCTET_ALIGN,
+                            (x.fixed_digits () + 2) / 2);
 }
 
 ACE_INLINE ACE_CDR::Boolean
@@ -344,6 +348,13 @@ ACE_INLINE ACE_CDR::Boolean
 operator<< (ACE_SizeCDR &ss, ACE_CDR::Double x)
 {
   ss.write_double (x);
+  return (ACE_CDR::Boolean) ss.good_bit ();
+}
+
+ACE_INLINE ACE_CDR::Boolean
+operator<< (ACE_SizeCDR &ss, const ACE_CDR::Fixed &x)
+{
+  ss.write_fixed (x);
   return (ACE_CDR::Boolean) ss.good_bit ();
 }
 

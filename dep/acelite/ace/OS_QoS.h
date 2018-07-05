@@ -4,8 +4,6 @@
 /**
  *  @file   OS_QoS.h
  *
- *  $Id: OS_QoS.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @brief  Contains OS specific data structures for QoS networking.
  *
  *  @author Craig Rodrigues  <crodrigu@bbn.com>

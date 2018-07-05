@@ -4,8 +4,6 @@
 /**
  *  @file    ace_wchar.h
  *
- *  $Id: ace_wchar.h 93597 2011-03-21 12:54:52Z johnnyw $
- *
  *  @author Darrell Brunsch <brunsch@uci.edu>
  */
 //=============================================================================
@@ -275,6 +273,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #define ACE_TEXT_PdhExpandCounterPath            ::PdhExpandCounterPathW
 #define ACE_TEXT_PdhOpenQuery                    ::PdhOpenQueryW
 #define ACE_TEXT_PdhAddCounter                   ::PdhAddCounterW
+#define ACE_TEXT_gai_strerror                    ::gai_strerrorW
 
 #else /* ACE_USES_WCHAR */
 #define ACE_LPSTR                                LPSTR
@@ -334,6 +333,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #define ACE_TEXT_PdhExpandCounterPath            ::PdhExpandCounterPathA
 #define ACE_TEXT_PdhOpenQuery                    ::PdhOpenQueryA
 #define ACE_TEXT_PdhAddCounter                   ::PdhAddCounterA
+#define ACE_TEXT_gai_strerror                    ::gai_strerrorA
 #endif /* ACE_USES_WCHAR */
 #endif /* ACE_WIN32 */
 

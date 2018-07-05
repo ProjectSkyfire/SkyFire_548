@@ -1,5 +1,3 @@
-// $Id: Auto_Update_Starter.cpp 86518 2009-08-18 12:30:56Z olli $
-
 #include "ace/Monitor_Control/Auto_Update_Starter.h"
 
 #if defined (ACE_HAS_MONITOR_FRAMEWORK) && (ACE_HAS_MONITOR_FRAMEWORK == 1)
@@ -14,6 +12,10 @@ namespace ACE
 {
   namespace Monitor_Control
   {
+    Auto_Update_Starter::Auto_Update_Starter (void)
+    {
+    }
+
     int
     Auto_Update_Starter::svc (void)
     {

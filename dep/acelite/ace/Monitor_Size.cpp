@@ -1,5 +1,3 @@
-// $Id: Monitor_Size.cpp 82328 2008-07-15 17:20:17Z parsons $
-
 #include "ace/Monitor_Size.h"
 
 #if defined (ACE_HAS_MONITOR_FRAMEWORK) && (ACE_HAS_MONITOR_FRAMEWORK == 1)

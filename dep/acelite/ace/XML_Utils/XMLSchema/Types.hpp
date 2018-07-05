@@ -1,7 +1,5 @@
 // file      : XMLSchema/Types.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Types.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 #ifndef XMLSCHEMA_TYPES_HPP
 #define XMLSCHEMA_TYPES_HPP
 
@@ -59,8 +57,6 @@ namespace XMLSchema
     typedef basic_string<C> Base__ ;
 
   public:
-    //    typedef ACE_Refcounted_Auto_Ptr < string, ACE_Null_Mutex > _ptr;
-
     //@@ VC6 does not inject XSCRT::Type into the scope so I have
     //   to qualify it all the time.
     //
@@ -663,7 +659,5 @@ namespace XMLSchema
     }
   };
 }
-
-#include "ace/XML_Utils/XMLSchema/Types.ipp"
 
 #endif  // XMLSCHEMA_TYPES_HPP

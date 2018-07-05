@@ -1,5 +1,3 @@
-// $Id: Timer_Wheel_T.cpp 95401 2011-12-31 22:17:35Z schmidt $
-
 #ifndef ACE_TIMER_WHEEL_T_CPP
 #define ACE_TIMER_WHEEL_T_CPP
 
@@ -10,7 +8,8 @@
 #include "ace/OS_NS_sys_time.h"
 #include "ace/Guard_T.h"
 #include "ace/Timer_Wheel_T.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
+#include "ace/Truncate.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -240,7 +239,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::find_node (long timer_i
   if (n != 0)
     return n;
 
-  //ACE_ERROR((LM_ERROR, "Node not found in original spoke.\n"));
+  //ACELIB_ERROR((LM_ERROR, "Node not found in original spoke.\n"));
 
   // Search the rest of the spokes
   for (u_int i = 0; i < this->spoke_count_; ++i)
@@ -253,7 +252,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::find_node (long timer_i
         }
     }
 
-  //ACE_ERROR((LM_ERROR, "Node not found.\n"));
+  //ACELIB_ERROR((LM_ERROR, "Node not found.\n"));
   return 0;
 }
 
@@ -321,7 +320,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::generate_timer_id (u_in
 #  pragma warning(push)
 #  pragma warning(disable : 4311)
 #endif /* ACE_WIN64 */
-  long next_cnt = reinterpret_cast<long> (root->get_act ());
+  long next_cnt = ACE_Utils::truncate_cast<long> ((intptr_t)root->get_act ());
 #if defined (ACE_WIN64)
 #  pragma warning(pop)
 #endif /* ACE_WIN64 */
@@ -348,7 +347,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::generate_timer_id (u_in
       return (cnt << this->spoke_bits_) | spoke;
     }
 
-  //ACE_ERROR((LM_ERROR, "Timer id overflow. We have to search now.\n"));
+  //ACELIB_ERROR((LM_ERROR, "Timer id overflow. We have to search now.\n"));
 
   // We've run out of consecutive id numbers so now we have to search
   // for a unique id.
@@ -415,7 +414,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::schedule_i (const TYPE&
       u_int spoke = calculate_spoke (future_time);
       long id = generate_timer_id (spoke);
 
-      //ACE_ERROR((LM_ERROR, "Scheduling %x spoke:%d id:%d\n", (long) n, spoke, id));
+      //ACELIB_ERROR((LM_ERROR, "Scheduling %x spoke:%d id:%d\n", (long) n, spoke, id));
 
       if (id != -1)
         {
@@ -698,7 +697,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::recalc_earliest
     }
 
   this->earliest_spoke_ = es;
-  //ACE_ERROR((LM_ERROR, "We had to search the whole wheel.\n"));
+  //ACELIB_ERROR((LM_ERROR, "We had to search the whole wheel.\n"));
 }
 
 /**
@@ -710,18 +709,18 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Timer_Wheel_T::dump");
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
     ACE_TEXT ("\nspoke_count_ = %d"), this->spoke_count_));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
     ACE_TEXT ("\nresolution_ = %d"), 1 << this->res_bits_));
-  ACE_DEBUG ((LM_DEBUG,
+  ACELIB_DEBUG ((LM_DEBUG,
     ACE_TEXT ("\nwheel_ =\n")));
 
   for (u_int i = 0; i < this->spoke_count_; ++i)
     {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("%d\n"), i));
+      ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("%d\n"), i));
       ACE_Timer_Node_T<TYPE>* root = this->spokes_[i];
       for (ACE_Timer_Node_T<TYPE>* n = root->get_next ();
            n != root;
@@ -731,7 +730,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::dump (void) const
         }
     }
 
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -808,14 +807,10 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::iter (void)
   return *this->iterator_;
 }
 
-/**
-* Dummy version of expire to get rid of warnings in Sun CC 4.2
-* Just call the expire of the base class.
-*/
 template <class TYPE, class FUNCTOR, class ACE_LOCK, typename TIME_POLICY> int
 ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::expire ()
 {
-  return ACE_Timer_Queue_T<TYPE,FUNCTOR,ACE_LOCK>::expire ();
+  return ACE_Timer_Queue_T<TYPE,FUNCTOR,ACE_LOCK,TIME_POLICY>::expire ();
 }
 
 /**
@@ -841,7 +836,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::expire (const ACE_Time_
     {
       ++expcount;
 
-      //ACE_ERROR((LM_ERROR, "Expiring %x\n", (long) n));
+      //ACELIB_ERROR((LM_ERROR, "Expiring %x\n", (long) n));
 
       ACE_Timer_Node_Dispatch_Info_T<TYPE> info;
 

@@ -1,5 +1,3 @@
-// $Id: XercesString.h 95760 2012-05-15 13:46:19Z msmit $
-
 #ifndef _XERCESSTRING_H
 #define _XERCESSTRING_H
 

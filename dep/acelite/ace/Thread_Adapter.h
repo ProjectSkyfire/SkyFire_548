@@ -4,8 +4,6 @@
 /**
  *  @file    Thread_Adapter.h
  *
- *  $Id: Thread_Adapter.h 92682 2010-11-23 23:41:19Z shuston $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================
@@ -68,6 +66,8 @@ public:
 
   /// Accessor for the optional ACE_Thread_Manager.
   ACE_Thread_Manager *thr_mgr (void);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Ensure that this object must be allocated on the heap.

@@ -1707,6 +1707,14 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
                         return SPELL_FAILED_INCORRECT_AREA;
                     break;
                 }
+                case SPELL_AURA_MOD_SHAPESHIFT:
+                {
+                    if (SpellShapeshiftFormEntry const* spellShapeshiftForm = sSpellShapeshiftFormStore.LookupEntry(Effects[i].MiscValue))
+                        if (uint32 mountType = spellShapeshiftForm->mount_type)
+                            if (!player->GetMountCapability(mountType))
+                                return SPELL_FAILED_NOT_HERE;
+                    break;
+                }
                 case SPELL_AURA_MOUNTED:
                 {
                     if (Effects[i].MiscValueB && !player->GetMountCapability(Effects[i].MiscValueB))

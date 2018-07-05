@@ -1773,9 +1773,9 @@ struct LFGDungeonEntry
     uint32  recminlevel;                                    // 5
     uint32  recmaxlevel;                                    // 6
     int32   map;                                            // 7
-    uint32  type;                                           // 8
+    uint32  difficulty;                                     // 8
     uint32  flags;                                          // 9
-    uint32  difficulty;                                     // 10
+    uint32  type;                                           // 10
     //uint32  unk2;                                         // 11
     //char*   iconname;                                     // 12
     uint32  expansion;                                      // 13
@@ -2472,7 +2472,7 @@ struct SpellShapeshiftFormEntry
     //uint32 unk3;                                          // 9 unused always 0
     //uint32 unk4;                                          // 10 unused always 0
     uint32 stanceSpell[MAX_SHAPESHIFT_SPELLS];              // 11-18 spells which appear in the bar after shapeshifting
-    //uint32 unk5;                                          // 19
+    uint32 mount_type;                                       // MountType.dbc
     //uint32 unk6;                                          // 20
 };
 
@@ -2527,17 +2527,18 @@ struct SpellItemEnchantmentEntry
     //uint32      charges;                                  // 1        m_charges
     uint32      type[MAX_ITEM_ENCHANTMENT_EFFECTS];         // 2-4      m_effect[MAX_ITEM_ENCHANTMENT_EFFECTS]
     uint32      amount[MAX_ITEM_ENCHANTMENT_EFFECTS];       // 5-7      m_effectPointsMin[MAX_ITEM_ENCHANTMENT_EFFECTS]
-    //uint32      amount2[MAX_ITEM_ENCHANTMENT_EFFECTS]     // 8-10     m_effectPointsMax[MAX_ITEM_ENCHANTMENT_EFFECTS]
-    uint32      spellid[MAX_ITEM_ENCHANTMENT_EFFECTS];      // 11-13    m_effectArg[MAX_ITEM_ENCHANTMENT_EFFECTS]
-    char*       description;                                // 14       m_name_lang
-    uint32      aura_id;                                    // 15       m_itemVisual
-    uint32      slot;                                       // 16       m_flags
-    uint32      GemID;                                      // 17       m_src_itemID
-    uint32      EnchantmentCondition;                       // 18       m_condition_id
-    uint32      requiredSkill;                              // 19       m_requiredSkillID
-    uint32      requiredSkillValue;                         // 20       m_requiredSkillRank
-    uint32      requiredLevel;                              // 21       new in 3.1
-                                                            // 22       new in 3.1
+    uint32      spellid[MAX_ITEM_ENCHANTMENT_EFFECTS];      // 8-10    m_effectArg[MAX_ITEM_ENCHANTMENT_EFFECTS]
+    char*       description;                                // 11       m_name_lang
+    uint32      aura_id;                                    // 12       m_itemVisual
+    uint32      slot;                                       // 13       m_flags
+    uint32      GemID;                                      // 14       m_src_itemID
+    uint32      EnchantmentCondition;                       // 15       m_condition_id
+    uint32      requiredSkill;                              // 16       m_requiredSkillID
+    uint32      requiredSkillValue;                         // 17       m_requiredSkillRank
+    uint32      requiredMinLevel;                           // 18       m_requiredMinLevel
+    uint32      requiredMaxLevel;                           // 19       m_requiredMaxLevel
+    //uint32      unk[MAX_ITEM_ENCHANTMENT_EFFECTS]         // 20-22    unk
+    //float     unk2[MAX_ITEM_ENCHANTMENT_EFFECTS]          // 23-25    unk2
 };
 
 struct SpellItemEnchantmentConditionEntry

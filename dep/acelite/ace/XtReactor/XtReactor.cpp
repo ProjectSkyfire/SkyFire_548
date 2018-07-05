@@ -1,5 +1,3 @@
-// $Id: XtReactor.cpp 95528 2012-02-07 12:57:33Z johnnyw $
-
 #include "ace/XtReactor/XtReactor.h"
 
 #include "ace/SOCK_Acceptor.h"

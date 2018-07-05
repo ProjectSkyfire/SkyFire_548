@@ -4,8 +4,6 @@
 /**
  *  @file    ATM_Connector.h
  *
- *  $Id: ATM_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Joe Hoffert <joeh@cs.wustl.edu>
  */
 //=============================================================================

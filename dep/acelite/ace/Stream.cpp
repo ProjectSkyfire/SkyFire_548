@@ -1,6 +1,4 @@
 // Stream.cpp
-// $Id: Stream.cpp 96070 2012-08-17 09:07:16Z mcorino $
-
 #ifndef ACE_STREAM_CPP
 #define ACE_STREAM_CPP
 
@@ -21,7 +19,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Stream)
+ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Stream)
 
 // Give some idea of what the heck is going on in a stream!
 
@@ -30,18 +28,18 @@ ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::dump");
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------- module links --------\n")));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------- module links --------\n")));
 
   for (ACE_Module<ACE_SYNCH_USE, TIME_POLICY> *mp = this->stream_head_;
        ;
        mp = mp->next ())
     {
-      ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("module name = %s\n"), mp->name ()));
+      ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("module name = %s\n"), mp->name ()));
       if (mp == this->stream_tail_)
         break;
     }
 
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------- writer links --------\n")));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------- writer links --------\n")));
 
   ACE_Task<ACE_SYNCH_USE, TIME_POLICY> *tp;
 
@@ -49,21 +47,21 @@ ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::dump (void) const
        ;
        tp = tp->next ())
     {
-      ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("writer queue name = %s\n"), tp->name ()));
+      ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("writer queue name = %s\n"), tp->name ()));
       tp->dump ();
-      ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------\n")));
+      ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------\n")));
       if (tp == this->stream_tail_->writer ()
           || (this->linked_us_
               && tp == this->linked_us_->stream_head_->reader ()))
         break;
     }
 
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------- reader links --------\n")));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------- reader links --------\n")));
   for (tp = this->stream_tail_->reader (); ; tp = tp->next ())
     {
-      ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("reader queue name = %s\n"), tp->name ()));
+      ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("reader queue name = %s\n"), tp->name ()));
       tp->dump ();
-      ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------\n")));
+      ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("-------\n")));
       if (tp == this->stream_head_->reader ()
           || (this->linked_us_
               && tp == this->linked_us_->stream_head_->writer ()))
@@ -246,7 +244,7 @@ ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::remove (const ACE_TCHAR *name,
 #ifndef ACE_NLOGGING
     if (ACE::debug ())
     {
-      ACE_DEBUG ((LM_DEBUG,
+      ACELIB_DEBUG ((LM_DEBUG,
         ACE_TEXT ("ACE_Stream::remove - comparing existing module :%s: with :%s:\n"),
         mod->name (),
         name));
@@ -276,7 +274,7 @@ ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::remove (const ACE_TCHAR *name,
       prev = mod;
   }
 
-  ACE_DEBUG ((LM_WARNING,  ACE_TEXT ("ACE_Stream::remove failed to find module with name %s to remove\n"),name));
+  ACELIB_DEBUG ((LM_WARNING,  ACE_TEXT ("ACE_Stream::remove failed to find module with name %s to remove\n"),name));
   return -1;
 }
 
@@ -612,7 +610,7 @@ ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::ACE_Stream (void * a,
 {
   ACE_TRACE ("ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::ACE_Stream");
   if (this->open (a, head, tail) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("ACE_Stream<ACE_SYNCH_USE, TIME_POLICY>::open (%s, %s)\n"),
                head->name (), tail->name ()));
 }

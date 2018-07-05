@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Select_Reactor_Base.inl 81138 2008-03-28 09:18:15Z johnnyw $
-
 #include "ace/Reactor.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

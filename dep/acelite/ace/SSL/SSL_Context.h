@@ -3,8 +3,6 @@
 /**
  *  @file    SSL_Context.h
  *
- *  $Id: SSL_Context.h 96087 2012-08-21 12:26:44Z sma $
- *
  *  @author Carlos O'Ryan <coryan@ece.uci.edu>
  *  @author Ossama Othman <ossama@dre.vanderbilt.edu>
  */
@@ -31,13 +29,15 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
+class ACE_INET_Addr;
+
 class ACE_SSL_Export ACE_SSL_Data_File
 {
 public:
   /// Default constructor
   ACE_SSL_Data_File (void);
 
-  /// Contructor from a file name and the file type.
+  /// Constructor from a file name and the file type.
   ACE_SSL_Data_File (const char *file_name,
                      int type = SSL_FILETYPE_PEM);
 
@@ -104,18 +104,9 @@ public:
 
   enum {
     INVALID_METHOD = -1,
-    SSLv2_client = 1,
-    SSLv2_server,
-    SSLv2,
-    SSLv3_client,
-    SSLv3_server,
-    SSLv3,
     SSLv23_client,
     SSLv23_server,
-    SSLv23,
-    TLSv1_client,
-    TLSv1_server,
-    TLSv1
+    SSLv23
   };
 
   /// Constructor
@@ -127,6 +118,9 @@ public:
   /// The Singleton context, the SSL components use the singleton if
   /// nothing else is available.
   static ACE_SSL_Context *instance (void);
+
+  /// Explicitly delete the Singleton context.
+  static void close (void);
 
   /**
    * Set the CTX mode.  The mode can be set only once, afterwards the
@@ -173,6 +167,12 @@ public:
 
   /// Load certificate from memory rather than a file.
   int certificate (X509* cert);
+
+  /// Parse the string and filter crypto versions accordingly
+  int filter_versions (const char *filter);
+
+  /// verify the peer cert matches the host
+  bool check_host (const ACE_INET_Addr& host, SSL * peerssl);
 
   /**
    *  Load the location of the trusted certification authority
@@ -394,11 +394,11 @@ private:
   /// count of successful CA load attempts
   int have_ca_;
 
-#ifdef ACE_HAS_THREADS
+#if defined(ACE_HAS_THREADS) && (OPENSSL_VERSION_NUMBER < 0x10100000L)
   /// Array of mutexes used internally by OpenSSL when the SSL
   /// application is multithreaded.
   static lock_type * locks_;
-#endif  /* ACE_HAS_THREADS */
+#endif /* ACE_HAS_THREADS && OPENSSL_VERSION_NUMBER < 0x10100000L */
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

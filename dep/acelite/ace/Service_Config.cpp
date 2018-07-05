@@ -1,5 +1,3 @@
-// $Id: Service_Config.cpp 96017 2012-08-08 22:18:09Z mitza $
-
 #include "ace/Service_Config.h"
 
 #if !defined (__ACE_INLINE__)
@@ -21,9 +19,12 @@
 #include "ace/Thread.h"
 #include "ace/Get_Opt.h"
 #include "ace/ARGV.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/ACE.h"
 
+#ifdef ACE_HAS_TSS_EMULATION
+#include "ace/Object_Manager.h"
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,7 +43,7 @@ ACE_Threading_Helper<ACE_Thread_Mutex>::ACE_Threading_Helper (void)
 
   if (ACE_Thread::keycreate (&key_, 0) == -1)
     {
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("(%P|%t) Failed to create thread key: %p\n"),
                   ACE_TEXT ("")));
     }
@@ -52,7 +53,7 @@ void
 ACE_Threading_Helper<ACE_Thread_Mutex>::set (void* p)
 {
   if (ACE_Thread::setspecific (key_, p) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                ACE_TEXT ("(%P|%t) Service Config failed to set thread key value: %p\n"),
                ACE_TEXT("")));
 }
@@ -62,7 +63,7 @@ ACE_Threading_Helper<ACE_Thread_Mutex>::get (void)
 {
   void* temp = 0;
   if (ACE_Thread::getspecific (key_, &temp) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("(%P|%t) Service Config failed to get thread key value: %p\n"),
                        ACE_TEXT("")),
                       0);
@@ -106,9 +107,9 @@ ACE_Service_Config_Guard::ACE_Service_Config_Guard (ACE_Service_Gestalt * psg)
   : saved_ (ACE_Service_Config::current ())
 {
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) - SCG:<ctor=%@>")
-                ACE_TEXT (" - config=%@ repo=%@ superceded by repo=%@\n"),
+                ACE_TEXT (" - config=%@ repo=%@ superseded by repo=%@\n"),
                 this,
                 this->saved_.get (),
                 this->saved_->repo_,
@@ -126,7 +127,7 @@ ACE_Service_Config_Guard::~ACE_Service_Config_Guard (void)
   ACE_Service_Config::current (s);
 
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) SCG:<dtor=%@>")
                 ACE_TEXT (" - new repo=%@\n"),
                 this,
@@ -202,7 +203,7 @@ ACE_Service_Config::parse_args_i (int argc, ACE_TCHAR *argv[])
           if (ACE_Reactor::instance ()->register_handler
               (ACE_Service_Config::signum_,
                ACE_Service_Config::signal_handler_) == -1)
-            ACE_ERROR_RETURN ((LM_ERROR,
+            ACELIB_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT ("cannot obtain signal handler\n")),
                               -1);
 #endif /* ACE_LACKS_UNIX_SIGNALS */
@@ -229,7 +230,7 @@ ACE_Service_Config::open_i (const ACE_TCHAR program_name[],
   ACE_Log_Msg *log_msg = ACE_LOG_MSG;
 
   if (ACE::debug ())
-    ACE_DEBUG ((LM_DEBUG,
+    ACELIB_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("ACE (%P|%t) SC::open_i - this=%@, opened=%d\n"),
                 this, this->is_opened_));
 
@@ -244,7 +245,12 @@ ACE_Service_Config::open_i (const ACE_TCHAR program_name[],
 
   // Become a daemon before doing anything else.
   if (ACE_Service_Config::be_a_daemon_)
-    ACE::daemonize ();
+    {
+      // If we have to become a daemn and that fails
+      // return -1 here
+      if (ACE::daemonize () == -1)
+        return -1;
+    }
 
   // Write process id to file.
   if (this->pid_file_name_ != 0)
@@ -287,7 +293,7 @@ ACE_Service_Config::open_i (const ACE_TCHAR program_name[],
     return -1;
 
   if (ACE::debug ())
-    ACE_DEBUG ((LM_STARTUP,
+    ACELIB_DEBUG ((LM_STARTUP,
                 ACE_TEXT ("starting up daemon %n\n")));
 
   // Initialize the Service Repository (this will still work if
@@ -310,7 +316,7 @@ ACE_Service_Config::open_i (const ACE_TCHAR program_name[],
       if ((ACE_Reactor::instance () != 0) &&
           (ACE_Reactor::instance ()->register_handler
            (ss, ACE_Service_Config::signal_handler_) == -1))
-        ACE_ERROR ((LM_ERROR,
+        ACELIB_ERROR ((LM_ERROR,
                     ACE_TEXT ("can't register signal handler\n")));
     }
 #endif /* ACE_LACKS_UNIX_SIGNALS */
@@ -407,7 +413,7 @@ ACE_Service_Config::ACE_Service_Config (const ACE_TCHAR program_name[],
     {
       // Only print out an error if it wasn't the svc.conf file that was
       // missing.
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("(%P|%t) SC failed to open: %p\n"),
                   program_name));
     }
@@ -497,7 +503,7 @@ ACE_Service_Config::create_service_type_impl (const ACE_TCHAR *name,
                       0);
       break;
     default:
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("unknown case\n")));
       break;
     }
@@ -533,14 +539,15 @@ ACE_Service_Config::reconfigure (void)
     {
 #if !defined (ACE_NLOGGING)
       time_t t = ACE_OS::time (0);
-#endif /* ! ACE_NLOGGING */
+
       if (ACE::debug ())
-        ACE_DEBUG ((LM_DEBUG,
+        ACELIB_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("beginning reconfiguration at %s"),
                     ACE_OS::ctime (&t)));
+#endif /* ! ACE_NLOGGING */
     }
   if (ACE_Service_Config::process_directives () == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("process_directives")));
 }

@@ -1,5 +1,3 @@
-// $Id: Priority_Reactor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/Priority_Reactor.h"
 #include "ace/Malloc_T.h"
 
@@ -31,8 +29,13 @@ ACE_Priority_Reactor::init_bucket (void)
            TUPLE_ALLOCATOR (ACE_Select_Reactor::DEFAULT_SIZE));
 
   // The event handlers are assigned to a new As the Event
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR (this->bucket_,
+                 static_cast<QUEUE **>(ACE_Allocator::instance()->malloc(sizeof(QUEUE *) * (npriorities))));
+#else
   ACE_NEW (this->bucket_,
            QUEUE *[npriorities]);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   // This loops "ensures" exception safety.
   for (int i = 0; i < npriorities; ++i)
@@ -69,7 +72,11 @@ ACE_Priority_Reactor::~ACE_Priority_Reactor (void)
   for (int i = 0; i < npriorities; ++i)
     delete this->bucket_[i];
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->bucket_);
+#else
   delete[] this->bucket_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
   delete tuple_allocator_;
 }
 
@@ -177,11 +184,11 @@ ACE_Priority_Reactor::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Priority_Reactor::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 
   ACE_Select_Reactor::dump ();
 
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 

@@ -1,5 +1,3 @@
-// $Id: Singleton.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #ifndef ACE_SINGLETON_CPP
 #define ACE_SINGLETON_CPP
 
@@ -14,12 +12,19 @@
 #endif /* __ACE_INLINE__ */
 
 #include "ace/Object_Manager.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Framework_Component.h"
 #include "ace/Guard_T.h"
 #include "ace/os_include/os_typeinfo.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Singleton)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Unmanaged_Singleton)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_TSS_Singleton)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Unmanaged_TSS_Singleton)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_DLL_Singleton_T)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_DLL_Singleton_Adapter_T)
 
 template <class TYPE, class ACE_LOCK> void
 ACE_Singleton<TYPE, ACE_LOCK>::dump (void)
@@ -28,9 +33,9 @@ ACE_Singleton<TYPE, ACE_LOCK>::dump (void)
   ACE_TRACE ("ACE_Singleton<TYPE, ACE_LOCK>::dump");
 
 #if !defined (ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES)
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
               ACE_Singleton<TYPE, ACE_LOCK>::instance_i ()));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES */
 #endif /* ACE_HAS_DUMP */
 }
@@ -78,7 +83,12 @@ ACE_Singleton<TYPE, ACE_LOCK>::instance (void)
           // Obtain a lock from the ACE_Object_Manager.  The pointer
           // is static, so we only obtain one per ACE_Singleton
           // instantiation.
+#if defined(ACE_FACE_SAFETY_BASE)
+          static ACE_LOCK the_lock;
+          static ACE_LOCK *lock = &the_lock;
+#else /* ACE_FACE_SAFETY_BASE */
           static ACE_LOCK *lock = 0;
+#endif /* ACE_FACE_SAFETY_BASE */
           if (ACE_Object_Manager::get_singleton_lock (lock) != 0)
             // Failed to acquire the lock!
             return 0;
@@ -91,8 +101,11 @@ ACE_Singleton<TYPE, ACE_LOCK>::instance (void)
               ACE_NEW_RETURN (singleton, (ACE_Singleton<TYPE, ACE_LOCK>), 0);
 
               // Register for destruction with ACE_Object_Manager.
+#if !defined (ACE_MT_SAFE) || (ACE_MT_SAFE == 0)
               ACE_Object_Manager::at_exit (singleton, 0, typeid (TYPE).name ());
-#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
+#else
+              ACE_Object_Manager::at_exit (singleton, &lock,
+                                           typeid (TYPE).name ());
             }
 #endif /* ACE_MT_SAFE */
         }
@@ -102,11 +115,21 @@ ACE_Singleton<TYPE, ACE_LOCK>::instance (void)
 }
 
 template <class TYPE, class ACE_LOCK> void
-ACE_Singleton<TYPE, ACE_LOCK>::cleanup (void *)
+ACE_Singleton<TYPE, ACE_LOCK>::cleanup (void *param)
 {
   ACE_Object_Manager::remove_at_exit (this);
   delete this;
   ACE_Singleton<TYPE, ACE_LOCK>::instance_i () = 0;
+
+#if !defined ACE_MT_SAFE || ACE_MT_SAFE == 0 || defined ACE_FACE_SAFETY_BASE
+  ACE_UNUSED_ARG (param);
+#else
+  if (param)
+    {
+      ACE_LOCK **lock = static_cast<ACE_LOCK **> (param);
+      *lock = 0;
+    }
+#endif
 }
 
 template <class TYPE, class ACE_LOCK> void
@@ -138,9 +161,9 @@ ACE_Unmanaged_Singleton<TYPE, ACE_LOCK>::dump (void)
   ACE_TRACE ("ACE_Unmanaged_Singleton<TYPE, ACE_LOCK>::dump");
 
 #if !defined (ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES)
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
               ACE_Unmanaged_Singleton<TYPE, ACE_LOCK>::instance_i ()));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES */
 #endif /* ACE_HAS_DUMP */
 }
@@ -190,7 +213,12 @@ ACE_Unmanaged_Singleton<TYPE, ACE_LOCK>::instance (void)
           // Obtain a lock from the ACE_Object_Manager.  The pointer
           // is static, so we only obtain one per
           // ACE_Unmanaged_Singleton instantiation.
+#if defined(ACE_FACE_SAFETY_BASE)
+          static ACE_LOCK the_lock;
+          static ACE_LOCK *lock = &the_lock;
+#else /* ACE_FACE_SAFETY_BASE */
           static ACE_LOCK *lock = 0;
+#endif /* ACE_FACE_SAFETY_BASE */
           if (ACE_Object_Manager::get_singleton_lock (lock) != 0)
             // Failed to acquire the lock!
             return 0;
@@ -228,9 +256,9 @@ ACE_TSS_Singleton<TYPE, ACE_LOCK>::dump (void)
   ACE_TRACE ("ACE_TSS_Singleton<TYPE, ACE_LOCK>::dump");
 
 #if !defined (ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES)
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
               ACE_TSS_Singleton<TYPE, ACE_LOCK>::instance_i ()));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES */
 #endif /* ACE_HAS_DUMP */
 }
@@ -278,7 +306,12 @@ ACE_TSS_Singleton<TYPE, ACE_LOCK>::instance (void)
 
           // Obtain a lock from the ACE_Object_Manager.  The pointer
           // is static, so we only obtain one per ACE_Singleton instantiation.
+#if defined(ACE_FACE_SAFETY_BASE)
+          static ACE_LOCK the_lock;
+          static ACE_LOCK *lock = &the_lock;
+#else /* ACE_FACE_SAFETY_BASE */
           static ACE_LOCK *lock = 0;
+#endif /* ACE_FACE_SAFETY_BASE */
           if (ACE_Object_Manager::get_singleton_lock (lock) != 0)
             // Failed to acquire the lock!
             return 0;
@@ -316,9 +349,9 @@ ACE_Unmanaged_TSS_Singleton<TYPE, ACE_LOCK>::dump (void)
   ACE_TRACE ("ACE_Unmanaged_TSS_Singleton<TYPE, ACE_LOCK>::dump");
 
 #if !defined (ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES)
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
               ACE_Unmanaged_TSS_Singleton<TYPE, ACE_LOCK>::instance_i ()));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES */
 #endif /* ACE_HAS_DUMP */
 }
@@ -369,7 +402,12 @@ ACE_Unmanaged_TSS_Singleton<TYPE, ACE_LOCK>::instance (void)
           // Obtain a lock from the ACE_Object_Manager.  The pointer
           // is static, so we only obtain one per
           // ACE_Unmanaged_Singleton instantiation.
+#if defined(ACE_FACE_SAFETY_BASE)
+          static ACE_LOCK the_lock;
+          static ACE_LOCK *lock = &the_lock;
+#else /* ACE_FACE_SAFETY_BASE */
           static ACE_LOCK *lock = 0;
+#endif /* ACE_FACE_SAFETY_BASE */
           if (ACE_Object_Manager::get_singleton_lock (lock) != 0)
             // Failed to acquire the lock!
             return 0;
@@ -422,9 +460,9 @@ ACE_DLL_Singleton_T<TYPE, ACE_LOCK>::dump (void)
   ACE_TRACE ("ACE_DLL_Singleton_T<TYPE, ACE_LOCK>::dump");
 
 #if !defined (ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES)
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("instance_ = %x"),
               ACE_DLL_Singleton_T<TYPE, ACE_LOCK>::instance_i ()));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES */
 #endif /* ACE_HAS_DUMP */
 }
@@ -476,7 +514,12 @@ ACE_DLL_Singleton_T<TYPE, ACE_LOCK>::instance (void)
           // Obtain a lock from the ACE_Object_Manager.  The pointer
           // is static, so we only obtain one per
           // ACE_Unmanaged_Singleton instantiation.
+#if defined(ACE_FACE_SAFETY_BASE)
+          static ACE_LOCK the_lock;
+          static ACE_LOCK *lock = &the_lock;
+#else /* ACE_FACE_SAFETY_BASE */
           static ACE_LOCK *lock = 0;
+#endif /* ACE_FACE_SAFETY_BASE */
           if (ACE_Object_Manager::get_singleton_lock (lock) != 0)
             // Failed to acquire the lock!
             return 0;

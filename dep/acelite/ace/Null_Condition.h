@@ -4,8 +4,6 @@
 /**
  *  @file    Null_Condition.h
  *
- *  $Id: Null_Condition.h 96076 2012-08-18 19:26:00Z johnnyw $
- *
  *   Moved from Synch.h.
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>

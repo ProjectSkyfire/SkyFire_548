@@ -4,8 +4,6 @@
 /**
  *  @file    IOStream_T.h
  *
- *  $Id: IOStream_T.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author James CE Johnson <jcej@lads.com>
  *  @author Jim Crossley <jim@lads.com>
  *

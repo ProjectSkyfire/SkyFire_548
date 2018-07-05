@@ -1,16 +1,22 @@
-// $Id: Pipe.cpp 92010 2010-09-24 14:54:19Z shuston $
-
 #include "ace/Pipe.h"
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
+#include "ace/OS_NS_stdio.h"
 #include "ace/OS_NS_sys_socket.h"
 #include "ace/OS_Memory.h"
 #include "ace/Truncate.h"
+#include "ace/Malloc_Base.h"
 
 #if defined (ACE_HAS_STREAM_PIPES) || defined (__QNX__)
 #  include "ace/OS_NS_unistd.h"
 #endif  // ACE_HAS_STREAM_PIPES || __QNX__
+
+#if defined (ACE_LACKS_LISTEN) && defined (ACE_LACKS_SOCKETPAIR) \
+  && !defined (ACE_HAS_STREAM_PIPES)
+#  include "ace/OS_NS_time.h"
+#  include "ace/os_include/sys/os_un.h"
+#endif
 
 #include "ace/os_include/netinet/os_tcp.h"
 
@@ -27,10 +33,10 @@ ACE_Pipe::dump (void) const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Pipe::dump");
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("handles_[0] = %d"), this->handles_[0]));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nhandles_[1] = %d\n"), this->handles_[1]));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("handles_[0] = %d"), this->handles_[0]));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nhandles_[1] = %d\n"), this->handles_[1]));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -39,7 +45,41 @@ ACE_Pipe::open (int buffer_size)
 {
   ACE_TRACE ("ACE_Pipe::open");
 
-#if defined (ACE_LACKS_SOCKETPAIR)
+#if defined (ACE_LACKS_LISTEN) && defined (ACE_LACKS_SOCKETPAIR) \
+  && !defined (ACE_HAS_STREAM_PIPES)
+  ACE_UNUSED_ARG (buffer_size);
+
+  if ((this->handles_[0] = ACE_OS::socket (AF_LOCAL, SOCK_DGRAM, 0)) == -1)
+    {
+      return -1;
+    }
+
+  sockaddr_un addr = {
+#if defined(ACE_VXWORKS) || defined(__APPLE__)
+    sizeof (sockaddr_un),
+#endif
+    AF_LOCAL, {}};
+  unsigned seed = static_cast<unsigned> (ACE_OS::time ());
+  ACE_OS::snprintf (addr.sun_path, sizeof addr.sun_path, "/tmp/ACE-Pipe-%d-%p",
+                    ACE_OS::rand_r (&seed), this);
+
+  if (ACE_OS::bind (this->handles_[0], (sockaddr*) &addr, sizeof addr) == -1)
+    {
+      this->close ();
+      return -1;
+    }
+
+  if ((this->handles_[1] = ACE_OS::socket (AF_LOCAL, SOCK_DGRAM, 0)) == -1 ||
+      ACE_OS::connect (this->handles_[1], (sockaddr*) &addr, sizeof addr) == -1)
+    {
+      ACE_OS::unlink (addr.sun_path);
+      this->close ();
+      return -1;
+    }
+
+  ACE_OS::unlink (addr.sun_path);
+
+#elif defined (ACE_LACKS_SOCKETPAIR)
   ACE_INET_Addr my_addr;
   ACE_SOCK_Acceptor acceptor;
   ACE_SOCK_Connector connector;
@@ -125,12 +165,12 @@ ACE_Pipe::open (int buffer_size)
 #elif defined (ACE_HAS_STREAM_PIPES) || defined (__QNX__)
   ACE_UNUSED_ARG (buffer_size);
   if (ACE_OS::pipe (this->handles_) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%p\n"),
                        ACE_TEXT ("pipe")),
                       -1);
 
-#if !defined(__QNX__)
+# if !defined(__QNX__)
   int arg = RMSGN;
 
   // Enable "msg no discard" mode, which ensures that record
@@ -143,18 +183,18 @@ ACE_Pipe::open (int buffer_size)
                         (void *) arg) == -1)
     {
       this->close ();
-      ACE_ERROR_RETURN ((LM_ERROR,
+      ACELIB_ERROR_RETURN ((LM_ERROR,
                          ACE_TEXT ("%p\n"),
                          ACE_TEXT ("ioctl")), -1);
     }
-#endif /* __QNX__ */
+# endif /* __QNX__ */
 
 #else  /* ! ACE_LACKS_SOCKETPAIR && ! ACE_HAS_STREAM_PIPES */
   if (ACE_OS::socketpair (AF_UNIX,
                           SOCK_STREAM,
                           0,
                           this->handles_) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("%p\n"),
                        ACE_TEXT ("socketpair")),
                       -1);
@@ -237,7 +277,7 @@ ACE_Pipe::ACE_Pipe (ACE_HANDLE handles[2])
   ACE_TRACE ("ACE_Pipe::ACE_Pipe");
 
   if (this->open (handles) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("ACE_Pipe::ACE_Pipe")));
 }
 
@@ -274,7 +314,7 @@ int ACE_Pipe::close_write (void)
 // the ints (basically, an varargs version of writev).  The count N is
 // the *total* number of trailing arguments, *not* a couple of the
 // number of tuple pairs!
-
+#if !defined (ACE_LACKS_VA_FUNCTIONS)
 ssize_t
 ACE_Pipe::send (size_t n, ...) const
 {
@@ -285,9 +325,16 @@ ACE_Pipe::send (size_t n, ...) const
 #if defined (ACE_HAS_ALLOCA)
   iovp = (iovec *) alloca (total_tuples * sizeof (iovec));
 #else
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_ALLOCATOR_RETURN (iovp, (iovec *)
+                        ACE_Allocator::instance ()->malloc (total_tuples *
+                                                            sizeof (iovec)),
+                        -1);
+# else
   ACE_NEW_RETURN (iovp,
                   iovec[total_tuples],
                   -1);
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
 
   va_start (argp, n);
@@ -309,7 +356,11 @@ ACE_Pipe::send (size_t n, ...) const
 #endif /* ACE_WIN32 */
 
 #if !defined (ACE_HAS_ALLOCA)
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_Allocator::instance ()->free (iovp);
+# else
   delete [] iovp;
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
   va_end (argp);
   return result;
@@ -331,9 +382,16 @@ ACE_Pipe::recv (size_t n, ...) const
 #if defined (ACE_HAS_ALLOCA)
   iovp = (iovec *) alloca (total_tuples * sizeof (iovec));
 #else
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_ALLOCATOR_RETURN (iovp, (iovec *)
+                        ACE_Allocator::instance ()->malloc (total_tuples *
+                                                            sizeof (iovec)),
+                        -1);
+# else
   ACE_NEW_RETURN (iovp,
                   iovec[total_tuples],
                   -1);
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
 
   va_start (argp, n);
@@ -355,10 +413,15 @@ ACE_Pipe::recv (size_t n, ...) const
 #endif /* ACE_WIN32 */
 
 #if !defined (ACE_HAS_ALLOCA)
+# ifdef ACE_HAS_ALLOC_HOOKS
+  ACE_Allocator::instance ()->free (iovp);
+# else
   delete [] iovp;
+# endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* !defined (ACE_HAS_ALLOCA) */
   va_end (argp);
   return result;
 }
+#endif /* !ACE_LACKS_VA_FUNCTIONS */
 
 ACE_END_VERSIONED_NAMESPACE_DECL

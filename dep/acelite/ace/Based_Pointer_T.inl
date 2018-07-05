@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Based_Pointer_T.inl 81705 2008-05-15 14:02:02Z johnnyw $
-
 #define ACE_COMPUTE_BASED_POINTER(P) (((char *) (P) - (P)->base_offset_) + (P)->target_)
 #include "ace/Global_Macros.h"
 

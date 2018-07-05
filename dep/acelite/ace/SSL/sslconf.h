@@ -4,8 +4,6 @@
 /**
  *  @file     sslconf.h
  *
- *  $Id: sslconf.h 83879 2008-11-26 10:46:30Z smcqueen $
- *
  *  @author   Carlos O'Ryan <coryan@ece.uci.edu>
  */
 //=============================================================================

@@ -1,5 +1,3 @@
-// $Id: Framework_Component.cpp 92208 2010-10-13 06:20:39Z johnnyw $
-
 #include "ace/Framework_Component.h"
 
 #if !defined (__ACE_INLINE__)
@@ -7,7 +5,7 @@
 #endif /* __ACE_INLINE__ */
 
 #include "ace/Object_Manager.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/DLL_Manager.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/OS_NS_string.h"
@@ -44,9 +42,15 @@ ACE_Framework_Repository::open (int size)
 
   ACE_Framework_Component **temp = 0;
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (temp,
+                        static_cast<ACE_Framework_Component**> (ACE_Allocator::instance()->malloc(sizeof(ACE_Framework_Component*) * size)),
+                        -1);
+#else
   ACE_NEW_RETURN (temp,
                   ACE_Framework_Component *[size],
                   -1);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   this->component_vector_ = temp;
   this->total_size_ = size;
@@ -75,7 +79,11 @@ ACE_Framework_Repository::close (void)
             delete s;
           }
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_Allocator::instance()->free(this->component_vector_);
+#else
       delete [] this->component_vector_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
       this->component_vector_ = 0;
       this->current_size_ = 0;
     }
@@ -133,7 +141,7 @@ ACE_Framework_Repository::register_component (ACE_Framework_Component *fc)
     if (this->component_vector_[i] &&
         fc->this_ == this->component_vector_[i]->this_)
       {
-        ACE_ERROR_RETURN ((LM_ERROR,
+        ACELIB_ERROR_RETURN ((LM_ERROR,
           "AFR::register_component: error, compenent already registered\n"),
                           -1);
       }
@@ -193,7 +201,7 @@ ACE_Framework_Repository::remove_dll_components_i (const ACE_TCHAR *dll_name)
         ACE_OS::strcmp (this->component_vector_[i]->dll_name_, dll_name) == 0)
       {
           if (ACE::debug ())
-            ACE_DEBUG ((LM_DEBUG,
+            ACELIB_DEBUG ((LM_DEBUG,
                         ACE_TEXT ("AFR::remove_dll_components_i (%s) ")
                         ACE_TEXT ("component \"%s\"\n"),
                         dll_name, this->component_vector_[i]->name_));
@@ -268,7 +276,7 @@ ACE_Framework_Repository::ACE_Framework_Repository (int size)
   ACE_TRACE ("ACE_Framework_Repository::ACE_Framework_Repository");
 
   if (this->open (size) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_Framework_Repository")));
 }

@@ -1,5 +1,3 @@
-// $Id: CDR_Stream.cpp 95896 2012-06-18 20:42:07Z hillj $
-
 #include "ace/CDR_Stream.h"
 #include "ace/SString.h"
 #include "ace/Auto_Ptr.h"
@@ -531,22 +529,10 @@ ACE_OutputCDR::write_8 (const ACE_CDR::ULongLong *x)
 
   if (this->adjust (ACE_CDR::LONGLONG_SIZE, buf) == 0)
     {
-#if defined (__arm__) && !defined (ACE_HAS_IPHONE)
-      // Convert to Intel format (12345678 => 56781234)
-      const char *orig = reinterpret_cast<const char *> (x);
-      char *target = buf;
-      register ACE_UINT32 x =
-        *reinterpret_cast<const ACE_UINT32 *> (orig);
-      register ACE_UINT32 y =
-        *reinterpret_cast<const ACE_UINT32 *> (orig + 4);
-      *reinterpret_cast<ACE_UINT32 *> (target) = y;
-      *reinterpret_cast<ACE_UINT32 *> (target + 4) = x;
-      return true;
-#else
-#  if !defined (ACE_ENABLE_SWAP_ON_WRITE)
+#if !defined (ACE_ENABLE_SWAP_ON_WRITE)
       *reinterpret_cast<ACE_CDR::ULongLong *> (buf) = *x;
       return true;
-#  else
+#else
       if (!this->do_byte_swap_)
         {
           *reinterpret_cast<ACE_CDR::ULongLong *> (buf) = *x;
@@ -557,8 +543,7 @@ ACE_OutputCDR::write_8 (const ACE_CDR::ULongLong *x)
           ACE_CDR::swap_8 (reinterpret_cast<const char*> (x), buf);
           return true;
         }
-#  endif /* ACE_ENABLE_SWAP_ON_WRITE */
-#endif /* !__arm__ */
+#endif /* ACE_ENABLE_SWAP_ON_WRITE */
      }
 
   return false;
@@ -1535,9 +1520,15 @@ ACE_InputCDR::read_string (ACE_CDR::Char *&x)
   // the memory is allocated.
   if (len > 0 && len <= this->length())
     {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_ALLOCATOR_RETURN (x,
+                            static_cast<ACE_CDR::Char*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::Char) * (len))),
+                            0);
+#else
       ACE_NEW_RETURN (x,
                       ACE_CDR::Char[len],
                       0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
       ACE_Auto_Basic_Array_Ptr<ACE_CDR::Char> safe_data (x);
 
@@ -1551,9 +1542,16 @@ ACE_InputCDR::read_string (ACE_CDR::Char *&x)
     {
       // Convert any null strings to empty strings since empty
       // strings can cause crashes. (See bug 58.)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_ALLOCATOR_RETURN (x,
+                            static_cast<ACE_CDR::Char*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::Char) * (1))),
+                            0);
+#else
       ACE_NEW_RETURN (x,
                       ACE_CDR::Char[1],
                       0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
       ACE_OS::strcpy (const_cast<char *&> (x), "");
       return true;
     }
@@ -1616,9 +1614,15 @@ ACE_InputCDR::read_wstring (ACE_CDR::WChar*& x)
               ACE_OutputCDR::wchar_maxbytes_);
 
           //allocating one extra for the null character needed by applications
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_ALLOCATOR_RETURN (x,
+                                static_cast<ACE_CDR::WChar*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::WChar) * (len + 1))),
+                                0);
+#else
           ACE_NEW_RETURN (x,
                           ACE_CDR::WChar [len + 1],
                           false);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
           ACE_auto_ptr_reset (safe_data, x);
 
@@ -1637,9 +1641,15 @@ ACE_InputCDR::read_wstring (ACE_CDR::WChar*& x)
         }
       else
         {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_ALLOCATOR_RETURN (x,
+                                static_cast<ACE_CDR::WChar*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::WChar) * (len))),
+                                0);
+#else
           ACE_NEW_RETURN (x,
                           ACE_CDR::WChar [len],
                           false);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
           ACE_auto_ptr_reset (safe_data, x);
 
@@ -1655,9 +1665,16 @@ ACE_InputCDR::read_wstring (ACE_CDR::WChar*& x)
     {
       // Convert any null strings to empty strings since empty
       // strings can cause crashes. (See bug 58.)
-      ACE_NEW_RETURN (x,
-                      ACE_CDR::WChar[1],
-                      false);
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_ALLOCATOR_RETURN (x,
+                                static_cast<ACE_CDR::WChar*> (ACE_Allocator::instance()->malloc(sizeof (ACE_CDR::WChar) * (1))),
+                                0);
+#else
+          ACE_NEW_RETURN (x,
+                          ACE_CDR::WChar [1],
+                          false);
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
       x[0] = '\x00';
       return true;
     }
@@ -1839,39 +1856,10 @@ ACE_InputCDR::read_8 (ACE_CDR::ULongLong *x)
   if (this->adjust (ACE_CDR::LONGLONG_SIZE, buf) == 0)
     {
 #if !defined (ACE_DISABLE_SWAP_ON_READ)
-#  if defined (__arm__) && !defined (ACE_HAS_IPHONE)
-      if (!this->do_byte_swap_)
-        {
-          // Convert from Intel format (12345678 => 56781234)
-          const char *orig = buf;
-          char *target = reinterpret_cast<char *> (x);
-          register ACE_UINT32 x =
-            *reinterpret_cast<const ACE_UINT32 *> (orig);
-          register ACE_UINT32 y =
-            *reinterpret_cast<const ACE_UINT32 *> (orig + 4);
-          *reinterpret_cast<ACE_UINT32 *> (target) = y;
-          *reinterpret_cast<ACE_UINT32 *> (target + 4) = x;
-        }
-      else
-        {
-          // Convert from Sparc format (12345678 => 43218765)
-          const char *orig = buf;
-          char *target = reinterpret_cast<char *> (x);
-          register ACE_UINT32 x =
-            *reinterpret_cast<const ACE_UINT32 *> (orig);
-          register ACE_UINT32 y =
-            *reinterpret_cast<const ACE_UINT32 *> (orig + 4);
-          x = (x << 24) | ((x & 0xff00) << 8) | ((x & 0xff0000) >> 8) | (x >> 24);
-          y = (y << 24) | ((y & 0xff00) << 8) | ((y & 0xff0000) >> 8) | (y >> 24);
-          *reinterpret_cast<ACE_UINT32 *> (target) = x;
-          *reinterpret_cast<ACE_UINT32 *> (target + 4) = y;
-        }
-#  else
       if (!this->do_byte_swap_)
         *x = *reinterpret_cast<ACE_CDR::ULongLong *> (buf);
       else
         ACE_CDR::swap_8 (buf, reinterpret_cast<char *> (x));
-#  endif /* !__arm__ */
 #else
       *x = *reinterpret_cast<ACE_CDR::ULongLong *> (buf);
 #endif /* ACE_DISABLE_SWAP_ON_READ */

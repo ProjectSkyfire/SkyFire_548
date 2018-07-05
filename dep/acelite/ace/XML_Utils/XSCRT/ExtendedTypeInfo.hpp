@@ -1,7 +1,5 @@
 // file      : XSCRT/ExtendedTypeInfo.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: ExtendedTypeInfo.hpp 95802 2012-05-31 12:37:36Z johnnyw $
-
 #ifndef XSCRT_EXTENDED_TYPE_INFO_HPP
 #define XSCRT_EXTENDED_TYPE_INFO_HPP
 

@@ -1,5 +1,3 @@
-// $Id: TLI_Stream.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 /* Defines the member functions for the base class of the ACE_TLI_Stream
    abstraction. */
 

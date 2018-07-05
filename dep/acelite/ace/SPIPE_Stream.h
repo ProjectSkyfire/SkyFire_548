@@ -4,8 +4,6 @@
 /**
  *  @file    SPIPE_Stream.h
  *
- *  $Id: SPIPE_Stream.h 84480 2009-02-16 18:58:16Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -112,6 +110,7 @@ public:
   /// Recv iovecs via the OS "scatter-read" operation.
   ssize_t recv (iovec iov[], int len) const;
 
+#ifndef ACE_LACKS_VA_FUNCTIONS
   /**
    * Send N char *ptrs and int lengths.  Note that the char *'s
    * precede the ints (basically, an varargs version of writev).  The
@@ -128,6 +127,7 @@ public:
    * number of tuple pairs!
    */
   ssize_t recv (size_t len, ...) const;
+#endif
 
   /// Send @a len bytes via Win32 <WriteFile> using overlapped I/O.
   ssize_t send (const void *buf, size_t len, ACE_OVERLAPPED *overlapped) const;

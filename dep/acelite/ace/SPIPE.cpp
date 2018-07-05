@@ -1,8 +1,10 @@
-// $Id: SPIPE.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/SPIPE.h"
 
 #include "ace/OS_NS_unistd.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SPIPE.inl"

@@ -4,8 +4,6 @@
 /**
  *  @file    Intrusive_Auto_Ptr.h
  *
- *  $Id: Intrusive_Auto_Ptr.h 81388 2008-04-23 14:02:05Z johnnyw $
- *
  *  @author Iliyan Jeliazkov <iliyan@ociweb.com>
  *
  *  @note Modeled on http://www.boost.org/boost/intrusive_ptr.hpp
@@ -17,7 +15,6 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/Auto_Ptr.h"
 #include "ace/Atomic_Op.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

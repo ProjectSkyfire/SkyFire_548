@@ -4,8 +4,6 @@
 /**
  *  @file   Init_ACE.h
  *
- *  $Id: Init_ACE.h 88794 2010-02-01 19:15:36Z schmidt $
- *
  *  Initialize and finalize the ACE library services.  You can
  *  generally execute the @a ACE::init() and @a ACE::fini() sequence
  *  multiple times, but be aware that nothing that ACE controls (e.g.,
@@ -56,8 +54,8 @@ namespace ACE
   //  Used internally, so not exported.
 
   /**
-   * Counter to match <init()>/<fini()> calls.  <init()> must increment it;
-   * <fini()> must decrement it.  <fini()> then does nothing until it
+   * Counter to match init()/fini() calls.  init() must increment it;
+   * fini() must decrement it.  fini() then does nothing until it
    * reaches 0.
    */
   extern unsigned int init_fini_count_;

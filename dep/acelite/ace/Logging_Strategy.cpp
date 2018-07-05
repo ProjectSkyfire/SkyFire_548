@@ -1,5 +1,3 @@
-// $Id: Logging_Strategy.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #include "ace/Logging_Strategy.h"
 #include "ace/Service_Config.h"
 #include "ace/ACE.h"
@@ -10,7 +8,7 @@
 #include "ace/streams.h"
 
 #include "ace/Lib_Find.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/Reactor.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_stdio.h"
@@ -175,7 +173,11 @@ ACE_Logging_Strategy::parse_args (int argc, ACE_TCHAR *argv[])
         case 'k':
           // Ensure that the LOGGER flag is set
           ACE_SET_BITS (this->flags_, ACE_Log_Msg::LOGGER);
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free(this->logger_key_);
+#else
           delete [] this->logger_key_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
           this->logger_key_ = ACE::strnew (get_opt.opt_arg ());
           break;
         case 'm':
@@ -184,7 +186,11 @@ ACE_Logging_Strategy::parse_args (int argc, ACE_TCHAR *argv[])
           this->max_size_ <<= 10;       // convert from KB to bytes.
           break;
         case 'n':
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free(this->program_name_);
+#else
           delete [] this->program_name_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
           this->program_name_ = ACE::strnew (get_opt.opt_arg ());
           break;
         case 'N':
@@ -204,7 +210,11 @@ ACE_Logging_Strategy::parse_args (int argc, ACE_TCHAR *argv[])
         case 's':
           // Ensure that the OSTREAM flag is set
           ACE_SET_BITS (this->flags_, ACE_Log_Msg::OSTREAM);
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free(this->filename_);
+#else
           delete [] this->filename_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
           this->filename_ = ACE::strnew (get_opt.opt_arg ());
           break;
         case 't':
@@ -243,15 +253,20 @@ ACE_Logging_Strategy::ACE_Logging_Strategy (void)
 #if defined (ACE_DEFAULT_LOGFILE)
   this->filename_ = ACE::strnew (ACE_DEFAULT_LOGFILE);
 #else /* ACE_DEFAULT_LOGFILE */
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR (this->filename_,
+                 static_cast<ACE_TCHAR *>(ACE_Allocator::instance()->malloc(sizeof(ACE_TCHAR) * (MAXPATHLEN + 1))));
+#else
   ACE_NEW (this->filename_,
            ACE_TCHAR[MAXPATHLEN + 1]);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   // Get the temporary directory
   if (ACE::get_temp_dir
       (this->filename_,
        MAXPATHLEN - 7) == -1) // 7 for "logfile"
     {
-      ACE_ERROR ((LM_ERROR,
+      ACELIB_ERROR ((LM_ERROR,
                   ACE_TEXT ("Temporary path too long, ")
                   ACE_TEXT ("defaulting to current directory\n")));
       this->filename_[0] = 0;
@@ -267,17 +282,30 @@ ACE_Logging_Strategy::~ACE_Logging_Strategy (void)
 {
   // This is allocated in constructor, so it must be deallocated in
   // the destructor!
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->filename_);
+#else
   delete [] this->filename_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 int
 ACE_Logging_Strategy::fini (void)
 {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->filename_);
+#else
   delete [] this->filename_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
   this->filename_ = 0; // Avoid double deletions.
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->logger_key_);
+  ACE_Allocator::instance()->free(this->program_name_);;
+#else
   delete [] this->logger_key_;
   delete [] this->program_name_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   if (this->reactor ()
       && this->interval_ > 0 && this->max_size_ > 0)
@@ -406,7 +434,7 @@ ACE_Logging_Strategy::handle_timeout (const ACE_Time_Value &,
     {
       // Lock out any other logging.
       if (this->log_msg_->acquire ())
-        ACE_ERROR_RETURN ((LM_ERROR,
+        ACELIB_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT ("Cannot acquire lock!\n")),
                           -1);
 
@@ -478,14 +506,14 @@ ACE_Logging_Strategy::handle_timeout (const ACE_Time_Value &,
 
               for (int i = max_num ; i > 1 ;i--)
                 {
-                  ACE_OS::sprintf (backup,
-                                   ACE_TEXT ("%s.%d"),
-                                   this->filename_,
-                                   i);
-                  ACE_OS::sprintf (to_backup,
-                                   ACE_TEXT ("%s.%d"),
-                                   this->filename_,
-                                   i - 1);
+                  ACE_OS::snprintf (backup, MAXPATHLEN + 1,
+                                    ACE_TEXT ("%s.%d"),
+                                    this->filename_,
+                                    i);
+                  ACE_OS::snprintf (to_backup, MAXPATHLEN + 1,
+                                    ACE_TEXT ("%s.%d"),
+                                    this->filename_,
+                                    i - 1);
 
                   // Remove any existing old file; ignore error as
                   // file may not exist.
@@ -495,19 +523,19 @@ ACE_Logging_Strategy::handle_timeout (const ACE_Time_Value &,
                   // backup log file.
                   ACE_OS::rename (to_backup, backup);
                 }
-              ACE_OS::sprintf (backup,
-                               ACE_TEXT ("%s.1"),
-                               this->filename_);
+              ACE_OS::snprintf (backup, MAXPATHLEN + 1,
+                                ACE_TEXT ("%s.1"),
+                                this->filename_);
             }
           else
             {
               if (fixed_number_ && count_>max_file_number_)
                 count_ = 1; // start over from 1
 
-              ACE_OS::sprintf (backup,
-                               ACE_TEXT ("%s.%d"),
-                               this->filename_,
-                               count_);
+              ACE_OS::snprintf (backup, MAXPATHLEN + 1,
+                                ACE_TEXT ("%s.%d"),
+                                this->filename_,
+                                count_);
             }
 
           // Remove any existing old file; ignore error as file may
@@ -519,7 +547,7 @@ ACE_Logging_Strategy::handle_timeout (const ACE_Time_Value &,
           ACE_OS::rename (this->filename_, backup);
         }
       else
-        ACE_ERROR ((LM_ERROR,
+        ACELIB_ERROR ((LM_ERROR,
                     ACE_TEXT ("Backup file name too long; ")
                     ACE_TEXT ("backup logfile not saved.\n")));
 
@@ -586,8 +614,6 @@ ACE_Logging_Strategy::log_msg (ACE_Log_Msg *log_msg)
   this->log_msg_  = log_msg;
 }
 
-ACE_END_VERSIONED_NAMESPACE_DECL
-
 // The following is a "Factory" used by the ACE_Service_Config and
 // svc.conf file to dynamically initialize the state of the
 // Logging_Strategy.
@@ -600,6 +626,8 @@ ACE_STATIC_SVC_DEFINE (ACE_Logging_Strategy,
                        0)
 
 ACE_FACTORY_DEFINE (ACE, ACE_Logging_Strategy)
+
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 // _get_dll_unload_policy() prevents ACE from being unloaded and having its
 // framework components run down if/when the Logging Strategy is unloaded.

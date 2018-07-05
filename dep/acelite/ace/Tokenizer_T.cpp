@@ -1,12 +1,9 @@
-// $Id: Tokenizer_T.cpp 91813 2010-09-17 07:52:52Z johnnyw $
-
 #ifndef ACE_TOKENIZER_T_CPP
 #define ACE_TOKENIZER_T_CPP
 
 #include "ace/ACE.h"
 #include "ace/Malloc_Base.h"
 #include "ace/String_Base.h"
-#include "ace/Auto_Ptr.h"
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

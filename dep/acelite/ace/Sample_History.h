@@ -4,8 +4,6 @@
 /**
  *  @file    Sample_History.h
  *
- *  $Id: Sample_History.h 95747 2012-05-13 17:14:12Z johnnyw $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================

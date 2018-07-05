@@ -4,8 +4,6 @@
 /**
  *  @file    Hash_Map_Manager_T.h
  *
- *  $Id: Hash_Map_Manager_T.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -22,7 +20,7 @@
 
 #include "ace/Default_Constants.h"
 #include "ace/Functor_T.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include <iterator>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -428,6 +426,9 @@ public:
   const_reverse_iterator rbegin (void) const;
   const_reverse_iterator rend (void) const;
 
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
+
 protected:
   // = The following methods do the actual work.
 
@@ -603,7 +604,7 @@ public:
   typedef typename container_type::difference_type difference_type;
 
   // = Initialization method.
-  /// Contructor.
+  /// Constructor.
   /**
    *  If @a head != @c false, the iterator constructed is positioned
    *  at the head of the map.  It is positioned at the end otherwise.
@@ -617,7 +618,7 @@ public:
     ACE_LOCK> &mm,
     bool head);
 
-  /// Contructor.
+  /// Constructor.
   /**
    * This constructor positions the iterator to the given @a entry.
    */
@@ -702,7 +703,7 @@ public:
   typedef typename container_type::difference_type difference_type;
 
   // = Initialization method.
-  /// Contructor.  If head the iterator constructed is positioned
+  /// Constructor.  If head the iterator constructed is positioned
   /// at the head of the map, it is positioned at the end otherwise.
   ACE_Hash_Map_Const_Iterator_Base_Ex (const ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK> &mm,
                                        bool head);
@@ -787,7 +788,7 @@ public:
   ACE_Hash_Map_Iterator_Ex (ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK> &mm,
                             int tail = 0);
 
-  /// Contructor.
+  /// Constructor.
   /**
    * This constructor positions the iterator to the given @a entry.
    */

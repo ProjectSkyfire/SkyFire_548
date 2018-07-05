@@ -4,8 +4,6 @@
 /**
  *  @file    Thread_Control.h
  *
- *  $Id: Thread_Control.h 94054 2011-05-11 18:28:20Z johnnyw $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================

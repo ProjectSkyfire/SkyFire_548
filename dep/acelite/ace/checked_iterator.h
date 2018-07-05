@@ -23,8 +23,6 @@
  * not supported, the pointer passed to the function is returned
  * instead.
  *
- * $Id: checked_iterator.h 88263 2009-12-20 07:58:09Z johnnyw $
- *
  * @internal The functions and types in this header are meant for
  *           internal use.  They may change at any point between
  *           releases.

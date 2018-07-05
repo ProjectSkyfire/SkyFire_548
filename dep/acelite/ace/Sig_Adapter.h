@@ -4,8 +4,6 @@
 /**
  *  @file    Sig_Adapter.h
  *
- *  $Id: Sig_Adapter.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -46,6 +44,8 @@ public:
 
   /// Called by the <Reactor> to dispatch the signal handler.
   virtual int handle_signal (int, siginfo_t *, ucontext_t *);
+
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   /// Key for this signal handler (used to remove it).

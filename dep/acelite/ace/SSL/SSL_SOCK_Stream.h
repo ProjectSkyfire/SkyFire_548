@@ -4,8 +4,6 @@
 /**
  *  @file    SSL_SOCK_Stream.h
  *
- *  $Id: SSL_SOCK_Stream.h 91743 2010-09-13 18:24:51Z johnnyw $
- *
  *  @author Ossama Othman <ossama@uci.edu>
  *  @author Carlos O'Ryan <coryan@uci.edu>
  *  @author John Heitmann

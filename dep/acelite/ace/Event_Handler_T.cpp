@@ -1,7 +1,4 @@
 // Event_Handler_T.cpp
-//
-// $Id: Event_Handler_T.cpp 91626 2010-09-07 10:59:20Z johnnyw $
-
 #ifndef ACE_EVENT_HANDLER_T_CPP
 #define ACE_EVENT_HANDLER_T_CPP
 

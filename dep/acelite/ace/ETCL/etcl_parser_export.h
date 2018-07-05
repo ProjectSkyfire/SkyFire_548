@@ -1,6 +1,5 @@
 
 // -*- C++ -*-
-// $Id: etcl_parser_export.h 81640 2008-05-07 19:04:11Z parsons $
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl
 // ------------------------------

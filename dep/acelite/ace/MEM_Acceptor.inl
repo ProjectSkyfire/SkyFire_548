@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: MEM_Acceptor.inl 91688 2010-09-09 11:21:50Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE int

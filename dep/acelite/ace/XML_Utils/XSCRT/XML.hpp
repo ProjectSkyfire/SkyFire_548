@@ -1,7 +1,5 @@
 // file      : XSCRT/XML.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: XML.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 
 #ifndef XSCRT_XML_HPP
 #define XSCRT_XML_HPP

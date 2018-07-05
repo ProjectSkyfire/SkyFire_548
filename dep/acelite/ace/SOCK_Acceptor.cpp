@@ -1,12 +1,13 @@
-// $Id: SOCK_Acceptor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/SOCK_Acceptor.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_Errno.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_sys_socket.h"
 #include "ace/os_include/os_fcntl.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SOCK_Acceptor.inl"
@@ -220,12 +221,15 @@ ACE_SOCK_Acceptor::dump (void) const
 int
 ACE_SOCK_Acceptor::shared_open (const ACE_Addr &local_sap,
                                 int protocol_family,
-                                int backlog)
+                                int backlog,
+                                int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Acceptor::shared_open");
   int error = 0;
 
-#if defined (ACE_HAS_IPV6)
+#if !defined (ACE_HAS_IPV6)
+  ACE_UNUSED_ARG (ipv6_only);
+#else /* defined (ACE_HAS_IPV6) */
   if (protocol_family == PF_INET6)
     {
       sockaddr_in6 local_inet6_addr;
@@ -242,16 +246,31 @@ ACE_SOCK_Acceptor::shared_open (const ACE_Addr &local_sap,
       else
         local_inet6_addr = *reinterpret_cast<sockaddr_in6 *> (local_sap.get_addr ());
 
-      // We probably don't need a bind_port written here.
-      // There are currently no supported OS's that define
-      // ACE_LACKS_WILDCARD_BIND.
-      if (ACE_OS::bind (this->get_handle (),
-                        reinterpret_cast<sockaddr *> (&local_inet6_addr),
-                        sizeof local_inet6_addr) == -1)
+      /*
+       * Handle IPv6-only requests. On Windows, v6-only is the default
+       * unless it is turned off. On Linux, v4/v6 dual is the default
+       * unless v6-only is turned on.
+       * This must be done before attempting to bind the address.
+       * On Windows older than Vista this will fail.
+       */
+      int setting = !!ipv6_only;
+      if (-1 == ACE_OS::setsockopt (this->get_handle (),
+                                    IPPROTO_IPV6,
+                                    IPV6_V6ONLY,
+                                    (char *)&setting,
+                                    sizeof (setting)))
         error = 1;
+      else
+        // We probably don't need a bind_port written here.
+        // There are currently no supported OS's that define
+        // ACE_LACKS_WILDCARD_BIND.
+        if (ACE_OS::bind (this->get_handle (),
+                          reinterpret_cast<sockaddr *> (&local_inet6_addr),
+                          sizeof local_inet6_addr) == -1)
+          error = 1;
     }
   else
-#endif
+#endif /* ACE_HAS_IPV6 */
   if (protocol_family == PF_INET)
     {
       sockaddr_in local_inet_addr;
@@ -301,7 +320,8 @@ ACE_SOCK_Acceptor::open (const ACE_Addr &local_sap,
                          int reuse_addr,
                          int protocol_family,
                          int backlog,
-                         int protocol)
+                         int protocol,
+                         int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Acceptor::open");
 
@@ -319,7 +339,8 @@ ACE_SOCK_Acceptor::open (const ACE_Addr &local_sap,
   else
     return this->shared_open (local_sap,
                               protocol_family,
-                              backlog);
+                              backlog,
+                              ipv6_only);
 }
 
 ACE_SOCK_Acceptor::ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
@@ -329,7 +350,8 @@ ACE_SOCK_Acceptor::ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
                                       int reuse_addr,
                                       int protocol_family,
                                       int backlog,
-                                      int protocol)
+                                      int protocol,
+                                      int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Acceptor::ACE_SOCK_Acceptor");
   if (this->open (local_sap,
@@ -339,8 +361,9 @@ ACE_SOCK_Acceptor::ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
                   reuse_addr,
                   protocol_family,
                   backlog,
-                  protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+                  protocol,
+                  ipv6_only) == -1)
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_Acceptor")));
 }
@@ -352,7 +375,8 @@ ACE_SOCK_Acceptor::open (const ACE_Addr &local_sap,
                          int reuse_addr,
                          int protocol_family,
                          int backlog,
-                         int protocol)
+                         int protocol,
+                         int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Acceptor::open");
 
@@ -375,7 +399,8 @@ ACE_SOCK_Acceptor::open (const ACE_Addr &local_sap,
   else
     return this->shared_open (local_sap,
                               protocol_family,
-                              backlog);
+                              backlog,
+                              ipv6_only);
 }
 
 // General purpose routine for performing server ACE_SOCK creation.
@@ -384,15 +409,17 @@ ACE_SOCK_Acceptor::ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
                                       int reuse_addr,
                                       int protocol_family,
                                       int backlog,
-                                      int protocol)
+                                      int protocol,
+                                      int ipv6_only)
 {
   ACE_TRACE ("ACE_SOCK_Acceptor::ACE_SOCK_Acceptor");
   if (this->open (local_sap,
                   reuse_addr,
                   protocol_family,
                   backlog,
-                  protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+                  protocol,
+                  ipv6_only) == -1)
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_SOCK_Acceptor")));
 }

@@ -4,8 +4,6 @@
 /**
  *  @file   OS_NS_wchar.h
  *
- *  $Id: OS_NS_wchar.h 91995 2010-09-24 12:45:24Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...

@@ -4,11 +4,8 @@
 /**
  *  @file   SSL_Asynch_BIO.h
  *
- *  $Id: SSL_Asynch_BIO.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Alexander Libman <alibman@baltimore.com>
  *  @author Ossama Othman <ossama@uci.edu>
- *
  */
 //=============================================================================
 

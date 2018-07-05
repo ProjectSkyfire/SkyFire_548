@@ -1,5 +1,3 @@
-// $Id: CDR_Size.cpp 91813 2010-09-17 07:52:52Z johnnyw $
-
 #include "ace/CDR_Size.h"
 #include "ace/SString.h"
 #include "ace/OS_Memory.h"

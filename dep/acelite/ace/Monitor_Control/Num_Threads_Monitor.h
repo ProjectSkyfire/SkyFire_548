@@ -4,8 +4,6 @@
 /**
  * @file Num_Threads_Monitor.h
  *
- * $Id: Num_Threads_Monitor.h 95533 2012-02-14 22:59:17Z wotte $
- *
  * @author Jeff Parsons <j.parsons@vanderbilt.edu>
  */
 //=============================================================================

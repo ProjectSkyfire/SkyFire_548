@@ -4,8 +4,6 @@
 /**
  *  @file    Addr.h
  *
- *  $Id: Addr.h 81030 2008-03-20 12:43:29Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -59,7 +57,7 @@ public:
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (void *, int len);
+  virtual void set_addr (const void *, int len);
 
   // = Equality/inequality tests
   /// Check for address equality.

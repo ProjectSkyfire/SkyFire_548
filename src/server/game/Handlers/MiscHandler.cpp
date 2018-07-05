@@ -2555,3 +2555,11 @@ void WorldSession::HandleSelectFactionOpcode(WorldPacket& recvPacket)
 
     _player->SendMovieStart(116);
 }
+
+void WorldSession::SendPlayMusic(uint32 SoundKitID)
+{
+    WorldPacket data(SMSG_PLAY_MUSIC, 4);
+    data << uint32(SoundKitID);
+    SendPacket(&data);
+}
+

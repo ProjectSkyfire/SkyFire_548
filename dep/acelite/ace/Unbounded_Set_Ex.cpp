@@ -1,11 +1,9 @@
-// $Id: Unbounded_Set_Ex.cpp 94304 2011-07-07 15:25:58Z johnnyw $
-
 #ifndef ACE_UNBOUNDED_SET_EX_CPP
 #define ACE_UNBOUNDED_SET_EX_CPP
 
 #include "ace/Unbounded_Set.h"
 #include "ace/Malloc_Base.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -17,7 +15,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Unbounded_Set_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Unbounded_Set_Ex)
 
 template <class T, class C> size_t
 ACE_Unbounded_Set_Ex<T, C>::size (void) const
@@ -64,10 +62,10 @@ ACE_Unbounded_Set_Ex<T, C>::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Unbounded_Set_Ex<T, C>::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nhead_ = %u"), this->head_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nhead_->next_ = %u"), this->head_->next_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("\ncur_size_ = %d\n"), this->cur_size_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nhead_ = %u"), this->head_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\nhead_->next_ = %u"), this->head_->next_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("\ncur_size_ = %d\n"), this->cur_size_));
 
   T *item = 0;
 #if !defined (ACE_NLOGGING)
@@ -78,9 +76,9 @@ ACE_Unbounded_Set_Ex<T, C>::dump (void) const
   for (const_iterator i (this->begin ());
        i != the_end;
        ++i)
-    ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("count = %u\n"), count++));
+    ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("count = %u\n"), count++));
 
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -228,13 +226,18 @@ ACE_Unbounded_Set_Ex<T, C>::remove (const T &item)
 {
   // ACE_TRACE ("ACE_Unbounded_Set_Ex<T, C>::remove");
 
-  // Insert the item to be founded into the dummy node.
+  // Insert the item to be found into the dummy node.
   this->head_->item_ = item;
 
   NODE *curr = this->head_;
 
   while (!(this->comp_ (curr->next_->item_, item)))
     curr = curr->next_;
+
+  // reset the dummy node. This ensures reference counted items are
+  // completely released. Without this, a reference can linger as
+  // the dummy long after it was removed from the list.
+  this->head_->item_ = T();
 
   if (curr->next_ == this->head_)
     return -1; // Item was not found.
@@ -280,7 +283,7 @@ ACE_Unbounded_Set_Ex<T, C>::end (void) const
   return const_iterator (*this, 1);
 }
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Unbounded_Set_Ex_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Unbounded_Set_Ex_Iterator)
 
 template <class T, class C> void
 ACE_Unbounded_Set_Ex_Iterator<T, C>::dump (void) const
@@ -387,7 +390,7 @@ ACE_Unbounded_Set_Ex_Iterator<T, C>::operator!= (const ACE_Unbounded_Set_Ex_Iter
   return (this->set_ != rhs.set_ || this->current_ != rhs.current_);
 }
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Unbounded_Set_Ex_Const_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Unbounded_Set_Ex_Const_Iterator)
 
 template <class T, class C> void
 ACE_Unbounded_Set_Ex_Const_Iterator<T, C>::dump (void) const

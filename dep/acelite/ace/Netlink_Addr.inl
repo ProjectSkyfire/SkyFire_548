@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Netlink_Addr.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #ifdef ACE_HAS_NETLINK
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -41,8 +39,8 @@ ACE_INLINE int ACE_Netlink_Addr::get_addr_size (void) const
 }
 
 
-ACE_INLINE void ACE_Netlink_Addr::set_addr (void *addr, int len){
-  ACE_OS::memcpy (&this->nl_,addr,len);
+ACE_INLINE void ACE_Netlink_Addr::set_addr (const void *addr, int len) {
+  ACE_OS::memcpy (&this->nl_, addr, len);
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL

@@ -1,7 +1,5 @@
 // file      : XMLSchema/Writer.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Writer.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 #ifndef XMLSCHEMA_WRITER_HPP
 #define XMLSCHEMA_WRITER_HPP
 
@@ -152,7 +150,5 @@ namespace XMLSchema
     };
   }
 }
-
-#include <ace/XML_Utils/XMLSchema/Writer.ipp>
 
 #endif  // XMLSCHEMA_WRITER_HPP

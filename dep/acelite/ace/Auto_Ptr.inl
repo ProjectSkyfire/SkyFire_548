@@ -1,8 +1,9 @@
 // -*- C++ -*-
-//
-// $Id: Auto_Ptr.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/Global_Macros.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -120,7 +121,12 @@ ACE_Auto_Basic_Array_Ptr<X>::reset (X *p)
 {
   ACE_TRACE ("ACE_Auto_Basic_Array_Ptr<X>::reset");
   if (this->get () != p)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    ACE_Allocator::instance()->free(this->get ());
+#else
     delete [] this->get ();
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
   this->p_ = p;
 }
 
@@ -146,7 +152,11 @@ template<class X> ACE_INLINE
 ACE_Auto_Basic_Array_Ptr<X>::~ACE_Auto_Basic_Array_Ptr (void)
 {
   ACE_TRACE ("ACE_Auto_Basic_Array_Ptr<X>::~ACE_Auto_Basic_Array_Ptr");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->get ());
+#else
   delete [] this->get ();
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 template<class X> ACE_INLINE X &

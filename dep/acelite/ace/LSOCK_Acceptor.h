@@ -4,8 +4,6 @@
 /**
  *  @file    LSOCK_Acceptor.h
  *
- *  $Id: LSOCK_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================

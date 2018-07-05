@@ -4,8 +4,6 @@
 /**
  *  @file    Object_Manager_Base.h
  *
- *  $Id: Object_Manager_Base.h 84163 2009-01-15 07:57:27Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
@@ -18,7 +16,7 @@
 #define ACE_OBJECT_MANAGER_BASE_H
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -129,6 +127,8 @@ class ACE_Log_Msg;
 class ACE_Export ACE_OS_Object_Manager : public ACE_Object_Manager_Base
 {
 public:
+  ACE_ALLOC_HOOK_DECLARE;
+
   /// Explicitly initialize.
   virtual int init (void);
 

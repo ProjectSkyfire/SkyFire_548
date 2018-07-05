@@ -6,8 +6,6 @@
  *
  *  XSI semaphore facility
  *
- *  $Id: os_sem.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -18,13 +16,14 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/os_include/sys/os_ipc.h"
+#include "ace/os_include/os_stdint.h"
 
 #if !defined (ACE_LACKS_SYS_SEM_H)
 #  include /**/ <sys/sem.h>

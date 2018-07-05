@@ -1,5 +1,3 @@
-// $Id: Capabilities.cpp 91287 2010-08-05 10:30:49Z johnnyw $
-
 #include "ace/Capabilities.h"
 #include "ace/OS_NS_ctype.h"
 #include "ace/OS_Memory.h"
@@ -220,7 +218,7 @@ ACE_Capabilities::is_entry (const ACE_TCHAR *name, const ACE_TCHAR *line)
         ++line;
       else
         {
-          ACE_DEBUG ((LM_DEBUG,
+          ACELIB_DEBUG ((LM_DEBUG,
                       ACE_TEXT ("Invalid entry\n")));
           break;
         }
@@ -285,7 +283,6 @@ ACE_Capabilities::getval (const ACE_TCHAR *keyname, int &val)
   return 0;
 }
 
-#if !defined (ACE_IS_SPLITTING)
 static int
 is_empty (const ACE_TCHAR *line)
 {
@@ -303,7 +300,6 @@ is_line (const ACE_TCHAR *line)
 
   return *line != ACE_TEXT ('\0');
 }
-#endif /* !ACE_IS_SPLITTING */
 
 int
 ACE_Capabilities::getent (const ACE_TCHAR *fname, const ACE_TCHAR *name)
@@ -311,7 +307,7 @@ ACE_Capabilities::getent (const ACE_TCHAR *fname, const ACE_TCHAR *name)
   FILE *fp = ACE_OS::fopen (fname, ACE_TEXT ("r"));
 
   if (fp == 0)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("Can't open %s file\n"),
                        fname),
                       -1);
@@ -348,5 +344,9 @@ ACE_Capabilities::getent (const ACE_TCHAR *fname, const ACE_TCHAR *name)
   ACE_OS::fclose (fp);
   return -1;
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_StringCapEntry)
+ACE_ALLOC_HOOK_DEFINE(ACE_IntCapEntry)
+ACE_ALLOC_HOOK_DEFINE(ACE_BoolCapEntry)
 
 ACE_END_VERSIONED_NAMESPACE_DECL

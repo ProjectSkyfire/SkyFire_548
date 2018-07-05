@@ -4,8 +4,6 @@
 /**
  *  @file    Process_Manager.h
  *
- *  $Id: Process_Manager.h 92489 2010-11-05 00:33:37Z shuston $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
@@ -39,9 +37,9 @@ class ACE_Reactor;
  * @brief Manages a group of processes.
  *
  * This class allows applications to control groups of processes,
- * similar to how the ACE_Thread_Manager controls groups of
+ * similar to the way ACE_Thread_Manager controls groups of
  * threads.  Naturally, it doesn't work at all on platforms, such
- * as VxWorks or pSoS, that don't support process.
+ * as VxWorks or pSoS, that don't support multiple processes.
  * There are two main ways of using ACE_Process_Manager,
  * depending on how involved you wish to be with the termination
  * of managed processes.  If you want processes to simply
@@ -82,7 +80,7 @@ class ACE_Reactor;
  * spawned process exits, or when any process without a specific
  * ACE_Event_Handler exits.  When a process exits, the
  * appropriate ACE_Event_Handler's handle_input() method is called; the
- * ACE_HANDLE passed is either the process's HANDLE (on Win32),
+ * ACE_HANDLE passed is either the process's HANDLE (on Windows),
  * or its pid cast to an ACE_HANDLE (on POSIX).
  * It is also possible to call the wait() functions even when the
  * ACE_Process_Manager is registered with a reactor.
@@ -167,6 +165,8 @@ public:
   /**
    * Create a new process with specified @a options.
    * Register @a event_handler to be called back when the process exits.
+   * The @a proc object's ACE_Process::unmanage() method is called when
+   * the process is removed from ACE_Process_Manager.
    *
    * On success, returns the process id of the child that was created.
    * On failure, returns ACE_INVALID_PID.
@@ -243,6 +243,15 @@ public:
    * @retval 0 on success; -1 on failure.
    */
   int wait (const ACE_Time_Value &timeout = ACE_Time_Value::max_time);
+#if defined (ACE_HAS_CPP11)
+  /// @sa wait
+  template< class Rep, class Period >
+  int wait (const std::chrono::duration<Rep, Period>& timeout)
+  {
+    ACE_Time_Value const tv (timeout);
+    return this->wait (tv);
+  }
+#endif
 
   /**
    * Wait up to @a timeout for a single specified process to terminate.
@@ -260,6 +269,17 @@ public:
   pid_t wait (pid_t pid,
               const ACE_Time_Value &timeout,
               ACE_exitcode *status = 0);
+#if defined (ACE_HAS_CPP11)
+  /// @sa wait
+  template< class Rep, class Period >
+  pid_t wait (pid_t pid,
+              const std::chrono::duration<Rep, Period>& timeout,
+              ACE_exitcode *status = 0)
+  {
+    ACE_Time_Value const tv (timeout);
+    return this->wait (pid, tv, status);
+  }
+#endif
 
   /**
    * Wait indefinitely for a single, specified process to terminate.
@@ -354,6 +374,12 @@ protected:
 #if !defined(ACE_WIN32)
   /// Collect one (or more, on unix) process exit status.
   virtual int handle_input (ACE_HANDLE proc);
+
+  /// If registered with a reactor for SIGCHLD and the reactor closes, this
+  /// will get called to notify.
+  virtual int handle_close (ACE_HANDLE handle,
+                            ACE_Reactor_Mask close_mask);
+
 #endif // !defined(ACE_WIN32)
 
   /**
@@ -393,6 +419,8 @@ private:
 
     /// Dump the state of an object.
     void dump (void) const;
+
+    ACE_ALLOC_HOOK_DECLARE;
   };
 
   /// Resize the pool of Process_Descriptors.

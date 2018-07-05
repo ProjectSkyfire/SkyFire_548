@@ -4,8 +4,6 @@
 /**
  *  @file    TkReactor.h
  *
- *  $Id: TkReactor.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Nagarajan Surendran <naga@cs.wustl.edu>
  */
 //=============================================================================

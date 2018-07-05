@@ -1,5 +1,3 @@
-// $Id: OS_NS_dirent.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/OS_NS_dirent.h"
 
 
@@ -10,8 +8,12 @@
 
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_string.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/OS_NS_stdlib.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -191,13 +193,25 @@ ACE_OS::scandir_emulation (const ACE_TCHAR *dirname,
       if (nfiles == arena_size)
         {
           ACE_DIRENT **newv = 0;
+          int new_arena_size;
           if (arena_size == 0)
-            arena_size = 10;
+            new_arena_size = 10;
           else
-            arena_size *= 2;
+            new_arena_size = arena_size * 2;
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          newv = (ACE_DIRENT **) ACE_Allocator::instance()->malloc (new_arena_size * sizeof (ACE_DIRENT *));
+          if (newv && vector)
+            {
+              ACE_OS::memcpy (newv, vector, arena_size * sizeof (ACE_DIRENT *));
+            }
+#else
           newv = (ACE_DIRENT **) ACE_OS::realloc (vector,
-                                              arena_size * sizeof (ACE_DIRENT *));
+                                              new_arena_size * sizeof (ACE_DIRENT *));
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
+          arena_size = new_arena_size;
+
           if (newv == 0)
             {
               fail = 1;
@@ -207,12 +221,20 @@ ACE_OS::scandir_emulation (const ACE_TCHAR *dirname,
         }
 
 #if defined (ACE_LACKS_STRUCT_DIR)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_DIRENT *newdp = (ACE_DIRENT *) ACE_Allocator::instance()->malloc (sizeof (ACE_DIRENT));
+#else
       ACE_DIRENT *newdp = (ACE_DIRENT *) ACE_OS::malloc (sizeof (ACE_DIRENT));
+#endif /* ACE_HAS_ALLOC_HOOKS */
 #else
       size_t dsize =
         sizeof (ACE_DIRENT) +
         ((ACE_OS::strlen (dp->d_name) + 1) * sizeof (ACE_TCHAR));
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_DIRENT *newdp = (ACE_DIRENT *) ACE_Allocator::instance()->malloc (dsize);
+#else
       ACE_DIRENT *newdp = (ACE_DIRENT *) ACE_OS::malloc (dsize);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* ACE_LACKS_STRUCT_DIR */
 
       if (newdp == 0)
@@ -222,13 +244,20 @@ ACE_OS::scandir_emulation (const ACE_TCHAR *dirname,
         }
 
 #if defined (ACE_LACKS_STRUCT_DIR)
-      newdp->d_name = (ACE_TCHAR*) ACE_OS::malloc (
-        (ACE_OS::strlen (dp->d_name) + 1) * sizeof (ACE_TCHAR));
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      newdp->d_name = (ACE_TCHAR*) ACE_Allocator::instance()->malloc ((ACE_OS::strlen (dp->d_name) + 1) * sizeof (ACE_TCHAR));
+#else
+      newdp->d_name = (ACE_TCHAR*) ACE_OS::malloc ((ACE_OS::strlen (dp->d_name) + 1) * sizeof (ACE_TCHAR));
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
       if (newdp->d_name == 0)
         {
           fail = 1;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free (newdp);
+#else
           ACE_OS::free (newdp);
+#endif /* ACE_HAS_ALLOC_HOOKS */
           break;
         }
 
@@ -249,11 +278,23 @@ ACE_OS::scandir_emulation (const ACE_TCHAR *dirname,
       while (vector && nfiles-- > 0)
         {
 #if defined (ACE_LACKS_STRUCT_DIR)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free (vector[nfiles]->d_name);
+#else
           ACE_OS::free (vector[nfiles]->d_name);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 #endif /* ACE_LACKS_STRUCT_DIR */
+#if defined (ACE_HAS_ALLOC_HOOKS)
+          ACE_Allocator::instance()->free (vector[nfiles]);
+#else
           ACE_OS::free (vector[nfiles]);
+#endif /* ACE_HAS_ALLOC_HOOKS */
         }
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_Allocator::instance()->free (vector);
+#else
       ACE_OS::free (vector);
+#endif /* ACE_HAS_ALLOC_HOOKS */
       return -1;
     }
 

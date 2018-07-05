@@ -4,8 +4,6 @@
 /**
  *  @file   OS_NS_sys_msg.h
  *
- *  $Id: OS_NS_sys_msg.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...

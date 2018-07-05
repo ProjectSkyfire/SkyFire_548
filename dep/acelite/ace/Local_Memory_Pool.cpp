@@ -1,10 +1,8 @@
-// $Id: Local_Memory_Pool.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 // Local_Memory_Pool.cpp
 #include "ace/Local_Memory_Pool.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/OS_Memory.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 
 
@@ -55,14 +53,20 @@ ACE_Local_Memory_Pool::acquire (size_t nbytes,
   rounded_bytes = this->round_up (nbytes);
 
   char *temp = 0;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (temp,
+                        static_cast<char*>(ACE_Allocator::instance()->malloc(sizeof(char) * rounded_bytes)),
+                        0);
+#else
   ACE_NEW_RETURN (temp,
                   char[rounded_bytes],
                   0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   ACE_Auto_Basic_Array_Ptr<char> cp (temp);
 
   if (this->allocated_chunks_.insert (cp.get ()) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR,
+    ACELIB_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("(%P|%t) insertion into set failed\n")),
                       0);
 
@@ -78,7 +82,12 @@ ACE_Local_Memory_Pool::release (int)
   for (ACE_Unbounded_Set<char *>::iterator i = this->allocated_chunks_.begin ();
        i != this->allocated_chunks_.end ();
        ++i)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    ACE_Allocator::instance()->free(*i);
+#else
     delete [] *i;
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
   this->allocated_chunks_.reset ();
   return 0;
 }

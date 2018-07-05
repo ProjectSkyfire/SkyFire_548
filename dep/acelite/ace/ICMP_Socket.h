@@ -4,8 +4,6 @@
 /**
  *  @file    ICMP_Socket.h
  *
- *  $Id: ICMP_Socket.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Robert S. Iakobashvili <coroberti@gmail.com> <coroberti@walla.co.il>
  *  @author Gonzalo A. Diethelm <gonzalo.diethelm@aditiva.com>
  */

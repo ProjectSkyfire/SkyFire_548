@@ -1,7 +1,5 @@
-// $Id: TLI_Acceptor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/TLI_Acceptor.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_Memory.h"
@@ -400,7 +398,7 @@ ACE_TLI_Acceptor::ACE_TLI_Acceptor (const ACE_Addr &remote_sap,
                   info,
                   back,
                   dev) == ACE_INVALID_HANDLE)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("%p\n"),
                 ACE_TEXT ("ACE_TLI_Acceptor::ACE_TLI_Acceptor")));
 }

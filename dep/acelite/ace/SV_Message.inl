@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SV_Message.inl 80826 2008-03-04 14:51:23Z wotte $
-
 #include "ace/Global_Macros.h"
 #include "ace/config-all.h"
 

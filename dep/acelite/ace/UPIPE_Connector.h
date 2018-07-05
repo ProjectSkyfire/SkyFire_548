@@ -4,8 +4,6 @@
 /**
  *  @file    UPIPE_Connector.h
  *
- *  $Id: UPIPE_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Gerhard Lenzer and Douglas C. Schmidt
  */
 //=============================================================================

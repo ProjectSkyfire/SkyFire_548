@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Pipe.inl 92010 2010-09-24 14:54:19Z shuston $
-
 #include "ace/Global_Macros.h"
 #include "ace/ACE.h"
 

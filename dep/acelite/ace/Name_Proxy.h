@@ -4,11 +4,8 @@
 /**
  *  @file    Name_Proxy.h
  *
- *  $Id: Name_Proxy.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  Proxy for dealing with remote server process managing NET_LOCAL
  *  Name_Bindings.
- *
  *
  *  @author Gerhard Lenzer
  *  @author Douglas C. Schmidt

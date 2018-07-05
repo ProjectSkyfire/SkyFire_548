@@ -1,6 +1,3 @@
-/*
- *  $Id: Rtems_init.c 80826 2008-03-04 14:51:23Z wotte $
- */
 
 #if defined (ACE_HAS_RTEMS)
 

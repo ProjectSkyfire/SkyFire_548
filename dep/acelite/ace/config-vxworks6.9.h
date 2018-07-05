@@ -1,6 +1,4 @@
 //* -*- C++ -*- */
-// $Id: config-vxworks6.9.h 96017 2012-08-08 22:18:09Z mitza $
-
 // The following configuration file is designed to work for VxWorks
 // 6.9 platforms using one of these compilers:
 // 1) The GNU g++ compiler that is shipped with VxWorks 6.9
@@ -26,6 +24,17 @@
 #if defined(__RTP__)
 // bzero is in strings.h
 # define ACE_HAS_STRINGS 1
+# if defined ACE_HAS_PTHREADS
+#  define ACE_HAS_RECURSIVE_THR_EXIT_SEMANTICS
+# endif
+#endif
+
+// As of VxWorks 6.9, the networking APIs have been made conformant with
+// the POSIX sockets prototypes. See IEEE Std 1003.1 and Section 6.3.3 Socket
+// Functional Interface in the VxWorks reference document -
+// wr_net_stack_programmers_guide_vol3_6.9.pdf.
+#if defined (ACE_HAS_BROKEN_ACCEPT_ADDR)
+#  undef ACE_HAS_BROKEN_ACCEPT_ADDR
 #endif
 
 #include /**/ "ace/post.h"

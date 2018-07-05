@@ -1,4 +1,3 @@
-// $Id: ETCL_y.h 81458 2008-04-28 11:31:49Z johnnyw $
 #define  ETCL_GT  257
 #define  ETCL_GE  258
 #define  ETCL_LT  259

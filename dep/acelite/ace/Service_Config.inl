@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Service_Config.inl 91813 2010-09-17 07:52:52Z johnnyw $
-
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -1,6 +1,5 @@
 
 // -*- C++ -*-
-// $Id: XML_Utils_Export.h 95760 2012-05-15 13:46:19Z msmit $
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl XML_Utils
 // ------------------------------

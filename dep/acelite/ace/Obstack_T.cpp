@@ -1,5 +1,3 @@
-// $Id: Obstack_T.cpp 88793 2010-02-01 17:50:34Z cleeland $
-
 #ifndef ACE_OBSTACK_T_CPP
 #define ACE_OBSTACK_T_CPP
 
@@ -17,7 +15,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Obstack_T)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Obstack_T)
 
 template <class ACE_CHAR_T> void
 ACE_Obstack_T<ACE_CHAR_T>::dump (void) const
@@ -25,11 +23,11 @@ ACE_Obstack_T<ACE_CHAR_T>::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Obstack_T<ACE_CHAR_T>::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("size_ = %d\n"), this->size_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("head_ = %x\n"), this->head_));
-  ACE_DEBUG ((LM_DEBUG,  ACE_TEXT ("curr_ = %x\n"), this->curr_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("size_ = %d\n"), this->size_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("head_ = %x\n"), this->head_));
+  ACELIB_DEBUG ((LM_DEBUG,  ACE_TEXT ("curr_ = %x\n"), this->curr_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -54,8 +52,8 @@ ACE_Obstack_T<ACE_CHAR_T>::request (size_t len)
   // chunk or will need a new one.
   if (this->curr_->cur_ + len >= this->curr_->end_)
     {
-      // Need a new chunk. Save the current one so the current string can be
-      // copied to the new chunk.
+      // Need a new chunk. Save the current one so the current string
+      // can be copied to the new chunk.
       ACE_Obchunk *temp = this->curr_;
       if (this->curr_->next_ == 0)
         {
@@ -122,7 +120,7 @@ ACE_Obstack_T<ACE_CHAR_T>::new_chunk (void)
 
 template <class ACE_CHAR_T>
 ACE_Obstack_T<ACE_CHAR_T>::ACE_Obstack_T (size_t size,
-                                    ACE_Allocator *allocator_strategy)
+                                          ACE_Allocator *allocator_strategy)
   : allocator_strategy_ (allocator_strategy),
     size_ (size),
     head_ (0),
@@ -156,7 +154,7 @@ ACE_Obstack_T<ACE_CHAR_T>::~ACE_Obstack_T (void)
 
 template <class ACE_CHAR_T> ACE_CHAR_T *
 ACE_Obstack_T<ACE_CHAR_T>::copy (const ACE_CHAR_T *s,
-                           size_t len)
+                                 size_t len)
 {
   ACE_TRACE ("ACE_Obstack_T<ACE_CHAR_T>::copy");
 
@@ -190,7 +188,7 @@ ACE_Obstack_T<ACE_CHAR_T>::unwind_i (void* obj)
       this->curr_->block_ = this->curr_->cur_ = reinterpret_cast<char*> (obj);
     }
   else if (obj != 0)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("Deletion of non-existent object.\n%a")));
 }
 

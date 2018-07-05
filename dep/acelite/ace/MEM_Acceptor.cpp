@@ -1,6 +1,5 @@
-// $Id: MEM_Acceptor.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/MEM_Acceptor.h"
+#include "ace/Lib_Find.h"
 
 #if (ACE_HAS_POSITION_INDEPENDENT_POINTERS == 1)
 
@@ -40,7 +39,11 @@ ACE_MEM_Acceptor::ACE_MEM_Acceptor (void)
 ACE_MEM_Acceptor::~ACE_MEM_Acceptor (void)
 {
   ACE_TRACE ("ACE_MEM_Acceptor::~ACE_MEM_Acceptor");
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->mmap_prefix_);
+#else
   delete[] this->mmap_prefix_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 // General purpose routine for performing server ACE_SOCK creation.
@@ -58,7 +61,7 @@ ACE_MEM_Acceptor::ACE_MEM_Acceptor (const ACE_MEM_Addr &remote_sap,
                   reuse_addr,
                   backlog,
                   protocol) == -1)
-    ACE_ERROR ((LM_ERROR,
+    ACELIB_ERROR ((LM_ERROR,
                 ACE_TEXT ("ACE_MEM_Acceptor::ACE_MEM_Acceptor")));
 }
 
@@ -139,10 +142,10 @@ ACE_MEM_Acceptor::accept (ACE_MEM_Stream &new_stream,
 
   if (this->mmap_prefix_ != 0)
     {
-      ACE_OS::sprintf (buf,
-                       ACE_TEXT ("%s_%d_"),
-                       this->mmap_prefix_,
-                       local_addr.get_port_number ());
+      ACE_OS::snprintf (buf, sizeof buf / sizeof buf[0],
+                        ACE_TEXT ("%s_%d_"),
+                        this->mmap_prefix_,
+                        local_addr.get_port_number ());
     }
   else
     {
@@ -150,15 +153,15 @@ ACE_MEM_Acceptor::accept (ACE_MEM_Stream &new_stream,
       // - 24 is so we can append name to the end.
       if (ACE::get_temp_dir (buf, MAXPATHLEN - 24) == -1)
         {
-          ACE_ERROR ((LM_ERROR,
+          ACELIB_ERROR ((LM_ERROR,
                       ACE_TEXT ("Temporary path too long, ")
                       ACE_TEXT ("defaulting to current directory\n")));
           buf[0] = 0;
         }
 
-      ACE_OS::sprintf (name,
-                       ACE_TEXT ("MEM_Acceptor_%d_"),
-                       local_addr.get_port_number ());
+      ACE_OS::snprintf (name, 25,
+                        ACE_TEXT ("MEM_Acceptor_%d_"),
+                        local_addr.get_port_number ());
       ACE_OS::strcat (buf, name);
     }
   ACE_TCHAR unique [MAXPATHLEN];
@@ -184,14 +187,14 @@ ACE_MEM_Acceptor::accept (ACE_MEM_Stream &new_stream,
 #endif /* ACE_WIN32 || !_ACE_USE_SV_SEM */
   if (ACE::send (new_handle, &client_signaling,
                  sizeof (ACE_INT16)) == -1)
-    ACE_ERROR_RETURN ((LM_DEBUG,
+    ACELIB_ERROR_RETURN ((LM_DEBUG,
                        ACE_TEXT ("ACE_MEM_Acceptor::accept error sending strategy\n")),
                       -1);
 
   //   Now we get the signaling strategy the client support.
   if (ACE::recv (new_handle, &client_signaling,
                  sizeof (ACE_INT16)) == -1)
-    ACE_ERROR_RETURN ((LM_DEBUG,
+    ACELIB_ERROR_RETURN ((LM_DEBUG,
                        ACE_TEXT ("ACE_MEM_Acceptor::%p error receiving strategy\n"),
                        ACE_TEXT ("accept")),
                       -1);

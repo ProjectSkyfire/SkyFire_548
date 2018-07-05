@@ -4,8 +4,6 @@
 /**
  *  @file    Auto_Ptr.h
  *
- *  $Id: Auto_Ptr.h 92580 2010-11-15 09:48:02Z johnnyw $
- *
  *  @author Doug Schmidt <schmidt@uci.edu>
  *  @author Irfan Pyarali <irfan@cs.wustl.edu>
  *  @author Jack Reeves <jack@fx.com>

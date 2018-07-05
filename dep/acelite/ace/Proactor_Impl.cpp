@@ -1,5 +1,3 @@
-// $Id: Proactor_Impl.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
-
 #include "ace/Proactor_Impl.h"
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)

@@ -1,7 +1,5 @@
 // file      : XSCRT/Writer.hpp
 // author    : Boris Kolpackov <boris@dre.vanderbilt.edu>
-// cvs-id    : $Id: Writer.hpp 95832 2012-06-06 13:09:50Z johnnyw $
-
 #ifndef XSCRT_WRITER_HPP
 #define XSCRT_WRITER_HPP
 

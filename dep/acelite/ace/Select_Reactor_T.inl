@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Select_Reactor_T.inl 96017 2012-08-08 22:18:09Z mitza $
-
 #include "ace/Reactor.h"
 #include "ace/Signal.h"
 #include "ace/Sig_Handler.h"

@@ -4,8 +4,6 @@
 /**
  *  @file    SPIPE_Acceptor.h
  *
- *  $Id: SPIPE_Acceptor.h 94007 2011-04-27 09:01:45Z johnnyw $
- *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  */
@@ -43,7 +41,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  *
  * @warning Works on non-Windows platforms only when @c ACE_HAS_STREAM_PIPES
  * is defined.
- *
  */
 class ACE_Export ACE_SPIPE_Acceptor : public ACE_SPIPE
 {

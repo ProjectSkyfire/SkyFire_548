@@ -6,8 +6,6 @@
  *
  *  integer types
  *
- *  $Id: os_stdint.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -18,7 +16,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -36,7 +34,8 @@ extern "C"
 
 // BSD style types
 #if defined (ACE_LACKS_SYS_TYPES_H) \
-       || (defined (__GLIBC__) && !defined (_BSD_SOURCE))
+       || (defined (__GLIBC__) && !defined (_BSD_SOURCE)) \
+       || defined (ACE_LACKS_BSD_TYPES)
       typedef unsigned char u_char;
       typedef unsigned short u_short;
       typedef unsigned int u_int;

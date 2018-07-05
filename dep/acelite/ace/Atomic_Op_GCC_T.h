@@ -4,8 +4,6 @@
 /**
  *  @file    Atomic_Op_GCC_T.h
  *
- *  $Id: Atomic_Op_GCC_T.h 95225 2011-12-05 20:25:15Z shuston $
- *
  *  @author Johnny Willemsen  <jwillemsen@remedy.nl
  */
 //=============================================================================

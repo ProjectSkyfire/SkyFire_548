@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_wchar.inl 80826 2008-03-04 14:51:23Z wotte $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_HAS_WCHAR)

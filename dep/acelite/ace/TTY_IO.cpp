@@ -1,5 +1,3 @@
-// $Id: TTY_IO.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/TTY_IO.h"
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_string.h"
@@ -25,6 +23,10 @@ namespace
 }
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_TTY_IO::ACE_TTY_IO (void)
+{
+}
 
 ACE_TTY_IO::Serial_Params::Serial_Params (void)
 {
@@ -240,16 +242,24 @@ int ACE_TTY_IO::control (Control_Mode cmd, Serial_Params *arg) const
             {
               devpar.c_cflag |=  PARENB;
               devpar.c_cflag |=  PARODD;
+              devpar.c_iflag &= ~IGNPAR;
+              devpar.c_iflag |=  INPCK | PARMRK;
             }
           else if (ACE_OS::strcasecmp (arg->paritymode, ACE_TTY_IO_EVEN) == 0)
             {
               devpar.c_cflag |=  PARENB;
               devpar.c_cflag &= ~PARODD;
+              devpar.c_iflag &= ~IGNPAR;
+              devpar.c_iflag |=  INPCK | PARMRK;
             }
           else if (ACE_OS::strcasecmp (arg->paritymode, ACE_TTY_IO_NONE) == 0)
-            devpar.c_cflag &= ~PARENB;
+            {
+              devpar.c_cflag &= ~PARENB;
+            }
           else
-            return -1;
+            {
+              return -1;
+            }
         }
       else
         {
@@ -289,7 +299,6 @@ int ACE_TTY_IO::control (Control_Mode cmd, Serial_Params *arg) const
         devpar.c_cflag |= CLOCAL;
 #endif /* CLOCAL */
 
-      devpar.c_iflag = IGNPAR | INPCK;
       if (arg->databits < 8)
         devpar.c_iflag |= ISTRIP;
 
