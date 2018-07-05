@@ -1843,7 +1843,7 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, std::string c
         for (GuildBankRightsAndSlotsVec::const_iterator itr = rightsAndSlots.begin(); itr != rightsAndSlots.end(); ++itr)
             _SetRankBankTabRightsAndSlots(rankId, *itr);
 
-        char aux[2];
+        char aux[3];
         snprintf(aux, sizeof(aux), "%u", rankId);
         _BroadcastEvent(GE_RANK_UPDATED, 0, aux);
     }
