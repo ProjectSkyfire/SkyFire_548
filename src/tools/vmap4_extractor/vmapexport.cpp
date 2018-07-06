@@ -35,7 +35,7 @@
 #endif
 
 #ifndef _sntprintf
-#define _sntprintf snprintf;
+#define _sntprintf _snwprintf;
 #endif
 
 #undef min
