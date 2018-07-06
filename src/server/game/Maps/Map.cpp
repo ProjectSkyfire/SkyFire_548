@@ -2999,12 +2999,12 @@ bool Map::IsHeroic() const
 {
     if (DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(i_spawnMode))
     {
-        SF_LOG_DEBUG("maps", "Difficulty Check: Difficulty: %u, SpawnMode: %u", difficulty, i_spawnMode);
         switch (i_spawnMode)
         {
             case DIFFICULTY_10MAN_HEROIC:
             case DIFFICULTY_25MAN_HEROIC:
             case DIFFICULTY_HEROIC:
+            case DIFFICULTY_SCE_HEROIC:
                 return true;
             default:
                 return false;

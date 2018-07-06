@@ -1878,7 +1878,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
      }
     if (difficultyEntry->maptype != MAP_RAID)
     {
-        SF_LOG_DEBUG("network", "%s sent an non-raid instance mode %u!",
+        SF_LOG_DEBUG("network", "%d sent an non-raid instance mode %u!",
             _player->GetGUIDLow(), difficultyEntry->DiffID);
         return;
     }

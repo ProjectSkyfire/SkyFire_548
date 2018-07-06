@@ -126,7 +126,7 @@ const char* szRawVMAPMagic = "VMAP052";
 
 bool LoadLocaleMPQFile(int locale)
 {
-    TCHAR buff[512];
+    TCHAR buff[1024];
     memset(buff, 0, sizeof(buff));
     _stprintf(buff, _T("%s%s/locale-%s.MPQ"), input_path, LocalesT[locale], LocalesT[locale]);
     if (!SFileOpenArchive(buff, 0, MPQ_OPEN_READ_ONLY, &LocaleMpq))
@@ -174,7 +174,7 @@ bool LoadLocaleMPQFile(int locale)
 
 void LoadCommonMPQFiles(uint32 build)
 {
-    TCHAR filename[512];
+    TCHAR filename[1024];
     _stprintf(filename, _T("%sworld.MPQ"), input_path);
     _tprintf(_T("Loading common MPQ files\n"));
     if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &WorldMpq))
@@ -263,7 +263,7 @@ void strToLower(char* str)
 void ReadLiquidTypeTableDBC()
 {
     HANDLE localeFile;
-    char localMPQ[512];
+    char localMPQ[1024];
 
     snprintf(localMPQ, sizeof(localMPQ), "%smisc.MPQ", input_path);
     if (FileExists(localMPQ)==false)
