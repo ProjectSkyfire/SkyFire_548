@@ -34,10 +34,6 @@
     #define ERROR_PATH_NOT_FOUND ERROR_FILE_NOT_FOUND
 #endif
 
-#ifndef _sntprintf
-#define _sntprintf _snwprintf;
-#endif
-
 #undef min
 #undef max
 
@@ -132,7 +128,7 @@ bool LoadLocaleMPQFile(int locale)
 {
     TCHAR buff[512];
     memset(buff, 0, sizeof(buff));
-    _sntprintf(buff, sizeof(buff), _T("%s%s/locale-%s.MPQ"), input_path, LocalesT[locale], LocalesT[locale]);
+    _stprintf(buff, _T("%s%s/locale-%s.MPQ"), input_path, LocalesT[locale], LocalesT[locale]);
     if (!SFileOpenArchive(buff, 0, MPQ_OPEN_READ_ONLY, &LocaleMpq))
     {
         if (GetLastError() != ERROR_PATH_NOT_FOUND)
@@ -179,7 +175,7 @@ bool LoadLocaleMPQFile(int locale)
 void LoadCommonMPQFiles(uint32 build)
 {
     TCHAR filename[512];
-    _sntprintf(filename, sizeof(filename), _T("%sworld.MPQ"), input_path);
+    _stprintf(filename, _T("%sworld.MPQ"), input_path);
     _tprintf(_T("Loading common MPQ files\n"));
     if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &WorldMpq))
     {
@@ -218,12 +214,12 @@ void LoadCommonMPQFiles(uint32 build)
         if (Builds[i] > LAST_DBC_IN_DATA_BUILD)
         {
             prefix = "";
-            _sntprintf(filename, sizeof(filename), _T("%swow-update-base-%u.MPQ"), input_path, Builds[i]);
+            _stprintf(filename, _T("%swow-update-base-%u.MPQ"), input_path, Builds[i]);
         }
         else
         {
             prefix = "base";
-            _sntprintf(filename, sizeof(filename), _T("%swow-update-%u.MPQ"), input_path, Builds[i]);
+            _stprintf(filename, _T("%swow-update-%u.MPQ"), input_path, Builds[i]);
         }
 
         if (!SFileOpenPatchArchive(WorldMpq, filename, prefix, 0))
