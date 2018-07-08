@@ -58,7 +58,7 @@ protected:
 class ItemChatLink : public ChatLink
 {
 public:
-    ItemChatLink() : ChatLink(), _item(NULL), _suffix(NULL), _property(NULL) { }
+    ItemChatLink() : ChatLink(), _item(NULL), _suffix(NULL), _property(NULL) { memset(_data, 0, sizeof(_data)); }
     virtual bool Initialize(std::istringstream& iss);
     virtual bool ValidateName(char* buffer, const char* context);
 
@@ -100,7 +100,7 @@ protected:
 class AchievementChatLink : public ChatLink
 {
 public:
-    AchievementChatLink() : ChatLink(), _guid(0), _achievement(NULL) { }
+    AchievementChatLink() : ChatLink(), _guid(0), _achievement(NULL) { memset(_data, 0, sizeof(_data)); }
     virtual bool Initialize(std::istringstream& iss);
     virtual bool ValidateName(char* buffer, const char* context);
 

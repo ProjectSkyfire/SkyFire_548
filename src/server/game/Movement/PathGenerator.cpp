@@ -34,6 +34,7 @@ PathGenerator::PathGenerator(const Unit* owner) :
     _endPosition(G3D::Vector3::zero()), _sourceUnit(owner), _navMesh(NULL),
     _navMeshQuery(NULL)
 {
+    memset(_pathPolyRefs, 0, sizeof(_pathPolyRefs));
     SF_LOG_DEBUG("maps", "++ PathGenerator::PathGenerator for %u \n", _sourceUnit->GetGUIDLow());
 
     uint32 mapId = _sourceUnit->GetMapId();
