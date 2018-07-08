@@ -433,7 +433,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
 
     Object* object = _player;
 
-    if (!quest->GetRewardPackageItemId() > 0)
+    if (quest->GetRewardPackageItemId() == 0)
     {
         if (!quest->IsRewChoiceItemValid(reward))
         {
