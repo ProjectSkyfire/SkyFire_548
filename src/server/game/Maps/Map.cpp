@@ -2947,7 +2947,8 @@ void InstanceMap::PermBindAllPlayers(Player* source)
         {
             player->BindToInstance(save, true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 1);
-            data.WriteBit(0); // isGM?
+            data.WriteBit(player->IsGameMaster()); // isGM?
+            data.FlushBits();
             player->GetSession()->SendPacket(&data);
 
             player->GetSession()->SendCalendarRaidLockout(save, true);

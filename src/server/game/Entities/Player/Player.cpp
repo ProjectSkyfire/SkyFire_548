@@ -19645,7 +19645,8 @@ void Player::BindToInstance()
         return;
 
     WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 1);
-    data.WriteBit(0); // isGM?
+    data.WriteBit(IsGameMaster()); // isGM?
+    data.FlushBits();
     GetSession()->SendPacket(&data);
     BindToInstance(mapSave, true);
 
