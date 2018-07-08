@@ -217,7 +217,7 @@ void Guild::EventLogEntry::WritePacket(WorldPacket& p_Data, ByteBuffer& p_Conten
     p_Content.WriteGuidBytes(l_PlayerGuid, 2); //2
     p_Content.WriteGuidBytes(l_OtherGuid, 4); //12
 
-    p_Content << uint8(TransactionType); //20
+    p_Content << uint8(m_eventType); //20
 
     //8, 7, 3, 13, 10, 0
     p_Content.WriteGuidBytes(l_OtherGuid, 0); //8
