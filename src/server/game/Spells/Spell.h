@@ -702,6 +702,9 @@ class Spell
         double rand_norm()                      { return m_caster->GetMap()->mtRand.randExc(); }
         double rand_chance()                    { return m_caster->GetMap()->mtRand.randExc(100.0); }
 #endif
+    private:
+        Spell(Spell const& right) = delete;
+        Spell & operator=(Spell const& right) = delete;
 };
 
 namespace Skyfire

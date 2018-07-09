@@ -95,6 +95,9 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         TO* getTarget() const { return iRefTo; }
 
         FROM* GetSource() const { return iRefFrom; }
+    private:
+        Reference(Reference const&);
+        Reference & operator=(Reference const&);
 };
 
 //=====================================================

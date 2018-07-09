@@ -96,6 +96,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     SetGoAnimProgress(animprogress);
     SetName(goinfo->name);
     UpdateRotationFields(0.0f, 1.0f);
+    m_model = GameObjectModel::Create(*this);
     return true;
 }
 
@@ -194,6 +195,9 @@ void Transport::Update(uint32 diff)
 
 void Transport::AddPassenger(WorldObject* passenger)
 {
+    if (!IsInWorld())
+        return;
+
     if (_passengers.insert(passenger).second)
     {
         SF_LOG_DEBUG("entities.transport", "Object %s boarded transport %s.", passenger->GetName().c_str(), GetName().c_str());
@@ -305,6 +309,7 @@ void Transport::UpdatePosition(float x, float y, float z, float o)
     bool newActive = GetMap()->IsGridLoaded(x, y);
 
     Relocate(x, y, z, o);
+    UpdateModelPosition();
 
     UpdatePassengerPositions(_passengers);
 
@@ -476,6 +481,7 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         }
 
         Relocate(x, y, z, GetOrientation());
+        UpdateModelPosition();
         GetMap()->AddToMap<Transport>(this);
         return true;
     }

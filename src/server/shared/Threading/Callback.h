@@ -111,6 +111,8 @@ class QueryCallback
         ACE_Future<Result> _result;
         ParamType _param;
         uint8 _stage;
+        QueryCallback(QueryCallback const& right) = delete;
+        QueryCallback & operator=(QueryCallback const& right) = delete;
 };
 
 template <typename Result, typename ParamType1, typename ParamType2, bool chain = false>
@@ -203,6 +205,8 @@ class QueryCallback_2
         ParamType1 _param_1;
         ParamType2 _param_2;
         uint8 _stage;
+        QueryCallback_2(QueryCallback_2 const& right) = delete;
+        QueryCallback_2 & operator=(QueryCallback_2 const& right) = delete;
 };
 
 #endif

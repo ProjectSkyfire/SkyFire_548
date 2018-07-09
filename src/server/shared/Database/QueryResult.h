@@ -56,6 +56,8 @@ class ResultSet
         void CleanUp();
         MYSQL_RES* _result;
         MYSQL_FIELD* _fields;
+        ResultSet(ResultSet const& right) = delete;
+        ResultSet & operator=(ResultSet const& right) = delete;
 };
 
 typedef Skyfire::AutoPtr<ResultSet, ACE_Thread_Mutex> QueryResult;
@@ -100,7 +102,8 @@ class PreparedResultSet
         void FreeBindBuffer();
         void CleanUp();
         bool _NextRow();
-
+        PreparedResultSet(PreparedResultSet const& right) = delete;
+        PreparedResultSet & operator=(PreparedResultSet const& right) = delete;
 };
 
 typedef Skyfire::AutoPtr<PreparedResultSet, ACE_Thread_Mutex> PreparedQueryResult;
