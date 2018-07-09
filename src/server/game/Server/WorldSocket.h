@@ -211,6 +211,8 @@ class WorldSocket : public WorldHandler
 
         uint32 m_Seed;
 
+        WorldSocket(WorldSocket const& right) = delete;
+        WorldSocket & operator=(WorldSocket const& right) = delete;
 };
 
 #endif  /* _WORLDSOCKET_H */

@@ -40,8 +40,7 @@ enum ConnectionFlags
 
 struct MySQLConnectionInfo
 {
-    MySQLConnectionInfo() { }
-    MySQLConnectionInfo(const std::string& infoString)
+    explicit MySQLConnectionInfo(std::string const& infoString)
     {
         Tokenizer tokens(infoString, ';');
 
@@ -134,6 +133,9 @@ class MySQLConnection
         MySQLConnectionInfo&  m_connectionInfo;             //! Connection info (used for logging)
         ConnectionFlags       m_connectionFlags;            //! Connection flags (for preparing relevant statements)
         ACE_Thread_Mutex      m_Mutex;
+
+        MySQLConnection(MySQLConnection const& right) = delete;
+        MySQLConnection & operator=(MySQLConnection const& right) = delete;
 };
 
 #endif

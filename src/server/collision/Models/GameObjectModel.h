@@ -45,8 +45,9 @@ class GameObjectModel /*, public Intersectable*/
     float iInvScale;
     float iScale;
     VMAP::WorldModel* iModel;
+    GameObject const* owner;
 
-    GameObjectModel() : phasemask(0), iModel(NULL) { }
+    GameObjectModel() : phasemask(0), iInvScale(0), iScale(0), iModel(NULL), owner(NULL) { }
     bool initialize(const GameObject& go, const GameObjectDisplayInfoEntry& info);
 
 public:
@@ -67,6 +68,7 @@ public:
     bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
 
     static GameObjectModel* Create(const GameObject& go);
+    bool Relocate(GameObject const& go);
 };
 
 #endif // _GAMEOBJECT_MODEL_H
