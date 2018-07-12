@@ -4670,15 +4670,15 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
     if (resetSpecialization)
     {
-        SetTalentSpecialization(GetActiveSpec(), 0);
-        SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, 0);
-
         std::list<uint32> learnList = GetSpellsForLevels(0, getRaceMask(), GetTalentSpecialization(GetActiveSpec()), 0, getLevel());
         for (std::list<uint32>::const_iterator iter = learnList.begin(); iter != learnList.end(); ++iter)
         {
             if (HasSpell(*iter))
                 removeSpell(*iter, true);
         }
+
+        SetTalentSpecialization(GetActiveSpec(), 0);
+        SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, 0);
     }
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
