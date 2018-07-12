@@ -21,15 +21,9 @@
 #include "VMapManager2.h"
 #include "VMapDefinitions.h"
 #include "WorldModel.h"
-
 #include "GameObjectModel.h"
 #include "Log.h"
-#include "GameObject.h"
-#include "Creature.h"
-#include "TemporarySummon.h"
-#include "Object.h"
-#include "DBCStores.h"
-#include "World.h"
+#include "Timer.h"
 
 using G3D::Vector3;
 using G3D::Ray;
@@ -47,13 +41,13 @@ struct GameobjectModelData
 typedef UNORDERED_MAP<uint32, GameobjectModelData> ModelList;
 ModelList model_list;
 
-void LoadGameObjectModelList()
+void LoadGameObjectModelList(std::string const& dataPath)
 {
 #ifndef NO_CORE_FUNCS
     uint32 oldMSTime = getMSTime();
 #endif
 
-    FILE* model_list_file = fopen((sWorld->GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
+    FILE* model_list_file = fopen((dataPath + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
     if (!model_list_file)
     {
         VMAP_ERROR_LOG("misc", "Unable to open '%s' file.", VMAP::GAMEOBJECT_MODELS);
@@ -79,10 +73,16 @@ void LoadGameObjectModelList()
             break;
         }
 
+        if (v1.isNaN() || v2.isNaN())
+        {
+            VMAP_ERROR_LOG("misc", "File '%s' Model '%s' has invalid v1%s v2%s values!", VMAP::GAMEOBJECT_MODELS, std::string(buff, name_length).c_str(), v1.toString().c_str(), v2.toString().c_str());
+            break;
+        }
+
         model_list.insert
         (
-            ModelList::value_type( displayId, GameobjectModelData(std::string(buff, name_length), AABox(v1, v2)) )
-        );
+            ModelList::value_type(displayId, GameobjectModelData(std::string(buff, name_length), AABox(v1, v2)))
+        );      
     }
 
     fclose(model_list_file);
@@ -95,9 +95,9 @@ GameObjectModel::~GameObjectModel()
         ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->releaseModelInstance(name);
 }
 
-bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayInfoEntry& info)
+bool GameObjectModel::initialize(std::unique_ptr<GameObjectModelOwnerBase> modelOwner, std::string const& dataPath)
 {
-    ModelList::const_iterator it = model_list.find(info.Displayid);
+    ModelList::const_iterator it = model_list.find(modelOwner->GetDisplayId());
     if (it == model_list.end())
         return false;
 
@@ -109,7 +109,7 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
         return false;
     }
 
-    iModel = ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->acquireModelInstance(sWorld->GetDataPath() + "vmaps/", it->second.name);
+    iModel = ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->acquireModelInstance(dataPath + "vmaps/", it->second.name);
 
     if (!iModel)
         return false;
@@ -118,12 +118,12 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
     //flags = VMAP::MOD_M2;
     //adtId = 0;
     //ID = 0;
-    iPos = Vector3(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ());
-    phasemask = go.GetPhaseMask();
-    iScale = go.GetObjectScale();
+    iPos = modelOwner->GetPosition();
+    phasemask = modelOwner->GetPhaseMask(); 
+    iScale = modelOwner->GetScale();
     iInvScale = 1.f / iScale;
 
-    G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(go.GetOrientation(), 0, 0);
+    G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(modelOwner->GetOrientation(), 0, 0);
     iInvRot = iRotation.inverse();
     // transform bounding box:
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
@@ -137,21 +137,17 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
     for (int i = 0; i < 8; ++i)
     {
         Vector3 pos(iBound.corner(i));
-        go.SummonCreature(1, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN);
+        modelOwner->DebugVisualizeCorner(pos);
     }
 #endif
-    owner = &go;
+    owner = std::move(modelOwner);
     return true;
 }
 
-GameObjectModel* GameObjectModel::Create(const GameObject& go)
+GameObjectModel* GameObjectModel::Create(std::unique_ptr<GameObjectModelOwnerBase> modelOwner, std::string const& dataPath)
 {
-    const GameObjectDisplayInfoEntry* info = sGameObjectDisplayInfoStore.LookupEntry(go.GetDisplayId());
-    if (!info)
-        return NULL;
-
     GameObjectModel* mdl = new GameObjectModel();
-    if (!mdl->initialize(go, *info))
+    if (!mdl->initialize(std::move(modelOwner), dataPath))
     {
         delete mdl;
         return NULL;
@@ -182,12 +178,12 @@ bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     return hit;
 }
 
-bool GameObjectModel::Relocate(const GameObject& go)
+bool GameObjectModel::Relocate()
 {
     if (!iModel)
         return false;
 
-    ModelList::const_iterator it = model_list.find(go.GetDisplayId());
+    ModelList::const_iterator it = model_list.find(owner->GetDisplayId());
     if (it == model_list.end())
         return false;
 
@@ -199,9 +195,9 @@ bool GameObjectModel::Relocate(const GameObject& go)
         return false;
     }
 
-    iPos = Vector3(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ());
+    iPos = owner->GetPosition();
 
-    G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(go.GetOrientation(), 0, 0);
+    G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(owner->GetOrientation(), 0, 0);
     iInvRot = iRotation.inverse();
     // transform bounding box:
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
@@ -215,7 +211,7 @@ bool GameObjectModel::Relocate(const GameObject& go)
     for (int i = 0; i < 8; ++i)
     {
         Vector3 pos(iBound.corner(i));
-        go.SummonCreature(1, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN);
+        owner->DebugVisualizeCorner(pos);
     }
 #endif
 
