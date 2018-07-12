@@ -130,7 +130,7 @@ namespace MMAP
 
         if (fileHeader.mmapVersion != MMAP_VERSION)
         {
-            SF_LOG_ERROR("maps", "MMAP:loadMap: %04u_%02i_%02i.mmtile was built with generator v%i, expected v%i",
+            SF_LOG_ERROR("maps", "MMAP:loadMap: %04u_%02i_%02i.mmtile was built with generator v%f, expected v%f",
                 mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
             fclose(file);
             return false;

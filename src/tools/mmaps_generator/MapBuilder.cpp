@@ -37,13 +37,13 @@ namespace DisableMgr
 }
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 5
+#define MMAP_VERSION 5.1
 
 struct MmapTileHeader
 {
     uint32 mmapMagic;
     uint32 dtVersion;
-    uint32 mmapVersion;
+    float mmapVersion;
     uint32 size;
     bool usesLiquids : 1;
 
