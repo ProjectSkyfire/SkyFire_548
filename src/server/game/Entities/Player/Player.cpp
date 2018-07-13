@@ -19661,42 +19661,49 @@ void Player::SetPendingBind(uint32 instanceId, uint32 bindTimer)
 
 void Player::SendRaidInfo()
 {
-    uint32 counter = 0;
+    uint32 iLockPos = 0;
+    ByteBuffer iLockData;
+    time_t now = time(NULL);
 
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
 
-    size_t p_counter = data.wpos();
-    data << uint32(counter);                                // placeholder
-
-    time_t now = time(NULL);
+    size_t writePos = data.bitwpos();
+    data.WriteBits(iLockPos, 20); // placeholder
 
     for (uint8 i = 0; i < 15; ++i)
     {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        Player::BoundInstancesMap boundInstances = GetBoundInstances(DifficultyID(i));
+        for (BoundInstancesMap::iterator itr = boundInstances.begin(); itr != boundInstances.end(); ++itr)
         {
             if (itr->second.perm)
             {
                 InstanceSave* save = itr->second.save;
-                bool isHeroic = save->GetDifficulty() == DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == DIFFICULTY_25MAN_HEROIC;
+                ObjectGuid InstanceGuid = save->GetInstanceId();
                 uint32 completedEncounters = 0;
                 if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
                     if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
                         completedEncounters = instanceScript->GetCompletedEncounterMask();
 
-                data << uint32(save->GetMapId());           // map id
-                data << uint32(save->GetDifficulty());      // difficulty
-                data << uint32(isHeroic);                   // heroic
-                data << uint64(save->GetInstanceId());      // instance id
-                data << uint8(1);                           // expired = 0
-                data << uint8(0);                           // extended = 1
-                data << uint32(save->GetResetTime() - now); // reset time
-                data << uint32(completedEncounters);        // completed encounters mask
-                ++counter;
+                data.WriteGuidMask(InstanceGuid, 1, 2, 6);
+                data.WriteBit(0);                           // extended = 1
+                data.WriteGuidMask(InstanceGuid, 5, 4);
+                data.WriteBit(1);                           // expired = 0
+                data.WriteGuidMask(InstanceGuid, 7, 3);
+                
+                iLockData.WriteGuidBytes(InstanceGuid, 7, 6, 4, 2, 0);
+                iLockData << uint32(save->GetResetTime() - now); // reset time
+                iLockData << uint32(completedEncounters);        // completed encounters mask
+                iLockData.WriteGuidBytes(InstanceGuid, 1);
+                iLockData << uint32(save->GetMapId());           // map id
+                iLockData << uint32(save->GetDifficulty());      // difficulty
+                iLockData.WriteGuidBytes(InstanceGuid, 3, 5);
+                ++iLockPos;
             }
         }
     }
-
-    data.put<uint32>(p_counter, counter);
+    data.FlushBits();
+    data.PutBits(writePos, iLockPos, 20);
+    data.append(iLockData);
     GetSession()->SendPacket(&data);
 }
 

@@ -129,7 +129,7 @@ void GroupMgr::LoadGroups()
             ", g.icon7, g.icon8, g.partyType, g.difficulty, g.raiddifficulty, g.guid, lfg.dungeon, lfg.state FROM parties g LEFT JOIN lfg_data lfg ON lfg.guid = g.guid ORDER BY g.guid ASC");
         if (!result)
         {
-            SF_LOG_INFO("server.loading", ">> Loaded 0 group definitions. DB table `groups` is empty!");
+            SF_LOG_INFO("server.loading", ">> Loaded 0 group definitions. DB table `parties` is empty!");
             return;
         }
 
@@ -161,17 +161,17 @@ void GroupMgr::LoadGroups()
     {
         uint32 oldMSTime = getMSTime();
 
-        // Delete all rows from group_member or group_instance with no group
-        CharacterDatabase.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM groups)");
-        CharacterDatabase.DirectExecute("DELETE FROM group_instance WHERE guid NOT IN (SELECT guid FROM groups)");
+        // Delete all rows from party_member and party_instance with no group
+        CharacterDatabase.DirectExecute("DELETE FROM party_member WHERE guid NOT IN (SELECT guid FROM parties)");
+        CharacterDatabase.DirectExecute("DELETE FROM party_instance WHERE guid NOT IN (SELECT guid FROM parties)");
         // Delete all members that does not exist
-        CharacterDatabase.DirectExecute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
+        CharacterDatabase.DirectExecute("DELETE FROM party_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
 
         //                                                    0        1           2            3       4
-        QueryResult result = CharacterDatabase.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
+        QueryResult result = CharacterDatabase.Query("SELECT guid, memberGuid, memberFlags, subparty, roles FROM party_member ORDER BY guid");
         if (!result)
         {
-            SF_LOG_INFO("server.loading", ">> Loaded 0 group members. DB table `group_member` is empty!");
+            SF_LOG_INFO("server.loading", ">> Loaded 0 group members. DB table `party_member` is empty!");
             return;
         }
 
@@ -199,11 +199,11 @@ void GroupMgr::LoadGroups()
         uint32 oldMSTime = getMSTime();
         //                                                   0           1        2              3             4             5            6
         QueryResult result = CharacterDatabase.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, COUNT(g.guid) "
-            "FROM group_instance gi INNER JOIN instance i ON gi.instance = i.id "
-            "LEFT JOIN character_instance ci LEFT JOIN groups g ON g.leaderGuid = ci.guid ON ci.instance = gi.instance AND ci.permanent = 1 GROUP BY gi.instance ORDER BY gi.guid");
+            "FROM party_instance gi INNER JOIN instance i ON gi.instance = i.id "
+            "LEFT JOIN character_instance ci LEFT JOIN parties g ON g.leaderGuid = ci.guid ON ci.instance = gi.instance AND ci.permanent = 1 GROUP BY gi.instance ORDER BY gi.guid");
         if (!result)
         {
-            SF_LOG_INFO("server.loading", ">> Loaded 0 group-instance saves. DB table `group_instance` is empty!");
+            SF_LOG_INFO("server.loading", ">> Loaded 0 group-instance saves. DB table `party_instance` is empty!");
             return;
         }
 
@@ -217,7 +217,7 @@ void GroupMgr::LoadGroups()
             MapEntry const* mapEntry = sMapStore.LookupEntry(fields[1].GetUInt16());
             if (!mapEntry || !mapEntry->IsInstance())
             {
-                SF_LOG_ERROR("sql.sql", "Incorrect entry in group_instance table : no dungeon map %d", fields[1].GetUInt16());
+                SF_LOG_ERROR("sql.sql", "Incorrect entry in party_instance table : no dungeon map %d", fields[1].GetUInt16());
                 continue;
             }
 
