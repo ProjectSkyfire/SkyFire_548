@@ -32,7 +32,6 @@
 enum WarlockSpells
 {
     SPELL_WARLOCK_AFTERMATH_STUN                    = 85387,
-    SPELL_WARLOCK_BANE_OF_DOOM_EFFECT               = 18662,
     SPELL_WARLOCK_CREATE_HEALTHSTONE                = 34130,
     SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT              = 18662,
     SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST         = 62388,
@@ -53,8 +52,6 @@ enum WarlockSpells
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
     SPELL_WARLOCK_GLYPH_OF_SOUL_SWAP                = 56226,
     SPELL_WARLOCK_GLYPH_OF_SUCCUBUS                 = 56250,
-    SPELL_WARLOCK_HAUNT                             = 48181,
-    SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
     SPELL_WARLOCK_IMMOLATE                          = 348,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R1    = 60955,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R2    = 60956,
@@ -256,54 +253,6 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warl_create_healthstone_SpellScript();
-        }
-};
-
-// 603 - Bane of Doom
-/// Updated 4.3.4
-class spell_warl_bane_of_doom : public SpellScriptLoader
-{
-    public:
-        spell_warl_bane_of_doom() : SpellScriptLoader("spell_warl_bane_of_doom") { }
-
-        class spell_warl_curse_of_doom_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_curse_of_doom_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_BANE_OF_DOOM_EFFECT))
-                    return false;
-                return true;
-            }
-
-            bool Load() OVERRIDE
-            {
-                return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (!GetCaster())
-                    return;
-
-                AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                if (removeMode != AURA_REMOVE_BY_DEATH || !IsExpired())
-                    return;
-
-                if (GetCaster()->ToPlayer()->isHonorOrXPTarget(GetTarget()))
-                    GetCaster()->CastSpell(GetTarget(), SPELL_WARLOCK_BANE_OF_DOOM_EFFECT, true, NULL, aurEff);
-            }
-
-            void Register() OVERRIDE
-            {
-                 AfterEffectRemove += AuraEffectRemoveFn(spell_warl_curse_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_warl_curse_of_doom_AuraScript();
         }
 };
 
@@ -668,67 +617,6 @@ class spell_warl_glyph_of_shadowflame : public SpellScriptLoader
         AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_warl_glyph_of_shadowflame_AuraScript();
-        }
-};
-
-// 48181 - Haunt
-/// Updated 4.3.4
-class spell_warl_haunt : public SpellScriptLoader
-{
-    public:
-        spell_warl_haunt() : SpellScriptLoader("spell_warl_haunt") { }
-
-        class spell_warl_haunt_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_haunt_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Aura* aura = GetHitAura())
-                    if (AuraEffect* aurEff = aura->GetEffect(EFFECT_1))
-                        aurEff->SetAmount(CalculatePct(aurEff->GetAmount(), GetHitDamage()));
-            }
-
-            void Register() OVERRIDE
-            {
-                OnHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleOnHit);
-            }
-        };
-
-        class spell_warl_haunt_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_haunt_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HAUNT_HEAL))
-                    return false;
-                return true;
-            }
-
-            void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    int32 amount = aurEff->GetAmount();
-                    GetTarget()->CastCustomSpell(caster, SPELL_WARLOCK_HAUNT_HEAL, &amount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
-                }
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectRemove += AuraEffectApplyFn(spell_warl_haunt_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_warl_haunt_SpellScript();
-        }
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_warl_haunt_AuraScript();
         }
 };
 
@@ -1436,7 +1324,6 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_aftermath();
-    new spell_warl_bane_of_doom();
     new spell_warl_banish();
     new spell_warl_conflagrate();
     new spell_warl_create_healthstone();
@@ -1448,7 +1335,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_fel_flame();
     new spell_warl_fel_synergy();
     new spell_warl_glyph_of_shadowflame();
-    new spell_warl_haunt();
     new spell_warl_health_funnel();
     new spell_warl_healthstone_heal();
     new spell_warl_improved_soul_fire();
