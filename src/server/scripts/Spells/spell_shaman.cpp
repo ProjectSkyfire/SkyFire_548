@@ -49,8 +49,6 @@ enum ShamanSpells
     SPELL_SHAMAN_GLYPH_OF_MANA_TIDE             = 55441,
     SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM          = 62132,
     SPELL_SHAMAN_LAVA_BURST                     = 51505,
-    SPELL_SHAMAN_LAVA_FLOWS_R1                  = 51480,
-    SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1        = 65264,
     SPELL_SHAMAN_LAVA_SURGE                     = 77762,
     SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD          = 23552,
     SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD_DAMAGE   = 27635,
@@ -58,11 +56,7 @@ enum ShamanSpells
     SPELL_SHAMAN_LIGHTNING_SHIELD               = 324,
     SPELL_SHAMAN_NATURE_GUARDIAN                = 31616,
     SPELL_SHAMAN_SATED                          = 57724,
-    SPELL_SHAMAN_STORM_EARTH_AND_FIRE           = 51483,
     SPELL_SHAMAN_TELLURIC_CURRENTS              = 82987,
-    SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB      = 64695,
-    SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
-    SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
     SPELL_SHAMAN_TIDAL_WAVES                    = 53390,
     SPELL_SHAMAN_ASCENDANCE_ELEMENTAL           = 114050,
@@ -318,107 +312,6 @@ class spell_sha_earth_shield : public SpellScriptLoader
         }
 };
 
-// 6474 - Earthbind Totem - Fix Talent:Earthen Power, Earth's Grasp
-/// Updated 4.3.4
-class spell_sha_earthbind_totem : public SpellScriptLoader
-{
-    public:
-        spell_sha_earthbind_totem() : SpellScriptLoader("spell_sha_earthbind_totem") { }
-
-        class spell_sha_earthbind_totem_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_sha_earthbind_totem_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_EARTHEN_POWER))
-                    return false;
-                return true;
-            }
-
-            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
-            {
-                if (!GetCaster())
-                    return;
-                if (Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    if (AuraEffect* aur = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
-                        if (roll_chance_i(aur->GetBaseAmount()))
-                            GetTarget()->CastSpell((Unit*)NULL, SPELL_SHAMAN_TOTEM_EARTHEN_POWER, true);
-            }
-
-            void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (!GetCaster())
-                    return;
-                Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself();
-                if (!owner)
-                    return;
-                // Earth's Grasp
-                if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpell(SPELL_SHAMAN_STORM_EARTH_AND_FIRE, EFFECT_1))
-                {
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB, false);
-                }
-            }
-
-            void Register() OVERRIDE
-            {
-                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_earthbind_totem_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-                 OnEffectApply += AuraEffectApplyFn(spell_sha_earthbind_totem_AuraScript::Apply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_sha_earthbind_totem_AuraScript();
-        }
-};
-
-class EarthenPowerTargetSelector
-{
-    public:
-        EarthenPowerTargetSelector() { }
-
-        bool operator() (WorldObject* target)
-        {
-            if (!target->ToUnit())
-                return true;
-
-            if (!target->ToUnit()->HasAuraWithMechanic(1 << MECHANIC_SNARE))
-                return true;
-
-            return false;
-        }
-};
-
-// 59566 - Earthen Power
-class spell_sha_earthen_power : public SpellScriptLoader
-{
-    public:
-        spell_sha_earthen_power() : SpellScriptLoader("spell_sha_earthen_power") { }
-
-        class spell_sha_earthen_power_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_sha_earthen_power_SpellScript);
-
-            void FilterTargets(std::list<WorldObject*>& unitList)
-            {
-                unitList.remove_if(EarthenPowerTargetSelector());
-            }
-
-            void Register() OVERRIDE
-            {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_earthen_power_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_sha_earthen_power_SpellScript();
-        }
-};
-
 // 86185 Feedback
 class spell_sha_feedback : public SpellScriptLoader
 {
@@ -488,54 +381,6 @@ class spell_sha_fire_nova : public SpellScriptLoader
         SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_sha_fire_nova_SpellScript();
-        }
-};
-
-// 8050 -Flame Shock
-/// Updated 4.3.4
-class spell_sha_flame_shock : public SpellScriptLoader
-{
-    public:
-        spell_sha_flame_shock() : SpellScriptLoader("spell_sha_flame_shock") { }
-
-        class spell_sha_flame_shock_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_sha_flame_shock_AuraScript);
-
-            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LAVA_FLOWS_R1) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1))
-                    return false;
-                return true;
-            }
-
-            void HandleDispel(DispelInfo* /*dispelInfo*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    // Lava Flows
-                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW, EFFECT_0))
-                    {
-                        if (SpellInfo const* firstRankSpellInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LAVA_FLOWS_R1))
-                            if (!aurEff->GetSpellInfo()->IsRankOf(firstRankSpellInfo))
-                                return;
-
-                        int32 basepoints = aurEff->GetAmount();
-                        caster->CastCustomSpell(caster, SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1, &basepoints, NULL, NULL, true);
-                    }
-                }
-            }
-
-            void Register() OVERRIDE
-            {
-                AfterDispel += AuraDispelFn(spell_sha_flame_shock_AuraScript::HandleDispel);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_sha_flame_shock_AuraScript();
         }
 };
 
@@ -1241,11 +1086,8 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_bloodlust();
     new spell_sha_chain_heal();
     new spell_sha_earth_shield();
-    new spell_sha_earthbind_totem();
-    new spell_sha_earthen_power();
     new spell_sha_feedback();
     new spell_sha_fire_nova();
-    new spell_sha_flame_shock();
     new spell_sha_focused_insight();
     new spell_sha_glyph_of_healing_wave();
     new spell_sha_healing_stream_totem();
