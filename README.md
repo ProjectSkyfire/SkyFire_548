@@ -37,7 +37,7 @@ For further information on the SkyFire project, please visit our project website
 + MySQL = 8.0 (Windows / Linux)
 + CMake = 3.8.1/3.5.1 (Windows / Linux)
 + OpenSSL = 1.1.0G
-+ GCC = 6.3.0 (Linux only)
++ GCC = 8.1.0 (Linux only)
 + MS Visual Studio = 15 (2017) (Windows only)
 
 ## Install

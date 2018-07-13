@@ -36,8 +36,6 @@
 #include "World.h"
 #include "Transport.h"
 
-#include <memory>
-
 GameObject::GameObject() : WorldObject(false), MapObject(),
     m_model(NULL), m_goValue(), m_AI(NULL)
 {
