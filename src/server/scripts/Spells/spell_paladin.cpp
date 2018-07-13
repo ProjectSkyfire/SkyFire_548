@@ -42,19 +42,14 @@ enum PaladinSpells
     SPELL_PALADIN_CONCENTRACTION_AURA            = 19746,
     SPELL_PALADIN_DIVINE_PURPOSE_PROC            = 90174,
     SPELL_PALADIN_DIVINE_SACRIFICE               = 64205,
-    SPELL_PALADIN_DIVINE_STORM                   = 53385,
-    SPELL_PALADIN_DIVINE_STORM_DUMMY             = 54171,
-    SPELL_PALADIN_DIVINE_STORM_HEAL              = 54172,
     SPELL_PALADIN_EYE_FOR_AN_EYE_RANK_1          = 9799,
     SPELL_PALADIN_EYE_FOR_AN_EYE_DAMAGE          = 25997,
-    SPELL_PALADIN_FORBEARANCE                    = 25771,
     SPELL_PALADIN_GLYPH_OF_SALVATION             = 63225,
     SPELL_PALADIN_HAND_OF_SACRIFICE              = 6940,
     SPELL_PALADIN_HOLY_LIGHT                     = 635,
     SPELL_PALADIN_HOLY_SHOCK_R1                  = 20473,
     SPELL_PALADIN_HOLY_SHOCK_R1_DAMAGE           = 25912,
     SPELL_PALADIN_HOLY_SHOCK_R1_HEALING          = 25914,
-    SPELL_PALADIN_IMMUNE_SHIELD_MARKER           = 61988,
     SPELL_PALADIN_IMPROVED_CONCENTRACTION_AURA   = 63510,
     SPELL_PALADIN_IMPROVED_DEVOTION_AURA         = 63514,
     SPELL_PALADIN_ITEM_HEALING_TRANCE            = 37706,
@@ -401,95 +396,6 @@ class spell_pal_divine_sacrifice : public SpellScriptLoader
         }
 };
 
-// 53385 - Divine Storm
-class spell_pal_divine_storm : public SpellScriptLoader
-{
-    public:
-        spell_pal_divine_storm() : SpellScriptLoader("spell_pal_divine_storm") { }
-
-        class spell_pal_divine_storm_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_divine_storm_SpellScript);
-
-            uint32 healPct;
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_DIVINE_STORM_DUMMY))
-                    return false;
-                return true;
-            }
-
-            bool Load() override
-            {
-                healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
-                return true;
-            }
-
-            void TriggerHeal()
-            {
-                Unit* caster = GetCaster();
-                caster->CastCustomSpell(SPELL_PALADIN_DIVINE_STORM_DUMMY, SPELLVALUE_BASE_POINT0, (GetHitDamage() * healPct) / 100, caster, true);
-            }
-
-            void Register() override
-            {
-                AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::TriggerHeal);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_pal_divine_storm_SpellScript();
-        }
-};
-
-// 54171 - Divine Storm (Dummy)
-class spell_pal_divine_storm_dummy : public SpellScriptLoader
-{
-    public:
-        spell_pal_divine_storm_dummy() : SpellScriptLoader("spell_pal_divine_storm_dummy") { }
-
-        class spell_pal_divine_storm_dummy_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_divine_storm_dummy_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_DIVINE_STORM_HEAL))
-                    return false;
-                return true;
-            }
-
-            void CountTargets(std::list<WorldObject*>& targetList)
-            {
-                _targetCount = targetList.size();
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (!_targetCount || ! GetHitUnit())
-                    return;
-
-                int32 heal = GetEffectValue() / _targetCount;
-                GetCaster()->CastCustomSpell(GetHitUnit(), SPELL_PALADIN_DIVINE_STORM_HEAL, &heal, NULL, NULL, true);
-            }
-        private:
-            uint32 _targetCount;
-
-            void Register() override
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_divine_storm_dummy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_divine_storm_dummy_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_pal_divine_storm_dummy_SpellScript();
-        }
-};
-
 // 33695 - Exorcism and Holy Wrath Damage
 class spell_pal_exorcism_and_holy_wrath_damage : public SpellScriptLoader
 {
@@ -795,61 +701,6 @@ class spell_pal_item_healing_discount : public SpellScriptLoader
         }
 };
 
-// 633 - Lay on Hands
-class spell_pal_lay_on_hands : public SpellScriptLoader
-{
-    public:
-        spell_pal_lay_on_hands() : SpellScriptLoader("spell_pal_lay_on_hands") { }
-
-        class spell_pal_lay_on_hands_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_lay_on_hands_SpellScript);
-
-            bool Validate(SpellInfo const* /*spell*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_FORBEARANCE) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_PALADIN_IMMUNE_SHIELD_MARKER))
-                    return false;
-                return true;
-            }
-
-            SpellCastResult CheckCast()
-            {
-                Unit* caster = GetCaster();
-                if (Unit* target = GetExplTargetUnit())
-                    if (caster == target)
-                        if (target->HasAura(SPELL_PALADIN_FORBEARANCE) ||
-                            target->HasAura(SPELL_PALADIN_IMMUNE_SHIELD_MARKER))
-                        {
-                            return SPELL_FAILED_TARGET_AURASTATE;
-                        }
-
-                return SPELL_CAST_OK;
-            }
-
-            void HandleScript()
-            {
-                Unit* caster = GetCaster();
-                if (caster == GetHitUnit())
-                {
-                    caster->CastSpell(caster, SPELL_PALADIN_FORBEARANCE, true);
-                    caster->CastSpell(caster, SPELL_PALADIN_IMMUNE_SHIELD_MARKER, true);
-                }
-            }
-
-            void Register() override
-            {
-                OnCheckCast += SpellCheckCastFn(spell_pal_lay_on_hands_SpellScript::CheckCast);
-                AfterHit += SpellHitFn(spell_pal_lay_on_hands_SpellScript::HandleScript);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_pal_lay_on_hands_SpellScript();
-        }
-};
-
 // 31789 - Righteous Defense
 class spell_pal_righteous_defense : public SpellScriptLoader
 {
@@ -1071,8 +922,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_beacon_of_light();
     new spell_pal_blessing_of_faith();
     new spell_pal_divine_sacrifice();
-    new spell_pal_divine_storm();
-    new spell_pal_divine_storm_dummy();
     new spell_pal_exorcism_and_holy_wrath_damage();
     new spell_pal_eye_for_an_eye();
     new spell_pal_grand_crusader();
@@ -1082,7 +931,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_improved_aura_effect("spell_pal_improved_devotion_aura_effect");
     new spell_pal_improved_aura_effect("spell_pal_sanctified_retribution_effect");
     new spell_pal_item_healing_discount();
-    new spell_pal_lay_on_hands();
     new spell_pal_righteous_defense();
     new spell_pal_sacred_shield();
     new spell_pal_templar_s_verdict();
