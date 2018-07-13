@@ -666,20 +666,6 @@ void AddSC_kezan();
 void AddSC_event_childrens_week();
 
 // Pandaria
-void AddSC_boss_ordos();
-//void AddSC_dread_wastes();
-//void AddSC_isle_of_giants();
-void AddSC_isle_of_thunder();
-//void AddSC_krasarang_wilds();
-//void AddSC_kun_lai_summit();
-//void AddSC_the_jade_forest();
-//void AddSC_the_situation_in_dalaran();
-//void AddSC_the_veiled_stair();
-//void AddSC_timeless_isle();
-//void AddSC_townlong_steppes();
-//void AddSC_vale_of_eternal_blossoms();
-//void AddSC_valley_of_the_four_winds();
-void AddSC_zone_wandering_island();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1405,25 +1391,11 @@ void AddEventScripts()
 #endif
 }
 
-void AddPandariaScripts()
-{
-#ifdef SCRIPTS
-    AddSC_boss_ordos();
-    //AddSC_dread_wastes();
-    //AddSC_isle_of_giants();
-    AddSC_isle_of_thunder();
-    //AddSC_krasarang_wilds();
-    //AddSC_kun_lai_summit();
-    //AddSC_the_jade_forest();
-    //AddSC_the_situation_in_dalaran();
-    //AddSC_the_veiled_stair();
-    //AddSC_timeless_isle();
-    //AddSC_townlong_steppes();
-    //AddSC_vale_of_eternal_blossoms();
-    //AddSC_valley_of_the_four_winds();
-    AddSC_zone_wandering_island();
-#endif
-}
+//void AddPandariaScripts()
+//{
+//#ifdef SCRIPTS
+//#endif
+//}
 
 void AddPetScripts()
 {
