@@ -31,20 +31,14 @@
 
 enum PriestSpells
 {
-    SPELL_PRIEST_ABSOLUTION                         = 33167,
     SPELL_PRIEST_BODY_AND_SOUL_DISPEL               = 64136,
     SPELL_PRIEST_BODY_AND_SOUL_SPEED                = 65081,
     SPELL_PRIEST_CURE_DISEASE                       = 528,
-    SPELL_PRIEST_DISPEL_MAGIC_FRIENDLY              = 97690,
-    SPELL_PRIEST_DISPEL_MAGIC_HOSTILE               = 97691,
     SPELL_PRIEST_DIVINE_AEGIS                       = 47753,
     SPELL_PRIEST_DIVINE_TOUCH                       = 63544,
-    SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC              = 55677,
-    SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC_HEAL         = 56131,
     SPELL_PRIEST_GLYPH_OF_LIGHTWELL                 = 55673,
     SPELL_PRIEST_GLYPH_OF_PRAYER_OF_HEALING_HEAL    = 56161,
     SPELL_PRIEST_GLYPH_OF_SHADOW                    = 107906,
-    SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL               = 48153,
     SPELL_PRIEST_ITEM_EFFICIENCY                    = 37595,
     SPELL_PRIEST_LEAP_OF_FAITH                      = 73325,
     SPELL_PRIEST_LEAP_OF_FAITH_EFFECT               = 92832,
@@ -62,7 +56,6 @@ enum PriestSpells
     SPELL_PRIEST_TWIN_DISCIPLINES_RANK_1            = 47586,
     SPELL_PRIEST_T9_HEALING_2P                      = 67201,
     SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL              = 15290,
-    SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 64085
 };
 
 enum PriestSpellIcons
@@ -126,65 +119,6 @@ class spell_pri_body_and_soul : public SpellScriptLoader
         {
             return new spell_pri_body_and_soul_AuraScript();
         }
-};
-
-// 527 - Dispel magic
-class spell_pri_dispel_magic : public SpellScriptLoader
-{
-public:
-    spell_pri_dispel_magic() : SpellScriptLoader("spell_pri_dispel_magic") { }
-
-    class spell_pri_dispel_magic_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pri_dispel_magic_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_ABSOLUTION))
-                return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC_HEAL))
-                return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC))
-                return false;
-            return true;
-        }
-
-        SpellCastResult CheckCast()
-        {
-            Unit* caster = GetCaster();
-            Unit* target = GetExplTargetUnit();
-
-            if (!target || (!caster->HasAura(SPELL_PRIEST_ABSOLUTION) && caster != target && target->IsFriendlyTo(caster)))
-                return SPELL_FAILED_BAD_TARGETS;
-            return SPELL_CAST_OK;
-        }
-
-        void AfterEffectHit(SpellEffIndex /*effIndex*/)
-        {
-            if (GetHitUnit()->IsFriendlyTo(GetCaster()))
-            {
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_PRIEST_DISPEL_MAGIC_FRIENDLY, true);
-                if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC, EFFECT_0))
-                {
-                    int32 heal = GetHitUnit()->CountPctFromMaxHealth(aurEff->GetAmount());
-                    GetCaster()->CastCustomSpell(SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC_HEAL, SPELLVALUE_BASE_POINT0, heal, GetHitUnit());
-                }
-            }
-            else
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_PRIEST_DISPEL_MAGIC_HOSTILE, true);
-        }
-
-        void Register()
-        {
-            OnCheckCast += SpellCheckCastFn(spell_pri_dispel_magic_SpellScript::CheckCast);
-            OnEffectHitTarget += SpellEffectFn(spell_pri_dispel_magic_SpellScript::AfterEffectHit, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pri_dispel_magic_SpellScript();
-    }
 };
 
 // -47509 - Divine Aegis
@@ -342,63 +276,6 @@ class spell_pri_item_greater_heal_refund : public SpellScriptLoader
         AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_pri_item_greater_heal_refund_AuraScript();
-        }
-};
-
-// 47788 - Guardian Spirit
-class spell_pri_guardian_spirit : public SpellScriptLoader
-{
-    public:
-        spell_pri_guardian_spirit() : SpellScriptLoader("spell_pri_guardian_spirit") { }
-
-        class spell_pri_guardian_spirit_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_guardian_spirit_AuraScript);
-
-            uint32 healPct;
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL))
-                    return false;
-                return true;
-            }
-
-            bool Load() OVERRIDE
-            {
-                healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
-                return true;
-            }
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                // Set absorbtion amount to unlimited
-                amount = -1;
-            }
-
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                Unit* target = GetTarget();
-                if (dmgInfo.GetDamage() < target->GetHealth())
-                    return;
-
-                int32 healAmount = int32(target->CountPctFromMaxHealth(healPct));
-                // remove the aura now, we don't want 40% healing bonus
-                Remove(AURA_REMOVE_BY_ENEMY_SPELL);
-                target->CastCustomSpell(target, SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL, &healAmount, NULL, NULL, true);
-                absorbAmount = dmgInfo.GetDamage();
-            }
-
-            void Register() OVERRIDE
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_guardian_spirit_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_guardian_spirit_AuraScript::Absorb, EFFECT_1);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_pri_guardian_spirit_AuraScript();
         }
 };
 
@@ -1034,22 +911,9 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_GEN_REPLENISHMENT))
+                if (!sSpellMgr->GetSpellInfo(SPELL_GEN_REPLENISHMENT))
                     return false;
                 return true;
-            }
-
-            void HandleDispel(DispelInfo* /*dispelInfo*/)
-            {
-                if (Unit* caster = GetCaster())
-                    if (Unit* target = GetUnitOwner())
-                        if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
-                        {
-                            int32 damage = aurEff->GetAmount() * 8;
-                            // backfire damage
-                            caster->CastCustomSpell(target, SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
-                        }
             }
 
             bool CheckProc(ProcEventInfo& eventInfo)
@@ -1064,9 +928,8 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
 
             void Register() OVERRIDE
             {
-                AfterDispel += AuraDispelFn(spell_pri_vampiric_touch_AuraScript::HandleDispel);
                 DoCheckProc += AuraCheckProcFn(spell_pri_vampiric_touch_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_pri_vampiric_touch_AuraScript::HandleEffectProc, EFFECT_2, SPELL_AURA_DUMMY);
+                OnEffectProc += AuraEffectProcFn(spell_pri_vampiric_touch_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
@@ -1079,12 +942,10 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_body_and_soul();
-    new spell_pri_dispel_magic();
     new spell_pri_divine_aegis();
     new spell_pri_glyph_of_prayer_of_healing();
     new spell_pri_improved_power_word_shield();
     new spell_pri_item_greater_heal_refund();
-    new spell_pri_guardian_spirit();
     new spell_pri_leap_of_faith_effect_trigger();
     new spell_pri_lightwell_renew();
     new spell_pri_mana_burn();
