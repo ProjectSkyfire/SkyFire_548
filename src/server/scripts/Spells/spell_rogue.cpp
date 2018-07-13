@@ -662,47 +662,6 @@ class spell_rog_rupture : public SpellScriptLoader
         }
 };
 
-// 5938 - Shiv
-class spell_rog_shiv : public SpellScriptLoader
-{
-    public:
-        spell_rog_shiv() : SpellScriptLoader("spell_rog_shiv") { }
-
-        class spell_rog_shiv_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_rog_shiv_SpellScript);
-
-            bool Load() OVERRIDE
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_SHIV_TRIGGERED))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                    caster->CastSpell(unitTarget, SPELL_ROGUE_SHIV_TRIGGERED, true);
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_rog_shiv_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_rog_shiv_SpellScript();
-        }
-};
-
 // 1784 - Stealth
 class spell_rog_stealth : public SpellScriptLoader
 {
@@ -872,7 +831,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_prey_on_the_weak();
     new spell_rog_recuperate();
     new spell_rog_rupture();
-    new spell_rog_shiv();
     new spell_rog_stealth();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
