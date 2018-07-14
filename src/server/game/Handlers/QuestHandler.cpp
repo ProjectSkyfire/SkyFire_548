@@ -231,7 +231,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
         {
             _player->AddQuest(quest, object);
 
-            if (quest->HasFlag(QUEST_FLAGS_PARTY_ACCEPT))
+            // QUEST_FLAGS_PARTY_ACCEPT
+            if (quest->HasFlag(QUEST_FLAGS_START_EVENT_MUST_COMPLETE))
             {
                 if (Group* group = _player->GetGroup())
                 {
@@ -442,7 +443,8 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         }
     }
     
-    if (!quest->HasFlag(QUEST_FLAGS_AUTO_SUBMIT))
+    // QUEST_FLAGS_AUTO_SUBMIT
+    if (!quest->HasFlag(QUEST_FLAGS_PLAYER_CAST_ACCEPT))
     {
         object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
         if (!object || !object->hasInvolvedQuest(questId))
@@ -635,7 +637,8 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recvData)
 
     if (const Quest* quest = sObjectMgr->GetQuestTemplate(questId))
     {
-        if (!quest->HasFlag(QUEST_FLAGS_PARTY_ACCEPT))
+        // QUEST_FLAGS_PARTY_ACCEPT
+        if (!quest->HasFlag(QUEST_FLAGS_START_EVENT_MUST_COMPLETE))
             return;
 
         Player* originalPlayer = ObjectAccessor::FindPlayer(_player->GetDivider());

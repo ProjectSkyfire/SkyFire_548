@@ -718,7 +718,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
 
     data.FlushBits();
 
-    bool hiddenReward = quest->HasFlag(QUEST_FLAGS_HIDDEN_REWARDS);
+    bool hiddenReward = quest->HasFlag(QUEST_FLAGS_HIDE_REWARD);
 
     // values need rechecking and zero values need more research
     data.append(objData);
