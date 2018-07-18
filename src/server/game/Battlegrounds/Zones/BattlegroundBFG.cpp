@@ -240,13 +240,13 @@ void BattlegroundBFG::HandleAreaTrigger(Player* player, uint32 trigger)
     switch (trigger) {
     case 6447:                                          // Alliance start
         if (player->GetTeam() != ALLIANCE)
-            player->GetSession()->SendAreaTriggerMessage("Only The Alliance can use that portal");
+            player->GetSession()->SendNotification("Only The Alliance can use that portal");
         else
             player->LeaveBattleground();
         break;
     case 6448:                                          // Horde start
         if (player->GetTeam() != HORDE)
-            player->GetSession()->SendAreaTriggerMessage("Only The Horde can use that portal");
+            player->GetSession()->SendNotification("Only The Horde can use that portal");
         else
             player->LeaveBattleground();
         break;
