@@ -2427,7 +2427,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         }
     }
 
-    // Flat mod from caster auras by spell school and power type
+    /*// Flat mod from caster auras by spell school and power type
     Unit::AuraEffectList const& auras = caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
     {
@@ -2436,7 +2436,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         if (!((*i)->GetMiscValueB() & (1 << PowerType)))
             continue;
         powerCost += (*i)->GetAmount();
-    }
+    }*/
 
     // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
     if (AttributesEx4 & SPELL_ATTR4_SPELL_VS_EXTEND_COST)
@@ -2473,6 +2473,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         }
     }
 
+    /*
     // PCT mod from user auras by spell school and power type
     Unit::AuraEffectList const& aurasPct = caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT);
     for (Unit::AuraEffectList::const_iterator i = aurasPct.begin(); i != aurasPct.end(); ++i)
@@ -2485,6 +2486,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
     }
     if (powerCost < 0)
         powerCost = 0;
+        */
     return powerCost;
 }
 

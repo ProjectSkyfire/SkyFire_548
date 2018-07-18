@@ -48,7 +48,7 @@ class TempSummon : public Creature
         virtual void UnSummon(uint32 msTime = 0);
         void RemoveFromWorld();
         void SetTempSummonType(TempSummonType type);
-        void SaveToDB(uint32 /*mapid*/, uint32 /*spawnMask*/, uint32 /*phaseMask*/) { }
+        void SaveToDB(uint32 /*mapid*/, uint32 /*spawnMask*/) { }
         Unit* GetSummoner() const;
         Creature* GetSummonerCreatureBase() const;
         uint64 GetSummonerGUID() const { return m_summonerGUID; }

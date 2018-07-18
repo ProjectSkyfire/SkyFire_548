@@ -485,7 +485,7 @@ bool Map::AddPlayerToMap(Player* player)
 
     player->m_clientGUIDs.clear();
     player->UpdateObjectVisibility(false);
-
+    player->UpdatePhasing();
     sScriptMgr->OnPlayerEnterMap(this, player);
     return true;
 }
@@ -543,6 +543,8 @@ bool Map::AddToMap(T* obj)
 
     if (obj->isActiveObject())
         AddToActive(obj);
+
+    obj->RebuildTerrainSwaps();
 
     //something, such as vehicle, needs to be update immediately
     //also, trigger needs to cast spell, if not update, cannot see visual

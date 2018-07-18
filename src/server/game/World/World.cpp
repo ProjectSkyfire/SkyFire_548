@@ -1502,9 +1502,6 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading Spell Group Stack Rules...");
     sSpellMgr->LoadSpellGroupStackRules();
 
-    SF_LOG_INFO("server.loading", "Loading Spell Phase Dbc Info...");
-    sObjectMgr->LoadSpellPhaseInfo();
-
     SF_LOG_INFO("server.loading", "Loading NPC Texts...");
     sObjectMgr->LoadGossipText();
 
@@ -1770,8 +1767,17 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading World States...");              // must be loaded before battleground, outdoor PvP and conditions
     LoadWorldStates();
 
-    SF_LOG_INFO("server.loading", "Loading Phase definitions...");
-    sObjectMgr->LoadPhaseDefinitions();
+    SF_LOG_INFO("server.loading", "Loading Terrain Phase definitions...");
+    sObjectMgr->LoadTerrainPhaseInfo();
+
+    SF_LOG_INFO("server.loading", "Loading Terrain Swap Default definitions...");
+    sObjectMgr->LoadTerrainSwapDefaults();
+
+    SF_LOG_INFO("server.loading", "Loading Terrain World Map definitions...");
+    sObjectMgr->LoadTerrainWorldMaps();
+
+    SF_LOG_INFO("server.loading", "Loading Phase Area definitions...");
+    sObjectMgr->LoadAreaPhases();
 
     SF_LOG_INFO("server.loading", "Loading Conditions...");
     sConditionMgr->LoadConditions();
@@ -3377,14 +3383,6 @@ CharacterNameData const* World::GetCharacterNameData(uint32 guid) const
         return &itr->second;
     else
         return NULL;
-}
-
-void World::UpdatePhaseDefinitions()
-{
-    SessionMap::const_iterator itr;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second && itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
-            itr->second->GetPlayer()->GetPhaseMgr().NotifyStoresReloaded();
 }
 
 void World::ReloadRBAC()

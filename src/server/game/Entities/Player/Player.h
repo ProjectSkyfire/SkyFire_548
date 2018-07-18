@@ -26,7 +26,6 @@
 
 #include "Item.h"
 #include "PetDefines.h"
-#include "PhaseMgr.h"
 #include "QuestDef.h"
 #include "SpellMgr.h"
 #include "Unit.h"
@@ -57,7 +56,6 @@ class PlayerMenu;
 class PlayerSocial;
 class SpellCastTargets;
 class UpdateMask;
-class PhaseMgr;
 class BattlePetMgr;
 
 typedef std::deque<Mail*> PlayerMails;
@@ -1565,11 +1563,6 @@ class Player : public Unit, public GridObject<Player>
     Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime);
     void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
 
-    PhaseMgr& GetPhaseMgr()
-    {
-        return phaseMgr;
-    }
-
     /// Handles said message in regular chat based on declared language and in config pre-defined Range.
     void Say(std::string const& text, const uint32 language);
     /// Handles yelled message in regular chat based on declared language and in config pre-defined Range.
@@ -2956,7 +2949,7 @@ class Player : public Unit, public GridObject<Player>
 
     template<class T>
     void UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& visibleNow);
-
+    void UpdatePhasing();
     uint8 m_forced_speed_changes [MAX_MOVE_TYPE];
 
     bool HasAtLoginFlag(AtLoginFlags f) const
@@ -3676,8 +3669,6 @@ class Player : public Unit, public GridObject<Player>
 
     uint32 _activeCheats;
     uint32 _maxPersonalArenaRate;
-
-    PhaseMgr phaseMgr;
 
     uint32 _ConquestCurrencytotalWeekCap;
 

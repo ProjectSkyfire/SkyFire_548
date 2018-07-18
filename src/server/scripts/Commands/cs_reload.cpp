@@ -1246,16 +1246,6 @@ public:
         return true;
     }
 
-
-    static bool HandleReloadPhaseDefinitionsCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        SF_LOG_INFO("misc", "Reloading phase_definitions table...");
-        sObjectMgr->LoadPhaseDefinitions();
-        sWorld->UpdatePhaseDefinitions();
-        handler->SendGlobalGMSysMessage("Phase Definitions reloaded.");
-        return true;
-    }
-
     static bool HandleReloadRBACCommand(ChatHandler* handler, const char* /*args*/)
     {
         SF_LOG_INFO("misc", "Reloading RBAC tables...");

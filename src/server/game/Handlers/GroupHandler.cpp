@@ -1113,8 +1113,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask == GROUP_UPDATE_FLAG_NONE)
         return;
 
-    std::set<uint32> phases;
-    player->GetPhaseMgr().GetActivePhases(phases);
+    std::set<uint32> const& phases = player->GetPhases();
 
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)                // if update power type, update current/max power also
         mask |= (GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
@@ -1408,8 +1407,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
 
     Pet* pet = player->GetPet();
     Powers powerType = player->getPowerType();
-    std::set<uint32> phases;
-    player->GetPhaseMgr().GetActivePhases(phases);
+    std::set<uint32> const& phases = player->GetPhases();
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4+2+2+2+1+2*6+8+1+8);
     data << uint8(0);                                       // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
@@ -1489,9 +1487,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
             {
                 for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 {
-                    if (AuraEffect const* eff = aurApp->GetBase()->GetEffect(i))
+                    /*if (AuraEffect const* eff = aurApp->GetBase()->GetEffect(i))
                         data << int32(eff->GetAmount());
-                    else
+                    else*/
                         data << int32(0);
                 }
             }
@@ -1541,10 +1539,10 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
                 if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
                 {
                     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                    {
+                    {/*
                         if (AuraEffect const* eff = aurApp->GetBase()->GetEffect(i))
                             data << int32(eff->GetAmount());
-                        else
+                        else*/
                             data << int32(0);
                     }
                 }

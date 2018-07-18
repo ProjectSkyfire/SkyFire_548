@@ -1523,7 +1523,7 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
     // So we must create it specific for this instance
     GameObject* go = new GameObject;
     if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetBgMap(),
-        PHASEMASK_NORMAL, x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, GO_STATE_READY))
+        x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, GO_STATE_READY))
     {
         SF_LOG_ERROR("sql.sql", "Battleground::AddObject: cannot create gameobject (entry: %u) for BG (map: %u, instance id: %u)!",
                 entry, m_MapId, m_InstanceID);
@@ -1532,6 +1532,9 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
         delete go;
         return false;
     }
+
+    for (auto phase : go->GetPhases())
+        go->SetPhased(phase, false, true);
 /*
     uint32 guid = go->GetGUIDLow();
 
@@ -1638,7 +1641,7 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
         return NULL;
 
     Creature* creature = new Creature;
-    if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, PHASEMASK_NORMAL, entry, 0, teamval, x, y, z, o))
+    if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, entry, 0, teamval, x, y, z, o))
     {
         SF_LOG_ERROR("bg.battleground", "Battleground::AddCreature: cannot create creature (entry: %u) for BG (map: %u, instance id: %u)!",
             entry, m_MapId, m_InstanceID);

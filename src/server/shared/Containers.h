@@ -66,6 +66,22 @@ namespace Skyfire
             std::advance(it, urand(0, container.size() - 1));
             return *it;
         }
+
+        template<class Iterator1, class Iterator2>
+        bool Intersects(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2)
+        {
+            while (first1 != last1 && first2 != last2)
+            {
+                if (*first1 < *first2)
+                    ++first1;
+                else if (*first2 < *first1)
+                    ++first2;
+                else
+                    return true;
+            }
+
+            return false;
+        }
     }
     //! namespace Containers
 }

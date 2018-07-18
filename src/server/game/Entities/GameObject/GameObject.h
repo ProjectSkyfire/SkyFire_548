@@ -593,7 +593,8 @@ struct GameObjectData
     explicit GameObjectData() : dbData(true) { }
     uint32 id;                                              // entry in gamobject_template
     uint16 mapid;
-    uint32 phaseMask;
+    uint32 phaseid;
+    uint32 phaseGroup;
     float posX;
     float posY;
     float posZ;
@@ -640,7 +641,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void RemoveFromWorld();
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
-        bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
+        bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
         void Update(uint32 p_time);
         static GameObject* GetGameObject(WorldObject& object, uint64 guid);
         GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
@@ -659,7 +660,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const;
 
         void SaveToDB();
-        void SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask);
+        void SaveToDB(uint32 mapid, uint32 spawnMask);
         bool LoadFromDB(uint32 guid, Map* map) { return LoadGameObjectFromDB(guid, map, false); }
         bool LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap = true);
         void DeleteFromDB();
@@ -723,7 +724,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3, animprogress); }
         void SetGameobjectTransparence(uint8 transparency) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0, transparency); }
         static void SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid = 0);
-
+        bool SetPhased(uint32 id, bool update, bool apply);
         void SetPhaseMask(uint32 newPhaseMask, bool update);
         void EnableCollision(bool enable);
 

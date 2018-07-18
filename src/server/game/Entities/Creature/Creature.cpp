@@ -738,11 +738,17 @@ void Creature::Motion_Initialize()
         i_motionMaster.Initialize();
 }
 
-bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data)
+bool Creature::Create(uint32 guidlow, Map* map, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data)
 {
     ASSERT(map);
     SetMap(map);
-    SetPhaseMask(phaseMask, false);
+
+    if(data && data->phaseid)
+        SetPhased(data->phaseid, false, true);
+
+    if (data && data->phaseGroup)
+        for (auto ph : GetPhasesForGroup(data->phaseGroup))
+            SetPhased(ph, false, true);
 
     CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(Entry);
     if (!cinfo)
@@ -935,10 +941,10 @@ void Creature::SaveToDB()
     }
 
     uint32 mapId = GetTransport() ? GetTransport()->GetGOInfo()->moTransport.mapID : GetMapId();
-    SaveToDB(mapId, data->spawnMask, GetPhaseMask());
+    SaveToDB(mapId, data->spawnMask);
 }
 
-void Creature::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
+void Creature::SaveToDB(uint32 mapid, uint32 spawnMask)
 {
     // update in loaded data
     if (!m_DBTableGuid)
@@ -971,7 +977,6 @@ void Creature::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
     // data->guid = guid must not be updated at save
     data.id = GetEntry();
     data.mapid = mapid;
-    data.phaseMask = phaseMask;
     data.displayid = displayId;
     data.equipmentId = GetCurrentEquipmentId();
     if (!GetTransport())
@@ -1017,7 +1022,6 @@ void Creature::SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask)
     stmt->setUInt32(index++, GetEntry());
     stmt->setUInt16(index++, uint16(mapid));
     stmt->setUInt32(index++, spawnMask);
-    stmt->setUInt32(index++, GetPhaseMask());
     stmt->setUInt32(index++, displayId);
     stmt->setInt32(index++, int32(GetCurrentEquipmentId()));
     stmt->setFloat(index++, GetPositionX());
@@ -1214,7 +1218,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
         guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
 
     uint16 team = 0;
-    if (!Create(guid, map, data->phaseMask, data->id, 0, team, data->posX, data->posY, data->posZ, data->orientation, data))
+    if (!Create(guid, map, data->id, 0, team, data->posX, data->posY, data->posZ, data->orientation, data))
         return false;
 
     //We should set first home position, because then AI calls home movement
@@ -1493,8 +1497,8 @@ void Creature::setDeathState(DeathState s)
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
         LoadCreaturesAddon(true);
         Motion_Initialize();
-        if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
-            SetPhaseMask(GetCreatureData()->phaseMask, false);
+        //if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
+        //    SetPhaseMask(GetCreatureData()->phaseMask, false);
         Unit::setDeathState(ALIVE);
     }
 }

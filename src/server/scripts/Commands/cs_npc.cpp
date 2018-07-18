@@ -187,6 +187,7 @@ public:
             { "model",      rbac::RBAC_PERM_COMMAND_NPC_SET_MODEL,     false, &HandleNpcSetModelCommand,         "", },
             { "movetype",   rbac::RBAC_PERM_COMMAND_NPC_SET_MOVETYPE,  false, &HandleNpcSetMoveTypeCommand,      "", },
             { "phase",      rbac::RBAC_PERM_COMMAND_NPC_SET_PHASE,     false, &HandleNpcSetPhaseCommand,         "", },
+            { "phasegroup", rbac::RBAC_PERM_COMMAND_NPC_SET_PHASE,     false, &HandleNpcSetPhaseGroup,           "", },
             { "spawndist",  rbac::RBAC_PERM_COMMAND_NPC_SET_SPAWNDIST, false, &HandleNpcSetSpawnDistCommand,     "", },
             { "spawntime",  rbac::RBAC_PERM_COMMAND_NPC_SET_SPAWNTIME, false, &HandleNpcSetSpawnTimeCommand,     "", },
             { "data",       rbac::RBAC_PERM_COMMAND_NPC_SET_DATA,      false, &HandleNpcSetDataCommand,          "", },
@@ -250,7 +251,6 @@ public:
             uint32 guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
             CreatureData& data = sObjectMgr->NewOrExistCreatureData(guid);
             data.id = id;
-            data.phaseMask = chr->GetPhaseMgr().GetPhaseMaskForSpawn();
             data.posX = chr->GetTransOffsetX();
             data.posY = chr->GetTransOffsetY();
             data.posZ = chr->GetTransOffsetZ();
@@ -258,20 +258,23 @@ public:
 
             Creature* creature = trans->CreateNPCPassenger(guid, &data);
 
-            creature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode(), chr->GetPhaseMgr().GetPhaseMaskForSpawn());
+            creature->SaveToDB(trans->GetGOInfo()->moTransport.mapID, 1 << map->GetSpawnMode());
 
             sObjectMgr->AddCreatureToGrid(guid, &data);
             return true;
         }
 
         Creature* creature = new Creature();
-        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMgr().GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
+        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, id, 0, (uint32)teamval, x, y, z, o))
         {
             delete creature;
             return false;
         }
 
-        creature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), chr->GetPhaseMgr().GetPhaseMaskForSpawn());
+        for (auto phase : chr->GetPhases())
+            creature->SetPhased(phase, false, true);
+
+        creature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
 
         uint32 db_guid = creature->GetDBTableGUIDLow();
 
@@ -1078,33 +1081,56 @@ public:
         return true;
     }
 
-    //npc phasemask handling
-    //change phasemask of creature or pet
-    static bool HandleNpcSetPhaseCommand(ChatHandler* handler, char const* args)
+    //npc phase handling
+    //change phase of creature
+    static bool HandleNpcSetPhaseGroup(ChatHandler* handler, char const* args)
     {
         if (!*args)
             return false;
 
-        uint32 phasemask = (uint32) atoi((char*)args);
-        if (phasemask == 0)
-        {
-            handler->SendSysMessage(LANG_BAD_VALUE);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
+        uint32 phaseGroupId = (uint32)atoi((char*)args);
 
         Creature* creature = handler->getSelectedCreature();
-        if (!creature)
+        if (!creature || creature->IsPet())
         {
             handler->SendSysMessage(LANG_SELECT_CREATURE);
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        creature->SetPhaseMask(phasemask, true);
+        creature->ClearPhases();
 
-        if (!creature->IsPet())
-            creature->SaveToDB();
+        for (uint32 id : GetPhasesForGroup(phaseGroupId))
+            creature->SetPhased(id, false, true); // don't send update here for multiple phases, only send it once after adding all phases
+
+        creature->UpdateObjectVisibility();
+
+        creature->SaveToDB();
+
+        return true;
+    }
+
+    //npc phase handling
+    //change phase of creature
+    static bool HandleNpcSetPhaseCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        uint32 phase = (uint32)atoi((char*)args);
+
+        Creature* creature = handler->getSelectedCreature();
+        if (!creature || creature->IsPet())
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        creature->ClearPhases();
+        creature->SetPhased(phase, true, true);
+
+        creature->SaveToDB();
 
         return true;
     }

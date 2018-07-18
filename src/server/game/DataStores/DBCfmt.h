@@ -103,6 +103,7 @@ char const LFGDungeonEntryfmt[] = "nsiiiiiiiiixxixixixxxxxxxxxxx";
 char const LiquidTypefmt[] = "nxxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 char const LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 char const PhaseEntryfmt[] = "nsi";
+char const PhaseGroupfmt[] = "nii";
 char const MailTemplateEntryfmt[] = "nxs";
 char const MapEntryfmt[] = "nxixxsixxixiffxiixi";
 char const MapDifficultyEntryfmt[] = "diisiix";

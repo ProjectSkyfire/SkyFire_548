@@ -190,7 +190,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
             GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
         return false;
     }
-
+    for (auto itr : owner->GetPhases())
+        SetPhased(itr, false, true);
     setPetType(petType);
     setFaction(owner->getFaction());
     SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, summonSpellId);

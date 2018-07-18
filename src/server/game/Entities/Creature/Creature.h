@@ -271,7 +271,8 @@ struct CreatureData
     CreatureData() : dbData(true) { }
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
-    uint32 phaseMask;
+    uint32 phaseid;
+    uint32 phaseGroup;
     uint32 displayid;
     int8 equipmentId;
     float posX;
@@ -453,7 +454,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
 
         void DisappearAndDie();
 
-        bool Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data = NULL);
+        bool Create(uint32 guidlow, Map* map, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data = NULL);
         bool LoadCreaturesAddon(bool reload = false);
         void SelectLevel(const CreatureTemplate* cinfo);
         void LoadEquipment(int8 id = 1, bool force = false);
@@ -553,7 +554,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         bool LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap = true);
         void SaveToDB();
                                                             // overriden in Pet
-        virtual void SaveToDB(uint32 mapid, uint32 spawnMask, uint32 phaseMask);
+        virtual void SaveToDB(uint32 mapid, uint32 spawnMask);
         virtual void DeleteFromDB();                        // overriden in Pet
 
         Loot loot;
