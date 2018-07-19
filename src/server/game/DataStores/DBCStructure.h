@@ -1902,7 +1902,7 @@ struct MapDifficultyEntry
     //uint32      Id;                                       // 0
     uint32      MapId;                                      // 1
     uint32      Difficulty;                                 // 2 (for arenas: arena slot)
-    char*   areaTriggerText;                                // 3        m_message_lang (text showed when transfer to map failed)
+    char*       areaTriggerText;                            // 3        m_message_lang (text showed when transfer to map failed)
     uint32      resetTime;                                  // 4,       m_raidDuration in secs, 0 if no fixed reset time
     uint32      maxPlayers;                                 // 5,       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
     //char*       difficultyString;                         // 6        m_difficultystring
@@ -2901,11 +2901,12 @@ typedef std::map<uint32, VectorArray> NameGenVectorArraysMap;
 // Structures not used for casting to loaded DBC data and not required then packing
 struct MapDifficulty
 {
-    MapDifficulty() : DifficultyID(0), resetTime(0), maxPlayers(0), hasErrorMessage(false) { }
-    MapDifficulty(uint32 difficultyID, uint32 _resetTime, uint32 _maxPlayers, bool _hasErrorMessage) 
-        : DifficultyID(difficultyID), resetTime(_resetTime), maxPlayers(_maxPlayers), hasErrorMessage(_hasErrorMessage) { }
+    MapDifficulty() : DifficultyID(0), ErrorMessage(""), resetTime(0), maxPlayers(0), hasErrorMessage(false) { }
+    MapDifficulty(uint32 difficultyID, std::string _errorMessage, uint32 _resetTime, uint32 _maxPlayers, bool _hasErrorMessage)
+        : DifficultyID(difficultyID), ErrorMessage(_errorMessage), resetTime(_resetTime), maxPlayers(_maxPlayers), hasErrorMessage(_hasErrorMessage) { }
     
     uint32 DifficultyID;
+    std::string ErrorMessage;
     uint32 resetTime;
     uint32 maxPlayers;
     bool hasErrorMessage;

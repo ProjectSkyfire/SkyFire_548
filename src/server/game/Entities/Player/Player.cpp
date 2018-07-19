@@ -19803,7 +19803,10 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
                 if (missingQuest && !ar->questFailedText.empty())
                     ChatHandler(GetSession()).PSendSysMessage("%s", ar->questFailedText.c_str());
                 else if (mapDiff->hasErrorMessage) // if (missingAchievement) covered by this case
+                {
                     SendTransferAborted(target_map, TRANSFER_ABORT_DIFFICULTY, target_difficulty);
+                    GetSession()->SendNotification("%s", mapDiff->ErrorMessage.c_str());
+                }
                 else if (missingItem)
                     GetSession()->SendNotification(LANG_LEVEL_MINREQUIRED_AND_ITEM, LevelMin, sObjectMgr->GetItemTemplate(missingItem)->Name1.c_str());
                 else if (LevelMin)
