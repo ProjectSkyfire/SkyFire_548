@@ -27,23 +27,31 @@
 
 void BuildPlayerLockDungeonBlock(WorldPacket& data, lfg::LfgLockMap const& lock)
 {
-    data << uint32(lock.size());                           // Size of lock dungeons
     for (lfg::LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
     {
-        data << uint32(it->first);                         // Dungeon entry (id + type)
-        data << uint32(it->second);                        // Lock status
-        data << uint32(0);                                 // Required itemLevel
         data << uint32(0);                                 // Current itemLevel
+        data << uint32(it->first);                         // Dungeon entry (id + type)
+        data << uint32(0);                                 // Required itemLevel
+        data << uint32(it->second);                        // Lock status
     }
 }
 
 void BuildPartyLockDungeonBlock(WorldPacket& data, lfg::LfgLockPartyMap const& lockMap)
 {
-    data << uint8(lockMap.size());
+    data.WriteBits(lockMap.size(), 22);
     for (lfg::LfgLockPartyMap::const_iterator it = lockMap.begin(); it != lockMap.end(); ++it)
     {
-        data << uint64(it->first);                         // Player guid
+        bool hasGuid = true;
+        ObjectGuid PlayerGUID = it->first;
+
+        data.WriteBit(hasGuid);
+        data.WriteGuidMask(PlayerGUID, 3, 6, 0, 5, 2, 7, 4, 1);
+        data.WriteBits(it->second.size(), 20);                            // Size of lock dungeons
+
+        data.FlushBits();
+
         BuildPlayerLockDungeonBlock(data, it->second);
+        data.WriteGuidBytes(PlayerGUID, 0, 3, 1, 4, 6, 2, 5, 7);
     }
 }
 
@@ -379,8 +387,8 @@ void WorldSession::SendLfgPartyLockInfo()
     for (lfg::LfgLockPartyMap::const_iterator it = lockMap.begin(); it != lockMap.end(); ++it)
         size += 8 + 4 + uint32(it->second.size()) * (4 + 4 + 4 + 4);
 
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_PARTY_INFO %s", GetPlayerInfo().c_str());
-    WorldPacket data(SMSG_LFG_PARTY_INFO, 1 + size);
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_PARTY_INFO %s", GetPlayerInfo().c_str());
+    WorldPacket data(SMSG_LFD_PARTY_INFO, 1 + size);
     BuildPartyLockDungeonBlock(data, lockMap);
     SendPacket(&data);
 }
