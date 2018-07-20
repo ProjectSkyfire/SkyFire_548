@@ -200,54 +200,39 @@ void Guild::EventLogEntry::SaveToDB(SQLTransaction& trans) const
 
 void Guild::EventLogEntry::WritePacket(WorldPacket& data, ByteBuffer& content) const
 {
-    ObjectGuid guid1 = MAKE_NEW_GUID(m_playerGuid1, 0, HIGHGUID_PLAYER);
-    ObjectGuid guid2 = MAKE_NEW_GUID(m_playerGuid2, 0, HIGHGUID_PLAYER);
+    ObjectGuid PlayerGUID = MAKE_NEW_GUID(m_playerGuid1, 0, HIGHGUID_PLAYER);
+    ObjectGuid OtherGUID = MAKE_NEW_GUID(m_playerGuid2, 0, HIGHGUID_PLAYER);
 
-    data.WriteBit(guid1[6]);
-    data.WriteBit(guid1[4]);
-    data.WriteBit(guid2[5]);
-    data.WriteBit(guid2[1]);
-    data.WriteBit(guid2[3]);
-    data.WriteBit(guid2[0]);
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid1[4]);
-    data.WriteBit(guid2[7]);
-    data.WriteBit(guid1[0]);
-    data.WriteBit(guid1[2]);
-    data.WriteBit(guid1[7]);
-    data.WriteBit(guid1[3]);
-    data.WriteBit(guid1[5]);
-    data.WriteBit(guid2[2]);
-    data.WriteBit(guid2[6]);
+    data.WriteGuidMask(PlayerGUID, 6, 1);
+    data.WriteGuidMask(OtherGUID, 5, 1, 3, 0, 4);
+    data.WriteGuidMask(PlayerGUID, 4);
+    data.WriteGuidMask(OtherGUID, 7);
+    data.WriteGuidMask(PlayerGUID, 0, 2, 7, 3, 5);
+    data.WriteGuidMask(OtherGUID, 2, 6);
 
-    content.WriteByteSeq(guid1[5]);
-    content.WriteByteSeq(guid1[4]);
-    content.WriteByteSeq(guid2[6]);
-    content.WriteByteSeq(guid1[2]);
-    content.WriteByteSeq(guid2[4]);
+    content.WriteGuidBytes(PlayerGUID, 5, 4);
+    content.WriteGuidBytes(OtherGUID, 6);
+    content.WriteGuidBytes(PlayerGUID, 2);
+    content.WriteGuidBytes(OtherGUID, 4);
 
     // Event type
     content << uint8(m_eventType);
 
-    content.WriteByteSeq(guid2[0]);
-    content.WriteByteSeq(guid1[7]);
-    content.WriteByteSeq(guid1[3]);
-    content.WriteByteSeq(guid2[5]);
-    content.WriteByteSeq(guid2[2]);
-    content.WriteByteSeq(guid1[0]);
+    content.WriteGuidBytes(OtherGUID, 0);
+    content.WriteGuidBytes(PlayerGUID, 7, 3);
+    content.WriteGuidBytes(OtherGUID, 5, 2);
+    content.WriteGuidBytes(PlayerGUID, 0);
 
     // Event timestamp
     content << uint32(::time(NULL) - m_timestamp);
 
-    content.WriteByteSeq(guid1[1]);
-    content.WriteByteSeq(guid1[6]);
-    content.WriteByteSeq(guid2[7]);
-    content.WriteByteSeq(guid2[1]);
+    content.WriteGuidBytes(PlayerGUID, 1, 6);
+    content.WriteGuidBytes(OtherGUID, 7, 1);
 
     // New Rank
     content << uint8(m_newRank);
 
-    content.WriteByteSeq(guid2[3]);
+    content.WriteGuidBytes(OtherGUID, 3);
 }
 
 // BankEventLogEntry
