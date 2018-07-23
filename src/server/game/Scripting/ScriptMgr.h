@@ -1134,13 +1134,4 @@ public:
 };
 #define RegisterGameObjectAI(ai_name) new GenericGameObjectScript<ai_name>(#ai_name)
 
-template <class AI>
-class GenericAreaTriggerEntityScript : public AreaTriggerEntityScript
-{
-public:
-	GenericAreaTriggerEntityScript(char const* name) : AreaTriggerEntityScript(name) { }
-	AreaTriggerAI * GetAI(AreaTrigger* at) const override { return new AI(at); }
-	};
-#define RegisterAreaTriggerAI(ai_name) new GenericAreaTriggerEntityScript<ai_name>(#ai_name)
-
 #endif
