@@ -1222,7 +1222,7 @@ bool ConditionMgr::addToTerrainSwaps(Condition* cond)
     if (added)
         return true;
 
-    SF_LOG_ERROR("sql.sql", "%u No terrain swap with map %u exists.", cond, cond->SourceEntry);
+    SF_LOG_ERROR("sql.sql", "No terrain swap with map %u exists.", cond->SourceEntry);
     return false;
 }
 
@@ -1255,7 +1255,7 @@ bool ConditionMgr::addToPhases(Condition* cond)
         }
     }
 
-    SF_LOG_ERROR("sql.sql", "%u phase %u does not have Area %u.", cond, cond->SourceGroup, cond->SourceEntry);
+    SF_LOG_ERROR("sql.sql", "Phase %u does not have Area %u.", cond->SourceGroup, cond->SourceEntry);
     return false;
 }
 
