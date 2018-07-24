@@ -9016,6 +9016,7 @@ PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
     return info;
 }
 
+/*
 void ObjectMgr::LoadResearchDigsiteInfo()
 {
     _researchDigsiteStore.clear();
@@ -9144,7 +9145,7 @@ void ObjectMgr::LoadResearchProjectRequirements()
     while (result->NextRow());
     SF_LOG_INFO("server.loading", ">> Loaded %u research project requirements in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
-
+*/
 void ObjectMgr::LoadBattlePetBreedData()
 {
     uint32 oldMSTime = getMSTime();

@@ -1846,14 +1846,14 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading Calendar data...");
     sCalendarMgr->LoadFromDB();
 
-    SF_LOG_INFO("server.loading", "Loading Research Digsite info...");
-    sObjectMgr->LoadResearchDigsiteInfo();
+    //SF_LOG_INFO("server.loading", "Loading Research Digsite info...");
+    //sObjectMgr->LoadResearchDigsiteInfo();
 
-    SF_LOG_INFO("server.loading", "Loading Archaeology Find info...");
-    sObjectMgr->LoadArchaeologyFindInfo();
+    //SF_LOG_INFO("server.loading", "Loading Archaeology Find info...");
+    //sObjectMgr->LoadArchaeologyFindInfo();
 
-    SF_LOG_INFO("server.loading", "Loading Research Project requirements...");
-    sObjectMgr->LoadResearchProjectRequirements();
+    //SF_LOG_INFO("server.loading", "Loading Research Project requirements...");
+    //sObjectMgr->LoadResearchProjectRequirements();
 
     SF_LOG_INFO("server.loading", "Loading Battle Pet breed data...");
     sObjectMgr->LoadBattlePetBreedData();

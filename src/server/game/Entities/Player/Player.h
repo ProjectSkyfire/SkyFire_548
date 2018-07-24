@@ -3263,6 +3263,7 @@ class Player : public Unit, public GridObject<Player>
     uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 
     // Archaeology
+    /*
     void SaveResearchDigsiteToDB(ResearchDigsite* digsite);
     void DeleteResearchDigsite(ResearchDigsite* digsite);
     void UpdateResearchDigsites();
@@ -3279,6 +3280,7 @@ class Player : public Unit, public GridObject<Player>
     uint32 GetRandomResearchProjectForRace(uint32 researchBranchId);
     void UpdateResearchProjects();
     void SendSurveryCastInfo(ResearchDigsite* digsite, bool success);
+    */
 
     void SetKnockBackTime(uint32 timer) { m_knockBackTimer = timer; }
     uint32 GetKnockBackTime() const { return m_knockBackTimer;}
@@ -3373,9 +3375,9 @@ class Player : public Unit, public GridObject<Player>
     void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
     void _LoadCurrency(PreparedQueryResult result);
     void _LoadCUFProfiles(PreparedQueryResult result);
-    void _LoadResearchHistory(PreparedQueryResult result);
-    void _LoadResearchProjects(PreparedQueryResult result);
-    void _LoadResearchDigsites(PreparedQueryResult result);
+    //void _LoadResearchHistory(PreparedQueryResult result);
+    //void _LoadResearchProjects(PreparedQueryResult result);
+    //void _LoadResearchDigsites(PreparedQueryResult result);
 
     /*********************************************************/
     /***                   SAVE SYSTEM                     ***/
@@ -3402,8 +3404,8 @@ class Player : public Unit, public GridObject<Player>
     void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
     void _SaveCurrency(SQLTransaction& trans);
     void _SaveCUFProfiles(SQLTransaction& trans);
-    void _SaveResearchHistory(SQLTransaction& trans);
-    void _SaveResearchProjects(SQLTransaction& trans);
+    //void _SaveResearchHistory(SQLTransaction& trans);
+    //void _SaveResearchProjects(SQLTransaction& trans);
 
     /*********************************************************/
     /***              ENVIRONMENTAL SYSTEM                 ***/
