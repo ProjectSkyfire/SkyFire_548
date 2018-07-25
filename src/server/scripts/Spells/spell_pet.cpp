@@ -32,33 +32,19 @@
 
 enum HunterPetCalculate
 {
-     SPELL_TAMED_PET_PASSIVE_06         = 19591,
      SPELL_TAMED_PET_PASSIVE_07         = 20784,
-     SPELL_TAMED_PET_PASSIVE_08         = 34666,
-     SPELL_TAMED_PET_PASSIVE_09         = 34667,
-     SPELL_TAMED_PET_PASSIVE_10         = 34675,
      SPELL_HUNTER_PET_SCALING_01        = 34902,
-     SPELL_HUNTER_PET_SCALING_02        = 34903,
-     SPELL_HUNTER_PET_SCALING_03        = 34904,
-     SPELL_HUNTER_PET_SCALING_04        = 61017,
-     SPELL_HUNTER_ANIMAL_HANDLER        = 34453,
 };
 
 enum WarlockPetCalculate
 {
      SPELL_PET_PASSIVE_CRIT             = 35695,
      SPELL_PET_PASSIVE_DAMAGE_TAKEN     = 35697,
-     SPELL_WARLOCK_PET_SCALING_01       = 34947,
-     SPELL_WARLOCK_PET_SCALING_02       = 34956,
-     SPELL_WARLOCK_PET_SCALING_03       = 34957,
-     SPELL_WARLOCK_PET_SCALING_04       = 34958,
-     SPELL_WARLOCK_PET_SCALING_05       = 61013,
      ENTRY_FELGUARD                     = 17252,
      ENTRY_VOIDWALKER                   = 1860,
      ENTRY_FELHUNTER                    = 417,
      ENTRY_SUCCUBUS                     = 1863,
      ENTRY_IMP                          = 416,
-     SPELL_WARLOCK_GLYPH_OF_VOIDWALKER  = 56247,
 };
 
 enum DKPetCalculate
@@ -67,25 +53,7 @@ enum DKPetCalculate
     SPELL_DEATH_KNIGHT_PET_SCALING_01   = 54566,
     SPELL_DEATH_KNIGHT_PET_SCALING_02   = 51996,
     SPELL_DEATH_KNIGHT_PET_SCALING_03   = 61697,
-    SPELL_NIGHT_OF_THE_DEAD             = 55620,
     ENTRY_ARMY_OF_THE_DEAD_GHOUL        = 24207,
-    SPELL_DEATH_KNIGHT_GLYPH_OF_GHOUL   = 58686,
-};
-
-enum ShamanPetCalculate
-{
-    SPELL_FERAL_SPIRIT_PET_UNK_01      = 35674,
-    SPELL_FERAL_SPIRIT_PET_UNK_02      = 35675,
-    SPELL_FERAL_SPIRIT_PET_UNK_03      = 35676,
-    SPELL_FERAL_SPIRIT_PET_SCALING_04  = 61783,
-};
-
-enum MiscPetCalculate
-{
-     SPELL_MAGE_PET_PASSIVE_ELEMENTAL   = 44559,
-     SPELL_PET_HEALTH_SCALING           = 61679,
-     SPELL_PET_UNK_01                   = 67561,
-     SPELL_PET_UNK_02                   = 67557,
 };
 
 class spell_gen_pet_calculate : public SpellScriptLoader
@@ -191,19 +159,9 @@ class spell_gen_pet_calculate : public SpellScriptLoader
             {
                 switch (m_scriptSpellId)
                 {
-                    case SPELL_TAMED_PET_PASSIVE_06:
-                        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountCritMelee, EFFECT_0, SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
-                        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountCritSpell, EFFECT_1, SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
-                        break;
                     case SPELL_PET_PASSIVE_CRIT:
                         DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountCritSpell, EFFECT_0, SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
                         DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountCritMelee, EFFECT_1, SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
-                        break;
-                    case SPELL_WARLOCK_PET_SCALING_05:
-                    case SPELL_HUNTER_PET_SCALING_04:
-                        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountMeleeHit, EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE);
-                        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountSpellHit, EFFECT_1, SPELL_AURA_MOD_SPELL_HIT_CHANCE);
-                        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_pet_calculate_AuraScript::CalculateAmountExpertise, EFFECT_2, SPELL_AURA_MOD_EXPERTISE);
                         break;
                     case SPELL_DEATH_KNIGHT_PET_SCALING_03:
 //                    case SPELL_SHAMAN_PET_HIT:
@@ -777,43 +735,6 @@ public:
     }
 };
 
-class spell_warl_pet_passive_voidwalker : public SpellScriptLoader
-{
-public:
-    spell_warl_pet_passive_voidwalker() : SpellScriptLoader("spell_warl_pet_passive_voidwalker") { }
-
-    class spell_warl_pet_passive_voidwalker_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_warl_pet_passive_voidwalker_AuraScript);
-
-        bool Load() OVERRIDE
-        {
-            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
-                return false;
-            return true;
-        }
-
-        void CalculateAmount(AuraEffect const* /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
-        {
-            if (Unit* pet = GetUnitOwner())
-                if (pet->IsPet())
-                    if (Unit* owner = pet->ToPet()->GetOwner())
-                        if (AuraEffect* /* aurEff */ect = owner->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_VOIDWALKER, EFFECT_0))
-                            amount += /* aurEff */ect->GetAmount();
-        }
-
-        void Register() OVERRIDE
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_passive_voidwalker_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_warl_pet_passive_voidwalker_AuraScript();
-    }
-};
-
 class spell_sha_pet_scaling_04 : public SpellScriptLoader
 {
 public:
@@ -1365,91 +1286,6 @@ public:
     }
 };
 
-class spell_hun_animal_handler : public SpellScriptLoader
-{
-public:
-    spell_hun_animal_handler() : SpellScriptLoader("spell_hun_animal_handler") { }
-
-    class spell_hun_animal_handler_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_hun_animal_handler_AuraScript);
-
-        bool Load() OVERRIDE
-        {
-            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
-                return false;
-            return true;
-        }
-
-        void CalculateAmountDamageDone(AuraEffect const* /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
-        {
-            if (!GetCaster() || !GetCaster()->GetOwner())
-                return;
-            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
-            {
-                if (AuraEffect* /* aurEff */ect = owner->GetAuraEffectOfRankedSpell(SPELL_HUNTER_ANIMAL_HANDLER, EFFECT_1))
-                    amount = /* aurEff */ect->GetAmount();
-                else
-                    amount = 0;
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_animal_handler_AuraScript::CalculateAmountDamageDone, EFFECT_0, SPELL_AURA_MOD_ATTACK_POWER_PCT);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_hun_animal_handler_AuraScript();
-    }
-};
-
-class spell_dk_avoidance_passive : public SpellScriptLoader
-{
-public:
-    spell_dk_avoidance_passive() : SpellScriptLoader("spell_dk_avoidance_passive") { }
-
-    class spell_dk_avoidance_passive_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dk_avoidance_passive_AuraScript);
-
-        bool Load() OVERRIDE
-        {
-            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
-                return false;
-            return true;
-        }
-
-        void CalculateAvoidanceAmount(AuraEffect const* /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
-        {
-            if (Unit* pet = GetUnitOwner())
-            {
-                if (Unit* owner = pet->GetOwner())
-                {
-                    // Army of the dead ghoul
-                    if (pet->GetEntry() == ENTRY_ARMY_OF_THE_DEAD_GHOUL)
-                        amount = -90;
-                    // Night of the dead
-                    else if (Aura* aur = owner->GetAuraOfRankedSpell(SPELL_NIGHT_OF_THE_DEAD))
-                        amount = aur->GetSpellInfo()->Effects[EFFECT_2].CalcValue();
-                }
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_avoidance_passive_AuraScript::CalculateAvoidanceAmount, EFFECT_0, SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_dk_avoidance_passive_AuraScript();
-    }
-};
-
 class spell_dk_pet_scaling_01 : public SpellScriptLoader
 {
 public:
@@ -1482,9 +1318,6 @@ public:
                         {
                             mod += aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue()/100;                   // Ravenous Dead edits the original scale
                         }
-                        // Glyph of the Ghoul
-                        if (AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_DEATH_KNIGHT_GLYPH_OF_GHOUL, 0))
-                            mod += aurEff->GetAmount()/100;
 
                         float ownerBonus = float(owner->GetStat(STAT_STAMINA)) * mod;
                         amount += ownerBonus;
@@ -1527,10 +1360,6 @@ public:
                 {
                     mod += CalculatePct(mod, aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue());                   // Ravenous Dead edits the original scale
                 }
-                // Glyph of the Ghoul
-                aurEff = owner->GetAuraEffect(58686, 0);
-                if (aurEff)
-                    mod += CalculatePct(1.0f, aurEff->GetAmount());                                                    // Glyph of the Ghoul adds a flat value to the scale mod
                 float ownerBonus = float(owner->GetStat(STAT_STRENGTH)) * mod;
                 amount += ownerBonus;
             }
