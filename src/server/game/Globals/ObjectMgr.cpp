@@ -3475,6 +3475,61 @@ void ObjectMgr::LoadPlayerInfo()
 
         SF_LOG_INFO("server.loading", ">> Loaded %u xp for level definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
+
+    // Load playercreate cast spell
+    SF_LOG_INFO("server.loading", "Loading Player Create Spell Cast Data...");
+    {
+        uint32 oldMSTime = getMSTime();
+
+        QueryResult result = WorldDatabase.PQuery("SELECT racemask, classmask, Spell FROM playercreateinfo_spell_cast");
+
+        if (!result)
+            SF_LOG_ERROR("server.loading", ">> Loaded 0 player create cast spells. DB table `playercreateinfo_spell_cast` is empty.");
+        else
+        {
+            uint32 count = 0;
+
+            do
+            {
+                Field* fields = result->Fetch();
+                uint32 racemask = fields[0].GetUInt32();
+                uint32 classmask = fields[1].GetUInt32();
+                uint32 spellId = fields[2].GetUInt32();
+
+                if (racemask != 0 && !(racemask & RACEMASK_ALL_PLAYABLE))
+                {
+                    SF_LOG_ERROR("sql.sql", "Wrong race mask %u in `playercreateinfo_spell_cast` table, ignoring.", racemask);
+                    continue;
+                }
+
+                if (classmask != 0 && !(classmask & CLASSMASK_ALL_PLAYABLE))
+                {
+                    SF_LOG_ERROR("sql.sql", "Wrong class mask %u in `playercreateinfo_spell_cast` table, ignoring.", classmask);
+                    continue;
+                }
+
+                for (uint32 raceIndex = RACE_HUMAN; raceIndex < MAX_RACES; ++raceIndex)
+                {
+                    if (racemask == 0 || ((1 << (raceIndex - 1)) & racemask))
+                    {
+                        for (uint32 classIndex = CLASS_WARRIOR; classIndex < MAX_CLASSES; ++classIndex)
+                        {
+                            if (classmask == 0 || ((1 << (classIndex - 1)) & classmask))
+                            {
+                                if (PlayerInfo* info = _playerInfo[raceIndex][classIndex])
+                                {
+                                    info->spell_cast.push_back(spellId);
+                                    ++count;
+                                }
+                            }
+                        }
+                    }
+                }
+            } while (result->NextRow());
+
+            SF_LOG_INFO("server.loading", ">> Loaded %u player create spell casts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        }
+    }
 }
 
 void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint8 level, uint32& baseHP, uint32& baseMana) const
@@ -9016,6 +9071,7 @@ PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
     return info;
 }
 
+/*
 void ObjectMgr::LoadResearchDigsiteInfo()
 {
     _researchDigsiteStore.clear();
@@ -9144,7 +9200,7 @@ void ObjectMgr::LoadResearchProjectRequirements()
     while (result->NextRow());
     SF_LOG_INFO("server.loading", ">> Loaded %u research project requirements in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
-
+*/
 void ObjectMgr::LoadBattlePetBreedData()
 {
     uint32 oldMSTime = getMSTime();

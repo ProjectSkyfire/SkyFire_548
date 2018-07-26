@@ -2167,8 +2167,7 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
 {
-    uint8 accept;
-    recvPacket >> accept;
+    bool AcceptLock = recvPacket.ReadBit();
 
     if (!_player->HasPendingBind())
     {
@@ -2177,7 +2176,7 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
         return;
     }
 
-    if (accept)
+    if (AcceptLock)
         _player->BindToInstance();
     else
         _player->RepopAtGraveyard();

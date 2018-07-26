@@ -28913,7 +28913,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
 
     #undef REMOVE_VIOLATING_FLAGS
 }
-
+/*
 void Player::SaveResearchDigsiteToDB(ResearchDigsite* digsite)
 {
     // DELETE FROM character_research_digsites WHERE guid = ? AND digsiteId = ?
@@ -29421,7 +29421,7 @@ void Player::UpdateResearchProjects()
         SetUInt16Value(PLAYER_FIELD_RESEARCHING, i % 2, projectIds [i]);
     }
 }
-
+*/
 void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecline /*= false*/)
 {
     WorldPacket data(SMSG_GUILD_DECLINE, 5 + declinerName.length());
