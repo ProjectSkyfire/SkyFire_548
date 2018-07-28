@@ -3,10 +3,10 @@
 # ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
 
 ## Project Information
-SkyFire is a *MMORPG* Framework based mostly in C++.
+SkyFire is a *MMORPG* Framework based mostly on C++.
 
 SkyFireEMU is a MMORPG Framework based mostly on C++. It is completely 
-open source, and is community supported. It is derived
+open-source, and is community supported. It is derived
 from CactusEmu, TrinityCore, and MaNGOS, the Massive Network Game Object Servers, 
 and is based on the code of there projects with extensive changes over time to optimize, 
 improve and cleanup the code base at the same time as improving the in game mechanics
