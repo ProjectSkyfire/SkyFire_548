@@ -1,0 +1,20 @@
+UPDATE creature_template SET exp=5 WHERE entry=50331;
+UPDATE creature_template SET exp=5 WHERE entry=50341;
+UPDATE creature_template SET exp=5 WHERE entry=50352;
+UPDATE creature_template SET exp=5 WHERE entry=50364;
+UPDATE creature_template SET exp=5 WHERE entry=50388;
+UPDATE creature_template SET exp=5 WHERE entry=50739;
+UPDATE creature_template SET exp=5 WHERE entry=50768;
+UPDATE creature_template SET exp=5 WHERE entry=50769;
+UPDATE creature_template SET exp=5 WHERE entry=50789;
+UPDATE creature_template SET exp=5 WHERE entry=50791;
+UPDATE creature_template SET exp=5 WHERE entry=50805;
+UPDATE creature_template SET exp=5 WHERE entry=50808;
+UPDATE creature_template SET exp=5 WHERE entry=50830;
+UPDATE creature_template SET exp=5 WHERE entry=50836;
+UPDATE creature_template SET exp=5 WHERE entry=50958;
+UPDATE creature_template SET exp=5 WHERE entry=51078;
+UPDATE creature_template SET exp=5 WHERE entry=58065;
+
+UPDATE creature_template SET exp=exp-1 WHERE exp=4;
+UPDATE creature_template SET exp=exp-1 WHERE exp=5;
