@@ -10,7 +10,7 @@ INSERT INTO npc_spellclick_spells (npc_entry, spell_id, cast_flags, user_type) V
 (62809, 122729, 1, 0);
 
 -- Grand Expedition Yak - Vehicle Template
-DELETE FROM vehicle_template_accessory entry=62809;
+DELETE FROM vehicle_template_accessory WHERE entry=62809;
 INSERT INTO vehicle_template_accessory (entry, accessory_entry, seat_id, minion, description, summontype, summontimer) VALUES
 (62809, 62821, 0, 1, 'Grand Expedition Yak - Transmogrifier', 6, 30000),
 (62809, 62822, 1, 1, 'Grand Expedition Yak - Traveling Trader', 6, 30000);
