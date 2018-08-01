@@ -29,6 +29,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <unordered_map>
 
 // Structures using to access raw DBC data and required packing to portability
 
