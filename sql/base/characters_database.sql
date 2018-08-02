@@ -195,7 +195,7 @@ CREATE TABLE `arena_team` (
   `seasonWins` smallint(5) unsigned NOT NULL DEFAULT '0',
   `weekGames` smallint(5) unsigned NOT NULL DEFAULT '0',
   `weekWins` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `rank` int(10) unsigned NOT NULL DEFAULT '0',
+  `arena_rank` int(10) unsigned NOT NULL DEFAULT '0',
   `backgroundColor` int(10) unsigned NOT NULL DEFAULT '0',
   `emblemStyle` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emblemColor` int(10) unsigned NOT NULL DEFAULT '0',
@@ -396,7 +396,7 @@ CREATE TABLE `calendar_invites` (
   `sender` int(10) unsigned NOT NULL DEFAULT '0',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `statustime` int(10) unsigned NOT NULL DEFAULT '0',
-  `rank` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `mod_rank` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `text` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -2121,7 +2121,7 @@ DROP TABLE IF EXISTS `guild_member`;
 CREATE TABLE `guild_member` (
   `guildid` int(10) unsigned NOT NULL COMMENT 'Guild Identificator',
   `guid` int(10) unsigned NOT NULL,
-  `rank` tinyint(3) unsigned NOT NULL,
+  `member_rank` tinyint(3) unsigned NOT NULL,
   `pnote` varchar(31) NOT NULL DEFAULT '',
   `offnote` varchar(31) NOT NULL DEFAULT '',
   UNIQUE KEY `guid_key` (`guid`),
