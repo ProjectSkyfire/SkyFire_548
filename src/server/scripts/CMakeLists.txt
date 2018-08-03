@@ -18,7 +18,7 @@ if (USE_SCRIPTPCH)
 endif ()
 
 file(GLOB_RECURSE sources_Commands Commands/*.cpp Commands/*.h)
-file(GLOB_RECURSE sources_Examples Examples/*.cpp Examples/*.h)
+#file(GLOB_RECURSE sources_Examples Examples/*.cpp Examples/*.h)
 file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
 
@@ -36,7 +36,7 @@ if(SCRIPTS)
 endif()
 
 source_group(Commands FILES ${sources_Commands})
-source_group(Examples FILES ${sources_Examples})
+#source_group(Examples FILES ${sources_Examples})
 source_group(Spells FILES ${sources_Spells})
 
 if(SCRIPTS)
@@ -61,7 +61,7 @@ set(scripts_STAT_SRCS
 )
 
 include(Commands/CMakeLists.txt)
-include(Examples/CMakeLists.txt)
+#include(Examples/CMakeLists.txt)
 include(Spells/CMakeLists.txt)
 
 if(SCRIPTS)
