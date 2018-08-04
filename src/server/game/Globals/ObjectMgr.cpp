@@ -476,8 +476,8 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.SubName           = fields[11].GetString();
         creatureTemplate.IconName          = fields[12].GetString();
         creatureTemplate.GossipMenuId      = fields[13].GetUInt32();
-        creatureTemplate.minlevel          = fields[14].GetInt16();
-        creatureTemplate.maxlevel          = fields[15].GetInt16();
+        creatureTemplate.minlevel          = fields[14].GetInt8();
+        creatureTemplate.maxlevel          = fields[15].GetInt8();
         creatureTemplate.expansion         = uint32(fields[16].GetInt16());
         creatureTemplate.expansionUnknown  = uint32(fields[17].GetUInt16());
         creatureTemplate.faction_A         = uint32(fields[18].GetUInt16());
@@ -935,27 +935,6 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     {
         SF_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with disallowed `flags_extra` %u, removing incorrect flag.", cInfo->Entry, badFlags);
         const_cast<CreatureTemplate*>(cInfo)->flags_extra &= CREATURE_FLAG_EXTRA_DB_ALLOWED;
-    }
-
-    // -1 is used in the client for auto-updating the levels
-    // having their expansion set to it to the latest one
-    if (cInfo->expansion == -1)
-    {
-        const_cast<CreatureTemplate*>(cInfo)->minlevel = (MAX_LEVEL + cInfo->minlevel);
-        const_cast<CreatureTemplate*>(cInfo)->maxlevel = (MAX_LEVEL + cInfo->maxlevel);
-        const_cast<CreatureTemplate*>(cInfo)->expansion = EXPANSION_MISTS_OF_PANDARIA;
-    }
-
-    if (cInfo->minlevel < 1 || cInfo->minlevel > STRONG_MAX_LEVEL)
-    {
-        SF_LOG_ERROR("sql.sql", "Creature (ID: %u): MinLevel %i is not within [1, 255], value has been set to 1.", cInfo->Entry, cInfo->minlevel);
-        const_cast<CreatureTemplate*>(cInfo)->minlevel = 1;
-    }
-
-    if (cInfo->maxlevel < 1 || cInfo->maxlevel > STRONG_MAX_LEVEL)
-    {
-        SF_LOG_ERROR("sql.sql", "Creature (ID: %u): MaxLevel %i is not within [1, 255], value has been set to 1.", cInfo->Entry, cInfo->maxlevel);
-        const_cast<CreatureTemplate*>(cInfo)->maxlevel = 1;
     }
 
     const_cast<CreatureTemplate*>(cInfo)->dmg_multiplier *= Creature::_GetDamageMod(cInfo->rank);
