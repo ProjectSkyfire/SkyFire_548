@@ -131,6 +131,14 @@ bool AssistDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
+uint32 CreatureBaseStats::GenerateHealth(CreatureTemplate const * info) const
+{
+    if (info->ModLevel == true)
+        return uint32(ceil(BaseHealth[1] * info->ModHealth));
+    else
+        return uint32(ceil(BaseHealth[CURRENT_CONTENT_EXP == info->expansion ? 1 : 0] * info->ModHealth));
+}
+
 CreatureBaseStats const* CreatureBaseStats::GetBaseStats(uint8 level, uint8 unitClass)
 {
     return sObjectMgr->GetCreatureBaseStats(level, unitClass);

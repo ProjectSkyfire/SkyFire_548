@@ -1,0 +1,2 @@
+ALTER TABLE creature_template
+	ADD COLUMN ModLevel TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER ScriptName;

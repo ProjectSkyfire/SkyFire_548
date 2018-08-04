@@ -440,7 +440,7 @@ void ObjectMgr::LoadCreatureTemplates()
     //                                             69          70         71         72            73            74          75           76          77          78           79          80
                                              "InhabitType, HoverHeight, Health_mod, Mana_mod, Mana_mod_extra, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, "
     //                                            81           82          83               84                85           86
-                                             " questItem6, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName "
+                                             " questItem6, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName, ModLevel "
                                              "FROM creature_template;");
 
     if (!result)
@@ -540,6 +540,7 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.MechanicImmuneMask = fields[84].GetUInt32();
         creatureTemplate.flags_extra        = fields[85].GetUInt32();
         creatureTemplate.ScriptID           = GetScriptId(fields[86].GetCString());
+        creatureTemplate.ModLevel           = fields[87].GetBool();
 
         ++count;
     }
@@ -935,6 +936,21 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     {
         SF_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with disallowed `flags_extra` %u, removing incorrect flag.", cInfo->Entry, badFlags);
         const_cast<CreatureTemplate*>(cInfo)->flags_extra &= CREATURE_FLAG_EXTRA_DB_ALLOWED;
+    }
+
+    if (cInfo->ModLevel == true)
+    {
+        if (cInfo->minlevel < DEFAULT_MAX_LEVEL)
+        {
+            SF_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with enabled ModLevel and minlevel %u, minlevel set to 90.", cInfo->Entry, cInfo->minlevel);
+            const_cast<CreatureTemplate*>(cInfo)->minlevel = 90;
+        }
+
+        if (cInfo->maxlevel < DEFAULT_MAX_LEVEL)
+        {
+            SF_LOG_ERROR("sql.sql", "Table `creature_template` lists creature (Entry: %u) with enabled ModLevel and maxlevel %u, maxlevel set to 90.", cInfo->Entry, cInfo->maxlevel);
+            const_cast<CreatureTemplate*>(cInfo)->maxlevel = 90;
+        }
     }
 
     const_cast<CreatureTemplate*>(cInfo)->dmg_multiplier *= Creature::_GetDamageMod(cInfo->rank);

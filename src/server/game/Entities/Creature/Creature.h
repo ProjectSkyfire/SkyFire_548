@@ -142,6 +142,7 @@ struct CreatureTemplate
     uint32  MechanicImmuneMask;
     uint32  flags_extra;
     uint32  ScriptID;
+    bool    ModLevel;
     uint32  GetRandomValidModelId() const;
     uint32  GetFirstValidModelId() const;
 
@@ -215,10 +216,7 @@ struct CreatureBaseStats
 
     // Helpers
 
-    uint32 GenerateHealth(CreatureTemplate const* info) const
-    {
-        return uint32(ceil(BaseHealth[(CURRENT_CONTENT_EXP == info->expansion) ? 1 : 0] * info->ModHealth));
-    }
+    uint32 GenerateHealth(CreatureTemplate const* info) const;
 
     uint32 GenerateMana(CreatureTemplate const* info) const
     {
