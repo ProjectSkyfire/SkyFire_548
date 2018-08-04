@@ -217,7 +217,7 @@ struct CreatureBaseStats
 
     uint32 GenerateHealth(CreatureTemplate const* info) const
     {
-        return uint32(ceil(BaseHealth[(CURRENT_CONTENT_EXP > info->expansion) ? 0 : 1] * info->ModHealth));
+        return uint32(ceil(BaseHealth[(CURRENT_CONTENT_EXP == info->expansion) ? 1 : 0] * info->ModHealth));
     }
 
     uint32 GenerateMana(CreatureTemplate const* info) const
