@@ -644,7 +644,7 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
 
 void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
 {
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_QUEUE_STATUS %s dungeon: %u, waitTime: %d, "
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_QUEUE_STATUS %s dungeon: %u, waitTime: %d, "
         "avgWaitTime: %d, waitTimeTanks: %d, waitTimeHealer: %d, waitTimeDps: %d, "
         "queuedTime: %u, tanks: %u, healers: %u, dps: %u",
         GetPlayerInfo().c_str(), queueData.dungeonId, queueData.waitTime, queueData.waitTimeAvg,
@@ -652,38 +652,26 @@ void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
         queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
 
     ObjectGuid guid = _player->GetGUID();
-    WorldPacket data(SMSG_LFG_QUEUE_STATUS, 4 + 4 + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 4 + 4 + 4 + 4 + 8);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-
-    data.WriteByteSeq(guid[0]);
-    data << uint8(queueData.tanks);                        // Tanks needed
-    data << int32(queueData.waitTimeTank);                 // Wait Tanks
-    data << uint8(queueData.healers);                      // Healers needed
-    data << int32(queueData.waitTimeHealer);               // Wait Healers
-    data << uint8(queueData.dps);                          // Dps needed
-    data << int32(queueData.waitTimeDps);                  // Wait Dps
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data << int32(queueData.waitTime);                     // Wait Time
-    data << uint32(queueData.joinTime);                    // Join time
+    WorldPacket data(SMSG_LFD_QUEUE_STATUS, 8+(10*4)+(3*1));
+    data.WriteGuidMask(guid, 4, 3, 5, 1, 2, 0, 6, 7);
     data << uint32(queueData.dungeonId);                   // Dungeon
+    data.WriteGuidBytes(guid, 0);
     data << uint32(queueData.queuedTime);                  // Player wait time in queue
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[3]);
-    data << uint32(queueData.queueId);                     // Queue Id
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[2]);
+    data.WriteGuidBytes(guid, 4);
+    data << uint32(queueData.joinTime);                    // Join time
+    data << int32(queueData.waitTimeTank);                 // Wait Tanks
+    data << uint8(queueData.tanks);                        // Tanks needed
+    data << int32(queueData.waitTimeHealer);               // Wait Healers
+    data << uint8(queueData.healers);                      // Healers needed
+    data << int32(queueData.waitTimeDps);                  // Wait Dps
+    data << uint8(queueData.dps);                          // Dps needed
+    data << int32(queueData.waitTime);                     // Wait Time
     data << int32(queueData.waitTimeAvg);                  // Average Wait time
+    data.WriteGuidBytes(guid, 1);
+    data << uint32(queueData.queueId);                     // Queue Id
+    data.WriteGuidBytes(guid, 7, 2);
     data << uint32(3);
-
+    data.WriteGuidBytes(guid, 5, 3, 6);
     SendPacket(&data);
 }
 
