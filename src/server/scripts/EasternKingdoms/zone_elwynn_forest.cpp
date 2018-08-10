@@ -32,7 +32,8 @@ npc_blackrock_battle_worg
 npc_goblin_assassin
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum Northshire
 {
