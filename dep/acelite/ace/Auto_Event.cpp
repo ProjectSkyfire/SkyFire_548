@@ -1,3 +1,6 @@
+#ifndef AUTOEVENTCPP
+#define AUTOEVENTCPP
+
 #include "ace/Auto_Event.h"
 
 #if !defined (__ACE_INLINE__)
@@ -52,3 +55,4 @@ ACE_Auto_Event_T<TIME_POLICY>::dump (void) const
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+#endif

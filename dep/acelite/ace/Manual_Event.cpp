@@ -1,3 +1,6 @@
+#ifndef MANUALEVENTCPP
+#define MANUALEVENTCPP
+
 #include "ace/Manual_Event.h"
 
 #if !defined (__ACE_INLINE__)
@@ -52,3 +55,4 @@ ACE_Manual_Event_T<TIME_POLICY>::dump (void) const
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+#endif

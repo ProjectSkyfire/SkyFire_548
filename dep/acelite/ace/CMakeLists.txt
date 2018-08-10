@@ -22,6 +22,7 @@ set(ace_STAT_SRCS
   Active_Map_Manager_T.cpp
   Addr.cpp
   Arg_Shifter.cpp
+  ARGV.cpp
   Argv_Type_Converter.cpp
   Array_Base.cpp
   Array_Map.cpp
@@ -41,6 +42,7 @@ set(ace_STAT_SRCS
   Atomic_Op_GCC_T.cpp
   Atomic_Op_Sparc.c
   Atomic_Op_T.cpp
+  Auto_Event.cpp
   Auto_Functor.cpp
   Auto_IncDec_T.cpp
   Auto_Ptr.cpp
@@ -98,6 +100,7 @@ set(ace_STAT_SRCS
   Encoding_Converter.cpp
   Encoding_Converter_Factory.cpp
   Env_Value_T.cpp
+  Event.cpp
   Event_Base.cpp
   Event_Handler.cpp
   Event_Handler_Handle_Timeout_Upcall.cpp
@@ -170,6 +173,7 @@ set(ace_STAT_SRCS
   Malloc_Allocator.cpp
   Malloc_T.cpp
   Managed_Object.cpp
+  Manual_Event.cpp
   Map_Manager.cpp
   Map_T.cpp
   MEM_Acceptor.cpp
@@ -385,6 +389,7 @@ set(ace_STAT_SRCS
   Token_Invariants.cpp
   Token_Manager.cpp
   Token_Request_Reply.cpp
+  Tokenizer_T.cpp
   TP_Reactor.cpp
   Trace.cpp
   TSS_Adapter.cpp

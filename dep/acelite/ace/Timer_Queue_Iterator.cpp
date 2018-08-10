@@ -6,15 +6,15 @@
 # include "ace/Malloc_Base.h"
 #endif /* ACE_HAS_ALLOC_HOOKS */
 
-#include "ace/Timer_Queue_Iterator.h"
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if !defined (__ACE_INLINE__)
+#if defined (__ACE_INLINE__)
 #include "ace/Timer_Queue_Iterator.inl"
 #endif /* __ACE_INLINE__ */
+
+#include "ace/Timer_Queue_Iterator.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
