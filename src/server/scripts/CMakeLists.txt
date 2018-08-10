@@ -14,12 +14,9 @@
 if (USE_SCRIPTPCH)
   set(scripts_STAT_PCH_HDR PrecompiledHeaders/ScriptPCH.h)
   set(scripts_STAT_PCH_SRC PrecompiledHeaders/ScriptPCH.cpp)
-  source_group(PrecompiledHeaders FILES ${sources_PrecompiledHeaders})
 endif ()
 
 file(GLOB_RECURSE sources_Commands Commands/*.cpp Commands/*.h)
-#file(GLOB_RECURSE sources_Examples Examples/*.cpp Examples/*.h)
-file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
 
 if(SCRIPTS)
@@ -36,7 +33,6 @@ if(SCRIPTS)
 endif()
 
 source_group(Commands FILES ${sources_Commands})
-#source_group(Examples FILES ${sources_Examples})
 source_group(Spells FILES ${sources_Spells})
 
 if(SCRIPTS)
@@ -61,7 +57,6 @@ set(scripts_STAT_SRCS
 )
 
 include(Commands/CMakeLists.txt)
-#include(Examples/CMakeLists.txt)
 include(Spells/CMakeLists.txt)
 
 if(SCRIPTS)
@@ -176,7 +171,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Warden/Modules
   ${CMAKE_SOURCE_DIR}/src/server/game/Weather
   ${CMAKE_SOURCE_DIR}/src/server/game/World
-  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
 )
