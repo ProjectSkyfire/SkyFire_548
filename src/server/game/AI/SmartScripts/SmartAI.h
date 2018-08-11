@@ -27,7 +27,6 @@
 #include "Spell.h"
 
 #include "SmartScript.h"
-#include "SmartScriptMgr.h"
 #include "GameObjectAI.h"
 
 enum SmartEscortState

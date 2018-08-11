@@ -27,9 +27,6 @@
 #include "Spell.h"
 #include "DB2Stores.h"
 
-//#include "SmartScript.h"
-//#include "SmartAI.h"
-
 struct WayPoint
 {
     WayPoint(uint32 _id, float _x, float _y, float _z)
