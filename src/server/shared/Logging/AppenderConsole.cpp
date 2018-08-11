@@ -23,8 +23,8 @@
 
 #include <sstream>
 
-AppenderConsole::AppenderConsole(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags):
-Appender(id, name, APPENDER_CONSOLE, level, flags), _colored(false)
+AppenderConsole::AppenderConsole(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags) :
+    Appender(id, name, APPENDER_CONSOLE, level, flags), _colored(false)
 {
     for (uint8 i = 0; i < MaxLogLevels; ++i)
         _colors[i] = ColorTypes(MaxColors);
@@ -89,7 +89,7 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     SetConsoleTextAttribute(hConsole, WinColorFG[color]);
-    #else
+#else
     enum ANSITextAttr
     {
         TA_NORMAL                                = 0,
@@ -113,7 +113,7 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 
     enum ANSIBgTextAttr
     {
-        BG_BLACK                                 = 40,
+        BG_BLACK = 40,
         BG_RED,
         BG_GREEN,
         BG_BROWN,
@@ -142,48 +142,48 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
         FG_WHITE                                           // LWHITE
     };
 
-    fprintf((stdout_stream? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < MaxColors ? ";1" : ""));
-    #endif
+    fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < MaxColors ? ";1" : ""));
+#endif
 }
 
 void AppenderConsole::ResetColor(bool stdout_stream)
 {
-    #if PLATFORM == PLATFORM_WINDOWS
+#if PLATFORM == PLATFORM_WINDOWS
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-    #else
+#else
     fprintf((stdout_stream ? stdout : stderr), "\x1b[0m");
-    #endif
+#endif
 }
 
 void AppenderConsole::_write(LogMessage const& message)
 {
-    bool stdout_stream = message.level == LOG_LEVEL_ERROR || message.level == LOG_LEVEL_FATAL;
+    bool stdout_stream = !(message.level == LOG_LEVEL_ERROR || message.level == LOG_LEVEL_FATAL);
 
     if (_colored)
     {
         uint8 index;
         switch (message.level)
         {
-            case LOG_LEVEL_TRACE:
-               index = 5;
-               break;
-            case LOG_LEVEL_DEBUG:
-               index = 4;
-               break;
-            case LOG_LEVEL_INFO:
-               index = 3;
-               break;
-            case LOG_LEVEL_WARN:
-               index = 2;
-               break;
-            case LOG_LEVEL_FATAL:
-               index = 0;
-               break;
-            case LOG_LEVEL_ERROR: // No break on purpose
-            default:
-               index = 1;
-               break;
+        case LOG_LEVEL_TRACE:
+            index = 5;
+            break;
+        case LOG_LEVEL_DEBUG:
+            index = 4;
+            break;
+        case LOG_LEVEL_INFO:
+            index = 3;
+            break;
+        case LOG_LEVEL_WARN:
+            index = 2;
+            break;
+        case LOG_LEVEL_FATAL:
+            index = 0;
+            break;
+        case LOG_LEVEL_ERROR: // No break on purpose
+        default:
+            index = 1;
+            break;
         }
 
         SetColor(stdout_stream, _colors[index]);

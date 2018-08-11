@@ -26,8 +26,7 @@ class Logger
 {
     public:
         Logger();
-        ~Logger();
-
+        
         void Create(std::string const& name, LogLevel level);
         void addAppender(uint8 type, Appender *);
         void delAppender(uint8 type);
