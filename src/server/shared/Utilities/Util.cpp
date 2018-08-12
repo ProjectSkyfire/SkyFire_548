@@ -522,7 +522,7 @@ void vutf8printf(FILE* out, const char *str, va_list* ap)
 #endif
 }
 
-std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse /* = false */)
+std::string ByteArrayToHexStr(uint8 const* bytes, int32 arrayLen, bool reverse /* = false */)
 {
     int32 init = 0;
     int32 end = arrayLen;
