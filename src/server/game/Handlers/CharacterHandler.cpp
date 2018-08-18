@@ -1971,7 +1971,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         recvData.ReadGuidMask(itemGuid[i], 3, 1, 7, 4, 5, 6, 0, 2);
-    
+
     uint8 InvItemCounter = recvData.ReadBits(2);
 
     for (uint8 i = 0; i < InvItemCounter; i++)
@@ -1982,8 +1982,8 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        recvData.ReadGuidBytes(itemGuid[i], 4, 7, 0, 3, 2, 5, 1, 6));
-        
+        recvData.ReadGuidBytes(itemGuid[i], 4, 7, 0, 3, 2, 5, 1, 6);
+
         if (i < uint32(startSlot))
             continue;
 
@@ -2019,7 +2019,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 
         _player->SwapItem(item->GetPos(), dstpos);
     }
-    
+
     recvData.rfinish(); //Container Slot and Slot not used.
 
     uint8 Reason = 0;
