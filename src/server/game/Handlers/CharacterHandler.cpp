@@ -1967,38 +1967,22 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
     EquipmentSlots startSlot = _player->IsInCombat() ? EQUIPMENT_SLOT_MAINHAND : EQUIPMENT_SLOT_START;
 
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
-        recvData >> srcbag[i] >> srcslot[i];
+        recvData >> srcslot[i] >> srcbag[i];
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
-    {
-        itemGuid[i][2] = recvData.ReadBit();
-        itemGuid[i][0] = recvData.ReadBit();
-        itemGuid[i][6] = recvData.ReadBit();
-        itemGuid[i][3] = recvData.ReadBit();
-        itemGuid[i][4] = recvData.ReadBit();
-        itemGuid[i][5] = recvData.ReadBit();
-        itemGuid[i][7] = recvData.ReadBit();
-        itemGuid[i][1] = recvData.ReadBit();
-    }
+        recvData.ReadGuidMask(itemGuid[i], 3, 1, 7, 4, 5, 6, 0, 2);
 
     uint8 InvItemCounter = recvData.ReadBits(2);
 
     for (uint8 i = 0; i < InvItemCounter; i++)
     {
-        recvData.ReadBit(); // Container Slot
-        recvData.ReadBit(); // Slot
+        !recvData.ReadBit(); // Container Slot
+        !recvData.ReadBit(); // Slot
     }
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        recvData.ReadByteSeq(itemGuid[i][3]);
-        recvData.ReadByteSeq(itemGuid[i][0]);
-        recvData.ReadByteSeq(itemGuid[i][7]);
-        recvData.ReadByteSeq(itemGuid[i][4]);
-        recvData.ReadByteSeq(itemGuid[i][5]);
-        recvData.ReadByteSeq(itemGuid[i][2]);
-        recvData.ReadByteSeq(itemGuid[i][6]);
-        recvData.ReadByteSeq(itemGuid[i][1]);
+        recvData.ReadGuidBytes(itemGuid[i], 4, 7, 0, 3, 2, 5, 1, 6);
 
         if (i < uint32(startSlot))
             continue;
@@ -2035,6 +2019,8 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 
         _player->SwapItem(item->GetPos(), dstpos);
     }
+
+    recvData.rfinish(); //Container Slot and Slot not used.
 
     uint8 Reason = 0;
     WorldPacket data(SMSG_USE_EQUIPMENT_SET_RESULT, 1);
