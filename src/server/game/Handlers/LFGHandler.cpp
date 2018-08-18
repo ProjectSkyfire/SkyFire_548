@@ -511,10 +511,16 @@ void WorldSession::SendLfgRoleChosen(uint64 guid, uint8 roles)
     SF_LOG_DEBUG("lfg", "SMSG_LFG_ROLE_CHOSEN %s guid: %u roles: %u",
         GetPlayerInfo().c_str(), GUID_LOPART(guid), roles);
 
+    ObjectGuid objGuid = guid;
     WorldPacket data(SMSG_LFG_ROLE_CHOSEN, 8 + 1 + 4);
-    data << uint64(guid);                                  // Guid
-    data << uint8(roles > 0);                              // Ready
-    data << uint32(roles);                                 // Roles
+    data.WriteGuidMask(objGuid, 6, 2, 1, 7, 0);
+    data.WriteBit(roles);   // Ready
+    data.WriteGuidMask(objGuid, 3, 5, 4);
+    data.FlushBits();
+
+    data.WriteGuidBytes(objGuid, 0, 3, 6);
+    data << uint32(roles);
+    data.WriteGuidBytes(objGuid, 5, 1, 4, 2, 7);
     SendPacket(&data);
 }
 

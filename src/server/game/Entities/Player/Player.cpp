@@ -1563,10 +1563,15 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
     if (newDrunkenState == oldDrunkenState)
         return;
 
-    WorldPacket data(SMSG_CROSSED_INEBRIATION_THRESHOLD, (8+4+4));
-    data << uint64(GetGUID());
-    data << uint32(newDrunkenState);
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_CROSSED_INEBRIATION_THRESHOLD, (8 + 4 + 4));
+    data.WriteGuidMask(guid, 0, 4, 2, 6, 5, 1, 3, 7);
+
+    data.WriteGuidBytes(guid, 3);
     data << uint32(itemId);
+    data << uint32(newDrunkenState);
+    data.WriteGuidBytes(guid, 4, 6, 7, 0, 2, 5, 1);
+
     SendMessageToSet(&data, true);
 }
 
