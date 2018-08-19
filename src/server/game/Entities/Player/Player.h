@@ -1650,9 +1650,7 @@ class Player : public Unit, public GridObject<Player>
     InventoryResult CanUnequipItem(uint16 src, bool swap) const;
     InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading = true) const;
     InventoryResult CanUseItem(Item* pItem, bool not_loading = true) const;
-    bool HasItemTotemCategory(uint32 TotemCategory) const;
     InventoryResult CanUseItem(ItemTemplate const* pItem) const;
-    InventoryResult CanUseAmmo(uint32 item) const;
     InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
     Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0, AllowedLooterSet const& allowedLooters = AllowedLooterSet());
     Item* StoreItem(ItemPosCountVec const& pos, Item* pItem, bool update);
@@ -1995,7 +1993,6 @@ class Player : public Unit, public GridObject<Player>
     void SetBindPoint(uint64 guid);
     void SendTalentWipeConfirm(ObjectGuid guid, bool resetType);
     void ResetPetTalents();
-    void CalcRage(uint32 damage, bool attacker);
     void RegenerateAll();
     void Regenerate(Powers power);
     void RegenerateHealth();
@@ -2149,10 +2146,7 @@ class Player : public Unit, public GridObject<Player>
     void SetActiveSpec(uint8 spec) { _talentMgr->ActiveSpec = spec; }
     uint8 GetSpecsCount() const {  return _talentMgr->SpecsCount; }
     void SetSpecsCount(uint8 count) { _talentMgr->SpecsCount = count; }
-    void SetSpecializationId(uint8 spec, uint32 id);
     uint32 GetSpecializationId(uint8 spec) const { return _talentMgr->SpecInfo [spec].SpecializationId; }
-    uint32 GetRoleForGroup(uint32 specializationId);
-    float GetMasterySpellCoefficient() const;
 
     void SendInspectResult(Player const* player);
 
@@ -2878,7 +2872,6 @@ class Player : public Unit, public GridObject<Player>
 
     void UpdateSpeakTime();
     bool CanSpeak() const;
-    void ChangeSpeakTime(int utime);
 
     /*********************************************************/
     /***                 VARIOUS SYSTEMS                   ***/
@@ -3296,7 +3289,6 @@ class Player : public Unit, public GridObject<Player>
     uint32 getEnchanterSlot() const { return m_currentEnchanterEntrySlot; }
     void setEnchanterSlot(uint32 slot) { m_currentEnchanterEntrySlot = slot; }
 
-    void SendWarningMessage(const std::string &msg);
     protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;
@@ -3365,7 +3357,6 @@ class Player : public Unit, public GridObject<Player>
     void _LoadGroup(PreparedQueryResult result);
     void _LoadSkills(PreparedQueryResult result);
     void _LoadSpells(PreparedQueryResult result);
-    void _LoadFriendList(PreparedQueryResult result);
     bool _LoadHomeBind(PreparedQueryResult result);
     void _LoadDeclinedNames(PreparedQueryResult result);
     void _LoadArenaTeamInfo(PreparedQueryResult result);
@@ -3441,10 +3432,6 @@ class Player : public Unit, public GridObject<Player>
     PlayerCurrenciesMap _currencyStorage;
 
     uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const;
-
-    /// Updates weekly conquest point cap (dynamic cap)
-    void SendCurrencyWeekCap(uint32 id) const;
-    void SendCurrencyWeekCap(const CurrencyTypesEntry* currency) const;
 
     uint32 GetCurrencyWeekCap(CurrencyTypesEntry const* currency) const;
     uint32 GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const;
