@@ -829,6 +829,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
         ASSERT(Target->GetBase()->SetCharmedBy(Passenger, CHARM_TYPE_VEHICLE));  // SMSG_CLIENT_CONTROL
 
     Passenger->SendClearTarget();                            // SMSG_BREAK_TARGET
+    Passenger->SetDisableGravity(true);                      // SMSG_MOVE_GRAVITY_DISABLE
     Passenger->SetControlled(true, UNIT_STATE_ROOT);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
     // also adds MOVEMENTFLAG_ROOT
 
