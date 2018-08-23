@@ -52,7 +52,7 @@ namespace Movement
 
     void PacketBuilder::WriteStopMovement(Vector3 const& pos, uint32 splineId, ByteBuffer& data, Unit* unit)
     {
-
+        bool hasVehicle = unit->GetVehicle();
         ObjectGuid guid = unit->GetGUID();
         ObjectGuid transport = unit->GetTransGUID();
 
@@ -60,17 +60,17 @@ namespace Movement
         data << float(pos.x);
         data << uint32(splineId);
         data << float(pos.y);
-        data << float(0.f); // Most likely transport Y
-        data << float(0.f); // Most likely transport Z
-        data << float(0.f); // Most likely transport X
+        data << float(unit->GetTransOffsetY()); // Most likely transport Y
+        data << float(unit->GetTransOffsetZ()); // Most likely transport Z
+        data << float(unit->GetTransOffsetX()); // Most likely transport X
 
         data.WriteBit(1); // Parabolic speed // esi+4Ch
         data.WriteBit(guid[0]);
         data.WriteBits(MonsterMoveStop, 3);
         data.WriteBit(1);
         data.WriteBit(1);
-        data.WriteBit(1);
-        data.WriteBits(0,  20);
+        data.WriteBit(!hasVehicle);
+        data.WriteBits(0, 20);
         data.WriteBit(1);
         data.WriteBit(guid[3]);
         data.WriteBit(1);
@@ -112,6 +112,8 @@ namespace Movement
         data.WriteByteSeq(guid[3]);
         data.WriteByteSeq(guid[6]);
         data.WriteByteSeq(guid[0]);
+        if (hasVehicle)
+            data << uint8(unit->GetTransSeat());
         data.WriteByteSeq(guid[7]);
         data.WriteByteSeq(guid[2]);
         data.WriteByteSeq(guid[4]);
@@ -151,18 +153,18 @@ namespace Movement
 
     void PacketBuilder::WriteMonsterMove(const MoveSpline& moveSpline, WorldPacket& data, Unit* unit)
     {
+        bool hasVehicle = unit->GetVehicle();
         ObjectGuid guid = unit->GetGUID();
         ObjectGuid transport = unit->GetTransGUID();
         MonsterMoveType type = GetMonsterMoveType(moveSpline);
         G3D::Vector3 const& firstPoint = moveSpline.spline.getPoint(moveSpline.spline.first());
-
         data << float(firstPoint.z);
         data << float(firstPoint.x);
         data << uint32(moveSpline.GetId());
         data << float(firstPoint.y);
-        data << float(0.f); // Most likely transport Y
-        data << float(0.f); // Most likely transport Z
-        data << float(0.f); // Most likely transport X
+        data << float(unit->GetTransOffsetY()); // Most likely transport Y
+        data << float(unit->GetTransOffsetZ()); // Most likely transport Z
+        data << float(unit->GetTransOffsetX()); // Most likely transport X
 
         data.WriteBit(1); // Parabolic speed // esi+4Ch
         data.WriteBit(guid[0]);
@@ -183,10 +185,10 @@ namespace Movement
 
         data.WriteBit(1);
         data.WriteBit(1);
-        data.WriteBit(1);
+        data.WriteBit(!hasVehicle);
 
         uint32 uncompressedSplineCount = moveSpline.splineflags & MoveSplineFlag::UncompressedPath ? moveSpline.splineflags.cyclic ? moveSpline.spline.getPointCount() - 3 : moveSpline.spline.getPointCount() - 2 : 1;
-        data.WriteBits(uncompressedSplineCount,  20);
+        data.WriteBits(uncompressedSplineCount, 20);
 
         data.WriteBit(!moveSpline.splineflags.raw());
         data.WriteBit(guid[3]);
@@ -276,6 +278,8 @@ namespace Movement
             data << moveSpline.facing.f.x << moveSpline.facing.f.y << moveSpline.facing.f.z;
 
         data.WriteByteSeq(guid[0]);
+        if (hasVehicle)
+            data << uint8(unit->GetTransSeat());
         data.WriteByteSeq(guid[7]);
         data.WriteByteSeq(guid[2]);
         data.WriteByteSeq(guid[4]);

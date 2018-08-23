@@ -1360,26 +1360,14 @@ bool Guild::SetName(std::string const& name)
     CharacterDatabase.Execute(stmt);
 
     ObjectGuid guid = GetGUID();
-    WorldPacket data(SMSG_GUILD_RENAMED, 24 + 8 + 1);
-    data.WriteBit(guid[5]);
-    data.WriteBits(name.length(), 8);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
+    WorldPacket data(SMSG_GUILD_RENAMED, name.length() + 8 + 1);
+    data.WriteGuidMask(guid, 0, 7, 3, 1, 5, 6);
+    data.WriteBits(name.length(), 7);
+    data.WriteGuidMask(guid, 2, 4);
+    data.FlushBits();
 
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
     data.WriteString(name);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
+    data.WriteGuidBytes(guid, 3, 2, 6, 7, 5, 0, 1, 4);
 
     BroadcastPacket(&data);
     return true;
