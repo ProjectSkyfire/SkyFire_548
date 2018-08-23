@@ -11,7 +11,6 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
-  Kalimdor/zone_stonetalon_mountains.cpp
   Kalimdor/zone_silithus.cpp
   Kalimdor/zone_moonglade.cpp
   Kalimdor/RazorfenDowns/razorfen_downs.cpp
@@ -61,9 +60,7 @@ set(scripts_STAT_SRCS
   Kalimdor/BlackfathomDeeps/boss_aku_mai.cpp
   Kalimdor/BlackfathomDeeps/blackfathom_deeps.h
   Kalimdor/zone_azuremyst_isle.cpp
-  Kalimdor/zone_orgrimmar.cpp
   Kalimdor/zone_desolace.cpp
-  Kalimdor/zone_feralas.cpp
   Kalimdor/Maraudon/boss_princess_theradras.cpp
   Kalimdor/Maraudon/boss_landslide.cpp
   Kalimdor/Maraudon/boss_celebras_the_cursed.cpp
@@ -81,7 +78,6 @@ set(scripts_STAT_SRCS
   Kalimdor/TempleOfAhnQiraj/boss_skeram.cpp
   Kalimdor/TempleOfAhnQiraj/boss_ouro.cpp
   Kalimdor/TempleOfAhnQiraj/boss_bug_trio.cpp
-  Kalimdor/zone_darkshore.cpp
   Kalimdor/RuinsOfAhnQiraj/boss_buru.cpp
   Kalimdor/RuinsOfAhnQiraj/instance_ruins_of_ahnqiraj.cpp
   Kalimdor/RuinsOfAhnQiraj/boss_rajaxx.cpp
@@ -93,22 +89,18 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_mulgore.cpp
   Kalimdor/zone_bloodmyst_isle.cpp
   Kalimdor/zone_thunder_bluff.cpp
-  Kalimdor/zone_azshara.cpp
   Kalimdor/RazorfenKraul/razorfen_kraul.h
   Kalimdor/RazorfenKraul/instance_razorfen_kraul.cpp
   Kalimdor/RazorfenKraul/razorfen_kraul.cpp
   Kalimdor/zone_the_barrens.cpp
-  Kalimdor/zone_ungoro_crater.cpp
   Kalimdor/WailingCaverns/wailing_caverns.h
   Kalimdor/WailingCaverns/instance_wailing_caverns.cpp
   Kalimdor/WailingCaverns/wailing_caverns.cpp
   Kalimdor/zone_durotar.cpp
-  Kalimdor/zone_felwood.cpp
   Kalimdor/boss_azuregos.cpp
   Kalimdor/zone_tanaris.cpp
   Kalimdor/zone_dustwallow_marsh.cpp
   Kalimdor/zone_winterspring.cpp
-  Kalimdor/zone_thousand_needles.cpp
   Kalimdor/zone_ashenvale.cpp
   Kalimdor/zone_teldrassil.cpp
   Kalimdor/OnyxiasLair/boss_onyxia.cpp

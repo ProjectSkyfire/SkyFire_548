@@ -1976,8 +1976,8 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 
     for (uint8 i = 0; i < InvItemCounter; i++)
     {
-        !recvData.ReadBit(); // Container Slot
-        !recvData.ReadBit(); // Slot
+        recvData.ReadBit(); // Container Slot
+        recvData.ReadBit(); // Slot
     }
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
