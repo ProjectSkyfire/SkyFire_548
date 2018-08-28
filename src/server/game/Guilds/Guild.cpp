@@ -1675,7 +1675,7 @@ void Guild::_SendSetNewGuildMaster(Member const* guildMaster, Member const* newG
 void Guild::_SendRemovePlayerFromGuild(ObjectGuid removedGuid, std::string const& removedName, Player const* remover) const
 {
     ObjectGuid removerGuid = remover ? remover->GetGUID() : 0;
-    WorldPacket data(SMSG_GUILD_LEAVE, 8 + 4 + 1 + 1 + removedName.length() + (remover ? (8 + 4 + 1 + 1 + remover->GetName().length()) : 0));
+    WorldPacket data(SMSG_GUILD_EVENT_PLAYER_LEFT, 8 + 4 + 1 + 1 + removedName.length() + (remover ? (8 + 4 + 1 + 1 + remover->GetName().length()) : 0));
     data.WriteGuidMask(removedGuid, 2);
     data.WriteBits(removedName.length(), 6);
     data.WriteGuidMask(removedGuid, 6, 5);
@@ -1683,8 +1683,8 @@ void Guild::_SendRemovePlayerFromGuild(ObjectGuid removedGuid, std::string const
 
     if (remover)
     {
-        data.WriteBit(0); // unk bool
-        data.WriteBit(0); // unk bool
+        data.WriteBit(0); // Remover name denoted
+        data.WriteBit(0); // Fake bit
         data.WriteBits(remover->GetName().length(), 6);
 
         data.WriteGuidMask(removerGuid, 1, 3, 4, 2, 5, 7, 6, 0);
