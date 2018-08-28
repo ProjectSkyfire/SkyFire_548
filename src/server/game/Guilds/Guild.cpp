@@ -1672,6 +1672,44 @@ void Guild::_SendSetNewGuildMaster(Member const* guildMaster, Member const* newG
     BroadcastPacket(&data);
 }
 
+void Guild::_SendRemovePlayerFromGuild(ObjectGuid removedGuid, std::string const& removedName, Player const* remover) const
+{
+    ObjectGuid removerGuid = remover ? remover->GetGUID() : 0;
+    WorldPacket data(SMSG_GUILD_EVENT_PLAYER_LEFT, 8 + 4 + 1 + 1 + removedName.length() + (remover ? (8 + 4 + 1 + 1 + remover->GetName().length()) : 0));
+    data.WriteGuidMask(removedGuid, 2);
+    data.WriteBits(removedName.length(), 6);
+    data.WriteGuidMask(removedGuid, 6, 5);
+    data.WriteBit(remover != nullptr);
+
+    if (remover)
+    {
+        data.WriteBit(0); // Remover name denoted
+        data.WriteBit(0); // Fake bit
+        data.WriteBits(remover->GetName().length(), 6);
+
+        data.WriteGuidMask(removerGuid, 1, 3, 4, 2, 5, 7, 6, 0);
+        data.WriteBit(0);
+    }
+
+    data.WriteGuidMask(removedGuid, 1, 0, 3, 4, 7);
+    data.FlushBits();
+
+    if (remover)
+    {
+        data.WriteGuidBytes(removerGuid, 1, 3, 5, 2, 0, 4, 6, 7);
+        data.WriteString(remover->GetName());
+        data << (int32)0;
+    }
+
+    data.WriteString(removedName);
+    data.WriteGuidBytes(removedGuid, 1);
+    data << (int32)0;
+    data.WriteGuidBytes(removedGuid, 0, 4, 2, 3, 6, 5, 7);
+
+    BroadcastPacket(&data);
+}
+
+
 void Guild::HandleSetNewGuildMaster(WorldSession* session, std::string const& name)
 {
     Player* player = session->GetPlayer();
@@ -2008,12 +2046,10 @@ void Guild::HandleLeaveMember(WorldSession* session)
     }
     else
     {
+        _SendRemovePlayerFromGuild(player->GetGUID(), player->GetName(), nullptr);
         DeleteMember(player->GetGUID(), false, false);
 
         _LogEvent(GUILD_EVENT_LOG_LEAVE_GUILD, player->GetGUIDLow());
-        _BroadcastEvent(GE_LEFT, player->GetGUID(), player->GetName().c_str());
-
-        SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_COMMAND_SUCCESS, m_name);
     }
 
     sCalendarMgr->RemovePlayerGuildEventsAndSignups(player->GetGUID(), GetId());
@@ -2044,11 +2080,10 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
                 SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_RANK_TOO_HIGH_S, name);
             else
             {
+                _SendRemovePlayerFromGuild(guid, name, player);
                 // After call to DeleteMember pointer to member becomes invalid
                 DeleteMember(guid, false, true);
                 _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
-                _BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName().c_str());
-                SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_COMMAND_SUCCESS, name);
             }
         }
     }
