@@ -512,7 +512,7 @@ void WorldSession::SendLfgRoleChosen(uint64 guid, uint8 roles)
         GetPlayerInfo().c_str(), GUID_LOPART(guid), roles);
 
     ObjectGuid objGuid = guid;
-    bool isReady = (roles > 0x01 ? true : false);	
+    bool isReady = (roles > 0x01 ? true : false);
 
     WorldPacket data(SMSG_LFG_ROLE_CHOSEN, 8 + 1 + 4);
     data.WriteGuidMask(objGuid, 6, 2, 1, 7, 0);
