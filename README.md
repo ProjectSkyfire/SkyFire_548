@@ -29,6 +29,8 @@ For further information on the SkyFire project, please visit our project website
 
 ## Build Status
 # [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire.548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire.548)
+[![Code Quality: Cpp](https://img.shields.io/lgtm/grade/cpp/g/ProjectSkyfire/SkyFire.548.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ProjectSkyfire/SkyFire.548/context:cpp)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/ProjectSkyfire/SkyFire.548.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ProjectSkyfire/SkyFire.548/alerts)
 
 ## Requirements
 + Platform: Linux, Windows or Mac
