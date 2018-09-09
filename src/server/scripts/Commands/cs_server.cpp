@@ -83,6 +83,7 @@ public:
             { "restart",      rbac::RBAC_PERM_COMMAND_SERVER_RESTART,      true, NULL,                        "", serverRestartCommandTable },
             { "shutdown",     rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,     true, NULL,                        "", serverShutdownCommandTable },
             { "set",          rbac::RBAC_PERM_COMMAND_SERVER_SET,          true, NULL,                        "", serverSetCommandTable },
+            { "uptime",       rbac::RBAC_PERM_COMMAND_SERVER_UPTIME,       true, &HandleServerUptimeCommand,  "", },
         };
 
          static std::vector<ChatCommand> commandTable =
@@ -121,6 +122,12 @@ public:
             handler->PSendSysMessage(LANG_SHUTDOWN_TIMELEFT, secsToTimeString(sWorld->GetShutDownTimeLeft()).c_str());
 
         return true;
+    }
+
+    static bool HandleServerUptimeCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        std::string uptime = secsToTimeString(sWorld->GetUptime());
+        handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
     }
 
     // Display the 'Message of the day' for the realm
