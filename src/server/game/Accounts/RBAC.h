@@ -681,8 +681,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_WP_RELOAD                              = 773,
     RBAC_PERM_COMMAND_WP_SHOW                                = 774,
     RBAC_PERM_COMMAND_MODIFY_CURRENCY                        = 775, // only 4.3.4
-    //Unused                                                 = 776,
-
+    RBAC_PERM_COMMAND_SERVER_UPTIME                          = 776,
     RBAC_PERM_COMMAND_SUPPORT_BUG                            = 777,
     RBAC_PERM_COMMAND_SUPPORT_BUG_ASSIGN                     = 778,
     RBAC_PERM_COMMAND_SUPPORT_BUG_CLOSE                      = 779,
