@@ -27194,7 +27194,7 @@ void Player::SendEquipmentSetList()
     GetSession()->SendPacket(&data);
 }
 
-void Player::SetEquipmentSet(uint32 index, EquipmentSet eqset)
+void Player::SetEquipmentSet(uint32 index, EquipmentSet const& eqset)
 {
     if (eqset.Guid != 0)
     {
