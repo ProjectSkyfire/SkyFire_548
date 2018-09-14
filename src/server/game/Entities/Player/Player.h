@@ -2739,7 +2739,7 @@ class Player : public Unit, public GridObject<Player>
     void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto);
 
     void SendEquipmentSetList();
-    void SetEquipmentSet(uint32 index, EquipmentSet eqset);
+    void SetEquipmentSet(uint32 index, EquipmentSet const& eqset);
     void DeleteEquipmentSet(uint64 setGuid);
 
     void SendInitWorldStates(uint32 zone, uint32 area);
