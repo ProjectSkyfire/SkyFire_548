@@ -128,6 +128,7 @@ public:
     {
         std::string uptime = secsToTimeString(sWorld->GetUptime());
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
+        return true;
     }
 
     // Display the 'Message of the day' for the realm
