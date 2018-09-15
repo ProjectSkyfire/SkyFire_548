@@ -3020,6 +3020,24 @@ bool Map::IsHeroic() const
     return false;
 }
 
+bool Map::Is25ManRaid() const
+{
+    if (DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(i_spawnMode))
+    {
+        switch (i_spawnMode)
+        {
+            case DIFFICULTY_25MAN_NORMAL:
+            case DIFFICULTY_25MAN_HEROIC:
+            case DIFFICULTY_25MAN_LFR:
+                return true;
+            default:
+                return false;
+                break;
+        }
+    }
+    return false;
+}
+
 uint32 InstanceMap::GetMaxPlayers() const
 {
     if (MapDifficulty const* mapDiff = GetMapDifficulty())

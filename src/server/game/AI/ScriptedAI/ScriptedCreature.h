@@ -300,20 +300,7 @@ struct ScriptedAI : public CreatureAI
     }
 
     // return true for 25 man or 25 man heroic mode
-    bool Is25ManRaid() const
-    {
-        switch (_difficulty)
-        {
-            case DIFFICULTY_25MAN_LFR:
-            case DIFFICULTY_25MAN_NORMAL:
-            case DIFFICULTY_25MAN_HEROIC:
-                return true;
-            default:
-                break;
-        }
-        
-        return false;
-    }
+    bool Is25ManRaid() const;
 
     template<class T> inline
         const T& DUNGEON_MODE(const T& normal5, const T& heroic5) const

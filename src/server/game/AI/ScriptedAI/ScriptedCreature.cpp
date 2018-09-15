@@ -109,6 +109,20 @@ ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
     _difficulty = DifficultyID(me->GetMap()->GetSpawnMode());
 }
 
+bool Is25ManRaid() const
+{
+    switch (_difficulty)
+    {
+        case DIFFICULTY_25MAN_LFR:
+        case DIFFICULTY_25MAN_NORMAL:
+        case DIFFICULTY_25MAN_HEROIC:
+            return true;
+        default:
+            break;
+    } 
+    return false;
+}
+
 void ScriptedAI::AttackStartNoMove(Unit* who)
 {
     if (!who)
