@@ -109,7 +109,7 @@ ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
     _difficulty = DifficultyID(me->GetMap()->GetSpawnMode());
 }
 
-bool Is25ManRaid() const
+bool ScriptedAI::Is25ManRaid() const
 {
     switch (_difficulty)
     {
