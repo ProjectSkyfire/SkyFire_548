@@ -51,7 +51,12 @@ endif()
 
 include(CheckPlatform)
 
-set(OPENSSL_EXPECTED_VERSION 1.1.0)
+if( UNIX )
+  set(OPENSSL_EXPECTED_VERSION 1.1.0)
+else()
+  set(OPENSSL_EXPECTED_VERSION 1.1.1)
+endif()
+
 set(ACE_EXPECTED_VERSION 5.8.3)
 
 find_package(PCHSupport)
