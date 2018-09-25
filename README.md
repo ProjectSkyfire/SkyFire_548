@@ -28,7 +28,7 @@ For further information on the SkyFire project, please visit our project website
 [SkyFire-Community-Tools](https://github.com/ProjectSkyfire/SkyFire-Community-Tools).
 
 ## Build Status
-# [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire.548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire.548)
+# [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire_548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire_548)
 
 ## Requirements
 + Platform: Linux, Windows or Mac
