@@ -373,6 +373,7 @@ class WorldSession
         void SendTotemCreated(ObjectGuid TotemGUID, uint32 Duration, uint32 SpellID, uint8 Slot);
 
         // Spell
+        void SendModifyCooldown(ObjectGuid UnitGUID, int32 DeltaTime, int32 SpellID);
         void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets & targets);
 
         // Pet

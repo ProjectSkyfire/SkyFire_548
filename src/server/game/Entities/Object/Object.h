@@ -134,6 +134,7 @@ class Object
         uint32 GetGUIDLow() const { return GUID_LOPART(GetUInt64Value(0)); }
         uint32 GetGUIDMid() const { return GUID_ENPART(GetUInt64Value(0)); }
         uint32 GetGUIDHigh() const { return GUID_HIPART(GetUInt64Value(0)); }
+        ObjectGuid GetObjectGUID() const { return static_cast<ObjectGuid>(GetGUID()); }
         const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY_ID); }
         void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY_ID, entry); }

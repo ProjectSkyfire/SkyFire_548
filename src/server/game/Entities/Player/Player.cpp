@@ -23352,30 +23352,7 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
     else
         m_spellCooldowns.erase(itr);
 
-    ObjectGuid playerGuid = GetGUID();          // Player GUID
-    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(playerGuid[1]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[5]);
-
-    data.WriteByteSeq(playerGuid[4]);
-    data.WriteByteSeq(playerGuid[1]);
-    data << uint32(spellId);         // Spell ID
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[6]);
-    data.WriteByteSeq(playerGuid[7]);
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(playerGuid[0]);
-    data << int32(cooldown);         // Cooldown mod in milliseconds
-    data.WriteByteSeq(playerGuid[2]);
-
-    GetSession()->SendPacket(&data);
+    GetSession()->SendModifyCooldown(GetObjectGUID(), cooldown, spellId);
 
     SF_LOG_DEBUG("misc", "ModifySpellCooldown:: Player: %s (GUID: %u) Spell: %u cooldown: %u", GetName().c_str(), GetGUIDLow(), spellId, GetSpellCooldownDelay(spellId));
 }
