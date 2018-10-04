@@ -2196,8 +2196,8 @@ void AchievementMgr<Player>::SendAchievementInfo(Player* receiver, uint32 /*achi
     data.WriteBit(guid[7]);
     data.WriteBit(guid[1]);
 
-    data.WriteByteSeq(guid[5]);
     data.FlushBits();
+    data.WriteByteSeq(guid[5]);
 
     data.append(achievementsData);
     data.append(criteriaData);
