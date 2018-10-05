@@ -88,6 +88,12 @@ struct AchievementCriteriaEntry
             uint32  bgMapID;                                // 3
             uint32  winCount;                               // 4
         } win_bg;
+        // ACHIEVEMENT_CRITERIA_TYPE_FIND_ARTIFACT          = 3
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                  // 4
+        } find_artifact;
 
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL      = 125
@@ -131,7 +137,7 @@ struct AchievementCriteriaEntry
             uint32  questCount;                             // 4
         } complete_quests_in_zone;
 
-        // ACHIEVEMENT_CRITERIA_TYPE_CURRENCY = 12
+        // ACHIEVEMENT_CRITERIA_TYPE_CURRENCY               = 12
         struct
         {
             uint32 currency;
@@ -211,7 +217,7 @@ struct AchievementCriteriaEntry
             uint32  castCount;                              // 4
         } cast_spell;
 
-        // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE
+        // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE   = 30
         struct
         {
             uint32 objectiveId;                             // 3
