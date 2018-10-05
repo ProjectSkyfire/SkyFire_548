@@ -501,12 +501,109 @@ struct AchievementCriteriaEntry
             uint32  killCount;                              // 4
         } honorable_kill;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_114_SUMMON             = 114
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  unk;                                    // 4 unk is 1 true/false?
+        } summons;
+        // ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINT = 115
+        // ACHIEVEMENT_CRITERIA_TYPE_118_UNK                = 118
+        // ACHIEVEMENT_CRITERIA_TYPE_LFG                    = 119
         struct
         {
             uint32  unused;
             uint32  dungeonsComplete;
         } use_lfg;
+        // ACHIEVEMENT_CRITERIA_TYPE_120                    = 120
+        // ACHIEVEMENT_CRITERIA_TYPE_121                    = 121
+        // ACHIEVEMENT_CRITERIA_TYPE_122                    = 122
+        // ACHIEVEMENT_CRITERIA_TYPE_123                    = 123
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_REPAIR_SPEND     = 124
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  goldInCopper;                           // 4
+        } guild_repair_money;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_LEVEL            = 125
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  level;                                  // 4
+        } guild_level;
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_CRAFTING         = 126
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                  // 4
+        } guild_craft;
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_FISHING         = 127
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                  // 4
+        } guild_fishing;
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_BANK_TAB_BUY    = 128
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  tab;                                    // 4
+        } guild_tab_bought;
+        // ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACH_POINTS = 129
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                    // 4
+        } guild_ach_pts;
+        // ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BG          = 130
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                    // 4
+        } rated_bg_won;
+        // ACHIEVEMENT_CRITERIA_TYPE_EARN_RATED_BG_RATING  = 132
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  rating;                                 // 4
+        } rated_bg_rating;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_CREATE_GUILD_LOGO     = 133
+        // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT2 = 134
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  totalQuestCount;                        // 4
+        } complete_quest_count2;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL2  = 135
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  killCount;                              // 4
+        } honorable_kill2;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_EARN_CRITTER_KILLS    = 136
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  killCount;                              // 4
+        } critter_kills;
+        // ACHIEVEMENT_CRITERIA_TYPE_137                   = 137
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGES      = 138
+        struct
+        {
+            uint32  type;                                   // 3
+            uint32  count;                                  // 4
+        } guild_challenges;
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGES2     = 139
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                  // 4
+        } guild_challenges2;
+        // ACHIEVEMENT_CRITERIA_TYPE_140_150_PLACEHOLDER   = 140-150
         struct
         {
             uint32  field3;                                 // 3 main requirement
