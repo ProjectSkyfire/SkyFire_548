@@ -11173,7 +11173,7 @@ void Unit::AddThreat(Unit* victim, float fThreat, SpellSchoolMask schoolMask, Sp
 void Unit::DeleteThreatList()
 {
     if (CanHaveThreatList() && !m_ThreatManager.isThreatListEmpty())
-        SendClearThreatListOpcode();
+        SendClearThreatListOpcode(GetObjectGUID());
     m_ThreatManager.clearReferences();
 }
 
@@ -16557,30 +16557,11 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
     }
 }
 
-void Unit::SendClearThreatListOpcode()
+void Unit::SendClearThreatListOpcode(ObjectGuid UnitGUID)
 {
-    SF_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_CLEAR Message");
     WorldPacket data(SMSG_THREAT_CLEAR, 8);
-    ObjectGuid UnitGUID = GetGUID();
-
-    data.WriteBit(UnitGUID [6]);
-    data.WriteBit(UnitGUID [7]);
-    data.WriteBit(UnitGUID [4]);
-    data.WriteBit(UnitGUID [5]);
-    data.WriteBit(UnitGUID [2]);
-    data.WriteBit(UnitGUID [1]);
-    data.WriteBit(UnitGUID [0]);
-    data.WriteBit(UnitGUID [3]);
-
-    data.WriteByteSeq(UnitGUID [7]);
-    data.WriteByteSeq(UnitGUID [0]);
-    data.WriteByteSeq(UnitGUID [4]);
-    data.WriteByteSeq(UnitGUID [3]);
-    data.WriteByteSeq(UnitGUID [2]);
-    data.WriteByteSeq(UnitGUID [1]);
-    data.WriteByteSeq(UnitGUID [6]);
-    data.WriteByteSeq(UnitGUID [5]);
-
+    data.WriteGuidMask(UnitGUID, 6, 7, 4, 5, 2, 1, 0, 3);
+    data.WriteGuidBytes(UnitGUID, 7, 0, 4, 3, 2, 1, 6, 5);
     SendMessageToSet(&data, false);
 }
 

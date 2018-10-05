@@ -2035,7 +2035,7 @@ class Unit : public WorldObject
     void SetFacingToObject(WorldObject* object);
 
     void SendChangeCurrentVictimOpcode(HostileReference* pHostileReference);
-    void SendClearThreatListOpcode();
+    void SendClearThreatListOpcode(ObjectGuid UnitGUID);
     void SendRemoveFromThreatListOpcode(HostileReference* pHostileReference);
     void SendThreatListUpdate();
 
