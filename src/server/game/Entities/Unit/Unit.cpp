@@ -17057,7 +17057,7 @@ bool Unit::SetHover(bool enable, bool packetOnly /*= false*/)
 
     return true;
 }
-
+/*
 void Unit::SendSetPlayHoverAnim(bool PlayHoverAnim)
 {
     ObjectGuid UnitGUID = GetGUID();
@@ -17083,7 +17083,7 @@ void Unit::SendSetPlayHoverAnim(bool PlayHoverAnim)
 
     SendMessageToSet(&data, true);
 }
-
+*/
 void Unit::SendMovementSetSplineAnim(Movement::AnimType anim)
 {
     WorldPacket data(SMSG_SPLINE_MOVE_SET_ANIM, 8 + 4);

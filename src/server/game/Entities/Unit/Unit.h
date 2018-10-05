@@ -2009,7 +2009,7 @@ class Unit : public WorldObject
     void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
 
 
-    void SendSetPlayHoverAnim(bool PlayHoverAnim);
+    //void SendSetPlayHoverAnim(bool PlayHoverAnim);
     void SendMovementSetSplineAnim(Movement::AnimType anim);
 
     bool IsLevitating() const
