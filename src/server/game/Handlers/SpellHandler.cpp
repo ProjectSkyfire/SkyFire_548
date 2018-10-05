@@ -1615,29 +1615,12 @@ void WorldSession::HandleRequestCategoryCooldowns(WorldPacket& /*recvPacket*/)
 void WorldSession::SendTotemCreated(ObjectGuid TotemGUID, uint32 Duration, uint32 SpellID, uint8 Slot)
 {
     WorldPacket data(SMSG_TOTEM_CREATED, 17);
-    data.WriteBit(TotemGUID[6]);
-    data.WriteBit(TotemGUID[1]);
-    data.WriteBit(TotemGUID[2]);
-    data.WriteBit(TotemGUID[5]);
-    data.WriteBit(TotemGUID[3]);
-    data.WriteBit(TotemGUID[4]);
-    data.WriteBit(TotemGUID[7]);
-    data.WriteBit(TotemGUID[0]);
-
+    data.WriteGuidMask(TotemGUID, 6, 1, 2, 5, 3, 4, 7, 0);
     data << uint32(Duration);
     data << uint32(SpellID);
-
-    data.WriteByteSeq(TotemGUID[3]);
-    data.WriteByteSeq(TotemGUID[4]);
-    data.WriteByteSeq(TotemGUID[5]);
-    data.WriteByteSeq(TotemGUID[6]);
-    data.WriteByteSeq(TotemGUID[0]);
-    data.WriteByteSeq(TotemGUID[2]);
-
+    data.WriteGuidBytes(TotemGUID, 3, 4, 5, 6, 0, 2);
     data << uint8(Slot);
-
-    data.WriteByteSeq(TotemGUID[1]);
-    data.WriteByteSeq(TotemGUID[7]);
+    data.WriteGuidBytes(TotemGUID, 1, 7);
     _player->SendDirectMessage(&data);
 }
 
