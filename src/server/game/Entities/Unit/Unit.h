@@ -2010,7 +2010,7 @@ class Unit : public WorldObject
 
 
     //void SendSetPlayHoverAnim(bool PlayHoverAnim);
-    void SendMovementSetSplineAnim(Movement::AnimType anim);
+    //void SendMovementSetSplineAnim(Movement::AnimType anim);
 
     bool IsLevitating() const
     {

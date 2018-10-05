@@ -17083,7 +17083,7 @@ void Unit::SendSetPlayHoverAnim(bool PlayHoverAnim)
 
     SendMessageToSet(&data, true);
 }
-*/
+
 void Unit::SendMovementSetSplineAnim(Movement::AnimType anim)
 {
     WorldPacket data(SMSG_SPLINE_MOVE_SET_ANIM, 8 + 4);
@@ -17091,7 +17091,7 @@ void Unit::SendMovementSetSplineAnim(Movement::AnimType anim)
     data << uint32(anim);
     SendMessageToSet(&data, false);
 }
-
+*/
 bool Unit::IsSplineEnabled() const
 {
     return movespline->Initialized() && !movespline->Finalized();
