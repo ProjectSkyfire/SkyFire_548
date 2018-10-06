@@ -1959,7 +1959,7 @@ class Unit : public WorldObject
     virtual void UpdateUnderwaterState(Map* m, float x, float y, float z);
     bool isInAccessiblePlaceFor(Creature const* c) const;
 
-    void SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical = false);
+    void SendHealSpellLog(ObjectGuid CasterGUID, ObjectGuid TargetGUID, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical = false);
     int32 HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHealth, bool critical = false);
     void SendEnergizeSpellLog(Unit* victim, uint32 spellID, int32 damage, Powers powertype);
     void EnergizeBySpell(Unit* victim, uint32 SpellID, int32 Damage, Powers powertype);

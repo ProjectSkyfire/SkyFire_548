@@ -8637,57 +8637,41 @@ void Unit::UnsummonAllTotems()
     }
 }
 
-void Unit::SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical)
+void Unit::SendHealSpellLog(ObjectGuid CasterGUID, ObjectGuid TargetGUID, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical)
 {
-    ObjectGuid victimGuid = victim->GetGUID();
-    ObjectGuid casterGuid = GetGUID();
-
-    // we guess size
-    WorldPacket data(SMSG_SPELL_HEAL_LOG, 8 + 8 + 4 + 4 + 4 + 4 + 1 + 1);
-
-    data << uint32(SpellID);
-    data << uint32(Absorb);
-    data << uint32(Damage);
-    data << uint32(OverHeal);
-
-    data.WriteBit(victimGuid [0]);
-    data.WriteBit(casterGuid [2]);
-    data.WriteBit(casterGuid [6]);
-    data.WriteBit(victimGuid [2]);
-    data.WriteBit(critical);
-    data.WriteBit(casterGuid [3]);
-    data.WriteBit(casterGuid [0]);
-    data.WriteBit(casterGuid [5]);
-    data.WriteBit(victimGuid [3]);
-    data.WriteBit(0); // PowerData
-    data.WriteBit(victimGuid [7]);
-    data.WriteBit(victimGuid [5]);
-    data.WriteBit(casterGuid [7]);
-    data.WriteBit(victimGuid [4]);
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.WriteBit(casterGuid [4]);
-    data.WriteBit(casterGuid [1]);
-    data.WriteBit(victimGuid [1]);
-    data.WriteBit(victimGuid [6]);
-
-    data.WriteByteSeq(casterGuid [2]);
-    data.WriteByteSeq(victimGuid [6]);
-    data.WriteByteSeq(casterGuid [5]);
-    data.WriteByteSeq(casterGuid [3]);
-    data.WriteByteSeq(victimGuid [7]);
-    data.WriteByteSeq(casterGuid [7]);
-    data.WriteByteSeq(casterGuid [6]);
-    data.WriteByteSeq(casterGuid [1]);
-    data.WriteByteSeq(victimGuid [2]);
-    data.WriteByteSeq(victimGuid [4]);
-    data.WriteByteSeq(victimGuid [3]);
-    data.WriteByteSeq(victimGuid [0]);
-    data.WriteByteSeq(victimGuid [5]);
-    data.WriteByteSeq(casterGuid [0]);
-    data.WriteByteSeq(victimGuid [1]);
-    data.WriteByteSeq(casterGuid [4]);
-
+    WorldPacket data(SMSG_SPELL_HEAL_LOG, 8 + 8 + 4 + 4 + 4 + 4 + 1 + 1 + 1 /*+ SpellCastLogData.size()*/);
+    data << uint32(Absorb);   // Absorbed
+    data << uint32(OverHeal); // OverHeal
+    data << uint32(SpellID);  // SpellID
+    data << uint32(Damage);   // Health
+    data.WriteGuidMask(TargetGUID, 0);
+    data.WriteGuidMask(CasterGUID, 2, 6);
+    data.WriteGuidMask(TargetGUID, 2);
+    data.WriteBit(critical); // Crit
+    data.WriteGuidMask(CasterGUID, 3, 0, 5);
+    data.WriteGuidMask(TargetGUID, 3);
+    data.WriteBit(0); // SpellCastLogData 
+    data.WriteGuidMask(TargetGUID, 7, 5);
+    data.WriteGuidMask(CasterGUID, 7);
+    data.WriteGuidMask(TargetGUID, 4);
+    //if (SpellCastLogData ) Write 21Bits
+    data.WriteBit(0); // CritRollMade
+    data.WriteBit(0); // CritRollNeeded
+    data.WriteGuidMask(CasterGUID, 4, 1);
+    data.WriteGuidMask(TargetGUID, 1, 6);
+    data.FlushBits();
+    //if (SpellCastLogData )
+    data.WriteGuidBytes(CasterGUID, 2);
+    data.WriteGuidBytes(TargetGUID, 6);
+    data.WriteGuidBytes(CasterGUID, 5, 3);
+    data.WriteGuidBytes(TargetGUID, 7);
+    //if (88) Float CritRollNeeded
+    data.WriteGuidBytes(CasterGUID, 7, 6, 1);
+    data.WriteGuidBytes(TargetGUID, 2, 4, 3, 0, 5);
+    data.WriteGuidBytes(CasterGUID, 0);
+    //if (72) Float CritRollMade
+    data.WriteGuidBytes(TargetGUID, 1);
+    data.WriteGuidBytes(CasterGUID, 4);
     SendMessageToSet(&data, true);
 }
 
@@ -8698,7 +8682,7 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
     CalcHealAbsorb(victim, spellInfo, addHealth, absorb);
 
     int32 gain = DealHeal(victim, addHealth);
-    SendHealSpellLog(victim, spellInfo->Id, addHealth, uint32(addHealth - gain), absorb, critical);
+    SendHealSpellLog(GetObjectGUID(), victim->GetObjectGUID(), spellInfo->Id, addHealth, uint32(addHealth - gain), absorb, critical);
     return gain;
 }
 
