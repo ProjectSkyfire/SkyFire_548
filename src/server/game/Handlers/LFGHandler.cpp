@@ -306,10 +306,29 @@ void WorldSession::SendLfgPlayerLockInfo()
     SF_LOG_DEBUG("lfg", "SMSG_LFG_PLAYER_INFO %s", GetPlayerInfo().c_str());
     WorldPacket data(SMSG_LFG_PLAYER_INFO, 1 + rsize * (4 + 1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4) + 4 + lsize * (1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4));
 
-    data << uint8(randomDungeons.size());                  // Random Dungeon count
+    data.WriteBits(lock.size(), 20); // locksize count
+    data.WriteBit(0);                // hasPlayerGuid
+    data.WriteBits(randomDungeons.size(), 17);
+
+
     for (lfg::LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
     {
-        data << uint32(*it);                               // Dungeon Entry (id + type)
+        
+        data.WriteBit(0); // ShortageEligible
+        data.WriteBit(0); // FirstReward
+        data.WriteBits(0, 21);
+        data.WriteBits(0, 19);
+        data.WriteBits(0, 20);
+        //forloop {} // 64
+        
+        data.WriteBits(0, 21);
+    }
+    // if (hasPlayerGuid) {}
+    data.FlushBits();
+    // if (hasPlayerGuid) {}
+
+    for (lfg::LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
+    {
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
         Quest const* quest = NULL;
         bool done = false;
@@ -324,40 +343,36 @@ void WorldSession::SendLfgPlayerLockInfo()
             }
         }
 
-        data << uint8(done);
-        data << uint32(0);                                              // currencyQuantity
-        data << uint32(0);                                              // some sort of overall cap/weekly cap
-        data << uint32(0);                                              // currencyID
-        data << uint32(0);                                              // tier1Quantity
-        data << uint32(0);                                              // tier1Limit
-        data << uint32(0);                                              // overallQuantity
-        data << uint32(0);                                              // overallLimit
-        data << uint32(0);                                              // periodPurseQuantity
-        data << uint32(0);                                              // periodPurseLimit
-        data << uint32(0);                                              // purseQuantity
-        data << uint32(0);                                              // purseLimit
-        data << uint32(0);                                              // some sort of reward for completion
-        data << uint32(0);                                              // completedEncounters
-        data << uint8(0);                                               // Call to Arms eligible
-
-        for (uint32 i = 0; i < 3; ++i)
-        {
-            data << uint32(0);                                          // Call to Arms Role
-            //if (role)
-            //    BuildQuestReward(data, ctaRoleQuest, GetPlayer());
-        }
-
-        if (quest)
-            BuildQuestReward(data, quest, GetPlayer());
-        else
-        {
-            data << uint32(0);                                          // Money
-            data << uint32(0);                                          // XP
-            data << uint8(0);                                           // Reward count
-        }
+        data << uint32(0); // RewardXP
+        //forloop {} // ShortageReward
+        data << uint32(0); // SpecificQuantity
+        //forloop {} // BonusCurrency
+        data << uint32(0); // PurseLimit
+        data << uint32(0); // RewardMoney
+        //forloop {} // Item
+        data << uint32(0); // OverallQuantity
+        data << uint32(0); // PurseWeeklyQuantity
+        data << uint32(0); // OverallLimit
+        data << uint32(0); // Quantity
+        data << uint32(0); // CompletionCurrencyID
+        data << uint32(*it); // Dungeon Entry (id + type)
+        //forloop {} // Currency
+        data << uint32(0); // PurseWeeklyLimit
+        data << uint32(0); // Mask
+        data << uint32(0); // PurseQuantity
+        data << uint32(0); // CompletionLimit
+        data << uint32(0); // SpecificLimit
+        data << uint32(0); // CompletedMask
+        data << uint32(0); // CompletionQuantity
     }
 
-    BuildPlayerLockDungeonBlock(data, lock);
+    for (lfg::LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
+    {
+        data << uint32(it->first);                         // Dungeon entry (id + type)
+        data << uint32(it->second);                        // Lock status
+        data << uint32(0);                                 // Current itemLevel
+        data << uint32(0);                                 // Required itemLevel
+    }
     SendPacket(&data);
 }
 
