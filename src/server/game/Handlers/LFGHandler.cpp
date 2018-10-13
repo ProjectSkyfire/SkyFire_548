@@ -135,40 +135,20 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 {
-    ObjectGuid leaveGuid;
+    ObjectGuid RequesterGUID;
     Group* group = GetPlayer()->GetGroup();
-    uint64 guid = GetPlayer()->GetGUID();
-    uint64 gguid = group ? group->GetGUID() : guid;
-
     recvData.read_skip<uint32>();                          // Always 8
     recvData.read_skip<uint32>();                          // Join date
     recvData.read_skip<uint32>();                          // Always 3
     recvData.read_skip<uint32>();                          // Queue Id
 
-    leaveGuid[4] = recvData.ReadBit();
-    leaveGuid[5] = recvData.ReadBit();
-    leaveGuid[0] = recvData.ReadBit();
-    leaveGuid[6] = recvData.ReadBit();
-    leaveGuid[2] = recvData.ReadBit();
-    leaveGuid[7] = recvData.ReadBit();
-    leaveGuid[1] = recvData.ReadBit();
-    leaveGuid[3] = recvData.ReadBit();
 
-    recvData.ReadByteSeq(leaveGuid[7]);
-    recvData.ReadByteSeq(leaveGuid[4]);
-    recvData.ReadByteSeq(leaveGuid[3]);
-    recvData.ReadByteSeq(leaveGuid[2]);
-    recvData.ReadByteSeq(leaveGuid[6]);
-    recvData.ReadByteSeq(leaveGuid[0]);
-    recvData.ReadByteSeq(leaveGuid[1]);
-    recvData.ReadByteSeq(leaveGuid[5]);
-
-    SF_LOG_DEBUG("lfg", "CMSG_LFG_LEAVE %s in group: %u sent guid " UI64FMTD ".",
-        GetPlayerInfo().c_str(), group ? 1 : 0, uint64(leaveGuid));
+    recvData.ReadGuidMask(RequesterGUID, 6, 0, 2, 3, 1, 5, 4, 7);
+    recvData.ReadGuidBytes(RequesterGUID, 2, 0, 4, 6, 3, 1, 5, 7);
 
     // Check cheating - only leader can leave the queue
-    if (!group || group->GetLeaderGUID() == guid)
-        sLFGMgr->LeaveLfg(gguid);
+    if (!group || group->GetLeaderGUID() == uint64(RequesterGUID))
+        sLFGMgr->LeaveLfg(uint64(RequesterGUID));
 }
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
