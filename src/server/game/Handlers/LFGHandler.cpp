@@ -532,42 +532,63 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
     else
         dungeons = roleCheck.dungeons;
 
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_ROLE_CHECK_UPDATE %s", GetPlayerInfo().c_str());
-    WorldPacket data(SMSG_LFG_ROLE_CHECK_UPDATE, 4 + 1 + 1 + dungeons.size() * 4 + 1 + roleCheck.roles.size() * (8 + 1 + 4 + 1));
+    ObjectGuid guid = roleCheck.leader;
+    uint8 roles = roleCheck.roles.find(guid)->second;
+    Player* player = ObjectAccessor::FindPlayer(guid);
 
-    data << uint32(roleCheck.state);                       // Check result
-    data << uint8(roleCheck.state == lfg::LFG_ROLECHECK_INITIALITING);
-    data << uint8(dungeons.size());                        // Number of dungeons
-    if (!dungeons.empty())
-        for (lfg::LfgDungeonSet::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
-            data << uint32(sLFGMgr->GetLFGDungeonEntry(*it)); // Dungeon
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_ROLE_CHECK_UPDATE %s", GetPlayerInfo().c_str());
+    WorldPacket data(SMSG_LFD_ROLE_CHECK_UPDATE, 4 + 1 + 1 + dungeons.size() * 4 + 1 + roleCheck.roles.size() * (8 + 1 + 4 + 1));
 
-    data << uint8(roleCheck.roles.size());                 // Players in group
+    data << uint8(roleCheck.state); // RoleCheckStatus
+    data << uint8(0); // PartyIndex
+    data.WriteBits(roleCheck.roles.size(), 21); // Members
     if (!roleCheck.roles.empty())
     {
-        // Leader info MUST be sent 1st :S
-        uint64 guid = roleCheck.leader;
-        uint8 roles = roleCheck.roles.find(guid)->second;
-        Player* player = ObjectAccessor::FindPlayer(guid);
-        data << uint64(guid);                              // Guid
-        data << uint8(roles > 0);                          // Ready
-        data << uint32(roles);                             // Roles
-        data << uint8(player ? player->getLevel() : 0);    // Level
+        // Leader info MUST be sent 1st :S        
+        data.WriteBit(roles > 0); // RoleCheckComplete
+        data.WriteGuidMask(guid, 3, 0, 5, 2, 7, 1, 4, 6);
 
         for (lfg::LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
         {
             if (it->first == roleCheck.leader)
                 continue;
 
-            guid = it->first;
-            roles = it->second;
-            player = ObjectAccessor::FindPlayer(guid);
-            data << uint64(guid);                          // Guid
-            data << uint8(roles > 0);                      // Ready
-            data << uint32(roles);                         // Roles
-            data << uint8(player ? player->getLevel() : 0);// Level
+            data.WriteBit(roles > 0); // RoleCheckComplete
+            data.WriteGuidMask(guid, 3, 0, 5, 2, 7, 1, 4, 6);
         }
     }
+    data.WriteGuidMask(guid, 3, 5);
+    data.WriteBits(dungeons.size(), 22); // JoinSlots
+    data.WriteGuidMask(guid, 0, 7, 6, 1, 4, 2);
+    data.WriteBit(roleCheck.state == lfg::LFG_ROLECHECK_INITIALITING); // IsBeginning
+
+    data.FlushBits();
+
+    data.WriteGuidBytes(guid, 0);
+    if (!roleCheck.roles.empty())
+    {
+        // Leader info MUST be sent 1st :S        
+        data << uint8(player ? player->getLevel() : 0); // Level
+        data.WriteGuidBytes(guid, 3, 6);
+        data << uint32(roles); // RolesDesired
+        data.WriteGuidBytes(guid, 2, 4, 0, 1, 5, 7);
+
+        for (lfg::LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
+        {
+            if (it->first == roleCheck.leader)
+                continue;
+
+            data << uint8(player ? player->getLevel() : 0); // Level
+            data.WriteGuidBytes(guid, 3, 6);
+            data << uint32(roles);                          // RolesDesired
+            data.WriteGuidBytes(guid, 2, 4, 0, 1, 5, 7);
+        }
+    }
+    data.WriteGuidBytes(guid, 1, 7, 6, 4, 3, 2, 5);
+    if (!dungeons.empty())
+        for (lfg::LfgDungeonSet::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+            data << uint32(sLFGMgr->GetLFGDungeonEntry(*it)); // Dungeon
+
     SendPacket(&data);
 }
 
