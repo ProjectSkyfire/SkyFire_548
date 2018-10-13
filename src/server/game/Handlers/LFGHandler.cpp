@@ -102,13 +102,13 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     bool unk1;
     uint8 unk0;
 
-    recvData >> unk0;
+    recvData >> unk0;                 // PartyIndex
     for (int32 i = 0; i < 3; ++i)
-        recvData.read_skip<uint32>();
-    recvData >> roles;
+        recvData.read_skip<uint32>(); // Needs
+    recvData >> roles;                // Roles
     uint32 numDungeons = recvData.ReadBits(22);
     uint32 commentLen = recvData.ReadBits(8);
-    unk1 = recvData.ReadBit();
+    unk1 = recvData.ReadBit();        // QueueAsGroup
 
     if (!numDungeons)
     {
@@ -117,8 +117,6 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         return;
     }
 
-    std::string comment = recvData.ReadString(commentLen);
-
     lfg::LfgDungeonSet newDungeons;
     for (uint32 i = 0; i < numDungeons; ++i)
     {
@@ -126,6 +124,8 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         recvData >> dungeon;
         newDungeons.insert((dungeon & 0x00FFFFFF));        // remove the type from the dungeon entry
     }
+
+    std::string comment = recvData.ReadString(commentLen);
 
     SF_LOG_DEBUG("lfg", "CMSG_LFD_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
         GetPlayerInfo().c_str(), roles, uint8(newDungeons.size()), comment.c_str());
@@ -596,72 +596,47 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
         size += 8 + 4 + uint32(it->second.size()) * (4 + 4 + 4 + 4);
 
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_JOIN_RESULT %s checkResult: %u checkValue: %u",
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_JOIN_RESULT %s checkResult: %u checkValue: %u",
         GetPlayerInfo().c_str(), joinData.result, joinData.state);
 
-    WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size);
-    data << uint32(3);
-    data << uint8(joinData.result);                        // Check Result
-    data << uint8(joinData.state);
-    data << uint32(queueId);                               // Queue Id
-    data << uint32(time(NULL));                            // Join date
+    WorldPacket data(SMSG_LFD_JOIN_RESULT, 4 + 4 + size);
 
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[1]);
-    data.WriteBits(joinData.lockmap.size(), 22);
-    data.WriteBit(guid[3]);
+    data.WriteGuidMask(guid, 7, 6, 3, 0);
+    data.WriteBits(joinData.lockmap.size(), 22); // BlackList
+    
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         ObjectGuid playerGuid = it->first;
-        data.WriteBit(playerGuid[7]);
-        data.WriteBit(playerGuid[0]);
-        data.WriteBit(playerGuid[1]);
-        data.WriteBit(playerGuid[6]);
-        data.WriteBit(playerGuid[2]);
-        data.WriteBit(playerGuid[4]);
-        data.WriteBits(it->second.size(), 20);
-        data.WriteBit(playerGuid[3]);
-        data.WriteBit(playerGuid[5]);
-
+        data.WriteGuidMask(playerGuid, 3);
+        data.WriteBits(it->second.size(), 20); // Slots
+        data.WriteGuidMask(playerGuid, 6, 1, 4, 7, 2, 0, 5);
     }
 
-    data.WriteBit(guid[7]);
+    data.WriteGuidMask(guid, 5, 1, 4, 2);
+    data.FlushBits();
+    data << uint8(joinData.result); // Result
 
-    data.WriteByteSeq(guid[5]);
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         ObjectGuid playerGuid = it->first;
+        data.WriteGuidBytes(playerGuid, 4);
+
         for (lfg::LfgLockMap::const_iterator itr = it->second.begin(); itr != it->second.end(); ++itr)
         {
-            data << uint32(itr->second);                       // Lock status
-            data << uint32(0);                                 // Current itemLevel
-            data << uint32(0);                                 // Required itemLevel
-            data << uint32(itr->first);                        // Dungeon entry (id + type)
+            data << uint32(0);                                 // SubReason2
+            data << uint32(0);                                 // SubReason1
+            data << uint32(itr->second);                       // Reason
+            data << uint32(itr->first);                        // Slot
         }
-
-        data.WriteByteSeq(playerGuid[1]);
-        data.WriteByteSeq(playerGuid[4]);
-        data.WriteByteSeq(playerGuid[7]);
-        data.WriteByteSeq(playerGuid[6]);
-        data.WriteByteSeq(playerGuid[3]);
-        data.WriteByteSeq(playerGuid[2]);
-        data.WriteByteSeq(playerGuid[0]);
-        data.WriteByteSeq(playerGuid[5]);
+        data.WriteGuidBytes(playerGuid, 1, 0, 5, 7, 3, 6, 2);
     }
 
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-
-
+    data << uint8(joinData.state);  // ResultDetail
+    data.WriteGuidBytes(guid, 2);
+    data << uint32(time(NULL));     // UnixTime
+    data << uint32(queueId);        // Id
+    data << uint32(3);              // Type
+    data.WriteGuidBytes(guid, 6, 4, 1, 0, 5, 7, 3);
     SendPacket(&data);
 }
 
