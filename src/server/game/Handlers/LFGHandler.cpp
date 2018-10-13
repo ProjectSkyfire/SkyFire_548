@@ -112,7 +112,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
 
     if (!numDungeons)
     {
-        SF_LOG_DEBUG("lfg", "CMSG_LFG_JOIN %s no dungeons selected", GetPlayerInfo().c_str());
+        SF_LOG_DEBUG("lfg", "CMSG_LFD_JOIN %s no dungeons selected", GetPlayerInfo().c_str());
         recvData.rfinish();
         return;
     }
@@ -127,7 +127,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         newDungeons.insert((dungeon & 0x00FFFFFF));        // remove the type from the dungeon entry
     }
 
-    SF_LOG_DEBUG("lfg", "CMSG_LFG_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
+    SF_LOG_DEBUG("lfg", "CMSG_LFD_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
         GetPlayerInfo().c_str(), roles, uint8(newDungeons.size()), comment.c_str());
 
     sLFGMgr->JoinLfg(GetPlayer(), uint8(roles), newDungeons, comment);
