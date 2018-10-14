@@ -555,7 +555,7 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
 
             guid = it->first;
             data.WriteBit(roleCheck.state == lfg::LFG_ROLECHECK_FINISHED); // RoleCheckComplete
-            data.WriteGuidMask(roleCheck.leader, 3, 0, 5, 2, 7, 1, 4, 6);
+            data.WriteGuidMask(guid, 3, 0, 5, 2, 7, 1, 4, 6);
         }
     }
     data.WriteGuidMask(guid, 3, 5);
