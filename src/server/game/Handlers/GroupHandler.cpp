@@ -556,29 +556,13 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket& recvData)
 
     ObjectGuid lootMaster;
     uint8 lootMethod;
-    uint8 lootThreshold;
+    uint32 lootThreshold;
 
-    recvData >> lootThreshold;
-    recvData >> lootMethod;
-    recvData.read_skip<uint32>();
-
-    lootMaster[7] = recvData.ReadBit();
-    lootMaster[1] = recvData.ReadBit();
-    lootMaster[2] = recvData.ReadBit();
-    lootMaster[0] = recvData.ReadBit();
-    lootMaster[4] = recvData.ReadBit();
-    lootMaster[5] = recvData.ReadBit();
-    lootMaster[6] = recvData.ReadBit();
-    lootMaster[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(lootMaster[7]);
-    recvData.ReadByteSeq(lootMaster[1]);
-    recvData.ReadByteSeq(lootMaster[3]);
-    recvData.ReadByteSeq(lootMaster[4]);
-    recvData.ReadByteSeq(lootMaster[6]);
-    recvData.ReadByteSeq(lootMaster[5]);
-    recvData.ReadByteSeq(lootMaster[0]);
-    recvData.ReadByteSeq(lootMaster[2]);
+    recvData.read_skip<uint8>(); // PartyIndex
+    recvData >> lootMethod;      // Method
+    recvData >> lootThreshold;   // Threshold
+    recvData.ReadGuidMask(lootMaster, 7, 1, 2, 0, 4, 5, 6, 3);
+    recvData.ReadGuidBytes(lootMaster, 7, 1, 3, 4, 6, 5, 0, 2);
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
