@@ -734,14 +734,14 @@ void WorldSession::SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot)
 
 void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
 {
-    uint64 guid = GetPlayer()->GetGUID();
-    uint64 gguid = proposal.players.find(guid)->second.group;
+    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid gguid = proposal.players.find(guid)->second.group;
     bool silent = !proposal.isNew && gguid == proposal.group;
     uint32 dungeonEntry = proposal.dungeonId;
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
     time_t joinTime = sLFGMgr->GetQueueJoinTime(_player->GetGUID());
 
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_PROPOSAL_UPDATE %s state: %u",
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_PROPOSAL_UPDATE %s state: %u",
         GetPlayerInfo().c_str(), proposal.state);
 
     // show random dungeon if player selected random dungeon and it's not lfg group
@@ -754,32 +754,24 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
 
     dungeonEntry = sLFGMgr->GetLFGDungeonEntry(dungeonEntry);
 
-    WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 +1));
-    data << uint32(joinTime);
-    data << uint32(proposal.encounters);                   // Encounters done
-    data << uint32(queueId);                               // Queue Id
-    data << uint32(3);                                     // Always 3
-    data << uint32(dungeonEntry);                          // Dungeon
-    data << uint32(proposal.id);                           // Proposal Id
-    data << uint8(proposal.state);                         // State
-
-    ObjectGuid guid1 = guid;
-    ObjectGuid guid2 = gguid;
-
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid1[3]);
-    data.WriteBit(guid1[7]);
-    data.WriteBit(guid1[0]);
-    data.WriteBit(guid2[1]);
-    data.WriteBit(silent);
-    data.WriteBit(guid1[4]);
-    data.WriteBit(guid1[5]);
-    data.WriteBit(guid2[3]);
-    data.WriteBits(proposal.players.size(), 23);
-    data.WriteBit(guid2[7]);
-
+    WorldPacket data(SMSG_LFD_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 +1));
+    data.WriteGuidMask(guid, 6, 0);
+    data.WriteGuidMask(gguid, 1, 7, 5);
+    data.WriteGuidMask(guid, 5);
+    data.WriteGuidMask(gguid, 4);
+    data.WriteBit(proposal.encounters > 0);             // ValidCompletedMask
+    data.WriteGuidMask(guid, 2);
+    data.WriteGuidMask(gguid, 6);
+    data.WriteGuidMask(guid, 3, 7);
+    data.WriteGuidMask(gguid, 3);
+    data.WriteBits(proposal.players.size(), 21);        // Players
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
+        // 6 MyParty
+        // 4 Me
+        // 7 Responded
+        // 8 Accepted
+        // 5 SameParty
         lfg::LfgProposalPlayer const& player = it->second;
 
         if (!player.group)
@@ -793,43 +785,42 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
             data.WriteBit(player.group == gguid);               // Same group as the player
         }
 
-        data.WriteBit(player.accept == lfg::LFG_ANSWER_AGREE);
         data.WriteBit(player.accept != lfg::LFG_ANSWER_PENDING);
+        data.WriteBit(player.accept == lfg::LFG_ANSWER_AGREE);
         data.WriteBit(it->first == guid);
     }
-
-    data.WriteBit(guid2[5]);
-    data.WriteBit(guid1[6]);
-    data.WriteBit(guid2[2]);
-    data.WriteBit(guid2[6]);
-    data.WriteBit(guid1[2]);
-    data.WriteBit(guid1[1]);
-    data.WriteBit(guid2[0]);
-
-    data.WriteByteSeq(guid1[5]);
-    data.WriteByteSeq(guid2[3]);
-    data.WriteByteSeq(guid2[6]);
-    data.WriteByteSeq(guid1[6]);
-    data.WriteByteSeq(guid1[0]);
-    data.WriteByteSeq(guid2[5]);
-    data.WriteByteSeq(guid1[1]);
-
+    data.WriteGuidMask(gguid, 2);
+    data.WriteGuidMask(guid, 4);
+    data.WriteBit(silent);        // ProposalSilent
+    data.WriteGuidMask(gguid, 0);
+    data.WriteGuidMask(guid, 1);
+    data.FlushBits();
+    data.WriteGuidBytes(guid, 1);
+    data.WriteGuidBytes(gguid, 4);
+    data.WriteGuidBytes(guid, 4);
+    data.WriteGuidBytes(gguid, 7);
+    data.WriteGuidBytes(guid, 2);
+    data.WriteGuidBytes(gguid, 0);
+    data << uint32(proposal.encounters); // CompletedMask
+    data << uint8(proposal.state); // State
+    data << uint32(dungeonEntry); // Slot
+    data.WriteGuidBytes(guid, 6);
+    data << uint32(joinTime); // UnixTime
+    data.WriteGuidBytes(gguid, 5, 3);
+    data << uint32(3); // Type
+    data.WriteGuidBytes(guid, 5);
+    data.WriteGuidBytes(gguid, 6);
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
         lfg::LfgProposalPlayer const& player = it->second;
         data << uint32(player.role);
     }
-
-    data.WriteByteSeq(guid2[7]);
-    data.WriteByteSeq(guid1[4]);
-    data.WriteByteSeq(guid2[0]);
-    data.WriteByteSeq(guid2[1]);
-    data.WriteByteSeq(guid1[2]);
-    data.WriteByteSeq(guid1[7]);
-    data.WriteByteSeq(guid2[2]);
-    data.WriteByteSeq(guid1[3]);
-    data.WriteByteSeq(guid2[4]);
-
+    data << uint32(proposal.id); // ProposalID
+    data.WriteGuidBytes(guid, 7);
+    data.WriteGuidBytes(gguid, 1);
+    data.WriteGuidBytes(guid, 0, 2);
+    data << uint32(queueId); // Id
+    data.WriteGuidBytes(guid, 3);
     SendPacket(&data);
 }
 
