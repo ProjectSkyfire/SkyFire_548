@@ -545,7 +545,7 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
     if (!roleCheck.roles.empty())
     {
         // Leader info MUST be sent 1st :S        
-        data.WriteBit(roles > 0); // RoleCheckComplete
+        data.WriteBit(roleCheck.state == lfg::LFG_ROLECHECK_FINISHED); // RoleCheckComplete
         data.WriteGuidMask(guid, 3, 0, 5, 2, 7, 1, 4, 6);
 
         for (lfg::LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
@@ -553,8 +553,9 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
             if (it->first == roleCheck.leader)
                 continue;
 
-            data.WriteBit(roles > 0); // RoleCheckComplete
-            data.WriteGuidMask(guid, 3, 0, 5, 2, 7, 1, 4, 6);
+            guid = it->first;
+            data.WriteBit(roleCheck.state == lfg::LFG_ROLECHECK_FINISHED); // RoleCheckComplete
+            data.WriteGuidMask(roleCheck.leader, 3, 0, 5, 2, 7, 1, 4, 6);
         }
     }
     data.WriteGuidMask(guid, 3, 5);
@@ -578,6 +579,7 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
             if (it->first == roleCheck.leader)
                 continue;
 
+            guid = it->first;
             data << uint8(player ? player->getLevel() : 0); // Level
             data.WriteGuidBytes(guid, 3, 6);
             data << uint32(roles);                          // RolesDesired
@@ -842,8 +844,8 @@ void WorldSession::SendLfgLfrList(bool update)
 
 void WorldSession::SendLfgDisabled()
 {
-    SF_LOG_DEBUG("lfg", "SMSG_LFG_DISABLED %s", GetPlayerInfo().c_str());
-    WorldPacket data(SMSG_LFG_DISABLED, 0);
+    SF_LOG_DEBUG("lfg", "SMSG_LFD_DISABLED %s", GetPlayerInfo().c_str());
+    WorldPacket data(SMSG_LFD_DISABLED, 0);
     SendPacket(&data);
 }
 
