@@ -1585,33 +1585,15 @@ void WorldSession::HandleGroupInitiatePollRole(WorldPacket& recvData)
     if (!group)
         return;
 
-    SendRolePollInform(Index);
+    SendRolePollInform(GetPlayer()->GetObjectGUID(), Index);
 }
 
-void WorldSession::SendRolePollInform(uint8 Index)
+void WorldSession::SendRolePollInform(ObjectGuid guid, uint8 Index)
 {
-    ObjectGuid guid = GetPlayer()->GetGUID();
-
     WorldPacket data(SMSG_GROUP_ROLE_POLL_INFORM, 8 + 1);
-
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidMask(guid, 5, 7, 3, 1, 2, 0, 4, 6);
+    data.WriteGuidBytes(guid, 7);
     data << uint8(Index);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[3]);
-
+    data.WriteGuidBytes(guid, 6, 5, 0, 1, 4, 2, 3);
     GetPlayer()->GetGroup()->BroadcastPacket(&data, false, -1);
 }
