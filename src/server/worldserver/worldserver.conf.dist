@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2017091000
+ConfVersion=2018101400
 
 ###################################################################################################
 # SECTION INDEX
@@ -2767,6 +2767,44 @@ Logger.sql.sql=5,Console DBErrors
 #Logger.gameevent=3,Console Server
 #Logger.guild=3,Console Server
 #Logger.lfg=3,Console Server
+#Logger.lfg.join=3,Console Server
+#Logger.lfg.leave=3,Console Server
+#Logger.lfg.update=3,Console Server
+#Logger.lfg.proposal.update=3,Console Server
+#Logger.lfg.proposal.remove=3,Console Server
+#Logger.lfg.teleport=3,Console Server
+#Logger.lfg.dungeon.finish=3,Console Server
+#Logger.lfg.data.group.dungeon.get=3,Console Server
+#Logger.lfg.data.group.dungeon.map=3,Console Server
+#Logger.lfg.data.group.dungeon.set=3,Console Server
+#Logger.lfg.data.group.kickleft.get=3,Console Server
+#Logger.lfg.data.group.kicksleft.decrease=3,Console Server
+#Logger.lfg.data.group.remove.get=3,Console Server
+#Logger.lfg.data.group.state.get=3,Console Server
+#Logger.lfg.data.group.state.restore=3,Console Server
+#Logger.lfg.data.group.state.set=3,Console Server
+#Logger.lfg.data.group.oldstate.get=3,Console Server
+#Logger.lfg.data.player.comment.get=3,Console Server
+#Logger.lfg.data.player.comment.set=3,Console Server
+#Logger.lfg.data.player.dungeons.locked.get=3,Console Server
+#Logger.lfg.data.player.dungeons.locked.set=3,Console Server
+#Logger.lfg.data.player.dungeons.selected.get=3,Console Server
+#Logger.lfg.data.player.dungeons.selected.set=3,Console Server
+#Logger.lfg.data.player.remove=3,Console Server
+#Logger.lfg.data.player.role.get=3,Console Server
+#Logger.lfg.data.player.role.set=3,Console Server
+#Logger.lfg.data.player.state.get=3,Console Server
+#Logger.lfg.data.player.state.restore=3,Console Server
+#Logger.lfg.data.player.state.set=3,Console Server
+#Logger.lfg.data.player.team.get=3,Console Server
+#Logger.lfg.queue.add=3,Console Server
+#Logger.lfg.queue.compatibles.find=3,Console Server
+#Logger.lfg.queue.compatibles.update=3,Console Server
+#Logger.lfg.queue.data.compatibles.remove=3,Console Server
+#Logger.lfg.queue.match.check=3,Console Server
+#Logger.lfg.queue.match.check.new=3,Console Server
+#Logger.lfg.queue.match.compatibility.check=3,Console Server
+#Logger.lfg.queue.timers.update=3,Console Server
 #Logger.loot=3,Console Server
 #Logger.maps.script=3,Console Server
 #Logger.maps=3,Console Server
