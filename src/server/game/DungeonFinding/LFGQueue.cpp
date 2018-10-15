@@ -90,7 +90,7 @@ void LFGQueue::AddToQueue(uint64 guid)
     LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(guid);
     if (itQueue == QueueDataStore.end())
     {
-        SF_LOG_ERROR("lfg.queue.add", "Queue data not found for [" UI64FMTD "]", guid);
+        SF_LOG_ERROR("lfg.queue.add", "Queue data not found for [%u]", GUID_LOPART(guid));
         return;
     }
 
@@ -196,7 +196,7 @@ void LFGQueue::RemoveFromCompatibles(uint64 guid)
     out << guid;
     std::string strGuid = out.str();
 
-    SF_LOG_DEBUG("lfg.queue.data.compatibles.remove", "Removing [" UI64FMTD "]", guid);
+    SF_LOG_DEBUG("lfg.queue.data.compatibles.remove", "Removing [%u]", GUID_LOPART(guid));
     for (LfgCompatibleContainer::iterator itNext = CompatibleMapStore.begin(); itNext != CompatibleMapStore.end();)
     {
         LfgCompatibleContainer::iterator it = itNext++;
@@ -253,7 +253,7 @@ uint8 LFGQueue::FindGroups()
     while (!newToQueueStore.empty())
     {
         uint64 frontguid = newToQueueStore.front();
-        SF_LOG_DEBUG("lfg.queue.match.check.new", "Checking [" UI64FMTD "] newToQueue(%u), currentQueue(%u)", frontguid, uint32(newToQueueStore.size()), uint32(currentQueueStore.size()));
+        SF_LOG_DEBUG("lfg.queue.match.check.new", "Checking [%u] newToQueue(%u), currentQueue(%u)", GUID_LOPART(frontguid), uint32(newToQueueStore.size()), uint32(currentQueueStore.size()));
         firstNew.clear();
         firstNew.push_back(frontguid);
         RemoveFromNewQueue(frontguid);
@@ -355,7 +355,7 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
         LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(guid);
         if (itQueue == QueueDataStore.end())
         {
-            SF_LOG_ERROR("lfg.queue.match.compatibility.check", "Guid: [" UI64FMTD "] is not queued but listed as queued!", guid);
+            SF_LOG_ERROR("lfg.queue.match.compatibility.check", "Guid: [%u] is not queued but listed as queued!", GUID_LOPART(guid));
             RemoveFromQueue(guid);
             return LFG_COMPATIBILITY_PENDING;
         }
@@ -415,7 +415,9 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
                 for (itPlayer = proposalRoles.begin(); itPlayer != proposalRoles.end(); ++itPlayer)
                 {
                     if (itRoles->first == itPlayer->first)
-                        SF_LOG_ERROR("lfg.queue.match.compatibility.check", "Guids: ERROR! Player multiple times in queue! [" UI64FMTD "]", itRoles->first);
+                    {
+                        SF_LOG_ERROR("lfg.queue.match.compatibility.check", "Guids: ERROR! Player multiple times in queue! [%u]", GUID_LOPART(itRoles->first));
+                    }
                     else if (sLFGMgr->HasIgnore(itRoles->first, itPlayer->first))
                         break;
                 }
