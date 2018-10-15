@@ -438,6 +438,7 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     ObjectGuid guid = _player->GetGUID();
     time_t joinTime = sLFGMgr->GetQueueJoinTime(_player->GetGUID());
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
+    bool lfgjoined = updateData.updateType != lfg::LFG_UPDATETYPE_REMOVED_FROM_QUEUE;
 
     switch (updateData.updateType)
     {
@@ -470,9 +471,9 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     data.WriteBit(join);                                  // Joined
     data.WriteBits(size, 22);                             // Slots
     data.WriteGuidMask(guid, 2, 3, 1);
-    data.WriteBit(0);                                     // NotifyUI
+    data.WriteBit(true);                                  // NotifyUI
     data.WriteGuidMask(guid, 7, 6, 0);
-    data.WriteBit(0);                                     // LfgJoined
+    data.WriteBit(lfgjoined); // LfgJoined
     data.WriteBit(queued);                                // Queued
     data.WriteBits(0, 24);                                // SuspendedPlayers
     data.WriteGuidMask(guid, 5);
@@ -488,8 +489,8 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     data.WriteGuidBytes(guid, 4);
     //forloop 75 SuspendedPlayers
     data.WriteGuidBytes(guid, 6);
-    data << uint8(updateData.updateType);                 // SubType
-    data << uint32(0);                                    // RequestedRoles
+    data << uint8(0);                                      // SubType
+    data << uint32(sLFGMgr->GetRoles(_player->GetGUID())); // RequestedRoles
     data << uint32(queueId);                              // Id
     data.WriteGuidBytes(guid, 5);
     data.WriteString(updateData.comment);                 // Comment
@@ -498,7 +499,7 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
         data << uint32(*it);
     data.WriteGuidBytes(guid, 0, 1);
     data << uint32(joinTime);                             // UnixTime
-    data << uint8(0);                                     // Reason
+    data << uint8(updateData.updateType);                 // Reason
     data << uint32(3);                                    // Type
     data.WriteGuidBytes(guid, 7);
     SendPacket(&data);
