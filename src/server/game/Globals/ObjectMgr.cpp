@@ -5873,7 +5873,7 @@ void ObjectMgr::LoadAccessRequirements()
     }
 
     //                                               0      1           2          3          4     5      6             7             8                      9                  10
-    QueryResult result = WorldDatabase.Query("SELECT mapid, difficulty, level_min, level_max, item, item2, quest_done_A, quest_done_H, completed_achievement, quest_failed_text, ilvlFROM access_requirement");
+    QueryResult result = WorldDatabase.Query("SELECT mapid, difficulty, level_min, level_max, item, item2, quest_done_A, quest_done_H, completed_achievement, quest_failed_text, ilvl FROM access_requirement");
     if (!result)
     {
         SF_LOG_INFO("server.loading", ">> Loaded 0 access requirement definitions. DB table `access_requirement` is empty.");
