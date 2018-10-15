@@ -786,27 +786,11 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     data.WriteBits(proposal.players.size(), 21);        // Players
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
-        // 6 MyParty
-        // 4 Me
-        // 7 Responded
-        // 8 Accepted
-        // 5 SameParty
-        lfg::LfgProposalPlayer const& player = it->second;
-
-        if (!player.group)
-        {
-            data.WriteBit(0);
-            data.WriteBit(0);
-        }
-        else
-        {
-            data.WriteBit(player.group == proposal.group);      // Is group in dungeon
-            data.WriteBit(player.group == gguid);               // Same group as the player
-        }
-
-        data.WriteBit(player.accept != lfg::LFG_ANSWER_PENDING);
-        data.WriteBit(player.accept == lfg::LFG_ANSWER_AGREE);
-        data.WriteBit(it->first == guid);
+        data.WriteBit(it->second.group && it->second.group == proposal.group); // MyParty
+        data.WriteBit(it->first == guid);                                      // Me
+        data.WriteBit(it->second.accept != lfg::LFG_ANSWER_PENDING);           // Responded
+        data.WriteBit(it->second.accept == lfg::LFG_ANSWER_AGREE);             // Accepted
+        data.WriteBit(it->second.group && it->second.group == gguid);          // SameParty
     }
     data.WriteGuidMask(gguid, 2);
     data.WriteGuidMask(guid, 4);
