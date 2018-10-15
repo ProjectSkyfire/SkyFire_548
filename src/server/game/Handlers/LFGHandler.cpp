@@ -99,16 +99,16 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         return;
     }
     uint32 roles;
-    bool unk1;
-    uint8 unk0;
+    bool QueueAsGroup;
+    uint8 PartyIndex;
 
-    recvData >> unk0;                 // PartyIndex
+    recvData >> PartyIndex;           // PartyIndex
     for (int32 i = 0; i < 3; ++i)
         recvData.read_skip<uint32>(); // Needs
     recvData >> roles;                // Roles
     uint32 numDungeons = recvData.ReadBits(22);
     uint32 commentLen = recvData.ReadBits(8);
-    unk1 = recvData.ReadBit();        // QueueAsGroup
+    QueueAsGroup = recvData.ReadBit();        // QueueAsGroup
 
     if (!numDungeons)
     {
@@ -129,6 +129,9 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
 
     SF_LOG_DEBUG("lfg", "CMSG_LFD_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
         GetPlayerInfo().c_str(), roles, uint8(newDungeons.size()), comment.c_str());
+
+    if (QueueAsGroup)
+        SendRolePollInform(GetPlayer()->GetObjectGUID(), PartyIndex);
 
     sLFGMgr->JoinLfg(GetPlayer(), uint8(roles), newDungeons, comment);
 }
