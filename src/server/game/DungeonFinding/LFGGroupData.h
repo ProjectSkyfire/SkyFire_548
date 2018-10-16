@@ -67,6 +67,8 @@ class LfgGroupData
 
         // VoteKick
         uint8 GetKicksLeft() const;
+        void SetVoteKick(bool active);
+        bool IsVoteKickActive() const;
 
     private:
         // General
@@ -78,6 +80,7 @@ class LfgGroupData
         uint32 m_Dungeon;                                  ///< Dungeon entry
         // Vote Kick
         uint8 m_KicksLeft;                                 ///< Number of kicks left
+        bool m_VoteKickActive;
 };
 
 } // namespace lfg

@@ -93,9 +93,9 @@ std::string GetStateString(LfgState state)
         case LFG_STATE_DUNGEON:
             entry = LANG_LFG_STATE_DUNGEON;
             break;
-        case LFG_STATE_BOOT:
-            entry = LANG_LFG_STATE_BOOT;
-            break;
+        //case LFG_STATE_BOOT:
+        //    entry = LANG_LFG_STATE_BOOT;
+        //    break;
         case LFG_STATE_FINISHED_DUNGEON:
             entry = LANG_LFG_STATE_FINISHED_DUNGEON;
             break;

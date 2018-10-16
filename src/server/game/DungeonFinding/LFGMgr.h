@@ -328,6 +328,8 @@ class LFGMgr
         uint32 GetDungeon(uint64 guid, bool asId = true);
         /// Get the map id of the current dungeon
         uint32 GetDungeonMapId(uint64 guid);
+        /// Get current vote kick state
+        bool IsVoteKickActive(uint64 gguid);
         /// Get kicks left in current group
         uint8 GetKicksLeft(uint64 gguid);
         /// Load Lfg group info from DB
@@ -399,7 +401,7 @@ class LFGMgr
         /// Join Lfg with selected roles, dungeons and comment
         void JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string const& comment);
         /// Leaves lfg
-        void LeaveLfg(uint64 guid);
+        void LeaveLfg(uint64 guid, bool disconnected = false);
 
         // LfgQueue
         /// Get last lfg state (NONE, DUNGEON or FINISHED_DUNGEON)
@@ -431,8 +433,9 @@ class LFGMgr
         void SetSelectedDungeons(uint64 guid, LfgDungeonSet const& dungeons);
         void DecreaseKicksLeft(uint64 guid);
         void SetState(uint64 guid, LfgState state);
+        void SetVoteKick(uint64 guid, bool active);
         void RemovePlayerData(uint64 guid);
-        void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap);
+        void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, bool isContinue);
         void _SaveToDB(uint64 guid, uint32 db_guid);
         LFGDungeonData const* GetLFGDungeon(uint32 id);
 

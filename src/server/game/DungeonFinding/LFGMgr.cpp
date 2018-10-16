@@ -23,7 +23,7 @@
 #include "DisableMgr.h"
 #include "ObjectMgr.h"
 #include "SocialMgr.h"
-#include "Language.h"
+#include "InstanceSaveMgr.h"
 #include "LFGMgr.h"
 #include "LFGScripts.h"
 #include "LFGGroupData.h"
@@ -74,6 +74,7 @@ void LFGMgr::_LoadFromDB(Field* fields, uint64 guid)
     {
         case LFG_STATE_DUNGEON:
         case LFG_STATE_FINISHED_DUNGEON:
+        //case LFG_STATE_BOOT:
             SetState(guid, (LfgState)state);
             break;
         default:
@@ -311,7 +312,7 @@ void LFGMgr::Update(uint32 diff)
                     SendLfgBootProposalUpdate(pguid, boot);
                 SetState(pguid, LFG_STATE_DUNGEON);
             }
-            SetState(itBoot->first, LFG_STATE_DUNGEON);
+            SetVoteKick(itBoot->first, false);
             BootsStore.erase(itBoot);
         }
     }
@@ -483,7 +484,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
                 dungeons = GetDungeonsByRandom(rDungeonId);
 
             // if we have lockmap then there are no compatible dungeons
-            GetCompatibleDungeons(dungeons, players, joinData.lockmap);
+            GetCompatibleDungeons(dungeons, players, joinData.lockmap, isContinue);
             if (dungeons.empty())
                 joinData.result = grp ? LFG_JOIN_INTERNAL_ERROR : LFG_JOIN_NOT_MEET_REQS;
         }
@@ -580,7 +581,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
 
    @param[in]     guid Player or group guid
 */
-void LFGMgr::LeaveLfg(uint64 guid)
+void LFGMgr::LeaveLfg(uint64 guid, bool disconnected)
 {
     uint64 gguid = IS_GROUP_GUID(guid) ? guid : GetGroup(guid);
 
@@ -641,8 +642,8 @@ void LFGMgr::LeaveLfg(uint64 guid)
             break;
         case LFG_STATE_DUNGEON:
         case LFG_STATE_FINISHED_DUNGEON:
-        case LFG_STATE_BOOT:
-            if (guid != gguid) // Player
+        //case LFG_STATE_BOOT:
+            if (guid != gguid && !disconnected) // Player
                 SetState(guid, LFG_STATE_NONE);
             break;
     }
@@ -747,20 +748,44 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
    @param[in]     players Set of players to check their dungeon restrictions
    @param[out]    lockMap Map of players Lock status info of given dungeons (Empty if dungeons is not empty)
 */
-void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap)
+void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, bool isContinue)
 {
     lockMap.clear();
+    std::map<uint32, uint32> lockedDungeons;
     for (LfgGuidSet::const_iterator it = players.begin(); it != players.end() && !dungeons.empty(); ++it)
     {
         uint64 guid = (*it);
         LfgLockMap const& cachedLockMap = GetLockedDungeons(guid);
+        Player* player = ObjectAccessor::FindPlayer(guid);
         for (LfgLockMap::const_iterator it2 = cachedLockMap.begin(); it2 != cachedLockMap.end() && !dungeons.empty(); ++it2)
         {
             uint32 dungeonId = (it2->first & 0x00FFFFFF); // Compare dungeon ids
             LfgDungeonSet::iterator itDungeon = dungeons.find(dungeonId);
             if (itDungeon != dungeons.end())
             {
-                dungeons.erase(itDungeon);
+                bool eraseDungeon = true;
+                // Don't remove the dungeon if team members are trying to continue a locked instance
+                if (it2->second == LFG_LOCKSTATUS_RAID_LOCKED && isContinue)
+                {
+                    LFGDungeonData const* dungeon = GetLFGDungeon(dungeonId);
+                    ASSERT(dungeon);
+                    ASSERT(player);
+                    if (InstancePlayerBind* playerBind = player->GetBoundInstance(dungeon->map, DifficultyID(dungeon->difficulty)))
+                    {
+                        if (InstanceSave* playerSave = playerBind->save)
+                        {
+                            uint32 dungeonInstanceId = playerSave->GetInstanceId();
+                            auto itLockedDungeon = lockedDungeons.find(dungeonId);
+                            if (itLockedDungeon == lockedDungeons.end() || itLockedDungeon->second == dungeonInstanceId)
+                                eraseDungeon = false;
+                            lockedDungeons[dungeonId] = dungeonInstanceId;
+                        }
+                    }
+                }
+
+                if (eraseDungeon)
+                    dungeons.erase(itDungeon);
+
                 lockMap[guid][dungeonId] = it2->second;
             }
         }
@@ -1130,7 +1155,7 @@ void LFGMgr::RemoveProposal(LfgProposalContainer::iterator itProposal, LfgUpdate
 */
 void LFGMgr::InitBoot(uint64 gguid, uint64 kicker, uint64 victim, std::string const& reason)
 {
-    SetState(gguid, LFG_STATE_BOOT);
+    SetVoteKick(gguid, true);
 
     LfgPlayerBoot& boot = BootsStore[gguid];
     boot.inProgress = true;
@@ -1144,7 +1169,6 @@ void LFGMgr::InitBoot(uint64 gguid, uint64 kicker, uint64 victim, std::string co
     for (LfgGuidSet::const_iterator itr = players.begin(); itr != players.end(); ++itr)
     {
         uint64 guid = (*itr);
-        SetState(guid, LFG_STATE_BOOT);
         boot.votes[guid] = LFG_ANSWER_PENDING;
     }
 
@@ -1201,13 +1225,10 @@ void LFGMgr::UpdateBoot(uint64 guid, bool accept)
     {
         uint64 pguid = itVotes->first;
         if (pguid != boot.victim)
-        {
-            SetState(pguid, LFG_STATE_DUNGEON);
             SendLfgBootProposalUpdate(pguid, boot);
-        }
     }
 
-    SetState(gguid, LFG_STATE_DUNGEON);
+    SetVoteKick(gguid, false);
     if (agreeNum == LFG_GROUP_KICK_VOTES_NEEDED)           // Vote passed - Kick player
     {
         if (Group* group = sGroupMgr->GetGroupByGUID(GUID_LOPART(gguid)))
@@ -1519,6 +1540,20 @@ uint8 LFGMgr::GetRoles(uint64 guid)
     uint8 roles = PlayersStore[guid].GetRoles();
     SF_LOG_TRACE("lfg.data.player.role.get", "Player: %u, Role: %u", GUID_LOPART(guid), roles);
     return roles;
+}
+
+bool LFGMgr::IsVoteKickActive(uint64 guid)
+{
+    bool active = GroupsStore[guid].IsVoteKickActive();
+    SF_LOG_TRACE("lfg.data.group.votekick.get", "Group: %u, Active: %d", GUID_LOPART(guid), active);
+    return active;
+}
+
+void LFGMgr::SetVoteKick(uint64 guid, bool active)
+{
+    LfgGroupData& data = GroupsStore[guid];
+    SF_LOG_TRACE("lfg.data.group.votekick.set", "Group: %u, New state: %d, Previous: %d", GUID_LOPART(guid), active, data.IsVoteKickActive());
+    data.SetVoteKick(active);
 }
 
 const std::string& LFGMgr::GetComment(uint64 guid)
