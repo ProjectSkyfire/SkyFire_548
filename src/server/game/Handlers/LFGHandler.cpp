@@ -130,7 +130,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     SF_LOG_DEBUG("lfg", "CMSG_LFD_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
         GetPlayerInfo().c_str(), roles, uint8(newDungeons.size()), comment.c_str());
 
-    if (QueueAsGroup)
+    if (GetPlayer()->GetGroup() && QueueAsGroup)
         SendRolePollInform(GetPlayer()->GetObjectGUID(), PartyIndex);
 
     sLFGMgr->JoinLfg(GetPlayer(), uint8(roles), newDungeons, comment);

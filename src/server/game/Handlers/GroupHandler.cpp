@@ -1580,12 +1580,6 @@ void WorldSession::HandleGroupInitiatePollRole(WorldPacket& recvData)
 
     uint8 Index = 0;
     recvData >> Index;
-
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    SendRolePollInform(GetPlayer()->GetObjectGUID(), Index);
 }
 
 void WorldSession::SendRolePollInform(ObjectGuid guid, uint8 Index)
