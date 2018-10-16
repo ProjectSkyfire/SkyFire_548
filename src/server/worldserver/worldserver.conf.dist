@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2018101400
+ConfVersion=2018101600
 
 ###################################################################################################
 # SECTION INDEX
@@ -2784,6 +2784,8 @@ Logger.sql.sql=5,Console DBErrors
 #Logger.lfg.data.group.state.restore=3,Console Server
 #Logger.lfg.data.group.state.set=3,Console Server
 #Logger.lfg.data.group.oldstate.get=3,Console Server
+#Logger.lfg.data.group.votekick.get=3,Console Server
+#Logger.lfg.data.group.votekick.set=3,Console Server
 #Logger.lfg.data.player.comment.get=3,Console Server
 #Logger.lfg.data.player.comment.set=3,Console Server
 #Logger.lfg.data.player.dungeons.locked.get=3,Console Server
