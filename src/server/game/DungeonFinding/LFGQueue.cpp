@@ -82,7 +82,7 @@ char const* GetCompatibleString(LfgCompatibility compatibles)
     }
 }
 
-LFGQueue::AddToQueue(uint64 guid, bool reQueue)
+void LFGQueue::AddToQueue(uint64 guid, bool reQueue)
 {
     LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(guid);
     if (itQueue == QueueDataStore.end())
