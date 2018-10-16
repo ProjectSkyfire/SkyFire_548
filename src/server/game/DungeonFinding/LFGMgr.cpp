@@ -86,20 +86,20 @@ void LFGMgr::_SaveToDB(uint64 guid, uint32 db_guid)
 {
     if (!IS_GROUP_GUID(guid))
         return;
-
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_LFG_DATA);
 
     stmt->setUInt32(0, db_guid);
 
-    CharacterDatabase.Execute(stmt);
+    trans->Append(stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LFG_DATA);
     stmt->setUInt32(0, db_guid);
 
     stmt->setUInt32(1, GetDungeon(guid));
     stmt->setUInt32(2, GetState(guid));
-
-    CharacterDatabase.Execute(stmt);
+    trans->Append(stmt);
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 /// Load rewards for completing dungeons
@@ -1139,7 +1139,7 @@ void LFGMgr::RemoveProposal(LfgProposalContainer::iterator itProposal, LfgUpdate
     for (LfgGuidList::const_iterator it = proposal.queues.begin(); it != proposal.queues.end(); ++it)
     {
         uint64 guid = *it;
-        queue.AddToQueue(guid);
+        queue.AddToQueue(guid, true);
     }
 
     ProposalsStore.erase(itProposal);
@@ -1877,8 +1877,15 @@ bool LFGMgr::AllQueued(LfgGuidList const& check)
         return false;
 
     for (LfgGuidList::const_iterator it = check.begin(); it != check.end(); ++it)
-        if (GetState(*it) != LFG_STATE_QUEUED)
+    {
+        LfgState state = GetState(*it);
+        if (state != LFG_STATE_QUEUED)
+        {
+            if (state != LFG_STATE_PROPOSAL)
+                SF_LOG_DEBUG("lfg.allqueued", "Unexpected state found while trying to form new group. Guid: %u, State: %s", GUID_LOPART((*it)), GetStateString(state).c_str());
             return false;
+        }
+    }
     return true;
 }
 

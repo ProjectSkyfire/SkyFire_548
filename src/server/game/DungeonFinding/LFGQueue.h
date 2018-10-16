@@ -90,7 +90,7 @@ class LFGQueue
     public:
 
         // Add/Remove from queue
-        void AddToQueue(uint64 guid);
+        void AddToQueue(uint64 guid, bool reQueue = false);
         void RemoveFromQueue(uint64 guid);
         void AddQueueData(uint64 guid, time_t joinTime, LfgDungeonSet const& dungeons, LfgRolesMap const& rolesMap);
         void RemoveQueueData(uint64 guid);
