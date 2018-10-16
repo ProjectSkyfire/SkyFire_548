@@ -156,57 +156,40 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
 {
-    uint32 proposalID;  // Proposal ID
-    bool accept;
+    uint32 ProposalID;
+    bool Accepted;
 
-    ObjectGuid guid1;
-    ObjectGuid guid2;
+    ObjectGuid guid1, guid2;
 
-    recvData >> proposalID;
-    recvData.read_skip<uint32>();
-    recvData.read_skip<uint32>();
-    recvData.read_skip<uint32>();
+    recvData >> ProposalID;         // ProposalID
+    recvData.read_skip<uint32>();   // Id
+    recvData.read_skip<uint32>();   // Type
+    recvData.read_skip<uint32>();   // UnixTime
 
-    guid2[4] = recvData.ReadBit();
-    guid2[5] = recvData.ReadBit();
-    guid2[0] = recvData.ReadBit();
-    guid2[6] = recvData.ReadBit();
-    guid2[2] = recvData.ReadBit();
-    guid2[7] = recvData.ReadBit();
-    guid2[1] = recvData.ReadBit();
-    guid2[3] = recvData.ReadBit();
+    Accepted = recvData.ReadBit();
+    recvData.ReadGuidMask(guid1, 6, 0, 2, 4);
+    recvData.ReadGuidMask(guid2, 6, 7);
+    recvData.ReadGuidMask(guid1, 3);
+    recvData.ReadGuidMask(guid2, 4);
+    recvData.ReadGuidMask(guid1, 7);
+    recvData.ReadGuidMask(guid2, 1);
+    recvData.ReadGuidMask(guid1, 5);
+    recvData.ReadGuidMask(guid2, 0);
+    recvData.ReadGuidMask(guid1, 1);
+    recvData.ReadGuidMask(guid2, 2, 3, 5);
 
-    recvData.ReadByteSeq(guid2[7]);
-    recvData.ReadByteSeq(guid2[4]);
-    recvData.ReadByteSeq(guid2[3]);
-    recvData.ReadByteSeq(guid2[2]);
-    recvData.ReadByteSeq(guid2[6]);
-    recvData.ReadByteSeq(guid2[0]);
-    recvData.ReadByteSeq(guid2[1]);
-    recvData.ReadByteSeq(guid2[5]);
+    recvData.ReadGuidBytes(guid1, 3, 6, 4, 1);
+    recvData.ReadGuidBytes(guid2, 7, 0);
+    recvData.ReadGuidBytes(guid1, 7);
+    recvData.ReadGuidBytes(guid2, 6);
+    recvData.ReadGuidBytes(guid1, 5);
+    recvData.ReadGuidBytes(guid2, 3, 1, 5, 4);
+    recvData.ReadGuidBytes(guid1, 0, 2);
+    recvData.ReadGuidBytes(guid2, 2);
 
-    guid1[7] = recvData.ReadBit();
-    accept =  recvData.ReadBit();
-    guid1[1] = recvData.ReadBit();
-    guid1[3] = recvData.ReadBit();
-    guid1[0] = recvData.ReadBit();
-    guid1[5] = recvData.ReadBit();
-    guid1[4] = recvData.ReadBit();
-    guid1[6] = recvData.ReadBit();
-    guid1[2] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid1[7]);
-    recvData.ReadByteSeq(guid1[1]);
-    recvData.ReadByteSeq(guid1[5]);
-    recvData.ReadByteSeq(guid1[6]);
-    recvData.ReadByteSeq(guid1[3]);
-    recvData.ReadByteSeq(guid1[4]);
-    recvData.ReadByteSeq(guid1[0]);
-    recvData.ReadByteSeq(guid1[2]);
-
-    SF_LOG_DEBUG("lfg", "CMSG_LFG_PROPOSAL_RESULT %s proposal: %u accept: %u",
-        GetPlayerInfo().c_str(), proposalID, accept ? 1 : 0);
-    sLFGMgr->UpdateProposal(proposalID, GetPlayer()->GetGUID(), accept);
+    SF_LOG_DEBUG("lfg", "CMSG_LFD_PROPOSAL_RESULT %s proposal: %u accept: %u",
+        GetPlayerInfo().c_str(), ProposalID, Accepted ? 1 : 0);
+    sLFGMgr->UpdateProposal(ProposalID, GetPlayer()->GetGUID(), Accepted);
 }
 
 void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recvData)
@@ -797,7 +780,7 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     }
     data.WriteGuidMask(gguid, 2);
     data.WriteGuidMask(guid, 4);
-    data.WriteBit(silent);        // ProposalSilent
+    data.WriteBit(silent);               // ProposalSilent
     data.WriteGuidMask(gguid, 0);
     data.WriteGuidMask(guid, 1);
     data.FlushBits();
@@ -807,25 +790,25 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     data.WriteGuidBytes(gguid, 7);
     data.WriteGuidBytes(guid, 2);
     data.WriteGuidBytes(gguid, 0);
-    data << uint32(proposal.encounters); // CompletedMask
-    data << uint8(proposal.state); // State
-    data << uint32(dungeonEntry); // Slot
+    data << uint32(dungeonEntry);        // Slot
+    data << uint8(proposal.state);       // State
+    data << uint32(queueId);             // Id
     data.WriteGuidBytes(guid, 6);
-    data << uint32(joinTime); // UnixTime
+    data << uint32(proposal.id);         // ProposalID
     data.WriteGuidBytes(gguid, 5, 3);
-    data << uint32(3); // Type
+    data << uint32(joinTime);            // UnixTime
     data.WriteGuidBytes(guid, 5);
     data.WriteGuidBytes(gguid, 6);
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
         lfg::LfgProposalPlayer const& player = it->second;
-        data << uint32(player.role);
+        data << uint32(player.role);     // Role
     }
-    data << uint32(proposal.id); // ProposalID
+    data << uint32(proposal.encounters); // CompletedMask
     data.WriteGuidBytes(guid, 7);
     data.WriteGuidBytes(gguid, 1);
     data.WriteGuidBytes(guid, 0, 2);
-    data << uint32(queueId); // Id
+    data << uint32(3);                   // Type
     data.WriteGuidBytes(guid, 3);
     SendPacket(&data);
 }
