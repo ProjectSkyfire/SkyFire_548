@@ -2529,3 +2529,10 @@ void WorldSession::SendPlayMusic(uint32 SoundKitID)
     SendPacket(&data);
 }
 
+void WorldSession::SendPageText(ObjectGuid GameObjectGUID)
+{
+    WorldPacket data(SMSG_PAGETEXT, 8);
+    data.WriteGuidMask(GameObjectGUID, 0, 3, 2, 6, 5, 1, 7, 4);
+    data.WriteGuidBytes(GameObjectGUID, 6, 2, 7, 0, 5, 3, 1, 4);
+    _player->SendDirectMessage(&data);
+}

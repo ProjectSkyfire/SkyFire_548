@@ -843,6 +843,7 @@ class WorldSession
         void HandleNextCinematicCamera(WorldPacket& recvPacket);
 
         void HandlePageTextQueryOpcode(WorldPacket& recvPacket);
+        void SendPageText(ObjectGuid GameObjectGUID);
 
         void HandleTutorialFlag (WorldPacket& recvData);
         void HandleTutorialClear(WorldPacket& recvData);
