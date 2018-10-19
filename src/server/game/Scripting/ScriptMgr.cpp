@@ -171,11 +171,7 @@ class ScriptRegistry
     if (!V) \
         return R;
 
-struct TSpellSummary
-{
-    uint8 Targets;                                          // set of enum SelectTarget
-    uint8 Effects;                                          // set of enum SelectEffect
-} *SpellSummary;
+struct TSpellSummary *SpellSummary;
 
 ScriptMgr::ScriptMgr()
     : _scriptCount(0), _scheduledScripts(0) { }

@@ -25,14 +25,11 @@
 #include "Cell.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
+#include "ScriptMgr.h"
 #include "TemporarySummon.h"
 
 // Spell summary for ScriptedAI::SelectSpell
-struct TSpellSummary
-{
-    uint8 Targets;                                          // set of enum SelectTarget
-    uint8 Effects;                                          // set of enum SelectEffect
-} extern* SpellSummary;
+extern struct TSpellSummary *SpellSummary;
 
 void SummonList::DoZoneInCombat(uint32 entry)
 {
