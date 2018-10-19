@@ -222,7 +222,7 @@ class Item : public Object
         Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
-        virtual bool Create(uint32 guidlow, uint32 itemid, uint64 playerGuid);
+        bool Create(uint32 guidlow, uint32 itemid, uint64 playerGuid);
 
         ItemTemplate const* GetTemplate() const;
 
