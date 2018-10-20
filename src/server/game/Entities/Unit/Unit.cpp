@@ -13136,8 +13136,10 @@ void Unit::SendPetTalk(uint32 pettalk)
         return;
 
     WorldPacket data(SMSG_PET_ACTION_SOUND, 8 + 4);
-    data << uint64(GetGUID());
+    data.WriteGuidMask(GetObjectGUID(), 2, 7, 6, 0, 5, 1, 3, 4);
+    data.WriteGuidBytes(GetObjectGUID(), 7, 4, 6, 1);
     data << uint32(pettalk);
+    data.WriteGuidBytes(GetObjectGUID(), 2, 3, 5, 0);
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
