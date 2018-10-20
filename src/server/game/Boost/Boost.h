@@ -17,7 +17,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef SF_BOOST_H
+#define SF_BOOST_H
+
 #include "Player.h"
 
 typedef std::map<uint8, uint32> SlotEquipmentMap;
@@ -603,3 +605,5 @@ private:
     bool m_boosting;
     bool m_sendPacket;
 };
+
+#endif
