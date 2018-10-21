@@ -45,8 +45,8 @@ namespace Skyfire
     class BattlegroundChatBuilder
     {
         public:
-            BattlegroundChatBuilder(ChatMsg msgtype, int32 textId, Player const* source, va_list* args = NULL)
-                : _msgtype(msgtype), _textId(textId), _source(source), _args(args) { }
+            BattlegroundChatBuilder(ChatMsg msgtype, int32 textId, Player const* source, Player* const target = NULL, va_list* args = NULL)
+                : _msgtype(msgtype), _textId(textId), _source(source), _target(target), _args(args) { }
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
@@ -58,7 +58,7 @@ namespace Skyfire
                     va_copy(ap, *_args);
 
                     char str[2048];
-                    vsnprintf(str, 2048, text, ap);
+                    vsnprintf(str, sizeof(str), text, ap);
                     va_end(ap);
 
                     do_helper(data, &str[0]);
@@ -70,21 +70,21 @@ namespace Skyfire
         private:
             void do_helper(WorldPacket& data, char const* text)
             {
-                uint64 target_guid = _source ? _source->GetGUID() : 0;
-                ChatHandler::BuildChatPacket(data, _msgtype, LANG_UNIVERSAL, _source, _source, text);
+                ChatHandler::BuildChatPacket(data, _msgtype, LANG_UNIVERSAL, _source, _target, text);
             }
 
             ChatMsg _msgtype;
             int32 _textId;
             Player const* _source;
+            Player const* _target;
             va_list* _args;
     };
 
     class Battleground2ChatBuilder
     {
         public:
-            Battleground2ChatBuilder(ChatMsg msgtype, int32 textId, Player const* source, int32 arg1, int32 arg2)
-                : _msgtype(msgtype), _textId(textId), _source(source), _arg1(arg1), _arg2(arg2) { }
+            Battleground2ChatBuilder(ChatMsg msgtype, int32 textId, int32 arg1, int32 arg2, Player const* source = NULL, Player const* target = NULL)
+                : _msgtype(msgtype), _textId(textId), _arg1(arg1), _arg2(arg2), _source(source), _target(target) { }
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
@@ -93,17 +93,16 @@ namespace Skyfire
                 char const* arg2str = _arg2 ? sObjectMgr->GetSkyFireString(_arg2, loc_idx) : "";
 
                 char str[2048];
-                snprintf(str, 2048, text, arg1str, arg2str);
+                snprintf(str, sizeof(str), text, arg1str, arg2str);
 
-                uint64 target_guid = _source  ? _source->GetGUID() : 0;
-
-                ChatHandler::BuildChatPacket(data, _msgtype, LANG_UNIVERSAL, _source, _source, str);
+                ChatHandler::BuildChatPacket(data, _msgtype, LANG_UNIVERSAL, _source, _target, str);
             }
 
         private:
             ChatMsg _msgtype;
             int32 _textId;
             Player const* _source;
+            Player const* _target;
             int32 _arg1;
             int32 _arg2;
     };
@@ -1758,7 +1757,7 @@ void Battleground::PSendMessageToAll(int32 entry, ChatMsg type, Player const* so
     va_list ap;
     va_start(ap, source);
 
-    Skyfire::BattlegroundChatBuilder bg_builder(type, entry, source, &ap);
+    Skyfire::BattlegroundChatBuilder bg_builder(type, entry, source, NULL, &ap);
     Skyfire::LocalizedPacketDo<Skyfire::BattlegroundChatBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
 
@@ -1794,7 +1793,7 @@ void Battleground::SendWarningToAll(int32 entry, ...)
 
 void Battleground::SendMessage2ToAll(int32 entry, ChatMsg type, Player const* source, int32 arg1, int32 arg2)
 {
-    Skyfire::Battleground2ChatBuilder bg_builder(type, entry, source, arg1, arg2);
+    Skyfire::Battleground2ChatBuilder bg_builder(type, entry, arg1, arg2, source);
     Skyfire::LocalizedPacketDo<Skyfire::Battleground2ChatBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
 }
