@@ -384,15 +384,6 @@ uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-    bool hasLiving = flags & UPDATEFLAG_LIVING;
-    bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
-    bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
-    bool hasTransportPosition = flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
-    bool hasTarget = flags & UPDATEFLAG_HAS_TARGET;
-    bool hasTransport = flags & UPDATEFLAG_TRANSPORT;
-    bool hasVehicle = flags & UPDATEFLAG_VEHICLE;
-    bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
-
     bool hasFallData;
     bool hasFallDirection;
     bool hasSpline;
@@ -403,29 +394,29 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     uint32 movementFlags;
     uint32 movementFlagsExtra;
 
+    data->WriteBit(0);                                        // 676  UPDATEFLAG_HAS_GAMEOBJECT          // NEW
+    data->WriteBit(false /*flags & UPDATEFLAG_ANIMKITS*/);    // 498  UPDATEFLAG_ANIMKITS                // OLD
+    data->WriteBit(flags & UPDATEFLAG_LIVING);                // 368  UPDATEFLAG_LIVING                  // OLD
+    data->WriteBit(0);                                        // 810  UPDATEFLAG_SCENE_LOCAL_SCRIPT_DATA // NEW
     data->WriteBit(0);
-    data->WriteBit(hasAnimKits);
-    data->WriteBit(hasLiving);
+    data->WriteBits(0, 22);                                   // 1068 UPDATEFLAG_TRANSPORT_FRAME_COUNT   // NEW
+    data->WriteBit(flags & UPDATEFLAG_VEHICLE);               // 488  UPDATEFLAG_VEHICLE                 // OLD
+    data->WriteBit(0);                                        // 1044 UNK
     data->WriteBit(0);
+    data->WriteBit(flags & UPDATEFLAG_TRANSPORT);             // 476  UPDATEFLAG_TRANSPORT               // OLD
+    data->WriteBit(flags & UPDATEFLAG_ROTATION);              // 512  UPDATEFLAG_ROTATION                // OLD
     data->WriteBit(0);
-    data->WriteBits(0, 22);
-    data->WriteBit(hasVehicle);
+    data->WriteBit(flags & UPDATEFLAG_SELF);                  // 680  UPDATEFLAG_SELF                    // OLD
+    data->WriteBit(flags & UPDATEFLAG_HAS_TARGET);            // 464  UPDATEFLAG_HAS_TARGET              // OLD
+    data->WriteBit(0);                                        // 1032 UPDATEFLAG_SCENE_OBJECT            // NEW
+    data->WriteBit(0);                                        // 1064 UPDATEFLAG_SCENE_PENDING_INSTANCES // NEW
     data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(hasTransport);
-    data->WriteBit(hasGobjectRotation);
-    data->WriteBit(0);
-    data->WriteBit(flags & UPDATEFLAG_SELF);
-    data->WriteBit(hasTarget);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(hasTransportPosition);
-    data->WriteBit(0);
-    data->WriteBit(hasStacionaryPostion);
+    data->WriteBit(0);                                        // 668  UPDATEFLAG_HAS_AREATRIGGER         // NEW
+    data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION); // 424  UPDATEFLAG_GO_TRANSPORT_POSITION   // OLD
+    data->WriteBit(0);                                        // 681  UPDATEFLAG_REPLACE_YOU             // NEW
+    data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);   // 448  UPDATEFLAG_STATIONARY_POSITION     // OLD
 
-    if (hasLiving)
+    if (flags & UPDATEFLAG_LIVING) // 368
     {
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
@@ -499,7 +490,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
            data->WriteBits(movementFlagsExtra, 13);
     }
 
-    if (hasTransportPosition)
+    // 1032 {}
+
+    if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION) // 424
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
@@ -515,8 +508,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
     }
 
+    // 668 {}
+
     /*
-    if (hasAnimKits)
+    if (flags & UPDATEFLAG_ANIMKITS) // 498
     {
         data->WriteBit(1);  // Missing AnimKit1
         data->WriteBit(1);  // Missing AnimKit2
@@ -524,7 +519,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
     */
 
-    if (hasTarget)
+    if (flags & UPDATEFLAG_HAS_TARGET) // 464
     {
         Unit const* self = ToUnit();
         ObjectGuid victimGuid = self->GetVictim()->GetGUID();
@@ -538,9 +533,15 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(victimGuid[7]);
     }
 
+    // 1064 {}
+    // 810 {}
+
     data->FlushBits();
 
-    if (hasLiving)
+    // 1068 {}
+    // 1032 {}
+
+    if (flags & UPDATEFLAG_LIVING)
     {
         Unit const* self = ToUnit();
         ObjectGuid guid = GetGUID();
@@ -633,7 +634,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     }
 
-    if (hasTransportPosition)
+    if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.transport.guid;
@@ -662,8 +663,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(transGuid[3]);
         data->WriteBit(transGuid[7]);
     }
+    
+    // 668
 
-    if (hasTarget)
+    if (flags & UPDATEFLAG_HAS_TARGET) // 464
     {
         Unit const* self = ToUnit();
         ObjectGuid victimGuid = self->GetVictim()->GetGUID();
@@ -676,15 +679,15 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(victimGuid[0]);
         data->WriteByteSeq(victimGuid[4]);
     }
-
-    if (hasVehicle)
+    
+    if (flags & UPDATEFLAG_VEHICLE)
     {
         Unit const* self = ToUnit();
         *data << uint32(self->GetVehicleKit()->GetVehicleInfo()->m_ID);
         *data << float(self->GetOrientation());
     }
 
-    if (hasStacionaryPostion)
+    if (flags & UPDATEFLAG_STATIONARY_POSITION)
     {
         WorldObject const* self = static_cast<WorldObject const*>(this);
         *data << float(self->GetPositionY());
@@ -696,8 +699,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetPositionX());
     }
 
+    // 676 {}
     /*
-    if (hasAnimKits)
+    if (flags & UPDATEFLAG_ANIMKITS)
     {
         if (hasAnimKit3)
             *data << uint16(animKit3);
@@ -707,7 +711,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
             *data << uint16(animKit1);
     }*/
 
-    if (hasTransport)
+    // 810 {}
+    if (flags & UPDATEFLAG_TRANSPORT)
     {
         GameObject const* go = ToGameObject();
 
@@ -716,11 +721,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         else
             *data << uint32(getMSTime());
     }
-
-    if (hasGobjectRotation)
+    // 1064 {}
+    if (flags & UPDATEFLAG_ROTATION)
         *data << uint64(ToGameObject()->GetRotation());
-
-     if (hasLiving && hasSpline)
+    // 1044 {}
+    if (flags & UPDATEFLAG_LIVING && hasSpline)
         Movement::PacketBuilder::WriteFacingTargetPart(*ToUnit()->movespline, *data);
 }
 
