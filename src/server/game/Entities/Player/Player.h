@@ -735,29 +735,29 @@ enum InventorySlots                                         // 4 slots
     INVENTORY_SLOT_BAG_END   = 23
 };
 
-enum InventoryPackSlots                                     // 16 slots
+enum InventoryPackSlots                                     // 24 slots
 {
     INVENTORY_SLOT_ITEM_START = 23,
-    INVENTORY_SLOT_ITEM_END   = 39
+    INVENTORY_SLOT_ITEM_END   = 47
 };
 
 enum BankItemSlots                                          // 28 slots
 {
-    BANK_SLOT_ITEM_START = 39,
-    BANK_SLOT_ITEM_END   = 67
+    BANK_SLOT_ITEM_START = 47,
+    BANK_SLOT_ITEM_END   = 75
 };
 
 enum BankBagSlots                                           // 7 slots
 {
-    BANK_SLOT_BAG_START = 67,
-    BANK_SLOT_BAG_END   = 74
+    BANK_SLOT_BAG_START = 75,
+    BANK_SLOT_BAG_END   = 82
 };
 
 enum BuyBackSlots                                           // 12 slots
 {
     // stored in m_buybackitems
-    BUYBACK_SLOT_START = 74,
-    BUYBACK_SLOT_END   = 86
+    BUYBACK_SLOT_START = 82,
+    BUYBACK_SLOT_END   = 94
 };
 
 enum EquipmentSetUpdateState
