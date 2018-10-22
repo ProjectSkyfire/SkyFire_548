@@ -21090,6 +21090,7 @@ void Player::SendAttackSwingError(AttackSwingError error)
 {
     WorldPacket data(SMSG_ATTACKSWING_ERROR, 1);
     data.WriteBits(error, 2);
+    data.FlushBits();
     GetSession()->SendPacket(&data);
 }
 
