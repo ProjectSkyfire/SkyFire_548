@@ -1680,7 +1680,7 @@ void Player::Update(uint32 p_time)
                     setAttackTimer(BASE_ATTACK, 100);
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
                     {
-                        SendAttackSwingNotInRange();
+                        SendAttackSwingError(ATTACKSWINGERR_NOTINRANGE);
                         m_swingErrorMsg = 1;
                     }
                 }
@@ -1690,14 +1690,21 @@ void Player::Update(uint32 p_time)
                     setAttackTimer(BASE_ATTACK, 100);
                     if (m_swingErrorMsg != 2)               // send single time (client auto repeat)
                     {
-                        SendAttackSwingBadFacingAttack();
+                        SendAttackSwingError(ATTACKSWINGERR_BADFACING);
                         m_swingErrorMsg = 2;
+                    }
+                }
+                else if (!victim->IsAlive())
+                {
+                    setAttackTimer(BASE_ATTACK, 100);
+                    if (m_swingErrorMsg != 3)               // send single time (client auto repeat)
+                    {
+                        SendAttackSwingError(ATTACKSWINGERR_DEADTARGET);
+                        m_swingErrorMsg = 3;
                     }
                 }
                 else
                 {
-                    m_swingErrorMsg = 0;                    // reset swing error state
-
                     // prevent base and off attack in same time, delay attack at 0.2 sec
                     if (haveOffhandWeapon())
                         if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
@@ -1714,6 +1721,8 @@ void Player::Update(uint32 p_time)
                 if (!(IsWithinMeleeRange(victim) || (m_overrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_overrideAutoattackRange))))
                     setAttackTimer(OFF_ATTACK, 100);
                 else if (!HasInArc(2*M_PI/3, victim))
+                    setAttackTimer(OFF_ATTACK, 100);
+                else if (!victim->IsAlive())
                     setAttackTimer(OFF_ATTACK, 100);
                 else
                 {
@@ -21024,12 +21033,6 @@ bool Player::CanSpeak() const
 /***              LOW LEVEL FUNCTIONS:Notifiers        ***/
 /*********************************************************/
 
-void Player::SendAttackSwingNotInRange()
-{
-    WorldPacket data(SMSG_ATTACKSWING_NOTINRANGE, 0);
-    GetSession()->SendPacket(&data);
-}
-
 void Player::SavePositionInDB(uint32 mapid, float x, float y, float z, float o, uint32 zone, uint64 guid)
 {
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_POSITION);
@@ -21081,15 +21084,10 @@ void Player::Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 
     CharacterDatabase.Execute(stmt);
 }
 
-void Player::SendAttackSwingDeadTarget()
+void Player::SendAttackSwingError(AttackSwingError error)
 {
-    WorldPacket data(SMSG_ATTACKSWING_DEADTARGET, 0);
-    GetSession()->SendPacket(&data);
-}
-
-void Player::SendAttackSwingCantAttack()
-{
-    WorldPacket data(SMSG_ATTACKSWING_CANT_ATTACK, 0);
+    WorldPacket data(SMSG_ATTACKSWING_ERROR, 1);
+    data.WriteBits(error, 2);
     GetSession()->SendPacket(&data);
 }
 
@@ -21101,12 +21099,6 @@ void Player::SendAttackSwingCancelAttack()
     data << uint32(0); // Unk
     data << uint32(0); // Unk
 
-    GetSession()->SendPacket(&data);
-}
-
-void Player::SendAttackSwingBadFacingAttack()
-{
-    WorldPacket data(SMSG_ATTACKSWING_BADFACING, 0);
     GetSession()->SendPacket(&data);
 }
 

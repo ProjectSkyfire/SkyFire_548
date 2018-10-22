@@ -698,7 +698,7 @@ enum PlayerSlots
     // first slot for item stored (in any way in player m_items data)
     PLAYER_SLOT_START  = 0,
     // last+1 slot for item stored (in any way in player m_items data)
-    PLAYER_SLOT_END    = 86,
+    PLAYER_SLOT_END    = 94,
     PLAYER_SLOTS_COUNT = (PLAYER_SLOT_END - PLAYER_SLOT_START)
 };
 
@@ -1370,6 +1370,14 @@ struct ResearchProjectHistory
 
 typedef UNORDERED_MAP<uint32 /*projectId*/, ResearchProjectHistory> ResearchHistoryMap;
 typedef UNORDERED_MAP<uint32 /*branchId*/, uint32 /*projectId*/> ResearchProjectMap;
+
+enum AttackSwingError
+{
+    ATTACKSWINGERR_NOTINRANGE  = 0,
+    ATTACKSWINGERR_BADFACING   = 1,
+    ATTACKSWINGERR_DEADTARGET  = 2,
+    ATTACKSWINGERR_CANT_ATTACK = 3
+};
 
 class Player : public Unit, public GridObject<Player>
 {
@@ -2501,11 +2509,8 @@ class Player : public Unit, public GridObject<Player>
     void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend = false, float group_rate = 1.0f);
 
     // notifiers
-    void SendAttackSwingCantAttack();
     void SendAttackSwingCancelAttack();
-    void SendAttackSwingDeadTarget();
-    void SendAttackSwingNotInRange();
-    void SendAttackSwingBadFacingAttack();
+    void SendAttackSwingError(AttackSwingError error);
     void SendAutoRepeatCancel(Unit* target);
     void SendExplorationExperience(uint32 Area, uint32 Experience);
 
