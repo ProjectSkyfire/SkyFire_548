@@ -1705,6 +1705,8 @@ void Player::Update(uint32 p_time)
                 }
                 else
                 {
+                    m_swingErrorMsg = 0;
+
                     // prevent base and off attack in same time, delay attack at 0.2 sec
                     if (haveOffhandWeapon())
                         if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
