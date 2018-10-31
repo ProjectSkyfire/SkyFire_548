@@ -1162,7 +1162,6 @@ enum Opcodes
     SMSG_MOVE_UPDATE_TURN_RATE,
     SMSG_MOVE_UPDATE_WALK_SPEED,
     SMSG_MOVE_WATER_WALK,
-    SMSG_MULTIPLE_PACKETS,
     SMSG_QUERY_PLAYER_NAME_RESPONSE,
     SMSG_NEW_TAXI_PATH,
     SMSG_NEW_WORLD,
@@ -1471,10 +1470,16 @@ enum Opcodes
     SMSG_XP_GAIN_ABORTED,
     SMSG_ZONE_UNDER_ATTACK,
 
+        ///Unknown opcodes
     SMSG_UNK_2590,
     SMSG_UNK_4614,
     SMSG_UNK_5345,
     SMSG_UNK_7731,
+
+        ///Opcodes that are not generated automatically (Hardcoded in client) NetClient::OneMessageReady
+    SMSG_COMPRESSED_PACKET,
+    SMSG_MULTIPLE_PACKETS,
+
     NUM_OPCODES,
     UNKNOWN_OPCODE
 };

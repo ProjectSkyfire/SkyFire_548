@@ -272,7 +272,7 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
     }
 #endif                                                      // !SKYFIRE_DEBUG
 
-    if (m_Socket->SendPacket(*packet) == -1)
+    if (m_Socket->SendPacket(packet) == -1)
         m_Socket->CloseSocket();
 }
 

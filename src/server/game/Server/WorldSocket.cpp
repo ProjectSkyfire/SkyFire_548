@@ -46,6 +46,7 @@
 #include "PacketLog.h"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
+#include "zlib.h"
 
 #if defined(__GNUC__)
 #pragma pack(1)
@@ -92,24 +93,47 @@ struct WorldClientPktHeader
     uint16 cmd;
 };
 
+struct CompressedWorldPacket
+{
+    uint32 UncompressedSize;
+    uint32 UncompressedAdler;
+    uint32 CompressedAdler;
+};
+
 #if defined(__GNUC__)
 #pragma pack()
 #else
 #pragma pack(pop)
 #endif
 
-WorldSocket::WorldSocket (void): WorldHandler(),
-m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
-m_RecvWPct(0), m_RecvPct(), m_Header(sizeof(AuthClientPktHeader)),
-m_WorldHeader(sizeof(WorldClientPktHeader)), m_OutBuffer(0),
-m_OutBufferSize(65536), m_OutActive(false),
+uint32 const WorldSocket::MinSizeForCompression = 0x400;
+uint32 const SizeOfServerHeader[2] = { sizeof(uint16) + sizeof(uint32), sizeof(uint32) };
 
-m_Seed(static_cast<uint32> (rand32()))
+WorldSocket::WorldSocket (void): WorldHandler(),
+    m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
+    m_RecvWPct(0), m_RecvPct(), m_Header(sizeof(AuthClientPktHeader)),
+    m_WorldHeader(sizeof(WorldClientPktHeader)), m_OutBuffer(0),
+    m_OutBufferSize(65536), m_OutActive(false),
+    m_Seed(static_cast<uint32> (rand32())), m_zstream()
 {
     reference_counting_policy().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
     msg_queue()->high_water_mark(8 * 1024 * 1024);
     msg_queue()->low_water_mark(8 * 1024 * 1024);
+
+    m_zstream = new z_stream_s();
+    m_zstream->zalloc = (alloc_func)0;
+    m_zstream->zfree = (free_func)0;
+    m_zstream->opaque = (voidpf)0;
+
+    int z_res = deflateInit2(m_zstream, sWorld->getIntConfig(CONFIG_COMPRESSION), Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
+    if (z_res != Z_OK)
+    {
+        SF_LOG_ERROR("network.io", "WorldSocket: Can't initialize packet compression deflateInit failed with code %d", z_res);
+        ASSERT(z_res == Z_OK);
+    }
+
+    _multiplePacket.Initialize(SMSG_MULTIPLE_PACKETS);
 }
 
 WorldSocket::~WorldSocket (void)
@@ -118,6 +142,16 @@ WorldSocket::~WorldSocket (void)
 
     if (m_OutBuffer)
         m_OutBuffer->release();
+
+    int z_res = deflateEnd(m_zstream);
+    if (z_res != Z_OK && z_res != Z_DATA_ERROR)
+    {
+        SF_LOG_ERROR("network.io", "WorldSocket: Can't close packet compression stream. deflateEnd failed with code %d", z_res);
+        delete m_zstream;
+        return;
+    }
+
+    delete m_zstream;
 
     closing_ = true;
 
@@ -153,45 +187,127 @@ const std::string& WorldSocket::GetRemoteAddress (void) const
     return m_Address;
 }
 
-int WorldSocket::SendPacket(WorldPacket const& pct)
+///Add opcodes here that you want batched
+inline bool _CanBeBatched(uint32 opcode)
 {
-    ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, -1);
+    switch (opcode)
+    {
+        case SMSG_CRITERIA_UPDATE:
+        case SMSG_ACCOUNT_CRITERIA_UPDATE:
+        case SMSG_CREATURE_QUERY_RESPONSE:
+        case SMSG_GAMEOBJECT_QUERY_RESPONSE:
+        case SMSG_THREAT_UPDATE:
+        case SMSG_HIGHEST_THREAT_UPDATE:
+        case SMSG_HOTFIX_NOTIFY_BLOB:
+        case SMSG_SET_PROFICIENCY:
+        case SMSG_QUESTGIVER_STATUS:
+        case SMSG_QUEST_GIVER_STATUS_MULTIPLE:
+            return true;
+    }
+
+    return false;
+}
+
+int WorldSocket::SendPacket(WorldPacket const* pct)
+{
+    ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
     if (closing_)
         return -1;
 
+    uint16 opcodeNumber = serverOpcodeTable[pct->GetOpcode()]->OpcodeNumber;
+
+    if (_CanBeBatched(pct->GetOpcode()) && _multiplePacket.size() <= 0x1FFFF)
+    {
+        std::lock_guard<std::mutex> guard(_mpLock);
+        _multiplePacket << uint16(pct->GetOpcode());
+        _multiplePacket << uint16(pct->size());
+        if (!pct->empty())
+            _multiplePacket.append(pct->contents(), pct->size());
+        return 0;
+    }
+
     // Dump outgoing packet
     if (sPacketLog->CanLogPacket())
-        sPacketLog->LogPacket(pct, SERVER_TO_CLIENT);
-
-    WorldPacket const* pkt = &pct;
-
-    // Empty buffer used in case packet should be compressed
-    // Disable compression for now :)
-   /* WorldPacket buff;
-    if (m_Session && pkt->size() > 0x400)
-    {
-        buff.Compress(m_Session->GetCompressionStream(), pkt);
-        pkt = &buff;
-    }*/
-
-    uint16 opcodeNumber = serverOpcodeTable[pkt->GetOpcode()]->OpcodeNumber;
+        sPacketLog->LogPacket(*pct, SERVER_TO_CLIENT);
 
     if (m_Session)
-        SF_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pkt->GetOpcode(), true).c_str());
+        SF_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pct->GetOpcode(), true).c_str());
 
-    sScriptMgr->OnPacketSend(this, *pkt);
+    sScriptMgr->OnPacketSend(this, *pct);
 
-    ServerPktHeader header(!m_Crypt.IsInitialized() ? pkt->size() + 2 : pct.size(), opcodeNumber, &m_Crypt);
+    if (m_Crypt.IsInitialized()) //Opcodes like SMSG_AUTH_CHALLENGE can't be compressed
+    {
+        size_t size = pct->size();
+        uint32 bufferSize = deflateBound(m_zstream, pct->size() + SizeOfServerHeader[m_Crypt.IsInitialized()]);
 
-    if (m_OutBuffer->space() >= pkt->size() + header.getHeaderLength() && msg_queue()->is_empty())
+        size_t reserved_size = bufferSize + 12;
+        m_CompressedPct.resize(reserved_size);
+        m_CompressedPct.put<uint32>(0, size + 4);
+
+        uint32 adler_1 = adler32(adler32(0x9827D8F1, (Bytef*)&opcodeNumber, 4), pct->contents(), size);
+
+        m_CompressedPct.put<uint32>(4, adler_1);
+
+        m_zstream->next_out = (Bytef*)(m_CompressedPct.contents() + 12);
+        m_zstream->avail_out = bufferSize;
+
+        m_zstream->next_in = (Bytef*)&opcodeNumber;
+        m_zstream->avail_in = 4;
+
+        int z_res = deflate(m_zstream, Z_BLOCK);
+        if (z_res != Z_OK)
+        {
+            SF_LOG_ERROR("network.io", "Can't compress packet opcode (zlib: deflate) Error code: %i (%s, msg: %s)", z_res, zError(z_res), m_zstream->msg);
+            return 0;
+        }
+
+        m_zstream->next_in = (Bytef*)pct->contents();
+        m_zstream->avail_in = pct->size();
+
+        z_res = deflate(m_zstream, Z_SYNC_FLUSH);
+        if (z_res != Z_OK)
+        {
+            SF_LOG_ERROR("network.io", "Can't compress packet data (zlib: deflate) Error code: %i (%s, msg: %s)", z_res, zError(z_res), m_zstream->msg);
+            return 0;
+        }
+
+        uint32 compressedSize = bufferSize - m_zstream->avail_out;;
+        uint32 adler_2 = (uint32)adler32(0x9827D8F1, (const Bytef*)(m_CompressedPct.contents() + 12), compressedSize);
+
+        m_CompressedPct.put<uint32>(8, adler_2);
+
+        if (z_res != Z_OK)
+        {
+            SF_LOG_ERROR("network.io", "Can't compress packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
+        }
+        else if (m_zstream->avail_in != 0)
+        {
+            SF_LOG_ERROR("network.io", "Can't compress packet (zlib: deflate not greedy)");
+        }
+        else
+        {
+            m_CompressedPct.resize(compressedSize + 12);
+            m_CompressedPct.SetOpcode(SMSG_COMPRESSED_PACKET);
+            pct = &m_CompressedPct;
+        }
+
+        m_zstream->next_in = NULL;
+        m_zstream->next_out = NULL;
+        m_zstream->avail_in = 0;
+        m_zstream->avail_out = 0;
+    }
+
+    ServerPktHeader header(!m_Crypt.IsInitialized() ? pct->size() + 2 : pct->size(), opcodeNumber, &m_Crypt);
+
+    if (m_OutBuffer->space() >= pct->size() + header.getHeaderLength() && msg_queue()->is_empty())
     {
         // Put the packet on the buffer.
         if (m_OutBuffer->copy((char*) header.header, header.getHeaderLength()) == -1)
             ACE_ASSERT (false);
 
-        if (!pkt->empty())
-            if (m_OutBuffer->copy((char*) pkt->contents(), pkt->size()) == -1)
+        if (!pct->empty())
+            if (m_OutBuffer->copy((char*) pct->contents(), pct->size()) == -1)
                 ACE_ASSERT (false);
     }
     else
@@ -199,12 +315,12 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
         // Enqueue the packet.
         ACE_Message_Block* mb;
 
-        ACE_NEW_RETURN(mb, ACE_Message_Block(pkt->size() + header.getHeaderLength()), -1);
+        ACE_NEW_RETURN(mb, ACE_Message_Block(pct->size() + header.getHeaderLength()), -1);
 
         mb->copy((char*) header.header, header.getHeaderLength());
 
-        if (!pkt->empty())
-            mb->copy((const char*)pkt->contents(), pkt->size());
+        if (!pct->empty())
+            mb->copy((const char*)pct->contents(), pct->size());
 
         if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
@@ -262,7 +378,7 @@ int WorldSocket::open (void *a)
     WorldPacket packet(MSG_VERIFY_CONNECTIVITY);
     packet << std::string("RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT");
 
-    if (SendPacket(packet) == -1)
+    if (SendPacket(&packet) == -1)
         return -1;
 
     // Register with ACE Reactor
@@ -462,6 +578,15 @@ int WorldSocket::Update (void)
 
     if (m_OutActive)
         return 0;
+
+    {
+        std::lock_guard<std::mutex> guard(_mpLock);
+        if (!_multiplePacket.empty())
+        {
+            SendPacket(&_multiplePacket);
+            _multiplePacket.clear();
+        }
+    }
 
     {
         ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, 0);
@@ -869,8 +994,7 @@ int WorldSocket::HandleSendAuthSession()
     packet << uint8(1);
     packet << uint32(m_Seed);
 
-    return SendPacket(packet);
-
+    return SendPacket(&packet);
 }
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
@@ -887,29 +1011,29 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     BigNumber k;
     WorldPacket addonsData;
 
-    recvPacket.read_skip<uint32>();
-    recvPacket.read_skip<uint32>();
+    recvPacket.read_skip<uint32>(); //RegionId
+    recvPacket.read_skip<uint32>(); //BattlegroupId
     recvPacket >> digest[18];
     recvPacket >> digest[14];
     recvPacket >> digest[3];
     recvPacket >> digest[4];
     recvPacket >> digest[0];
-    recvPacket.read_skip<uint32>();
+    recvPacket.read_skip<uint32>(); //RealmId
     recvPacket >> digest[11];
-    recvPacket >> clientSeed;
+    recvPacket >> clientSeed;       //LocalChallenge
     recvPacket >> digest[19];
-    recvPacket.read_skip<uint8>();
-    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint8>(); //LoginServerType
+    recvPacket.read_skip<uint8>(); //BuildType
     recvPacket >> digest[2];
     recvPacket >> digest[9];
     recvPacket >> digest[12];
-    recvPacket.read_skip<uint64>();
-    recvPacket.read_skip<uint32>();
+    recvPacket.read_skip<uint64>(); //DosResponse
+    recvPacket.read_skip<uint32>(); //ServerId
     recvPacket >> digest[16];
     recvPacket >> digest[5];
     recvPacket >> digest[6];
     recvPacket >> digest[8];
-    recvPacket >> clientBuild;
+    recvPacket >> clientBuild;      //Build
     recvPacket >> digest[17];
     recvPacket >> digest[7];
     recvPacket >> digest[13];
@@ -921,7 +1045,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     addonsData.resize(addonSize);
     recvPacket.read((uint8*)addonsData.contents(), addonSize);
 
-    recvPacket.ReadBit();
+    recvPacket.ReadBit(); //UseIPv6
     uint32 accountNameLength = recvPacket.ReadBits(11);
 
     account = recvPacket.ReadString(accountNameLength);
@@ -1171,14 +1295,14 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
 
     WorldPacket packet(SMSG_PONG, 4);
     packet << ping;
-    return SendPacket(packet);
+    return SendPacket(&packet);
 }
 
 void WorldSocket::SendAuthResponseError(uint8 code)
 {
-        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
-        packet.WriteBit(0); // has account info
-        packet.WriteBit(0); // has queue info
-        packet << uint8(code);
-        SendPacket(packet);
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+    packet.WriteBit(0); // has account info
+    packet.WriteBit(0); // has queue info
+    packet << uint8(code);
+    SendPacket(&packet);
 }

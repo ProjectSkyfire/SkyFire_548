@@ -34,6 +34,9 @@
 #include <ace/Guard_T.h>
 #include <ace/Unbounded_Queue.h>
 #include <ace/Message_Block.h>
+#include <mutex>
+
+#include "WorldPacket.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -43,9 +46,9 @@
 #include "AuthCrypt.h"
 
 class ACE_Message_Block;
-class WorldPacket;
 class WorldSession;
 
+struct z_stream_s;
 /// Handler that can communicate over stream sockets.
 typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
 
@@ -87,6 +90,8 @@ typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
  */
 class WorldSocket : public WorldHandler
 {
+    static uint32 const MinSizeForCompression;
+
     public:
         WorldSocket (void);
         virtual ~WorldSocket (void);
@@ -109,7 +114,7 @@ class WorldSocket : public WorldHandler
         /// Send A packet on the socket, this function is reentrant.
         /// @param pct packet to send
         /// @return -1 of failure
-        int SendPacket(const WorldPacket& pct);
+        int SendPacket(const WorldPacket* pct);
 
         /// Add reference to this object.
         long AddReference(void);
@@ -188,6 +193,9 @@ class WorldSocket : public WorldHandler
         /// here are stored the fragments of the received data
         WorldPacket* m_RecvWPct;
 
+        /// Store compressed packet to reduce allocations in WorldSocket::SendPacket
+        WorldPacket m_CompressedPct;
+
         /// This block actually refers to m_RecvWPct contents,
         /// which allows easy and safe writing to it.
         /// It wont free memory when its deleted. m_RecvWPct takes care of freeing.
@@ -211,8 +219,14 @@ class WorldSocket : public WorldHandler
 
         uint32 m_Seed;
 
+        z_stream_s* m_zstream;
+
         WorldSocket(WorldSocket const& right) = delete;
         WorldSocket & operator=(WorldSocket const& right) = delete;
+
+    private:
+        std::mutex _mpLock;
+        WorldPacket _multiplePacket;
 };
 
 #endif  /* _WORLDSOCKET_H */
