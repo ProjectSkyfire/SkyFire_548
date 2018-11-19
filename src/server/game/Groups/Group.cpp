@@ -2147,6 +2147,11 @@ void Group::ChangeMembersGroup(uint64 guid, uint8 group)
     SendUpdate();
 }
 
+void Group::ChangeMembersGroup(Player* player, uint8 group)
+{
+    ChangeMembersGroup(player->GetGUID(), group);
+}
+
 // Retrieve the next Round-Roubin player for the group
 //
 // No update done if loot method is Master or FFA.
