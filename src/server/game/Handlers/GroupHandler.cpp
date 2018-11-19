@@ -787,10 +787,16 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
     if (!group)
         return;
 
-    std::string name;
+    ObjectGuid TargetGUID;
+
+    uint8 PartyIndex;
     uint8 groupNr;
-    recvData >> name;
+
+    recvData >> PartyIndex;
     recvData >> groupNr;
+
+    recvData.ReadGuidMask(TargetGUID, 1, 4, 6, 3, 7, 2, 0, 5); //17, 20, 22, 19, 23, 18, 16, 21
+    recvData.ReadGuidBytes(TargetGUID, 2, 6, 1, 5, 3, 4, 0, 7); //18, 22, 17, 21, 19, 20, 16, 23
 
     if (groupNr >= MAX_RAID_SUBGROUPS)
         return;
@@ -802,18 +808,8 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
     if (!group->HasFreeSlotSubGroup(groupNr))
         return;
 
-    Player* movedPlayer = sObjectAccessor->FindPlayerByName(name);
-    uint64 guid;
-
-    if (movedPlayer)
-        guid = movedPlayer->GetGUID();
-    else
-    {
-        CharacterDatabase.EscapeString(name);
-        guid = sObjectMgr->GetPlayerGUIDByName(name.c_str());
-    }
-
-    group->ChangeMembersGroup(guid, groupNr);
+    if(Player* movedPlayer = sObjectAccessor->FindPlayer(TargetGUID))
+        group->ChangeMembersGroup(movedPlayer, groupNr);
 }
 
 void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recvData)
