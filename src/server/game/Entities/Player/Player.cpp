@@ -21219,12 +21219,12 @@ void Player::SendResetInstanceSuccess(uint32 MapId)
 void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 {
     /*reasons for instance reset failure:
-    // 0: There are players inside the instance.
-    // 1: There are players offline in your party.
-    // 2>: There are players in your party attempting to zone into an instance.
+    // 0: There are players in your party attempting to zone into an instance.
+    // 1>: There are players inside the instance.
     */
-    WorldPacket data(SMSG_INSTANCE_RESET_FAILED, 8);
-    data << uint32(reason);
+    WorldPacket data(SMSG_INSTANCE_RESET_FAILED, 1 + 4);
+    data.WriteBits(reason, 2);
+    data.FlushBits();
     data << uint32(MapId);
     GetSession()->SendPacket(&data);
 }
