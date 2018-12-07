@@ -33,12 +33,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
 
 # Set a default build type if none was specified
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+if( NOT CMAKE_BUILD_TYPE )
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
-  mark_as_advanced(CMAKE_BUILD_TYPE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 include(CheckCXXSourceRuns)
