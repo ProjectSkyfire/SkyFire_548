@@ -13,11 +13,11 @@
 project(Project_Skyfire)
 
 # CMake policies (can not be handled elsewhere)
-cmake_minimum_required(VERSION 2.8.7)
-cmake_policy(SET CMP0005 OLD)
-if(POLICY CMP0043)
-  cmake_policy(SET CMP0043 OLD) # Disable 'Ignore COMPILE_DEFINITIONS_<Config> properties'
-endif(POLICY CMP0043)
+if( UNIX )
+  cmake_minimum_required(VERSION 3.5.1)
+else()
+  cmake_minimum_required(VERSION 3.13.1)
+endif()
 
 # add this options before PROJECT keyword
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -32,9 +32,13 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
 
-# build in Release-mode by default if not explicitly set
-if( NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE "Release")
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+  mark_as_advanced(CMAKE_BUILD_TYPE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
 include(CheckCXXSourceRuns)
