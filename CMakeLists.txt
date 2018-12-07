@@ -12,12 +12,14 @@
 # Set projectname (must be done AFTER setting configurationtypes)
 project(Project_Skyfire)
 
-# CMake policies (can not be handled elsewhere)
 if( UNIX )
   cmake_minimum_required(VERSION 3.5.1)
 else()
   cmake_minimum_required(VERSION 3.13.1)
 endif()
+
+# CMake policies (can not be handled elsewhere)
+cmake_policy(SET CMP0005 OLD)
 
 # add this options before PROJECT keyword
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
