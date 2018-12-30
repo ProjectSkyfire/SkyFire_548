@@ -6,7 +6,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,2,0,25,0,100,6,0,0,0,0,11,46598,0,0,0,0,0,19,36891,20,0,0,0,0,0, 'Ymirjar Skycaller - Reset - Cast Ride Vehicle Hardcoded');
 
 -- Wrathbone Laborer SAI
-SET @ENTRY   := -201800; -- NPC entry
+SET @ENTRY   := -201900; -- NPC entry
 SET @SPELL1  := 70302; -- Blinding Dirt
 SET @SPELL2  := 70278; -- Puncture Wound
 SET @SPELL3  := 69572; -- Shovelled!

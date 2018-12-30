@@ -2403,7 +2403,7 @@ REPLACE INTO `research_digsite_finds` (`guid`, `digsiteId`, `goEntry`, `position
 (2289, 373, 207188, -2033.92, 4266.69, 4.40135), -- Draenei Archaeology Find
 (2290, 373, 207188, -2036.8, 4256.43, 4.71566), -- Draenei Archaeology Find
 (2291, 373, 207188, -2047.96, 4252.65, 6.71172), -- Draenei Archaeology Find
-(2292, 373, 207188, -2018.44, 4206.75, 15.0985), -- Draenei Archaeology Find
+(2292, 373, 207188, -2019.44, 4206.75, 15.0985), -- Draenei Archaeology Find
 (2293, 373, 207188, -2197.36, 4206.21, 12.0943), -- Draenei Archaeology Find
 (2294, 373, 207188, -2145.88, 4200.81, 6.99389), -- Draenei Archaeology Find
 (2295, 373, 207188, -2062.36, 4193.25, 6.54662), -- Draenei Archaeology Find
