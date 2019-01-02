@@ -1,0 +1,1 @@
+DELETE FROM creature_addon WHERE guid IN (138335, 138523, 138526);
