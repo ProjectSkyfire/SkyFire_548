@@ -31,7 +31,17 @@ For further information on the SkyFire project, please visit our project website
 # [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire_548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire_548)
 
 ## Requirements
-+ Platform: Linux, Windows or Mac
++ Platform/Architecture:
+  + Canonical:
+    + Ubuntu 18.04 LTS: x86_32, x86_64
+    + Ubuntu 16.04 LTS: x86_32, x86_64
+  + Debian:
+    + Debian GNU/Linux 9: x86_32, x86_64
+  + Windows / Windows Server:
+    + Windows 10:               x86_64
+    + Windows 8.1:              x86_64
+    + Windows 2016 Server:      x86_64
+    + Windows 2012 Server R2:   x86_64
 + Processor with SSE2 support
 + ACE = 6.3.3  (Linux only)
 + MySQL = 8.0 (Windows / Linux)
