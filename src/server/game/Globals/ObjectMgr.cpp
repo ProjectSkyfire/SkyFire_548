@@ -837,7 +837,7 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         SF_LOG_ERROR("sql.sql", "Creature (Entry: %u) has [UNIT_NPC_FLAG_GOSSIP] set, but does have (gossip_menu_id: %u) set.", cInfo->Entry, cInfo->GossipMenuId);
 
     if (cInfo->GossipMenuId > 0 && !(cInfo->npcflag & UNIT_NPC_FLAG_GOSSIP))
-        SF_LOG_ERROR("sql.sql", "Creature (Entry: %u) has (gossip_menu_id: %u) set, but does not have [UNIT_NPC_FLAG_GOSSIP] set.", cInfo->GossipMenuId, cInfo->Entry);
+        SF_LOG_ERROR("sql.sql", "Creature (Entry: %u) has (gossip_menu_id: %u) set, but does not have [UNIT_NPC_FLAG_GOSSIP] set.", cInfo->Entry, cInfo->GossipMenuId);
 
     if ((cInfo->npcflag & UNIT_NPC_FLAG_TRAINER) && cInfo->trainer_type >= MAX_TRAINER_TYPE)
         SF_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong trainer type %u.", cInfo->Entry, cInfo->trainer_type);
