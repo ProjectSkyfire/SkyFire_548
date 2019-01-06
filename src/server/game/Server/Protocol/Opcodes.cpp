@@ -90,9 +90,9 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BANKER_ACTIVATE,                              0x02E9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBankerActivateOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LEAVE,                            0x0257, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBattlefieldLeaveOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LIST,                             0x1C41, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldListOpcode               ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE,        0x1806, STATUS_LOGGEDIN,  PROCESS_INPLACE,   &WorldSession::HandleBfEntryInviteResponse                  ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE,        0x1806, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfEntryInviteResponse               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_EXIT_REQUEST,                 0x08B3, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfExitRequest                       ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE,        0x0A97, STATUS_LOGGEDIN,  PROCESS_INPLACE,   &WorldSession::HandleBfQueueInviteResponse                  ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE,        0x0A97, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfQueueInviteResponse               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_PORT,                             0x1379, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattleFieldPortOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN,                            0x0769, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterJoinOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_ARENA,                      0x02D2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterJoinArena               ); // 5.4.8 18414
@@ -248,8 +248,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LFD_LOCK_INFO_REQUEST,                        0x006B, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleLFDGetLockInfoOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_TELEPORT,                                 0x1AA6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLFDTeleportOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_SET_BOOT_VOTE,                            0x17BE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLFDSetBootVoteOpcode                ); // 5.4.8 18414
-                                                                                                                                                                                      
-                                                                                                                                                                                      
+
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_ADD_APPLICATION,                     0x0C63, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderAddApplication           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_BROWSE,                              0x159A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderBrowse                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_DECLINE_RECRUIT,                     0x14F3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderDeclineRecruit           ); // 5.4.8 18414
@@ -391,13 +390,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SPIRIT_HEALER_ACTIVATE,                       0x0340, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSpiritHealerActivateOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                                   0x02EC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_STAND_STATE_CHANGE,                           0x03E6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleStandStateChangeOpcode              ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_ORDER_INITIATION_FAILED,                0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_PURCHASE_ERROR,                         0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_PURCHASE_LIST_UPDATED,                  0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_PRODUCT_DELIVERED,                      0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_STATUS_CHANGED,                         0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_CONFIRM_PURCHASE,                       0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
-    DEFINE_OPCODE_HANDLER(CMSG_STORE_PRODUCTS_UPDATED,                       0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_NULL                               );
     DEFINE_OPCODE_HANDLER(CMSG_SUBMIT_BUG,                                   0x0861, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSubmitBugOpcode                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUGGESTION_SUBMIT,                            0x0A12, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSubmitSuggestOpcode                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUMMON_RESPONSE,                              0x0A33, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSummonResponseOpcode                ); // 5.4.8 18414
@@ -1227,7 +1219,6 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_GAMETIME_UPDATE, 0x0E1B, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GAME_EVENT_DEBUG_LOG, 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GAME_OBJECT_ACTIVATE_ANIM_KIT, 0x0C8A, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_GAME_STORE_INGAME_BUY_FAILED, 0x023A, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GMRESPONSE_DB_ERROR, 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GM_RESPONSE_STATUS_UPDATE, 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GM_TICKET_UPDATE_TEXT, 0x0000, STATUS_UNHANDLED);
