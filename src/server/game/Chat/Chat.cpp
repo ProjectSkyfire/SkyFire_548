@@ -607,8 +607,8 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
 
     switch (chatType)
     {
-        case CHAT_MSG_BATTLEGROUND:
-        case CHAT_MSG_BATTLEGROUND_LEADER:
+        case CHAT_MSG_INSTANCE:
+        case CHAT_MSG_INSTANCE_LEADER:
         case CHAT_MSG_PARTY:
         case CHAT_MSG_PARTY_LEADER:
         case CHAT_MSG_RAID:

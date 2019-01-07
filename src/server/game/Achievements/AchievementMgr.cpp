@@ -818,6 +818,8 @@ void AchievementMgr<Guild>::Reset()
 template<class T>
 void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievement) const
 {
+    bool GuildAchievement = false;
+
     // Don't send for achievements with ACHIEVEMENT_FLAG_HIDDEN
     if (achievement->flags & ACHIEVEMENT_FLAG_HIDDEN)
         return;
@@ -835,12 +837,19 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
     {
         // broadcast realm first reached
         WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, GetOwner()->GetName().size() + 1 + 8 + 4 + 4);
-        data << GetOwner()->GetName();
-        data << uint64(GetOwner()->GetGUID());
-        data << uint32(achievement->ID);
-        data << uint32(0);                                  // 1=link supplied string as player name, 0=display plain string
+        data.WriteGuidMask(GetOwner()->GetObjectGUID(), 5, 6, 3, 7, 0, 4);
+        data.WriteBits(GetOwner()->GetName().size(), 7);
+        data.WriteGuidMask(GetOwner()->GetObjectGUID(), 2, 1);
+        data.WriteBit(GuildAchievement);  // GuildAchievement
+        data.FlushBits();
+        data.WriteGuidBytes(GetOwner()->GetObjectGUID(), 1);
+        data.WriteString(GetOwner()->GetName());
+        data.WriteGuidBytes(GetOwner()->GetObjectGUID(), 0, 2);
+        data << uint32(achievement->ID); //29
+        data.WriteGuidBytes(GetOwner()->GetObjectGUID(), 6, 3, 4, 5, 7);
         sWorld->SendGlobalMessage(&data);
     }
+
     // if player is in world he can tell his friends about new achievement
     else if (GetOwner()->IsInWorld())
     {
@@ -860,7 +869,7 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
     ObjectGuid guid = GetOwner()->GetGUID();
     ObjectGuid guid2 = GetOwner()->GetGUID();
 
-    WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8+4+8);
+    WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8 + 4 + 8);
     data.WriteBit(guid2[6]);
     data.WriteBit(guid2[2]);
     data.WriteBit(guid[4]);
@@ -906,29 +915,31 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
 template<>
 void AchievementMgr<Guild>::SendAchievementEarned(AchievementEntry const* achievement) const
 {
-    ObjectGuid guid = GetOwner()->GetGUID();
+    ObjectGuid GuildGUID = GetOwner()->GetGUID();
+    bool GuildAchievement = true;
+    if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_KILL | ACHIEVEMENT_FLAG_REALM_FIRST_REACH))
+    {
+        // broadcast realm first reached
+        WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, GetOwner()->GetName().size() + 1 + 8 + 4 + 4);
+        data.WriteGuidMask(GuildGUID, 5, 6, 3, 7, 0, 4);
+        data.WriteBits(GetOwner()->GetName().size(), 7);
+        data.WriteGuidMask(GuildGUID, 2, 1);
+        data.WriteBit(GuildAchievement);  // GuildAchievement
+        data.FlushBits();
+        data.WriteGuidBytes(GuildGUID, 1);
+        data.WriteString(GetOwner()->GetName());
+        data.WriteGuidBytes(GuildGUID, 0, 2);
+        data << uint32(achievement->ID); //29
+        data.WriteGuidBytes(GuildGUID, 6, 3, 4, 5, 7);
+        sWorld->SendGlobalMessage(&data);
+    }
 
-    WorldPacket data(SMSG_GUILD_ACHIEVEMENT_EARNED, 8+4+8);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-
-    data.WriteByteSeq(guid[2]);
+    WorldPacket data(SMSG_GUILD_ACHIEVEMENT_EARNED, 8 + 4 + 8);
+    data.WriteGuidMask(GuildGUID, 5, 7, 1, 4, 2, 0, 3, 6);
+    data.WriteGuidBytes(GuildGUID, 7);
     data.AppendPackedTime(time(NULL));
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
     data << uint32(achievement->ID);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[6]);
-
+    data.WriteGuidBytes(GuildGUID, 0, 5, 3, 2, 4, 1, 6);
     SendPacket(&data);
 }
 

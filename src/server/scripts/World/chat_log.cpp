@@ -109,7 +109,7 @@ public:
                         player->GetName().c_str(), msg.c_str());
                 break;
 
-            case CHAT_MSG_BATTLEGROUND:
+            case CHAT_MSG_INSTANCE:
                 if (lang != LANG_ADDON && sWorld->getBoolConfig(CONFIG_CHATLOG_BGROUND))
                     SF_LOG_DEBUG("chat.log", "[BATTLEGROUND] Player %s tells battleground with leader %s: %s",
                         player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
@@ -118,7 +118,7 @@ public:
                         player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                 break;
 
-            case CHAT_MSG_BATTLEGROUND_LEADER:
+            case CHAT_MSG_INSTANCE_LEADER:
                 if (sWorld->getBoolConfig(CONFIG_CHATLOG_BGROUND))
                     SF_LOG_DEBUG("chat.log", "[BATTLEGROUND] Leader player %s tells battleground: %s",
                         player->GetName().c_str(), msg.c_str());
