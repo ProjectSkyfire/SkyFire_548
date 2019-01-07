@@ -17189,8 +17189,50 @@ void Player::KilledPlayerCredit()
 
 void Player::KillCreditGO(uint32 entry, uint64 guid)
 {
-    // here to not break old scripts, this function should be removed at some point
-    QuestObjectiveSatisfy(entry, 1, QUEST_OBJECTIVE_TYPE_GO, 0);
+    uint16 addKillCount = 1;
+    uint32 realEntry = entry;
+
+    for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+    {
+        uint32 questId = GetQuestSlotQuestId(i);
+        if (!questId)
+            continue;
+
+        Quest const* qInfo = sObjectMgr->GetQuestTemplate(questId);
+        if (!qInfo)
+            continue;
+
+        if (!qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_GO))
+            continue;
+
+        // just if !ingroup || !noraidgroup || raidgroup
+        QuestStatusData& questStatus = m_QuestStatus[questId];
+        if (questStatus.Status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsAllowedInRaid(GetMap()->GetDifficulty())))
+        {
+            for (QuestObjectiveSet::const_iterator citr = qInfo->m_questObjectives.begin(); citr != qInfo->m_questObjectives.end(); ++citr)
+            {
+                QuestObjective const* questObjective = *citr;
+                if (questObjective->Type == QUEST_OBJECTIVE_TYPE_GO && questObjective->ObjectId == realEntry)
+                {
+                    uint32 currentCounter = GetQuestObjectiveCounter(questObjective->Id);
+                    if (currentCounter < uint32(questObjective->Amount))
+                    {
+                        m_questObjectiveStatus[questObjective->Id] += addKillCount;
+
+                        m_questObjectiveStatusSave[questObjective->Id] = true;
+                        m_QuestStatusSave[questId] = true;
+
+                        SendQuestUpdateAddCredit(qInfo, questObjective, ObjectGuid(guid), currentCounter, addKillCount);
+                    }
+
+                    if (CanCompleteQuest(questId))
+                        CompleteQuest(questId);
+
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void Player::TalkedToCreature(uint32 entry, uint64 guid)
