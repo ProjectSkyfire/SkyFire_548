@@ -472,8 +472,8 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
             rewChoiceItemDisplayId[i] = 0;
     }
 
-    ObjectGuid guid = npcGUID;
-    ObjectGuid guid2 = npcGUID;                             // quest ender guid?
+    ObjectGuid QuestGiverGUID = npcGUID;
+    ObjectGuid InformUnit = npcGUID;                             // quest ender guid?
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
     data << uint32(quest->RewardItemIdCount[3]);
@@ -489,12 +489,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->GetRewChoiceItemsCount());
     data << uint32(quest->RewardChoiceItemCount[2]);
     data << uint32(quest->RewardItemIdCount[1]);
-    data << uint32(0);                                      // unknown
+    data << uint32(rewChoiceItemDisplayId[5]);
     data << uint32(quest->RewardItemIdCount[0]);
     data << uint32(rewItemDisplayId[3]);
     data << uint32(quest->RewardChoiceItemId[0]);
     data << uint32(quest->RewardChoiceItemCount[3]);
-    data << uint32(0);                                      // model Id, usually used in wanted or boss quests
+    data << uint32(quest->GetQuestGiverPortrait());
     data << uint32(rewChoiceItemDisplayId[3]);
     data << uint32(quest->RewardItemId[0]);
     data << uint32(quest->GetQuestId());
@@ -514,7 +514,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     }
 
     data << uint32(quest->RewardItemId[3]);
-    data << uint32(0);                                      // unknown
+    data << uint32(quest->GetRewardSkillId());
     data << uint32(quest->XPValue(_session->GetPlayer()) * sWorld->getRate(RATE_XP_QUEST));
     data << uint32(quest->GetRewardReputationMask());
     data << uint32(rewItemDisplayId[2]);
@@ -531,62 +531,78 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->GetRewSpell());
     data << uint32(quest->RewardChoiceItemId[3]);
     data << uint32(quest->GetRewItemsCount());
-    data << uint32(0);                                      // unknown
+    data << uint32(quest->GetRewardSkillPoints());
     data << uint32(rewChoiceItemDisplayId[5]);
     data << uint32(quest->RewardChoiceItemId[4]);
     data << uint32(quest->GetRewardPackageItemId());
     data << uint32(quest->RewardChoiceItemCount[0]);
     data << uint32(rewItemDisplayId[1]);
     data << uint32(rewChoiceItemDisplayId[1]);
-    data << uint32(0);                                      // unknown
+    data << uint32(quest->GetQuestTurnInPortrait());
 
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid2[1]);
+    data.WriteGuidMask(QuestGiverGUID, 7);
+    data.WriteGuidMask(InformUnit, 1);
+
     data.WriteBits(questTurnTargetName.size(), 8);
-    data.WriteBit(guid2[2]);
+
+    data.WriteGuidMask(InformUnit, 2);
+
     data.WriteBits(questGiverTextWindow.size(), 10);
-    data.WriteBit(0);                                       // unknown
-    data.WriteBit(guid[2]);
+    data.WriteBit(activateAccept);
+
+    data.WriteGuidMask(QuestGiverGUID, 2);
+
     data.WriteBits(questTitle.size(), 9);
     data.WriteBits(QUEST_EMOTE_COUNT, 21);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid2[6]);
-    data.WriteBit(guid2[5]);
+
+    data.WriteGuidMask(QuestGiverGUID, 0);
+    data.WriteGuidMask(InformUnit, 6, 5);
+
     data.WriteBits(questGiverTargetName.size(), 8);
-    data.WriteBit(guid2[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid2[0]);
-    data.WriteBit(0);                                       // unknown
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[4]);
+
+    data.WriteGuidMask(InformUnit, 3);
+    data.WriteGuidMask(QuestGiverGUID, 1);
+    data.WriteGuidMask(InformUnit, 0);
+
+    data.WriteBit(0);                                       /// StartCheat
+
+    data.WriteGuidMask(InformUnit, 4);
+    data.WriteGuidMask(QuestGiverGUID, 3, 5, 4);
+
     data.WriteBits(questTurnTextWindow.size(), 10);
-    data.WriteBit(0);                                       // unknown
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid2[7]);
+    data.WriteBit(0);                                       /// DisplayPopup
+
+    data.WriteGuidMask(QuestGiverGUID, 6);
+    data.WriteGuidMask(InformUnit, 7);
+
     data.WriteBits(questDetails.size(), 12);
-    data.WriteBits(0, 22);                                  // unknown counter
+    data.WriteBits(0, 22);                                  /// Learned Spells
     data.WriteBits(quest->m_questObjectives.size(), 20);
     data.WriteBits(questObjectives.size(), 12);
+
     data.FlushBits();
 
-    data.WriteByteSeq(guid[0]);
+    data.WriteGuidBytes(QuestGiverGUID, 0);
+
     data.WriteString(questGiverTargetName);
     data.WriteString(questTurnTextWindow);
     data.WriteString(questTitle);
-    data.WriteByteSeq(guid2[6]);
+
+    data.WriteGuidBytes(InformUnit, 6);
+
     data.WriteString(questObjectives);
-    data.WriteByteSeq(guid[2]);
+
+    data.WriteGuidBytes(QuestGiverGUID, 2);
+
     data.WriteString(questGiverTextWindow);
+
     data.append(objData);
+
     data.WriteString(questTurnTargetName);
     data.WriteString(questDetails);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid2[7]);
-    data.WriteByteSeq(guid2[3]);
-    data.WriteByteSeq(guid2[0]);
+
+    data.WriteGuidBytes(QuestGiverGUID, 5, 7);
+    data.WriteGuidBytes(InformUnit, 7, 3, 0);
 
     for (uint8 i = 0; i < QUEST_EMOTE_COUNT; i++)
     {
@@ -594,29 +610,14 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         data << uint32(quest->DetailsEmote[i]);
     }
 
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid2[5]);
-    data.WriteByteSeq(guid2[1]);
-    data.WriteByteSeq(guid2[2]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid2[4]);
+    data.WriteGuidBytes(QuestGiverGUID, 4, 3);
+    data.WriteGuidBytes(InformUnit, 5, 1, 2);
+    data.WriteGuidBytes(QuestGiverGUID, 1, 6);
+    data.WriteGuidBytes(InformUnit, 4);
 
-    /*for (uint i = 0; i < unkCounterBits22; i++)
-        data << uint32(0);*/
+    /// Learned Spells (uint32 vector)
 
     _session->SendPacket(&data);
-
-    /*
-     *  -- Missing Values from Cata could be an unknown --
-     *  activateAccept (auto finish)
-     *  quest->GetQuestGiverPortrait()
-     *  quest->GetQuestTurnInPortrait()
-     *  GetRewSpellCast()
-     *  GetRewardSkillId()
-     *  GetRewardSkillPoints()
-     */
 
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());
 }
