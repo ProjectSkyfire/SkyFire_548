@@ -851,6 +851,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
         }
     }
 
+    uint32 QuestTakerEntry = 0;
+
+    if (npcGuid)
+        if (Object* l_Object = ObjectAccessor::GetObjectByTypeMask(*(_session->GetPlayer()), npcGuid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM))
+            if (l_Object->hasInvolvedQuest(quest->GetQuestId()))
+                QuestTakerEntry = l_Object->GetEntry();
+
     if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
@@ -877,14 +884,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
         rewEmoteCount++;
     }
 
-    /*
-     *  TODO: Quest System
-     *
-     *  Finish structure, missing values:
-     *      SuggestedPartyMembers, FactionFlags, SkillLineID, NumSkillUps, SpellCompletionID, SpellCompletionDisplayID
-     */
-
-    ObjectGuid guid = npcGuid;
+    ObjectGuid QuestGiverGUID = npcGuid;
 
     WorldPacket data(SMSG_QUESTGIVER_OFFER_REWARD, 50);     // guess size
     data << uint32(quest->RewardItemIdCount[2]);
@@ -914,15 +914,15 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
     data << uint32(rewChoiceItemDisplayId[0]);
     data << uint32(rewItemDisplayId[0]);
     data << uint32(quest->GetRewardPackageItemId());
-    data << uint32(0);                                      // model Id, usually used in wanted or boss quests
+    data << uint32(quest->GetQuestTurnInPortrait());
     data << uint32(quest->RewardItemIdCount[1]);
-    data << uint32(0);
+    data << uint32(quest->GetRewardReputationMask());
     data << uint32(quest->RewardChoiceItemId[0]);
     data << uint32(quest->RewardChoiceItemCount[3]);
     data << uint32(quest->RewardChoiceItemCount[4]);
     data << uint32(quest->RewardChoiceItemId[1]);
     data << uint32(quest->GetBonusTalents());
-    data << uint32(0);
+    data << uint32(quest->GetRewardSkillId());
 
     for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; i++)
     {
@@ -936,13 +936,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
     data << uint32(quest->GetCharTitleId());
     data << uint32(quest->RewardChoiceItemId[2]);
     data << uint32(quest->GetRewItemsCount());
-    data << uint32(0);
+    data << uint32(quest->GetSuggestedPlayers());
     data << uint32(quest->RewardChoiceItemId[4]);
-    data << uint32(0);                                      // ender NPC or GO entry
+    data << uint32(QuestTakerEntry);                                      // ender NPC or GO entry
     data << uint32(quest->RewardItemId[2]);
     data << uint32(quest->RewardChoiceItemCount[0]);
-    data << uint32(0);
-    data << uint32(0);
+    data << uint32(rewChoiceItemDisplayId[5]);
+    data << uint32(quest->GetQuestGiverPortrait());
     data << uint32(quest->GetRewMoney());
     data << uint32(quest->RewardChoiceItemId[5]);
     data << uint32(rewChoiceItemDisplayId[1]);
@@ -950,24 +950,29 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
     data << uint32(rewItemDisplayId[2]);
     data << uint32(0);
     data << uint32(quest->RewardItemId[0]);
-    data << uint32(rewChoiceItemDisplayId[5]);
+    data << uint32(quest->GetRewardSkillPoints());
 
     data.WriteBits(questTurnTextWindow.size(), 10);
     data.WriteBits(questGiverTargetName.size(), 8);
-    data.WriteBit(guid[6]);
+
+    data.WriteGuidMask(QuestGiverGUID, 6);
+
     data.WriteBits(rewEmoteCount, 21);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
+
+    data.WriteGuidMask(QuestGiverGUID, 3, 7);
+
     data.WriteBits(questTitle.size(), 9);
-    data.WriteBit(guid[4]);
+
+    data.WriteGuidMask(QuestGiverGUID, 4);
+
     data.WriteBits(questTurnTargetName.size(), 8);
     data.WriteBits(questGiverTextWindow.size(), 10);
     data.WriteBits(questOfferRewardText.size(), 12);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[5]);
+
+    data.WriteGuidMask(QuestGiverGUID, 1, 2, 0, 5);
+
     data.WriteBit(enableNext);
+
     data.FlushBits();
 
     data.WriteString(questGiverTargetName);
@@ -979,18 +984,17 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
         data << uint32(quest->OfferRewardEmote[i]);
     }
 
-    data.WriteByteSeq(guid[2]);
+    data.WriteGuidBytes(QuestGiverGUID, 2);
+
     data.WriteString(questOfferRewardText);
     data.WriteString(questTurnTextWindow);
     data.WriteString(questTurnTargetName);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
+
+    data.WriteGuidBytes(QuestGiverGUID, 5, 1);
+
     data.WriteString(questGiverTextWindow);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
+
+    data.WriteGuidBytes(QuestGiverGUID, 0, 7, 6, 4, 3);
 
     _session->SendPacket(&data);
 
