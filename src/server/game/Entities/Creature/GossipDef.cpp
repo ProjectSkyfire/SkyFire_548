@@ -453,23 +453,23 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         objData << uint32(objective->ObjectId);
     }
 
-    uint32 rewItemDisplayId[QUEST_REWARDS_COUNT];
-    uint32 rewChoiceItemDisplayId[QUEST_REWARD_CHOICES_COUNT];
+    uint32 RewardItemDisplayId[QUEST_REWARDS_COUNT];
+    uint32 RewardChoiceItemDisplayId[QUEST_REWARD_CHOICES_COUNT];
 
     for (uint8 i = 0; i < QUEST_REWARDS_COUNT; i++)
     {
         if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardItemId[i]))
-            rewItemDisplayId[i] = itemTemplate->DisplayInfoID;
+            RewardItemDisplayId[i] = itemTemplate->DisplayInfoID;
         else
-            rewItemDisplayId[i] = 0;
+            RewardItemDisplayId[i] = 0;
     }
 
     for (uint8 i = 0; i < QUEST_REWARD_CHOICES_COUNT; i++)
     {
         if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[i]))
-            rewChoiceItemDisplayId[i] = itemTemplate->DisplayInfoID;
+            RewardChoiceItemDisplayId[i] = itemTemplate->DisplayInfoID;
         else
-            rewChoiceItemDisplayId[i] = 0;
+            RewardChoiceItemDisplayId[i] = 0;
     }
 
     ObjectGuid QuestGiverGUID = npcGUID;
@@ -477,7 +477,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
     data << uint32(quest->RewardItemIdCount[3]);
-    data << uint32(rewChoiceItemDisplayId[4]);
+    data << uint32(RewardChoiceItemDisplayId[4]);
     data << uint32(quest->RewardChoiceItemId[2]);
 
     for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; i++)
@@ -489,22 +489,22 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->GetRewChoiceItemsCount());
     data << uint32(quest->RewardChoiceItemCount[2]);
     data << uint32(quest->RewardItemIdCount[1]);
-    data << uint32(rewChoiceItemDisplayId[5]);
+    data << uint32(RewardChoiceItemDisplayId[5]);
     data << uint32(quest->RewardItemIdCount[0]);
-    data << uint32(rewItemDisplayId[3]);
+    data << uint32(RewardItemDisplayId[3]);
     data << uint32(quest->RewardChoiceItemId[0]);
     data << uint32(quest->RewardChoiceItemCount[3]);
     data << uint32(quest->GetQuestGiverPortrait());
-    data << uint32(rewChoiceItemDisplayId[3]);
+    data << uint32(RewardChoiceItemDisplayId[3]);
     data << uint32(quest->RewardItemId[0]);
     data << uint32(quest->GetQuestId());
     data << uint32(quest->GetSuggestedPlayers());
-    data << uint32(rewChoiceItemDisplayId[0]);
+    data << uint32(RewardChoiceItemDisplayId[0]);
     data << uint32(quest->RewardChoiceItemCount[4]);
     data << uint32(quest->RewardChoiceItemCount[5]);
     data << uint32(quest->GetBonusTalents());
     data << uint32(quest->RewardChoiceItemCount[1]);
-    data << uint32(rewChoiceItemDisplayId[2]);
+    data << uint32(RewardChoiceItemDisplayId[2]);
 
     for (uint8 i = 0; i < QUEST_REPUTATIONS_COUNT; i++)
     {
@@ -517,11 +517,11 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->GetRewardSkillId());
     data << uint32(quest->XPValue(_session->GetPlayer()) * sWorld->getRate(RATE_XP_QUEST));
     data << uint32(quest->GetRewardReputationMask());
-    data << uint32(rewItemDisplayId[2]);
+    data << uint32(RewardItemDisplayId[2]);
     data << uint32(quest->RewardItemId[1]);
     data << uint32(quest->RewardChoiceItemId[1]);
     data << uint32(quest->RewardChoiceItemId[5]);
-    data << uint32(rewItemDisplayId[0]);
+    data << uint32(quest->GetRewSpell());                   /// SpellCompletionID
     data << uint32(quest->GetFlags());
     data << uint32(quest->GetCharTitleId());
     data << uint32(quest->RewardItemId[2]);
@@ -532,12 +532,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->RewardChoiceItemId[3]);
     data << uint32(quest->GetRewItemsCount());
     data << uint32(quest->GetRewardSkillPoints());
-    data << uint32(rewChoiceItemDisplayId[5]);
+    data << uint32(RewardItemDisplayId[0]);
     data << uint32(quest->RewardChoiceItemId[4]);
     data << uint32(quest->GetRewardPackageItemId());
     data << uint32(quest->RewardChoiceItemCount[0]);
-    data << uint32(rewItemDisplayId[1]);
-    data << uint32(rewChoiceItemDisplayId[1]);
+    data << uint32(RewardItemDisplayId[1]);
+    data << uint32(RewardChoiceItemDisplayId[1]);
     data << uint32(quest->GetQuestTurnInPortrait());
 
     data.WriteGuidMask(QuestGiverGUID, 7);
