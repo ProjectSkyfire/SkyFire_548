@@ -331,13 +331,15 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
     ObjectGuid guid = npcGUID;
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_LIST, 100);      // guess size
+
     data << uint32(eEmote._Emote);                          // NPC emote
     data << uint32(eEmote._Delay);                          // player emote
 
-    data.WriteBit(guid[2]);
+    data.WriteGuidMask(guid, 2);
+
     data.WriteBits(Title.size(), 11);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[0]);
+
+    data.WriteGuidMask(guid, 6, 0);
 
     uint32 count = 0;
     size_t countPos = data.bitwpos();
@@ -365,7 +367,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
             if (questLevelInTitle)
                 AddQuestLevelToTitle(title, quest->GetQuestLevel());
 
-            data.WriteBit(0);                               // unknown bit
+            data.WriteBit(quest->IsRepeatable());
             data.WriteBits(title.size(), 9);
 
             questData << uint32(quest->GetFlags());
@@ -377,24 +379,16 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
         }
     }
 
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
+    data.WriteGuidMask(guid, 1, 3, 4, 5, 7);
+
     data.PutBits(countPos, count, 19);
     data.FlushBits();
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidBytes(guid, 1, 0, 6, 7);
     data.append(questData);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
+    data.WriteGuidBytes(guid, 5, 3, 2);
     data.WriteString(Title);
-    data.WriteByteSeq(guid[4]);
+    data.WriteGuidBytes(guid, 4);
 
     _session->SendPacket(&data);
 
@@ -406,24 +400,16 @@ void PlayerMenu::SendQuestGiverStatus(uint32 questStatus, uint64 npcGUID) const
     ObjectGuid guid = npcGUID;
 
     WorldPacket data(SMSG_QUESTGIVER_STATUS, 1 + 8 + 4);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[0]);
 
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidMask(guid, 1, 7, 4, 2, 5, 3, 6, 0);
+
+    data.FlushBits();
+
+    data.WriteGuidBytes(guid, 7);
+
     data << uint32(questStatus);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
+
+    data.WriteGuidBytes(guid, 4, 6, 1, 5, 2, 0, 3);
 
     _session->SendPacket(&data);
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC Guid=%u, status=%u", GUID_LOPART(npcGUID), questStatus);
