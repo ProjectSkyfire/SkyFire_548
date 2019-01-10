@@ -948,7 +948,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
     data << uint32(rewChoiceItemDisplayId[1]);
     data << uint32(quest->RewardChoiceItemCount[2]);
     data << uint32(rewItemDisplayId[2]);
-    data << uint32(0);
+    data << uint32(quest->GetRewSpell());                                 /// SpellCompletionID
     data << uint32(quest->RewardItemId[0]);
     data << uint32(quest->GetRewardSkillPoints());
 
@@ -1026,6 +1026,13 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGuid, 
         }
     }
 
+    uint32 QuestTakerEntry = 0;
+
+    if (npcGuid)
+        if (Object* l_Object = ObjectAccessor::GetObjectByTypeMask(*(_session->GetPlayer()), npcGuid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM))
+            if (l_Object->hasInvolvedQuest(quest->GetQuestId()))
+                QuestTakerEntry = l_Object->GetEntry();
+
     uint32 requiredMoney = 0;
     ByteBuffer currencyData, itemData;
 
@@ -1066,60 +1073,50 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGuid, 
     if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
-    ObjectGuid guid = npcGuid;
+    ObjectGuid QuestGiverGUID = npcGuid;
     uint32 currencyCounter = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_CURRENCY);
 
     WorldPacket data(SMSG_QUESTGIVER_REQUEST_ITEMS, 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 8 + 8 +
         questTitle.size() + requestItemsText.size() + itemCounter * (4 + 4 + 4) + currencyCounter * (4 + 4));
 
-    data << uint32(0);
+    data << uint32(quest->GetSuggestedPlayers());
     data << uint32(quest->GetFlags());
-    data << uint32(0);
-    data << uint32(canComplete ? 0x5F : 0x5B);              // status flags
+    data << uint32(quest->OfferRewardEmoteDelay[0]);         /// It's CompEmoteDelay, but not sure if send right value
+    data << uint32(canComplete ? 0x5F : 0x5B);               ///Status flags: (v10 = (v9 >> 1) & 1 && (v9 >> 2) & 1 && (v9 >> 3) & 1 && (v9 >> 4) & 1 && (v9 >> 6) & 1;)
     data << uint32(requiredMoney);
-    data << uint32(0);                                      // quest starter NPC/GO entry
-    data << uint32(0);
+    data << uint32(QuestTakerEntry);                         // quest starter NPC/GO entry
+    data << uint32(quest->GetFlags2());
     data << uint32(canComplete ? quest->GetCompleteEmote() : quest->GetIncompleteEmote());
     data << uint32(quest->GetQuestId());
 
-    /*
-     *  TODO: Quest System
-     *
-     *  Finish structure, missing values:
-     *      Flags2, SuggestPartyMembers, EmoteDelay
-     *
-     *  Research StatusFlags:
-     *  0x5B = 0x01 + 0x02 + 0x08 + 0x10 + 0x40
-     *  0x5F = 0x01 + 0x02 + 0x04 + 0x08 + 0x10 + 0x40
-     */
-
     data.WriteBits(currencyCounter, 21);
     data.WriteBit(closeOnCancel);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
+
+    data.WriteGuidMask(QuestGiverGUID, 2, 5, 1);
+
     data.WriteBits(questTitle.size(), 9);
     data.WriteBits(requestItemsText.size(), 12);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[0]);
+
+    data.WriteGuidMask(QuestGiverGUID, 6, 0);
+
     data.WriteBits(itemCounter, 20);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
+
+    data.WriteGuidMask(QuestGiverGUID, 4, 7, 3);
+
     data.FlushBits();
 
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[2]);
+    data.WriteGuidBytes(QuestGiverGUID, 0, 2);
+
     data.WriteString(questTitle);
+
     data.append(currencyData);
     data.append(itemData);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[1]);
+
+    data.WriteGuidBytes(QuestGiverGUID, 3, 1);
+
     data.WriteString(requestItemsText);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[6]);
+
+    data.WriteGuidBytes(QuestGiverGUID, 4, 5, 7, 6);
 
     _session->SendPacket(&data);
 
