@@ -368,36 +368,22 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleQuestQueryOpcode(WorldPacket& recvData)
 {
-    if (!_player)
+    ObjectGuid QuestGiverGUID;
+    uint32 QuestID;
+
+    recvData >> QuestID;
+
+    recvData.ReadGuidMask(QuestGiverGUID, 0, 5, 2, 7, 6, 4, 1, 3);
+    recvData.ReadGuidBytes(QuestGiverGUID, 4, 1, 7, 5, 2, 3, 6, 0);
+
+    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, QuestGiverGUID, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM);
+    if (!object || (!object->hasQuest(QuestID) && !object->hasInvolvedQuest(QuestID)))
+    {
+        _player->PlayerTalkClass->SendCloseGossip();
         return;
+    }
 
-    ObjectGuid guid;
-    uint32 questId;
-
-    recvData >> questId;
-
-    guid[0] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[0]);
-
-    SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_QUERY quest = %u", questId);
-
-    if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
-        _player->PlayerTalkClass->SendQuestQueryResponse(quest);
+    _player->PlayerTalkClass->SendQuestQueryResponse(QuestID);
 }
 
 void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
