@@ -192,19 +192,15 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         if (questLevelInTitle)
             AddQuestLevelToTitle(title, quest->GetQuestLevel());
 
-        data.WriteBit(0);                                   // unknown bit
+        data.WriteBit(quest->IsRepeatable());
         data.WriteBits(title.length(), 9);
 
         updatedQuestTitles[i] = title;
     }
 
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
+    data.WriteGuidMask(guid, 5, 7, 4, 0);
     data.WriteBits(_gossipMenu.GetMenuItemCount(), 20);     // max count 0x10
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
+    data.WriteGuidMask(guid, 6, 2);
 
     for (GossipMenuItemContainer::const_iterator itr = _gossipMenu.GetMenuItems().begin(); itr != _gossipMenu.GetMenuItems().end(); ++itr)
     {
@@ -214,8 +210,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         data.WriteBits(item.Message.length(), 12);
     }
 
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
+    data.WriteGuidMask(guid, 3, 1);
     data.FlushBits();
 
     for (uint8 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
@@ -231,8 +226,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         data << int32(quest->GetFlags2());
     }
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
+    data.WriteGuidBytes(guid, 1, 0);
 
     for (GossipMenuItemContainer::const_iterator itr = _gossipMenu.GetMenuItems().begin(); itr != _gossipMenu.GetMenuItems().end(); ++itr)
     {
@@ -246,14 +240,11 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         data << int8(item.MenuItemIcon);
     }
 
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
+    data.WriteGuidBytes(guid, 5, 3);
     data << int32(_gossipMenu.GetMenuId());                 // new 2.4.0
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[4]);
-    data << int32(0);                                       // friend faction ID?
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidBytes(guid, 2, 6, 4);
+    data << int32(0);                                       //FriendshipFactionID
+    data.WriteGuidBytes(guid, 7);
     data << int32(titleTextId);
 
     _session->SendPacket(&data);
