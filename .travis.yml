@@ -33,6 +33,8 @@ before_install:
   - export CXX=g++-8 CC=gcc-8
   - sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb
   - sudo dpkg -i mysql-apt-config_0.8.10-1_all.deb
+  # temp till travis realease new iso files
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
   - sudo apt update
   - sudo apt-get install libncurses5-dev libace-dev
   - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
