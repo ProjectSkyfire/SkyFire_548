@@ -4966,7 +4966,7 @@ void ObjectMgr::LoadInstanceEncounters()
     }
 
     uint32 count = 0;
-    std::map<uint32, DungeonEncounterEntry const*> dungeonLastBosses;
+    std::map<uint32, std::pair<uint32, DungeonEncounterEntry const*>> dungeonLastBosses;
     do
     {
         Field* fields = result->Fetch();
@@ -4987,16 +4987,17 @@ void ObjectMgr::LoadInstanceEncounters()
             continue;
         }
 
-        std::map<uint32, DungeonEncounterEntry const*>::const_iterator itr = dungeonLastBosses.find(lastEncounterDungeon);
+        std::map < uint32, std::pair<uint32, DungeonEncounterEntry const*>>::const_iterator itr = dungeonLastBosses.find(lastEncounterDungeon);
         if (lastEncounterDungeon)
         {
             if (itr != dungeonLastBosses.end())
             {
-                SF_LOG_ERROR("sql.sql", "Table `instance_encounters` specified encounter %u (%s) as last encounter but %u (%s) is already marked as one, skipped!", entry, dungeonEncounter->encounterName, itr->second->id, itr->second->encounterName);
+                SF_LOG_ERROR("sql.sql", "Table `instance_encounters` specified encounter %u (%s) as last encounter but %u (%s) is already marked as one, skipped!",
+                    entry, dungeonEncounter->encounterName, itr->second.first, itr->second.second->encounterName);
                 continue;
             }
 
-            dungeonLastBosses[lastEncounterDungeon] = dungeonEncounter;
+            dungeonLastBosses[lastEncounterDungeon] = std::make_pair(entry, dungeonEncounter);
         }
 
         switch (creditType)
@@ -5024,7 +5025,7 @@ void ObjectMgr::LoadInstanceEncounters()
                 continue;
         }
 
-        if (dungeonEncounter->difficulty == -1)
+        if (dungeonEncounter->difficulty == DIFFICULTY_NONE)
         {
             for (uint32 i = 0; i < 14; ++i)
             {
