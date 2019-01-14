@@ -33,7 +33,6 @@ enum DeathKnightSpells
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT = 51052,
     SPELL_DK_BLOOD_BOIL_TRIGGERED = 65658,
     SPELL_DK_BLOOD_GORGED_HEAL = 50454,
-    SPELL_DK_BLOOD_PLAGUE = 55078,
     SPELL_DK_BLOOD_PRESENCE = 48263,
     SPELL_DK_BLOOD_PRESENCE_TRIGGERED = 61261,
     SPELL_DK_BLOOD_SHIELD_MASTERY = 77513,
@@ -46,7 +45,6 @@ enum DeathKnightSpells
     SPELL_DK_DEATH_GRIP_ONLY_JUMP = 49575,
     SPELL_DK_DEATH_STRIKE_HEAL = 45470,
     SPELL_DK_DEATH_STRIKE_ENABLER = 89832,
-    SPELL_DK_FROST_FEVER = 55095,
     SPELL_DK_FROST_PRESENCE = 48266,
     SPELL_DK_GHOUL_EXPLODE = 47496,
     SPELL_DK_GHOUL_AS_GUARDIAN = 46585,
@@ -233,41 +231,6 @@ class spell_dk_runic_corruption : public SpellScriptLoader
     SpellScript* GetSpellScript() const
     {
         return new spell_dk_runic_corruption_SpellScript();
-    }
-};
-
-// Outbreak - 77575
-class spell_dk_outbreak : public SpellScriptLoader
-{
-    public:
-    spell_dk_outbreak() : SpellScriptLoader("spell_dk_outbreak")
-    { }
-
-    class spell_dk_outbreak_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_dk_outbreak_SpellScript);
-
-        void HandleOnHit()
-        {
-            if (Player* _player = GetCaster()->ToPlayer())
-            {
-                if (Unit* target = GetHitUnit())
-                {
-                    _player->CastSpell(target, SPELL_DK_BLOOD_PLAGUE, true);
-                    _player->CastSpell(target, SPELL_DK_FROST_FEVER, true);
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnHit += SpellHitFn(spell_dk_outbreak_SpellScript::HandleOnHit);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_dk_outbreak_SpellScript();
     }
 };
 
