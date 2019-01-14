@@ -31,7 +31,6 @@
 enum DeathKnightSpells
 {
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT = 51052,
-    SPELL_DK_BLACK_ICE_R1 = 49140,
     SPELL_DK_BLOOD_BOIL_TRIGGERED = 65658,
     SPELL_DK_BLOOD_GORGED_HEAL = 50454,
     SPELL_DK_BLOOD_PLAGUE = 55078,
@@ -1361,12 +1360,11 @@ class spell_dk_scent_of_blood : public SpellScriptLoader
     }
 };
 
-// 55090 - Scourge Strike (55265, 55270, 55271)
+// 55090 - Scourge Strike
 class spell_dk_scourge_strike : public SpellScriptLoader
 {
-    public:
-    spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike")
-    { }
+public:
+    spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike") { }
 
     class spell_dk_scourge_strike_SpellScript : public SpellScript
     {
@@ -1379,14 +1377,15 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             return true;
         }
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCOURGE_STRIKE_TRIGGERED))
-            return false;
+            if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCOURGE_STRIKE_TRIGGERED) ||
+                !sSpellMgr->GetSpellInfo(SPELL_DK_ITEM_T8_MELEE_4P_BONUS))
+                return false;
             return true;
         }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+        void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             Unit* caster = GetCaster();
             if (Unit* unitTarget = GetHitUnit())
@@ -1404,10 +1403,6 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             if (Unit* unitTarget = GetHitUnit())
             {
                 int32 bp = GetHitDamage() * multiplier;
-
-                if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_DK_BLACK_ICE_R1, EFFECT_0))
-                    AddPct(bp, aurEff->GetAmount());
-
                 caster->CastCustomSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
             }
         }
@@ -1528,7 +1523,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_presence();
     new spell_dk_rune_tap_party();
     new spell_dk_scent_of_blood();
-    new spell_dk_scourge_strike();
+    new spell_dk_scourge_strike(); // 5.4.8 18414
     new spell_dk_vampiric_blood();
     new spell_dk_will_of_the_necropolis();
 }
