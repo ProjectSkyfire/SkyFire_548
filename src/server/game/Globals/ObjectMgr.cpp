@@ -7660,13 +7660,13 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
         case SKILL_CATEGORY_LANGUAGES:
             return SKILL_RANGE_LANGUAGE;
         case SKILL_CATEGORY_WEAPON:
-            return SKILL_RANGE_LEVEL;
-        case SKILL_CATEGORY_ARMOR:
         case SKILL_CATEGORY_CLASS:
-            if (pSkill->id != SKILL_LOCKPICKING)
+            if (pSkill->id == SKILL_RUNEFORGING)
                 return SKILL_RANGE_MONO;
             else
                 return SKILL_RANGE_LEVEL;
+        case SKILL_CATEGORY_ARMOR:
+            return SKILL_RANGE_MONO;
         case SKILL_CATEGORY_SECONDARY:
         case SKILL_CATEGORY_PROFESSION:
             // not set skills for professions and racial abilities
