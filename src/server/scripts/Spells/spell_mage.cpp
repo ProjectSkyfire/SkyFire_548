@@ -470,77 +470,6 @@ class spell_mage_ignite : public SpellScriptLoader
         }
 };
 
-// 543 - Mage Ward
-/// Updated 4.3.4
-class spell_mage_mage_ward : public SpellScriptLoader
-{
-   public:
-       spell_mage_mage_ward() : SpellScriptLoader("spell_mage_mage_ward") { }
-
-       class spell_mage_mage_ward_AuraScript : public AuraScript
-       {
-           PrepareAuraScript(spell_mage_mage_ward_AuraScript);
-
-           void HandleAbsorb(AuraEffect* /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
-           {
-               if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
-               {
-                   int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
-               }
-           }
-
-            void Register() override
-           {
-               AfterEffectAbsorb += AuraEffectAbsorbFn(spell_mage_mage_ward_AuraScript::HandleAbsorb, EFFECT_0);
-           }
-       };
-
-        AuraScript* GetAuraScript() const override
-       {
-           return new spell_mage_mage_ward_AuraScript();
-       }
-};
-
-// 1463 - Mana Shield
-/// Updated 4.3.4
-class spell_mage_mana_shield : public SpellScriptLoader
-{
-    public:
-       spell_mage_mana_shield() : SpellScriptLoader("spell_mage_mana_shield") { }
-
-       class spell_mage_mana_shield_AuraScript : public AuraScript
-       {
-           PrepareAuraScript(spell_mage_mana_shield_AuraScript);
-
-           void HandleAbsorb(AuraEffect* /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
-           {
-               if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
-               {
-                   int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
-               }
-           }
-
-           void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-           {
-               if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
-                   GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_R1, true);
-           }
-
-           void Register() override
-           {
-                AfterEffectManaShield += AuraEffectManaShieldFn(spell_mage_mana_shield_AuraScript::HandleAbsorb, EFFECT_0);
-                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_mana_shield_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_MANA_SHIELD, AURA_EFFECT_HANDLE_REAL);
-           }
-       };
-
-        AuraScript* GetAuraScript() const override
-       {
-           return new spell_mage_mana_shield_AuraScript();
-       }
-};
-
 // 86181 - Nether Vortex
 class spell_mage_nether_vortex : public SpellScriptLoader
 {
@@ -856,8 +785,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_glyph_of_icy_veins();
     new spell_mage_glyph_of_polymorph();
     new spell_mage_living_bomb();
-    new spell_mage_mage_ward();
-    new spell_mage_mana_shield();
     new spell_mage_nether_vortex();
     new spell_mage_polymorph_cast_visual();
     new spell_mage_ring_of_frost();
