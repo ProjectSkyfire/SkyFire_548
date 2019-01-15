@@ -1672,9 +1672,7 @@ void WorldSession::HandleFarSightOpcode(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: CMSG_FAR_SIGHT");
 
-    bool apply;
-    recvData >> apply;
-
+    bool apply = recvData.ReadBit();
     if (apply)
     {
         SF_LOG_DEBUG("network", "Added FarSight " UI64FMTD " to player %u", _player->GetUInt64Value(PLAYER_FIELD_FARSIGHT_OBJECT), _player->GetGUIDLow());

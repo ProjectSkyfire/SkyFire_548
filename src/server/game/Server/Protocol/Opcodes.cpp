@@ -170,6 +170,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_EQUIPMENT_SET_DELETE,                         0x02E8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleEquipmentSetDelete                  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_EQUIPMENT_SET_SAVE,                           0x0669, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleEquipmentSetSave                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_EQUIPMENT_SET_USE,                            0x036E, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleEquipmentSetUse                     ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_FAR_SIGHT,                                    0x1341, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleFarSightOpcode                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_ROOT_ACK,                          0x107A, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck                         ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_UNROOT_ACK,                        0x1051, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck                       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJECT_QUERY,                             0x1461, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleGameObjectQueryOpcode               ); // 5.4.8 18414
@@ -511,7 +512,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle);
     DEFINE_OPCODE_HANDLER(CMSG_EJECT_PASSENGER, 0x06E7, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_ENABLE_NAGLE, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_EarlyProccess);
-    DEFINE_OPCODE_HANDLER(CMSG_FAR_SIGHT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleFarSightOpcode);
     //DEFINE_OPCODE_HANDLER(CMSG_GM_TICKET_ACKNOWLEDGE_SURVEY, 0x1093, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve);
     DEFINE_OPCODE_HANDLER(CMSG_GMSURVEY_SUBMIT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmit);
