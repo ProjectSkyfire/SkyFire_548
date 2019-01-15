@@ -24,6 +24,7 @@
  */
 
 #include "Player.h"
+#include "GridNotifiers.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
@@ -48,7 +49,13 @@ enum MageSpells
     SPELL_MAGE_RING_OF_FROST_FREEZE              = 82691,
     SPELL_MAGE_RING_OF_FROST_DUMMY               = 91264,
 
-    SPELL_MAGE_FINGERS_OF_FROST                  = 44544
+    SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
+
+    // Time Warp - 80353
+    SPELL_MAGE_TEMPORAL_DISPLACEMENT             = 80354,
+    SPELL_SHAMAN_SATED                           = 57724,
+    SPELL_HUNTER_INSANITY                        = 95809
+    //
 };
 
 enum MageIcons
@@ -63,6 +70,48 @@ enum MageIcons
 enum MiscSpells
 {
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409
+};
+
+// Time Warp - 80353
+class spell_mage_time_warp : public SpellScriptLoader
+{
+public:
+    spell_mage_time_warp() : SpellScriptLoader("spell_mage_time_warp") { }
+    class spell_mage_time_warp_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_time_warp_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_TEMPORAL_DISPLACEMENT))
+                return false;
+            return true;
+        }
+
+        void RemoveInvalidTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(Skyfire::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
+            targets.remove_if(Skyfire::UnitAuraCheck(true, SPELL_HUNTER_INSANITY));
+            targets.remove_if(Skyfire::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
+        }
+
+        void ApplyDebuff()
+        {
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, SPELL_MAGE_TEMPORAL_DISPLACEMENT, true);
+        }
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_time_warp_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_time_warp_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_time_warp_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
+            AfterHit += SpellHitFn(spell_mage_time_warp_SpellScript::ApplyDebuff);
+        }
+    };
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mage_time_warp_SpellScript();
+    }
 };
 
 // 11113 - Blast Wave
@@ -776,6 +825,7 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
 
 void AddSC_mage_spell_scripts()
 {
+    new spell_mage_time_warp(); // 5.4.8 18414
     new spell_mage_blast_wave();
     new spell_mage_cold_snap();
     new spell_mage_conjure_refreshment();
