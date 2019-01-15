@@ -360,6 +360,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_RESET_INSTANCES,                              0x0C69, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleResetInstancesOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RESURRECT_RESPONSE,                           0x0B0C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleResurrectResponseOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RETURN_TO_GRAVEYARD,                          0x12EA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReturnToGraveyard                   ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SELF_RES,                                     0x0360, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode                       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                                    0x1358, STATUS_LOGGEDIN, PROCESS_THREADUNSAFE,  &WorldSession::HandleSellItemOpcode                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELECT_FACTION,                               0x0027, STATUS_LOGGEDIN, PROCESS_THREADUNSAFE,  &WorldSession::HandleSelectFactionOpcode                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SEND_MAIL,                                    0x1DBA, STATUS_LOGGEDIN, PROCESS_THREADUNSAFE,  &WorldSession::HandleSendMail                            ); // 5.4.8 18414
@@ -597,7 +598,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_SWITCH_SEAT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle);
     DEFINE_OPCODE_HANDLER(CMSG_RESET_FACTION_CHEAT, 0x10B6, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES, 0x06E6, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::HandleSaveCUFProfiles);
-    DEFINE_OPCODE_HANDLER(CMSG_SELF_RES, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_SEND_SOR_REQUEST_VIA_ADDRESS, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_SET_ACTIVE_VOICE_CHANNEL, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetActiveVoiceChannel);
