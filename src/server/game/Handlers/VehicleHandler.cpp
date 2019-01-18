@@ -120,15 +120,15 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
         }
         case CMSG_REQUEST_VEHICLE_SWITCH_SEAT:
         {
-            uint64 guid;        // current vehicle guid
-            recvData.readPackGUID(guid);
-
             int8 seatId;
+            ObjectGuid VehicleGUID;        // current vehicle guid
             recvData >> seatId;
+            recvData.ReadGuidMask(VehicleGUID, 7, 3, 0, 1, 6, 4, 5, 2);
+            recvData.ReadGuidBytes(VehicleGUID, 5, 0, 2, 3, 7, 4, 6, 1);
 
-            if (vehicle_base->GetGUID() == guid)
+            if (vehicle_base->GetGUID() == VehicleGUID)
                 GetPlayer()->ChangeSeat(seatId);
-            else if (Unit* vehUnit = Unit::GetUnit(*GetPlayer(), guid))
+            else if (Unit* vehUnit = Unit::GetUnit(*GetPlayer(), VehicleGUID))
                 if (Vehicle* vehicle = vehUnit->GetVehicleKit())
                     if (vehicle->HasEmptySeat(seatId))
                         vehUnit->HandleSpellClick(GetPlayer(), seatId);
@@ -139,28 +139,13 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
     }
 }
 
-void WorldSession::HandleEnterPlayerVehicle(WorldPacket& recvData)
+void WorldSession::HandleRideVehicleInteract(WorldPacket& recvData)
 {
-    ObjectGuid Guid;
-    Guid[5] = recvData.ReadBit();
-    Guid[7] = recvData.ReadBit();
-    Guid[3] = recvData.ReadBit();
-    Guid[0] = recvData.ReadBit();
-    Guid[2] = recvData.ReadBit();
-    Guid[4] = recvData.ReadBit();
-    Guid[6] = recvData.ReadBit();
-    Guid[1] = recvData.ReadBit();
+    ObjectGuid VehicleGUID;
+    recvData.ReadGuidMask(VehicleGUID, 5, 7, 3, 0, 2, 4, 6, 1);
+    recvData.ReadGuidBytes(VehicleGUID, 5, 3, 1, 2, 7, 0, 6, 4);
 
-    recvData.ReadByteSeq(Guid[5]);
-    recvData.ReadByteSeq(Guid[3]);
-    recvData.ReadByteSeq(Guid[1]);
-    recvData.ReadByteSeq(Guid[2]);
-    recvData.ReadByteSeq(Guid[7]);
-    recvData.ReadByteSeq(Guid[0]);
-    recvData.ReadByteSeq(Guid[6]);
-    recvData.ReadByteSeq(Guid[4]);
-
-    if (Player* player = ObjectAccessor::FindPlayer(Guid))
+    if (Player* player = ObjectAccessor::FindPlayer(VehicleGUID))
     {
         if (!player->GetVehicleKit())
             return;
