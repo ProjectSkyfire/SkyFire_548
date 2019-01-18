@@ -2869,9 +2869,8 @@ struct VehicleSeatEntry
     uint32  m_vehicleAbilityDisplay;                        // 41
     uint32  m_enterUISoundID;                               // 42
     uint32  m_exitUISoundID;                                // 43
-    int32   m_uiSkin;                                       // 44
-    uint32  m_flagsB;                                       // 45
-                                                            // 46-57 added in 3.1, floats mostly
+    uint32  m_flagsB;                                       // 44
+                                                            // 45-56 added in 3.1, floats mostly
 
     bool CanEnterOrExit() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT; }
     bool CanSwitchFromSeat() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_SWITCH; }
