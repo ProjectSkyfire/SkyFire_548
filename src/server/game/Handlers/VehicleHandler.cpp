@@ -168,21 +168,22 @@ void WorldSession::HandleEjectPassenger(WorldPacket& data)
         return;
     }
 
-    uint64 guid;
-    data >> guid;
+    ObjectGuid PassengerGUID;
+    data.ReadGuidMask(PassengerGUID, 4, 2, 1, 6, 5, 0, 7, 3);
+    data.ReadGuidBytes(PassengerGUID, 2, 7, 0, 6, 4, 3, 5, 1);
 
-    if (IS_PLAYER_GUID(guid))
+    if (IS_PLAYER_GUID(PassengerGUID))
     {
-        Player* player = ObjectAccessor::FindPlayer(guid);
+        Player* player = ObjectAccessor::FindPlayer(PassengerGUID);
         if (!player)
         {
-            SF_LOG_ERROR("network", "Player %u tried to eject player %u from vehicle, but the latter was not found in world!", GetPlayer()->GetGUIDLow(), GUID_LOPART(guid));
+            SF_LOG_ERROR("network", "Player %u tried to eject player %u from vehicle, but the latter was not found in world!", GetPlayer()->GetGUIDLow(), GUID_LOPART(PassengerGUID));
             return;
         }
 
         if (!player->IsOnVehicle(vehicle->GetBase()))
         {
-            SF_LOG_ERROR("network", "Player %u tried to eject player %u, but they are not in the same vehicle", GetPlayer()->GetGUIDLow(), GUID_LOPART(guid));
+            SF_LOG_ERROR("network", "Player %u tried to eject player %u, but they are not in the same vehicle", GetPlayer()->GetGUIDLow(), GUID_LOPART(PassengerGUID));
             return;
         }
 
@@ -191,21 +192,21 @@ void WorldSession::HandleEjectPassenger(WorldPacket& data)
         if (seat->IsEjectable())
             player->ExitVehicle();
         else
-            SF_LOG_ERROR("network", "Player %u attempted to eject player %u from non-ejectable seat.", GetPlayer()->GetGUIDLow(), GUID_LOPART(guid));
+            SF_LOG_ERROR("network", "Player %u attempted to eject player %u from non-ejectable seat.", GetPlayer()->GetGUIDLow(), GUID_LOPART(PassengerGUID));
     }
 
-    else if (IS_CREATURE_GUID(guid))
+    else if (IS_CREATURE_GUID(PassengerGUID))
     {
-        Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
+        Unit* unit = ObjectAccessor::GetUnit(*_player, PassengerGUID);
         if (!unit) // creatures can be ejected too from player mounts
         {
-            SF_LOG_ERROR("network", "Player %u tried to eject creature guid %u from vehicle, but the latter was not found in world!", GetPlayer()->GetGUIDLow(), GUID_LOPART(guid));
+            SF_LOG_ERROR("network", "Player %u tried to eject creature guid %u from vehicle, but the latter was not found in world!", GetPlayer()->GetGUIDLow(), GUID_LOPART(PassengerGUID));
             return;
         }
 
         if (!unit->IsOnVehicle(vehicle->GetBase()))
         {
-            SF_LOG_ERROR("network", "Player %u tried to eject unit %u, but they are not in the same vehicle", GetPlayer()->GetGUIDLow(), GUID_LOPART(guid));
+            SF_LOG_ERROR("network", "Player %u tried to eject unit %u, but they are not in the same vehicle", GetPlayer()->GetGUIDLow(), GUID_LOPART(PassengerGUID));
             return;
         }
 
@@ -217,10 +218,10 @@ void WorldSession::HandleEjectPassenger(WorldPacket& data)
             unit->ExitVehicle();
         }
         else
-            SF_LOG_ERROR("network", "Player %u attempted to eject creature GUID %u from non-ejectable seat.", GetPlayer()->GetGUIDLow(), GUID_LOPART(guid));
+            SF_LOG_ERROR("network", "Player %u attempted to eject creature GUID %u from non-ejectable seat.", GetPlayer()->GetGUIDLow(), GUID_LOPART(PassengerGUID));
     }
     else
-        SF_LOG_ERROR("network", "HandleEjectPassenger: Player %u tried to eject invalid GUID " UI64FMTD, GetPlayer()->GetGUIDLow(), guid);
+        SF_LOG_ERROR("network", "HandleEjectPassenger: Player %u tried to eject invalid GUID " UI64FMTD, GetPlayer()->GetGUIDLow(), PassengerGUID);
 }
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
