@@ -1467,8 +1467,9 @@ enum InvisibilityType
     INVISIBILITY_UNK9        =  9,
     INVISIBILITY_UNK10       = 10,
     INVISIBILITY_UNK11       = 11,
-
-    TOTAL_INVISIBILITY_TYPES = 12
+    //...
+    INVISIBILITY_UNK37       = 37,
+    TOTAL_INVISIBILITY_TYPES = 38
 };
 
 enum ServerSideVisibilityType
