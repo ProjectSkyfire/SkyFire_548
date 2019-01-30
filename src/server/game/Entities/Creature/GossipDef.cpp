@@ -622,210 +622,180 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());
 }
 
-void PlayerMenu::SendQuestQueryResponse(uint32 questID) const
+void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
 {
-    Quest const* quest = sObjectMgr->GetQuestTemplate(questID);
+    std::string questTitle = quest->GetTitle();
+    std::string questDetails = quest->GetDetails();
+    std::string questObjectives = quest->GetObjectives();
+    std::string questEndText = quest->GetEndText();
+    std::string questCompletedText = quest->GetCompletedText();
+    std::string questGiverTextWindow = quest->GetQuestGiverTextWindow();
+    std::string questGiverTargetName = quest->GetQuestGiverTargetName();
+    std::string questTurnTextWindow = quest->GetQuestTurnTextWindow();
+    std::string questTurnTargetName = quest->GetQuestTurnTargetName();
 
-    /// If quest is nullptr we send empty packet so client know quest don't exist
-    WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);   // guess size
-    data << uint32(quest ? quest->GetQuestId() : 0);
-
-    if (data.WriteBit(quest != nullptr)) ///< HasData
+    int32 locale = _session->GetSessionDbLocaleIndex();
+    if (locale >= 0)
     {
-        ///@todo - Move as static member to item class ?
-        auto GetDisplayID([](uint32 ItemID) -> uint32
+        if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(quest->GetQuestId()))
         {
-            if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(ItemID))
-                return proto->DisplayInfoID;
-
-            return 0;
-        });
-
-        std::string questTitle = quest->GetTitle();
-        std::string questDetails = quest->GetDetails();
-        std::string questObjectives = quest->GetObjectives();
-        std::string questEndText = quest->GetEndText();
-        std::string questCompletedText = quest->GetCompletedText();
-        std::string questGiverTextWindow = quest->GetQuestGiverTextWindow();
-        std::string questGiverTargetName = quest->GetQuestGiverTargetName();
-        std::string questTurnTextWindow = quest->GetQuestTurnTextWindow();
-        std::string questTurnTargetName = quest->GetQuestTurnTargetName();
-
-        int32 locale = _session->GetSessionDbLocaleIndex();
-        if (locale >= 0)
-        {
-            if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(quest->GetQuestId()))
-            {
-                ObjectMgr::GetLocaleString(localeData->Title, locale, questTitle);
-                ObjectMgr::GetLocaleString(localeData->Details, locale, questDetails);
-                ObjectMgr::GetLocaleString(localeData->Objectives, locale, questObjectives);
-                ObjectMgr::GetLocaleString(localeData->EndText, locale, questEndText);
-                ObjectMgr::GetLocaleString(localeData->CompletedText, locale, questCompletedText);
-                ObjectMgr::GetLocaleString(localeData->QuestGiverTextWindow, locale, questGiverTextWindow);
-                ObjectMgr::GetLocaleString(localeData->QuestGiverTargetName, locale, questGiverTargetName);
-                ObjectMgr::GetLocaleString(localeData->QuestTurnTextWindow, locale, questTurnTextWindow);
-                ObjectMgr::GetLocaleString(localeData->QuestTurnTargetName, locale, questTurnTargetName);
-            }
+            ObjectMgr::GetLocaleString(localeData->Title, locale, questTitle);
+            ObjectMgr::GetLocaleString(localeData->Details, locale, questDetails);
+            ObjectMgr::GetLocaleString(localeData->Objectives, locale, questObjectives);
+            ObjectMgr::GetLocaleString(localeData->EndText, locale, questEndText);
+            ObjectMgr::GetLocaleString(localeData->CompletedText, locale, questCompletedText);
+            ObjectMgr::GetLocaleString(localeData->QuestGiverTextWindow, locale, questGiverTextWindow);
+            ObjectMgr::GetLocaleString(localeData->QuestGiverTargetName, locale, questGiverTargetName);
+            ObjectMgr::GetLocaleString(localeData->QuestTurnTextWindow, locale, questTurnTextWindow);
+            ObjectMgr::GetLocaleString(localeData->QuestTurnTargetName, locale, questTurnTargetName);
         }
-
-        if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
-            AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
-
-        data.WriteBits(questTurnTextWindow.size(), 10);
-        data.WriteBits(questTitle.size(), 9);
-        data.WriteBits(questCompletedText.size(), 11);
-        data.WriteBits(questDetails.size(), 12);
-        data.WriteBits(questTurnTargetName.size(), 8);
-        data.WriteBits(questGiverTargetName.size(), 8);
-        data.WriteBits(questGiverTextWindow.size(), 10);
-        data.WriteBits(questEndText.size(), 9);
-        data.WriteBits(quest->m_questObjectives.size(), 19);
-        data.WriteBits(questObjectives.size(), 12);
-
-        ByteBuffer objData;
-        for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
-        {
-            QuestObjective const* questObjective = *citr;
-
-            std::string descriptionText = questObjective->Description;
-            if (locale > 0)
-                if (QuestObjectiveLocale const* questObjectiveLocale = sObjectMgr->GetQuestObjectiveLocale(questObjective->Id))
-                    ObjectMgr::GetLocaleString(questObjectiveLocale->Description, locale, descriptionText);
-
-            data.WriteBits(descriptionText.size(), 8);
-            data.WriteBits(questObjective->VisualEffects.size(), 22);
-
-            objData << int32(questObjective->Amount);
-            objData << uint32(questObjective->Id);
-            objData.WriteString(descriptionText);
-            objData << uint32(questObjective->Flags);
-            objData << uint8(questObjective->Index);
-            objData << uint8(questObjective->Type);
-            objData << uint32(questObjective->ObjectId);
-
-            for (VisualEffectVec::const_iterator citrEffects = questObjective->VisualEffects.begin(); citrEffects != questObjective->VisualEffects.end(); ++citrEffects)
-                objData << uint32(*citrEffects);
-        }
-
-        data.FlushBits();
-
-        bool hiddenReward = quest->HasFlag(QUEST_FLAGS_HIDE_REWARD);
-
-        data.append(objData);
-
-        data << uint32(quest->RequiredSourceItemId[0]);
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[4]);
-        data << uint32(hiddenReward ? 0 : quest->RewardItemId[3]);
-        data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[1]);
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[2]);
-
-        for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; i++)
-        {
-            data << uint32(quest->RewardCurrencyId[i]);
-            data << uint32(quest->RewardCurrencyCount[i]);
-        }
-
-        data << uint32(quest->GetBonusTalents());                               // bonus talents
-        data << float(quest->GetPointY());
-        data << uint32(quest->GetSoundTurnIn());
-
-        for (int i = 0; i < QUEST_REPUTATIONS_COUNT; i++)
-        {
-            data << uint32(quest->RewardFactionValueId[i]);                     // columnid+1 QuestFactionReward.dbc?
-            data << uint32(quest->RewardFactionValueIdOverride[i]);             // unknown usage
-            data << uint32(quest->RewardFactionId[i]);                          // reward factions ids
-        }
-
-        data << uint32(hiddenReward ? 0 : quest->GetRewMoney());                // reward money (below max lvl)
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[4]);
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[1]);
-        data << uint32(quest->GetFlags2());
-
-        data.WriteString(questEndText);
-
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[1]);
-        data << uint32(quest->GetRewMoneyMaxLevel());                           // used in XP calculation at client
-        data << uint32(hiddenReward ? 0 : quest->RewardItemId[0]);
-
-        data.WriteString(questCompletedText);
-
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[3]);
-        data << uint32(quest->GetRewHonorAddition());                           // rewarded honor points
-
-        data.WriteString(questGiverTextWindow);
-        data.WriteString(questObjectives);
-
-        data << uint32(quest->GetRewardSkillPoints());                          // reward skill points
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[5]);
-        data << uint32(quest->GetSuggestedPlayers());                           // suggested players count
-        data << uint32(quest->GetQuestId());                                    // quest id
-        data << uint32(quest->RequiredSourceItemId[1]);
-        data << uint32(hiddenReward ? 0 : quest->RewardItemId[1]);
-        data << int32(quest->GetMinLevel());                                    // min level
-        data << uint32(quest->GetRewardReputationMask());                       // rep mask (unsure on what it does)
-        data << uint32(quest->GetPointOpt());
-        data << int32(quest->GetQuestLevel());                                  // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
-        data << uint32(quest->GetQuestMethod());                                // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
-        data << uint32(quest->RequiredSourceItemCount[2]);
-        data << uint32(quest->GetXPId());                                       // seems to always have the same value as the first XP ID field
-
-        data.WriteString(questDetails);
-
-        data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[0]);
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[5]);
-        data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[2]);
-        data << uint32(quest->GetRewSpellCast());                               // casted spell
-        data << uint32(hiddenReward ? 0 : GetDisplayID(quest->RewardChoiceItemId[2]));
-
-        data.WriteString(questTurnTargetName);
-
-        data << uint32(hiddenReward ? 0 : GetDisplayID(quest->RewardChoiceItemId[1]));
-        data << uint32(quest->RequiredSourceItemCount[1]);
-        data << uint32(quest->RequiredSourceItemId[2]);
-        data << uint32(quest->GetQuestTurnInPortrait());
-
-        data.WriteString(questTitle);
-
-        data << uint32(quest->GetType());                                       // quest type
-        data << uint32(quest->GetXPId());                                       // used for calculating rewarded experience
-        data << uint32(hiddenReward ? 0 : GetDisplayID(quest->RewardChoiceItemId[4]));
-        data << uint32(quest->GetRewArenaPoints());
-        data << uint32(quest->GetPointMapId());
-        data << uint32(quest->GetNextQuestInChain());                           // client will request this quest from NPC, if not 0
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[0]);
-
-        data.WriteString(questGiverTargetName);
-
-        data << uint32(hiddenReward ? 0 : GetDisplayID(quest->RewardChoiceItemId[3]));
-        data << uint32(quest->RequiredSourceItemId[3]);
-        data << float(quest->GetPointX());
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[2]);
-        data << uint32(hiddenReward ? 0 : GetDisplayID(quest->RewardChoiceItemId[0]));
-        data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[3]);
-        data << uint32(quest->GetSoundAccept());
-        data << uint32(hiddenReward ? 0 : quest->RewardItemId[2]);
-        data << float(quest->GetRewHonorMultiplier());
-        data << uint32(quest->GetCharTitleId());                                // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
-
-        data.WriteString(questTurnTextWindow);
-
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[3]);
-        data << uint32(quest->RequiredSourceItemCount[0]);
-        data << int32(quest->GetZoneOrSort());                                  // zone or sort to display in quest log
-        data << uint32(quest->GetRewardSkillId());                              // reward skill id
-        data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[0]);
-        data << uint32(quest->GetRewSpell());                                   // reward spell, this spell will display (icon) (casted if RewSpellCast == 0)
-        data << uint32(quest->GetQuestGiverPortrait());
-        data << uint32(hiddenReward ? 0 : GetDisplayID(quest->RewardChoiceItemId[5]));
-        data << uint32(quest->RequiredSourceItemCount[3]);
-        data << uint32(quest->GetFlags());                                      // quest flags
-        data << uint32(quest->GetRewardPackageItemId());
-        data << uint32(quest->GetSrcItemId());                                  // source item id
     }
-    else
-        data.FlushBits();
+
+    if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
+        AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
+
+    WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);   // guess size
+    data << uint32(quest->GetQuestId());
+
+    data.WriteBit(1);                                   // has data
+    data.WriteBits(questTurnTextWindow.size(), 10);
+    data.WriteBits(questTitle.size(), 9);
+    data.WriteBits(questCompletedText.size(), 11);
+    data.WriteBits(questDetails.size(), 12);
+    data.WriteBits(questTurnTargetName.size(), 8);
+    data.WriteBits(questGiverTargetName.size(), 8);
+    data.WriteBits(questGiverTextWindow.size(), 10);
+    data.WriteBits(questEndText.size(), 9);
+    data.WriteBits(quest->m_questObjectives.size(), 19);
+    data.WriteBits(questObjectives.size(), 12);
+
+    ByteBuffer objData;
+    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
+    {
+        QuestObjective const* questObjective = *citr;
+
+        std::string descriptionText = questObjective->Description;
+        if (locale > 0)
+            if (QuestObjectiveLocale const* questObjectiveLocale = sObjectMgr->GetQuestObjectiveLocale(questObjective->Id))
+                ObjectMgr::GetLocaleString(questObjectiveLocale->Description, locale, descriptionText);
+
+        data.WriteBits(descriptionText.size(), 8);
+        data.WriteBits(questObjective->VisualEffects.size(), 22);
+
+        objData << int32(questObjective->Amount);
+        objData << uint32(questObjective->Id);
+        objData.WriteString(descriptionText);
+        objData << uint32(questObjective->Flags);
+        objData << uint8(questObjective->Index);
+        objData << uint8(questObjective->Type);
+        objData << uint32(questObjective->ObjectId);
+
+        for (VisualEffectVec::const_iterator citrEffects = questObjective->VisualEffects.begin(); citrEffects != questObjective->VisualEffects.end(); ++citrEffects)
+            objData << uint32(*citrEffects);
+    }
+
+    data.FlushBits();
+
+    bool hiddenReward = quest->HasFlag(QUEST_FLAGS_HIDE_REWARD);
+
+    // values need rechecking and zero values need more research
+    data.append(objData);
+    data << uint32(quest->RequiredSourceItemId[0]);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[4]);
+    data << uint32(hiddenReward ? 0 : quest->RewardItemId[3]);
+    data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[1]);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[2]);
+
+    for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; i++)
+    {
+        data << uint32(quest->RewardCurrencyId[i]);
+        data << uint32(quest->RewardCurrencyCount[i]);
+    }
+
+    data << uint32(quest->GetBonusTalents());                               // bonus talents
+    data << float(quest->GetPointY());
+    data << uint32(quest->GetSoundTurnIn());
+
+    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; i++)
+    {
+        data << uint32(quest->RewardFactionValueId[i]);                     // columnid+1 QuestFactionReward.dbc?
+        data << uint32(quest->RewardFactionValueIdOverride[i]);             // unknown usage
+        data << uint32(quest->RewardFactionId[i]);                          // reward factions ids
+    }
+
+    data << uint32(hiddenReward ? 0 : quest->GetRewMoney());                // reward money (below max lvl)
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[4]);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[1]);
+    data << uint32(quest->GetFlags2());
+    data.WriteString(questEndText);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[1]);
+    data << uint32(quest->GetRewMoneyMaxLevel());                           // used in XP calculation at client
+    data << uint32(hiddenReward ? 0 : quest->RewardItemId[0]);
+    data.WriteString(questCompletedText);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[3]);
+    data << uint32(quest->GetRewHonorAddition());                           // rewarded honor points
+    data.WriteString(questGiverTextWindow);
+    data.WriteString(questObjectives);
+    data << uint32(quest->GetRewardSkillPoints());                          // reward skill points
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[5]);
+    data << uint32(quest->GetSuggestedPlayers());                           // suggested players count
+    data << uint32(quest->GetQuestId());                                    // quest id
+    data << uint32(quest->RequiredSourceItemId[1]);
+    data << uint32(hiddenReward ? 0 : quest->RewardItemId[1]);
+    data << int32(quest->GetMinLevel());                                    // min level
+    data << uint32(quest->GetRewardReputationMask());                       // rep mask (unsure on what it does)
+    data << uint32(quest->GetPointOpt());
+    data << int32(quest->GetQuestLevel());                                  // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
+    data << uint32(quest->GetQuestMethod());                                // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
+    data << uint32(quest->RequiredSourceItemCount[2]);
+    data << uint32(quest->GetXPId());                                       // seems to always have the same value as the first XP ID field
+    data.WriteString(questDetails);
+    data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[0]);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[5]);
+    data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[2]);
+    data << uint32(quest->GetRewSpellCast());                               // casted spell
+    data << uint32(0);                                                      // unknown
+    data.WriteString(questTurnTargetName);
+    data << uint32(0);                                                      // unknown
+    data << uint32(quest->RequiredSourceItemCount[1]);
+    data << uint32(quest->RequiredSourceItemId[2]);
+    data << uint32(quest->GetQuestTurnInPortrait());
+    data.WriteString(questTitle);
+    data << uint32(quest->GetType());                                       // quest type
+    data << uint32(quest->GetXPId());                                       // used for calculating rewarded experience
+    data << uint32(0);                                                      // unknown
+    data << uint32(0);                                                      // unknown
+    data << uint32(quest->GetPointMapId());
+    data << uint32(quest->GetNextQuestInChain());                           // client will request this quest from NPC, if not 0
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[0]);
+    data.WriteString(questGiverTargetName);
+    data << uint32(0);                                                      // unknown
+    data << uint32(quest->RequiredSourceItemId[3]);
+    data << float(quest->GetPointX());
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemId[2]);
+    data << uint32(0);                                                      // unknown
+    data << uint32(hiddenReward ? 0 : quest->RewardItemIdCount[3]);
+    data << uint32(quest->GetSoundAccept());
+    data << uint32(hiddenReward ? 0 : quest->RewardItemId[2]);
+    data << float(quest->GetRewHonorMultiplier());
+    data << uint32(quest->GetCharTitleId());                                // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
+    data.WriteString(questTurnTextWindow);
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[3]);
+    data << uint32(quest->RequiredSourceItemCount[0]);
+    data << int32(quest->GetZoneOrSort());                                  // zone or sort to display in quest log
+    data << uint32(quest->GetRewardSkillId());                              // reward skill id
+    data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[0]);
+    data << uint32(quest->GetRewSpell());                                   // reward spell, this spell will display (icon) (casted if RewSpellCast == 0)
+    data << uint32(quest->GetQuestGiverPortrait());
+    data << uint32(0);                                                      // unknown
+    data << uint32(quest->RequiredSourceItemCount[3]);
+    data << uint32(quest->GetFlags() & 0xFFFF);                             // quest flags
+    data << uint32(quest->GetRewardPackageItemId());
+    data << uint32(quest->GetSrcItemId());                                  // source item id
 
     _session->SendPacket(&data);
+
+    SF_LOG_DEBUG("network", "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u", quest->GetQuestId());
 }
 
 void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, bool enableNext) const
