@@ -982,6 +982,28 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                         case 92797:
                         case 92800:
                         case 92803:
+                        case 104262:
+                        case 104269:
+                        case 104270:
+                        case 105230:
+                        case 105232:
+                        case 118358:
+                        case 130335:
+                        case 130336:
+                        case 130337:
+                        case 130338:
+                        case 130339:
+                        case 130340:
+                        case 130341:
+                        case 148922:
+                        case 148961: // Drink Pandaren Brew
+                        case 148995: // Drink Bitter Brew
+                        case 148996: // Drink Stormstout Brew
+                        case 148997: // Drink Unga Brew
+                        case 149000: // Drink Funky Monkey Brew
+                        case 149006: // Drink Boomer Brew
+                        case 149009: // Drink Greenstone Brew
+                        case 149024: // Drink Blazing Brew
                             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                                 return;
                             // Get SPELL_AURA_MOD_POWER_REGEN aura from spell
@@ -1036,7 +1058,7 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                         case 59911: // Tenacity (vehicle)
                            GetBase()->RefreshDuration();
                            break;
-                        case 66823: case 67618: case 67619: case 67620: // Paralytic Toxin
+                        case 66823: // Paralytic Toxin
                             // Get 0 effect aura
                             if (AuraEffect* slow = GetBase()->GetEffect(0))
                             {
