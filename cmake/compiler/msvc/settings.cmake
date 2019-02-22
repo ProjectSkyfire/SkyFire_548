@@ -12,21 +12,29 @@
 # set up output paths for executable binaries (.exe-files, and .dll-files on DLL-capable platforms)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Check C++14 compiler support
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-if(COMPILER_SUPPORTS_CXX14)
-  set(CMAKE_CXX_STANDARD 14)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  
+if(${CMAKE_VERSION} VERSION_LESS "3.14")
+  # Check C++14 compiler support
+  include(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+  if(COMPILER_SUPPORTS_CXX14)
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  else()
+    message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++14!")
+  endif()
+  set(MSVC_EXPECTED_VERSION 19.16.27027.1)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
+    message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2017) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
+  endif()
 else()
-  message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++14!")
+  set(MSVC_EXPECTED_VERSION 19.20.27323.0)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
+    message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2019) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
+  endif()
 endif()
 
-set(MSVC_EXPECTED_VERSION 19.16.27025.1)
-
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
-  message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2017) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
-endif()
 
 # set up output paths ofr static libraries etc (commented out - shown here as an example only)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
