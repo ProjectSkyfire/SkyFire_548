@@ -31,8 +31,8 @@ before_install:
   - sudo rm -rf /var/lib/dpkg/lock
   - sudo apt-get install gcc-8 g++-8
   - export CXX=g++-8 CC=gcc-8
-  - sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb
-  - sudo dpkg -i mysql-apt-config_0.8.10-1_all.deb
+  - sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+  - sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
   # temp till travis realease new iso files
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
   - sudo apt update
