@@ -6088,6 +6088,8 @@ float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
             return GetUInt32Value(PLAYER_FIELD_MAINHAND_EXPERTISE) / 4.0f;
         case OFF_ATTACK:
             return GetUInt32Value(PLAYER_FIELD_OFFHAND_EXPERTISE) / 4.0f;
+        case RANGED_ATTACK:
+            return GetUInt32Value(PLAYER_FIELD_RANGED_EXPERTISE) / 4.0f;
         default:
             break;
     }
