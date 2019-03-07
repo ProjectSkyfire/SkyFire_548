@@ -28630,6 +28630,7 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
     bool hasSplineElevation = false;
     bool hasCounter = false;
     uint32 forcesCount = 0u;
+    uint32 ackCount = 0u;
 
     ObjectGuid guid;
     ObjectGuid tguid;
@@ -28839,6 +28840,9 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
                 break;
             case MSEExtraElement:
                 extras->ReadNextElement(data);
+                break;
+            case MSEAckCount:
+                data.read_skip<uint32>();
                 break;
             default:
                 ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));

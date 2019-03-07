@@ -291,6 +291,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MINIMAP_PING,                                 0x0837, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMinimapPingOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOUNTSPECIAL_ANIM,                            0x0082, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMountSpecialAnimOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_CHNG_TRANSPORT,                          0x09DB, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                          0x00F2, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SPLINE_DONE,                             0x11D9, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveSplineDoneOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TELEPORT_ACK,                            0x0078, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveTeleportAck                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TIME_SKIPPED,                            0x0150, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode               ); // 5.4.8 18414
@@ -564,7 +565,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_DISABLE_ACK, 0x09D3, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_ENABLE_ACK, 0x11D8, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_HOVER_ACK, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMoveHoverAck);
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK, 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleMoveKnockBackAck);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_NOT_ACTIVE_MOVER, 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleMoveNotActiveMover);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK, 0x1052, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleMoveSetCanFlyAckOpcode);
