@@ -109,6 +109,7 @@ enum MovementStatusElements
     MSEUintCount,
 
     MSEAckCount,
+    MSEFlushBits,
 
     // Special
     MSEZeroBit,         // writes bit value 1 or skips read bit

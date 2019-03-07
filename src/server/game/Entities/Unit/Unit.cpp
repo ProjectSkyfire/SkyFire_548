@@ -15224,11 +15224,11 @@ void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float 
     ObjectGuid guid = GetGUID();
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, (1 + 8 + 4 + 4 + 4 + 4 + 4));
 
-    data << float(vsin);
-    data << float(vcos);
     data << float(speedXY);
-    data << uint32(0);
+    data << float(vsin);
     data << float(speedZ);
+    data << uint32(0);
+    data << float(vcos);
 
     data.WriteBit(guid [2]);
     data.WriteBit(guid [0]);
@@ -16299,6 +16299,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
                 for (uint8 i = 0; i < forcesCount; ++i)
                 data << uint32(0);
                 */
+                break;
+            case MSEFlushBits:
+                data.FlushBits();
                 break;
             default:
                 ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
