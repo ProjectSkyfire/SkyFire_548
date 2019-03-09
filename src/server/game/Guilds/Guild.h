@@ -269,7 +269,7 @@ struct GuildReward
     uint8 Standing;
 };
 
-uint32 const MinNewsItemLevel[MAX_CONTENT] = { 61, 90, 200, 353 };
+uint32 const MinNewsItemLevel[MAX_CONTENT] = { 61, 90, 200, 353, 463 };
 
 // GuildChallengeInfo
 const uint32 GuildChallengeWeeklyMaximum[] = { 0, 7, 1, 3, 15, 3 };
