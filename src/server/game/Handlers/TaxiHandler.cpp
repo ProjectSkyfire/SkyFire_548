@@ -336,16 +336,8 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-    ObjectGuid guid(_player->GetGUID());
-
-    WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 1 + 1 + 8);
-    data.WriteGuidMask(guid, 2, 7);
-    data.WriteBit(!reply);
-    data.WriteGuidMask(guid, 0, 3, 6, 5, 1, 4);
+    WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 4);
+    data.WriteBits(reply, 4);
     data.FlushBits();
-    data.WriteGuidBytes(guid, 1, 5, 7, 4, 2, 6, 3, 0);
-
     SendPacket(&data);
-
-    SF_LOG_DEBUG("network", "WORLD: Sent SMSG_ACTIVATE_TAXI_REPLY");
 }
