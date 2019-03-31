@@ -4102,21 +4102,22 @@ enum RemoveMethod
     GROUP_REMOVEMETHOD_KICK_LFG = 3
 };
 
+/// 5.4.8 18414
 enum ActivateTaxiReply
-{
-    ERR_TAXIOK                      = 0,
-    ERR_TAXIUNSPECIFIEDSERVERERROR  = 1,
-    ERR_TAXINOSUCHPATH              = 2,
-    ERR_TAXINOTENOUGHMONEY          = 3,
-    ERR_TAXITOOFARAWAY              = 4,
-    ERR_TAXINOVENDORNEARBY          = 5,
-    ERR_TAXINOTVISITED              = 6,
-    ERR_TAXIPLAYERBUSY              = 7,
-    ERR_TAXIPLAYERALREADYMOUNTED    = 8,
-    ERR_TAXIPLAYERSHAPESHIFTED      = 9,
-    ERR_TAXIPLAYERMOVING            = 10,
-    ERR_TAXISAMENODE                = 11,
-    ERR_TAXINOTSTANDING             = 12
+{ 
+    ERR_TAXI_SAME_NODE                  = 2,
+    ERR_TAXI_PLAYER_MOVING              = 3,
+    ERR_TAXI_NOT_ENOUGH_MONEY           = 4,
+    ERR_TAXI_UNSPECIFIED_SERVER_ERROR   = 5,
+    ERR_TAXI_NO_SUCH_PATH               = 6,
+    ERR_TAXI_PLAYER_ALREADY_MOUNTED     = 7,
+    ERR_TAXI_OK                         = 8,
+    ERR_TAXI_PLAYER_SHAPESHIFTED        = 9,
+    ERR_TAXI_PLAYER_BUSY                = 10,
+    ERR_TAXI_NOT_STANDING               = 11,
+    ERR_TAXI_NO_VENDOR_NEARBY           = 12,
+    ERR_TAXI_TOO_FAR_AWAY               = 13,
+    ERR_TAXI_NOT_VISITED                = 15,
 };
 
 enum ProfessionUI

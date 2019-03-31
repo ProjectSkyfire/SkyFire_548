@@ -22275,7 +22275,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // not let cheating with start flight in time of logout process || while in combat || has type state: stunned || has type state: root
     if (GetSession()->isLogingOut() || IsInCombat() || HasUnitState(UNIT_STATE_STUNNED) || HasUnitState(UNIT_STATE_ROOT))
     {
-        GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERBUSY);
+        GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_PLAYER_BUSY);
         return false;
     }
 
@@ -22288,20 +22288,20 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         // not let cheating with start flight mounted
         if (IsMounted())
         {
-            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERALREADYMOUNTED);
+            GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_PLAYER_ALREADY_MOUNTED);
             return false;
         }
 
         if (IsInDisallowedMountForm())
         {
-            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERSHAPESHIFTED);
+            GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_PLAYER_SHAPESHIFTED);
             return false;
         }
 
         // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi
         if (IsNonMeleeSpellCasted(false))
         {
-            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERBUSY);
+            GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_PLAYER_BUSY);
             return false;
         }
     }
@@ -22330,7 +22330,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(sourcenode);
     if (!node)
     {
-        GetSession()->SendActivateTaxiReply(ERR_TAXINOSUCHPATH);
+        GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_NO_SUCH_PATH);
         return false;
     }
 
@@ -22343,14 +22343,14 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
             (node->z - GetPositionZ())*(node->z - GetPositionZ()) >
             (2*INTERACTION_DISTANCE)*(2*INTERACTION_DISTANCE)*(2*INTERACTION_DISTANCE))
         {
-            GetSession()->SendActivateTaxiReply(ERR_TAXITOOFARAWAY);
+            GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_TOO_FAR_AWAY);
             return false;
         }
     }
     // node must have pos if taxi master case (npc != NULL)
     else if (npc)
     {
-        GetSession()->SendActivateTaxiReply(ERR_TAXIUNSPECIFIEDSERVERERROR);
+        GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_UNSPECIFIED_SERVER_ERROR);
         return false;
     }
 
@@ -22413,7 +22413,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // in spell case allow 0 model
     if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
     {
-        GetSession()->SendActivateTaxiReply(ERR_TAXIUNSPECIFIEDSERVERERROR);
+        GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_UNSPECIFIED_SERVER_ERROR);
         m_taxi.ClearTaxiDestinations();
         return false;
     }
@@ -22425,7 +22425,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     if (money < totalcost)
     {
-        GetSession()->SendActivateTaxiReply(ERR_TAXINOTENOUGHMONEY);
+        GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_NOT_ENOUGH_MONEY);
         m_taxi.ClearTaxiDestinations();
         return false;
     }
@@ -22447,7 +22447,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     }
     else
     {
-        GetSession()->SendActivateTaxiReply(ERR_TAXIOK);
+        GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_OK);
         GetSession()->SendDoFlight(mount_display_id, sourcepath);
     }
     return true;
