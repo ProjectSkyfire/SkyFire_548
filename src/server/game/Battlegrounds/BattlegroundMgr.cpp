@@ -37,6 +37,7 @@
 #include "BattlegroundRV.h"
 #include "BattlegroundIC.h"
 #include "BattlegroundTP.h"
+#include "BattlegroundTV.h"
 #include "BattlegroundBFG.h"
 #include "Chat.h"
 #include "Map.h"
@@ -515,6 +516,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
             case BATTLEGROUND_RL:
             case BATTLEGROUND_DS:
             case BATTLEGROUND_RV:
+            case BATTLEGROUND_TV:
                 data->WriteBits(0, 22);
                 break;
             default:
@@ -844,6 +846,9 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
         case BATTLEGROUND_BFG:
             bg = new BattlegroundBFG(*(BattlegroundBFG*)bg_template);
             break;
+        case BATTLEGROUND_TV:
+            bg = new BattlegroundTV(*(BattlegroundTV*)bg_template);
+            break;
         case BATTLEGROUND_RB:
         case BATTLEGROUND_AA:
             bg = new Battleground(*bg_template);
@@ -937,6 +942,9 @@ bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
             break;
         case BATTLEGROUND_TP:
             bg = new BattlegroundTP;
+            break;
+        case BATTLEGROUND_TV:
+            bg = new BattlegroundTV;
             break;
         case BATTLEGROUND_BFG:
             bg = new BattlegroundBFG;
@@ -1205,6 +1213,7 @@ bool BattlegroundMgr::IsArenaType(BattlegroundTypeId bgTypeId)
             || bgTypeId == BATTLEGROUND_NA
             || bgTypeId == BATTLEGROUND_DS
             || bgTypeId == BATTLEGROUND_RV
+            || bgTypeId == BATTLEGROUND_TV
             || bgTypeId == BATTLEGROUND_RL;
 }
 
@@ -1236,6 +1245,7 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
         case BATTLEGROUND_NA:
         case BATTLEGROUND_RL:
         case BATTLEGROUND_RV:
+        case BATTLEGROUND_TV:
             switch (arenaType)
             {
                 case ARENA_TYPE_2v2:

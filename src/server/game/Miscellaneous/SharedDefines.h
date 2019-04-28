@@ -3995,7 +3995,7 @@ enum BattlegroundTypeId
     BATTLEGROUND_TOK           = 699, // 5.x Temple of Kotmogu
     BATTLEGROUND_CTF           = 706, // 5.x CTF3
     BATTLEGROUND_SM            = 708, // 5.x Silvershard Mines
-    BATTLEGROUND_TA            = 719, // 5.x Tol'Vir Arena
+    BATTLEGROUND_TV            = 719, // 5.x Tol'Vir Arena
     BATTLEGROUND_DG            = 754, // 5.x Deepwind Gorge
     BATTLEGROUND_TTP           = 757, // 5.x The Tiger's Peak
 };
