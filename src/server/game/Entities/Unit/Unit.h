@@ -1125,6 +1125,7 @@ struct RedirectThreatInfo
 struct DeclinedName
 {
     std::string name [MAX_DECLINED_NAME_CASES];
+    uint32 nameLength[MAX_DECLINED_NAME_CASES];
 };
 
 enum CurrentSpellTypes
