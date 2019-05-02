@@ -5028,17 +5028,37 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     SendMessageToSet(&data, true);
 }
 
+struct SpellLogMissEntry
+{
+    SpellLogMissEntry(ObjectGuid const& target, uint8 missInfo) : TargetGUID(target), MissInfo(missInfo) { }
+    ObjectGuid TargetGUID;
+    uint8 MissInfo;
+};
+
 void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)
 {
-    WorldPacket data(SMSG_SPELLLOGMISS, (4 + 8 + 1 + 4 + 8 + 1));
+    std::vector<SpellLogMissEntry> Entries;
+    Entries.emplace_back(target->GetGUID(), missInfo);
+
+    WorldPacket data(SMSG_SPELLLOGMISS, (8+4+1+(8+1+(1+(2*4)))));
+    data.WriteGuidMask(GetGUID(), 5, 1, 4, 0, 7, 3, 2, 6);
+    data.WriteBits(Entries.size(), 23);
+    for (SpellLogMissEntry const& entry : Entries)
+    {
+        data.WriteGuidMask(entry.TargetGUID, 0, 1, 6, 2, 5, 3, 4, 7);
+        data.WriteBit(false); // debuginfo
+    }
+    data.FlushBits();
+    for (SpellLogMissEntry const& entry : Entries)
+    {
+        data << entry.MissInfo;
+        data.WriteGuidBytes(entry.TargetGUID, 7, 5, 0, 6, 3, 2);
+        // debuginfo { float, float }
+        data.WriteGuidBytes(entry.TargetGUID, 1, 4);
+    }
+    data.WriteGuidBytes(GetGUID(), 6, 4, 2, 0, 1);
     data << uint32(spellID);
-    data << uint64(GetGUID());
-    data << uint8(0);                                       // can be 0 or 1
-    data << uint32(1);                                      // target count
-    // for (i = 0; i < target count; ++i)
-    data << uint64(target->GetGUID());                      // target GUID
-    data << uint8(missInfo);
-    // end loop
+    data.WriteGuidBytes(GetGUID(), 3, 7, 5);
     SendMessageToSet(&data, true);
 }
 
