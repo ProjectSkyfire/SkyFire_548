@@ -472,24 +472,6 @@ void ArenaTeam::NotifyStatsChanged()
             SendStats(player->GetSession());
 }
 
-void ArenaTeam::Inspect(WorldSession* session, uint64 guid)
-{
-    ArenaTeamMember* member = GetMember(guid);
-    if (!member)
-        return;
-
-    WorldPacket data(MSG_INSPECT_ARENA_TEAMS, 8+1+4*6);
-    data << uint64(guid);                                   // player guid
-    data << uint8(GetSlot());                               // slot (0...2)
-    data << uint32(GetId());                                // arena team id
-    data << uint32(Stats.Rating);                           // rating
-    data << uint32(Stats.SeasonGames);                      // season played
-    data << uint32(Stats.SeasonWins);                       // season wins
-    data << uint32(member->SeasonGames);                    // played (count of all games, that the inspected member participated...)
-    data << uint32(member->PersonalRating);                 // personal rating
-    session->SendPacket(&data);
-}
-
 void ArenaTeamMember::ModifyPersonalRating(Player* player, int32 mod, uint32 type)
 {
     if (int32(PersonalRating) + mod < 0)

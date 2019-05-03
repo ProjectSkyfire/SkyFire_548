@@ -165,7 +165,6 @@ class ArenaTeam
         void Roster(WorldSession* session);
         void Query(WorldSession* session);
         void SendStats(WorldSession* session);
-        void Inspect(WorldSession* session, uint64 guid);
 
         static int32 GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
         static int32 GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
