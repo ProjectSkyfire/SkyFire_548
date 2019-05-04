@@ -328,4 +328,5 @@ void WorldSession::HandleBattlefieldRatedInfoRequest(WorldPacket& recvData)
         data << uint32(0);
         data << uint32(0);
     }
+    SendPacket(&data);
 }
