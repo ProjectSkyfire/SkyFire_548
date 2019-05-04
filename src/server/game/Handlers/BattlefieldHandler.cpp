@@ -312,3 +312,20 @@ void WorldSession::HandleBfExitRequest(WorldPacket& recvData)
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByGUID(guid))
         bf->AskToLeaveQueue(_player);
 }
+
+void WorldSession::HandleBattlefieldRatedInfoRequest(WorldPacket& recvData)
+{
+    WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 4 * (8 * 4));
+    for (uint8 i = 0; i < 4; i++)
+    {
+        //TODO: PLAYER_FIELD_PVP_INFO, Updatefield Data 8*3 = size 24
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+    }
+}
