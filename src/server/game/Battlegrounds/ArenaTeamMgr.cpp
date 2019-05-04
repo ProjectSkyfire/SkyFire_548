@@ -80,13 +80,3 @@ void ArenaTeamMgr::RemoveArenaTeam(uint32 arenaTeamId)
     ArenaTeamStore.erase(arenaTeamId);
 }
 
-uint32 ArenaTeamMgr::GenerateArenaTeamId()
-{
-    if (NextArenaTeamId >= 0xFFFFFFFE)
-    {
-        SF_LOG_ERROR("bg.battleground", "Arena team ids overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
-    }
-    return NextArenaTeamId++;
-}
-

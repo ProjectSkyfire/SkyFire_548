@@ -41,9 +41,6 @@ public:
     ArenaTeamContainer::iterator GetArenaTeamMapBegin() { return ArenaTeamStore.begin(); }
     ArenaTeamContainer::iterator GetArenaTeamMapEnd()   { return ArenaTeamStore.end(); }
 
-    uint32 GenerateArenaTeamId();
-    void SetNextArenaTeamId(uint32 Id) { NextArenaTeamId = Id; }
-
 protected:
     uint32 NextArenaTeamId;
     ArenaTeamContainer ArenaTeamStore;

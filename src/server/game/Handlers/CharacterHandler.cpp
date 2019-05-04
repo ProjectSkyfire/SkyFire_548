@@ -2311,9 +2311,6 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
             }
 
-            // Leave Arena Teams
-            Player::LeaveAllArenaTeams(guid);
-
             // Reset homebind and position
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PLAYER_HOMEBIND);
             stmt->setUInt32(0, lowGuid);

@@ -4933,9 +4933,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
         if (Guild* guild = sGuildMgr->GetGuildById(guildId))
             guild->DeleteMember(guid, false, false, true);
 
-    // remove from arena teams
-    LeaveAllArenaTeams(playerguid);
-
     // the player was uninvited already on logout so just remove from group
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GROUP_MEMBER);
     stmt->setUInt32(0, guid);
@@ -8027,20 +8024,6 @@ void Player::SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type)
 {
     SetArenaTeamInfoField(slot, ARENA_TEAM_ID, ArenaTeamId);
     SetArenaTeamInfoField(slot, ARENA_TEAM_TYPE, type);
-}
-
-uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 type)
-{
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ARENA_TEAM_ID_BY_PLAYER_GUID);
-    stmt->setUInt32(0, GUID_LOPART(guid));
-    stmt->setUInt8(1, type);
-    PreparedQueryResult result = CharacterDatabase.Query(stmt);
-
-    if (!result)
-        return 0;
-
-    uint32 id = (*result)[0].GetUInt32();
-    return id;
 }
 
 uint32 Player::GetZoneIdFromDB(uint64 guid)
