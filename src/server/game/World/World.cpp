@@ -1725,9 +1725,6 @@ void World::SetInitialWorldSettings()
 
     sGuildFinderMgr->LoadFromDB();
 
-    SF_LOG_INFO("server.loading", "Loading ArenaTeams...");
-    sArenaTeamMgr->LoadArenaTeams();
-
     SF_LOG_INFO("server.loading", "Loading Groups...");
     sGroupMgr->LoadGroups();
 

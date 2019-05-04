@@ -968,9 +968,11 @@ void Battleground::EndBattleground(uint32 winner)
 
     if (isArena() && isRated() && winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)
     {
+        /*
         // save the stat changes
         winnerArenaTeam->SaveToDB();
         loserArenaTeam->SaveToDB();
+        */
         // send updated arena team stats to players
         // this way all arena team members will get notified, not only the ones who participated in this match
         winnerArenaTeam->NotifyStatsChanged();

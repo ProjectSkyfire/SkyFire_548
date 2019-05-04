@@ -115,12 +115,6 @@ class ArenaTeam
         ArenaTeam();
         ~ArenaTeam();
 
-        bool Create(uint64 captainGuid, uint8 type, std::string const& teamName,
-                                      uint32 backgroundColor, uint8 emblemStyle, uint32 emblemColor,
-                                      uint8 borderStyle, uint32 borderColor);
-        void Disband(WorldSession* session);
-        void Disband();
-
         typedef std::list<ArenaTeamMember> MemberList;
 
         uint32 GetId() const { return TeamId; }
@@ -135,11 +129,6 @@ class ArenaTeam
         uint32 GetRating() const          { return Stats.Rating; }
         uint32 GetAverageMMR(Group* group) const;
 
-        void SetCaptain(uint64 guid);
-        bool SetName(std::string const& name);
-        bool AddMember(uint64 PlayerGuid);
-        void DelMember(uint64 guid, bool cleanDb);
-
         size_t GetMembersSize() const         { return Members.size(); }
         bool   Empty() const                  { return Members.empty(); }
         MemberList::iterator m_membersBegin() { return Members.begin(); }
@@ -150,11 +139,6 @@ class ArenaTeam
         ArenaTeamMember* GetMember(std::string const& name);
 
         bool IsFighting() const;
-
-        bool LoadArenaTeamFromDB(QueryResult arenaTeamDataResult);
-        bool LoadMembersFromDB(QueryResult arenaTeamMembersResult);
-        void LoadStatsFromDB(uint32 ArenaTeamId);
-        void SaveToDB();
 
         void BroadcastPacket(WorldPacket* packet);
         void BroadcastEvent(ArenaTeamEvents event, uint64 guid, uint8 strCount, std::string const& str1, std::string const& str2, std::string const& str3);
