@@ -174,12 +174,6 @@ public:
         _bitpos = 8;
     }
 
-    void WriteBitInOrder(ObjectGuid guid, uint8 order[8])
-    {
-        for (uint8 i = 0; i < 8; ++i)
-            WriteBit(guid[order[i]]);
-    }
-
     bool WriteBit(uint32 bit)
     {
         --_bitpos;
@@ -194,12 +188,6 @@ public:
         }
 
         return (bit != 0);
-    }
-
-    void ReadBitInOrder(ObjectGuid& guid, uint8 order[8])
-    {
-        for (uint8 i = 0; i < 8; ++i)
-            guid[order[i]] = ReadBit();
     }
 
     bool ReadBit()

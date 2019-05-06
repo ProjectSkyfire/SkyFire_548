@@ -29,10 +29,9 @@
 void WorldSession::HandleBlackMarketHelloOpcode(WorldPacket& recvData)
 {
     ObjectGuid NpcGUID;
-    uint8 bitOrder[8] = { 4, 5, 2, 7, 0, 1, 3, 6 };
-    recvData.ReadBitInOrder(NpcGUID, bitOrder);
+    recvData.ReadGuidMask(NpcGUID, 4, 5, 2, 7, 0, 1, 3, 6);
     recvData.ReadGuidBytes(NpcGUID, 4, 3, 0, 6, 2, 7, 5, 1);
-        
+ 
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
     
@@ -42,14 +41,9 @@ void WorldSession::HandleBlackMarketHelloOpcode(WorldPacket& recvData)
 void WorldSession::SendBlackMarketHello(ObjectGuid NpcGUID, bool Open)
 {
     WorldPacket data(SMSG_BLACKMARKET_HELLO, 9);
-    
-    uint8 bitOrder[8] = { 2, 0, 4, 1, 3, 6, 5, 7 };
-    data.WriteBitInOrder(NpcGUID, bitOrder);
-
+    data.WriteGuidMask(NpcGUID, 2, 0, 4, 1, 3, 6, 5, 7);
     data.WriteBit(Open); 
-
-    uint8 byteOrder[8] = { 6, 1, 2, 5, 0, 7, 4, 3 };
-    data.WriteBytesSeq(NpcGUID, byteOrder);
+    data.WriteGuidBytes(NpcGUID, 6, 1, 2, 5, 0, 7, 4, 3);
     SendPacket(&data);
 }
 
@@ -57,13 +51,9 @@ void WorldSession::HandleBlackMarketRequestItemOpcode(WorldPacket& recvData)
 {
     ObjectGuid NpcGUID;
     uint32 Timestamp;
-
     recvData >> Timestamp;
-
-    uint8 bitOrder[8] = { 2, 6, 0, 3, 4, 5, 1, 7 };
-    recvData.ReadBitInOrder(NpcGUID, bitOrder);
+    recvData.ReadGuidMask(NpcGUID, 2, 6, 0, 3, 4, 5, 1, 7);
     recvData.ReadGuidBytes(NpcGUID, 6, 2, 3, 5, 7, 4, 1, 0);
-    
     SendBlackMarketRequestItemsResult();
 }
 
@@ -83,9 +73,7 @@ void WorldSession::HandleBlackMarketBidOnItem(WorldPacket& recvData)
     uint64 BidAmount;
 
     recvData >> ItemID >> MarketID >> BidAmount;
-
-    uint8 bitOrder[8] = { 0, 5, 4, 3, 7, 6, 1, 2};
-    recvData.ReadBitInOrder(NpcGUID, bitOrder);
+    recvData.ReadGuidMask(NpcGUID, 0, 5, 4, 3, 7, 6, 1, 2);
     recvData.ReadGuidBytes(NpcGUID, 4, 3, 6, 5, 7, 1, 0, 2);
     
     SF_LOG_DEBUG("blackMarket", ">> HandleBlackMarketBid >> MarketID : %u, BidAmount : " UI64FMTD ", ItemID : %u", MarketID, BidAmount, ItemID);

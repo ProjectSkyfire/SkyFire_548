@@ -774,10 +774,8 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     bool state;
 
     recvPacket >> spellId;
-    uint8 bitOrder[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
-    recvPacket.ReadBitInOrder(petGUID, bitOrder);
+    recvPacket.ReadGuidMask(petGUID, 0, 4, 2, 6, 1, 5, 3, 7);
     state = recvPacket.ReadBit();
-
     recvPacket.ReadGuidBytes(petGUID, 5, 0, 4, 1, 7, 2, 3, 6);
 
     if (!_player->GetGuardianPet() && !_player->GetCharm())

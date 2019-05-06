@@ -27661,11 +27661,9 @@ void Player::SendInspectResult(Player const* player)
     WorldPacket data(SMSG_INSPECT_RESULTS, 8 + 4 + 1 + 1 + talentPoints + 8 + 4 + 8 + 4);
     data.WriteBit(guild ? 1 : 0);
     data.WriteBit(guid[2]);
+
     if (guild)
-    {
-        uint8 bitValues[] = { 7, 0, 5, 3, 2, 4, 6, 1 };
-        data.WriteBitInOrder(guildGuid, bitValues);
-    }
+        data.WriteGuidMask(guildGuid, 7, 0, 5, 3, 2, 4, 6, 1);
 
     data.WriteBit(guid[4]);
     data.WriteBit(guid[3]);
@@ -27747,17 +27745,13 @@ void Player::SendInspectResult(Player const* player)
     data.append(enchantData);
     if (guild)
     {
-        data.WriteByteSeq(guildGuid[6]);
-        data.WriteByteSeq(guildGuid[2]);
-        data.WriteByteSeq(guildGuid[5]);
-        data.WriteByteSeq(guildGuid[0]);
+        data.WriteGuidBytes(guildGuid, 6, 2, 5, 0);
         data << uint32(guild->GetMembersCount());
-        data.WriteByteSeq(guildGuid[4]);
-        data.WriteByteSeq(guildGuid[7]);
+        data.WriteGuidBytes(guildGuid, 4, 7);
         data << uint64(guild->GetExperience());
-        data.WriteByteSeq(guildGuid[1]);
+        data.WriteGuidBytes(guildGuid, 1);
         data << uint32(guild->GetLevel());
-        data.WriteByteSeq(guildGuid[3]);
+        data.WriteGuidBytes(guildGuid, 3);
     }
 
     data.WriteByteSeq(guid[5]);
