@@ -47,29 +47,6 @@ ArenaTeam* ArenaTeamMgr::GetArenaTeamById(uint32 arenaTeamId) const
     return NULL;
 }
 
-ArenaTeam* ArenaTeamMgr::GetArenaTeamByName(const std::string& arenaTeamName) const
-{
-    std::string search = arenaTeamName;
-    std::transform(search.begin(), search.end(), search.begin(), ::toupper);
-    for (ArenaTeamContainer::const_iterator itr = ArenaTeamStore.begin(); itr != ArenaTeamStore.end(); ++itr)
-    {
-        std::string teamName = itr->second->GetName();
-        std::transform(teamName.begin(), teamName.end(), teamName.begin(), ::toupper);
-        if (search == teamName)
-            return itr->second;
-    }
-    return NULL;
-}
-
-ArenaTeam* ArenaTeamMgr::GetArenaTeamByCaptain(uint64 guid) const
-{
-    for (ArenaTeamContainer::const_iterator itr = ArenaTeamStore.begin(); itr != ArenaTeamStore.end(); ++itr)
-        if (itr->second->GetCaptain() == guid)
-            return itr->second;
-
-    return NULL;
-}
-
 void ArenaTeamMgr::AddArenaTeam(ArenaTeam* arenaTeam)
 {
     ArenaTeamStore[arenaTeam->GetId()] = arenaTeam;
