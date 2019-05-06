@@ -837,19 +837,6 @@ enum InstanceResetWarningType
     RAID_INSTANCE_EXPIRED          = 5
 };
 
-// PLAYER_FIELD_PVP_INFO offsets
-enum ArenaTeamInfoType
-{
-    ARENA_TEAM_ID              = 0,
-    ARENA_TEAM_TYPE            = 1,                       // new in 3.2 - team type?
-    ARENA_TEAM_MEMBER          = 2,                       // 0 - captain, 1 - member
-    ARENA_TEAM_GAMES_WEEK      = 3,
-    ARENA_TEAM_GAMES_SEASON    = 4,
-    ARENA_TEAM_WINS_SEASON     = 5,
-    ARENA_TEAM_PERSONAL_RATING = 6,
-    ARENA_TEAM_END             = 7
-};
-
 class InstanceSave;
 
 enum RestType
@@ -918,7 +905,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS = 14,
     PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES = 15,
     PLAYER_LOGIN_QUERY_LOAD_GUILD = 16,
-    PLAYER_LOGIN_QUERY_LOAD_ARENA_INFO = 17,
+    // 17 free
     PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS = 18,
     PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS = 19,
     PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS = 20,
@@ -2381,25 +2368,11 @@ class Player : public Unit, public GridObject<Player>
     void SendDeclineGuildInvitation(std::string declinerName, bool autoDecline = false);
     static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
-    // Arena Team
-    void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type);
-    void SetArenaTeamInfoField(uint8 slot, ArenaTeamInfoType type, uint32 value);
-    uint32 GetArenaTeamId(uint8 slot) const
-    {
-        return GetUInt32Value(PLAYER_FIELD_PVP_INFO + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID);
-    }
     uint32 GetArenaPersonalRating(uint8 slot) const
     {
-        return GetUInt32Value(PLAYER_FIELD_PVP_INFO + (slot * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING);
+        return 0;
     }
-    void SetArenaTeamIdInvited(uint32 ArenaTeamId)
-    {
-        m_ArenaTeamIdInvited = ArenaTeamId;
-    }
-    uint32 GetArenaTeamIdInvited()
-    {
-        return m_ArenaTeamIdInvited;
-    }
+
     uint32 GetRBGPersonalRating() const
     {
         return 0;
@@ -3363,7 +3336,6 @@ class Player : public Unit, public GridObject<Player>
     void _LoadSpells(PreparedQueryResult result);
     bool _LoadHomeBind(PreparedQueryResult result);
     void _LoadDeclinedNames(PreparedQueryResult result);
-    void _LoadArenaTeamInfo(PreparedQueryResult result);
     void _LoadEquipmentSets(PreparedQueryResult result);
     void _LoadBGData(PreparedQueryResult result);
     void _LoadGlyphs(PreparedQueryResult result);
@@ -3464,7 +3436,6 @@ class Player : public Unit, public GridObject<Player>
     SkillStatusMap mSkillStatus;
 
     uint32 m_GuildIdInvited;
-    uint32 m_ArenaTeamIdInvited;
 
     PlayerMails m_mail;
     PlayerSpellMap m_spells;

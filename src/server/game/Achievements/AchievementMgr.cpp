@@ -1333,6 +1333,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 else
                     SetCriteriaProgress(achievementCriteria, miscValue1, referencePlayer, PROGRESS_ACCUMULATE);
                 break;
+                /*
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING:
             {
                 uint32 reqTeamType = achievementCriteria->highest_team_rating.teamtype;
@@ -1394,7 +1395,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     }
                 }
                 break;
-            }
+            }*/
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
                 SetCriteriaProgress(achievementCriteria, miscValue1, referencePlayer);
                 break;
