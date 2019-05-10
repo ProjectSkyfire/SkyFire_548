@@ -404,12 +404,8 @@ typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
 
 struct PlayerLevelInfo
 {
-    PlayerLevelInfo()
-    {
-        for (uint8 i = 0; i < MAX_STATS; ++i) stats [i] = 0;
-    }
-
-    uint8 stats [MAX_STATS];
+    PlayerLevelInfo() { }
+    uint8 stats[MAX_STATS] = { };
 };
 
 typedef std::list<uint32> PlayerCreateInfoSpells;
@@ -1104,7 +1100,7 @@ struct BGData
     uint32 bgTeam;                          ///< What side the player will be added to
 
     uint32 mountSpell;
-    uint32 taxiPath [2];
+    uint32 taxiPath[2] = { };
 
     WorldLocation joinPos;                  ///< From where player entered BG
 

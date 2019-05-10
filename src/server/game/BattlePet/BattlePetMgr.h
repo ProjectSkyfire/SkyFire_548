@@ -121,7 +121,7 @@ private:
 
     bool m_loadoutSave;
     uint8 m_loadoutFlags;
-    uint64 m_loadout[BATTLE_PET_MAX_LOADOUT_SLOTS];
+    uint64 m_loadout[BATTLE_PET_MAX_LOADOUT_SLOTS] = { };
 };
 
 #endif
