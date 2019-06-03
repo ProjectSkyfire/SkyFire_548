@@ -8531,7 +8531,7 @@ void ObjectMgr::LoadCreatureClassLevelStats()
         for (uint16 lvl = itr->second.minlevel; lvl <= itr->second.maxlevel; ++lvl)
         {
             if (_creatureBaseStatsStore.find(MAKE_PAIR16(lvl, itr->second.unit_class)) == _creatureBaseStatsStore.end())
-                SF_LOG_ERROR("sql.sql", "Missing base stats for creature class %u level %u", itr->second.unit_class, lvl);
+                SF_LOG_ERROR("sql.sql", "Missing base stats for creature entry %u, class %u, level %u", itr->second.Entry, itr->second.unit_class, lvl);
         }
     }
 
