@@ -153,6 +153,7 @@ class ReputationMgr
         void SetInactive(FactionState* faction, bool inactive) const;
         void SendVisible(FactionState const* faction) const;
         void UpdateRankCounters(ReputationRank old_rank, ReputationRank new_rank);
+        float GetLFGBonus(FactionEntry const* factionEntry);
     private:
         Player* _player;
         FactionStateList _factions;
