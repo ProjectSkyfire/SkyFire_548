@@ -109,8 +109,11 @@ namespace MMAP
         for (uint32 i = 0; i < files.size(); ++i)
         {
             mapID = uint32(atoi(files[i].substr(0, 4).c_str()));
-            m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, new std::set<uint32>));
-            count++;
+            if (m_tiles.find(mapID) == m_tiles.end())
+            {
+                m_tiles.insert(std::pair<uint32, std::set<uint32>*>(mapID, new std::set<uint32>));
+                count++;
+            }
         }
         printf("found %u.\n", count);
 
