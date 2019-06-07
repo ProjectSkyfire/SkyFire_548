@@ -24,7 +24,7 @@
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"
-#include "SystemConfig.h"
+#include "GitRevision.h"
 #include "SignalHandler.h"
 #include "World.h"
 #include "WorldRunnable.h"
@@ -128,7 +128,7 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
+    SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", GitRevision::GetFullVersion());
     SF_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");
 
     SF_LOG_INFO("server.worldserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
@@ -141,7 +141,7 @@ int Master::Run()
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
-    if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
+    if (confVersion < 2018101600)
     {
          SF_LOG_INFO("server.worldserver", "*****************************************************************************");
          SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
@@ -304,7 +304,7 @@ int Master::Run()
     // set server online (allow connecting now)
     LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, realmID);
 
-    SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", _FULLVERSION);
+    SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", GitRevision::GetFullVersion());
 
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
@@ -494,7 +494,7 @@ bool Master::_StartDB()
     ClearOnlineAccounts();
 
     ///- Insert version info into DB
-    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _HASH);        // One-time query
+    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", GitRevision::GetFullVersion(), GitRevision::GetHash());        // One-time query
 
     sWorld->LoadDBVersion();
 

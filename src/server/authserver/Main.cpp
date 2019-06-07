@@ -36,7 +36,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Configuration/Config.h"
 #include "Log.h"
-#include "SystemConfig.h"
+#include "GitRevision.h"
 #include "Util.h"
 #include "SignalHandler.h"
 #include "RealmList.h"
@@ -112,22 +112,14 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    SF_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
+    SF_LOG_INFO("server.authserver", "%s (authserver)", GitRevision::GetFullVersion());
     SF_LOG_INFO("server.authserver", "<Ctrl-C> to stop.\n");
-    
-    SF_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
-    SF_LOG_INFO("server.authserver", "  /\\  ___\\/\\ \\/ / /\\ \\_\\ \\/\\  ___/\\ \\/\\  == \\/\\  ___\\ ");
-    SF_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
-    SF_LOG_INFO("server.authserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
-    SF_LOG_INFO("server.authserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
-    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2019(c) Open-sourced Game Emulation ");
-    SF_LOG_INFO("server.authserver", "           <http://www.projectskyfire.org/> \n");
 
     SF_LOG_INFO("server.authserver", "Using configuration file %s.", configFile);
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
-    if (confVersion < SKYFIREAUTH_CONFIG_VERSION)
+    if (confVersion < 2017021900)
     {
         SF_LOG_INFO("server.authserver", "*****************************************************************************");
         SF_LOG_INFO("server.authserver", " WARNING: Your authserver.conf version indicates your conf file is out of date!");
