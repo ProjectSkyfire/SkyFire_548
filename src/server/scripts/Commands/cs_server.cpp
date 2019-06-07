@@ -30,7 +30,7 @@ EndScriptData */
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
-#include "SystemConfig.h"
+#include "GitRevision.h"
 
 class server_commandscript : public CommandScript
 {
@@ -111,7 +111,7 @@ public:
         std::string uptime          = secsToTimeString(sWorld->GetUptime());
         uint32 updateTime           = sWorld->GetUpdateTime();
 
-        handler->SendSysMessage(_FULLVERSION);
+		handler->PSendSysMessage("%s", GitRevision::GetFullVersion());
         handler->PSendSysMessage(LANG_CONNECTED_PLAYERS, playersNum, maxPlayersNum);
         handler->PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
