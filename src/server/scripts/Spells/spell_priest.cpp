@@ -153,41 +153,6 @@ class spell_pri_divine_aegis : public SpellScriptLoader
         }
 };
 
-class spell_pri_improved_power_word_shield : public SpellScriptLoader
-{
-    public:
-        spell_pri_improved_power_word_shield() : SpellScriptLoader("spell_pri_improved_power_word_shield") { }
-
-        class spell_pri_improved_power_word_shield_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_improved_power_word_shield_AuraScript);
-
-            void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
-            {
-                if (!spellMod)
-                {
-                    spellMod = new SpellModifier(GetAura());
-                    spellMod->op = SpellModOp(aurEff->GetMiscValue());
-                    spellMod->type = SPELLMOD_PCT;
-                    spellMod->spellId = GetId();
-                    spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
-                }
-
-                spellMod->value = aurEff->GetAmount();
-            }
-
-            void Register() OVERRIDE
-            {
-                DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_pri_improved_power_word_shield_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_pri_improved_power_word_shield_AuraScript();
-        }
-};
-
 // 37594 - Greater Heal Refund
 class spell_pri_item_greater_heal_refund : public SpellScriptLoader
 {
@@ -883,7 +848,6 @@ void AddSC_priest_spell_scripts()
 {
     new spell_pri_body_and_soul();
     new spell_pri_divine_aegis();
-    new spell_pri_improved_power_word_shield();
     new spell_pri_item_greater_heal_refund();
     new spell_pri_leap_of_faith_effect_trigger();
     new spell_pri_lightwell_renew();
