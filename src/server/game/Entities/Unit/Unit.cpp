@@ -8959,7 +8959,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             break;
         case SPELLFAMILY_PRIEST:
             // Smite
-            if (spellProto->SpellFamilyFlags [0] & 0x80)
+            if (spellProto->SpellFamilyFlags[0] & 0x00000080)
             {
                 // Glyph of Smite
                 if (AuraEffect* aurEff = GetAuraEffect(55692, 0))
@@ -8988,12 +8988,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (spellProto->SpellFamilyFlags [1] & 0x00400000 && IsPet())
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
-            break;
-        case SPELLFAMILY_DEATHKNIGHT:
-            // Sigil of the Vengeful Heart
-            if (spellProto->SpellFamilyFlags [0] & 0x2000)
-                if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
-                    DoneTotal += aurEff->GetAmount();
             break;
     }
 
