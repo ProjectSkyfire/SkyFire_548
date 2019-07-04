@@ -39,7 +39,7 @@ enum RogueSpells
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
     SPELL_ROGUE_OVERKILL_TALENT                     = 58426,
     SPELL_ROGUE_OVERKILL_POWER_REGEN                = 58427,
-    SPELL_ROGUE_SILCE_AND_DICE                      = 5171,
+    SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
 };
@@ -218,7 +218,7 @@ class spell_rog_cut_to_the_chase : public SpellScriptLoader
             void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                if (Aura* aur = GetTarget()->GetAura(SPELL_ROGUE_SILCE_AND_DICE))
+                if (Aura* aur = GetTarget()->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
                     aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
             }
 
