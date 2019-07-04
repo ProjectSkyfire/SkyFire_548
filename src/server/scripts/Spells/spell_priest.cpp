@@ -338,36 +338,6 @@ class spell_pri_mind_sear : public SpellScriptLoader
         }
 };
 
-// 47948 - Pain and Suffering (Proc)
-class spell_pri_pain_and_suffering_proc : public SpellScriptLoader
-{
-    public:
-        spell_pri_pain_and_suffering_proc() : SpellScriptLoader("spell_pri_pain_and_suffering_proc") { }
-
-        class spell_pri_pain_and_suffering_proc_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pri_pain_and_suffering_proc_SpellScript);
-
-            void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
-            {
-                // Refresh Shadow Word: Pain on target
-                if (Unit* unitTarget = GetHitUnit())
-                    if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetCaster()->GetGUID()))
-                        aur->GetBase()->RefreshDuration();
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_pri_pain_and_suffering_proc_SpellScript::HandleEffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_pri_pain_and_suffering_proc_SpellScript;
-        }
-};
-
 // 47540 - Penance
 class spell_pri_penance : public SpellScriptLoader
 {
@@ -825,7 +795,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_lightwell_renew();
     new spell_pri_mana_leech();
     new spell_pri_mind_sear();
-    new spell_pri_pain_and_suffering_proc();
     new spell_pri_penance();
     new spell_pri_phantasm();
     new spell_pri_power_word_shield();
