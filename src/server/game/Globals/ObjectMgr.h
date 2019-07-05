@@ -459,9 +459,9 @@ typedef std::pair<QuestRelations::const_iterator, QuestRelations::const_iterator
 
 struct PetLevelInfo
 {
-    PetLevelInfo() : health(0), mana(0), armor(0) { for (uint8 i=0; i < MAX_STATS; ++i) stats[i] = 0; }
+    PetLevelInfo() : health(0), mana(0), armor(0) { }
 
-    uint16 stats[MAX_STATS];
+    uint16 stats[MAX_STATS] = { };
     uint16 health;
     uint16 mana;
     uint16 armor;

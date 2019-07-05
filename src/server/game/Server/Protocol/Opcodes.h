@@ -1480,10 +1480,8 @@ typedef void(WorldSession::*pOpcodeHandler)(WorldPacket& recvPacket);
 
 struct OpcodeHandler
 {
-    OpcodeHandler() {}
-
     OpcodeHandler(uint16 opcodeNumber, char const* _name, SessionStatus _status, PacketProcessing _processing, pOpcodeHandler _handler)
-        : OpcodeNumber(opcodeNumber), Handler(_handler), Name(_name), Status(_status), ProcessingPlace(_processing) {}
+        : Handler(_handler), Name(_name), Status(_status), ProcessingPlace(_processing), OpcodeNumber(opcodeNumber) { }
 
     pOpcodeHandler Handler;
     char const* Name;

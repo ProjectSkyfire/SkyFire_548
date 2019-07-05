@@ -766,7 +766,7 @@ enum EquipmentSetUpdateState
 
 struct EquipmentSet
 {
-    EquipmentSet() : Guid(0), IgnoreMask(0), state(EQUIPMENT_SET_NEW)
+    EquipmentSet() : Guid(0), Name(""), IconName(""), IgnoreMask(0), state(EQUIPMENT_SET_NEW)
     {
         for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
             Items [i] = 0;
@@ -776,7 +776,7 @@ struct EquipmentSet
     std::string Name;
     std::string IconName;
     uint32 IgnoreMask;
-    uint32 Items [EQUIPMENT_SLOT_END];
+    uint32 Items[EQUIPMENT_SLOT_END] = { };
     EquipmentSetUpdateState state;
 };
 
@@ -1259,34 +1259,20 @@ class KillRewarder
 struct PlayerTalentInfo
 {
     PlayerTalentInfo() : UsedTalentCount(0), ResetTalentsCost(0), ResetTalentsTime(0),
-        ResetSpecializationCost(0), ActiveSpec(0), SpecsCount(1), ResetSpecializationTime(0)
-    {
-        for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
-        {
-            SpecInfo [i].Talents = new PlayerTalentMap();
-            memset(SpecInfo [i].Glyphs, 0, MAX_GLYPH_SLOT_INDEX * sizeof(uint32));
-            SpecInfo [i].TalentTree = 0;
-            SpecInfo [i].SpecializationId = 0;
-        }
-    }
+        ResetSpecializationCost(0), ResetSpecializationTime(0), ActiveSpec(0), SpecsCount(1) { }
 
-    ~PlayerTalentInfo()
-    {
-        for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
-        {
-            for (PlayerTalentMap::const_iterator itr = SpecInfo [i].Talents->begin(); itr != SpecInfo [i].Talents->end(); ++itr)
-                delete itr->second;
-            delete SpecInfo [i].Talents;
-        }
-    }
+    ~PlayerTalentInfo() { }
 
     struct TalentSpecInfo
     {
+        TalentSpecInfo() : Talents(nullptr), TalentTree(0), SpecializationId(0) { }
+        ~TalentSpecInfo() { }
+
         PlayerTalentMap* Talents;
-        uint32 Glyphs [MAX_GLYPH_SLOT_INDEX];
+        uint32 Glyphs[MAX_GLYPH_SLOT_INDEX] = { };
         uint32 TalentTree;
         uint32 SpecializationId;
-    } SpecInfo [MAX_TALENT_SPECS];
+    } SpecInfo[MAX_TALENT_SPECS] = { };
 
     uint32 UsedTalentCount;
     uint32 ResetTalentsCost;
