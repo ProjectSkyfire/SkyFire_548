@@ -146,8 +146,6 @@ class ArenaTeam
 
         void MassInviteToEvent(WorldSession* session);
 
-        void Roster(WorldSession* session);
-        void Query(WorldSession* session);
         void SendStats(WorldSession* session);
 
         static int32 GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
