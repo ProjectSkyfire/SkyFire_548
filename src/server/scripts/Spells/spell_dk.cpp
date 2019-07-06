@@ -59,7 +59,6 @@ enum DeathKnightSpells
     SPELL_DK_SCENT_OF_BLOOD = 50422,
     SPELL_DK_SCOURGE_STRIKE_TRIGGERED = 70890,
     SPELL_DK_UNHOLY_PRESENCE = 48265,
-    SPELL_DK_WILL_OF_THE_NECROPOLIS = 96171
 };
 
 // Gorefiend's Grasp - 108199
@@ -1111,58 +1110,6 @@ class spell_dk_vampiric_blood : public SpellScriptLoader
     }
 };
 
-// -52284 - Will of the Necropolis
-class spell_dk_will_of_the_necropolis : public SpellScriptLoader
-{
-    public:
-    spell_dk_will_of_the_necropolis() : SpellScriptLoader("spell_dk_will_of_the_necropolis")
-    { }
-
-    class spell_dk_will_of_the_necropolis_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dk_will_of_the_necropolis_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DK_WILL_OF_THE_NECROPOLIS))
-            return false;
-            return true;
-        }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-        {
-            //! HACK due to currenct proc system implementation
-            if (Player* player = GetTarget()->ToPlayer())
-                if (player->HasSpellCooldown(GetId()))
-                    return false;
-
-            return GetTarget()->HealthBelowPctDamaged(30, eventInfo.GetDamageInfo()->GetDamage());
-        }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-        {
-            GetTarget()->CastSpell(GetTarget(), SPELL_DK_WILL_OF_THE_NECROPOLIS, true, NULL, aurEff);
-
-            if (Player* player = GetTarget()->ToPlayer())
-            {
-                player->RemoveSpellCooldown(SPELL_DK_RUNE_TAP, true);
-                player->AddSpellCooldown(GetId(), 0, time(NULL) + 45);
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            DoCheckProc += AuraCheckProcFn(spell_dk_will_of_the_necropolis_AuraScript::CheckProc);
-            OnEffectProc += AuraEffectProcFn(spell_dk_will_of_the_necropolis_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_dk_will_of_the_necropolis_AuraScript();
-    }
-};
-
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1183,5 +1130,4 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_scent_of_blood();
     new spell_dk_scourge_strike(); // 5.4.8 18414
     new spell_dk_vampiric_blood();
-    new spell_dk_will_of_the_necropolis();
 }
