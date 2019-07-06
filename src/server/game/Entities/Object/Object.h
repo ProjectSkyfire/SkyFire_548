@@ -152,6 +152,7 @@ class Object
         void BuildOutOfRangeUpdateBlock(UpdateData* data) const;
 
         virtual void DestroyForPlayer(Player* target, bool onDeath = false) const;
+        void SendDestroyObject(Player* target, ObjectGuid Guid, bool onDeath = false) const;
 
         int32 GetInt32Value(uint16 index) const;
         uint32 GetUInt32Value(uint16 index) const;

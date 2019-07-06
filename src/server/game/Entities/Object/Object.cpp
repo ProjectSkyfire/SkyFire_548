@@ -307,34 +307,19 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
             }
         }
     }
+    SendDestroyObject(target, GetObjectGUID(), onDeath);
+}
 
-    WorldPacket data(SMSG_DESTROY_OBJECT, 2 + 8);
-    ObjectGuid guid(GetGUID());
-
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[1]);
-
+void Object::SendDestroyObject(Player* target, ObjectGuid Guid, bool onDeath) const
+{
+    WorldPacket data(SMSG_DESTROY_OBJECT, 1 + 8);
+    data.WriteGuidMask(Guid, 3, 2, 4, 1);
     //! If the following bool is true, the client will call "void CGUnit_C::OnDeath()" for this object.
     //! OnDeath() does for eg trigger death animation and interrupts certain spells/missiles/auras/sounds...
     data.WriteBit(onDeath);
-
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
+    data.WriteGuidMask(Guid, 7, 0, 6, 5);
     data.FlushBits();
-
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[5]);
-
+    data.WriteGuidBytes(Guid, 0, 4, 7, 2, 6, 3, 1, 5);
     target->GetSession()->SendPacket(&data);
 }
 
