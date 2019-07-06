@@ -56,7 +56,6 @@ enum DeathKnightSpells
     SPELL_DK_IMPROVED_FROST_PRESENCE_TRIGGERED = 63621,
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_R1 = 50391,
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
-    SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS = 64736,
     SPELL_DK_MASTER_OF_GHOULS = 52143,
     SPELL_DK_RUNIC_CORRUPTION_REGEN = 51460,
@@ -550,11 +549,7 @@ class spell_dk_death_coil : public SpellScriptLoader
                     caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_HEAL, &bp, NULL, NULL, true);
                 }
                 else
-                {
-                    if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART, EFFECT_1))
-                        damage += auraEffect->GetBaseAmount();
                     caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
-                }
             }
         }
 
