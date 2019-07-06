@@ -1259,13 +1259,36 @@ class KillRewarder
 struct PlayerTalentInfo
 {
     PlayerTalentInfo() : UsedTalentCount(0), ResetTalentsCost(0), ResetTalentsTime(0),
-        ResetSpecializationCost(0), ResetSpecializationTime(0), ActiveSpec(0), SpecsCount(1) { }
+        ResetSpecializationCost(0), ResetSpecializationTime(0), ActiveSpec(0), SpecsCount(1)
+    {
+        for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
+        {
+            SpecInfo[i].Talents = new PlayerTalentMap();
+            SpecInfo[i].TalentTree = 0;
+            SpecInfo[i].SpecializationId = 0;
+        }
+    }
 
-    ~PlayerTalentInfo() { }
+    ~PlayerTalentInfo()
+    {
+        for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
+        {
+            for (PlayerTalentMap::const_iterator itr = SpecInfo[i].Talents->begin(); itr != SpecInfo[i].Talents->end(); ++itr)
+                delete itr->second;
+            delete SpecInfo[i].Talents;
+        }
+    }
 
     struct TalentSpecInfo
     {
-        TalentSpecInfo() : Talents(nullptr), TalentTree(0), SpecializationId(0) { }
+        TalentSpecInfo() : Talents(NULL), TalentTree(0), SpecializationId(0)
+        {
+            for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+            {
+                Glyphs[i] = 0;
+            }
+        }
+
         ~TalentSpecInfo() { }
 
         PlayerTalentMap* Talents;
