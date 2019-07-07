@@ -179,8 +179,6 @@ void BlackMarketMgr::LoadBlackMarketAuctions()
 
 void BlackMarketMgr::Update()
 {
-    uint32 curTime = time(NULL);
-
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     // Delete expired auctions

@@ -4901,130 +4901,73 @@ void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVict
 
 void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 {
+    std::vector<SpellPeriodicAuraLogInfo> Entries;
     AuraEffect const* aura = pInfo->auraEff;
-    ObjectGuid casterGuid = aura->GetCasterGUID();
-    ObjectGuid targetGuid = GetGUID();
+    ObjectGuid CasterGUID = aura->GetCasterGUID();
+    ObjectGuid TargetGUID = GetGUID();
 
     WorldPacket data(SMSG_SPELL_PERIODIC_AURA_LOG, 30);
 
-    data.WriteBit(targetGuid [7]);
-    data.WriteBit(casterGuid [0]);
-    data.WriteBit(casterGuid [7]);
-    data.WriteBit(targetGuid [1]);
-    data.WriteBits(1, 21); // Count
+    data.WriteGuidMask(TargetGUID, 7);
+    data.WriteGuidMask(CasterGUID, 0, 7);
+    data.WriteGuidMask(TargetGUID, 1);
+    data.WriteBits(Entries.size(), 21); // SpellPeriodicAuraLogInfo
+    data.WriteGuidMask(TargetGUID, 0);
 
-    // Count loop here
-    data.WriteBit(pInfo->critical);
-    size_t pos = data.bitwpos();
-
-    data.WriteBit(targetGuid [0]);
-
-    // All sent for now, will mess with it l8 ^^
-    switch (aura->GetAuraType())
+    for (SpellPeriodicAuraLogInfo const& entry : Entries)
     {
-
-        case SPELL_AURA_PERIODIC_DAMAGE:
-        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-            data.WriteBit(0); // Int 2 -- OverKill
-            data.WriteBit(0); // Int 4 -- Absorb
-            data.WriteBit(0); // Int 3 -- SchoolMask
-            data.WriteBit(0); // Int 5 -- Resist
-            break;
-        case SPELL_AURA_PERIODIC_HEAL:
-        case SPELL_AURA_OBS_MOD_HEALTH:
-            data.WriteBit(0); // Int 2 -- OverHeal
-            data.WriteBit(0); // Int 4 -- Absorb
-            data.WriteBit(0); // Int 3 -- SchoolMask
-            data.WriteBit(1); // Int 5
-            break;
-        case SPELL_AURA_OBS_MOD_POWER:
-        case SPELL_AURA_PERIODIC_ENERGIZE:
-            data.WriteBit(1); // Int 2
-            data.WriteBit(1); // Int 4
-            data.WriteBit(0); // Int 3
-            data.WriteBit(1); // Int 5
-        case SPELL_AURA_PERIODIC_MANA_LEECH:
-            data.WriteBit(1); // Int 2
-            data.WriteBit(1); // Int 4
-            data.WriteBit(0); // Int 3
-            data.WriteBit(1); // Int 5
-            break;
-        default:
-            data.WriteBit(1); // Int 2
-            data.WriteBit(1); // Int 4
-            data.WriteBit(1); // Int 3
-            data.WriteBit(1); // Int 5
-            break;
+        data.WriteBit(!entry.overDamage);
+        data.WriteBit(!entry.absorb);
+        data.WriteBit(entry.critical);
+        data.WriteBit(!entry.resist);
+        data.WriteBit(!entry.power);
     }
 
-    data.WriteBit(targetGuid [5]);
-    data.WriteBit(targetGuid [3]);
-    data.WriteBit(casterGuid [1]);
-    data.WriteBit(targetGuid [2]);
-    data.WriteBit(casterGuid [6]);
-    data.WriteBit(casterGuid [3]);
-    data.WriteBit(casterGuid [4]);
-    data.WriteBit(0); // Power data
-    data.WriteBit(casterGuid [2]);
-    data.WriteBit(targetGuid [6]);
-    data.WriteBit(casterGuid [5]);
-    data.WriteBit(casterGuid [4]);
+    data.WriteGuidMask(TargetGUID, 5, 3);
+    data.WriteGuidMask(CasterGUID, 1);
+    data.WriteGuidMask(TargetGUID, 2);
+    data.WriteGuidMask(CasterGUID, 6, 3, 4);
+    data.WriteBit(0); // PeriodicAuraLogEffectDebugInfo
+    data.WriteGuidMask(CasterGUID, 2);
+    data.WriteGuidMask(TargetGUID, 6);
+    data.WriteGuidMask(CasterGUID, 5);
+    data.WriteGuidMask(TargetGUID, 4);
     data.FlushBits();
 
-    // Switch Loop
-    data << uint32(aura->GetAuraType());                    // auraId
-    switch (aura->GetAuraType())
+    for (SpellPeriodicAuraLogInfo const& entry : Entries)
     {
-
-        case SPELL_AURA_PERIODIC_DAMAGE:
-        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        if (entry.overDamage)
             data << uint32(pInfo->overDamage);              // overkill
-            data << uint32(pInfo->absorb);                  // absorb
-            data << uint32(pInfo->damage);                  // damage
+
+        data << uint32(pInfo->damage);                      // amount
+        data << uint32(aura->GetAuraType());
+
+        if (entry.resist)
             data << uint32(pInfo->resist);                  // resist
-            data << uint32(aura->GetSpellInfo()->GetSchoolMask());
-            break;
-        case SPELL_AURA_PERIODIC_HEAL:
-        case SPELL_AURA_OBS_MOD_HEALTH:
-            data << uint32(pInfo->overDamage);              // overheal
+
+        if (entry.absorb);
             data << uint32(pInfo->absorb);                  // absorb
-            data << uint32(pInfo->damage);                  // damage
-            data << uint32(aura->GetSpellInfo()->GetSchoolMask());
-            break;
-        case SPELL_AURA_OBS_MOD_POWER:
-        case SPELL_AURA_PERIODIC_ENERGIZE:
-            data << uint32(pInfo->damage);                  // damage
-            data << uint32(aura->GetMiscValue());           // power type
-            break;
-        case SPELL_AURA_PERIODIC_MANA_LEECH:
-            data << uint32(pInfo->damage);                  // amount
-            data << uint32(aura->GetMiscValue());           // power type
-            //data << float(pInfo->multiplier);               // gain multiplier
-            break;
-        default:
-            SF_LOG_ERROR("entities.unit", "Unit::SendPeriodicAuraLog: unknown aura %u", uint32(aura->GetAuraType()));
-            data << uint32(0); // Mask
-            break;
+
+        if (entry.power)
+            data << uint32(pInfo->power);                   // power
     }
 
-    data.WriteByteSeq(casterGuid [5]);
-    data.WriteByteSeq(casterGuid [3]);
-    data.WriteByteSeq(targetGuid [4]);
-    data << uint32(aura->GetId());                          // spellId
-    data.WriteByteSeq(targetGuid [6]);
-    data.WriteByteSeq(casterGuid [7]);
-    data.WriteByteSeq(casterGuid [1]);
-    data.WriteByteSeq(targetGuid [5]);
-    data.WriteByteSeq(casterGuid [0]);
-    data.WriteByteSeq(targetGuid [1]);
-    data.WriteByteSeq(targetGuid [7]);
-    data.WriteByteSeq(casterGuid [4]);
-    data.WriteByteSeq(targetGuid [3]);
-    data.WriteByteSeq(casterGuid [2]);
-    data.WriteByteSeq(targetGuid [0]);
-    data.WriteByteSeq(targetGuid [2]);
-    data.WriteByteSeq(casterGuid [6]);
+    data.WriteGuidBytes(CasterGUID, 5, 3);
+    data.WriteGuidBytes(TargetGUID, 4);
+    data << int32(aura->GetId());                           // auraId
+    data.WriteGuidBytes(TargetGUID, 6);
+    data.WriteGuidBytes(CasterGUID, 7, 1);
 
+    // for (PeriodicAuraLogEffectDebugInfo : DebugInfo)
+
+    data.WriteGuidBytes(TargetGUID, 5);
+    data.WriteGuidBytes(CasterGUID, 0); 
+    data.WriteGuidBytes(TargetGUID, 1, 7);
+    data.WriteGuidBytes(CasterGUID, 4);
+    data.WriteGuidBytes(TargetGUID, 3);
+    data.WriteGuidBytes(CasterGUID, 2);
+    data.WriteGuidBytes(TargetGUID, 0, 2);
+    data.WriteGuidBytes(CasterGUID, 6); 
     SendMessageToSet(&data, true);
 }
 

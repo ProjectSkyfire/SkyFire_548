@@ -1076,8 +1076,8 @@ struct SpellNonMeleeDamage
 
 struct SpellPeriodicAuraLogInfo
 {
-    SpellPeriodicAuraLogInfo(AuraEffect const* _auraEff, uint32 _damage, uint32 _overDamage, uint32 _absorb, uint32 _resist, float _multiplier, bool _critical)
-        : auraEff(_auraEff), damage(_damage), overDamage(_overDamage), absorb(_absorb), resist(_resist), multiplier(_multiplier), critical(_critical)
+    SpellPeriodicAuraLogInfo(AuraEffect const* _auraEff, uint32 _damage, uint32 _overDamage, uint32 _absorb, uint32 _resist, uint32 _power, float _multiplier, bool _critical)
+        : auraEff(_auraEff), damage(_damage), overDamage(_overDamage), absorb(_absorb), resist(_resist), power(_power), multiplier(_multiplier), critical(_critical)
     { }
 
     AuraEffect const* auraEff;
@@ -1085,6 +1085,7 @@ struct SpellPeriodicAuraLogInfo
     uint32 overDamage;                                      // overkill/overheal
     uint32 absorb;
     uint32 resist;
+    uint32 power;
     float  multiplier;
     bool   critical;
 };
