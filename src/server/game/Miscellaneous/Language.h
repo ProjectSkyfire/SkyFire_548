@@ -806,6 +806,7 @@ enum SkyFireStrings
     LANG_NPCINFO_REFORGER               = 882,
     LANG_NPCINFO_TRANSMOGRIFIER         = 883,
     LANG_NPCINFO_VAULTKEEPER            = 884,
+    LANG_NPCINFO_WILDPET_CAPTURABLE     = 885,
 
     // Pinfo commands
     LANG_PINFO_PLAYER                   = 453,
@@ -859,7 +860,11 @@ enum SkyFireStrings
     //                                  = 879, see LANG_PINFO_CHR_REGMAILS
     LANG_ACCOUNT_SEC_TYPE               = 880,
     LANG_RBAC_EMAIL_REQUIRED            = 881,
-    // Room for in-game strings           885-999 not used
+    //                                  = 882, see LANG_NPCINFO_REFORGER
+    //                                  = 883, see LANG_NPCINFO_TRANSMOGRIFIER
+    //                                  = 884, see LANG_NPCINFO_VAULTKEEPER
+    //                                  = 885, see LANG_NPCINFO_WILDPET_CAPTURABLE
+    // Room for in-game strings           886-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
