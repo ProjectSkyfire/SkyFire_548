@@ -48,7 +48,7 @@ For further information on the SkyFire project, please visit our project website
 + CMake = 3.13.1/3.5.1 (Windows / Linux)
 + OpenSSL = 1.1.1/1.1.0G (Windows / Linux)
 + GCC = 8.1.0 (Linux only)
-+ MS Visual Studio = 15 (2017) (Windows only)
++ MS Visual Studio = 16 (2019) (Windows only)
 
 ## Install
 Detailed installation guides are available in the wiki for
