@@ -1296,8 +1296,10 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(buttonStream[0]);
 
     ActionButtonPACKET* button = reinterpret_cast<ActionButtonPACKET*>(&buttonStream);
+    button->id = ACTION_BUTTON_ACTION(buttonStream);
+    button->unk = ACTION_BUTTON_TYPE(buttonStream);
 
-    SF_LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON slotId: %u actionId: %u", slotId, button->id);
+    SF_LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON slotId: %u actionId: %u buttontype: %u", slotId, button->id, button->unk);
 
     if (!button->id)
         GetPlayer()->removeActionButton(slotId);

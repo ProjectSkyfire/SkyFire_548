@@ -6808,7 +6808,8 @@ void Player::SendActionButtons(uint32 state) const
         }
 
         buttonsTab[i].id = ab->GetAction();
-        buttonsTab[i].unk = uint32(ab->GetType());
+        buttonsTab[i].unk = uint32(ab->GetType()) << 56;
+
     }
 
     // Bits
