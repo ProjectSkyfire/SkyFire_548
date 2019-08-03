@@ -331,7 +331,7 @@ enum ActionButtonUpdateState
     ACTIONBUTTON_DELETED    = 3
 };
 
-enum ActionButtonType
+enum ActionButtonType : uint8
 {
     ACTION_BUTTON_SPELL    = 0x00,
     ACTION_BUTTON_C        = 0x01,
