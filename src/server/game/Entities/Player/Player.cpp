@@ -6808,7 +6808,10 @@ void Player::SendActionButtons(uint32 state) const
         }
 
         buttonsTab[i].id = ab->GetAction();
-        buttonsTab[i].unk = uint32(uint8(ab->GetType()) << 56);
+        buttonsTab[i].unk = ab->GetHiType();
+
+        SF_LOG_DEBUG("network", "SendActionButtons actionId: %u lowtype: %u hiType: %u", ab->GetAction(), ab->GetType(), ab->GetHiType());
+
 
     }
 

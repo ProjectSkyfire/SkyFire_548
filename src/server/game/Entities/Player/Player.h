@@ -370,6 +370,10 @@ struct ActionButton
     { 
         return ActionButtonType(ACTION_BUTTON_TYPE(packedData)); 
     }
+    uint32 GetHiType() const
+    {
+        return uint32(GetType() << 24);
+    }
     uint32 GetAction() const 
     { 
         return ACTION_BUTTON_ACTION(packedData); 
