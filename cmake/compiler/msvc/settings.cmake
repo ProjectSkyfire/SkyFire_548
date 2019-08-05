@@ -12,27 +12,11 @@
 # set up output paths for executable binaries (.exe-files, and .dll-files on DLL-capable platforms)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-
+include(CheckCXXCompilerFlag)
   
-if(${CMAKE_VERSION} VERSION_LESS "3.14")
-  # Check C++14 compiler support
-  include(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-  if(COMPILER_SUPPORTS_CXX14)
-    set(CMAKE_CXX_STANDARD 14)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  else()
-    message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++14!")
-  endif()
-  set(MSVC_EXPECTED_VERSION 19.16.27027.1)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
-    message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2017) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
-  endif()
-else()
-  set(MSVC_EXPECTED_VERSION 19.20.27323.0)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
-    message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2019) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
-  endif()
+set(MSVC_EXPECTED_VERSION 19.22.27905.0)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
+  message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2019) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 
 
@@ -81,6 +65,21 @@ if(NOT WITH_WARNINGS)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619 /wd4512")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619 /wd4512")
   message(STATUS "MSVC: Disabled generic compiletime warnings")
+endif()
+
+if(WITH_CXX_17_STD)
+  if(NOT WITH_CXX_DRAFT_STD)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+    message(STATUS "MSVC: C++17 Standard Enabled.")
+  else()
+    message(FATAL_ERROR "MSVC: Only 1 CXX Standard can be used!")
+  endif()
+endif()
+if(WITH_CXX_DRAFT_STD)
+  if(NOT WITH_CXX_17_STD)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+    message(STATUS "MSVC: C++ Draft Standard Enabled.")
+  endif()
 endif()
 
 # Specify the maximum PreCompiled Header memory allocation limit

@@ -15,9 +15,9 @@ set(ACE_LIBRARY "ace")
 set(BZIP2_LIBRARIES "bzip2")
 set(ZLIB_LIBRARIES "zlib")
  	
-# We require at least Visual Studio 15 2017(aka 14.0) which has version nr 1900.		
-IF(NOT FORCE_UNSUPPORTED_COMPILER AND MSVC_VERSION LESS 1900)		
-  MESSAGE(FATAL_ERROR "Visual Studio 15 2017 or newer is required!")		
+# We require at least Visual Studio 16 2019(aka 16.0) which has version nr 1920.		
+IF(NOT FORCE_UNSUPPORTED_COMPILER AND MSVC_VERSION LESS 1920)		
+  MESSAGE(FATAL_ERROR "Visual Studio 16 2019 or newer is required!")		
 ENDIF()
 
 # check the CMake preload parameters (commented out by default)
