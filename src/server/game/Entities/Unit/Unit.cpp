@@ -4945,7 +4945,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
         if (entry.resist)
             data << uint32(pInfo->resist);                  // resist
 
-        if (entry.absorb);
+        if (entry.absorb)
             data << uint32(pInfo->absorb);                  // absorb
 
         if (entry.power)

@@ -97,7 +97,7 @@ enum MiscInfo
     MAX_BONE_SPIKE_IMMUNE           = 3,
 };
 
-class BoneSpikeTargetSelector : public std::unary_function<Unit*, bool>
+class BoneSpikeTargetSelector : public SF_UNARY_FUNCTION<Unit*, bool>
 {
     public:
         BoneSpikeTargetSelector(UnitAI* ai) : _ai(ai) { }

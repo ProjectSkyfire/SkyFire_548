@@ -205,7 +205,7 @@ class npc_eyestalk : public CreatureScript
         }
 };
 
-class FocusedFireTargetSelector : public std::unary_function<Unit *, bool>
+class FocusedFireTargetSelector : public SF_UNARY_FUNCTION<Unit *, bool>
 {
     public:
         FocusedFireTargetSelector(Creature* me, const Unit* victim) : _me(me), _victim(victim) { }

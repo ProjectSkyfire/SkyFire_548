@@ -26,6 +26,7 @@ SDComment:
 SDCategory:
 Script Data End */
 
+#include <random>
 #include <algorithm>
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -109,18 +110,22 @@ public:
         uint32 uiWaitingTimer;
         Phase currentPhase;
         uint8 AddCount;
-        Phase Sequence[4];
+        Phase Sequence[5];
 
         InstanceScript* instance;
 
         void Reset() OVERRIDE
         {
             /// There is a good reason to store them like this, we are going to shuffle the order.
-            for (uint32 i = PHASE_FRENZIED_WORGEN; i < PHASE_GORTOK_PALEHOOF; ++i)
+            for (uint32 i = PHASE_FRENZIED_WORGEN; i < PHASE_NONE; ++i)
                 Sequence[i] = Phase(i);
 
+            std::vector<int> v = { Sequence[0], Sequence[1], Sequence[2], Sequence[3], Sequence[4] };
+            std::random_device rd;
+            std::mt19937 g(rd());
+
             /// This ensures a random order and only executes each phase once.
-            std::random_shuffle(Sequence, Sequence + PHASE_GORTOK_PALEHOOF);
+            std::shuffle(v.begin(), v.end(), g);
 
             uiArcingSmashTimer = 15000;
             uiImpaleTimer = 12000;
