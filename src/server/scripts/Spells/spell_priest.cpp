@@ -31,6 +31,7 @@
 
 enum PriestSpells
 {
+    SPELL_PRIEST_EVANGELISM_PROC                    = 81661,
     SPELL_PRIEST_BODY_AND_SOUL_SPEED                = 65081,
     SPELL_PRIEST_DIVINE_AEGIS                       = 47753,
     SPELL_PRIEST_DIVINE_TOUCH                       = 63544,
@@ -64,6 +65,43 @@ enum PriestSpellIcons
 enum MiscSpells
 {
     SPELL_GEN_REPLENISHMENT                         = 57669
+};
+
+class spell_pri_evangelism : public SpellScriptLoader
+{
+    public:
+        spell_pri_evangelism() : SpellScriptLoader("spell_pri_evangelism"){ }
+
+        class spell_pri_evangelism_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_evangelism_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_EVANGELISM_PROC))
+                    return false;
+                return true;
+            }
+            void HandleEffectStackProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                // Proc only with Penance, Holy Fire, Smite
+                if (!(eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[1] & 0x00800000 ||
+                    eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x00100000 ||
+                    eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x00000080))
+                    return;
+
+                GetTarget()->CastCustomSpell(SPELL_PRIEST_EVANGELISM_PROC, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), eventInfo.GetProcTarget(), true, NULL, aurEff);
+            }
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_pri_evangelism_AuraScript::HandleEffectStackProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_pri_evangelism_AuraScript();
+        } 
 };
 
 class spell_pri_body_and_soul : public SpellScriptLoader
@@ -788,6 +826,7 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
 
 void AddSC_priest_spell_scripts()
 {
+    new spell_pri_evangelism();
     new spell_pri_body_and_soul();
     new spell_pri_divine_aegis();
     new spell_pri_item_greater_heal_refund();
