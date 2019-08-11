@@ -449,40 +449,6 @@ class spell_pri_penance : public SpellScriptLoader
         }
 };
 
-// -47569 - Phantasm
-class spell_pri_phantasm : public SpellScriptLoader
-{
-    public:
-        spell_pri_phantasm() : SpellScriptLoader("spell_pri_phantasm") { }
-
-        class spell_pri_phantasm_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_phantasm_AuraScript);
-
-            bool CheckProc(ProcEventInfo& /*eventInfo*/)
-            {
-                return roll_chance_i(GetEffect(EFFECT_0)->GetAmount());
-            }
-
-            void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-            {
-                PreventDefaultAction();
-                GetTarget()->RemoveMovementImpairingAuras();
-            }
-
-            void Register() OVERRIDE
-            {
-                DoCheckProc += AuraCheckProcFn(spell_pri_phantasm_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_pri_phantasm_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_pri_phantasm_AuraScript();
-        }
-};
-
 // 17 - Power Word: Shield
 class spell_pri_power_word_shield : public SpellScriptLoader
 {
@@ -835,7 +801,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mana_leech();
     new spell_pri_mind_sear();
     new spell_pri_penance();
-    new spell_pri_phantasm();
     new spell_pri_power_word_shield();
     new spell_pri_prayer_of_mending_heal();
     new spell_pri_renew();
