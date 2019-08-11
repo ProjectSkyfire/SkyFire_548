@@ -141,7 +141,7 @@ class spell_pri_body_and_soul : public SpellScriptLoader
         }
 };
 
-// -47509 - Divine Aegis
+// 47515 - Divine Aegis
 class spell_pri_divine_aegis : public SpellScriptLoader
 {
     public:
