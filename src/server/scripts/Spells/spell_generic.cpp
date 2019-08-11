@@ -3622,7 +3622,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_increase_stats_buff("spell_pal_blessing_of_might");
     new spell_gen_increase_stats_buff("spell_dru_mark_of_the_wild");
     new spell_gen_increase_stats_buff("spell_pri_power_word_fortitude");
-    new spell_gen_increase_stats_buff("spell_pri_shadow_protection");
     new spell_gen_increase_stats_buff("spell_mage_arcane_brilliance");
     new spell_gen_increase_stats_buff("spell_mage_dalaran_brilliance");
     new spell_gen_interrupt();
