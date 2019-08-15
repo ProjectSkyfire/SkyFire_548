@@ -451,7 +451,7 @@ bool Group::AddMember(Player* player)
             if (player->GetRaidDifficulty() != GetRaidDifficulty())
             {
                 player->SetRaidDifficulty(GetRaidDifficulty());
-                player->SendRaidDifficulty(true);
+                player->SendRaidDifficulty();
             }
         }
     }
@@ -2357,7 +2357,7 @@ void Group::SetRaidDifficulty(DifficultyID difficulty)
             continue;
 
         player->SetRaidDifficulty(difficulty);
-        player->SendRaidDifficulty(true);
+        player->SendRaidDifficulty();
     }
 }
 

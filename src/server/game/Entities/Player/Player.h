@@ -2495,7 +2495,7 @@ class Player : public Unit, public GridObject<Player>
     void SendExplorationExperience(uint32 Area, uint32 Experience);
 
     void SendDungeonDifficulty(/*bool IsInGroup*/);
-    void SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty = -1);
+    void SendRaidDifficulty(/*bool IsInGroup,*/ int32 forcedDifficulty = -1);
     void ResetInstances(uint8 method, bool isRaid);
     void SendResetInstanceSuccess(uint32 MapId);
     void SendResetInstanceFailed(uint32 reason, uint32 MapId);
