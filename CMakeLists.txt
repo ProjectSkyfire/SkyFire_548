@@ -13,7 +13,7 @@
 project(Project_Skyfire)
 
 if( UNIX )
-  cmake_minimum_required(VERSION 3.5.1)
+  cmake_minimum_required(VERSION 3.10.2)
 else()
   cmake_minimum_required(VERSION 3.15.1)
 endif()
@@ -54,13 +54,8 @@ endif()
 
 include(CheckPlatform)
 
-if( UNIX )
-  set(OPENSSL_EXPECTED_VERSION 1.1.0)
-else()
-  set(OPENSSL_EXPECTED_VERSION 1.1.1)
-endif()
-
-set(ACE_EXPECTED_VERSION 6.3.3)
+set(OPENSSL_EXPECTED_VERSION 1.1.1)
+set(ACE_EXPECTED_VERSION 6.4.5)
 
 find_package(PCHSupport)
 find_package(ACE REQUIRED)

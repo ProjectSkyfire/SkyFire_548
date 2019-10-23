@@ -35,7 +35,7 @@ For further information on the SkyFire project, please visit our project website
   + Canonical:
     + Ubuntu 18.04 LTS: x86_32, x86_64
   + Debian:
-    + Debian GNU/Linux 9: x86_32, x86_64
+    + Debian GNU/Linux 10: x86_32, x86_64
   + Windows / Windows Server:
     + Windows 10:               x86_64
     + Windows 8.1:              x86_64
@@ -45,7 +45,7 @@ For further information on the SkyFire project, please visit our project website
 + ACE = 6.4.5  (Linux only)
 + MySQL = 8.0 (Windows / Linux)
 + CMake = 3.13.1/3.10.2 (Windows / Linux)
-+ OpenSSL = 1.1.1/1.1.1 (Windows / Linux)
++ OpenSSL = 1.1.1 (Windows / Linux)
 + GCC = 9.2.1 (Linux only)
 + MS Visual Studio = 16 (2019) (Windows only)
 
