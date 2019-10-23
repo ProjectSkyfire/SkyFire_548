@@ -34,7 +34,6 @@ For further information on the SkyFire project, please visit our project website
 + Platform/Architecture:
   + Canonical:
     + Ubuntu 18.04 LTS: x86_32, x86_64
-    + Ubuntu 16.04 LTS: x86_32, x86_64
   + Debian:
     + Debian GNU/Linux 9: x86_32, x86_64
   + Windows / Windows Server:
@@ -43,11 +42,11 @@ For further information on the SkyFire project, please visit our project website
     + Windows 2016 Server:      x86_64
     + Windows 2012 Server R2:   x86_64
 + Processor with SSE2 support
-+ ACE = 6.3.3  (Linux only)
++ ACE = 6.4.5  (Linux only)
 + MySQL = 8.0 (Windows / Linux)
-+ CMake = 3.13.1/3.5.1 (Windows / Linux)
-+ OpenSSL = 1.1.1/1.1.0G (Windows / Linux)
-+ GCC = 8.1.0 (Linux only)
++ CMake = 3.13.1/3.10.2 (Windows / Linux)
++ OpenSSL = 1.1.1/1.1.1 (Windows / Linux)
++ GCC = 9.2.1 (Linux only)
 + MS Visual Studio = 16 (2019) (Windows only)
 
 ## Install
