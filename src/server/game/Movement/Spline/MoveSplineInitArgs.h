@@ -37,8 +37,6 @@ namespace Movement
         uint64  target;
         float   angle;
 
-        FacingInfo(float o) : angle(o) { }
-        FacingInfo(uint64 t) : target(t) { }
         FacingInfo() : target(0), angle(0.0f) { f.x = f.y = f.z = 0.0f; }
     };
 
