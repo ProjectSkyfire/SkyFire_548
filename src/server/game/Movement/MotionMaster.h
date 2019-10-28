@@ -98,14 +98,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void InitTop();
     public:
 
-        explicit MotionMaster(Unit* unit) : _expList(NULL), _top(-1), _owner(unit), _cleanFlag(MMCF_NONE)
-        {
-            for (uint8 i = 0; i < MAX_MOTION_SLOT; ++i)
-            {
-                Impl[i] = NULL;
-                _needInit[i] = true;
-            }
-        }
+        explicit MotionMaster(Unit* unit) : _expList(NULL), _top(-1), _owner(unit), _cleanFlag(MMCF_NONE) { }
         ~MotionMaster();
 
         void Initialize();
@@ -195,10 +188,10 @@ class MotionMaster //: private std::stack<MovementGenerator *>
 
         typedef std::vector<_Ty> ExpireList;
         ExpireList* _expList;
-        _Ty Impl[MAX_MOTION_SLOT];
+        _Ty Impl[MAX_MOTION_SLOT] = {};
         int _top;
         Unit* _owner;
-        bool _needInit[MAX_MOTION_SLOT];
+        bool _needInit[MAX_MOTION_SLOT] = {true};
         uint8 _cleanFlag;
 };
 #endif
