@@ -1420,7 +1420,7 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         memberData.WriteByteSeq(guid[3]);
         memberData << uint64(member->GetTotalActivity());
         memberData.WriteString(member->GetOfficerNote());
-        memberData << float(member->IsOnline() ? 0.0f : float(::time(NULL) - member->GetLogoutTime()) / DAY);
+        memberData << float(member->IsOnline() ? 0.0f : float(::time(NULL) - member->GetLogoutTime()) / float(DAY));
         memberData << uint8(0);        // Gender
         memberData << uint32(member->GetRankId());
         memberData << uint32(realmID);

@@ -331,7 +331,7 @@ void InstanceSaveManager::LoadResetTimes()
             {
                 Field* fields = result2->Fetch();
                 uint32 instance = fields[1].GetUInt32();
-                time_t resettime = time_t(fields[0].GetUInt32() + 2 * HOUR);
+                time_t resettime = time_t(fields[0].GetUInt32() + 2 * uint32(HOUR));
                 InstResetTimeMapDiffType::iterator itr = instResetTime.find(instance);
                 if (itr != instResetTime.end() && itr->second.second != resettime)
                 {
@@ -391,7 +391,7 @@ void InstanceSaveManager::LoadResetTimes()
                 continue;
 
             // the reset_delay must be at least one day
-            uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
+            uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / uint32(DAY)) * uint32(DAY));
             if (period < DAY)
                 period = DAY;
 
@@ -603,7 +603,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
         // calculate the next reset time
         uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
 
-        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
+        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/uint32(DAY)) * uint32(DAY));
         if (period < DAY)
             period = DAY;
 

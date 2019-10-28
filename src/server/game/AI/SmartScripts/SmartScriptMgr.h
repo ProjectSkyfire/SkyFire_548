@@ -1038,7 +1038,7 @@ enum SMARTAI_TARGETS
 
 struct SmartTarget
 {
-    SmartTarget (SMARTAI_TARGETS t = SMART_TARGET_NONE, uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0)
+    SmartTarget (SMARTAI_TARGETS t = SMART_TARGET_NONE, uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0) : x(0.0f), y(0.0f), z(0.0f), o(0.0f)
     {
         type = t;
         raw.param1 = p1;

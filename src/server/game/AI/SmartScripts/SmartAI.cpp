@@ -390,7 +390,7 @@ bool SmartAI::IsEscortInvokerInRange()
         if (targets->size() == 1 && GetScript()->IsPlayer((*targets->begin())))
         {
             Player* player = (*targets->begin())->ToPlayer();
-            if (me->GetDistance(player) <= SMART_ESCORT_MAX_PLAYER_DIST)
+            if (me->GetDistance(player) <= float(SMART_ESCORT_MAX_PLAYER_DIST))
                         return true;
 
             if (Group* group = player->GetGroup())
@@ -399,7 +399,7 @@ bool SmartAI::IsEscortInvokerInRange()
                 {
                     Player* groupGuy = groupRef->GetSource();
 
-                    if (me->GetDistance(groupGuy) <= SMART_ESCORT_MAX_PLAYER_DIST)
+                    if (me->GetDistance(groupGuy) <= float(SMART_ESCORT_MAX_PLAYER_DIST))
                         return true;
                 }
             }
@@ -409,7 +409,7 @@ bool SmartAI::IsEscortInvokerInRange()
             {
                 if (GetScript()->IsPlayer((*iter)))
                 {
-                    if (me->GetDistance((*iter)->ToPlayer()) <= SMART_ESCORT_MAX_PLAYER_DIST)
+                    if (me->GetDistance((*iter)->ToPlayer()) <= float(SMART_ESCORT_MAX_PLAYER_DIST))
                         return true;
                 }
             }

@@ -809,7 +809,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
         mailData << uint64(mail->COD);
         mailData.WriteString(mail->subject);
         mailData << uint32(mail->stationery);
-        mailData << float(float(mail->expire_time - time(NULL)) / DAY);
+        mailData << float(float(mail->expire_time - time(NULL)) / float(DAY));
         mailData << uint64(mail->money);
         mailData << uint32(mail->checked);
 

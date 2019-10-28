@@ -29,7 +29,7 @@
 #include "Player.h"
 #include "Opcodes.h"
 
-inline float GetAge(uint64 t) { return float(time(NULL) - t) / DAY; }
+inline float GetAge(uint64 t) { return float(time(NULL) - t) / float(DAY); }
 
 TicketMgr::TicketMgr() : _feedbackSystemStatus(false), _gmTicketSystemStatus(false),
 _lastGmTicketId(0), _lastBugId(0), _lastSuggestId(0), _lastChange(0),
