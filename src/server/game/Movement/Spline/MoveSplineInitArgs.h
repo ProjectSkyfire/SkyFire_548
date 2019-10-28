@@ -33,11 +33,11 @@ namespace Movement
     {
         struct {
             float x, y, z;
-        } f;
+        } f = { 0.0f, 0.0f, 0.0f };
         uint64  target;
         float   angle;
 
-        FacingInfo() : target(0), angle(0.0f) { f.x = 0.0f; f.y = 0.0f; f.z = 0.0f; }
+        FacingInfo() : target(0), angle(0.0f) { }
     };
 
     struct MoveSplineInitArgs
