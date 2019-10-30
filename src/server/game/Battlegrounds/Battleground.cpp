@@ -132,6 +132,7 @@ Battleground::Battleground()
     m_ArenaType         = 0;
     m_IsArena           = false;
     m_Winner            = 2;
+    m_StartDelayTime    = 0;
     m_StartTime         = 0;
     m_CountdownTimer    = 0;
     m_ResetStatTimer    = 0;
@@ -155,6 +156,8 @@ Battleground::Battleground()
     m_Map               = NULL;
     m_StartMaxDist      = 0.0f;
 
+    ScriptId = 0;
+
     m_TeamStartLocX[TEAM_ALLIANCE]   = 0;
     m_TeamStartLocX[TEAM_HORDE]      = 0;
 
@@ -173,6 +176,9 @@ Battleground::Battleground()
     m_ArenaTeamRatingChanges[TEAM_ALLIANCE]   = 0;
     m_ArenaTeamRatingChanges[TEAM_HORDE]      = 0;
 
+    m_ArenaTeamMMR[TEAM_ALLIANCE]   = 0;
+    m_ArenaTeamMMR[TEAM_HORDE]   = 0;
+
     m_BgRaids[TEAM_ALLIANCE]         = NULL;
     m_BgRaids[TEAM_HORDE]            = NULL;
 
@@ -183,6 +189,7 @@ Battleground::Battleground()
     m_TeamScores[TEAM_HORDE]         = 0;
 
     m_PrematureCountDown = false;
+    m_PrematureCountDownTimer = 0;
 
     m_HonorMode = BG_NORMAL;
 
