@@ -1379,6 +1379,7 @@ GridMap::GridMap()
     _areaMap = NULL;
     // Height level data
     _gridHeight = INVALID_HEIGHT;
+    _gridIntHeightMultiplier = 0.0f;
     _gridGetHeight = &GridMap::getHeightFromFlat;
     m_V9 = NULL;
     m_V8 = NULL;
