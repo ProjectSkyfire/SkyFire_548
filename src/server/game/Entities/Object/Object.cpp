@@ -3286,6 +3286,9 @@ bool WorldObject::IsPhased(WorldObject const* obj) const
     if (obj->GetPhases().empty() && IsPhased(169))
         return true;
 
+    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->IsGameMaster())
+        return true;
+
     return Skyfire::Containers::Intersects(_phases.begin(), _phases.end(), obj->GetPhases().begin(), obj->GetPhases().end());
 }
 

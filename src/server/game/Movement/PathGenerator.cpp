@@ -41,8 +41,8 @@ PathGenerator::PathGenerator(const Unit* owner) :
     if (MMAP::MMapFactory::IsPathfindingEnabled(mapId))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-        _navMesh = mmap->GetNavMesh(mapId);
-        _navMeshQuery = mmap->GetNavMeshQuery(mapId, _sourceUnit->GetInstanceId());
+        _navMesh = mmap->GetNavMesh(mapId, _sourceUnit->GetTerrainSwaps());
+        _navMeshQuery = mmap->GetNavMeshQuery(mapId, _sourceUnit->GetInstanceId(), _sourceUnit->GetTerrainSwaps());
     }
 
     CreateFilter();

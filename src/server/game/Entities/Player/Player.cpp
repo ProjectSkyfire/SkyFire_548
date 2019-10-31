@@ -15904,6 +15904,8 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     UpdateForQuestWorldObjects();
     UpdatePhasing();
 
+    UpdateObjectVisibility();
+
     if (questGiver) // script managment for every quest
     {
         switch (questGiver->GetTypeId())
@@ -28366,7 +28368,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
     Map* map = GetMap();
     uint32 pet_number = sObjectMgr->GeneratePetNumber();
-    if (!pet->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PET), map, GetPhaseMask(), entry, pet_number))
+    if (!pet->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PET), map, /*GetPhaseMask(),*/ entry, pet_number))
     {
         SF_LOG_ERROR("misc", "no such creature entry %u", entry);
         delete pet;
@@ -29325,9 +29327,8 @@ void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecli
 
 void Player::UpdatePhasing()
 {
-    std::set<uint32> phaseIds;
-    std::set<uint32> terrainswaps;
-    std::set<uint32> worldAreaSwaps;
+    if (!IsInWorld())
+        return;
 
     RebuildTerrainSwaps(); // to set default map swaps
 

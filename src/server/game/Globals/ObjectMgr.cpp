@@ -1709,6 +1709,12 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
+        if (data.phaseGroup && GetPhasesForGroup(data.phaseGroup).empty())
+        {
+            SF_LOG_ERROR("sql.sql", "Table `creature` has creature (GUID: %u Entry: %u) with non-existing `phasegroup` (%u) set, `phasegroup` set to 0", guid, data.id, data.phaseGroup);
+            data.phaseGroup = 0;
+        }
+
         if (data.phaseGroup && data.phaseid)
         {
             SF_LOG_ERROR("sql.sql", "Table `creature` have creature (GUID: %u Entry: %u) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
@@ -1999,6 +2005,12 @@ void ObjectMgr::LoadGameobjects()
         data.phaseGroup = fields[16].GetUInt32();
         int16 gameEvent     = fields[17].GetInt8();
         uint32 PoolId       = fields[18].GetUInt32();
+
+        if (data.phaseGroup && GetPhasesForGroup(data.phaseGroup).empty())
+        {
+            SF_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with non-existing `phasegroup` (%u) set, `phasegroup` set to 0", guid, data.id, data.phaseGroup);
+            data.phaseGroup = 0;
+        }
 
         if (data.phaseGroup && data.phaseid)
         {
