@@ -776,6 +776,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_Last_tick = m_logintime;
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
+    m_canDodge = false;
     m_canParry = false;
     m_canBlock = false;
     m_canDualWield = false;
