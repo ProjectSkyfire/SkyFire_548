@@ -91,7 +91,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectWeaponDmg,                                // 17 SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL
     &Spell::EffectResurrect,                                // 18 SPELL_EFFECT_RESURRECT
     &Spell::EffectAddExtraAttacks,                          // 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS
-    &Spell::EffectUnused,                                   // 20 SPELL_EFFECT_DODGE                    one spell: Dodge
+    &Spell::EffectDodge,                                    // 20 SPELL_EFFECT_DODGE
     &Spell::EffectUnused,                                   // 21 SPELL_EFFECT_EVADE                    one spell: Evade (DND)
     &Spell::EffectParry,                                    // 22 SPELL_EFFECT_PARRY
     &Spell::EffectBlock,                                    // 23 SPELL_EFFECT_BLOCK                    one spell: Block
@@ -4588,6 +4588,14 @@ void Spell::EffectAddExtraAttacks(SpellEffIndex effIndex)
     unitTarget->m_extraAttacks = damage;
 
     ExecuteLogEffectExtraAttacks(effIndex, unitTarget->GetVictim(), damage);
+}
+void Spell::EffectDodge(SpellEffIndex /*effIndex*/)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SetCanDodge(true);
 }
 
 void Spell::EffectParry(SpellEffIndex /*effIndex*/)

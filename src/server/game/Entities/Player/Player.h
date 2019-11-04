@@ -2662,16 +2662,13 @@ class Player : public Unit, public GridObject<Player>
     void SendCorpseReclaimDelay(bool load = false);
 
     uint32 GetBlockPercent() const override { return GetUInt32Value(PLAYER_FIELD_SHIELD_BLOCK); }
-    bool CanParry() const
-    {
-        return m_canParry;
-    }
+    bool CanDodge() const { return m_canDodge; }
+    void SetCanDodge(bool value);
+    bool CanParry() const { return m_canParry; }
     void SetCanParry(bool value);
-    bool CanBlock() const
-    {
-        return m_canBlock;
-    }
+    bool CanBlock() const { return m_canBlock; }
     void SetCanBlock(bool value);
+
     bool CanTitanGrip() const
     {
         return m_canTitanGrip;
@@ -3504,6 +3501,7 @@ class Player : public Unit, public GridObject<Player>
 
     uint32 m_WeaponProficiency;
     uint32 m_ArmorProficiency;
+    bool m_canDodge;
     bool m_canParry;
     bool m_canBlock;
     bool m_canTitanGrip;

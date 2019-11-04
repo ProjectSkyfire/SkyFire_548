@@ -291,6 +291,7 @@ class Spell
         void EffectEnchantHeldItem(SpellEffIndex effIndex);
         void EffectSummonObject(SpellEffIndex effIndex);
         void EffectResurrect(SpellEffIndex effIndex);
+        void EffectDodge(SpellEffIndex effIndex);
         void EffectParry(SpellEffIndex effIndex);
         void EffectBlock(SpellEffIndex effIndex);
         void EffectLeap(SpellEffIndex effIndex);

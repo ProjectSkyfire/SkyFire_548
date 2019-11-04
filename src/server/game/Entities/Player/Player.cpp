@@ -25735,6 +25735,15 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 }
 
+void Player::SetCanDodge(bool value)
+{
+    if (m_canDodge == value)
+        return;
+
+    m_canDodge = value;
+    UpdateDodgePercentage();
+}
+
 void Player::SetCanParry(bool value)
 {
     if (m_canParry == value)
