@@ -83,4 +83,9 @@ INSERT INTO `npc_vendor` VALUES
 UPDATE `npc_vendor` SET `incrtime`='60000' WHERE `entry`=67181 AND `item`=6365;
 
 -- Fix Missing Item : Timeless Essence of the Black Dragonflight
+DELETE FROM `item_template` WHERE `entry`=146428;
 INSERT INTO `item_template` (`entry`, `name`, `displayid`, `spellid_1`) VALUES ('146428', 'Timeless Essence of the Black Dragonflight', '125694', '146428');
+
+-- Fix Missing Item : Fire-Watcher's Oath
+DELETE FROM `item_template` WHERE `entry`=102463;
+INSERT INTO `item_template` (`entry`, `name`, `spellid_1`, `spellcooldown_1`) VALUES ('102463', 'Fire-Watcher\'s Oath', '148429', '600000');
