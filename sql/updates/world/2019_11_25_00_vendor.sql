@@ -89,3 +89,4 @@ INSERT INTO `item_template` (`entry`, `name`, `displayid`, `spellid_1`) VALUES (
 -- Fix Missing Item : Fire-Watcher's Oath
 DELETE FROM `item_template` WHERE `entry`=102463;
 INSERT INTO `item_template` (`entry`, `name`, `spellid_1`, `spellcooldown_1`) VALUES ('102463', 'Fire-Watcher\'s Oath', '148429', '600000');
+UPDATE `item_template` SET `class`='15', `subclass`='4', `displayid`='129132', `Quality`='3', `description`='Ordon Fire-Watchers carry the ashes of their victims in a special pouch that keeps them smouldering.', `Material`='4', `WDBVerified`='15595' WHERE `entry`=102463;
