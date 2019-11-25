@@ -90,3 +90,5 @@ INSERT INTO `item_template` (`entry`, `name`, `displayid`, `Quality`, `spellid_1
 DELETE FROM `item_template` WHERE `entry`=102463;
 INSERT INTO `item_template` (`entry`, `name`, `displayid`, `Quality`, `class`, `subclass`, `spellid_1`, `spellcooldown_1`, `description`, `Material`, `WDBVerified`) VALUES ('102463', 'Fire-Watcher\'s Oath', '129132', '3', '15', '4', '148429', '600000', 'Ordon Fire-Watchers carry the ashes of their victims in a special pouch that keeps them smouldering.', '4', '15595');
 
+-- Fix Mising Item : Kukuru's Cache Key
+INSERT INTO `item_template` (`entry`, `class`, `name`, `displayid`, `Quality`, `ItemLevel`, `stackable`, `spellid_1`, `bonding`) VALUES ('101538', '13', 'Kukuru\'s Cache Key', '75937', '3', '1', '20', '144528', '1');
