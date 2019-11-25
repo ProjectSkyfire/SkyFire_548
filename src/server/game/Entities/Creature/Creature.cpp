@@ -1271,6 +1271,12 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_POWERS))
+    {
+        SetMaxHealth(0);
+        SetMaxPower(POWER_MANA, 0);
+    }
+
     SetHealth(m_deathState == ALIVE ? curhealth : 0);
 
     // checked at creature_template loading

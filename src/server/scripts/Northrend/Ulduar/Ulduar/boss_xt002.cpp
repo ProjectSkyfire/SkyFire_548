@@ -384,7 +384,7 @@ class boss_xt002 : public CreatureScript
                     heart->CastSpell(heart, SPELL_EXPOSED_HEART, false);    // Channeled
                     heart->ChangeSeat(HEART_VEHICLE_SEAT_EXPOSED, true);
                     heart->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    heart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+                    heart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_POWERS);
                }
 
                 events.CancelEvent(EVENT_SEARING_LIGHT);
@@ -419,7 +419,7 @@ class boss_xt002 : public CreatureScript
 
                 heart->ChangeSeat(HEART_VEHICLE_SEAT_NORMAL, false);
                 heart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                heart->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+                heart->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_POWERS);
                 heart->RemoveAurasDueToSpell(SPELL_EXPOSED_HEART);
 
                 if (!_hardMode)
