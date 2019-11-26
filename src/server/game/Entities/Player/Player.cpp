@@ -3414,8 +3414,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     //set create powers
     SetCreateMana(basemana);
 
-    SetArmor(int32(m_createStats[STAT_AGILITY]*2));
-
     InitStatBuffMods();
 
     //reset rating fields values
@@ -3473,8 +3471,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE, 0.0f);
     SetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING, 0.0f);
 
-    // set armor (resistance 0) to original value (create_agility*2)
-    SetArmor(int32(m_createStats[STAT_AGILITY]*2));
+    // set armor (resistance 0) to original value
+    SetArmor(0);
     SetResistanceBuffMods(SpellSchools(0), true, 0.0f);
     SetResistanceBuffMods(SpellSchools(0), false, 0.0f);
     // set other resistance to original value (0)
