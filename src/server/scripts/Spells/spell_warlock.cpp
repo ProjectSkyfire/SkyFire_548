@@ -42,11 +42,6 @@ enum WarlockSpells
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_IMP           = 54444,
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_SUCCUBUS      = 54435,
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER    = 54443,
-    SPELL_WARLOCK_DEMON_SOUL_IMP                    = 79459,
-    SPELL_WARLOCK_DEMON_SOUL_FELHUNTER              = 79460,
-    SPELL_WARLOCK_DEMON_SOUL_FELGUARD               = 79452,
-    SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS               = 79453,
-    SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER             = 79454,
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
     SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME              = 63311,
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
@@ -341,73 +336,6 @@ class spell_warl_demonic_circle_teleport : public SpellScriptLoader
         AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_warl_demonic_circle_teleport_AuraScript();
-        }
-};
-
-// 77801 - Demon Soul - Updated to 4.3.4
-class spell_warl_demon_soul : public SpellScriptLoader
-{
-    public:
-        spell_warl_demon_soul() : SpellScriptLoader("spell_warl_demon_soul") { }
-
-        class spell_warl_demon_soul_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_demon_soul_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMON_SOUL_IMP))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMON_SOUL_FELHUNTER))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMON_SOUL_FELGUARD))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER))
-                    return false;
-                return true;
-            }
-
-            void OnHitTarget(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (Creature* targetCreature = GetHitCreature())
-                {
-                    if (targetCreature->IsPet())
-                    {
-                        CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(targetCreature->GetEntry());
-                        switch (ci->family)
-                        {
-                            case CREATURE_FAMILY_SUCCUBUS:
-                                caster->CastSpell(caster, SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS);
-                                break;
-                            case CREATURE_FAMILY_VOIDWALKER:
-                                caster->CastSpell(caster, SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER);
-                                break;
-                            case CREATURE_FAMILY_FELGUARD:
-                                caster->CastSpell(caster, SPELL_WARLOCK_DEMON_SOUL_FELGUARD);
-                                break;
-                            case CREATURE_FAMILY_FELHUNTER:
-                                caster->CastSpell(caster, SPELL_WARLOCK_DEMON_SOUL_FELHUNTER);
-                                break;
-                            case CREATURE_FAMILY_IMP:
-                                caster->CastSpell(caster, SPELL_WARLOCK_DEMON_SOUL_IMP);
-                                break;
-                        }
-                    }
-                }
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warl_demon_soul_SpellScript::OnHitTarget, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_warl_demon_soul_SpellScript;
         }
 };
 
@@ -1330,7 +1258,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();
     new spell_warl_demonic_empowerment();
-    new spell_warl_demon_soul();
     new spell_warl_everlasting_affliction();
     new spell_warl_fel_flame();
     new spell_warl_fel_synergy();
