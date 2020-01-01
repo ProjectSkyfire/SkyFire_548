@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2011-2019 Project SkyFire <http://www.projectskyfire.org/>
-* Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
-* Copyright (C) 2005-2019 MaNGOS <https://www.getmangos.eu/>
+* Copyright (C) 2011-2020 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2020 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2020 MaNGOS <https://www.getmangos.eu/>
 * Copyright (C) 2006-2014 ScriptDev2 <https://github.com/scriptdev2/scriptdev2/>
 *
 * This program is free software; you can redistribute it and/or modify it
