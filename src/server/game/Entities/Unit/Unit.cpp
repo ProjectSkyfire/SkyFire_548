@@ -11930,10 +11930,11 @@ void Unit::SetHealth(uint32 val)
 
 void Unit::SetMaxHealth(uint32 val)
 {
-    if (!val && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_POWERS))
-        val = 0;
-    else
+    if (!val)
         val = 1;
+
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_POWERS))
+        val = 0;
 
     uint32 health = GetHealth();
     SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val);
