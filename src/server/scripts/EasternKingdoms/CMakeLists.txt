@@ -75,21 +75,22 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_sulfuron_harbinger.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_magmadar.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_shazzrah.cpp
-  EasternKingdoms/Scholomance/boss_the_ravenian.cpp
-  EasternKingdoms/Scholomance/boss_instructor_malicia.cpp
-  EasternKingdoms/Scholomance/boss_death_knight_darkreaver.cpp
-  EasternKingdoms/Scholomance/boss_illucia_barov.cpp
-  EasternKingdoms/Scholomance/scholomance.h
-  EasternKingdoms/Scholomance/boss_vectus.cpp
-  EasternKingdoms/Scholomance/boss_jandice_barov.cpp
-  EasternKingdoms/Scholomance/boss_kormok.cpp
-  EasternKingdoms/Scholomance/boss_lord_alexei_barov.cpp
-  EasternKingdoms/Scholomance/boss_doctor_theolen_krastinov.cpp
-  EasternKingdoms/Scholomance/boss_darkmaster_gandling.cpp
-  EasternKingdoms/Scholomance/instance_scholomance.cpp
-  EasternKingdoms/Scholomance/boss_lorekeeper_polkelt.cpp
-  EasternKingdoms/Scholomance/boss_ras_frostwhisper.cpp
-  EasternKingdoms/Scholomance/boss_kirtonos_the_herald.cpp
+  #REWORKED IN PANDARIA
+  #EasternKingdoms/Scholomance/boss_the_ravenian.cpp
+  #EasternKingdoms/Scholomance/boss_instructor_malicia.cpp
+  #EasternKingdoms/Scholomance/boss_death_knight_darkreaver.cpp
+  #EasternKingdoms/Scholomance/boss_illucia_barov.cpp
+  #EasternKingdoms/Scholomance/scholomance.h
+  #EasternKingdoms/Scholomance/boss_vectus.cpp
+  #EasternKingdoms/Scholomance/boss_jandice_barov.cpp
+  #EasternKingdoms/Scholomance/boss_kormok.cpp
+  #EasternKingdoms/Scholomance/boss_lord_alexei_barov.cpp
+  #EasternKingdoms/Scholomance/boss_doctor_theolen_krastinov.cpp
+  #EasternKingdoms/Scholomance/boss_darkmaster_gandling.cpp
+  #EasternKingdoms/Scholomance/instance_scholomance.cpp
+  #EasternKingdoms/Scholomance/boss_lorekeeper_polkelt.cpp
+  #EasternKingdoms/Scholomance/boss_ras_frostwhisper.cpp
+  #EasternKingdoms/Scholomance/boss_kirtonos_the_herald.cpp
   EasternKingdoms/zone_isle_of_queldanas.cpp
   EasternKingdoms/ZulGurub/boss_grilek.cpp
   EasternKingdoms/ZulGurub/boss_hazzarah.cpp
@@ -124,9 +125,10 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Stratholme/boss_postmaster_malown.cpp
   EasternKingdoms/Stratholme/stratholme.h
   EasternKingdoms/Stratholme/stratholme.cpp
-  EasternKingdoms/SunkenTemple/sunken_temple.cpp
-  EasternKingdoms/SunkenTemple/sunken_temple.h
-  EasternKingdoms/SunkenTemple/instance_sunken_temple.cpp
+  #REWORKED IN CATACLYSM
+  #EasternKingdoms/SunkenTemple/sunken_temple.cpp
+  #EasternKingdoms/SunkenTemple/sunken_temple.h
+  #EasternKingdoms/SunkenTemple/instance_sunken_temple.cpp
   EasternKingdoms/MagistersTerrace/boss_felblood_kaelthas.cpp
   EasternKingdoms/MagistersTerrace/magisters_terrace.h
   EasternKingdoms/MagistersTerrace/boss_priestess_delrissa.cpp
@@ -134,11 +136,12 @@ set(scripts_STAT_SRCS
   EasternKingdoms/MagistersTerrace/boss_selin_fireheart.cpp
   EasternKingdoms/MagistersTerrace/boss_vexallus.cpp
   EasternKingdoms/MagistersTerrace/magisters_terrace.cpp
-  EasternKingdoms/Uldaman/uldaman.cpp
-  EasternKingdoms/Uldaman/boss_ironaya.cpp
-  EasternKingdoms/Uldaman/uldaman.h
-  EasternKingdoms/Uldaman/instance_uldaman.cpp
-  EasternKingdoms/Uldaman/boss_archaedas.cpp
+  #REWORKED IN CATACLYSM
+  #EasternKingdoms/Uldaman/uldaman.cpp
+  #EasternKingdoms/Uldaman/boss_ironaya.cpp
+  #EasternKingdoms/Uldaman/uldaman.h
+  #EasternKingdoms/Uldaman/instance_uldaman.cpp
+  #EasternKingdoms/Uldaman/boss_archaedas.cpp
   EasternKingdoms/SunwellPlateau/boss_eredar_twins.cpp
   EasternKingdoms/SunwellPlateau/boss_kiljaeden.cpp
   EasternKingdoms/SunwellPlateau/sunwell_plateau.h
@@ -149,36 +152,40 @@ set(scripts_STAT_SRCS
   EasternKingdoms/SunwellPlateau/sunwell_plateau.cpp
   EasternKingdoms/SunwellPlateau/boss_felmyst.cpp
   EasternKingdoms/zone_stranglethorn_vale.cpp
-  EasternKingdoms/Deadmines/deadmines.h
-  EasternKingdoms/Deadmines/deadmines.cpp
-  EasternKingdoms/Deadmines/boss_mr_smite.cpp
-  EasternKingdoms/Deadmines/instance_deadmines.cpp
-  EasternKingdoms/ScarletMonastery/boss_azshir_the_sleepless.cpp
-  EasternKingdoms/ScarletMonastery/boss_mograine_and_whitemane.cpp
-  EasternKingdoms/ScarletMonastery/boss_bloodmage_thalnos.cpp
-  EasternKingdoms/ScarletMonastery/boss_interrogator_vishas.cpp
-  EasternKingdoms/ScarletMonastery/boss_headless_horseman.cpp
-  EasternKingdoms/ScarletMonastery/instance_scarlet_monastery.cpp
-  EasternKingdoms/ScarletMonastery/boss_houndmaster_loksey.cpp
-  EasternKingdoms/ScarletMonastery/scarlet_monastery.h
-  EasternKingdoms/ScarletMonastery/boss_high_inquisitor_fairbanks.cpp
-  EasternKingdoms/ScarletMonastery/boss_arcanist_doan.cpp
-  EasternKingdoms/ScarletMonastery/boss_herod.cpp
-  EasternKingdoms/ScarletMonastery/boss_scorn.cpp
+  #REWORKED IN CATACLYSM
+  #EasternKingdoms/Deadmines/deadmines.h
+  #EasternKingdoms/Deadmines/deadmines.cpp
+  #EasternKingdoms/Deadmines/boss_mr_smite.cpp
+  #EasternKingdoms/Deadmines/instance_deadmines.cpp
+  #REWORKED IN PANDARIA
+  #EasternKingdoms/ScarletMonastery/boss_azshir_the_sleepless.cpp
+  #EasternKingdoms/ScarletMonastery/boss_mograine_and_whitemane.cpp
+  #EasternKingdoms/ScarletMonastery/boss_bloodmage_thalnos.cpp
+  #EasternKingdoms/ScarletMonastery/boss_interrogator_vishas.cpp
+  #EasternKingdoms/ScarletMonastery/boss_headless_horseman.cpp
+  #EasternKingdoms/ScarletMonastery/instance_scarlet_monastery.cpp
+  #EasternKingdoms/ScarletMonastery/boss_houndmaster_loksey.cpp
+  #EasternKingdoms/ScarletMonastery/scarlet_monastery.h
+  #EasternKingdoms/ScarletMonastery/boss_high_inquisitor_fairbanks.cpp
+  #EasternKingdoms/ScarletMonastery/boss_arcanist_doan.cpp
+  #EasternKingdoms/ScarletMonastery/boss_herod.cpp
+  #EasternKingdoms/ScarletMonastery/boss_scorn.cpp
   EasternKingdoms/zone_undercity.cpp
-  EasternKingdoms/ShadowfangKeep/shadowfang_keep.cpp
-  EasternKingdoms/ShadowfangKeep/instance_shadowfang_keep.cpp
-  EasternKingdoms/ShadowfangKeep/shadowfang_keep.h
+  #REWORKED IN CATACLYSM
+  #EasternKingdoms/ShadowfangKeep/shadowfang_keep.cpp
+  #EasternKingdoms/ShadowfangKeep/instance_shadowfang_keep.cpp
+  #EasternKingdoms/ShadowfangKeep/shadowfang_keep.h
   EasternKingdoms/zone_blasted_lands.cpp
-  EasternKingdoms/ZulAman/boss_halazzi.cpp
-  EasternKingdoms/ZulAman/boss_hexlord.cpp
-  EasternKingdoms/ZulAman/boss_daakara.cpp
-  EasternKingdoms/ZulAman/boss_akilzon.cpp
-  EasternKingdoms/ZulAman/instance_zulaman.cpp
-  EasternKingdoms/ZulAman/boss_janalai.cpp
-  EasternKingdoms/ZulAman/boss_nalorakk.cpp
-  EasternKingdoms/ZulAman/zulaman.cpp
-  EasternKingdoms/ZulAman/zulaman.h
+  #REWORKED IN CATACLYSM
+  #EasternKingdoms/ZulAman/boss_halazzi.cpp
+  #EasternKingdoms/ZulAman/boss_hexlord.cpp
+  #EasternKingdoms/ZulAman/boss_daakara.cpp
+  #EasternKingdoms/ZulAman/boss_akilzon.cpp
+  #EasternKingdoms/ZulAman/instance_zulaman.cpp
+  #EasternKingdoms/ZulAman/boss_janalai.cpp
+  #EasternKingdoms/ZulAman/boss_nalorakk.cpp
+  #EasternKingdoms/ZulAman/zulaman.cpp
+  #EasternKingdoms/ZulAman/zulaman.h
   EasternKingdoms/zone_hinterlands.cpp
   EasternKingdoms/zone_silverpine_forest.cpp
   EasternKingdoms/Karazhan/instance_karazhan.cpp
@@ -194,7 +201,8 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/boss_moroes.cpp
   EasternKingdoms/Karazhan/boss_terestian_illhoof.cpp
   EasternKingdoms/Karazhan/karazhan.h
-  EasternKingdoms/TheStockade/instance_the_stockade.cpp
+  #REWORKED IN CATACLYSM
+  #EasternKingdoms/TheStockade/instance_the_stockade.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")

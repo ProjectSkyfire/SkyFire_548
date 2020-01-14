@@ -41,7 +41,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake ../ -DSCRIPTS=0 -DTOOLS=0 -DCMAKE_BUILD_TYPE=Release
+  - cmake ../ -DSCRIPTS=1 -DTOOLS=0 -DCMAKE_BUILD_TYPE=Release
   - make -j16
 
 notifications:
