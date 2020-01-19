@@ -5676,12 +5676,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_MAGE:
         {
-            // Hot Streak & Improved Hot Streak
+            // Heating Up & Pyroblast!
             if (dummySpell->SpellIconID == 2999)
             {
                 if (effIndex != 0)
                     return false;
-                AuraEffect* counter = triggeredByAura->GetBase()->GetEffect(EFFECT_1);
+                AuraEffect* counter = triggeredByAura->GetBase()->GetEffect(EFFECT_0);
                 if (!counter)
                     return true;
 
@@ -5689,11 +5689,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (procEx & PROC_EX_CRITICAL_HIT)
                 {
                     counter->SetAmount(counter->GetAmount() * 2);
-                    if (counter->GetAmount() < 100 && dummySpell->Id != 44445) // not enough or Hot Streak spell
+                    if (counter->GetAmount() < 100) // not enough
+                    {
+                        CastSpell(this, 48107, true, castItem, triggeredByAura); // Heating Up
                         return true;
-                    // Crititcal counted -> roll chance
+                    }
+                    // Critical counted -> roll chance
                     if (roll_chance_i(triggerAmount))
-                        CastSpell(this, 48108, true, castItem, triggeredByAura);
+                    {
+                        CastSpell(this, 48108, true, castItem, triggeredByAura); // Pyroblast!
+                    }
                 }
                 counter->SetAmount(25);
                 return true;
