@@ -54,8 +54,10 @@ enum MageSpells
     // Time Warp - 80353
     SPELL_MAGE_TEMPORAL_DISPLACEMENT             = 80354,
     SPELL_SHAMAN_SATED                           = 57724,
-    SPELL_HUNTER_INSANITY                        = 95809
-    //
+    SPELL_HUNTER_INSANITY                        = 95809,
+
+    // Pyroblast!
+    SPELL_MAGE_PYROBLAST_CLEARCAST               = 48108,
 };
 
 enum MageIcons
@@ -70,6 +72,45 @@ enum MageIcons
 enum MiscSpells
 {
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409
+};
+
+// Pyroblast - 11366 // 5.4.8
+class spell_mage_pyroblast : public SpellScriptLoader
+{
+public:
+    spell_mage_pyroblast() : SpellScriptLoader("spell_mage_pyroblast") { }
+    class spell_mage_pyroblast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_pyroblast_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_PYROBLAST_CLEARCAST))
+                return false;
+            return true;
+        }
+        void RecalculateDamage(SpellEffIndex effIndex)
+        {
+            Unit* caster = GetCaster();
+
+            if (caster->HasAura(SPELL_MAGE_PYROBLAST_CLEARCAST))
+            {
+                int basedmg = GetHitDamage();
+                int bonusdmg = CalculatePct(basedmg, GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster()));
+                SetHitDamage(basedmg + bonusdmg);
+                caster->RemoveAurasDueToSpell(SPELL_MAGE_PYROBLAST_CLEARCAST);
+            }
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_pyroblast_SpellScript::RecalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mage_pyroblast_SpellScript();
+    }
 };
 
 // Time Warp - 80353
@@ -825,6 +866,7 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
 
 void AddSC_mage_spell_scripts()
 {
+    new spell_mage_pyroblast(); // 5.4.8 18414
     new spell_mage_time_warp(); // 5.4.8 18414
     new spell_mage_blast_wave();
     new spell_mage_cold_snap();
