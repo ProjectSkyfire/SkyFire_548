@@ -2560,11 +2560,10 @@ struct SpellPowerEntry
 struct SpellRuneCostEntry
 {
     uint32  ID;                                             // 0
-    uint32  RuneCost[3];                                    // 1-3 (0=blood, 1=frost, 2=unholy)
-    //uint32 unk0                                           // 4 - 4th rune ??
+    uint32  RuneCost[4];                                    // 1-4 (0=blood, 1=frost, 2=unholy, 3=death)
     uint32  runePowerGain;                                  // 5
 
-    bool NoRuneCost() const { return RuneCost[0] == 0 && RuneCost[1] == 0 && RuneCost[2] == 0; }
+    bool NoRuneCost() const { return RuneCost[0] == 0 && RuneCost[1] == 0 && RuneCost[2] == 0 && RuneCost[3] == 0; }
     bool NoRunicPowerGain() const { return runePowerGain == 0; }
 };
 
