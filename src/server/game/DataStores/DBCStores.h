@@ -26,8 +26,6 @@
 
 #include <list>
 
-typedef std::map<uint32, uint32> SpecializationOverrideSpellsMap;
-
 typedef std::list<uint32> SimpleFactionsList;
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
 
@@ -94,7 +92,6 @@ uint32 GetPowerIndexByClass(uint32 powerType, uint32 classId);
 LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, DifficultyID difficulty);
 std::set<uint32> const& GetPhasesForGroup(uint32 group);
 
-extern SpecializationOverrideSpellsMap sSpecializationOverrideSpellMap;
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
