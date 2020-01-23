@@ -1143,6 +1143,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         SetMaxPower(POWER_RUNIC_POWER, 1000);
     }
 
+
     // original spells
     learnDefaultSpells();
 
@@ -2641,6 +2642,9 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
+        if (getClass() == CLASS_WARLOCK && GetSpecializationId(SPEC_WARLOCK_DEMONOLOGY))
+            Regenerate(POWER_DEMONIC_FURY);
+
         m_regenTimerCount -= 2000;
     }
 
@@ -2733,6 +2737,14 @@ void Player::Regenerate(Powers power)
             addvalue += -1.0f;      // remove 1 each 10 sec
         }
         break;
+        case POWER_DEMONIC_FURY:
+        {
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            {
+                float DemonicFuryDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
+                addvalue += -30 * DemonicFuryDecreaseRate;         // 3 fury by tick
+            }
+        }
         case POWER_HEALTH:
             return;
         default:
@@ -2868,6 +2880,8 @@ void Player::ResetAllPowers()
         case POWER_ECLIPSE:
             SetPower(POWER_ECLIPSE, 0);
             break;
+        case POWER_DEMONIC_FURY:
+            SetPower(POWER_DEMONIC_FURY, 200);
         default:
             break;
     }
@@ -3537,6 +3551,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
     SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
     SetPower(POWER_RUNIC_POWER, 0);
+    if (GetPower(POWER_DEMONIC_FURY) > GetMaxPower(POWER_DEMONIC_FURY))
+        SetPower(POWER_DEMONIC_FURY, GetMaxPower(POWER_DEMONIC_FURY));
 
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())

@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2019103000
+ConfVersion=2020012200
 
 ###################################################################################################
 # SECTION INDEX
@@ -1707,6 +1707,7 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #    Rate.Rage.Loss
 #    Rate.RunicPower.Income
 #    Rate.RunicPower.Loss
+#    Rate.DemonicFury.Loss
 #    Rate.Focus
 #    Rate.Chi
 #    Rate.Energy
@@ -1719,6 +1720,7 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #                     1 - (Rate.Rage.Loss)
 #                     1 - (Rate.RunicPower.Income)
 #                     1 - (Rate.RunicPower.Loss)
+#                     1 - (Rate.DemonicFury.Loss)
 #                     1 - (Rate.Focus)
 #                     1 - (Rate.Chi)
 #                     1 - (Rate.Energy)
@@ -1730,6 +1732,7 @@ Rate.Rage.Income       = 1
 Rate.Rage.Loss         = 1
 Rate.RunicPower.Income = 1
 Rate.RunicPower.Loss   = 1
+Rate.DemonicFury.Loss  = 1
 Rate.Focus             = 1
 Rate.Chi               = 1
 Rate.Energy            = 1

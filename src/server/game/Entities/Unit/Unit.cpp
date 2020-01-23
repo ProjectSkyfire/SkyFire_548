@@ -11720,7 +11720,15 @@ bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, f
         case UNIT_MOD_FOCUS:
         case UNIT_MOD_ENERGY:
         case UNIT_MOD_RUNE:
-        case UNIT_MOD_RUNIC_POWER:          UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod));          break;
+        case UNIT_MOD_RUNIC_POWER:
+        case UNIT_MOD_SOUL_SHARDS:
+        case UNIT_MOD_ECLIPSE:
+        case UNIT_MOD_HOLY_POWER:
+        case UNIT_MOD_CHI:
+        case UNIT_MOD_SHADOW_ORBS:
+        case UNIT_MOD_BURNING_EMBERS:
+        case UNIT_MOD_DEMONIC_FURY:
+        case UNIT_MOD_ARCANE_CHARGES:      UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod)); break;
 
         case UNIT_MOD_RESISTANCE_HOLY:
         case UNIT_MOD_RESISTANCE_FIRE:
@@ -11840,6 +11848,14 @@ Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
         case UNIT_MOD_ENERGY:      return POWER_ENERGY;
         case UNIT_MOD_RUNE:        return POWER_RUNES;
         case UNIT_MOD_RUNIC_POWER: return POWER_RUNIC_POWER;
+        case UNIT_MOD_SOUL_SHARDS: return POWER_SOUL_SHARDS;
+        case UNIT_MOD_ECLIPSE:     return POWER_ECLIPSE;
+        case UNIT_MOD_HOLY_POWER:  return POWER_HOLY_POWER;
+        case UNIT_MOD_CHI:         return POWER_CHI;
+        case UNIT_MOD_SHADOW_ORBS: return POWER_SHADOW_ORBS;
+        case UNIT_MOD_BURNING_EMBERS: return POWER_BURNING_EMBERS;
+        case UNIT_MOD_DEMONIC_FURY: return POWER_DEMONIC_FURY;
+        case UNIT_MOD_ARCANE_CHARGES: return POWER_ARCANE_CHARGES;
         default:
         case UNIT_MOD_MANA:        return POWER_MANA;
     }
@@ -12112,6 +12128,8 @@ int32 Unit::GetCreatePowers(Powers power) const
             return 0;
         case POWER_CHI:
             return 4;
+        case POWER_DEMONIC_FURY:
+            return 1000;
         default:
             break;
     }

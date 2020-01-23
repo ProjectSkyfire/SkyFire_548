@@ -471,6 +471,12 @@ void World::LoadConfigSettings(bool reload)
         SF_LOG_ERROR("server.loading", "Rate.RunicPower.Loss (%f) must be > 0. Using 1 instead.", rate_values[RATE_POWER_RUNICPOWER_LOSS]);
         rate_values[RATE_POWER_RUNICPOWER_LOSS] = 1;
     }
+    rate_values[RATE_POWER_DEMONICFURY_LOSS] = sConfigMgr->GetFloatDefault("Rate.DemonicFury.Loss", 1);
+    if (rate_values[RATE_POWER_DEMONICFURY_LOSS] < 0)
+    {
+        SF_LOG_ERROR("server.loading", "Rate.DemonicFury.Loss (%f) must be > 0. Using 1 instead.", rate_values[RATE_POWER_DEMONICFURY_LOSS]);
+        rate_values[RATE_POWER_DEMONICFURY_LOSS] = 1;
+    }
     rate_values[RATE_POWER_FOCUS]  = sConfigMgr->GetFloatDefault("Rate.Focus", 1.0f);
     rate_values[RATE_POWER_ENERGY] = sConfigMgr->GetFloatDefault("Rate.Energy", 1.0f);
     rate_values[RATE_POWER_CHI]    = sConfigMgr->GetFloatDefault("Rate.Chi", 1.0f);
