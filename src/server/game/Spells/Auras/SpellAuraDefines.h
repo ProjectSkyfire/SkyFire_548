@@ -459,7 +459,7 @@ enum AuraType
     SPELL_AURA_397                                          = 397,
     SPELL_AURA_398                                          = 398,
     // 399 unused
-    SPELL_AURA_400                                          = 400,
+    SPELL_AURA_MOD_SKILL_2                                  = 400,
     SPELL_AURA_401                                          = 401,
     SPELL_AURA_402                                          = 402,
     SPELL_AURA_403                                          = 403,

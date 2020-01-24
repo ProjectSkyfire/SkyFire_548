@@ -461,7 +461,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //397 SPELL_AURA_397
     &AuraEffect::HandleNULL,                                      //398 SPELL_AURA_398
     &AuraEffect::HandleUnused,                                    //399 unused (5.4.2)
-    &AuraEffect::HandleNULL,                                      //400 SPELL_AURA_400 (used in spells 124353 & 124351) (5.4.2)
+    &AuraEffect::HandleAuraModSkill,                              //400 SPELL_AURA_MOD_SKILL_2
     &AuraEffect::HandleNULL,                                      //401 SPELL_AURA_401 (used in spell 125695) (5.4.2)
     &AuraEffect::HandleNULL,                                      //402 SPELL_AURA_402
     &AuraEffect::HandleNULL,                                      //403 SPELL_AURA_403
