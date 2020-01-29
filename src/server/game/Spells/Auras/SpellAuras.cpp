@@ -1008,10 +1008,6 @@ bool Aura::CanBeSaved() const
     if (HasEffectType(SPELL_AURA_CONVERT_RUNE))
         return false;
 
-    // No point in saving this, since the stable dialog can't be open on aura load anyway.
-    if (HasEffectType(SPELL_AURA_OPEN_STABLE))
-        return false;
-
     // Can't save vehicle auras, it requires both caster & target to be in world
     if (HasEffectType(SPELL_AURA_CONTROL_VEHICLE))
         return false;
