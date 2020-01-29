@@ -161,13 +161,13 @@ LOCK TABLES `ip2nation` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `ip2nationcountries`
+-- Table structure for table `ip2nationCountries`
 --
 
-DROP TABLE IF EXISTS `ip2nationcountries`;
+DROP TABLE IF EXISTS `ip2nationCountries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `ip2nationcountries` (
+CREATE TABLE `ip2nationCountries` (
   `code` varchar(4) NOT NULL DEFAULT '',
   `iso_code_2` varchar(2) NOT NULL DEFAULT '',
   `iso_code_3` varchar(3) DEFAULT '',
@@ -181,12 +181,12 @@ CREATE TABLE `ip2nationcountries` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `ip2nationcountries`
+-- Dumping data for table `ip2nationCountries`
 --
 
-LOCK TABLES `ip2nationcountries` WRITE;
-/*!40000 ALTER TABLE `ip2nationcountries` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ip2nationcountries` ENABLE KEYS */;
+LOCK TABLES `ip2nationCountries` WRITE;
+/*!40000 ALTER TABLE `ip2nationCountries` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ip2nationCountries` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
