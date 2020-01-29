@@ -129,7 +129,7 @@ enum AuraType
     SPELL_AURA_MOD_STALKED                                  = 68,
     SPELL_AURA_SCHOOL_ABSORB                                = 69,
     SPELL_AURA_EXTRA_ATTACKS                                = 70,
-    SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL                 = 71,
+    SPELL_AURA_71                                           = 71,   // old SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL. unused  5.4.8
     SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT                    = 72,
     SPELL_AURA_MOD_POWER_COST_SCHOOL                        = 73,
     SPELL_AURA_REFLECT_SPELLS_SCHOOL                        = 74,
@@ -213,9 +213,9 @@ enum AuraType
     SPELL_AURA_MOD_DETECTED_RANGE                           = 152,  //    Mod Detected Range
     SPELL_AURA_153                                          = 153,  // old SPELL_AURA_SPLIT_DAMAGE_FLAT. unused 4.3.4
     SPELL_AURA_MOD_STEALTH_LEVEL                            = 154,  //    Stealth Level Modifier
-    SPELL_AURA_MOD_WATER_BREATHING                          = 155,  //    Mod Water Breathing
+    SPELL_AURA_155                                          = 155,  // old SPELL_AURA_MOD_WATER_BREATHING. unused 5.4.8
     SPELL_AURA_MOD_REPUTATION_GAIN                          = 156,  //    Mod Reputation Gain
-    SPELL_AURA_PET_DAMAGE_MULTI                             = 157,  //    Mod Pet Damage
+    SPELL_AURA_157                                          = 157,  // old SPELL_AURA_PET_DAMAGE_MULTI. unused 5.4.8
     SPELL_AURA_MOD_SHIELD_BLOCKVALUE                        = 158,
     SPELL_AURA_NO_PVP_CREDIT                                = 159,
     SPELL_AURA_160                                          = 160,  // old SPELL_AURA_MOD_AOE_AVOIDANCE. Unused 4.3.4
@@ -240,13 +240,13 @@ enum AuraType
     SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE               = 179,
     SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS                 = 180,
     SPELL_AURA_181                                          = 181,  // old SPELL_AURA_MOD_FLAT_SPELL_CRIT_DAMAGE_VERSUS - possible flat spell crit damage versus
-    SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT               = 182,
+    SPELL_AURA_182                                          = 182,  // old SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT. unused 5.4.8
     SPELL_AURA_MOD_CRITICAL_THREAT                          = 183,
     SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE                = 184,
     SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE               = 185,
     SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE                = 186,
     SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE               = 187,
-    SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE              = 188,
+    SPELL_AURA_188                                          = 188,  // old SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE. unused 5.4.8
     SPELL_AURA_MOD_RATING                                   = 189,
     SPELL_AURA_MOD_FACTION_REPUTATION_GAIN                  = 190,
     SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED                    = 191,
@@ -277,7 +277,7 @@ enum AuraType
     SPELL_AURA_HASTE_SPELLS                                 = 216,
     SPELL_AURA_MOD_MELEE_HASTE_2                            = 217,
     SPELL_AURA_HASTE_RANGED                                 = 218,
-    SPELL_AURA_MOD_MANA_REGEN_FROM_STAT                     = 219,
+    SPELL_AURA_219                                          = 219,  // old SPELL_AURA_MOD_MANA_REGEN_FROM_STAT. unused 5.4.8
     SPELL_AURA_MOD_RATING_FROM_STAT                         = 220,
     SPELL_AURA_MOD_DETAUNT                                  = 221,
     SPELL_AURA_222                                          = 222,
@@ -295,8 +295,8 @@ enum AuraType
     SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK              = 234,
     SPELL_AURA_MOD_DISPEL_RESIST                            = 235,
     SPELL_AURA_CONTROL_VEHICLE                              = 236,
-    SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER             = 237,
-    SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER            = 238,
+    SPELL_AURA_237                                          = 237,  // old SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER. unused 5.4.8
+    SPELL_AURA_238                                          = 238,  // old SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER. unused 5.4.8
     SPELL_AURA_MOD_SCALE_2                                  = 239,
     SPELL_AURA_MOD_EXPERTISE                                = 240,
     SPELL_AURA_FORCE_MOVE_FORWARD                           = 241,
