@@ -616,13 +616,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
                     // Remove cooldown - summon spellls have category
                     m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                    spell_id = 48289;
-                    break;
-                // Raise dead - take reagents and trigger summon spells
-                case 48289:
-                    if (m_targets.HasDst())
-                        targets.SetDst(*m_targets.GetDstPos());
-                    spell_id = CalculateDamage(0, NULL);
                     break;
             }
             break;
