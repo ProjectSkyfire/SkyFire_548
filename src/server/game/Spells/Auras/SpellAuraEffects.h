@@ -251,7 +251,7 @@ class AuraEffect
         void HandleAuraModRangedAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModRangedAttackPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
-        void HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+
         //   damage bonus
         void HandleModDamageDone(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModDamagePercentDone(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -261,7 +261,7 @@ class AuraEffect
         void HandleModPowerCostPCT(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModPowerCost(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleArenaPreparation(AuraApplication const* aurApp, uint8 mode, bool apply) const;
-        void HandleNoReagentUseAura(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+
         void HandleAuraRetainComboPoints(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         //  others
         void HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -273,7 +273,7 @@ class AuraEffect
         void HandleComprehendLanguage(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraConvertRune(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraLinked(AuraApplication const* aurApp, uint8 mode, bool apply) const;
-        void HandleAuraOpenStable(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+
         void HandleAuraModFakeInebriation(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode, bool apply) const;
