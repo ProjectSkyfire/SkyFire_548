@@ -38,6 +38,7 @@
 #include "ScriptMgr.h"
 #include "CreatureAI.h"
 #include "SpellInfo.h"
+#include "BlackMarketMgr.h"
 
 enum StableResultCode
 {
@@ -427,6 +428,12 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
 
     if (unit->IsArmorer() || unit->IsCivilian() || unit->IsQuestGiver() || unit->IsServiceProvider() || unit->IsGuard())
         unit->StopMoving();
+
+    if (unit->IsBMAuctioner())
+    {
+        _player->GetSession()->SendBlackMarketHello(unit->GetGUID(), sBlackMarketMgr->isBlackMarketOpen());
+        return;
+    }
 
     // If spiritguide, no need for gossip menu, just put player into resurrect queue
     if (unit->IsSpiritGuide())

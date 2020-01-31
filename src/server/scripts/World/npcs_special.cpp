@@ -2478,18 +2478,6 @@ public:
     }
 };
 
-class npc_madam_goya : public CreatureScript
-{
-public:
-    npc_madam_goya() : CreatureScript("npc_madam_goya") { }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        player->GetSession()->SendBlackMarketHello(creature->GetGUID(), sBlackMarketMgr->isBlackMarketOpen());
-        return true;
-    }
-};
-
 class npc_training_target : public CreatureScript
 {
 public:
@@ -2537,6 +2525,5 @@ void AddSC_npcs_special()
     new npc_firework();
     new npc_Spirit_of_Master_Shang_Xi();
     new npc_spring_rabbit();
-    new npc_madam_goya();
     new npc_training_target();
 }

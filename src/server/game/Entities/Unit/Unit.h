@@ -716,7 +716,8 @@ enum NPCFlags
     UNIT_NPC_FLAG_REFORGER = 0x08000000,       // reforging
     UNIT_NPC_FLAG_TRANSMOGRIFIER = 0x10000000,       // transmogrification
     UNIT_NPC_FLAG_VAULTKEEPER = 0x20000000,       // void storage
-    UNIT_NPC_FLAG_WILDPET_CAPTURABLE = 0x80000000        // wild pet
+    UNIT_NPC_FLAG_WILDPET_CAPTURABLE = 0x40000000,        // wild pet
+    UNIT_NPC_FLAG_BMAH = 0x80000000,        // bmah goya (-2147483648)
 };
 
 enum MovementFlags
@@ -1906,6 +1907,10 @@ class Unit : public WorldObject
     bool IsSpiritService() const
     {
         return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE);
+    }
+    bool IsBMAuctioner() const
+    {
+        return HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_BMAH);
     }
 
     bool IsInFlight()  const
