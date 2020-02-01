@@ -1,5 +1,5 @@
-TRUNCATE `playercreateinfo_cast_spell`;
-INSERT INTO `playercreateinfo_cast_spell` (`raceMask`, `classMask`, `spell`, `note`) VALUES
+TRUNCATE `playercreateinfo_spell_cast`;
+INSERT INTO `playercreateinfo_spell_cast` (`raceMask`, `classMask`, `spell`, `note`) VALUES
 (1, 4, 79597, 'Human - Hunter - Young Wolf'),
 (2, 4, 79598, 'Orc - Hunter - Young Boar'),
 (4, 4, 79593, 'Dwarf - Hunter - Young Bear'),
