@@ -1335,6 +1335,9 @@ bool Item::HasStats() const
         if (proto->ItemStat[i].ItemStatValue != 0)
             return true;
 
+    if (proto->ScalingStatDistribution != 0)
+        return true;
+
     return false;
 }
 
