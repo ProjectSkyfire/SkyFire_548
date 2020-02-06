@@ -1,0 +1,1 @@
+UPDATE creature SET phaseId=170 WHERE id IN (35010,35011,35830);
