@@ -5,7 +5,7 @@ UPDATE `quest_template` SET `Title`='Frost Nova', `Objectives`='Reach level 3 to
 -- Orc Frost Nova
 UPDATE `quest_template` SET `Title`='Frost Nova', `Objectives`='Reach level 3 to learn Frost Nova. Locate a Training Dummy and practice using Frost Nova 2 times.' WHERE `Id`=25149;
 -- Gnome Frost Nova
-UPDATE `quest_template` SET `Title`='Frost Nova', `Objectives`='Reach level 3 to learn Frost Nova. Once you've learned the spell, successfully cast it twice at a Training Dummy in New Tinkertown.' WHERE `Id`=26198;
+UPDATE `quest_template` SET `Title`='Frost Nova', `Objectives`='Reach level 3 to learn Frost Nova. Once you''ve learned the spell, successfully cast it twice at a Training Dummy in New Tinkertown.' WHERE `Id`=26198;
 -- Blood Elf Frost Nova
 UPDATE `quest_template` SET `Title`='Frost Nova', `Objectives`='Reach level 3 to learn Frost Nova. Locate a Training Dummy outside the Sunspire and practice using it 2 times.' WHERE `Id`=10068;
 -- Dwarf Frost Nova
