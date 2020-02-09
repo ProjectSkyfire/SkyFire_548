@@ -2846,9 +2846,6 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
             case 43215: // Flame Breath
             case 70461: // Coldflame Trap
             case 72133: // Pain and Suffering
-            case 73788: // Pain and Suffering
-            case 73789: // Pain and Suffering
-            case 73790: // Pain and Suffering
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
             case 24340: // Meteor
@@ -2870,9 +2867,6 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
             case 72373: // Shared Suffering
             case 71904: // Chaos Bane
             case 70492: // Ooze Eruption
-            case 72505: // Ooze Eruption
-            case 72624: // Ooze Eruption
-            case 72625: // Ooze Eruption
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
@@ -2886,10 +2880,6 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
             case 64777: // Machine Gun
             case 65239: // Machine Gun
             case 65919: // Impale
-            case 67858: // Impale
-            case 67859: // Impale
-            case 67860: // Impale
-            case 69293: // Wing Buffet
             case 74439: // Machine Gun
             case 63278: // Mark of the Faceless (General Vezax)
             case 62544: // Thrust (Argent Tournament)
@@ -2910,9 +2900,6 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
             case 63010: // Charge (Argent Tournament, NPC)
             case 68321: // Charge (Argent Tournament, NPC)
             case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)
