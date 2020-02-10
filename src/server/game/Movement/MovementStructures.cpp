@@ -5597,8 +5597,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MovementForceFlightSpeedChangeAck;
         //case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
         //    return MovementForceRunBackSpeedChangeAck;
-        case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:
-            return MovementForceRunSpeedChangeAck;
+        //case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:
+        //    return MovementForceRunSpeedChangeAck;
         //case CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK:
         //    return MovementForceSwimSpeedChangeAck;
         //case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:
