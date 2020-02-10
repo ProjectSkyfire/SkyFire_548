@@ -105,7 +105,7 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
         return false;
 
     LogLevel logLevel = logger->getLogLevel();
-    return logLevel != LOG_LEVEL_DISABLED && logLevel <= level;
+    return logLevel != LogLevel::LOG_LEVEL_DISABLED && logLevel <= level;
 }
 
 inline void Log::outMessage(std::string const& filter, LogLevel level, const char * str, ...)
@@ -136,21 +136,21 @@ inline void Log::outMessage(std::string const& filter, LogLevel level, const cha
 #endif
 
 #define SF_LOG_TRACE(filterType__, ...) \
-    SF_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
+    SF_LOG_MESSAGE_BODY(filterType__, LogLevel::LOG_LEVEL_TRACE, __VA_ARGS__)
 
 #define SF_LOG_DEBUG(filterType__, ...) \
-    SF_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
+    SF_LOG_MESSAGE_BODY(filterType__, LogLevel::LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 #define SF_LOG_INFO(filterType__, ...)  \
-    SF_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
+    SF_LOG_MESSAGE_BODY(filterType__, LogLevel::LOG_LEVEL_INFO, __VA_ARGS__)
 
 #define SF_LOG_WARN(filterType__, ...)  \
-    SF_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
+    SF_LOG_MESSAGE_BODY(filterType__, LogLevel::LOG_LEVEL_WARN, __VA_ARGS__)
 
 #define SF_LOG_ERROR(filterType__, ...) \
-    SF_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
+    SF_LOG_MESSAGE_BODY(filterType__, LogLevel::LOG_LEVEL_ERROR, __VA_ARGS__)
 
 #define SF_LOG_FATAL(filterType__, ...) \
-    SF_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
+    SF_LOG_MESSAGE_BODY(filterType__, LogLevel::LOG_LEVEL_FATAL, __VA_ARGS__)
 
 #endif

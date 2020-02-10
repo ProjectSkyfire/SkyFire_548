@@ -20940,7 +20940,7 @@ void Player::_SaveStats(SQLTransaction& trans)
 
 void Player::outDebugValues() const
 {
-    if (!sLog->ShouldLog("entities.unit", LOG_LEVEL_DEBUG))
+    if (!sLog->ShouldLog("entities.unit", LogLevel::LOG_LEVEL_DEBUG))
         return;
 
     SF_LOG_DEBUG("entities.unit", "HP is: \t\t\t%u\t\tMP is: \t\t\t%u", GetMaxHealth(), GetMaxPower(POWER_MANA));

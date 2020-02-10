@@ -711,7 +711,7 @@ enum RBACPermissions
     RBAC_PERM_MAX
 };
 
-enum RBACCommandResult
+enum class RBACCommandResult
 {
     RBAC_OK,
     RBAC_CANT_ADD_ALREADY_ADDED,

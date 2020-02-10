@@ -24,7 +24,7 @@
 #include <sstream>
 
 AppenderConsole::AppenderConsole(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags) :
-    Appender(id, name, APPENDER_CONSOLE, level, flags), _colored(false)
+    Appender(id, name, AppenderType::APPENDER_CONSOLE, level, flags), _colored(false)
 {
     for (uint8 i = 0; i < MaxLogLevels; ++i)
         _colors[i] = ColorTypes(MaxColors);
@@ -158,29 +158,29 @@ void AppenderConsole::ResetColor(bool stdout_stream)
 
 void AppenderConsole::_write(LogMessage const& message)
 {
-    bool stdout_stream = !(message.level == LOG_LEVEL_ERROR || message.level == LOG_LEVEL_FATAL);
+    bool stdout_stream = !(message.level == LogLevel::LOG_LEVEL_ERROR || message.level == LogLevel::LOG_LEVEL_FATAL);
 
     if (_colored)
     {
         uint8 index;
         switch (message.level)
         {
-        case LOG_LEVEL_TRACE:
+        case LogLevel::LOG_LEVEL_TRACE:
             index = 5;
             break;
-        case LOG_LEVEL_DEBUG:
+        case LogLevel::LOG_LEVEL_DEBUG:
             index = 4;
             break;
-        case LOG_LEVEL_INFO:
+        case LogLevel::LOG_LEVEL_INFO:
             index = 3;
             break;
-        case LOG_LEVEL_WARN:
+        case LogLevel::LOG_LEVEL_WARN:
             index = 2;
             break;
-        case LOG_LEVEL_FATAL:
+        case LogLevel::LOG_LEVEL_FATAL:
             index = 0;
             break;
-        case LOG_LEVEL_ERROR: // No break on purpose
+        case LogLevel::LOG_LEVEL_ERROR: // No break on purpose
         default:
             index = 1;
             break;

@@ -71,7 +71,7 @@ void Appender::setLogLevel(LogLevel _level)
 
 void Appender::write(LogMessage& message)
 {
-    if (!level || level > message.level)
+    if (level == LogLevel::LOG_LEVEL_DISABLED || level > message.level)
         return;
 
     message.prefix.clear();
@@ -108,17 +108,17 @@ const char* Appender::getLogLevelString(LogLevel level)
 {
     switch (level)
     {
-        case LOG_LEVEL_FATAL:
+        case LogLevel::LOG_LEVEL_FATAL:
             return "FATAL";
-        case LOG_LEVEL_ERROR:
+        case LogLevel::LOG_LEVEL_ERROR:
             return "ERROR";
-        case LOG_LEVEL_WARN:
+        case LogLevel::LOG_LEVEL_WARN:
             return "WARN";
-        case LOG_LEVEL_INFO:
+        case LogLevel::LOG_LEVEL_INFO:
             return "INFO";
-        case LOG_LEVEL_DEBUG:
+        case LogLevel::LOG_LEVEL_DEBUG:
             return "DEBUG";
-        case LOG_LEVEL_TRACE:
+        case LogLevel::LOG_LEVEL_TRACE:
             return "TRACE";
         default:
             return "DISABLED";

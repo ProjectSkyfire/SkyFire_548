@@ -25,7 +25,7 @@
 #endif
 
 AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, const char* _filename, const char* _logDir, const char* _mode, AppenderFlags _flags, uint64 fileSize):
-    Appender(id, name, APPENDER_FILE, level, _flags),
+    Appender(id, name, AppenderType::APPENDER_FILE, level, _flags),
     logfile(NULL),
     filename(_filename),
     logDir(_logDir),

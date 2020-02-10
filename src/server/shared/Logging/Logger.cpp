@@ -19,7 +19,7 @@
 
 #include "Logger.h"
 
-Logger::Logger(): name(""), level(LOG_LEVEL_DISABLED) { }
+Logger::Logger(): name(""), level(LogLevel::LOG_LEVEL_DISABLED) { }
 
 void Logger::Create(std::string const& _name, LogLevel _level)
 {
@@ -54,9 +54,9 @@ void Logger::setLogLevel(LogLevel _level)
 
 void Logger::write(LogMessage& message) const
 {
-    if (!level || level > message.level || message.text.empty())
+    if (level == LogLevel::LOG_LEVEL_DISABLED || level > message.level || message.text.empty())
     {
-        //fprintf(stderr, "Logger::write: Logger %s, Level %u. Msg %s Level %u WRONG LEVEL MASK OR EMPTY MSG\n", getName().c_str(), messge.level, message.text.c_str(), .message.level); // DEBUG - RemoveMe
+        //fprintf(stderr, "Logger::write: Logger %s, Level %u. Msg %s Level %u WRONG LEVEL MASK OR EMPTY MSG\n", getName().c_str(), message.level, message.text.c_str(), message.level); // DEBUG - RemoveMe
         return;
     }
 

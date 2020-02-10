@@ -27,7 +27,7 @@
 #include <string>
 
 // Values assigned have their equivalent in enum ACE_Log_Priority
-enum LogLevel
+enum class LogLevel
 {
     LOG_LEVEL_DISABLED                           = 0,
     LOG_LEVEL_TRACE                              = 1,
@@ -40,7 +40,7 @@ enum LogLevel
 
 const uint8 MaxLogLevels = 6;
 
-enum AppenderType
+enum class AppenderType
 {
     APPENDER_NONE,
     APPENDER_CONSOLE,
@@ -84,7 +84,7 @@ struct LogMessage
 class Appender
 {
     public:
-        Appender(uint8 _id, std::string const& name, AppenderType type = APPENDER_NONE, LogLevel level = LOG_LEVEL_DISABLED, AppenderFlags flags = APPENDER_FLAGS_NONE);
+        Appender(uint8 _id, std::string const& name, AppenderType type = AppenderType::APPENDER_NONE, LogLevel level = LogLevel::LOG_LEVEL_DISABLED, AppenderFlags flags = APPENDER_FLAGS_NONE);
         virtual ~Appender();
 
         uint8 getId() const;
@@ -103,7 +103,7 @@ class Appender
         uint8 id;
         std::string name;
         AppenderType type;
-        LogLevel level;
+        LogLevel level = LogLevel::LOG_LEVEL_DISABLED;
         AppenderFlags flags;
 };
 

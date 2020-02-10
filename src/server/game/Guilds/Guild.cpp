@@ -3542,7 +3542,7 @@ void Guild::_BroadcastEvent(GuildEvents guildEvent, uint64 guid, const char* par
 
     BroadcastPacket(&data);
 
-    if (sLog->ShouldLog("guild", LOG_LEVEL_DEBUG))
+    if (sLog->ShouldLog("guild", LogLevel::LOG_LEVEL_DEBUG))
         SF_LOG_DEBUG("guild", "SMSG_GUILD_EVENT [Broadcast] Event: %s (%u)", _GetGuildEventString(guildEvent).c_str(), guildEvent);
 }
 

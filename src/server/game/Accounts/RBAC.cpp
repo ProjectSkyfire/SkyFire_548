@@ -58,7 +58,7 @@ RBACCommandResult RBACData::GrantPermission(uint32 permissionId, int32 realmId /
     {
         SF_LOG_TRACE("rbac", "RBACData::GrantPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Permission does not exists",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_ID_DOES_NOT_EXISTS;
+        return RBACCommandResult::RBAC_ID_DOES_NOT_EXISTS;
     }
 
     // Check if already added in denied list
@@ -66,7 +66,7 @@ RBACCommandResult RBACData::GrantPermission(uint32 permissionId, int32 realmId /
     {
         SF_LOG_TRACE("rbac", "RBACData::GrantPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Permission in deny list",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_IN_DENIED_LIST;
+        return RBACCommandResult::RBAC_IN_DENIED_LIST;
     }
 
     // Already added?
@@ -74,7 +74,7 @@ RBACCommandResult RBACData::GrantPermission(uint32 permissionId, int32 realmId /
     {
         SF_LOG_TRACE("rbac", "RBACData::GrantPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Permission already granted",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_CANT_ADD_ALREADY_ADDED;
+        return RBACCommandResult::RBAC_CANT_ADD_ALREADY_ADDED;
     }
 
     AddGrantedPermission(permissionId);
@@ -91,7 +91,7 @@ RBACCommandResult RBACData::GrantPermission(uint32 permissionId, int32 realmId /
         SF_LOG_TRACE("rbac", "RBACData::GrantPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Ok",
                        GetId(), GetName().c_str(), permissionId, realmId);
 
-    return RBAC_OK;
+    return RBACCommandResult::RBAC_OK;
 }
 
 RBACCommandResult RBACData::DenyPermission(uint32 permissionId, int32 realmId /* = 0*/)
@@ -102,7 +102,7 @@ RBACCommandResult RBACData::DenyPermission(uint32 permissionId, int32 realmId /*
     {
         SF_LOG_TRACE("rbac", "RBACData::DenyPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Permission does not exists",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_ID_DOES_NOT_EXISTS;
+        return RBACCommandResult::RBAC_ID_DOES_NOT_EXISTS;
     }
 
     // Check if already added in granted list
@@ -110,7 +110,7 @@ RBACCommandResult RBACData::DenyPermission(uint32 permissionId, int32 realmId /*
     {
         SF_LOG_TRACE("rbac", "RBACData::DenyPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Permission in grant list",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_IN_GRANTED_LIST;
+        return RBACCommandResult::RBAC_IN_GRANTED_LIST;
     }
 
     // Already added?
@@ -118,7 +118,7 @@ RBACCommandResult RBACData::DenyPermission(uint32 permissionId, int32 realmId /*
     {
         SF_LOG_TRACE("rbac", "RBACData::DenyPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Permission already denied",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_CANT_ADD_ALREADY_ADDED;
+        return RBACCommandResult::RBAC_CANT_ADD_ALREADY_ADDED;
     }
 
     AddDeniedPermission(permissionId);
@@ -135,7 +135,7 @@ RBACCommandResult RBACData::DenyPermission(uint32 permissionId, int32 realmId /*
         SF_LOG_TRACE("rbac", "RBACData::DenyPermission [Id: %u Name: %s] (Permission %u, RealmId %d). Ok",
                        GetId(), GetName().c_str(), permissionId, realmId);
 
-    return RBAC_OK;
+    return RBACCommandResult::RBAC_OK;
 }
 
 void RBACData::SavePermission(uint32 permission, bool granted, int32 realmId)
@@ -155,7 +155,7 @@ RBACCommandResult RBACData::RevokePermission(uint32 permissionId, int32 realmId 
     {
         SF_LOG_TRACE("rbac", "RBACData::RevokePermission [Id: %u Name: %s] (Permission %u, RealmId %d). Not granted or revoked",
                        GetId(), GetName().c_str(), permissionId, realmId);
-        return RBAC_CANT_REVOKE_NOT_IN_LIST;
+        return RBACCommandResult::RBAC_CANT_REVOKE_NOT_IN_LIST;
     }
 
     RemoveGrantedPermission(permissionId);
@@ -178,7 +178,7 @@ RBACCommandResult RBACData::RevokePermission(uint32 permissionId, int32 realmId 
         SF_LOG_TRACE("rbac", "RBACData::RevokePermission [Id: %u Name: %s] (Permission %u, RealmId %d). Ok",
                        GetId(), GetName().c_str(), permissionId, realmId);
 
-    return RBAC_OK;
+    return RBACCommandResult::RBAC_OK;
 }
 
 void RBACData::LoadFromDB()

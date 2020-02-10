@@ -23,7 +23,7 @@
 #include "RBAC.h"
 #include <ace/Singleton.h>
 
-enum AccountOpResult
+enum class AccountOpResult
 {
     AOR_OK,
     AOR_NAME_TOO_LONG,
