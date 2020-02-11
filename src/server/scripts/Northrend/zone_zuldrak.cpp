@@ -87,7 +87,7 @@ public:
             // pointer check not needed
             DoCast(rageclaw, SPELL_FREE_RAGECLAW, true);
 
-            me->setDeathState(DEAD);
+            me->setDeathState(DeathState::DEAD);
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
@@ -103,7 +103,7 @@ public:
                         me->DespawnOrUnsummon();
                     }
                     else
-                        me->setDeathState(JUST_DIED);
+                        me->setDeathState(DeathState::JUST_DIED);
                 }
             }
         }

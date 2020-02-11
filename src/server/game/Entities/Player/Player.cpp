@@ -1526,18 +1526,18 @@ void Player::HandleSobering()
 DrunkenState Player::GetDrunkenstateByValue(uint8 value)
 {
     if (value >= 90)
-        return DRUNKEN_SMASHED;
+        return DrunkenState::DRUNKEN_SMASHED;
     if (value >= 50)
-        return DRUNKEN_DRUNK;
+        return DrunkenState::DRUNKEN_DRUNK;
     if (value)
-        return DRUNKEN_TIPSY;
-    return DRUNKEN_SOBER;
+        return DrunkenState::DRUNKEN_TIPSY;
+    return DrunkenState::DRUNKEN_SOBER;
 }
 
 void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 {
     bool isSobering = newDrunkValue < GetDrunkValue();
-    uint32 oldDrunkenState = Player::GetDrunkenstateByValue(GetDrunkValue());
+    DrunkenState oldDrunkenState = Player::GetDrunkenstateByValue(GetDrunkValue());
     if (newDrunkValue > 100)
         newDrunkValue = 100;
 
@@ -1551,7 +1551,7 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
     else if (!HasAuraType(SPELL_AURA_MOD_FAKE_INEBRIATE) && !newDrunkValue)
         m_invisibilityDetect.DelFlag(INVISIBILITY_DRUNK);
 
-    uint32 newDrunkenState = Player::GetDrunkenstateByValue(newDrunkValue);
+    DrunkenState newDrunkenState = Player::GetDrunkenstateByValue(newDrunkValue);
     SetByteValue(PLAYER_FIELD_ARENA_FACTION, 1, newDrunkValue);
     UpdateObjectVisibility();
 
@@ -1806,7 +1806,7 @@ void Player::Update(uint32 p_time)
         RegenerateAll();
     }
 
-    if (m_deathState == JUST_DIED)
+    if (m_deathState == DeathState::JUST_DIED)
         KillPlayer();
 
     if (m_nextSave > 0)
@@ -1909,7 +1909,7 @@ void Player::setDeathState(DeathState s)
 
     bool cur = IsAlive();
 
-    if (s == JUST_DIED)
+    if (s == DeathState::JUST_DIED)
     {
         if (!cur)
         {
@@ -1944,7 +1944,7 @@ void Player::setDeathState(DeathState s)
     Unit::setDeathState(s);
 
     // restore resurrection spell id for player after aura remove
-    if (s == JUST_DIED && cur && ressSpellId)
+    if (s == DeathState::JUST_DIED && cur && ressSpellId)
         SetUInt32Value(PLAYER_FIELD_SELF_RES_SPELL, ressSpellId);
 
     if (IsAlive() && !cur)
@@ -5378,7 +5378,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
         SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
 
-    setDeathState(ALIVE);
+    setDeathState(DeathState::ALIVE);
 
     SetWaterWalking(false, true);
     if (!HasUnitState(UNIT_STATE_STUNNED))
@@ -5448,7 +5448,7 @@ void Player::KillPlayer()
 
     StopMirrorTimers();                                     //disable timers(bars)
 
-    setDeathState(CORPSE);
+    setDeathState(DeathState::CORPSE);
     //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
 
     SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
@@ -18279,7 +18279,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadGlyphAuras();
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        m_deathState = DEAD;
+        m_deathState = DeathState::DEAD;
 
     // after spell load, learn rewarded spell if need also
     _LoadQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_QUEST_STATUS));

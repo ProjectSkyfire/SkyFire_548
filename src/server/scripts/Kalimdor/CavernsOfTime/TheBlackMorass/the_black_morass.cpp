@@ -364,7 +364,7 @@ public:
                 return;
 
             SF_LOG_DEBUG("scripts", "npc_time_rift: not casting anylonger, i need to die.");
-            me->setDeathState(JUST_DIED);
+            me->setDeathState(DeathState::JUST_DIED);
 
             if (instance->GetData(TYPE_RIFT) == IN_PROGRESS)
                 instance->SetData(TYPE_RIFT, SPECIAL);

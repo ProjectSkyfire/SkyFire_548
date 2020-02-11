@@ -81,7 +81,7 @@ public:
             return false;
         }
 
-        creatureTarget->setDeathState(JUST_DIED);
+        creatureTarget->setDeathState(DeathState::JUST_DIED);
         creatureTarget->RemoveCorpse();
         creatureTarget->SetHealth(0); // just for nice GM-mode view
 

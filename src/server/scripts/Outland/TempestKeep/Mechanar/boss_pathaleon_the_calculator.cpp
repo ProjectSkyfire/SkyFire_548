@@ -222,7 +222,7 @@ class npc_nether_wraith : public CreatureScript
                 {
                     if (Die_Timer <= diff)
                     {
-                        me->setDeathState(JUST_DIED);
+                        me->setDeathState(DeathState::JUST_DIED);
                         me->RemoveCorpse();
                     }
                     else

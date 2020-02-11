@@ -1300,7 +1300,7 @@ struct npc_argent_captainAI : public ScriptedAI
             if (spell->Id == SPELL_REVIVE_CHAMPION && !IsUndead)
             {
                 IsUndead = true;
-                me->setDeathState(JUST_RESPAWNED);
+                me->setDeathState(DeathState::JUST_RESPAWNED);
                 uint32 newEntry = 0;
                 switch (me->GetEntry())
                 {

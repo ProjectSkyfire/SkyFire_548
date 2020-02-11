@@ -247,7 +247,7 @@ public:
                     Creature* boss = Unit::GetCreature((*me), AzgalorGUID);
                     if (!boss || (boss && boss->isDead()))
                     {
-                        me->setDeathState(JUST_DIED);
+                        me->setDeathState(DeathState::JUST_DIED);
                         me->RemoveCorpse();
                         return;
                     }

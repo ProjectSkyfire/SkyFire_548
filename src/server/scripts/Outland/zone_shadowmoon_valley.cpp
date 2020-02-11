@@ -900,7 +900,7 @@ public:
                     if (Illi)
                     {
                         Illi->SetVisible(false);
-                        Illi->setDeathState(JUST_DIED);
+                        Illi->setDeathState(DeathState::JUST_DIED);
                     }
                     return 1000;
                     break;

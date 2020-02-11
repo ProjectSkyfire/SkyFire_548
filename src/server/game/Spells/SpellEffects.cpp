@@ -3465,7 +3465,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         caster->RewardPlayerAndGroupAtEvent(18388, unitTarget);
                         if (Creature* target = unitTarget->ToCreature())
                         {
-                            target->setDeathState(CORPSE);
+                            target->setDeathState(DeathState::CORPSE);
                             target->RemoveCorpse();
                         }
                     }
@@ -4900,7 +4900,7 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
 
     pet->SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-    pet->setDeathState(ALIVE);
+    pet->setDeathState(DeathState::ALIVE);
     pet->ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
     pet->SetHealth(pet->CountPctFromMaxHealth(damage));
 

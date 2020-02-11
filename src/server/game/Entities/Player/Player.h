@@ -543,7 +543,7 @@ struct EnchantDuration
 typedef std::list<EnchantDuration> EnchantDurationList;
 typedef std::list<Item*> ItemDurationList;
 
-enum DrunkenState
+enum class DrunkenState
 {
     DRUNKEN_SOBER   = 0,
     DRUNKEN_TIPSY   = 1,

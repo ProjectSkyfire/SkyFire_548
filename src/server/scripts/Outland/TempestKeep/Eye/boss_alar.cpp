@@ -485,7 +485,7 @@ class npc_ember_of_alar : public CreatureScript
 
             void EnterEvadeMode() OVERRIDE
             {
-                me->setDeathState(JUST_DIED);
+                me->setDeathState(DeathState::JUST_DIED);
             }
 
             void DamageTaken(Unit* killer, uint32 &damage) OVERRIDE

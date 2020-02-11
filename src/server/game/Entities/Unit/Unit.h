@@ -501,7 +501,7 @@ enum BaseModType
     MOD_END
 };
 
-enum DeathState
+enum class DeathState
 {
     ALIVE = 0,
     JUST_DIED = 1,
@@ -2056,15 +2056,15 @@ class Unit : public WorldObject
 
     bool IsAlive() const
     {
-        return (m_deathState == ALIVE);
+        return (m_deathState == DeathState::ALIVE);
     }
     bool isDying() const
     {
-        return (m_deathState == JUST_DIED);
+        return (m_deathState == DeathState::JUST_DIED);
     }
     bool isDead() const
     {
-        return (m_deathState == DEAD || m_deathState == CORPSE);
+        return (m_deathState == DeathState::DEAD || m_deathState == DeathState::CORPSE);
     }
     DeathState getDeathState() const
     {

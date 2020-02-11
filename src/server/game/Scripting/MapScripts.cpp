@@ -873,7 +873,7 @@ void Map::ScriptsProcess()
                             step.script->GetDebugInfo().c_str(), cSource->GetEntry(), cSource->GetGUIDLow());
                     else
                     {
-                        cSource->setDeathState(JUST_DIED);
+                        cSource->setDeathState(DeathState::JUST_DIED);
                         if (step.script->Kill.RemoveCorpse == 1)
                             cSource->RemoveCorpse();
                     }

@@ -1888,7 +1888,7 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
         }
         case CONDITION_DRUNKENSTATE:
         {
-            if (cond->ConditionValue1 > DRUNKEN_SMASHED)
+            if (cond->ConditionValue1 >= MAX_DRUNKEN)
             {
                 SF_LOG_ERROR("sql.sql", "DrunkState condition has invalid state (%u), skipped", cond->ConditionValue1);
                 return false;

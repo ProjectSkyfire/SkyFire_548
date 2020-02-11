@@ -180,7 +180,7 @@ class boss_harbinger_skyriss : public CreatureScript
                             if (Unit* mellic = Unit::GetUnit(*me, instance->GetData64(DATA_MELLICHAR)))
                             {
                                 //should have a better way to do this. possibly spell exist.
-                                mellic->setDeathState(JUST_DIED);
+                                mellic->setDeathState(DeathState::JUST_DIED);
                                 mellic->SetHealth(0);
                                 instance->SetData(TYPE_SHIELD_OPEN, IN_PROGRESS);
                             }

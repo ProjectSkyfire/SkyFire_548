@@ -189,7 +189,7 @@ class npc_ragin_flames : public CreatureScript
                             if (instance->GetData(DATA_NETHERMANCER_SEPRETHREA) != IN_PROGRESS)
                             {
                                 //remove
-                                me->setDeathState(JUST_DIED);
+                                me->setDeathState(DeathState::JUST_DIED);
                                 me->RemoveCorpse();
                             }
                         }

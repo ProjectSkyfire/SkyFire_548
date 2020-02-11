@@ -211,7 +211,7 @@ public:
                 {
                     if (Unit* remo = Unit::GetUnit(*me, ShieldGeneratorChannel[i]))
                     {
-                        remo->setDeathState(JUST_DIED);
+                        remo->setDeathState(DeathState::JUST_DIED);
                         ShieldGeneratorChannel[i] = 0;
                     }
                 }
@@ -703,7 +703,7 @@ public:
             if (DespawnTimer <= diff)
             {
                 // call Unsummon()
-                me->setDeathState(DEAD);
+                me->setDeathState(DeathState::DEAD);
 
                 // to prevent crashes
                 DespawnTimer = 1000;
@@ -799,7 +799,7 @@ public:
                     if (!Vashj || !Vashj->IsAlive() || CAST_AI(boss_lady_vashj::boss_lady_vashjAI, Vashj->ToCreature()->AI())->Phase != 3)
                     {
                         // remove
-                        me->setDeathState(DEAD);
+                        me->setDeathState(DeathState::DEAD);
                         me->RemoveCorpse();
                         me->setFaction(35);
                     }
@@ -923,7 +923,7 @@ public:
 
                 // get and remove channel
                 if (Unit* channel = Unit::GetCreature(*vashj, CAST_AI(boss_lady_vashj::boss_lady_vashjAI, vashj->AI())->ShieldGeneratorChannel[channelIdentifier]))
-                    channel->setDeathState(JUST_DIED); // call Unsummon()
+                    channel->setDeathState(DeathState::JUST_DIED); // call Unsummon()
 
                 instance->SetData(identifier, 1);
 

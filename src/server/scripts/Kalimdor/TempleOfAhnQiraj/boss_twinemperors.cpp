@@ -122,7 +122,7 @@ struct boss_twinemperorsAI : public ScriptedAI
             pOtherBoss->SetHealth(ohealth > 0 ? ohealth : 0);
             if (ohealth <= 0)
             {
-                pOtherBoss->setDeathState(JUST_DIED);
+                pOtherBoss->setDeathState(DeathState::JUST_DIED);
                 pOtherBoss->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
         }
@@ -134,7 +134,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         if (pOtherBoss)
         {
             pOtherBoss->SetHealth(0);
-            pOtherBoss->setDeathState(JUST_DIED);
+            pOtherBoss->setDeathState(DeathState::JUST_DIED);
             pOtherBoss->SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             CAST_AI(boss_twinemperorsAI, pOtherBoss->AI())->DontYellWhenDead = true;
         }

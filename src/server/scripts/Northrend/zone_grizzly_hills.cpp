@@ -150,7 +150,7 @@ public:
                             if (Creature* RWORG = Unit::GetCreature(*me, _RavenousworgGUID))
                                 RWORG->DisappearAndDie();
                             me->GetMotionMaster()->MovePoint(0, Mrfloppy->GetPositionX(), Mrfloppy->GetPositionY(), Mrfloppy->GetPositionZ());
-                            Mrfloppy->setDeathState(ALIVE);
+                            Mrfloppy->setDeathState(DeathState::ALIVE);
                             Mrfloppy->GetMotionMaster()->MoveFollow(me, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                             Talk(SAY_VICTORY3);
                         }

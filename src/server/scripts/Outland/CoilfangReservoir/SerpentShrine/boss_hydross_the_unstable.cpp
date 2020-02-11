@@ -167,7 +167,7 @@ public:
             {
                 if (Creature* mob = Unit::GetCreature(*me, beams[i]))
                 {
-                    mob->setDeathState(DEAD);
+                    mob->setDeathState(DeathState::DEAD);
                     mob->RemoveCorpse();
                 }
             }
