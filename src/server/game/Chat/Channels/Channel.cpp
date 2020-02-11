@@ -596,7 +596,7 @@ void Channel::Announce(Player const* player)
     UpdateChannelInDB();
 }
 
-void Channel::Say(uint64 guid, std::string const& what, uint32 lang)
+void Channel::Say(uint64 guid, std::string const& what, Language lang)
 {
     if (what.empty())
         return;
@@ -612,7 +612,7 @@ void Channel::Say(uint64 guid, std::string const& what, uint32 lang)
 
     // TODO: Add proper RBAC check
     if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
-        lang = LANG_UNIVERSAL;
+        lang = Language::LANG_UNIVERSAL;
 
     if (!IsOn(guid))
     {
@@ -631,7 +631,7 @@ void Channel::Say(uint64 guid, std::string const& what, uint32 lang)
     }
 
     WorldPacket data;
-    ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, Language(lang), guid, guid, what, chatTag, "", "", 0, isGM, _name);
+    ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_CHANNEL, lang, guid, guid, what, chatTag, "", "", 0, isGM, _name);
 
     SendToAll(&data, !playersStore[guid].IsModerator() ? guid : false);
 }

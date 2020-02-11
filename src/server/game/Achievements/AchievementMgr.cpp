@@ -56,7 +56,7 @@ namespace Skyfire
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 std::string text = sObjectMgr->GetSkyFireString(i_textId, loc_idx);
-                ChatHandler::BuildChatPacket(data, i_msgtype, LANG_UNIVERSAL, &i_player, &i_player, text, i_achievementId);
+                ChatHandler::BuildChatPacket(data, i_msgtype, Language::LANG_UNIVERSAL, &i_player, &i_player, text, i_achievementId);
             }
 
         private:
@@ -828,7 +828,7 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
 
     if (Guild* guild = sGuildMgr->GetGuildById(GetOwner()->GetGuildId()))
     {
-        Skyfire::AchievementChatBuilder say_builder(*GetOwner(), CHAT_MSG_GUILD_ACHIEVEMENT, LANG_ACHIEVEMENT_EARNED, achievement->ID);
+        Skyfire::AchievementChatBuilder say_builder(*GetOwner(), ChatMsg::CHAT_MSG_GUILD_ACHIEVEMENT, LANG_ACHIEVEMENT_EARNED, achievement->ID);
         Skyfire::LocalizedPacketDo<Skyfire::AchievementChatBuilder> say_do(say_builder);
         guild->BroadcastWorker(say_do);
     }
@@ -853,7 +853,7 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
     // if player is in world he can tell his friends about new achievement
     else if (GetOwner()->IsInWorld())
     {
-        Skyfire::AchievementChatBuilder say_builder(*GetOwner(), CHAT_MSG_ACHIEVEMENT, LANG_ACHIEVEMENT_EARNED, achievement->ID);
+        Skyfire::AchievementChatBuilder say_builder(*GetOwner(), ChatMsg::CHAT_MSG_ACHIEVEMENT, LANG_ACHIEVEMENT_EARNED, achievement->ID);
 
         CellCoord p = Skyfire::ComputeCellCoord(GetOwner()->GetPositionX(), GetOwner()->GetPositionY());
 

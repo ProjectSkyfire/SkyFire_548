@@ -2203,8 +2203,8 @@ namespace Skyfire
     class MonsterChatBuilder
     {
         public:
-            MonsterChatBuilder(WorldObject const* obj, ChatMsg msgtype, int32 textId, uint32 language, WorldObject const* target)
-                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(Language(language)), i_target(target) { }
+            MonsterChatBuilder(WorldObject const* obj, ChatMsg msgtype, int32 textId, Language language, WorldObject const* target)
+                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target) { }
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
@@ -2225,8 +2225,8 @@ namespace Skyfire
     class MonsterCustomChatBuilder
     {
         public:
-            MonsterCustomChatBuilder(WorldObject const* obj, ChatMsg msgtype, const char* text, uint32 language, WorldObject const* target)
-                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(Language(language)), i_target(target) { }
+            MonsterCustomChatBuilder(WorldObject const* obj, ChatMsg msgtype, const char* text, Language language, WorldObject const* target)
+                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_target(target) { }
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
@@ -2243,56 +2243,56 @@ namespace Skyfire
     };
 }                                                           // namespace Skyfire
 
-void WorldObject::MonsterSay(const char* text, uint32 language, WorldObject const* target)
+void WorldObject::MonsterSay(const char* text, Language language, WorldObject const* target)
 {
     CellCoord p = Skyfire::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Skyfire::MonsterCustomChatBuilder say_build(this, CHAT_MSG_MONSTER_SAY, text, language, target);
+    Skyfire::MonsterCustomChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_SAY, text, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> say_do(say_build);
     Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterSay(int32 textId, uint32 language, WorldObject const* target)
+void WorldObject::MonsterSay(int32 textId, Language language, WorldObject const* target)
 {
     CellCoord p = Skyfire::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Skyfire::MonsterChatBuilder say_build(this, CHAT_MSG_MONSTER_SAY, textId, language, target);
+    Skyfire::MonsterChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_SAY, textId, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> say_do(say_build);
     Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
-void WorldObject::MonsterYell(const char* text, uint32 language, WorldObject const* target)
+void WorldObject::MonsterYell(const char* text, Language language, WorldObject const* target)
 {
     CellCoord p = Skyfire::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Skyfire::MonsterCustomChatBuilder say_build(this, CHAT_MSG_MONSTER_YELL, text, language, target);
+    Skyfire::MonsterCustomChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_YELL, text, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> say_do(say_build);
     Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
 }
 
-void WorldObject::MonsterYell(int32 textId, uint32 language, WorldObject const* target)
+void WorldObject::MonsterYell(int32 textId, Language language, WorldObject const* target)
 {
     CellCoord p = Skyfire::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Skyfire::MonsterChatBuilder say_build(this, CHAT_MSG_MONSTER_YELL, textId, language, target);
+    Skyfire::MonsterChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_YELL, textId, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> say_do(say_build);
     Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
@@ -2303,7 +2303,7 @@ void WorldObject::MonsterYell(int32 textId, uint32 language, WorldObject const* 
 void WorldObject::MonsterTextEmote(const char* text, WorldObject const* target, bool IsBossEmote)
 {
     WorldPacket data;
-    ChatHandler::BuildChatPacket(data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, this, target, text);
+    ChatHandler::BuildChatPacket(data, IsBossEmote ? ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE : ChatMsg::CHAT_MSG_MONSTER_EMOTE, Language::LANG_UNIVERSAL, this, target, text);
     SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
@@ -2314,7 +2314,7 @@ void WorldObject::MonsterTextEmote(int32 textId, WorldObject const* target, bool
     Cell cell(p);
     cell.SetNoCreate();
 
-    Skyfire::MonsterChatBuilder say_build(this, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, textId, LANG_UNIVERSAL, target);
+    Skyfire::MonsterChatBuilder say_build(this, IsBossEmote ? ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE : ChatMsg::CHAT_MSG_MONSTER_EMOTE, textId, Language::LANG_UNIVERSAL, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> say_do(say_build);
     Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
@@ -2328,7 +2328,7 @@ void WorldObject::MonsterWhisper(const char* text, Player const* target, bool Is
 
     LocaleConstant loc_idx = target->GetSession()->GetSessionDbLocaleIndex();
     WorldPacket data;
-    ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
+    ChatHandler::BuildChatPacket(data, IsBossWhisper ? ChatMsg::CHAT_MSG_RAID_BOSS_WHISPER : ChatMsg::CHAT_MSG_MONSTER_WHISPER, Language::LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
     target->GetSession()->SendPacket(&data);
 }
 
@@ -2341,7 +2341,7 @@ void WorldObject::MonsterWhisper(int32 textId, Player const* target, bool IsBoss
     char const* text = sObjectMgr->GetSkyFireString(textId, loc_idx);
 
     WorldPacket data;
-    ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
+    ChatHandler::BuildChatPacket(data, IsBossWhisper ? ChatMsg::CHAT_MSG_RAID_BOSS_WHISPER : ChatMsg::CHAT_MSG_MONSTER_WHISPER, Language::LANG_UNIVERSAL, this, target, text, 0, "", loc_idx);
     target->GetSession()->SendPacket(&data);
 }
 

@@ -426,7 +426,7 @@ class Battleground
         virtual void FillInitialWorldStates(WorldStateBuilder& /*builder*/) { }
         void SendPacketToTeam(uint32 TeamID, WorldPacket* packet, Player* sender = NULL, bool self = true);
         void SendPacketToAll(WorldPacket* packet);
-        void YellToAll(Creature* creature, const char* text, uint32 language);
+        void YellToAll(Creature* creature, const char* text, Language language);
 
         template<class Do>
         void BroadcastWorker(Do& _do);

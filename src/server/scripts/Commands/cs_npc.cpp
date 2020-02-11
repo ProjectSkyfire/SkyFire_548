@@ -1237,7 +1237,7 @@ public:
             return false;
         }
 
-        creature->MonsterSay(args, LANG_UNIVERSAL, NULL);
+        creature->MonsterSay(args, Language::LANG_UNIVERSAL, NULL);
 
         // make some emotes
         char lastchar = args[strlen(args) - 1];
@@ -1345,7 +1345,7 @@ public:
             return false;
         }
 
-        creature->MonsterYell(args, LANG_UNIVERSAL, NULL);
+        creature->MonsterYell(args, Language::LANG_UNIVERSAL, NULL);
 
         // make an emote
         creature->HandleEmoteCommand(EMOTE_ONESHOT_SHOUT);

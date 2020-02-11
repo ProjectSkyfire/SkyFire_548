@@ -533,7 +533,7 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
     data.WriteByteSeq(target[2]);
     data.WriteByteSeq(target[3]);
 
-    data << uint8(CHAT_MSG_RAID_BOSS_EMOTE);
+    data << uint8(ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE);
 
     data.WriteByteSeq(unkGuid[1]);
     data.WriteByteSeq(unkGuid[3]);
@@ -553,7 +553,7 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
     data.WriteByteSeq(source[1]);
     data.WriteByteSeq(source[0]);
 
-    data << uint8(LANG_UNIVERSAL);
+    data << uint8(Language::LANG_UNIVERSAL);
     data.WriteString(msg);
     return data;
 }
@@ -562,7 +562,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
 {
     if (Creature* stalker = GetCreature(StalkerGuid))
         // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
-        sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_ADDON, TEXT_RANGE_ZONE);
+        sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, ChatMsg::CHAT_MSG_BG_SYSTEM_NEUTRAL, Language::LANG_ADDON, TEXT_RANGE_ZONE);
 }
 
 void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)

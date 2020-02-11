@@ -43,46 +43,46 @@
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 {
-    uint32 type = 0;
-    uint32 lang;
+    ChatMsg type;
+    Language lang;
 
     switch (recvData.GetOpcode())
     {
         case CMSG_MESSAGECHAT_SAY:
-            type = CHAT_MSG_SAY;
+            type = ChatMsg::CHAT_MSG_SAY;
             break;
         case CMSG_MESSAGECHAT_YELL:
-            type = CHAT_MSG_YELL;
+            type = ChatMsg::CHAT_MSG_YELL;
             break;
         case CMSG_MESSAGECHAT_PARTY:
-            type = CHAT_MSG_PARTY;
+            type = ChatMsg::CHAT_MSG_PARTY;
             break;
         case CMSG_MESSAGECHAT_RAID:
-            type = CHAT_MSG_RAID;
+            type = ChatMsg::CHAT_MSG_RAID;
             break;
         case CMSG_MESSAGECHAT_RAID_WARNING:
-            type = CHAT_MSG_RAID_WARNING;
+            type = ChatMsg::CHAT_MSG_RAID_WARNING;
             break;
         case CMSG_MESSAGECHAT_GUILD:
-            type = CHAT_MSG_GUILD;
+            type = ChatMsg::CHAT_MSG_GUILD;
             break;
         case CMSG_MESSAGECHAT_OFFICER:
-            type = CHAT_MSG_OFFICER;
+            type = ChatMsg::CHAT_MSG_OFFICER;
             break;
         case CMSG_MESSAGECHAT_WHISPER:
-            type = CHAT_MSG_WHISPER;
+            type = ChatMsg::CHAT_MSG_WHISPER;
             break;
         case CMSG_MESSAGECHAT_EMOTE:
-            type = CHAT_MSG_EMOTE;
+            type = ChatMsg::CHAT_MSG_EMOTE;
             break;
         case CMSG_MESSAGECHAT_CHANNEL:
-            type = CHAT_MSG_CHANNEL;
+            type = ChatMsg::CHAT_MSG_CHANNEL;
             break;
         case CMSG_CHAT_MESSAGE_AFK:
-            type = CHAT_MSG_AFK;
+            type = ChatMsg::CHAT_MSG_AFK;
             break;
         case CMSG_MESSAGECHAT_DND:
-            type = CHAT_MSG_DND;
+            type = ChatMsg::CHAT_MSG_DND;
             break;
         /*
             case CMSG_MESSAGECHAT_BATTLEGROUND:
@@ -95,7 +95,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             return;
     }
 
-    if (type >= MSG_NULL_ACTION)
+    if (type >= ChatMsg::MSG_NULL_ACTION)
     {
         SF_LOG_ERROR("network", "CHAT: Wrong message type received: %u", type);
         recvData.rfinish();
@@ -107,9 +107,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
     //SF_LOG_DEBUG("misc", "CHAT: packet received. type %u, lang %u", type, lang);
 
     // no language sent with emote packet.
-    if (type != CHAT_MSG_EMOTE && type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
+    if (type != ChatMsg::CHAT_MSG_EMOTE && type != ChatMsg::CHAT_MSG_AFK && type != ChatMsg::CHAT_MSG_DND)
     {
-        recvData >> lang;
+        uint32 plang = 0;
+        recvData >> plang;
+        lang = Language(plang);
 
         // prevent talking at unknown language (cheating)
         LanguageDesc const* langDesc = GetLanguageDescByID(lang);
@@ -140,16 +142,16 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
         }
 
-        if (lang == LANG_ADDON)
+        if (lang == Language::LANG_ADDON)
         {
             // LANG_ADDON is only valid for the following message types
             switch (type)
             {
-                case CHAT_MSG_PARTY:
-                case CHAT_MSG_RAID:
-                case CHAT_MSG_GUILD:
-                case CHAT_MSG_INSTANCE:
-                case CHAT_MSG_WHISPER:
+                case ChatMsg::CHAT_MSG_PARTY:
+                case ChatMsg::CHAT_MSG_RAID:
+                case ChatMsg::CHAT_MSG_GUILD:
+                case ChatMsg::CHAT_MSG_INSTANCE:
+                case ChatMsg::CHAT_MSG_WHISPER:
                     if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
                     {
                         std::string msg = "";
@@ -158,7 +160,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                         if (msg.empty())
                             return;
 
-                        sScriptMgr->OnPlayerChat(sender, uint32(CHAT_MSG_ADDON), lang, msg);
+                        sScriptMgr->OnPlayerChat(sender, ChatMsg::CHAT_MSG_ADDON, lang, msg);
                     }
 
                     // Disabled addon channel?
@@ -178,30 +180,30 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         {
             // send in universal language if player in .gm on mode (ignore spell effects)
             if (sender->IsGameMaster())
-                lang = LANG_UNIVERSAL;
+                lang = Language::LANG_UNIVERSAL;
             else
             {
                 // send in universal language in two side iteration allowed mode
                 if (HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT))
-                    lang = LANG_UNIVERSAL;
+                    lang = Language::LANG_UNIVERSAL;
                 else
                 {
                     switch (type)
                     {
-                        case CHAT_MSG_PARTY:
-                        case CHAT_MSG_PARTY_LEADER:
-                        case CHAT_MSG_RAID:
-                        case CHAT_MSG_RAID_LEADER:
-                        case CHAT_MSG_RAID_WARNING:
+                        case ChatMsg::CHAT_MSG_PARTY:
+                        case ChatMsg::CHAT_MSG_PARTY_LEADER:
+                        case ChatMsg::CHAT_MSG_RAID:
+                        case ChatMsg::CHAT_MSG_RAID_LEADER:
+                        case ChatMsg::CHAT_MSG_RAID_WARNING:
                             // allow two side chat at group channel if two side group allowed
                             if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
-                                lang = LANG_UNIVERSAL;
+                                lang = Language::LANG_UNIVERSAL;
                             break;
-                        case CHAT_MSG_GUILD:
-                        case CHAT_MSG_OFFICER:
+                        case ChatMsg::CHAT_MSG_GUILD:
+                        case ChatMsg::CHAT_MSG_OFFICER:
                             // allow two side chat at guild channel if two side guild allowed
                             if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
-                                lang = LANG_UNIVERSAL;
+                                lang = Language::LANG_UNIVERSAL;
                             break;
                     }
                 }
@@ -209,7 +211,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
                 Unit::AuraEffectList const& ModLangAuras = sender->GetAuraEffectsByType(SPELL_AURA_MOD_LANGUAGE);
                 if (!ModLangAuras.empty())
-                    lang = ModLangAuras.front()->GetMiscValue();
+                    lang = Language(ModLangAuras.front()->GetMiscValue());
             }
 
             if (!sender->CanSpeak())
@@ -222,9 +224,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         }
     }
     else
-        lang = LANG_UNIVERSAL;
+        lang = Language::LANG_UNIVERSAL;
 
-    if (sender->HasAura(1852) && type != CHAT_MSG_WHISPER)
+    if (sender->HasAura(1852) && type != ChatMsg::CHAT_MSG_WHISPER)
     {
         SendNotification(GetSkyFireString(LANG_GM_SILENCE), sender->GetName().c_str());
         recvData.rfinish();
@@ -237,32 +239,32 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
     bool ignoreChecks = false;
     switch (type)
     {
-        case CHAT_MSG_SAY:
-        case CHAT_MSG_EMOTE:
-        case CHAT_MSG_YELL:
-        case CHAT_MSG_PARTY:
-        case CHAT_MSG_GUILD:
-        case CHAT_MSG_OFFICER:
-        case CHAT_MSG_RAID:
-        case CHAT_MSG_RAID_WARNING:
-        case CHAT_MSG_INSTANCE:
+        case ChatMsg::CHAT_MSG_SAY:
+        case ChatMsg::CHAT_MSG_EMOTE:
+        case ChatMsg::CHAT_MSG_YELL:
+        case ChatMsg::CHAT_MSG_PARTY:
+        case ChatMsg::CHAT_MSG_GUILD:
+        case ChatMsg::CHAT_MSG_OFFICER:
+        case ChatMsg::CHAT_MSG_RAID:
+        case ChatMsg::CHAT_MSG_RAID_WARNING:
+        case ChatMsg::CHAT_MSG_INSTANCE:
             textLength = recvData.ReadBits(8);
             msg = recvData.ReadString(textLength);
             break;
-        case CHAT_MSG_WHISPER:
+        case ChatMsg::CHAT_MSG_WHISPER:
             textLength = recvData.ReadBits(8);
             receiverLength = recvData.ReadBits(9);
             msg = recvData.ReadString(textLength);
             to = recvData.ReadString(receiverLength);
             break;
-        case CHAT_MSG_CHANNEL:
+        case ChatMsg::CHAT_MSG_CHANNEL:
             textLength = recvData.ReadBits(9);
             receiverLength = recvData.ReadBits(8);
             msg = recvData.ReadString(receiverLength);
             channel = recvData.ReadString(textLength);
             break;
-        case CHAT_MSG_AFK:
-        case CHAT_MSG_DND:
+        case ChatMsg::CHAT_MSG_AFK:
+        case ChatMsg::CHAT_MSG_DND:
             textLength = recvData.ReadBits(8);
             msg = recvData.ReadString(textLength);
             ignoreChecks = true;
@@ -277,7 +279,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         if (ChatHandler(this).ParseCommands(msg.c_str()))
             return;
 
-        if (lang != LANG_ADDON)
+        if (lang != Language::LANG_ADDON)
         {
             // Strip invisible characters for non-addon messages
             if (sWorld->getBoolConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
@@ -298,9 +300,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
     switch (type)
     {
-        case CHAT_MSG_SAY:
-        case CHAT_MSG_EMOTE:
-        case CHAT_MSG_YELL:
+        case ChatMsg::CHAT_MSG_SAY:
+        case ChatMsg::CHAT_MSG_EMOTE:
+        case ChatMsg::CHAT_MSG_YELL:
         {
             if (sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ))
             {
@@ -308,14 +310,14 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 return;
             }
 
-            if (type == CHAT_MSG_SAY)
+            if (type == ChatMsg::CHAT_MSG_SAY)
                 sender->Say(msg, lang);
-            else if (type == CHAT_MSG_EMOTE)
+            else if (type == ChatMsg::CHAT_MSG_EMOTE)
                 sender->TextEmote(msg);
-            else if (type == CHAT_MSG_YELL)
+            else if (type == ChatMsg::CHAT_MSG_YELL)
                 sender->Yell(msg, lang);
         } break;
-        case CHAT_MSG_WHISPER:
+        case ChatMsg::CHAT_MSG_WHISPER:
         {
             if (!normalizePlayerName(to))
             {
@@ -355,8 +357,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             GetPlayer()->Whisper(msg, lang, receiver->GetGUID());
         } break;
-        case CHAT_MSG_PARTY:
-        case CHAT_MSG_PARTY_LEADER:
+        case ChatMsg::CHAT_MSG_PARTY:
+        case ChatMsg::CHAT_MSG_PARTY_LEADER:
         {
             // if player is in battleground, he cannot say to battleground members by /p
             Group* group = GetPlayer()->GetOriginalGroup();
@@ -368,7 +370,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
 
             if (group->IsLeader(GetPlayer()->GetGUID()))
-                type = CHAT_MSG_PARTY_LEADER;
+                type = ChatMsg::CHAT_MSG_PARTY_LEADER;
 
             sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
@@ -376,7 +378,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             ChatHandler::BuildChatPacket(data, ChatMsg(type), Language(lang), _player, NULL, msg);
             group->BroadcastPacket(&data, false, group->GetMemberGroup(GetPlayer()->GetGUID()));
         } break;
-        case CHAT_MSG_GUILD:
+        case ChatMsg::CHAT_MSG_GUILD:
         {
             if (GetPlayer()->GetGuildId())
             {
@@ -384,11 +386,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 {
                     sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, guild);
 
-                    guild->BroadcastToGuild(this, false, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
+                    guild->BroadcastToGuild(this, false, msg, lang == Language::LANG_ADDON ? Language::LANG_ADDON : Language::LANG_UNIVERSAL);
                 }
             }
         } break;
-        case CHAT_MSG_OFFICER:
+        case ChatMsg::CHAT_MSG_OFFICER:
         {
             if (GetPlayer()->GetGuildId())
             {
@@ -396,12 +398,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 {
                     sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, guild);
 
-                    guild->BroadcastToGuild(this, true, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
+                    guild->BroadcastToGuild(this, true, msg, lang == Language::LANG_ADDON ? Language::LANG_ADDON : Language::LANG_UNIVERSAL);
                 }
             }
         } break;
-        case CHAT_MSG_RAID:
-        case CHAT_MSG_RAID_LEADER:
+        case ChatMsg::CHAT_MSG_RAID:
+        case ChatMsg::CHAT_MSG_RAID_LEADER:
         {
             // if player is in battleground, he cannot say to battleground members by /ra
             Group* group = GetPlayer()->GetOriginalGroup();
@@ -413,15 +415,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
 
             if (group->IsLeader(GetPlayer()->GetGUID()))
-                type = CHAT_MSG_RAID_LEADER;
+                type = ChatMsg::CHAT_MSG_RAID_LEADER;
 
             sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
             WorldPacket data;
-            ChatHandler::BuildChatPacket(data, ChatMsg(type), Language(lang), _player, NULL, msg);
+            ChatHandler::BuildChatPacket(data, ChatMsg(type), lang, _player, NULL, msg);
             group->BroadcastPacket(&data, false);
         } break;
-        case CHAT_MSG_RAID_WARNING:
+        case ChatMsg::CHAT_MSG_RAID_WARNING:
         {
             Group* group = GetPlayer()->GetGroup();
             if (!group || !group->isRaidGroup() || !(group->IsLeader(GetPlayer()->GetGUID()) || group->IsAssistant(GetPlayer()->GetGUID())) || group->isBGGroup())
@@ -431,11 +433,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             WorldPacket data;
             //in battleground, raid warning is sent only to players in battleground - code is ok
-            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_WARNING, Language(lang), _player, NULL, msg);
+            ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_RAID_WARNING, lang, _player, NULL, msg);
             group->BroadcastPacket(&data, false);
         } break;
-        case CHAT_MSG_INSTANCE:
-        case CHAT_MSG_INSTANCE_LEADER:
+        case ChatMsg::CHAT_MSG_INSTANCE:
+        case ChatMsg::CHAT_MSG_INSTANCE_LEADER:
         {
             // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
             Group* group = GetPlayer()->GetGroup();
@@ -443,7 +445,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 return;
 
             if (group->IsLeader(GetPlayer()->GetGUID()))
-                type = CHAT_MSG_INSTANCE_LEADER;
+                type = ChatMsg::CHAT_MSG_INSTANCE_LEADER;
 
             sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
@@ -451,7 +453,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             ChatHandler::BuildChatPacket(data, (ChatMsg)type, Language(lang), _player, NULL, msg);
             group->BroadcastPacket(&data, false);
         } break;
-        case CHAT_MSG_CHANNEL:
+        case ChatMsg::CHAT_MSG_CHANNEL:
         {
             if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_CHANNEL_REQ))
             {
@@ -471,7 +473,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 }
             }
         } break;
-        case CHAT_MSG_AFK:
+        case ChatMsg::CHAT_MSG_AFK:
         {
             if (!_player->IsInCombat())
             {
@@ -496,7 +498,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
             break;
         }
-        case CHAT_MSG_DND:
+        case ChatMsg::CHAT_MSG_DND:
         {
             if (_player->isDND())                           // Already DND
             {
@@ -532,22 +534,22 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
     switch (recvData.GetOpcode())
     {
         case CMSG_MESSAGECHAT_ADDON_BATTLEGROUND:
-            type = CHAT_MSG_INSTANCE;
+            type = ChatMsg::CHAT_MSG_INSTANCE;
             break;
         case CMSG_MESSAGECHAT_ADDON_GUILD:
-            type = CHAT_MSG_GUILD;
+            type = ChatMsg::CHAT_MSG_GUILD;
             break;
         case CMSG_MESSAGECHAT_ADDON_OFFICER:
-            type = CHAT_MSG_OFFICER;
+            type = ChatMsg::CHAT_MSG_OFFICER;
             break;
         case CMSG_MESSAGECHAT_ADDON_PARTY:
-            type = CHAT_MSG_PARTY;
+            type = ChatMsg::CHAT_MSG_PARTY;
             break;
         case CMSG_MESSAGECHAT_ADDON_RAID:
-            type = CHAT_MSG_RAID;
+            type = ChatMsg::CHAT_MSG_RAID;
             break;
         case CMSG_MESSAGECHAT_ADDON_WHISPER:
-            type = CHAT_MSG_WHISPER;
+            type = ChatMsg::CHAT_MSG_WHISPER;
             break;
         default:
             SF_LOG_ERROR("network", "HandleAddonMessagechatOpcode: Unknown addon chat opcode (%u)", recvData.GetOpcode());
@@ -561,7 +563,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
     switch (type)
     {
-        case CHAT_MSG_WHISPER:
+        case ChatMsg::CHAT_MSG_WHISPER:
         {
             uint32 msgLen = recvData.ReadBits(9);
             uint32 prefixLen = recvData.ReadBits(5);
@@ -571,9 +573,9 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             targetName = recvData.ReadString(targetLen);
             break;
         }
-        case CHAT_MSG_PARTY:
-        case CHAT_MSG_RAID:
-        case CHAT_MSG_OFFICER:
+        case ChatMsg::CHAT_MSG_PARTY:
+        case ChatMsg::CHAT_MSG_RAID:
+        case ChatMsg::CHAT_MSG_OFFICER:
         {
             uint32 prefixLen = recvData.ReadBits(5);
             uint32 msgLen = recvData.ReadBits(9);
@@ -581,8 +583,8 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             message = recvData.ReadString(msgLen);
             break;
         }
-        case CHAT_MSG_GUILD:
-        case CHAT_MSG_INSTANCE:
+        case ChatMsg::CHAT_MSG_GUILD:
+        case ChatMsg::CHAT_MSG_INSTANCE:
         {
             uint32 msgLen = recvData.ReadBits(9);
             uint32 prefixLen = recvData.ReadBits(5);
@@ -604,7 +606,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             return;
 
         // Weird way to log stuff...
-        sScriptMgr->OnPlayerChat(sender, uint32(CHAT_MSG_ADDON), uint32(LANG_ADDON), message);
+        sScriptMgr->OnPlayerChat(sender, ChatMsg::CHAT_MSG_ADDON, Language::LANG_ADDON, message);
     }
 
     // Disabled addon channel?
@@ -613,26 +615,26 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
     switch (type)
     {
-        case CHAT_MSG_INSTANCE:
+        case ChatMsg::CHAT_MSG_INSTANCE:
         {
             Group* group = sender->GetGroup();
             if (!group || !group->isBGGroup())
                 return;
 
             WorldPacket data;
-            ChatHandler::BuildChatPacket(data, type, LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
+            ChatHandler::BuildChatPacket(data, type, Language::LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
             group->BroadcastAddonMessagePacket(&data, prefix, false);
             break;
         }
-        case CHAT_MSG_GUILD:
-        case CHAT_MSG_OFFICER:
+        case ChatMsg::CHAT_MSG_GUILD:
+        case ChatMsg::CHAT_MSG_OFFICER:
         {
             if (sender->GetGuildId())
                 if (Guild* guild = sGuildMgr->GetGuildById(sender->GetGuildId()))
-                    guild->BroadcastAddonToGuild(this, type == CHAT_MSG_OFFICER, message, prefix);
+                    guild->BroadcastAddonToGuild(this, type == ChatMsg::CHAT_MSG_OFFICER, message, prefix);
             break;
         }
-        case CHAT_MSG_WHISPER:
+        case ChatMsg::CHAT_MSG_WHISPER:
         {
             if (!normalizePlayerName(targetName))
                 break;
@@ -644,8 +646,8 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             break;
         }
         // Messages sent to "RAID" while in a party will get delivered to "PARTY"
-        case CHAT_MSG_PARTY:
-        case CHAT_MSG_RAID:
+        case ChatMsg::CHAT_MSG_PARTY:
+        case ChatMsg::CHAT_MSG_RAID:
         {
 
             Group* group = sender->GetGroup();
@@ -653,7 +655,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
                 break;
 
             WorldPacket data;
-            ChatHandler::BuildChatPacket(data, type, LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
+            ChatHandler::BuildChatPacket(data, type, Language::LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
             group->BroadcastAddonMessagePacket(&data, prefix, true, -1, group->GetMemberGroup(sender->GetGUID()));
             break;
         }
@@ -848,7 +850,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
         return;
 
     WorldPacket data;
-    ChatHandler::BuildChatPacket(data, CHAT_MSG_IGNORED, LANG_UNIVERSAL, _player, _player, GetPlayer()->GetName());
+    ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_IGNORED, Language::LANG_UNIVERSAL, _player, _player, GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 }
 

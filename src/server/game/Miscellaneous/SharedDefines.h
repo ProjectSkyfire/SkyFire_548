@@ -834,7 +834,7 @@ enum CharacterSlot
     SLOT_EMPTY                         = 19
 };
 
-enum Language
+enum class Language
 {
     LANG_UNIVERSAL         = 0,
     LANG_ORCISH            = 1,
@@ -3657,7 +3657,7 @@ enum WeatherType
 
 #define MAX_WEATHER_TYPE 4
 
-enum ChatMsg
+enum class ChatMsg
 {
     CHAT_MSG_ADDON                            = 0xFFFFFFFF, // -1
     CHAT_MSG_SYSTEM                           = 0x00,
@@ -3728,9 +3728,8 @@ enum ChatMsg
     CHAT_MSG_PET_BATTLE_INFO                  = 0x41,
     CHAT_MSG_INSTANCE                         = 0x42,
     CHAT_MSG_INSTANCE_LEADER                  = 0x43,
+    MSG_NULL_ACTION                           = 0x44
 };
-
-#define MSG_NULL_ACTION 0x44
 
 enum ChatLinkColors
 {

@@ -620,7 +620,7 @@ struct LanguageDesc
 };
 
 extern LanguageDesc lang_description[LANGUAGES_COUNT];
-LanguageDesc const* GetLanguageDescByID(uint32 lang);
+LanguageDesc const* GetLanguageDescByID(Language lang);
 
 enum EncounterCreditType
 {

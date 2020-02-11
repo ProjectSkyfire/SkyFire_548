@@ -374,7 +374,7 @@ void Map::ScriptsProcess()
         switch (step.script->command)
         {
             case SCRIPT_COMMAND_TALK:
-                if (step.script->Talk.ChatType > CHAT_TYPE_WHISPER && step.script->Talk.ChatType != CHAT_MSG_RAID_BOSS_WHISPER)
+                if (step.script->Talk.ChatType > CHAT_TYPE_WHISPER && step.script->Talk.ChatType != CHAT_TYPE_BOSS_WHISPER)
                 {
                     SF_LOG_ERROR("scripts", "%s invalid chat type (%u) specified, skipping.", step.script->GetDebugInfo().c_str(), step.script->Talk.ChatType);
                     break;
@@ -389,23 +389,23 @@ void Map::ScriptsProcess()
                         switch (step.script->Talk.ChatType)
                         {
                             case CHAT_TYPE_SAY:
-                                player->Say(text, LANG_UNIVERSAL);
+                                player->Say(text, Language::LANG_UNIVERSAL);
                                 break;
                             case CHAT_TYPE_YELL:
-                                player->Yell(text, LANG_UNIVERSAL);
+                                player->Yell(text, Language::LANG_UNIVERSAL);
                                 break;
                             case CHAT_TYPE_TEXT_EMOTE:
                             case CHAT_TYPE_BOSS_EMOTE:
                                 player->TextEmote(text);
                                 break;
                             case CHAT_TYPE_WHISPER:
-                            case CHAT_MSG_RAID_BOSS_WHISPER:
+                            case CHAT_TYPE_BOSS_WHISPER:
                             {
                                 uint64 targetGUID = target ? target->GetGUID() : 0;
                                 if (!targetGUID || !IS_PLAYER_GUID(targetGUID))
                                     SF_LOG_ERROR("scripts", "%s attempt to whisper to non-player unit, skipping.", step.script->GetDebugInfo().c_str());
                                 else
-                                    player->Whisper(text, LANG_UNIVERSAL, targetGUID);
+                                    player->Whisper(text, Language::LANG_UNIVERSAL, targetGUID);
                                 break;
                             }
                             default:
@@ -422,10 +422,10 @@ void Map::ScriptsProcess()
                         switch (step.script->Talk.ChatType)
                         {
                             case CHAT_TYPE_SAY:
-                                cSource->MonsterSay(step.script->Talk.TextID, LANG_UNIVERSAL, target);
+                                cSource->MonsterSay(step.script->Talk.TextID, Language::LANG_UNIVERSAL, target);
                                 break;
                             case CHAT_TYPE_YELL:
-                                cSource->MonsterYell(step.script->Talk.TextID, LANG_UNIVERSAL, target);
+                                cSource->MonsterYell(step.script->Talk.TextID, Language::LANG_UNIVERSAL, target);
                                 break;
                             case CHAT_TYPE_TEXT_EMOTE:
                                 cSource->MonsterTextEmote(step.script->Talk.TextID, target);
@@ -439,7 +439,7 @@ void Map::ScriptsProcess()
                                 else
                                     cSource->MonsterWhisper(step.script->Talk.TextID, target->ToPlayer());
                                 break;
-                            case CHAT_MSG_RAID_BOSS_WHISPER:
+                            case CHAT_TYPE_BOSS_WHISPER:
                                 if (!targetGUID || !IS_PLAYER_GUID(targetGUID))
                                     SF_LOG_ERROR("scripts", "%s attempt to raidbosswhisper to non-player unit, skipping.", step.script->GetDebugInfo().c_str());
                                 else

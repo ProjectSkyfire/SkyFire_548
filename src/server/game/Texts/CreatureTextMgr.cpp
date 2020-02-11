@@ -30,7 +30,7 @@
 class CreatureTextBuilder
 {
     public:
-         CreatureTextBuilder(WorldObject* obj, ChatMsg msgtype, uint8 textGroup, uint32 id, uint32 language, WorldObject const* target)
+         CreatureTextBuilder(WorldObject* obj, ChatMsg msgtype, uint8 textGroup, uint32 id, Language language, WorldObject const* target)
             : _source(obj), _msgType(msgtype), _textGroup(textGroup), _textId(id), _language(language), _target(target)
         {
         }
@@ -38,21 +38,21 @@ class CreatureTextBuilder
         size_t operator()(WorldPacket* data, LocaleConstant locale) const
         {
             std::string const& text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
-            return ChatHandler::BuildChatPacket(*data, _msgType, Language(_language), _source, _target, text, 0, "", locale);;
+            return ChatHandler::BuildChatPacket(*data, _msgType, _language, _source, _target, text, 0, "", locale);;
         }
 
         WorldObject* _source;
         ChatMsg _msgType;
         uint8 _textGroup;
         uint32 _textId;
-        uint32 _language;
+        Language _language;
         WorldObject const* _target;
 };
 
 class PlayerTextBuilder
 {
     public:
-        PlayerTextBuilder(WorldObject* obj, WorldObject* speaker, ChatMsg msgtype, uint8 textGroup, uint32 id, uint32 language, WorldObject const* target)
+        PlayerTextBuilder(WorldObject* obj, WorldObject* speaker, ChatMsg msgtype, uint8 textGroup, uint32 id, Language language, WorldObject const* target)
             : _source(obj), _talker(speaker), _msgType(msgtype), _textGroup(textGroup), _textId(id), _language(language), _target(target)
         {
 
@@ -61,7 +61,7 @@ class PlayerTextBuilder
         size_t operator()(WorldPacket* data, LocaleConstant locale) const
         {
             std::string const& text = sCreatureTextMgr->GetLocalizedChatString(_source->GetEntry(), _textGroup, _textId, locale);
-            return ChatHandler::BuildChatPacket(*data, _msgType, Language(_language), _talker, _target, text, 0, "", locale);
+            return ChatHandler::BuildChatPacket(*data, _msgType, _language, _talker, _target, text, 0, "", locale);
         }
 
         WorldObject* _source;
@@ -69,7 +69,7 @@ class PlayerTextBuilder
         ChatMsg _msgType;
         uint8 _textGroup;
         uint32 _textId;
-        uint32 _language;
+        Language _language;
         WorldObject const* _target;
 };
 
@@ -119,12 +119,12 @@ void CreatureTextMgr::LoadCreatureTexts()
         if (!GetLanguageDescByID(temp.lang))
         {
             SF_LOG_ERROR("sql.sql", "CreatureTextMgr:  Entry %u, Group %u in table `creature_texts` using Language %u but Language does not exist.", temp.entry, temp.group, uint32(temp.lang));
-            temp.lang = LANG_UNIVERSAL;
+            temp.lang = Language::LANG_UNIVERSAL;
         }
-        if (temp.type >= MSG_NULL_ACTION)
+        if (temp.type >= ChatMsg::MSG_NULL_ACTION)
         {
             SF_LOG_ERROR("sql.sql", "CreatureTextMgr:  Entry %u, Group %u in table `creature_texts` has Type %u but this Chat Type does not exist.", temp.entry, temp.group, uint32(temp.type));
-            temp.type = CHAT_MSG_SAY;
+            temp.type = ChatMsg::CHAT_MSG_SAY;
         }
         if (temp.emote)
         {
@@ -255,8 +255,8 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup,  WorldObject
 
     CreatureTextGroup::const_iterator iter = tempGroup.begin() + pos;
 
-    ChatMsg finalType = (msgType == CHAT_MSG_ADDON) ? iter->type : msgType;
-    Language finalLang = (language == LANG_ADDON) ? iter->lang : language;
+    ChatMsg finalType = (msgType == ChatMsg::CHAT_MSG_ADDON) ? iter->type : msgType;
+    Language finalLang = (language == Language::LANG_ADDON) ? iter->lang : language;
     uint32 finalSound = sound ? sound : iter->sound;
 
     if (finalSound)
@@ -290,11 +290,11 @@ float CreatureTextMgr::GetRangeForChatType(ChatMsg msgType) const
     float dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY);
     switch (msgType)
     {
-        case CHAT_MSG_MONSTER_YELL:
+        case ChatMsg::CHAT_MSG_MONSTER_YELL:
             dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL);
             break;
-        case CHAT_MSG_MONSTER_EMOTE:
-        case CHAT_MSG_RAID_BOSS_EMOTE:
+        case ChatMsg::CHAT_MSG_MONSTER_EMOTE:
+        case ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE:
             dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE);
             break;
         default:
@@ -339,8 +339,8 @@ void CreatureTextMgr::SendNonChatPacket(WorldObject* source, WorldPacket* data, 
 
     switch (msgType)
     {
-        case CHAT_MSG_MONSTER_WHISPER:
-        case CHAT_MSG_RAID_BOSS_WHISPER:
+        case ChatMsg::CHAT_MSG_MONSTER_WHISPER:
+        case ChatMsg::CHAT_MSG_RAID_BOSS_WHISPER:
         {
             if (range == TEXT_RANGE_NORMAL)//ignores team and gmOnly
             {

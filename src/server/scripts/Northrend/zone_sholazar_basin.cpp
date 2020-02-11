@@ -624,7 +624,7 @@ public:
                 return;
 
             player->KilledMonsterCredit(me->GetEntry(), 0);
-            player->Say(SAY_OFFER, LANG_UNIVERSAL);
+            player->Say(SAY_OFFER, Language::LANG_UNIVERSAL);
             sayStep = 1;
         }
 

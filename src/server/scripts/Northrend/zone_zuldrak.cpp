@@ -780,7 +780,7 @@ public:
             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
             {
                 std::string sText = (std::string(killer->GetName()) + " has defeated Yg.. Yggg-really big worm!");
-                summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                summoner->MonsterYell(sText.c_str(), Language::LANG_UNIVERSAL, 0);
             }
 
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -920,7 +920,7 @@ public:
                 player->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR, killer);
 
             std::string sText = ("And with AUTHORITY, " + std::string(killer->GetName()) + " dominates the magnataur lord! Stinkbeard's clan is gonna miss him back home in the Dragonblight!");
-            me->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+            me->MonsterYell(sText.c_str(), Language::LANG_UNIVERSAL, 0);
         }
         private:
             bool   _enrage;
@@ -1070,7 +1070,7 @@ public:
             std::string sText = (std::string(killer->GetName()) + " is victorious once more!");
 
             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                summoner->MonsterYell(sText.c_str(), Language::LANG_UNIVERSAL, 0);
         }
     };
 

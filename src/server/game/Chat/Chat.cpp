@@ -175,7 +175,7 @@ void ChatHandler::SendSysMessage(const char *str)
 
     while (char* line = LineFromMessage(pos))
     {
-        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+        BuildChatPacket(data, ChatMsg::CHAT_MSG_SYSTEM, Language::LANG_UNIVERSAL, NULL, NULL, line);
         m_session->SendPacket(&data);
     }
 
@@ -193,7 +193,7 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
 
     while (char* line = LineFromMessage(pos))
     {
-        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+        BuildChatPacket(data, ChatMsg::CHAT_MSG_SYSTEM, Language::LANG_UNIVERSAL, NULL, NULL, line);
         sWorld->SendGlobalMessage(&data);
     }
 
@@ -211,7 +211,7 @@ void ChatHandler::SendGlobalGMSysMessage(const char *str)
 
     while (char* line = LineFromMessage(pos))
     {
-        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+        BuildChatPacket(data, ChatMsg::CHAT_MSG_SYSTEM, Language::LANG_UNIVERSAL, NULL, NULL, line);
         sWorld->SendGlobalGMMessage(&data);
     }
     free(buf);
@@ -597,7 +597,8 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
                                   uint32 achievementId /*= 0*/, bool gmMessage /*= false*/, std::string const& channelName /*= ""*/,
                                   std::string const& addonPrefix /*= ""*/)
 {
-    bool hasAchievementId = (chatType == CHAT_MSG_ACHIEVEMENT || chatType == CHAT_MSG_GUILD_ACHIEVEMENT) && achievementId;
+    bool hasAchievementId = (chatType == ChatMsg::CHAT_MSG_ACHIEVEMENT || chatType == ChatMsg::CHAT_MSG_GUILD_ACHIEVEMENT) && achievementId;
+    bool hasLanguage = (language > Language::LANG_UNIVERSAL);
     bool hasSenderName = false;
     bool hasReceiverName = false;
     bool hasChannelName = false;
@@ -607,43 +608,43 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
 
     switch (chatType)
     {
-        case CHAT_MSG_INSTANCE:
-        case CHAT_MSG_INSTANCE_LEADER:
-        case CHAT_MSG_PARTY:
-        case CHAT_MSG_PARTY_LEADER:
-        case CHAT_MSG_RAID:
-        case CHAT_MSG_RAID_LEADER:
-        case CHAT_MSG_RAID_WARNING:
+        case ChatMsg::CHAT_MSG_INSTANCE:
+        case ChatMsg::CHAT_MSG_INSTANCE_LEADER:
+        case ChatMsg::CHAT_MSG_PARTY:
+        case ChatMsg::CHAT_MSG_PARTY_LEADER:
+        case ChatMsg::CHAT_MSG_RAID:
+        case ChatMsg::CHAT_MSG_RAID_LEADER:
+        case ChatMsg::CHAT_MSG_RAID_WARNING:
             hasGroupGUID = true;
             break;
-        case CHAT_MSG_GUILD:
-        case CHAT_MSG_OFFICER:
-        case CHAT_MSG_GUILD_ACHIEVEMENT:
+        case ChatMsg::CHAT_MSG_GUILD:
+        case ChatMsg::CHAT_MSG_OFFICER:
+        case ChatMsg::CHAT_MSG_GUILD_ACHIEVEMENT:
             hasGuildGUID = true;
             break;
-        case CHAT_MSG_MONSTER_WHISPER:
-        case CHAT_MSG_RAID_BOSS_WHISPER:
-        case CHAT_MSG_BATTLENET:
+        case ChatMsg::CHAT_MSG_MONSTER_WHISPER:
+        case ChatMsg::CHAT_MSG_RAID_BOSS_WHISPER:
+        case ChatMsg::CHAT_MSG_BATTLENET:
             if (receiverGUID && !IS_PLAYER_GUID(receiverGUID) && !IS_PET_GUID(receiverGUID))
                 hasReceiverName = receiverName.length();
-        case CHAT_MSG_MONSTER_SAY:
-        case CHAT_MSG_MONSTER_PARTY:
-        case CHAT_MSG_MONSTER_YELL:
-        case CHAT_MSG_MONSTER_EMOTE:
-        case CHAT_MSG_RAID_BOSS_EMOTE:
+        case ChatMsg::CHAT_MSG_MONSTER_SAY:
+        case ChatMsg::CHAT_MSG_MONSTER_PARTY:
+        case ChatMsg::CHAT_MSG_MONSTER_YELL:
+        case ChatMsg::CHAT_MSG_MONSTER_EMOTE:
+        case ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE:
             hasSenderName = senderName.length();
             break;
-        case CHAT_MSG_WHISPER_FOREIGN:
+        case ChatMsg::CHAT_MSG_WHISPER_FOREIGN:
             hasSenderName = senderName.length();
             break;
-        case CHAT_MSG_BG_SYSTEM_NEUTRAL:
-        case CHAT_MSG_BG_SYSTEM_ALLIANCE:
-        case CHAT_MSG_BG_SYSTEM_HORDE:
+        case ChatMsg::CHAT_MSG_BG_SYSTEM_NEUTRAL:
+        case ChatMsg::CHAT_MSG_BG_SYSTEM_ALLIANCE:
+        case ChatMsg::CHAT_MSG_BG_SYSTEM_HORDE:
             if (receiverGUID && !IS_PLAYER_GUID(receiverGUID))
                 hasReceiverName = receiverName.length();
             break;
 
-        case CHAT_MSG_CHANNEL:
+        case ChatMsg::CHAT_MSG_CHANNEL:
             hasChannelName = channelName.length();
             hasSenderName = senderName.length();
             break;
@@ -653,7 +654,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
             break;
     }
 
-    if (language == LANG_ADDON)
+    if (language == Language::LANG_ADDON)
         hasPrefix = addonPrefix.length();
 
     Player* sender = sObjectAccessor->FindPlayer(senderGUID);
@@ -700,7 +701,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
     data.WriteBit(receiverGUID[5]);
 
     data.WriteBit(0); // Fake Bit
-    data.WriteBit(!language);
+    data.WriteBit(!hasLanguage);
     data.WriteBit(!hasPrefix);
 
     data.WriteBit(senderGUID[0]);
@@ -794,7 +795,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
     data.WriteByteSeq(receiverGUID[1]);
     data.WriteByteSeq(receiverGUID[0]);
 
-    if (language)
+    if (hasLanguage)
         data << uint8(language);
 
     if (message.length())

@@ -831,7 +831,7 @@ public:
     bool Validate();
 
     // Broadcasts
-    void BroadcastToGuild(WorldSession* session, bool officerOnly, std::string const& msg, uint32 language = LANG_UNIVERSAL) const;
+    void BroadcastToGuild(WorldSession* session, bool officerOnly, std::string const& msg, Language language = Language::LANG_UNIVERSAL) const;
     void BroadcastAddonToGuild(WorldSession* session, bool officerOnly, std::string const& msg, std::string const& prefix) const;
     void BroadcastPacketToRank(WorldPacket* packet, uint8 rankId) const;
     void BroadcastPacket(WorldPacket* packet) const;
