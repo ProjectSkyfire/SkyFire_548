@@ -836,6 +836,7 @@ enum CharacterSlot
 
 enum class Language
 {
+    LANG_ADDON             = -1,  // used by addons, in 2.4.0 not exist, replaced by messagetype?
     LANG_UNIVERSAL         = 0,
     LANG_ORCISH            = 1,
     LANG_DARNASSIAN        = 2,
@@ -860,7 +861,6 @@ enum class Language
     LANG_PANDAREN_ALLIANCE = 43,
     LANG_PANDAREN_HORDE    = 44,
     LANG_RIKKITUN          = 168,
-    LANG_ADDON             = 0xFFFFFFFF                        // used by addons, in 2.4.0 not exist, replaced by messagetype?
 };
 
 #define LANGUAGES_COUNT   24
@@ -3659,7 +3659,7 @@ enum WeatherType
 
 enum class ChatMsg
 {
-    CHAT_MSG_ADDON                            = 0xFFFFFFFF, // -1
+    CHAT_MSG_ADDON                            = -1, // -1
     CHAT_MSG_SYSTEM                           = 0x00,
     CHAT_MSG_SAY                              = 0x01,
     CHAT_MSG_PARTY                            = 0x02,
