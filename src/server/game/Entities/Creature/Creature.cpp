@@ -857,20 +857,20 @@ bool Creature::isCanInteractWithBattleMaster(Player* player, bool msg) const
         player->PlayerTalkClass->ClearMenus();
         switch (bgTypeId)
         {
-            case BATTLEGROUND_AV:  player->PlayerTalkClass->SendGossipMenu(7616, GetGUID()); break;
-            case BATTLEGROUND_WS:  player->PlayerTalkClass->SendGossipMenu(7599, GetGUID()); break;
-            case BATTLEGROUND_AB:  player->PlayerTalkClass->SendGossipMenu(7642, GetGUID()); break;
-            case BATTLEGROUND_EY:  player->PlayerTalkClass->SendGossipMenu(10024, GetGUID()); break;
-            case BATTLEGROUND_SA:  player->PlayerTalkClass->SendGossipMenu(13832, GetGUID()); break;
-            case BATTLEGROUND_IC:  player->PlayerTalkClass->SendGossipMenu(14669, GetGUID()); break;
-            case BATTLEGROUND_TP:  player->PlayerTalkClass->SendGossipMenu(16522, GetGUID()); break;
-            case BATTLEGROUND_BFG: player->PlayerTalkClass->SendGossipMenu(16520, GetGUID()); break;
-            case BATTLEGROUND_NA: break;
-            case BATTLEGROUND_BE: break;
-            case BATTLEGROUND_AA: break;
-            case BATTLEGROUND_RL: break;
-            case BATTLEGROUND_DS: break;
-            case BATTLEGROUND_RV: break;
+            case BattlegroundTypeId::BATTLEGROUND_AV:  player->PlayerTalkClass->SendGossipMenu(7616, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_WS:  player->PlayerTalkClass->SendGossipMenu(7599, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_AB:  player->PlayerTalkClass->SendGossipMenu(7642, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_EY:  player->PlayerTalkClass->SendGossipMenu(10024, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_SA:  player->PlayerTalkClass->SendGossipMenu(13832, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_IC:  player->PlayerTalkClass->SendGossipMenu(14669, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_TP:  player->PlayerTalkClass->SendGossipMenu(16522, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_BFG: player->PlayerTalkClass->SendGossipMenu(16520, GetGUID()); break;
+            case BattlegroundTypeId::BATTLEGROUND_NA: break;
+            case BattlegroundTypeId::BATTLEGROUND_BE: break;
+            case BattlegroundTypeId::BATTLEGROUND_AA: break;
+            case BattlegroundTypeId::BATTLEGROUND_RL: break;
+            case BattlegroundTypeId::BATTLEGROUND_DS: break;
+            case BattlegroundTypeId::BATTLEGROUND_RV: break;
             default: break;
         }
         return false;

@@ -111,7 +111,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         if (!mEntry->IsBattlegroundOrArena())
         {
             // We're not in BG
-            _player->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
+            _player->SetBattlegroundId(0, BattlegroundTypeId::BATTLEGROUND_TYPE_NONE);
             // reset destination bg team
             _player->SetBGTeam(0);
         }

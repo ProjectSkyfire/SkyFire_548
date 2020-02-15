@@ -192,7 +192,7 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
     if (sender.GetMailMessageType() == MAIL_AUCTION && m_items.empty() && !m_money)
         expire_delay = sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY);
     // mail from battlemaster (rewardmarks) should last only one day
-    else if (sender.GetMailMessageType() == MAIL_CREATURE && sBattlegroundMgr->GetBattleMasterBG(sender.GetSenderId()) != BATTLEGROUND_TYPE_NONE)
+    else if (sender.GetMailMessageType() == MAIL_CREATURE && sBattlegroundMgr->GetBattleMasterBG(sender.GetSenderId()) != BattlegroundTypeId::BATTLEGROUND_TYPE_NONE)
         expire_delay = DAY;
      // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
     else

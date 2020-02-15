@@ -53,7 +53,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
-        if (IsHolidayActive(HOLIDAY_HALLOWS_END) && !player->HasAura(SPELL_TRICK_OR_TREATED))
+        if (IsHolidayActive(HolidayIds::HOLIDAY_HALLOWS_END) && !player->HasAura(SPELL_TRICK_OR_TREATED))
         {
             const char* localizedEntry;
             switch (player->GetSession()->GetSessionDbcLocale())
@@ -91,7 +91,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF + 1 && IsHolidayActive(HOLIDAY_HALLOWS_END) && !player->HasAura(SPELL_TRICK_OR_TREATED))
+        if (action == GOSSIP_ACTION_INFO_DEF + 1 && IsHolidayActive(HolidayIds::HOLIDAY_HALLOWS_END) && !player->HasAura(SPELL_TRICK_OR_TREATED))
         {
             player->CastSpell(player, SPELL_TRICK_OR_TREATED, true);
 

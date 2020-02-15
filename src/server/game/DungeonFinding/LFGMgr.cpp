@@ -1931,13 +1931,13 @@ bool LFGMgr::IsSeasonActive(uint32 dungeonId)
     switch (dungeonId)
     {
         case 285: // The Headless Horseman
-            return IsHolidayActive(HOLIDAY_HALLOWS_END);
+            return IsHolidayActive(HolidayIds::HOLIDAY_HALLOWS_END);
         case 286: // The Frost Lord Ahune
-            return IsHolidayActive(HOLIDAY_FIRE_FESTIVAL);
+            return IsHolidayActive(HolidayIds::HOLIDAY_FIRE_FESTIVAL);
         case 287: // Coren Direbrew
-            return IsHolidayActive(HOLIDAY_BREWFEST);
+            return IsHolidayActive(HolidayIds::HOLIDAY_BREWFEST);
         case 288: // The Crown Chemical Co.
-            return IsHolidayActive(HOLIDAY_LOVE_IS_IN_THE_AIR);
+            return IsHolidayActive(HolidayIds::HOLIDAY_LOVE_IS_IN_THE_AIR);
     }
     return false;
 }

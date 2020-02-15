@@ -2237,7 +2237,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
     if (isLFGGroup())
         return ERR_LFG_CANT_USE_BATTLEGROUND;
 
-    BattlemasterListEntry const* bgEntry = sBattlemasterListStore.LookupEntry(bgOrTemplate->GetTypeID());
+    BattlemasterListEntry const* bgEntry = sBattlemasterListStore.LookupEntry(uint32(bgOrTemplate->GetTypeID()));
     if (!bgEntry)
         return ERR_BATTLEGROUND_JOIN_FAILED;            // shouldn't happen
 
@@ -2259,7 +2259,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
 
     uint32 team = reference->GetTeam();
 
-    BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
+    BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId::BATTLEGROUND_RB, 0);
 
     // check every member of the group to be able to join
     memberscount = 0;
@@ -2283,10 +2283,10 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         if (member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRandom))
             return ERR_IN_RANDOM_BG;
         // don't let join to bg queue random if someone from the group is already in bg queue
-        if (bgOrTemplate->GetTypeID() == BATTLEGROUND_RB && member->InBattlegroundQueue())
+        if (bgOrTemplate->GetTypeID() == BattlegroundTypeId::BATTLEGROUND_RB && member->InBattlegroundQueue())
             return ERR_IN_NON_RANDOM_BG;
         // check for deserter debuff in case not arena queue
-        if (bgOrTemplate->GetTypeID() != BATTLEGROUND_AA && !member->CanJoinToBattleground(bgOrTemplate))
+        if (bgOrTemplate->GetTypeID() != BattlegroundTypeId::BATTLEGROUND_AA && !member->CanJoinToBattleground(bgOrTemplate))
             return ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;
         // check if member can join any more battleground queues
         if (!member->HasFreeBattlegroundQueueId())

@@ -1595,7 +1595,7 @@ class npc_brewfest_reveler : public CreatureScript
 
             void ReceiveEmote(Player* player, uint32 emote) OVERRIDE
             {
-                if (!IsHolidayActive(HOLIDAY_BREWFEST))
+                if (!IsHolidayActive(HolidayIds::HOLIDAY_BREWFEST))
                     return;
 
                 if (emote == TEXT_EMOTE_DANCE)

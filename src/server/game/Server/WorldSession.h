@@ -362,7 +362,7 @@ class WorldSession
 
         void SendAttackStop(Unit const* enemy);
 
-        void SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId = BATTLEGROUND_RB);
+        void SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId = BattlegroundTypeId::BATTLEGROUND_RB);
 
         void SendTradeStatus(TradeStatus status);
         void SendUpdateTrade(bool trader_data = true);

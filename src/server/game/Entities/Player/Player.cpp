@@ -9499,7 +9499,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             uint32 pLevel = bones->loot.gold;
             bones->loot.clear();
             if (Battleground* bg = GetBattleground())
-                if (bg->GetTypeID(true) == BATTLEGROUND_AV)
+                if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_AV)
                     loot->FillLoot(1, LootTemplates_Creature, this, true);
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
@@ -9787,7 +9787,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             builder.AppendState(2325, 0x0); // 13 sandworm E
             break;
         case 2597:                                          // Alterac Valley
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_AV)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_AV)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -9869,7 +9869,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 3277:                                          // Warsong Gulch
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_WS)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_WS)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -9884,7 +9884,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 3358:                                          // Arathi Basin
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_AB)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_AB)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -9923,7 +9923,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 3820:                                          // Eye of the Storm
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_EY)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_EY)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10096,7 +10096,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 3698:                                          // Nagrand Arena
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_NA)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_NA)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10106,7 +10106,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 3702:                                          // Blade's Edge Arena
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_BE)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_BE)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10116,7 +10116,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 3968:                                          // Ruins of Lordaeron
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_RL)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_RL)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10126,7 +10126,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 4378:                                          // Dalaran Sewers
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_DS)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_DS)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10136,7 +10136,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 4384:                                          // Strand of the Ancients
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_SA)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_SA)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10171,7 +10171,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 4406:                                          // Ring of Valor
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_RV)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_RV)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10181,7 +10181,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
         case 4710:
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_IC)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_IC)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10265,7 +10265,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             break;
         // Twin Peaks
         case 5031:
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_TP)
                 bg->FillInitialWorldStates(builder);
             else
             {
@@ -10281,7 +10281,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             break;
         // Battle for Gilneas
         case 5449:
-            if (bg && bg->GetTypeID(true) == BATTLEGROUND_BFG)
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_BFG)
                 bg->FillInitialWorldStates(builder);
             break;
         // Wintergrasp
@@ -15339,7 +15339,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
         {
             BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetBattleMasterBG(source->GetEntry());
 
-            if (bgTypeId == BATTLEGROUND_TYPE_NONE)
+            if (bgTypeId == BattlegroundTypeId::BATTLEGROUND_TYPE_NONE)
             {
                 SF_LOG_ERROR("entities.player", "a user (guid %u) requested battlegroundlist from a npc who is no battlemaster", GetGUIDLow());
                 return;
@@ -17942,7 +17942,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     {
         Battleground* currentBg = NULL;
         if (m_bgData.bgInstanceID)                                                //saved in Battleground
-            currentBg = sBattlegroundMgr->GetBattleground(m_bgData.bgInstanceID, BATTLEGROUND_TYPE_NONE);
+            currentBg = sBattlegroundMgr->GetBattleground(m_bgData.bgInstanceID, BattlegroundTypeId::BATTLEGROUND_TYPE_NONE);
 
         bool player_at_bg = currentBg && currentBg->IsPlayerInBattleground(GetGUID());
 

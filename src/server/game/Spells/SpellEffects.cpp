@@ -1399,20 +1399,20 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
     }
 
     // bg reward have some special in code work
-    uint32 bgType = 0;
+    BattlegroundTypeId bgType = BattlegroundTypeId::BATTLEGROUND_TYPE_NONE;
     switch (m_spellInfo->Id)
     {
         case SPELL_AV_MARK_WINNER:
         case SPELL_AV_MARK_LOSER:
-            bgType = BATTLEGROUND_AV;
+            bgType = BattlegroundTypeId::BATTLEGROUND_AV;
             break;
         case SPELL_WS_MARK_WINNER:
         case SPELL_WS_MARK_LOSER:
-            bgType = BATTLEGROUND_WS;
+            bgType = BattlegroundTypeId::BATTLEGROUND_WS;
             break;
         case SPELL_AB_MARK_WINNER:
         case SPELL_AB_MARK_LOSER:
-            bgType = BATTLEGROUND_AB;
+            bgType = BattlegroundTypeId::BATTLEGROUND_AB;
             break;
         default:
             break;
@@ -1476,7 +1476,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
             pItem->SetUInt32Value(ITEM_FIELD_CREATOR, player->GetGUIDLow());
 
         // send info to the client
-        player->SendNewItem(pItem, num_to_add, true, bgType == 0);
+        player->SendNewItem(pItem, num_to_add, true, bgType == BattlegroundTypeId::BATTLEGROUND_TYPE_NONE);
 
         if (pProto->Quality > ITEM_QUALITY_EPIC || (pProto->Quality == ITEM_QUALITY_EPIC && pProto->ItemLevel >= MinNewsItemLevel[sWorld->getIntConfig(CONFIG_EXPANSION)]))
             if (Guild* guild = player->GetGuild())
@@ -1484,7 +1484,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
 
 
         // we succeeded in creating at least one item, so a levelup is possible
-        if (bgType == 0)
+        if (bgType == BattlegroundTypeId::BATTLEGROUND_TYPE_NONE)
             player->UpdateCraftSkill(m_spellInfo->Id);
     }
 
@@ -1823,7 +1823,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
             // in battleground check
             if (Battleground* bg = player->GetBattleground())
             {
-                if (bg->GetTypeID(true) == BATTLEGROUND_EY)
+                if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_EY)
                     bg->EventPlayerClickedOnFlag(player, gameObjTarget);
                 return;
             }

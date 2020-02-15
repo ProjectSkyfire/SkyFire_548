@@ -119,8 +119,8 @@ void Battleground::BroadcastWorker(Do& _do)
 Battleground::Battleground()
 {
     m_Guid              = 0;
-    m_TypeID            = BATTLEGROUND_TYPE_NONE;
-    m_RandomTypeID      = BATTLEGROUND_TYPE_NONE;
+    m_TypeID            = BattlegroundTypeId::BATTLEGROUND_TYPE_NONE;
+    m_RandomTypeID      = BattlegroundTypeId::BATTLEGROUND_TYPE_NONE;
     m_InstanceID        = 0;
     m_Status            = STATUS_NONE;
     m_ClientInstanceID  = 0;
@@ -1055,7 +1055,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
             // if arena, remove the specific arena auras
             if (isArena())
             {
-                bgTypeId=BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
+                bgTypeId= BattlegroundTypeId::BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
                 player->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT);
@@ -1118,7 +1118,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
     if (player)
     {
         // Do next only if found in battleground
-        player->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);  // We're not in BG.
+        player->SetBattlegroundId(0, BattlegroundTypeId::BATTLEGROUND_TYPE_NONE);  // We're not in BG.
         // reset destination bg team
         player->SetBGTeam(0);
         player->RemoveBattlegroundQueueJoinTime(bgTypeId);

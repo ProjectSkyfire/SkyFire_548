@@ -127,7 +127,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
 
     // can do this, since it's battleground, not arena
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, 0);
-    BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
+    BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId::BATTLEGROUND_RB, 0);
 
     // ignore if player is already in BG
     if (_player->InBattleground())
@@ -174,7 +174,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             return;
         }
 
-        if (_player->InBattlegroundQueue() && bgTypeId == BATTLEGROUND_RB)
+        if (_player->InBattlegroundQueue() && bgTypeId == BattlegroundTypeId::BATTLEGROUND_RB)
         {
             // player is already in queue, can't start random queue
             WorldPacket data;
@@ -468,7 +468,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     BattlegroundTypeId bgTypeId = BattlegroundMgr::BGTemplateId(bgQueueTypeId);
     // BGTemplateId returns BATTLEGROUND_AA when it is arena queue.
     // Do instance id search as there is no AA bg instances.
-    Battleground* bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId == BATTLEGROUND_AA ? BATTLEGROUND_TYPE_NONE : bgTypeId);
+    Battleground* bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId == BattlegroundTypeId::BATTLEGROUND_AA ? BattlegroundTypeId::BATTLEGROUND_TYPE_NONE : bgTypeId);
     if (!bg)
     {
         if (action)
@@ -685,14 +685,14 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
     uint8 arenatype = ArenaTeam::GetTypeBySlot(arenaslot);
 
     //check existance
-    Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA);
+    Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BattlegroundTypeId::BATTLEGROUND_AA);
     if (!bg)
     {
         SF_LOG_ERROR("network", "Battleground: template bg (all arenas) not found");
         return;
     }
 
-    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_BATTLEGROUND, BATTLEGROUND_AA, NULL))
+    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_BATTLEGROUND, uint32(BattlegroundTypeId::BATTLEGROUND_AA), NULL))
     {
         ChatHandler(this).PSendSysMessage(LANG_ARENA_DISABLED);
         return;

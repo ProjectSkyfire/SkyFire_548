@@ -1085,7 +1085,7 @@ class Player;
 /// Holder for Battleground data
 struct BGData
 {
-    BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
+    BGData() : bgInstanceID(0), bgTypeID(BattlegroundTypeId::BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
         bgTeam(0), mountSpell(0)
     {
         bgQueuesJoinedTime.clear(); ClearTaxiPath();
@@ -2760,17 +2760,17 @@ class Player : public Unit, public GridObject<Player>
     }
     Battleground* GetBattleground() const;
 
-    uint32 GetBattlegroundQueueJoinTime(uint32 bgTypeId) const
+    uint32 GetBattlegroundQueueJoinTime(BattlegroundTypeId bgTypeId) const
     {
-        return m_bgData.bgQueuesJoinedTime.find(bgTypeId)->second;
+        return m_bgData.bgQueuesJoinedTime.find(uint32(bgTypeId))->second;
     }
-    void AddBattlegroundQueueJoinTime(uint32 bgTypeId, uint32 joinTime)
+    void AddBattlegroundQueueJoinTime(BattlegroundTypeId bgTypeId, uint32 joinTime)
     {
-        m_bgData.bgQueuesJoinedTime [bgTypeId] = joinTime;
+        m_bgData.bgQueuesJoinedTime [uint32(bgTypeId)] = joinTime;
     }
-    void RemoveBattlegroundQueueJoinTime(uint32 bgTypeId)
+    void RemoveBattlegroundQueueJoinTime(BattlegroundTypeId bgTypeId)
     {
-        m_bgData.bgQueuesJoinedTime.erase(m_bgData.bgQueuesJoinedTime.find(bgTypeId)->second);
+        m_bgData.bgQueuesJoinedTime.erase(m_bgData.bgQueuesJoinedTime.find(uint32(bgTypeId))->second);
     }
 
     bool InBattlegroundQueue() const;

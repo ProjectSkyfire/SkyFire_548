@@ -1672,7 +1672,7 @@ class spell_gen_gunship_portal : public SpellScriptLoader
             {
                 Player* caster = GetCaster()->ToPlayer();
                 if (Battleground* bg = caster->GetBattleground())
-                    if (bg->GetTypeID(true) == BATTLEGROUND_IC)
+                    if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_IC)
                         bg->DoAction(1, caster->GetGUID());
             }
 

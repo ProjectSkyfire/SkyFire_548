@@ -3222,7 +3222,7 @@ enum CreatureEliteType
 };
 
 // values based at Holidays.dbc
-enum HolidayIds
+enum class HolidayIds
 {
     HOLIDAY_NONE                     = 0,
 
@@ -3987,7 +3987,7 @@ enum BanReturn
 };
 
 // indexes of BattlemasterList.dbc
-enum BattlegroundTypeId
+enum class BattlegroundTypeId
 {
     BATTLEGROUND_TYPE_NONE      = 0, // None
     BATTLEGROUND_AV             = 1, // Alterac Valley

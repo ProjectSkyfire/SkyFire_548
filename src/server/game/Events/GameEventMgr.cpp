@@ -246,12 +246,12 @@ void GameEventMgr::LoadFromDB()
                 continue;
             }
 
-            if (pGameEvent.holiday_id != HOLIDAY_NONE)
+            if (pGameEvent.holiday_id != HolidayIds::HOLIDAY_NONE)
             {
-                if (!sHolidaysStore.LookupEntry(pGameEvent.holiday_id))
+                if (!sHolidaysStore.LookupEntry(uint32(pGameEvent.holiday_id)))
                 {
-                    SF_LOG_ERROR("sql.sql", "`game_event` game event id (%i) have not existed holiday id %u.", event_id, pGameEvent.holiday_id);
-                    pGameEvent.holiday_id = HOLIDAY_NONE;
+                    SF_LOG_ERROR("sql.sql", "`game_event` game event id (%i) have not existed holiday id %u.", event_id, uint32(pGameEvent.holiday_id));
+                    pGameEvent.holiday_id = HolidayIds::HOLIDAY_NONE;
                 }
             }
 
@@ -1479,12 +1479,12 @@ void GameEventMgr::UpdateEventQuests(uint16 event_id, bool activate)
 void GameEventMgr::UpdateWorldStates(uint16 event_id, bool Activate)
 {
     GameEventData const& event = mGameEvent[event_id];
-    if (event.holiday_id != HOLIDAY_NONE)
+    if (event.holiday_id != HolidayIds::HOLIDAY_NONE)
     {
         BattlegroundTypeId bgTypeId = BattlegroundMgr::WeekendHolidayIdToBGType(event.holiday_id);
-        if (bgTypeId != BATTLEGROUND_TYPE_NONE)
+        if (bgTypeId != BattlegroundTypeId::BATTLEGROUND_TYPE_NONE)
         {
-            BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgTypeId);
+            BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(uint32(bgTypeId));
             if (bl && bl->HolidayWorldStateId)
             {
                 WorldPacket data;
@@ -1631,7 +1631,7 @@ uint16 GameEventMgr::GetEventIdForQuest(Quest const* quest) const
 
 bool IsHolidayActive(HolidayIds id)
 {
-    if (id == HOLIDAY_NONE)
+    if (id == HolidayIds::HOLIDAY_NONE)
         return false;
 
     GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();

@@ -130,7 +130,7 @@ class BattlegroundMgr
             BattleMastersMap::const_iterator itr = mBattleMastersMap.find(entry);
             if (itr != mBattleMastersMap.end())
                 return itr->second;
-            return BATTLEGROUND_WS;
+            return BattlegroundTypeId::BATTLEGROUND_WS;
         }
 
     private:
