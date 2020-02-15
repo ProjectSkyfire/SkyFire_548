@@ -97,7 +97,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
     if (type >= ChatMsg::MSG_NULL_ACTION)
     {
-        SF_LOG_ERROR("network", "CHAT: Wrong message type received: %u", type);
+        SF_LOG_ERROR("network", "CHAT: Wrong message type received: %u", uint8(type));
         recvData.rfinish();
         return;
     }
@@ -521,7 +521,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             break;
         }
         default:
-            SF_LOG_ERROR("network", "CHAT: unknown message type %u, lang: %u", type, lang);
+            SF_LOG_ERROR("network", "CHAT: unknown message type %u, lang: %u", uint8(type), uint8(lang));
             break;
     }
 }
@@ -661,7 +661,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         }
         default:
         {
-            SF_LOG_ERROR("misc", "HandleAddonMessagechatOpcode: unknown addon message type %u", type);
+            SF_LOG_ERROR("misc", "HandleAddonMessagechatOpcode: unknown addon message type %u", uint8(type));
             break;
         }
     }

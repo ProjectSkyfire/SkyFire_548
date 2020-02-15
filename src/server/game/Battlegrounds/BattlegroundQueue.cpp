@@ -155,7 +155,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
         index += BG_TEAMS_COUNT;
     if (ginfo->Team == HORDE)
         index++;
-    SF_LOG_DEBUG("bg.battleground", "Adding Group to BattlegroundQueue bgTypeId : %u, bracket_id : %u, index : %u", BgTypeId, bracketId, index);
+    SF_LOG_DEBUG("bg.battleground", "Adding Group to BattlegroundQueue bgTypeId : %u, bracket_id : %u, index : %u", uint32(BgTypeId), bracketId, index);
 
     uint32 lastOnlineTime = getMSTime();
 
@@ -464,7 +464,7 @@ bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg,
             uint32 queueSlot = player->GetBattlegroundQueueIndex(bgQueueTypeId);
 
             SF_LOG_DEBUG("bg.battleground", "Battleground: invited player %s (%u) to BG instance %u queueindex %u bgtype %u",
-                 player->GetName().c_str(), player->GetGUIDLow(), bg->GetInstanceID(), queueSlot, bg->GetTypeID());
+                 player->GetName().c_str(), player->GetGUIDLow(), bg->GetInstanceID(), queueSlot, uint32(bg->GetTypeID()));
 
             // send status packet
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, player, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, player->GetBattlegroundQueueJoinTime(bgTypeId), ginfo->ArenaType);
@@ -771,7 +771,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
     Battleground* bg_template = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
     if (!bg_template)
     {
-        SF_LOG_ERROR("bg.battleground", "Battleground: Update: bg template not found for %u", bgTypeId);
+        SF_LOG_ERROR("bg.battleground", "Battleground: Update: bg template not found for %u", uint32(bgTypeId));
         return;
     }
 
@@ -805,7 +805,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 0, false);
             if (!bg2)
             {
-                SF_LOG_ERROR("bg.battleground", "BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
+                SF_LOG_ERROR("bg.battleground", "BattlegroundQueue::Update - Cannot create battleground: %u", uint32(bgTypeId));
                 return;
             }
             // invite those selection pools
@@ -831,7 +831,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, false);
             if (!bg2)
             {
-                SF_LOG_ERROR("bg.battleground", "BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
+                SF_LOG_ERROR("bg.battleground", "BattlegroundQueue::Update - Cannot create battleground: %u", uint32(bgTypeId));
                 return;
             }
 

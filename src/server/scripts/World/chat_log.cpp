@@ -40,7 +40,7 @@ public:
             case ChatMsg::CHAT_MSG_SAY:
                 if (sWorld->getBoolConfig(CONFIG_CHATLOG_PUBLIC))
                     SF_LOG_DEBUG("chat.log", "[SAY] Player %s says (language %u): %s",
-                        player->GetName().c_str(), lang, msg.c_str());
+                        player->GetName().c_str(), uint8(lang), msg.c_str());
                 break;
 
             case ChatMsg::CHAT_MSG_EMOTE:
@@ -52,7 +52,7 @@ public:
             case ChatMsg::CHAT_MSG_YELL:
                 if (sWorld->getBoolConfig(CONFIG_CHATLOG_PUBLIC))
                     SF_LOG_DEBUG("chat.log", "[YELL] Player %s yells (language %u): %s",
-                        player->GetName().c_str(), lang, msg.c_str());
+                        player->GetName().c_str(), uint8(lang), msg.c_str());
                 break;
         }
     }

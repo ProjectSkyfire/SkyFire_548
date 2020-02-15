@@ -2024,7 +2024,7 @@ uint32 Battleground::GetTeamScore(uint32 teamId) const
     if (teamId == TEAM_ALLIANCE || teamId == TEAM_HORDE)
         return m_TeamScores[teamId];
 
-    SF_LOG_ERROR("bg.battleground", "GetTeamScore with wrong Team %u for BG %u", teamId, GetTypeID());
+    SF_LOG_ERROR("bg.battleground", "GetTeamScore with wrong Team %u for BG %u", teamId, uint32(GetTypeID()));
     return 0;
 }
 

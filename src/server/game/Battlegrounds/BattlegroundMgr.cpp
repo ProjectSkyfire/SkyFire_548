@@ -373,7 +373,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
     {
         if (!bg->IsPlayerInBattleground(itr->first))
         {
-            SF_LOG_ERROR("network", "Player " UI64FMTD " has scoreboard entry for battleground %u but is not in battleground!", itr->first, bg->GetTypeID(true));
+            SF_LOG_ERROR("network", "Player " UI64FMTD " has scoreboard entry for battleground %u but is not in battleground!", itr->first, uint32(bg->GetTypeID(true)));
             continue;
         }
 
@@ -799,7 +799,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
 
     if (!bg_template)
     {
-        SF_LOG_ERROR("bg.battleground", "Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
+        SF_LOG_ERROR("bg.battleground", "Battleground: CreateNewBattleground - bg template not found for %u", uint32(bgTypeId));
         return NULL;
     }
 
@@ -1169,11 +1169,11 @@ void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, Batt
         uint32 team = player->GetBGTeam();
 
         bg->GetTeamStartLoc(team, x, y, z, O);
-        SF_LOG_DEBUG("bg.battleground", "BattlegroundMgr::SendToBattleground: Sending %s to map %u, X %f, Y %f, Z %f, O %f (bgType %u)", player->GetName().c_str(), mapid, x, y, z, O, bgTypeId);
+        SF_LOG_DEBUG("bg.battleground", "BattlegroundMgr::SendToBattleground: Sending %s to map %u, X %f, Y %f, Z %f, O %f (bgType %u)", player->GetName().c_str(), mapid, x, y, z, O, uint32(bgTypeId));
         player->TeleportTo(mapid, x, y, z, O);
     }
     else
-        SF_LOG_ERROR("bg.battleground", "BattlegroundMgr::SendToBattleground: Instance %u (bgType %u) not found while trying to teleport player %s", instanceId, bgTypeId, player->GetName().c_str());
+        SF_LOG_ERROR("bg.battleground", "BattlegroundMgr::SendToBattleground: Instance %u (bgType %u) not found while trying to teleport player %s", instanceId, uint32(bgTypeId), player->GetName().c_str());
 }
 
 void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battleground* bg, uint64 guid)
