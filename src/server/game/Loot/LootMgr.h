@@ -31,16 +31,17 @@
 #include <vector>
 #include <list>
 
-enum RollType
+enum class RollType
 {
     ROLL_PASS         = 0,
     ROLL_NEED         = 1,
     ROLL_GREED        = 2,
     ROLL_DISENCHANT   = 3,
-    MAX_ROLL_TYPE     = 4
+    MAX_ROLL_TYPE     = 4,
+    ROLL_INVALID      = 5
 };
 
-enum RollMask
+enum class RollMask
 {
     ROLL_FLAG_TYPE_PASS         = 0x01,
     ROLL_FLAG_TYPE_NEED         = 0x02,
@@ -56,7 +57,7 @@ enum RollMask
 #define MAX_NR_QUEST_ITEMS 32
 // unrelated to the number of quest items shown, just for reserve
 
-enum LootMethod
+enum class LootMethod
 {
     FREE_FOR_ALL      = 0,
     ROUND_ROBIN       = 1,
@@ -65,7 +66,7 @@ enum LootMethod
     NEED_BEFORE_GREED = 4
 };
 
-enum PermissionTypes
+enum class PermissionTypes
 {
     ALL_PERMISSION              = 0,
     GROUP_PERMISSION            = 1,
@@ -75,7 +76,7 @@ enum PermissionTypes
     NONE_PERMISSION             = 5
 };
 
-enum LootType
+enum class LootType
 {
     LOOT_CORPSE                 = 1,
     LOOT_PICKPOCKETING          = 2,
@@ -91,7 +92,7 @@ enum LootType
 };
 
 // type of Loot Item in Loot View
-enum LootSlotType
+enum class LootSlotType
 {
     LOOT_SLOT_TYPE_ROLL_ONGOING = 0,                        // roll is ongoing. player cannot loot.
     LOOT_SLOT_TYPE_LOCKED       = 1,                        // item is shown in red. player cannot loot.
@@ -158,8 +159,8 @@ struct LootItem
     const AllowedLooterSet & GetAllowedLooters() const { return allowedGUIDs; }
 
     // Write packet data
-    void WriteBitDataPart(uint8 permission, bool hasSlotType, ByteBuffer* buff);
-    void WriteBasicDataPart(uint8 slotType, uint8 slot, ByteBuffer* buff);
+    void WriteBitDataPart(PermissionTypes permission, LootSlotType hasSlotType, ByteBuffer* buff);
+    void WriteBasicDataPart(LootSlotType slotType, uint8 slot, ByteBuffer* buff);
 };
 
 struct QuestItem
@@ -304,7 +305,7 @@ struct Loot
     //  Only set for inventory items that can be right-click looted
     uint32 containerID;
 
-    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), roundRobinPlayer(0), loot_type(LOOT_CORPSE), maxDuplicates(1), containerID(0) { }
+    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), roundRobinPlayer(0), loot_type(LootType::LOOT_CORPSE), maxDuplicates(1), containerID(0) { }
     ~Loot() { clear(); }
 
     // For deleting items at loot removal since there is no backward interface to the Item()
@@ -383,7 +384,7 @@ struct LootView
     Player* viewer;
     PermissionTypes permission;
 
-    LootView(Loot &_loot, Player* _viewer, PermissionTypes _permission = ALL_PERMISSION)
+    LootView(Loot &_loot, Player* _viewer, PermissionTypes _permission = PermissionTypes::ALL_PERMISSION)
         : loot(_loot), viewer(_viewer), permission(_permission) { }
 
     void WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data);

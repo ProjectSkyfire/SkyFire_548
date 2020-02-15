@@ -45,16 +45,6 @@ struct MapEntry;
 #define MAX_RAID_SUBGROUPS MAXRAIDSIZE/MAXGROUPSIZE
 #define TARGETICONCOUNT 8
 
-enum RollVote
-{
-    PASS              = 0,
-    NEED              = 1,
-    GREED             = 2,
-    DISENCHANT        = 3,
-    NOT_EMITED_YET    = 4,
-    NOT_VALID         = 5
-};
-
 enum GroupMemberOnlineStatus
 {
     MEMBER_STATUS_OFFLINE   = 0x0000,
@@ -142,7 +132,7 @@ class Roll : public LootValidatorRef
         int32  itemRandomPropId;
         uint32 itemRandomSuffix;
         uint8 itemCount;
-        typedef std::map<uint64, RollVote> PlayerVote;
+        typedef std::map<uint64, RollType> PlayerVote;
         PlayerVote playerVote;                              //vote position correspond with player position (in group)
         uint8 totalPlayersRolling;
         uint8 totalNeed;
@@ -297,8 +287,8 @@ class Group
         bool isRollLootActive() const;
         void SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll &r);
         void SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p, bool canNeed, Roll const& r);
-        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
-        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, RollType RollType, const Roll &r);
+        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, RollType RollType, const Roll &r);
         void SendLootAllPassed(Roll const& roll);
         void SendLooter(Creature* creature, Player* pLooter);
         void GroupLoot(Loot* loot, WorldObject* pLootedObject);
@@ -306,7 +296,7 @@ class Group
         void MasterLoot(Loot* loot, WorldObject* pLootedObject);
         Rolls::iterator GetRoll(uint64 Guid);
         void CountTheRoll(Rolls::iterator roll);
-        void CountRollVote(uint64 playerGUID, uint64 Guid, uint8 Choise);
+        void CountRollVote(uint64 playerGUID, uint64 Guid, RollType Choise);
         void EndRoll(Loot* loot);
 
         // related to disenchant rolls

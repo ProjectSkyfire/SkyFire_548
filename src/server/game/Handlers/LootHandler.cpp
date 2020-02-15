@@ -286,7 +286,7 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
     if (!_player->IsAlive())
         return;
 
-    GetPlayer()->SendLoot(guid, LOOT_CORPSE);
+    GetPlayer()->SendLoot(guid, LootType::LOOT_CORPSE);
 
     // interrupt cast
     if (GetPlayer()->IsNonMeleeSpellCasted(false))
@@ -377,7 +377,7 @@ void WorldSession::DoLootRelease(uint64 lguid)
             {
                 if (Group* group = player->GetGroup())
                 {
-                    if (group->GetLootMethod() != MASTER_LOOT)
+                    if (group->GetLootMethod() != LootMethod::MASTER_LOOT)
                     {
                         loot->roundRobinPlayer = 0;
                     }
@@ -455,7 +455,7 @@ void WorldSession::DoLootRelease(uint64 lguid)
             {
                 if (Group* group = player->GetGroup())
                 {
-                    if (group->GetLootMethod() != MASTER_LOOT)
+                    if (group->GetLootMethod() != LootMethod::MASTER_LOOT)
                     {
                         loot->roundRobinPlayer = 0;
                         group->SendLooter(creature, NULL);
@@ -546,7 +546,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item.itemid, item.count);
-    target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, item.itemid, item.count, loot->loot_type);
+    target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, item.itemid, item.count, uint64(loot->loot_type));
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item.itemid, item.count);
 
     // mark as looted

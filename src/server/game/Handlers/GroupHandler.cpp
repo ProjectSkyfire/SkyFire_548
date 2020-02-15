@@ -595,14 +595,15 @@ void WorldSession::HandleLootRoll(WorldPacket& recvData)
     if (!group)
         return;
 
-    group->CountRollVote(GetPlayer()->GetGUID(), guid, rollType);
+    RollType type = RollType(rollType);
+    group->CountRollVote(GetPlayer()->GetGUID(), guid, type);
 
-    switch (rollType)
+    switch (type)
     {
-        case ROLL_NEED:
+        case RollType::ROLL_NEED:
             GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED, 1);
             break;
-        case ROLL_GREED:
+        case RollType::ROLL_GREED:
             GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED, 1);
             break;
     }
