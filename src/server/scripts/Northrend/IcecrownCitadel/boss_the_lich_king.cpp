@@ -391,10 +391,10 @@ class FrozenThroneResetWorker
                     go->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
                     break;
                 case GO_DOODAD_ICECROWN_THRONEFROSTYWIND01:
-                    go->SetGoState(GO_STATE_ACTIVE);
+                    go->SetGoState(GOState::GO_STATE_ACTIVE);
                     break;
                 case GO_DOODAD_ICECROWN_THRONEFROSTYEDGE01:
-                    go->SetGoState(GO_STATE_READY);
+                    go->SetGoState(GOState::GO_STATE_READY);
                     break;
                 case GO_DOODAD_ICESHARD_STANDING02:
                 case GO_DOODAD_ICESHARD_STANDING01:

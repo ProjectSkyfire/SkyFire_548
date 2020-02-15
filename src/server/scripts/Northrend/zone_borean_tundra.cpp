@@ -575,7 +575,7 @@ public:
                             player->KilledMonsterCredit(me->GetEntry(), 0);
 
             if (GameObject* go_caribou = me->GetMap()->GetGameObject(go_caribouGUID))
-                go_caribou->SetGoState(GO_STATE_READY);
+                go_caribou->SetGoState(GOState::GO_STATE_READY);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -624,7 +624,7 @@ public:
                             go_caribou = me->FindNearestGameObject(CaribouTraps[i], 5.0f);
                             if (go_caribou)
                             {
-                                go_caribou->SetGoState(GO_STATE_ACTIVE);
+                                go_caribou->SetGoState(GOState::GO_STATE_ACTIVE);
                                 go_caribouGUID = go_caribou->GetGUID();
                                 break;
                             }
@@ -1996,7 +1996,7 @@ public:
                 pTrap = me->FindNearestGameObject(MammothTraps[i], 11.0f);
                 if (pTrap)
                 {
-                    pTrap->SetGoState(GO_STATE_ACTIVE);
+                    pTrap->SetGoState(GOState::GO_STATE_ACTIVE);
                     return;
                 }
             }

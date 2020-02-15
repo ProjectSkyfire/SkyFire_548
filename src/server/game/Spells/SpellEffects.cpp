@@ -3257,7 +3257,7 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
     Map* map = target->GetMap();
 
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
-        x, y, z, target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
+        x, y, z, target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GOState::GO_STATE_READY))
     {
         delete pGameObj;
         return;
@@ -3284,7 +3284,7 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
     {
         GameObject* linkedGO = new GameObject;
         if (linkedGO->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, map,
-            x, y, z, target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
+            x, y, z, target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GOState::GO_STATE_READY))
         {
             for (auto phase : m_caster->GetPhases())
                 linkedGO->SetPhased(phase, false, true);
@@ -3996,7 +3996,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
         m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2,
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2,
         m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GOState::GO_STATE_READY))
     {
         delete pGameObj;
         return;
@@ -4411,7 +4411,7 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
 
     Map* map = m_caster->GetMap();
     if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
-        x, y, z, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        x, y, z, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GOState::GO_STATE_READY))
     {
         delete go;
         return;
@@ -5050,7 +5050,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
     GameObject* pGameObj = new GameObject;
 
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
-        fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
+        fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GOState::GO_STATE_READY))
     {
         delete pGameObj;
         return;
@@ -5119,7 +5119,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
     {
         GameObject* linkedGO = new GameObject;
         if (linkedGO->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, cMap,
-            fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
+            fx, fy, fz, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, GOState::GO_STATE_READY))
         {
             for (auto phase : m_caster->GetPhases())
                 linkedGO->SetPhased(phase, false, true);

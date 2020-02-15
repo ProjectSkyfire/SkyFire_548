@@ -368,7 +368,7 @@ class BIH
                 int sumDepth;
                 int minDepth;
                 int maxDepth;
-                int numLeavesN[6];
+                int numLeavesN[6] = { };
                 int numBVH2;
 
             public:

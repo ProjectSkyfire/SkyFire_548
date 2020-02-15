@@ -446,7 +446,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (GetBossState(DATA_LADY_DEATHWHISPER) == DONE)
                         {
                             go->SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, 0);
-                            go->SetGoState(GO_STATE_READY);
+                            go->SetGoState(GOState::GO_STATE_READY);
                         }
                         break;
                     case GO_SAURFANG_S_DOOR:
@@ -485,14 +485,14 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_SCIENTIST_AIRLOCK_DOOR_ORANGE:
                         PutricideGateGUIDs[0] = go->GetGUID();
                         if (GetBossState(DATA_FESTERGUT) == DONE && GetBossState(DATA_ROTFACE) == DONE)
-                            go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                         else if (GetBossState(DATA_FESTERGUT) == DONE)
                             HandleGameObject(PutricideGateGUIDs[1], false, go);
                         break;
                     case GO_SCIENTIST_AIRLOCK_DOOR_GREEN:
                         PutricideGateGUIDs[1] = go->GetGUID();
                         if (GetBossState(DATA_ROTFACE) == DONE && GetBossState(DATA_FESTERGUT) == DONE)
-                            go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                         else if (GetBossState(DATA_ROTFACE) == DONE)
                             HandleGameObject(PutricideGateGUIDs[1], false, go);
                         break;
@@ -520,7 +520,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_SCOURGE_TRANSPORTER_LK:
                         TheLichKingTeleportGUID = go->GetGUID();
                         if (GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && GetBossState(DATA_SINDRAGOSA) == DONE)
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                         break;
                     case GO_ARTHAS_PLATFORM:
                         ArthasPlatformGUID = go->GetGUID();
@@ -696,7 +696,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                             if (GameObject* elevator = instance->GetGameObject(LadyDeathwisperElevatorGUID))
                             {
                                 elevator->SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, 0);
-                                elevator->SetGoState(GO_STATE_READY);
+                                elevator->SetGoState(GOState::GO_STATE_READY);
                             }
                         }
                         break;
@@ -729,9 +729,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                             {
                                 HandleGameObject(PutricideCollisionGUID, true);
                                 if (GameObject* go = instance->GetGameObject(PutricideGateGUIDs[0]))
-                                    go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                                    go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                                 if (GameObject* go = instance->GetGameObject(PutricideGateGUIDs[1]))
-                                    go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                                    go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                             }
                             else
                                 HandleGameObject(PutricideGateGUIDs[0], false);
@@ -745,9 +745,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                             {
                                 HandleGameObject(PutricideCollisionGUID, true);
                                 if (GameObject* go = instance->GetGameObject(PutricideGateGUIDs[0]))
-                                    go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                                    go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                                 if (GameObject* go = instance->GetGameObject(PutricideGateGUIDs[1]))
-                                    go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                                    go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                             }
                             else
                                 HandleGameObject(PutricideGateGUIDs[1], false);
@@ -1090,7 +1090,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 {
                     if (GameObject* teleporter = instance->GetGameObject(TheLichKingTeleportGUID))
                     {
-                        teleporter->SetGoState(GO_STATE_ACTIVE);
+                        teleporter->SetGoState(GOState::GO_STATE_ACTIVE);
 
                         std::list<Creature*> stalkers;
                         GetCreatureListWithEntryInGrid(stalkers, teleporter, NPC_INVISIBLE_STALKER, 100.0f);
@@ -1195,11 +1195,11 @@ class instance_icecrown_citadel : public InstanceMapScript
                             if (GameObject* platform = instance->GetGameObject(ArthasPlatformGUID))
                                 platform->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
                             if (GameObject* edge = instance->GetGameObject(FrozenThroneEdgeGUID))
-                                edge->SetGoState(GO_STATE_ACTIVE);
+                                edge->SetGoState(GOState::GO_STATE_ACTIVE);
                             if (GameObject* wind = instance->GetGameObject(FrozenThroneWindGUID))
-                                wind->SetGoState(GO_STATE_READY);
+                                wind->SetGoState(GOState::GO_STATE_READY);
                             if (GameObject* warning = instance->GetGameObject(FrozenThroneWarningGUID))
-                                warning->SetGoState(GO_STATE_READY);
+                                warning->SetGoState(GOState::GO_STATE_READY);
                             if (Creature* theLichKing = instance->GetCreature(TheLichKingGUID))
                                 theLichKing->AI()->DoAction(ACTION_RESTORE_LIGHT);
                             break;
@@ -1208,9 +1208,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                             if (GameObject* platform = instance->GetGameObject(ArthasPlatformGUID))
                                 platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
                             if (GameObject* edge = instance->GetGameObject(FrozenThroneEdgeGUID))
-                                edge->SetGoState(GO_STATE_READY);
+                                edge->SetGoState(GOState::GO_STATE_READY);
                             if (GameObject* wind = instance->GetGameObject(FrozenThroneWindGUID))
-                                wind->SetGoState(GO_STATE_ACTIVE);
+                                wind->SetGoState(GOState::GO_STATE_ACTIVE);
                             break;
                         default:
                             break;
@@ -1224,7 +1224,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 {
                     case EVENT_QUAKE:
                         if (GameObject* warning = instance->GetGameObject(FrozenThroneWarningGUID))
-                            warning->SetGoState(GO_STATE_ACTIVE);
+                            warning->SetGoState(GOState::GO_STATE_ACTIVE);
                         Events.ScheduleEvent(EVENT_QUAKE_SHATTER, 5000);
                         break;
                     case EVENT_SECOND_REMORSELESS_WINTER:

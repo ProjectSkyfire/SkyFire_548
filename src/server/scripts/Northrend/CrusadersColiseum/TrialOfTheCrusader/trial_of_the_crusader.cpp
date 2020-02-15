@@ -325,7 +325,7 @@ class boss_lich_king_toc : public CreatureScript
                             {
                                 go->SetDisplayId(DISPLAYID_DESTROYED_FLOOR);
                                 go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
-                                go->SetGoState(GO_STATE_ACTIVE);
+                                go->SetGoState(GOState::GO_STATE_ACTIVE);
                             }
 
                             me->CastSpell(me, SPELL_CORPSE_TELEPORT, false);

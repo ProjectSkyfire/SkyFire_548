@@ -86,7 +86,7 @@ public:
                 if (GameObject* go = instance->GetGameObject(DoorWardGUID))
                 {
                     go->SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, 33);
-                    go->SetGoState(GO_STATE_ACTIVE);
+                    go->SetGoState(GOState::GO_STATE_ACTIVE);
                 }
         }
 

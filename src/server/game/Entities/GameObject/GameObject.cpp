@@ -149,7 +149,7 @@ void GameObject::AddToWorld()
         sObjectAccessor->AddObject(this);
 
         // The state can be changed after GameObject::Create but before GameObject::AddToWorld
-        bool toggledState = GetGoType() == GAMEOBJECT_TYPE_CHEST ? getLootState() == GO_READY : (GetGoState() == GO_STATE_READY || IsTransport());
+        bool toggledState = GetGoType() == GAMEOBJECT_TYPE_CHEST ? getLootState() == GO_READY : (GetGoState() == GOState::GO_STATE_READY || IsTransport());
         if (m_model)
             GetMap()->InsertGameObjectModel(*m_model);
 
@@ -255,7 +255,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
             break;
         case GAMEOBJECT_TYPE_TRANSPORT:
             SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, goinfo->transport.pause);
-            SetGoState(goinfo->transport.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
+            SetGoState(goinfo->transport.startOpen ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
             SetGoAnimProgress(animprogress);
             m_goValue.Transport.PathProgress = 0;
             m_goValue.Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->entry);
@@ -360,7 +360,7 @@ void GameObject::Update(uint32 diff)
                         Unit* caster = GetOwner();
                         if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            SetGoState(GO_STATE_ACTIVE);
+                            SetGoState(GOState::GO_STATE_ACTIVE);
                             SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NODESPAWN);
 
                             UpdateData udata(caster->GetMapId());
@@ -425,7 +425,7 @@ void GameObject::Update(uint32 diff)
                         case GAMEOBJECT_TYPE_DOOR:
                         case GAMEOBJECT_TYPE_BUTTON:
                             //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for battlegrounds)
-                            if (GetGoState() != GO_STATE_READY)
+                            if (GetGoState() != GOState::GO_STATE_READY)
                                 ResetDoorOrButton();
                             break;
                         case GAMEOBJECT_TYPE_FISHINGHOLE:
@@ -599,7 +599,7 @@ void GameObject::Update(uint32 diff)
                     m_usetimes = 0;
                 }
 
-                SetGoState(GO_STATE_READY);
+                SetGoState(GOState::GO_STATE_READY);
 
                 //any return here in case battleground traps
                 if (GetGOInfo()->flags & GO_FLAG_NODESPAWN)
@@ -674,7 +674,7 @@ void GameObject::Delete()
 
     SendObjectDeSpawnAnim(GetGUID());
 
-    SetGoState(GO_STATE_READY);
+    SetGoState(GOState::GO_STATE_READY);
     SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, GetGOInfo()->flags);
 
     uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<GameObject>(GetDBTableGUIDLow()) : 0;
@@ -1124,10 +1124,10 @@ void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false *
     else
         RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
 
-    if (GetGoState() == GO_STATE_READY)                      //if closed -> open
-        SetGoState(alternative ? GO_STATE_ACTIVE_ALTERNATIVE : GO_STATE_ACTIVE);
+    if (GetGoState() == GOState::GO_STATE_READY)                      //if closed -> open
+        SetGoState(alternative ? GOState::GO_STATE_ACTIVE_ALTERNATIVE : GOState::GO_STATE_ACTIVE);
     else                                                    //if open -> close
-        SetGoState(GO_STATE_READY);
+        SetGoState(GOState::GO_STATE_READY);
 }
 
 void GameObject::Use(Unit* user)
@@ -1319,7 +1319,7 @@ void GameObject::Use(Unit* user)
             if (info->goober.customAnim)
                 SendCustomAnim(GetGoAnimProgress());
             else
-                SetGoState(GO_STATE_ACTIVE);
+                SetGoState(GOState::GO_STATE_ACTIVE);
 
             m_cooldownTime = time(NULL) + info->GetAutoCloseTime();
 
@@ -2030,7 +2030,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
     {
         bool collision = false;
         // Use the current go state
-        if ((GetGoState() != GO_STATE_READY && (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)) || state == GO_READY)
+        if ((GetGoState() != GOState::GO_STATE_READY && (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)) || state == GO_READY)
             collision = !collision;
 
         EnableCollision(collision);
@@ -2039,8 +2039,8 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
 void GameObject::SetGoState(GOState state)
 {
-    SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0, state);
-    sScriptMgr->OnGameObjectStateChanged(this, state);
+    SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0, GetGOStateValue(state));
+    sScriptMgr->OnGameObjectStateChanged(this, uint32(state));
     if (m_model && !IsTransport())
     {
         if (!IsInWorld())
@@ -2048,7 +2048,7 @@ void GameObject::SetGoState(GOState state)
 
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool collision = false;
-        if (state == GO_STATE_READY)
+        if (state == GOState::GO_STATE_READY)
             collision = !collision;
 
         EnableCollision(collision);
@@ -2259,6 +2259,28 @@ void GameObject::UpdateModelPosition()
         GetMap()->InsertGameObjectModel(*m_model);
     }
 }
+uint32 GameObject::GetGOStateValue(GOState state)
+{
+    switch (state)
+    {
+        case GOState::GO_STATE_ACTIVE:
+            return 0;
+            break;
+        case GOState::GO_STATE_READY:
+            return 1;
+            break;
+        case GOState::GO_STATE_ACTIVE_ALTERNATIVE:
+            return 2;
+            break;
+        case GOState::GO_STATE_PREPARE_TRANSPORT:
+            return 24;
+            break;
+        default:
+            return 0;
+            break;
+    }
+}
+
 class GameObjectModelOwnerImpl : public GameObjectModelOwnerBase
 {
 public:

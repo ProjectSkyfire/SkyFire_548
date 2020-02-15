@@ -1785,7 +1785,7 @@ uint32 ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, float y, float 
     data.spawntimesecs  = spawntimedelay;
     data.animprogress   = 100;
     data.spawnMask      = 1;
-    data.go_state       = GO_STATE_READY;
+    data.go_state       = GOState::GO_STATE_READY;
     data.phaseid        = 169;
     data.phaseGroup     = 0;
     data.artKit         = goinfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT ? 21 : 0;
@@ -1989,10 +1989,19 @@ void ObjectMgr::LoadGameobjects()
         data.artKit         = 0;
 
         uint32 go_state     = fields[13].GetUInt8();
-        if (go_state != GO_STATE_ACTIVE && go_state != GO_STATE_READY && go_state != GO_STATE_ACTIVE_ALTERNATIVE && go_state != GO_STATE_PREPARE_TRANSPORT)
+        switch (GOState(go_state))
         {
-            SF_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);
-            continue;
+            case GOState::GO_STATE_ACTIVE:
+            case GOState::GO_STATE_READY:
+            case GOState::GO_STATE_ACTIVE_ALTERNATIVE:
+            case GOState::GO_STATE_PREPARE_TRANSPORT:
+                continue;
+            default:
+            {
+                SF_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);
+                continue;
+            }
+            break;
         }
         data.go_state       = GOState(go_state);
 

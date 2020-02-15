@@ -97,7 +97,7 @@ class instance_ahnkahet : public InstanceMapScript
                     case GO_SPHERE_1:
                         if (SpheresState[0])
                         {
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                             go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         }
                         else
@@ -106,7 +106,7 @@ class instance_ahnkahet : public InstanceMapScript
                     case GO_SPHERE_2:
                         if (SpheresState[1])
                         {
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                             go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         }
                         else

@@ -138,7 +138,7 @@ public:
                 ContainmentSpheres[i] = instance->instance->GetGameObject(auiContainmentSphereGUIDs[i]);
                 if (!ContainmentSpheres[i])
                     return false;
-                if (ContainmentSpheres[i]->GetGoState() != GO_STATE_ACTIVE)
+                if (ContainmentSpheres[i]->GetGoState() != GOState::GO_STATE_ACTIVE)
                     return false;
             }
             if (remove_prison)
@@ -223,7 +223,7 @@ public:
         {
             // maybe these are hacks :(
             go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
-            go->SetGoState(GO_STATE_ACTIVE);
+            go->SetGoState(GOState::GO_STATE_ACTIVE);
 
             CAST_AI(boss_keristrasza::boss_keristraszaAI, pKeristrasza->AI())->CheckContainmentSpheres(true);
         }

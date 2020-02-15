@@ -213,7 +213,7 @@ class npc_ruul_snowhoof : public CreatureScript
                     case 0:
                         me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
                         if (GameObject* Cage = me->FindNearestGameObject(GO_CAGE, 20))
-                            Cage->SetGoState(GO_STATE_ACTIVE);
+                            Cage->SetGoState(GOState::GO_STATE_ACTIVE);
                         break;
                     case 13:
                         me->SummonCreature(NPC_THISTLEFUR_TOTEMIC, RuulSnowhoofSummonsCoord[0], TEMPSUMMON_DEAD_DESPAWN, 60000);
@@ -236,7 +236,7 @@ class npc_ruul_snowhoof : public CreatureScript
             void Reset() OVERRIDE
             {
                 if (GameObject* Cage = me->FindNearestGameObject(GO_CAGE, 20))
-                    Cage->SetGoState(GO_STATE_READY);
+                    Cage->SetGoState(GOState::GO_STATE_READY);
             }
 
             void JustSummoned(Creature* summoned) OVERRIDE

@@ -2064,7 +2064,7 @@ public:
         // Grid search for nearest live Creature of entry 23304 within 10 yards
         if (Creature* pTrigger = go->FindNearestCreature(23304, 10.0f))
             CAST_AI(npc_cage_trap_trigger::cage_trap_triggerAI, pTrigger->AI())->Active = true;
-        go->SetGoState(GO_STATE_ACTIVE);
+        go->SetGoState(GOState::GO_STATE_ACTIVE);
         return true;
     }
 };

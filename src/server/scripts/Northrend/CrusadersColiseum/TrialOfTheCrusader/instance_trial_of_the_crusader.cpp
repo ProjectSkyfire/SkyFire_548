@@ -112,7 +112,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     return;
 
                 if (GameObject* go = instance->GetGameObject(guid))
-                    go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    go->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
             }
 
             void CloseDoor(uint64 guid)
@@ -121,7 +121,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     return;
 
                 if (GameObject* go = instance->GetGameObject(guid))
-                    go->SetGoState(GO_STATE_READY);
+                    go->SetGoState(GOState::GO_STATE_READY);
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE

@@ -89,7 +89,7 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
         else if (getWaterFallStatus() == BG_DS_WATERFALL_STATUS_WARNING) // Active collision and start knockback timer
         {
             if (GameObject* gob = GetBgMap()->GetGameObject(BgObjects[BG_DS_OBJECT_WATER_1]))
-                gob->SetGoState(GO_STATE_READY);
+                gob->SetGoState(GOState::GO_STATE_READY);
 
             setWaterFallTimer(BG_DS_WATERFALL_DURATION);
             setWaterFallStatus(BG_DS_WATERFALL_STATUS_ON);
@@ -99,7 +99,7 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
         {
             // turn off collision
             if (GameObject* gob = GetBgMap()->GetGameObject(BgObjects[BG_DS_OBJECT_WATER_1]))
-                gob->SetGoState(GO_STATE_ACTIVE);
+                gob->SetGoState(GOState::GO_STATE_ACTIVE);
 
             DoorOpen(BG_DS_OBJECT_WATER_2);
             setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
@@ -135,7 +135,7 @@ void BattlegroundDS::StartingEventOpenDoors()
 
     // Turn off collision
     if (GameObject* gob = GetBgMap()->GetGameObject(BgObjects[BG_DS_OBJECT_WATER_1]))
-        gob->SetGoState(GO_STATE_ACTIVE);
+        gob->SetGoState(GOState::GO_STATE_ACTIVE);
 
     // Remove effects of Demonic Circle Summon
     for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)

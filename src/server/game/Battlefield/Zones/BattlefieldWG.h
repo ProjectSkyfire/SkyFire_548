@@ -1128,7 +1128,7 @@ struct BfWGGameObjectBuilding
                 build->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
                 if (build->GetEntry() == GO_WINTERGRASP_VAULT_GATE)
                     if (GameObject* go = build->FindNearestGameObject(GO_WINTERGRASP_KEEP_COLLISION_WALL, 50.0f))
-                        go->SetGoState(GO_STATE_READY);
+                        go->SetGoState(GOState::GO_STATE_READY);
 
                 // Update worldstate
                 m_State = BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT - (m_Team * 3);
@@ -1185,7 +1185,7 @@ struct BfWGGameObjectBuilding
             case BATTLEFIELD_WG_OBJECTTYPE_DOOR_LAST:
                 if (GameObject* build = m_WG->GetGameObject(m_BuildGUID))
                     if (GameObject* go = build->FindNearestGameObject(GO_WINTERGRASP_KEEP_COLLISION_WALL, 50.0f))
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GOState::GO_STATE_ACTIVE);
                 m_WG->SetRelicInteractible(true);
                 if (m_WG->GetRelic())
                     m_WG->GetRelic()->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);

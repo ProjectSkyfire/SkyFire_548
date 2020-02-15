@@ -90,7 +90,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     SetPeriod(tInfo->pathTime);
     SetEntry(goinfo->entry);
     SetDisplayId(goinfo->displayId);
-    SetGoState(GO_STATE_READY);
+    SetGoState(GOState::GO_STATE_READY);
     _pendingStop = goinfo->moTransport.canBeStopped != 0;
     SetGoType(GAMEOBJECT_TYPE_MO_TRANSPORT);
     SetGoAnimProgress(animprogress);
@@ -134,12 +134,12 @@ void Transport::Update(uint32 diff)
             {
                 SetMoving(false);
                 if (_pendingStop)
-                    SetGoState(GO_STATE_READY);
+                    SetGoState(GOState::GO_STATE_READY);
                 break;  // its a stop frame and we are waiting
             }
         }
 
-        if (_pendingStop && timer >= _currentFrame->DepartureTime && GetGoState() == GO_STATE_READY)
+        if (_pendingStop && timer >= _currentFrame->DepartureTime && GetGoState() == GOState::GO_STATE_READY)
         {
             m_goValue.Transport.PathProgress = (m_goValue.Transport.PathProgress / GetPeriod());
             m_goValue.Transport.PathProgress *= GetPeriod();
@@ -163,7 +163,7 @@ void Transport::Update(uint32 diff)
 
         // Enable movement
         if (GetGOInfo()->moTransport.canBeStopped)
-            SetGoState(GO_STATE_ACTIVE);
+            SetGoState(GOState::GO_STATE_ACTIVE);
 
         sScriptMgr->OnRelocate(this, _currentFrame->Node->index, _currentFrame->Node->mapid, _currentFrame->Node->x, _currentFrame->Node->y, _currentFrame->Node->z);
 

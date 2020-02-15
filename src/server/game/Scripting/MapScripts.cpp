@@ -253,7 +253,7 @@ inline void Map::_ScriptProcessDoor(Object* source, Object* target, const Script
             else if (pDoor->GetGoType() != GAMEOBJECT_TYPE_DOOR)
                 SF_LOG_ERROR("scripts", "%s gameobject is not a door (GoType: %u, Entry: %u, GUID: %u).",
                     scriptInfo->GetDebugInfo().c_str(), pDoor->GetGoType(), pDoor->GetEntry(), pDoor->GetGUIDLow());
-            else if (bOpen == (pDoor->GetGoState() == GO_STATE_READY))
+            else if (bOpen == (pDoor->GetGoState() == GOState::GO_STATE_READY))
             {
                 pDoor->UseDoorOrButton(nTimeToToggle);
 

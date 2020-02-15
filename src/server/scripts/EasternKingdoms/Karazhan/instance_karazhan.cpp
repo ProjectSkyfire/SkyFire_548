@@ -200,12 +200,12 @@ public:
                 case 184278:
                     m_uiStageDoorLeftGUID = go->GetGUID();
                     if (m_auiEncounter[4] == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GOState::GO_STATE_ACTIVE);
                     break;
                 case 184279:
                     m_uiStageDoorRightGUID = go->GetGUID();
                     if (m_auiEncounter[4] == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GOState::GO_STATE_ACTIVE);
                     break;
                 case 184517:   m_uiLibraryDoor          = go->GetGUID();         break;
                 case 185521:   m_uiMassiveDoor          = go->GetGUID();         break;

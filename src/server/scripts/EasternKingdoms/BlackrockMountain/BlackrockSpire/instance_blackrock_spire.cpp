@@ -479,7 +479,7 @@ public:
                 if (!rune)
                     continue;
 
-                if (rune->GetGoState() == GO_STATE_ACTIVE)
+                if (rune->GetGoState() == GOState::GO_STATE_ACTIVE)
                 {
                     for (uint8 ii = 0; ii < 5; ++ii)
                     {
@@ -489,7 +489,7 @@ public:
                     }
                 }
 
-                if (!_mobAlive && rune->GetGoState() == GO_STATE_ACTIVE)
+                if (!_mobAlive && rune->GetGoState() == GOState::GO_STATE_ACTIVE)
                 {
                     HandleGameObject(0, false, rune);
 

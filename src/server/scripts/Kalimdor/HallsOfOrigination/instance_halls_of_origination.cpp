@@ -186,9 +186,9 @@ class instance_halls_of_origination : public InstanceMapScript
                 if (_deadElementals == 4)
                 {
                     if (GameObject* mirror = instance->GetGameObject(SunMirrorGUID))
-                        mirror->SetGoState(GO_STATE_ACTIVE);
+                        mirror->SetGoState(GOState::GO_STATE_ACTIVE);
                     if (GameObject* door = instance->GetGameObject(AnraphetDoorGUID))
-                        door->SetGoState(GO_STATE_ACTIVE);
+                        door->SetGoState(GOState::GO_STATE_ACTIVE);
                 }
             }
 

@@ -268,9 +268,9 @@ public:
                                 me->SetFacingToObject(player);
                                 Talk(SAY_SUCCESS);
                                 if (GameObject* portcullis1 = me->FindNearestGameObject(GO_PORTCULLIS_ACTIVE, 65.0f))
-                                    portcullis1->SetGoState(GO_STATE_ACTIVE);
+                                    portcullis1->SetGoState(GOState::GO_STATE_ACTIVE);
                                 if (GameObject* portcullis2 = me->FindNearestGameObject(GO_PORTCULLIS_TOBOSSROOMS, 80.0f))
-                                    portcullis2->SetGoState(GO_STATE_ACTIVE);
+                                    portcullis2->SetGoState(GOState::GO_STATE_ACTIVE);
                             }
                             events.ScheduleEvent(EVENT_SUCCESS_2, 4000);
                             break;

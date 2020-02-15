@@ -180,9 +180,9 @@ public:
             {
                 case GO_DRAGON_CAGE_DOOR:
                     if (GetBossState(DATA_DRAKOS_EVENT) == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GOState::GO_STATE_ACTIVE);
                     else
-                        go->SetGoState(GO_STATE_READY);
+                        go->SetGoState(GOState::GO_STATE_READY);
                     gameObjectList.push_back(go->GetGUID());
                     break;
                 case GO_EREGOS_CACHE_N:
@@ -280,7 +280,7 @@ public:
             for (std::list<uint64>::const_iterator itr = gameObjectList.begin(); itr != gameObjectList.end(); ++itr)
             {
                 if (GameObject* go = instance->GetGameObject(*itr))
-                    go->SetGoState(GO_STATE_ACTIVE);
+                    go->SetGoState(GOState::GO_STATE_ACTIVE);
             }
         }
 

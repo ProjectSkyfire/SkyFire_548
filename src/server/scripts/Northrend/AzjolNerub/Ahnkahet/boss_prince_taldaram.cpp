@@ -374,7 +374,7 @@ class prince_taldaram_sphere : public GameObjectScript
             {
                 // maybe these are hacks :(
                 go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                go->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GOState::GO_STATE_ACTIVE);
 
                 switch (go->GetEntry())
                 {

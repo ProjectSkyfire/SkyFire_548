@@ -36,13 +36,13 @@ class go_main_chambers_access_panel : public GameObjectScript
             if (go->GetEntry() == GO_ACCESS_PANEL_HYDRO && (instance->GetBossState(DATA_HYDROMANCER_THESPIA) == DONE || instance->GetBossState(DATA_HYDROMANCER_THESPIA) == SPECIAL))
             {
                 instance->SetBossState(DATA_HYDROMANCER_THESPIA, SPECIAL);
-                go->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GOState::GO_STATE_ACTIVE);
             }
 
             if (go->GetEntry() == GO_ACCESS_PANEL_MEK && (instance->GetBossState(DATA_MEKGINEER_STEAMRIGGER) == DONE || instance->GetBossState(DATA_MEKGINEER_STEAMRIGGER) == SPECIAL))
             {
                 instance->SetBossState(DATA_MEKGINEER_STEAMRIGGER, SPECIAL);
-                go->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GOState::GO_STATE_ACTIVE);
             }
 
             return true;

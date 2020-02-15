@@ -124,12 +124,12 @@ public:
             bridgeGUID = 0;
             collisionGUID = 0;
 
-            sladRanStatueState = GO_STATE_ACTIVE;
-            moorabiStatueState = GO_STATE_ACTIVE;
-            drakkariColossusStatueState = GO_STATE_ACTIVE;
-            galDarahStatueState = GO_STATE_READY;
-            bridgeState = GO_STATE_ACTIVE;
-            collisionState = GO_STATE_READY;
+            sladRanStatueState = GOState::GO_STATE_ACTIVE;
+            moorabiStatueState = GOState::GO_STATE_ACTIVE;
+            drakkariColossusStatueState = GOState::GO_STATE_ACTIVE;
+            galDarahStatueState = GOState::GO_STATE_READY;
+            bridgeState = GOState::GO_STATE_ACTIVE;
+            collisionState = GOState::GO_STATE_READY;
 
             DwellerGUIDs.clear();
 
@@ -181,12 +181,12 @@ public:
                     go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     if (m_auiEncounter[0] == DONE)
                     {
-                        if (sladRanStatueState == GO_STATE_ACTIVE)
+                        if (sladRanStatueState == GOState::GO_STATE_ACTIVE)
                             go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         else
                         {
                             ++phase;
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                         }
                     }
                     break;
@@ -196,12 +196,12 @@ public:
                     go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     if (m_auiEncounter[0] == DONE)
                     {
-                        if (moorabiStatueState == GO_STATE_ACTIVE)
+                        if (moorabiStatueState == GOState::GO_STATE_ACTIVE)
                             go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         else
                         {
                             ++phase;
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                         }
                     }
                     break;
@@ -211,12 +211,12 @@ public:
                     go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     if (m_auiEncounter[0] == DONE)
                     {
-                        if (drakkariColossusStatueState == GO_STATE_ACTIVE)
+                        if (drakkariColossusStatueState == GOState::GO_STATE_ACTIVE)
                             go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         else
                         {
                             ++phase;
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                         }
                     }
                     break;
@@ -265,7 +265,7 @@ public:
                     go->SetGoState(collisionState);
 
                     // Can't spawn here with SpawnGameObject because go isn't added to world yet...
-                    if (collisionState == GO_STATE_ACTIVE_ALTERNATIVE)
+                    if (collisionState == GOState::GO_STATE_ACTIVE_ALTERNATIVE)
                         spawnSupport = true;
                     break;
                 case GO_GALDARAH_DOOR3:
@@ -393,10 +393,11 @@ public:
 
             std::ostringstream saveStream;
             saveStream << "G D " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' '
-                 << m_auiEncounter[2] << ' ' << m_auiEncounter[3] << ' ' << m_auiEncounter[4] << ' '
-                 << (sladRanStatueGUID ? GetObjState(sladRanStatueGUID) : GO_STATE_ACTIVE) << ' ' << (moorabiStatueGUID ? GetObjState(moorabiStatueGUID) : GO_STATE_ACTIVE) << ' '
-                 << (drakkariColossusStatueGUID ? GetObjState(drakkariColossusStatueGUID) : GO_STATE_ACTIVE) << ' ' << (galDarahStatueGUID ? GetObjState(galDarahStatueGUID) : GO_STATE_READY) << ' '
-                 << (bridgeGUID ? GetObjState(bridgeGUID) : GO_STATE_ACTIVE) << ' ' << (collisionGUID ? GetObjState(collisionGUID) : GO_STATE_READY);
+                << m_auiEncounter[2] << ' ' << m_auiEncounter[3] << ' ' << m_auiEncounter[4]; // << ' '
+                 /*
+                 << (sladRanStatueGUID ? GetObjState(sladRanStatueGUID) : (0)) << ' ' << (moorabiStatueGUID ? GetObjState(moorabiStatueGUID) : (1)) << ' '
+                 << (drakkariColossusStatueGUID ? GetObjState(drakkariColossusStatueGUID) : 0) << ' ' << (galDarahStatueGUID ? GetObjState(galDarahStatueGUID) : GOState::GO_STATE_READY) << ' '
+                 << (bridgeGUID ? GetObjState(bridgeGUID) : GOState::GO_STATE_ACTIVE) << ' ' << (collisionGUID ? GetObjState(collisionGUID) : GOState::GO_STATE_READY);*/
 
             str_data = saveStream.str();
 
@@ -473,12 +474,12 @@ public:
 
                      if (bridge && collision && sladRanStatue && moorabiStatue && drakkariColossusStatue && galDarahStatue)
                      {
-                         bridge->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                         collision->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                         sladRanStatue->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                         moorabiStatue->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                         drakkariColossusStatue->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                         galDarahStatue->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                         bridge->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
+                         collision->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
+                         sladRanStatue->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
+                         moorabiStatue->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
+                         drakkariColossusStatue->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
+                         galDarahStatue->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
 
                          // Add the GO that solidifies the bridge so you can walk on it
                          spawnSupport = true;
@@ -516,7 +517,7 @@ public:
                          }
 
                      if (GameObject* statueGO = instance->GetGameObject(toActivate))
-                         statueGO->SetGoState(GO_STATE_READY);
+                         statueGO->SetGoState(GOState::GO_STATE_READY);
 
                      toActivate = 0;
 
@@ -534,7 +535,7 @@ public:
          {
              if (GameObject* go = instance->GetGameObject(guid))
                  return go->GetGoState();
-             return GO_STATE_ACTIVE;
+             return GOState::GO_STATE_ACTIVE;
          }
     };
 
@@ -551,7 +552,7 @@ public:
         uint64 statueGUID = 0;
 
         go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
-        go->SetGoState(GO_STATE_ACTIVE);
+        go->SetGoState(GOState::GO_STATE_ACTIVE);
 
         if (instance)
         {
@@ -572,7 +573,7 @@ public:
             {
                 instance->SetData64(DATA_STATUE_ACTIVATE, statueGUID);
                 go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                go->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GOState::GO_STATE_ACTIVE);
             }
             return true;
         }

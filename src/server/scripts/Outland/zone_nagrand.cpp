@@ -389,7 +389,7 @@ public:
 
   bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
   {
-      go->SetGoState(GO_STATE_READY);
+      go->SetGoState(GOState::GO_STATE_READY);
       if (go->GetEntry() == GO_CORKIS_PRISON)
       {
           if (Creature* corki = go->FindNearestCreature(NPC_CORKI, 25, true))

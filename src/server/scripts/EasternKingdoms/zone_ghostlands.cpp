@@ -119,7 +119,7 @@ public:
                 case 0:
                     me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
                     if (GameObject* Cage = me->FindNearestGameObject(GO_CAGE, 20))
-                        Cage->SetGoState(GO_STATE_ACTIVE);
+                        Cage->SetGoState(GOState::GO_STATE_ACTIVE);
                     Talk(SAY_START, player);
                     break;
                 case 5:
@@ -168,7 +168,7 @@ public:
         void Reset() OVERRIDE
         {
             if (GameObject* Cage = me->FindNearestGameObject(GO_CAGE, 20))
-                Cage->SetGoState(GO_STATE_READY);
+                Cage->SetGoState(GOState::GO_STATE_READY);
         }
     };
 

@@ -349,7 +349,7 @@ public:
             if (pTrap)
             {
                 pMammoth->AI()->DoAction(1);
-                pTrap->SetGoState(GO_STATE_READY);
+                pTrap->SetGoState(GOState::GO_STATE_READY);
                 player->KilledMonsterCredit(NPC_TRAPPED_MAMMOTH_CALF, 0);
                 return true;
             }

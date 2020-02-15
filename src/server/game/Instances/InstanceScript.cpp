@@ -49,7 +49,7 @@ void InstanceScript::HandleGameObject(uint64 GUID, bool open, GameObject* go)
     if (!go)
         go = instance->GetGameObject(GUID);
     if (go)
-        go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
+        go->SetGoState(open ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
     else
         SF_LOG_DEBUG("scripts", "InstanceScript: HandleGameObject failed");
 }
@@ -134,7 +134,7 @@ void InstanceScript::UpdateDoorState(GameObject* door)
         }
     }
 
-    door->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
+    door->SetGoState(open ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
 }
 
 void InstanceScript::AddDoor(GameObject* door, bool add)

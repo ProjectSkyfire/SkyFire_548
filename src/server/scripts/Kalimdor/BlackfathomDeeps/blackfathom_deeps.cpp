@@ -60,7 +60,7 @@ public:
 
         if (instance)
         {
-            go->SetGoState(GO_STATE_ACTIVE);
+            go->SetGoState(GOState::GO_STATE_ACTIVE);
             go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
             instance->SetData(DATA_FIRE, instance->GetData(DATA_FIRE) + 1);
             return true;

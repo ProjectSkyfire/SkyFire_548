@@ -213,7 +213,7 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
                 if (GameObject* mirror = GetClosestGameObjectWithEntry(me, GO_UTGARDE_MIRROR, 100.0f))
-                    mirror->SetGoState(GO_STATE_READY);
+                    mirror->SetGoState(GOState::GO_STATE_READY);
 
                 if (Creature* arthas = me->SummonCreature(NPC_ARTHAS, ArthasPos, TEMPSUMMON_MANUAL_DESPAWN))
                 {
@@ -349,7 +349,7 @@ public:
                             break;
                         case 9:
                             if (GameObject* mirror = GetClosestGameObjectWithEntry(me, GO_UTGARDE_MIRROR, 100.0f))
-                                mirror->SetGoState(GO_STATE_ACTIVE);
+                                mirror->SetGoState(GOState::GO_STATE_ACTIVE);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             arthas->DespawnOrUnsummon();
                             arthasGUID = 0;

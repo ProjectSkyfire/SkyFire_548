@@ -160,7 +160,7 @@ public:
                 GameObject* go = instance->instance->GetGameObject(instance->GetData64(DATA_GORTOK_PALEHOOF_SPHERE));
                 if (go)
                 {
-                    go->SetGoState(GO_STATE_READY);
+                    go->SetGoState(GOState::GO_STATE_READY);
                     go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                 }
             }
@@ -840,7 +840,7 @@ public:
         if (pPalehoof && pPalehoof->IsAlive())
         {
             go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
-            go->SetGoState(GO_STATE_ACTIVE);
+            go->SetGoState(GOState::GO_STATE_ACTIVE);
 
             CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->NextPhase();
         }

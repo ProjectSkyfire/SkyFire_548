@@ -230,7 +230,7 @@ public:
 
         void SetCrystalStatus(GameObject* crystal, bool active)
         {
-            crystal->SetGoState(active ? GO_STATE_ACTIVE : GO_STATE_READY);
+            crystal->SetGoState(active ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
             if (Creature* crystalChannelTarget = crystal->FindNearestCreature(NPC_CRYSTAL_CHANNEL_TARGET, 5.0f))
             {
                 if (active)
@@ -245,7 +245,7 @@ public:
             for (uint8 i = 0; i < 4; i++)
                 if (uint64 guid = instance->GetData64(DATA_NOVOS_CRYSTAL_1 + i))
                     if (GameObject* crystal = instance->instance->GetGameObject(guid))
-                        if (crystal->GetGoState() == GO_STATE_ACTIVE)
+                        if (crystal->GetGoState() == GOState::GO_STATE_ACTIVE)
                         {
                             SetCrystalStatus(crystal, false);
                             break;

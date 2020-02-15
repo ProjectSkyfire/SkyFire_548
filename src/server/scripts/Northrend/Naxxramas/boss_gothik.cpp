@@ -185,7 +185,7 @@ class boss_gothik : public CreatureScript
 
                 me->SetReactState(REACT_PASSIVE);
                 if (instance)
-                    instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
+                    instance->SetData(DATA_GOTHIK_GATE, uint32((GOState::GO_STATE_ACTIVE)));
                 _Reset();
                 mergedSides = false;
                 phaseTwo = false;
@@ -214,7 +214,7 @@ class boss_gothik : public CreatureScript
                 DoTeleportTo(PosPlatform);
                 Talk(SAY_SPEECH);
                 if (instance)
-                    instance->SetData(DATA_GOTHIK_GATE, GO_STATE_READY);
+                    instance->SetData(DATA_GOTHIK_GATE, uint32(GOState::GO_STATE_READY));
             }
 
             void JustSummoned(Creature* summon) OVERRIDE
@@ -252,7 +252,7 @@ class boss_gothik : public CreatureScript
                 _JustDied();
                 Talk(SAY_DEATH);
                 if (instance)
-                    instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
+                    instance->SetData(DATA_GOTHIK_GATE, uint32(GOState::GO_STATE_ACTIVE));
             }
 
             void DoGothikSummon(uint32 entry)
@@ -407,7 +407,7 @@ class boss_gothik : public CreatureScript
                 {
                     thirtyPercentReached = true;
                     if (instance)
-                        instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
+                        instance->SetData(DATA_GOTHIK_GATE, uint32(GOState::GO_STATE_ACTIVE));
                 }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -433,7 +433,7 @@ class boss_gothik : public CreatureScript
                                     if (!CheckGroupSplitted())
                                     {
                                         if (instance)
-                                            instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
+                                            instance->SetData(DATA_GOTHIK_GATE, uint32(GOState::GO_STATE_ACTIVE));
                                         DummyEntryCheckPredicate pred;
                                         summons.DoAction(0, pred);  //! Magic numbers fail
                                         summons.DoZoneInCombat();

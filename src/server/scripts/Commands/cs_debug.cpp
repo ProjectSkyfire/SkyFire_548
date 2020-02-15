@@ -1203,7 +1203,7 @@ public:
         }
         else
         {
-            handler->PSendSysMessage("Transport %s is %s", transport->GetName().c_str(), transport->GetGoState() == GO_STATE_READY ? "stopped" : "moving");
+            handler->PSendSysMessage("Transport %s is %s", transport->GetName().c_str(), transport->GetGoState() == GOState::GO_STATE_READY ? "stopped" : "moving");
             return true;
         }
 

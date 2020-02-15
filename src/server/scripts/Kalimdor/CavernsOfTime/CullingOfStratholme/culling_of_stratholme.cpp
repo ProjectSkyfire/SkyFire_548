@@ -564,7 +564,7 @@ public:
                 case 36:
                     if (instance)
                         if (GameObject* pGate = instance->instance->GetGameObject(instance->GetData64(DATA_SHKAF_GATE)))
-                            pGate->SetGoState(GO_STATE_ACTIVE);
+                            pGate->SetGoState(GOState::GO_STATE_ACTIVE);
                     break;
                 case 45:
                     SetRun(true);
@@ -1163,7 +1163,7 @@ public:
                             }
                             if (instance)
                                 if (GameObject* pGate = instance->instance->GetGameObject(instance->GetData64(DATA_MAL_GANIS_GATE_1)))
-                                    pGate->SetGoState(GO_STATE_ACTIVE);
+                                    pGate->SetGoState(GOState::GO_STATE_ACTIVE);
                             SetHoldState(false);
                             bStepping = false;
                             JumpToNextStep(0);

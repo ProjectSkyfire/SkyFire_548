@@ -143,7 +143,7 @@ public:
             if (instance)
             {
                 if (GameObject* pDoor = instance->instance->GetGameObject(instance->GetData64(DATA_XEVOZZ_CELL)))
-                    if (pDoor->GetGoState() == GO_STATE_READY)
+                    if (pDoor->GetGoState() == GOState::GO_STATE_READY)
                     {
                         EnterEvadeMode();
                         return;

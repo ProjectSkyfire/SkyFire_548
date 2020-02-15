@@ -170,7 +170,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
     {
-        go->SetGoState(GO_STATE_READY);
+        go->SetGoState(GOState::GO_STATE_READY);
         if (Creature* stillpine = go->FindNearestCreature(NPC_PRINCESS_STILLPINE, 25, true))
         {
             stillpine->GetMotionMaster()->MovePoint(1, go->GetPositionX(), go->GetPositionY()-15, go->GetPositionZ());

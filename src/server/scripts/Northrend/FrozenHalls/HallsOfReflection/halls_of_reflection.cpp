@@ -1080,7 +1080,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         break;
                     case EVENT_ESCAPE_25:
                         if (GameObject* cave = ObjectAccessor::GetGameObject(*me, _instance->GetData64(DATA_CAVE_IN)))
-                            cave->SetGoState(GO_STATE_READY);
+                            cave->SetGoState(GOState::GO_STATE_READY);
                         _events.ScheduleEvent(EVENT_ESCAPE_26, 4000);
                         break;
                     case EVENT_ESCAPE_26:

@@ -685,7 +685,7 @@ class npc_stillpine_capitive : public CreatureScript
                 if (GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f))
                 {
                     cage->SetLootState(GO_JUST_DEACTIVATED);
-                    cage->SetGoState(GO_STATE_READY);
+                    cage->SetGoState(GOState::GO_STATE_READY);
                 }
                 _events.Reset();
                 _player = NULL;
@@ -746,7 +746,7 @@ class go_bristlelimb_cage : public GameObjectScript
 
         bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
         {
-            go->SetGoState(GO_STATE_READY);
+            go->SetGoState(GOState::GO_STATE_READY);
             if (player->GetQuestStatus(QUEST_THE_PROPHECY_OF_AKIDA) == QUEST_STATUS_INCOMPLETE)
             {
                 if (Creature* capitive = go->FindNearestCreature(NPC_STILLPINE_CAPITIVE, 5.0f, true))

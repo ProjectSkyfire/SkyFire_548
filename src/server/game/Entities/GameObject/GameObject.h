@@ -579,7 +579,7 @@ struct GameObjectLocale
 };
 
 // client side GO show states
-enum GOState
+enum class GOState
 {
     GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
     GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
@@ -591,7 +591,7 @@ enum GOState
 struct GameObjectData
 {
     explicit GameObjectData() : id(0), mapid(0), phaseid(0), phaseGroup(0), posX(0.0f), posY(0.0f), posZ(0.0f), orientation(0.0f),
-        rotation0(0.0f), rotation1(0.0f), rotation2(0.0f), rotation3(0.0f), spawntimesecs(0), animprogress(0), go_state(GO_STATE_ACTIVE),
+        rotation0(0.0f), rotation1(0.0f), rotation2(0.0f), rotation3(0.0f), spawntimesecs(0), animprogress(0), go_state(GOState::GO_STATE_ACTIVE),
         spawnMask(0), artKit(0), dbData(true) { }
     uint32 id;                                              // entry in gamobject_template
     uint16 mapid;
@@ -832,6 +832,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         float GetStationaryO() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
 
         void UpdateModelPosition();
+
+        uint32 GetGOStateValue(GOState state);
     protected:
         bool AIM_Initialize();
         GameObjectModel* CreateModel();

@@ -221,10 +221,10 @@ void BattlegroundRV::TogglePillarCollision()
         {
             if (i >= BG_RV_OBJECT_PILAR_COLLISION_1)
             {
-                uint32 _state = GO_STATE_READY;
+                GOState _state = GOState::GO_STATE_READY;
                 if (gob->GetGOInfo()->door.startOpen)
-                    _state = GO_STATE_ACTIVE;
-                gob->SetGoState(apply ? (GOState)_state : (GOState)(!_state));
+                    _state = GOState::GO_STATE_ACTIVE;
+                gob->SetGoState(apply ? _state : GOState::GO_STATE_ACTIVE);
 
                 if (gob->GetGOInfo()->door.startOpen)
                     gob->EnableCollision(!apply); // Forced collision toggle

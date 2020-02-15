@@ -1530,7 +1530,7 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
     // So we must create it specific for this instance
     GameObject* go = new GameObject;
     if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetBgMap(),
-        x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, GO_STATE_READY))
+        x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, GOState::GO_STATE_READY))
     {
         SF_LOG_ERROR("sql.sql", "Battleground::AddObject: cannot create gameobject (entry: %u) for BG (map: %u, instance id: %u)!",
                 entry, m_MapId, m_InstanceID);
@@ -1581,10 +1581,10 @@ void Battleground::DoorClose(uint32 type)
     if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
     {
         // If doors are open, close it
-        if (obj->getLootState() == GO_ACTIVATED && obj->GetGoState() != GO_STATE_READY)
+        if (obj->getLootState() == GO_ACTIVATED && obj->GetGoState() != GOState::GO_STATE_READY)
         {
             obj->SetLootState(GO_READY);
-            obj->SetGoState(GO_STATE_READY);
+            obj->SetGoState(GOState::GO_STATE_READY);
         }
     }
     else
@@ -1597,7 +1597,7 @@ void Battleground::DoorOpen(uint32 type)
     if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
     {
         obj->SetLootState(GO_ACTIVATED);
-        obj->SetGoState(GO_STATE_ACTIVE);
+        obj->SetGoState(GOState::GO_STATE_ACTIVE);
     }
     else
         SF_LOG_ERROR("bg.battleground", "Battleground::DoorOpen: door gameobject (type: %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
