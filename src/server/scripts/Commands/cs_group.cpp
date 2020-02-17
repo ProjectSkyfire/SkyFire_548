@@ -321,17 +321,17 @@ public:
 
             // Check for given flag and assign it to that iterator
             std::string flags;
-            if (slot.flags & MEMBER_FLAG_ASSISTANT)
+            if (slot.flags & uint8(GroupMemberFlags::MEMBER_FLAG_ASSISTANT))
                 flags = "Assistant";
 
-            if (slot.flags & MEMBER_FLAG_MAINTANK)
+            if (slot.flags & uint8(GroupMemberFlags::MEMBER_FLAG_MAINTANK))
             {
                 if (!flags.empty())
                     flags.append(", ");
                 flags.append("MainTank");
             }
 
-            if (slot.flags & MEMBER_FLAG_MAINASSIST)
+            if (slot.flags & uint8(GroupMemberFlags::MEMBER_FLAG_MAINASSIST))
             {
                 if (!flags.empty())
                     flags.append(", ");

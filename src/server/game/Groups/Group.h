@@ -58,14 +58,14 @@ enum GroupMemberOnlineStatus
     MEMBER_STATUS_DND       = 0x0080                        // Lua_UnitIsDND
 };
 
-enum GroupMemberFlags
+enum class GroupMemberFlags
 {
     MEMBER_FLAG_ASSISTANT   = 0x01,
     MEMBER_FLAG_MAINTANK    = 0x02,
     MEMBER_FLAG_MAINASSIST  = 0x04
 };
 
-enum GroupMemberAssignment
+enum class GroupMemberAssignment
 {
     GROUP_ASSIGN_MAINTANK   = 0,
     GROUP_ASSIGN_MAINASSIST = 1
@@ -325,7 +325,7 @@ class Group
         member_witerator _getMemberWSlot(uint64 Guid);
         void SubGroupCounterIncrease(uint8 subgroup);
         void SubGroupCounterDecrease(uint8 subgroup);
-        void ToggleGroupMemberFlag(member_witerator slot, uint8 flag, bool apply);
+        void ToggleGroupMemberFlag(member_witerator slot, GroupMemberFlags flag, bool apply);
 
         MemberSlotList      m_memberSlots;
         GroupRefManager     m_memberMgr;

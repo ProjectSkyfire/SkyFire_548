@@ -858,7 +858,7 @@ void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[2]);
     recvData.ReadByteSeq(guid[4]);
 
-    group->SetGroupMemberFlag(guid, apply, MEMBER_FLAG_ASSISTANT);
+    group->SetGroupMemberFlag(guid, apply, GroupMemberFlags::MEMBER_FLAG_ASSISTANT);
 
     group->SendUpdate();
 }
@@ -881,9 +881,9 @@ void WorldSession::HandleGroupEveryoneIsAssistantOpcode(WorldPacket& recvData)
     group->ChangeFlagEveryoneAssistant(apply);
 }
 
-void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recvData)
+void WorldSession::HandleSetPartyAssignmentOpcode(WorldPacket& recvData)
 {
-    SF_LOG_DEBUG("network", "WORLD: Received MSG_PARTY_ASSIGNMENT");
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_SET_PARTY_ASSIGNMENT");
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
@@ -893,21 +893,25 @@ void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recvData)
     if (!group->IsLeader(senderGuid) && !group->IsAssistant(senderGuid))
         return;
 
-    uint8 assignment;
-    bool apply;
-    uint64 guid;
-    recvData >> assignment >> apply;
-    recvData >> guid;
+    uint8 Assignment, partyindex;
+    ObjectGuid guid;
+    recvData >> Assignment;
+    recvData >> partyindex;
+    recvData.ReadGuidMask(guid, 5, 6, 2, 3, 1, 0, 4, 7);
+    bool apply = recvData.ReadBit();
+    recvData.FlushBits();
+    recvData.ReadGuidBytes(guid, 2, 5, 1, 0, 6, 3, 4, 7);
 
+    GroupMemberAssignment assignment = GroupMemberAssignment(Assignment);
     switch (assignment)
     {
-        case GROUP_ASSIGN_MAINASSIST:
-            group->RemoveUniqueGroupMemberFlag(MEMBER_FLAG_MAINASSIST);
-            group->SetGroupMemberFlag(guid, apply, MEMBER_FLAG_MAINASSIST);
+        case GroupMemberAssignment::GROUP_ASSIGN_MAINASSIST:
+            group->RemoveUniqueGroupMemberFlag(GroupMemberFlags::MEMBER_FLAG_MAINASSIST);
+            group->SetGroupMemberFlag(guid, apply, GroupMemberFlags::MEMBER_FLAG_MAINASSIST);
             break;
-        case GROUP_ASSIGN_MAINTANK:
-            group->RemoveUniqueGroupMemberFlag(MEMBER_FLAG_MAINTANK);           // Remove main assist flag from current if any.
-            group->SetGroupMemberFlag(guid, apply, MEMBER_FLAG_MAINTANK);
+        case GroupMemberAssignment::GROUP_ASSIGN_MAINTANK:
+            group->RemoveUniqueGroupMemberFlag(GroupMemberFlags::MEMBER_FLAG_MAINTANK);
+            group->SetGroupMemberFlag(guid, apply, GroupMemberFlags::MEMBER_FLAG_MAINTANK);
         default:
             break;
     }

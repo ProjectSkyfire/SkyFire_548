@@ -697,7 +697,7 @@ void Group::ChangeLeader(uint64 newLeaderGuid)
 
     m_leaderGuid = newLeader->GetGUID();
     m_leaderName = newLeader->GetName();
-    ToggleGroupMemberFlag(slot, MEMBER_FLAG_ASSISTANT, false);
+    ToggleGroupMemberFlag(slot, GroupMemberFlags::MEMBER_FLAG_ASSISTANT, false);
 
     uint8 leaderNameLen = m_leaderName.size();
 
@@ -1780,17 +1780,17 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
 
         memberData.WriteByteSeq(memberGuid[6]);
         memberData.WriteByteSeq(memberGuid[3]);
-        memberData << uint8(citr->roles);
-        memberData << uint8(onlineState);
+        memberData << uint8(citr->roles); // 67
+        memberData << uint8(onlineState); // 64
         memberData.WriteByteSeq(memberGuid[7]);
         memberData.WriteByteSeq(memberGuid[4]);
         memberData.WriteByteSeq(memberGuid[1]);
         memberData.WriteString(memberName);
         memberData.WriteByteSeq(memberGuid[5]);
         memberData.WriteByteSeq(memberGuid[2]);
-        memberData << uint8(citr->flags);
+        memberData << uint8(citr->group); // 65
         memberData.WriteByteSeq(memberGuid[0]);
-        memberData << uint8(citr->group);
+        memberData << uint8(citr->flags); // 66
     }
 
     data.WriteBit(leaderGuid[3]);
@@ -2699,7 +2699,7 @@ bool Group::IsAssistant(uint64 guid) const
     member_citerator mslot = _getMemberCSlot(guid);
     if (mslot == m_memberSlots.end())
         return false;
-    return mslot->flags & MEMBER_FLAG_ASSISTANT;
+    return mslot->flags & uint8(GroupMemberFlags::MEMBER_FLAG_ASSISTANT);
 }
 
 bool Group::SameSubGroup(uint64 guid1, uint64 guid2) const
@@ -2756,13 +2756,13 @@ void Group::SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag)
     // Do flag specific actions, e.g ensure uniqueness
     switch (flag)
     {
-        case MEMBER_FLAG_MAINASSIST:
-            RemoveUniqueGroupMemberFlag(MEMBER_FLAG_MAINASSIST);         // Remove main assist flag from current if any.
+        case GroupMemberFlags::MEMBER_FLAG_MAINASSIST:
+            RemoveUniqueGroupMemberFlag(GroupMemberFlags::MEMBER_FLAG_MAINASSIST);         // Remove main assist flag from current if any.
             break;
-        case MEMBER_FLAG_MAINTANK:
-            RemoveUniqueGroupMemberFlag(MEMBER_FLAG_MAINTANK);           // Remove main tank flag from current if any.
+        case GroupMemberFlags::MEMBER_FLAG_MAINTANK:
+            RemoveUniqueGroupMemberFlag(GroupMemberFlags::MEMBER_FLAG_MAINTANK);           // Remove main tank flag from current if any.
             break;
-        case MEMBER_FLAG_ASSISTANT:
+        case GroupMemberFlags::MEMBER_FLAG_ASSISTANT:
             break;
         default:
             return;                                                      // This should never happen
@@ -2883,16 +2883,16 @@ void Group::SubGroupCounterDecrease(uint8 subgroup)
 void Group::RemoveUniqueGroupMemberFlag(GroupMemberFlags flag)
 {
     for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
-        if (itr->flags & flag)
-            itr->flags &= ~flag;
+        if (itr->flags & uint8(flag))
+            itr->flags &= ~uint8(flag);
 }
 
-void Group::ToggleGroupMemberFlag(member_witerator slot, uint8 flag, bool apply)
+void Group::ToggleGroupMemberFlag(member_witerator slot, GroupMemberFlags flag, bool apply)
 {
     if (apply)
-        slot->flags |= flag;
+        slot->flags |= uint8(flag);
     else
-        slot->flags &= ~flag;
+        slot->flags &= ~uint8(flag);
 }
 
 void Group::SetMemberRole(uint64 guid, uint32 role)
