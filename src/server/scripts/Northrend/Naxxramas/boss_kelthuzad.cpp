@@ -325,7 +325,7 @@ public:
             {
                 if (GameObject* pPortal = me->GetMap()->GetGameObject(PortalsGUID[i]))
                 {
-                    if (!((pPortal->getLootState() == GO_READY) || (pPortal->getLootState() == GO_NOT_READY)))
+                    if (!((pPortal->getLootState() == LootState::GO_READY) || (pPortal->getLootState() == LootState::GO_NOT_READY)))
                         pPortal->ResetDoorOrButton();
                 }
             }
@@ -466,7 +466,7 @@ public:
                         {
                             if (GameObject* pPortal = me->GetMap()->GetGameObject(PortalsGUID[i]))
                             {
-                                if (pPortal->getLootState() == GO_READY)
+                                if (pPortal->getLootState() == LootState::GO_READY)
                                     pPortal->UseDoorOrButton();
                             }
                         }
@@ -680,7 +680,7 @@ public:
         pKelthuzadAI->AttackStart(player);
         if (GameObject* trigger = instance->instance->GetGameObject(instance->GetData64(DATA_KELTHUZAD_TRIGGER)))
         {
-            if (trigger->getLootState() == GO_READY)
+            if (trigger->getLootState() == LootState::GO_READY)
                 trigger->UseDoorOrButton();
 
             // Note: summon must be done by trigger and not by KT.

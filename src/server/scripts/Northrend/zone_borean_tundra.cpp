@@ -566,7 +566,7 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (GameObject* go_caribou = me->GetMap()->GetGameObject(go_caribouGUID))
-                go_caribou->SetLootState(GO_JUST_DEACTIVATED);
+                go_caribou->SetLootState(LootState::GO_JUST_DEACTIVATED);
 
             if (TempSummon* summon = me->ToTempSummon())
                 if (summon->IsSummon())
@@ -2036,7 +2036,7 @@ public:
                 pTrap = me->FindNearestGameObject(MammothTraps[i], 11.0f);
                 if (pTrap)
                 {
-                    pTrap->SetLootState(GO_JUST_DEACTIVATED);
+                    pTrap->SetLootState(LootState::GO_JUST_DEACTIVATED);
                     return;
                 }
             }

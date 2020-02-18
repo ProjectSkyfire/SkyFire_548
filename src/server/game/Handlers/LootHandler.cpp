@@ -358,19 +358,19 @@ void WorldSession::DoLootRelease(uint64 lguid)
             {                                               // The fishing hole used once more
                 go->AddUse();                               // if the max usage is reached, will be despawned in next tick
                 if (go->GetUseCount() >= go->GetGOValue()->FishingHole.MaxOpens)
-                    go->SetLootState(GO_JUST_DEACTIVATED);
+                    go->SetLootState(LootState::GO_JUST_DEACTIVATED);
                 else
-                    go->SetLootState(GO_READY);
+                    go->SetLootState(LootState::GO_READY);
             }
             else
-                go->SetLootState(GO_JUST_DEACTIVATED);
+                go->SetLootState(LootState::GO_JUST_DEACTIVATED);
 
             loot->clear();
         }
         else
         {
             // not fully looted object
-            go->SetLootState(GO_ACTIVATED, player);
+            go->SetLootState(LootState::GO_ACTIVATED, player);
 
             // if the round robin player release, reset it.
             if (player->GetGUID() == loot->roundRobinPlayer)

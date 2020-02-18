@@ -550,7 +550,7 @@ public:
                 for (std::list<GameObject*>::const_iterator itr = FlagList.begin(); itr != FlagList.end(); ++itr)
                 {
                     if (despawn)
-                        (*itr)->SetLootState(GO_JUST_DEACTIVATED);
+                        (*itr)->SetLootState(LootState::GO_JUST_DEACTIVATED);
                     else
                         (*itr)->Respawn();
                 }
@@ -684,7 +684,7 @@ class npc_stillpine_capitive : public CreatureScript
             {
                 if (GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f))
                 {
-                    cage->SetLootState(GO_JUST_DEACTIVATED);
+                    cage->SetLootState(LootState::GO_JUST_DEACTIVATED);
                     cage->SetGoState(GOState::GO_STATE_READY);
                 }
                 _events.Reset();

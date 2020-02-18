@@ -588,7 +588,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 if (IsGameObject(*itr))
                 {
                     // Activate
-                    (*itr)->ToGameObject()->SetLootState(GO_READY);
+                    (*itr)->ToGameObject()->SetLootState(LootState::GO_READY);
                     (*itr)->ToGameObject()->UseDoorOrButton(0, false, unit);
                     SF_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_ACTIVATE_GOBJECT. Gameobject %u (entry: %u) activated",
                         (*itr)->GetGUIDLow(), (*itr)->GetEntry());

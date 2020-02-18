@@ -265,9 +265,9 @@ void InstanceScript::DoUseDoorOrButton(uint64 uiGuid, uint32 uiWithRestoreTime, 
     {
         if (go->GetGoType() == GAMEOBJECT_TYPE_DOOR || go->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
         {
-            if (go->getLootState() == GO_READY)
+            if (go->getLootState() == LootState::GO_READY)
                 go->UseDoorOrButton(uiWithRestoreTime, bUseAlternativeState);
-            else if (go->getLootState() == GO_ACTIVATED)
+            else if (go->getLootState() == LootState::GO_ACTIVATED)
                 go->ResetDoorOrButton();
         }
         else

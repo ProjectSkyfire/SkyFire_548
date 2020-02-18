@@ -9358,7 +9358,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         loot = &go->loot;
 
-        if (go->getLootState() == GO_READY)
+        if (go->getLootState() == LootState::GO_READY)
         {
             uint32 lootid = go->GetGOInfo()->GetLootId();
             if (Battleground* bg = GetBattleground())
@@ -9411,10 +9411,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 }
             }
 
-            go->SetLootState(GO_ACTIVATED, this);
+            go->SetLootState(LootState::GO_ACTIVATED, this);
         }
 
-        if (go->getLootState() == GO_ACTIVATED)
+        if (go->getLootState() == LootState::GO_ACTIVATED)
         {
             if (Group* group = GetGroup())
             {

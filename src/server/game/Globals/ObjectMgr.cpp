@@ -1995,7 +1995,7 @@ void ObjectMgr::LoadGameobjects()
             case GOState::GO_STATE_READY:
             case GOState::GO_STATE_ACTIVE_ALTERNATIVE:
             case GOState::GO_STATE_PREPARE_TRANSPORT:
-                continue;
+                break;
             default:
             {
                 SF_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);

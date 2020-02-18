@@ -47,7 +47,7 @@ GameObject::GameObject() : WorldObject(false), MapObject(),
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 300;
-    m_lootState = GO_NOT_READY;
+    m_lootState = LootState::GO_NOT_READY;
     m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
@@ -149,7 +149,7 @@ void GameObject::AddToWorld()
         sObjectAccessor->AddObject(this);
 
         // The state can be changed after GameObject::Create but before GameObject::AddToWorld
-        bool toggledState = GetGoType() == GAMEOBJECT_TYPE_CHEST ? getLootState() == GO_READY : (GetGoState() == GOState::GO_STATE_READY || IsTransport());
+        bool toggledState = GetGoType() == GAMEOBJECT_TYPE_CHEST ? getLootState() == LootState::GO_READY : (GetGoState() == GOState::GO_STATE_READY || IsTransport());
         if (m_model)
             GetMap()->InsertGameObjectModel(*m_model);
 
@@ -300,7 +300,7 @@ void GameObject::Update(uint32 diff)
 
     switch (m_lootState)
     {
-        case GO_NOT_READY:
+        case LootState::GO_NOT_READY:
         {
             switch (GetGoType())
             {
@@ -316,7 +316,7 @@ void GameObject::Update(uint32 diff)
                         if (owner->IsInCombat())
                             m_cooldownTime = time(NULL) + goInfo->trap.startDelay;
                     }
-                    m_lootState = GO_READY;
+                    m_lootState = LootState::GO_READY;
                     break;
                 }
                 /* TODO: Fix movement in unloaded grid - currently GO will just disappear
@@ -372,17 +372,17 @@ void GameObject::Update(uint32 diff)
                             SendCustomAnim(GetGoAnimProgress());
                         }
 
-                        m_lootState = GO_READY;                 // can be successfully open with some chance
+                        m_lootState = LootState::GO_READY;                 // can be successfully open with some chance
                     }
                     return;
                 }
                 default:
-                    m_lootState = GO_READY;                         // for other GOis same switched without delay to GO_READY
+                    m_lootState = LootState::GO_READY;                         // for other GOis same switched without delay to GO_READY
                     break;
             }
             // NO BREAK for switch (m_lootState)
         }
-        case GO_READY:
+        case LootState::GO_READY:
         {
             if (m_respawnTime > 0)                          // timer on
             {
@@ -419,7 +419,7 @@ void GameObject::Update(uint32 diff)
                                 caster->ToPlayer()->SendDirectMessage(&data);
                             }
                             // can be delete
-                            m_lootState = GO_JUST_DEACTIVATED;
+                            m_lootState = LootState::GO_JUST_DEACTIVATED;
                             return;
                         }
                         case GAMEOBJECT_TYPE_DOOR:
@@ -439,7 +439,7 @@ void GameObject::Update(uint32 diff)
                     if (!m_spawnedByDefault)        // despawn timer
                     {
                                                     // can be despawned or destroyed
-                        SetLootState(GO_JUST_DEACTIVATED);
+                        SetLootState(LootState::GO_JUST_DEACTIVATED);
                         return;
                     }
                                                     // respawn timer
@@ -465,7 +465,7 @@ void GameObject::Update(uint32 diff)
                     {
                         if (goInfo->trap.spellId)
                             CastSpell(NULL, goInfo->trap.spellId);  // FIXME: null target won't work for target type 1
-                        SetLootState(GO_JUST_DEACTIVATED);
+                        SetLootState(LootState::GO_JUST_DEACTIVATED);
                         break;
                     }
                     // Type 0 and 1 - trap (type 0 will not get removed after casting a spell)
@@ -522,7 +522,7 @@ void GameObject::Update(uint32 diff)
                         m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
 
                         if (goInfo->trap.type == 1)
-                            SetLootState(GO_JUST_DEACTIVATED);
+                            SetLootState(LootState::GO_JUST_DEACTIVATED);
 
                         if (IsBattlegroundTrap && ok->GetTypeId() == TYPEID_PLAYER)
                         {
@@ -538,14 +538,14 @@ void GameObject::Update(uint32 diff)
                     if (m_usetimes >= max_charges)
                     {
                         m_usetimes = 0;
-                        SetLootState(GO_JUST_DEACTIVATED);      // can be despawned or destroyed
+                        SetLootState(LootState::GO_JUST_DEACTIVATED);      // can be despawned or destroyed
                     }
                 }
             }
 
             break;
         }
-        case GO_ACTIVATED:
+        case LootState::GO_ACTIVATED:
         {
             switch (GetGoType())
             {
@@ -559,7 +559,7 @@ void GameObject::Update(uint32 diff)
                     {
                         RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
 
-                        SetLootState(GO_JUST_DEACTIVATED);
+                        SetLootState(LootState::GO_JUST_DEACTIVATED);
                         m_cooldownTime = 0;
                     }
                     break;
@@ -581,7 +581,7 @@ void GameObject::Update(uint32 diff)
             }
             break;
         }
-        case GO_JUST_DEACTIVATED:
+        case LootState::GO_JUST_DEACTIVATED:
         {
             //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
             if (GetGoType() == GAMEOBJECT_TYPE_GOOBER)
@@ -617,7 +617,7 @@ void GameObject::Update(uint32 diff)
                 return;
             }
 
-            SetLootState(GO_READY);
+            SetLootState(LootState::GO_READY);
 
             //burning flags in some battlegrounds, if you find better condition, just add it
             if (GetGOInfo()->IsDespawnAtAction() || GetGoAnimProgress() > 0)
@@ -669,7 +669,7 @@ void GameObject::AddUniqueUse(Player* player)
 
 void GameObject::Delete()
 {
-    SetLootState(GO_NOT_READY);
+    SetLootState(LootState::GO_NOT_READY);
     RemoveFromOwner();
 
     SendObjectDeSpawnAnim(GetGUID());
@@ -1072,24 +1072,24 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
 
 void GameObject::ResetDoorOrButton()
 {
-    if (m_lootState == GO_READY || m_lootState == GO_JUST_DEACTIVATED)
+    if (m_lootState == LootState::GO_READY || m_lootState == LootState::GO_JUST_DEACTIVATED)
         return;
 
     SwitchDoorOrButton(false);
-    SetLootState(GO_JUST_DEACTIVATED);
+    SetLootState(LootState::GO_JUST_DEACTIVATED);
     m_cooldownTime = 0;
 }
 
 void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = false */, Unit* user /*=NULL*/)
 {
-    if (m_lootState != GO_READY)
+    if (m_lootState != LootState::GO_READY)
         return;
 
     if (!time_to_restore)
         time_to_restore = GetGOInfo()->GetAutoCloseTime();
 
     SwitchDoorOrButton(true, alternative);
-    SetLootState(GO_ACTIVATED, user);
+    SetLootState(LootState::GO_ACTIVATED, user);
 
     m_cooldownTime = time(NULL) + time_to_restore;
 }
@@ -1182,7 +1182,7 @@ void GameObject::Use(Unit* user)
             m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
 
             if (goInfo->trap.type == 1)         // Deactivate after trigger
-                SetLootState(GO_JUST_DEACTIVATED);
+                SetLootState(LootState::GO_JUST_DEACTIVATED);
 
             return;
         }
@@ -1313,7 +1313,7 @@ void GameObject::Use(Unit* user)
                 TriggeringLinkedGameObject(trapEntry, user);
 
             SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_IN_USE);
-            SetLootState(GO_ACTIVATED, user);
+            SetLootState(LootState::GO_ACTIVATED, user);
 
             // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
             if (info->goober.customAnim)
@@ -1360,7 +1360,7 @@ void GameObject::Use(Unit* user)
 
             switch (getLootState())
             {
-                case GO_READY:                              // ready for loot
+                case LootState::GO_READY:                              // ready for loot
                 {
                     uint32 zone, subzone;
                     GetZoneAndAreaId(zone, subzone);
@@ -1404,7 +1404,7 @@ void GameObject::Use(Unit* user)
                         if (ok)
                         {
                             ok->Use(player);
-                            SetLootState(GO_JUST_DEACTIVATED);
+                            SetLootState(LootState::GO_JUST_DEACTIVATED);
                         }
                         else
                             player->SendLoot(GetGUID(), LootType::LOOT_FISHING);
@@ -1415,11 +1415,11 @@ void GameObject::Use(Unit* user)
 
                     break;
                 }
-                case GO_JUST_DEACTIVATED:                   // nothing to do, will be deleted at next update
+                case LootState::GO_JUST_DEACTIVATED:                   // nothing to do, will be deleted at next update
                     break;
                 default:
                 {
-                    SetLootState(GO_JUST_DEACTIVATED);
+                    SetLootState(LootState::GO_JUST_DEACTIVATED);
 
                     WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
                     player->SendDirectMessage(&data);
@@ -1511,7 +1511,7 @@ void GameObject::Use(Unit* user)
 
                 // can be deleted now, if
                 if (!info->summoningRitual.ritualPersistent)
-                    SetLootState(GO_JUST_DEACTIVATED);
+                    SetLootState(LootState::GO_JUST_DEACTIVATED);
                 else
                 {
                     // reset ritual for this GO
@@ -2024,13 +2024,13 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
 void GameObject::SetLootState(LootState state, Unit* unit)
 {
     m_lootState = state;
-    AI()->OnStateChanged(state, unit);
-    sScriptMgr->OnGameObjectLootStateChanged(this, state, unit);
+    AI()->OnStateChanged(uint32(state), unit);
+    sScriptMgr->OnGameObjectLootStateChanged(this, uint32(state), unit);
     if (m_model)
     {
         bool collision = false;
         // Use the current go state
-        if ((GetGoState() != GOState::GO_STATE_READY && (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)) || state == GO_READY)
+        if ((GetGoState() != GOState::GO_STATE_READY && (state == LootState::GO_ACTIVATED || state == LootState::GO_JUST_DEACTIVATED)) || state == LootState::GO_READY)
             collision = !collision;
 
         EnableCollision(collision);

@@ -1581,9 +1581,9 @@ void Battleground::DoorClose(uint32 type)
     if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
     {
         // If doors are open, close it
-        if (obj->getLootState() == GO_ACTIVATED && obj->GetGoState() != GOState::GO_STATE_READY)
+        if (obj->getLootState() == LootState::GO_ACTIVATED && obj->GetGoState() != GOState::GO_STATE_READY)
         {
-            obj->SetLootState(GO_READY);
+            obj->SetLootState(LootState::GO_READY);
             obj->SetGoState(GOState::GO_STATE_READY);
         }
     }
@@ -1596,7 +1596,7 @@ void Battleground::DoorOpen(uint32 type)
 {
     if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
     {
-        obj->SetLootState(GO_ACTIVATED);
+        obj->SetLootState(LootState::GO_ACTIVATED);
         obj->SetGoState(GOState::GO_STATE_ACTIVE);
     }
     else
@@ -1628,11 +1628,11 @@ void Battleground::SpawnBGObject(uint32 type, uint32 respawntime)
         if (GameObject* obj = map->GetGameObject(BgObjects[type]))
         {
             if (respawntime)
-                obj->SetLootState(GO_JUST_DEACTIVATED);
+                obj->SetLootState(LootState::GO_JUST_DEACTIVATED);
             else
-                if (obj->getLootState() == GO_JUST_DEACTIVATED)
+                if (obj->getLootState() == LootState::GO_JUST_DEACTIVATED)
                     // Change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
-                    obj->SetLootState(GO_READY);
+                    obj->SetLootState(LootState::GO_READY);
             obj->SetRespawnTime(respawntime);
             map->AddToMap(obj);
         }

@@ -1080,7 +1080,7 @@ class go_massive_seaforium_charge : public GameObjectScript
 
         bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
         {
-            go->SetLootState(GO_JUST_DEACTIVATED);
+            go->SetLootState(LootState::GO_JUST_DEACTIVATED);
             return true;
         }
 };

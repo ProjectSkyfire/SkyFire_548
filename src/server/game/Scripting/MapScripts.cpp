@@ -635,7 +635,7 @@ void Map::ScriptsProcess()
                     if (!pGO->isSpawned())
                     {
                         int32 nTimeToDespawn = std::max(5, int32(step.script->RespawnGameobject.DespawnDelay));
-                        pGO->SetLootState(GO_READY);
+                        pGO->SetLootState(LootState::GO_READY);
                         pGO->SetRespawnTime(nTimeToDespawn);
 
                         pGO->GetMap()->AddToMap(pGO);
