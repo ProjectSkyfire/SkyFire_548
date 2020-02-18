@@ -29,8 +29,6 @@
 
 enum PriestSpells
 {
-    SPELL_PRIEST_GLYPH_OF_SHADOWFIEND       = 58228,
-    SPELL_PRIEST_GLYPH_OF_SHADOWFIEND_MANA  = 58227,
     SPELL_PRIEST_LIGHTWELL_CHARGES          = 59907
 };
 
@@ -63,32 +61,7 @@ class npc_pet_pri_lightwell : public CreatureScript
         }
 };
 
-class npc_pet_pri_shadowfiend : public CreatureScript
-{
-    public:
-        npc_pet_pri_shadowfiend() : CreatureScript("npc_pet_pri_shadowfiend") { }
-
-        struct npc_pet_pri_shadowfiendAI : public PetAI
-        {
-            npc_pet_pri_shadowfiendAI(Creature* creature) : PetAI(creature) { }
-
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (me->IsSummon())
-                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                        if (owner->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOWFIEND))
-                            owner->CastSpell(owner, SPELL_PRIEST_GLYPH_OF_SHADOWFIEND_MANA, true);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_pet_pri_shadowfiendAI(creature);
-        }
-};
-
 void AddSC_priest_pet_scripts()
 {
     new npc_pet_pri_lightwell();
-    new npc_pet_pri_shadowfiend();
 }
