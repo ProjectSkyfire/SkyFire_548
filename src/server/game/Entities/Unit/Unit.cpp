@@ -10910,11 +10910,14 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 pet->SetSpeed(mtype, m_speed_rate [mtype], forced);
     }
 
-    static MovementStatusElements const speedVal = MSEExtraFloat;
-    Movement::ExtraMovementStatusElement extra(&speedVal);
-    extra.Data.floatData = GetSpeed(mtype);
+    if (IsInWorld())
+    {
+        static MovementStatusElements const speedVal = MSEExtraFloat;
+        Movement::ExtraMovementStatusElement extra(&speedVal);
+        extra.Data.floatData = GetSpeed(mtype);
 
-    Movement::PacketSender(this, moveTypeToOpcode [mtype] [0], moveTypeToOpcode [mtype] [1], moveTypeToOpcode [mtype] [2], &extra).Send();
+        Movement::PacketSender(this, moveTypeToOpcode[mtype][0], moveTypeToOpcode[mtype][1], moveTypeToOpcode[mtype][2], &extra).Send();
+    }
 }
 
 void Unit::setDeathState(DeathState s)
