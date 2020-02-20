@@ -531,28 +531,28 @@ m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(PathGenerator(m_ca
     {
         case SPELL_DAMAGE_CLASS_MELEE:
             if (m_spellInfo->AttributesEx3 & SPELL_ATTR3_REQ_OFFHAND)
-                m_attackType = OFF_ATTACK;
+                m_attackType = WeaponAttackType::OFF_ATTACK;
             else
-                m_attackType = BASE_ATTACK;
+                m_attackType = WeaponAttackType::BASE_ATTACK;
             break;
         case SPELL_DAMAGE_CLASS_RANGED:
-            m_attackType = m_spellInfo->IsRangedWeaponSpell() ? RANGED_ATTACK : BASE_ATTACK;
+            m_attackType = m_spellInfo->IsRangedWeaponSpell() ? WeaponAttackType::RANGED_ATTACK : WeaponAttackType::BASE_ATTACK;
             break;
         default:
                                                             // Wands
             if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_AUTOREPEAT_FLAG)
-                m_attackType = RANGED_ATTACK;
+                m_attackType = WeaponAttackType::RANGED_ATTACK;
             else
-                m_attackType = BASE_ATTACK;
+                m_attackType = WeaponAttackType::BASE_ATTACK;
             break;
     }
 
     m_spellSchoolMask = info->GetSchoolMask();           // Can be override for some spell (wand shoot for example)
 
-    if (m_attackType == RANGED_ATTACK)
+    if (m_attackType == WeaponAttackType::RANGED_ATTACK)
         // wand case
         if ((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0 && m_caster->GetTypeId() == TYPEID_PLAYER)
-            if (Item* pItem = m_caster->ToPlayer()->GetWeaponForAttack(RANGED_ATTACK))
+            if (Item* pItem = m_caster->ToPlayer()->GetWeaponForAttack(WeaponAttackType::RANGED_ATTACK))
                 m_spellSchoolMask = SpellSchoolMask(1 << pItem->GetTemplate()->DamageType);
 
     if (originalCasterGUID)
@@ -2067,7 +2067,7 @@ void Spell::prepareDataForTriggerSystem(AuraEffect const* /*triggeredByAura*/)
     {
         case SPELL_DAMAGE_CLASS_MELEE:
             m_procAttacker = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
-            if (m_attackType == OFF_ATTACK)
+            if (m_attackType == WeaponAttackType::OFF_ATTACK)
                 m_procAttacker |= PROC_FLAG_DONE_OFFHAND_ATTACK;
             else
                 m_procAttacker |= PROC_FLAG_DONE_MAINHAND_ATTACK;
@@ -3541,7 +3541,7 @@ void Spell::_handle_immediate_phase()
             procAttacker |= PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS;
 
         // Proc the spells that have DEST target
-        m_originalCaster->ProcDamageAndSpell(NULL, procAttacker, 0, m_procEx | PROC_EX_NORMAL_HIT, 0, BASE_ATTACK, m_spellInfo, m_triggeredByAuraSpell);
+        m_originalCaster->ProcDamageAndSpell(NULL, procAttacker, 0, m_procEx | PROC_EX_NORMAL_HIT, 0, WeaponAttackType::BASE_ATTACK, m_spellInfo, m_triggeredByAuraSpell);
     }
 }
 
@@ -3720,10 +3720,10 @@ void Spell::finish(bool ok)
         }
         if (!found && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS))
         {
-            m_caster->resetAttackTimer(BASE_ATTACK);
+            m_caster->resetAttackTimer(WeaponAttackType::BASE_ATTACK);
             if (m_caster->haveOffhandWeapon())
-                m_caster->resetAttackTimer(OFF_ATTACK);
-            m_caster->resetAttackTimer(RANGED_ATTACK);
+                m_caster->resetAttackTimer(WeaponAttackType::OFF_ATTACK);
+            m_caster->resetAttackTimer(WeaponAttackType::RANGED_ATTACK);
         }
     }
 
@@ -5367,7 +5367,7 @@ void Spell::HandleThreatSpells()
     if (SpellThreatEntry const* threatEntry = sSpellMgr->GetSpellThreatEntry(m_spellInfo->Id))
     {
         if (threatEntry->apPctMod != 0.0f)
-            threat += threatEntry->apPctMod * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+            threat += threatEntry->apPctMod * m_caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK);
 
         threat += threatEntry->flatMod;
     }
@@ -6965,7 +6965,7 @@ SpellCastResult Spell::CheckItems()
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
             {
-                if (m_attackType != RANGED_ATTACK)
+                if (m_attackType != WeaponAttackType::RANGED_ATTACK)
                     break;
 
                 Item* pItem = player->GetWeaponForAttack(m_attackType);
@@ -7018,7 +7018,7 @@ SpellCastResult Spell::CheckItems()
         // main hand weapon required
         if (m_spellInfo->AttributesEx3 & SPELL_ATTR3_MAIN_HAND)
         {
-            Item* item = m_caster->ToPlayer()->GetWeaponForAttack(BASE_ATTACK);
+            Item* item = m_caster->ToPlayer()->GetWeaponForAttack(WeaponAttackType::BASE_ATTACK);
 
             // skip spell if no weapon in slot or broken
             if (!item || item->IsBroken())
@@ -7032,7 +7032,7 @@ SpellCastResult Spell::CheckItems()
         // offhand hand weapon required
         if (m_spellInfo->AttributesEx3 & SPELL_ATTR3_REQ_OFFHAND)
         {
-            Item* item = m_caster->ToPlayer()->GetWeaponForAttack(OFF_ATTACK);
+            Item* item = m_caster->ToPlayer()->GetWeaponForAttack(WeaponAttackType::OFF_ATTACK);
 
             // skip spell if no weapon in slot or broken
             if (!item || item->IsBroken())

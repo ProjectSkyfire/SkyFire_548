@@ -52,10 +52,10 @@ void UnitAI::DoMeleeAttackIfReady()
         me->resetAttackTimer();
     }
 
-    if (me->haveOffhandWeapon() && me->isAttackReady(OFF_ATTACK) && me->IsWithinMeleeRange(victim))
+    if (me->haveOffhandWeapon() && me->isAttackReady(WeaponAttackType::OFF_ATTACK) && me->IsWithinMeleeRange(victim))
     {
-        me->AttackerStateUpdate(victim, OFF_ATTACK);
-        me->resetAttackTimer(OFF_ATTACK);
+        me->AttackerStateUpdate(victim, WeaponAttackType::OFF_ATTACK);
+        me->resetAttackTimer(WeaponAttackType::OFF_ATTACK);
     }
 }
 

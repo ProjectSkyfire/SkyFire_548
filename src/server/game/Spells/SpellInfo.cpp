@@ -1793,7 +1793,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
                     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                     {
                         Player const* player = unitTarget->ToPlayer();
-                        if (!player->GetWeaponForAttack(BASE_ATTACK) || !player->IsUseEquipedWeapon(true))
+                        if (!player->GetWeaponForAttack(WeaponAttackType::BASE_ATTACK) || !player->IsUseEquipedWeapon(true))
                             return SPELL_FAILED_TARGET_NO_WEAPONS;
                     }
                     else if (!unitTarget->GetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID))
@@ -2455,9 +2455,9 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         else
 */
         {
-            WeaponAttackType slot = BASE_ATTACK;
+            WeaponAttackType slot = WeaponAttackType::BASE_ATTACK;
             if (AttributesEx3 & SPELL_ATTR3_REQ_OFFHAND)
-                slot = OFF_ATTACK;
+                slot = WeaponAttackType::OFF_ATTACK;
 
             speed = caster->GetAttackTime(slot);
         }

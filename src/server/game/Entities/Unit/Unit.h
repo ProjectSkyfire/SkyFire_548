@@ -571,12 +571,12 @@ enum UnitMoveType
 extern float baseMoveSpeed [MAX_MOVE_TYPE];
 extern float playerBaseMoveSpeed [MAX_MOVE_TYPE];
 
-enum WeaponAttackType
+enum class WeaponAttackType
 {
     BASE_ATTACK = 0,
     OFF_ATTACK = 1,
     RANGED_ATTACK = 2,
-    MAX_ATTACK
+    MAX_ATTACK = 3
 };
 
 enum CombatRating
@@ -1452,16 +1452,16 @@ class Unit : public WorldObject
 
     void setAttackTimer(WeaponAttackType type, uint32 time)
     {
-        m_attackTimer [type] = time;
+        m_attackTimer [uint8(type)] = time;
     }
-    void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
+    void resetAttackTimer(WeaponAttackType type = WeaponAttackType::BASE_ATTACK);
     uint32 getAttackTimer(WeaponAttackType type) const
     {
-        return m_attackTimer [type];
+        return m_attackTimer [uint8(type)];
     }
-    bool isAttackReady(WeaponAttackType type = BASE_ATTACK) const
+    bool isAttackReady(WeaponAttackType type = WeaponAttackType::BASE_ATTACK) const
     {
-        return m_attackTimer [type] == 0;
+        return m_attackTimer [uint8(type)] == 0;
     }
     bool haveOffhandWeapon() const;
     bool CanDualWield() const
@@ -1703,7 +1703,7 @@ class Unit : public WorldObject
     uint32 GetAttackTime(WeaponAttackType att) const;
     void SetAttackTime(WeaponAttackType att, uint32 val)
     {
-        SetFloatValue(UNIT_FIELD_ATTACK_ROUND_BASE_TIME + att, val*m_modAttackSpeedPct [att]);
+        SetFloatValue(UNIT_FIELD_ATTACK_ROUND_BASE_TIME + uint8(att), val*m_modAttackSpeedPct [uint8(att)]);
     }
     void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply);
     void ApplyCastTimePercentMod(float val, bool apply);
@@ -1788,7 +1788,7 @@ class Unit : public WorldObject
     void Kill(Unit* victim, bool durabilityLoss = true);
     int32 DealHeal(Unit* victim, uint32 addhealth);
 
-    void ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = BASE_ATTACK, SpellInfo const* procSpell = NULL, SpellInfo const* procAura = NULL);
+    void ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = WeaponAttackType::BASE_ATTACK, SpellInfo const* procSpell = NULL, SpellInfo const* procAura = NULL);
     void ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, SpellInfo const* procAura = NULL);
 
     void GetProcAurasTriggeredOnEvent(AuraApplicationList& aurasTriggeringProc, AuraApplicationList* procAuras, ProcEventInfo eventInfo);
@@ -1800,13 +1800,13 @@ class Unit : public WorldObject
     void TriggerAurasProcOnEvent(ProcEventInfo& eventInfo, AuraApplicationList& procAuras);
 
     void HandleEmoteCommand(uint32 anim_id);
-    void AttackerStateUpdate(Unit* victim, WeaponAttackType attType = BASE_ATTACK, bool extra = false);
+    void AttackerStateUpdate(Unit* victim, WeaponAttackType attType = WeaponAttackType::BASE_ATTACK, bool extra = false);
 
-    void CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
+    void CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = WeaponAttackType::BASE_ATTACK);
     void DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss);
     void HandleProcExtraAttackFor(Unit* victim);
 
-    void CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = BASE_ATTACK, bool crit = false);
+    void CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = WeaponAttackType::BASE_ATTACK, bool crit = false);
     void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss);
 
     // player or player's pet resilience (-1%)
@@ -1832,7 +1832,7 @@ class Unit : public WorldObject
     float GetUnitMissChance(WeaponAttackType attType) const;
     float GetUnitCriticalChance(WeaponAttackType attackType, const Unit* victim) const;
     int32 GetMechanicResistChance(SpellInfo const* spellInfo) const;
-    bool CanUseAttackType(uint8 attacktype) const;
+    bool CanUseAttackType(WeaponAttackType attacktype) const;
 
     virtual uint32 GetBlockPercent() const
     {
@@ -2452,7 +2452,7 @@ class Unit : public WorldObject
     float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type) const;
     void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value)
     {
-        m_weaponDamage [attType] [damageRange] = value;
+        m_weaponDamage [uint8(attType)] [damageRange] = value;
     }
 
     bool isInFrontInMap(Unit const* target, float distance, float arc = M_PI) const;
@@ -2570,9 +2570,9 @@ class Unit : public WorldObject
     uint32 MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackType attType, SpellInfo const* spellProto = NULL);
 
 
-    bool   isSpellBlocked(Unit* victim, SpellInfo const* spellProto, WeaponAttackType attackType = BASE_ATTACK);
+    bool   isSpellBlocked(Unit* victim, SpellInfo const* spellProto, WeaponAttackType attackType = WeaponAttackType::BASE_ATTACK);
     bool   isBlockCritical();
-    bool   isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
+    bool   isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType::BASE_ATTACK) const;
     uint32 SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage, Unit* victim);
     uint32 SpellCriticalHealingBonus(SpellInfo const* spellProto, uint32 damage, Unit* victim);
 
@@ -2595,7 +2595,7 @@ class Unit : public WorldObject
     virtual bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const; // redefined in Creature
 
     static bool IsDamageReducedByArmor(SpellSchoolMask damageSchoolMask, SpellInfo const* spellInfo = NULL, uint8 effIndex = MAX_SPELL_EFFECTS);
-    uint32 CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = MAX_ATTACK);
+    uint32 CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = WeaponAttackType::MAX_ATTACK);
     uint32 CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, SpellInfo const* spellInfo) const;
     void CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, uint32 const damage, uint32* absorb, uint32* resist, SpellInfo const* spellInfo = NULL);
     void CalcHealAbsorb(Unit* victim, SpellInfo const* spellInfo, uint32& healAmount, uint32& absorb);
@@ -2897,7 +2897,7 @@ class Unit : public WorldObject
 
     bool m_AutoRepeatFirstCast;
 
-    uint32 m_attackTimer [MAX_ATTACK];
+    uint32 m_attackTimer [uint8(WeaponAttackType::MAX_ATTACK)];
 
     float m_createStats [MAX_STATS];
 
@@ -2933,7 +2933,7 @@ class Unit : public WorldObject
     uint32 m_interruptMask;
 
     float m_auraModifiersGroup [UNIT_MOD_END] [MODIFIER_TYPE_END];
-    float m_weaponDamage [MAX_ATTACK] [2];
+    float m_weaponDamage [uint8(WeaponAttackType::MAX_ATTACK)] [2];
     bool m_canModifyStats;
     VisibleAuraMap m_visibleAuras;
 

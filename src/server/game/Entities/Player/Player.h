@@ -1596,7 +1596,7 @@ class Player : public Unit, public GridObject<Player>
     Bag*  GetBagByPos(uint8 slot) const;
     Item* GetWeaponForAttack(WeaponAttackType attackType, bool useable = false) const;
     Item* GetShield(bool useable = false) const;
-    static uint8 GetAttackBySlot(uint8 slot);        // MAX_ATTACK if not weapon slot
+    static WeaponAttackType GetAttackBySlot(uint8 slot);        // MAX_ATTACK if not weapon slot
     std::vector<Item*> &GetItemUpdateQueue()
     {
         return m_itemUpdateQueue;

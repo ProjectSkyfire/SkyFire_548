@@ -198,8 +198,8 @@ bool Player::UpdateAllStats()
     UpdateDodgePercentage();
     UpdateSpellDamageAndHealingBonus();
     UpdateManaRegen();
-    UpdateExpertise(BASE_ATTACK);
-    UpdateExpertise(OFF_ATTACK);
+    UpdateExpertise(WeaponAttackType::BASE_ATTACK);
+    UpdateExpertise(WeaponAttackType::OFF_ATTACK);
     RecalculateRating(CR_ARMOR_PENETRATION);
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
@@ -354,15 +354,15 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     //automatically update weapon damage after attack power modification
     if (ranged)
     {
-        UpdateDamagePhysical(RANGED_ATTACK);
+        UpdateDamagePhysical(WeaponAttackType::RANGED_ATTACK);
         if (pet && pet->IsHunterPet()) // At ranged attack change for hunter pet
             pet->UpdateAttackPowerAndDamage();
     }
     else
     {
-        UpdateDamagePhysical(BASE_ATTACK);
+        UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
         if (CanDualWield() && haveOffhandWeapon())           //allow update offhand damage only if player knows DualWield Spec and has equipped offhand weapon
-            UpdateDamagePhysical(OFF_ATTACK);
+            UpdateDamagePhysical(WeaponAttackType::OFF_ATTACK);
 
         if (HasAuraType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT))
             UpdateSpellDamageAndHealingBonus();
@@ -381,14 +381,14 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
 
     switch (attType)
     {
-        case BASE_ATTACK:
+        case WeaponAttackType::BASE_ATTACK:
         default:
             unitMod = UNIT_MOD_DAMAGE_MAINHAND;
             break;
-        case OFF_ATTACK:
+        case WeaponAttackType::OFF_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_OFFHAND;
             break;
-        case RANGED_ATTACK:
+        case WeaponAttackType::RANGED_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_RANGED;
             break;
     }
@@ -406,7 +406,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     if (IsInFeralForm())                                    //check if player is druid and in cat or bear forms
     {
         float weaponSpeed = BASE_ATTACK_TIME / 1000.f;
-        if (Item* weapon = GetWeaponForAttack(BASE_ATTACK, true))
+        if (Item* weapon = GetWeaponForAttack(WeaponAttackType::BASE_ATTACK, true))
             weaponSpeed =  weapon->GetTemplate()->Delay / 1000;
 
         if (GetShapeshiftForm() == FORM_CAT)
@@ -423,7 +423,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
     {
         //cannot use ranged/off attack, set values to 0
-        if (attType != BASE_ATTACK)
+        if (attType != WeaponAttackType::BASE_ATTACK)
         {
             min_damage = 0;
             max_damage = 0;
@@ -453,16 +453,16 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
 
     switch (attType)
     {
-        case BASE_ATTACK:
+        case WeaponAttackType::BASE_ATTACK:
         default:
             SetStatFloatValue(UNIT_FIELD_MIN_DAMAGE, mindamage);
             SetStatFloatValue(UNIT_FIELD_MAX_DAMAGE, maxdamage);
             break;
-        case OFF_ATTACK:
+        case WeaponAttackType::OFF_ATTACK:
             SetStatFloatValue(UNIT_FIELD_MIN_OFF_HAND_DAMAGE, mindamage);
             SetStatFloatValue(UNIT_FIELD_MAX_OFF_HAND_DAMAGE, maxdamage);
             break;
-        case RANGED_ATTACK:
+        case WeaponAttackType::RANGED_ATTACK:
             SetStatFloatValue(UNIT_FIELD_MIN_RANGED_DAMAGE, mindamage);
             SetStatFloatValue(UNIT_FIELD_MAX_RANGED_DAMAGE, maxdamage);
             break;
@@ -498,17 +498,17 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
 
     switch (attType)
     {
-        case OFF_ATTACK:
+        case WeaponAttackType::OFF_ATTACK:
             modGroup = OFFHAND_CRIT_PERCENTAGE;
             index = PLAYER_FIELD_OFFHAND_CRIT_PERCENTAGE;
             cr = CR_CRIT_MELEE;
             break;
-        case RANGED_ATTACK:
+        case WeaponAttackType::RANGED_ATTACK:
             modGroup = RANGED_CRIT_PERCENTAGE;
             index = PLAYER_FIELD_RANGED_CRIT_PERCENTAGE;
             cr = CR_CRIT_RANGED;
             break;
-        case BASE_ATTACK:
+        case WeaponAttackType::BASE_ATTACK:
         default:
             modGroup = CRIT_PERCENTAGE;
             index = PLAYER_FIELD_CRIT_PERCENTAGE;
@@ -535,9 +535,9 @@ void Player::UpdateAllCritPercentages()
     SetBaseModValue(OFFHAND_CRIT_PERCENTAGE, PCT_MOD, value);
     SetBaseModValue(RANGED_CRIT_PERCENTAGE, PCT_MOD, value);
 
-    UpdateCritPercentage(BASE_ATTACK);
-    UpdateCritPercentage(OFF_ATTACK);
-    UpdateCritPercentage(RANGED_ATTACK);
+    UpdateCritPercentage(WeaponAttackType::BASE_ATTACK);
+    UpdateCritPercentage(WeaponAttackType::OFF_ATTACK);
+    UpdateCritPercentage(WeaponAttackType::RANGED_ATTACK);
 }
 
 void Player::UpdateMastery()
@@ -740,9 +740,9 @@ void Player::UpdateExpertise(WeaponAttackType attack)
 
     switch (attack)
     {
-        case BASE_ATTACK: SetUInt32Value(PLAYER_FIELD_MAINHAND_EXPERTISE, expertise); break;
-        case OFF_ATTACK:  SetUInt32Value(PLAYER_FIELD_OFFHAND_EXPERTISE, expertise); break;
-        case RANGED_ATTACK: SetUInt32Value(PLAYER_FIELD_RANGED_EXPERTISE, expertise); break;
+        case WeaponAttackType::BASE_ATTACK: SetUInt32Value(PLAYER_FIELD_MAINHAND_EXPERTISE, expertise); break;
+        case WeaponAttackType::OFF_ATTACK:  SetUInt32Value(PLAYER_FIELD_OFFHAND_EXPERTISE, expertise); break;
+        case WeaponAttackType::RANGED_ATTACK: SetUInt32Value(PLAYER_FIELD_RANGED_EXPERTISE, expertise); break;
         default: break;
     }
 }
@@ -911,11 +911,11 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
 
     //automatically update weapon damage after attack power modification
     if (ranged)
-        UpdateDamagePhysical(RANGED_ATTACK);
+        UpdateDamagePhysical(WeaponAttackType::RANGED_ATTACK);
     else
     {
-        UpdateDamagePhysical(BASE_ATTACK);
-        UpdateDamagePhysical(OFF_ATTACK);
+        UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
+        UpdateDamagePhysical(WeaponAttackType::OFF_ATTACK);
     }
 }
 
@@ -924,14 +924,14 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
     UnitMods unitMod;
     switch (attType)
     {
-        case BASE_ATTACK:
+        case WeaponAttackType::BASE_ATTACK:
         default:
             unitMod = UNIT_MOD_DAMAGE_MAINHAND;
             break;
-        case OFF_ATTACK:
+        case WeaponAttackType::OFF_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_OFFHAND;
             break;
-        case RANGED_ATTACK:
+        case WeaponAttackType::RANGED_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_RANGED;
             break;
     }
@@ -960,16 +960,16 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 
     switch (attType)
     {
-        case BASE_ATTACK:
+        case WeaponAttackType::BASE_ATTACK:
         default:
             SetStatFloatValue(UNIT_FIELD_MIN_DAMAGE, mindamage);
             SetStatFloatValue(UNIT_FIELD_MAX_DAMAGE, maxdamage);
             break;
-        case OFF_ATTACK:
+        case WeaponAttackType::OFF_ATTACK:
             SetStatFloatValue(UNIT_FIELD_MIN_OFF_HAND_DAMAGE, mindamage);
             SetStatFloatValue(UNIT_FIELD_MAX_OFF_HAND_DAMAGE, maxdamage);
             break;
-        case RANGED_ATTACK:
+        case WeaponAttackType::RANGED_ATTACK:
             SetStatFloatValue(UNIT_FIELD_MIN_RANGED_DAMAGE, mindamage);
             SetStatFloatValue(UNIT_FIELD_MAX_RANGED_DAMAGE, maxdamage);
             break;
@@ -1187,21 +1187,26 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         if (IsHunterPet())                      //hunter pets benefit from owner's attack power
         {
             float mod = 1.0f;                                                 //Hunter contribution modifier
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod));
+            bonusAP = owner->GetTotalAttackPowerValue(WeaponAttackType::RANGED_ATTACK) * 0.22f * mod;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(WeaponAttackType::RANGED_ATTACK) * 0.1287f * mod));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
-            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.22f;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1287f));
+            bonusAP = owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.22f;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.1287f));
         }
         else if (IsSpiritWolf()) //wolf benefit from shaman's attack power
         {
             float dmg_multiplier = 0.31f;
             if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
                 dmg_multiplier = 0.61f;
-            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier));
+            bonusAP = owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * dmg_multiplier;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * dmg_multiplier));
+        }
+        else if (IsWhiteTiger())
+        {
+            bonusAP = owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.22f;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.1287f));
         }
         //demons benefit from warlocks shadow or fire damage
         else if (IsPet())
@@ -1236,12 +1241,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
 
     //automatically update weapon damage after attack power modification
-    UpdateDamagePhysical(BASE_ATTACK);
+    UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
 }
 
 void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
 {
-    if (attType > BASE_ATTACK)
+    if (attType > WeaponAttackType::BASE_ATTACK)
         return;
 
     float bonusDamage = 0.0f;
@@ -1265,15 +1270,15 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
 
     UnitMods unitMod = UNIT_MOD_DAMAGE_MAINHAND;
 
-    float att_speed = float(GetAttackTime(BASE_ATTACK))/1000.0f;
+    float att_speed = float(GetAttackTime(WeaponAttackType::BASE_ATTACK))/1000.0f;
 
     float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType)/ 14.0f * att_speed  + bonusDamage;
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);
 
-    float weapon_mindamage = GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
-    float weapon_maxdamage = GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+    float weapon_mindamage = GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, MINDAMAGE);
+    float weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, MAXDAMAGE);
 
     float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
