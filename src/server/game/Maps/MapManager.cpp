@@ -100,6 +100,33 @@ Map* MapManager::CreateBaseMap(uint32 id)
 {
     Map* map = FindBaseMap(id);
 
+    if (!map)
+    {
+        MapEntry const* entry = sMapStore.LookupEntry(id);
+        if (entry->entrance_map != -1)
+        {
+            CreateBaseMap(entry->entrance_map);
+
+            // must have been created by parent map
+            map = FindBaseMap(id);
+            ASSERT(entry);
+        }
+
+        std::lock_guard<std::mutex> guard(Lock);
+        if (entry->Instanceable())
+            map = new MapInstanced(entry->MapID, i_gridCleanUpDelay);
+        else
+            map = new Map(entry->MapID, i_gridCleanUpDelay, 0, DIFFICULTY_NONE);
+
+        i_maps[entry->MapID] = map;
+
+        if (!entry->Instanceable())
+            map->LoadRespawnTimes();
+    }
+
+    ASSERT(map);
+    return map;
+    /*
     if (map == NULL)
     {
         std::lock_guard<std::mutex> guard(Lock);
@@ -120,6 +147,7 @@ Map* MapManager::CreateBaseMap(uint32 id)
 
     ASSERT(map);
     return map;
+    */
 }
 
 Map* MapManager::FindBaseNonInstanceMap(uint32 mapId) const
