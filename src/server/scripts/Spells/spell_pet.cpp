@@ -865,7 +865,7 @@ public:
                     mod += CalculatePct(1.0f, spellInfo->Effects[EFFECT_1].CalcValue());
                 }
 
-                bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
+                bonusAP = owner->GetTotalAttackPowerValue(WeaponAttackType::RANGED_ATTACK) * 0.22f * mod;
 
                 amount += bonusAP;
             }
@@ -895,7 +895,7 @@ public:
                     mod += CalculatePct(1.0f, spellInfo->Effects[EFFECT_1].CalcValue());
                 }
 
-                bonusDamage = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod;
+                bonusDamage = owner->GetTotalAttackPowerValue(WeaponAttackType::RANGED_ATTACK) * 0.1287f * mod;
 
                 amount += bonusDamage;
             }
@@ -1408,7 +1408,7 @@ public:
                 // For others recalculate it from:
                 float HasteMelee = 0.0f;
                 // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
-                HasteMelee += (1-owner->m_modAttackSpeedPct[BASE_ATTACK])*100;
+                HasteMelee += (1-owner->m_modAttackSpeedPct[uint8(WeaponAttackType::BASE_ATTACK)])*100;
 
                 amount += int32(HasteMelee);
             }
@@ -1514,9 +1514,9 @@ public:
                     return;
 
                 if (pet->IsGuardian())
-                    ((Guardian*)pet)->SetBonusDamage(owner->GetTotalAttackPowerValue(BASE_ATTACK));
+                    ((Guardian*)pet)->SetBonusDamage(owner->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK));
 
-                amount += owner->CalculateDamage(BASE_ATTACK, true, true);
+                amount += owner->CalculateDamage(WeaponAttackType::BASE_ATTACK, true, true);
             }
         }
 
@@ -1529,7 +1529,7 @@ public:
                 // For others recalculate it from:
                 float HasteMelee = 0.0f;
                 // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
-                HasteMelee += (1-owner->m_modAttackSpeedPct[BASE_ATTACK])*100;
+                HasteMelee += (1-owner->m_modAttackSpeedPct[uint8(WeaponAttackType::BASE_ATTACK)])*100;
 
                 amount += int32(HasteMelee);
             }

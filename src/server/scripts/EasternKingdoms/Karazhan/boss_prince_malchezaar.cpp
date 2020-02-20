@@ -305,9 +305,9 @@ public:
 
             //damage
             const CreatureTemplate* cinfo = me->GetCreatureTemplate();
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg);
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg);
-            me->UpdateDamagePhysical(BASE_ATTACK);
+            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MINDAMAGE, cinfo->mindmg);
+            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg);
+            me->UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
         }
 
         void EnfeebleHealthEffect()
@@ -426,17 +426,17 @@ public:
 
                     //damage
                     const CreatureTemplate* cinfo = me->GetCreatureTemplate();
-                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 2*cinfo->mindmg);
-                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 2*cinfo->maxdmg);
-                    me->UpdateDamagePhysical(BASE_ATTACK);
+                    me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MINDAMAGE, 2*cinfo->mindmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MAXDAMAGE, 2*cinfo->maxdmg);
+                    me->UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
 
-                    me->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, cinfo->mindmg);
-                    me->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, cinfo->maxdmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::OFF_ATTACK, MINDAMAGE, cinfo->mindmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::OFF_ATTACK, MAXDAMAGE, cinfo->maxdmg);
                     //Sigh, updating only works on main attack, do it manually ....
                     me->SetFloatValue(UNIT_FIELD_MIN_OFF_HAND_DAMAGE, cinfo->mindmg);
                     me->SetFloatValue(UNIT_FIELD_MAX_OFF_HAND_DAMAGE, cinfo->maxdmg);
 
-                    me->SetAttackTime(OFF_ATTACK, (me->GetAttackTime(BASE_ATTACK)*150)/100);
+                    me->SetAttackTime(WeaponAttackType::OFF_ATTACK, (me->GetAttackTime(WeaponAttackType::BASE_ATTACK)*150)/100);
                 }
             }
             else if (phase == 2)
@@ -580,10 +580,10 @@ public:
                     me->resetAttackTimer();
                 }
                 //Check for offhand attack
-                if (me->isAttackReady(OFF_ATTACK) && me->GetVictim())
+                if (me->isAttackReady(WeaponAttackType::OFF_ATTACK) && me->GetVictim())
                 {
-                    me->AttackerStateUpdate(me->GetVictim(), OFF_ATTACK);
-                    me->resetAttackTimer(OFF_ATTACK);
+                    me->AttackerStateUpdate(me->GetVictim(), WeaponAttackType::OFF_ATTACK);
+                    me->resetAttackTimer(WeaponAttackType::OFF_ATTACK);
                 }
             }
         }

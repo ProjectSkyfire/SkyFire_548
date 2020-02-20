@@ -1586,12 +1586,12 @@ class spell_gen_gift_of_naaru : public SpellScriptLoader
                         break;
                     case SPELLFAMILY_PALADIN:
                     case SPELLFAMILY_SHAMAN:
-                        heal = std::max(1.885f * float(GetCaster()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask())), 1.1f * float(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK)));
+                        heal = std::max(1.885f * float(GetCaster()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask())), 1.1f * float(GetCaster()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK)));
                         break;
                     case SPELLFAMILY_WARRIOR:
                     case SPELLFAMILY_HUNTER:
                     case SPELLFAMILY_DEATHKNIGHT:
-                        heal = 1.1f * float(std::max(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK), GetCaster()->GetTotalAttackPowerValue(RANGED_ATTACK)));
+                        heal = 1.1f * float(std::max(GetCaster()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK), GetCaster()->GetTotalAttackPowerValue(WeaponAttackType::RANGED_ATTACK)));
                         break;
                     case SPELLFAMILY_GENERIC:
                     default:

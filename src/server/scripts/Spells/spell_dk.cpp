@@ -392,7 +392,7 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
             SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT);
             amount = talentSpell->Effects [EFFECT_0].CalcValue(GetCaster());
             if (Player* player = GetCaster()->ToPlayer())
-                amount += int32(2 * player->GetTotalAttackPowerValue(BASE_ATTACK));
+                amount += int32(2 * player->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK));
         }
 
         void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
@@ -942,7 +942,7 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
         void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
         {
             if (Unit* caster = GetCaster())
-                amount = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.7f);
+                amount = int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.7f);
         }
 
         void Register() OVERRIDE

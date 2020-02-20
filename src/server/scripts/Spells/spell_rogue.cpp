@@ -579,7 +579,7 @@ class spell_rog_rupture : public SpellScriptLoader
                     if (cp > 5)
                         cp = 5;
 
-                    amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * attackpowerPerCombo[cp]);
+                    amount += int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * attackpowerPerCombo[cp]);
                 }
             }
 

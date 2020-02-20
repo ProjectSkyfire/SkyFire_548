@@ -82,7 +82,7 @@ class npc_pet_hunter_snake_trap : public CreatureScript
                     {
                         if (!(rand() % 5))
                         {
-                            me->setAttackTimer(BASE_ATTACK, (rand() % 10) * 100);
+                            me->setAttackTimer(WeaponAttackType::BASE_ATTACK, (rand() % 10) * 100);
                             _spellTimer = (rand() % 10) * 100;
                             AttackStart(who);
                         }
