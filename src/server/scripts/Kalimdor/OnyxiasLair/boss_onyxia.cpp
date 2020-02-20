@@ -281,7 +281,7 @@ public:
                 (Spell->Id >= 21135 && Spell->Id <= 21139) ||
                 (Spell->Id >= 22191 && Spell->Id <= 22202) ||
                 (Spell->Id >= 22267 && Spell->Id <= 22268)) &&
-                (target->GetTypeId() == TYPEID_PLAYER))
+                (target->GetTypeId() == TypeID::TYPEID_PLAYER))
             {
                 if (instance)
                 {

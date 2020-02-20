@@ -246,7 +246,7 @@ public:
                         if (someplayer)
                         {
                             Unit* u = Unit::GetUnit(*me, someplayer);
-                            if (u && u->GetTypeId() == TYPEID_PLAYER)
+                            if (u && u->GetTypeId() == TypeID::TYPEID_PLAYER)
                                 Talk(EMOTE_START, u);
                         }
                         Event_Timer = 60000;
@@ -776,7 +776,7 @@ public:
 
         void EnterCombat(Unit* who) OVERRIDE
         {
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 PlayerGUID = who->GetGUID();
         }
 

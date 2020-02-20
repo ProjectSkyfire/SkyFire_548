@@ -781,10 +781,10 @@ class boss_sister_svalna : public CreatureScript
             {
                 switch (victim->GetTypeId())
                 {
-                    case TYPEID_PLAYER:
+                    case TypeID::TYPEID_PLAYER:
                         Talk(SAY_SVALNA_KILL);
                         break;
-                    case TYPEID_UNIT:
+                    case TypeID::TYPEID_UNIT:
                         switch (victim->GetEntry())
                         {
                             case NPC_CAPTAIN_ARNATH:
@@ -1236,7 +1236,7 @@ struct npc_argent_captainAI : public ScriptedAI
 
         void KilledUnit(Unit* victim) OVERRIDE
         {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
+            if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                 Talk(SAY_CAPTAIN_KILL);
         }
 
@@ -1842,7 +1842,7 @@ class DeathPlagueTargetSelector
             if (object == _caster)
                 return true;
 
-            if (object->GetTypeId() != TYPEID_PLAYER)
+            if (object->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return true;
 
             if (object->ToUnit()->HasAura(SPELL_RECENTLY_INFECTED) || object->ToUnit()->HasAura(SPELL_DEATH_PLAGUE_AURA))

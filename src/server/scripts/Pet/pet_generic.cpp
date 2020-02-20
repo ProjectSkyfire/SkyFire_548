@@ -58,7 +58,7 @@ class npc_pet_gen_mojo : public CreatureScript
             {
                 me->HandleEmoteCommand(emote);
                 Unit* owner = me->GetOwner();
-                if (emote != TEXT_EMOTE_KISS || !owner || owner->GetTypeId() != TYPEID_PLAYER ||
+                if (emote != TEXT_EMOTE_KISS || !owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER ||
                     owner->ToPlayer()->GetTeam() != player->GetTeam())
                 {
                     return;

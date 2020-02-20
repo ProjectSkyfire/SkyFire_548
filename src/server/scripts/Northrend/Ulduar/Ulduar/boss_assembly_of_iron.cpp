@@ -218,7 +218,7 @@ class boss_steelbreaker : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_STEELBREAKER_SLAY);
 
                 if (phase == 3)
@@ -355,7 +355,7 @@ class boss_runemaster_molgeim : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_MOLGEIM_SLAY);
             }
 
@@ -524,7 +524,7 @@ class boss_stormcaller_brundir : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_BRUNDIR_SLAY);
             }
 

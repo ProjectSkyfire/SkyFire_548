@@ -273,7 +273,7 @@ public:
         void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
-            if (!Intro && who->GetTypeId() == TYPEID_PLAYER && me->CanCreatureAttack(who))
+            if (!Intro && who->GetTypeId() == TypeID::TYPEID_PLAYER && me->CanCreatureAttack(who))
             {
                 if (me->IsWithinDistInMap(who, VISIBLE_RANGE) && me->IsWithinLOSInMap(who))
                 {

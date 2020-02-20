@@ -239,7 +239,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (who->GetTypeId() == TYPEID_PLAYER)//If damage taken from player
+            if (who->GetTypeId() == TypeID::TYPEID_PLAYER)//If damage taken from player
             {
                 me->getThreatManager().resetAllAggro();
                 who->AddThreat(me, 1.0f);
@@ -315,7 +315,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (who->GetTypeId() == TYPEID_PLAYER)//If damage taken from player
+            if (who->GetTypeId() == TypeID::TYPEID_PLAYER)//If damage taken from player
             {
                 me->getThreatManager().resetAllAggro();
                 who->AddThreat(me, 1.0f);

@@ -103,7 +103,7 @@ public:
             if (spell->Id == SPELL_INSANITY)
             {
                 // Not good target or too many players
-                if (target->GetTypeId() != TYPEID_PLAYER || insanityHandled > 4)
+                if (target->GetTypeId() != TypeID::TYPEID_PLAYER || insanityHandled > 4)
                     return;
                 // First target - start channel visual and set self as unnattackable
                 if (!insanityHandled)

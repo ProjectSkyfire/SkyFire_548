@@ -437,7 +437,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
 
             {
                 // TODO: MoveInLineOfSight doesn't work for such a big distance
-                if (who->GetTypeId() == TYPEID_PLAYER && me->GetDistance2d(who) < 99.0f && !me->IsInCombat())
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER && me->GetDistance2d(who) < 99.0f && !me->IsInCombat())
                     me->SetInCombatWithZone();
             }
 
@@ -731,7 +731,7 @@ class boss_sara : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER && !me->IsInEvadeMode())
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER && !me->IsInEvadeMode())
                     Talk(SAY_SARA_KILL);
             }
 
@@ -3018,7 +3018,7 @@ class spell_yogg_saron_keeper_aura : public SpellScriptLoader     // 62650, 6267
 
             bool CanApply(Unit* target)
             {
-                if (target->GetTypeId() != TYPEID_PLAYER && target != GetCaster())
+                if (target->GetTypeId() != TypeID::TYPEID_PLAYER && target != GetCaster())
                     return false;
                 return true;
             }
@@ -3144,7 +3144,7 @@ class spell_yogg_saron_hodirs_protective_gaze : public SpellScriptLoader     // 
 
             bool CanApply(Unit* target)
             {
-                if (target->GetTypeId() != TYPEID_PLAYER && target != GetCaster())
+                if (target->GetTypeId() != TypeID::TYPEID_PLAYER && target != GetCaster())
                     return false;
                 return true;
             }

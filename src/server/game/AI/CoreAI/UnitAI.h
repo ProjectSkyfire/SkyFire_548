@@ -63,7 +63,7 @@ struct DefaultTargetSelector : public SF_UNARY_FUNCTION<Unit*, bool>
         if (!target)
             return false;
 
-        if (m_playerOnly && (target->GetTypeId() != TYPEID_PLAYER))
+        if (m_playerOnly && (target->GetTypeId() != TypeID::TYPEID_PLAYER))
             return false;
 
         if (m_dist > 0.0f && !me->IsWithinCombatRange(target, m_dist))

@@ -306,7 +306,7 @@ void boss_attumen::boss_attumenAI::UpdateAI(uint32 diff)
         if (HealthBelowPct(25))
         {
             Creature* pMidnight = Unit::GetCreature(*me, Midnight);
-            if (pMidnight && pMidnight->GetTypeId() == TYPEID_UNIT)
+            if (pMidnight && pMidnight->GetTypeId() == TypeID::TYPEID_UNIT)
             {
                 CAST_AI(boss_midnight::boss_midnightAI, (pMidnight->AI()))->Mount(me);
                 me->SetHealth(pMidnight->GetHealth());

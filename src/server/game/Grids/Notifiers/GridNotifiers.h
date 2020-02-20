@@ -98,7 +98,7 @@ namespace Skyfire
     {
         Unit &i_unit;
         bool isCreature;
-        explicit AIRelocationNotifier(Unit &unit) : i_unit(unit), isCreature(unit.GetTypeId() == TYPEID_UNIT)  { }
+        explicit AIRelocationNotifier(Unit &unit) : i_unit(unit), isCreature(unit.GetTypeId() == TypeID::TYPEID_UNIT)  { }
         template<class T> void Visit(GridRefManager<T> &) { }
         void Visit(CreatureMapType &);
     };
@@ -835,7 +835,7 @@ namespace Skyfire
                 if (u->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
                     return false;
 
-                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
+                if (u->GetTypeId() == TypeID::TYPEID_UNIT && ((Creature*)u)->IsTotem())
                     return false;
 
                 if (!u->isTargetableForAttack(false))
@@ -887,7 +887,7 @@ namespace Skyfire
             AnyFriendlyUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range, bool playerOnly = false) : i_obj(obj), i_funit(funit), i_range(range), i_playerOnly(playerOnly) { }
             bool operator()(Unit* u)
             {
-                if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_funit->IsFriendlyTo(u) && (!i_playerOnly || u->GetTypeId() == TYPEID_PLAYER))
+                if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_funit->IsFriendlyTo(u) && (!i_playerOnly || u->GetTypeId() == TypeID::TYPEID_PLAYER))
                     return true;
                 else
                     return false;
@@ -977,17 +977,17 @@ namespace Skyfire
                 Unit const* owner = i_funit->GetOwner();
                 if (owner)
                     check = owner;
-                i_targetForPlayer = (check->GetTypeId() == TYPEID_PLAYER);
-                if (i_obj->GetTypeId() == TYPEID_DYNAMICOBJECT)
+                i_targetForPlayer = (check->GetTypeId() == TypeID::TYPEID_PLAYER);
+                if (i_obj->GetTypeId() == TypeID::TYPEID_DYNAMICOBJECT)
                     _spellInfo = sSpellMgr->GetSpellInfo(((DynamicObject*)i_obj)->GetSpellId());
             }
             bool operator()(Unit* u)
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
-                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
+                if (u->GetTypeId() == TypeID::TYPEID_UNIT && ((Creature*)u)->IsTotem())
                     return false;
 
-                if (i_funit->_IsValidAttackTarget(u, _spellInfo, i_obj->GetTypeId() == TYPEID_DYNAMICOBJECT ? i_obj : NULL) && i_obj->IsWithinDistInMap(u, i_range))
+                if (i_funit->_IsValidAttackTarget(u, _spellInfo, i_obj->GetTypeId() == TypeID::TYPEID_DYNAMICOBJECT ? i_obj : NULL) && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
 
                 return false;
@@ -1061,7 +1061,7 @@ namespace Skyfire
                 if (!me->IsValidAttackTarget(u))
                     return false;
 
-                if (i_playerOnly && u->GetTypeId() != TYPEID_PLAYER)
+                if (i_playerOnly && u->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return false;
 
                 m_range = me->GetDistance(u);   // use found unit range as new range limit for next check

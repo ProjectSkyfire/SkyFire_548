@@ -388,7 +388,7 @@ class spell_pri_penance : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* spellInfo) OVERRIDE
@@ -574,7 +574,7 @@ class spell_pri_renew : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster() && GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleApplyEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)

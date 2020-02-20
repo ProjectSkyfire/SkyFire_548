@@ -192,7 +192,7 @@ struct boss_twin_baseAI : public BossAI
 
     void KilledUnit(Unit* who) OVERRIDE
     {
-        if (who->GetTypeId() == TYPEID_PLAYER)
+        if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
         {
             Talk(SAY_KILL_PLAYER);
             if (instance)
@@ -844,7 +844,7 @@ class spell_power_of_the_twins : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)

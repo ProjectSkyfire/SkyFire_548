@@ -248,7 +248,7 @@ class spell_rog_deadly_poison : public SpellScriptLoader
             {
                 _stackAmount = 0;
                 // at this point CastItem must already be initialized
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCastItem();
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER && GetCastItem();
             }
 
             void HandleBeforeHit()
@@ -461,7 +461,7 @@ class spell_rog_preparation : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -506,7 +506,7 @@ class spell_rog_recuperate : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void OnPeriodic(AuraEffect const* /*aurEff*/)
@@ -556,7 +556,7 @@ class spell_rog_rupture : public SpellScriptLoader
             bool Load() OVERRIDE
             {
                 Unit* caster = GetCaster();
-                return caster && caster->GetTypeId() == TYPEID_PLAYER;
+                return caster && caster->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)

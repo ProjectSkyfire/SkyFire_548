@@ -200,7 +200,7 @@ class boss_anubarak_trial : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     Talk(SAY_KILL_PLAYER);
                     if (instance)
@@ -683,7 +683,7 @@ class npc_anubarak_spike : public CreatureScript
 
             bool CanAIAttack(Unit const* victim) const OVERRIDE
             {
-                return victim->GetTypeId() == TYPEID_PLAYER;
+                return victim->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void EnterCombat(Unit* who) OVERRIDE

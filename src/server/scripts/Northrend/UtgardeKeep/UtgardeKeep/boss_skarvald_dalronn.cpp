@@ -160,7 +160,7 @@ class boss_skarvald_the_constructor : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (!ghost && who->GetTypeId() == TYPEID_PLAYER)
+                if (!ghost && who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(YELL_SKARVALD_KILL);
             }
 
@@ -307,7 +307,7 @@ class boss_dalronn_the_controller : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (!ghost && who->GetTypeId() == TYPEID_PLAYER)
+                if (!ghost && who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(YELL_DALRONN_KILL);
             }
 

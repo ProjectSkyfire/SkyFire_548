@@ -109,7 +109,7 @@ class spell_dru_eclipse : public SpellScriptLoader
 
             bool Load() override
             {
-                return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster() && GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void ApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -148,7 +148,7 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
 
             bool Load() override
             {
-                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                if (GetCaster()->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return false;
 
                 if (GetCaster()->ToPlayer()->getClass() != CLASS_DRUID)
@@ -865,7 +865,7 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
 
             bool Load() override
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
@@ -899,7 +899,7 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 
             bool Load() override
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void FilterTargets(std::list<WorldObject*>& targets)
@@ -914,7 +914,7 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
                     targets.remove(GetExplTargetUnit());
                     std::list<Unit*> tempTargets;
                     for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                        if ((*itr)->GetTypeId() == TYPEID_PLAYER && GetCaster()->IsInRaidWith((*itr)->ToUnit()))
+                        if ((*itr)->GetTypeId() == TypeID::TYPEID_PLAYER && GetCaster()->IsInRaidWith((*itr)->ToUnit()))
                             tempTargets.push_back((*itr)->ToUnit());
 
                     if (tempTargets.empty())

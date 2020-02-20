@@ -82,7 +82,7 @@ public:
         void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE
         {
             // Damage done by the controlled Death Knight understudies should also count toward damage done by players
-            if (pDone_by->GetTypeId() == TYPEID_UNIT && (pDone_by->GetEntry() == 16803 || pDone_by->GetEntry() == 29941))
+            if (pDone_by->GetTypeId() == TypeID::TYPEID_UNIT && (pDone_by->GetEntry() == 16803 || pDone_by->GetEntry() == 29941))
             {
                 me->LowerPlayerDamageReq(uiDamage);
             }

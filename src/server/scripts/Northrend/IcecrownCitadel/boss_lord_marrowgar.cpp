@@ -104,7 +104,7 @@ class BoneSpikeTargetSelector : public SF_UNARY_FUNCTION<Unit*, bool>
 
         bool operator()(Unit* unit) const
         {
-            if (unit->GetTypeId() != TYPEID_PLAYER)
+            if (unit->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return false;
 
             if (unit->HasAura(SPELL_IMPALED))
@@ -178,7 +178,7 @@ class boss_lord_marrowgar : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_KILL);
             }
 
@@ -364,7 +364,7 @@ class npc_coldflame : public CreatureScript
 
             void IsSummonedBy(Unit* owner) OVERRIDE
             {
-                if (owner->GetTypeId() != TYPEID_UNIT)
+                if (owner->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 Position pos;
@@ -622,7 +622,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT && GetCaster()->IsAIEnabled;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT && GetCaster()->IsAIEnabled;
             }
 
             SpellCastResult CheckCast()

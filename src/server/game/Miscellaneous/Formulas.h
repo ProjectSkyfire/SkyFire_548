@@ -169,7 +169,7 @@ namespace Skyfire
         {
             uint32 gain;
 
-            if (u->GetTypeId() == TYPEID_UNIT &&
+            if (u->GetTypeId() == TypeID::TYPEID_UNIT &&
                 (((Creature*)u)->IsTotem() || ((Creature*)u)->IsPet() ||
                 (((Creature*)u)->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL) ||
                 ((Creature*)u)->GetCreatureTemplate()->type == CREATURE_TYPE_CRITTER))
@@ -178,7 +178,7 @@ namespace Skyfire
             {
                 gain = BaseGain(player->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(u->GetMapId(), u->GetZoneId()));
 
-                if (gain != 0 && u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->isElite())
+                if (gain != 0 && u->GetTypeId() == TypeID::TYPEID_UNIT && ((Creature*)u)->isElite())
                 {
                     // Elites in instances have a 2.75x XP bonus instead of the regular 2x world bonus.
                     if (u->GetMap() && u->GetMap()->IsInstance())

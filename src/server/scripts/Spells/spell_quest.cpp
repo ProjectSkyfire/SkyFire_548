@@ -148,7 +148,7 @@ class spell_q5206_test_fetid_skull : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
@@ -200,7 +200,7 @@ class spell_q6124_6129_apply_salve : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -324,7 +324,7 @@ class spell_q11396_11399_scourging_crystal_controller : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* target = GetExplTargetUnit())
-                    if (target->GetTypeId() == TYPEID_UNIT && target->HasAura(SPELL_FORCE_SHIELD_ARCANE_PURPLE_X3))
+                    if (target->GetTypeId() == TypeID::TYPEID_UNIT && target->HasAura(SPELL_FORCE_SHIELD_ARCANE_PURPLE_X3))
                         // Make sure nobody else is channeling the same target
                         if (!target->HasAura(SPELL_SCOURGING_CRYSTAL_CONTROLLER))
                             GetCaster()->CastSpell(target, SPELL_SCOURGING_CRYSTAL_CONTROLLER, true, GetCastItem());
@@ -362,7 +362,7 @@ class spell_q11396_11399_scourging_crystal_controller_dummy : public SpellScript
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* target = GetHitUnit())
-                    if (target->GetTypeId() == TYPEID_UNIT)
+                    if (target->GetTypeId() == TypeID::TYPEID_UNIT)
                         target->RemoveAurasDueToSpell(SPELL_FORCE_SHIELD_ARCANE_PURPLE_X3);
             }
 
@@ -475,7 +475,7 @@ class spell_q11730_ultrasonic_screwdriver : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCastItem();
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER && GetCastItem();
             }
 
             bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
@@ -739,7 +739,7 @@ class spell_q12937_relief_for_the_fallen : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
@@ -877,7 +877,7 @@ class spell_q12659_ahunaes_knife : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -921,7 +921,7 @@ class spell_q9874_liquid_fire : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -966,7 +966,7 @@ class spell_q12805_lifeblood_dummy : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
@@ -1093,7 +1093,7 @@ class spell_q9452_cast_net: public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -1181,7 +1181,7 @@ class spell_q12277_wintergarde_mine_explosion : public SpellScriptLoader
                 {
                     if (Unit* caster = GetCaster())
                     {
-                        if (caster->GetTypeId() == TYPEID_UNIT)
+                        if (caster->GetTypeId() == TypeID::TYPEID_UNIT)
                         {
                             if (Unit* owner = caster->GetOwner())
                             {
@@ -1813,7 +1813,7 @@ class spell_q13011_bear_flank_master : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
@@ -1918,7 +1918,7 @@ class spell_q12690_burst_at_the_seams : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void HandleKnockBack(SpellEffIndex /*effIndex*/)

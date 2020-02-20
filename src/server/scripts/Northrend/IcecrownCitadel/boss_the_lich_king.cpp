@@ -564,7 +564,7 @@ class boss_the_lich_king : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER && !me->IsInEvadeMode() && !events.IsInPhase(PHASE_OUTRO))
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER && !me->IsInEvadeMode() && !events.IsInPhase(PHASE_OUTRO))
                     Talk(SAY_LK_KILL);
             }
 
@@ -2349,7 +2349,7 @@ class spell_the_lich_king_ice_burst_target_search : public SpellScriptLoader
 
                 // if there is at least one affected target cast the explosion
                 GetCaster()->CastSpell(GetCaster(), SPELL_ICE_BURST, true);
-                if (GetCaster()->GetTypeId() == TYPEID_UNIT)
+                if (GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT)
                 {
                     GetCaster()->ToCreature()->SetReactState(REACT_PASSIVE);
                     GetCaster()->AttackStop();
@@ -2755,7 +2755,7 @@ class spell_the_lich_king_vile_spirit_move_target_search : public SpellScriptLoa
             bool Load() OVERRIDE
             {
                 _target = NULL;
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void SelectTarget(std::list<WorldObject*>& targets)
@@ -2803,7 +2803,7 @@ class spell_the_lich_king_vile_spirit_damage_target_search : public SpellScriptL
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void CheckTargetCount(std::list<WorldObject*>& targets)

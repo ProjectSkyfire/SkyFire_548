@@ -135,7 +135,7 @@ bool EffectMovementGenerator::Update(Unit* unit, uint32)
 
 void EffectMovementGenerator::Finalize(Unit* unit)
 {
-    if (unit->GetTypeId() != TYPEID_UNIT)
+    if (unit->GetTypeId() != TypeID::TYPEID_UNIT)
         return;
 
     // Need restore previous movement since we have no proper states system

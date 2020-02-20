@@ -2859,7 +2859,7 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
         {
             if (!me || !unit)
                 return;
-            if (e.event.kill.playerOnly && unit->GetTypeId() != TYPEID_PLAYER)
+            if (e.event.kill.playerOnly && unit->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
             if (e.event.kill.creature && unit->GetEntry() != e.event.kill.creature)
                 return;
@@ -3367,12 +3367,12 @@ void SmartScript::OnInitialize(WorldObject* obj, AreaTriggerEntry const* at)
     {
         switch (obj->GetTypeId())
         {
-            case TYPEID_UNIT:
+            case TypeID::TYPEID_UNIT:
                 mScriptType = SMART_SCRIPT_TYPE_CREATURE;
                 me = obj->ToCreature();
                 SF_LOG_DEBUG("scripts.ai", "SmartScript::OnInitialize: source is Creature %u", me->GetEntry());
                 break;
-            case TYPEID_GAMEOBJECT:
+            case TypeID::TYPEID_GAMEOBJECT:
                 mScriptType = SMART_SCRIPT_TYPE_GAMEOBJECT;
                 go = obj->ToGameObject();
                 SF_LOG_DEBUG("scripts.ai", "SmartScript::OnInitialize: source is GameObject %u", go->GetEntry());

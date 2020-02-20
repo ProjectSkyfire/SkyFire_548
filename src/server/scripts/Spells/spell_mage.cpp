@@ -221,7 +221,7 @@ class spell_mage_cold_snap : public SpellScriptLoader
 
             bool Load() override
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -297,7 +297,7 @@ class spell_mage_conjure_refreshment : public SpellScriptLoader
 
             bool Load() override
             {
-                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                if (GetCaster()->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return false;
                 return true;
             }
@@ -382,7 +382,7 @@ class spell_mage_glyph_of_ice_block : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& /*eventInfo*/)
             {
-                return GetTarget()->GetTypeId() == TYPEID_PLAYER;
+                return GetTarget()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
@@ -635,7 +635,7 @@ class spell_mage_polymorph_cast_visual : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* target = GetCaster()->FindNearestCreature(NPC_AUROSALIA, 30.0f))
-                    if (target->GetTypeId() == TYPEID_UNIT)
+                    if (target->GetTypeId() == TypeID::TYPEID_UNIT)
                         target->CastSpell(target, PolymorhForms[urand(0, 5)], true);
             }
 

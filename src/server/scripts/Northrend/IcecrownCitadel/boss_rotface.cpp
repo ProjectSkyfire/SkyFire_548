@@ -154,7 +154,7 @@ class boss_rotface : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_KILL);
             }
 
@@ -780,7 +780,7 @@ class spell_rotface_unstable_ooze_explosion_suicide : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 Unit* target = GetTarget();
-                if (target->GetTypeId() != TYPEID_UNIT)
+                if (target->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 target->RemoveAllAuras();

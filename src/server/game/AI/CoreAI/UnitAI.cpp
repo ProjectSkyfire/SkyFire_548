@@ -101,7 +101,7 @@ void UnitAI::DoAddAuraToAllHostilePlayers(uint32 spellid)
         for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
         {
             if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                if (unit->GetTypeId() == TYPEID_PLAYER)
+                if (unit->GetTypeId() == TypeID::TYPEID_PLAYER)
                     me->AddAura(spellid, unit);
         }
     }
@@ -115,7 +115,7 @@ void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
         for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
         {
             if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                if (unit->GetTypeId() == TYPEID_PLAYER)
+                if (unit->GetTypeId() == TypeID::TYPEID_PLAYER)
                     me->CastSpell(unit, spellid, triggered);
         }
     }
@@ -326,7 +326,7 @@ bool NonTankTargetSelector::operator()(Unit const* target) const
     if (!target)
         return false;
 
-    if (_playerOnly && target->GetTypeId() != TYPEID_PLAYER)
+    if (_playerOnly && target->GetTypeId() != TypeID::TYPEID_PLAYER)
         return false;
 
     return target != _source->GetVictim();

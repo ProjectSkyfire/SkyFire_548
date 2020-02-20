@@ -377,7 +377,7 @@ class spell_pal_grand_crusader : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& /*eventInfo*/)
             {
-                return GetTarget()->GetTypeId() == TYPEID_PLAYER;
+                return GetTarget()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
@@ -605,7 +605,7 @@ class spell_pal_righteous_defense : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 Unit* caster = GetCaster();
-                if (caster->GetTypeId() != TYPEID_PLAYER)
+                if (caster->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return SPELL_FAILED_DONT_REPORT;
 
                 if (Unit* target = GetExplTargetUnit())
@@ -662,7 +662,7 @@ class spell_pal_sacred_shield : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 Unit* caster = GetCaster();
-                if (caster->GetTypeId() != TYPEID_PLAYER)
+                if (caster->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return SPELL_FAILED_DONT_REPORT;
 
                 if (!caster->HealthBelowPct(30))
@@ -704,7 +704,7 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
 
             bool Load() override
             {
-                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                if (GetCaster()->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return false;
 
                 if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)

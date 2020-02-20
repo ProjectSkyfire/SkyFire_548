@@ -179,7 +179,7 @@ public:
 
         void KilledUnit(Unit* victim) OVERRIDE
         {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
+            if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                 Talk(ANRAPHET_SAY_KILL);
         }
 

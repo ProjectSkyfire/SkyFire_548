@@ -476,7 +476,7 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_KELESETH_KILL);
             }
 
@@ -695,7 +695,7 @@ class boss_prince_taldaram_icc : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_TALDARAM_KILL);
             }
 
@@ -934,7 +934,7 @@ class boss_prince_valanar_icc : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_VALANAR_KILL);
             }
 
@@ -1526,7 +1526,7 @@ class spell_valanar_kinetic_bomb : public SpellScriptLoader
             void HandleDummyTick(AuraEffect const* /*aurEff*/)
             {
                 Unit* target = GetTarget();
-                if (target->GetTypeId() != TYPEID_UNIT)
+                if (target->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 if (Creature* bomb = target->FindNearestCreature(NPC_KINETIC_BOMB, 1.0f, true))

@@ -150,7 +150,7 @@ class spell_warl_create_healthstone : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
@@ -406,7 +406,7 @@ class spell_warl_life_tap : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
              bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE

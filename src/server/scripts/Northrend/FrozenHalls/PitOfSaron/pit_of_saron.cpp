@@ -173,7 +173,7 @@ class npc_geist_ambusher : public CreatureScript
 
             void EnterCombat(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() != TYPEID_PLAYER)
+                if (who->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
                 // the max range is determined by aggro range

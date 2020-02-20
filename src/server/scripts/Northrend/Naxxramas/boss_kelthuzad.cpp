@@ -607,7 +607,7 @@ public:
                             {
                                 Unit* const target = (*itr)->getTarget();
 
-                                if (target->GetTypeId() == TYPEID_PLAYER
+                                if (target->GetTypeId() == TypeID::TYPEID_PLAYER
                                         && target->getPowerType() == POWER_MANA
                                         && target->GetPower(POWER_MANA))
                                 {

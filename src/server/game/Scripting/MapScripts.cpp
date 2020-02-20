@@ -43,7 +43,7 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
     // prepare static data
     uint64 sourceGUID = source ? source->GetGUID() : uint64(0); //some script commands doesn't have source
     uint64 targetGUID = target ? target->GetGUID() : uint64(0);
-    uint64 ownerGUID  = (source && source->GetTypeId() == TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
+    uint64 ownerGUID  = (source && source->GetTypeId() == TypeID::TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const* s2 = &(s->second);
@@ -78,7 +78,7 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     // prepare static data
     uint64 sourceGUID = source ? source->GetGUID() : uint64(0);
     uint64 targetGUID = target ? target->GetGUID() : uint64(0);
-    uint64 ownerGUID  = (source && source->GetTypeId() == TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
+    uint64 ownerGUID  = (source && source->GetTypeId() == TypeID::TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
 
     ScriptAction sa;
     sa.sourceGUID = sourceGUID;
@@ -116,8 +116,8 @@ inline Player* Map::_GetScriptPlayerSourceOrTarget(Object* source, Object* targe
         if (!player)
             SF_LOG_ERROR("scripts", "%s neither source nor target object is player (source: TypeId: %u, Entry: %u, GUID: %u; target: TypeId: %u, Entry: %u, GUID: %u), skipping.",
                 scriptInfo->GetDebugInfo().c_str(),
-                source ? source->GetTypeId() : 0, source ? source->GetEntry() : 0, source ? source->GetGUIDLow() : 0,
-                target ? target->GetTypeId() : 0, target ? target->GetEntry() : 0, target ? target->GetGUIDLow() : 0);
+                source ? uint8(source->GetTypeId()) : 0, source ? source->GetEntry() : 0, source ? source->GetGUIDLow() : 0,
+                target ? uint8(target->GetTypeId()) : 0, target ? target->GetEntry() : 0, target ? target->GetGUIDLow() : 0);
     }
     return player;
 }
@@ -149,8 +149,8 @@ inline Creature* Map::_GetScriptCreatureSourceOrTarget(Object* source, Object* t
         if (!creature)
             SF_LOG_ERROR("scripts", "%s neither source nor target are creatures (source: TypeId: %u, Entry: %u, GUID: %u; target: TypeId: %u, Entry: %u, GUID: %u), skipping.",
                 scriptInfo->GetDebugInfo().c_str(),
-                source ? source->GetTypeId() : 0, source ? source->GetEntry() : 0, source ? source->GetGUIDLow() : 0,
-                target ? target->GetTypeId() : 0, target ? target->GetEntry() : 0, target ? target->GetGUIDLow() : 0);
+                source ? uint8(source->GetTypeId()) : 0, source ? source->GetEntry() : 0, source ? source->GetGUIDLow() : 0,
+                target ? uint8(target->GetTypeId()) : 0, target ? target->GetEntry() : 0, target ? target->GetGUIDLow() : 0);
     }
     return creature;
 }
@@ -553,7 +553,7 @@ void Map::ScriptsProcess()
                 Player* player = target->ToPlayer();
                 if (player)
                 {
-                    if (source->GetTypeId() != TYPEID_UNIT && source->GetTypeId() != TYPEID_GAMEOBJECT && source->GetTypeId() != TYPEID_PLAYER)
+                    if (source->GetTypeId() != TypeID::TYPEID_UNIT && source->GetTypeId() != TypeID::TYPEID_GAMEOBJECT && source->GetTypeId() != TypeID::TYPEID_PLAYER)
                     {
                         SF_LOG_ERROR("scripts", "%s source is not unit, gameobject or player (TypeId: %u, Entry: %u, GUID: %u), skipping.",
                             step.script->GetDebugInfo().c_str(), source->GetTypeId(), source->GetEntry(), source->GetGUIDLow());
@@ -566,7 +566,7 @@ void Map::ScriptsProcess()
                     player = source->ToPlayer();
                     if (player)
                     {
-                        if (target->GetTypeId() != TYPEID_UNIT && target->GetTypeId() != TYPEID_GAMEOBJECT && target->GetTypeId() != TYPEID_PLAYER)
+                        if (target->GetTypeId() != TypeID::TYPEID_UNIT && target->GetTypeId() != TypeID::TYPEID_GAMEOBJECT && target->GetTypeId() != TypeID::TYPEID_PLAYER)
                         {
                             SF_LOG_ERROR("scripts", "%s target is not unit, gameobject or player (TypeId: %u, Entry: %u, GUID: %u), skipping.",
                                 step.script->GetDebugInfo().c_str(), target->GetTypeId(), target->GetEntry(), target->GetGUIDLow());
@@ -584,7 +584,7 @@ void Map::ScriptsProcess()
                 }
 
                 // quest id and flags checked at script loading
-                if ((worldObject->GetTypeId() != TYPEID_UNIT || ((Unit*)worldObject)->IsAlive()) &&
+                if ((worldObject->GetTypeId() != TypeID::TYPEID_UNIT || ((Unit*)worldObject)->IsAlive()) &&
                     (step.script->QuestExplored.Distance == 0 || worldObject->IsWithinDistInMap(player, float(step.script->QuestExplored.Distance))))
                     player->AreaExploredOrEventHappens(step.script->QuestExplored.QuestID);
                 else
@@ -680,7 +680,7 @@ void Map::ScriptsProcess()
                         break;
                     }
 
-                    if (target->GetTypeId() != TYPEID_GAMEOBJECT)
+                    if (target->GetTypeId() != TypeID::TYPEID_GAMEOBJECT)
                     {
                         SF_LOG_ERROR("scripts", "%s target object is not gameobject (TypeId: %u, Entry: %u, GUID: %u), skipping.",
                             step.script->GetDebugInfo().c_str(), target->GetTypeId(), target->GetEntry(), target->GetGUIDLow());

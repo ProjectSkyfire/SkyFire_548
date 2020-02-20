@@ -451,7 +451,7 @@ KillRewarder::KillRewarder(Player* killer, Unit* victim, bool isBattleGround) :
     _isFullXP(false), _maxLevel(0), _isBattleGround(isBattleGround), _isPvP(false)
 {
     // mark the credit as pvp if victim is player
-    if (victim->GetTypeId() == TYPEID_PLAYER)
+    if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
         _isPvP = true;
     // or if its owned by player and its not a vehicle
     else if (IS_PLAYER_GUID(victim->GetCharmerOrOwnerGUID()))
@@ -533,7 +533,7 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
             AddPct(xp, (*i)->GetAmount());
 
         // 4.2.3. Calculate expansion penalty
-        if (_victim->GetTypeId() == TYPEID_UNIT && player->getLevel() >= GetMaxLevelForExpansion(_victim->ToCreature()->GetCreatureTemplate()->expansion))
+        if (_victim->GetTypeId() == TypeID::TYPEID_UNIT && player->getLevel() >= GetMaxLevelForExpansion(_victim->ToCreature()->GetCreatureTemplate()->expansion))
             xp = CalculatePct(xp, 10); // Players get only 10% xp for killing creatures of lower expansion levels than himself
 
         // 4.2.4. Give XP to player.
@@ -570,7 +570,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         // 4.1. Give honor (player must be alive and not on BG).
         _RewardHonor(player);
         // 4.1.1 Send player killcredit for quests with PlayerSlain
-        if (_victim->GetTypeId() == TYPEID_PLAYER)
+        if (_victim->GetTypeId() == TypeID::TYPEID_PLAYER)
             player->KilledPlayerCredit();
     }
     // Give XP only in PvE or in battlegrounds.
@@ -680,7 +680,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_speakCount = 0;
 
     m_objectType |= TYPEMASK_PLAYER;
-    m_objectTypeId = TYPEID_PLAYER;
+    m_objectTypeId = TypeID::TYPEID_PLAYER;
 
     m_valuesCount = PLAYER_END;
 
@@ -1618,7 +1618,7 @@ void Player::Update(uint32 p_time)
 
     if (IsCharmed())
         if (Unit* charmer = GetCharmer())
-            if (charmer->GetTypeId() == TYPEID_UNIT && charmer->IsAlive())
+            if (charmer->GetTypeId() == TypeID::TYPEID_UNIT && charmer->IsAlive())
                 UpdateCharmedAI();
 
     // Update items that have just a limited lifetime
@@ -2888,13 +2888,13 @@ bool Player::CanInteractWithQuestGiver(Object* questGiver)
 {
     switch (questGiver->GetTypeId())
     {
-        case TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
             return GetNPCIfCanInteractWith(questGiver->GetGUID(), UNIT_NPC_FLAG_QUESTGIVER) != NULL;
-        case TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
             return GetGameObjectIfCanInteractWith(questGiver->GetGUID(), GAMEOBJECT_TYPE_QUESTGIVER) != NULL;
-        case TYPEID_PLAYER:
+        case TypeID::TYPEID_PLAYER:
             return IsAlive() && questGiver->ToPlayer()->IsAlive();
-        case TYPEID_ITEM:
+        case TypeID::TYPEID_ITEM:
             return IsAlive();
         default:
             break;
@@ -3182,7 +3182,7 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     if (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN))
         return;
 
-    if (victim && victim->GetTypeId() == TYPEID_UNIT && !victim->ToCreature()->hasLootRecipient())
+    if (victim && victim->GetTypeId() == TypeID::TYPEID_UNIT && !victim->ToCreature()->hasLootRecipient())
         return;
 
     uint8 level = getLevel();
@@ -7241,7 +7241,7 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
 // Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardReputation(Unit* victim, float rate)
 {
-    if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
+    if (!victim || victim->GetTypeId() == TypeID::TYPEID_PLAYER)
         return;
 
     if (victim->ToCreature()->IsReputationGainDisabled())
@@ -7369,7 +7369,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     // do not reward honor in arenas, but enable onkill spellproc
     if (InArena())
     {
-        if (!victim || victim == this || victim->GetTypeId() != TYPEID_PLAYER)
+        if (!victim || victim == this || victim->GetTypeId() != TypeID::TYPEID_PLAYER)
             return false;
 
         if (GetBGTeam() == victim->ToPlayer()->GetBGTeam())
@@ -7497,7 +7497,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
         if (!victim || victim == this || victim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
             return true;
 
-        if (victim->GetTypeId() == TYPEID_PLAYER)
+        if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
         {
             // Check if allowed to receive it in current map
             uint8 MapType = sWorld->getIntConfig(CONFIG_PVP_TOKEN_MAP_TYPE);
@@ -15052,13 +15052,13 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
 
     uint32 npcflags = 0;
 
-    if (source->GetTypeId() == TYPEID_UNIT)
+    if (source->GetTypeId() == TypeID::TYPEID_UNIT)
     {
         npcflags = source->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
         if (showQuests && npcflags & UNIT_NPC_FLAG_QUESTGIVER)
             PrepareQuestMenu(source->GetGUID());
     }
-    else if (source->GetTypeId() == TYPEID_GAMEOBJECT)
+    else if (source->GetTypeId() == TypeID::TYPEID_GAMEOBJECT)
         if (showQuests && source->ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
             PrepareQuestMenu(source->GetGUID());
 
@@ -15187,7 +15187,7 @@ void Player::SendPreparedGossip(WorldObject* source)
     if (!source)
         return;
 
-    if (source->GetTypeId() == TYPEID_UNIT)
+    if (source->GetTypeId() == TypeID::TYPEID_UNIT)
     {
         // in case no gossip flag and quest menu not empty, open quest menu (client expect gossip menu with this flag)
         if (!source->ToCreature()->HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !PlayerTalkClass->GetQuestMenu().Empty())
@@ -15196,7 +15196,7 @@ void Player::SendPreparedGossip(WorldObject* source)
             return;
         }
     }
-    else if (source->GetTypeId() == TYPEID_GAMEOBJECT)
+    else if (source->GetTypeId() == TypeID::TYPEID_GAMEOBJECT)
     {
         // probably need to find a better way here
         if (!PlayerTalkClass->GetGossipMenu().GetMenuId() && !PlayerTalkClass->GetQuestMenu().Empty())
@@ -15232,7 +15232,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
     uint32 gossipOptionId = item->OptionType;
     uint64 guid = source->GetGUID();
 
-    if (source->GetTypeId() == TYPEID_GAMEOBJECT)
+    if (source->GetTypeId() == TypeID::TYPEID_GAMEOBJECT)
     {
         if (gossipOptionId > GOSSIP_OPTION_QUESTGIVER)
         {
@@ -15386,9 +15386,9 @@ uint32 Player::GetDefaultGossipMenuForSource(WorldObject* source)
 {
     switch (source->GetTypeId())
     {
-        case TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
             return source->ToCreature()->GetCreatureTemplate()->GossipMenuId;
-        case TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
             return source->ToGameObject()->GetGOInfo()->GetGossipMenuId();
         default:
             break;
@@ -15894,7 +15894,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         uint32 limittime = quest->GetLimitTime();
 
         // shared timed quest
-        if (questGiver && questGiver->GetTypeId() == TYPEID_PLAYER)
+        if (questGiver && questGiver->GetTypeId() == TypeID::TYPEID_PLAYER)
             limittime = questGiver->ToPlayer()->getQuestStatusMap()[questId].Timer / IN_MILLISECONDS;
 
         AddTimedQuest(questId);
@@ -15925,17 +15925,17 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     {
         switch (questGiver->GetTypeId())
         {
-            case TYPEID_UNIT:
+            case TypeID::TYPEID_UNIT:
                 sScriptMgr->OnQuestAccept(this, (questGiver->ToCreature()), quest);
                 break;
-            case TYPEID_ITEM:
-            case TYPEID_CONTAINER:
+            case TypeID::TYPEID_ITEM:
+            case TypeID::TYPEID_CONTAINER:
                 {
                     Item* item = (Item*)questGiver;
                     sScriptMgr->OnQuestAccept(this, item, quest);
                     break;
                 }
-            case TYPEID_GAMEOBJECT:
+            case TypeID::TYPEID_GAMEOBJECT:
                 sScriptMgr->OnQuestAccept(this, questGiver->ToGameObject(), quest);
                 break;
             default:
@@ -21393,7 +21393,7 @@ void Player::StopCastingCharm()
     if (!charm)
         return;
 
-    if (charm->GetTypeId() == TYPEID_UNIT)
+    if (charm->GetTypeId() == TypeID::TYPEID_UNIT)
     {
         if (charm->ToCreature()->HasUnitTypeMask(UNIT_MASK_PUPPET))
             ((Puppet*)charm)->UnSummon();
@@ -21791,7 +21791,7 @@ void Player::CharmSpellInitialize()
     }
 
     uint8 addlist = 0;
-    if (charm->GetTypeId() != TYPEID_PLAYER)
+    if (charm->GetTypeId() != TypeID::TYPEID_PLAYER)
     {
         //CreatureInfo const* cinfo = charm->ToCreature()->GetCreatureTemplate();
         //if (cinfo && cinfo->type == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
@@ -21831,7 +21831,7 @@ void Player::CharmSpellInitialize()
     data << uint32(0);
     data.WriteByteSeq(CharmGuid[5]);
     
-    if (charm->GetTypeId() != TYPEID_PLAYER)
+    if (charm->GetTypeId() != TypeID::TYPEID_PLAYER)
         data << uint8(charm->ToCreature()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
     else
         data << uint32(0);
@@ -23750,7 +23750,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
     {
         if (!CanSeeOrDetect(target, false, true))
         {
-            if (target->GetTypeId() == TYPEID_UNIT)
+            if (target->GetTypeId() == TypeID::TYPEID_UNIT)
                 BeforeVisibilityDestroy<Creature>(target->ToCreature(), this);
 
             target->DestroyForPlayer(this);
@@ -25267,7 +25267,7 @@ void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewar
 {
     if (!pRewardSource)
         return;
-    uint64 creature_guid = (pRewardSource->GetTypeId() == TYPEID_UNIT) ? pRewardSource->GetGUID() : uint64(0);
+    uint64 creature_guid = (pRewardSource->GetTypeId() == TypeID::TYPEID_UNIT) ? pRewardSource->GetGUID() : uint64(0);
 
     // prepare data for near group iteration
     if (Group* group = GetGroup())

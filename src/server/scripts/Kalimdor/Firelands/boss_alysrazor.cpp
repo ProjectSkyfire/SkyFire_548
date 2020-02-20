@@ -632,7 +632,7 @@ class spell_alysrazor_aggro_closest : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void HandleEffect(SpellEffIndex effIndex)

@@ -321,7 +321,7 @@ class spell_item_deviate_fish : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
@@ -491,7 +491,7 @@ class spell_item_make_a_wish : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
@@ -702,7 +702,7 @@ class spell_item_noggenfogger_elixir : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
@@ -787,7 +787,7 @@ class spell_item_savory_deviate_delight : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
@@ -848,7 +848,7 @@ class spell_item_scroll_of_recall : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleScript(SpellEffIndex effIndex)
@@ -916,11 +916,11 @@ class spell_item_unsated_craving : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& procInfo)
             {
                 Unit* caster = procInfo.GetActor();
-                if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                if (!caster || caster->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return false;
 
                 Unit* target = procInfo.GetActionTarget();
-                if (!target || target->GetTypeId() != TYPEID_UNIT || target->GetCreatureType() == CREATURE_TYPE_CRITTER || (target->GetEntry() != NPC_SINDRAGOSA && target->IsSummon()))
+                if (!target || target->GetTypeId() != TypeID::TYPEID_UNIT || target->GetCreatureType() == CREATURE_TYPE_CRITTER || (target->GetEntry() != NPC_SINDRAGOSA && target->IsSummon()))
                     return false;
 
                 return true;
@@ -1213,7 +1213,7 @@ class spell_item_underbelly_elixir : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
@@ -1360,7 +1360,7 @@ class spell_item_book_of_glyph_mastery : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             SpellCastResult CheckRequirement()
@@ -1546,7 +1546,7 @@ class spell_item_ashbringer : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void OnDummyEffect(SpellEffIndex effIndex)
@@ -1676,7 +1676,7 @@ class spell_item_purify_helboar_meat : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spell*/) OVERRIDE
@@ -1980,7 +1980,7 @@ class spell_item_demon_broiled_surprise : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-               return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+               return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void HandleDummy(SpellEffIndex /* effIndex */)
@@ -2231,7 +2231,7 @@ class spell_item_teach_language : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spell*/) OVERRIDE
@@ -2277,7 +2277,7 @@ class spell_item_rocket_boots : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spell*/) OVERRIDE
@@ -2415,7 +2415,7 @@ class spell_item_chicken_cover : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             bool Validate(SpellInfo const* /*spell*/) OVERRIDE

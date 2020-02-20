@@ -293,13 +293,13 @@ public:
                     break;
                 case EVENT_REACHED_HOME:
                     Unit* player = me->GetVehicleKit()->GetPassenger(0);
-                    if (player && player->GetTypeId() == TYPEID_PLAYER)
+                    if (player && player->GetTypeId() == TypeID::TYPEID_PLAYER)
                     {
                         // for each prisoner on drake, give credit
                         for (uint8 i = 1; i < 4; ++i)
                             if (Unit* prisoner = me->GetVehicleKit()->GetPassenger(i))
                             {
-                                if (prisoner->GetTypeId() != TYPEID_UNIT)
+                                if (prisoner->GetTypeId() != TypeID::TYPEID_UNIT)
                                     return;
                                 prisoner->CastSpell(player, SPELL_KILL_CREDIT_PRISONER, true);
                                 prisoner->CastSpell(prisoner, SPELL_SUMMON_LIBERATED, true);
@@ -334,7 +334,7 @@ public:
 
         void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) OVERRIDE
         {
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
             {
                 if (apply)
                     Start(false, true, who->GetGUID());

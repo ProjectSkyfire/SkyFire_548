@@ -305,7 +305,7 @@ class boss_sapphiron : public CreatureScript
                                 std::vector<Unit*> targets;
                                 std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
                                 for (; i != me->getThreatManager().getThreatList().end(); ++i)
-                                    if ((*i)->getTarget()->GetTypeId() == TYPEID_PLAYER && !(*i)->getTarget()->HasAura(SPELL_ICEBOLT))
+                                    if ((*i)->getTarget()->GetTypeId() == TypeID::TYPEID_PLAYER && !(*i)->getTarget()->HasAura(SPELL_ICEBOLT))
                                         targets.push_back((*i)->getTarget());
 
                                 if (targets.empty())
@@ -364,7 +364,7 @@ class boss_sapphiron : public CreatureScript
                 for (; i != me->getThreatManager().getThreatList().end(); ++i)
                 {
                     Unit* target = (*i)->getTarget();
-                    if (target->GetTypeId() != TYPEID_PLAYER)
+                    if (target->GetTypeId() != TypeID::TYPEID_PLAYER)
                         continue;
 
                     if (target->HasAura(SPELL_ICEBOLT))

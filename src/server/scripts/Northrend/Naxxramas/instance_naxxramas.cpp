@@ -252,7 +252,7 @@ class instance_naxxramas : public InstanceMapScript
 
             void OnUnitDeath(Unit* unit) OVERRIDE
             {
-                if (unit->GetTypeId() == TYPEID_PLAYER && IsEncounterInProgress())
+                if (unit->GetTypeId() == TypeID::TYPEID_PLAYER && IsEncounterInProgress())
                 {
                     playerDied = 1;
                     SaveToDB();

@@ -159,7 +159,7 @@ public:
     {
         npc_ancestral_wolfAI(Creature* creature) : npc_escortAI(creature)
         {
-            if (creature->GetOwner() && creature->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+            if (creature->GetOwner() && creature->GetOwner()->GetTypeId() == TypeID::TYPEID_PLAYER)
                 Start(false, false, creature->GetOwner()->GetGUID());
             else
                 SF_LOG_ERROR("scripts", "SKYFIRE: npc_ancestral_wolf can not obtain owner or owner is not a player.");

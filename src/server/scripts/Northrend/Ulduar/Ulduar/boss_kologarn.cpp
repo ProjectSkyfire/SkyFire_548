@@ -157,7 +157,7 @@ class boss_kologarn : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
@@ -371,7 +371,7 @@ class StoneGripTargetSelector : public SF_UNARY_FUNCTION<Unit*, bool>
             if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
                 return true;
 
-            if (target->GetTypeId() != TYPEID_PLAYER)
+            if (target->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return true;
 
             return false;
@@ -392,7 +392,7 @@ class spell_ulduar_stone_grip_cast_target : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                if (GetCaster()->GetTypeId() != TYPEID_UNIT)
+                if (GetCaster()->GetTypeId() != TypeID::TYPEID_UNIT)
                     return false;
                 return true;
             }

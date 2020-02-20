@@ -322,7 +322,7 @@ class npc_warden_mellichar : public CreatureScript
                 {
                     if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
-                    if (who->GetTypeId() != TYPEID_PLAYER)
+                    if (who->GetTypeId() != TypeID::TYPEID_PLAYER)
                         return;
 
                     float attackRadius = me->GetAttackDistance(who)/10;

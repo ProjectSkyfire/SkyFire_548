@@ -908,7 +908,7 @@ class boss_kaelthas : public CreatureScript
                                         for (i = threatlist.begin(); i != threatlist.end(); ++i)
                                         {
                                             Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                            if (unit && (unit->GetTypeId() == TYPEID_PLAYER))
+                                            if (unit && (unit->GetTypeId() == TypeID::TYPEID_PLAYER))
                                             {
                                                 //Use work around packet to prevent player from being dropped from combat
                                                 DoTeleportPlayer(unit, afGravityPos[0], afGravityPos[1], afGravityPos[2], unit->GetOrientation());

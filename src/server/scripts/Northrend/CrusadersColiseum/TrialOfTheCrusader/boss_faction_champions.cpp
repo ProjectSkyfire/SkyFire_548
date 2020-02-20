@@ -583,7 +583,7 @@ struct boss_faction_championsAI : public BossAI
             Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
             if (unit && me->getThreatManager().getThreat(unit))
             {
-                if (unit->GetTypeId() == TYPEID_PLAYER)
+                if (unit->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     float threat = CalculateThreat(me->GetDistance2d(unit), (float)unit->GetArmor(), unit->GetHealth());
                     me->getThreatManager().modifyThreatPercent(unit, -100);
@@ -628,7 +628,7 @@ struct boss_faction_championsAI : public BossAI
 
     void KilledUnit(Unit* who) OVERRIDE
     {
-        if (who->GetTypeId() == TYPEID_PLAYER)
+        if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
         {
             Map::PlayerList const &players = me->GetMap()->GetPlayers();
             uint32 TeamInInstance = 0;

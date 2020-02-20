@@ -155,7 +155,7 @@ class boss_mandokir : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     Talk(SAY_PLAYER_KILL);
                     DoCast(SPELL_LEVEL_UP);
@@ -550,7 +550,7 @@ class DevastatingSlamTargetSelector : public SF_UNARY_FUNCTION<Unit *, bool>
             if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
                 return true;
 
-            if (target->GetTypeId() != TYPEID_PLAYER)
+            if (target->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return true;
 
             return false;

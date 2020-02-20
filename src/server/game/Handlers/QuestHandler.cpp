@@ -67,7 +67,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
 
     switch (questgiver->GetTypeId())
     {
-    case TYPEID_UNIT:
+    case TypeID::TYPEID_UNIT:
         {
             SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_GIVER_STATUS_QUERY for npc, guid = %u", uint32(GUID_LOPART(guid)));
             Creature* cr_questgiver=questgiver->ToCreature();
@@ -79,7 +79,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
             }
             break;
         }
-    case TYPEID_GAMEOBJECT:
+    case TypeID::TYPEID_GAMEOBJECT:
         {
             SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_GIVER_STATUS_QUERY for GameObject guid = %u", uint32(GUID_LOPART(guid)));
             GameObject* go_questgiver=(GameObject*)questgiver;
@@ -261,11 +261,11 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
             switch (object->GetTypeId())
             {
-            case TYPEID_UNIT:
+            case TypeID::TYPEID_UNIT:
                 object->ToCreature()->AI()->sQuestAccept(_player, quest);
                 break;
-            case TYPEID_ITEM:
-            case TYPEID_CONTAINER:
+            case TypeID::TYPEID_ITEM:
+            case TypeID::TYPEID_CONTAINER:
                 {
                     Item* item = (Item*)object;
 
@@ -289,7 +289,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
                     break;
                 }
-            case TYPEID_GAMEOBJECT:
+            case TypeID::TYPEID_GAMEOBJECT:
                 object->ToGameObject()->AI()->QuestAccept(_player, quest);
                 break;
             default:
@@ -470,7 +470,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
 
             switch (object->GetTypeId())
             {
-                case TYPEID_UNIT:
+                case TypeID::TYPEID_UNIT:
                 {
                     Creature* questgiver = object->ToCreature();
                     if (!sScriptMgr->OnQuestReward(_player, questgiver, quest, reward))
@@ -492,7 +492,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                     }
                     break;
                 }
-                case TYPEID_GAMEOBJECT:
+                case TypeID::TYPEID_GAMEOBJECT:
                 {
                     GameObject* questGiver = object->ToGameObject();
                     if (!sScriptMgr->OnQuestReward(_player, questGiver, quest, reward))
@@ -847,13 +847,13 @@ uint32 WorldSession::getDialogStatus(Player* player, Object* questgiver, uint32 
 
     switch (questgiver->GetTypeId())
     {
-    case TYPEID_GAMEOBJECT:
+    case TypeID::TYPEID_GAMEOBJECT:
         {
             qr  = sObjectMgr->GetGOQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetGOQuestInvolvedRelationBounds(questgiver->GetEntry());
             break;
         }
-    case TYPEID_UNIT:
+    case TypeID::TYPEID_UNIT:
         {
             qr  = sObjectMgr->GetCreatureQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetCreatureQuestInvolvedRelationBounds(questgiver->GetEntry());

@@ -554,7 +554,7 @@ public:
 
         void KilledUnit(Unit* victim) OVERRIDE
         {
-            if (victim->GetTypeId() != TYPEID_PLAYER)
+            if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
 
             Talk(SAY_ILLIDAN_KILL);
@@ -2000,7 +2000,7 @@ public:
             if (!Active)
                 return;
 
-            if (who && (who->GetTypeId() != TYPEID_PLAYER))
+            if (who && (who->GetTypeId() != TypeID::TYPEID_PLAYER))
             {
                 if (who->GetEntry() == ILLIDAN_STORMRAGE) // Check if who is Illidan
                 {
@@ -2100,7 +2100,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->GetVictim()->GetTypeId() != TYPEID_PLAYER)
+            if (me->GetVictim()->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return; // Only cast the below on players.
 
             if (!me->GetVictim()->HasAura(SPELL_PARALYZE))

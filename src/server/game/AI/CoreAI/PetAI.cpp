@@ -235,10 +235,10 @@ void PetAI::UpdateAI(uint32 diff)
             if (!me->HasInArc(M_PI, target))
             {
                 me->SetInFront(target);
-                if (target && target->GetTypeId() == TYPEID_PLAYER)
+                if (target && target->GetTypeId() == TypeID::TYPEID_PLAYER)
                     me->SendUpdateToPlayer(target->ToPlayer());
 
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                if (owner && owner->GetTypeId() == TypeID::TYPEID_PLAYER)
                     me->SendUpdateToPlayer(owner->ToPlayer());
             }
 

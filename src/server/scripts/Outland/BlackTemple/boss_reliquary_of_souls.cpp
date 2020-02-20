@@ -186,7 +186,7 @@ public:
             if (me->IsInCombat())
                 return;
 
-            if (who->GetTypeId() != TYPEID_PLAYER)
+            if (who->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
 
             if (me->GetDistance(who) > 50.0f)
@@ -454,7 +454,7 @@ public:
             for (; itr != threatlist.end(); ++itr)
             {
                 Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
-                if (unit && unit->IsAlive() && (unit->GetTypeId() == TYPEID_PLAYER)) // Only alive players
+                if (unit && unit->IsAlive() && (unit->GetTypeId() == TypeID::TYPEID_PLAYER)) // Only alive players
                     targets.push_back(unit);
             }
             if (targets.empty())

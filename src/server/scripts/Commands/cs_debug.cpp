@@ -1075,7 +1075,7 @@ public:
 
         updateIndex = atoi(index);
         //check updateIndex
-        if (unit->GetTypeId() == TYPEID_PLAYER)
+        if (unit->GetTypeId() == TypeID::TYPEID_PLAYER)
         {
             if (updateIndex >= PLAYER_END)
                 return true;
@@ -1162,7 +1162,7 @@ public:
                 target->SetExtraUnitMovementFlags(moveFlagsExtra);
             }
 
-            if (target->GetTypeId() != TYPEID_PLAYER)
+            if (target->GetTypeId() != TypeID::TYPEID_PLAYER)
                 target->DestroyForNearbyPlayers();  // Force new SMSG_UPDATE_OBJECT:CreateObject
             else
             {

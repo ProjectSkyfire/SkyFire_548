@@ -174,7 +174,7 @@ class boss_devourer_of_souls : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() != TYPEID_PLAYER)
+                if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
                 int32 textId = 0;

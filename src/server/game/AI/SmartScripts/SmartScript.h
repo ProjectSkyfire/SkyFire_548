@@ -66,22 +66,22 @@ class SmartScript
 
         bool IsUnit(WorldObject* obj)
         {
-            return obj && (obj->GetTypeId() == TYPEID_UNIT || obj->GetTypeId() == TYPEID_PLAYER);
+            return obj && (obj->GetTypeId() == TypeID::TYPEID_UNIT || obj->GetTypeId() == TypeID::TYPEID_PLAYER);
         }
 
         bool IsPlayer(WorldObject* obj)
         {
-            return obj && obj->GetTypeId() == TYPEID_PLAYER;
+            return obj && obj->GetTypeId() == TypeID::TYPEID_PLAYER;
         }
 
         bool IsCreature(WorldObject* obj)
         {
-            return obj && obj->GetTypeId() == TYPEID_UNIT;
+            return obj && obj->GetTypeId() == TypeID::TYPEID_UNIT;
         }
 
         bool IsGameObject(WorldObject* obj)
         {
-            return obj && obj->GetTypeId() == TYPEID_GAMEOBJECT;
+            return obj && obj->GetTypeId() == TypeID::TYPEID_GAMEOBJECT;
         }
 
         void OnUpdate(const uint32 diff);

@@ -428,19 +428,19 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
         case CONDITION_OBJECT_ENTRY:
             switch (ConditionValue1)
             {
-                case TYPEID_UNIT:
+                case uint32(TypeID::TYPEID_UNIT):
                     mask |= GRID_MAP_TYPE_MASK_CREATURE;
                     break;
-                case TYPEID_PLAYER:
+                case uint32(TypeID::TYPEID_PLAYER):
                     mask |= GRID_MAP_TYPE_MASK_PLAYER;
                     break;
-                case TYPEID_GAMEOBJECT:
+                case uint32(TypeID::TYPEID_GAMEOBJECT):
                     mask |= GRID_MAP_TYPE_MASK_GAMEOBJECT;
                     break;
-                case TYPEID_CORPSE:
+                case uint32(TypeID::TYPEID_CORPSE):
                     mask |= GRID_MAP_TYPE_MASK_CORPSE;
                     break;
-                case TYPEID_AREATRIGGER:
+                case uint32(TypeID::TYPEID_AREATRIGGER):
                     mask |= GRID_MAP_TYPE_MASK_AREATRIGGER;
                     break;
                 default:
@@ -1928,22 +1928,22 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
         {
             switch (cond->ConditionValue1)
             {
-                case TYPEID_UNIT:
+                case uint32(TypeID::TYPEID_UNIT):
                     if (cond->ConditionValue2 && !sObjectMgr->GetCreatureTemplate(cond->ConditionValue2))
                     {
                         SF_LOG_ERROR("sql.sql", "ObjectEntry condition has non existing creature template entry  (%u), skipped", cond->ConditionValue2);
                         return false;
                     }
                     break;
-                case TYPEID_GAMEOBJECT:
+                case uint32(TypeID::TYPEID_GAMEOBJECT):
                     if (cond->ConditionValue2 && !sObjectMgr->GetGameObjectTemplate(cond->ConditionValue2))
                     {
                         SF_LOG_ERROR("sql.sql", "ObjectEntry condition has non existing game object template entry  (%u), skipped", cond->ConditionValue2);
                         return false;
                     }
                     break;
-                case TYPEID_PLAYER:
-                case TYPEID_CORPSE:
+                case uint32(TypeID::TYPEID_PLAYER):
+                case uint32(TypeID::TYPEID_CORPSE):
                     if (cond->ConditionValue2)
                         SF_LOG_ERROR("sql.sql", "ObjectEntry condition has useless data in value2 (%u)!", cond->ConditionValue2);
                     break;

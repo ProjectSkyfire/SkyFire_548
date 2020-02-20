@@ -279,7 +279,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                         //Target the tank ?
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                         {
-                            if (target->GetTypeId() == TYPEID_PLAYER)
+                            if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
                             {
                                 DoCast(target, SPELL_WRATH_OF_THE_ASTROMANCER);
                                 m_uiWrathOfTheAstromancer_Timer = 25000;

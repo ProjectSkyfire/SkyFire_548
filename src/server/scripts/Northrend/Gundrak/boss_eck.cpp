@@ -99,7 +99,7 @@ public:
             if (uiSpringTimer <= diff)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
-                if (target && target->GetTypeId() == TYPEID_PLAYER)
+                if (target && target->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     DoCast(target, RAND(SPELL_ECK_SPRING_1, SPELL_ECK_SPRING_2));
                     uiSpringTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);

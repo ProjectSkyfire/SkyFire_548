@@ -202,7 +202,7 @@ public:
 
         void SpellHitTarget(Unit* who, SpellInfo const* spell) OVERRIDE
         {
-            if (who && who->GetTypeId() == TYPEID_PLAYER && spell->Id == 59302)
+            if (who && who->GetTypeId() == TypeID::TYPEID_PLAYER && spell->Id == 59302)
                 kingsBane = false;
         }
 

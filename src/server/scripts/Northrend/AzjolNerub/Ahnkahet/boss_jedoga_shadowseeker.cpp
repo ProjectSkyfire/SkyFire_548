@@ -120,7 +120,7 @@ public:
 
         void EnterCombat(Unit* who) OVERRIDE
         {
-            if (!instance || (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == NPC_JEDOGA_CONTROLLER))
+            if (!instance || (who->GetTypeId() == TypeID::TYPEID_UNIT && who->GetEntry() == NPC_JEDOGA_CONTROLLER))
                 return;
 
             Talk(TEXT_AGGRO);
@@ -130,7 +130,7 @@ public:
 
         void AttackStart(Unit* who) OVERRIDE
         {
-            if (!who || (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == NPC_JEDOGA_CONTROLLER))
+            if (!who || (who->GetTypeId() == TypeID::TYPEID_UNIT && who->GetEntry() == NPC_JEDOGA_CONTROLLER))
                 return;
 
             ScriptedAI::AttackStart(who);
@@ -138,7 +138,7 @@ public:
 
         void KilledUnit(Unit* Victim) OVERRIDE
         {
-            if (!Victim || Victim->GetTypeId() != TYPEID_PLAYER)
+            if (!Victim || Victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
 
             Talk(TEXT_SLAY);
@@ -167,10 +167,10 @@ public:
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
         {
-            if (!instance || !who || (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == NPC_JEDOGA_CONTROLLER))
+            if (!instance || !who || (who->GetTypeId() == TypeID::TYPEID_UNIT && who->GetEntry() == NPC_JEDOGA_CONTROLLER))
                 return;
 
-            if (!bPreDone && who->GetTypeId() == TYPEID_PLAYER && me->GetDistance(who) < 100.0f)
+            if (!bPreDone && who->GetTypeId() == TypeID::TYPEID_PLAYER && me->GetDistance(who) < 100.0f)
             {
                 Talk(TEXT_PREACHING);
                 bPreDone = true;
@@ -398,7 +398,7 @@ public:
                     if (!CAST_AI(boss_jedoga_shadowseeker::boss_jedoga_shadowseekerAI, boss->AI())->bOpFerok)
                         CAST_AI(boss_jedoga_shadowseeker::boss_jedoga_shadowseekerAI, boss->AI())->bOpFerokFail = true;
 
-                    if (killer->GetTypeId() == TYPEID_PLAYER)
+                    if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                         boss->AI()->DoAction(ACTION_INITIAND_KILLED);
                 }
 
@@ -406,7 +406,7 @@ public:
 
                 bWalking = false;
             }
-            if (killer->GetTypeId() == TYPEID_PLAYER)
+            if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 instance->SetData64(DATA_PL_JEDOGA_TARGET, killer->GetGUID());
         }
 

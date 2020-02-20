@@ -130,7 +130,7 @@ class boss_void_reaver : public CreatureScript
                         if (!target)
                             continue;
                         // exclude pets & totems, 18 yard radius minimum
-                        if (target->GetTypeId() == TYPEID_PLAYER && target->IsAlive() && !target->IsWithinDist(me, 18, false))
+                        if (target->GetTypeId() == TypeID::TYPEID_PLAYER && target->IsAlive() && !target->IsWithinDist(me, 18, false))
                             target_list.push_back(target);
                         target = NULL;
                     }

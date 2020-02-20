@@ -121,7 +121,7 @@ public:
         void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
-            if (!HasTaunted && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 100.0f))
+            if (!HasTaunted && who->GetTypeId() == TypeID::TYPEID_PLAYER && me->IsWithinDistInMap(who, 100.0f))
             {
                 Talk(SAY_INTRO);
                 HasTaunted = true;

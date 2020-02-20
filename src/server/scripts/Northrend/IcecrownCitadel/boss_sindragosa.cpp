@@ -206,7 +206,7 @@ class FrostBeaconSelector
 
         bool operator()(Unit* target) const
         {
-            return target->GetTypeId() == TYPEID_PLAYER &&
+            return target->GetTypeId() == TypeID::TYPEID_PLAYER &&
                 target != _source->GetVictim() &&
                 !target->HasAura(SPELL_ICE_TOMB_UNTARGETABLE);
         }
@@ -284,7 +284,7 @@ class boss_sindragosa : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_KILL);
             }
 
@@ -1458,7 +1458,7 @@ class spell_frostwarden_handler_order_whelp : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if(Skyfire::ObjectTypeIdCheck(TYPEID_PLAYER, false));
+                targets.remove_if(Skyfire::ObjectTypeIdCheck(TypeID::TYPEID_PLAYER, false));
                 if (targets.empty())
                     return;
 

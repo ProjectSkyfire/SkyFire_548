@@ -97,7 +97,7 @@ class boss_doomlord_kazzak : public CreatureScript
             void KilledUnit(Unit* victim) OVERRIDE
             {
                 // When Kazzak kills a player (not pets/totems), he regens some health
-                if (victim->GetTypeId() != TYPEID_PLAYER)
+                if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
                 DoCast(me, SPELL_CAPTURE_SOUL);

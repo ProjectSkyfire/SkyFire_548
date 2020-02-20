@@ -172,7 +172,7 @@ class spell_mastery_combo_breaker : public SpellScriptLoader
                 {
                     if (Unit* target = GetHitUnit())
                     {
-						if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(MASTERY_MONK_WINDWALKER))
+						if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && caster->HasAura(MASTERY_MONK_WINDWALKER))
                         {
 							float Mastery = caster->GetFloatValue(PLAYER_FIELD_MASTERY) * 1.4f;
 
@@ -217,7 +217,7 @@ class spell_mastery_blood_shield : public SpellScriptLoader
                 {
                     if (Unit* target = GetHitUnit())
                     {
-                        if (_plr->GetTypeId() == TYPEID_PLAYER && _plr->HasAura(77513) && _plr->getLevel() >= 80)
+                        if (_plr->GetTypeId() == TypeID::TYPEID_PLAYER && _plr->HasAura(77513) && _plr->getLevel() >= 80)
                         {
                             // Check the Mastery aura while in Blood presence
                             if (_plr->HasAura(77513) && _plr->HasAura(48263))
@@ -270,7 +270,7 @@ class spell_mastery_ignite : public SpellScriptLoader
                 {
                     if (Unit* target = GetHitUnit())
                     {
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(12846) && caster->getLevel() >= 80)
+                        if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && caster->HasAura(12846) && caster->getLevel() >= 80)
                         {
                             uint32 procSpellId = GetSpellInfo()->Id ? GetSpellInfo()->Id : 0;
                             if (procSpellId != MASTERY_SPELL_IGNITE)
@@ -322,7 +322,7 @@ class spell_mastery_hand_of_light : public SpellScriptLoader
                 {
                     if (Unit* target = GetHitUnit())
                     {
-                        if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(76672) && caster->getLevel() >= 80)
+                        if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && caster->HasAura(76672) && caster->getLevel() >= 80)
                         {
                             uint32 procSpellId = GetSpellInfo()->Id ? GetSpellInfo()->Id : 0;
                             if (procSpellId != MASTERY_SPELL_HAND_OF_LIGHT)
@@ -378,7 +378,7 @@ class spell_mastery_elemental_overload : public SpellScriptLoader
                     {
                         if (Unit* unitTarget = GetHitUnit())
                         {
-                            if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(77222))
+                            if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && caster->HasAura(77222))
                             {
                                 // Every Lightning Bolt, Chain Lightning and Lava Burst spells have duplicate vs 75% damage and no cost
                                 switch (procSpell->Id)

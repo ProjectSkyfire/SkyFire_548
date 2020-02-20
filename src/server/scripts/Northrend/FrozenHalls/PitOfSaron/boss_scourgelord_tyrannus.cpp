@@ -184,7 +184,7 @@ class boss_tyrannus : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
@@ -432,7 +432,7 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
 
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+                if (GetTarget()->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
                 oldAI = GetTarget()->GetAI();
@@ -443,7 +443,7 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+                if (GetTarget()->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
                 GetTarget()->IsAIEnabled = oldAIState;
@@ -480,7 +480,7 @@ class spell_tyrannus_mark_of_rimefang : public SpellScriptLoader
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* caster = GetCaster();
-                if (!caster || caster->GetTypeId() != TYPEID_UNIT)
+                if (!caster || caster->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 if (InstanceScript* instance = caster->GetInstanceScript())

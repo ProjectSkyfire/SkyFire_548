@@ -69,7 +69,7 @@ bool RotateMovementGenerator::Update(Unit* owner, uint32 diff)
 void RotateMovementGenerator::Finalize(Unit* unit)
 {
     unit->ClearUnitState(UNIT_STATE_ROTATING);
-    if (unit->GetTypeId() == TYPEID_UNIT)
+    if (unit->GetTypeId() == TypeID::TYPEID_UNIT)
       unit->ToCreature()->AI()->MovementInform(ROTATE_MOTION_TYPE, 0);
 }
 

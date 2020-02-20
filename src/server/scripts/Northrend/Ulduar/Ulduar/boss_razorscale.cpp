@@ -621,7 +621,7 @@ class npc_expedition_commander : public CreatureScript
             void MoveInLineOfSight(Unit* who) OVERRIDE
 
             {
-                if (!Greet && me->IsWithinDistInMap(who, 10.0f) && who->GetTypeId() == TYPEID_PLAYER)
+                if (!Greet && me->IsWithinDistInMap(who, 10.0f) && who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     Talk(SAY_INTRO);
                     Greet = true;

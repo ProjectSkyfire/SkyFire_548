@@ -193,7 +193,7 @@ public:
         {
             //will update once TargetGUID is 0. In case noone actually moves(not likely) and this is 0
             //when UpdateAI needs it, it will be forced to select randomPoint
-            if (!TargetGUID && who->GetTypeId() == TYPEID_PLAYER)
+            if (!TargetGUID && who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 TargetGUID = who->GetGUID();
         }
 
@@ -318,7 +318,7 @@ public:
         {
             Talk(SAY_SLAY);
 
-            if (victim && victim->GetTypeId() == TYPEID_PLAYER)
+            if (victim && victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                 GainSoulCharge(victim->ToPlayer());
         }
 

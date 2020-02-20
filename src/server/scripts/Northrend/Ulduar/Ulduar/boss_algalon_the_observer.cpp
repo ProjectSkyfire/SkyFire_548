@@ -319,7 +319,7 @@ class boss_algalon_the_observer : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_UNIT)
+                if (victim->GetTypeId() == TypeID::TYPEID_UNIT)
                 {
                     _fedOnTears = true;
                     if (!_hasYelled)
@@ -760,7 +760,7 @@ class npc_living_constellation : public CreatureScript
 
             void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
             {
-                if (spell->Id != SPELL_CONSTELLATION_PHASE_EFFECT || caster->GetTypeId() != TYPEID_UNIT)
+                if (spell->Id != SPELL_CONSTELLATION_PHASE_EFFECT || caster->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 me->DespawnOrUnsummon(1);

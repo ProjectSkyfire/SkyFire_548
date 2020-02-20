@@ -184,14 +184,14 @@ public:
         {
             ScriptedAI::MoveInLineOfSight(who);
 
-            if (who->GetTypeId() != TYPEID_UNIT)
+            if (who->GetTypeId() != TypeID::TYPEID_UNIT)
                 return;
 
             if (who->GetEntry() == 25861 && me->IsWithinDistInMap(who, 10.0f))
             {
                 if (Unit* owner = who->GetOwner())
                 {
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    if (owner->GetTypeId() == TypeID::TYPEID_PLAYER)
                     {
                         owner->CastSpell(owner, 46231, true);
                         who->ToCreature()->DespawnOrUnsummon();
@@ -840,7 +840,7 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
-            if (spell->Id == SPELL_DRAKE_HARPOON && caster->GetTypeId() == TYPEID_PLAYER)
+            if (spell->Id == SPELL_DRAKE_HARPOON && caster->GetTypeId() == TypeID::TYPEID_PLAYER)
             {
                 HarpoonerGUID = caster->GetGUID();
                 DoCast(me, SPELL_RED_DRAGONBLOOD, true);
@@ -1607,7 +1607,7 @@ public:
 
         void SpellHit(Unit* pCaster, const SpellInfo* pSpell) OVERRIDE
         {
-            if (pSpell->Id == SPELL_ARCANE_CHAINS && pCaster->GetTypeId() == TYPEID_PLAYER && !HealthAbovePct(50) && !bEnslaved)
+            if (pSpell->Id == SPELL_ARCANE_CHAINS && pCaster->GetTypeId() == TypeID::TYPEID_PLAYER && !HealthAbovePct(50) && !bEnslaved)
             {
                 EnterEvadeMode(); //We make sure that the npc is not attacking the player!
                 me->SetReactState(REACT_PASSIVE);
@@ -1710,7 +1710,7 @@ public:
 
         void SpellHit(Unit* unit, const SpellInfo* spell) OVERRIDE
         {
-            if (spell->Id == SPELL_NEURAL_NEEDLE && unit->GetTypeId() == TYPEID_PLAYER)
+            if (spell->Id == SPELL_NEURAL_NEEDLE && unit->GetTypeId() == TypeID::TYPEID_PLAYER)
             {
                 if (Player* player = unit->ToPlayer())
                 {

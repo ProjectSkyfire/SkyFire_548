@@ -467,7 +467,7 @@ class spell_thaddius_pos_neg_charge : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void HandleTargets(std::list<WorldObject*>& targets)
@@ -504,7 +504,7 @@ class spell_thaddius_pos_neg_charge : public SpellScriptLoader
                     SetHitDamage(0);
                 else
                 {
-                    if (target->GetTypeId() == TYPEID_PLAYER && caster->IsAIEnabled)
+                    if (target->GetTypeId() == TypeID::TYPEID_PLAYER && caster->IsAIEnabled)
                         caster->ToCreature()->AI()->SetData(DATA_POLARITY_SWITCH, 1);
                 }
             }

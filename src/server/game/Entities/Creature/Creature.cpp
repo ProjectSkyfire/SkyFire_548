@@ -913,7 +913,7 @@ void Creature::SetLootRecipient(Unit* unit)
         return;
     }
 
-    if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+    if (unit->GetTypeId() != TypeID::TYPEID_PLAYER && !unit->IsVehicle())
         return;
 
     Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -1393,7 +1393,7 @@ bool Creature::CanStartAttack(Unit const* who, bool force) const
         return false;
 
     // Do not attack non-combat pets
-    if (who->GetTypeId() == TYPEID_UNIT && who->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
+    if (who->GetTypeId() == TypeID::TYPEID_UNIT && who->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
         return false;
 
     if (!CanFly() && (GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE + m_CombatDistance))
@@ -2487,9 +2487,9 @@ float Creature::GetAggroRange(Unit const* target) const
     {
         uint32 targetLevel = 0;
 
-        if (target->GetTypeId() == TYPEID_PLAYER)
+        if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
             targetLevel = target->getLevelForTarget(this);
-        else if (target->GetTypeId() == TYPEID_UNIT)
+        else if (target->GetTypeId() == TypeID::TYPEID_UNIT)
             targetLevel = target->ToCreature()->getLevelForTarget(this);
 
         uint32 myLevel = getLevelForTarget(target);

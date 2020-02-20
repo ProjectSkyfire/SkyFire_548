@@ -26,7 +26,7 @@
 AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0)
 {
     m_objectType |= TYPEMASK_AREATRIGGER;
-    m_objectTypeId = TYPEID_AREATRIGGER;
+    m_objectTypeId = TypeID::TYPEID_AREATRIGGER;
 
     m_updateFlag = UPDATEFLAG_STATIONARY_POSITION;
 

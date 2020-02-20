@@ -434,7 +434,7 @@ class spell_dk_blood_boil : public SpellScriptLoader
             bool Load() OVERRIDE
         {
             _executed = false;
-            return GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DEATH_KNIGHT;
+            return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DEATH_KNIGHT;
         }
 
             void HandleAfterHit()
@@ -892,7 +892,7 @@ class spell_dk_icebound_fortitude : public SpellScriptLoader
         bool Load() OVERRIDE
         {
             Unit* caster = GetCaster();
-            return caster && caster->GetTypeId() == TYPEID_PLAYER;
+            return caster && caster->GetTypeId() == TypeID::TYPEID_PLAYER;
         }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)

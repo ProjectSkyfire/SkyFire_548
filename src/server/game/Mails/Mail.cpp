@@ -34,11 +34,11 @@ MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery
 {
     switch (sender->GetTypeId())
     {
-        case TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
             m_messageType = MAIL_CREATURE;
             m_senderId = sender->GetEntry();
             break;
-        case TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
             m_messageType = MAIL_GAMEOBJECT;
             m_senderId = sender->GetEntry();
             break;
@@ -46,7 +46,7 @@ MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery
             m_messageType = MAIL_ITEM;
             m_senderId = sender->GetEntry();
             break;*/
-        case TYPEID_PLAYER:
+        case TypeID::TYPEID_PLAYER:
             m_messageType = MAIL_NORMAL;
             m_senderId = sender->GetGUIDLow();
             break;

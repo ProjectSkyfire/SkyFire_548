@@ -1013,7 +1013,7 @@ bool ScriptMgr::OnConditionCheck(Condition* condition, ConditionSourceInfo& sour
 void ScriptMgr::OnInstall(Vehicle* veh)
 {
     ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
+    ASSERT(veh->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT);
 
     GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
     tmpscript->OnInstall(veh);
@@ -1022,7 +1022,7 @@ void ScriptMgr::OnInstall(Vehicle* veh)
 void ScriptMgr::OnUninstall(Vehicle* veh)
 {
     ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
+    ASSERT(veh->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT);
 
     GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
     tmpscript->OnUninstall(veh);
@@ -1031,7 +1031,7 @@ void ScriptMgr::OnUninstall(Vehicle* veh)
 void ScriptMgr::OnReset(Vehicle* veh)
 {
     ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
+    ASSERT(veh->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT);
 
     GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
     tmpscript->OnReset(veh);
@@ -1040,7 +1040,7 @@ void ScriptMgr::OnReset(Vehicle* veh)
 void ScriptMgr::OnInstallAccessory(Vehicle* veh, Creature* accessory)
 {
     ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
+    ASSERT(veh->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT);
     ASSERT(accessory);
 
     GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
@@ -1050,7 +1050,7 @@ void ScriptMgr::OnInstallAccessory(Vehicle* veh, Creature* accessory)
 void ScriptMgr::OnAddPassenger(Vehicle* veh, Unit* passenger, int8 seatId)
 {
     ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
+    ASSERT(veh->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT);
     ASSERT(passenger);
 
     GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
@@ -1060,7 +1060,7 @@ void ScriptMgr::OnAddPassenger(Vehicle* veh, Unit* passenger, int8 seatId)
 void ScriptMgr::OnRemovePassenger(Vehicle* veh, Unit* passenger)
 {
     ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
+    ASSERT(veh->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT);
     ASSERT(passenger);
 
     GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);

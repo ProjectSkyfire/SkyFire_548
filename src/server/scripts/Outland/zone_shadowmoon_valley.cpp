@@ -108,7 +108,7 @@ public:
             if (bCanEat || bIsEating)
                 return;
 
-            if (pCaster->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_PLACE_CARCASS && !me->HasAura(SPELL_JUST_EATEN))
+            if (pCaster->GetTypeId() == TypeID::TYPEID_PLAYER && spell->Id == SPELL_PLACE_CARCASS && !me->HasAura(SPELL_JUST_EATEN))
             {
                 uiPlayerGUID = pCaster->GetGUID();
                 bCanEat = true;
@@ -246,7 +246,7 @@ public:
             if (!caster)
                 return;
 
-            if (caster->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_HIT_FORCE_OF_NELTHARAKU && !Tapped)
+            if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && spell->Id == SPELL_HIT_FORCE_OF_NELTHARAKU && !Tapped)
             {
                 Tapped = true;
                 PlayerGUID = caster->GetGUID();
@@ -369,7 +369,7 @@ public:
             if (!caster)
                 return;
 
-            if (caster->GetTypeId() == TYPEID_PLAYER && spell->Id == 40468 && !Tapped)
+            if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && spell->Id == 40468 && !Tapped)
             {
                 PlayerGUID = caster->GetGUID();
 
@@ -1126,7 +1126,7 @@ public:
                 return;
 
             //only aggro text if not player
-            if (who->GetTypeId() != TYPEID_PLAYER)
+            if (who->GetTypeId() != TypeID::TYPEID_PLAYER)
             {
                 //appears to be random
                 if (urand(0, 1))
@@ -1384,12 +1384,12 @@ public:
         {
             switch (killer->GetTypeId())
             {
-                case TYPEID_UNIT:
+                case TypeID::TYPEID_UNIT:
                     if (Unit* owner = killer->GetOwner())
                         if (Player* player = owner->ToPlayer())
                             player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
                     break;
-                case TYPEID_PLAYER:
+                case TypeID::TYPEID_PLAYER:
                     if (Player* player = killer->ToPlayer())
                         player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
                     break;
@@ -1623,7 +1623,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     {
-                        if (target->GetTypeId() == TYPEID_PLAYER)
+                        if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
                         {
                             DoCast(target, SpawnCast[1].SpellId); //Focused Bursts
                             SpellTimer1 = SpawnCast[1].Timer2 + (rand()%5 * 1000);
@@ -1899,7 +1899,7 @@ class spell_unlocking_zuluheds_chains : public SpellScriptLoader
 
             void HandleAfterHit()
             {
-                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                if (GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER)
                     if (Creature* karynaku = GetCaster()->FindNearestCreature(NPC_KARYNAKU, 15.0f))
                         GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_KARYNAKU, karynaku->GetGUID());
             }

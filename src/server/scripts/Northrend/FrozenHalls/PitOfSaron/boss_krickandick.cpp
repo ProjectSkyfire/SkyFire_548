@@ -309,7 +309,7 @@ class boss_krick : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() != TYPEID_PLAYER)
+                if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
                 Talk(SAY_KRICK_SLAY);
@@ -513,7 +513,7 @@ class spell_krick_explosive_barrage : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
-                    if (caster->GetTypeId() == TYPEID_UNIT)
+                    if (caster->GetTypeId() == TypeID::TYPEID_UNIT)
                     {
                         Map::PlayerList const &players = caster->GetMap()->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -547,14 +547,14 @@ class spell_ick_explosive_barrage : public SpellScriptLoader
             void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
-                    if (caster->GetTypeId() == TYPEID_UNIT)
+                    if (caster->GetTypeId() == TypeID::TYPEID_UNIT)
                         caster->GetMotionMaster()->MoveIdle();
             }
 
             void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
-                    if (caster->GetTypeId() == TYPEID_UNIT)
+                    if (caster->GetTypeId() == TypeID::TYPEID_UNIT)
                     {
                         caster->GetMotionMaster()->Clear();
                         caster->GetMotionMaster()->MoveChase(caster->GetVictim());

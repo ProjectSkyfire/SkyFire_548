@@ -247,7 +247,7 @@ bool ItemCanGoIntoBag(ItemTemplate const* pProto, ItemTemplate const* pBagProto)
 Item::Item()
 {
     m_objectType |= TYPEMASK_ITEM;
-    m_objectTypeId = TYPEID_ITEM;
+    m_objectTypeId = TypeID::TYPEID_ITEM;
 
     m_updateFlag = 0;
 

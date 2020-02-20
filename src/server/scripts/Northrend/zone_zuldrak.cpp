@@ -592,7 +592,7 @@ public:
                 if (Creature* whisker = me->GetCreature(*me, _whiskerGUID))
                     whisker->RemoveFromWorld();
 
-            if (killer->GetTypeId() == TYPEID_PLAYER)
+            if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 killer->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_TUSKARRMAGEDDON, killer);
 
         }

@@ -183,7 +183,7 @@ public:
 
             if (me->IsSummon())
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                    if (summoner->GetTypeId() == TYPEID_PLAYER)
+                    if (summoner->GetTypeId() == TypeID::TYPEID_PLAYER)
                         summonerGUID = summoner->GetGUID();
 
             if (!summonerGUID)

@@ -89,7 +89,7 @@ class boss_faerlina : public CreatureScript
             void MoveInLineOfSight(Unit* who) OVERRIDE
 
             {
-                if (!_introDone && who->GetTypeId() == TYPEID_PLAYER)
+                if (!_introDone && who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     Talk(SAY_GREET);
                     _introDone = true;

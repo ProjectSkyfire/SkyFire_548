@@ -83,7 +83,7 @@ class boss_blackheart_the_inciter : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
@@ -115,7 +115,7 @@ class boss_blackheart_the_inciter : public CreatureScript
                             for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
                             {
                                 if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
-                                    if (target->GetTypeId() == TYPEID_PLAYER)
+                                    if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
                                         me->CastSpell(target, SPELL_INCITE_CHAOS_B, true);
                             }
 

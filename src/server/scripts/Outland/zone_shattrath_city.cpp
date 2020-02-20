@@ -176,7 +176,7 @@ public:
 
         void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
         {
-            if (done_by->GetTypeId() == TYPEID_PLAYER && me->HealthBelowPctDamaged(20, damage))
+            if (done_by->GetTypeId() == TypeID::TYPEID_PLAYER && me->HealthBelowPctDamaged(20, damage))
             {
                 done_by->ToPlayer()->GroupEventHappens(QUEST_10004, me);
                 damage = 0;

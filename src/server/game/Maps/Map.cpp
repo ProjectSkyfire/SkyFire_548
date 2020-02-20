@@ -2411,7 +2411,7 @@ void Map::AddObjectToSwitchList(WorldObject* obj, bool on)
     ASSERT(obj->GetMapId() == GetId() && obj->GetInstanceId() == GetInstanceId());
     // i_objectsToSwitch is iterated only in Map::RemoveAllObjectsInRemoveList() and it uses
     // the contained objects only if GetTypeId() == TYPEID_UNIT , so we can return in all other cases
-    if (obj->GetTypeId() != TYPEID_UNIT && obj->GetTypeId() != TYPEID_GAMEOBJECT)
+    if (obj->GetTypeId() != TypeID::TYPEID_UNIT && obj->GetTypeId() != TypeID::TYPEID_GAMEOBJECT)
         return;
 
     std::map<WorldObject*, bool>::iterator itr = i_objectsToSwitch.find(obj);
@@ -2436,10 +2436,10 @@ void Map::RemoveAllObjectsInRemoveList()
         {
             switch (obj->GetTypeId())
             {
-                case TYPEID_UNIT:
+                case TypeID::TYPEID_UNIT:
                     SwitchGridContainers<Creature>(obj->ToCreature(), on);
                     break;
-                case TYPEID_GAMEOBJECT:
+                case TypeID::TYPEID_GAMEOBJECT:
                     SwitchGridContainers<GameObject>(obj->ToGameObject(), on);
                     break;
                 default:
@@ -2456,7 +2456,7 @@ void Map::RemoveAllObjectsInRemoveList()
 
         switch (obj->GetTypeId())
         {
-            case TYPEID_CORPSE:
+            case TypeID::TYPEID_CORPSE:
             {
                 Corpse* corpse = ObjectAccessor::GetCorpse(*obj, obj->GetGUID());
                 if (!corpse)
@@ -2465,16 +2465,16 @@ void Map::RemoveAllObjectsInRemoveList()
                     RemoveFromMap(corpse, true);
                 break;
             }
-        case TYPEID_DYNAMICOBJECT:
+        case TypeID::TYPEID_DYNAMICOBJECT:
             RemoveFromMap((DynamicObject*)obj, true);
             break;
-        case TYPEID_AREATRIGGER:
+        case TypeID::TYPEID_AREATRIGGER:
             RemoveFromMap((AreaTrigger*)obj, true);
             break;
-        case TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
             RemoveFromMap((GameObject*)obj, true);
             break;
-        case TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
             // in case triggered sequence some spell can continue casting after prev CleanupsBeforeDelete call
             // make sure that like sources auras/etc removed before destructor start
             obj->ToCreature()->CleanupsBeforeDelete();

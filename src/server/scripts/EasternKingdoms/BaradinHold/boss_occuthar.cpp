@@ -215,7 +215,7 @@ class FocusedFireTargetSelector : public SF_UNARY_FUNCTION<Unit *, bool>
             if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
                 return true;
 
-            if (target->GetTypeId() != TYPEID_PLAYER)
+            if (target->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return true;
 
             return false;
@@ -277,7 +277,7 @@ class spell_occuthar_eyes_of_occuthar : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
             }
 
             void FilterTargets(std::list<WorldObject*>& targets)
@@ -359,7 +359,7 @@ class spell_occuthar_occuthars_destruction : public SpellScriptLoader
 
             bool Load() OVERRIDE
             {
-                return GetCaster() && GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster() && GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)

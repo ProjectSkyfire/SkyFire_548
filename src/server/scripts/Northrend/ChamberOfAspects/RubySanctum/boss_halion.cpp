@@ -497,7 +497,7 @@ class boss_twilight_halion : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_KILL);
 
                 // Victims should not be in the Twilight Realm
@@ -935,7 +935,7 @@ class npc_orb_carrier : public CreatureScript
                     Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
                     if (southOrb && northOrb)
                     {
-                        if (northOrb->GetTypeId() == TYPEID_UNIT)
+                        if (northOrb->GetTypeId() == TypeID::TYPEID_UNIT)
                             northOrb->ToCreature()->AI()->Talk(EMOTE_WARN_LASER);
                         TriggerCutter(northOrb, southOrb);
                     }

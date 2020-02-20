@@ -285,7 +285,7 @@ class boss_professor_putricide : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
+                if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_KILL);
             }
 
@@ -501,7 +501,7 @@ class boss_professor_putricide : public CreatureScript
                                 {
                                     const std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
                                     for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                                        if ((*itr)->getTarget()->GetTypeId() == TYPEID_PLAYER)
+                                        if ((*itr)->getTarget()->GetTypeId() == TypeID::TYPEID_PLAYER)
                                             targetList.push_back((*itr)->getTarget());
                                 }
 
@@ -874,7 +874,7 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
             bool Load() OVERRIDE
             {
                 _target = NULL;
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+                return GetCaster()->GetTypeId() == TypeID::TYPEID_UNIT;
             }
 
             void SelectTarget(std::list<WorldObject*>& targets)
@@ -1006,7 +1006,7 @@ class spell_putricide_unstable_experiment : public SpellScriptLoader
             void HandleScript(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                if (GetCaster()->GetTypeId() != TYPEID_UNIT)
+                if (GetCaster()->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 Creature* creature = GetCaster()->ToCreature();
@@ -1327,7 +1327,7 @@ class spell_putricide_mutation_init : public SpellScriptLoader
                 if (!GetExplTargetUnit())
                     return SPELL_FAILED_BAD_TARGETS;
 
-                if (GetExplTargetUnit()->GetTypeId() != TYPEID_PLAYER)
+                if (GetExplTargetUnit()->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return SPELL_FAILED_TARGET_NOT_PLAYER;
 
                 SpellCustomErrors extension = SPELL_CUSTOM_ERROR_NONE;

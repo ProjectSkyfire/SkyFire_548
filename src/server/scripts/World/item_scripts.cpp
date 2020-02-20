@@ -116,7 +116,7 @@ public:
 
     bool OnUse(Player* player, Item* item, SpellCastTargets const& targets) OVERRIDE
     {
-        if (targets.GetUnitTarget() && targets.GetUnitTarget()->GetTypeId() == TYPEID_UNIT &&
+        if (targets.GetUnitTarget() && targets.GetUnitTarget()->GetTypeId() == TypeID::TYPEID_UNIT &&
             targets.GetUnitTarget()->GetEntry() == 20748 && !targets.GetUnitTarget()->HasAura(32578))
             return false;
 

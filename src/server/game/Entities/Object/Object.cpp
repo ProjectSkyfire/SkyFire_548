@@ -54,28 +54,28 @@
 #include "BattlefieldMgr.h"
 #include "Chat.h"
 
-uint32 GuidHigh2TypeId(uint32 guid_hi)
+TypeID GuidHigh2TypeId(uint32 guid_hi)
 {
     switch (guid_hi)
     {
-        case HIGHGUID_ITEM:         return TYPEID_ITEM;
+        case HIGHGUID_ITEM:         return TypeID::TYPEID_ITEM;
         //case HIGHGUID_CONTAINER:    return TYPEID_CONTAINER; HIGHGUID_CONTAINER == HIGHGUID_ITEM currently
-        case HIGHGUID_UNIT:         return TYPEID_UNIT;
-        case HIGHGUID_PET:          return TYPEID_UNIT;
-        case HIGHGUID_PLAYER:       return TYPEID_PLAYER;
-        case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
-        case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
-        case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
-        case HIGHGUID_AREATRIGGER:  return TYPEID_AREATRIGGER;
-        case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
-        case HIGHGUID_VEHICLE:      return TYPEID_UNIT;
+        case HIGHGUID_UNIT:         return TypeID::TYPEID_UNIT;
+        case HIGHGUID_PET:          return TypeID::TYPEID_UNIT;
+        case HIGHGUID_PLAYER:       return TypeID::TYPEID_PLAYER;
+        case HIGHGUID_GAMEOBJECT:   return TypeID::TYPEID_GAMEOBJECT;
+        case HIGHGUID_DYNAMICOBJECT:return TypeID::TYPEID_DYNAMICOBJECT;
+        case HIGHGUID_CORPSE:       return TypeID::TYPEID_CORPSE;
+        case HIGHGUID_AREATRIGGER:  return TypeID::TYPEID_AREATRIGGER;
+        case HIGHGUID_MO_TRANSPORT: return TypeID::TYPEID_GAMEOBJECT;
+        case HIGHGUID_VEHICLE:      return TypeID::TYPEID_UNIT;
     }
-    return NUM_CLIENT_OBJECT_TYPES;                         // unknown
+    return TypeID::NUM_CLIENT_OBJECT_TYPES;                         // unknown
 }
 
 Object::Object() : m_PackGUID(sizeof(uint64)+1)
 {
-    m_objectTypeId      = TYPEID_OBJECT;
+    m_objectTypeId      = TypeID::TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
 
     m_uint32Values      = NULL;
@@ -93,7 +93,7 @@ WorldObject::~WorldObject()
     // this may happen because there are many !create/delete
     if (IsWorldObject() && m_currMap)
     {
-        if (GetTypeId() == TYPEID_CORPSE)
+        if (GetTypeId() == TypeID::TYPEID_CORPSE)
         {
             SF_LOG_FATAL("misc", "Object::~Object Corpse guid=" UI64FMTD ", type=%d, entry=%u deleted but still in map!!",
                 GetGUID(), ((Corpse*)this)->GetType(), GetEntry());
@@ -410,12 +410,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         hasFallData = hasFallDirection || self->m_movementInfo.jump.fallTime != 0;
         movementFlags = self->GetUnitMovementFlags();
         movementFlagsExtra = self->GetExtraUnitMovementFlags();
-        hasSpline = self->IsSplineEnabled() && self->GetTypeId() != TYPEID_PLAYER;
+        hasSpline = self->IsSplineEnabled() && self->GetTypeId() != TypeID::TYPEID_PLAYER;
         hasPitch = self->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || self->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
         hasSplineElevation = self->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
         hasUnitTransport = self->m_movementInfo.transport.guid;
 
-        if (GetTypeId() == TYPEID_UNIT)
+        if (GetTypeId() == TypeID::TYPEID_UNIT)
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
 
         data->WriteBit(guid[2]);
@@ -747,7 +747,7 @@ void Object::BuildDynamicValuesUpdate(ByteBuffer *data) const
 {
     // Only handle Item type
     // TODO: Implement Player dynamis fields
-    if (m_objectTypeId != TYPEID_ITEM)
+    if (m_objectTypeId != TypeID::TYPEID_ITEM)
     {
         *data << uint8(0);
         return;
@@ -835,14 +835,14 @@ uint32 Object::GetUpdateFieldData(Player const* target, uint32*& flags) const
 
     switch (GetTypeId())
     {
-        case TYPEID_ITEM:
-        case TYPEID_CONTAINER:
+        case TypeID::TYPEID_ITEM:
+        case TypeID::TYPEID_CONTAINER:
             flags = ItemUpdateFieldFlags;
             if (((Item*)this)->GetOwnerGUID() == target->GetGUID())
                 visibleFlag |= UF_FLAG_OWNER | UF_FLAG_ITEM_OWNER;
             break;
-        case TYPEID_UNIT:
-        case TYPEID_PLAYER:
+        case TypeID::TYPEID_UNIT:
+        case TypeID::TYPEID_PLAYER:
         {
             Player* plr = ToUnit()->GetCharmerOrOwnerPlayerOrPlayerItself();
             flags = UnitUpdateFieldFlags;
@@ -857,25 +857,25 @@ uint32 Object::GetUpdateFieldData(Player const* target, uint32*& flags) const
                 visibleFlag |= UF_FLAG_PARTY_MEMBER;
             break;
         }
-        case TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
             flags = GameObjectUpdateFieldFlags;
             if (ToGameObject()->GetOwnerGUID() == target->GetGUID())
                 visibleFlag |= UF_FLAG_OWNER;
             break;
-        case TYPEID_DYNAMICOBJECT:
+        case TypeID::TYPEID_DYNAMICOBJECT:
             flags = DynamicObjectUpdateFieldFlags;
             if (((DynamicObject*)this)->GetCasterGUID() == target->GetGUID())
                 visibleFlag |= UF_FLAG_OWNER;
             break;
-        case TYPEID_CORPSE:
+        case TypeID::TYPEID_CORPSE:
             flags = CorpseUpdateFieldFlags;
             if (ToCorpse()->GetOwnerGUID() == target->GetGUID())
                 visibleFlag |= UF_FLAG_OWNER;
             break;
-        case TYPEID_AREATRIGGER:
+        case TypeID::TYPEID_AREATRIGGER:
             flags = AreaTriggerUpdateFieldFlags;
             break;
-        case TYPEID_OBJECT:
+        case TypeID::TYPEID_OBJECT:
             break;
         default:
             break;
@@ -1427,7 +1427,7 @@ void WorldObject::setActive(bool on)
     if (m_isActive == on)
         return;
 
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (GetTypeId() == TypeID::TYPEID_PLAYER)
         return;
 
     m_isActive = on;
@@ -1441,16 +1441,16 @@ void WorldObject::setActive(bool on)
 
     if (on)
     {
-        if (GetTypeId() == TYPEID_UNIT)
+        if (GetTypeId() == TypeID::TYPEID_UNIT)
             map->AddToActive(this->ToCreature());
-        else if (GetTypeId() == TYPEID_DYNAMICOBJECT)
+        else if (GetTypeId() == TypeID::TYPEID_DYNAMICOBJECT)
             map->AddToActive((DynamicObject*)this);
     }
     else
     {
-        if (GetTypeId() == TYPEID_UNIT)
+        if (GetTypeId() == TypeID::TYPEID_UNIT)
             map->RemoveFromActive(this->ToCreature());
-        else if (GetTypeId() == TYPEID_DYNAMICOBJECT)
+        else if (GetTypeId() == TypeID::TYPEID_DYNAMICOBJECT)
             map->RemoveFromActive((DynamicObject*)this);
     }
 }
@@ -1869,7 +1869,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 {
     switch (GetTypeId())
     {
-        case TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
         {
             // non fly unit don't must be in air
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
@@ -1896,7 +1896,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             }
             break;
         }
-        case TYPEID_PLAYER:
+        case TypeID::TYPEID_PLAYER:
         {
             // for server controlled moves playr work same as creature (but it can always swim)
             if (!ToPlayer()->CanFly())
@@ -2182,7 +2182,7 @@ void WorldObject::SendPlaySound(uint32 Sound, bool OnlySelf)
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[1]);
-    if (OnlySelf && GetTypeId() == TYPEID_PLAYER)
+    if (OnlySelf && GetTypeId() == TypeID::TYPEID_PLAYER)
         this->ToPlayer()->GetSession()->SendPacket(&data);
     else
         SendMessageToSet(&data, true); // ToSelf ignored in this case
@@ -2392,7 +2392,7 @@ void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
 void WorldObject::SetMap(Map* map)
 {
     ASSERT(map);
-    ASSERT(!IsInWorld() || GetTypeId() == TYPEID_CORPSE);
+    ASSERT(!IsInWorld() || GetTypeId() == TypeID::TYPEID_CORPSE);
     if (m_currMap == map) // command add npc: first create, than loadfromdb
         return;
     if (m_currMap)
@@ -2495,7 +2495,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     if (summoner)
     {
         phase = summoner->GetPhaseMask();
-        if (summoner->GetTypeId() == TYPEID_PLAYER)
+        if (summoner->GetTypeId() == TypeID::TYPEID_PLAYER)
             team = summoner->ToPlayer()->GetTeam();
 
         phases = summoner->GetPhases();
@@ -2627,7 +2627,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
         go->SetPhased(phase, false, true);
 
     go->SetRespawnTime(respawnTime);
-    if (GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_UNIT) //not sure how to handle this
+    if (GetTypeId() == TypeID::TYPEID_PLAYER || GetTypeId() == TypeID::TYPEID_UNIT) //not sure how to handle this
         ToUnit()->AddGameObject(go);
     else
         go->SetSpawnedByDefault(false);
@@ -2644,7 +2644,7 @@ Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint3
         return NULL;
 
     //summon->SetName(GetName());
-    if (GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_UNIT)
+    if (GetTypeId() == TypeID::TYPEID_PLAYER || GetTypeId() == TypeID::TYPEID_UNIT)
     {
         summon->setFaction(((Unit*)this)->getFaction());
         summon->SetLevel(((Unit*)this)->getLevel());
@@ -2663,9 +2663,9 @@ Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint3
 */
 void WorldObject::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list /*= NULL*/)
 {
-    ASSERT((GetTypeId() == TYPEID_GAMEOBJECT || GetTypeId() == TYPEID_UNIT) && "Only GOs and creatures can summon npc groups!");
+    ASSERT((GetTypeId() == TypeID::TYPEID_GAMEOBJECT || GetTypeId() == TypeID::TYPEID_UNIT) && "Only GOs and creatures can summon npc groups!");
 
-    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetEntry(), GetTypeId() == TYPEID_GAMEOBJECT ? SUMMONER_TYPE_GAMEOBJECT : SUMMONER_TYPE_CREATURE, group);
+    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetEntry(), GetTypeId() == TypeID::TYPEID_GAMEOBJECT ? SUMMONER_TYPE_GAMEOBJECT : SUMMONER_TYPE_CREATURE, group);
     if (!data)
         return;
 
@@ -3132,7 +3132,7 @@ void WorldObject::RebuildTerrainSwaps()
                 _terrainSwaps.insert(swap.id);
 
     // online players have a game client with world map display
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (GetTypeId() == TypeID::TYPEID_PLAYER)
         RebuildWorldMapAreaSwaps();
 }
 
@@ -3223,7 +3223,7 @@ void WorldObject::UpdateAreaPhase()
 
     // only update visibility and send packets if there was a change in the phase list
 
-    if (updateNeeded && GetTypeId() == TYPEID_PLAYER && IsInWorld())
+    if (updateNeeded && GetTypeId() == TypeID::TYPEID_PLAYER && IsInWorld())
         ToPlayer()->GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
 
     // only update visibilty once, to prevent objects appearing for a moment while adding in multiple phases
@@ -3286,7 +3286,7 @@ bool WorldObject::IsPhased(WorldObject const* obj) const
     if (obj->GetPhases().empty() && IsPhased(169))
         return true;
 
-    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->IsGameMaster())
+    if (GetTypeId() == TypeID::TYPEID_PLAYER && ToPlayer()->IsGameMaster())
         return true;
 
     return Skyfire::Containers::Intersects(_phases.begin(), _phases.end(), obj->GetPhases().begin(), obj->GetPhases().end());

@@ -487,7 +487,7 @@ public:
                         EnterEvadeMode();
                     return;
                 }
-                else if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER && me->GetVictim()->HealthBelowPct(10))
+                else if (me->GetVictim()->GetTypeId() == TypeID::TYPEID_PLAYER && me->GetVictim()->HealthBelowPct(10))
                 {
                     me->GetVictim()->CastSpell(me->GetVictim(), 7267, true); // beg
                     me->GetVictim()->RemoveGameObject(SPELL_DUEL_FLAG, true);
@@ -624,7 +624,7 @@ public:
         {
             if (spell->Id == SPELL_DELIVER_STOLEN_HORSE)
             {
-                if (caster->GetTypeId() == TYPEID_UNIT && caster->IsVehicle())
+                if (caster->GetTypeId() == TypeID::TYPEID_UNIT && caster->IsVehicle())
                 {
                     if (Unit* charmer = caster->GetCharmer())
                     {
@@ -646,7 +646,7 @@ public:
         {
             ScriptedAI::MoveInLineOfSight(who);
 
-            if (who->GetTypeId() == TYPEID_UNIT && who->IsVehicle() && me->IsWithinDistInMap(who, 5.0f))
+            if (who->GetTypeId() == TypeID::TYPEID_UNIT && who->IsVehicle() && me->IsWithinDistInMap(who, 5.0f))
             {
                 if (Unit* charmer = who->GetCharmer())
                 {
@@ -716,7 +716,7 @@ public:
             if (!deathcharger)
                 return;
 
-            if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->IsVehicle())
+            if (killer->GetTypeId() == TypeID::TYPEID_PLAYER && deathcharger->GetTypeId() == TypeID::TYPEID_UNIT && deathcharger->IsVehicle())
             {
                 deathcharger->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 deathcharger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

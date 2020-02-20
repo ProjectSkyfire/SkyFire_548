@@ -234,7 +234,7 @@ class npc_iron_roots : public CreatureScript
 
             void IsSummonedBy(Unit* summoner) OVERRIDE
             {
-                if (summoner->GetTypeId() != TYPEID_PLAYER)
+                if (summoner->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
                 // Summoner is a player, who should have root aura on self
                 summonerGUID = summoner->GetGUID();
@@ -312,7 +312,7 @@ class boss_freya : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
@@ -698,7 +698,7 @@ class boss_elder_brightleaf : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_ELDER_SLAY);
             }
 
@@ -707,7 +707,7 @@ class boss_elder_brightleaf : public CreatureScript
                 _JustDied();
                 Talk(SAY_ELDER_DEATH);
 
-                if (killer->GetTypeId() == TYPEID_PLAYER)
+                if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     if (Creature* Ironbranch = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_IRONBRANCH)))
                         Ironbranch->AI()->DoAction(ACTION_ELDER_DEATH);
@@ -819,7 +819,7 @@ class boss_elder_stonebark : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_ELDER_SLAY);
             }
 
@@ -828,7 +828,7 @@ class boss_elder_stonebark : public CreatureScript
                 _JustDied();
                 Talk(SAY_ELDER_DEATH);
 
-                if (killer->GetTypeId() == TYPEID_PLAYER)
+                if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     if (Creature* Ironbranch = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_IRONBRANCH)))
                         Ironbranch->AI()->DoAction(ACTION_ELDER_DEATH);
@@ -946,7 +946,7 @@ class boss_elder_ironbranch : public CreatureScript
 
             void KilledUnit(Unit* who) OVERRIDE
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
+                if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_ELDER_SLAY);
             }
 
@@ -955,7 +955,7 @@ class boss_elder_ironbranch : public CreatureScript
                 _JustDied();
                 Talk(SAY_ELDER_DEATH);
 
-                if (killer->GetTypeId() == TYPEID_PLAYER)
+                if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     if (Creature* Brightleaf = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRIGHTLEAF)))
                         Brightleaf->AI()->DoAction(ACTION_ELDER_DEATH);

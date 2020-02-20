@@ -117,7 +117,7 @@ public:
 
         void KilledUnit(Unit* who) OVERRIDE
         {
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 Talk(SAY_KILL);
         }
 
@@ -166,7 +166,7 @@ public:
         {
             BossAI::MoveInLineOfSight(who);
 
-            if (!_ohNovos || !who || who->GetTypeId() != TYPEID_UNIT || who->GetPositionY() > MAX_Y_COORD_OH_NOVOS)
+            if (!_ohNovos || !who || who->GetTypeId() != TypeID::TYPEID_UNIT || who->GetPositionY() > MAX_Y_COORD_OH_NOVOS)
                 return;
 
             uint32 entry = who->GetEntry();
@@ -346,7 +346,7 @@ public:
 
     bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
     {
-        return target && target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->AI()->GetData(DATA_NOVOS_ACHIEV);
+        return target && target->GetTypeId() == TypeID::TYPEID_UNIT && target->ToCreature()->AI()->GetData(DATA_NOVOS_ACHIEV);
     }
 };
 

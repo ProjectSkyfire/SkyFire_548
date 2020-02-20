@@ -188,7 +188,7 @@ void TempSummon::InitStats(uint32 duration)
     {
         setFaction(owner->getFaction());
         SetLevel(owner->getLevel());
-        if (owner->GetTypeId() == TYPEID_PLAYER)
+        if (owner->GetTypeId() == TypeID::TYPEID_PLAYER)
             m_ControlledByPlayer = true;
     }
 
@@ -221,7 +221,7 @@ void TempSummon::InitSummon()
     Unit* owner = GetSummoner();
     if (owner)
     {
-        if (owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
+        if (owner->GetTypeId() == TypeID::TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
             owner->ToCreature()->AI()->JustSummoned(this);
         if (IsAIEnabled)
             AI()->IsSummonedBy(owner);
@@ -252,7 +252,7 @@ void TempSummon::UnSummon(uint32 msTime)
     }
 
     Unit* owner = GetSummoner();
-    if (owner && owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
+    if (owner && owner->GetTypeId() == TypeID::TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
         owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
 
     AddObjectToRemoveList();
@@ -337,7 +337,7 @@ void Guardian::InitStats(uint32 duration)
 
     InitStatsForLevel(GetOwner()->getLevel());
 
-    if (GetOwner()->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
+    if (GetOwner()->GetTypeId() == TypeID::TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         m_charmInfo->InitCharmCreateSpells();
 
     SetReactState(REACT_AGGRESSIVE);
@@ -347,7 +347,7 @@ void Guardian::InitSummon()
 {
     TempSummon::InitSummon();
 
-    if (GetOwner()->GetTypeId() == TYPEID_PLAYER
+    if (GetOwner()->GetTypeId() == TypeID::TYPEID_PLAYER
             && GetOwner()->GetMinionGUID() == GetGUID()
             && !GetOwner()->GetCharmGUID())
     {
@@ -358,7 +358,7 @@ void Guardian::InitSummon()
 Puppet::Puppet(SummonPropertiesEntry const* properties, Unit* owner)
     : Minion(properties, owner, false) //maybe true?
 {
-    ASSERT(m_owner->GetTypeId() == TYPEID_PLAYER);
+    ASSERT(m_owner->GetTypeId() == TypeID::TYPEID_PLAYER);
     m_unitTypeMask |= UNIT_MASK_PUPPET;
 }
 

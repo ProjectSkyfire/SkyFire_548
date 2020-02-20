@@ -80,7 +80,7 @@ public:
         {
             if (!(rand()%5))
                 Talk(SAY_SLAY);
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 safetyDance = false;
         }
 
