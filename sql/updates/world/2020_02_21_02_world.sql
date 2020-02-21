@@ -11,5 +11,5 @@ INSERT INTO `gossip_menu_option` (`menu_id`,`id`,`option_icon`,`option_text`,`op
 SET @CGUID := 100051;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID-1 AND @CGUID-0;
 INSERT INTO `creature` (`guid`, `id`, `map`, `position_x`, `position_y`, `position_z`, `orientation`) VALUES
-(@CGUID-0, 55135, 870, 3176.74, -694.437, 230.969, 2.42254),
+(@CGUID-0, 55135, 870, 3176.74, -694.437, 321.444, 2.42254),
 (@CGUID-1, 55054, 1, 1862.281, -5461.901, 443.814, 3.174382);
