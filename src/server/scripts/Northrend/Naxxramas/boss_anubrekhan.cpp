@@ -85,11 +85,11 @@ public:
                 // otherwise, after a wipe, they respawn where boss was at wipe moment.
                 pos = me->GetHomePosition();
                 pos.m_positionY -= 10.0f;
-                me->SummonCreature(NPC_CRYPT_GUARD, pos, TEMPSUMMON_CORPSE_DESPAWN);
+                me->SummonCreature(NPC_CRYPT_GUARD, pos, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
 
                 pos = me->GetHomePosition();
                 pos.m_positionY += 10.0f;
-                me->SummonCreature(NPC_CRYPT_GUARD, pos, TEMPSUMMON_CORPSE_DESPAWN);
+                me->SummonCreature(NPC_CRYPT_GUARD, pos, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
             }
         }
 
@@ -167,12 +167,12 @@ public:
                     case EVENT_LOCUST:
                         /// @todo Add Text
                         DoCast(me, RAID_MODE(SPELL_LOCUST_SWARM_10, SPELL_LOCUST_SWARM_25));
-                        DoSummon(NPC_CRYPT_GUARD, GuardSummonPos, 0, TEMPSUMMON_CORPSE_DESPAWN);
+                        DoSummon(NPC_CRYPT_GUARD, GuardSummonPos, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                         events.ScheduleEvent(EVENT_LOCUST, 90000);
                         break;
                     case EVENT_SPAWN_GUARDIAN_NORMAL:
                         /// @todo Add Text
-                        DoSummon(NPC_CRYPT_GUARD, GuardSummonPos, 0, TEMPSUMMON_CORPSE_DESPAWN);
+                        DoSummon(NPC_CRYPT_GUARD, GuardSummonPos, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                         break;
                     case EVENT_BERSERK:
                         DoCast(me, SPELL_BERSERK, true);

@@ -219,7 +219,7 @@ class boss_gormok : public CreatureScript
 
                 for (uint8 i = 0; i < MAX_SNOBOLDS; i++)
                 {
-                    if (Creature* pSnobold = DoSpawnCreature(NPC_SNOBOLD_VASSAL, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                    if (Creature* pSnobold = DoSpawnCreature(NPC_SNOBOLD_VASSAL, 0, 0, 0, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0))
                     {
                         pSnobold->EnterVehicle(me, i);
                         pSnobold->SetInCombatWithZone();
@@ -602,7 +602,7 @@ struct boss_jormungarAI : public BossAI
                     events.ScheduleEvent(EVENT_SLIME_POOL, 30*IN_MILLISECONDS, 0, PHASE_MOBILE);
                     return;
                 case EVENT_SUMMON_ACIDMAW:
-                    if (Creature* acidmaw = me->SummonCreature(NPC_ACIDMAW, ToCCommonLoc[9].GetPositionX(), ToCCommonLoc[9].GetPositionY(), ToCCommonLoc[9].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* acidmaw = me->SummonCreature(NPC_ACIDMAW, ToCCommonLoc[9].GetPositionX(), ToCCommonLoc[9].GetPositionY(), ToCCommonLoc[9].GetPositionZ(), 5, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         acidmaw->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         acidmaw->SetReactState(REACT_AGGRESSIVE);
@@ -843,7 +843,7 @@ class spell_gormok_fire_bomb : public SpellScriptLoader
                 if (const WorldLocation* pos = GetExplTargetDest())
                 {
                     if (Unit* caster = GetCaster())
-                        caster->SummonCreature(NPC_FIRE_BOMB, pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30*IN_MILLISECONDS);
+                        caster->SummonCreature(NPC_FIRE_BOMB, pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 30*IN_MILLISECONDS);
                 }
             }
 

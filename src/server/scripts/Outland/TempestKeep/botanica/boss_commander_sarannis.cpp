@@ -163,11 +163,11 @@ class spell_commander_sarannis_summon_reinforcements : public SpellScriptLoader
 
             void HandleCast(SpellEffIndex /*effIndex*/)
             {
-                GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_MENDER, PosSummonReinforcements[0], TEMPSUMMON_CORPSE_DESPAWN);
-                GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_RESERVIST, PosSummonReinforcements[1], TEMPSUMMON_CORPSE_DESPAWN);
-                GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_RESERVIST, PosSummonReinforcements[2], TEMPSUMMON_CORPSE_DESPAWN);
+                GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_MENDER, PosSummonReinforcements[0], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
+                GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_RESERVIST, PosSummonReinforcements[1], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
+                GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_RESERVIST, PosSummonReinforcements[2], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                 if (GetCaster()->GetMap()->IsHeroic())
-                    GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_RESERVIST, PosSummonReinforcements[3], TEMPSUMMON_CORPSE_DESPAWN);
+                    GetCaster()->SummonCreature(NPC_SUMMONED_BLOODWARDER_RESERVIST, PosSummonReinforcements[3], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
             }
 
             void Register() OVERRIDE

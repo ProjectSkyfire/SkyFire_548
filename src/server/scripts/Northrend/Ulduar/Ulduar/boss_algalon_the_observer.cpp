@@ -519,7 +519,7 @@ class boss_algalon_the_observer : public CreatureScript
                     for (std::list<Creature*>::iterator itr = stalkers.begin(); itr != stalkers.end(); ++itr)
                         (*itr)->m_Events.KillAllEvents(true);
                     for (uint32 i = 0; i < COLLAPSING_STAR_COUNT; ++i)
-                        if (Creature* wormHole = DoSummon(NPC_WORM_HOLE, CollapsingStarPos[i], TEMPSUMMON_MANUAL_DESPAWN))
+                        if (Creature* wormHole = DoSummon(NPC_WORM_HOLE, CollapsingStarPos[i], 30000, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                             wormHole->m_Events.AddEvent(new SummonUnleashedDarkMatter(wormHole), wormHole->m_Events.CalculateTime(i >= 2 ? 8000 : 6000));
                 }
                 else if ((int32(me->GetHealth()) - int32(damage)) < CalculatePct<int32>(int32(me->GetMaxHealth()), 2.5f) && !_fightWon)
@@ -586,7 +586,7 @@ class boss_algalon_the_observer : public CreatureScript
                             if (!me->getThreatManager().isThreatListEmpty())
                                 AttackStart(me->getThreatManager().getHostilTarget());
                             for (uint32 i = 0; i < LIVING_CONSTELLATION_COUNT; ++i)
-                                if (Creature* summon = DoSummon(NPC_LIVING_CONSTELLATION, ConstellationPos[i], 0, TEMPSUMMON_DEAD_DESPAWN))
+                                if (Creature* summon = DoSummon(NPC_LIVING_CONSTELLATION, ConstellationPos[i], 0, TempSummonType::TEMPSUMMON_DEAD_DESPAWN))
                                     summon->SetReactState(REACT_PASSIVE);
 
                             std::list<Creature*> stalkers;
@@ -610,7 +610,7 @@ class boss_algalon_the_observer : public CreatureScript
                             Talk(SAY_ALGALON_COLLAPSING_STAR);
                             Talk(EMOTE_ALGALON_COLLAPSING_STAR);
                             for (uint32 i = 0; i < COLLAPSING_STAR_COUNT; ++i)
-                                me->SummonCreature(NPC_COLLAPSING_STAR, CollapsingStarPos[i], TEMPSUMMON_CORPSE_DESPAWN);
+                                me->SummonCreature(NPC_COLLAPSING_STAR, CollapsingStarPos[i], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                             events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_STAR, 60000);
                             break;
                         case EVENT_BIG_BANG:
@@ -666,7 +666,7 @@ class boss_algalon_the_observer : public CreatureScript
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             break;
                         case EVENT_OUTRO_5:
-                            if (Creature* brann = DoSummon(NPC_BRANN_BRONZBEARD_ALG, BrannOutroPos[0], 131500, TEMPSUMMON_TIMED_DESPAWN))
+                            if (Creature* brann = DoSummon(NPC_BRANN_BRONZBEARD_ALG, BrannOutroPos[0], 131500, TempSummonType::TEMPSUMMON_TIMED_DESPAWN))
                                 brann->AI()->DoAction(ACTION_OUTRO);
                             break;
                         case EVENT_OUTRO_6:

@@ -239,7 +239,7 @@ class instance_stratholme : public InstanceMapScript
                                 {
                                     Position ysidaPos;
                                     ysidaTrigger->GetPosition(&ysidaPos);
-                                    ysidaTrigger->SummonCreature(NPC_YSIDA, ysidaPos, TEMPSUMMON_TIMED_DESPAWN, 1800000);
+                                    ysidaTrigger->SummonCreature(NPC_YSIDA, ysidaPos, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 1800000);
                                 }
                                 events.CancelEvent(EVENT_BARON_RUN);
                                 break;
@@ -290,7 +290,7 @@ class instance_stratholme : public InstanceMapScript
                                 //a bit itchy, it should close the door after 10 secs, but it doesn't. skipping it for now.
                                 //UpdateGoState(ziggurat4GUID, 0, true);
                                 if (Creature* pBaron = instance->GetCreature(baronGUID))
-                                    pBaron->SummonCreature(NPC_RAMSTEIN, 4032.84f, -3390.24f, 119.73f, 4.71f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 1800000);
+                                    pBaron->SummonCreature(NPC_RAMSTEIN, 4032.84f, -3390.24f, 119.73f, 4.71f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 1800000);
                                 SF_LOG_DEBUG("scripts", "Instance Stratholme: Ramstein spawned.");
                             }
                             else
@@ -445,7 +445,7 @@ class instance_stratholme : public InstanceMapScript
                             if (Creature* baron = instance->GetCreature(baronGUID))
                             {
                                 for (uint8 i = 0; i < 4; ++i)
-                                    baron->SummonCreature(NPC_BLACK_GUARD, 4032.84f, -3390.24f, 119.73f, 4.71f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 1800000);
+                                    baron->SummonCreature(NPC_BLACK_GUARD, 4032.84f, -3390.24f, 119.73f, 4.71f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 1800000);
 
                                 HandleGameObject(ziggurat4GUID, true);
                                 HandleGameObject(ziggurat5GUID, true);

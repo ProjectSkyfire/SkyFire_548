@@ -1564,9 +1564,9 @@ void ObjectMgr::LoadTempSummons()
 
         data.type                       = TempSummonType(fields[8].GetUInt8());
 
-        if (data.type > TEMPSUMMON_MANUAL_DESPAWN)
+        if (data.type > TempSummonType::TEMPSUMMON_MANUAL_DESPAWN)
         {
-            SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has unhandled temp summon type %u in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] for creature entry %u, skipped.", data.type, summonerId, summonerType, group, data.entry);
+            SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has unhandled temp summon type %u in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] for creature entry %u, skipped.", uint32(data.type), summonerId, summonerType, group, data.entry);
             continue;
         }
 

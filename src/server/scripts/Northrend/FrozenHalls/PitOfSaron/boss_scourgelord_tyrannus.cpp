@@ -195,7 +195,7 @@ class boss_tyrannus : public CreatureScript
 
                 // Prevent corpse despawning
                 if (TempSummon* summ = me->ToTempSummon())
-                    summ->SetTempSummonType(TEMPSUMMON_DEAD_DESPAWN);
+                    summ->SetTempSummonType(TempSummonType::TEMPSUMMON_DEAD_DESPAWN);
 
                 // Stop combat for Rimefang
                 if (Creature* rimefang = GetRimefang())

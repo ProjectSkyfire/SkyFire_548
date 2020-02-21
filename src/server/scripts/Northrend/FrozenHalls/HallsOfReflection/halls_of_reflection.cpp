@@ -394,7 +394,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                     _events.ScheduleEvent(EVENT_INTRO_A2_4, 10000);
                     break;
                 case EVENT_INTRO_A2_4:
-                    if (Creature* uther = me->SummonCreature(NPC_UTHER, UtherSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* uther = me->SummonCreature(NPC_UTHER, UtherSpawnPos, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         uther->GetMotionMaster()->MoveIdle();
                         _utherGUID = uther->GetGUID();
@@ -490,7 +490,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                     break;
                 case EVENT_INTRO_H2_4:
                     // spawn UTHER during speach 2
-                    if (Creature* uther = me->SummonCreature(NPC_UTHER, UtherSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* uther = me->SummonCreature(NPC_UTHER, UtherSpawnPos, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         uther->GetMotionMaster()->MoveIdle();
                         _utherGUID = uther->GetGUID();
@@ -553,7 +553,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                 // Remaining Intro Events common for both faction
                 case EVENT_INTRO_LK_1:
                     // Spawn LK in front of door, and make him move to the sword.
-                    if (Creature* lichking = me->SummonCreature(NPC_LICH_KING_PART1, LichKingSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* lichking = me->SummonCreature(NPC_LICH_KING_PART1, LichKingSpawnPos, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         lichking->SetWalk(true);
                         lichking->GetMotionMaster()->MovePoint(0, LichKingMoveThronePos);
@@ -681,7 +681,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                 case EVENT_SKIP_INTRO:
                     me->GetMotionMaster()->MovePoint(0, MoveThronePos);
                     /// @todo Loralen/Koreln shall run also
-                    if (Creature* lichking = me->SummonCreature(NPC_LICH_KING_PART1, LichKingSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* lichking = me->SummonCreature(NPC_LICH_KING_PART1, LichKingSpawnPos, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         lichking->SetWalk(true);
                         lichking->GetMotionMaster()->MovePoint(0, LichKingMoveThronePos);
@@ -801,7 +801,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                 switch (event)
                 {
                     case EVENT_ESCAPE:
-                        if (Creature* lichking = me->SummonCreature(NPC_LICH_KING_PART2, LichKingSpawnPos2, TEMPSUMMON_MANUAL_DESPAWN))
+                        if (Creature* lichking = me->SummonCreature(NPC_LICH_KING_PART2, LichKingSpawnPos2, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                         {
                             me->Attack(lichking, true);
                             lichking->Attack(me, true);
@@ -908,7 +908,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             lichking->GetMotionMaster()->MoveIdle();
                             lichking->GetMotionMaster()->MoveChase(me);
                         }
-                        if (Creature* walltarget = me->SummonCreature(NPC_ICE_WALL, IceWalls[0], TEMPSUMMON_MANUAL_DESPAWN, 720000))
+                        if (Creature* walltarget = me->SummonCreature(NPC_ICE_WALL, IceWalls[0], TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 720000))
                         {
                             _walltargetGUID = walltarget->GetGUID();
                             walltarget->AI()->DoCast(walltarget, SPELL_SUMMON_ICE_WALL);
@@ -981,7 +981,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         }
                         if (_icewall < 4)
                         {
-                            if (Creature* walltarget = me->SummonCreature(NPC_ICE_WALL, IceWalls[_icewall], TEMPSUMMON_MANUAL_DESPAWN, 720000))
+                            if (Creature* walltarget = me->SummonCreature(NPC_ICE_WALL, IceWalls[_icewall], TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 720000))
                             {
                                 _walltargetGUID = walltarget->GetGUID();
                                 walltarget->AI()->DoCast(walltarget, SPELL_SUMMON_ICE_WALL);
@@ -1655,7 +1655,7 @@ public:
             for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
             {
                 Unit* temp = (*itr);
-                Creature* reflection = me->SummonCreature(NPC_REFLECTION, temp->GetPositionX(), temp->GetPositionY(), temp->GetPositionZ(), temp->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
+                Creature* reflection = me->SummonCreature(NPC_REFLECTION, temp->GetPositionX(), temp->GetPositionY(), temp->GetPositionZ(), temp->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
                 reflection->SetName(temp->GetName());
                 temp->CastSpell(reflection, SPELL_CLONE_NAME, true);
                 temp->CastSpell(reflection, SPELL_CLONE_MODEL, true);

@@ -662,7 +662,7 @@ class npc_karynaku : public CreatureScript
                 player->ActivateTaxiPathTo(TAXI_PATH_ID);
 
             if (quest->GetQuestId() == QUEST_ZUHULED_THE_WACK)
-                creature->SummonCreature(NPC_ZUHULED_THE_WACKED, -4204.94f, 316.397f, 122.508f, 1.309f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 300000);
+                creature->SummonCreature(NPC_ZUHULED_THE_WACKED, -4204.94f, 316.397f, 122.508f, 1.309f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 300000);
 
             return true;
         }
@@ -754,7 +754,7 @@ public:
         {
             me->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, 0);
             me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
-            Unit* Illidan = me->SummonCreature(C_ILLIDAN, -5107.83f, 602.584f, 85.2393f, 4.92598f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            Unit* Illidan = me->SummonCreature(C_ILLIDAN, -5107.83f, 602.584f, 85.2393f, 4.92598f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
             if (Illidan)
             {
                 IllidanGUID = Illidan->GetGUID();
@@ -1116,7 +1116,7 @@ public:
         void DoSpawnAssassin()
         {
             //unknown where they actually appear
-            DoSummon(NPC_COILSKAR_ASSASSIN, me, 15.0f, 5000, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
+            DoSummon(NPC_COILSKAR_ASSASSIN, me, 15.0f, 5000, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
         }
 
         void EnterCombat(Unit* who) OVERRIDE
@@ -1678,7 +1678,7 @@ void npc_lord_illidan_stormrage::npc_lord_illidan_stormrageAI::SummonNextWave()
         float Y = SpawnLocation[locIndex + i].y;
         float Z = SpawnLocation[locIndex + i].z;
         float O = SpawnLocation[locIndex + i].o;
-        Spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, X, Y, Z, O, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000);
+        Spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, X, Y, Z, O, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000);
         ++LiveCount;
 
         if (Spawn)
@@ -1861,7 +1861,7 @@ public:
             Unit* totemOspirits = NULL;
 
             if (entry != 0)
-                Summoned = DoSpawnCreature(entry, 0, 0, 1, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 5000);
+                Summoned = DoSpawnCreature(entry, 0, 0, 1, 0, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 5000);
 
             // FIND TOTEM, PROCESS QUEST
             if (Summoned)

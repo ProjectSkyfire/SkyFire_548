@@ -509,7 +509,7 @@ public:
                      // This is a workaround to make the beam cast properly. The caster should be ID 30298 but since the spells
                      // all are with scripted target for that same ID, it will hit itself.
                      if (altar)
-                         if (Creature* trigger = altar->SummonCreature(18721, altar->GetPositionX(), altar->GetPositionY(), altar->GetPositionZ() + 3, altar->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 5000))
+                         if (Creature* trigger = altar->SummonCreature(18721, altar->GetPositionX(), altar->GetPositionY(), altar->GetPositionZ() + 3, altar->GetOrientation(), TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 5000))
                          {
                              // Set the trigger model to invisible
                              trigger->SetDisplayId(11686);

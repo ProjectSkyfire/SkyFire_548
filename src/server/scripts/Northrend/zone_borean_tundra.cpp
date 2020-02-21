@@ -1005,7 +1005,7 @@ public:
             {
                 case 3:
                     SetEscortPaused(true);
-                    if (Creature* arthas = me->SummonCreature(NPC_IMAGE_LICH_KING, 3730.313f, 3518.689f, 473.324f, 1.562f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+                    if (Creature* arthas = me->SummonCreature(NPC_IMAGE_LICH_KING, 3730.313f, 3518.689f, 473.324f, 1.562f, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                     {
                         arthasGUID = arthas->GetGUID();
                         arthas->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -1013,7 +1013,7 @@ public:
                         arthas->SetWalk(true);
                         arthas->GetMotionMaster()->MovePoint(0, 3737.374756f, 3564.841309f, 477.433014f);
                     }
-                    if (Creature* talbot = me->SummonCreature(NPC_COUNSELOR_TALBOT, 3747.23f, 3614.936f, 473.321f, 4.462012f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+                    if (Creature* talbot = me->SummonCreature(NPC_COUNSELOR_TALBOT, 3747.23f, 3614.936f, 473.321f, 4.462012f, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                     {
                         talbotGUID = talbot->GetGUID();
                         talbot->SetWalk(true);
@@ -1094,13 +1094,13 @@ public:
                         break;
 
                     case 6:
-                        if (Creature* arlos = me->SummonCreature(NPC_GENERAL_ARLOS, 3745.527100f, 3615.655029f, 473.321533f, 4.447805f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+                        if (Creature* arlos = me->SummonCreature(NPC_GENERAL_ARLOS, 3745.527100f, 3615.655029f, 473.321533f, 4.447805f, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                         {
                             arlosGUID = arlos->GetGUID();
                             arlos->SetWalk(true);
                             arlos->GetMotionMaster()->MovePoint(0, 3735.570068f, 3572.419922f, 477.441010f);
                         }
-                        if (Creature* leryssa = me->SummonCreature(NPC_LERYSSA, 3749.654541f, 3614.959717f, 473.323486f, 4.524959f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+                        if (Creature* leryssa = me->SummonCreature(NPC_LERYSSA, 3749.654541f, 3614.959717f, 473.323486f, 4.524959f, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                         {
                             leryssaGUID = leryssa->GetGUID();
                             leryssa->SetWalk(false);

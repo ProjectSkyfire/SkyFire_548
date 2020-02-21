@@ -142,7 +142,7 @@ class boss_skarvald_the_constructor : public CreatureScript
                             me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
                             //DoCast(me, SPELL_SUMMON_SKARVALD_GHOST, true);
-                            if (Creature* temp = me->SummonCreature(NPC_SKARVALD_GHOST, *me, TEMPSUMMON_CORPSE_DESPAWN, 5000))
+                            if (Creature* temp = me->SummonCreature(NPC_SKARVALD_GHOST, *me, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 5000))
                             {
                                 temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 temp->AI()->AttackStart(killer);
@@ -289,7 +289,7 @@ class boss_dalronn_the_controller : public CreatureScript
                             me->RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
                             //DoCast(me, SPELL_SUMMON_DALRONN_GHOST, true);
-                            if (Creature* temp = me->SummonCreature(NPC_DALRONN_GHOST, *me, TEMPSUMMON_CORPSE_DESPAWN, 5000))
+                            if (Creature* temp = me->SummonCreature(NPC_DALRONN_GHOST, *me, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 5000))
                             {
                                 temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 temp->AI()->AttackStart(killer);

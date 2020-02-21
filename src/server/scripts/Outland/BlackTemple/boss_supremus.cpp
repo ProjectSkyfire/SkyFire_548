@@ -240,7 +240,7 @@ public:
                         if (target)
                         {
                             //DoCast(target, SPELL_VOLCANIC_SUMMON);//movement bugged
-                            me->SummonCreature(CREATURE_VOLCANO, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                            me->SummonCreature(CREATURE_VOLCANO, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 30000);
                             Talk(EMOTE_GROUND_CRACK);
                             events.DelayEvents(1500, GCD_CAST);
                         }

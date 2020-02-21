@@ -140,7 +140,7 @@ public:
                 instance->SetData(DATA_BRUTALLUS_EVENT, DONE);
                 float x, y, z;
                 me->GetPosition(x, y, z);
-                me->SummonCreature(FELMYST, x, y, z+30, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
+                me->SummonCreature(FELMYST, x, y, z+30, me->GetOrientation(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 0);
             }
         }
 

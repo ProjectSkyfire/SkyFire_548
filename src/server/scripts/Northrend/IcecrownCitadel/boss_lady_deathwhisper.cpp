@@ -547,7 +547,7 @@ class boss_lady_deathwhisper : public CreatureScript
             // helper for summoning wave mobs
             void Summon(uint32 entry, const Position& pos)
             {
-                if (TempSummon* summon = me->SummonCreature(entry, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                if (TempSummon* summon = me->SummonCreature(entry, pos, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
                     summon->AI()->DoCast(summon, SPELL_TELEPORT_VISUAL);
             }
 
@@ -582,9 +582,9 @@ class boss_lady_deathwhisper : public CreatureScript
                     Position pos;
                     target->GetPosition(&pos);
                     if (target->GetEntry() == NPC_CULT_FANATIC)
-                        me->SummonCreature(NPC_REANIMATED_FANATIC, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                        me->SummonCreature(NPC_REANIMATED_FANATIC, pos, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                     else
-                        me->SummonCreature(NPC_REANIMATED_ADHERENT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                        me->SummonCreature(NPC_REANIMATED_ADHERENT, pos, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
 
                     if (TempSummon* summon = target->ToTempSummon())
                         summon->UnSummon();

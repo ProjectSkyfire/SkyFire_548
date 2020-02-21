@@ -440,12 +440,12 @@ public:
                             }
                             break;
                         case EVENT_LAIR_GUARD:       // Phase PHASE_BREATH
-                             me->SummonCreature(NPC_LAIRGUARD, SpawnLocations[2], TEMPSUMMON_CORPSE_DESPAWN);
+                             me->SummonCreature(NPC_LAIRGUARD, SpawnLocations[2], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                             events.ScheduleEvent(EVENT_LAIR_GUARD, 30000);
                             break;
                         case EVENT_WHELP_SPAWN:      // Phase PHASE_BREATH
-                            me->SummonCreature(NPC_WHELP, SpawnLocations[0], TEMPSUMMON_CORPSE_DESPAWN);
-                            me->SummonCreature(NPC_WHELP, SpawnLocations[1], TEMPSUMMON_CORPSE_DESPAWN);
+                            me->SummonCreature(NPC_WHELP, SpawnLocations[0], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
+                            me->SummonCreature(NPC_WHELP, SpawnLocations[1], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                             if (SummonWhelpCount >= RAID_MODE(20, 40))
                             {
                                 SummonWhelpCount = 0;

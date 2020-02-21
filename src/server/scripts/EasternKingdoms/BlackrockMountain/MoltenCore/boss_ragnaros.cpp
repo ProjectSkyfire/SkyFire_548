@@ -263,7 +263,7 @@ class boss_ragnaros : public CreatureScript
                                         // summon 8 elementals
                                         for (uint8 i = 0; i < 8; ++i)
                                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                                if (Creature* summoned = me->SummonCreature(12143, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 900000))
+                                                if (Creature* summoned = me->SummonCreature(12143, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 900000))
                                                     summoned->AI()->AttackStart(target);
 
                                         _hasSubmergedOnce = true;
@@ -278,7 +278,7 @@ class boss_ragnaros : public CreatureScript
 
                                         for (uint8 i = 0; i < 8; ++i)
                                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                                if (Creature* summoned = me->SummonCreature(12143, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 900000))
+                                                if (Creature* summoned = me->SummonCreature(12143, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 900000))
                                                     summoned->AI()->AttackStart(target);
 
                                         _isBanished = true;

@@ -1372,7 +1372,7 @@ public:
         if (!sObjectMgr->GetCreatureTemplate(id))
             return false;
 
-        chr->SummonCreature(id, *chr, TEMPSUMMON_CORPSE_DESPAWN, 120);
+        chr->SummonCreature(id, *chr, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 120);
 
         return true;
     }

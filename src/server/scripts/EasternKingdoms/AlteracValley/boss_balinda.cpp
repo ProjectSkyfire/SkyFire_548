@@ -156,7 +156,7 @@ public:
             if (waterElementalTimer < diff)
             {
                 if (summons.empty())
-                    me->SummonCreature(NPC_WATER_ELEMENTAL, 0, 0, 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 45 * IN_MILLISECONDS);
+                    me->SummonCreature(NPC_WATER_ELEMENTAL, 0, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 45 * IN_MILLISECONDS);
                 waterElementalTimer = 50 * IN_MILLISECONDS;
             } else waterElementalTimer -= diff;
 

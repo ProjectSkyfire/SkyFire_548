@@ -453,7 +453,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 float angle = me->GetAngle(summon);
                 me->MovePositionToFirstCollision(pos, maxRange, angle);
                 summon->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
-                summon->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
+                summon->ToTempSummon()->SetTempSummonType(TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
             }
 
             void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType) OVERRIDE
@@ -1082,7 +1082,7 @@ class npc_blood_queen_lana_thel : public CreatureScript
                 _events.SetPhase(1);
                 _events.ScheduleEvent(EVENT_INTRO_1, 14000);
                 // summon a visual trigger
-                if (Creature* summon = DoSummon(NPC_FLOATING_TRIGGER, triggerPos, 15000, TEMPSUMMON_TIMED_DESPAWN))
+                if (Creature* summon = DoSummon(NPC_FLOATING_TRIGGER, triggerPos, 15000, TempSummonType::TEMPSUMMON_TIMED_DESPAWN))
                 {
                     summon->CastSpell(summon, SPELL_OOC_INVOCATION_VISUAL, true);
                     summon->SetSpeed(MOVE_FLIGHT, 0.15f, true);

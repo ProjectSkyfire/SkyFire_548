@@ -91,8 +91,8 @@ class npc_professor_phizzlethorpe : public CreatureScript
                         break;
                     case 8:
                         Talk(EMOTE_PROGRESS_4);
-                        me->SummonCreature(NPC_VENGEFUL_SURGE, -2065.505f, -2136.88f, 22.20362f, 1.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                        me->SummonCreature(NPC_VENGEFUL_SURGE, -2059.249f, -2134.88f, 21.51582f, 1.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        me->SummonCreature(NPC_VENGEFUL_SURGE, -2065.505f, -2136.88f, 22.20362f, 1.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        me->SummonCreature(NPC_VENGEFUL_SURGE, -2059.249f, -2134.88f, 21.51582f, 1.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
                         break;
                     case 11:
                         Talk(SAY_PROGRESS_5, player);

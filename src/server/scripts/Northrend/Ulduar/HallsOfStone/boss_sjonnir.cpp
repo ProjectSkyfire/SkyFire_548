@@ -174,13 +174,13 @@ class boss_sjonnir : public CreatureScript
                         {
                             uint8 summonPipe = urand(0, 1);
                             if (HealthAbovePct(75))
-                                me->SummonCreature(NPC_FORGED_IRON_DWARF, PipeLocations[summonPipe], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                                me->SummonCreature(NPC_FORGED_IRON_DWARF, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                             else if (HealthAbovePct(50))
-                                me->SummonCreature(NPC_FORGED_IRON_TROGG, PipeLocations[summonPipe], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                                me->SummonCreature(NPC_FORGED_IRON_TROGG, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                             else if (HealthAbovePct(25))
-                                me->SummonCreature(NPC_MALFORMED_OOZE, PipeLocations[summonPipe], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                                me->SummonCreature(NPC_MALFORMED_OOZE, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                             else
-                                me->SummonCreature(NPC_EARTHEN_DWARF, PipeLocations[summonPipe], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                                me->SummonCreature(NPC_EARTHEN_DWARF, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
 
                             events.ScheduleEvent(EVENT_SUMMON, 20000);
                             break;
@@ -227,7 +227,7 @@ class npc_malformed_ooze : public CreatureScript
                 {
                     if (Creature* temp = me->FindNearestCreature(NPC_MALFORMED_OOZE, 3.0f, true))
                     {
-                        DoSpawnCreature(NPC_IRON_SLUDGE, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+                        DoSpawnCreature(NPC_IRON_SLUDGE, 0, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
                         temp->DisappearAndDie();
                         me->DisappearAndDie();
                     }

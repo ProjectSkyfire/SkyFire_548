@@ -245,7 +245,7 @@ public:
                 if (instance)
                     instance->SetData(DATA_GORTOK_PALEHOOF_EVENT, IN_PROGRESS);
 
-                me->SummonCreature(NPC_STASIS_CONTROLLER, moveLocs[5].x, moveLocs[5].y, moveLocs[5].z, 0, TEMPSUMMON_CORPSE_DESPAWN);
+                me->SummonCreature(NPC_STASIS_CONTROLLER, moveLocs[5].x, moveLocs[5].y, moveLocs[5].z, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
             }
             Phase move = PHASE_NONE;
             if (AddCount >= DUNGEON_MODE(2, 4))

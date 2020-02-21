@@ -784,7 +784,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u creature summon: There is a summon spell for creature entry %u (SpellId: %u, effect: %u)",
                     e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.summonCreature.creature, itr->second.first, itr->second.second);
 
-            if (e.action.summonCreature.type < TEMPSUMMON_TIMED_OR_DEAD_DESPAWN || e.action.summonCreature.type > TEMPSUMMON_MANUAL_DESPAWN)
+            if (e.action.summonCreature.type < uint32(TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN) || e.action.summonCreature.type > uint32(TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
             {
                 SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses incorrect TempSummonType %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.summonCreature.type);
                 return false;

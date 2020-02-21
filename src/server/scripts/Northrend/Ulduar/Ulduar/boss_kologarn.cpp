@@ -291,7 +291,7 @@ class boss_kologarn : public CreatureScript
                             {
                                 int8 seat = eventId == EVENT_RESPAWN_LEFT_ARM ? 0 : 1;
                                 uint32 entry = eventId == EVENT_RESPAWN_LEFT_ARM ? NPC_LEFT_ARM : NPC_RIGHT_ARM;
-                                vehicle->InstallAccessory(entry, seat, true, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                                vehicle->InstallAccessory(entry, seat, true, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 0);
                             }
                             break;
                         }

@@ -328,7 +328,7 @@ class boss_hodir : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
 
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
-                    if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
+                    if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                         FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
             }
 

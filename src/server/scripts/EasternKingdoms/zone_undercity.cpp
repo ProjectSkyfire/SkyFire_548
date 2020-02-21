@@ -88,7 +88,7 @@ public:
             creature->CastSpell(creature, SPELL_SYLVANAS_CAST, false);
 
             for (uint8 i = 0; i < 4; ++i)
-                creature->SummonCreature(ENTRY_HIGHBORNE_LAMENTER, HighborneLoc[i][0], HighborneLoc[i][1], HIGHBORNE_LOC_Y, HighborneLoc[i][2], TEMPSUMMON_TIMED_DESPAWN, 160000);
+                creature->SummonCreature(ENTRY_HIGHBORNE_LAMENTER, HighborneLoc[i][0], HighborneLoc[i][1], HIGHBORNE_LOC_Y, HighborneLoc[i][2], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 160000);
         }
 
         return true;
@@ -150,7 +150,7 @@ public:
             {
                 if (LamentEventTimer <= diff)
                 {
-                    DoSummon(ENTRY_HIGHBORNE_BUNNY, me, 10.0f, 3000, TEMPSUMMON_TIMED_DESPAWN);
+                    DoSummon(ENTRY_HIGHBORNE_BUNNY, me, 10.0f, 3000, TempSummonType::TEMPSUMMON_TIMED_DESPAWN);
 
                     LamentEventTimer = 2000;
                     if (!me->HasAura(SPELL_SYLVANAS_CAST))

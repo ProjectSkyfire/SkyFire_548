@@ -171,7 +171,7 @@ class boss_taldaram : public CreatureScript
                             float angle, x, y;
 
                             //DoCast(me, SPELL_FLAME_SPHERE_SUMMON_1);
-                            if (Creature* sphere = DoSpawnCreature(CREATURE_FLAME_SPHERE, 0, 0, 5, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
+                            if (Creature* sphere = DoSpawnCreature(CREATURE_FLAME_SPHERE, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                             {
                                 angle = sphere->GetAngle(sphereTarget);
                                 x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE * std::cos(angle);
@@ -182,7 +182,7 @@ class boss_taldaram : public CreatureScript
                             if (IsHeroic())
                             {
                                 //DoCast(me, H_SPELL_FLAME_SPHERE_SUMMON_1);
-                                if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_1, 0, 0, 5, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
+                                if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_1, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                                 {
                                     angle = sphere->GetAngle(sphereTarget) + DATA_SPHERE_ANGLE_OFFSET;
                                     x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE/2 * std::cos(angle);
@@ -191,7 +191,7 @@ class boss_taldaram : public CreatureScript
                                 }
 
                                 //DoCast(me, H_SPELL_FLAME_SPHERE_SUMMON_2);
-                                if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_2, 0, 0, 5, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
+                                if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_2, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                                 {
                                     angle = sphere->GetAngle(sphereTarget) - DATA_SPHERE_ANGLE_OFFSET;
                                     x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE/2 * std::cos(angle);

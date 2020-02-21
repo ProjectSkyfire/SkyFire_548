@@ -180,7 +180,7 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (Tagged)
-                me->SummonCreature(NPC_FREED, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 300000);
+                me->SummonCreature(NPC_FREED, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 300000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

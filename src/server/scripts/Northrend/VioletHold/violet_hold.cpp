@@ -614,7 +614,7 @@ public:
                             for (uint8 i = 0; i < k; ++i)
                             {
                                 uint32 entry = RAND(CREATURE_AZURE_CAPTAIN, CREATURE_AZURE_RAIDER, CREATURE_AZURE_STALKER, CREATURE_AZURE_SORCEROR);
-                                DoSummon(entry, me, 2.0f, 20000, TEMPSUMMON_DEAD_DESPAWN);
+                                DoSummon(entry, me, 2.0f, 20000, TempSummonType::TEMPSUMMON_DEAD_DESPAWN);
                             }
                             me->SetVisible(false);
                         } else uiSpawnTimer -= diff;
@@ -639,14 +639,14 @@ public:
                             for (uint8 i = 0; i < k; ++i)
                             {
                                 uint32 entry = RAND(CREATURE_AZURE_INVADER_1, CREATURE_AZURE_INVADER_2, CREATURE_AZURE_SPELLBREAKER_1, CREATURE_AZURE_SPELLBREAKER_2, CREATURE_AZURE_MAGE_SLAYER_1, CREATURE_AZURE_MAGE_SLAYER_2, CREATURE_AZURE_BINDER_1, CREATURE_AZURE_BINDER_2);
-                                DoSummon(entry, me, 2.0f, 20000, TEMPSUMMON_DEAD_DESPAWN);
+                                DoSummon(entry, me, 2.0f, 20000, TempSummonType::TEMPSUMMON_DEAD_DESPAWN);
                             }
                         }
                         else
                         {
                             bPortalGuardianOrKeeperOrEliteSpawn = true;
                             uint32 entry = RAND(CREATURE_PORTAL_GUARDIAN, CREATURE_PORTAL_KEEPER);
-                            if (Creature* pPortalKeeper = DoSummon(entry, me, 2.0f, 0, TEMPSUMMON_DEAD_DESPAWN))
+                            if (Creature* pPortalKeeper = DoSummon(entry, me, 2.0f, 0, TempSummonType::TEMPSUMMON_DEAD_DESPAWN))
                                 me->CastSpell(pPortalKeeper, SPELL_PORTAL_CHANNEL, false);
                         }
                         uiSpawnTimer = SPAWN_TIME;

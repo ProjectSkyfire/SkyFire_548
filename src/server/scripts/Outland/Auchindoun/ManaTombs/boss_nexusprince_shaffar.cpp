@@ -107,9 +107,9 @@ public:
             float posX, posY, posZ, angle;
             me->GetHomePosition(posX, posY, posZ, angle);
 
-            me->SummonCreature(NPC_BEACON, posX - dist, posY - dist, posZ, angle, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
-            me->SummonCreature(NPC_BEACON, posX - dist, posY + dist, posZ, angle, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
-            me->SummonCreature(NPC_BEACON, posX + dist, posY, posZ, angle, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
+            me->SummonCreature(NPC_BEACON, posX - dist, posY - dist, posZ, angle, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
+            me->SummonCreature(NPC_BEACON, posX - dist, posY + dist, posZ, angle, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
+            me->SummonCreature(NPC_BEACON, posX + dist, posY, posZ, angle, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
         }
 
         void EnterEvadeMode() OVERRIDE

@@ -87,7 +87,7 @@ public:
                 case GO_WHELP_SPAWNER:
                     Position goPos;
                     go->GetPosition(&goPos);
-                    if (Creature* temp = go->SummonCreature(NPC_WHELP, goPos, TEMPSUMMON_CORPSE_DESPAWN))
+                    if (Creature* temp = go->SummonCreature(NPC_WHELP, goPos, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN))
                     {
                         temp->SetInCombatWithZone();
                         ++manyWhelpsCounter;

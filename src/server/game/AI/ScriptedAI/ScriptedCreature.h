@@ -254,7 +254,7 @@ struct ScriptedAI : public CreatureAI
     Player* GetPlayerAtMinimumRange(float minRange);
 
     //Spawns a creature relative to me
-    Creature* DoSpawnCreature(uint32 entry, float offsetX, float offsetY, float offsetZ, float angle, uint32 type, uint32 despawntime);
+    Creature* DoSpawnCreature(uint32 entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, uint32 despawntime);
 
     bool HealthBelowPct(uint32 pct) const
     {

@@ -196,7 +196,7 @@ class boss_ayamiss : public CreatureScript
                                 DoCast(target, SPELL_PARALYZE);
                                 instance->SetData64(DATA_PARALYZED, target->GetGUID());
                                 uint8 Index = urand(0, 1);
-                                me->SummonCreature(NPC_LARVA, LarvaPos[Index], TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
+                                me->SummonCreature(NPC_LARVA, LarvaPos[Index], TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
                             }
                             events.ScheduleEvent(EVENT_PARALYZE, 15000);
                             break;

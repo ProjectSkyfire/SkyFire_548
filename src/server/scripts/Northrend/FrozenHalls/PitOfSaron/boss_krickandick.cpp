@@ -333,7 +333,7 @@ class boss_krick : public CreatureScript
                     if (tyrannusPtr)
                         tyrannusPtr->NearTeleportTo(outroPos[1].GetPositionX(), outroPos[1].GetPositionY(), outroPos[1].GetPositionZ(), outroPos[1].GetOrientation());
                     else
-                        tyrannusPtr = me->SummonCreature(NPC_TYRANNUS_EVENTS, outroPos[1], TEMPSUMMON_MANUAL_DESPAWN);
+                        tyrannusPtr = me->SummonCreature(NPC_TYRANNUS_EVENTS, outroPos[1], TempSummonType::TEMPSUMMON_MANUAL_DESPAWN);
 
                     tyrannusPtr->SetCanFly(true);
                     me->GetMotionMaster()->MovePoint(POINT_KRICK_INTRO, outroPos[0].GetPositionX(), outroPos[0].GetPositionY(), outroPos[0].GetPositionZ());
@@ -370,9 +370,9 @@ class boss_krick : public CreatureScript
 
                             Creature* jainaOrSylvanas = NULL;
                             if (_instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
-                                jainaOrSylvanas = me->SummonCreature(NPC_JAINA_PART1, outroPos[2], TEMPSUMMON_MANUAL_DESPAWN);
+                                jainaOrSylvanas = me->SummonCreature(NPC_JAINA_PART1, outroPos[2], TempSummonType::TEMPSUMMON_MANUAL_DESPAWN);
                             else
-                                jainaOrSylvanas = me->SummonCreature(NPC_SYLVANAS_PART1, outroPos[2], TEMPSUMMON_MANUAL_DESPAWN);
+                                jainaOrSylvanas = me->SummonCreature(NPC_SYLVANAS_PART1, outroPos[2], TempSummonType::TEMPSUMMON_MANUAL_DESPAWN);
 
                             if (jainaOrSylvanas)
                             {

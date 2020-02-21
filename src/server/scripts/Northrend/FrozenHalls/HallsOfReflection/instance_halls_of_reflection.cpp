@@ -392,7 +392,7 @@ public:
                             {
                                 if (Creature* boss = instance->GetCreature(bossGuid))
                                 {
-                                    if (Creature* temp = boss->SummonCreature(*itr, SpawnPos[posIndex], TEMPSUMMON_DEAD_DESPAWN))
+                                    if (Creature* temp = boss->SummonCreature(*itr, SpawnPos[posIndex], TempSummonType::TEMPSUMMON_DEAD_DESPAWN))
                                     {
                                         temp->AI()->SetData(0, i);
                                         waveGuidList[i].insert(temp->GetGUID());

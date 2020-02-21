@@ -474,7 +474,7 @@ public:
             {
                 float x, y, z;
                 me->GetPosition(x, y, z);
-                Creature* trigger = me->SummonCreature(NPC_TRIGGER, x+8, y+8, z+25+rand()%10, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 1000);
+                Creature* trigger = me->SummonCreature(NPC_TRIGGER, x+8, y+8, z+25+rand()%10, me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 1000);
                 if (trigger)
                 {
                     trigger->SetVisible(false);
@@ -810,15 +810,15 @@ public:
             switch (urand(0, 2))
             {
                 case 0:
-                    DoSpawnCreature(17902, 3, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
-                    DoSpawnCreature(17902, -3, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                    DoSpawnCreature(17902, 3, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 60000);
+                    DoSpawnCreature(17902, -3, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 60000);
                     break;
                 case 1:
-                    DoSpawnCreature(17903, 3, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
-                    DoSpawnCreature(17903, -3, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                    DoSpawnCreature(17903, 3, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 60000);
+                    DoSpawnCreature(17903, -3, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 60000);
                     break;
                 case 2:
-                    DoSpawnCreature(RAND(17902, 17903), 3, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                    DoSpawnCreature(RAND(17902, 17903), 3, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 60000);
                     break;
             }
         }

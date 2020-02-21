@@ -198,7 +198,7 @@ public:
                 {
                     uint32 entry = *itr;
 
-                    if (Creature* creature = me->SummonCreature(entry, Locations[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    if (Creature* creature = me->SummonCreature(entry, Locations[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
                     {
                         AddGUID[i] = creature->GetGUID();
                         AddId[i] = entry;
@@ -209,7 +209,7 @@ public:
             {
                 for (uint8 i = 0; i < 4; ++i)
                 {
-                    if (Creature* creature = me->SummonCreature(AddId[i], Locations[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    if (Creature* creature = me->SummonCreature(AddId[i], Locations[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
                         AddGUID[i] = creature->GetGUID();
                 }
             }

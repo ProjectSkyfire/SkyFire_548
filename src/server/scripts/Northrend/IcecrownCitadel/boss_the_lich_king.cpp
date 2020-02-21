@@ -757,7 +757,7 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_VALKYR_SHADOWGUARD:
                     case NPC_RAGING_SPIRIT:
                     case NPC_VILE_SPIRIT:
-                        summon->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
+                        summon->ToTempSummon()->SetTempSummonType(TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                         break;
                     default:
                         break;
@@ -1399,7 +1399,7 @@ class npc_raging_spirit : public CreatureScript
                 if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
                     lichKing->AI()->SummonedCreatureDespawn(me);
                 if (TempSummon* summon = me->ToTempSummon())
-                    summon->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
+                    summon->SetTempSummonType(TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE

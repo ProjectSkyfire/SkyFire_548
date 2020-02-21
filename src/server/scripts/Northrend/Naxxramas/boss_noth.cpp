@@ -144,7 +144,7 @@ public:
             {
                 uint32 pos = rand()%MAX_SUMMON_POS;
                 me->SummonCreature(entry, SummonPos[pos][0], SummonPos[pos][1], SummonPos[pos][2],
-                    SummonPos[pos][3], TEMPSUMMON_CORPSE_DESPAWN, 60000);
+                    SummonPos[pos][3], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 60000);
             }
         }
 

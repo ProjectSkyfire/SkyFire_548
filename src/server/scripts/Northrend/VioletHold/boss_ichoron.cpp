@@ -241,7 +241,7 @@ public:
                             for (uint8 i = 0; i < 10; i++)
                             {
                                 int tmp = urand(0, MAX_SPAWN_LOC-1);
-                                me->SummonCreature(NPC_ICHOR_GLOBULE, SpawnLoc[tmp], TEMPSUMMON_CORPSE_DESPAWN);
+                                me->SummonCreature(NPC_ICHOR_GLOBULE, SpawnLoc[tmp], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                             }
                         }
                     }

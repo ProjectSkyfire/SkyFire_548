@@ -26,7 +26,7 @@
 #include "Player.h"
 
 TempSummon::TempSummon(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) :
-Creature(isWorldObject), m_Properties(properties), m_type(TEMPSUMMON_MANUAL_DESPAWN),
+Creature(isWorldObject), m_Properties(properties), m_type(TempSummonType::TEMPSUMMON_MANUAL_DESPAWN),
 m_timer(0), m_lifetime(0)
 {
     m_summonerGUID = owner ? owner->GetGUID() : 0;
@@ -54,9 +54,9 @@ void TempSummon::Update(uint32 diff)
     }
     switch (m_type)
     {
-        case TEMPSUMMON_MANUAL_DESPAWN:
+        case TempSummonType::TEMPSUMMON_MANUAL_DESPAWN:
             break;
-        case TEMPSUMMON_TIMED_DESPAWN:
+        case TempSummonType::TEMPSUMMON_TIMED_DESPAWN:
         {
             if (m_timer <= diff)
             {
@@ -67,7 +67,7 @@ void TempSummon::Update(uint32 diff)
             m_timer -= diff;
             break;
         }
-        case TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT:
+        case TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT:
         {
             if (!IsInCombat())
             {
@@ -85,7 +85,7 @@ void TempSummon::Update(uint32 diff)
             break;
         }
 
-        case TEMPSUMMON_CORPSE_TIMED_DESPAWN:
+        case TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN:
         {
             if (m_deathState == DeathState::CORPSE)
             {
@@ -99,7 +99,7 @@ void TempSummon::Update(uint32 diff)
             }
             break;
         }
-        case TEMPSUMMON_CORPSE_DESPAWN:
+        case TempSummonType::TEMPSUMMON_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (m_deathState == DeathState::CORPSE || m_deathState == DeathState::DEAD)
@@ -110,7 +110,7 @@ void TempSummon::Update(uint32 diff)
 
             break;
         }
-        case TEMPSUMMON_DEAD_DESPAWN:
+        case TempSummonType::TEMPSUMMON_DEAD_DESPAWN:
         {
             if (m_deathState == DeathState::DEAD)
             {
@@ -119,7 +119,7 @@ void TempSummon::Update(uint32 diff)
             }
             break;
         }
-        case TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
+        case TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (m_deathState == DeathState::CORPSE || m_deathState == DeathState::DEAD)
@@ -142,7 +142,7 @@ void TempSummon::Update(uint32 diff)
                 m_timer = m_lifetime;
             break;
         }
-        case TEMPSUMMON_TIMED_OR_DEAD_DESPAWN:
+        case TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (m_deathState == DeathState::DEAD)
@@ -167,7 +167,7 @@ void TempSummon::Update(uint32 diff)
         }
         default:
             UnSummon();
-            SF_LOG_ERROR("entities.unit", "Temporary summoned creature (entry: %u) have unknown type %u of ", GetEntry(), m_type);
+            SF_LOG_ERROR("entities.unit", "Temporary summoned creature (entry: %u) have unknown type %u of ", GetEntry(), uint32(m_type));
             break;
     }
 }
@@ -179,8 +179,8 @@ void TempSummon::InitStats(uint32 duration)
     m_timer = duration;
     m_lifetime = duration;
 
-    if (m_type == TEMPSUMMON_MANUAL_DESPAWN)
-        m_type = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
+    if (m_type == TempSummonType::TEMPSUMMON_MANUAL_DESPAWN)
+        m_type = (duration == 0) ? TempSummonType::TEMPSUMMON_DEAD_DESPAWN : TempSummonType::TEMPSUMMON_TIMED_DESPAWN;
 
     Unit* owner = GetSummoner();
 

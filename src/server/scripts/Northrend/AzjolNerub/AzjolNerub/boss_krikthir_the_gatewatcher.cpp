@@ -123,22 +123,22 @@ public:
 
         void Summon()
         {
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[0], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[0], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[1], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[1], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[2], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[2], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[3], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[3], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_INFECTIOR, SpawnPoint[4], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[4], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_INFECTIOR, SpawnPoint[5], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[5], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_INFECTIOR, SpawnPoint[6], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[6], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[7], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
-                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[7], TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[0], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[0], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[1], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[1], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[2], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[2], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[3], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[3], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_INFECTIOR, SpawnPoint[4], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[4], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_INFECTIOR, SpawnPoint[5], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[5], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_INFECTIOR, SpawnPoint[6], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[6], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[7], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
+                me->SummonCreature(NPC_SKITTERING_SWARMER, SpawnPoint[7], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 25*IN_MILLISECONDS);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

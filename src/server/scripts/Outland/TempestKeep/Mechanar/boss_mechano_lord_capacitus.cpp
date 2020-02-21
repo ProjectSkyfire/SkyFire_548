@@ -137,7 +137,7 @@ class boss_mechano_lord_capacitus : public CreatureScript
                         case EVENT_SUMMON_NETHER_CHARGE:
                             Position pos;
                             me->GetRandomNearPosition(pos, 5.0f);
-                            me->SummonCreature(NPC_NETHER_CHARGE, pos, TEMPSUMMON_TIMED_DESPAWN, 18000);
+                            me->SummonCreature(NPC_NETHER_CHARGE, pos, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 18000);
                             events.ScheduleEvent(EVENT_SUMMON_NETHER_CHARGE, 10 * IN_MILLISECONDS);
                             break;
                         case EVENT_BERSERK:

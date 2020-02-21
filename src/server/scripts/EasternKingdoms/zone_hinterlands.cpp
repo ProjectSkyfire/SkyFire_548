@@ -118,7 +118,7 @@ public:
                         const Position src = {147.927444f, -3851.513428f, 130.893f, 0};
                         Position dst;
                         me->GetRandomPoint(src, 7.0f, dst);
-                        DoSummon(NPC_MARAUDING_OWL, dst, 25000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+                        DoSummon(NPC_MARAUDING_OWL, dst, 25000, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN);
                     }
                     break;
                 case 44:
@@ -127,7 +127,7 @@ public:
                         const Position src = {-141.151581f, -4291.213867f, 120.130f, 0};
                         Position dst;
                         me->GetRandomPoint(src, 7.0f, dst);
-                        me->SummonCreature(NPC_VILE_AMBUSHER, dst, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+                        me->SummonCreature(NPC_VILE_AMBUSHER, dst, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
                     }
                     break;
             }

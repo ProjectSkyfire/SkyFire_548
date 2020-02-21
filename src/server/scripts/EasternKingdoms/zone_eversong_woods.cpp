@@ -112,9 +112,9 @@ public:
 
             if (Summon)
             {
-                me->SummonCreature(NPC_GHARZUL, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                me->SummonCreature(NPC_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                me->SummonCreature(NPC_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+                me->SummonCreature(NPC_GHARZUL, 8745, -7134.32f, 35.22f, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 4000);
+                me->SummonCreature(NPC_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 4000);
+                me->SummonCreature(NPC_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 4000);
                 Summon = false;
             }
         }
@@ -232,9 +232,9 @@ public:
                 uint32 ran1 = rand()%8;
                 uint32 ran2 = rand()%8;
                 uint32 ran3 = rand()%8;
-                me->SummonCreature(NPC_ENRAGED_WRAITH, SpawnLocations[ran1].x, SpawnLocations[ran1].y, SpawnLocations[ran1].z, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10000);
-                me->SummonCreature(NPC_ENRAGED_WRAITH, SpawnLocations[ran2].x, SpawnLocations[ran2].y, SpawnLocations[ran2].z, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10000);
-                me->SummonCreature(NPC_ENRAGED_WRAITH, SpawnLocations[ran3].x, SpawnLocations[ran3].y, SpawnLocations[ran3].z, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10000);
+                me->SummonCreature(NPC_ENRAGED_WRAITH, SpawnLocations[ran1].x, SpawnLocations[ran1].y, SpawnLocations[ran1].z, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10000);
+                me->SummonCreature(NPC_ENRAGED_WRAITH, SpawnLocations[ran2].x, SpawnLocations[ran2].y, SpawnLocations[ran2].z, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10000);
+                me->SummonCreature(NPC_ENRAGED_WRAITH, SpawnLocations[ran3].x, SpawnLocations[ran3].y, SpawnLocations[ran3].z, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10000);
                 WaveTimer = 30000;
             } else WaveTimer -= diff;
         }

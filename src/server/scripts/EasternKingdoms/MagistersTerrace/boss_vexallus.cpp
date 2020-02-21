@@ -169,10 +169,10 @@ public:
                         DoCast(me, SPELL_SUMMON_PURE_ENERGY, false);
 
                     //below are workaround summons, remove when summoning spells w/implicitTarget 73 implemented in the core
-                    me->SummonCreature(NPC_PURE_ENERGY, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(NPC_PURE_ENERGY, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
 
                     if (IsHeroic())
-                        me->SummonCreature(NPC_PURE_ENERGY, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        me->SummonCreature(NPC_PURE_ENERGY, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
                 }
 
                 if (ChainLightningTimer <= diff)
