@@ -1,0 +1,1 @@
+UPDATE `version` SET `core_version`='SkyFire 5.x.x rev. dd191e7d75af 2020-02-21 00:00:00 +0100 (master branch) (Win64, Release)', `core_revision`='dd191e7d75af' WHERE `core_version`='SkyFire 5.x.x rev. 6d20c5df6d59 2019-04-28 00:00:00 +0100 (master branch) (Win64, Debug)';
