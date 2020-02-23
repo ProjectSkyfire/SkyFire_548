@@ -640,6 +640,15 @@ struct _Socket
 
 struct ItemTemplate
 {
+    ItemTemplate() : ItemId(0), Class(0), SubClass(0), SoundOverrideSubclass(0), DisplayInfoID(0), Quality(0), Flags(0), Flags2(0), Flags3(0),
+        Unk430_1(0.0f), Unk430_2(0.0f), BuyCount(0), BuyPrice(0), SellPrice(0), InventoryType(0), AllowableClass(0), AllowableRace(0), ItemLevel(0),
+        RequiredLevel(0), RequiredSkill(0), RequiredSkillRank(0), RequiredSpell(0), RequiredHonorRank(0), RequiredCityRank(0), RequiredReputationFaction(0),
+        RequiredReputationRank(0), MaxCount(0), Stackable(0), ContainerSlots(0), ScalingStatDistribution(0), DamageType(0), Delay(0), RangedModRange(0.0f),
+        Bonding(0), PageText(0), LanguageID(0), PageMaterial(0), StartQuest(0), LockID(0), Material(0), Sheath(0), RandomProperty(0), RandomSuffix(0), ItemSet(0),
+        MaxDurability(0), Area(0), Map(0), BagFamily(0), TotemCategory(0), socketBonus(0), GemProperties(0), ArmorDamageModifier(0.0f), Duration(0), ItemLimitCategory(0),
+        HolidayId(0), StatScalingFactor(0.0f), CurrencySubstitutionId(0), CurrencySubstitutionCount(0), DamageMin(0.0f), DamageMax(0.0f), DPS(0.0f), Armor(0), SpellPPMRate(0.0f),
+        ScriptId(0), DisenchantID(0), RequiredDisenchantSkill(0), FoodType(0), MinMoneyLoot(0), MaxMoneyLoot(0), FlagsCu(0) {}
+
     uint32 ItemId;
     uint32 Class;                                           // id from ItemClass.dbc
     uint32 SubClass;                                        // id from ItemSubClass.dbc
@@ -670,12 +679,12 @@ struct ItemTemplate
     int32  MaxCount;                                        // <= 0: no limit
     int32  Stackable;                                       // 0: not allowed, -1: put in player coin info tab and don't limit stacking (so 1 slot)
     uint32 ContainerSlots;
-    _ItemStat ItemStat[MAX_ITEM_PROTO_STATS];
+    _ItemStat ItemStat[MAX_ITEM_PROTO_STATS] = {};
     uint32 ScalingStatDistribution;                         // id from ScalingStatDistribution.dbc
     uint32 DamageType;                                      // id from Resistances.dbc
     uint32 Delay;
     float  RangedModRange;
-    _Spell Spells[MAX_ITEM_PROTO_SPELLS];
+    _Spell Spells[MAX_ITEM_PROTO_SPELLS] = {};
     uint32 Bonding;
     std::string Description;
     uint32 PageText;
@@ -693,7 +702,7 @@ struct ItemTemplate
     uint32 Map;                                             // id from Map.dbc
     uint32 BagFamily;                                       // bit mask (1 << id from ItemBagFamily.dbc)
     uint32 TotemCategory;                                   // id from TotemCategory.dbc
-    _Socket Socket[MAX_ITEM_PROTO_SOCKETS];
+    _Socket Socket[MAX_ITEM_PROTO_SOCKETS] = {};
     uint32 socketBonus;                                     // id from SpellItemEnchantment.dbc
     uint32 GemProperties;                                   // id from GemProperties.dbc
     float  ArmorDamageModifier;
