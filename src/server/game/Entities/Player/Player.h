@@ -1221,6 +1221,7 @@ class TradeData
 
 struct ResurrectionData
 {
+    ResurrectionData() : GUID(0), Health(0), Mana(0), Aura(0) {}
     uint64 GUID;
     WorldLocation Location;
     uint32 Health;

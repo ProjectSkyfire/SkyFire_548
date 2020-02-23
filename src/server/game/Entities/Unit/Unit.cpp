@@ -9257,10 +9257,13 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
-    AuraEffectList const& critAuras = victim->GetAuraEffectsByType(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER);
-    for (AuraEffectList::const_iterator i = critAuras.begin(); i != critAuras.end(); ++i)
-        if ((*i)->GetCasterGUID() == GetGUID() && (*i)->IsAffectingSpell(spellProto))
-            crit_chance += (*i)->GetAmount();
+    if (victim)
+    {
+        AuraEffectList const& critAuras = victim->GetAuraEffectsByType(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER);
+        for (AuraEffectList::const_iterator i = critAuras.begin(); i != critAuras.end(); ++i)
+            if ((*i)->GetCasterGUID() == GetGUID() && (*i)->IsAffectingSpell(spellProto))
+                crit_chance += (*i)->GetAmount();
+    }
 
     crit_chance = crit_chance > 0.0f ? crit_chance : 0.0f;
     if (roll_chance_f(crit_chance))
@@ -14047,7 +14050,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     {
         SF_LOG_DEBUG("entities.unit", "DealDamageNotPlayer");
 
-        if (!creature->IsPet())
+        if (creature && !creature->IsPet())
         {
             creature->DeleteThreatList();
             CreatureTemplate const* cInfo = creature->GetCreatureTemplate();
@@ -14060,7 +14063,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
             ToCreature()->AI()->KilledUnit(victim);
 
         // Call creature just died function
-        if (creature->IsAIEnabled)
+        if (creature && creature->IsAIEnabled)
             creature->AI()->JustDied(this);
 
         if (TempSummon* summon = creature->ToTempSummon())
@@ -14069,7 +14072,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                     summoner->ToCreature()->AI()->SummonedCreatureDies(creature, this);
 
         // Dungeon specific stuff, only applies to players killing creatures
-        if (creature->GetInstanceId())
+        if (creature && creature->GetInstanceId())
         {
             Map* instanceMap = creature->GetMap();
             Player* creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
