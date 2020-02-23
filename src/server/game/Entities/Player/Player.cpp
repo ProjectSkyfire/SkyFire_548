@@ -17225,8 +17225,47 @@ void Player::KillCreditGO(uint32 entry, uint64 guid)
 
 void Player::TalkedToCreature(uint32 entry, uint64 guid)
 {
-    // here to not break old scripts, this function should be removed at some point
-    QuestObjectiveSatisfy(entry, 1, QUEST_OBJECTIVE_TYPE_NPC /*QUEST_OBJECTIVE_TYPE_NPC_INTERACT*/, guid);
+    int16 addTalkCount = 1;
+    uint32 realEntry = entry;
+    for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+    {
+        uint32 questid = GetQuestSlotQuestId(i);
+        if (!questid)
+            continue;
+
+        Quest const* qInfo = sObjectMgr->GetQuestTemplate(questid);
+        if (!qInfo)
+            continue;
+
+        QuestStatusData& q_status = m_QuestStatus[questid];
+        if (q_status.Status == QUEST_STATUS_INCOMPLETE)
+        {
+            for (QuestObjectiveSet::const_iterator citr = qInfo->m_questObjectives.begin(); citr != qInfo->m_questObjectives.end(); ++citr)
+            {
+                QuestObjective const* questObjective = *citr;
+                {
+                    if (questObjective->Type == QUEST_OBJECTIVE_TYPE_NPC_INTERACT && questObjective->ObjectId == realEntry)
+                    {
+                        uint32 currentCounter = GetQuestObjectiveCounter(questObjective->Id);
+                        if (currentCounter < uint32(questObjective->Amount))
+                        {
+                            m_questObjectiveStatus[questObjective->Id] += addTalkCount;
+
+                            m_questObjectiveStatusSave[questObjective->Id] = true;
+                            m_QuestStatusSave[questid] = true;
+
+                            SendQuestUpdateAddCredit(qInfo, questObjective, ObjectGuid(guid), currentCounter, addTalkCount);
+                        }
+
+                        if (CanCompleteQuest(questid))
+                            CompleteQuest(questid);
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Player::MoneyChanged(uint32 count)
