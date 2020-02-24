@@ -320,7 +320,7 @@ public:
         }
 
         // Get security level of player, whom this ticket is assigned to
-        uint32 security = SEC_PLAYER;
+        AccountTypes security = AccountTypes::SEC_PLAYER;
         Player* assignedPlayer = ticket->GetAssignedPlayer();
         if (assignedPlayer && assignedPlayer->IsInWorld())
             security = assignedPlayer->GetSession()->GetSecurity();
@@ -333,7 +333,7 @@ public:
 
         // Check security
         //! If no m_session present it means we're issuing this command from the console
-        uint32 mySecurity = handler->GetSession() ? handler->GetSession()->GetSecurity() : SEC_CONSOLE;
+        AccountTypes mySecurity = handler->GetSession() ? handler->GetSession()->GetSecurity() : AccountTypes::SEC_CONSOLE;
         if (security > mySecurity)
         {
             handler->SendSysMessage(LANG_COMMAND_TICKETUNASSIGNSECURITY);
@@ -583,7 +583,7 @@ public:
         }
 
         // Get security level of player, whom this ticket is assigned to
-        uint32 security = SEC_PLAYER;
+        AccountTypes security = AccountTypes::SEC_PLAYER;
         Player* assignedPlayer = ticket->GetAssignedPlayer();
         if (assignedPlayer)
             security = assignedPlayer->GetSession()->GetSecurity();
@@ -596,7 +596,7 @@ public:
 
         // Check security
         //! If no m_session present it means we're issuing this command from the console
-        uint32 mySecurity = handler->GetSession() ? handler->GetSession()->GetSecurity() : SEC_CONSOLE;
+        AccountTypes mySecurity = handler->GetSession() ? handler->GetSession()->GetSecurity() : AccountTypes::SEC_CONSOLE;
         if (security > mySecurity)
         {
             handler->SendSysMessage(LANG_COMMAND_TICKETUNASSIGNSECURITY);

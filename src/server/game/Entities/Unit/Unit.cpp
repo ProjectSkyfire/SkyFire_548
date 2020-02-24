@@ -10719,15 +10719,15 @@ bool Unit::IsAlwaysDetectableFor(WorldObject const* seer) const
 
 bool Unit::IsVisible() const
 {
-    return (m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM) > SEC_PLAYER) ? false : true;
+    return (m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM) > uint32(AccountTypes::SEC_PLAYER)) ? false : true;
 }
 
 void Unit::SetVisible(bool x)
 {
     if (!x)
-        m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_GAMEMASTER);
+        m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, uint32(AccountTypes::SEC_GAMEMASTER));
     else
-        m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
+        m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, uint32(AccountTypes::SEC_PLAYER));
 
     UpdateObjectVisibility();
 }

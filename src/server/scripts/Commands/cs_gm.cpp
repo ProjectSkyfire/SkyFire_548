@@ -140,15 +140,15 @@ public:
                 }
                 std::string const& name = itr->second->GetName();
                 uint8 size = name.size();
-                uint8 security = itrSec;
+                AccountTypes security = itrSec;
                 uint8 max = ((16 - size) / 2);
                 uint8 max2 = max;
                 if ((max + max2 + size) == 16)
                     max2 = max - 1;
                 if (handler->GetSession())
-                    handler->PSendSysMessage("|    %s GMLevel %u", name.c_str(), security);
+                    handler->PSendSysMessage("|    %s GMLevel %u", name.c_str(), uint8(security));
                 else
-                    handler->PSendSysMessage("|%*s%s%*s|   %u  |", max, " ", name.c_str(), max2, " ", security);
+                    handler->PSendSysMessage("|%*s%s%*s|   %u  |", max, " ", name.c_str(), max2, " ", uint8(security));
             }
         }
         if (footer)
@@ -163,7 +163,7 @@ public:
     {
         ///- Get the accounts with GM Level >0
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_GM_ACCOUNTS);
-        stmt->setUInt8(0, uint8(SEC_MODERATOR));
+        stmt->setUInt8(0, uint8(AccountTypes::SEC_MODERATOR));
         stmt->setInt32(1, int32(realmID));
         PreparedQueryResult result = LoginDatabase.Query(stmt);
 

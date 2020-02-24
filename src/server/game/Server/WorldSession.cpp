@@ -1241,13 +1241,13 @@ void WorldSession::LoadPermissions()
     uint32 id = GetAccountId();
     std::string name;
     AccountMgr::GetName(id, name);
-    uint8 secLevel = GetSecurity();
+    AccountTypes secLevel = GetSecurity();
 
-    _RBACData = new rbac::RBACData(id, name, realmID, secLevel);
+    _RBACData = new rbac::RBACData(id, name, realmID, uint8(secLevel));
     _RBACData->LoadFromDB();
 
     SF_LOG_DEBUG("rbac", "WorldSession::LoadPermissions [AccountId: %u, Name: %s, realmId: %d, secLevel: %u]",
-                   id, name.c_str(), realmID, secLevel);
+                   id, name.c_str(), realmID, uint8(secLevel));
 }
 
 rbac::RBACData* WorldSession::GetRBACData()

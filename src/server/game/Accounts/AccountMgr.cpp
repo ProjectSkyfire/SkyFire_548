@@ -257,23 +257,23 @@ uint32 AccountMgr::GetId(std::string const& username)
     return (result) ? (*result)[0].GetUInt32() : 0;
 }
 
-uint32 AccountMgr::GetSecurity(uint32 accountId)
+AccountTypes AccountMgr::GetSecurity(uint32 accountId)
 {
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCOUNT_ACCESS_GMLEVEL);
     stmt->setUInt32(0, accountId);
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
-    return (result) ? (*result)[0].GetUInt8() : uint32(SEC_PLAYER);
+    return (result) ? AccountTypes((*result)[0].GetUInt8()) : AccountTypes::SEC_PLAYER;
 }
 
-uint32 AccountMgr::GetSecurity(uint32 accountId, int32 realmId)
+AccountTypes AccountMgr::GetSecurity(uint32 accountId, int32 realmId)
 {
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
     stmt->setUInt32(0, accountId);
     stmt->setInt32(1, realmId);
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
-    return (result) ? (*result)[0].GetUInt8() : uint32(SEC_PLAYER);
+    return (result) ? AccountTypes((*result)[0].GetUInt8()) : AccountTypes::SEC_PLAYER;
 }
 
 bool AccountMgr::GetName(uint32 accountId, std::string& name)
@@ -381,19 +381,19 @@ std::string AccountMgr::CalculateShaPassHash(std::string const& name, std::strin
     return ByteArrayToHexStr(sha.GetDigest(), sha.GetLength());
 }
 
-bool AccountMgr::IsPlayerAccount(uint32 gmlevel)
+bool AccountMgr::IsPlayerAccount(AccountTypes gmlevel)
 {
-    return gmlevel == SEC_PLAYER;
+    return gmlevel == AccountTypes::SEC_PLAYER;
 }
 
-bool AccountMgr::IsAdminAccount(uint32 gmlevel)
+bool AccountMgr::IsAdminAccount(AccountTypes gmlevel)
 {
-    return gmlevel >= SEC_ADMINISTRATOR && gmlevel <= SEC_CONSOLE;
+    return gmlevel >= AccountTypes::SEC_ADMINISTRATOR && gmlevel <= AccountTypes::SEC_CONSOLE;
 }
 
-bool AccountMgr::IsConsoleAccount(uint32 gmlevel)
+bool AccountMgr::IsConsoleAccount(AccountTypes gmlevel)
 {
-    return gmlevel == SEC_CONSOLE;
+    return gmlevel == AccountTypes::SEC_CONSOLE;
 }
 
 void AccountMgr::LoadRBAC()

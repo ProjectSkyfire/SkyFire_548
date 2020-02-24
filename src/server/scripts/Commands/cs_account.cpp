@@ -636,8 +636,8 @@ public:
 
         std::string targetAccountName;
         uint32 targetAccountId = 0;
-        uint32 targetSecurity = 0;
-        uint32 gm = 0;
+        AccountTypes targetSecurity = AccountTypes::SEC_PLAYER;
+        AccountTypes gm = AccountTypes::SEC_PLAYER;
         char* arg1 = strtok((char*)args, " ");
         char* arg2 = strtok(NULL, " ");
         char* arg3 = strtok(NULL, " ");
@@ -667,8 +667,8 @@ public:
         }
 
         // Check for invalid specified GM level.
-        gm = (isAccountNameGiven) ? atoi(arg2) : atoi(arg1);
-        if (gm > SEC_CONSOLE)
+        gm = AccountTypes((isAccountNameGiven) ? atoi(arg2) : atoi(arg1));
+        if (gm > AccountTypes::SEC_CONSOLE)
         {
             handler->SendSysMessage(LANG_BAD_VALUE);
             handler->SetSentErrorMessage(true);
@@ -678,11 +678,11 @@ public:
         // handler->getSession() == NULL only for console
         targetAccountId = (isAccountNameGiven) ? AccountMgr::GetId(targetAccountName) : handler->getSelectedPlayer()->GetSession()->GetAccountId();
         int32 gmRealmID = (isAccountNameGiven) ? atoi(arg3) : atoi(arg2);
-        uint32 playerSecurity;
+        AccountTypes playerSecurity;
         if (handler->GetSession())
             playerSecurity = AccountMgr::GetSecurity(handler->GetSession()->GetAccountId(), gmRealmID);
         else
-            playerSecurity = SEC_CONSOLE;
+            playerSecurity = AccountTypes::SEC_CONSOLE;
 
         // can set security level only for target with less security and to less security that we have
         // This also restricts setting handler's own security.

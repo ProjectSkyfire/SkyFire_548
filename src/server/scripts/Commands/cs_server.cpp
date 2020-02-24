@@ -149,13 +149,13 @@ public:
             int32 limit = strlen(paramStr);
 
             if (strncmp(paramStr, "player", limit) == 0)
-                sWorld->SetPlayerSecurityLimit(SEC_PLAYER);
+                sWorld->SetPlayerSecurityLimit(AccountTypes::SEC_PLAYER);
             else if (strncmp(paramStr, "moderator", limit) == 0)
-                sWorld->SetPlayerSecurityLimit(SEC_MODERATOR);
+                sWorld->SetPlayerSecurityLimit(AccountTypes::SEC_MODERATOR);
             else if (strncmp(paramStr, "gamemaster", limit) == 0)
-                sWorld->SetPlayerSecurityLimit(SEC_GAMEMASTER);
+                sWorld->SetPlayerSecurityLimit(AccountTypes::SEC_GAMEMASTER);
             else if (strncmp(paramStr, "administrator", limit) == 0)
-                sWorld->SetPlayerSecurityLimit(SEC_ADMINISTRATOR);
+                sWorld->SetPlayerSecurityLimit(AccountTypes::SEC_ADMINISTRATOR);
             else if (strncmp(paramStr, "reset", limit) == 0)
             {
                 sWorld->SetPlayerAmountLimit(sConfigMgr->GetIntDefault("PlayerLimit", 100));
@@ -176,16 +176,16 @@ public:
         char const* secName = "";
         switch (allowedAccountType)
         {
-            case SEC_PLAYER:
+            case AccountTypes::SEC_PLAYER:
                 secName = "Player";
                 break;
-            case SEC_MODERATOR:
+            case AccountTypes::SEC_MODERATOR:
                 secName = "Moderator";
                 break;
-            case SEC_GAMEMASTER:
+            case AccountTypes::SEC_GAMEMASTER:
                 secName = "Gamemaster";
                 break;
-            case SEC_ADMINISTRATOR:
+            case AccountTypes::SEC_ADMINISTRATOR:
                 secName = "Administrator";
                 break;
             default:

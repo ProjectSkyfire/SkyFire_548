@@ -102,7 +102,7 @@ int32 World::m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_
 World::World()
 {
     m_playerLimit = 0;
-    m_allowedSecurityLevel = SEC_PLAYER;
+    m_allowedSecurityLevel = AccountTypes::SEC_PLAYER;
     m_allowMovement = true;
     m_ShutdownMask = 0;
     m_ShutdownTimer = 0;
@@ -907,8 +907,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_GM_CHAT]               = sConfigMgr->GetIntDefault("GM.Chat", 2);
     m_int_configs[CONFIG_GM_WHISPERING_TO]      = sConfigMgr->GetIntDefault("GM.WhisperingTo", 2);
 
-    m_int_configs[CONFIG_GM_LEVEL_IN_GM_LIST]   = sConfigMgr->GetIntDefault("GM.InGMList.Level", SEC_ADMINISTRATOR);
-    m_int_configs[CONFIG_GM_LEVEL_IN_WHO_LIST]  = sConfigMgr->GetIntDefault("GM.InWhoList.Level", SEC_ADMINISTRATOR);
+    m_int_configs[CONFIG_GM_LEVEL_IN_GM_LIST]   = sConfigMgr->GetIntDefault("GM.InGMList.Level", uint8(AccountTypes::SEC_ADMINISTRATOR));
+    m_int_configs[CONFIG_GM_LEVEL_IN_WHO_LIST]  = sConfigMgr->GetIntDefault("GM.InWhoList.Level", uint8(AccountTypes::SEC_ADMINISTRATOR));
     m_int_configs[CONFIG_START_GM_LEVEL]        = sConfigMgr->GetIntDefault("GM.StartLevel", 1);
     if (m_int_configs[CONFIG_START_GM_LEVEL] < m_int_configs[CONFIG_START_PLAYER_LEVEL])
     {
@@ -983,7 +983,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY] = sConfigMgr->GetBoolDefault("SaveRespawnTimeImmediately", true);
     m_bool_configs[CONFIG_WEATHER] = sConfigMgr->GetBoolDefault("ActivateWeather", true);
 
-    m_int_configs[CONFIG_DISABLE_BREATHING] = sConfigMgr->GetIntDefault("DisableWaterBreath", SEC_CONSOLE);
+    m_int_configs[CONFIG_DISABLE_BREATHING] = sConfigMgr->GetIntDefault("DisableWaterBreath", uint8(AccountTypes::SEC_CONSOLE));
 
     if (reload)
     {
@@ -3072,7 +3072,7 @@ void World::LoadDBAllowedSecurityLevel()
 
 void World::SetPlayerSecurityLimit(AccountTypes _sec)
 {
-    AccountTypes sec = _sec < SEC_CONSOLE ? _sec : SEC_PLAYER;
+    AccountTypes sec = _sec < AccountTypes::SEC_CONSOLE ? _sec : AccountTypes::SEC_PLAYER;
     bool update = sec > m_allowedSecurityLevel;
     m_allowedSecurityLevel = sec;
     if (update)

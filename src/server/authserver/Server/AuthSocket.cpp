@@ -200,7 +200,7 @@ Patcher PatchesCache;
 // Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(RealmSocket& socket) :
     pPatch(NULL), socket_(socket), _authed(false), _build(0),
-    _expversion(0), _accountSecurityLevel(SEC_PLAYER)
+    _expversion(0), _accountSecurityLevel(AccountTypes::SEC_PLAYER)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -529,8 +529,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     if (securityFlags & 0x04)               // Security token input
                         pkt << uint8(1);
 
-                    uint8 secLevel = fields[5].GetUInt8();
-                    _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+                    AccountTypes secLevel = AccountTypes(fields[5].GetUInt8());
+                    _accountSecurityLevel = secLevel <= AccountTypes::SEC_ADMINISTRATOR ? AccountTypes(secLevel) : AccountTypes::SEC_ADMINISTRATOR;
 
                     _localizationName.resize(4);
                     for (int i = 0; i < 4; ++i)
@@ -824,8 +824,8 @@ bool AuthSocket::_HandleReconnectChallenge()
     std::reverse(_os.begin(), _os.end());
 
     Field* fields = result->Fetch();
-    uint8 secLevel = fields[2].GetUInt8();
-    _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+    AccountTypes secLevel = AccountTypes(fields[2].GetUInt8());
+    _accountSecurityLevel = secLevel <= AccountTypes::SEC_ADMINISTRATOR ? AccountTypes(secLevel) : AccountTypes::SEC_ADMINISTRATOR;
 
     K.SetHexStr ((*result)[0].GetCString());
 

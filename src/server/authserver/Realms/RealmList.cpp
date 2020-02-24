@@ -89,7 +89,7 @@ void RealmList::UpdateRealms(bool init)
             uint8 icon                  = fields[6].GetUInt8();
             RealmFlags flag             = RealmFlags(fields[7].GetUInt8());
             uint8 timezone              = fields[8].GetUInt8();
-            uint8 allowedSecurityLevel  = fields[9].GetUInt8();
+            AccountTypes allowedSecurityLevel  = AccountTypes(fields[9].GetUInt8());
             float pop                   = fields[10].GetFloat();
             uint32 build                = fields[11].GetUInt32();
 
@@ -97,7 +97,7 @@ void RealmList::UpdateRealms(bool init)
             ACE_INET_Addr localAddr(port, localAddress.c_str(), AF_INET);
             ACE_INET_Addr submask(0, localSubmask.c_str(), AF_INET);
 
-            UpdateRealm(realmId, name, externalAddr, localAddr, submask, icon, flag, timezone, (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), pop, build);
+            UpdateRealm(realmId, name, externalAddr, localAddr, submask, icon, flag, timezone, (allowedSecurityLevel <= AccountTypes::SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : AccountTypes::SEC_ADMINISTRATOR), pop, build);
 
             if (init)
                 SF_LOG_INFO("server.authserver", "Added realm \"%s\" at %s:%u.", name.c_str(), m_realms[name].ExternalAddress.get_host_addr(), port);
