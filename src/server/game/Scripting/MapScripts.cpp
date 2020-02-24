@@ -493,36 +493,30 @@ void Map::ScriptsProcess()
                 break;
 
             case SCRIPT_COMMAND_FLAG_SET:
-                if (source)
+                // Source or target must be Creature.
+                if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
-                   // Source or target must be Creature.
-                    if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
-                    {
+                // Validate field number.
+                if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
+                    SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
+                        step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
+                        cSource->GetValuesCount(), uint8(cSource->GetTypeId()), cSource->GetEntry(), cSource->GetGUIDLow());
+                else
+                    cSource->SetFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
+                }
+                break;
+
+            case SCRIPT_COMMAND_FLAG_REMOVE:
+                // Source or target must be Creature.
+                if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                {
                     // Validate field number.
                     if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
                         SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
                             step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
-                            source->GetValuesCount(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
+                            cSource->GetValuesCount(), uint8(cSource->GetTypeId()), cSource->GetEntry(), cSource->GetGUIDLow());
                     else
-                        cSource->SetFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
-                    }
-            }
-            break;
-
-            case SCRIPT_COMMAND_FLAG_REMOVE:
-                if (source)
-                {
-                    // Source or target must be Creature.
-                    if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
-                    {
-                        // Validate field number.
-                        if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
-                            SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
-                                step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
-                                source->GetValuesCount(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
-                        else
-                            cSource->RemoveFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
-                    }
+                        cSource->RemoveFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
                 }
                 break;
 
