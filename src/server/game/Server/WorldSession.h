@@ -71,7 +71,7 @@ namespace rbac
 class RBACData;
 }
 
-enum AccountDataType
+enum class AccountDataType
 {
     GLOBAL_CONFIG_CACHE             = 0,                    // 0x01 g
     PER_CHARACTER_CONFIG_CACHE      = 1,                    // 0x02 p
@@ -80,10 +80,10 @@ enum AccountDataType
     GLOBAL_MACROS_CACHE             = 4,                    // 0x10 g
     PER_CHARACTER_MACROS_CACHE      = 5,                    // 0x20 p
     PER_CHARACTER_LAYOUT_CACHE      = 6,                    // 0x40 p
-    PER_CHARACTER_CHAT_CACHE        = 7                     // 0x80 p
+    PER_CHARACTER_CHAT_CACHE        = 7,                    // 0x80 p
+    NUM_ACCOUNT_DATA_TYPES          = 8
 };
 
-#define NUM_ACCOUNT_DATA_TYPES        8
 
 #define GLOBAL_CACHE_MASK           0x15
 #define PER_CHARACTER_CACHE_MASK    0xEA
@@ -385,7 +385,7 @@ class WorldSession
         bool CheckStableMaster(uint64 guid);
 
         // Account Data
-        AccountData* GetAccountData(AccountDataType type) { return &m_accountData[type]; }
+        AccountData* GetAccountData(AccountDataType type) { return &m_accountData[uint8(type)]; }
         void SetAccountData(AccountDataType type, time_t tm, std::string const& data);
         void SendAccountDataTimes(uint32 mask);
         void LoadGlobalAccountData();
@@ -1173,7 +1173,7 @@ class WorldSession
         LocaleConstant m_sessionDbLocaleIndex;
         uint32 m_latency;
         uint32 m_clientTimeDelay;
-        AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
+        AccountData m_accountData[uint8(AccountDataType::NUM_ACCOUNT_DATA_TYPES)];
         uint32 m_Tutorials[MAX_ACCOUNT_TUTORIAL_VALUES];
         bool   m_TutorialsChanged;
         AddonsList m_addonsList;

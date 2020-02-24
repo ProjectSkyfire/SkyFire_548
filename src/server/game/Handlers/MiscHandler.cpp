@@ -1191,16 +1191,20 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 
     type = recvData.ReadBits(3);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    AccountDataType UADType = AccountDataType(type);
+    if (UADType >= AccountDataType::NUM_ACCOUNT_DATA_TYPES)
+    {
+        SF_LOG_DEBUG("network", "UAD: Unknown account data type: %u", type);
         return;
+    }
 
     std::string adata;
     dest >> adata;
 
-    SetAccountData(AccountDataType(type), timestamp, adata);
+    SetAccountData(UADType, timestamp, adata);
 
     WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4 + 4);
-    data << uint32(type);
+    data << uint32(UADType);
     data << uint32(0);
     SendPacket(&data);
 }
@@ -1213,10 +1217,14 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     SF_LOG_DEBUG("network", "RAD: type %u", type);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    AccountDataType RADType = AccountDataType(type);
+    if (RADType >= AccountDataType::NUM_ACCOUNT_DATA_TYPES)
+    {
+        SF_LOG_DEBUG("network", "RAD: Unknown account data type: %u", type);
         return;
+    }
 
-    AccountData* adata = GetAccountData(AccountDataType(type));
+    AccountData* adata = GetAccountData(RADType);
 
     uint32 size = adata->Data.size();
 

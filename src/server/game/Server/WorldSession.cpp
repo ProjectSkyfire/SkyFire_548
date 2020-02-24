@@ -758,7 +758,8 @@ void WorldSession::LoadGlobalAccountData()
 
 void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
 {
-    for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
+    uint8 maxADT = uint8(AccountDataType::NUM_ACCOUNT_DATA_TYPES);
+    for (uint32 i = 0; i < maxADT; ++i)
         if (mask & (1 << i))
             m_accountData[i] = AccountData();
 
@@ -769,7 +770,7 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
     {
         Field* fields = result->Fetch();
         uint32 type = fields[0].GetUInt8();
-        if (type >= NUM_ACCOUNT_DATA_TYPES)
+        if (AccountDataType(type) >= AccountDataType::NUM_ACCOUNT_DATA_TYPES)
         {
             SF_LOG_ERROR("misc", "Table `%s` have invalid account data type (%u), ignore.",
                 mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
@@ -793,7 +794,7 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
 {
     uint32 id = 0;
     uint32 index = 0;
-    if ((1 << type) & GLOBAL_CACHE_MASK)
+    if ((1 << uint8(type)) & GLOBAL_CACHE_MASK)
     {
         id = GetAccountId();
         index = CHAR_REP_ACCOUNT_DATA;
@@ -810,23 +811,23 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(index);
     stmt->setUInt32(0, id);
-    stmt->setUInt8 (1, type);
+    stmt->setUInt8 (1, uint8(type));
     stmt->setUInt32(2, uint32(tm));
     stmt->setString(3, data);
     CharacterDatabase.Execute(stmt);
 
-    m_accountData[type].Time = tm;
-    m_accountData[type].Data = data;
+    m_accountData[uint8(type)].Time = tm;
+    m_accountData[uint8(type)].Data = data;
 }
 
 void WorldSession::SendAccountDataTimes(uint32 mask)
 {
-    WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + NUM_ACCOUNT_DATA_TYPES * 4);
+    WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + (8 * 4));
 
     data.WriteBit(1);
     data.FlushBits();
 
-    for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
+    for (uint32 i = 0; i < 8; ++i)
         data << uint32(GetAccountData(AccountDataType(i))->Time); // also unix time
 
     data << uint32(mask);

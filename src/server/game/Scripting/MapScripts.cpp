@@ -471,7 +471,7 @@ void Map::ScriptsProcess()
                     if (step.script->FieldSet.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FieldSet.FieldID >= cSource->GetValuesCount())
                         SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
                             step.script->GetDebugInfo().c_str(), step.script->FieldSet.FieldID,
-                            cSource->GetValuesCount(), cSource->GetTypeId(), cSource->GetEntry(), cSource->GetGUIDLow());
+                            cSource->GetValuesCount(), uint8(cSource->GetTypeId()), cSource->GetEntry(), cSource->GetGUIDLow());
                     else
                         cSource->SetUInt32Value(step.script->FieldSet.FieldID, step.script->FieldSet.FieldValue);
                 }
@@ -584,7 +584,7 @@ void Map::ScriptsProcess()
                     {
                         SF_LOG_ERROR("scripts", "%s neither source nor target is player (source: TypeId: %u, Entry: %u, GUID: %u; target: TypeId: %u, Entry: %u, GUID: %u), skipping.",
                             step.script->GetDebugInfo().c_str(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow(),
-                            target->GetTypeId(), target->GetEntry(), target->GetGUIDLow());
+                            uint8(target->GetTypeId()), target->GetEntry(), target->GetGUIDLow());
                         break;
                     }
                 }

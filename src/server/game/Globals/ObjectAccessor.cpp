@@ -108,7 +108,7 @@ template<class T> T* ObjectAccessor::GetObjectInWorld(uint32 mapid, float x, flo
     CellCoord q = Skyfire::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY());
     if (!q.IsCoordValid())
     {
-        SF_LOG_ERROR("misc", "ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
+        SF_LOG_ERROR("misc", "ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), uint8(obj->GetTypeId()), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
         return NULL;
     }
 
