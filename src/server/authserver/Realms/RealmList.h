@@ -41,6 +41,8 @@ enum RealmFlags
 // Storage object for a realm
 struct Realm
 {
+    Realm() : icon(0), flag(REALM_FLAG_NONE), timezone(0), m_ID(0),
+              allowedSecurityLevel(AccountTypes::SEC_PLAYER), populationLevel(0.0f), gamebuild(0) {}
     ACE_INET_Addr ExternalAddress;
     ACE_INET_Addr LocalAddress;
     ACE_INET_Addr LocalSubnetMask;
