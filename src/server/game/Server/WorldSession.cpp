@@ -759,7 +759,7 @@ void WorldSession::LoadGlobalAccountData()
 void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
 {
     uint8 maxADT = uint8(AccountDataType::NUM_ACCOUNT_DATA_TYPES);
-    for (uint32 i = 0; i < maxADT; ++i)
+    for (uint8 i = 0; i < maxADT; ++i)
         if (mask & (1 << i))
             m_accountData[i] = AccountData();
 
@@ -827,7 +827,8 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
     data.WriteBit(1);
     data.FlushBits();
 
-    for (uint32 i = 0; i < 8; ++i)
+    uint8 maxADT = uint8(AccountDataType::NUM_ACCOUNT_DATA_TYPES);
+    for (uint8 i = 0; i < maxADT; ++i)
         data << uint32(GetAccountData(AccountDataType(i))->Time); // also unix time
 
     data << uint32(mask);
