@@ -162,7 +162,7 @@ inline Unit* Map::_GetScriptUnit(Object* obj, bool isSource, const ScriptInfo* s
         SF_LOG_ERROR("scripts", "%s %s object is NULL.", scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target");
     else if (!obj->isType(TYPEMASK_UNIT))
         SF_LOG_ERROR("scripts", "%s %s object is not unit (TypeId: %u, Entry: %u, GUID: %u), skipping.",
-            scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target", obj->GetTypeId(), obj->GetEntry(), obj->GetGUIDLow());
+            scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target", uint8(obj->GetTypeId()), obj->GetEntry(), obj->GetGUIDLow());
     else
     {
         unit = obj->ToUnit();
@@ -183,7 +183,7 @@ inline Player* Map::_GetScriptPlayer(Object* obj, bool isSource, const ScriptInf
         player = obj->ToPlayer();
         if (!player)
             SF_LOG_ERROR("scripts", "%s %s object is not a player (TypeId: %u, Entry: %u, GUID: %u).",
-                scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target", obj->GetTypeId(), obj->GetEntry(), obj->GetGUIDLow());
+                scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target", uint8(obj->GetTypeId()), obj->GetEntry(), obj->GetGUIDLow());
     }
     return player;
 }
@@ -198,7 +198,7 @@ inline Creature* Map::_GetScriptCreature(Object* obj, bool isSource, const Scrip
         creature = obj->ToCreature();
         if (!creature)
             SF_LOG_ERROR("scripts", "%s %s object is not a creature (TypeId: %u, Entry: %u, GUID: %u).", scriptInfo->GetDebugInfo().c_str(),
-                isSource ? "source" : "target", obj->GetTypeId(), obj->GetEntry(), obj->GetGUIDLow());
+                isSource ? "source" : "target", uint8(obj->GetTypeId()), obj->GetEntry(), obj->GetGUIDLow());
     }
     return creature;
 }
@@ -214,7 +214,7 @@ inline WorldObject* Map::_GetScriptWorldObject(Object* obj, bool isSource, const
         pWorldObject = dynamic_cast<WorldObject*>(obj);
         if (!pWorldObject)
             SF_LOG_ERROR("scripts", "%s %s object is not a world object (TypeId: %u, Entry: %u, GUID: %u).",
-                scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target", obj->GetTypeId(), obj->GetEntry(), obj->GetGUIDLow());
+                scriptInfo->GetDebugInfo().c_str(), isSource ? "source" : "target", uint8(obj->GetTypeId()), obj->GetEntry(), obj->GetGUIDLow());
     }
     return pWorldObject;
 }
@@ -238,13 +238,13 @@ inline void Map::_ScriptProcessDoor(Object* source, Object* target, const Script
         SF_LOG_ERROR("scripts", "%s source object is NULL.", scriptInfo->GetDebugInfo().c_str());
     else if (!source->isType(TYPEMASK_UNIT))
         SF_LOG_ERROR("scripts", "%s source object is not unit (TypeId: %u, Entry: %u, GUID: %u), skipping.", scriptInfo->GetDebugInfo().c_str(),
-            source->GetTypeId(), source->GetEntry(), source->GetGUIDLow());
+            uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
     else
     {
         WorldObject* wSource = dynamic_cast <WorldObject*> (source);
         if (!wSource)
             SF_LOG_ERROR("scripts", "%s source object could not be casted to world object (TypeId: %u, Entry: %u, GUID: %u), skipping.",
-                scriptInfo->GetDebugInfo().c_str(), source->GetTypeId(), source->GetEntry(), source->GetGUIDLow());
+                scriptInfo->GetDebugInfo().c_str(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
         else
         {
             GameObject* pDoor = _FindGameObject(wSource, guid);
@@ -493,30 +493,36 @@ void Map::ScriptsProcess()
                 break;
 
             case SCRIPT_COMMAND_FLAG_SET:
-                // Source or target must be Creature.
-                if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                if (source)
                 {
+                   // Source or target must be Creature.
+                    if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                    {
                     // Validate field number.
                     if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
                         SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
                             step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
-                            source->GetValuesCount(), source->GetTypeId(), source->GetEntry(), source->GetGUIDLow());
+                            source->GetValuesCount(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
                     else
                         cSource->SetFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
-                }
-                break;
+                    }
+            }
+            break;
 
             case SCRIPT_COMMAND_FLAG_REMOVE:
-                // Source or target must be Creature.
-                if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                if (source)
                 {
-                    // Validate field number.
-                    if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
-                        SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
-                            step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
-                            source->GetValuesCount(), source->GetTypeId(), source->GetEntry(), source->GetGUIDLow());
-                    else
-                        cSource->RemoveFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
+                    // Source or target must be Creature.
+                    if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                    {
+                        // Validate field number.
+                        if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
+                            SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
+                                step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
+                                source->GetValuesCount(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
+                        else
+                            cSource->RemoveFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
+                    }
                 }
                 break;
 
@@ -556,7 +562,7 @@ void Map::ScriptsProcess()
                     if (source->GetTypeId() != TypeID::TYPEID_UNIT && source->GetTypeId() != TypeID::TYPEID_GAMEOBJECT && source->GetTypeId() != TypeID::TYPEID_PLAYER)
                     {
                         SF_LOG_ERROR("scripts", "%s source is not unit, gameobject or player (TypeId: %u, Entry: %u, GUID: %u), skipping.",
-                            step.script->GetDebugInfo().c_str(), source->GetTypeId(), source->GetEntry(), source->GetGUIDLow());
+                            step.script->GetDebugInfo().c_str(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow());
                         break;
                     }
                     worldObject = dynamic_cast<WorldObject*>(source);
@@ -569,7 +575,7 @@ void Map::ScriptsProcess()
                         if (target->GetTypeId() != TypeID::TYPEID_UNIT && target->GetTypeId() != TypeID::TYPEID_GAMEOBJECT && target->GetTypeId() != TypeID::TYPEID_PLAYER)
                         {
                             SF_LOG_ERROR("scripts", "%s target is not unit, gameobject or player (TypeId: %u, Entry: %u, GUID: %u), skipping.",
-                                step.script->GetDebugInfo().c_str(), target->GetTypeId(), target->GetEntry(), target->GetGUIDLow());
+                                step.script->GetDebugInfo().c_str(), uint8(target->GetTypeId()), target->GetEntry(), target->GetGUIDLow());
                             break;
                         }
                         worldObject = dynamic_cast<WorldObject*>(target);
@@ -577,7 +583,7 @@ void Map::ScriptsProcess()
                     else
                     {
                         SF_LOG_ERROR("scripts", "%s neither source nor target is player (source: TypeId: %u, Entry: %u, GUID: %u; target: TypeId: %u, Entry: %u, GUID: %u), skipping.",
-                            step.script->GetDebugInfo().c_str(), source->GetTypeId(), source->GetEntry(), source->GetGUIDLow(),
+                            step.script->GetDebugInfo().c_str(), uint8(source->GetTypeId()), source->GetEntry(), source->GetGUIDLow(),
                             target->GetTypeId(), target->GetEntry(), target->GetGUIDLow());
                         break;
                     }
@@ -683,7 +689,7 @@ void Map::ScriptsProcess()
                     if (target->GetTypeId() != TypeID::TYPEID_GAMEOBJECT)
                     {
                         SF_LOG_ERROR("scripts", "%s target object is not gameobject (TypeId: %u, Entry: %u, GUID: %u), skipping.",
-                            step.script->GetDebugInfo().c_str(), target->GetTypeId(), target->GetEntry(), target->GetGUIDLow());
+                            step.script->GetDebugInfo().c_str(), uint8(target->GetTypeId()), target->GetEntry(), target->GetGUIDLow());
                         break;
                     }
 

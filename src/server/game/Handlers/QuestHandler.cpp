@@ -61,7 +61,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
     Object* questgiver = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
     if (!questgiver)
     {
-        SF_LOG_INFO("network", "Error in CMSG_QUEST_GIVER_STATUS_QUERY, called for non-existing questgiver (Typeid: %u GUID: %u)", GuidHigh2TypeId(GUID_HIPART(guid)), GUID_LOPART(guid));
+        SF_LOG_INFO("network", "Error in CMSG_QUEST_GIVER_STATUS_QUERY, called for non-existing questgiver (Typeid: %u GUID: %u)", uint8(GuidHigh2TypeId(GUID_HIPART(guid))), GUID_LOPART(guid));
         return;
     }
 
@@ -89,7 +89,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
             break;
         }
     default:
-        SF_LOG_ERROR("network", "QuestGiver called for unexpected type %u", questgiver->GetTypeId());
+        SF_LOG_ERROR("network", "QuestGiver called for unexpected type %u", uint8(questgiver->GetTypeId()));
         break;
     }
 
@@ -861,7 +861,7 @@ uint32 WorldSession::getDialogStatus(Player* player, Object* questgiver, uint32 
         }
     default:
         //its imposible, but check ^)
-        SF_LOG_ERROR("network", "Warning: GetDialogStatus called for unexpected type %u", questgiver->GetTypeId());
+        SF_LOG_ERROR("network", "Warning: GetDialogStatus called for unexpected type %u", uint8(questgiver->GetTypeId()));
         return DIALOG_STATUS_NONE;
     }
 

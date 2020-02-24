@@ -2481,7 +2481,7 @@ void Map::RemoveAllObjectsInRemoveList()
             RemoveFromMap(obj->ToCreature(), true);
             break;
         default:
-            SF_LOG_ERROR("maps", "Non-grid object (TypeId: %u) is in grid object remove list, ignored.", obj->GetTypeId());
+            SF_LOG_ERROR("maps", "Non-grid object (TypeId: %u) is in grid object remove list, ignored.", uint8(obj->GetTypeId()));
             break;
         }
 
