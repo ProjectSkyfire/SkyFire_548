@@ -1065,14 +1065,14 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     SetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_CONQUEST_POINTS));
 
     // start with every map explored
-    if (sWorld->getBoolConfig(CONFIG_START_ALL_EXPLORED))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_EXPLORED))
     {
         for (uint8 i=0; i<PLAYER_EXPLORED_ZONES_SIZE; i++)
             SetFlag(PLAYER_FIELD_EXPLORED_ZONES+i, 0xFFFFFFFF);
     }
 
     //Reputations if "StartAllReputation" is enabled, -- @todo Fix this in a better way
-    if (sWorld->getBoolConfig(CONFIG_START_ALL_REP))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_REP))
     {
         GetReputationMgr().SetReputation(sFactionStore.LookupEntry(942), 42999);
         GetReputationMgr().SetReputation(sFactionStore.LookupEntry(935), 42999);
@@ -2011,7 +2011,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
     if (fields[20].GetUInt32())
         charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
 
-    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED) && !fields[22].GetString().empty())
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DECLINED_NAMES_USED) && !fields[22].GetString().empty())
         charFlags |= CHARACTER_FLAG_DECLINED;
 
     uint32 customizationFlag = 0;
@@ -3294,7 +3294,7 @@ void Player::GiveLevel(uint8 level)
 
     UpdateAllStats();
 
-    if (sWorld->getBoolConfig(CONFIG_ALWAYS_MAXSKILL)) // Max weapon skill when leveling up
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALWAYS_MAXSKILL)) // Max weapon skill when leveling up
         UpdateSkillsToMaxSkillsForLevel();
 
     _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
@@ -4400,7 +4400,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
         }
     }
 
-    if (sWorld->getBoolConfig(CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN))
         AutoUnequipOffhandIfNeed();
 
     // remove from spell book if not replaced by lesser rank
@@ -4641,7 +4641,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
     uint32 cost = 0;
 
-    if (!noCost && !sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST))
+    if (!noCost && !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_NO_RESET_TALENT_COST))
     {
         cost = GetNextResetTalentsCost();
 
@@ -7061,7 +7061,7 @@ void Player::CheckAreaExploreAndOutdoor()
     bool isOutdoor;
     uint16 areaFlag = GetBaseMap()->GetAreaFlag(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
 
-    if (sWorld->getBoolConfig(CONFIG_VMAP_INDOOR_CHECK) && !isOutdoor)
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_VMAP_INDOOR_CHECK) && !isOutdoor)
         RemoveAurasWithAttribute(SPELL_ATTR0_OUTDOORS_ONLY);
 
     if (areaFlag == 0xffff)
@@ -7492,7 +7492,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
         }
     }
 
-    if (sWorld->getBoolConfig(CONFIG_PVP_TOKEN_ENABLE) && pvptoken)
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_PVP_TOKEN_ENABLE) && pvptoken)
     {
         if (!victim || victim == this || victim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
             return true;
@@ -8002,7 +8002,7 @@ void Player::SetInGuild(uint32 guildId)
     else
         SetUInt64Value(OBJECT_FIELD_DATA, 0);
 
-    ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GUILD_LEVEL_ENABLED, guildId != 0 && sWorld->getBoolConfig(CONFIG_GUILD_LEVELING_ENABLED));
+    ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GUILD_LEVEL_ENABLED, guildId != 0 && sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_GUILD_LEVELING_ENABLED));
     SetUInt16Value(OBJECT_FIELD_TYPE, 1, guildId != 0);
 }
 
@@ -8139,7 +8139,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     if (!zone)
         return;
 
-    if (sWorld->getBoolConfig(CONFIG_WEATHER) && !HasAuraType(SPELL_AURA_FORCE_WEATHER))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WEATHER) && !HasAuraType(SPELL_AURA_FORCE_WEATHER))
     {
         if (Weather* weather = WeatherMgr::FindWeather(zone->ID))
             weather->SendWeatherUpdateToPlayer(this);
@@ -9748,7 +9748,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
     builder.AppendState(0x8d4, 0x0);                   // 5
     builder.AppendState(0x8d3, 0x0);                   // 6
                                                             // 7 1 - Arena season in progress, 0 - end of season
-    //builder.AppendState(0xC77, sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
+    //builder.AppendState(0xC77, sWorld->GetBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
                                                             // 8 Arena season id
     //builder.AppendState(0xF3D, sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
 
@@ -10337,7 +10337,7 @@ void Player::SendBGWeekendWorldStates()
 void Player::SendBattlefieldWorldStates()
 {
     /// Send misc stuff that needs to be sent on every login, like the battle timers.
-    if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_ENABLE))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WINTERGRASP_ENABLE))
     {
         if (BattlefieldWG* wg = (BattlefieldWG*)sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
         {
@@ -10396,9 +10396,9 @@ void Player::SendTalentWipeConfirm(ObjectGuid guid, bool resetType)
     uint32 Cost = 0;
 
     if (!resetType)
-        Cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
+        Cost = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
     else
-        Cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetSpecializationCost();
+        Cost = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetSpecializationCost();
 
     WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 8 + 1 + 4);
     data.WriteBit(guid[5]);
@@ -19779,7 +19779,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         if (!mapEntry)
             return false;
 
-        if (!sWorld->getBoolConfig(CONFIG_INSTANCE_IGNORE_LEVEL))
+        if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_INSTANCE_IGNORE_LEVEL))
         {
             if (ar->levelMin && getLevel() < ar->levelMin)
                 LevelMin = ar->levelMin;
@@ -20240,7 +20240,7 @@ void Player::SaveToDB(bool create /*=false*/)
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
-    if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
+    if (m_session->isLogingOut() || !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
         _SaveStats(trans);
 
     CharacterDatabase.CommitTransaction(trans);
@@ -22381,7 +22381,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // prevent stealth flight
     //RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
 
-    if (sWorld->getBoolConfig(CONFIG_INSTANT_TAXI))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_INSTANT_TAXI))
     {
         TaxiNodesEntry const* lastPathNode = sTaxiNodesStore.LookupEntry(nodes[nodes.size()-1]);
         m_taxi.ClearTaxiDestinations();
@@ -23604,7 +23604,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
-        if (bg->isBattleground() && !IsGameMaster() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
+        if (bg->isBattleground() && !IsGameMaster() && sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_BATTLEGROUND_CAST_DESERTER))
         {
             if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
             {
@@ -25504,10 +25504,10 @@ uint32 Player::GetCorpseReclaimDelay(bool pvp) const
 {
     if (pvp)
     {
-        if (!sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP))
+        if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP))
             return copseReclaimDelay[0];
     }
-    else if (!sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE))
+    else if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE))
         return 0;
 
     time_t now = time(NULL);
@@ -25521,8 +25521,8 @@ void Player::UpdateCorpseReclaimDelay()
 {
     bool pvp = m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH;
 
-    if ((pvp && !sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
-        (!pvp && !sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
+    if ((pvp && !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
+        (!pvp && !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
         return;
 
     time_t now = time(NULL);
@@ -25558,8 +25558,8 @@ void Player::SendCorpseReclaimDelay(bool load)
             return;
 
         uint64 count;
-        if ((pvp && sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
-           (!pvp && sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
+        if ((pvp && sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
+           (!pvp && sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
         {
             count = (m_deathExpireTime-corpse->GetGhostTime())/DEATH_EXPIRE_STEP;
             if (count >= MAX_DEATH_COUNT)

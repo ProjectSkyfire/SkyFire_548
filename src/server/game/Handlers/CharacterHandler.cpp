@@ -151,7 +151,7 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS, stmt);
 
-    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DECLINED_NAMES_USED))
     {
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_DECLINEDNAMES);
         stmt->setUInt32(0, lowGuid);
@@ -302,7 +302,7 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 
     /// get all the data necessary for loading all characters (along with their pets) on the account
 
-    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DECLINED_NAMES_USED))
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ENUM_DECLINED_NAME);
     else
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ENUM);
@@ -920,7 +920,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_DATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    bool feedbackSystem = sWorld->getBoolConfig(CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED);
+    bool feedbackSystem = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED);
     bool excessiveWarning = false;
 
     data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 4 + 4 + 4 + 1 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
@@ -1168,7 +1168,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     if (sWorld->IsShuttingDown())
         sWorld->ShutdownMsg(true, pCurrChar);
 
-    if (sWorld->getBoolConfig(CONFIG_ALL_TAXI_PATHS))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALL_TAXI_PATHS))
         pCurrChar->SetTaxiCheater(true);
 
     if (pCurrChar->IsGameMaster())
@@ -2272,7 +2272,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                 trans->Append(stmt);
             }
 
-            if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+            if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
             {
                 // Reset guild
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_MEMBER);

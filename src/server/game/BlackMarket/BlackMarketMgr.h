@@ -153,7 +153,7 @@ public:
     void SendAuctionWon(BlackMarketAuction* auction, SQLTransaction& trans);
     void SendAuctionOutbidded(BlackMarketAuction* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
     
-    bool isBlackMarketOpen() { return sWorld->getBoolConfig(CONFIG_BLACK_MARKET_OPEN); }
+    bool isBlackMarketOpen() { return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_BLACK_MARKET_OPEN); }
 };
 
 #define sBlackMarketMgr ACE_Singleton<BlackMarketMgr, ACE_Null_Mutex>::instance()

@@ -995,7 +995,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     bool hasBoost = fields[9].GetBool();
 
     // Must be done before WorldSession is created
-    if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED) && os != "Win" && os != "OSX")
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED) && os != "Win" && os != "OSX")
     {
         SendAuthResponseError(AUTH_REJECT);
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", GetRemoteAddress().c_str(), os.c_str());
@@ -1098,7 +1098,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadPermissions();
 
     // Initialize Warden system only if it is enabled by config
-    if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED))
         m_Session->InitWarden(&k, os);
 
     // Sleep this Network thread for

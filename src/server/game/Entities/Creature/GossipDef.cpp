@@ -175,7 +175,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
     data.WriteBits(_questMenu.GetMenuItemCount(), 19);      // max count 0x20
 
     // Store this instead of checking the Singleton every loop iteration
-    bool questLevelInTitle = sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
+    bool questLevelInTitle = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
 
     for (uint8 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
     {
@@ -346,7 +346,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
     data.WriteBits(count, 19);
 
     // Store this instead of checking the Singleton every loop iteration
-    bool questLevelInTitle = sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
+    bool questLevelInTitle = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
 
     for (uint32 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
     {
@@ -440,7 +440,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         }
     }
 
-    if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
     ByteBuffer objData;
@@ -651,7 +651,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
         }
     }
 
-    if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
     WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);   // guess size
@@ -828,7 +828,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
             if (l_Object->hasInvolvedQuest(quest->GetQuestId()))
                 QuestTakerEntry = l_Object->GetEntry();
 
-    if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
     uint32 rewItemDisplayId[QUEST_REWARDS_COUNT];
@@ -1040,7 +1040,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGuid, 
         }
     }
 
-    if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
     ObjectGuid QuestGiverGUID = npcGuid;

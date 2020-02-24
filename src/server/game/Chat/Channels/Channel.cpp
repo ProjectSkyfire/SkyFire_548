@@ -61,7 +61,7 @@ Channel::Channel(std::string const& name, uint32 channelId, uint32 team):
         _flags |= CHANNEL_FLAG_CUSTOM;
 
         // If storing custom channels in the db is enabled either load or save the channel
-        if (sWorld->getBoolConfig(CONFIG_PRESERVE_CUSTOM_CHANNELS))
+        if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_PRESERVE_CUSTOM_CHANNELS))
         {
             PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHANNEL);
             stmt->setString(0, name);
@@ -180,7 +180,7 @@ void Channel::JoinChannel(Player* player, std::string const& pass)
     }
 
     if (HasFlag(CHANNEL_FLAG_LFG) &&
-        sWorld->getBoolConfig(CONFIG_RESTRICTED_LFG_CHANNEL) &&
+        sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_RESTRICTED_LFG_CHANNEL) &&
         AccountMgr::IsPlayerAccount(player->GetSession()->GetSecurity()) && //FIXME: Move to RBAC
         player->GetGroup())
     {
@@ -611,7 +611,7 @@ void Channel::Say(uint64 guid, std::string const& what, Language lang)
     }
 
     // TODO: Add proper RBAC check
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         lang = Language::LANG_UNIVERSAL;
 
     if (!IsOn(guid))

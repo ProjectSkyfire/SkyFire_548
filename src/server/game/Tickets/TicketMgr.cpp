@@ -49,8 +49,8 @@ TicketMgr::~TicketMgr()
 
 void TicketMgr::Initialize()
 {
-    SetFeedBackSystemStatus(sWorld->getBoolConfig(CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED));
-    SetGmTicketSystemStatus(sWorld->getBoolConfig(CONFIG_TICKETS_GM_ENABLED));
+    SetFeedBackSystemStatus(sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED));
+    SetGmTicketSystemStatus(sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_GM_ENABLED));
 }
 
 void TicketMgr::LoadGmTickets()

@@ -207,12 +207,12 @@ uint32 Quest::GetRewMoneyMaxLevel() const
 
 bool Quest::IsAutoAccept() const
 {
-    return sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_AUTO_ACCEPT) ? false : (Flags & QUEST_FLAGS_AUTO_ACCEPT);
+    return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_AUTO_ACCEPT) ? false : (Flags & QUEST_FLAGS_AUTO_ACCEPT);
 }
 
 bool Quest::IsAutoComplete() const
 {
-    return sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_AUTO_COMPLETE) ? false : (Method == 0 || HasFlag(QUEST_FLAGS_AUTOCOMPLETE));
+    return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_AUTO_COMPLETE) ? false : (Method == 0 || HasFlag(QUEST_FLAGS_AUTOCOMPLETE));
 }
 
 bool Quest::IsRaidQuest(DifficultyID difficulty) const
@@ -237,7 +237,7 @@ bool Quest::IsAllowedInRaid(DifficultyID difficulty) const
     if (IsRaidQuest(difficulty))
         return true;
 
-    return sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_RAID);
+    return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_RAID);
 }
 
 uint32 Quest::CalculateHonorGain(uint8 level) const

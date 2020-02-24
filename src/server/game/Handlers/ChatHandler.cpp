@@ -152,7 +152,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 case ChatMsg::CHAT_MSG_GUILD:
                 case ChatMsg::CHAT_MSG_INSTANCE:
                 case ChatMsg::CHAT_MSG_WHISPER:
-                    if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
+                    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_ADDON))
                     {
                         std::string msg = "";
                         recvData >> msg;
@@ -164,7 +164,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                     }
 
                     // Disabled addon channel?
-                    if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+                    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ADDON_CHANNEL))
                         return;
                     break;
                 default:
@@ -196,13 +196,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                         case ChatMsg::CHAT_MSG_RAID_LEADER:
                         case ChatMsg::CHAT_MSG_RAID_WARNING:
                             // allow two side chat at group channel if two side group allowed
-                            if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                            if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
                                 lang = Language::LANG_UNIVERSAL;
                             break;
                         case ChatMsg::CHAT_MSG_GUILD:
                         case ChatMsg::CHAT_MSG_OFFICER:
                             // allow two side chat at guild channel if two side guild allowed
-                            if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+                            if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
                                 lang = Language::LANG_UNIVERSAL;
                             break;
                     }
@@ -282,7 +282,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         if (lang != Language::LANG_ADDON)
         {
             // Strip invisible characters for non-addon messages
-            if (sWorld->getBoolConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
+            if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && !ChatHandler(this).isValidChatMessage(msg.c_str()))
@@ -600,7 +600,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         return;
 
     // Logging enabled?
-    if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_ADDON))
     {
         if (message.empty())
             return;
@@ -610,7 +610,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
     }
 
     // Disabled addon channel?
-    if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ADDON_CHANNEL))
         return;
 
     switch (type)

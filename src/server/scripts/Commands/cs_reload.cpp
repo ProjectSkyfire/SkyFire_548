@@ -758,7 +758,7 @@ public:
 
     static bool HandleReloadWardenactionCommand(ChatHandler* handler, const char* /*args*/)
     {
-        if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
+        if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED))
         {
             handler->SendSysMessage("Warden system disabled by config - reloading warden_action skipped.");
             handler->SetSentErrorMessage(true);

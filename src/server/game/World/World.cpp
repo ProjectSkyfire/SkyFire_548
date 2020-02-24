@@ -430,12 +430,12 @@ void World::LoadConfigSettings(bool reload)
     SetMotd(sConfigMgr->GetStringDefault("Motd", "Welcome to a Skyfire Core Server."));
 
     ///- Read ticket system setting from the config file
-    m_bool_configs[CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED] = sConfigMgr->GetBoolDefault("TicketSystem.FeedBackTickets", true);
-    m_bool_configs[CONFIG_TICKETS_GM_ENABLED]    = sConfigMgr->GetBoolDefault("TicketSystem.GMTickets", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED, sConfigMgr->GetBoolDefault("TicketSystem.FeedBackTickets", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_GM_ENABLED,              sConfigMgr->GetBoolDefault("TicketSystem.GMTickets", true));
     if (reload)
     {
-        sTicketMgr->SetFeedBackSystemStatus(m_bool_configs[CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED]);
-        sTicketMgr->SetGmTicketSystemStatus(m_bool_configs[CONFIG_TICKETS_GM_ENABLED]);
+        sTicketMgr->SetFeedBackSystemStatus(GetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED));
+        sTicketMgr->SetGmTicketSystemStatus(GetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_GM_ENABLED));
     }
 
     ///- Get string for new logins (newly created characters)
@@ -593,7 +593,7 @@ void World::LoadConfigSettings(bool reload)
     }
     ///- Read other configuration items from the config file
 
-    m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = sConfigMgr->GetBoolDefault("DurabilityLoss.InPvP", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DURABILITY_LOSS_IN_PVP, sConfigMgr->GetBoolDefault("DurabilityLoss.InPvP", false));
 
     m_int_configs[CONFIG_COMPRESSION] = sConfigMgr->GetIntDefault("Compression", 1);
     if (m_int_configs[CONFIG_COMPRESSION] < 1 || m_int_configs[CONFIG_COMPRESSION] > 9)
@@ -601,8 +601,8 @@ void World::LoadConfigSettings(bool reload)
         SF_LOG_ERROR("server.loading", "Compression level (%i) must be in range 1..9. Using default compression level (1).", m_int_configs[CONFIG_COMPRESSION]);
         m_int_configs[CONFIG_COMPRESSION] = 1;
     }
-    m_bool_configs[CONFIG_ADDON_CHANNEL] = sConfigMgr->GetBoolDefault("AddonChannel", true);
-    m_bool_configs[CONFIG_CLEAN_CHARACTER_DB] = sConfigMgr->GetBoolDefault("CleanCharacterDB", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ADDON_CHANNEL, sConfigMgr->GetBoolDefault("AddonChannel", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CLEAN_CHARACTER_DB, sConfigMgr->GetBoolDefault("CleanCharacterDB", false));
     m_int_configs[CONFIG_PERSISTENT_CHARACTER_CLEAN_FLAGS] = sConfigMgr->GetIntDefault("PersistentCharacterCleanFlags", 0);
     m_int_configs[CONFIG_CHAT_CHANNEL_LEVEL_REQ] = sConfigMgr->GetIntDefault("ChatLevelReq.Channel", 1);
     m_int_configs[CONFIG_CHAT_WHISPER_LEVEL_REQ] = sConfigMgr->GetIntDefault("ChatLevelReq.Whisper", 1);
@@ -611,12 +611,12 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_TICKET_LEVEL_REQ] = sConfigMgr->GetIntDefault("LevelReq.Ticket", 1);
     m_int_configs[CONFIG_AUCTION_LEVEL_REQ] = sConfigMgr->GetIntDefault("LevelReq.Auction", 1);
     m_int_configs[CONFIG_MAIL_LEVEL_REQ] = sConfigMgr->GetIntDefault("LevelReq.Mail", 1);
-    m_bool_configs[CONFIG_PRESERVE_CUSTOM_CHANNELS] = sConfigMgr->GetBoolDefault("PreserveCustomChannels", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_PRESERVE_CUSTOM_CHANNELS, sConfigMgr->GetBoolDefault("PreserveCustomChannels", false));
     m_int_configs[CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION] = sConfigMgr->GetIntDefault("PreserveCustomChannelDuration", 14);
-    m_bool_configs[CONFIG_GRID_UNLOAD] = sConfigMgr->GetBoolDefault("GridUnload", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_GRID_UNLOAD, sConfigMgr->GetBoolDefault("GridUnload", true));
     m_int_configs[CONFIG_INTERVAL_SAVE] = sConfigMgr->GetIntDefault("PlayerSaveInterval", 15 * MINUTE * IN_MILLISECONDS);
     m_int_configs[CONFIG_INTERVAL_DISCONNECT_TOLERANCE] = sConfigMgr->GetIntDefault("DisconnectToleranceInterval", 0);
-    m_bool_configs[CONFIG_STATS_SAVE_ONLY_ON_LOGOUT] = sConfigMgr->GetBoolDefault("PlayerSave.Stats.SaveOnlyOnLogout", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_STATS_SAVE_ONLY_ON_LOGOUT, sConfigMgr->GetBoolDefault("PlayerSave.Stats.SaveOnlyOnLogout", true));
 
     m_int_configs[CONFIG_MIN_LEVEL_STAT_SAVE] = sConfigMgr->GetIntDefault("PlayerSave.Stats.MinLevel", 0);
     if (m_int_configs[CONFIG_MIN_LEVEL_STAT_SAVE] > MAX_LEVEL)
@@ -682,12 +682,12 @@ void World::LoadConfigSettings(bool reload)
     else
         m_int_configs[CONFIG_REALM_ZONE] = sConfigMgr->GetIntDefault("RealmZone", REALM_ZONE_DEVELOPMENT);
 
-    m_bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CALENDAR]= sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Calendar", false);
-    m_bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL] = sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Channel", false);
-    m_bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP]   = sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Group", false);
-    m_bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD]   = sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Guild", false);
-    m_bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION] = sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Auction", false);
-    m_bool_configs[CONFIG_ALLOW_TWO_SIDE_TRADE]               = sConfigMgr->GetBoolDefault("AllowTwoSide.trade", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_CALENDAR, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Calendar", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Channel", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Group", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Guild", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Auction", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_TRADE, sConfigMgr->GetBoolDefault("AllowTwoSide.trade", false));
     m_int_configs[CONFIG_STRICT_PLAYER_NAMES]                 = sConfigMgr->GetIntDefault ("StrictPlayerNames",  0);
     m_int_configs[CONFIG_STRICT_CHARTER_NAMES]                = sConfigMgr->GetIntDefault ("StrictCharterNames", 0);
     m_int_configs[CONFIG_STRICT_PET_NAMES]                    = sConfigMgr->GetIntDefault ("StrictPetNames",     0);
@@ -884,13 +884,13 @@ void World::LoadConfigSettings(bool reload)
     }
 
     m_int_configs[CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL_DIFFERENCE] = sConfigMgr->GetIntDefault("RecruitAFriend.MaxDifference", 4);
-    m_bool_configs[CONFIG_ALL_TAXI_PATHS] = sConfigMgr->GetBoolDefault("AllFlightPaths", false);
-    m_bool_configs[CONFIG_INSTANT_TAXI] = sConfigMgr->GetBoolDefault("InstantFlightPaths", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALL_TAXI_PATHS, sConfigMgr->GetBoolDefault("AllFlightPaths", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_INSTANT_TAXI, sConfigMgr->GetBoolDefault("InstantFlightPaths", false));
 
-    m_bool_configs[CONFIG_INSTANCE_IGNORE_LEVEL] = sConfigMgr->GetBoolDefault("Instance.IgnoreLevel", false);
-    m_bool_configs[CONFIG_INSTANCE_IGNORE_RAID]  = sConfigMgr->GetBoolDefault("Instance.IgnoreRaid", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_INSTANCE_IGNORE_LEVEL, sConfigMgr->GetBoolDefault("Instance.IgnoreLevel", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_INSTANCE_IGNORE_RAID, sConfigMgr->GetBoolDefault("Instance.IgnoreRaid", false));
 
-    m_bool_configs[CONFIG_CAST_UNSTUCK] = sConfigMgr->GetBoolDefault("CastUnstuck", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CAST_UNSTUCK, sConfigMgr->GetBoolDefault("CastUnstuck", true));
     m_int_configs[CONFIG_INSTANCE_RESET_TIME_HOUR]  = sConfigMgr->GetIntDefault("Instance.ResetTimeHour", 4);
     m_int_configs[CONFIG_INSTANCE_UNLOAD_DELAY] = sConfigMgr->GetIntDefault("Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
 
@@ -921,8 +921,8 @@ void World::LoadConfigSettings(bool reload)
         SF_LOG_ERROR("server.loading", "GM.StartLevel (%i) must be in range 1..%u. Set to %u.", m_int_configs[CONFIG_START_GM_LEVEL], MAX_LEVEL, MAX_LEVEL);
         m_int_configs[CONFIG_START_GM_LEVEL] = MAX_LEVEL;
     }
-    m_bool_configs[CONFIG_ALLOW_GM_GROUP]       = sConfigMgr->GetBoolDefault("GM.AllowInvite", false);
-    m_bool_configs[CONFIG_GM_LOWER_SECURITY] = sConfigMgr->GetBoolDefault("GM.LowerSecurity", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_GM_GROUP, sConfigMgr->GetBoolDefault("GM.AllowInvite", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_GM_LOWER_SECURITY, sConfigMgr->GetBoolDefault("GM.LowerSecurity", false));
     m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = sConfigMgr->GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
 
     m_int_configs[CONFIG_GROUP_VISIBILITY] = sConfigMgr->GetIntDefault("Visibility.GroupMode", 1);
@@ -965,8 +965,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_SKILL_CHANCE_MINING_STEPS]  = sConfigMgr->GetIntDefault("SkillChance.MiningSteps", 75);
     m_int_configs[CONFIG_SKILL_CHANCE_SKINNING_STEPS]   = sConfigMgr->GetIntDefault("SkillChance.SkinningSteps", 75);
 
-    m_bool_configs[CONFIG_SKILL_PROSPECTING] = sConfigMgr->GetBoolDefault("SkillChance.Prospecting", false);
-    m_bool_configs[CONFIG_SKILL_MILLING] = sConfigMgr->GetBoolDefault("SkillChance.Milling", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_SKILL_PROSPECTING, sConfigMgr->GetBoolDefault("SkillChance.Prospecting", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_SKILL_MILLING, sConfigMgr->GetBoolDefault("SkillChance.Milling", false));
 
     m_int_configs[CONFIG_SKILL_GAIN_CRAFTING]  = sConfigMgr->GetIntDefault("SkillGain.Crafting", 1);
 
@@ -980,8 +980,8 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_MAX_OVERSPEED_PINGS] = 2;
     }
 
-    m_bool_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY] = sConfigMgr->GetBoolDefault("SaveRespawnTimeImmediately", true);
-    m_bool_configs[CONFIG_WEATHER] = sConfigMgr->GetBoolDefault("ActivateWeather", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY, sConfigMgr->GetBoolDefault("SaveRespawnTimeImmediately", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_WEATHER, sConfigMgr->GetBoolDefault("ActivateWeather", true));
 
     m_int_configs[CONFIG_DISABLE_BREATHING] = sConfigMgr->GetIntDefault("DisableWaterBreath", uint8(AccountTypes::SEC_CONSOLE));
 
@@ -998,7 +998,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CHATFLOOD_MESSAGE_DELAY] = sConfigMgr->GetIntDefault("ChatFlood.MessageDelay", 1);
     m_int_configs[CONFIG_CHATFLOOD_MUTE_TIME]     = sConfigMgr->GetIntDefault("ChatFlood.MuteTime", 10);
 
-    m_bool_configs[CONFIG_EVENT_ANNOUNCE] = sConfigMgr->GetIntDefault("Event.Announce", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_EVENT_ANNOUNCE, sConfigMgr->GetIntDefault("Event.Announce", false));
 
     m_float_configs[CONFIG_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS] = sConfigMgr->GetFloatDefault("CreatureFamilyFleeAssistanceRadius", 30.0f);
     m_float_configs[CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS] = sConfigMgr->GetFloatDefault("CreatureFamilyAssistanceRadius", 10.0f);
@@ -1014,9 +1014,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] = sConfigMgr->GetIntDefault("Quests.HighLevelHideDiff", 7);
     if (m_int_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] > MAX_LEVEL)
         m_int_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] = MAX_LEVEL;
-    m_bool_configs[CONFIG_QUEST_IGNORE_RAID] = sConfigMgr->GetBoolDefault("Quests.IgnoreRaid", false);
-    m_bool_configs[CONFIG_QUEST_IGNORE_AUTO_ACCEPT] = sConfigMgr->GetBoolDefault("Quests.IgnoreAutoAccept", false);
-    m_bool_configs[CONFIG_QUEST_IGNORE_AUTO_COMPLETE] = sConfigMgr->GetBoolDefault("Quests.IgnoreAutoComplete", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_RAID, sConfigMgr->GetBoolDefault("Quests.IgnoreRaid", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_AUTO_ACCEPT, sConfigMgr->GetBoolDefault("Quests.IgnoreAutoAccept", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_AUTO_COMPLETE, sConfigMgr->GetBoolDefault("Quests.IgnoreAutoComplete", false));
 
     m_int_configs[CONFIG_RANDOM_BG_RESET_HOUR] = sConfigMgr->GetIntDefault("Battleground.Random.ResetHour", 6);
     if (m_int_configs[CONFIG_RANDOM_BG_RESET_HOUR] > 23)
@@ -1032,11 +1032,11 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_GUILD_RESET_HOUR] = 6;
     }
 
-    m_bool_configs[CONFIG_DETECT_POS_COLLISION] = sConfigMgr->GetBoolDefault("DetectPosCollision", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DETECT_POS_COLLISION, sConfigMgr->GetBoolDefault("DetectPosCollision", true));
 
-    m_bool_configs[CONFIG_RESTRICTED_LFG_CHANNEL]      = sConfigMgr->GetBoolDefault("Channel.RestrictedLfg", true);
-    m_bool_configs[CONFIG_TALENTS_INSPECTING]           = sConfigMgr->GetBoolDefault("TalentsInspecting", true);
-    m_bool_configs[CONFIG_CHAT_FAKE_MESSAGE_PREVENTING] = sConfigMgr->GetBoolDefault("ChatFakeMessagePreventing", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_RESTRICTED_LFG_CHANNEL, sConfigMgr->GetBoolDefault("Channel.RestrictedLfg", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_TALENTS_INSPECTING, sConfigMgr->GetBoolDefault("TalentsInspecting", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_FAKE_MESSAGE_PREVENTING, sConfigMgr->GetBoolDefault("ChatFakeMessagePreventing", false));
     m_int_configs[CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY] = sConfigMgr->GetIntDefault("ChatStrictLinkChecking.Severity", 0);
     m_int_configs[CONFIG_CHAT_STRICT_LINK_CHECKING_KICK] = sConfigMgr->GetIntDefault("ChatStrictLinkChecking.Kick", 0);
 
@@ -1047,44 +1047,44 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CORPSE_DECAY_WORLDBOSS] = sConfigMgr->GetIntDefault("Corpse.Decay.WORLDBOSS", 3600);
 
     m_int_configs[CONFIG_DEATH_SICKNESS_LEVEL]           = sConfigMgr->GetIntDefault ("Death.SicknessLevel", 11);
-    m_bool_configs[CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP] = sConfigMgr->GetBoolDefault("Death.CorpseReclaimDelay.PvP", true);
-    m_bool_configs[CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE] = sConfigMgr->GetBoolDefault("Death.CorpseReclaimDelay.PvE", true);
-    m_bool_configs[CONFIG_DEATH_BONES_WORLD]              = sConfigMgr->GetBoolDefault("Death.Bones.World", true);
-    m_bool_configs[CONFIG_DEATH_BONES_BG_OR_ARENA]        = sConfigMgr->GetBoolDefault("Death.Bones.BattlegroundOrArena", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP, sConfigMgr->GetBoolDefault("Death.CorpseReclaimDelay.PvP", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE, sConfigMgr->GetBoolDefault("Death.CorpseReclaimDelay.PvE", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_BONES_WORLD, sConfigMgr->GetBoolDefault("Death.Bones.World", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DEATH_BONES_BG_OR_ARENA, sConfigMgr->GetBoolDefault("Death.Bones.BattlegroundOrArena", true));
 
-    m_bool_configs[CONFIG_DIE_COMMAND_MODE] = sConfigMgr->GetBoolDefault("Die.Command.Mode", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DIE_COMMAND_MODE, sConfigMgr->GetBoolDefault("Die.Command.Mode", true));
 
     m_float_configs[CONFIG_THREAT_RADIUS] = sConfigMgr->GetFloatDefault("ThreatRadius", 60.0f);
 
     // always use declined names in the russian client
-    m_bool_configs[CONFIG_DECLINED_NAMES_USED] =
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DECLINED_NAMES_USED,
 
-        (m_int_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : sConfigMgr->GetBoolDefault("DeclinedNames", false);
+        (m_int_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : sConfigMgr->GetBoolDefault("DeclinedNames", false));
 
     m_float_configs[CONFIG_LISTEN_RANGE_SAY]       = sConfigMgr->GetFloatDefault("ListenRange.Say", 25.0f);
     m_float_configs[CONFIG_LISTEN_RANGE_TEXTEMOTE] = sConfigMgr->GetFloatDefault("ListenRange.TextEmote", 25.0f);
     m_float_configs[CONFIG_LISTEN_RANGE_YELL]      = sConfigMgr->GetFloatDefault("ListenRange.Yell", 300.0f);
 
-    m_bool_configs[CONFIG_BATTLEGROUND_CAST_DESERTER]                = sConfigMgr->GetBoolDefault("Battleground.CastDeserter", true);
-    m_bool_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE]       = sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.Enable", false);
-    m_bool_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY]   = sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.PlayerOnly", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_BATTLEGROUND_CAST_DESERTER, sConfigMgr->GetBoolDefault("Battleground.CastDeserter", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE, sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.Enable", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY, sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.PlayerOnly", false));
     m_int_configs[CONFIG_BATTLEGROUND_INVITATION_TYPE]               = sConfigMgr->GetIntDefault ("Battleground.InvitationType", 0);
     m_int_configs[CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER]        = sConfigMgr->GetIntDefault ("Battleground.PrematureFinishTimer", 5 * MINUTE * IN_MILLISECONDS);
     m_int_configs[CONFIG_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH]  = sConfigMgr->GetIntDefault ("Battleground.PremadeGroupWaitForMatch", 30 * MINUTE * IN_MILLISECONDS);
-    m_bool_configs[CONFIG_BG_XP_FOR_KILL]                            = sConfigMgr->GetBoolDefault("Battleground.GiveXPForKills", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_BG_XP_FOR_KILL, sConfigMgr->GetBoolDefault("Battleground.GiveXPForKills", false));
     m_int_configs[CONFIG_ARENA_MAX_RATING_DIFFERENCE]                = sConfigMgr->GetIntDefault ("Arena.MaxRatingDifference", 150);
     m_int_configs[CONFIG_ARENA_RATING_DISCARD_TIMER]                 = sConfigMgr->GetIntDefault ("Arena.RatingDiscardTimer", 10 * MINUTE * IN_MILLISECONDS);
     m_int_configs[CONFIG_ARENA_RATED_UPDATE_TIMER]                   = sConfigMgr->GetIntDefault ("Arena.RatedUpdateTimer", 5 * IN_MILLISECONDS);
-    m_bool_configs[CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE]              = sConfigMgr->GetBoolDefault("Arena.QueueAnnouncer.Enable", false);
-    m_bool_configs[CONFIG_ARENA_QUEUE_ANNOUNCER_PLAYERONLY]          = sConfigMgr->GetBoolDefault("Arena.QueueAnnouncer.PlayerOnly", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE, sConfigMgr->GetBoolDefault("Arena.QueueAnnouncer.Enable", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ARENA_QUEUE_ANNOUNCER_PLAYERONLY, sConfigMgr->GetBoolDefault("Arena.QueueAnnouncer.PlayerOnly", false));
     m_int_configs[CONFIG_ARENA_SEASON_ID]                            = sConfigMgr->GetIntDefault ("Arena.ArenaSeason.ID", 1);
     m_int_configs[CONFIG_ARENA_START_RATING]                         = sConfigMgr->GetIntDefault ("Arena.ArenaStartRating", 0);
     m_int_configs[CONFIG_ARENA_START_PERSONAL_RATING]                = sConfigMgr->GetIntDefault ("Arena.ArenaStartPersonalRating", 1000);
     m_int_configs[CONFIG_ARENA_START_MATCHMAKER_RATING]              = sConfigMgr->GetIntDefault ("Arena.ArenaStartMatchmakerRating", 1500);
-    m_bool_configs[CONFIG_ARENA_SEASON_IN_PROGRESS]                  = sConfigMgr->GetBoolDefault("Arena.ArenaSeason.InProgress", true);
-    m_bool_configs[CONFIG_ARENA_LOG_EXTENDED_INFO]                   = sConfigMgr->GetBoolDefault("ArenaLog.ExtendedInfo", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ARENA_SEASON_IN_PROGRESS, sConfigMgr->GetBoolDefault("Arena.ArenaSeason.InProgress", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ARENA_LOG_EXTENDED_INFO, sConfigMgr->GetBoolDefault("ArenaLog.ExtendedInfo", false));
 
-    m_bool_configs[CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN]            = sConfigMgr->GetBoolDefault("OffhandCheckAtSpellUnlearn", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN, sConfigMgr->GetBoolDefault("OffhandCheckAtSpellUnlearn", true));
 
     if (int32 clientCacheId = sConfigMgr->GetIntDefault("ClientCacheVersion", 0))
     {
@@ -1124,7 +1124,7 @@ void World::LoadConfigSettings(bool reload)
     }
 
     // blackmarket
-    m_bool_configs[CONFIG_BLACK_MARKET_OPEN] = sConfigMgr->GetBoolDefault("BlackMarket.Open", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_BLACK_MARKET_OPEN, sConfigMgr->GetBoolDefault("BlackMarket.Open", false));
     m_int_configs[CONFIG_BLACK_MARKET_MAX_AUCTIONS] = sConfigMgr->GetIntDefault("BlackMarket.MaxAuctions", 12);
     if (m_int_configs[CONFIG_BLACK_MARKET_MAX_AUCTIONS] > CONFIG_BLACK_MARKET_MAX_AUCTIONS)
         m_int_configs[CONFIG_BLACK_MARKET_MAX_AUCTIONS] = CONFIG_BLACK_MARKET_MAX_AUCTIONS;
@@ -1136,7 +1136,7 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD] = CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD;
 
     // character boost
-    m_bool_configs[CONFIG_BOOST_NEW_ACCOUNT] = sConfigMgr->GetBoolDefault("Boost.NewAccounts", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_BOOST_NEW_ACCOUNT, sConfigMgr->GetBoolDefault("Boost.NewAccounts", false));
     m_int_configs[CONFIG_BOOST_START_MONEY] = sConfigMgr->GetIntDefault("Boost.StartMoney", 1500000);
     m_int_configs[CONFIG_BOOST_START_LEVEL] = sConfigMgr->GetIntDefault("Boost.StartLevel", 90);
 
@@ -1214,10 +1214,10 @@ void World::LoadConfigSettings(bool reload)
         SF_LOG_INFO("server.loading", "Using DataDir %s", m_dataPath.c_str());
     }
 
-    m_bool_configs[CONFIG_ENABLE_MMAPS] = sConfigMgr->GetBoolDefault("mmap.enablePathFinding", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ENABLE_MMAPS, sConfigMgr->GetBoolDefault("mmap.enablePathFinding", false));
     SF_LOG_INFO("server.loading", "WORLD: MMap data directory is: %smmaps", m_dataPath.c_str());
 
-    m_bool_configs[CONFIG_VMAP_INDOOR_CHECK] = sConfigMgr->GetBoolDefault("vmap.enableIndoorCheck", 0);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_VMAP_INDOOR_CHECK, sConfigMgr->GetBoolDefault("vmap.enableIndoorCheck", 0));
     bool enableIndoor = sConfigMgr->GetBoolDefault("vmap.enableIndoorCheck", true);
     bool enableLOS = sConfigMgr->GetBoolDefault("vmap.enableLOS", true);
     bool enableHeight = sConfigMgr->GetBoolDefault("vmap.enableHeight", true);
@@ -1231,40 +1231,40 @@ void World::LoadConfigSettings(bool reload)
     SF_LOG_INFO("server.loading", "VMap data directory is: %svmaps", m_dataPath.c_str());
 
     m_int_configs[CONFIG_MAX_WHO] = sConfigMgr->GetIntDefault("MaxWhoListReturns", 49);
-    m_bool_configs[CONFIG_START_ALL_SPELLS] = sConfigMgr->GetBoolDefault("PlayerStart.AllSpells", false);
-    if (m_bool_configs[CONFIG_START_ALL_SPELLS])
+    SetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_SPELLS, sConfigMgr->GetBoolDefault("PlayerStart.AllSpells", false));
+    if (GetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_SPELLS))
         SF_LOG_WARN("server.loading", "PlayerStart.AllSpells enabled - may not function as intended!");
     m_int_configs[CONFIG_HONOR_AFTER_DUEL] = sConfigMgr->GetIntDefault("HonorPointsAfterDuel", 0);
-    m_bool_configs[CONFIG_START_ALL_EXPLORED] = sConfigMgr->GetBoolDefault("PlayerStart.MapsExplored", false);
-    m_bool_configs[CONFIG_START_ALL_REP] = sConfigMgr->GetBoolDefault("PlayerStart.AllReputation", false);
-    m_bool_configs[CONFIG_ALWAYS_MAXSKILL] = sConfigMgr->GetBoolDefault("AlwaysMaxWeaponSkill", false);
-    m_bool_configs[CONFIG_PVP_TOKEN_ENABLE] = sConfigMgr->GetBoolDefault("PvPToken.Enable", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_EXPLORED, sConfigMgr->GetBoolDefault("PlayerStart.MapsExplored", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_REP, sConfigMgr->GetBoolDefault("PlayerStart.AllReputation", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALWAYS_MAXSKILL, sConfigMgr->GetBoolDefault("AlwaysMaxWeaponSkill", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_PVP_TOKEN_ENABLE, sConfigMgr->GetBoolDefault("PvPToken.Enable", false));
     m_int_configs[CONFIG_PVP_TOKEN_MAP_TYPE] = sConfigMgr->GetIntDefault("PvPToken.MapAllowType", 4);
     m_int_configs[CONFIG_PVP_TOKEN_ID] = sConfigMgr->GetIntDefault("PvPToken.ItemID", 29434);
     m_int_configs[CONFIG_PVP_TOKEN_COUNT] = sConfigMgr->GetIntDefault("PvPToken.ItemCount", 1);
     if (m_int_configs[CONFIG_PVP_TOKEN_COUNT] < 1)
         m_int_configs[CONFIG_PVP_TOKEN_COUNT] = 1;
 
-    m_bool_configs[CONFIG_NO_RESET_TALENT_COST] = sConfigMgr->GetBoolDefault("NoResetTalentsCost", false);
-    m_bool_configs[CONFIG_SHOW_KICK_IN_WORLD] = sConfigMgr->GetBoolDefault("ShowKickInWorld", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_NO_RESET_TALENT_COST, sConfigMgr->GetBoolDefault("NoResetTalentsCost", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_SHOW_KICK_IN_WORLD, sConfigMgr->GetBoolDefault("ShowKickInWorld", false));
     m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = sConfigMgr->GetIntDefault("RecordUpdateTimeDiffInterval", 60000);
     m_int_configs[CONFIG_MIN_LOG_UPDATE] = sConfigMgr->GetIntDefault("MinRecordUpdateTimeDiff", 100);
     m_int_configs[CONFIG_NUMTHREADS] = sConfigMgr->GetIntDefault("MapUpdate.Threads", 1);
     m_int_configs[CONFIG_MAX_RESULTS_LOOKUP_COMMANDS] = sConfigMgr->GetIntDefault("Command.LookupMaxResults", 0);
 
     // chat logging
-    m_bool_configs[CONFIG_CHATLOG_CHANNEL] = sConfigMgr->GetBoolDefault("ChatLogs.Channel", false);
-    m_bool_configs[CONFIG_CHATLOG_WHISPER] = sConfigMgr->GetBoolDefault("ChatLogs.Whisper", false);
-    m_bool_configs[CONFIG_CHATLOG_SYSCHAN] = sConfigMgr->GetBoolDefault("ChatLogs.SysChan", false);
-    m_bool_configs[CONFIG_CHATLOG_PARTY] = sConfigMgr->GetBoolDefault("ChatLogs.Party", false);
-    m_bool_configs[CONFIG_CHATLOG_RAID] = sConfigMgr->GetBoolDefault("ChatLogs.Raid", false);
-    m_bool_configs[CONFIG_CHATLOG_GUILD] = sConfigMgr->GetBoolDefault("ChatLogs.Guild", false);
-    m_bool_configs[CONFIG_CHATLOG_PUBLIC] = sConfigMgr->GetBoolDefault("ChatLogs.Public", false);
-    m_bool_configs[CONFIG_CHATLOG_ADDON] = sConfigMgr->GetBoolDefault("ChatLogs.Addon", false);
-    m_bool_configs[CONFIG_CHATLOG_BGROUND] = sConfigMgr->GetBoolDefault("ChatLogs.Battleground", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_CHANNEL, sConfigMgr->GetBoolDefault("ChatLogs.Channel", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_WHISPER, sConfigMgr->GetBoolDefault("ChatLogs.Whisper", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_SYSCHAN, sConfigMgr->GetBoolDefault("ChatLogs.SysChan", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_PARTY, sConfigMgr->GetBoolDefault("ChatLogs.Party", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_RAID, sConfigMgr->GetBoolDefault("ChatLogs.Raid", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_GUILD, sConfigMgr->GetBoolDefault("ChatLogs.Guild", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_PUBLIC, sConfigMgr->GetBoolDefault("ChatLogs.Public", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_ADDON, sConfigMgr->GetBoolDefault("ChatLogs.Addon", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_BGROUND, sConfigMgr->GetBoolDefault("ChatLogs.Battleground", false));
 
     // Warden
-    m_bool_configs[CONFIG_WARDEN_ENABLED]              = sConfigMgr->GetBoolDefault("Warden.Enabled", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED, sConfigMgr->GetBoolDefault("Warden.Enabled", false));
     m_int_configs[CONFIG_WARDEN_NUM_MEM_CHECKS]        = sConfigMgr->GetIntDefault("Warden.NumMemChecks", 3);
     m_int_configs[CONFIG_WARDEN_NUM_OTHER_CHECKS]      = sConfigMgr->GetIntDefault("Warden.NumOtherChecks", 7);
     m_int_configs[CONFIG_WARDEN_CLIENT_BAN_DURATION]   = sConfigMgr->GetIntDefault("Warden.BanDuration", 86400);
@@ -1276,7 +1276,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_LFG_OPTIONSMASK] = sConfigMgr->GetIntDefault("DungeonFinder.OptionsMask", 1);
 
     // DBC_ItemAttributes
-    m_bool_configs[CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES] = sConfigMgr->GetBoolDefault("DBC.EnforceItemAttributes", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES, sConfigMgr->GetBoolDefault("DBC.EnforceItemAttributes", true));
 
     // Accountpassword Secruity
     m_int_configs[CONFIG_ACC_PASSCHANGESEC] = sConfigMgr->GetIntDefault("Account.PasswordChangeSecurity", 0);
@@ -1296,10 +1296,10 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_MAX_INSTANCES_PER_HOUR] = sConfigMgr->GetIntDefault("AccountInstancesPerHour", 5);
 
     // Anounce reset of instance to whole party
-    m_bool_configs[CONFIG_INSTANCES_RESET_ANNOUNCE] = sConfigMgr->GetBoolDefault("InstancesResetAnnounce", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_INSTANCES_RESET_ANNOUNCE, sConfigMgr->GetBoolDefault("InstancesResetAnnounce", false));
 
     // AutoBroadcast
-    m_bool_configs[CONFIG_AUTOBROADCAST] = sConfigMgr->GetBoolDefault("AutoBroadcast.On", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_AUTOBROADCAST, sConfigMgr->GetBoolDefault("AutoBroadcast.On", false));
     m_int_configs[CONFIG_AUTOBROADCAST_CENTER] = sConfigMgr->GetIntDefault("AutoBroadcast.Center", 0);
     m_int_configs[CONFIG_AUTOBROADCAST_INTERVAL] = sConfigMgr->GetIntDefault("AutoBroadcast.Timer", 60000);
     if (reload)
@@ -1312,7 +1312,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_DB_PING_INTERVAL] = sConfigMgr->GetIntDefault("MaxPingTime", 30);
 
     // Guild save interval
-    m_bool_configs[CONFIG_GUILD_LEVELING_ENABLED] = sConfigMgr->GetBoolDefault("Guild.LevelingEnabled", true);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_GUILD_LEVELING_ENABLED, sConfigMgr->GetBoolDefault("Guild.LevelingEnabled", true));
     m_int_configs[CONFIG_GUILD_SAVE_INTERVAL] = sConfigMgr->GetIntDefault("Guild.SaveInterval", 15);
     m_int_configs[CONFIG_GUILD_MAX_LEVEL] = sConfigMgr->GetIntDefault("Guild.MaxLevel", 25);
     m_int_configs[CONFIG_GUILD_UNDELETABLE_LEVEL] = sConfigMgr->GetIntDefault("Guild.UndeletableLevel", 4);
@@ -1321,12 +1321,12 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_GUILD_WEEKLY_REP_CAP] = sConfigMgr->GetIntDefault("Guild.WeeklyReputationCap", 4375);
 
     // misc
-    m_bool_configs[CONFIG_PDUMP_NO_PATHS] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowPaths", true);
-    m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowOverwrite", true);
-    m_bool_configs[CONFIG_UI_QUESTLEVELS_IN_DIALOGS] = sConfigMgr->GetBoolDefault("UI.ShowQuestLevelsInDialogs", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_PDUMP_NO_PATHS, sConfigMgr->GetBoolDefault("PlayerDump.DisallowPaths", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_PDUMP_NO_OVERWRITE, sConfigMgr->GetBoolDefault("PlayerDump.DisallowOverwrite", true));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS, sConfigMgr->GetBoolDefault("UI.ShowQuestLevelsInDialogs", false));
 
     // Wintergrasp battlefield
-    m_bool_configs[CONFIG_WINTERGRASP_ENABLE] = sConfigMgr->GetBoolDefault("Wintergrasp.Enable", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_WINTERGRASP_ENABLE, sConfigMgr->GetBoolDefault("Wintergrasp.Enable", false));
     m_int_configs[CONFIG_WINTERGRASP_PLR_MAX] = sConfigMgr->GetIntDefault("Wintergrasp.PlayerMax", 100);
     m_int_configs[CONFIG_WINTERGRASP_PLR_MIN] = sConfigMgr->GetIntDefault("Wintergrasp.PlayerMin", 0);
     m_int_configs[CONFIG_WINTERGRASP_PLR_MIN_LVL] = sConfigMgr->GetIntDefault("Wintergrasp.PlayerMinLvl", 77);
@@ -1335,7 +1335,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WINTERGRASP_RESTART_AFTER_CRASH] = sConfigMgr->GetIntDefault("Wintergrasp.CrashRestartTimer", 10);
 
     // Stats limits
-    m_bool_configs[CONFIG_STATS_LIMITS_ENABLE] = sConfigMgr->GetBoolDefault("Stats.Limits.Enable", false);
+    SetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE, sConfigMgr->GetBoolDefault("Stats.Limits.Enable", false));
     m_float_configs[CONFIG_STATS_LIMITS_DODGE] = sConfigMgr->GetFloatDefault("Stats.Limits.Dodge", 95.0f);
     m_float_configs[CONFIG_STATS_LIMITS_PARRY] = sConfigMgr->GetFloatDefault("Stats.Limits.Parry", 95.0f);
     m_float_configs[CONFIG_STATS_LIMITS_BLOCK] = sConfigMgr->GetFloatDefault("Stats.Limits.Block", 95.0f);
@@ -2188,7 +2188,7 @@ void World::Update(uint32 diff)
     sMapMgr->Update(diff);
     RecordTimeDiff("UpdateMapMgr");
 
-    if (sWorld->getBoolConfig(CONFIG_AUTOBROADCAST))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_AUTOBROADCAST))
     {
         if (m_timers[WUPDATE_AUTOBROADCAST].Passed())
         {

@@ -399,7 +399,7 @@ void Map::EnsureGridCreated_i(const GridCoord &p)
     {
         SF_LOG_DEBUG("maps", "Creating grid[%u, %u] for map %u instance %u", p.x_coord, p.y_coord, GetId(), i_InstanceId);
 
-        setNGrid(new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, sWorld->getBoolConfig(CONFIG_GRID_UNLOAD)),
+        setNGrid(new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_GRID_UNLOAD)),
             p.x_coord, p.y_coord);
 
         // build a linkage between this map and NGridType
@@ -806,7 +806,7 @@ void Map::RemoveFromMap(T *obj, bool remove)
     if (remove)
     {
         // if option set then object already saved at this moment
-        if (!sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
+        if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
         DeleteFromWorld(obj);
     }
@@ -834,7 +834,7 @@ void Map::RemoveFromMap(Transport* obj, bool remove)
     if (remove)
     {
         // if option set then object already saved at this moment
-        if (!sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
+        if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
         DeleteFromWorld(obj);
     }

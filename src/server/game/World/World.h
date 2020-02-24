@@ -98,7 +98,7 @@ enum WorldTimers
 };
 
 /// Configuration elements
-enum WorldBoolConfigs
+enum class WorldBoolConfigs
 {
     CONFIG_DURABILITY_LOSS_IN_PVP = 0,
     CONFIG_ADDON_CHANNEL,
@@ -688,16 +688,16 @@ class World
         float getRate(Rates rate) const { return rate_values[rate]; }
 
         /// Set a server configuration element (see #WorldConfigs)
-        void setBoolConfig(WorldBoolConfigs index, bool value)
+        void SetBoolConfig(WorldBoolConfigs index, bool value)
         {
-            if (index < BOOL_CONFIG_VALUE_COUNT)
-                m_bool_configs[index] = value;
+            if (index < WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)
+                m_bool_configs[uint8(index)] = value;
         }
 
         /// Get a server configuration element (see #WorldConfigs)
-        bool getBoolConfig(WorldBoolConfigs index) const
+        bool GetBoolConfig(WorldBoolConfigs index) const
         {
-            return index < BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[index] : 0;
+            return index < WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[uint8(index)] : false;
         }
 
         /// Set a server configuration element (see #WorldConfigs)
@@ -837,7 +837,7 @@ class World
 
         float rate_values[MAX_RATES];
         uint32 m_int_configs[INT_CONFIG_VALUE_COUNT];
-        bool m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
+        bool m_bool_configs[uint8(WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)];
         float m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
         typedef std::map<uint32, uint64> WorldStatesMap;
         WorldStatesMap m_worldstates;

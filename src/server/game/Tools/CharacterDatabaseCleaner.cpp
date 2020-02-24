@@ -28,7 +28,7 @@
 void CharacterDatabaseCleaner::CleanDatabase()
 {
     // config to disable
-    if (!sWorld->getBoolConfig(CONFIG_CLEAN_CHARACTER_DB))
+    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CLEAN_CHARACTER_DB))
         return;
 
     SF_LOG_INFO("misc", "Cleaning character database...");

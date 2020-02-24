@@ -564,7 +564,7 @@ public:
 
         if (target->IsAlive())
         {
-            if (sWorld->getBoolConfig(CONFIG_DIE_COMMAND_MODE))
+            if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DIE_COMMAND_MODE))
                 handler->GetSession()->GetPlayer()->Kill(target);
             else
                 handler->GetSession()->GetPlayer()->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -830,7 +830,7 @@ public:
         if (handler->HasLowerSecurity(target, 0))
             return false;
 
-        if (sWorld->getBoolConfig(CONFIG_SHOW_KICK_IN_WORLD))
+        if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_SHOW_KICK_IN_WORLD))
             sWorld->SendWorldText(LANG_COMMAND_KICKMESSAGE, playerName.c_str());
         else
             handler->PSendSysMessage(LANG_COMMAND_KICKMESSAGE, playerName.c_str());
@@ -1264,7 +1264,7 @@ public:
             return false;
 
         // Weather is OFF
-        if (!sWorld->getBoolConfig(CONFIG_WEATHER))
+        if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WEATHER))
         {
             handler->SendSysMessage(LANG_WEATHER_DISABLED);
             handler->SetSentErrorMessage(true);

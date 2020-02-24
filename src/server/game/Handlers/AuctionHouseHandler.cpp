@@ -397,7 +397,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     AuctionEntry* AH = new AuctionEntry();
 
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
         AH->auctioneer = 23442;     ///@TODO - HARDCODED DB GUID, BAD BAD BAD
     else
         AH->auctioneer = GUID_LOPART(auctioneer);

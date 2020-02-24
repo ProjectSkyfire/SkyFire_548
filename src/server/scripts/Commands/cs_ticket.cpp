@@ -710,7 +710,7 @@ public:
 
     static bool HandleToggleGMTicketSystem(ChatHandler* handler, char const* /*args*/)
     {
-        bool status = sWorld->getBoolConfig(CONFIG_TICKETS_GM_ENABLED) ? true : (sTicketMgr->GetGmTicketSystemStatus() ? true : false);
+        bool status = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_TICKETS_GM_ENABLED) ? true : (sTicketMgr->GetGmTicketSystemStatus() ? true : false);
         int32 message = status ? LANG_ALLOW_TICKETS : LANG_DISALLOW_TICKETS;
         sTicketMgr->SetGmTicketSystemStatus(status);
         handler->PSendSysMessage(message);

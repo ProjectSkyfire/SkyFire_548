@@ -60,7 +60,7 @@ bool BattlefieldWG::SetupBattlefield()
     m_Map = sMapMgr->FindMap(m_MapId, 0);
 
     m_MaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MAX);
-    m_IsEnabled = sWorld->getBoolConfig(CONFIG_WINTERGRASP_ENABLE);
+    m_IsEnabled = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WINTERGRASP_ENABLE);
     m_MinPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MIN);
     m_MinLevel = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MIN_LVL);
     m_BattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_BATTLETIME) * MINUTE * IN_MILLISECONDS;
