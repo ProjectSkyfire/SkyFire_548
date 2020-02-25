@@ -331,7 +331,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_TEAMMASK))
     {
-        if (uint32 mask = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED))
+        if (uint32 mask = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_DISABLED))
         {
             bool disabled = false;
 
@@ -393,7 +393,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RACEMASK))
     {
-        uint32 raceMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
+        uint32 raceMaskDisabled = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
         if ((1 << (race_ - 1)) & raceMaskDisabled)
         {
             data << uint8(CHAR_CREATE_DISABLED);
@@ -404,7 +404,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_CLASSMASK))
     {
-        uint32 classMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_CLASSMASK);
+        uint32 classMaskDisabled = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_DISABLED_CLASSMASK);
         if ((1 << (class_ - 1)) & classMaskDisabled)
         {
             data << uint8(CHAR_CREATE_DISABLED);
@@ -441,7 +441,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     if (class_ == CLASS_DEATH_KNIGHT && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_HEROIC_CHARACTER))
     {
         // speedup check for heroic class disabled case
-        uint32 heroic_free_slots = sWorld->getIntConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
+        uint32 heroic_free_slots = sWorld->getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM);
         if (heroic_free_slots == 0)
         {
             data << uint8(CHAR_CREATE_UNIQUE_CLASS_LIMIT);
@@ -450,8 +450,8 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         }
 
         // speedup check for heroic class disabled case
-        uint32 req_level_for_heroic = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
-        if (req_level_for_heroic > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        uint32 req_level_for_heroic = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
+        if (req_level_for_heroic > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
         {
             data << uint8(CHAR_CREATE_LEVEL_REQUIREMENT);
             SendPacket(&data);
@@ -508,7 +508,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                     acctCharCount = atoi(ch);
             }
 
-            if (acctCharCount >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_ACCOUNT))
+            if (acctCharCount >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTERS_PER_ACCOUNT))
             {
                 WorldPacket data(SMSG_CHAR_CREATE, 1);
                 data << uint8(CHAR_CREATE_ACCOUNT_LIMIT);
@@ -536,7 +536,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 Field* fields = result->Fetch();
                 createInfo->CharCount = uint8(fields[0].GetUInt64()); // SQL's COUNT() returns uint64 but it will always be less than uint8.Max
 
-                if (createInfo->CharCount >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+                if (createInfo->CharCount >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTERS_PER_REALM))
                 {
                     WorldPacket data(SMSG_CHAR_CREATE, 1);
                     data << uint8(CHAR_CREATE_SERVER_LIMIT);
@@ -548,7 +548,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             }
 
             bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || HasPermission(rbac::RBAC_PERM_TWO_SIDE_CHARACTER_CREATION);
-            uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
+            uint32 skipCinematics = sWorld->getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS);
 
             _charCreateCallback.FreeResult();
 
@@ -569,16 +569,16 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
     case 3:
         {
             bool haveSameRace = false;
-            uint32 heroicReqLevel = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
+            uint32 heroicReqLevel = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
             bool hasHeroicReqLevel = (heroicReqLevel == 0);
             bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || HasPermission(rbac::RBAC_PERM_TWO_SIDE_CHARACTER_CREATION);
-            uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
+            uint32 skipCinematics = sWorld->getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS);
             bool checkHeroicReqs = createInfo->Class == CLASS_DEATH_KNIGHT && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_HEROIC_CHARACTER);
 
             if (result)
             {
                 uint32 team = Player::TeamForRace(createInfo->Race);
-                uint32 freeHeroicSlots = sWorld->getIntConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
+                uint32 freeHeroicSlots = sWorld->getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM);
 
                 Field* field = result->Fetch();
                 uint8 accRace  = field[1].GetUInt8();
@@ -999,15 +999,15 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SF_LOG_DEBUG("network", "WORLD: Sent motd (SMSG_MOTD)");
 
         // send server info
-        if (sWorld->getIntConfig(CONFIG_ENABLE_SINFO_LOGIN) == 1)
+        if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_ENABLE_SINFO_LOGIN) == 1)
             chH.PSendSysMessage(_FULLVERSION);
 
         SF_LOG_DEBUG("network", "WORLD: Sent server info");
     }
 
     data.Initialize(SMSG_PVP_SEASON, 4 + 4);
-    data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) - 1); // Old season
-    data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));     // Current season
+    data << uint32(sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_SEASON_ID) - 1); // Old season
+    data << uint32(sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_SEASON_ID));     // Current season
     SendPacket(&data);
 
     //QueryResult* result = CharacterDatabase.PQuery("SELECT guildid, rank FROM guild_member WHERE guid = '%u'", pCurrChar->GetGUIDLow());
@@ -2069,7 +2069,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RACEMASK))
     {
-        uint32 raceMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
+        uint32 raceMaskDisabled = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
         if ((1 << (race - 1)) & raceMaskDisabled)
         {
             WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);

@@ -1478,7 +1478,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         // send info to the client
         player->SendNewItem(pItem, num_to_add, true, bgType == BattlegroundTypeId::BATTLEGROUND_TYPE_NONE);
 
-        if (pProto->Quality > ITEM_QUALITY_EPIC || (pProto->Quality == ITEM_QUALITY_EPIC && pProto->ItemLevel >= MinNewsItemLevel[sWorld->getIntConfig(CONFIG_EXPANSION)]))
+        if (pProto->Quality > ITEM_QUALITY_EPIC || (pProto->Quality == ITEM_QUALITY_EPIC && pProto->ItemLevel >= MinNewsItemLevel[sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION)]))
             if (Guild* guild = player->GetGuild())
                 guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->ItemId);
 
@@ -6039,6 +6039,6 @@ void Spell::EffectBattlePetsUnlock(SpellEffIndex effIndex)
     player->learnSpell(SPELL_TRACK_PETS, false);
     player->learnSpell(SPELL_REVIVE_BATTLE_PETS, false);
 
-    for (uint8 i = 0; i < sWorld->getIntConfig(CONFIG_BATTLE_PET_LOADOUT_UNLOCK_COUNT); i++)
+    for (uint8 i = 0; i < sWorld->getIntConfig(WorldIntConfigs::CONFIG_BATTLE_PET_LOADOUT_UNLOCK_COUNT); i++)
         battlePetMgr->UnlockLoadoutSlot(i);
 }

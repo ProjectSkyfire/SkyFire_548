@@ -796,7 +796,7 @@ public:
         }
 
         // save if the player has last been saved over 20 seconds ago
-        uint32 saveInterval = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
+        uint32 saveInterval = sWorld->getIntConfig(WorldIntConfigs::CONFIG_INTERVAL_SAVE);
         if (saveInterval == 0 || (saveInterval > 20 * IN_MILLISECONDS && player->GetSaveTimer() <= saveInterval - 20 * IN_MILLISECONDS))
             player->SaveToDB();
 
@@ -1699,7 +1699,7 @@ public:
         handler->PSendSysMessage(LANG_PINFO_ACC_IP, lastIp.c_str(), locked ? "Yes" : "No");
 
         // Output X. LANG_PINFO_CHR_LEVEL
-        if (level != sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (level != sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
             handler->PSendSysMessage(LANG_PINFO_CHR_LEVEL_LOW, level, xp, xptotal, (xptotal - xp));
         else
             handler->PSendSysMessage(LANG_PINFO_CHR_LEVEL_HIGH, level);

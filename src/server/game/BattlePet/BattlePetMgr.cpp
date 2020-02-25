@@ -365,7 +365,7 @@ void BattlePetMgr::Create(uint16 speciesId)
     uint64 id     = sObjectMgr->BattlePetGetNewId();
     uint8 breed   = sObjectMgr->BattlePetGetRandomBreed(speciesId);
     uint8 quality = sObjectMgr->BattlePetGetRandomQuality(speciesId);
-    uint8 level   = sWorld->getIntConfig(CONFIG_BATTLE_PET_INITIAL_LEVEL);
+    uint8 level   = sWorld->getIntConfig(WorldIntConfigs::CONFIG_BATTLE_PET_INITIAL_LEVEL);
 
     BattlePet* battlePet = new BattlePet(id, speciesId, level, quality, breed);
     m_battlePetSet.insert(battlePet);

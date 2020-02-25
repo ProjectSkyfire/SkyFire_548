@@ -268,7 +268,7 @@ void GuildMgr::LoadGuilds()
     {
         uint32 oldMSTime = getMSTime();
 
-        CharacterDatabase.DirectPExecute("DELETE FROM guild_eventlog WHERE LogGuid > %u", sWorld->getIntConfig(CONFIG_GUILD_EVENT_LOG_COUNT));
+        CharacterDatabase.DirectPExecute("DELETE FROM guild_eventlog WHERE LogGuid > %u", sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_EVENT_LOG_COUNT));
 
                                                      //          0        1        2          3            4            5        6
         QueryResult result = CharacterDatabase.Query("SELECT guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog ORDER BY TimeStamp DESC, LogGuid DESC");
@@ -302,7 +302,7 @@ void GuildMgr::LoadGuilds()
         uint32 oldMSTime = getMSTime();
 
         // Remove log entries that exceed the number of allowed entries per guild
-        CharacterDatabase.DirectPExecute("DELETE FROM guild_bank_eventlog WHERE LogGuid > %u", sWorld->getIntConfig(CONFIG_GUILD_BANK_EVENT_LOG_COUNT));
+        CharacterDatabase.DirectPExecute("DELETE FROM guild_bank_eventlog WHERE LogGuid > %u", sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_BANK_EVENT_LOG_COUNT));
 
                                                      //          0        1      2        3          4           5            6               7          8
         QueryResult result = CharacterDatabase.Query("SELECT guildid, TabId, LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog ORDER BY TimeStamp DESC, LogGuid DESC");
@@ -335,7 +335,7 @@ void GuildMgr::LoadGuilds()
     {
         uint32 oldMSTime = getMSTime();
 
-        CharacterDatabase.DirectPExecute("DELETE FROM guild_newslog WHERE LogGuid > %u", sWorld->getIntConfig(CONFIG_GUILD_NEWS_LOG_COUNT));
+        CharacterDatabase.DirectPExecute("DELETE FROM guild_newslog WHERE LogGuid > %u", sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_NEWS_LOG_COUNT));
 
                                                      //      0        1        2          3           4      5      6
         QueryResult result = CharacterDatabase.Query("SELECT guildid, LogGuid, EventType, PlayerGuid, Flags, Value, Timestamp FROM guild_newslog ORDER BY TimeStamp DESC, LogGuid DESC");
@@ -469,8 +469,8 @@ void GuildMgr::LoadGuildXpForLevel()
 {
     uint32 oldMSTime = getMSTime();
 
-    GuildXPperLevel.resize(sWorld->getIntConfig(CONFIG_GUILD_MAX_LEVEL));
-    for (uint8 level = 0; level < sWorld->getIntConfig(CONFIG_GUILD_MAX_LEVEL); ++level)
+    GuildXPperLevel.resize(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_MAX_LEVEL));
+    for (uint8 level = 0; level < sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_MAX_LEVEL); ++level)
         GuildXPperLevel[level] = 0;
 
     //                                                 0         1
@@ -491,7 +491,7 @@ void GuildMgr::LoadGuildXpForLevel()
         uint32 level        = fields[0].GetUInt8();
         uint32 requiredXP   = fields[1].GetUInt64();
 
-        if (level >= sWorld->getIntConfig(CONFIG_GUILD_MAX_LEVEL))
+        if (level >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_MAX_LEVEL))
         {
             SF_LOG_INFO("misc", "Unused (> Guild.MaxLevel in worldserver.conf) level %u in `guild_xp_for_level` table, ignoring.", uint32(level));
             continue;
@@ -503,7 +503,7 @@ void GuildMgr::LoadGuildXpForLevel()
     } while (result->NextRow());
 
     // fill level gaps
-    for (uint8 level = 1; level < sWorld->getIntConfig(CONFIG_GUILD_MAX_LEVEL); ++level)
+    for (uint8 level = 1; level < sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_MAX_LEVEL); ++level)
     {
         if (!GuildXPperLevel[level])
         {

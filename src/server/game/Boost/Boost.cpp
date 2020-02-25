@@ -366,8 +366,8 @@ void CharacterBooster::_SaveBoostedChar(SQLTransaction& trans, std::string const
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_BOOST);
 
     stmt->setUInt8(0,  raceId);
-    stmt->setUInt64(1, sWorld->getIntConfig(CONFIG_BOOST_START_MONEY));
-    stmt->setUInt8(2,  sWorld->getIntConfig(CONFIG_BOOST_START_LEVEL));
+    stmt->setUInt64(1, sWorld->getIntConfig(WorldIntConfigs::CONFIG_BOOST_START_MONEY));
+    stmt->setUInt8(2,  sWorld->getIntConfig(WorldIntConfigs::CONFIG_BOOST_START_LEVEL));
     stmt->setFloat(3,  position[0]);
     stmt->setFloat(4,  position[1]);
     stmt->setFloat(5,  position[2]);

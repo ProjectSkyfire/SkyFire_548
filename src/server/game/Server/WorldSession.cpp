@@ -143,7 +143,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     _compressionStream->opaque = (voidpf)NULL;
     _compressionStream->avail_in = 0;
     _compressionStream->next_in = NULL;
-    int32 z_res = deflateInit(_compressionStream, sWorld->getIntConfig(CONFIG_COMPRESSION));
+    int32 z_res = deflateInit(_compressionStream, sWorld->getIntConfig(WorldIntConfigs::CONFIG_COMPRESSION));
     if (z_res != Z_OK)
         SF_LOG_ERROR("network", "Can't initialize packet compression (zlib: deflateInit) Error code: %i (%s)", z_res, zError(z_res));
 }
@@ -1293,8 +1293,8 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p) const
             return false;
         case POLICY_BAN:
         {
-            BanMode bm = (BanMode)sWorld->getIntConfig(CONFIG_PACKET_SPOOF_BANMODE);
-            uint32 duration = sWorld->getIntConfig(CONFIG_PACKET_SPOOF_BANDURATION); // in seconds
+            BanMode bm = (BanMode)sWorld->getIntConfig(WorldIntConfigs::CONFIG_PACKET_SPOOF_BANMODE);
+            uint32 duration = sWorld->getIntConfig(WorldIntConfigs::CONFIG_PACKET_SPOOF_BANDURATION); // in seconds
             std::string nameOrIp = "";
             switch (bm)
             {

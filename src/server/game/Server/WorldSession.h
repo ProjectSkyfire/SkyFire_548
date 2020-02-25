@@ -452,7 +452,7 @@ class WorldSession
             else
                 m_timeOutTime -= diff;
         }
-        void ResetTimeOutTime() { m_timeOutTime = sWorld->getIntConfig(CONFIG_SOCKET_TIMEOUTTIME); }
+        void ResetTimeOutTime() { m_timeOutTime = sWorld->getIntConfig(WorldIntConfigs::CONFIG_SOCKET_TIMEOUTTIME); }
         bool IsConnectionIdle() const { return (m_timeOutTime <= 0 && !m_inQueue); }
 
         // Recruit-A-Friend Handling
@@ -1099,7 +1099,7 @@ class WorldSession
         {
             friend class World;
             public:
-                DosProtection(WorldSession* s) : Session(s), _policy((Policy)sWorld->getIntConfig(CONFIG_PACKET_SPOOF_POLICY)) { }
+                DosProtection(WorldSession* s) : Session(s), _policy((Policy)sWorld->getIntConfig(WorldIntConfigs::CONFIG_PACKET_SPOOF_POLICY)) { }
                 bool EvaluateOpcode(WorldPacket& p) const;
                 void AllowOpcode(uint16 opcode, bool allow) { _isOpcodeAllowed[opcode] = allow; }
             protected:

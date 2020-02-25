@@ -62,7 +62,7 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
         error = ERR_REFER_A_FRIEND_DIFFERENT_FACTION;
     else if (target->getLevel() >= _player->getLevel())
         error = ERR_REFER_A_FRIEND_TARGET_TOO_HIGH;
-    else if (target->getLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+    else if (target->getLevel() >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
         error = ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I;
     else if (target->GetGroup() != _player->GetGroup())
         error = ERR_REFER_A_FRIEND_NOT_IN_GROUP;

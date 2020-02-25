@@ -42,8 +42,8 @@ extern GridState* si_GridStates[];                          // debugging code, s
 
 MapManager::MapManager()
 {
-    i_gridCleanUpDelay = sWorld->getIntConfig(CONFIG_INTERVAL_GRIDCLEAN);
-    i_timer.SetInterval(sWorld->getIntConfig(CONFIG_INTERVAL_MAPUPDATE));
+    i_gridCleanUpDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_INTERVAL_GRIDCLEAN);
+    i_timer.SetInterval(sWorld->getIntConfig(WorldIntConfigs::CONFIG_INTERVAL_MAPUPDATE));
 }
 
 MapManager::~MapManager() { }
@@ -59,7 +59,7 @@ void MapManager::Initialize()
 
         i_GridStateErrorCount = 0;
     }
-    int num_threads(sWorld->getIntConfig(CONFIG_NUMTHREADS));
+    int num_threads(sWorld->getIntConfig(WorldIntConfigs::CONFIG_NUMTHREADS));
     // Start mtmaps if needed.
     if (num_threads > 0 && m_updater.activate(num_threads) == -1)
         abort();

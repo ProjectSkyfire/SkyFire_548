@@ -782,19 +782,19 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 Entry, uint32 vehId, uint
     switch (GetCreatureTemplate()->rank)
     {
         case CREATURE_ELITE_RARE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RARE);
+            m_corpseDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CORPSE_DECAY_RARE);
             break;
         case CREATURE_ELITE_ELITE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_ELITE);
+            m_corpseDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CORPSE_DECAY_ELITE);
             break;
         case CREATURE_ELITE_RAREELITE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RAREELITE);
+            m_corpseDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CORPSE_DECAY_RAREELITE);
             break;
         case CREATURE_ELITE_WORLDBOSS:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+            m_corpseDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CORPSE_DECAY_WORLDBOSS);
             break;
         default:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL);
+            m_corpseDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CORPSE_DECAY_NORMAL);
             break;
     }
 
@@ -1444,7 +1444,7 @@ float Creature::GetAttackDistance(Unit const* player) const
     // radius grow if playlevel < creaturelevel
     RetDistance -= (float)leveldif;
 
-    if (creaturelevel+5 <= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    if (creaturelevel+5 <= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
     {
         // detect range auras
         RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
@@ -1884,7 +1884,7 @@ void Creature::CallAssistance()
                     e->AddAssistant((*assistList.begin())->GetGUID());
                     assistList.pop_front();
                 }
-                m_Events.AddEvent(e, m_Events.CalculateTime(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY)));
+                m_Events.AddEvent(e, m_Events.CalculateTime(sWorld->getIntConfig(WorldIntConfigs::CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY)));
             }
         }
     }
@@ -2320,7 +2320,7 @@ uint8 Creature::getLevelForTarget(WorldObject const* target) const
     if (!isWorldBoss() || !target->ToUnit())
         return Unit::getLevelForTarget(target);
 
-    uint16 level = target->ToUnit()->getLevel() + sWorld->getIntConfig(CONFIG_WORLD_BOSS_LEVEL_DIFF);
+    uint16 level = target->ToUnit()->getLevel() + sWorld->getIntConfig(WorldIntConfigs::CONFIG_WORLD_BOSS_LEVEL_DIFF);
     if (level < 1)
         return 1;
     if (level > 255)

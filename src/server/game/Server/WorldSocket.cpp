@@ -953,7 +953,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     Field* fields = result->Fetch();
 
     uint8 expansion = fields[4].GetUInt8();
-    uint32 world_expansion = sWorld->getIntConfig(CONFIG_EXPANSION);
+    uint32 world_expansion = sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION);
     if (expansion > world_expansion)
         expansion = world_expansion;
 
@@ -1102,7 +1102,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_Session->InitWarden(&k, os);
 
     // Sleep this Network thread for
-    uint32 sleepTime = sWorld->getIntConfig(CONFIG_SESSION_ADD_DELAY);
+    uint32 sleepTime = sWorld->getIntConfig(WorldIntConfigs::CONFIG_SESSION_ADD_DELAY);
     ACE_OS::sleep(ACE_Time_Value(0, sleepTime));
 
     sWorld->AddSession(m_Session);
@@ -1131,7 +1131,7 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
         {
             ++m_OverSpeedPings;
 
-            uint32 max_count = sWorld->getIntConfig (CONFIG_MAX_OVERSPEED_PINGS);
+            uint32 max_count = sWorld->getIntConfig (WorldIntConfigs::CONFIG_MAX_OVERSPEED_PINGS);
 
             if (max_count && m_OverSpeedPings > max_count)
             {

@@ -138,10 +138,10 @@ void Channel::UpdateChannelUseageInDB() const
 
 void Channel::CleanOldChannelsInDB()
 {
-    if (sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) > 0)
+    if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) > 0)
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_OLD_CHANNELS);
-        stmt->setUInt32(0, sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) * DAY);
+        stmt->setUInt32(0, sWorld->getIntConfig(WorldIntConfigs::CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) * DAY);
         CharacterDatabase.Execute(stmt);
 
         SF_LOG_DEBUG("chat.system", "Cleaned out unused custom chat channels.");
@@ -539,7 +539,7 @@ void Channel::List(Player const* player)
     size_t pos = data.wpos();
     data << uint32(0);                                  // size of list, placeholder
 
-    uint32 gmLevelInWhoList = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
+    uint32 gmLevelInWhoList = sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_WHO_LIST);
 
     uint32 count  = 0;
     for (PlayerContainer::const_iterator i = playersStore.begin(); i != playersStore.end(); ++i)

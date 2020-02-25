@@ -92,7 +92,7 @@ public:
         uint32 accountId = handler->GetSession()->GetAccountId();
 
         int expansion = atoi(exp); //get int anyway (0 if error)
-        if (expansion < 0 || uint8(expansion) > sWorld->getIntConfig(CONFIG_EXPANSION))
+        if (expansion < 0 || uint8(expansion) > sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION))
         {
             handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
@@ -449,7 +449,7 @@ public:
         }
 
         // First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
-        uint32 pwConfig = sWorld->getIntConfig(CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+        uint32 pwConfig = sWorld->getIntConfig(WorldIntConfigs::CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
         // Command is supposed to be: .account password [$oldpassword] [$newpassword] [$newpasswordconfirmation] [$emailconfirmation]
         char* oldPassword = strtok((char*)args, " ");       // This extracts [$oldpassword]
@@ -530,7 +530,7 @@ public:
 
         // Security level required
         bool hasRBAC = (handler->HasPermission(rbac::RBAC_PERM_EMAIL_CONFIRM_FOR_PASS_CHANGE) ? true : false);
-        uint32 pwConfig = sWorld->getIntConfig(CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+        uint32 pwConfig = sWorld->getIntConfig(WorldIntConfigs::CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
         handler->PSendSysMessage(LANG_ACCOUNT_SEC_TYPE, (pwConfig == PW_NONE  ? "Lowest level: No Email input required." :
                                                          pwConfig == PW_EMAIL ? "Highest level: Email input required." :
@@ -611,7 +611,7 @@ public:
             return false;
 
         int expansion = atoi(exp); //get int anyway (0 if error)
-        if (expansion < 0 || uint8(expansion) > sWorld->getIntConfig(CONFIG_EXPANSION))
+        if (expansion < 0 || uint8(expansion) > sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION))
             return false;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPANSION);

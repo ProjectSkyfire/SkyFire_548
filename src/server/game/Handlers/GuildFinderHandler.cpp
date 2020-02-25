@@ -89,7 +89,7 @@ void WorldSession::HandleGuildFinderBrowse(WorldPacket& recvPacket)
         return;
     if (!(guildInterests & ALL_INTERESTS) || guildInterests > ALL_INTERESTS)
         return;
-    if (playerLevel > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) || playerLevel < 1)
+    if (playerLevel > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL) || playerLevel < 1)
         return;
 
     Player* player = GetPlayer();

@@ -198,7 +198,7 @@ void BlackMarketMgr::Update()
     }
 
     // Add New Auctions
-    int32 add = sWorld->getIntConfig(CONFIG_BLACK_MARKET_MAX_AUCTIONS) - _auctions.size();
+    int32 add = sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_MAX_AUCTIONS) - _auctions.size();
     if (add > 0)
         CreateAuctions(add, trans);
 
@@ -240,7 +240,7 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
         if (!selTemplate)
             continue;
 
-        uint32 startTime = time(NULL) + sWorld->getIntConfig(CONFIG_BLACK_MARKET_AUCTION_DELAY) + urand(0, sWorld->getIntConfig(CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) * 2) - sWorld->getIntConfig(CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) / 2;
+        uint32 startTime = time(NULL) + sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY) + urand(0, sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) * 2) - sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) / 2;
 
         uint32 minIncrement = selTemplate->MinBid * 0.05f;
 

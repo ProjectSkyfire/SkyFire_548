@@ -863,7 +863,7 @@ void WorldSession::HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket)
         if (guild->IsMember(_player->GetGUID()))
         {
             WorldPacket data(SMSG_GUILD_MAX_DAILY_XP, 8);
-            data << uint64(sWorld->getIntConfig(CONFIG_GUILD_DAILY_XP_CAP));
+            data << uint64(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_DAILY_XP_CAP));
             SendPacket(&data);
         }
     }

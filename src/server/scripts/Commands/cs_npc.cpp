@@ -460,7 +460,7 @@ public:
             return false;
 
         uint8 lvl = (uint8) atoi((char*)args);
-        if (lvl < 1 || lvl > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) + 3)
+        if (lvl < 1 || lvl > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL) + 3)
         {
             handler->SendSysMessage(LANG_BAD_VALUE);
             handler->SetSentErrorMessage(true);

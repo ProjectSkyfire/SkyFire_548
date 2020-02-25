@@ -59,13 +59,13 @@ bool BattlefieldWG::SetupBattlefield()
     m_MapId = BATTLEFIELD_WG_MAPID;
     m_Map = sMapMgr->FindMap(m_MapId, 0);
 
-    m_MaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MAX);
+    m_MaxPlayer = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WINTERGRASP_PLR_MAX);
     m_IsEnabled = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WINTERGRASP_ENABLE);
-    m_MinPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MIN);
-    m_MinLevel = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MIN_LVL);
-    m_BattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_BATTLETIME) * MINUTE * IN_MILLISECONDS;
-    m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
-    m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_WINTERGRASP_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
+    m_MinPlayer = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WINTERGRASP_PLR_MIN);
+    m_MinLevel = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WINTERGRASP_PLR_MIN_LVL);
+    m_BattleTime = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WINTERGRASP_BATTLETIME) * MINUTE * IN_MILLISECONDS;
+    m_NoWarBattleTime = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WINTERGRASP_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
+    m_RestartAfterCrash = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WINTERGRASP_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
 
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;

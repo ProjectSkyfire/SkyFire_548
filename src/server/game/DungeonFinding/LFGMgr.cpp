@@ -40,7 +40,7 @@ namespace lfg
 {
 
 LFGMgr::LFGMgr(): m_QueueTimer(0), m_lfgProposalId(1),
-    m_options(sWorld->getIntConfig(CONFIG_LFG_OPTIONSMASK))
+    m_options(sWorld->getIntConfig(WorldIntConfigs::CONFIG_LFG_OPTIONSMASK))
 {
     new LFGPlayerScript();
     new LFGGroupScript();
@@ -137,10 +137,10 @@ void LFGMgr::LoadRewards()
             continue;
         }
 
-        if (!maxLevel || maxLevel > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (!maxLevel || maxLevel > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
         {
             SF_LOG_ERROR("sql.sql", "Level %u specified for dungeon %u in table `lfg_dungeon_rewards` can never be reached!", maxLevel, dungeonId);
-            maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+            maxLevel = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL);
         }
 
         if (!firstQuestId || !sObjectMgr->GetQuestTemplate(firstQuestId))

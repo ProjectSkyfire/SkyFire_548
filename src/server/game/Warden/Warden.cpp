@@ -97,7 +97,7 @@ void Warden::Update()
 
         if (_dataSent)
         {
-            uint32 maxClientResponseDelay = sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_RESPONSE_DELAY);
+            uint32 maxClientResponseDelay = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_CLIENT_RESPONSE_DELAY);
 
             if (maxClientResponseDelay > 0)
             {
@@ -183,7 +183,7 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
     if (check)
         action = check->Action;
     else
-        action = WardenActions(sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_FAIL_ACTION));
+        action = WardenActions(sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_CLIENT_FAIL_ACTION));
 
     switch (action)
     {
@@ -197,7 +197,7 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
     case WARDEN_ACTION_BAN:
         {
             std::stringstream duration;
-            duration << sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_BAN_DURATION) << "s";
+            duration << sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_CLIENT_BAN_DURATION) << "s";
             std::string accountName;
             AccountMgr::GetName(_session->GetAccountId(), accountName);
             std::stringstream banReason;

@@ -457,7 +457,7 @@ Valid examples:
         return false;
 
     // more simple checks
-    if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) < 3)
+    if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) < 3)
     {
         const char validSequence[6] = "cHhhr";
         const char* validSequenceIterator = validSequence;
@@ -478,7 +478,7 @@ Valid examples:
 
             ++message;
             // validate sequence
-            if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) == 2)
+            if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) == 2)
             {
                 if (commandChar == *validSequenceIterator)
                 {

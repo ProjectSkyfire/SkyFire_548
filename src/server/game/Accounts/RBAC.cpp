@@ -44,7 +44,7 @@ std::string GetDebugPermissionString(RBACPermissionContainer const& perms)
 
 bool RBACData::HasPermission(uint32 permission) const
 {
-    if (sWorld->getIntConfig(CONFIG_RBAC_FREE_PERMISSION_MODE))
+    if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_RBAC_FREE_PERMISSION_MODE))
         return true;
 
     return _globalPerms.find(permission) != _globalPerms.end();

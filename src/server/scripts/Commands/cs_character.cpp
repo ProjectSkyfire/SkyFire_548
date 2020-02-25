@@ -737,7 +737,7 @@ public:
      */
     static bool HandleCharacterDeletedOldCommand(ChatHandler* /*handler*/, char const* args)
     {
-        int32 keepDays = sWorld->getIntConfig(CONFIG_CHARDELETE_KEEP_DAYS);
+        int32 keepDays = sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHARDELETE_KEEP_DAYS);
 
         char* daysStr = strtok((char*)args, " ");
         if (daysStr)

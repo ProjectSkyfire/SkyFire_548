@@ -410,7 +410,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionGuid)
     data << uint32(type); // Type - 4 guild
     data.WriteByteSeq(ownerGuid[6]);
     data << uint32(0);
-    data << uint32(sWorld->getIntConfig(CONFIG_MIN_PETITION_SIGNS)); // Required sign count
+    data << uint32(sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PETITION_SIGNS)); // Required sign count
     data.WriteByteSeq(ownerGuid[1]);
     data.WriteByteSeq(ownerGuid[7]);
     data.WriteByteSeq(ownerGuid[0]);
@@ -935,7 +935,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recvData)
 
     uint32 requiredSignatures;
     if (type == GUILD_CHARTER_TYPE)
-        requiredSignatures = sWorld->getIntConfig(CONFIG_MIN_PETITION_SIGNS);
+        requiredSignatures = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PETITION_SIGNS);
     else
         requiredSignatures = type-1;
 

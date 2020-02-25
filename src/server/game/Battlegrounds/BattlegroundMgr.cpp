@@ -55,7 +55,7 @@
 /*********************************************************/
 
 BattlegroundMgr::BattlegroundMgr() :
-    m_NextRatedArenaUpdate(sWorld->getIntConfig(CONFIG_ARENA_RATED_UPDATE_TIMER)),
+    m_NextRatedArenaUpdate(sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_RATED_UPDATE_TIMER)),
     m_ArenaTesting(false), m_Testing(false)
 { }
 
@@ -130,7 +130,7 @@ void BattlegroundMgr::Update(uint32 diff)
     }
 
     // if rating difference counts, maybe force-update queues
-    if (sWorld->getIntConfig(CONFIG_ARENA_MAX_RATING_DIFFERENCE) && sWorld->getIntConfig(CONFIG_ARENA_RATED_UPDATE_TIMER))
+    if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_MAX_RATING_DIFFERENCE) && sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_RATED_UPDATE_TIMER))
     {
         // it's time to force update
         if (m_NextRatedArenaUpdate < diff)
@@ -143,7 +143,7 @@ void BattlegroundMgr::Update(uint32 diff)
                         BattlegroundTypeId::BATTLEGROUND_AA, BattlegroundBracketId(bracket),
                         BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId(qtype)), true, 0);
 
-            m_NextRatedArenaUpdate = sWorld->getIntConfig(CONFIG_ARENA_RATED_UPDATE_TIMER);
+            m_NextRatedArenaUpdate = sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_RATED_UPDATE_TIMER);
         }
         else
             m_NextRatedArenaUpdate -= diff;
@@ -1105,9 +1105,9 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
     if (!bracketEntry)
         return;
 
-    uint32 winnerConquest = (player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_CONQUEST_FIRST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_CONQUEST_LAST)) / CURRENCY_PRECISION;
-    uint32 winnerHonor = (player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_FIRST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_LAST)) / CURRENCY_PRECISION;
-    uint32 loserHonor = (!player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_FIRST) : sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_LAST)) / CURRENCY_PRECISION;
+    uint32 winnerConquest = (player->GetRandomWinner() ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_BG_REWARD_WINNER_CONQUEST_FIRST) : sWorld->getIntConfig(WorldIntConfigs::CONFIG_BG_REWARD_WINNER_CONQUEST_LAST)) / CURRENCY_PRECISION;
+    uint32 winnerHonor = (player->GetRandomWinner() ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_BG_REWARD_WINNER_HONOR_FIRST) : sWorld->getIntConfig(WorldIntConfigs::CONFIG_BG_REWARD_WINNER_HONOR_LAST)) / CURRENCY_PRECISION;
+    uint32 loserHonor = (!player->GetRandomWinner() ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_BG_REWARD_LOSER_HONOR_FIRST) : sWorld->getIntConfig(WorldIntConfigs::CONFIG_BG_REWARD_LOSER_HONOR_LAST)) / CURRENCY_PRECISION;
 
     ObjectGuid guidBytes = guid;
 
@@ -1343,7 +1343,7 @@ void BattlegroundMgr::ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 ar
 uint32 BattlegroundMgr::GetMaxRatingDifference() const
 {
     // this is for stupid people who can't use brain and set max rating difference to 0
-    uint32 diff = sWorld->getIntConfig(CONFIG_ARENA_MAX_RATING_DIFFERENCE);
+    uint32 diff = sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_MAX_RATING_DIFFERENCE);
     if (diff == 0)
         diff = 5000;
     return diff;
@@ -1351,12 +1351,12 @@ uint32 BattlegroundMgr::GetMaxRatingDifference() const
 
 uint32 BattlegroundMgr::GetRatingDiscardTimer() const
 {
-    return sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
+    return sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_RATING_DISCARD_TIMER);
 }
 
 uint32 BattlegroundMgr::GetPrematureFinishTime() const
 {
-    return sWorld->getIntConfig(CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER);
+    return sWorld->getIntConfig(WorldIntConfigs::CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER);
 }
 
 void BattlegroundMgr::LoadBattleMastersEntry()

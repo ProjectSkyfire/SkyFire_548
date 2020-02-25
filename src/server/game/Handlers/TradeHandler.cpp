@@ -670,9 +670,9 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (GetPlayer()->getLevel() < sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ))
+    if (GetPlayer()->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_TRADE_LEVEL_REQ))
     {
-        SendNotification(GetSkyFireString(LANG_TRADE_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
+        SendNotification(GetSkyFireString(LANG_TRADE_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_TRADE_LEVEL_REQ));
         return;
     }
 
@@ -732,9 +732,9 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pOther->getLevel() < sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ))
+    if (pOther->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_TRADE_LEVEL_REQ))
     {
-        SendNotification(GetSkyFireString(LANG_TRADE_OTHER_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
+        SendNotification(GetSkyFireString(LANG_TRADE_OTHER_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_TRADE_LEVEL_REQ));
         return;
     }
 

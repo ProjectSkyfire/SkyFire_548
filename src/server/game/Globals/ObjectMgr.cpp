@@ -2948,7 +2948,7 @@ void ObjectMgr::LoadPetLevelInfo()
         }
 
         uint32 current_level = fields[1].GetUInt8();
-        if (current_level > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (current_level > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
         {
             if (current_level > STRONG_MAX_LEVEL)        // hardcoded level maximum
                 SF_LOG_ERROR("sql.sql", "Wrong (> %u) level %u in `pet_levelstats` table, ignoring.", STRONG_MAX_LEVEL, current_level);
@@ -2968,7 +2968,7 @@ void ObjectMgr::LoadPetLevelInfo()
         PetLevelInfo*& pInfoMapEntry = _petInfoStore[creature_id];
 
         if (pInfoMapEntry == NULL)
-            pInfoMapEntry = new PetLevelInfo[sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)];
+            pInfoMapEntry = new PetLevelInfo[sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL)];
 
         // data for level 1 stored in [0] array element, ...
         PetLevelInfo* pLevelInfo = &pInfoMapEntry[current_level-1];
@@ -2999,7 +2999,7 @@ void ObjectMgr::LoadPetLevelInfo()
         }
 
         // fill level gaps
-        for (uint8 level = 1; level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+        for (uint8 level = 1; level < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL); ++level)
         {
             if (pInfo[level].health == 0)
             {
@@ -3014,8 +3014,8 @@ void ObjectMgr::LoadPetLevelInfo()
 
 PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint8 level) const
 {
-    if (level > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        level = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    if (level > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
+        level = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL);
 
     PetLevelInfoContainer::const_iterator itr = _petInfoStore.find(creature_id);
     if (itr == _petInfoStore.end())
@@ -3358,7 +3358,7 @@ void ObjectMgr::LoadPlayerInfo()
             }
 
             uint32 current_level = fields[2].GetUInt8();
-            if (current_level > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+            if (current_level > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
             {
                 if (current_level > STRONG_MAX_LEVEL)        // hardcoded level maximum
                     SF_LOG_ERROR("sql.sql", "Wrong (> %u) level %u in `player_levelstats` table, ignoring.", STRONG_MAX_LEVEL, current_level);
@@ -3373,7 +3373,7 @@ void ObjectMgr::LoadPlayerInfo()
             if (PlayerInfo* info = _playerInfo[current_race][current_class])
             {
                 if (!info->levelInfo)
-                    info->levelInfo = new PlayerLevelInfo[sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)];
+                    info->levelInfo = new PlayerLevelInfo[sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL)];
 
                 PlayerLevelInfo& levelInfo = info->levelInfo[current_level-1];
                 for (int i = 0; i < MAX_STATS; i++)
@@ -3402,15 +3402,15 @@ void ObjectMgr::LoadPlayerInfo()
                     continue;
 
                 // skip expansion races if not playing with expansion
-                if (sWorld->getIntConfig(CONFIG_EXPANSION) < 1 && (race == RACE_BLOODELF || race == RACE_DRAENEI))
+                if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION) < 1 && (race == RACE_BLOODELF || race == RACE_DRAENEI))
                     continue;
 
                 // skip expansion classes if not playing with expansion
-                if (sWorld->getIntConfig(CONFIG_EXPANSION) < 2 && class_ == CLASS_DEATH_KNIGHT)
+                if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION) < 2 && class_ == CLASS_DEATH_KNIGHT)
                     continue;
 
                 // skip expansion classes / races if not playing with expansion
-                if (sWorld->getIntConfig(CONFIG_EXPANSION) < 4 && (class_ == CLASS_MONK || race == RACE_PANDAREN_NEUTRAL || race == RACE_PANDAREN_ALLIANCE || race == RACE_PANDAREN_HORDE))
+                if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION) < 4 && (class_ == CLASS_MONK || race == RACE_PANDAREN_NEUTRAL || race == RACE_PANDAREN_ALLIANCE || race == RACE_PANDAREN_HORDE))
                     continue;
 
                 // fatal error if no level 1 data
@@ -3421,7 +3421,7 @@ void ObjectMgr::LoadPlayerInfo()
                 }
 
                 // fill level gaps
-                for (uint8 level = 1; level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+                for (uint8 level = 1; level < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL); ++level)
                 {
                     if (info->levelInfo[level].stats[0] == 0)
                     {
@@ -3440,8 +3440,8 @@ void ObjectMgr::LoadPlayerInfo()
     {
         uint32 oldMSTime = getMSTime();
 
-        _playerXPperLevel.resize(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
-        for (uint8 level = 0; level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+        _playerXPperLevel.resize(sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL));
+        for (uint8 level = 0; level < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL); ++level)
             _playerXPperLevel[level] = 0;
 
         //                                                 0    1
@@ -3462,7 +3462,7 @@ void ObjectMgr::LoadPlayerInfo()
             uint32 current_level = fields[0].GetUInt8();
             uint32 current_xp    = fields[1].GetUInt32();
 
-            if (current_level >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+            if (current_level >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
             {
                 if (current_level > STRONG_MAX_LEVEL)        // hardcoded level maximum
                     SF_LOG_ERROR("sql.sql", "Wrong (> %u) level %u in `player_xp_for_level` table, ignoring.", STRONG_MAX_LEVEL, current_level);
@@ -3480,7 +3480,7 @@ void ObjectMgr::LoadPlayerInfo()
         while (result->NextRow());
 
         // fill level gaps
-        for (uint8 level = 1; level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+        for (uint8 level = 1; level < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL); ++level)
         {
             if (_playerXPperLevel[level] == 0)
             {
@@ -3553,8 +3553,8 @@ void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint8 level, uint32& base
     if (level < 1 || class_ >= MAX_CLASSES)
         return;
 
-    if (level > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        level = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    if (level > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
+        level = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL);
 
     GtOCTBaseHPByClassEntry const* hp = sGtOCTBaseHPByClassStore.LookupEntry((class_-1) * GT_MAX_LEVEL + level-1);
     GtOCTBaseMPByClassEntry const* mp = sGtOCTBaseMPByClassStore.LookupEntry((class_-1) * GT_MAX_LEVEL + level-1);
@@ -3578,7 +3578,7 @@ void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint8 level, Play
     if (!pInfo)
         return;
 
-    if (level <= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    if (level <= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
         *info = pInfo->levelInfo[level-1];
     else
         BuildPlayerLevelInfo(race, class_, level, info);
@@ -3587,10 +3587,10 @@ void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint8 level, Play
 void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, PlayerLevelInfo* info) const
 {
     // base data (last known level)
-    *info = _playerInfo[race][_class]->levelInfo[sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)-1];
+    *info = _playerInfo[race][_class]->levelInfo[sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL)-1];
 
     // if conversion from uint32 to uint8 causes unexpected behaviour, change lvl to uint32
-    for (uint8 lvl = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)-1; lvl < level; ++lvl)
+    for (uint8 lvl = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL)-1; lvl < level; ++lvl)
     {
         switch (_class)
         {
@@ -7282,7 +7282,7 @@ enum LanguageType
 
 static LanguageType GetRealmLanguageType(bool create)
 {
-    switch (sWorld->getIntConfig(CONFIG_REALM_ZONE))
+    switch (sWorld->getIntConfig(WorldIntConfigs::CONFIG_REALM_ZONE))
     {
         case REALM_ZONE_UNKNOWN:                            // any language
         case REALM_ZONE_DEVELOPMENT:
@@ -7353,11 +7353,11 @@ uint8 ObjectMgr::CheckPlayerName(const std::string& name, bool create)
     if (wname.size() > MAX_PLAYER_NAME)
         return CHAR_NAME_TOO_LONG;
 
-    uint32 minName = sWorld->getIntConfig(CONFIG_MIN_PLAYER_NAME);
+    uint32 minName = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PLAYER_NAME);
     if (wname.size() < minName)
         return CHAR_NAME_TOO_SHORT;
 
-    uint32 strictMask = sWorld->getIntConfig(CONFIG_STRICT_PLAYER_NAMES);
+    uint32 strictMask = sWorld->getIntConfig(WorldIntConfigs::CONFIG_STRICT_PLAYER_NAMES);
     if (!isValidString(wname, strictMask, false, create))
         return CHAR_NAME_MIXED_LANGUAGES;
 
@@ -7378,11 +7378,11 @@ bool ObjectMgr::IsValidCharterName(const std::string& name)
     if (wname.size() > MAX_CHARTER_NAME)
         return false;
 
-    uint32 minName = sWorld->getIntConfig(CONFIG_MIN_CHARTER_NAME);
+    uint32 minName = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_CHARTER_NAME);
     if (wname.size() < minName)
         return false;
 
-    uint32 strictMask = sWorld->getIntConfig(CONFIG_STRICT_CHARTER_NAMES);
+    uint32 strictMask = sWorld->getIntConfig(WorldIntConfigs::CONFIG_STRICT_CHARTER_NAMES);
 
     return isValidString(wname, strictMask, true);
 }
@@ -7396,11 +7396,11 @@ PetNameInvalidReason ObjectMgr::CheckPetName(const std::string& name)
     if (wname.size() > MAX_PET_NAME)
         return PET_NAME_TOO_LONG;
 
-    uint32 minName = sWorld->getIntConfig(CONFIG_MIN_PET_NAME);
+    uint32 minName = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PET_NAME);
     if (wname.size() < minName)
         return PET_NAME_TOO_SHORT;
 
-    uint32 strictMask = sWorld->getIntConfig(CONFIG_STRICT_PET_NAMES);
+    uint32 strictMask = sWorld->getIntConfig(WorldIntConfigs::CONFIG_STRICT_PET_NAMES);
     if (!isValidString(wname, strictMask, false))
         return PET_NAME_MIXED_LANGUAGES;
 

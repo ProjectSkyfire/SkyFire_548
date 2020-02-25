@@ -969,7 +969,7 @@ uint32 GameEventMgr::StartSystem()                           // return the next 
 
 void GameEventMgr::StartArenaSeason()
 {
-    uint8 season = sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID);
+    uint8 season = sWorld->getIntConfig(WorldIntConfigs::CONFIG_ARENA_SEASON_ID);
     QueryResult result = WorldDatabase.PQuery("SELECT eventEntry FROM game_event_arena_seasons WHERE season = '%i'", season);
 
     if (!result)

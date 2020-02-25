@@ -285,12 +285,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
-            if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && !ChatHandler(this).isValidChatMessage(msg.c_str()))
+            if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && !ChatHandler(this).isValidChatMessage(msg.c_str()))
             {
                 SF_LOG_ERROR("network", "Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName().c_str(),
                     GetPlayer()->GetGUIDLow(), msg.c_str());
 
-                if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
+                if (sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
                     KickPlayer();
 
                 return;
@@ -304,9 +304,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case ChatMsg::CHAT_MSG_EMOTE:
         case ChatMsg::CHAT_MSG_YELL:
         {
-            if (sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ))
+            if (sender->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_SAY_LEVEL_REQ))
             {
-                SendNotification(GetSkyFireString(LANG_SAY_REQ), sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ));
+                SendNotification(GetSkyFireString(LANG_SAY_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_SAY_LEVEL_REQ));
                 return;
             }
 
@@ -331,9 +331,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 SendPlayerNotFoundNotice(to);
                 return;
             }
-            if (!sender->IsGameMaster() && sender->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ) && !receiver->IsInWhisperWhiteList(sender->GetGUID()))
+            if (!sender->IsGameMaster() && sender->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ) && !receiver->IsInWhisperWhiteList(sender->GetGUID()))
             {
-                SendNotification(GetSkyFireString(LANG_WHISPER_REQ), sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ));
+                SendNotification(GetSkyFireString(LANG_WHISPER_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ));
                 return;
             }
 
@@ -351,7 +351,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             // If player is a Gamemaster and doesn't accept whisper, we auto-whitelist every player that the Gamemaster is talking to
             // We also do that if a player is under the required level for whispers.
-            if (receiver->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ) ||
+            if (receiver->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ) ||
                 (HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !sender->isAcceptWhispers() && !sender->IsInWhisperWhiteList(receiver->GetGUID())))
                 sender->AddWhisperWhiteList(receiver->GetGUID());
 
@@ -457,9 +457,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         {
             if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_CHANNEL_REQ))
             {
-                if (_player->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ))
+                if (_player->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_CHANNEL_LEVEL_REQ))
                 {
-                    SendNotification(GetSkyFireString(LANG_CHANNEL_REQ), sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ));
+                    SendNotification(GetSkyFireString(LANG_CHANNEL_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_CHANNEL_LEVEL_REQ));
                     return;
                 }
             }

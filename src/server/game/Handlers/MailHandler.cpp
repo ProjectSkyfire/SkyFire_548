@@ -113,9 +113,9 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
 
     Player* player = _player;
 
-    if (player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    if (player->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAIL_LEVEL_REQ))
     {
-        SendNotification(GetSkyFireString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        SendNotification(GetSkyFireString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAIL_LEVEL_REQ));
         return;
     }
 
@@ -223,9 +223,9 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
         return;
     }
 
-    if (receiverLevel < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    if (receiverLevel < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAIL_LEVEL_REQ))
     {
-        SendNotification(GetSkyFireString(LANG_MAIL_RECEIVER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        SendNotification(GetSkyFireString(LANG_MAIL_RECEIVER_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAIL_LEVEL_REQ));
         return;
     }
 
@@ -330,7 +330,7 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
     }
 
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
-    uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
+    uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
     // Mail sent between guild members arrives instantly if they have the guild perk "Guild Mail"
     if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))

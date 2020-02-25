@@ -202,7 +202,7 @@ enum class WorldFloatConfigs
     FLOAT_CONFIG_VALUE_COUNT
 };
 
-enum WorldIntConfigs
+enum class WorldIntConfigs
 {
     CONFIG_COMPRESSION = 0,
     CONFIG_INTERVAL_SAVE,
@@ -377,6 +377,7 @@ enum WorldIntConfigs
 };
 
 /// Server rates
+
 enum class Rates
 {
     RATE_HEALTH = 0,
@@ -643,7 +644,7 @@ class World
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
         /// Update time
         uint32 GetUpdateTime() const { return m_updateTime; }
-        void SetRecordDiffInterval(int32 t) { if (t >= 0) m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = (uint32)t; }
+        void SetRecordDiffInterval(int32 t) { if (t >= 0) setIntConfig(WorldIntConfigs::CONFIG_INTERVAL_LOG_UPDATE, (uint32)t); }
 
         /// Next daily quests and random bg reset time
         time_t GetNextDailyQuestsResetTime() const { return m_NextDailyQuestReset; }
@@ -653,7 +654,7 @@ class World
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const
         {
-            uint8 lvl = uint8(getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
+            uint8 lvl = uint8(getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL));
             return lvl > 60 ? 300 + ((lvl - 60) * 75) / 10 : lvl * 5;
         }
 
@@ -716,14 +717,14 @@ class World
         /// Set a server configuration element (see #WorldConfigs)
         void setIntConfig(WorldIntConfigs index, uint32 value)
         {
-            if (index < INT_CONFIG_VALUE_COUNT)
-                m_int_configs[index] = value;
+            if (index < WorldIntConfigs::INT_CONFIG_VALUE_COUNT)
+                m_int_configs[uint8(index)] = value;
         }
 
         /// Get a server configuration element (see #WorldConfigs)
         uint32 getIntConfig(WorldIntConfigs index) const
         {
-            return index < INT_CONFIG_VALUE_COUNT ? m_int_configs[index] : 0;
+            return index < WorldIntConfigs::INT_CONFIG_VALUE_COUNT ? m_int_configs[uint8(index)] : 0;
         }
 
         void setWorldState(uint32 index, uint64 value);
@@ -731,8 +732,8 @@ class World
         void LoadWorldStates();
 
         /// Are we on a "Player versus Player" server?
-        bool IsPvPRealm() const { return (getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_PVP || getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_RPPVP || getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_FFA_PVP); }
-        bool IsFFAPvPRealm() const { return getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_FFA_PVP; }
+        bool IsPvPRealm() const { return (getIntConfig(WorldIntConfigs::CONFIG_GAME_TYPE) == REALM_TYPE_PVP || getIntConfig(WorldIntConfigs::CONFIG_GAME_TYPE) == REALM_TYPE_RPPVP || getIntConfig(WorldIntConfigs::CONFIG_GAME_TYPE) == REALM_TYPE_FFA_PVP); }
+        bool IsFFAPvPRealm() const { return getIntConfig(WorldIntConfigs::CONFIG_GAME_TYPE) == REALM_TYPE_FFA_PVP; }
 
         void KickAll();
         void KickAllLess(AccountTypes sec);
@@ -836,7 +837,7 @@ class World
         std::string m_newCharString;
 
         float rate_values[uint8(Rates::MAX_RATES)];
-        uint32 m_int_configs[INT_CONFIG_VALUE_COUNT];
+        uint32 m_int_configs[uint8(WorldIntConfigs::INT_CONFIG_VALUE_COUNT)];
         bool m_bool_configs[uint8(WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)];
         float m_float_configs[uint8(WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)];
         typedef std::map<uint32, uint64> WorldStatesMap;

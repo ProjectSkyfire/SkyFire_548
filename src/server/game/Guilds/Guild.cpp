@@ -1416,7 +1416,7 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         memberData << uint8(member->GetLevel());
         memberData << uint8(member->GetFlags());
         memberData << uint32(member->GetZoneId());
-        memberData << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - member->GetWeekReputation());
+        memberData << uint32(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_WEEKLY_REP_CAP) - member->GetWeekReputation());
         memberData.WriteByteSeq(guid[3]);
         memberData << uint64(member->GetTotalActivity());
         memberData.WriteString(member->GetOfficerNote());
@@ -1443,7 +1443,7 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
     data << uint32(m_accountsNumber);
     data.AppendPackedTime(m_createdDate);
     data.WriteString(m_info);
-    data << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP));
+    data << uint32(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_WEEKLY_REP_CAP));
     data.WriteString(m_motd);
     data << uint32(0);
 
@@ -2035,7 +2035,7 @@ void Guild::HandleLeaveMember(WorldSession* session)
         if (m_members.size() > 1)
             // Leader cannot leave if he is not the last member
             SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_LEADER_LEAVE);
-        else if (GetLevel() >= sWorld->getIntConfig(CONFIG_GUILD_UNDELETABLE_LEVEL))
+        else if (GetLevel() >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_UNDELETABLE_LEVEL))
             SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_UNDELETABLE_DUE_TO_LEVEL);
         else
         {
@@ -3033,10 +3033,10 @@ void Guild::SetBankTabText(uint8 tabId, std::string const& text)
 // Private methods
 void Guild::_CreateLogHolders()
 {
-    m_eventLog = new LogHolder(sWorld->getIntConfig(CONFIG_GUILD_EVENT_LOG_COUNT));
-    m_newsLog = new LogHolder(sWorld->getIntConfig(CONFIG_GUILD_NEWS_LOG_COUNT));
+    m_eventLog = new LogHolder(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_EVENT_LOG_COUNT));
+    m_newsLog = new LogHolder(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_NEWS_LOG_COUNT));
     for (uint8 tabId = 0; tabId <= GUILD_BANK_MAX_TABS; ++tabId)
-        m_bankEventLog[tabId] = new LogHolder(sWorld->getIntConfig(CONFIG_GUILD_BANK_EVENT_LOG_COUNT));
+        m_bankEventLog[tabId] = new LogHolder(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_BANK_EVENT_LOG_COUNT));
 }
 
 void Guild::_CreateNewBankTab()
@@ -3698,11 +3698,11 @@ void Guild::GiveXP(uint32 xp, Player* source)
 
     /// @todo: Award reputation and count activity for player
 
-    if (GetLevel() >= sWorld->getIntConfig(CONFIG_GUILD_MAX_LEVEL))
+    if (GetLevel() >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_MAX_LEVEL))
         xp = 0; // SMSG_GUILD_XP_GAIN is always sent, even for no gains
 
     if (GetLevel() < GUILD_EXPERIENCE_UNCAPPED_LEVEL)
-        xp = std::min(xp, sWorld->getIntConfig(CONFIG_GUILD_DAILY_XP_CAP) - uint32(_todayExperience));
+        xp = std::min(xp, sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_DAILY_XP_CAP) - uint32(_todayExperience));
 
     WorldPacket data(SMSG_GUILD_XP_GAIN, 8);
     data << uint64(xp);
@@ -3717,7 +3717,7 @@ void Guild::GiveXP(uint32 xp, Player* source)
     uint32 oldLevel = GetLevel();
 
     // Ding, mon!
-    while (GetExperience() >= sGuildMgr->GetXPForGuildLevel(GetLevel()) && GetLevel() < sWorld->getIntConfig(CONFIG_GUILD_MAX_LEVEL))
+    while (GetExperience() >= sGuildMgr->GetXPForGuildLevel(GetLevel()) && GetLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_MAX_LEVEL))
     {
         _experience -= sGuildMgr->GetXPForGuildLevel(GetLevel());
         ++_level;
@@ -3761,7 +3761,7 @@ void Guild::SendGuildXP(WorldSession* session /* = NULL */) const
 
 void Guild::SendGuildReputationWeeklyCap(WorldSession* session, uint32 reputation) const
 {
-    uint32 cap = sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - reputation;
+    uint32 cap = sWorld->getIntConfig(WorldIntConfigs::CONFIG_GUILD_WEEKLY_REP_CAP) - reputation;
     WorldPacket data(SMSG_GUILD_REPUTATION_WEEKLY_CAP, 4);
     data << uint32(cap);
     session->SendPacket(&data);

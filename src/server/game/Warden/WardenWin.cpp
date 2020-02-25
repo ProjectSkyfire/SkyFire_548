@@ -190,7 +190,7 @@ void WardenWin::RequestData()
     _currentChecks.clear();
 
     // Build check request
-    for (uint32 i = 0; i < sWorld->getIntConfig(CONFIG_WARDEN_NUM_MEM_CHECKS); ++i)
+    for (uint32 i = 0; i < sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_NUM_MEM_CHECKS); ++i)
     {
         // If todo list is done break loop (will be filled on next Update() run)
         if (_memChecksTodo.empty())
@@ -209,7 +209,7 @@ void WardenWin::RequestData()
 
     ACE_READ_GUARD(ACE_RW_Mutex, g, sWardenCheckMgr->_checkStoreLock);
 
-    for (uint32 i = 0; i < sWorld->getIntConfig(CONFIG_WARDEN_NUM_OTHER_CHECKS); ++i)
+    for (uint32 i = 0; i < sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_NUM_OTHER_CHECKS); ++i)
     {
         // If todo list is done break loop (will be filled on next Update() run)
         if (_otherChecksTodo.empty())
@@ -495,6 +495,6 @@ void WardenWin::HandleData(ByteBuffer &buff)
     }
 
     // Set hold off timer, minimum timer should at least be 1 second
-    uint32 holdOff = sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF);
+    uint32 holdOff = sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF);
     _checkTimer = (holdOff < 1 ? 1 : holdOff) * IN_MILLISECONDS;
 }
