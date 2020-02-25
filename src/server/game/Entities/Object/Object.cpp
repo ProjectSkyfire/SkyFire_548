@@ -2252,9 +2252,9 @@ void WorldObject::MonsterSay(const char* text, Language language, WorldObject co
 
     Skyfire::MonsterCustomChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_SAY, text, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> say_do(say_build);
-    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
+    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> > say_worker(this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
-    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+    cell.Visit(p, message, *GetMap(), *this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY));
 }
 
 void WorldObject::MonsterSay(int32 textId, Language language, WorldObject const* target)
@@ -2266,9 +2266,9 @@ void WorldObject::MonsterSay(int32 textId, Language language, WorldObject const*
 
     Skyfire::MonsterChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_SAY, textId, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> say_do(say_build);
-    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
+    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
-    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+    cell.Visit(p, message, *GetMap(), *this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY));
 }
 
 void WorldObject::MonsterYell(const char* text, Language language, WorldObject const* target)
@@ -2280,9 +2280,9 @@ void WorldObject::MonsterYell(const char* text, Language language, WorldObject c
 
     Skyfire::MonsterCustomChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_YELL, text, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> say_do(say_build);
-    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
+    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> > say_worker(this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
-    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
+    cell.Visit(p, message, *GetMap(), *this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL));
 }
 
 void WorldObject::MonsterYell(int32 textId, Language language, WorldObject const* target)
@@ -2294,9 +2294,9 @@ void WorldObject::MonsterYell(int32 textId, Language language, WorldObject const
 
     Skyfire::MonsterChatBuilder say_build(this, ChatMsg::CHAT_MSG_MONSTER_YELL, textId, language, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> say_do(say_build);
-    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
+    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
-    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
+    cell.Visit(p, message, *GetMap(), *this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL));
 }
 
 
@@ -2304,7 +2304,7 @@ void WorldObject::MonsterTextEmote(const char* text, WorldObject const* target, 
 {
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, IsBossEmote ? ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE : ChatMsg::CHAT_MSG_MONSTER_EMOTE, Language::LANG_UNIVERSAL, this, target, text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
+    SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
 void WorldObject::MonsterTextEmote(int32 textId, WorldObject const* target, bool IsBossEmote)
@@ -2316,9 +2316,9 @@ void WorldObject::MonsterTextEmote(int32 textId, WorldObject const* target, bool
 
     Skyfire::MonsterChatBuilder say_build(this, IsBossEmote ? ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE : ChatMsg::CHAT_MSG_MONSTER_EMOTE, textId, Language::LANG_UNIVERSAL, target);
     Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> say_do(say_build);
-    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), say_do);
+    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> > say_worker(this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE), say_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
-    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
+    cell.Visit(p, message, *GetMap(), *this, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE));
 }
 
 void WorldObject::MonsterWhisper(const char* text, Player const* target, bool IsBossWhisper)

@@ -861,9 +861,9 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
         cell.SetNoCreate();
 
         Skyfire::LocalizedPacketDo<Skyfire::AchievementChatBuilder> say_do(say_builder);
-        Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::AchievementChatBuilder> > say_worker(GetOwner(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
+        Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::AchievementChatBuilder> > say_worker(GetOwner(), sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY), say_do);
         TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::AchievementChatBuilder> >, WorldTypeMapContainer > message(say_worker);
-        cell.Visit(p, message, *GetOwner()->GetMap(), *GetOwner(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+        cell.Visit(p, message, *GetOwner()->GetMap(), *GetOwner(), sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY));
     }
 
     ObjectGuid guid = GetOwner()->GetGUID();
@@ -909,7 +909,7 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
     data.WriteByteSeq(guid[5]);
     data << uint32(realmID);
     data.WriteByteSeq(guid2[2]);
-    GetOwner()->SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
+    GetOwner()->SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY), true);
 }
 
 template<>

@@ -168,7 +168,7 @@ m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
     m_CreatureCategoryCooldowns.clear();
     DisableReputationGain = false;
 
-    m_SightDistance = sWorld->getFloatConfig(CONFIG_SIGHT_MONSTER);
+    m_SightDistance = sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_SIGHT_MONSTER);
     m_CombatDistance = 0;//MELEE_RANGE;
 
     ResetLootMode(); // restore default loot mode
@@ -681,7 +681,7 @@ void Creature::DoFleeToGetAssistance()
     if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
         return;
 
-    float radius = sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
+    float radius = sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
     if (radius >0)
     {
         Creature* creature = NULL;
@@ -1409,7 +1409,7 @@ bool Creature::CanStartAttack(Unit const* who, bool force) const
 
         if (who->IsInCombat() && IsWithinDist(who, ATTACK_DISTANCE))
             if (Unit* victim = who->getAttackerForHelper())
-                if (IsWithinDistInMap(victim, sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS)))
+                if (IsWithinDistInMap(victim, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS)))
                     force = true;
 
         if (!force && (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance)))
@@ -1856,7 +1856,7 @@ void Creature::CallAssistance()
     {
         SetNoCallAssistance(true);
 
-        float radius = sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS);
+        float radius = sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS);
 
         if (radius > 0)
         {
@@ -2014,7 +2014,7 @@ bool Creature::CanCreatureAttack(Unit const* victim, bool /*force*/) const
         return true;
 
     //Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    float dist = std::max(GetAttackDistance(victim), sWorld->getFloatConfig(CONFIG_THREAT_RADIUS)) + m_CombatDistance;
+    float dist = std::max(GetAttackDistance(victim), sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_THREAT_RADIUS)) + m_CombatDistance;
 
     if (Unit* unit = GetCharmerOrOwner())
         return victim->IsWithinDist(unit, dist);

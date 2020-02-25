@@ -182,7 +182,7 @@ enum class WorldBoolConfigs
     BOOL_CONFIG_VALUE_COUNT
 };
 
-enum WorldFloatConfigs
+enum class WorldFloatConfigs
 {
     CONFIG_GROUP_XP_DISTANCE = 0,
     CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE,
@@ -701,16 +701,16 @@ class World
         }
 
         /// Set a server configuration element (see #WorldConfigs)
-        void setFloatConfig(WorldFloatConfigs index, float value)
+        void SetFloatConfig(WorldFloatConfigs index, float value)
         {
-            if (index < FLOAT_CONFIG_VALUE_COUNT)
-                m_float_configs[index] = value;
+            if (index < WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)
+                m_float_configs[uint8(index)] = value;
         }
 
         /// Get a server configuration element (see #WorldConfigs)
-        float getFloatConfig(WorldFloatConfigs index) const
+        float GetFloatConfig(WorldFloatConfigs index) const
         {
-            return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0;
+            return index < WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[uint8(index)] : 0;
         }
 
         /// Set a server configuration element (see #WorldConfigs)
@@ -838,7 +838,7 @@ class World
         float rate_values[MAX_RATES];
         uint32 m_int_configs[INT_CONFIG_VALUE_COUNT];
         bool m_bool_configs[uint8(WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)];
-        float m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
+        float m_float_configs[uint8(WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)];
         typedef std::map<uint32, uint64> WorldStatesMap;
         WorldStatesMap m_worldstates;
         uint32 m_playerLimit;

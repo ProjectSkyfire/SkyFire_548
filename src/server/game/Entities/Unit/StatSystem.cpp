@@ -483,7 +483,7 @@ void Player::UpdateBlockPercentage()
         value += GetRatingBonusValue(CR_BLOCK);
 
         if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE))
-             value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_BLOCK) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_BLOCK) : value;
+             value = value > sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_BLOCK) ? sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_BLOCK) : value;
 
         value = value < 0.0f ? 0.0f : value;
     }
@@ -521,7 +521,7 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     value += (int32(GetMaxSkillValueForLevel()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE))
-         value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) : value;
+         value = value > sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_CRIT) ? sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_CRIT) : value;
 
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(index, value);
@@ -624,7 +624,7 @@ void Player::UpdateParryPercentage()
         value = nondiminishing + diminishing * parry_cap[pclass] / (diminishing + parry_cap[pclass] * m_diminishing_k[pclass]);
 
         if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE))
-             value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_PARRY) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_PARRY) : value;
+             value = value > sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_PARRY) ? sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_PARRY) : value;
 
         value = value < 0.0f ? 0.0f : value;
     }
@@ -659,7 +659,7 @@ void Player::UpdateDodgePercentage()
     float value = nondiminishing + (diminishing * dodge_cap[pclass] / (diminishing + dodge_cap[pclass] * m_diminishing_k[pclass]));
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE))
-         value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) : value;
+         value = value > sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_DODGE) ? sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_DODGE) : value;
 
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_FIELD_DODGE_PERCENTAGE, value);

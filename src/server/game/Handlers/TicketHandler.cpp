@@ -263,7 +263,7 @@ void WorldSession::HandleGMResponseResolve(WorldPacket& /*recvPacket*/)
     if (GmTicket* ticket = sTicketMgr->GetGmTicketByPlayerGuid(GetPlayer()->GetGUID()))
     {
         uint8 getSurvey = 0;
-        if (float(rand_chance()) < sWorld->getFloatConfig(CONFIG_CHANCE_OF_GM_SURVEY))
+        if (float(rand_chance()) < sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_CHANCE_OF_GM_SURVEY))
             getSurvey = 1;
 
         WorldPacket data(SMSG_GM_RESPONSE_STATUS_UPDATE, 4);

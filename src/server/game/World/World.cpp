@@ -657,12 +657,12 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_SOCKET_TIMEOUTTIME] = sConfigMgr->GetIntDefault("SocketTimeOutTime", 900000);
     m_int_configs[CONFIG_SESSION_ADD_DELAY] = sConfigMgr->GetIntDefault("SessionAddDelay", 10000);
 
-    m_float_configs[CONFIG_GROUP_XP_DISTANCE] = sConfigMgr->GetFloatDefault("MaxGroupXPDistance", 74.0f);
-    m_float_configs[CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE] = sConfigMgr->GetFloatDefault("MaxRecruitAFriendBonusDistance", 100.0f);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_GROUP_XP_DISTANCE, sConfigMgr->GetFloatDefault("MaxGroupXPDistance", 74.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE, sConfigMgr->GetFloatDefault("MaxRecruitAFriendBonusDistance", 100.0f));
 
     /// @todo Add MonsterSight and GuarderSight (with meaning) in worldserver.conf or put them as define
-    m_float_configs[CONFIG_SIGHT_MONSTER] = sConfigMgr->GetFloatDefault("MonsterSight", 50);
-    m_float_configs[CONFIG_SIGHT_GUARDER] = sConfigMgr->GetFloatDefault("GuarderSight", 50);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_SIGHT_MONSTER, sConfigMgr->GetFloatDefault("MonsterSight", 50));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_SIGHT_GUARDER, sConfigMgr->GetFloatDefault("GuarderSight", 50));
 
     if (reload)
     {
@@ -923,7 +923,7 @@ void World::LoadConfigSettings(bool reload)
     }
     SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_GM_GROUP, sConfigMgr->GetBoolDefault("GM.AllowInvite", false));
     SetBoolConfig(WorldBoolConfigs::CONFIG_GM_LOWER_SECURITY, sConfigMgr->GetBoolDefault("GM.LowerSecurity", false));
-    m_float_configs[CONFIG_CHANCE_OF_GM_SURVEY] = sConfigMgr->GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_CHANCE_OF_GM_SURVEY, sConfigMgr->GetFloatDefault("GM.TicketSystem.ChanceOfGMSurvey", 50.0f));
 
     m_int_configs[CONFIG_GROUP_VISIBILITY] = sConfigMgr->GetIntDefault("Visibility.GroupMode", 1);
 
@@ -1000,8 +1000,8 @@ void World::LoadConfigSettings(bool reload)
 
     SetBoolConfig(WorldBoolConfigs::CONFIG_EVENT_ANNOUNCE, sConfigMgr->GetIntDefault("Event.Announce", false));
 
-    m_float_configs[CONFIG_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS] = sConfigMgr->GetFloatDefault("CreatureFamilyFleeAssistanceRadius", 30.0f);
-    m_float_configs[CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS] = sConfigMgr->GetFloatDefault("CreatureFamilyAssistanceRadius", 10.0f);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS, sConfigMgr->GetFloatDefault("CreatureFamilyFleeAssistanceRadius", 30.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS, sConfigMgr->GetFloatDefault("CreatureFamilyAssistanceRadius", 10.0f));
     m_int_configs[CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY]  = sConfigMgr->GetIntDefault("CreatureFamilyAssistanceDelay", 1500);
     m_int_configs[CONFIG_CREATURE_FAMILY_FLEE_DELAY]        = sConfigMgr->GetIntDefault("CreatureFamilyFleeDelay", 7000);
 
@@ -1054,16 +1054,16 @@ void World::LoadConfigSettings(bool reload)
 
     SetBoolConfig(WorldBoolConfigs::CONFIG_DIE_COMMAND_MODE, sConfigMgr->GetBoolDefault("Die.Command.Mode", true));
 
-    m_float_configs[CONFIG_THREAT_RADIUS] = sConfigMgr->GetFloatDefault("ThreatRadius", 60.0f);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_THREAT_RADIUS, sConfigMgr->GetFloatDefault("ThreatRadius", 60.0f));
 
     // always use declined names in the russian client
     SetBoolConfig(WorldBoolConfigs::CONFIG_DECLINED_NAMES_USED,
 
         (m_int_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : sConfigMgr->GetBoolDefault("DeclinedNames", false));
 
-    m_float_configs[CONFIG_LISTEN_RANGE_SAY]       = sConfigMgr->GetFloatDefault("ListenRange.Say", 25.0f);
-    m_float_configs[CONFIG_LISTEN_RANGE_TEXTEMOTE] = sConfigMgr->GetFloatDefault("ListenRange.TextEmote", 25.0f);
-    m_float_configs[CONFIG_LISTEN_RANGE_YELL]      = sConfigMgr->GetFloatDefault("ListenRange.Yell", 300.0f);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY, sConfigMgr->GetFloatDefault("ListenRange.Say", 25.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE, sConfigMgr->GetFloatDefault("ListenRange.TextEmote", 25.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL, sConfigMgr->GetFloatDefault("ListenRange.Yell", 300.0f));
 
     SetBoolConfig(WorldBoolConfigs::CONFIG_BATTLEGROUND_CAST_DESERTER, sConfigMgr->GetBoolDefault("Battleground.CastDeserter", true));
     SetBoolConfig(WorldBoolConfigs::CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE, sConfigMgr->GetBoolDefault("Battleground.QueueAnnouncer.Enable", false));
@@ -1336,10 +1336,10 @@ void World::LoadConfigSettings(bool reload)
 
     // Stats limits
     SetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE, sConfigMgr->GetBoolDefault("Stats.Limits.Enable", false));
-    m_float_configs[CONFIG_STATS_LIMITS_DODGE] = sConfigMgr->GetFloatDefault("Stats.Limits.Dodge", 95.0f);
-    m_float_configs[CONFIG_STATS_LIMITS_PARRY] = sConfigMgr->GetFloatDefault("Stats.Limits.Parry", 95.0f);
-    m_float_configs[CONFIG_STATS_LIMITS_BLOCK] = sConfigMgr->GetFloatDefault("Stats.Limits.Block", 95.0f);
-    m_float_configs[CONFIG_STATS_LIMITS_CRIT] = sConfigMgr->GetFloatDefault("Stats.Limits.Crit", 95.0f);
+    SetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_DODGE, sConfigMgr->GetFloatDefault("Stats.Limits.Dodge", 95.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_PARRY, sConfigMgr->GetFloatDefault("Stats.Limits.Parry", 95.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_BLOCK, sConfigMgr->GetFloatDefault("Stats.Limits.Block", 95.0f));
+    SetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_CRIT, sConfigMgr->GetFloatDefault("Stats.Limits.Crit", 95.0f));
 
     //packet spoof punishment
     m_int_configs[CONFIG_PACKET_SPOOF_POLICY] = sConfigMgr->GetIntDefault("PacketSpoof.Policy", (uint32)WorldSession::DosProtection::POLICY_KICK);

@@ -21462,7 +21462,7 @@ void Player::Say(const std::string& text, const Language language)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_SAY, language, this, this, text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
+    SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY), true);
 }
 
 void Player::Yell(const std::string& text, const Language language)
@@ -21472,7 +21472,7 @@ void Player::Yell(const std::string& text, const Language language)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_YELL, language, this, this, text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), true);
+    SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL), true);
 }
 
 void Player::TextEmote(const std::string& text)
@@ -21482,7 +21482,7 @@ void Player::TextEmote(const std::string& text)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_EMOTE, Language::LANG_UNIVERSAL, this, this, text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
+    SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
 }
 
 void Player::WhisperAddon(const std::string& text, const std::string& prefix, Player* receiver)
@@ -25340,7 +25340,7 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     if (player->GetMapId() != pRewardSource->GetMapId() || player->GetInstanceId() != pRewardSource->GetInstanceId())
         return false;
 
-    return pRewardSource->GetDistance(player) <= sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE);
+    return pRewardSource->GetDistance(player) <= sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_GROUP_XP_DISTANCE);
 }
 
 bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
@@ -25354,7 +25354,7 @@ bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
     if (player->GetMapId() != pOther->GetMapId() || player->GetInstanceId() != pOther->GetInstanceId())
         return false;
 
-    return pOther->GetDistance(player) <= sWorld->getFloatConfig(CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE);
+    return pOther->GetDistance(player) <= sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE);
 }
 
 void Player::ResurectUsingRequestData()

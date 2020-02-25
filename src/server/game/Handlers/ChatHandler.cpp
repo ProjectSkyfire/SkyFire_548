@@ -809,9 +809,9 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
 
     Skyfire::EmoteChatBuilder emote_builder(*GetPlayer(), text_emote, emoteNum, unit);
     Skyfire::LocalizedPacketDo<Skyfire::EmoteChatBuilder > emote_do(emote_builder);
-    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::EmoteChatBuilder > > emote_worker(GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), emote_do);
+    Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::EmoteChatBuilder > > emote_worker(GetPlayer(), sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE), emote_do);
     TypeContainerVisitor<Skyfire::PlayerDistWorker<Skyfire::LocalizedPacketDo<Skyfire::EmoteChatBuilder> >, WorldTypeMapContainer> message(emote_worker);
-    cell.Visit(p, message, *GetPlayer()->GetMap(), *GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
+    cell.Visit(p, message, *GetPlayer()->GetMap(), *GetPlayer(), sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE));
 
     GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE, text_emote, 0, 0, unit);
 

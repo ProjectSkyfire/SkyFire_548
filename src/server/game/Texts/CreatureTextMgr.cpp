@@ -287,15 +287,15 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup,  WorldObject
 
 float CreatureTextMgr::GetRangeForChatType(ChatMsg msgType) const
 {
-    float dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY);
+    float dist = sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY);
     switch (msgType)
     {
         case ChatMsg::CHAT_MSG_MONSTER_YELL:
-            dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL);
+            dist = sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL);
             break;
         case ChatMsg::CHAT_MSG_MONSTER_EMOTE:
         case ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE:
-            dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE);
+            dist = sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE);
             break;
         default:
             break;
