@@ -23,10 +23,8 @@
 #include <list>
 #include <map>
 #include <string>
-
-#include "Common.h"
-
 #include "Opcodes.h"
+#include "SharedDefines.h"
 #include "WorldPacket.h"
 
 class Player;
@@ -123,6 +121,7 @@ class Channel
 {
     struct PlayerInfo
     {
+        PlayerInfo() : player(0), flags(0) { }
         uint64 player;
         uint8 flags;
 

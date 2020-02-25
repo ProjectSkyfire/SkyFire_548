@@ -21,6 +21,7 @@
 #define SF_ACCMGR_H
 
 #include "RBAC.h"
+#include "Common.h"
 #include <ace/Singleton.h>
 
 enum class AccountOpResult

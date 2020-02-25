@@ -40,7 +40,7 @@
 #include <vector>
 #include <cstring>
 #include <time.h>
-#include <math.h>
+#include <cmath>
 
 // Root of ByteBuffer exception hierarchy
 class ByteBufferException : public std::exception
