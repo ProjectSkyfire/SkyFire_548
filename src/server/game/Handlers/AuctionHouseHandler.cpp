@@ -385,7 +385,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     Item* item = items[0];
 
-    uint32 auctionTime = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
+    uint32 auctionTime = uint32(etime * sWorld->getRate(Rates::RATE_AUCTION_TIME));
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(creature->getFaction());
 
     uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, item, finalCount);

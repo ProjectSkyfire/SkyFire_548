@@ -194,7 +194,7 @@ uint32 Quest::XPValue(Player* player) const
 
 int32 Quest::GetRewMoney() const
 {
-    return int32(RewardMoney * sWorld->getRate(RATE_DROP_MONEY));
+    return int32(RewardMoney * sWorld->getRate(Rates::RATE_DROP_MONEY));
 }
 
 uint32 Quest::GetRewMoneyMaxLevel() const

@@ -187,7 +187,7 @@ namespace Skyfire
                         gain *= 2;
                 }
 
-                gain = uint32(gain * sWorld->getRate(RATE_XP_KILL));
+                gain = uint32(gain * sWorld->getRate(Rates::RATE_XP_KILL));
             }
 
             sScriptMgr->OnGainCalculation(gain, player, u);

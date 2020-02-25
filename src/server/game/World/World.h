@@ -377,7 +377,7 @@ enum WorldIntConfigs
 };
 
 /// Server rates
-enum Rates
+enum class Rates
 {
     RATE_HEALTH = 0,
     RATE_POWER_MANA,
@@ -683,9 +683,9 @@ class World
 
         void UpdateSessions(uint32 diff);
         /// Set a server rate (see #Rates)
-        void setRate(Rates rate, float value) { rate_values[rate]=value; }
+        void setRate(Rates rate, float value) { rate_values[uint8(rate)]=value; }
         /// Get a server rate (see #Rates)
-        float getRate(Rates rate) const { return rate_values[rate]; }
+        float getRate(Rates rate) const { return rate_values[uint8(rate)]; }
 
         /// Set a server configuration element (see #WorldConfigs)
         void SetBoolConfig(WorldBoolConfigs index, bool value)
@@ -835,7 +835,7 @@ class World
 
         std::string m_newCharString;
 
-        float rate_values[MAX_RATES];
+        float rate_values[uint8(Rates::MAX_RATES)];
         uint32 m_int_configs[INT_CONFIG_VALUE_COUNT];
         bool m_bool_configs[uint8(WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)];
         float m_float_configs[uint8(WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)];

@@ -445,151 +445,152 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ENABLE_SINFO_LOGIN] = sConfigMgr->GetIntDefault("Server.LoginInfo", 0);
 
     ///- Read all rates from the config file
-    rate_values[RATE_HEALTH]      = sConfigMgr->GetFloatDefault("Rate.Health", 1);
-    if (rate_values[RATE_HEALTH] < 0)
+    setRate(Rates::RATE_HEALTH, sConfigMgr->GetFloatDefault("Rate.Health", 1));
+    if (getRate(Rates::RATE_HEALTH) < 0)
     {
-        SF_LOG_ERROR("server.loading", "Rate.Health (%f) must be > 0. Using 1 instead.", rate_values[RATE_HEALTH]);
-        rate_values[RATE_HEALTH] = 1;
+        SF_LOG_ERROR("server.loading", "Rate.Health (%f) must be > 0. Using 1 instead.", getRate(Rates::RATE_HEALTH));
+        setRate(Rates::RATE_HEALTH, 1);
     }
-    rate_values[RATE_POWER_MANA]  = sConfigMgr->GetFloatDefault("Rate.Mana", 1);
-    if (rate_values[RATE_POWER_MANA] < 0)
+    setRate(Rates::RATE_POWER_MANA, sConfigMgr->GetFloatDefault("Rate.Mana", 1));
+    if (getRate(Rates::RATE_POWER_MANA) < 0)
     {
-        SF_LOG_ERROR("server.loading", "Rate.Mana (%f) must be > 0. Using 1 instead.", rate_values[RATE_POWER_MANA]);
-        rate_values[RATE_POWER_MANA] = 1;
+        SF_LOG_ERROR("server.loading", "Rate.Mana (%f) must be > 0. Using 1 instead.", getRate(Rates::RATE_POWER_MANA));
+        setRate(Rates::RATE_POWER_MANA, 1);
     }
-    rate_values[RATE_POWER_RAGE_INCOME] = sConfigMgr->GetFloatDefault("Rate.Rage.Income", 1);
-    rate_values[RATE_POWER_RAGE_LOSS]   = sConfigMgr->GetFloatDefault("Rate.Rage.Loss", 1);
-    if (rate_values[RATE_POWER_RAGE_LOSS] < 0)
+    setRate(Rates::RATE_POWER_RAGE_INCOME, sConfigMgr->GetFloatDefault("Rate.Rage.Income", 1));
+    setRate(Rates::RATE_POWER_RAGE_LOSS, sConfigMgr->GetFloatDefault("Rate.Rage.Loss", 1));
+    if (getRate(Rates::RATE_POWER_RAGE_LOSS) < 0)
     {
-        SF_LOG_ERROR("server.loading", "Rate.Rage.Loss (%f) must be > 0. Using 1 instead.", rate_values[RATE_POWER_RAGE_LOSS]);
-        rate_values[RATE_POWER_RAGE_LOSS] = 1;
+        SF_LOG_ERROR("server.loading", "Rate.Rage.Loss (%f) must be > 0. Using 1 instead.", getRate(Rates::RATE_POWER_RAGE_LOSS));
+        setRate(Rates::RATE_POWER_RAGE_LOSS, 1);
     }
-    rate_values[RATE_POWER_RUNICPOWER_INCOME] = sConfigMgr->GetFloatDefault("Rate.RunicPower.Income", 1);
-    rate_values[RATE_POWER_RUNICPOWER_LOSS]   = sConfigMgr->GetFloatDefault("Rate.RunicPower.Loss", 1);
-    if (rate_values[RATE_POWER_RUNICPOWER_LOSS] < 0)
+    setRate(Rates::RATE_POWER_RUNICPOWER_INCOME, sConfigMgr->GetFloatDefault("Rate.RunicPower.Income", 1));
+    setRate(Rates::RATE_POWER_RUNICPOWER_LOSS, sConfigMgr->GetFloatDefault("Rate.RunicPower.Loss", 1));
+    if (getRate(Rates::RATE_POWER_RUNICPOWER_LOSS) < 0)
     {
-        SF_LOG_ERROR("server.loading", "Rate.RunicPower.Loss (%f) must be > 0. Using 1 instead.", rate_values[RATE_POWER_RUNICPOWER_LOSS]);
-        rate_values[RATE_POWER_RUNICPOWER_LOSS] = 1;
+        SF_LOG_ERROR("server.loading", "Rate.RunicPower.Loss (%f) must be > 0. Using 1 instead.", getRate(Rates::RATE_POWER_RUNICPOWER_LOSS));
+        setRate(Rates::RATE_POWER_RUNICPOWER_LOSS, 1);
     }
-    rate_values[RATE_POWER_DEMONICFURY_LOSS] = sConfigMgr->GetFloatDefault("Rate.DemonicFury.Loss", 1);
-    if (rate_values[RATE_POWER_DEMONICFURY_LOSS] < 0)
+    setRate(Rates::RATE_POWER_DEMONICFURY_LOSS, sConfigMgr->GetFloatDefault("Rate.DemonicFury.Loss", 1));
+    if (getRate(Rates::RATE_POWER_DEMONICFURY_LOSS) < 0)
     {
-        SF_LOG_ERROR("server.loading", "Rate.DemonicFury.Loss (%f) must be > 0. Using 1 instead.", rate_values[RATE_POWER_DEMONICFURY_LOSS]);
-        rate_values[RATE_POWER_DEMONICFURY_LOSS] = 1;
+        SF_LOG_ERROR("server.loading", "Rate.DemonicFury.Loss (%f) must be > 0. Using 1 instead.", getRate(Rates::RATE_POWER_DEMONICFURY_LOSS));
+        setRate(Rates::RATE_POWER_DEMONICFURY_LOSS, 1);
     }
-    rate_values[RATE_POWER_FOCUS]  = sConfigMgr->GetFloatDefault("Rate.Focus", 1.0f);
-    rate_values[RATE_POWER_ENERGY] = sConfigMgr->GetFloatDefault("Rate.Energy", 1.0f);
-    rate_values[RATE_POWER_CHI]    = sConfigMgr->GetFloatDefault("Rate.Chi", 1.0f);
+    setRate(Rates::RATE_POWER_FOCUS, sConfigMgr->GetFloatDefault("Rate.Focus", 1.0f));
+    setRate(Rates::RATE_POWER_ENERGY, sConfigMgr->GetFloatDefault("Rate.Energy", 1.0f));
+    setRate(Rates::RATE_POWER_CHI, sConfigMgr->GetFloatDefault("Rate.Chi", 1.0f));
 
-    rate_values[RATE_SKILL_DISCOVERY]      = sConfigMgr->GetFloatDefault("Rate.Skill.Discovery", 1.0f);
+    setRate(Rates::RATE_SKILL_DISCOVERY, sConfigMgr->GetFloatDefault("Rate.Skill.Discovery", 1.0f));
 
-    rate_values[RATE_DROP_ITEM_POOR]       = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Poor", 1.0f);
-    rate_values[RATE_DROP_ITEM_NORMAL]     = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Normal", 1.0f);
-    rate_values[RATE_DROP_ITEM_UNCOMMON]   = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Uncommon", 1.0f);
-    rate_values[RATE_DROP_ITEM_RARE]       = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Rare", 1.0f);
-    rate_values[RATE_DROP_ITEM_EPIC]       = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Epic", 1.0f);
-    rate_values[RATE_DROP_ITEM_LEGENDARY]  = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Legendary", 1.0f);
-    rate_values[RATE_DROP_ITEM_ARTIFACT]   = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Artifact", 1.0f);
-    rate_values[RATE_DROP_ITEM_REFERENCED] = sConfigMgr->GetFloatDefault("Rate.Drop.Item.Referenced", 1.0f);
-    rate_values[RATE_DROP_ITEM_REFERENCED_AMOUNT] = sConfigMgr->GetFloatDefault("Rate.Drop.Item.ReferencedAmount", 1.0f);
-    rate_values[RATE_DROP_MONEY]  = sConfigMgr->GetFloatDefault("Rate.Drop.Money", 1.0f);
-    rate_values[RATE_XP_KILL]     = sConfigMgr->GetFloatDefault("Rate.XP.Kill", 1.0f);
-    rate_values[RATE_XP_QUEST]    = sConfigMgr->GetFloatDefault("Rate.XP.Quest", 1.0f);
-    rate_values[RATE_XP_EXPLORE]  = sConfigMgr->GetFloatDefault("Rate.XP.Explore", 1.0f);
-    rate_values[RATE_REPAIRCOST]  = sConfigMgr->GetFloatDefault("Rate.RepairCost", 1.0f);
-    if (rate_values[RATE_REPAIRCOST] < 0.0f)
+    setRate(Rates::RATE_DROP_ITEM_POOR, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Poor", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_NORMAL, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Normal", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_UNCOMMON, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Uncommon", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_RARE, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Rare", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_EPIC, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Epic", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_LEGENDARY, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Legendary", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_ARTIFACT, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Artifact", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_REFERENCED, sConfigMgr->GetFloatDefault("Rate.Drop.Item.Referenced", 1.0f));
+    setRate(Rates::RATE_DROP_ITEM_REFERENCED_AMOUNT, sConfigMgr->GetFloatDefault("Rate.Drop.Item.ReferencedAmount", 1.0f));
+    setRate(Rates::RATE_DROP_MONEY, sConfigMgr->GetFloatDefault("Rate.Drop.Money", 1.0f));
+    setRate(Rates::RATE_XP_KILL, sConfigMgr->GetFloatDefault("Rate.XP.Kill", 1.0f));
+    setRate(Rates::RATE_XP_QUEST, sConfigMgr->GetFloatDefault("Rate.XP.Quest", 1.0f));
+    setRate(Rates::RATE_XP_EXPLORE, sConfigMgr->GetFloatDefault("Rate.XP.Explore", 1.0f));
+    setRate(Rates::RATE_REPAIRCOST, sConfigMgr->GetFloatDefault("Rate.RepairCost", 1.0f));
+    if (getRate(Rates::RATE_REPAIRCOST) < 0.0f)
     {
-        SF_LOG_ERROR("server.loading", "Rate.RepairCost (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_REPAIRCOST]);
-        rate_values[RATE_REPAIRCOST] = 0.0f;
+        SF_LOG_ERROR("server.loading", "Rate.RepairCost (%f) must be >=0. Using 0.0 instead.", getRate(Rates::RATE_REPAIRCOST));
+        setRate(Rates::RATE_REPAIRCOST, 0.0f);
     }
-    rate_values[RATE_REPUTATION_GAIN]  = sConfigMgr->GetFloatDefault("Rate.Reputation.Gain", 1.0f);
-    rate_values[RATE_REPUTATION_LFG_BONUS] = sConfigMgr->GetFloatDefault("Rate.Reputation.LFGBonus", 1.0f);
-    rate_values[RATE_REPUTATION_LOWLEVEL_KILL]  = sConfigMgr->GetFloatDefault("Rate.Reputation.LowLevel.Kill", 1.0f);
-    rate_values[RATE_REPUTATION_LOWLEVEL_QUEST]  = sConfigMgr->GetFloatDefault("Rate.Reputation.LowLevel.Quest", 1.0f);
-    rate_values[RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS] = sConfigMgr->GetFloatDefault("Rate.Reputation.RecruitAFriendBonus", 0.1f);
-    rate_values[RATE_CREATURE_NORMAL_DAMAGE]          = sConfigMgr->GetFloatDefault("Rate.Creature.Normal.Damage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_ELITE_DAMAGE]     = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.Elite.Damage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_RAREELITE_DAMAGE] = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RAREELITE.Damage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE] = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.Damage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_RARE_DAMAGE]      = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RARE.Damage", 1.0f);
-    rate_values[RATE_CREATURE_NORMAL_HP]          = sConfigMgr->GetFloatDefault("Rate.Creature.Normal.HP", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_ELITE_HP]     = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.Elite.HP", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_RAREELITE_HP] = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RAREELITE.HP", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_WORLDBOSS_HP] = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.HP", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_RARE_HP]      = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RARE.HP", 1.0f);
-    rate_values[RATE_CREATURE_NORMAL_SPELLDAMAGE]          = sConfigMgr->GetFloatDefault("Rate.Creature.Normal.SpellDamage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE]     = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.Elite.SpellDamage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE] = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RAREELITE.SpellDamage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE] = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.SpellDamage", 1.0f);
-    rate_values[RATE_CREATURE_ELITE_RARE_SPELLDAMAGE]      = sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RARE.SpellDamage", 1.0f);
-    rate_values[RATE_CREATURE_AGGRO]  = sConfigMgr->GetFloatDefault("Rate.Creature.Aggro", 1.0f);
-    rate_values[RATE_REST_INGAME]                    = sConfigMgr->GetFloatDefault("Rate.Rest.InGame", 1.0f);
-    rate_values[RATE_REST_OFFLINE_IN_TAVERN_OR_CITY] = sConfigMgr->GetFloatDefault("Rate.Rest.Offline.InTavernOrCity", 1.0f);
-    rate_values[RATE_REST_OFFLINE_IN_WILDERNESS]     = sConfigMgr->GetFloatDefault("Rate.Rest.Offline.InWilderness", 1.0f);
-    rate_values[RATE_DAMAGE_FALL]  = sConfigMgr->GetFloatDefault("Rate.Damage.Fall", 1.0f);
-    rate_values[RATE_AUCTION_TIME]  = sConfigMgr->GetFloatDefault("Rate.Auction.Time", 1.0f);
-    rate_values[RATE_AUCTION_DEPOSIT] = sConfigMgr->GetFloatDefault("Rate.Auction.Deposit", 1.0f);
-    rate_values[RATE_AUCTION_CUT] = sConfigMgr->GetFloatDefault("Rate.Auction.Cut", 1.0f);
-    rate_values[RATE_HONOR] = sConfigMgr->GetFloatDefault("Rate.Honor", 1.0f);
-    rate_values[RATE_INSTANCE_RESET_TIME] = sConfigMgr->GetFloatDefault("Rate.InstanceResetTime", 1.0f);
-    rate_values[RATE_MOVESPEED] = sConfigMgr->GetFloatDefault("Rate.MoveSpeed", 1.0f);
-    if (rate_values[RATE_MOVESPEED] < 0)
+    setRate(Rates::RATE_REPUTATION_GAIN, sConfigMgr->GetFloatDefault("Rate.Reputation.Gain", 1.0f));
+    setRate(Rates::RATE_REPUTATION_LFG_BONUS, sConfigMgr->GetFloatDefault("Rate.Reputation.LFGBonus", 1.0f));
+    setRate(Rates::RATE_REPUTATION_LOWLEVEL_KILL, sConfigMgr->GetFloatDefault("Rate.Reputation.LowLevel.Kill", 1.0f));
+    setRate(Rates::RATE_REPUTATION_LOWLEVEL_QUEST, sConfigMgr->GetFloatDefault("Rate.Reputation.LowLevel.Quest", 1.0f));
+    setRate(Rates::RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS, sConfigMgr->GetFloatDefault("Rate.Reputation.RecruitAFriendBonus", 0.1f));
+    setRate(Rates::RATE_CREATURE_NORMAL_DAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Normal.Damage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_ELITE_DAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.Elite.Damage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_RAREELITE_DAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RAREELITE.Damage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.Damage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_RARE_DAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RARE.Damage", 1.0f));
+    setRate(Rates::RATE_CREATURE_NORMAL_HP, sConfigMgr->GetFloatDefault("Rate.Creature.Normal.HP", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_ELITE_HP, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.Elite.HP", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_RAREELITE_HP, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RAREELITE.HP", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_WORLDBOSS_HP, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.HP", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_RARE_HP, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RARE.HP", 1.0f));
+    setRate(Rates::RATE_CREATURE_NORMAL_SPELLDAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Normal.SpellDamage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.Elite.SpellDamage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RAREELITE.SpellDamage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.SpellDamage", 1.0f));
+    setRate(Rates::RATE_CREATURE_ELITE_RARE_SPELLDAMAGE, sConfigMgr->GetFloatDefault("Rate.Creature.Elite.RARE.SpellDamage", 1.0f));
+    setRate(Rates::RATE_CREATURE_AGGRO, sConfigMgr->GetFloatDefault("Rate.Creature.Aggro", 1.0f));
+    setRate(Rates::RATE_REST_INGAME, sConfigMgr->GetFloatDefault("Rate.Rest.InGame", 1.0f));
+    setRate(Rates::RATE_REST_OFFLINE_IN_TAVERN_OR_CITY, sConfigMgr->GetFloatDefault("Rate.Rest.Offline.InTavernOrCity", 1.0f));
+    setRate(Rates::RATE_REST_OFFLINE_IN_WILDERNESS, sConfigMgr->GetFloatDefault("Rate.Rest.Offline.InWilderness", 1.0f));
+    setRate(Rates::RATE_DAMAGE_FALL, sConfigMgr->GetFloatDefault("Rate.Damage.Fall", 1.0f));
+    setRate(Rates::RATE_AUCTION_TIME, sConfigMgr->GetFloatDefault("Rate.Auction.Time", 1.0f));
+    setRate(Rates::RATE_AUCTION_DEPOSIT, sConfigMgr->GetFloatDefault("Rate.Auction.Deposit", 1.0f));
+    setRate(Rates::RATE_AUCTION_CUT, sConfigMgr->GetFloatDefault("Rate.Auction.Cut", 1.0f));
+    setRate(Rates::RATE_HONOR, sConfigMgr->GetFloatDefault("Rate.Honor", 1.0f));
+    setRate(Rates::RATE_INSTANCE_RESET_TIME, sConfigMgr->GetFloatDefault("Rate.InstanceResetTime", 1.0f));
+    setRate(Rates::RATE_MOVESPEED, sConfigMgr->GetFloatDefault("Rate.MoveSpeed", 1.0f));
+    if (getRate(Rates::RATE_MOVESPEED) < 0)
     {
-        SF_LOG_ERROR("server.loading", "Rate.MoveSpeed (%f) must be > 0. Using 1 instead.", rate_values[RATE_MOVESPEED]);
-        rate_values[RATE_MOVESPEED] = 1.0f;
+        SF_LOG_ERROR("server.loading", "Rate.MoveSpeed (%f) must be > 0. Using 1 instead.", getRate(Rates::RATE_MOVESPEED));
+        setRate(Rates::RATE_MOVESPEED, 1.0f);
     }
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i) playerBaseMoveSpeed[i] = baseMoveSpeed[i] * rate_values[RATE_MOVESPEED];
-    rate_values[RATE_CORPSE_DECAY_LOOTED] = sConfigMgr->GetFloatDefault("Rate.Corpse.Decay.Looted", 0.5f);
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i) playerBaseMoveSpeed[i] = baseMoveSpeed[i] * getRate(Rates::RATE_MOVESPEED);
 
-    rate_values[RATE_TARGET_POS_RECALCULATION_RANGE] = sConfigMgr->GetFloatDefault("TargetPosRecalculateRange", 1.5f);
-    if (rate_values[RATE_TARGET_POS_RECALCULATION_RANGE] < CONTACT_DISTANCE)
+    setRate(Rates::RATE_CORPSE_DECAY_LOOTED, sConfigMgr->GetFloatDefault("Rate.Corpse.Decay.Looted", 0.5f));
+
+    setRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE, sConfigMgr->GetFloatDefault("TargetPosRecalculateRange", 1.5f));
+    if (getRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE) < CONTACT_DISTANCE)
     {
-        SF_LOG_ERROR("server.loading", "TargetPosRecalculateRange (%f) must be >= %f. Using %f instead.", rate_values[RATE_TARGET_POS_RECALCULATION_RANGE], CONTACT_DISTANCE, CONTACT_DISTANCE);
-        rate_values[RATE_TARGET_POS_RECALCULATION_RANGE] = CONTACT_DISTANCE;
+        SF_LOG_ERROR("server.loading", "TargetPosRecalculateRange (%f) must be >= %f. Using %f instead.", getRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE), CONTACT_DISTANCE, CONTACT_DISTANCE);
+        setRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE, CONTACT_DISTANCE);
     }
-    else if (rate_values[RATE_TARGET_POS_RECALCULATION_RANGE] > NOMINAL_MELEE_RANGE)
+    else if (getRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE) > NOMINAL_MELEE_RANGE)
     {
         SF_LOG_ERROR("server.loading", "TargetPosRecalculateRange (%f) must be <= %f. Using %f instead.",
-            rate_values[RATE_TARGET_POS_RECALCULATION_RANGE], NOMINAL_MELEE_RANGE, NOMINAL_MELEE_RANGE);
-        rate_values[RATE_TARGET_POS_RECALCULATION_RANGE] = NOMINAL_MELEE_RANGE;
+            getRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE), NOMINAL_MELEE_RANGE, NOMINAL_MELEE_RANGE);
+        setRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE, NOMINAL_MELEE_RANGE);
     }
 
-    rate_values[RATE_DURABILITY_LOSS_ON_DEATH]  = sConfigMgr->GetFloatDefault("DurabilityLoss.OnDeath", 10.0f);
-    if (rate_values[RATE_DURABILITY_LOSS_ON_DEATH] < 0.0f)
+    setRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH, sConfigMgr->GetFloatDefault("DurabilityLoss.OnDeath", 10.0f));
+    if (getRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH) < 0.0f)
     {
-        SF_LOG_ERROR("server.loading", "DurabilityLoss.OnDeath (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_ON_DEATH]);
-        rate_values[RATE_DURABILITY_LOSS_ON_DEATH] = 0.0f;
+        SF_LOG_ERROR("server.loading", "DurabilityLoss.OnDeath (%f) must be >=0. Using 0.0 instead.", getRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH));
+        setRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH, 0.0f);
     }
-    if (rate_values[RATE_DURABILITY_LOSS_ON_DEATH] > 100.0f)
+    if (getRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH) > 100.0f)
     {
-        SF_LOG_ERROR("server.loading", "DurabilityLoss.OnDeath (%f) must be <= 100. Using 100.0 instead.", rate_values[RATE_DURABILITY_LOSS_ON_DEATH]);
-        rate_values[RATE_DURABILITY_LOSS_ON_DEATH] = 0.0f;
+        SF_LOG_ERROR("server.loading", "DurabilityLoss.OnDeath (%f) must be <= 100. Using 100.0 instead.", getRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH));
+        setRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH, 0.0f);
     }
-    rate_values[RATE_DURABILITY_LOSS_ON_DEATH] = rate_values[RATE_DURABILITY_LOSS_ON_DEATH] / 100.0f;
+    setRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH, getRate(Rates::RATE_DURABILITY_LOSS_ON_DEATH) / 100.0f);
 
-    rate_values[RATE_DURABILITY_LOSS_DAMAGE] = sConfigMgr->GetFloatDefault("DurabilityLossChance.Damage", 0.5f);
-    if (rate_values[RATE_DURABILITY_LOSS_DAMAGE] < 0.0f)
+    setRate(Rates::RATE_DURABILITY_LOSS_DAMAGE, sConfigMgr->GetFloatDefault("DurabilityLossChance.Damage", 0.5f));
+    if (getRate(Rates::RATE_DURABILITY_LOSS_DAMAGE) < 0.0f)
     {
-        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Damage (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_DAMAGE]);
-        rate_values[RATE_DURABILITY_LOSS_DAMAGE] = 0.0f;
+        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Damage (%f) must be >=0. Using 0.0 instead.", getRate(Rates::RATE_DURABILITY_LOSS_DAMAGE));
+        setRate(Rates::RATE_DURABILITY_LOSS_DAMAGE, 0.0f);
     }
-    rate_values[RATE_DURABILITY_LOSS_ABSORB] = sConfigMgr->GetFloatDefault("DurabilityLossChance.Absorb", 0.5f);
-    if (rate_values[RATE_DURABILITY_LOSS_ABSORB] < 0.0f)
+    setRate(Rates::RATE_DURABILITY_LOSS_ABSORB, sConfigMgr->GetFloatDefault("DurabilityLossChance.Absorb", 0.5f));
+    if (getRate(Rates::RATE_DURABILITY_LOSS_ABSORB) < 0.0f)
     {
-        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Absorb (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_ABSORB]);
-        rate_values[RATE_DURABILITY_LOSS_ABSORB] = 0.0f;
+        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Absorb (%f) must be >=0. Using 0.0 instead.", getRate(Rates::RATE_DURABILITY_LOSS_ABSORB));
+        setRate(Rates::RATE_DURABILITY_LOSS_ABSORB, 0.0f);
     }
-    rate_values[RATE_DURABILITY_LOSS_PARRY] = sConfigMgr->GetFloatDefault("DurabilityLossChance.Parry", 0.05f);
-    if (rate_values[RATE_DURABILITY_LOSS_PARRY] < 0.0f)
+    setRate(Rates::RATE_DURABILITY_LOSS_PARRY, sConfigMgr->GetFloatDefault("DurabilityLossChance.Parry", 0.05f));
+    if (getRate(Rates::RATE_DURABILITY_LOSS_PARRY) < 0.0f)
     {
-        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Parry (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_PARRY]);
-        rate_values[RATE_DURABILITY_LOSS_PARRY] = 0.0f;
+        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Parry (%f) must be >=0. Using 0.0 instead.", getRate(Rates::RATE_DURABILITY_LOSS_PARRY));
+        setRate(Rates::RATE_DURABILITY_LOSS_PARRY, 0.0f);
     }
-    rate_values[RATE_DURABILITY_LOSS_BLOCK] = sConfigMgr->GetFloatDefault("DurabilityLossChance.Block", 0.05f);
-    if (rate_values[RATE_DURABILITY_LOSS_BLOCK] < 0.0f)
+    setRate(Rates::RATE_DURABILITY_LOSS_BLOCK, sConfigMgr->GetFloatDefault("DurabilityLossChance.Block", 0.05f));
+    if (getRate(Rates::RATE_DURABILITY_LOSS_BLOCK) < 0.0f)
     {
-        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Block (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_BLOCK]);
-        rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
+        SF_LOG_ERROR("server.loading", "DurabilityLossChance.Block (%f) must be >=0. Using 0.0 instead.", getRate(Rates::RATE_DURABILITY_LOSS_BLOCK));
+        setRate(Rates::RATE_DURABILITY_LOSS_BLOCK, 0.0f);
     }
     ///- Read other configuration items from the config file
 
@@ -1142,10 +1143,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility on continents
     m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);
-    if (m_MaxVisibleDistanceOnContinents < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceOnContinents < 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO))
     {
-        SF_LOG_ERROR("server.loading", "Visibility.Distance.Continents can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceOnContinents = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
+        SF_LOG_ERROR("server.loading", "Visibility.Distance.Continents can't be less max aggro radius %f", 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceOnContinents = 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceOnContinents > MAX_VISIBILITY_DISTANCE)
     {
@@ -1155,10 +1156,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility in instances
     m_MaxVisibleDistanceInInstances = sConfigMgr->GetFloatDefault("Visibility.Distance.Instances", DEFAULT_VISIBILITY_INSTANCE);
-    if (m_MaxVisibleDistanceInInstances < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceInInstances < 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO))
     {
-        SF_LOG_ERROR("server.loading", "Visibility.Distance.Instances can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInInstances = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
+        SF_LOG_ERROR("server.loading", "Visibility.Distance.Instances can't be less max aggro radius %f", 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceInInstances = 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceInInstances > MAX_VISIBILITY_DISTANCE)
     {
@@ -1168,10 +1169,10 @@ void World::LoadConfigSettings(bool reload)
 
     //visibility in BG/Arenas
     m_MaxVisibleDistanceInBGArenas = sConfigMgr->GetFloatDefault("Visibility.Distance.BGArenas", DEFAULT_VISIBILITY_BGARENAS);
-    if (m_MaxVisibleDistanceInBGArenas < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
+    if (m_MaxVisibleDistanceInBGArenas < 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO))
     {
-        SF_LOG_ERROR("server.loading", "Visibility.Distance.BGArenas can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInBGArenas = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
+        SF_LOG_ERROR("server.loading", "Visibility.Distance.BGArenas can't be less max aggro radius %f", 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceInBGArenas = 45*sWorld->getRate(Rates::RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceInBGArenas > MAX_VISIBILITY_DISTANCE)
     {
@@ -1316,7 +1317,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_GUILD_SAVE_INTERVAL] = sConfigMgr->GetIntDefault("Guild.SaveInterval", 15);
     m_int_configs[CONFIG_GUILD_MAX_LEVEL] = sConfigMgr->GetIntDefault("Guild.MaxLevel", 25);
     m_int_configs[CONFIG_GUILD_UNDELETABLE_LEVEL] = sConfigMgr->GetIntDefault("Guild.UndeletableLevel", 4);
-    rate_values[RATE_XP_GUILD_MODIFIER] = sConfigMgr->GetFloatDefault("Guild.XPModifier", 0.25f);
+    setRate(Rates::RATE_XP_GUILD_MODIFIER, sConfigMgr->GetFloatDefault("Guild.XPModifier", 0.25f));
     m_int_configs[CONFIG_GUILD_DAILY_XP_CAP] = sConfigMgr->GetIntDefault("Guild.DailyXPCap", 7807500);
     m_int_configs[CONFIG_GUILD_WEEKLY_REP_CAP] = sConfigMgr->GetIntDefault("Guild.WeeklyReputationCap", 4375);
 

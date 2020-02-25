@@ -391,7 +391,7 @@ void InstanceSaveManager::LoadResetTimes()
                 continue;
 
             // the reset_delay must be at least one day
-            uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / uint32(DAY)) * uint32(DAY));
+            uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(Rates::RATE_INSTANCE_RESET_TIME)) / uint32(DAY)) * uint32(DAY));
             if (period < DAY)
                 period = DAY;
 
@@ -603,7 +603,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
         // calculate the next reset time
         uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
 
-        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/uint32(DAY)) * uint32(DAY));
+        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(Rates::RATE_INSTANCE_RESET_TIME))/uint32(DAY)) * uint32(DAY));
         if (period < DAY)
             period = DAY;
 

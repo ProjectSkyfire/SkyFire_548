@@ -515,7 +515,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
 
     data << uint32(quest->RewardItemId[3]);
     data << uint32(quest->GetRewardSkillId());
-    data << uint32(quest->XPValue(_session->GetPlayer()) * sWorld->getRate(RATE_XP_QUEST));
+    data << uint32(quest->XPValue(_session->GetPlayer()) * sWorld->getRate(Rates::RATE_XP_QUEST));
     data << uint32(quest->GetRewardReputationMask());
     data << uint32(RewardItemDisplayId[2]);
     data << uint32(quest->RewardItemId[1]);
@@ -902,7 +902,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
 
     data << uint32(quest->GetFlags());
     data << uint32(quest->GetFlags2());
-    data << uint32(quest->XPValue(_session->GetPlayer()) * sWorld->getRate(RATE_XP_QUEST));
+    data << uint32(quest->XPValue(_session->GetPlayer()) * sWorld->getRate(Rates::RATE_XP_QUEST));
     data << uint32(quest->GetCharTitleId());
     data << uint32(quest->RewardChoiceItemId[2]);
     data << uint32(quest->GetRewItemsCount());
