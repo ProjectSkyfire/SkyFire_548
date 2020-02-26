@@ -2140,7 +2140,9 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     summon->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);
 
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                    summon->AI()->EnterEvadeMode();
+                    summon->SetFacingToObject(player);
+                    summon->GetMotionMaster()->Clear(false);
+                    summon->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, summon->GetFollowAngle()*2, MOTION_SLOT_ACTIVE);
 
                     break;
                 }
