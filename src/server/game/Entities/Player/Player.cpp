@@ -869,6 +869,7 @@ Player::Player(WorldSession* session): Unit(true)
     sWorld->IncreasePlayerCount();
 
     m_ChampioningFaction = 0;
+    m_ChampioningType = 0;
 
     for (uint8 i = 0; i < MAX_POWERS_PER_CLASS; ++i)
         m_powerFraction[i] = 0;
@@ -7253,13 +7254,19 @@ void Player::RewardReputation(Unit* victim, float rate)
 
     uint32 ChampioningFaction = 0;
 
-    if (GetChampioningFaction())
+    if (GetChampioningFaction() && GetChampioningType())
     {
         // support for: Championing - http://www.wowwiki.com/Championing
         Map const* map = GetMap();
         if (map && map->IsNonRaidInstance())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 80)
+                if (dungeon->reclevel == 80 && GetChampioningType() == 1)
+                    ChampioningFaction = GetChampioningFaction();
+                else if (dungeon->reclevel == 85 && GetChampioningType() == 2)
+                    ChampioningFaction = GetChampioningFaction();
+                else if (dungeon->reclevel == 90 && GetChampioningType() == 3)
+                    ChampioningFaction = GetChampioningFaction();
+                else if (GetChampioningType() == 4)
                     ChampioningFaction = GetChampioningFaction();
     }
 

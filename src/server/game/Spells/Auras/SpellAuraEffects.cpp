@@ -4725,38 +4725,40 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         break;
 
                     uint32 FactionID = 0;
+                    uint8 ChampioningType = 0;
 
                     if (apply)
                     {
                         switch (m_spellInfo->Id)
                         {
-                            case 57819: FactionID = 1106; break; // Argent Crusade
-                            case 57820: FactionID = 1098; break; // Knights of the Ebon Blade
-                            case 57821: FactionID = 1090; break; // Kirin Tor
-                            case 57822: FactionID = 1091; break; // The Wyrmrest Accord
-                            case 93337: FactionID = 1173; break; // Ramkahen
-                            case 93339: FactionID = 1135; break; // Earthen Ring
-                            case 93341: FactionID = 1158; break; // Guardians of Hyjal
-                            case 93347: FactionID = 1171; break; // Therazane
-                            case 93368: FactionID = 1174; break; // Wildhammer Clan
-                            case 93795: FactionID = 72; break;   // Stormwind
-                            case 93805: FactionID = 47; break;   // Ironforge
-                            case 93806: FactionID = 69; break;   // Darnassus
-                            case 93811: FactionID = 930; break;  // Exodar
-                            case 93816: FactionID = 1134; break; // Gilneas
-                            case 93821: FactionID = 54; break;   // Gnomeregan
-                            case 93825: FactionID = 76; break;   // Orgrimmar
-                            case 93827: FactionID = 530; break;  // Darkspear
-                            case 93828: FactionID = 911; break;  // Silvermoon
-                            case 93830: FactionID = 1133; break; // Bilgewater
-                            case 94158: FactionID = 1172; break; // Dragonmaw Clan
-                            case 94462: FactionID = 68; break;   // Undercity
-                            case 94463: FactionID = 81; break;   // Thunder Bluff
-                            case 126434: FactionID = 1353; break; // Tushui
-                            case 126436: FactionID = 1352; break; // Huojin
+                            case 57819: FactionID = 1106; ChampioningType = 1; break; // Argent Crusade
+                            case 57820: FactionID = 1098; ChampioningType = 1; break; // Knights of the Ebon Blade
+                            case 57821: FactionID = 1090; ChampioningType = 1; break; // Kirin Tor
+                            case 57822: FactionID = 1091; ChampioningType = 1; break; // The Wyrmrest Accord
+                            case 93337: FactionID = 1173; ChampioningType = 2; break; // Ramkahen
+                            case 93339: FactionID = 1135; ChampioningType = 2; break; // Earthen Ring
+                            case 93341: FactionID = 1158; ChampioningType = 2; break; // Guardians of Hyjal
+                            case 93347: FactionID = 1171; ChampioningType = 2; break; // Therazane
+                            case 93368: FactionID = 1174; ChampioningType = 2; break; // Wildhammer Clan
+                            case 93795: FactionID = 72; ChampioningType = 4; break;   // Stormwind
+                            case 93805: FactionID = 47; ChampioningType = 4; break;   // Ironforge
+                            case 93806: FactionID = 69; ChampioningType = 4; break;   // Darnassus
+                            case 93811: FactionID = 930; ChampioningType = 4; break;  // Exodar
+                            case 93816: FactionID = 1134; ChampioningType = 4; break; // Gilneas
+                            case 93821: FactionID = 54; ChampioningType = 4; break;   // Gnomeregan
+                            case 93825: FactionID = 76; ChampioningType = 4; break;   // Orgrimmar
+                            case 93827: FactionID = 530; ChampioningType = 4; break;  // Darkspear
+                            case 93828: FactionID = 911; ChampioningType = 4; break;  // Silvermoon
+                            case 93830: FactionID = 1133; ChampioningType = 4; break; // Bilgewater
+                            case 94158: FactionID = 1172; ChampioningType = 2; break; // Dragonmaw Clan
+                            case 94462: FactionID = 68; ChampioningType = 4; break;   // Undercity
+                            case 94463: FactionID = 81; ChampioningType = 4; break;   // Thunder Bluff
+                            case 126434: FactionID = 1353; ChampioningType = 4; break; // Tushui
+                            case 126436: FactionID = 1352; ChampioningType = 4; break; // Huojin
                         }
                     }
                     caster->ToPlayer()->SetChampioningFaction(FactionID);
+                    caster->ToPlayer()->SetChampioningType(ChampioningType);
                     break;
                 }
                 // LK Intro VO (1)

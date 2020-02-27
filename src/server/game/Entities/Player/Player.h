@@ -3177,6 +3177,15 @@ class Player : public Unit, public GridObject<Player>
     {
         m_ChampioningFaction = faction;
     }
+    uint32 GetChampioningType() const
+    {
+        return m_ChampioningType;
+    }
+    void SetChampioningType(uint8 type)
+    {
+        m_ChampioningType = type;
+    }
+
     Spell* m_spellModTakingSpell;
 
     float GetAverageItemLevel();
@@ -3630,6 +3639,7 @@ class Player : public Unit, public GridObject<Player>
     SpellCooldowns m_spellCooldowns;
 
     uint32 m_ChampioningFaction;
+    uint8 m_ChampioningType;
 
     std::queue<uint32> m_timeSyncQueue;
     uint32 m_timeSyncTimer;
