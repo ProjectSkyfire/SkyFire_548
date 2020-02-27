@@ -4619,6 +4619,14 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             break;
                         case 52172:  // Coyote Spirit Despawn Aura
                         case 60244:  // Blood Parrot Despawn Aura
+                        case 130067: // Terracotta Warrior Despawn Aura
+                        case 130070: // Whirlwind of Blades Despawn Aura
+                        case 130108: // Martar Despawn Aura
+                        case 130112: // Feverbite Despawn Aura
+                        case 130119: // Kidnapped Puppies Despawn Aura
+                        case 130156: // Tranquil Sprout Despawn Aura
+                        case 130484: // Quilen Statuette Despawn Aura
+                        case 148596: // Barnacle Crew Despawn Aura
                             target->CastSpell((Unit*)NULL, GetAmount(), true, NULL, this);
                             break;
                         case 91604: // Restricted Flight Area
