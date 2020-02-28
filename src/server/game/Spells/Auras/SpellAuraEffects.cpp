@@ -4809,43 +4809,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     }
                     break;
             }
-
             break;
         }
-        case SPELLFAMILY_MAGE:
-        {
-            //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
+        default:
             break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
-            break;
-        }
-        case SPELLFAMILY_DRUID:
-        {
-            //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
-            break;
-        }
-        case SPELLFAMILY_SHAMAN:
-        {
-            //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                //break;
-            break;
-        }
-        case SPELLFAMILY_PALADIN:
-            // if (!(mode & AURA_EFFECT_HANDLE_REAL))
-            //    break;
-            break;
-        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-            //    break;
-            break;
-        }
     }
 }
 
@@ -4871,15 +4838,6 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
 
     if (GetSpellInfo()->Effects[m_effIndex].ItemType == 0)
         return;
-
-    // Soul Shard
-    if (GetSpellInfo()->Effects[m_effIndex].ItemType == 6265)
-    {
-        // Soul Shard only from units that grant XP or honor
-        if (!plCaster->isHonorOrXPTarget(target) ||
-            (target->GetTypeId() == TypeID::TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
-            return;
-    }
 
     //Adding items
     uint32 noSpaceForCount = 0;
@@ -5310,32 +5268,8 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     caster->CastCustomSpell(53352, SPELLVALUE_BASE_POINT0, m_amount, target, true, NULL, this);
                 break;
             }
-            switch (GetSpellInfo()->Id)
-            {
-                // Feeding Frenzy Rank 1
-                case 53511:
-                    if (target->GetVictim() && target->GetVictim()->HealthBelowPct(35))
-                        target->CastSpell(target, 60096, true, 0, this);
-                    return;
-                // Feeding Frenzy Rank 2
-                case 53512:
-                    if (target->GetVictim() && target->GetVictim()->HealthBelowPct(35))
-                        target->CastSpell(target, 60097, true, 0, this);
-                    return;
-                default:
-                    break;
-            }
             break;
         }
-        case SPELLFAMILY_SHAMAN:
-            if (GetId() == 52179) // Astral Shift
-            {
-                // Periodic need for remove visual on stun/fear/silence lost
-                if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED)))
-                    target->RemoveAurasDueToSpell(52179);
-                break;
-            }
-            break;
         case SPELLFAMILY_DEATHKNIGHT:
             switch (GetId())
             {
