@@ -17419,6 +17419,7 @@ bool Player::HasQuestForItem(uint32 itemId) const
             continue;
 
         QuestStatusData const& questStatus = citrQs->second;
+
         if (questStatus.Status == QUEST_STATUS_INCOMPLETE)
         {
             Quest const* qInfo = sObjectMgr->GetQuestTemplate(questId);
@@ -17427,40 +17428,43 @@ bool Player::HasQuestForItem(uint32 itemId) const
 
             // hide quest if player is in raid-group and quest is no raid quest
             if (GetGroup() && GetGroup()->isRaidGroup() && !qInfo->IsAllowedInRaid(GetMap()->GetDifficulty()))
+            {
                 if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                     continue;
+            }
 
-            // There should be no mixed ReqItem/ReqSource drop
             // This part for ReqItem drop
-
-            if (!qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
-                continue;
-
-            for (QuestObjectiveSet::const_iterator citr = qInfo->m_questObjectives.begin(); citr != qInfo->m_questObjectives.end(); ++citr)
-                if ((*citr)->Type == QUEST_OBJECTIVE_TYPE_ITEM)
-                    if (itemId == (*citr)->ObjectId && GetQuestObjectiveCounter((*citr)->Id) < uint32((*citr)->Amount))
-                        return true;
-
-            // This part - for ReqSource
-            for (uint8 j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j)
+            if (qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
             {
-                // examined item is a source item
-                if (qInfo->RequiredSourceItemId[j] == itemId)
-                {
-                    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(itemId);
-
-                    // 'unique' item
-                    if (pProto->MaxCount && int32(GetItemCount(itemId, true)) < pProto->MaxCount)
-                        return true;
-
-                    // allows custom amount drop when not 0
-                    if (qInfo->RequiredSourceItemCount[j])
-                    {
-                        if (GetItemCount(itemId, true) < qInfo->RequiredSourceItemCount[j])
+                for (QuestObjectiveSet::const_iterator citr = qInfo->m_questObjectives.begin(); citr != qInfo->m_questObjectives.end(); ++citr)
+                    if ((*citr)->Type == QUEST_OBJECTIVE_TYPE_ITEM)
+                        if (itemId == (*citr)->ObjectId && GetQuestObjectiveCounter((*citr)->Id) < uint32((*citr)->Amount))
                             return true;
+            }
+            else
+            {
+                // This part - for ReqSource
+                for (uint8 j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j)
+                {
+                    // examined item is a source item
+                    if (qInfo->RequiredSourceItemId[j] == itemId)
+                    {
+                        ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(itemId);
+
+                        // 'unique' item
+                        if (pProto->MaxCount && int32(GetItemCount(itemId, true)) < pProto->MaxCount)
+                            return true;
+
+                        // allows custom amount drop when not 0
+                        if (qInfo->RequiredSourceItemCount[j])
+                        {
+                            if (GetItemCount(itemId, true) < qInfo->RequiredSourceItemCount[j])
+                                return true;
+                        }
+                        else if (GetItemCount(itemId, true) < pProto->GetMaxStackSize())
+                            return true;
+
                     }
-                    else if (GetItemCount(itemId, true) < pProto->GetMaxStackSize())
-                        return true;
                 }
             }
         }
