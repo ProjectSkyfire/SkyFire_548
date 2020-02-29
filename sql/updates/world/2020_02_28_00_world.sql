@@ -1,6 +1,6 @@
-UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-50' WHERE `entry`=2957 AND `item`=33009;
-UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-50' WHERE `entry`=3068 AND `item`=33009;
-UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-50' WHERE `entry`=2956 AND `item`=33009;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-25' WHERE `entry`=2957 AND `item`=33009;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-25' WHERE `entry`=3068 AND `item`=33009;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`='-25' WHERE `entry`=2956 AND `item`=33009;
 
 DELETE FROM `creature` WHERE `id`=23616;
 INSERT INTO `creature` (`guid`, `id`, `map`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
@@ -81,4 +81,5 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@Friendly*100,9,4,0,0,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kyle the Friendly -On Script - Despawn");
 
 DELETE FROM `creature_text` WHERE `entry`=@Friendly AND `groupid`=2 AND `id`=0;
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (@Friendly, 2, 0, '%s thanks you with a special dance.', 16, 0, 100, 0, 0, 0, 'kyle EMOTE_DANCE');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(@Friendly, 2, 0, '%s thanks you with a special dance.', 16, 0, 100, 0, 0, 0, 'kyle EMOTE_DANCE');
