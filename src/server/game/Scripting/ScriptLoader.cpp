@@ -344,7 +344,7 @@ void AddSC_desolace();
 void AddSC_durotar();
 void AddSC_dustwallow_marsh();
 void AddSC_moonglade();
-//void AddSC_mulgore();
+void AddSC_mulgore();
 void AddSC_silithus();
 void AddSC_tanaris();
 void AddSC_teldrassil();
@@ -1012,7 +1012,7 @@ void AddKalimdorScripts()
     AddSC_durotar();
     AddSC_dustwallow_marsh();
     AddSC_moonglade();
-    //AddSC_mulgore();
+    AddSC_mulgore();
     AddSC_silithus();
     AddSC_tanaris();
     AddSC_teldrassil();
