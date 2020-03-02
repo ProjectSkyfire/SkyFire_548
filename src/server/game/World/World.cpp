@@ -2352,9 +2352,6 @@ namespace Skyfire
                 while (char* line = lineFromMessage(pos))
                 {
                     WorldPacket* data = new WorldPacket();
-
-                    uint32 lineLength = strlen(line) + 1;
-
                     ChatHandler::BuildChatPacket(*data, ChatMsg::CHAT_MSG_SYSTEM, Language::LANG_UNIVERSAL, NULL, NULL, line);
                     data_list.push_back(data);
                 }
