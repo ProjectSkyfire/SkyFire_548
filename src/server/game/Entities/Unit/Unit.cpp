@@ -5029,7 +5029,6 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 
     ObjectGuid guid = GetGUID();
     uint32 count = 1;
-    uint32 counter = 0;
     size_t maxsize = 4 + 5 + 5 + 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 * 12;
     WorldPacket data(SMSG_ATTACKER_STATE_UPDATE, maxsize);    // we guess size
 
@@ -5711,6 +5710,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 37436;
                 break;
             }
+            break;
         }
         case SPELLFAMILY_WARLOCK:
         {

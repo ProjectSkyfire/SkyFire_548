@@ -722,7 +722,7 @@ class World
         }
 
         /// Get a server configuration element (see #WorldConfigs)
-        int32 getIntConfig(WorldIntConfigs index) const
+        uint32 getIntConfig(WorldIntConfigs index) const
         {
             return index < WorldIntConfigs::INT_CONFIG_VALUE_COUNT ? m_int_configs[uint8(index)] : 0;
         }

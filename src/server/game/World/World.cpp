@@ -734,7 +734,7 @@ void World::LoadConfigSettings(bool reload)
     }
 
     setIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM, sConfigMgr->GetIntDefault("HeroicCharactersPerRealm", 1));
-    if (getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM) < 0 || getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM) > 10)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM)) < 0 || getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM) > 10)
     {
         SF_LOG_ERROR("server.loading", "HeroicCharactersPerRealm (%i) must be in range 0..10. Set to 1.", getIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM));
         setIntConfig(WorldIntConfigs::CONFIG_HEROIC_CHARACTERS_PER_REALM, 1);
@@ -743,7 +743,7 @@ void World::LoadConfigSettings(bool reload)
     setIntConfig(WorldIntConfigs::CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER, sConfigMgr->GetIntDefault("CharacterCreating.MinLevelForHeroicCharacter", 55));
 
     setIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS, sConfigMgr->GetIntDefault("SkipCinematics", 0));
-    if (getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS) < 0 || getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS) > 2)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS)) < 0 || getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS) > 2)
     {
         SF_LOG_ERROR("server.loading", "SkipCinematics (%i) must be in range 0..2. Set to 0.", getIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS));
         setIntConfig(WorldIntConfigs::CONFIG_SKIP_CINEMATICS, 0);
@@ -827,13 +827,13 @@ void World::LoadConfigSettings(bool reload)
     }
 
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_HONOR_POINTS, sConfigMgr->GetIntDefault("Currency.StartHonorPoints", 0));
-    if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_HONOR_POINTS) < 0)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_HONOR_POINTS)) < 0)
     {
         SF_LOG_ERROR("server.loading", "Currency.StartHonorPoints (%i) must be >= 0, set to default 0.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_HONOR_POINTS));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_HONOR_POINTS, 0);
     }
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_HONOR_POINTS, sConfigMgr->GetIntDefault("Currency.MaxHonorPoints", 4000));
-    if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_HONOR_POINTS) < 0)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_HONOR_POINTS)) < 0)
     {
         SF_LOG_ERROR("server.loading", "Currency.MaxHonorPoints (%i) can't be negative. Set to default 4000.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_HONOR_POINTS));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_HONOR_POINTS, 4000);
@@ -842,13 +842,13 @@ void World::LoadConfigSettings(bool reload)
     //setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_HONOR_POINTS] *= 100;     //precision mod
 
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_JUSTICE_POINTS, sConfigMgr->GetIntDefault("Currency.StartJusticePoints", 0));
-    if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_JUSTICE_POINTS) < 0)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_JUSTICE_POINTS)) < 0)
     {
         SF_LOG_ERROR("server.loading", "Currency.StartJusticePoints (%i) must be >= 0, set to default 0.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_JUSTICE_POINTS));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_JUSTICE_POINTS, 0);
     }
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_JUSTICE_POINTS, sConfigMgr->GetIntDefault("Currency.MaxJusticePoints", 4000));
-    if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_JUSTICE_POINTS) < 0)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_JUSTICE_POINTS)) < 0)
     {
         SF_LOG_ERROR("server.loading", "Currency.MaxJusticePoints (%i) can't be negative. Set to default 4000.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_JUSTICE_POINTS));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_JUSTICE_POINTS, 4000);
@@ -857,7 +857,7 @@ void World::LoadConfigSettings(bool reload)
     //setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_MAX_JUSTICE_POINTS] *= 100;     //precision mod
 
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS, sConfigMgr->GetIntDefault("Currency.StartConquestPoints", 0));
-    if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS) < 0)
+    if (int32(getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS)) < 0)
     {
         SF_LOG_ERROR("server.loading", "Currency.StartConquestPoints (%i) must be >= 0, set to default 0.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS, 0);
