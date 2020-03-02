@@ -1353,31 +1353,16 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: CMSG_SPELLCLICK");
 
-    ObjectGuid guid;
+    ObjectGuid SpellClickUnitGUID;
+    bool TryAutoDismount = false;
 
-    guid[7] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-
-    uint8 unk = recvData.ReadBit();
-
-    guid[1] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadGuidMask(SpellClickUnitGUID, 7, 4, 0, 3, 6, 5);
+    TryAutoDismount = recvData.ReadBit();
+    recvData.ReadGuidMask(SpellClickUnitGUID, 1, 2);
+    recvData.ReadGuidBytes(SpellClickUnitGUID, 6, 1, 5, 4, 7, 2, 3, 0);
 
     // this will get something not in world. crash
-    Creature* unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
+    Creature* unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, SpellClickUnitGUID);
 
     if (!unit)
         return;
@@ -1385,6 +1370,9 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
     /// @todo Unit::SetCharmedBy: 28782 is not in world but 0 is trying to charm it! -> crash
     if (!unit->IsInWorld())
         return;
+
+    if (_player->IsMounted() && TryAutoDismount)
+        _player->Dismount();
 
     unit->HandleSpellClick(_player);
 }
