@@ -1125,6 +1125,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
 
+    /*
     if (castFlags & 0x8)   // Archaeology
     {
         SpellResearchData* researchData = new SpellResearchData();
@@ -1149,7 +1150,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         }
 
         spell->m_researchData = researchData;
-    }
+    }*/
 
     spell->prepare(&targets);
 }
