@@ -111,9 +111,9 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
 
         switch (battlePet->GetDbState())
         {
-            case BATTLE_PET_DB_STATE_NONE:
+            case BattlePetDbState::BATTLE_PET_DB_STATE_NONE:
                 break;
-            case BATTLE_PET_DB_STATE_DELETE:
+            case BattlePetDbState::BATTLE_PET_DB_STATE_DELETE:
             {
                 PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_BATTLE_PET);
                 stmt->setUInt64(0, battlePet->GetId());
@@ -124,7 +124,7 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
 
                 break;
             }
-            case BATTLE_PET_DB_STATE_SAVE:
+            case BattlePetDbState::BATTLE_PET_DB_STATE_SAVE:
             {
                 PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_BATTLE_PET);
                 stmt->setUInt64(0, battlePet->GetId());
@@ -147,7 +147,7 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
                 stmt->setUInt16(13, battlePet->GetFlags());
                 trans->Append(stmt);
 
-                battlePet->SetDbState(BATTLE_PET_DB_STATE_NONE);
+                battlePet->SetDbState(BattlePetDbState::BATTLE_PET_DB_STATE_NONE);
                 break;
             }
             default:
@@ -379,7 +379,7 @@ void BattlePetMgr::Delete(BattlePet* battlePet)
     if (!battlePet)
         return;
 
-    if (battlePet->GetDbState() == BATTLE_PET_DB_STATE_DELETE)
+    if (battlePet->GetDbState() == BattlePetDbState::BATTLE_PET_DB_STATE_DELETE)
         return;
 
     // this shouldn't happen since the client doesn't allow releasing of slotted Battle Pets
@@ -390,7 +390,7 @@ void BattlePetMgr::Delete(BattlePet* battlePet)
         SendBattlePetSlotUpdate(srcSlot, false);
     }
 
-    battlePet->SetDbState(BATTLE_PET_DB_STATE_DELETE);
+    battlePet->SetDbState(BattlePetDbState::BATTLE_PET_DB_STATE_DELETE);
 
     // alert client of deleted pet
     SendBattlePetDeleted(battlePet->GetId());
@@ -446,7 +446,7 @@ void BattlePetMgr::SendBattlePetJournal()
     for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); ++citr)
     {
         BattlePet const* battlePet = *citr;
-        if (battlePet->GetDbState() == BATTLE_PET_DB_STATE_DELETE)
+        if (battlePet->GetDbState() == BattlePetDbState::BATTLE_PET_DB_STATE_DELETE)
             continue;
 
         CreatureTemplate const* creatureTemplate = sObjectMgr->GetCreatureTemplate(sBattlePetSpeciesStore.LookupEntry(battlePet->GetSpecies())->NpcId);

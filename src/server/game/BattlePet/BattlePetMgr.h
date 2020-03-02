@@ -71,7 +71,7 @@ class BattlePetMgr
 {
 public:
     BattlePetMgr(Player* owner)
-        : m_owner(owner), m_summon(NULL), m_summonId(0), m_summonLastId(0), m_loadoutFlags(0), m_loadoutSave(false) { }
+        : m_owner(owner), m_summon(NULL), m_summonId(0), m_summonLastId(0), m_loadoutSave(false), m_loadoutFlags(0) { }
 
     ~BattlePetMgr();
 
