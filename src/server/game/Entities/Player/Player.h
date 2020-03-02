@@ -2378,7 +2378,7 @@ class Player : public Unit, public GridObject<Player>
     void SendDeclineGuildInvitation(std::string declinerName, bool autoDecline = false);
     static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
-    uint32 GetArenaPersonalRating(uint8 slot) const
+    uint32 GetArenaPersonalRating(uint8 /*slot*/) const
     {
         return 0;
     }
