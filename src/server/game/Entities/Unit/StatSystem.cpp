@@ -400,8 +400,8 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = addTotalPct ? GetModifierValue(unitMod, TOTAL_PCT) : 1.0f;
 
-    float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
-    float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
+    float weapon_mindamage = GetWeaponDamageRange(attType, WeaponDamageRange::MINDAMAGE);
+    float weapon_maxdamage = GetWeaponDamageRange(attType, WeaponDamageRange::MAXDAMAGE);
 
     if (IsInFeralForm())                                    //check if player is druid and in cat or bear forms
     {
@@ -938,8 +938,8 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 
     //float att_speed = float(GetAttackTime(attType))/1000.0f;
 
-    float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
-    float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
+    float weapon_mindamage = GetWeaponDamageRange(attType, WeaponDamageRange::MINDAMAGE);
+    float weapon_maxdamage = GetWeaponDamageRange(attType, WeaponDamageRange::MAXDAMAGE);
 
     /* difference in AP between current attack power and base value from DB */
     float att_pwr_change = GetTotalAttackPowerValue(attType) - GetCreatureTemplate()->attackpower;
@@ -1277,8 +1277,8 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);
 
-    float weapon_mindamage = GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, MINDAMAGE);
-    float weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, MAXDAMAGE);
+    float weapon_mindamage = GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE);
+    float weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE);
 
     float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;

@@ -391,7 +391,7 @@ enum UnitModifierType
     MODIFIER_TYPE_END = 4
 };
 
-enum WeaponDamageRange
+enum class WeaponDamageRange
 {
     MINDAMAGE,
     MAXDAMAGE
@@ -2452,7 +2452,7 @@ class Unit : public WorldObject
     float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type) const;
     void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value)
     {
-        m_weaponDamage [uint8(attType)] [damageRange] = value;
+        m_weaponDamage [uint8(attType)] [uint8(damageRange)] = value;
     }
 
     bool isInFrontInMap(Unit const* target, float distance, float arc = M_PI) const;

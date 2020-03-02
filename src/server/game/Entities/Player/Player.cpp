@@ -8712,13 +8712,13 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
     if (minDamage > 0)
     {
         damage = apply ? minDamage : BASE_MINDAMAGE;
-        SetBaseWeaponDamage(attType, MINDAMAGE, damage);
+        SetBaseWeaponDamage(attType, WeaponDamageRange::MINDAMAGE, damage);
     }
 
     if (maxDamage  > 0)
     {
         damage = apply ? maxDamage : BASE_MAXDAMAGE;
-        SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
+        SetBaseWeaponDamage(attType, WeaponDamageRange::MAXDAMAGE, damage);
     }
 
     if (proto->Delay && !IsInFeralForm())

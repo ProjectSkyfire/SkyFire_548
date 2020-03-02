@@ -225,8 +225,8 @@ m_HostileRefManager(this), _lastDamagedTime(0)
     uint8 maxAttackType = uint8(WeaponAttackType::MAX_ATTACK);
     for (uint8 i = 0; i < maxAttackType; ++i)
     {
-        m_weaponDamage [i] [MINDAMAGE] = BASE_MINDAMAGE;
-        m_weaponDamage [i] [MAXDAMAGE] = BASE_MAXDAMAGE;
+        m_weaponDamage [i] [uint8(WeaponDamageRange::MINDAMAGE)] = BASE_MINDAMAGE;
+        m_weaponDamage [i] [uint8(WeaponDamageRange::MAXDAMAGE)] = BASE_MAXDAMAGE;
     }
 
     for (uint8 i = 0; i < MAX_STATS; ++i)
@@ -11796,7 +11796,7 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange typ
     if (attType == WeaponAttackType::OFF_ATTACK && !haveOffhandWeapon())
         return 0.0f;
 
-    return m_weaponDamage[uint8(attType)][type];
+    return m_weaponDamage[uint8(attType)][uint8(type)];
 }
 
 bool Unit::CanFreeMove() const

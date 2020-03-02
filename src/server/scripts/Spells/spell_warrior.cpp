@@ -448,8 +448,8 @@ class spell_warr_rend : public SpellScriptLoader
                     // $0.25 * (($MWB + $mwb) / 2 + $AP / 14 * $MWS) bonus per tick
                     float ap = caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK);
                     int32 mws = caster->GetAttackTime(WeaponAttackType::BASE_ATTACK);
-                    float mwbMin = caster->GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, MINDAMAGE);
-                    float mwbMax = caster->GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, MAXDAMAGE);
+                    float mwbMin = caster->GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE);
+                    float mwbMax = caster->GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE);
                     float mwb = ((mwbMin + mwbMax) / 2 + ap * mws / 14000) * 0.25f;
                     amount += int32(caster->ApplyEffectModifiers(GetSpellInfo(), aurEff->GetEffIndex(), mwb));
                 }

@@ -305,8 +305,8 @@ public:
 
             //damage
             const CreatureTemplate* cinfo = me->GetCreatureTemplate();
-            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MINDAMAGE, cinfo->mindmg);
-            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg);
+            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, cinfo->mindmg);
+            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, cinfo->maxdmg);
             me->UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
         }
 
@@ -426,12 +426,12 @@ public:
 
                     //damage
                     const CreatureTemplate* cinfo = me->GetCreatureTemplate();
-                    me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MINDAMAGE, 2*cinfo->mindmg);
-                    me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, MAXDAMAGE, 2*cinfo->maxdmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, 2*cinfo->mindmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, 2*cinfo->maxdmg);
                     me->UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
 
-                    me->SetBaseWeaponDamage(WeaponAttackType::OFF_ATTACK, MINDAMAGE, cinfo->mindmg);
-                    me->SetBaseWeaponDamage(WeaponAttackType::OFF_ATTACK, MAXDAMAGE, cinfo->maxdmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::OFF_ATTACK, WeaponDamageRange::MINDAMAGE, cinfo->mindmg);
+                    me->SetBaseWeaponDamage(WeaponAttackType::OFF_ATTACK, WeaponDamageRange::MAXDAMAGE, cinfo->maxdmg);
                     //Sigh, updating only works on main attack, do it manually ....
                     me->SetFloatValue(UNIT_FIELD_MIN_OFF_HAND_DAMAGE, cinfo->mindmg);
                     me->SetFloatValue(UNIT_FIELD_MAX_OFF_HAND_DAMAGE, cinfo->maxdmg);
