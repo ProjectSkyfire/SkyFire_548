@@ -16219,9 +16219,6 @@ void Unit::SendTeleportPacket(Position& pos)
     if (GetTypeId() == TypeID::TYPEID_UNIT)
         Relocate(&pos); // Relocate the unit to its new position in order to build the packets correctly.
 
-    ObjectGuid guid = GetGUID();
-    ObjectGuid transGuid = GetTransGUID();
-
     WorldPacket data(SMSG_MOVE_UPDATE_TELEPORT, 38);
     WriteMovementInfo(data);
 
