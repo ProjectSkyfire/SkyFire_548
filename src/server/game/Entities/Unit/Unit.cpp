@@ -5941,23 +5941,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
-                // Sacred Shield
-                case 53601:
-                {
-                    if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
-                        return false;
-
-                    if (damage > 0)
-                        triggered_spell_id = 58597;
-
-                    // Item - Paladin T8 Holy 4P Bonus
-                    if (Unit* caster = triggeredByAura->GetCaster())
-                        if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
-                            cooldown = aurEff->GetAmount();
-
-                    target = this;
-                    break;
-                }
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
@@ -6156,13 +6139,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         default:
                             return false;
                     }
-                    break;
-                }
-                // Lesser Healing Wave (Totem of Flowing Water Relic)
-                case 28849:
-                {
-                    target = this;
-                    triggered_spell_id = 28850;
                     break;
                 }
                 // Windfury Weapon (Passive) 1-8 Ranks
