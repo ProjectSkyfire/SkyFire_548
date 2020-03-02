@@ -369,12 +369,12 @@ uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-    bool hasFallData;
-    bool hasFallDirection;
-    bool hasSpline;
-    bool hasPitch;
-    bool hasSplineElevation;
-    bool hasUnitTransport;
+    bool hasFallData = false;
+    bool hasFallDirection = false;
+    bool hasSpline = false;
+    bool hasPitch = false;
+    bool hasSplineElevation = false;
+    bool hasUnitTransport = false;
 
     uint32 movementFlags;
     uint32 movementFlagsExtra;
