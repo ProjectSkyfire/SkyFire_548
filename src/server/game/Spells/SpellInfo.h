@@ -261,9 +261,10 @@ public:
     float     DeltaScalingMultiplier;
     float     ComboScalingMultiplier;
 
-    SpellEffectInfo() : ApplyAuraName(0), ApplyAuraTickCount(0), BasePoints(0), BonusMultiplier(0), ChainTarget(0), ComboScalingMultiplier(0.0f),
-        DamageMultiplier(0.0f), DeltaScalingMultiplier(0.0f), DieSides(0), Effect(0), ItemType(0), Mechanic(MECHANIC_NONE), MiscValue(0), MiscValueB(0),
-        PointsPerComboPoint(0.0f), RealPointsPerLevel(0.0f), ScalingMultiplier(0.0f), TriggerSpell(0), ValueMultiplier(0.0f), _effIndex(0), _spellInfo(NULL) { }
+    SpellEffectInfo() : _spellInfo(NULL), _effIndex(0), Effect(0), ApplyAuraName(0), ApplyAuraTickCount(0), DieSides(0), RealPointsPerLevel(0.0f), BasePoints(0), PointsPerComboPoint(0.0f),
+        ValueMultiplier(0.0f), DamageMultiplier(0.0f), BonusMultiplier(0), MiscValue(0), MiscValueB(0), Mechanic(MECHANIC_NONE), ChainTarget(0), ItemType(0), 
+        TriggerSpell(0), ScalingMultiplier(0.0f), DeltaScalingMultiplier(0.0f), ComboScalingMultiplier(0.0f) { }
+
     SpellEffectInfo(SpellEntry const* spellEntry, SpellInfo const* spellInfo, uint8 effIndex, SpellEffectEntry const* effect);
 
     bool IsEffect() const;
