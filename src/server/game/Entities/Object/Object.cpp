@@ -96,7 +96,7 @@ WorldObject::~WorldObject()
         if (GetTypeId() == TypeID::TYPEID_CORPSE)
         {
             SF_LOG_FATAL("misc", "Object::~Object Corpse guid=" UI64FMTD ", type=%d, entry=%u deleted but still in map!!",
-                GetGUID(), ((Corpse*)this)->GetType(), GetEntry());
+                GetGUID(), uint8(((Corpse*)this)->GetType()), GetEntry());
             ASSERT(false);
         }
         ResetMap();

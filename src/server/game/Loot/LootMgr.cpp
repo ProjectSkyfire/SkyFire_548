@@ -1132,8 +1132,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                         }
                     }
 
-                    item.WriteBitDataPart(permission, slotType, data);
-                    item.WriteBasicDataPart(slotType, ci->index, &itemBuff);
+                    item.WriteBitDataPart(permission, finalSlotType, data);
+                    item.WriteBasicDataPart(finalSlotType, ci->index, &itemBuff);
                     ++itemsShown;
                 }
             }

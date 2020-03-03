@@ -217,19 +217,43 @@ bool Quest::IsAutoComplete() const
 
 bool Quest::IsRaidQuest(DifficultyID difficulty) const
 {
+    bool res = false;
     switch (Type)
     {
         case QUEST_TYPE_RAID:
-            return true;
-        case QUEST_TYPE_RAID_10:
-            return difficulty & (DIFFICULTY_10MAN_NORMAL || DIFFICULTY_10MAN_HEROIC);
-        case QUEST_TYPE_RAID_25:
-            return difficulty & (DIFFICULTY_25MAN_NORMAL || DIFFICULTY_25MAN_HEROIC);
-        default:
+        {
+            res = true;
             break;
+        }
+        case QUEST_TYPE_RAID_10:
+        {
+            switch (difficulty)
+            {
+                case DIFFICULTY_10MAN_NORMAL:
+                case DIFFICULTY_10MAN_HEROIC:
+                {
+                    res = true;
+                    break;
+                }
+                default: break;
+            }
+        }
+        case QUEST_TYPE_RAID_25:
+        {
+            switch (difficulty)
+            {
+                case DIFFICULTY_25MAN_NORMAL:
+                case DIFFICULTY_25MAN_HEROIC:
+                {
+                    res = true;
+                    break;
+                }
+                default: break;
+            }
+        }
+        default: break;
     }
-
-    return false;
+    return res;
 }
 
 bool Quest::IsAllowedInRaid(DifficultyID difficulty) const
