@@ -19130,7 +19130,7 @@ void Player::_LoadMail()
                 m->mailTemplateId = 0;
             }
 
-            m->state = MAIL_STATE_UNCHANGED;
+            m->state = MailState::MAIL_STATE_UNCHANGED;
 
             if (has_items)
                 _LoadMailedItems(m);
@@ -20581,7 +20581,7 @@ void Player::_SaveMail(SQLTransaction& trans)
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
     {
         Mail* m = (*itr);
-        if (m->state == MAIL_STATE_CHANGED)
+        if (m->state == MailState::MAIL_STATE_CHANGED)
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_MAIL);
             stmt->setUInt8(0, uint8(m->HasItems() ? 1 : 0));
@@ -20604,9 +20604,9 @@ void Player::_SaveMail(SQLTransaction& trans)
                 }
                 m->removedItems.clear();
             }
-            m->state = MAIL_STATE_UNCHANGED;
+            m->state = MailState::MAIL_STATE_UNCHANGED;
         }
-        else if (m->state == MAIL_STATE_DELETED)
+        else if (m->state == MailState::MAIL_STATE_DELETED)
         {
             if (m->HasItems())
             {
@@ -20630,7 +20630,7 @@ void Player::_SaveMail(SQLTransaction& trans)
     //deallocate deleted mails...
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end();)
     {
-        if ((*itr)->state == MAIL_STATE_DELETED)
+        if ((*itr)->state == MailState::MAIL_STATE_DELETED)
         {
             Mail* m = *itr;
             m_mail.erase(itr);

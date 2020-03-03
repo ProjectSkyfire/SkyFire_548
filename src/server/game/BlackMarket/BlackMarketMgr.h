@@ -32,7 +32,7 @@ class Item;
 class Player;
 class WorldPacket;
 
-enum BMMailAuctionAnswers
+enum class BMMailAuctionAnswers
 {
     BM_AUCTION_OUTBIDDED = 0,
     BM_AUCTION_WON = 1,
@@ -61,10 +61,10 @@ public:
     BlackMarketAuction(uint32 auctionId, uint32 templateId, uint32 startTime, uint32 currentBidder, uint32 currentBid,
         uint32 minIncrement, uint32 numBids) :
         _auctionId(auctionId), _templateId(templateId), _startTime(startTime), _currentBidder(currentBidder), _currentBid(currentBid),
-        _minIncrement(minIncrement), _numBids(numBids) { }
+        _minIncrement(minIncrement), _numBids(numBids), _template(NULL) { }
 
     BlackMarketAuction() : _auctionId(1), _templateId(1), _startTime(0), _currentBidder(0), _currentBid(0),
-        _minIncrement(0), _numBids(0) { }
+        _minIncrement(0), _numBids(0), _template(NULL) { }
 
     void SetAuctionId(uint32 auctionId) { _auctionId = auctionId; }
     uint32 GetAuctionId() const { return _auctionId; }

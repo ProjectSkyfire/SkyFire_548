@@ -65,8 +65,9 @@ enum MailStationery
     MAIL_STATIONERY_ORP     = 67                            // Orphan
 };
 
-enum MailState
+enum class MailState
 {
+    MAIL_STATE_NONE      = 0,
     MAIL_STATE_UNCHANGED = 1,
     MAIL_STATE_CHANGED   = 2,
     MAIL_STATE_DELETED   = 3
@@ -167,6 +168,9 @@ typedef std::vector<MailItemInfo> MailItemInfoVec;
 
 struct Mail
 {
+    Mail() : messageID(0), messageType(0), stationery(0), mailTemplateId(0), sender(0), receiver(0),
+        expire_time(0), deliver_time(0), money(0), COD(0), checked(0), state(MailState::MAIL_STATE_NONE) { }
+
     uint32 messageID;
     uint8 messageType;
     uint8 stationery;

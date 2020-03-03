@@ -260,7 +260,7 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
             m->expire_time = expire_time;
             m->deliver_time = deliver_time;
             m->checked = checked;
-            m->state = MAIL_STATE_UNCHANGED;
+            m->state = MailState::MAIL_STATE_UNCHANGED;
 
             pReceiver->AddMail(m);                           // to insert new mail to beginning of maillist
 

@@ -384,7 +384,7 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recvData)
             --_player->unReadMails;
 
         mail->checked |= MAIL_CHECK_MASK_READ;
-        mail->state = MAIL_STATE_CHANGED;
+        mail->state = MailState::MAIL_STATE_CHANGED;
 
         _player->m_mailsUpdated = true;
     }
@@ -407,7 +407,7 @@ void WorldSession::HandleMailDelete(WorldPacket& recvData)
             return;
         }
 
-        mail->state = MAIL_STATE_DELETED;
+        mail->state = MailState::MAIL_STATE_DELETED;
     }
 
     _player->m_mailsUpdated = true;
@@ -444,7 +444,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
 
     Player* player = _player;
     Mail* m = player->GetMail(mailId);
-    if (!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+    if (!m || m->state == MailState::MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         player->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -521,7 +521,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
     Player* player = _player;
 
     Mail* m = player->GetMail(mailId);
-    if (!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+    if (!m || m->state == MailState::MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -584,7 +584,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
             player->ModifyMoney(-int32(m->COD));
         }
         m->COD = 0;
-        m->state = MAIL_STATE_CHANGED;
+        m->state = MailState::MAIL_STATE_CHANGED;
         player->m_mailsUpdated = true;
         player->RemoveMItem(it->GetGUIDLow());
 
@@ -635,7 +635,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
     Player* player = _player;
 
     Mail* m = player->GetMail(mailId);
-    if ((!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL)) ||
+    if ((!m || m->state == MailState::MAIL_STATE_DELETED || m->deliver_time > time(NULL)) ||
         (money > 0 && m->money != money))
     {
         player->SendMailResult(mailId, MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
@@ -649,7 +649,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
     }
 
     m->money = 0;
-    m->state = MAIL_STATE_CHANGED;
+    m->state = MailState::MAIL_STATE_CHANGED;
     player->m_mailsUpdated = true;
 
     player->SendMailResult(mailId, MAIL_MONEY_TAKEN, MAIL_OK);
@@ -719,7 +719,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
         }
 
         // skip deleted or not delivered (deliver delay not expired) mails
-        if (mail->state == MAIL_STATE_DELETED || cur_time < mail->deliver_time)
+        if (mail->state == MailState::MAIL_STATE_DELETED || cur_time < mail->deliver_time)
             continue;
 
         // skip mail with more than MAX_MAIL_ITEMS items (should not occur)
@@ -867,7 +867,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
     Player* player = _player;
 
     Mail* m = player->GetMail(mailId);
-    if (!m || (m->body.empty() && !m->mailTemplateId) || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+    if (!m || (m->body.empty() && !m->mailTemplateId) || m->state == MailState::MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -905,7 +905,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
     if (msg == EQUIP_ERR_OK)
     {
         m->checked = m->checked | MAIL_CHECK_MASK_COPIED;
-        m->state = MAIL_STATE_CHANGED;
+        m->state = MailState::MAIL_STATE_CHANGED;
         player->m_mailsUpdated = true;
 
         player->StoreItem(dest, bodyItem, true);
