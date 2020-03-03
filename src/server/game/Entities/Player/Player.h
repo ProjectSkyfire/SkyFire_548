@@ -670,7 +670,7 @@ enum QuestSlotStateMask
     QUEST_STATE_FAIL     = 0x0002
 };
 
-enum SkillUpdateState
+enum class SkillUpdateState
 {
     SKILL_UNCHANGED = 0,
     SKILL_CHANGED   = 1,

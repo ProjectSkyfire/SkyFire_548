@@ -5474,7 +5474,7 @@ void Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse* corpse = new Corpse((m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) ? CORPSE_RESURRECTABLE_PVP : CORPSE_RESURRECTABLE_PVE);
+    Corpse* corpse = new Corpse((m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) ? CorpseType::CORPSE_RESURRECTABLE_PVP : CorpseType::CORPSE_RESURRECTABLE_PVE);
     SetPvPDeath(false);
 
     if (!corpse->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_CORPSE), this))
@@ -6277,7 +6277,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
         skill_id = SKILL_UNARMED;
 
     SkillStatusMap::iterator itr = mSkillStatus.find(skill_id);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return false;
 
     uint16 field = itr->second.pos / 2;
@@ -6296,8 +6296,8 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
             new_value = max;
 
         SetUInt16Value(PLAYER_FIELD_SKILL_RANKS + field, offset, new_value);
-        if (itr->second.uState != SKILL_NEW)
-            itr->second.uState = SKILL_CHANGED;
+        if (itr->second.uState != SkillUpdateState::SKILL_NEW)
+            itr->second.uState = SkillUpdateState::SKILL_CHANGED;
 
         UpdateSkillEnchantments(skill_id, value, new_value);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, skill_id);
@@ -6409,7 +6409,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     }
 
     SkillStatusMap::iterator itr = mSkillStatus.find(skillId);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return false;
 
     uint16 field = itr->second.pos / 2;
@@ -6432,8 +6432,8 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
         new_value = max;
 
     SetUInt16Value(PLAYER_FIELD_SKILL_RANKS + field, offset, new_value);
-    if (itr->second.uState != SKILL_NEW)
-        itr->second.uState = SKILL_CHANGED;
+    if (itr->second.uState != SkillUpdateState::SKILL_NEW)
+        itr->second.uState = SkillUpdateState::SKILL_CHANGED;
 
     for (size_t i = 0; i < bonusSkillLevelsSize; ++i)
     {
@@ -6454,7 +6454,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
 void Player::ModifySkillBonus(uint32 skillid, int32 val, bool talent)
 {
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skillid);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return;
 
     uint16 field = itr->second.pos / 2 + (talent ? PLAYER_FIELD_SKILL_TALENTS : PLAYER_FIELD_SKILL_MODIFIERS);
@@ -6471,7 +6471,7 @@ void Player::UpdateSkillsForLevel()
 
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
     {
-        if (itr->second.uState == SKILL_DELETED)
+        if (itr->second.uState == SkillUpdateState::SKILL_DELETED)
             continue;
 
         uint32 pskill = itr->first;
@@ -6496,8 +6496,8 @@ void Player::UpdateSkillsForLevel()
         {
             SetUInt16Value(PLAYER_FIELD_SKILL_RANKS + field, offset, maxSkill);
             SetUInt16Value(PLAYER_FIELD_SKILL_MAX_RANKS + field, offset, maxSkill);
-            if (itr->second.uState != SKILL_NEW)
-                itr->second.uState = SKILL_CHANGED;
+            if (itr->second.uState != SkillUpdateState::SKILL_NEW)
+                itr->second.uState = SkillUpdateState::SKILL_CHANGED;
         }
     }
 }
@@ -6506,7 +6506,7 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
 {
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
     {
-        if (itr->second.uState == SKILL_DELETED)
+        if (itr->second.uState == SkillUpdateState::SKILL_DELETED)
             continue;
 
         uint32 pskill = itr->first;
@@ -6525,8 +6525,8 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
         {
             SetUInt16Value(PLAYER_FIELD_SKILL_RANKS + field, offset, max);
 
-            if (itr->second.uState != SKILL_NEW)
-                itr->second.uState = SKILL_CHANGED;
+            if (itr->second.uState != SkillUpdateState::SKILL_NEW)
+                itr->second.uState = SkillUpdateState::SKILL_CHANGED;
         }
     }
 }
@@ -6542,7 +6542,7 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
     SkillStatusMap::iterator itr = mSkillStatus.find(id);
 
     //has skill
-    if (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED)
+    if (itr != mSkillStatus.end() && itr->second.uState != SkillUpdateState::SKILL_DELETED)
     {
         uint16 field = itr->second.pos / 2;
         uint8 offset = itr->second.pos & 1; // itr->second.pos % 2
@@ -6559,8 +6559,8 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
             SetUInt16Value(PLAYER_FIELD_SKILL_RANKS + field, offset, newVal);
             SetUInt16Value(PLAYER_FIELD_SKILL_MAX_RANKS + field, offset, maxVal);
 
-            if (itr->second.uState != SKILL_NEW)
-                itr->second.uState = SKILL_CHANGED;
+            if (itr->second.uState != SkillUpdateState::SKILL_NEW)
+                itr->second.uState = SkillUpdateState::SKILL_CHANGED;
 
             learnSkillRewardedSpells(id, newVal);
             // if skill value is going up, update enchantments after setting the new value
@@ -6583,8 +6583,8 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
             SetUInt16Value(PLAYER_FIELD_SKILL_TALENTS + field, offset, 0);
 
             // mark as deleted or simply remove from map if not saved yet
-            if (itr->second.uState != SKILL_NEW)
-                itr->second.uState = SKILL_DELETED;
+            if (itr->second.uState != SkillUpdateState::SKILL_NEW)
+                itr->second.uState = SkillUpdateState::SKILL_DELETED;
             else
                 mSkillStatus.erase(itr);
 
@@ -6639,10 +6639,10 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 if (itr != mSkillStatus.end())
                 {
                     itr->second.pos = i;
-                    itr->second.uState = SKILL_CHANGED;
+                    itr->second.uState = SkillUpdateState::SKILL_CHANGED;
                 }
                 else
-                    mSkillStatus.insert(SkillStatusMap::value_type(id, SkillStatusData(i, SKILL_NEW)));
+                    mSkillStatus.insert(SkillStatusMap::value_type(id, SkillStatusData(i, SkillUpdateState::SKILL_NEW)));
 
                 // apply skill bonuses
                 SetUInt16Value(PLAYER_FIELD_SKILL_MODIFIERS + field, offset, 0);
@@ -6674,7 +6674,7 @@ bool Player::HasSkill(uint32 skill) const
         return false;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    return (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED);
+    return (itr != mSkillStatus.end() && itr->second.uState != SkillUpdateState::SKILL_DELETED);
 }
 
 uint16 Player::GetSkillStep(uint16 skill) const
@@ -6683,7 +6683,7 @@ uint16 Player::GetSkillStep(uint16 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     return GetUInt16Value(PLAYER_FIELD_SKILL_STEPS + itr->second.pos / 2, itr->second.pos & 1);
@@ -6695,7 +6695,7 @@ uint16 Player::GetSkillValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -6713,7 +6713,7 @@ uint16 Player::GetMaxSkillValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -6731,7 +6731,7 @@ uint16 Player::GetPureMaxSkillValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -6746,7 +6746,7 @@ uint16 Player::GetBaseSkillValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -6763,7 +6763,7 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -6778,7 +6778,7 @@ int16 Player::GetSkillPermBonusValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -6793,7 +6793,7 @@ int16 Player::GetSkillTempBonusValue(uint32 skill) const
         return 0;
 
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+    if (itr == mSkillStatus.end() || itr->second.uState == SkillUpdateState::SKILL_DELETED)
         return 0;
 
     uint16 field = itr->second.pos / 2;
@@ -9495,7 +9495,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     {
         Corpse* bones = ObjectAccessor::GetCorpse(*this, guid);
 
-        if (!bones || !(loot_type == LootType::LOOT_CORPSE || loot_type == LootType::LOOT_INSIGNIA) || bones->GetType() != CORPSE_BONES)
+        if (!bones || !(loot_type == LootType::LOOT_CORPSE || loot_type == LootType::LOOT_INSIGNIA) || bones->GetType() != CorpseType::CORPSE_BONES)
         {
             SendLootRelease(guid);
             return;
@@ -20855,13 +20855,13 @@ void Player::_SaveSkills(SQLTransaction& trans)
     // we don't need transactions here.
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end();)
     {
-        if (itr->second.uState == SKILL_UNCHANGED)
+        if (itr->second.uState == SkillUpdateState::SKILL_UNCHANGED)
         {
             ++itr;
             continue;
         }
 
-        if (itr->second.uState == SKILL_DELETED)
+        if (itr->second.uState == SkillUpdateState::SKILL_DELETED)
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SKILL_BY_SKILL);
             stmt->setUInt32(0, GetGUIDLow());
@@ -20880,7 +20880,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
 
         switch (itr->second.uState)
         {
-            case SKILL_NEW:
+            case SkillUpdateState::SKILL_NEW:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_SKILLS);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt16(1, uint16(itr->first));
@@ -20888,7 +20888,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
                 stmt->setUInt16(3, max);
                 trans->Append(stmt);
                 break;
-            case SKILL_CHANGED:
+            case SkillUpdateState::SKILL_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UDP_CHAR_SKILLS);
                 stmt->setUInt16(0, value);
                 stmt->setUInt16(1, max);
@@ -20900,7 +20900,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
                 break;
         }
 
-        itr->second.uState = SKILL_UNCHANGED;
+        itr->second.uState = SkillUpdateState::SKILL_UNCHANGED;
         ++itr;
     }
 }
@@ -25558,7 +25558,7 @@ void Player::SendCorpseReclaimDelay(bool load)
 
     bool pvp;
     if (corpse)
-        pvp = (corpse->GetType() == CORPSE_RESURRECTABLE_PVP);
+        pvp = (corpse->GetType() == CorpseType::CORPSE_RESURRECTABLE_PVP);
     else
         pvp = (m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH);
 
@@ -26459,7 +26459,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
             SetUInt16Value(PLAYER_FIELD_SKILL_MODIFIERS + field, offset, 0);
             SetUInt16Value(PLAYER_FIELD_SKILL_TALENTS + field, offset, 0);
 
-            mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(count, SKILL_UNCHANGED)));
+            mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(count, SkillUpdateState::SKILL_UNCHANGED)));
 
             learnSkillRewardedSpells(skill, value);
 

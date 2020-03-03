@@ -348,7 +348,7 @@ bool AnyDeadUnitObjectInRangeCheck::operator()(Player* u)
 
 bool AnyDeadUnitObjectInRangeCheck::operator()(Corpse* u)
 {
-    return u->GetType() != CORPSE_BONES && i_searchObj->IsWithinDistInMap(u, i_range);
+    return u->GetType() != CorpseType::CORPSE_BONES && i_searchObj->IsWithinDistInMap(u, i_range);
 }
 
 bool AnyDeadUnitObjectInRangeCheck::operator()(Creature* u)

@@ -6606,9 +6606,9 @@ void ObjectMgr::LoadCorpses()
         Field* fields = result->Fetch();
         uint32 guid = fields[16].GetUInt32();
         CorpseType type = CorpseType(fields[12].GetUInt8());
-        if (type >= MAX_CORPSE_TYPE)
+        if (type >= CorpseType::MAX_CORPSE_TYPE)
         {
-            SF_LOG_ERROR("misc", "Corpse (guid: %u) have wrong corpse type (%u), not loading.", guid, type);
+            SF_LOG_ERROR("misc", "Corpse (guid: %u) have wrong corpse type (%u), not loading.", guid, uint8(type));
             continue;
         }
 

@@ -27,7 +27,7 @@
 #include "GossipDef.h"
 #include "World.h"
 
-Corpse::Corpse(CorpseType type) : WorldObject(type != CORPSE_BONES), m_type(type)
+Corpse::Corpse(CorpseType type) : WorldObject(type != CorpseType::CORPSE_BONES), m_type(type)
 {
     m_objectType |= TYPEMASK_CORPSE;
     m_objectTypeId = TypeID::TYPEID_CORPSE;
@@ -118,7 +118,7 @@ void Corpse::SaveToDB()
     stmt->setUInt8 (index++, GetUInt32Value(CORPSE_FIELD_FLAGS));                     // flags
     stmt->setUInt8 (index++, GetUInt32Value(CORPSE_FIELD_DYNAMIC_FLAGS));             // dynFlags
     stmt->setUInt32(index++, uint32(m_time));                                         // time
-    stmt->setUInt8 (index++, GetType());                                              // corpseType
+    stmt->setUInt8 (index++, uint8(GetType()));                                       // corpseType
     stmt->setUInt32(index++, GetInstanceId());                                        // instanceId
     stmt->setUInt32(index++, GetPhaseMask());                                         // phaseMask
     trans->Append(stmt);
@@ -128,7 +128,7 @@ void Corpse::SaveToDB()
 
 void Corpse::DeleteBonesFromWorld()
 {
-    ASSERT(GetType() == CORPSE_BONES);
+    ASSERT(GetType() == CorpseType::CORPSE_BONES);
     Corpse* corpse = ObjectAccessor::GetCorpse(*this, GetGUID());
 
     if (!corpse)
@@ -143,7 +143,7 @@ void Corpse::DeleteBonesFromWorld()
 void Corpse::DeleteFromDB(SQLTransaction& trans)
 {
     PreparedStatement* stmt = NULL;
-    if (GetType() == CORPSE_BONES)
+    if (GetType() == CorpseType::CORPSE_BONES)
     {
         // Only specific bones
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CORPSE);
@@ -204,7 +204,7 @@ bool Corpse::LoadCorpseFromDB(uint32 guid, Field* fields)
 
 bool Corpse::IsExpired(time_t t) const
 {
-    if (m_type == CORPSE_BONES)
+    if (m_type == CorpseType::CORPSE_BONES)
         return m_time < t - 60 * MINUTE;
     else
         return m_time < t - 3 * DAY;

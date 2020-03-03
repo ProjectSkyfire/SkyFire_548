@@ -307,14 +307,14 @@ Corpse* ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
     if (iter == i_player2corpse.end())
         return NULL;
 
-    ASSERT(iter->second->GetType() != CORPSE_BONES);
+    ASSERT(iter->second->GetType() != CorpseType::CORPSE_BONES);
 
     return iter->second;
 }
 
 void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 {
-    ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
+    ASSERT(corpse && corpse->GetType() != CorpseType::CORPSE_BONES);
 
     /// @todo more works need to be done for corpse and other world object
     if (Map* map = corpse->FindMap())
@@ -349,7 +349,7 @@ void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 
 void ObjectAccessor::AddCorpse(Corpse* corpse)
 {
-    ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
+    ASSERT(corpse && corpse->GetType() != CorpseType::CORPSE_BONES);
 
     // Critical section
     {

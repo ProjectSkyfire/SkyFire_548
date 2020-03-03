@@ -25,13 +25,13 @@
 #include "GridDefines.h"
 #include "LootMgr.h"
 
-enum CorpseType
+enum class CorpseType
 {
     CORPSE_BONES             = 0,
     CORPSE_RESURRECTABLE_PVE = 1,
-    CORPSE_RESURRECTABLE_PVP = 2
+    CORPSE_RESURRECTABLE_PVP = 2,
+    MAX_CORPSE_TYPE = 3
 };
-#define MAX_CORPSE_TYPE        3
 
 // Value equal client resurrection dialog show radius.
 #define CORPSE_RECLAIM_RADIUS 39
@@ -50,7 +50,7 @@ enum CorpseFlags
 class Corpse : public WorldObject, public GridObject<Corpse>
 {
     public:
-        explicit Corpse(CorpseType type = CORPSE_BONES);
+        explicit Corpse(CorpseType type = CorpseType::CORPSE_BONES);
         ~Corpse();
 
         void AddToWorld();
