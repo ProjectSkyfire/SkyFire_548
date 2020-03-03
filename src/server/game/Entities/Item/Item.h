@@ -216,13 +216,11 @@ class Item : public Object
 {
     public:
         static Item* CreateItem(uint32 itemEntry, uint32 count, Player const* player = NULL);
-        static Item* CreateItem(uint32 itemEntry, uint32 count, uint64 playerGuid);
         Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
-        bool Create(uint32 guidlow, uint32 itemid, uint64 playerGuid);
 
         ItemTemplate const* GetTemplate() const;
 

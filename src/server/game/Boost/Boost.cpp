@@ -155,9 +155,10 @@ void CharacterBooster::_SendMail(SQLTransaction& trans, std::vector<std::pair<ui
     uint32 mailId = _PrepareMail(trans, CHARRACTER_BOOST_EQUIPED_ITEMS_MAIL_SUBJECT, CHARRACTER_BOOST_EQUIPED_ITEMS_MAIL_BODY);
     PreparedStatement* stmt = NULL;
 
+    Player* player = sObjectAccessor->FindPlayer(m_charBoostInfo.charGuid);
     for (uint8 i = 0; i < items.size(); i++)
     {
-        if (Item* item = Item::CreateItem(items[i].first, items[i].second, m_charBoostInfo.charGuid))
+        if (Item* item = Item::CreateItem(items[i].first, items[i].second, player))
         {
             item->SetBinding(true);
             item->SaveToDB(trans);
@@ -329,12 +330,14 @@ std::string CharacterBooster::_EquipItems(SQLTransaction& trans, SlotEquipmentMa
     SlotEquipmentMap::const_iterator itr;
     std::ostringstream items;
     PreparedStatement* stmt;
+    Player* player = sObjectAccessor->FindPlayer(m_charBoostInfo.charGuid);
+
     for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         itr = itemsToEquip->find(i);
         if (itr != itemsToEquip->end())
         {
-            if (Item* item = Item::CreateItem(itr->second, 1, m_charBoostInfo.charGuid))
+            if (Item* item = Item::CreateItem(itr->second, 1, player))
             {
                 item->SetBinding(true);
                 item->SaveToDB(trans);
