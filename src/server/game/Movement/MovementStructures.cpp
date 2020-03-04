@@ -5089,6 +5089,51 @@ MovementStatusElements const MoveUnsetHover[] = // 5.4.8 18414
     MSEEnd,
 };
 
+MovementStatusElements const MoveGravityDisable[] = // 5.4.8 18414
+{
+    MSEHasGuidByte6, //22
+    MSEHasGuidByte1, //17
+    MSEHasGuidByte3, //19
+    MSEHasGuidByte7, //23
+    MSEHasGuidByte4, //20
+    MSEHasGuidByte2, //18
+    MSEHasGuidByte5, //21
+    MSEHasGuidByte0, //16
+
+    MSEGuidByte5, //21
+    MSEGuidByte2, //18
+    MSEGuidByte1, //17
+    MSEGuidByte6, //22
+    MSEGuidByte0, //16
+    MSECounter,   // uint32
+    MSEGuidByte3, //19
+    MSEGuidByte4, //20
+    MSEGuidByte7, //23
+};
+
+MovementStatusElements const MoveGravityEnable[] = // 5.4.8 18414
+{
+    MSEHasGuidByte3, //19
+    MSEHasGuidByte0, //16
+    MSEHasGuidByte7, //23
+    MSEHasGuidByte1, //17
+    MSEHasGuidByte5, //21
+    MSEHasGuidByte2, //18
+    MSEHasGuidByte6, //22
+    MSEHasGuidByte4, //20
+
+    MSEGuidByte3, //19
+    MSEGuidByte2, //18
+    MSEGuidByte1, //17
+    MSEGuidByte7, //23
+    MSEGuidByte6, //22
+    MSEGuidByte0, //16
+    MSEGuidByte4, //20
+    MSECounter,   // uint32
+    MSEGuidByte5, //21
+
+};
+
 MovementStatusElements const MoveWaterWalk[] = //5.4.8 18414
 {
     MSEHasGuidByte2,
@@ -5717,6 +5762,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MoveSetHover;
         case SMSG_MOVE_UNSET_HOVER:
             return MoveUnsetHover;
+        case SMSG_MOVE_GRAVITY_DISABLE:
+            return MoveGravityDisable;
+        case SMSG_MOVE_GRAVITY_ENABLE:
+            return MoveGravityEnable;
         case SMSG_MOVE_WATER_WALK:
             return MoveWaterWalk;
         case SMSG_MOVE_LAND_WALK:
