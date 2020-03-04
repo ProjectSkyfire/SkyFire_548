@@ -1263,13 +1263,14 @@ public:
         void DoAction(int32 /*action*/) OVERRIDE
         {
             if (Vehicle* vehicleTemp = me->GetVehicleKit())
+            {
                 if (vehicleTemp->GetPassenger(0) && vehicleTemp->GetPassenger(0)->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     vehicleTemp->RemoveAllPassengers();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 }
-
-                me->DespawnOrUnsummon(3*IN_MILLISECONDS);
+            }
+            me->DespawnOrUnsummon(3*IN_MILLISECONDS);
         }
 
         void MovementInform(uint32 type, uint32 id) OVERRIDE

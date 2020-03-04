@@ -545,12 +545,12 @@ public:
             if (!UpdateVictim())
                 return;
 
-                 /// @todo add his abilities'n-crap here
-                if (!LowHp && HealthBelowPct(20))
-                {
-                    Talk(SAY_TH_RANDOM_LOW_HP);
-                    LowHp = true;
-                }
+            /// @todo add his abilities'n-crap here
+            if (!LowHp && HealthBelowPct(20))
+            {
+                Talk(SAY_TH_RANDOM_LOW_HP);
+                LowHp = true;
+            }
         }
     };
 

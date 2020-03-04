@@ -121,7 +121,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_HOLYFIRE);
 
-                    Holyfire_Timer = urand(8000, 23000);      //Anywhere from 8 to 23 seconds, good luck having several of those in a row!
+                Holyfire_Timer = urand(8000, 23000);      //Anywhere from 8 to 23 seconds, good luck having several of those in a row!
             } else Holyfire_Timer -= diff;
 
             if (Holywrath_Timer <= diff)

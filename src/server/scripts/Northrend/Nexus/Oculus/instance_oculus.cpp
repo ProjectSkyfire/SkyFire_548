@@ -214,9 +214,11 @@ public:
                     break;
                 case DATA_VAROS_EVENT:
                     if (state == DONE)
+                    {
                         DoUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW, 0);
                         if (Creature* urom = instance->GetCreature(uromGUID))
                             urom->SetPhaseMask(1, true);
+                    }
                     break;
                 case DATA_UROM_EVENT:
                     if (state == DONE)

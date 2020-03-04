@@ -1205,12 +1205,14 @@ public:
     {
         go->UseDoorOrButton(10);
         if (!player->HasAura(SPELL_RECENT_MEDITATION))
+        {
             if (player->GetQuestStatus(QUEST_THE_CLEANSING_HORDE) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_THE_CLEANSING_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
             {
                 player->CastSpell(player, SPELL_CLEANSING_SOUL);
                 player->SetStandState(UNIT_STAND_STATE_SIT);
             }
-            return true;
+        }
+        return true;
     }
 };
 

@@ -458,9 +458,11 @@ public:
                         break;
                     case 5:
                         if (instance)
+                        {
                             if (Creature* temp = (Unit::GetCreature(*me, instance->GetData64(DATA_ABEDNEUM))))
                                 temp->AI()->Talk(SAY_EVENT_INTRO_3_ABED);
-                            JumpToNextStep(8500);
+                        }
+                        JumpToNextStep(8500);
                         break;
                     case 6:
                         Talk(SAY_EVENT_A_1);
@@ -468,9 +470,11 @@ public:
                         break;
                     case 7:
                         if (instance)
+                        {
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_KADDRAK)))
                                 temp->AI()->Talk(SAY_EVENT_A_2_KADD);
-                            JumpToNextStep(12500);
+                        }
+                        JumpToNextStep(12500);
                         break;
                     case 8:
                         Talk(SAY_EVENT_A_3);
@@ -491,8 +495,10 @@ public:
                         break;
                     case 11:
                         if (instance)
+                        {
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_MARNAK)))
                                 temp->AI()->Talk(SAY_EVENT_B_2_MARN);
+                        }
                         SpawnDwarf(1);
                         JumpToNextStep(20000);
                         break;
@@ -525,7 +531,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_ABEDNEUM)))
                                 temp->AI()->Talk(SAY_EVENT_C_2_ABED);
-                            SpawnDwarf(1);
+                        SpawnDwarf(1);
                         JumpToNextStep(20000);
                         break;
                     case 18:
@@ -613,7 +619,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_ABEDNEUM)))
                                 temp->AI()->Talk(SAY_EVENT_END_05_ABED);
-                            JumpToNextStep(11500);
+                        JumpToNextStep(11500);
                         break;
                     case 33:
                         Talk(SAY_EVENT_END_06);
@@ -623,7 +629,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_ABEDNEUM)))
                                 temp->AI()->Talk(SAY_EVENT_END_07_ABED);
-                            JumpToNextStep(22500);
+                        JumpToNextStep(22500);
                         break;
                     case 35:
                         Talk(SAY_EVENT_END_08);
@@ -643,7 +649,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_KADDRAK)))
                                 temp->AI()->Talk(SAY_EVENT_END_11_KADD);
-                            JumpToNextStep(20500);
+                        JumpToNextStep(20500);
                         break;
                     case 39:
                         Talk(SAY_EVENT_END_12);
@@ -663,7 +669,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_MARNAK)))
                                 temp->AI()->Talk(SAY_EVENT_END_15_MARN);
-                            JumpToNextStep(6500);
+                        JumpToNextStep(6500);
                         break;
                     case 43:
                         Talk(SAY_EVENT_END_16);
@@ -673,7 +679,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_MARNAK)))
                                 temp->AI()->Talk(SAY_EVENT_END_17_MARN);
-                            JumpToNextStep(25500);
+                        JumpToNextStep(25500);
                         break;
                     case 45:
                         Talk(SAY_EVENT_END_18);
@@ -683,7 +689,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_MARNAK)))
                                 temp->AI()->Talk(SAY_EVENT_END_19_MARN);
-                            JumpToNextStep(3500);
+                        JumpToNextStep(3500);
                         break;
                     case 47:
                         Talk(SAY_EVENT_END_20);
@@ -693,7 +699,7 @@ public:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_ABEDNEUM)))
                                 temp->AI()->Talk(SAY_EVENT_END_21_ABED);
-                            JumpToNextStep(5500);
+                        JumpToNextStep(5500);
                         break;
                     case 49:
                     {
