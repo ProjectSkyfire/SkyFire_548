@@ -790,9 +790,9 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return HandleAuthSession(*new_pct);
-            //case CMSG_KEEP_ALIVE:
-            //    sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
-            //    return 0;
+            case CMSG_KEEP_ALIVE:
+                sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
+                return 0;
             case CMSG_LOG_DISCONNECT:
                 new_pct->rfinish(); // contains uint32 disconnectReason;
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
