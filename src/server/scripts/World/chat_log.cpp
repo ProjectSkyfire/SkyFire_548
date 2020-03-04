@@ -54,6 +54,8 @@ public:
                     SF_LOG_DEBUG("chat.log", "[YELL] Player %s yells (language %u): %s",
                         player->GetName().c_str(), uint8(lang), msg.c_str());
                 break;
+            default:
+                break;
         }
     }
 
@@ -123,6 +125,8 @@ public:
                     SF_LOG_DEBUG("chat.log", "[BATTLEGROUND] Leader player %s tells battleground: %s",
                         player->GetName().c_str(), msg.c_str());
                 break;
+            default:
+                break;
         }
     }
 
@@ -143,6 +147,8 @@ public:
                 if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_GUILD))
                     SF_LOG_DEBUG("chat.log", "[OFFICER] Player %s tells guild %s officers: %s",
                         player->GetName().c_str(), guild ? guild->GetName().c_str() : "<unknown>", msg.c_str());
+                break;
+            default:
                 break;
         }
     }

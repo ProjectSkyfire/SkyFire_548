@@ -67,12 +67,13 @@ void TicketInfo::SetPosition(uint32 MapID, G3D::Vector3 pos)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // GM ticket
 
-GmTicket::GmTicket() : _lastModifiedTime(0), _completed(false), _escalatedStatus(TICKET_UNASSIGNED),
-_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), _needResponse(false){ }
+GmTicket::GmTicket() : _lastModifiedTime(0), _escalatedStatus(TICKET_UNASSIGNED),
+_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), _completed(false), _viewed(false),
+_needResponse(false), _haveTicket(false) { }
 
 GmTicket::GmTicket(Player* player) : TicketInfo(player), _lastModifiedTime(time(NULL)),
-_completed(false), _escalatedStatus(TICKET_UNASSIGNED),_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), 
-_needResponse(false)
+_escalatedStatus(TICKET_UNASSIGNED),_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), 
+_completed(false), _viewed(false), _needResponse(false), _haveTicket(false)
 {
     _ticketId = sTicketMgr->GenerateGmTicketId();
     _playerName = player->GetName();

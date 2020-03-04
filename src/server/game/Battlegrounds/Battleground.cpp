@@ -84,7 +84,7 @@ namespace Skyfire
     {
         public:
             Battleground2ChatBuilder(ChatMsg msgtype, int32 textId, int32 arg1, int32 arg2, Player const* source = NULL, Player const* target = NULL)
-                : _msgtype(msgtype), _textId(textId), _arg1(arg1), _arg2(arg2), _source(source), _target(target) { }
+                : _msgtype(msgtype), _textId(textId), _source(source), _target(target), _arg1(arg1), _arg2(arg2)  { }
 
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
