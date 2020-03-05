@@ -64,7 +64,7 @@ enum DeathKnightSpells
 // Gorefiend's Grasp - 108199
 class spell_dk_gorefiends_grasp : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_gorefiends_grasp() : SpellScriptLoader("spell_dk_gorefiends_grasp")
     { }
 
@@ -86,7 +86,7 @@ class spell_dk_gorefiends_grasp : public SpellScriptLoader
                     for (std::list<Unit*>::iterator itr = tempList.begin(); itr != tempList.end(); ++itr)
                     {
                         Unit* tlist = (*itr);
-						
+
                         if (tlist->GetGUID())
                             if (tlist->GetGUID() == target->GetGUID())
                                 continue;
@@ -123,13 +123,13 @@ class spell_dk_gorefiends_grasp : public SpellScriptLoader
             }
         }
 
-        void Register()
+        void Register() OVERRIDE
         {
             OnHit += SpellHitFn(spell_dk_gorefiends_grasp_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_dk_gorefiends_grasp_SpellScript();
     }
@@ -139,7 +139,7 @@ class spell_dk_gorefiends_grasp : public SpellScriptLoader
 // Runic Empowerment - 81229
 class spell_dk_runic_empowerment : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_runic_empowerment() : SpellScriptLoader("spell_dk_runic_empowerment")
     { }
 
@@ -171,13 +171,13 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
             }
         }
 
-        void Register()
+        void Register() OVERRIDE
         {
             OnHit += SpellHitFn(spell_dk_runic_empowerment_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_dk_runic_empowerment_SpellScript();
     }
@@ -187,7 +187,7 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
 // Runic Corruption - 51462
 class spell_dk_runic_corruption : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_runic_corruption() : SpellScriptLoader("spell_dk_runic_corruption")
     { }
 
@@ -213,13 +213,13 @@ class spell_dk_runic_corruption : public SpellScriptLoader
             }
         }
 
-        void Register()
+        void Register() OVERRIDE
         {
             OnHit += SpellHitFn(spell_dk_runic_corruption_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_dk_runic_corruption_SpellScript();
     }
@@ -228,7 +228,7 @@ class spell_dk_runic_corruption : public SpellScriptLoader
 // Raise Dead - 46584
 class spell_dk_raise_dead : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_raise_dead() : SpellScriptLoader("spell_dk_raise_dead")
     { }
 
@@ -247,13 +247,13 @@ class spell_dk_raise_dead : public SpellScriptLoader
             }
         }
 
-        void Register()
+        void Register() OVERRIDE
         {
             OnEffectHit += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_dk_raise_dead_SpellScript();
     }
@@ -262,7 +262,7 @@ class spell_dk_raise_dead : public SpellScriptLoader
 // 50462 - Anti-Magic Shell (on raid member)
 class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_anti_magic_shell_raid() : SpellScriptLoader("spell_dk_anti_magic_shell_raid")
     { }
 
@@ -274,17 +274,17 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
 
         bool Load() OVERRIDE
         {
-            absorbPct = GetSpellInfo()->Effects [EFFECT_0].CalcValue(GetCaster());
+            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
             return true;
         }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             /// @todo this should absorb limited amount of damage, but no info on calculation formula
             amount = -1;
         }
 
-        void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
         {
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
         }
@@ -305,7 +305,7 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
 // 48707 - Anti-Magic Shell (on self)
 class spell_dk_anti_magic_shell_self : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_anti_magic_shell_self() : SpellScriptLoader("spell_dk_anti_magic_shell_self")
     { }
 
@@ -316,29 +316,29 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
         uint32 absorbPct, hpPct;
         bool Load() OVERRIDE
         {
-            absorbPct = GetSpellInfo()->Effects [EFFECT_0].CalcValue(GetCaster());
-            hpPct = GetSpellInfo()->Effects [EFFECT_1].CalcValue(GetCaster());
+            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+            hpPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
             return true;
         }
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_RUNIC_POWER_ENERGIZE))
-            return false;
+                return false;
             return true;
         }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             amount = GetCaster()->CountPctFromMaxHealth(hpPct);
         }
 
-        void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
         {
             absorbAmount = std::min(CalculatePct(dmgInfo.GetDamage(), absorbPct), GetTarget()->CountPctFromMaxHealth(hpPct));
         }
 
-        void Trigger(AuraEffect* aurEff, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
+        void Trigger(AuraEffect* aurEff, DamageInfo& /*dmgInfo*/, uint32& absorbAmount)
         {
             Unit* target = GetTarget();
             // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
@@ -364,7 +364,7 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
 // 50461 - Anti-Magic Zone
 class spell_dk_anti_magic_zone : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_anti_magic_zone() : SpellScriptLoader("spell_dk_anti_magic_zone")
     { }
 
@@ -376,26 +376,26 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
 
         bool Load() OVERRIDE
         {
-            absorbPct = GetSpellInfo()->Effects [EFFECT_0].CalcValue(GetCaster());
+            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
             return true;
         }
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT))
-            return false;
+                return false;
             return true;
         }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT);
-            amount = talentSpell->Effects [EFFECT_0].CalcValue(GetCaster());
+            amount = talentSpell->Effects[EFFECT_0].CalcValue(GetCaster());
             if (Player* player = GetCaster()->ToPlayer())
                 amount += int32(2 * player->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK));
         }
 
-        void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
         {
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
         }
@@ -416,7 +416,7 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
 // 48721 - Blood Boil
 class spell_dk_blood_boil : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_blood_boil() : SpellScriptLoader("spell_dk_blood_boil")
     { }
 
@@ -427,17 +427,17 @@ class spell_dk_blood_boil : public SpellScriptLoader
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_BOIL_TRIGGERED))
-            return false;
+                return false;
             return true;
         }
 
-            bool Load() OVERRIDE
+        bool Load() OVERRIDE
         {
             _executed = false;
             return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DEATH_KNIGHT;
         }
 
-            void HandleAfterHit()
+        void HandleAfterHit()
         {
             if (_executed || !GetHitUnit())
                 return;
@@ -463,7 +463,7 @@ class spell_dk_blood_boil : public SpellScriptLoader
 // 50453 - Bloodworms Health Leech
 class spell_dk_blood_gorged : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_blood_gorged() : SpellScriptLoader("spell_dk_blood_gorged")
     { }
 
@@ -474,17 +474,17 @@ class spell_dk_blood_gorged : public SpellScriptLoader
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_GORGED_HEAL))
-            return false;
+                return false;
             return true;
         }
 
-            bool Load() OVERRIDE
+        bool Load() OVERRIDE
         {
             _procTarget = NULL;
             return true;
         }
 
-            bool CheckProc(ProcEventInfo& /*eventInfo*/)
+        bool CheckProc(ProcEventInfo& /*eventInfo*/)
         {
             _procTarget = GetTarget()->GetOwner();
             return _procTarget;
@@ -502,7 +502,7 @@ class spell_dk_blood_gorged : public SpellScriptLoader
             OnEffectProc += AuraEffectProcFn(spell_dk_blood_gorged_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
 
-        private:
+    private:
         Unit* _procTarget;
     };
 
@@ -515,7 +515,7 @@ class spell_dk_blood_gorged : public SpellScriptLoader
 // 47541, 52375, 59134, -62900 - Death Coil
 class spell_dk_death_coil : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_death_coil() : SpellScriptLoader("spell_dk_death_coil")
     { }
 
@@ -526,11 +526,11 @@ class spell_dk_death_coil : public SpellScriptLoader
         bool Validate(SpellInfo const* /*spell*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_COIL_DAMAGE) || !sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_COIL_HEAL))
-            return false;
+                return false;
             return true;
         }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+        void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             int32 damage = GetEffectValue();
             Unit* caster = GetCaster();
@@ -579,7 +579,7 @@ class spell_dk_death_coil : public SpellScriptLoader
 // 52751 - Death Gate
 class spell_dk_death_gate : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_death_gate() : SpellScriptLoader("spell_dk_death_gate")
     { }
 
@@ -621,7 +621,7 @@ class spell_dk_death_gate : public SpellScriptLoader
 // 49560 - Death Grip
 class spell_dk_death_grip : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_death_grip() : SpellScriptLoader("spell_dk_death_grip")
     { }
 
@@ -656,7 +656,7 @@ class spell_dk_death_grip : public SpellScriptLoader
 // 48743 - Death Pact
 class spell_dk_death_pact : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_death_pact() : SpellScriptLoader("spell_dk_death_pact")
     { }
 
@@ -713,7 +713,7 @@ class spell_dk_death_pact : public SpellScriptLoader
 // 49998 - Death Strike
 class spell_dk_death_strike : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_death_strike() : SpellScriptLoader("spell_dk_death_strike")
     { }
 
@@ -724,19 +724,19 @@ class spell_dk_death_strike : public SpellScriptLoader
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_STRIKE_ENABLER) ||
-            !sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_STRIKE_HEAL) ||
-            !sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_SHIELD_MASTERY) ||
-            !sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_SHIELD_ABSORB))
-            return false;
+                !sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_STRIKE_HEAL) ||
+                !sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_SHIELD_MASTERY) ||
+                !sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_SHIELD_ABSORB))
+                return false;
             return true;
         }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+        void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             if (AuraEffect* enabler = GetCaster()->GetAuraEffect(SPELL_DK_DEATH_STRIKE_ENABLER, EFFECT_0, GetCaster()->GetGUID()))
             {
                 // Call CalculateAmount() to constantly fire the AuraEffect's HandleCalcAmount method
-                int32 heal = CalculatePct(enabler->CalculateAmount(GetCaster()), GetSpellInfo()->Effects [EFFECT_0].DamageMultiplier);
+                int32 heal = CalculatePct(enabler->CalculateAmount(GetCaster()), GetSpellInfo()->Effects[EFFECT_0].DamageMultiplier);
 
                 if (AuraEffect const* aurEff = GetCaster()->GetAuraEffectOfRankedSpell(SPELL_DK_IMPROVED_DEATH_STRIKE, EFFECT_2))
                     heal = AddPct(heal, aurEff->GetAmount());
@@ -767,7 +767,7 @@ class spell_dk_death_strike : public SpellScriptLoader
 // 89832 - Death Strike (Save damage taken in last 5 sec)
 class spell_dk_death_strike_enabler : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_death_strike_enabler() : SpellScriptLoader("spell_dk_death_strike_enabler")
     { }
 
@@ -778,11 +778,11 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
         bool Load() OVERRIDE
         {
             for (uint8 i = 0; i < 5; ++i)
-            _damagePerSecond [i] = 0;
+                _damagePerSecond[i] = 0;
             return true;
         }
 
-            bool CheckProc(ProcEventInfo& eventInfo)
+        bool CheckProc(ProcEventInfo& eventInfo)
         {
             return eventInfo.GetDamageInfo();
         }
@@ -792,10 +792,10 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
             if (!GetUnitOwner()->HasAura(SPELL_DK_BLOOD_PRESENCE))
             {
                 for (uint8 i = 0; i < 5; ++i)
-                    _damagePerSecond [i] = 0;
+                    _damagePerSecond[i] = 0;
             }
             else
-                _damagePerSecond [0] += eventInfo.GetDamageInfo()->GetDamage();
+                _damagePerSecond[0] += eventInfo.GetDamageInfo()->GetDamage();
         }
 
         // Cheap hack to have update calls
@@ -809,8 +809,8 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
         {
             // Move backwards all datas by one
             for (uint8 i = 4; i > 0; --i)
-                _damagePerSecond [i] = _damagePerSecond [i - 1];
-            _damagePerSecond [0] = 0;
+                _damagePerSecond[i] = _damagePerSecond[i - 1];
+            _damagePerSecond[0] = 0;
         }
 
         void HandleCalcAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
@@ -818,7 +818,7 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
             canBeRecalculated = true;
             amount = 0;
             for (uint8 i = 0; i < 5; ++i)
-                amount += int32(_damagePerSecond [i]);
+                amount += int32(_damagePerSecond[i]);
         }
 
         void Register() OVERRIDE
@@ -830,7 +830,7 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_death_strike_enabler_AuraScript::HandleCalcAmount, EFFECT_0, SPELL_AURA_DUMMY);
         }
 
-        uint32 _damagePerSecond [5];
+        uint32 _damagePerSecond[5];
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
@@ -842,7 +842,7 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
 // 47496 - Explode, Ghoul spell for Corpse Explosion
 class spell_dk_ghoul_explode : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_ghoul_explode() : SpellScriptLoader("spell_dk_ghoul_explode")
     { }
 
@@ -853,11 +853,11 @@ class spell_dk_ghoul_explode : public SpellScriptLoader
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_CORPSE_EXPLOSION_TRIGGERED))
-            return false;
+                return false;
             return true;
         }
 
-            void Suicide(SpellEffIndex /*effIndex*/)
+        void Suicide(SpellEffIndex /*effIndex*/)
         {
             if (Unit* unitTarget = GetHitUnit())
             {
@@ -881,7 +881,7 @@ class spell_dk_ghoul_explode : public SpellScriptLoader
 // 48792 - Icebound Fortitude
 class spell_dk_icebound_fortitude : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_icebound_fortitude() : SpellScriptLoader("spell_dk_icebound_fortitude")
     { }
 
@@ -895,7 +895,7 @@ class spell_dk_icebound_fortitude : public SpellScriptLoader
             return caster && caster->GetTypeId() == TypeID::TYPEID_PLAYER;
         }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* caster = GetCaster())
             {
@@ -931,7 +931,7 @@ class spell_dk_icebound_fortitude : public SpellScriptLoader
 // 73975 - Necrotic Strike
 class spell_dk_necrotic_strike : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_necrotic_strike() : SpellScriptLoader("spell_dk_necrotic_strike")
     { }
 
@@ -939,7 +939,7 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
     {
         PrepareAuraScript(spell_dk_necrotic_strike_AuraScript);
 
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* caster = GetCaster())
                 amount = int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.7f);
@@ -960,7 +960,7 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
 // 59754 Rune Tap - Party
 class spell_dk_rune_tap_party : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_rune_tap_party() : SpellScriptLoader("spell_dk_rune_tap_party")
     { }
 
@@ -988,7 +988,7 @@ class spell_dk_rune_tap_party : public SpellScriptLoader
 // 50421 - Scent of Blood
 class spell_dk_scent_of_blood : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_scent_of_blood() : SpellScriptLoader("spell_dk_scent_of_blood")
     { }
 
@@ -999,11 +999,11 @@ class spell_dk_scent_of_blood : public SpellScriptLoader
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCENT_OF_BLOOD))
-            return false;
+                return false;
             return true;
         }
 
-            void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
             GetTarget()->CastSpell(GetTarget(), SPELL_DK_SCENT_OF_BLOOD, true, NULL, aurEff);
@@ -1085,7 +1085,7 @@ public:
 // 55233 - Vampiric Blood
 class spell_dk_vampiric_blood : public SpellScriptLoader
 {
-    public:
+public:
     spell_dk_vampiric_blood() : SpellScriptLoader("spell_dk_vampiric_blood")
     { }
 
