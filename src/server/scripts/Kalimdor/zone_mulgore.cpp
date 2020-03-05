@@ -88,10 +88,12 @@ public:
                         break;
                     }
                     case 1:
-                        Talk(0);
                         me->setFaction(14);
                         if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                        {
+                            Talk(0, player);
                             AttackStart(player);
+                        }
                         break;
                 }
             }
