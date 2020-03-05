@@ -37,12 +37,12 @@
 
 enum eAgitatedEarthSpirit
 {
-    SPELL_SOOTHE_EARTH_SPIRIT = 69453,
-    SPELL_ROCK_BARRAGE = 81305,
+    SPELL_SOOTHE_EARTH_SPIRIT       = 69453,
+    SPELL_ROCK_BARRAGE              = 81305,
 
-    NPC_EARTH_SPIRIT_CREDIT_BUNNY = 36872,
+    NPC_EARTH_SPIRIT_CREDIT_BUNNY   = 36872,
 
-    EVENT_ROCK_BARRAGE = 1
+    EVENT_ROCK_BARRAGE              = 1
 };
 
 // 36845 - Agitated Earth Spirit
@@ -58,16 +58,17 @@ public:
         void Reset() OVERRIDE
         {
             events.Reset();
+            playerGUID = 0;
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
         {
-            if (spell->Id == SPELL_SOOTHE_EARTH_SPIRIT)
+            if (spell->Id == SPELL_SOOTHE_EARTH_SPIRIT && me->getFaction() == 190)
             {
                 Position pos;
                 caster->GetNearPoint(caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0.0f, MIN_MELEE_REACH, caster->GetAngle(me));
                 me->GetMotionMaster()->MovePoint(1, pos);
-                _playerGUID = caster->GetGUID();
+                playerGUID = caster->GetGUID();
             }
         }
 
@@ -77,20 +78,21 @@ public:
             {
                 switch (urand(0, 1))
                 {
-                case 0:
-                {
-                    me->setFaction(35);
-                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                        player->KilledMonsterCredit(NPC_EARTH_SPIRIT_CREDIT_BUNNY);
+                    case 0:
+                    {
+                        me->setFaction(35);
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                            player->KilledMonsterCredit(NPC_EARTH_SPIRIT_CREDIT_BUNNY);
 
-                    me->DespawnOrUnsummon(1000);
-                    break;
-                }
-                case 1:
-                    me->setFaction(14);
-                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                        AttackStart(player);
-                    break;
+                        me->DespawnOrUnsummon(1000);
+                        break;
+                    }
+                    case 1:
+                        Talk(0);
+                        me->setFaction(14);
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                            AttackStart(player);
+                        break;
                 }
             }
         }
@@ -111,11 +113,11 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_ROCK_BARRAGE:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(target, SPELL_ROCK_BARRAGE);
-                    events.ScheduleEvent(EVENT_ROCK_BARRAGE, urand(18000, 21000));
-                    break;
+                    case EVENT_ROCK_BARRAGE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_ROCK_BARRAGE);
+                        events.ScheduleEvent(EVENT_ROCK_BARRAGE, urand(18000, 21000));
+                        break;
                 }
             }
 
@@ -123,7 +125,7 @@ public:
         }
 
     private:
-        uint64 _playerGUID = 0;
+        uint64 playerGUID;
         EventMap events;
     };
 
