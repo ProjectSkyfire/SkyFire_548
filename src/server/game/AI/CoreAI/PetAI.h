@@ -32,23 +32,23 @@ class PetAI : public CreatureAI
 
         explicit PetAI(Creature* c);
 
-        void UpdateAI(uint32);
+        void UpdateAI(uint32) OVERRIDE;
         static int Permissible(const Creature*);
 
-        void KilledUnit(Unit* /*victim*/);
-        void AttackStart(Unit* target);
-        void MovementInform(uint32 moveType, uint32 data);
-        void OwnerAttackedBy(Unit* attacker);
-        void OwnerAttacked(Unit* target);
-        void AttackedBy(Unit* attacker);
-        void ReceiveEmote(Player* player, uint32 textEmote);
+        void KilledUnit(Unit* /*victim*/) OVERRIDE;
+        void AttackStart(Unit* target) OVERRIDE;
+        void MovementInform(uint32 moveType, uint32 data) OVERRIDE;
+        void OwnerAttackedBy(Unit* attacker) OVERRIDE;
+        void OwnerAttacked(Unit* target) OVERRIDE;
+        void AttackedBy(Unit* attacker) OVERRIDE;
+        void ReceiveEmote(Player* player, uint32 textEmote) OVERRIDE;
 
         // The following aren't used by the PetAI but need to be defined to override
         //  default CreatureAI functions which interfere with the PetAI
         //
-        void MoveInLineOfSight(Unit* /*who*/) { } // CreatureAI interferes with returning pets
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { } // CreatureAI interferes with returning pets
         void MoveInLineOfSight_Safe(Unit* /*who*/) { } // CreatureAI interferes with returning pets
-        void EnterEvadeMode() { } // For fleeing, pets don't use this type of Evade mechanic
+        void EnterEvadeMode() OVERRIDE { } // For fleeing, pets don't use this type of Evade mechanic
 
     private:
         bool _isVisible(Unit*) const;

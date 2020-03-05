@@ -57,22 +57,22 @@ struct npc_escortAI : public ScriptedAI
         ~npc_escortAI() { }
 
         // CreatureAI functions
-        void AttackStart(Unit* who);
+        void AttackStart(Unit* who) OVERRIDE;
 
-        void MoveInLineOfSight(Unit* who);
+        void MoveInLineOfSight(Unit* who) OVERRIDE;
 
-        void JustDied(Unit*);
+        void JustDied(Unit*) OVERRIDE;
 
-        void JustRespawned();
+        void JustRespawned() OVERRIDE;
 
         void ReturnToLastPoint();
 
-        void EnterEvadeMode();
+        void EnterEvadeMode() OVERRIDE;
 
-        void UpdateAI(uint32 diff);                   //the "internal" update, calls UpdateEscortAI()
+        void UpdateAI(uint32 diff) OVERRIDE;                   //the "internal" update, calls UpdateEscortAI()
         virtual void UpdateEscortAI(uint32 const diff);     //used when it's needed to add code in update (abilities, scripted events, etc)
 
-        void MovementInform(uint32, uint32);
+        void MovementInform(uint32, uint32) OVERRIDE;
 
         // EscortAI functions
         void AddWaypoint(uint32 id, float x, float y, float z, uint32 waitTime = 0);    // waitTime is in ms
