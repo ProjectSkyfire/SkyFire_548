@@ -3552,7 +3552,7 @@ class spell_gen_override_display_power : public SpellScriptLoader
                     target->SetUInt32Value(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, aurEff->GetMiscValue());
             }
 
-            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* target = GetTarget())
                     target->SetUInt32Value(UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID, 0);

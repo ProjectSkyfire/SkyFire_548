@@ -89,7 +89,7 @@ public:
                 return false;
             return true;
         }
-        void RecalculateDamage(SpellEffIndex effIndex)
+        void RecalculateDamage(SpellEffIndex /*effIndex*/)
         {
             Unit* caster = GetCaster();
 

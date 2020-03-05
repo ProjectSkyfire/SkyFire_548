@@ -1096,7 +1096,7 @@ class boss_the_lich_king : public CreatureScript
             }
 
         private:
-            void SendMusicToPlayers(uint32 musicId) const
+            void SendMusicToPlayers(uint32 /*musicId*/) const
             {
                 ///@TODO: Wrong Packet, Send correct one.
                 //WorldPacket data(SMSG_PLAY_MUSIC, 4);

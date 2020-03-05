@@ -418,7 +418,7 @@ class item_eye_of_black_prince : public ItemScript
 public:
     item_eye_of_black_prince() : ItemScript("item_eye_of_black_prince") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) OVERRIDE {
+    bool OnUse(Player* /*player*/, Item* item, SpellCastTargets const& /*targets*/) OVERRIDE {
         switch (item->GetEntry())
         {
             ///// - Sha Touched Weapons - /////
