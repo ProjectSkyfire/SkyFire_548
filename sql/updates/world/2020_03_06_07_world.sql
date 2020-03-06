@@ -1,4 +1,5 @@
 SET @CGUID := 100132;
+DELETE FROM `creature` WHERE `id`=3232;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID-20 AND @CGUID-0;
 INSERT INTO `creature` (`guid`, `id`, `map`, `position_x`, `position_y`, `position_z`, `orientation`, `spawndist`, `MovementType`) VALUES
 (@CGUID-0, 3232, 1, -972.829, -1056.97, 29.763, 1.90076, 15, 1),
