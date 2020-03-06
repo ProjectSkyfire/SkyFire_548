@@ -59,6 +59,7 @@ public:
         {
             events.Reset();
             playerGUID = 0;
+            me->setFaction(190);
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
