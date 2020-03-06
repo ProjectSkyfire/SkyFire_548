@@ -626,6 +626,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
         case ChatMsg::CHAT_MSG_RAID_BOSS_WHISPER:
             if (receiverGUID && !IS_PLAYER_GUID(receiverGUID) && !IS_PET_GUID(receiverGUID))
                 hasReceiverName = receiverName.length();
+        case ChatMsg::CHAT_MSG_TEXT_EMOTE:
         case ChatMsg::CHAT_MSG_MONSTER_SAY:
         case ChatMsg::CHAT_MSG_MONSTER_PARTY:
         case ChatMsg::CHAT_MSG_MONSTER_YELL:
