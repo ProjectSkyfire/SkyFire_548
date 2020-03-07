@@ -449,29 +449,29 @@ class BattlegroundSA : public Battleground
          * -Update timer
          * -Round switch
          */
-        void PostUpdateImpl(uint32 diff);
+        void PostUpdateImpl(uint32 diff) OVERRIDE;
 
         /* inherited from BattlegroundClass */
         /// Called when a player join battle
-        void AddPlayer(Player* player);
+        void AddPlayer(Player* player) OVERRIDE;
         /// Called when battle start
-        void StartingEventCloseDoors();
-        void StartingEventOpenDoors();
+        void StartingEventCloseDoors() OVERRIDE;
+        void StartingEventOpenDoors() OVERRIDE;
         /// Called for ini battleground, after that the first player be entered
-        bool SetupBattleground();
-        void Reset();
+        bool SetupBattleground() OVERRIDE;
+        void Reset() OVERRIDE;
         /// Called for generate packet contain worldstate data
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
         /// Called when a player deal damage to building (door)
-        void EventPlayerDamagedGO(Player* player, GameObject* go, uint32 eventType);
+        void EventPlayerDamagedGO(Player* player, GameObject* go, uint32 eventType) OVERRIDE;
         /// Called when a player kill a unit in bg
-        void HandleKillUnit(Creature* creature, Player* killer);
+        void HandleKillUnit(Creature* creature, Player* killer) OVERRIDE;
         /// Return the nearest graveyard where player can respawn
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
         /// Called when a player click on flag (graveyard flag)
-        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj);
+        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
         /// Called when a player use a gamobject (relic)
-        void EventPlayerUsedGO(Player* Source, GameObject* object);
+        void EventPlayerUsedGO(Player* Source, GameObject* object) OVERRIDE;
         /// Return gate id, relative to bg data, according to gameobject id
         uint32 getGateIdFromDamagedOrDestroyEventId(uint32 id)
         {
@@ -533,18 +533,18 @@ class BattlegroundSA : public Battleground
         void EndBattleground(uint32 winner);
 
         /// CAlled when a player leave battleground
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+        void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
 
         /* Scorekeeping */
         /// Update score board
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
+        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
 
         // Achievement: Defense of the Ancients
         bool gateDestroyed;
 
         // Achievement: Not Even a Scratch
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0);
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0) OVERRIDE;
 
         /// Id of attacker team
         TeamId Attackers;
@@ -577,7 +577,7 @@ class BattlegroundSA : public Battleground
          * -Update worldstate
          * -Delete gameobject in front of door (lighting object, with different colours for each door)
          */
-        void DestroyGate(Player* player, GameObject* go);
+        void DestroyGate(Player* player, GameObject* go) OVERRIDE;
         /// Update timer worldstate
         void SendTime();
         /**

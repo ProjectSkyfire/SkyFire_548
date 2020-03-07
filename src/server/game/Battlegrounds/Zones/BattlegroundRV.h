@@ -100,23 +100,23 @@ class BattlegroundRV : public Battleground
         ~BattlegroundRV();
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player);
-        void StartingEventCloseDoors();
-        void StartingEventOpenDoors();
-        void Reset();
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        void AddPlayer(Player* player) OVERRIDE;
+        void StartingEventCloseDoors() OVERRIDE;
+        void StartingEventOpenDoors() OVERRIDE;
+        void Reset() OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
-        bool SetupBattleground();
-        void HandleKillPlayer(Player* player, Player* killer);
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+        void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
+        bool SetupBattleground() OVERRIDE;
+        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
 
     private:
         uint32 Timer;
         uint32 State;
         bool   PillarCollision;
 
-        void PostUpdateImpl(uint32 diff);
+        void PostUpdateImpl(uint32 diff) OVERRIDE;
 
     protected:
         uint32 getTimer() { return Timer; }

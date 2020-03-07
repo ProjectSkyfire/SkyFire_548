@@ -50,15 +50,15 @@ class BattlegroundNA : public Battleground
         ~BattlegroundNA();
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player);
-        void StartingEventCloseDoors();
-        void StartingEventOpenDoors();
+        void AddPlayer(Player* player) OVERRIDE;
+        void StartingEventCloseDoors() OVERRIDE;
+        void StartingEventOpenDoors() OVERRIDE;
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
-        bool SetupBattleground();
-        void Reset();
-        void FillInitialWorldStates(WorldStateBuilder &builder);
-        void HandleKillPlayer(Player* player, Player* killer);
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+        void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
+        bool SetupBattleground() OVERRIDE;
+        void Reset() OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder &builder) OVERRIDE;
+        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
 };
 #endif

@@ -863,39 +863,39 @@ class BattlegroundIC : public Battleground
         ~BattlegroundIC();
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player);
-        void StartingEventCloseDoors();
-        void StartingEventOpenDoors();
-        void PostUpdateImpl(uint32 diff);
+        void AddPlayer(Player* player) OVERRIDE;
+        void StartingEventCloseDoors() OVERRIDE;
+        void StartingEventOpenDoors() OVERRIDE;
+        void PostUpdateImpl(uint32 diff) OVERRIDE;
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* player, uint32 trigger);
-        bool SetupBattleground();
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+        void HandleAreaTrigger(Player* player, uint32 trigger) OVERRIDE;
+        bool SetupBattleground() OVERRIDE;
         void SpawnLeader(uint32 teamid);
-        void HandleKillUnit(Creature* unit, Player* killer);
-        void HandleKillPlayer(Player* player, Player* killer);
+        void HandleKillUnit(Creature* unit, Player* killer) OVERRIDE;
+        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
         void EndBattleground(uint32 winner);
-        void EventPlayerClickedOnFlag(Player* source, GameObject* /*target_obj*/);
+        void EventPlayerClickedOnFlag(Player* source, GameObject* /*target_obj*/) OVERRIDE;
 
-        void EventPlayerDamagedGO(Player* /*player*/, GameObject* go, uint32 eventType);
-        void DestroyGate(Player* player, GameObject* go);
+        void EventPlayerDamagedGO(Player* /*player*/, GameObject* go, uint32 eventType) OVERRIDE;
+        void DestroyGate(Player* player, GameObject* go) OVERRIDE;
 
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
 
         /* Scorekeeping */
-        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true);
+        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
 
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
-        void DoAction(uint32 action, uint64 var);
+        void DoAction(uint32 action, uint64 var) OVERRIDE;
 
-        void HandlePlayerResurrect(Player* player);
+        void HandlePlayerResurrect(Player* player) OVERRIDE;
 
         uint32 GetNodeState(uint8 nodeType) const { return (uint8)nodePoint[nodeType].nodeState; }
 
-        bool IsAllNodesControlledByTeam(uint32 team) const;
+        bool IsAllNodesControlledByTeam(uint32 team) const OVERRIDE;
 
-        bool IsSpellAllowed(uint32 spellId, Player const* player) const;
+        bool IsSpellAllowed(uint32 spellId, Player const* player) const OVERRIDE;
     private:
         uint32 closeFortressDoorsTimer;
         bool doorsClosed;

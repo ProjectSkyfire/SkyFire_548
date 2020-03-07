@@ -1547,37 +1547,37 @@ class BattlegroundAV : public Battleground
         ~BattlegroundAV();
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player);
-        void StartingEventCloseDoors();
-        void StartingEventOpenDoors();
+        void AddPlayer(Player* player) OVERRIDE;
+        void StartingEventCloseDoors() OVERRIDE;
+        void StartingEventOpenDoors() OVERRIDE;
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* player, uint32 trigger);
-        bool SetupBattleground();
-        void ResetBGSubclass();
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+        void HandleAreaTrigger(Player* player, uint32 trigger) OVERRIDE;
+        bool SetupBattleground() OVERRIDE;
+        void ResetBGSubclass() OVERRIDE;
 
         /*general stuff*/
         void UpdateScore(uint16 team, int16 points);
-        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true);
+        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
 
         /*handlestuff*/ //these are functions which get called from extern
-        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj);
-        void HandleKillPlayer(Player* player, Player* killer);
-        void HandleKillUnit(Creature* unit, Player* killer);
-        void HandleQuestComplete(uint32 questid, Player* player);
-        bool CanActivateGO(int32 GOId, uint32 team) const;
+        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) OVERRIDE;
+        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
+        void HandleKillUnit(Creature* unit, Player* killer) OVERRIDE;
+        void HandleQuestComplete(uint32 questid, Player* player) OVERRIDE;
+        bool CanActivateGO(int32 GOId, uint32 team) const OVERRIDE;
 
         void EndBattleground(uint32 winner);
 
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
 
         // Achievement: Av perfection and Everything counts
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0);
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0) OVERRIDE;
 
-        uint32 GetPrematureWinner();
+        uint32 GetPrematureWinner() OVERRIDE;
 
     private:
-        void PostUpdateImpl(uint32 diff);
+        void PostUpdateImpl(uint32 diff) OVERRIDE;
 
         /* Nodes occupying */
         void EventPlayerAssaultsPoint(Player* player, uint32 object);
@@ -1601,8 +1601,8 @@ class BattlegroundAV : public Battleground
         void ChangeMineOwner(uint8 mine, uint32 team, bool initial=false);
 
         /*worldstates*/
-        void FillInitialWorldStates(WorldStateBuilder& builder);
-        uint8 GetWorldStateType(uint8 state, uint16 team);
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        uint8 GetWorldStateType(uint8 state, uint16 team) ;
         void SendMineWorldStates(uint32 mine);
         void UpdateNodeWorldState(BG_AV_Nodes node);
 
