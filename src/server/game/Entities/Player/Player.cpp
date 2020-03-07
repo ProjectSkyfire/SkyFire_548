@@ -654,7 +654,7 @@ void KillRewarder::Reward()
     {
         if (victim->IsDungeonBoss())
             if (InstanceScript* instance = _victim->GetInstanceScript())
-                instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
+                instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
 
         if (uint32 guildId = victim->GetMap()->GetOwnerGuildId())
             if (Guild* guild = sGuildMgr->GetGuildById(guildId))
@@ -947,7 +947,7 @@ Player::~Player()
 void Player::CleanupsBeforeDelete(bool finalCleanup)
 {
     TradeCancel(false);
-    DuelComplete(DUEL_INTERRUPTED);
+    DuelComplete(DuelCompleteType::DUEL_INTERRUPTED);
 
     Unit::CleanupsBeforeDelete(finalCleanup);
 
@@ -2260,7 +2260,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // We have to perform this check before the teleport, otherwise the
     // ObjectAccessor won't find the flag.
     if (duel && GetMapId() != mapid && GetMap()->GetGameObject(GetUInt64Value(PLAYER_FIELD_DUEL_ARBITER)))
-        DuelComplete(DUEL_FLED);
+        DuelComplete(DuelCompleteType::DUEL_FLED);
 
     if (GetMapId() == mapid)
     {
@@ -8263,7 +8263,7 @@ void Player::CheckDuelDistance(time_t currTime)
             GetSession()->SendPacket(&data);
         }
         else if (currTime >= (duel->outOfBound+10))
-            DuelComplete(DUEL_FLED);
+            DuelComplete(DuelCompleteType::DUEL_FLED);
     }
 }
 
@@ -8281,17 +8281,17 @@ void Player::DuelComplete(DuelCompleteType type)
     SF_LOG_DEBUG("entities.unit", "Duel Complete %s %s", GetName().c_str(), duel->opponent->GetName().c_str());
 
     WorldPacket data(SMSG_DUEL_COMPLETE, 1);
-    data.WriteBit(type != DUEL_INTERRUPTED);
+    data.WriteBit(type != DuelCompleteType::DUEL_INTERRUPTED);
     data.FlushBits();
     GetSession()->SendPacket(&data);
 
     if (duel->opponent->GetSession())
         duel->opponent->GetSession()->SendPacket(&data);
 
-    if (type != DUEL_INTERRUPTED)
+    if (type != DuelCompleteType::DUEL_INTERRUPTED)
     {
         data.Initialize(SMSG_DUEL_WINNER, 1 + 20);          // we guess size
-        data.WriteBit(type != DUEL_WON);                    // 0 = just won; 1 = fled
+        data.WriteBit(type != DuelCompleteType::DUEL_WON);                    // 0 = just won; 1 = fled
         data.WriteBits(duel->opponent->GetName().length(), 6);
         data.WriteBits(GetName().length(), 6);
         data << uint32(realmID);
@@ -8305,7 +8305,7 @@ void Player::DuelComplete(DuelCompleteType type)
 
     switch (type)
     {
-        case DUEL_FLED:
+        case DuelCompleteType::DUEL_FLED:
             // if initiator and opponent are on the same team
             // or initiator and opponent are not PvP enabled, forcibly stop attacking
             if (duel->initiator->GetTeam() == duel->opponent->GetTeam())
@@ -8321,7 +8321,7 @@ void Player::DuelComplete(DuelCompleteType type)
                     duel->opponent->AttackStop();
             }
             break;
-        case DUEL_WON:
+        case DuelCompleteType::DUEL_WON:
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOSE_DUEL, 1);
             duel->opponent->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_DUEL, 1);
 
@@ -8339,7 +8339,7 @@ void Player::DuelComplete(DuelCompleteType type)
     }
 
     // Victory emote spell
-    if (type != DUEL_INTERRUPTED)
+    if (type != DuelCompleteType::DUEL_INTERRUPTED)
         duel->opponent->CastSpell(duel->opponent, 52852, true);
 
     //Remove Duel Flag object

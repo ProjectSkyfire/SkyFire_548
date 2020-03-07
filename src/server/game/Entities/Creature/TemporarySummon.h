@@ -21,7 +21,7 @@
 
 #include "Creature.h"
 
-enum SummonerType
+enum class SummonerType
 {
     SUMMONER_TYPE_CREATURE      = 0,
     SUMMONER_TYPE_GAMEOBJECT    = 1,
@@ -46,7 +46,7 @@ class TempSummon : public Creature
         virtual void InitStats(uint32 lifetime);
         virtual void InitSummon();
         virtual void UnSummon(uint32 msTime = 0);
-        void RemoveFromWorld();
+        void RemoveFromWorld() OVERRIDE;
         void SetTempSummonType(TempSummonType type);
         void SaveToDB(uint32 /*mapid*/, uint32 /*spawnMask*/) { }
         Unit* GetSummoner() const;
@@ -67,8 +67,8 @@ class Minion : public TempSummon
 {
     public:
         Minion(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject);
-        void InitStats(uint32 duration);
-        void RemoveFromWorld();
+        void InitStats(uint32 duration) OVERRIDE;
+        void RemoveFromWorld() OVERRIDE;
         Unit* GetOwner() const { return m_owner; }
         float GetFollowAngle() const { return m_followAngle; }
         void SetFollowAngle(float angle) { m_followAngle = angle; }
@@ -85,18 +85,18 @@ class Guardian : public Minion
 {
     public:
         Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject);
-        void InitStats(uint32 duration);
+        void InitStats(uint32 duration) OVERRIDE;
         bool InitStatsForLevel(uint8 level);
-        void InitSummon();
+        void InitSummon() OVERRIDE;
 
-        bool UpdateStats(Stats stat);
-        bool UpdateAllStats();
-        void UpdateResistances(uint32 school);
-        void UpdateArmor();
-        void UpdateMaxHealth();
-        void UpdateMaxPower(Powers power);
-        void UpdateAttackPowerAndDamage(bool ranged = false);
-        void UpdateDamagePhysical(WeaponAttackType attType);
+        bool UpdateStats(Stats stat) OVERRIDE;
+        bool UpdateAllStats() OVERRIDE;
+        void UpdateResistances(uint32 school) OVERRIDE;
+        void UpdateArmor() OVERRIDE;
+        void UpdateMaxHealth() OVERRIDE;
+        void UpdateMaxPower(Powers power) OVERRIDE;
+        void UpdateAttackPowerAndDamage(bool ranged = false) OVERRIDE;
+        void UpdateDamagePhysical(WeaponAttackType attType) OVERRIDE;
 
         int32 GetBonusDamage() const { return m_bonusSpellDamage; }
         void SetBonusDamage(int32 damage);
@@ -109,17 +109,17 @@ class Puppet : public Minion
 {
     public:
         Puppet(SummonPropertiesEntry const* properties, Unit* owner);
-        void InitStats(uint32 duration);
-        void InitSummon();
-        void Update(uint32 time);
-        void RemoveFromWorld();
+        void InitStats(uint32 duration) OVERRIDE;
+        void InitSummon() OVERRIDE;
+        void Update(uint32 time) OVERRIDE;
+        void RemoveFromWorld() OVERRIDE;
 };
 
 class ForcedUnsummonDelayEvent : public BasicEvent
 {
 public:
     ForcedUnsummonDelayEvent(TempSummon& owner) : BasicEvent(), m_owner(owner) { }
-    bool Execute(uint64 e_time, uint32 p_time);
+    bool Execute(uint64 e_time, uint32 p_time) OVERRIDE;
 
 private:
     TempSummon& m_owner;

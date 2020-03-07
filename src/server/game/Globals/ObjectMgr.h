@@ -61,6 +61,7 @@ struct PlayerLevelInfo;
 
 struct PageText
 {
+    PageText() : NextPage(0) { }
     std::string Text;
     uint16 NextPage;
 };
@@ -135,6 +136,7 @@ typedef UNORDERED_MAP<uint16, InstanceTemplate> InstanceTemplateContainer;
 
 struct GameTele
 {
+    GameTele() : position_x(0.0f), position_y(0.0f), position_z(0.0f), orientation(0.0f), mapId(0) { }
     float  position_x;
     float  position_y;
     float  position_z;
@@ -622,7 +624,7 @@ struct LanguageDesc
 extern LanguageDesc lang_description[LANGUAGES_COUNT];
 LanguageDesc const* GetLanguageDescByID(Language lang);
 
-enum EncounterCreditType
+enum class EncounterCreditType
 {
     ENCOUNTER_CREDIT_KILL_CREATURE  = 0,
     ENCOUNTER_CREDIT_CAST_SPELL     = 1
@@ -644,6 +646,7 @@ typedef UNORDERED_MAP<uint32, DungeonEncounterList> DungeonEncounterContainer;
 
 struct HotfixInfo
 {
+    HotfixInfo() : Type(0), Timestamp(0), Entry(0) {}
     uint32 Type;
     uint32 Timestamp;
     uint32 Entry;

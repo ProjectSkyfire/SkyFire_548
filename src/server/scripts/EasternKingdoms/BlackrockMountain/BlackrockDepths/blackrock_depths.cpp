@@ -212,7 +212,7 @@ public:
                 case 5:
                     if (instance)
                     {
-                        instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, NPC_GRIMSTONE, me);
+                        instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, NPC_GRIMSTONE, me);
                         instance->SetData(TYPE_RING_OF_LAW, DONE);
                         SF_LOG_DEBUG("scripts", "npc_grimstone: event reached end and set complete.");
                     }

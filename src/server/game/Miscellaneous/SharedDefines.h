@@ -4160,7 +4160,7 @@ enum ProfessionUI
     MAX_SECONDARY_SKILLS = 5
 };
 
-enum DuelCompleteType
+enum class DuelCompleteType
 {
     DUEL_INTERRUPTED = 0,
     DUEL_WON         = 1,

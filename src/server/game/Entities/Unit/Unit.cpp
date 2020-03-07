@@ -846,7 +846,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             he->CombatStopWithPets(true);
 
             he->CastSpell(he, 7267, true);                  // beg
-            he->DuelComplete(DUEL_WON);
+            he->DuelComplete(DuelCompleteType::DUEL_WON);
         }
     }
 
@@ -13935,7 +13935,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         {
             plrVictim->duel->opponent->CombatStopWithPets(true);
             plrVictim->CombatStopWithPets(true);
-            plrVictim->DuelComplete(DUEL_INTERRUPTED);
+            plrVictim->DuelComplete(DuelCompleteType::DUEL_INTERRUPTED);
         }
     }
     else                                                // creature died
@@ -15773,7 +15773,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     // If the player is on mounted duel and exits the mount, he should immediatly lose the duel
     if (player && player->duel && player->duel->isMounted)
-        player->DuelComplete(DUEL_FLED);
+        player->DuelComplete(DuelCompleteType::DUEL_FLED);
 
     SetDisableGravity(false);                   // SMSG_MOVE_GRAVITY_ENABLE
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT

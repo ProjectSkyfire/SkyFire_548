@@ -445,7 +445,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         virtual ~Creature();
 
         void AddToWorld();
-        void RemoveFromWorld();
+        void RemoveFromWorld() OVERRIDE;
 
         void SetObjectScale(float scale);
         void SetDisplayId(uint32 modelId);

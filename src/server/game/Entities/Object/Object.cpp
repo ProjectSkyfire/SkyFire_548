@@ -2551,7 +2551,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
 
 void Map::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list /*= NULL*/)
 {
-    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetId(), SUMMONER_TYPE_MAP, group);
+    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetId(), SummonerType::SUMMONER_TYPE_MAP, group);
     if (!data)
         return;
 
@@ -2665,7 +2665,7 @@ void WorldObject::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list 
 {
     ASSERT((GetTypeId() == TypeID::TYPEID_GAMEOBJECT || GetTypeId() == TypeID::TYPEID_UNIT) && "Only GOs and creatures can summon npc groups!");
 
-    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetEntry(), GetTypeId() == TypeID::TYPEID_GAMEOBJECT ? SUMMONER_TYPE_GAMEOBJECT : SUMMONER_TYPE_CREATURE, group);
+    std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetEntry(), GetTypeId() == TypeID::TYPEID_GAMEOBJECT ? SummonerType::SUMMONER_TYPE_GAMEOBJECT : SummonerType::SUMMONER_TYPE_CREATURE, group);
     if (!data)
         return;
 

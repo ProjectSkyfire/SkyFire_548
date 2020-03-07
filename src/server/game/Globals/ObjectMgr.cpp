@@ -1520,21 +1520,21 @@ void ObjectMgr::LoadTempSummons()
 
         switch (summonerType)
         {
-            case SUMMONER_TYPE_CREATURE:
+            case SummonerType::SUMMONER_TYPE_CREATURE:
                 if (!GetCreatureTemplate(summonerId))
                 {
                     SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has summoner with non existing entry %u for creature summoner type, skipped.", summonerId);
                     continue;
                 }
                 break;
-            case SUMMONER_TYPE_GAMEOBJECT:
+            case SummonerType::SUMMONER_TYPE_GAMEOBJECT:
                 if (!GetGameObjectTemplate(summonerId))
                 {
                     SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has summoner with non existing entry %u for gameobject summoner type, skipped.", summonerId);
                     continue;
                 }
                 break;
-            case SUMMONER_TYPE_MAP:
+            case SummonerType::SUMMONER_TYPE_MAP:
                 if (!sMapStore.LookupEntry(summonerId))
                 {
                     SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has summoner with non existing entry %u for map summoner type, skipped.", summonerId);
@@ -5021,9 +5021,9 @@ void ObjectMgr::LoadInstanceEncounters()
             dungeonLastBosses[lastEncounterDungeon] = std::make_pair(entry, dungeonEncounter);
         }
 
-        switch (creditType)
+        switch (EncounterCreditType(creditType))
         {
-            case ENCOUNTER_CREDIT_KILL_CREATURE:
+            case EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE:
             {
                 CreatureTemplate const* creatureInfo = GetCreatureTemplate(creditEntry);
                 if (!creatureInfo)
@@ -5034,7 +5034,7 @@ void ObjectMgr::LoadInstanceEncounters()
                 const_cast<CreatureTemplate*>(creatureInfo)->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
                 break;
             }
-            case ENCOUNTER_CREDIT_CAST_SPELL:
+            case EncounterCreditType::ENCOUNTER_CREDIT_CAST_SPELL:
                 if (!sSpellMgr->GetSpellInfo(creditEntry))
                 {
                     SF_LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid spell (entry %u) linked to the encounter %u (%s), skipped!", creditEntry, entry, dungeonEncounter->encounterName);
