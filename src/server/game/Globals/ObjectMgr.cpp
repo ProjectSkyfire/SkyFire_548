@@ -1542,7 +1542,7 @@ void ObjectMgr::LoadTempSummons()
                 }
                 break;
             default:
-                SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has unhandled summoner type %u for summoner %u, skipped.", summonerType, summonerId);
+                SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has unhandled summoner type %u for summoner %u, skipped.", uint8(summonerType), summonerId);
                 continue;
         }
 
@@ -1551,7 +1551,7 @@ void ObjectMgr::LoadTempSummons()
 
         if (!GetCreatureTemplate(data.entry))
         {
-            SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has creature in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] with non existing creature entry %u, skipped.", summonerId, summonerType, group, data.entry);
+            SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has creature in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] with non existing creature entry %u, skipped.", summonerId, uint8(summonerType), group, data.entry);
             continue;
         }
 
@@ -1566,7 +1566,7 @@ void ObjectMgr::LoadTempSummons()
 
         if (data.type > TempSummonType::TEMPSUMMON_MANUAL_DESPAWN)
         {
-            SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has unhandled temp summon type %u in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] for creature entry %u, skipped.", uint32(data.type), summonerId, summonerType, group, data.entry);
+            SF_LOG_ERROR("sql.sql", "Table `creature_summon_groups` has unhandled temp summon type %u in group [Summoner ID: %u, Summoner Type: %u, Group ID: %u] for creature entry %u, skipped.", uint32(data.type), summonerId, uint8(summonerType), group, data.entry);
             continue;
         }
 
