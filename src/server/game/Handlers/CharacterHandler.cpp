@@ -1975,7 +1975,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    uint8 gender, skin, face, hairStyle, hairColor, facialHair, race = 0;
+    uint8 gender = 0, skin = 0, face = 0, hairStyle = 0, hairColor = 0, facialHair = 0, race = 0;
 
     recvData >> gender;
     recvData >> race;

@@ -63,7 +63,7 @@ T* HashMapHolder<T>::Find(uint64 guid)
 }
 
 template<class T>
-auto HashMapHolder<T>::GetContainer() -> MapType&
+auto HashMapHolder<T>::GetContainer()->MapType&
 {
     static MapType m_objectMap;
     return m_objectMap;
