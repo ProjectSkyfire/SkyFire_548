@@ -40,7 +40,6 @@ void WorldSession::HandeSetTalentSpecialization(WorldPacket& recvData)
         return;
 
     uint32 specializationId = GetClassSpecializations(_player->getClass())[specializationTabId];
-    uint32 specializationSpell = 0;
 
     _player->SetTalentSpecialization(_player->GetActiveSpec(), specializationId);
     _player->SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, specializationId);
@@ -62,7 +61,7 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket& recvData)
     uint16 talentId;
     bool anythingLearned = false;
 
-    for (int i = 0; i != talentCount; i++)
+    for (uint32 i = 0; i != talentCount; i++)
     {
         recvData >> talentId;
         if (_player->LearnTalent(talentId))
