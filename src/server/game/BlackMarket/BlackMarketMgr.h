@@ -151,7 +151,7 @@ public:
     void BuildBlackMarketRequestItemsResult(WorldPacket& data, uint32 guidLow);
 
     void SendAuctionWon(BlackMarketAuction* auction, SQLTransaction& trans);
-    void SendAuctionOutbidded(BlackMarketAuction* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
+    void SendAuctionOutbidded(BlackMarketAuction* auction, SQLTransaction& trans);
     
     bool isBlackMarketOpen() { return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_BLACK_MARKET_OPEN); }
 };

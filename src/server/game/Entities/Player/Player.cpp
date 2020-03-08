@@ -26924,8 +26924,6 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
             *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
 
-        uint32 const* talentTabIds = GetClassSpecializations(getClass());
-
         int32 talentCount = 0;
         for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
         {

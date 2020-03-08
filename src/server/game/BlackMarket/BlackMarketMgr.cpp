@@ -309,7 +309,7 @@ void BlackMarketMgr::UpdateAuction(BlackMarketAuction* auction, uint64 newPrice,
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     if (auction->GetCurrentBidder())
-        SendAuctionOutbidded(auction, newPrice, newBidder, trans);
+        SendAuctionOutbidded(auction, trans);
 
     auction->SetCurrentBid(currentBid);
     auction->SetCurrentBidder(newBidder->GetGUIDLow());
@@ -358,7 +358,7 @@ std::string BlackMarketAuction::BuildAuctionMailBody(uint32 lowGuid)
     return strm.str();
 }
 
-void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans)
+void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, SQLTransaction& trans)
 {
     uint64 bidder_guid = MAKE_NEW_GUID(auction->GetCurrentBidder(), 0, HIGHGUID_PLAYER);
     Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
