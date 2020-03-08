@@ -407,8 +407,6 @@ void BlackMarketMgr::SendAuctionWon(BlackMarketAuction* auction, SQLTransaction&
         Item* pItem = Item::CreateItem(auction->GetTemplate()->ItemEntry, auction->GetTemplate()->Quantity, bidder);
 
         MailDraft draft(auction->BuildAuctionMailSubject(BMMailAuctionAnswers::BM_AUCTION_WON), auction->BuildAuctionMailBody(auction->GetCurrentBidder()));
-        
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
         if (pItem)
         {
             pItem->SaveToDB(trans);
