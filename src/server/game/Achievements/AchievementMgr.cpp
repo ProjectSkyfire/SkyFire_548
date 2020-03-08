@@ -1601,7 +1601,6 @@ bool AchievementMgr<T>::IsCompletedCriteriaForAchievement(CriteriaEntry const* c
         default:
             return false;
     }
-    return false;
 }
 
 template<class T>
