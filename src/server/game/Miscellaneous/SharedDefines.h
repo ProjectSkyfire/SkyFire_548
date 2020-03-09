@@ -4185,7 +4185,7 @@ enum BattlegroundQueueTypeId
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
-enum GroupJoinBattlegroundResult
+enum class GroupJoinBattlegroundResult
 {
     ERR_BATTLEGROUND_NONE                           = 0,
     ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS           = 2,        // You cannot join the battleground yet because you or one of your party members is flagged as a Deserter.
