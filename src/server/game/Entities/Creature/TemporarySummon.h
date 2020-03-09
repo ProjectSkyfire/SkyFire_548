@@ -42,13 +42,13 @@ class TempSummon : public Creature
     public:
         explicit TempSummon(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject);
         virtual ~TempSummon() { }
-        void Update(uint32 time);
+        void Update(uint32 time) OVERRIDE;
         virtual void InitStats(uint32 lifetime);
         virtual void InitSummon();
         virtual void UnSummon(uint32 msTime = 0);
         void RemoveFromWorld() OVERRIDE;
         void SetTempSummonType(TempSummonType type);
-        void SaveToDB(uint32 /*mapid*/, uint32 /*spawnMask*/) { }
+        void SaveToDB(uint32 /*mapid*/, uint32 /*spawnMask*/) OVERRIDE { }
         Unit* GetSummoner() const;
         Creature* GetSummonerCreatureBase() const;
         uint64 GetSummonerGUID() const { return m_summonerGUID; }
@@ -70,7 +70,7 @@ class Minion : public TempSummon
         void InitStats(uint32 duration) OVERRIDE;
         void RemoveFromWorld() OVERRIDE;
         Unit* GetOwner() const { return m_owner; }
-        float GetFollowAngle() const { return m_followAngle; }
+        float GetFollowAngle() const OVERRIDE { return m_followAngle; }
         void SetFollowAngle(float angle) { m_followAngle = angle; }
         bool IsPetGhoul() const {return GetEntry() == 26125;} // Ghoul may be guardian or pet
         bool IsSpiritWolf() const {return GetEntry() == 29264;} // Spirit wolf from feral spirits

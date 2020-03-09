@@ -185,7 +185,7 @@ class SmartAI : public CreatureAI
         //void sQuestComplete(Player* player, Quest const* quest) OVERRIDE;
         void sQuestReward(Player* player, Quest const* quest, uint32 opt) OVERRIDE;
         bool sOnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex) OVERRIDE;
-        void sOnGameEvent(bool start, uint16 eventId);
+        void sOnGameEvent(bool start, uint16 eventId) OVERRIDE;
 
         uint32 mEscortQuestID;
 
@@ -198,7 +198,7 @@ class SmartAI : public CreatureAI
 
         void RemoveAuras();
 
-        void OnSpellClick(Unit* clicker, bool& result);
+        void OnSpellClick(Unit* clicker, bool& result) OVERRIDE;
 
     private:
         uint32 mFollowCreditType;
@@ -252,7 +252,7 @@ class SmartGameObjectAI : public GameObjectAI
         bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/) OVERRIDE;
         bool QuestAccept(Player* player, Quest const* quest) OVERRIDE;
         bool QuestReward(Player* player, Quest const* quest, uint32 opt) OVERRIDE;
-        uint32 GetDialogStatus(Player* /*player*/);
+        uint32 GetDialogStatus(Player* /*player*/) OVERRIDE;
         void Destroyed(Player* player, uint32 eventId) OVERRIDE;
         void SetData(uint32 id, uint32 value) OVERRIDE;
         void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
