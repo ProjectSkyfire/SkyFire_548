@@ -11,12 +11,13 @@
 matrix:
   include:
     - compiler: clang
-      env: COMPILER=clang++-10
+      env: CXXCOMPILER=clang++-10 CCOMPILER=clang-10
       addons:
         apt:
           sources:
-            - llvm-toolchain-bionic-10
             - ubuntu-toolchain-r-test
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
           packages:
             - clang-10
             - libc++-10-dev
@@ -24,7 +25,7 @@ matrix:
             - lldb-10
             - lld-10
     - compiler: gcc
-      env: COMPILER=g++-9
+      env: CXXCOMPILER=g++-9 CCOMPILER=gcc-9
       addons:
         apt:
           sources:
@@ -57,8 +58,10 @@ before_install:
   - sudo apt-get install openssl libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
   
 install:
-  - export CXX=${COMPILER}
+  - export CXX=${CXXCOMPILER}
+  - export CC=${CCOMPILER}
   - ${CXX} --version
+  - ${CCOMPILER} --version
 
 before_script:
   - mkdir build
