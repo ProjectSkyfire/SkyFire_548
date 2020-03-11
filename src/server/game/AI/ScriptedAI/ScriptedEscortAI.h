@@ -95,7 +95,7 @@ struct npc_escortAI : public ScriptedAI
         void SetEscortPaused(bool on);
 
         bool HasEscortState(uint32 escortState) { return (m_uiEscortState & escortState); }
-        virtual bool IsEscorted() { return (m_uiEscortState & STATE_ESCORT_ESCORTING); }
+        virtual bool IsEscorted() OVERRIDE { return (m_uiEscortState & STATE_ESCORT_ESCORTING); }
 
         void SetMaxPlayerDistance(float newMax) { MaxPlayerDistance = newMax; }
         float GetMaxPlayerDistance() { return MaxPlayerDistance; }

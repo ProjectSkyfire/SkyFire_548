@@ -67,13 +67,13 @@ public:
             work = false;
         }
 
-        void MovementInform(uint32 /*type*/, uint32 id)
+        void MovementInform(uint32 /*type*/, uint32 id) OVERRIDE
         {
             if (id == 1)
                 work = true;
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id != SPELL_AWAKEN_PEON)
                 return;

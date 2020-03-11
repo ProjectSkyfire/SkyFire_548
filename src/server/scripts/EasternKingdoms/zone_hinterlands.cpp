@@ -60,7 +60,7 @@ class npc_00x09hl : public CreatureScript
 public:
     npc_00x09hl() : CreatureScript("npc_00x09hl") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_RESQUE_OOX_09)
         {
@@ -90,7 +90,7 @@ public:
 
         void Reset() OVERRIDE { }
 
-        void WaypointReached(uint32 waypointId)
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             switch (waypointId)
             {
@@ -108,7 +108,7 @@ public:
             }
         }
 
-        void WaypointStart(uint32 uiPointId)
+        void WaypointStart(uint32 uiPointId) OVERRIDE
         {
             switch (uiPointId)
             {
@@ -133,7 +133,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) OVERRIDE
         {
             if (who->GetEntry() == NPC_MARAUDING_OWL || who->GetEntry() == NPC_VILE_AMBUSHER)
                 return;
