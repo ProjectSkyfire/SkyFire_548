@@ -8,13 +8,30 @@
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+matrix:
+  include:
+    - compiler: clang
+      env: COMPILER=clang++-10
+      apt:
+        packages:
+          - clang-10.0
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-bionic-10
+    - compiler:gcc
+      env: COMPILER=g++-9
+      apt:
+        packages:
+          - gcc-9
+          - g++-9
+        sources:
+          - ubuntu-toolchain-r-test
 
 os: linux
 dist: bionic
+language: cpp
 sudo: required
 group: stable
-
-language: cpp
 
 git:
   depth: 1
@@ -22,23 +39,6 @@ git:
 branches:
   only:
     - master
-
-matrix:
-  include:
-    - env: COMPILER=clang++-10
-        apt:
-          packages:
-            - clang-10.0
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-bionic-10
-
-    - env: COMPILER=g++-9
-        apt:
-          packages:
-            - g++-9
-          sources:
-            - ubuntu-toolchain-r-test
 
 before_install:
   - sudo rm -rf /var/lib/dpkg/lock
