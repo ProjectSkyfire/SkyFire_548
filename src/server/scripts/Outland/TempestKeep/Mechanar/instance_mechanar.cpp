@@ -44,7 +44,7 @@ class instance_mechanar : public InstanceMapScript
             }
 
 
-            void OnGameObjectCreate(GameObject* gameObject)
+            void OnGameObjectCreate(GameObject* gameObject) OVERRIDE
             {
                 switch (gameObject->GetEntry())
                 {

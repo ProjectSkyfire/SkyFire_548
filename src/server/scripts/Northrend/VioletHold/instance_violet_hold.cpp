@@ -824,7 +824,7 @@ public:
             }
         }
 
-        void ProcessEvent(WorldObject* /*go*/, uint32 uiEventId)
+        void ProcessEvent(WorldObject* /*go*/, uint32 uiEventId) OVERRIDE
         {
             switch (uiEventId)
             {
