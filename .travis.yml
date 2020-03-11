@@ -14,20 +14,24 @@ matrix:
       env: COMPILER=clang++-10
       addons:
         apt:
-          packages:
-            - clang-10.0
           sources:
-            - ubuntu-toolchain-r-test
             - llvm-toolchain-bionic-10
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-10
+            - libc++-10-dev
+            - libc++abi-10-dev
+            - lldb-10
+            - lld-10
     - compiler: gcc
       env: COMPILER=g++-9
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
             - gcc-9
             - g++-9
-          sources:
-            - ubuntu-toolchain-r-test
 
 os: linux
 dist: bionic
