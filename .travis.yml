@@ -12,20 +12,22 @@ matrix:
   include:
     - compiler: clang
       env: COMPILER=clang++-10
-      apt:
-        packages:
-          - clang-10.0
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-bionic-10
-    - compiler:gcc
+      addons:
+        apt:
+          packages:
+            - clang-10.0
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-bionic-10
+    - compiler: gcc
       env: COMPILER=g++-9
-      apt:
-        packages:
-          - gcc-9
-          - g++-9
-        sources:
-          - ubuntu-toolchain-r-test
+      addons:
+        apt:
+          packages:
+            - gcc-9
+            - g++-9
+          sources:
+            - ubuntu-toolchain-r-test
 
 os: linux
 dist: bionic
