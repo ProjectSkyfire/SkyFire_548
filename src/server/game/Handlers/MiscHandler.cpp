@@ -1761,10 +1761,10 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recvData*/)
     if (Group* group = _player->GetGroup())
     {
         if (group->IsLeader(_player->GetGUID()))
-            group->ResetInstances(INSTANCE_RESET_ALL, false, _player);
+            group->ResetInstances(InstanceResetMethod::INSTANCE_RESET_ALL, false, _player);
     }
     else
-        _player->ResetInstances(INSTANCE_RESET_ALL, false);
+        _player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_ALL, false);
 }
 
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
@@ -1825,13 +1825,13 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
             }
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
-            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false, _player);
+            group->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, false, _player);
             group->SetDungeonDifficulty(DifficultyID(difficulty));
         }
     }
     else
     {
-        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false);
+        _player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, false);
         _player->SetDungeonDifficulty(DifficultyID(difficulty));
         _player->SendDungeonDifficulty();
     }
@@ -1892,13 +1892,13 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
             }
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
-            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
+            group->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
             group->SetRaidDifficulty(DifficultyID(difficulty));
         }
     }
     else
     {
-        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true);
+        _player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, true);
         _player->SetRaidDifficulty(DifficultyID(difficulty));
         _player->SendRaidDifficulty();
     }

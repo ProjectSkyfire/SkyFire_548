@@ -162,6 +162,7 @@ class Group
     public:
         struct MemberSlot
         {
+            MemberSlot() : guid(0), group(0), flags(0), roles(0), readyCheckHasResponded(false) { }
             uint64      guid;
             std::string name;
             uint8       group;
@@ -265,7 +266,7 @@ class Group
         void SetDungeonDifficulty(DifficultyID difficulty);
         void SetRaidDifficulty(DifficultyID difficulty);
         bool InCombatToInstance(uint32 instanceId);
-        void ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo);
+        void ResetInstances(InstanceResetMethod method, bool isRaid, Player* SendMsgTo);
 
         void ReadyCheck(bool state) { _readyCheckInProgress = state; }
         void ReadyCheckMemberHasResponded(uint64 guid);
@@ -341,7 +342,7 @@ class Group
         DifficultyID        m_raidDifficulty;
         Battleground*       m_bgGroup;
         Battlefield*        m_bfGroup;
-        uint64              m_targetIcons[TARGETICONCOUNT];
+        uint64              m_targetIcons[TARGETICONCOUNT] = { };
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
         uint64              m_looterGuid;

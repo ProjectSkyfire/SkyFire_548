@@ -2431,7 +2431,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_REP_BY_FACTION);
                 stmt->setUInt32(0, oldReputation);
                 stmt->setUInt32(1, lowGuid);
-                PreparedQueryResult result = CharacterDatabase.Query(stmt);
+                result = CharacterDatabase.Query(stmt);
 
                 if (!result)
                 {
@@ -2441,7 +2441,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                     return;
                 }
 
-                Field* fields = result->Fetch();
+                fields = result->Fetch();
                 int32 oldDBRep = fields[0].GetInt32();
                 FactionEntry const* factionEntry = sFactionStore.LookupEntry(oldReputation);
 

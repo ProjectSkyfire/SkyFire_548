@@ -631,7 +631,7 @@ class Map : public GridRefManager<NGridType>
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
 };
 
-enum InstanceResetMethod
+enum class InstanceResetMethod
 {
     INSTANCE_RESET_ALL,
     INSTANCE_RESET_CHANGE_DIFFICULTY,
@@ -646,16 +646,16 @@ class InstanceMap : public Map
     public:
         InstanceMap(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode, Map* _parent);
         ~InstanceMap();
-        bool AddPlayerToMap(Player*);
-        void RemovePlayerFromMap(Player*, bool);
-        void Update(const uint32);
+        bool AddPlayerToMap(Player*) OVERRIDE;
+        void RemovePlayerFromMap(Player*, bool) OVERRIDE;
+        void Update(const uint32) OVERRIDE;
         void CreateInstanceData(bool load);
-        bool Reset(uint8 method);
+        bool Reset(InstanceResetMethod method);
         uint32 GetScriptId() { return i_script_id; }
         InstanceScript* GetInstanceScript() { return i_data; }
         void PermBindAllPlayers(Player* source);
-        void UnloadAll();
-        bool CanEnter(Player* player);
+        void UnloadAll() OVERRIDE;
+        bool CanEnter(Player* player) OVERRIDE;
         void SendResetWarnings(uint32 timeLeft) const;
         void SetResetSchedule(bool on);
 
@@ -676,12 +676,12 @@ class BattlegroundMap : public Map
         BattlegroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent, uint8 spawnMode);
         ~BattlegroundMap();
 
-        bool AddPlayerToMap(Player*);
-        void RemovePlayerFromMap(Player*, bool);
-        bool CanEnter(Player* player);
+        bool AddPlayerToMap(Player*) OVERRIDE;
+        void RemovePlayerFromMap(Player*, bool) OVERRIDE;
+        bool CanEnter(Player* player) OVERRIDE;
         void SetUnload();
         //void UnloadAll(bool pForce);
-        void RemoveAllPlayers();
+        void RemoveAllPlayers() OVERRIDE;
 
         virtual void InitVisibilityDistance();
         Battleground* GetBG() { return m_bg; }

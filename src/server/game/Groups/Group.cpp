@@ -438,8 +438,8 @@ bool Group::AddMember(Player* player)
     {
         // reset the new member's instances, unless he is currently in one of them
         // including raid/heroic instances that they are not permanently bound to!
-        player->ResetInstances(INSTANCE_RESET_GROUP_JOIN, false);
-        player->ResetInstances(INSTANCE_RESET_GROUP_JOIN, true);
+        player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_JOIN, false);
+        player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_JOIN, true);
 
         if (player->getLevel() >= LEVELREQUIREMENT_HEROIC)
         {
@@ -777,8 +777,8 @@ void Group::Disband(bool hideDestroy /* = false */)
 
         CharacterDatabase.CommitTransaction(trans);
 
-        ResetInstances(INSTANCE_RESET_GROUP_DISBAND, false, NULL);
-        ResetInstances(INSTANCE_RESET_GROUP_DISBAND, true, NULL);
+        ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND, false, NULL);
+        ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND, true, NULL);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_LFG_DATA);
         stmt->setUInt32(0, m_dbStoreId);
@@ -2374,7 +2374,7 @@ bool Group::InCombatToInstance(uint32 instanceId)
     return false;
 }
 
-void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
+void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* SendMsgTo)
 {
     if (isBGGroup() || isBFGroup())
         return;
@@ -2392,13 +2392,13 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
     {
         InstanceSave* instanceSave = itr->second.save;
         const MapEntry* entry = sMapStore.LookupEntry(itr->first);
-        if (!entry || entry->IsRaid() != isRaid || (!instanceSave->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
+        if (!entry || entry->IsRaid() != isRaid || (!instanceSave->CanReset() && method != InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND))
         {
             ++itr;
             continue;
         }
 
-        if (method == INSTANCE_RESET_ALL)
+        if (method == InstanceResetMethod::INSTANCE_RESET_ALL)
         {
             // the "reset all instances" method can only reset normal maps
             if (entry->map_type == MAP_RAID || diff == DIFFICULTY_HEROIC)
@@ -2411,7 +2411,7 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
         bool isEmpty = true;
         // if the map is loaded, reset it
         Map* map = sMapMgr->FindMap(instanceSave->GetMapId(), instanceSave->GetInstanceId());
-        if (map && map->IsInstance() && !(method == INSTANCE_RESET_GROUP_DISBAND && !instanceSave->CanReset()))
+        if (map && map->IsInstance() && !(method == InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND && !instanceSave->CanReset()))
         {
             if (instanceSave->CanReset())
                 isEmpty = ((InstanceMap*)map)->Reset(method);
@@ -2439,7 +2439,7 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
                 SendMsgTo->SendResetInstanceSuccess(instanceSave->GetMapId());
         }
 
-        if (isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+        if (isEmpty || method == InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND || method == InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY)
         {
             // do not reset the instance, just unbind if others are permanently bound to it
             if (instanceSave->CanReset())
