@@ -662,7 +662,7 @@ class InstanceMap : public Map
         uint32 GetMaxPlayers() const;
         uint32 GetMaxResetDelay() const;
 
-        virtual void InitVisibilityDistance();
+        virtual void InitVisibilityDistance() OVERRIDE;
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
@@ -683,7 +683,7 @@ class BattlegroundMap : public Map
         //void UnloadAll(bool pForce);
         void RemoveAllPlayers() OVERRIDE;
 
-        virtual void InitVisibilityDistance();
+        virtual void InitVisibilityDistance() OVERRIDE;
         Battleground* GetBG() { return m_bg; }
         void SetBG(Battleground* bg) { m_bg = bg; }
     private:

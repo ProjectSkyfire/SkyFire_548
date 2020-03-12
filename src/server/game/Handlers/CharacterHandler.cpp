@@ -2279,7 +2279,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
                 stmt->setUInt32(0, lowGuid);
 
-                PreparedQueryResult result = CharacterDatabase.Query(stmt);
+                result = CharacterDatabase.Query(stmt);
                 if (result)
                     if (Guild* guild = sGuildMgr->GetGuildById((result->Fetch()[0]).GetUInt32()))
                         guild->DeleteMember(MAKE_NEW_GUID(lowGuid, 0, HIGHGUID_PLAYER));
