@@ -15,7 +15,7 @@ project(Project_Skyfire)
 if( UNIX )
   cmake_minimum_required(VERSION 3.10.2)
 else()
-  cmake_minimum_required(VERSION 3.15.1)
+  cmake_minimum_required(VERSION 3.17.0)
 endif()
 
 # CMake policies (can not be handled elsewhere)
