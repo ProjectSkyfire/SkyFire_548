@@ -375,6 +375,8 @@ public:
                             case GOState::GO_STATE_ACTIVE_ALTERNATIVE:
                                 pMainDoor->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                                 break;
+                            default:
+                                break;
                         }
                     }
                     break;

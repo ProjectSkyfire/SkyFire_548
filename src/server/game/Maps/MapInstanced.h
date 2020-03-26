@@ -62,7 +62,7 @@ class MapInstanced : public Map
         }
 
         InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
-        virtual void InitVisibilityDistance();
+        virtual void InitVisibilityDistance() OVERRIDE;
 
     private:
         InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave* save, DifficultyID difficulty);
