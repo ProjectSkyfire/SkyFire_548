@@ -38,7 +38,7 @@ enum LevelLimit
     STRONG_MAX_LEVEL = 255,
 };
 
-enum BattlegroundBracketId                                  // bracketId for level ranges
+enum class BattlegroundBracketId                             // bracketId for level ranges
 {
     BG_BRACKET_ID_FIRST          = 0,
     BG_BRACKET_ID_LAST           = 16
