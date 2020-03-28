@@ -59,7 +59,6 @@ enum Sound
 
 enum Misc
 {
-    PULL_RANGE                    = 50,
     ABUSE_BUG_RANGE               = 20,
     VEKLOR_DIST                   = 20,                      // VL will not come to melee when attacking
     TELEPORTTIME                  = 30000
@@ -303,8 +302,8 @@ struct boss_twinemperorsAI : public ScriptedAI
         if (me->CanCreatureAttack(who))
         {
             float attackRadius = me->GetAttackDistance(who);
-            if (attackRadius < PULL_RANGE)
-                attackRadius = PULL_RANGE;
+            if (attackRadius < 50.0f)
+                attackRadius = 50.0f;
             if (me->IsWithinDistInMap(who, attackRadius) && me->GetDistanceZ(who) <= /*CREATURE_Z_ATTACK_RANGE*/7 /*there are stairs*/)
             {
                 //if (who->HasStealthAura())

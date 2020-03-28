@@ -47,7 +47,6 @@ enum Misc
 {
     DATA_EMBRACE_DMG                              = 20000,
     H_DATA_EMBRACE_DMG                            = 40000,
-    DATA_SPHERE_DISTANCE                          = 15
 };
 
 #define DATA_SPHERE_ANGLE_OFFSET                  0.7f
@@ -174,8 +173,8 @@ class boss_taldaram : public CreatureScript
                             if (Creature* sphere = DoSpawnCreature(CREATURE_FLAME_SPHERE, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                             {
                                 angle = sphere->GetAngle(sphereTarget);
-                                x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE * std::cos(angle);
-                                y = sphere->GetPositionY() + DATA_SPHERE_DISTANCE * std::sin(angle);
+                                x = sphere->GetPositionX() + 15.0f * std::cos(angle);
+                                y = sphere->GetPositionY() + 15.0f * std::sin(angle);
                                 sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
                             }
 
@@ -185,8 +184,8 @@ class boss_taldaram : public CreatureScript
                                 if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_1, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                                 {
                                     angle = sphere->GetAngle(sphereTarget) + DATA_SPHERE_ANGLE_OFFSET;
-                                    x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE/2 * std::cos(angle);
-                                    y = sphere->GetPositionY() + DATA_SPHERE_DISTANCE/2 * std::sin(angle);
+                                    x = sphere->GetPositionX() + 15.0f / 2.0f * std::cos(angle);
+                                    y = sphere->GetPositionY() + 15.0f / 2.0f * std::sin(angle);
                                     sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
                                 }
 
@@ -194,8 +193,8 @@ class boss_taldaram : public CreatureScript
                                 if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_2, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                                 {
                                     angle = sphere->GetAngle(sphereTarget) - DATA_SPHERE_ANGLE_OFFSET;
-                                    x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE/2 * std::cos(angle);
-                                    y = sphere->GetPositionY() + DATA_SPHERE_DISTANCE/2 * std::sin(angle);
+                                    x = sphere->GetPositionX() + 15.0f / 2 * std::cos(angle);
+                                    y = sphere->GetPositionY() + 15.0f / 2 * std::sin(angle);
                                     sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
                                 }
                             }
@@ -298,8 +297,8 @@ class boss_taldaram : public CreatureScript
             }
 
         private:
-            uint64 _embraceTargetGUID;
-            uint32 _embraceTakenDamage;
+            uint64 _embraceTargetGUID = 0;
+            uint32 _embraceTakenDamage = 0;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -349,7 +348,7 @@ class npc_taldaram_flamesphere : public CreatureScript
             }
 
         private:
-            uint32 _despawnTimer;
+            uint32 _despawnTimer = 0;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE

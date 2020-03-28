@@ -59,7 +59,6 @@ enum Creatures
 enum Misc
 {
     DATA_MAX_SPARKS                               = 5,
-    DATA_MAX_SPARK_DISTANCE                       = 90, // Distance to boss - prevent runs through the whole instance
     DATA_POINT_CALLBACK                           = 0
 };
 
@@ -354,7 +353,7 @@ public:
                     Creature* pIonar = instance->instance->GetCreature(instance->GetData64(DATA_IONAR));
                     if (pIonar && pIonar->IsAlive())
                     {
-                        if (me->GetDistance(pIonar) > DATA_MAX_SPARK_DISTANCE)
+                        if (me->GetDistance(pIonar) > 90.0f)
                         {
                             Position pos;
                             pIonar->GetPosition(&pos);
