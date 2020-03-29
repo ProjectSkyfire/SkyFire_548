@@ -1150,7 +1150,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     // original action bar
     for (PlayerCreateInfoActions::const_iterator action_itr = info->action.begin(); action_itr != info->action.end(); ++action_itr)
-        addActionButton(action_itr->button, action_itr->action, action_itr->type);
+        addActionButton(action_itr->button, action_itr->action, ActionButtonType(action_itr->type));
 
     // original items
     if (CharStartOutfitEntry const* oEntry = GetCharStartOutfitEntry(createInfo->Race, createInfo->Class, createInfo->Gender))
@@ -6883,7 +6883,7 @@ void Player::SendActionButtons(uint32 state) const
     SF_LOG_INFO("network", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
 }
 
-bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
+bool Player::IsActionButtonDataValid(uint8 button, uint32 action, ActionButtonType type)
 {
     if (button >= MAX_ACTION_BUTTONS)
     {
@@ -6899,7 +6899,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
 
     switch (type)
     {
-        case ACTION_BUTTON_SPELL:
+        case ActionButtonType::ACTION_BUTTON_SPELL:
             if (!sSpellMgr->GetSpellInfo(action))
             {
                 SF_LOG_ERROR("entities.player", "Spell action %u not added into button %u for player %s (GUID: %u): spell not exist", action, button, GetName().c_str(), GUID_LOPART(GetGUID()));
@@ -6912,28 +6912,28 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
                 return false;
             }
             break;
-        case ACTION_BUTTON_ITEM:
+        case ActionButtonType::ACTION_BUTTON_ITEM:
             if (!sObjectMgr->GetItemTemplate(action))
             {
                 SF_LOG_ERROR("entities.player", "Item action %u not added into button %u for player %s (GUID: %u): item not exist", action, button, GetName().c_str(), GUID_LOPART(GetGUID()));
                 return false;
             }
             break;
-        case ACTION_BUTTON_C:
-        case ACTION_BUTTON_CMACRO:
-        case ACTION_BUTTON_MACRO:
-        case ACTION_BUTTON_EQSET:
-        case ACTION_BUTTON_DROPDOWN:
+        case ActionButtonType::ACTION_BUTTON_C:
+        case ActionButtonType::ACTION_BUTTON_CMACRO:
+        case ActionButtonType::ACTION_BUTTON_MACRO:
+        case ActionButtonType::ACTION_BUTTON_EQSET:
+        case ActionButtonType::ACTION_BUTTON_DROPDOWN:
             break;
         default:
-            SF_LOG_ERROR("entities.player", "Unknown action type %u", type);
+            SF_LOG_ERROR("entities.player", "Unknown action type %u", uint8(type));
             return false;                                          // other cases not checked at this moment
     }
 
     return true;
 }
 
-ActionButton* Player::addActionButton(uint8 button, uint32 action, uint8 type)
+ActionButton* Player::addActionButton(uint8 button, uint32 action, ActionButtonType type)
 {
     if (!IsActionButtonDataValid(button, action, type))
         return NULL;
@@ -6951,13 +6951,13 @@ ActionButton* Player::addActionButton(uint8 button, uint32 action, uint8 type)
 void Player::removeActionButton(uint8 button)
 {
     ActionButtonList::iterator buttonItr = m_actionButtons.find(button);
-    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ACTIONBUTTON_DELETED)
+    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ActionButtonUpdateState::ACTIONBUTTON_DELETED)
         return;
 
-    if (buttonItr->second.uState == ACTIONBUTTON_NEW)
+    if (buttonItr->second.uState == ActionButtonUpdateState::ACTIONBUTTON_NEW)
         m_actionButtons.erase(buttonItr);                   // new and not saved
     else
-        buttonItr->second.uState = ACTIONBUTTON_DELETED;    // saved, will deleted at next save
+        buttonItr->second.uState = ActionButtonUpdateState::ACTIONBUTTON_DELETED;    // saved, will deleted at next save
 
     SF_LOG_DEBUG("entities.player", "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow());
 }
@@ -6965,7 +6965,7 @@ void Player::removeActionButton(uint8 button)
 ActionButton const* Player::GetActionButton(uint8 button)
 {
     ActionButtonList::iterator buttonItr = m_actionButtons.find(button);
-    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ACTIONBUTTON_DELETED)
+    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ActionButtonUpdateState::ACTIONBUTTON_DELETED)
         return NULL;
 
     return &buttonItr->second;
@@ -17735,7 +17735,7 @@ void Player::_LoadEquipmentSets(PreparedQueryResult result)
         eqSet.Name      = fields[2].GetString();
         eqSet.IconName  = fields[3].GetString();
         eqSet.IgnoreMask = fields[4].GetUInt32();
-        eqSet.state     = EQUIPMENT_SET_UNCHANGED;
+        eqSet.state     = EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED;
 
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
             eqSet.Items[i] = fields[5+i].GetUInt32();
@@ -18586,14 +18586,14 @@ void Player::_LoadActions(PreparedQueryResult result)
             uint32 action = fields[1].GetUInt32();
             uint8 type = fields[2].GetUInt8();
 
-            if (ActionButton* ab = addActionButton(button, action, type))
-                ab->uState = ACTIONBUTTON_UNCHANGED;
+            if (ActionButton* ab = addActionButton(button, action, ActionButtonType(type)))
+                ab->uState = ActionButtonUpdateState::ACTIONBUTTON_UNCHANGED;
             else
             {
                 SF_LOG_ERROR("entities.player", "  ...at loading, and will deleted in DB also");
 
                 // Will deleted in DB at next save (it can create data until save but marked as deleted)
-                m_actionButtons[button].uState = ACTIONBUTTON_DELETED;
+                m_actionButtons[button].uState = ActionButtonUpdateState::ACTIONBUTTON_DELETED;
             }
         } while (result->NextRow());
     }
@@ -20285,7 +20285,7 @@ void Player::_SaveActions(SQLTransaction& trans)
     {
         switch (itr->second.uState)
         {
-            case ACTIONBUTTON_NEW:
+            case ActionButtonUpdateState::ACTIONBUTTON_NEW:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt8(1, GetActiveSpec());
@@ -20294,10 +20294,10 @@ void Player::_SaveActions(SQLTransaction& trans)
                 stmt->setUInt8(4, uint8(itr->second.GetType()));
                 trans->Append(stmt);
 
-                itr->second.uState = ACTIONBUTTON_UNCHANGED;
+                itr->second.uState = ActionButtonUpdateState::ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
-            case ACTIONBUTTON_CHANGED:
+            case ActionButtonUpdateState::ACTIONBUTTON_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_ACTION);
                 stmt->setUInt32(0, itr->second.GetAction());
                 stmt->setUInt8(1, uint8(itr->second.GetType()));
@@ -20306,10 +20306,10 @@ void Player::_SaveActions(SQLTransaction& trans)
                 stmt->setUInt8(4, GetActiveSpec());
                 trans->Append(stmt);
 
-                itr->second.uState = ACTIONBUTTON_UNCHANGED;
+                itr->second.uState = ActionButtonUpdateState::ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
-            case ACTIONBUTTON_DELETED:
+            case ActionButtonUpdateState::ACTIONBUTTON_DELETED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_ACTION_BY_BUTTON_SPEC);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt8(1, itr->first);
@@ -26094,7 +26094,7 @@ uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
 
     AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == runeType)
+        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == int32(runeType))
             cooldown *= 1.0f - (*i)->GetAmount() / 100.0f;
 
     // Runes cooldown are now affected by player's haste from equipment ...
@@ -26188,12 +26188,12 @@ void Player::AddRunePower(uint8 index)
 
 static RuneType runeSlotTypes[MAX_RUNES] =
 {
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
+    /*0*/ RuneType::RUNE_BLOOD,
+    /*1*/ RuneType::RUNE_BLOOD,
+    /*2*/ RuneType::RUNE_UNHOLY,
+    /*3*/ RuneType::RUNE_UNHOLY,
+    /*4*/ RuneType::RUNE_FROST,
+    /*5*/ RuneType::RUNE_FROST
 };
 
 void Player::InitRunes()
@@ -26204,7 +26204,7 @@ void Player::InitRunes()
     m_runes = new Runes;
 
     m_runes->runeState = 0;
-    m_runes->lastUsedRune = RUNE_BLOOD;
+    m_runes->lastUsedRune = RuneType::RUNE_BLOOD;
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
@@ -26215,7 +26215,7 @@ void Player::InitRunes()
         m_runes->SetRuneState(i);
     }
 
-    for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
+    for (uint8 i = 0; i < uint8(RuneType::NUM_RUNE_TYPES); ++i)
         SetFloatValue(PLAYER_FIELD_RUNE_REGEN + i, 0.1f);                  // set a base regen timer equal to 10 sec
 }
 
@@ -27080,7 +27080,7 @@ void Player::SendEquipmentSetList()
 
     for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
     {
-        if (itr->second.state == EQUIPMENT_SET_DELETED)
+        if (itr->second.state == EquipmentSetUpdateState::EQUIPMENT_SET_DELETED)
             continue;
 
         ObjectGuid setGuid = itr->second.Guid;
@@ -27114,7 +27114,7 @@ void Player::SendEquipmentSetList()
 
     for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
     {
-        if (itr->second.state == EQUIPMENT_SET_DELETED)
+        if (itr->second.state == EquipmentSetUpdateState::EQUIPMENT_SET_DELETED)
             continue;
 
         ObjectGuid setGuid = itr->second.Guid;
@@ -27206,7 +27206,7 @@ void Player::SetEquipmentSet(uint32 index, EquipmentSet const& eqset)
         GetSession()->SendPacket(&data);
     }
 
-    eqslot.state = old_state == EQUIPMENT_SET_NEW ? EQUIPMENT_SET_NEW : EQUIPMENT_SET_CHANGED;
+    eqslot.state = old_state == EquipmentSetUpdateState::EQUIPMENT_SET_NEW ? EquipmentSetUpdateState::EQUIPMENT_SET_NEW : EquipmentSetUpdateState::EQUIPMENT_SET_CHANGED;
 }
 
 void Player::_SaveEquipmentSets(SQLTransaction& trans)
@@ -27219,10 +27219,10 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
         uint8 j = 0;
         switch (eqset.state)
         {
-            case EQUIPMENT_SET_UNCHANGED:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED:
                 ++itr;
                 break;                                      // nothing do
-            case EQUIPMENT_SET_CHANGED:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_EQUIP_SET);
                 stmt->setString(j++, eqset.Name.c_str());
                 stmt->setString(j++, eqset.IconName.c_str());
@@ -27233,10 +27233,10 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
                 stmt->setUInt64(j++, eqset.Guid);
                 stmt->setUInt32(j, index);
                 trans->Append(stmt);
-                eqset.state = EQUIPMENT_SET_UNCHANGED;
+                eqset.state = EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED;
                 ++itr;
                 break;
-            case EQUIPMENT_SET_NEW:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_NEW:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_EQUIP_SET);
                 stmt->setUInt32(j++, GetGUIDLow());
                 stmt->setUInt64(j++, eqset.Guid);
@@ -27247,10 +27247,10 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
                 for (uint8 i=0; i<EQUIPMENT_SLOT_END; ++i)
                     stmt->setUInt32(j++, eqset.Items[i]);
                 trans->Append(stmt);
-                eqset.state = EQUIPMENT_SET_UNCHANGED;
+                eqset.state = EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED;
                 ++itr;
                 break;
-            case EQUIPMENT_SET_DELETED:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_DELETED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EQUIP_SET);
                 stmt->setUInt64(0, eqset.Guid);
                 trans->Append(stmt);
@@ -27287,10 +27287,10 @@ void Player::DeleteEquipmentSet(uint64 setGuid)
     {
         if (itr->second.Guid == setGuid)
         {
-            if (itr->second.state == EQUIPMENT_SET_NEW)
+            if (itr->second.state == EquipmentSetUpdateState::EQUIPMENT_SET_NEW)
                 m_EquipmentSets.erase(itr);
             else
-                itr->second.state = EQUIPMENT_SET_DELETED;
+                itr->second.state = EquipmentSetUpdateState::EQUIPMENT_SET_DELETED;
             break;
         }
     }

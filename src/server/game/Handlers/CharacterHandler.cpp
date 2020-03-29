@@ -1866,7 +1866,7 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
     eqSet.Guid = setGuid;
     eqSet.Name = name;
     eqSet.IconName = iconName;
-    eqSet.state = EQUIPMENT_SET_NEW;
+    eqSet.state = EquipmentSetUpdateState::EQUIPMENT_SET_NEW;
 
     _player->SetEquipmentSet(index, eqSet);
 }

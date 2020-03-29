@@ -4974,7 +4974,7 @@ void AuraEffect::HandleAuraConvertRune(AuraApplication const* aurApp, uint8 mode
     {
         for (uint32 i = 0; i < MAX_RUNES && runes; ++i)
         {
-            if (GetMiscValue() != player->GetCurrentRune(i))
+            if (RuneType(GetMiscValue()) != player->GetCurrentRune(i))
                 continue;
             if (!player->GetRuneCooldown(i))
             {

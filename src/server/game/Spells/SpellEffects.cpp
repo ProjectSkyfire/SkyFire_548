@@ -5469,7 +5469,7 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
 
         for (uint32 i = 0; i < MAX_RUNES; ++i)
         {
-            if (player->GetRuneCooldown(i) && (player->GetCurrentRune(i) == RUNE_FROST ||  player->GetCurrentRune(i) == RUNE_DEATH))
+            if (player->GetRuneCooldown(i) && (player->GetCurrentRune(i) == RuneType::RUNE_FROST ||  player->GetCurrentRune(i) == RuneType::RUNE_DEATH))
                 player->SetRuneCooldown(i, 0);
         }
     }
@@ -5810,7 +5810,7 @@ void Spell::EffectCastButtons(SpellEffIndex effIndex)
     for (; n_buttons; --n_buttons, ++button_id)
     {
         ActionButton const* ab = p_caster->GetActionButton(button_id);
-        if (!ab || ab->GetType() != ACTION_BUTTON_SPELL)
+        if (!ab || ab->GetType() != ActionButtonType::ACTION_BUTTON_SPELL)
             continue;
 
         //! Action button data is unverified when it's set so it can be "hacked"

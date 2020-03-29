@@ -6671,7 +6671,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
 
                     RuneType rune = ToPlayer()->GetLastUsedRune();
                     // can't proc from death rune use
-                    if (rune == RUNE_DEATH)
+                    if (rune == RuneType::RUNE_DEATH)
                         return false;
                     AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
                     if (!aurEff)
@@ -6690,14 +6690,14 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     {
                         if (dummySpell->SpellIconID == 2622)
                         {
-                            if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                player->GetBaseRune(i) == RUNE_BLOOD)
+                            if (player->GetCurrentRune(i) == RuneType::RUNE_DEATH ||
+                                player->GetBaseRune(i) == RuneType::RUNE_BLOOD)
                                 continue;
                         }
                         else
                         {
-                            if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                player->GetBaseRune(i) != RUNE_BLOOD)
+                            if (player->GetCurrentRune(i) == RuneType::RUNE_DEATH ||
+                                player->GetBaseRune(i) != RuneType::RUNE_BLOOD)
                                 continue;
                         }
                         if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))
@@ -6705,7 +6705,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
 
                         --runesLeft;
                         // Mark aura as used
-                        player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                        player->AddRuneByAuraEffect(i, RuneType::RUNE_DEATH, aurEff);
                     }
                     return true;
                 }

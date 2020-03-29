@@ -323,7 +323,7 @@ enum TrainerSpellState
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
-enum ActionButtonUpdateState
+enum class ActionButtonUpdateState
 {
     ACTIONBUTTON_UNCHANGED  = 0,
     ACTIONBUTTON_CHANGED    = 1,
@@ -331,7 +331,7 @@ enum ActionButtonUpdateState
     ACTIONBUTTON_DELETED    = 3
 };
 
-enum ActionButtonType : uint8
+enum class ActionButtonType : uint8
 {
     ACTION_BUTTON_SPELL    = 0x00,
     ACTION_BUTTON_C        = 0x01,
@@ -360,7 +360,7 @@ enum ReputationSource
 
 struct ActionButton
 {
-    ActionButton() : packedData(0), uState(ACTIONBUTTON_NEW) { }
+    ActionButton() : packedData(0), uState(ActionButtonUpdateState::ACTIONBUTTON_NEW) { }
 
     uint64 packedData;
     ActionButtonUpdateState uState;
@@ -372,7 +372,7 @@ struct ActionButton
     }
     uint32 GetHiType() const
     {
-        return uint32(GetType() << 24);
+        return uint32(uint8(GetType()) << 24);
     }
     uint32 GetAction() const 
     { 
@@ -382,11 +382,11 @@ struct ActionButton
     void SetActionAndType(uint32 action, ActionButtonType type)
     {
         uint64 newData = uint64(action) | (uint64(type) << 56);
-        if (newData != packedData || uState == ACTIONBUTTON_DELETED)
+        if (newData != packedData || uState == ActionButtonUpdateState::ACTIONBUTTON_DELETED)
         {
             packedData = newData;
-            if (uState != ACTIONBUTTON_NEW)
-                uState = ACTIONBUTTON_CHANGED;
+            if (uState != ActionButtonUpdateState::ACTIONBUTTON_NEW)
+                uState = ActionButtonUpdateState::ACTIONBUTTON_CHANGED;
         }
     }
 };
@@ -493,7 +493,7 @@ enum RuneCooldowns
     RUNE_MISS_COOLDOWN = 1500     // cooldown applied on runes when the spell misses
 };
 
-enum RuneType
+enum class RuneType
 {
     RUNE_BLOOD     = 0,
     RUNE_UNHOLY    = 1,
@@ -504,8 +504,8 @@ enum RuneType
 
 struct RuneInfo
 {
-    uint8 BaseRune;
-    uint8 CurrentRune;
+    RuneType BaseRune;
+    RuneType CurrentRune;
     uint32 Cooldown;
     AuraEffect const* ConvertAura;
 };
@@ -760,7 +760,7 @@ enum BuyBackSlots                                           // 12 slots
     BUYBACK_SLOT_END   = 94
 };
 
-enum EquipmentSetUpdateState
+enum class EquipmentSetUpdateState
 {
     EQUIPMENT_SET_UNCHANGED = 0,
     EQUIPMENT_SET_CHANGED   = 1,
@@ -770,7 +770,7 @@ enum EquipmentSetUpdateState
 
 struct EquipmentSet
 {
-    EquipmentSet() : Guid(0), Name(""), IconName(""), IgnoreMask(0), state(EQUIPMENT_SET_NEW)
+    EquipmentSet() : Guid(0), Name(""), IconName(""), IgnoreMask(0), state(EquipmentSetUpdateState::EQUIPMENT_SET_NEW)
     {
         for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
             Items [i] = 0;
@@ -2297,7 +2297,7 @@ class Player : public Unit, public GridObject<Player>
         m_cinematic = cine;
     }
 
-    ActionButton* addActionButton(uint8 button, uint32 action, uint8 type);
+    ActionButton* addActionButton(uint8 button, uint32 action, ActionButtonType type);
     void removeActionButton(uint8 button);
     ActionButton const* GetActionButton(uint8 button);
     void SendInitialActionButtons() const
@@ -2305,7 +2305,7 @@ class Player : public Unit, public GridObject<Player>
         SendActionButtons(0);
     }
     void SendActionButtons(uint32 state) const;
-    bool IsActionButtonDataValid(uint8 button, uint32 action, uint8 type);
+    bool IsActionButtonDataValid(uint8 button, uint32 action, ActionButtonType type);
 
     PvPInfo pvpInfo;
     void UpdatePvPState(bool onlyFFA = false);
@@ -3132,11 +3132,11 @@ class Player : public Unit, public GridObject<Player>
     }
     void SetBaseRune(uint8 index, RuneType baseRune)
     {
-        m_runes->runes [index].BaseRune = baseRune;
+        m_runes->runes[index].BaseRune = baseRune;
     }
     void SetCurrentRune(uint8 index, RuneType currentRune)
     {
-        m_runes->runes [index].CurrentRune = currentRune;
+        m_runes->runes[index].CurrentRune = currentRune;
     }
     void SetRuneCooldown(uint8 index, uint32 cooldown);
     void SetRuneConvertAura(uint8 index, AuraEffect const* aura);
