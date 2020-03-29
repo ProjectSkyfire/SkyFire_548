@@ -39,7 +39,7 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
         DynamicObject(bool isWorldObject);
         ~DynamicObject();
 
-        void AddToWorld();
+        void AddToWorld() OVERRIDE;
         void RemoveFromWorld() OVERRIDE;
 
         bool CreateDynamicObject(uint32 guidlow, Unit* caster, SpellInfo const* spell, Position const& pos, float radius, DynamicObjectType type);
