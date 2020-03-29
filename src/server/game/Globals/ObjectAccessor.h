@@ -28,8 +28,9 @@
 #include "GridDefines.h"
 #include "Object.h"
 
+#include "ace/Singleton.h"
 
-# include "SharedMutex.h"
+#include "SharedMutex.h"
 #include <set>
 
 class Creature;
@@ -71,6 +72,7 @@ class HashMapHolder
 
 class ObjectAccessor
 {
+    friend class ACE_Singleton<ObjectAccessor, ACE_Null_Mutex>;
     private:
         ObjectAccessor();
         ~ObjectAccessor();
@@ -78,15 +80,7 @@ class ObjectAccessor
         ObjectAccessor& operator=(const ObjectAccessor&);
 
     public:
-
-        static ObjectAccessor* instance()
-        {
-            static ObjectAccessor *instance = new ObjectAccessor();
-            return instance;
-        }
-
         /// @todo: Override these template functions for each holder type and add assertions
-
         template<class T> static T* GetObjectInOrOutOfWorld(uint64 guid, T* /*typeSpecifier*/)
         {
             return HashMapHolder<T>::Find(guid);
@@ -204,10 +198,6 @@ class ObjectAccessor
         void UnloadAll();
 
     private:
-        static void _buildChangeObjectForPlayer(WorldObject*, UpdateDataMapType&);
-        static void _buildPacket(Player*, Object*, UpdateDataMapType&);
-        void _update();
-
         typedef UNORDERED_MAP<uint64, Corpse*> Player2CorpsesMapType;
         typedef UNORDERED_MAP<Player*, UpdateData>::value_type UpdateDataValueType;
 
@@ -218,5 +208,6 @@ class ObjectAccessor
         SF_SHARED_MUTEX i_corpseLock;
 };
 
-#define sObjectAccessor ObjectAccessor::instance()
+#define sObjectAccessor ACE_Singleton<ObjectAccessor, ACE_Null_Mutex>::instance()
+
 #endif
