@@ -2669,7 +2669,7 @@ bool InstanceMap::CanEnter(Player* player)
     if (GetPlayersCountExceptGMs() >= maxPlayers)
     {
         SF_LOG_INFO("maps", "MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), maxPlayers, player->GetName().c_str());
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+        player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_MAX_PLAYERS);
         return false;
     }
 
@@ -2678,7 +2678,7 @@ bool InstanceMap::CanEnter(Player* player)
     if (!player->IsGameMaster() && group && group->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
     if (IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
     {
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
+        player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
     }
 
@@ -2695,13 +2695,13 @@ bool InstanceMap::CanEnter(Player* player)
                     continue;
                 if (!player->GetGroup()) // player has not group and there is someone inside, deny entry
                 {
-                    player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+                    player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_MAX_PLAYERS);
                     return false;
                 }
                 // player inside instance has no group or his groups is different to entering player's one, deny entry
                 if (!iPlayer->GetGroup() || iPlayer->GetGroup() != player->GetGroup())
                 {
-                    player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+                    player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_MAX_PLAYERS);
                     return false;
                 }
                 break;

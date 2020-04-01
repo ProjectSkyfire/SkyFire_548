@@ -201,7 +201,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         // Send aborted message for dungeons
         if (entry->IsNonRaidInstance())
         {
-            player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, player->GetDungeonDifficulty());
+            player->SendTransferAborted(mapid, TransferAbortReason::TRANSFER_ABORT_DIFFICULTY, player->GetDungeonDifficulty());
             return false;
         }
         else    // attempt to downscale
@@ -289,7 +289,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         // instanceId can never be 0 - will not be found
         if (!player->CheckInstanceCount(instaceIdToCheck) && !player->isDead())
         {
-            player->SendTransferAborted(mapid, TRANSFER_ABORT_TOO_MANY_INSTANCES);
+            player->SendTransferAborted(mapid, TransferAbortReason::TRANSFER_ABORT_TOO_MANY_INSTANCES);
             return false;
         }
     }

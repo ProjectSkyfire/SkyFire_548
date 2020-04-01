@@ -806,7 +806,7 @@ enum TradeSlots
     TRADE_SLOT_INVALID      = -1
 };
 
-enum TransferAbortReason
+enum class TransferAbortReason
 {
     TRANSFER_ABORT_NONE                         = 0x00,
     TRANSFER_ABORT_ERROR                        = 0x01,
@@ -1728,8 +1728,8 @@ class Player : public Unit, public GridObject<Player>
     Item* GetItemFromBuyBackSlot(uint32 slot);
     void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
     void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = NULL, uint32 itemid = 0);
-    void SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 param);
-    void SendSellError(SellResult msg, Creature* creature, uint64 guid);
+    void SendBuyFailed(BuyResult msg, ObjectGuid VendorGUID, uint32 item);
+    void SendSellResponse(SellResult msg, ObjectGuid VendorGUID, ObjectGuid ItemGUID);
     void AddWeaponProficiency(uint32 newflag)
     {
         m_WeaponProficiency |= newflag;
@@ -1750,7 +1750,7 @@ class Player : public Unit, public GridObject<Player>
     bool IsTwoHandUsed() const;
     void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
     bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
-    bool BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count);
+    bool BuyCurrencyFromVendorSlot(ObjectGuid VendorGUID, uint32 vendorSlot, uint32 currency, uint32 count);
     bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore);
 
     float GetReputationPriceDiscount(Creature const* creature) const;

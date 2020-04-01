@@ -135,7 +135,7 @@ enum InventoryResult
     EQUIP_ERR_ITEM_STILL_WAITING_TO_BE_UNLOCKED            = 94, // Your purchased item is still waiting to be unlocked.
 };
 
-enum BuyResult
+enum class BuyResult
 {
     BUY_ERR_CANT_FIND_ITEM                      = 0,  // The item was not found.
     BUY_ERR_ITEM_ALREADY_SOLD                   = 1,  // That item is currently sold out.
@@ -148,7 +148,7 @@ enum BuyResult
     BUY_ERR_REPUTATION_REQUIRE                  = 12  // You don't have the required reputation for that item
 };
 
-enum SellResult
+enum class SellResult
 {
     SELL_ERR_CANT_FIND_ITEM                      = 1,
     SELL_ERR_CANT_SELL_ITEM                      = 2,       // merchant doesn't like that item

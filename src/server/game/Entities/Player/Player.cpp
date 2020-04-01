@@ -2204,7 +2204,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_DISABLE_MAP) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
     {
         SF_LOG_ERROR("maps", "Player (GUID: %u, name: %s) tried to enter a forbidden map %u", GetGUIDLow(), GetName().c_str(), mapid);
-        SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
+        SendTransferAborted(mapid, TransferAbortReason::TRANSFER_ABORT_MAP_NOT_ALLOWED);
         return false;
     }
 
@@ -2231,7 +2231,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
         }
 
-        SendTransferAborted(mapid, TRANSFER_ABORT_INSUF_EXPAN_LVL, mEntry->Expansion());
+        SendTransferAborted(mapid, TransferAbortReason::TRANSFER_ABORT_INSUF_EXPAN_LVL, mEntry->Expansion());
 
         return false;                                       // normal client can't teleport to this map...
     }
@@ -4648,7 +4648,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
         if (!HasEnoughMoney(uint64(cost)))
         {
-            SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+            SendBuyFailed(BuyResult::BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0);
             return false;
         }
     }
@@ -6940,9 +6940,9 @@ ActionButton* Player::addActionButton(uint8 button, uint32 action, ActionButtonT
     ActionButton& ab = m_actionButtons[button];
 
     // set data and update to CHANGED if not NEW
-    ab.SetActionAndType(action, ActionButtonType(type));
+    ab.SetActionAndType(action, type);
 
-    SF_LOG_DEBUG("entities.player", "Player '%u' Added Action '%u' (type %u) to Button '%u'", GetGUIDLow(), action, type, button);
+    SF_LOG_DEBUG("entities.player", "Player '%u' Added Action '%u' (type %u) to Button '%u'", GetGUIDLow(), action, uint8(type), button);
     return &ab;
 }
 
@@ -14009,79 +14009,44 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 /*param*/)
+void Player::SendBuyFailed(BuyResult msg, ObjectGuid VendorGUID, uint32 item)
 {
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_BUY_FAILED");
-
-    ObjectGuid guid = creature ? creature->GetGUID() : 0;
-
-    WorldPacket data(SMSG_BUY_FAILED, 1 + 8 + 1 + 4);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
+    WorldPacket data(SMSG_BUY_FAILED, 8 + 1 + 4);
+    data.WriteGuidMask(VendorGUID, 6, 3, 1, 2, 4, 5, 0, 7);
 
     data << uint8(msg);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidBytes(VendorGUID, 2, 7);
     data << uint32(item);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[0]);
-
+    data.WriteGuidBytes(VendorGUID, 4, 5, 1, 3, 6, 0);
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendSellError(SellResult msg, Creature* creature, uint64 guid)
+void Player::SendSellResponse(SellResult msg, ObjectGuid VendorGUID, ObjectGuid ItemGUID)
 {
-    SF_LOG_DEBUG("network", "WORLD: Sent SMSG_SELL_ITEM");
+    SF_LOG_DEBUG("network", "WORLD: Sent SMSG_SELL_RESPONSE");
+    WorldPacket data(SMSG_SELL_RESPONSE, 8 + 8 + 1);
+    data.WriteGuidMask(ItemGUID, 2);
+    data.WriteGuidMask(VendorGUID, 4);
+    data.WriteGuidMask(ItemGUID, 5, 4);
+    data.WriteGuidMask(VendorGUID, 3, 5);
+    data.WriteGuidMask(ItemGUID, 3);
+    data.WriteGuidMask(VendorGUID, 6, 0, 2);
+    data.WriteGuidMask(ItemGUID, 1, 7);
+    data.WriteGuidMask(VendorGUID, 1);
+    data.WriteGuidMask(ItemGUID, 0, 6);
+    data.WriteGuidMask(VendorGUID, 7);
 
-    ObjectGuid npcGuid = creature ? creature->GetGUID() : 0;
-    ObjectGuid itemGuid = guid;
-
-    WorldPacket data(SMSG_SELL_ITEM, 1 + 8 + 1 + 8 + 1);
-    data.WriteBit(itemGuid[2]);
-    data.WriteBit(npcGuid[4]);
-    data.WriteBit(itemGuid[5]);
-    data.WriteBit(itemGuid[4]);
-    data.WriteBit(npcGuid[3]);
-    data.WriteBit(npcGuid[5]);
-    data.WriteBit(itemGuid[3]);
-    data.WriteBit(npcGuid[6]);
-    data.WriteBit(npcGuid[0]);
-    data.WriteBit(npcGuid[2]);
-    data.WriteBit(itemGuid[1]);
-    data.WriteBit(itemGuid[7]);
-    data.WriteBit(npcGuid[1]);
-    data.WriteBit(itemGuid[0]);
-    data.WriteBit(itemGuid[6]);
-    data.WriteBit(npcGuid[7]);
-
-    data.WriteByteSeq(itemGuid[4]);
-    data.WriteByteSeq(itemGuid[1]);
+    data.WriteGuidBytes(ItemGUID, 4, 1);
     data << uint8(msg);
-    data.WriteByteSeq(itemGuid[2]);
-    data.WriteByteSeq(npcGuid[4]);
-    data.WriteByteSeq(npcGuid[0]);
-    data.WriteByteSeq(npcGuid[5]);
-    data.WriteByteSeq(npcGuid[2]);
-    data.WriteByteSeq(itemGuid[0]);
-    data.WriteByteSeq(npcGuid[3]);
-    data.WriteByteSeq(itemGuid[5]);
-    data.WriteByteSeq(itemGuid[6]);
-    data.WriteByteSeq(itemGuid[7]);
-    data.WriteByteSeq(npcGuid[6]);
-    data.WriteByteSeq(npcGuid[1]);
-    data.WriteByteSeq(itemGuid[3]);
-    data.WriteByteSeq(npcGuid[7]);
-
+    data.WriteGuidBytes(ItemGUID, 2);
+    data.WriteGuidBytes(VendorGUID, 4, 0, 5, 2);
+    data.WriteGuidBytes(ItemGUID, 0);
+    data.WriteGuidBytes(VendorGUID, 3);
+    data.WriteGuidBytes(ItemGUID, 5, 6, 7);
+    data.WriteGuidBytes(VendorGUID, 6, 1);
+    data.WriteGuidBytes(ItemGUID, 3);
+    data.WriteGuidBytes(VendorGUID, 7);
     GetSession()->SendPacket(&data);
 }
 
@@ -15253,7 +15218,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
     int32 cost = int32(item->BoxMoney);
     if (!HasEnoughMoney(int64(cost)))
     {
-        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0);
         PlayerTalkClass->SendCloseGossip();
         return;
     }
@@ -19838,7 +19803,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
                     ChatHandler(GetSession()).PSendSysMessage("%s", ar->questFailedText.c_str());
                 else if (mapDiff->hasErrorMessage) // if (missingAchievement) covered by this case
                 {
-                    SendTransferAborted(target_map, TRANSFER_ABORT_DIFFICULTY, target_difficulty);
+                    SendTransferAborted(target_map, TransferAbortReason::TRANSFER_ABORT_DIFFICULTY, target_difficulty);
                     GetSession()->SendNotification("%s", mapDiff->ErrorMessage.c_str());
                 }
                 else if (missingItem)
@@ -22707,7 +22672,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
     return true;
 }
 
-bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count)
+bool Player::BuyCurrencyFromVendorSlot(ObjectGuid VendorGUID, uint32 vendorSlot, uint32 currency, uint32 count)
 {
     // cheating attempt
     if (count < 1) count = 1;
@@ -22718,28 +22683,28 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
     CurrencyTypesEntry const* proto = sCurrencyTypesStore.LookupEntry(currency);
     if (!proto)
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, 0, currency);
         return false;
     }
 
-    Creature* creature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
+    Creature* creature = GetNPCIfCanInteractWith(VendorGUID, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
     {
-        SF_LOG_DEBUG("network", "WORLD: BuyCurrencyFromVendorSlot - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(vendorGuid));
-        SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, NULL, currency, 0);
+        SF_LOG_DEBUG("network", "WORLD: BuyCurrencyFromVendorSlot - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(VendorGUID));
+        SendBuyFailed(BuyResult::BUY_ERR_DISTANCE_TOO_FAR, 0, currency);
         return false;
     }
 
     VendorItemData const* vItems = creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency);
         return false;
     }
 
     if (vendorSlot >= vItems->GetItemCount())
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency);
         return false;
     }
 
@@ -22747,7 +22712,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
     // store diff item (cheating)
     if (!crItem || crItem->item != currency || crItem->Type != ITEM_VENDOR_TYPE_CURRENCY)
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency);
         return false;
     }
 
@@ -22785,7 +22750,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
             if (!entry)
             {
-                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
+                SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency); // Find correct error
                 return false;
             }
 
@@ -22812,7 +22777,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
 
         if (iece->RequiredFactionId && uint32(GetReputationRank(iece->RequiredFactionId)) < iece->RequiredFactionStanding)
         {
-            SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, currency, 0);
+            SendBuyFailed(BuyResult::BUY_ERR_REPUTATION_REQUIRE, VendorGUID, currency);
             return false;
         }
 
@@ -22836,7 +22801,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
     }
     else // currencies have no price defined, can only be bought with ExtendedCost
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, 0, currency);
         return false;
     }
 
@@ -24270,9 +24235,10 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 1 + 4 + 1);
     data.WriteBit(!arg);
-    data.WriteBits(reason, 5); // transfer abort reason
+    data.WriteBits(uint8(reason), 5); // transfer abort reason
+    data.FlushBits();
     if (arg)
         data << uint8(arg);
     data << uint32(mapid);
