@@ -760,8 +760,8 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
-    // base regen since pandaria is 2% aka 6000 MP @90.
-    float base_regen = GetMaxPower(POWER_MANA) * 0.02f;
+    // base regen since pandaria is 2% per 5 seconds aka 6000 MP per 5 seconds @90.
+    float base_regen = GetMaxPower(POWER_MANA) * 0.004f;
     // Mana regen from spirit
     float spirit_regen = OCTRegenMPPerSpirit();
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
