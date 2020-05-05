@@ -124,41 +124,51 @@ class boss_taldaram : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        if (events.IsInPhase(PHASE_NORMAL))
+                        case EVENT_BLOODTHIRST:
                         {
-                            case EVENT_BLOODTHIRST:
-                                DoCast(me, SPELL_BLOODTHIRST);
-                                events.ScheduleEvent(EVENT_BLOODTHIRST, 10000);
+                            if (!events.IsInPhase(PHASE_NORMAL))
                                 break;
-                            case EVENT_FLAME_SPHERE:
-                                DoCastVictim(SPELL_CONJURE_FLAME_SPHERE);
-                                events.SetPhase(PHASE_SPECIAL);
-                                events.ScheduleEvent(EVENT_CASTING_FLAME_SPHERES, 3000);
-                                events.ScheduleEvent(EVENT_FLAME_SPHERE, 15000);
-                                break;
-                            case EVENT_VANISH:
-                            {
-                                Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                                uint32 targets = 0;
-                                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                                {
-                                    Player* player = i->GetSource();
-                                    if (player && player->IsAlive())
-                                        ++targets;
-                                }
 
-                                if (targets > 2)
-                                {
-                                    Talk(SAY_VANISH);
-                                    DoCast(me, SPELL_VANISH);
-                                    events.SetPhase(PHASE_SPECIAL);
-                                    events.ScheduleEvent(EVENT_JUST_VANISHED, 500);
-                                    if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                        _embraceTargetGUID = embraceTarget->GetGUID();
-                                }
-                                events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
+                            DoCast(me, SPELL_BLOODTHIRST);
+                            events.ScheduleEvent(EVENT_BLOODTHIRST, 10000);
+                            break;
+                        }
+                        case EVENT_FLAME_SPHERE:
+                        {
+                            if (!events.IsInPhase(PHASE_NORMAL))
                                 break;
+
+                            DoCastVictim(SPELL_CONJURE_FLAME_SPHERE);
+                            events.SetPhase(PHASE_SPECIAL);
+                            events.ScheduleEvent(EVENT_CASTING_FLAME_SPHERES, 3000);
+                            events.ScheduleEvent(EVENT_FLAME_SPHERE, 15000);
+                            break;
+                        }
+                        case EVENT_VANISH:
+                        {
+                            if (!events.IsInPhase(PHASE_NORMAL))
+                                break;
+
+                            Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                            uint32 targets = 0;
+                            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                            {
+                                Player* player = i->GetSource();
+                                if (player && player->IsAlive())
+                                    ++targets;
                             }
+
+                            if (targets > 2)
+                            {
+                                Talk(SAY_VANISH);
+                                DoCast(me, SPELL_VANISH);
+                                events.SetPhase(PHASE_SPECIAL);
+                                events.ScheduleEvent(EVENT_JUST_VANISHED, 500);
+                                if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                                    _embraceTargetGUID = embraceTarget->GetGUID();
+                            }
+                            events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
+                            break;
                         }
                         case EVENT_CASTING_FLAME_SPHERES:
                         {
