@@ -122,9 +122,9 @@ class boss_taldaram : public CreatureScript
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    if (events.IsInPhase(PHASE_NORMAL))
                     {
-                        if (events.IsInPhase(PHASE_NORMAL))
+                        switch (eventId)
                         {
                             case EVENT_BLOODTHIRST:
                                 DoCast(me, SPELL_BLOODTHIRST);
@@ -138,11 +138,11 @@ class boss_taldaram : public CreatureScript
                                 break;
                             case EVENT_VANISH:
                             {
-                                Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                                Map::PlayerList const &players = me->GetMap()->GetPlayers();
                                 uint32 targets = 0;
-                                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                                for (const auto & i : players)
                                 {
-                                    Player* player = i->GetSource();
+                                    Player *player = i.GetSource();
                                     if (player && player->IsAlive())
                                         ++targets;
                                 }
@@ -153,77 +153,91 @@ class boss_taldaram : public CreatureScript
                                     DoCast(me, SPELL_VANISH);
                                     events.SetPhase(PHASE_SPECIAL);
                                     events.ScheduleEvent(EVENT_JUST_VANISHED, 500);
-                                    if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                                    if (Unit *embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                         _embraceTargetGUID = embraceTarget->GetGUID();
                                 }
                                 events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
                                 break;
                             }
-                        }
-                        case EVENT_CASTING_FLAME_SPHERES:
-                        {
-                            events.SetPhase(PHASE_NORMAL);
-                            Unit* sphereTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
-                            if (!sphereTarget)
+                            default:
                                 break;
-
-                            float angle, x, y;
-
-                            //DoCast(me, SPELL_FLAME_SPHERE_SUMMON_1);
-                            if (Creature* sphere = DoSpawnCreature(CREATURE_FLAME_SPHERE, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
-                            {
-                                angle = sphere->GetAngle(sphereTarget);
-                                x = sphere->GetPositionX() + 15.0f * std::cos(angle);
-                                y = sphere->GetPositionY() + 15.0f * std::sin(angle);
-                                sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
-                            }
-
-                            if (IsHeroic())
-                            {
-                                //DoCast(me, H_SPELL_FLAME_SPHERE_SUMMON_1);
-                                if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_1, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
-                                {
-                                    angle = sphere->GetAngle(sphereTarget) + DATA_SPHERE_ANGLE_OFFSET;
-                                    x = sphere->GetPositionX() + 15.0f / 2.0f * std::cos(angle);
-                                    y = sphere->GetPositionY() + 15.0f / 2.0f * std::sin(angle);
-                                    sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
-                                }
-
-                                //DoCast(me, H_SPELL_FLAME_SPHERE_SUMMON_2);
-                                if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_2, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
-                                {
-                                    angle = sphere->GetAngle(sphereTarget) - DATA_SPHERE_ANGLE_OFFSET;
-                                    x = sphere->GetPositionX() + 15.0f / 2 * std::cos(angle);
-                                    y = sphere->GetPositionY() + 15.0f / 2 * std::sin(angle);
-                                    sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
-                                }
-                            }
-                            break;
                         }
-                        case EVENT_JUST_VANISHED:
-                            if (Unit* embraceTarget = GetEmbraceTarget())
+                    }
+                    else
+                    {
+                        switch (eventId)
+                        {
+                            case EVENT_CASTING_FLAME_SPHERES:
                             {
-                                me->GetMotionMaster()->Clear();
-                                me->SetSpeed(MOVE_WALK, 2.0f, true);
-                                me->GetMotionMaster()->MoveChase(embraceTarget);
+                                events.SetPhase(PHASE_NORMAL);
+                                Unit *sphereTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
+                                if (!sphereTarget)
+                                    break;
+
+                                float angle, x, y;
+
+                                //DoCast(me, SPELL_FLAME_SPHERE_SUMMON_1);
+                                if (Creature *sphere = DoSpawnCreature(CREATURE_FLAME_SPHERE, 0, 0, 5, 0,
+                                                                       TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,
+                                                                       10 * IN_MILLISECONDS))
+                                {
+                                    angle = sphere->GetAngle(sphereTarget);
+                                    x = sphere->GetPositionX() + 15.0f * std::cos(angle);
+                                    y = sphere->GetPositionY() + 15.0f * std::sin(angle);
+                                    sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
+                                }
+
+                                if (IsHeroic())
+                                {
+                                    //DoCast(me, H_SPELL_FLAME_SPHERE_SUMMON_1);
+                                    if (Creature *sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_1, 0, 0, 5, 0,
+                                                                           TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,
+                                                                           10 * IN_MILLISECONDS))
+                                    {
+                                        angle = sphere->GetAngle(sphereTarget) + DATA_SPHERE_ANGLE_OFFSET;
+                                        x = sphere->GetPositionX() + 15.0f / 2.0f * std::cos(angle);
+                                        y = sphere->GetPositionY() + 15.0f / 2.0f * std::sin(angle);
+                                        sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
+                                    }
+
+                                    //DoCast(me, H_SPELL_FLAME_SPHERE_SUMMON_2);
+                                    if (Creature *sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_2, 0, 0, 5, 0,
+                                                                           TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,
+                                                                           10 * IN_MILLISECONDS))
+                                    {
+                                        angle = sphere->GetAngle(sphereTarget) - DATA_SPHERE_ANGLE_OFFSET;
+                                        x = sphere->GetPositionX() + 15.0f / 2 * std::cos(angle);
+                                        y = sphere->GetPositionY() + 15.0f / 2 * std::sin(angle);
+                                        sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
+                                    }
+                                }
+                                break;
                             }
-                            events.ScheduleEvent(EVENT_VANISHED, 1300);
-                            break;
-                        case EVENT_VANISHED:
-                            if (Unit* embraceTarget = GetEmbraceTarget())
-                                DoCast(embraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
-                            Talk(SAY_FEED);
-                            me->GetMotionMaster()->Clear();
-                            me->SetSpeed(MOVE_WALK, 1.0f, true);
-                            me->GetMotionMaster()->MoveChase(me->GetVictim());
-                            events.ScheduleEvent(EVENT_FEEDING, 20000);
-                            break;
-                        case EVENT_FEEDING:
-                            _embraceTargetGUID = 0;
-                            events.SetPhase(PHASE_NORMAL);
-                            break;
-                        default:
-                            break;
+                            case EVENT_JUST_VANISHED:
+                                if (Unit *embraceTarget = GetEmbraceTarget())
+                                {
+                                    me->GetMotionMaster()->Clear();
+                                    me->SetSpeed(MOVE_WALK, 2.0f, true);
+                                    me->GetMotionMaster()->MoveChase(embraceTarget);
+                                }
+                                events.ScheduleEvent(EVENT_VANISHED, 1300);
+                                break;
+                            case EVENT_VANISHED:
+                                if (Unit *embraceTarget = GetEmbraceTarget())
+                                    DoCast(embraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
+                                Talk(SAY_FEED);
+                                me->GetMotionMaster()->Clear();
+                                me->SetSpeed(MOVE_WALK, 1.0f, true);
+                                me->GetMotionMaster()->MoveChase(me->GetVictim());
+                                events.ScheduleEvent(EVENT_FEEDING, 20000);
+                                break;
+                            case EVENT_FEEDING:
+                                _embraceTargetGUID = 0;
+                                events.SetPhase(PHASE_NORMAL);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
 
