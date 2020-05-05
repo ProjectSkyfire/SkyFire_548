@@ -20,3 +20,5 @@ CMakeLists.txt.user
 *.LOCAL.*
 /Win32/*
 /x64/*
+cmake-build-debug/
+.idea/
