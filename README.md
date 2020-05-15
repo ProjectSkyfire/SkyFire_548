@@ -1,5 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/ProjectSkyfire/SkyFire.548.png?label=ready&title=Ready)](https://waffle.io/ProjectSkyfire/SkyFire.548) [![Insight.io](https://insight.io/repoBadge/github.com/ProjectSkyfire/SkyFire.548)](https://insight.io/github.com/ProjectSkyfire/SkyFire.548)
-
 # ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
 
 ## Project Information
