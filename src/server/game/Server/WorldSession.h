@@ -98,7 +98,7 @@ struct AccountData
     std::string Data;
 };
 
-enum PartyOperation
+enum class PartyOperation
 {
     PARTY_OP_INVITE = 0,
     PARTY_OP_UNINVITE = 1,

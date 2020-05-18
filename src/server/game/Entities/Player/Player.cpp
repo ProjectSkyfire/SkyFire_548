@@ -25597,31 +25597,31 @@ PartyResult Player::CanUninviteFromGroup() const
 {
     Group const* grp = GetGroup();
     if (!grp)
-        return ERR_NOT_IN_GROUP;
+        return PartyResult::ERR_NOT_IN_GROUP;
 
     if (grp->isLFGGroup())
     {
         uint64 gguid = grp->GetGUID();
         if (!sLFGMgr->GetKicksLeft(gguid))
-            return ERR_PARTY_LFG_BOOT_LIMIT;
+            return PartyResult::ERR_PARTY_LFG_BOOT_LIMIT;
 
         lfg::LfgState state = sLFGMgr->GetState(gguid);
         if (sLFGMgr->IsVoteKickActive(gguid))
-            return ERR_PARTY_LFG_BOOT_IN_PROGRESS;
+            return PartyResult::ERR_PARTY_LFG_BOOT_IN_PROGRESS;
 
         if (grp->GetMembersCount() <= lfg::LFG_GROUP_KICK_VOTES_NEEDED)
-            return ERR_PARTY_LFG_BOOT_TOO_FEW_PLAYERS;
+            return PartyResult::ERR_PARTY_LFG_BOOT_TOO_FEW_PLAYERS;
 
         if (state == lfg::LFG_STATE_FINISHED_DUNGEON)
-            return ERR_PARTY_LFG_BOOT_DUNGEON_COMPLETE;
+            return PartyResult::ERR_PARTY_LFG_BOOT_DUNGEON_COMPLETE;
 
         if (grp->isRollLootActive())
-            return ERR_PARTY_LFG_BOOT_LOOT_ROLLS;
+            return PartyResult::ERR_PARTY_LFG_BOOT_LOOT_ROLLS;
 
         /// @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
         for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
             if (itr->GetSource() && itr->GetSource()->IsInCombat())
-                return ERR_PARTY_LFG_BOOT_IN_COMBAT;
+                return PartyResult::ERR_PARTY_LFG_BOOT_IN_COMBAT;
 
         /* Missing support for these types
             return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
@@ -25631,13 +25631,13 @@ PartyResult Player::CanUninviteFromGroup() const
     else
     {
         if (!grp->IsLeader(GetGUID()) && !grp->IsAssistant(GetGUID()))
-            return ERR_NOT_LEADER;
+            return PartyResult::ERR_NOT_LEADER;
 
         if (InBattleground())
-            return ERR_INVITE_RESTRICTED;
+            return PartyResult::ERR_INVITE_RESTRICTED;
     }
 
-    return ERR_PARTY_RESULT_OK;
+    return PartyResult::ERR_PARTY_RESULT_OK;
 }
 
 bool Player::isUsingLfg()

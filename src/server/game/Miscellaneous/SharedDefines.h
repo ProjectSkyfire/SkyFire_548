@@ -4271,7 +4271,7 @@ enum VoidTransferError
 
 #define CURRENCY_PRECISION 100
 
-enum PartyResult
+enum class PartyResult
 {
     ERR_PARTY_RESULT_OK                 = 0,
     ERR_BAD_PLAYER_NAME_S               = 1,
