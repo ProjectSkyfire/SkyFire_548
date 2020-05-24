@@ -4255,7 +4255,7 @@ enum DungeonStatusFlag
 #define VOID_STORAGE_MAX_WITHDRAW 9
 #define VOID_STORAGE_MAX_SLOT     80
 
-enum VoidTransferError
+enum class VoidTransferError
 {
     VOID_TRANSFER_ERROR_NO_ERROR          = 0,
     VOID_TRANSFER_ERROR_INTERNAL_ERROR_1  = 1, // Internal void storage Error.

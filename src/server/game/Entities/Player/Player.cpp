@@ -28208,7 +28208,7 @@ uint8 Player::AddVoidStorageItem(const VoidStorageItem& item)
 
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_FULL);
         return 255;
     }
 
@@ -28221,14 +28221,14 @@ void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
 {
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_FULL);
         return;
     }
 
     if (_voidStorageItems[slot])
     {
         SF_LOG_ERROR("misc", "Player::AddVoidStorageItemAtSlot - Player (GUID: %u, name: %s) tried to add an item to an used slot (item id: " UI64FMTD ", entry: %u, slot: %u).", GetGUIDLow(), GetName().c_str(), _voidStorageItems[slot]->ItemId, _voidStorageItems[slot]->ItemEntry, slot);
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
     }
 
@@ -28240,7 +28240,7 @@ void Player::DeleteVoidStorageItem(uint8 slot)
 {
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
     }
 
@@ -28261,7 +28261,7 @@ VoidStorageItem* Player::GetVoidStorageItem(uint8 slot) const
 {
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return NULL;
     }
 
