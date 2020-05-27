@@ -1,4 +1,5 @@
 # ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
+# [![CodeFactor](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548/badge)](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly on C++.
