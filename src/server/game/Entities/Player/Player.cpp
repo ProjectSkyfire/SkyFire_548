@@ -660,7 +660,6 @@ void KillRewarder::Reward()
             if (Guild* guild = sGuildMgr->GetGuildById(guildId))
                 guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, victim->GetEntry(), 1, 0, victim, _killer);
     }
-
 }
 
 // == Player ====================================================
@@ -6046,7 +6045,6 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
     // calculate diminishing (green in char screen) and non-diminishing (white) contribution
     diminishing = bonus_agility * dodge_ratio * crit_to_dodge[pclass-1];
     nondiminishing = dodge_base[pclass-1] + base_agility * dodge_ratio * crit_to_dodge[pclass-1];
-
 }
 
 float Player::GetSpellCritFromIntellect()
@@ -7552,7 +7550,6 @@ void Player::_LoadCurrency(PreparedQueryResult result)
                 _ConquestCurrencytotalWeekCap = cap;
         }
         _currencyStorage.insert(PlayerCurrenciesMap::value_type(currencyID, cur));
-
     } while (result->NextRow());
 }
 
@@ -16306,7 +16303,6 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
                         {
                             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
                             SF_LOG_DEBUG("misc", "SatisfyQuestPreviousQuest: Sent INVALIDREASON_DONT_HAVE_REQ (questId: %u) because player does not have required quest (2).", qInfo->GetQuestId());
-
                         }
                         return false;
                     }
@@ -16359,7 +16355,6 @@ bool Player::SatisfyQuestRace(Quest const* qInfo, bool msg)
         {
             SendCanTakeQuestResponse(INVALIDREASON_QUEST_FAILED_WRONG_RACE);
             SF_LOG_DEBUG("misc", "SatisfyQuestRace: Sent INVALIDREASON_QUEST_FAILED_WRONG_RACE (questId: %u) because player does not have required race.", qInfo->GetQuestId());
-
         }
         return false;
     }
@@ -17426,7 +17421,6 @@ bool Player::HasQuestForItem(uint32 itemId) const
                         }
                         else if (GetItemCount(itemId, true) < pProto->GetMaxStackSize())
                             return true;
-
                     }
                 }
             }
@@ -18776,7 +18770,6 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timeDiff)
                         delete item;
                         continue;
                     }
-
                 }
 
                 // Item's state may have changed after storing
@@ -20657,7 +20650,6 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
             stmt->setUInt32(0, GetGUIDLow());
             stmt->setUInt32(1, saveItr->first);
             trans->Append(stmt);
-
         }
         else if (!keepAbandoned)
         {
@@ -24703,7 +24695,6 @@ void Player::ResetWeeklyQuestStatus()
     m_weeklyquests.clear();
     // DB data deleted in caller
     m_WeeklyQuestChanged = false;
-
 }
 
 void Player::ResetSeasonalQuestStatus(uint16 event_id)
@@ -25992,7 +25983,6 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
         SetFlag(PLAYER_FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
         GetSession()->SendTitleEarned(title->bit_index);
     }
-
 }
 
 bool Player::isTotalImmunity()
@@ -26292,7 +26282,6 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         // LootItem is being removed (looted) from the container, delete it from the DB.
         if (loot->containerID > 0)
             loot->DeleteLootItemFromContainerItemDB(item->itemid);
-
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);
@@ -27482,7 +27471,6 @@ void Player::UpdateSpecCount(uint8 count)
 
 void Player::ActivateSpec(uint8 spec)
 {
-
     if (GetActiveSpec() == spec)
         return;
 
@@ -27587,7 +27575,6 @@ void Player::ActivateSpec(uint8 spec)
             continue;
 
         learnSpell(talentInfo->SpellId, false); // add the talent to the PlayerSpellMap
-
     }
 /*
     std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(GetTalentSpecialization(GetActiveSpec()));
