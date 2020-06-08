@@ -660,7 +660,6 @@ void KillRewarder::Reward()
             if (Guild* guild = sGuildMgr->GetGuildById(guildId))
                 guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, victim->GetEntry(), 1, 0, victim, _killer);
     }
-
 }
 
 // == Player ====================================================
@@ -1150,7 +1149,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     // original action bar
     for (PlayerCreateInfoActions::const_iterator action_itr = info->action.begin(); action_itr != info->action.end(); ++action_itr)
-        addActionButton(action_itr->button, action_itr->action, action_itr->type);
+        addActionButton(action_itr->button, action_itr->action, ActionButtonType(action_itr->type));
 
     // original items
     if (CharStartOutfitEntry const* oEntry = GetCharStartOutfitEntry(createInfo->Race, createInfo->Class, createInfo->Gender))
@@ -2204,7 +2203,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_DISABLE_MAP) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
     {
         SF_LOG_ERROR("maps", "Player (GUID: %u, name: %s) tried to enter a forbidden map %u", GetGUIDLow(), GetName().c_str(), mapid);
-        SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
+        SendTransferAborted(mapid, TransferAbortReason::TRANSFER_ABORT_MAP_NOT_ALLOWED);
         return false;
     }
 
@@ -2231,7 +2230,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
         }
 
-        SendTransferAborted(mapid, TRANSFER_ABORT_INSUF_EXPAN_LVL, mEntry->Expansion());
+        SendTransferAborted(mapid, TransferAbortReason::TRANSFER_ABORT_INSUF_EXPAN_LVL, mEntry->Expansion());
 
         return false;                                       // normal client can't teleport to this map...
     }
@@ -4648,7 +4647,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
         if (!HasEnoughMoney(uint64(cost)))
         {
-            SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+            SendBuyFailed(BuyResult::BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0);
             return false;
         }
     }
@@ -6046,7 +6045,6 @@ void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
     // calculate diminishing (green in char screen) and non-diminishing (white) contribution
     diminishing = bonus_agility * dodge_ratio * crit_to_dodge[pclass-1];
     nondiminishing = dodge_base[pclass-1] + base_agility * dodge_ratio * crit_to_dodge[pclass-1];
-
 }
 
 float Player::GetSpellCritFromIntellect()
@@ -6823,9 +6821,7 @@ void Player::SendActionButtons(uint32 state) const
         buttonsTab[i].id = ab->GetAction();
         buttonsTab[i].unk = ab->GetHiType();
 
-        SF_LOG_DEBUG("network", "SendActionButtons actionId: %u lowtype: %u hiType: %u", ab->GetAction(), ab->GetType(), ab->GetHiType());
-
-
+        SF_LOG_DEBUG("network", "SendActionButtons actionId: %u lowtype: %u hiType: %u", ab->GetAction(), uint8(ab->GetType()), ab->GetHiType());
     }
 
     // Bits
@@ -6883,7 +6879,7 @@ void Player::SendActionButtons(uint32 state) const
     SF_LOG_INFO("network", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
 }
 
-bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
+bool Player::IsActionButtonDataValid(uint8 button, uint32 action, ActionButtonType type)
 {
     if (button >= MAX_ACTION_BUTTONS)
     {
@@ -6899,7 +6895,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
 
     switch (type)
     {
-        case ACTION_BUTTON_SPELL:
+        case ActionButtonType::ACTION_BUTTON_SPELL:
             if (!sSpellMgr->GetSpellInfo(action))
             {
                 SF_LOG_ERROR("entities.player", "Spell action %u not added into button %u for player %s (GUID: %u): spell not exist", action, button, GetName().c_str(), GUID_LOPART(GetGUID()));
@@ -6912,28 +6908,28 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
                 return false;
             }
             break;
-        case ACTION_BUTTON_ITEM:
+        case ActionButtonType::ACTION_BUTTON_ITEM:
             if (!sObjectMgr->GetItemTemplate(action))
             {
                 SF_LOG_ERROR("entities.player", "Item action %u not added into button %u for player %s (GUID: %u): item not exist", action, button, GetName().c_str(), GUID_LOPART(GetGUID()));
                 return false;
             }
             break;
-        case ACTION_BUTTON_C:
-        case ACTION_BUTTON_CMACRO:
-        case ACTION_BUTTON_MACRO:
-        case ACTION_BUTTON_EQSET:
-        case ACTION_BUTTON_DROPDOWN:
+        case ActionButtonType::ACTION_BUTTON_C:
+        case ActionButtonType::ACTION_BUTTON_CMACRO:
+        case ActionButtonType::ACTION_BUTTON_MACRO:
+        case ActionButtonType::ACTION_BUTTON_EQSET:
+        case ActionButtonType::ACTION_BUTTON_DROPDOWN:
             break;
         default:
-            SF_LOG_ERROR("entities.player", "Unknown action type %u", type);
+            SF_LOG_ERROR("entities.player", "Unknown action type %u", uint8(type));
             return false;                                          // other cases not checked at this moment
     }
 
     return true;
 }
 
-ActionButton* Player::addActionButton(uint8 button, uint32 action, uint8 type)
+ActionButton* Player::addActionButton(uint8 button, uint32 action, ActionButtonType type)
 {
     if (!IsActionButtonDataValid(button, action, type))
         return NULL;
@@ -6942,22 +6938,22 @@ ActionButton* Player::addActionButton(uint8 button, uint32 action, uint8 type)
     ActionButton& ab = m_actionButtons[button];
 
     // set data and update to CHANGED if not NEW
-    ab.SetActionAndType(action, ActionButtonType(type));
+    ab.SetActionAndType(action, type);
 
-    SF_LOG_DEBUG("entities.player", "Player '%u' Added Action '%u' (type %u) to Button '%u'", GetGUIDLow(), action, type, button);
+    SF_LOG_DEBUG("entities.player", "Player '%u' Added Action '%u' (type %u) to Button '%u'", GetGUIDLow(), action, uint8(type), button);
     return &ab;
 }
 
 void Player::removeActionButton(uint8 button)
 {
     ActionButtonList::iterator buttonItr = m_actionButtons.find(button);
-    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ACTIONBUTTON_DELETED)
+    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ActionButtonUpdateState::ACTIONBUTTON_DELETED)
         return;
 
-    if (buttonItr->second.uState == ACTIONBUTTON_NEW)
+    if (buttonItr->second.uState == ActionButtonUpdateState::ACTIONBUTTON_NEW)
         m_actionButtons.erase(buttonItr);                   // new and not saved
     else
-        buttonItr->second.uState = ACTIONBUTTON_DELETED;    // saved, will deleted at next save
+        buttonItr->second.uState = ActionButtonUpdateState::ACTIONBUTTON_DELETED;    // saved, will deleted at next save
 
     SF_LOG_DEBUG("entities.player", "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow());
 }
@@ -6965,7 +6961,7 @@ void Player::removeActionButton(uint8 button)
 ActionButton const* Player::GetActionButton(uint8 button)
 {
     ActionButtonList::iterator buttonItr = m_actionButtons.find(button);
-    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ACTIONBUTTON_DELETED)
+    if (buttonItr == m_actionButtons.end() || buttonItr->second.uState == ActionButtonUpdateState::ACTIONBUTTON_DELETED)
         return NULL;
 
     return &buttonItr->second;
@@ -7554,7 +7550,6 @@ void Player::_LoadCurrency(PreparedQueryResult result)
                 _ConquestCurrencytotalWeekCap = cap;
         }
         _currencyStorage.insert(PlayerCurrenciesMap::value_type(currencyID, cur));
-
     } while (result->NextRow());
 }
 
@@ -14011,79 +14006,44 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 /*param*/)
+void Player::SendBuyFailed(BuyResult msg, ObjectGuid VendorGUID, uint32 item)
 {
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_BUY_FAILED");
-
-    ObjectGuid guid = creature ? creature->GetGUID() : 0;
-
-    WorldPacket data(SMSG_BUY_FAILED, 1 + 8 + 1 + 4);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
+    WorldPacket data(SMSG_BUY_FAILED, 8 + 1 + 4);
+    data.WriteGuidMask(VendorGUID, 6, 3, 1, 2, 4, 5, 0, 7);
 
     data << uint8(msg);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidBytes(VendorGUID, 2, 7);
     data << uint32(item);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[0]);
-
+    data.WriteGuidBytes(VendorGUID, 4, 5, 1, 3, 6, 0);
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendSellError(SellResult msg, Creature* creature, uint64 guid)
+void Player::SendSellResponse(SellResult msg, ObjectGuid VendorGUID, ObjectGuid ItemGUID)
 {
-    SF_LOG_DEBUG("network", "WORLD: Sent SMSG_SELL_ITEM");
+    SF_LOG_DEBUG("network", "WORLD: Sent SMSG_SELL_RESPONSE");
+    WorldPacket data(SMSG_SELL_RESPONSE, 8 + 8 + 1);
+    data.WriteGuidMask(ItemGUID, 2);
+    data.WriteGuidMask(VendorGUID, 4);
+    data.WriteGuidMask(ItemGUID, 5, 4);
+    data.WriteGuidMask(VendorGUID, 3, 5);
+    data.WriteGuidMask(ItemGUID, 3);
+    data.WriteGuidMask(VendorGUID, 6, 0, 2);
+    data.WriteGuidMask(ItemGUID, 1, 7);
+    data.WriteGuidMask(VendorGUID, 1);
+    data.WriteGuidMask(ItemGUID, 0, 6);
+    data.WriteGuidMask(VendorGUID, 7);
 
-    ObjectGuid npcGuid = creature ? creature->GetGUID() : 0;
-    ObjectGuid itemGuid = guid;
-
-    WorldPacket data(SMSG_SELL_ITEM, 1 + 8 + 1 + 8 + 1);
-    data.WriteBit(itemGuid[2]);
-    data.WriteBit(npcGuid[4]);
-    data.WriteBit(itemGuid[5]);
-    data.WriteBit(itemGuid[4]);
-    data.WriteBit(npcGuid[3]);
-    data.WriteBit(npcGuid[5]);
-    data.WriteBit(itemGuid[3]);
-    data.WriteBit(npcGuid[6]);
-    data.WriteBit(npcGuid[0]);
-    data.WriteBit(npcGuid[2]);
-    data.WriteBit(itemGuid[1]);
-    data.WriteBit(itemGuid[7]);
-    data.WriteBit(npcGuid[1]);
-    data.WriteBit(itemGuid[0]);
-    data.WriteBit(itemGuid[6]);
-    data.WriteBit(npcGuid[7]);
-
-    data.WriteByteSeq(itemGuid[4]);
-    data.WriteByteSeq(itemGuid[1]);
+    data.WriteGuidBytes(ItemGUID, 4, 1);
     data << uint8(msg);
-    data.WriteByteSeq(itemGuid[2]);
-    data.WriteByteSeq(npcGuid[4]);
-    data.WriteByteSeq(npcGuid[0]);
-    data.WriteByteSeq(npcGuid[5]);
-    data.WriteByteSeq(npcGuid[2]);
-    data.WriteByteSeq(itemGuid[0]);
-    data.WriteByteSeq(npcGuid[3]);
-    data.WriteByteSeq(itemGuid[5]);
-    data.WriteByteSeq(itemGuid[6]);
-    data.WriteByteSeq(itemGuid[7]);
-    data.WriteByteSeq(npcGuid[6]);
-    data.WriteByteSeq(npcGuid[1]);
-    data.WriteByteSeq(itemGuid[3]);
-    data.WriteByteSeq(npcGuid[7]);
-
+    data.WriteGuidBytes(ItemGUID, 2);
+    data.WriteGuidBytes(VendorGUID, 4, 0, 5, 2);
+    data.WriteGuidBytes(ItemGUID, 0);
+    data.WriteGuidBytes(VendorGUID, 3);
+    data.WriteGuidBytes(ItemGUID, 5, 6, 7);
+    data.WriteGuidBytes(VendorGUID, 6, 1);
+    data.WriteGuidBytes(ItemGUID, 3);
+    data.WriteGuidBytes(VendorGUID, 7);
     GetSession()->SendPacket(&data);
 }
 
@@ -15255,7 +15215,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
     int32 cost = int32(item->BoxMoney);
     if (!HasEnoughMoney(int64(cost)))
     {
-        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0);
         PlayerTalkClass->SendCloseGossip();
         return;
     }
@@ -16343,7 +16303,6 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
                         {
                             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
                             SF_LOG_DEBUG("misc", "SatisfyQuestPreviousQuest: Sent INVALIDREASON_DONT_HAVE_REQ (questId: %u) because player does not have required quest (2).", qInfo->GetQuestId());
-
                         }
                         return false;
                     }
@@ -16396,7 +16355,6 @@ bool Player::SatisfyQuestRace(Quest const* qInfo, bool msg)
         {
             SendCanTakeQuestResponse(INVALIDREASON_QUEST_FAILED_WRONG_RACE);
             SF_LOG_DEBUG("misc", "SatisfyQuestRace: Sent INVALIDREASON_QUEST_FAILED_WRONG_RACE (questId: %u) because player does not have required race.", qInfo->GetQuestId());
-
         }
         return false;
     }
@@ -17463,7 +17421,6 @@ bool Player::HasQuestForItem(uint32 itemId) const
                         }
                         else if (GetItemCount(itemId, true) < pProto->GetMaxStackSize())
                             return true;
-
                     }
                 }
             }
@@ -17735,7 +17692,7 @@ void Player::_LoadEquipmentSets(PreparedQueryResult result)
         eqSet.Name      = fields[2].GetString();
         eqSet.IconName  = fields[3].GetString();
         eqSet.IgnoreMask = fields[4].GetUInt32();
-        eqSet.state     = EQUIPMENT_SET_UNCHANGED;
+        eqSet.state     = EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED;
 
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
             eqSet.Items[i] = fields[5+i].GetUInt32();
@@ -18586,14 +18543,14 @@ void Player::_LoadActions(PreparedQueryResult result)
             uint32 action = fields[1].GetUInt32();
             uint8 type = fields[2].GetUInt8();
 
-            if (ActionButton* ab = addActionButton(button, action, type))
-                ab->uState = ACTIONBUTTON_UNCHANGED;
+            if (ActionButton* ab = addActionButton(button, action, ActionButtonType(type)))
+                ab->uState = ActionButtonUpdateState::ACTIONBUTTON_UNCHANGED;
             else
             {
                 SF_LOG_ERROR("entities.player", "  ...at loading, and will deleted in DB also");
 
                 // Will deleted in DB at next save (it can create data until save but marked as deleted)
-                m_actionButtons[button].uState = ACTIONBUTTON_DELETED;
+                m_actionButtons[button].uState = ActionButtonUpdateState::ACTIONBUTTON_DELETED;
             }
         } while (result->NextRow());
     }
@@ -18813,7 +18770,6 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timeDiff)
                         delete item;
                         continue;
                     }
-
                 }
 
                 // Item's state may have changed after storing
@@ -19840,7 +19796,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
                     ChatHandler(GetSession()).PSendSysMessage("%s", ar->questFailedText.c_str());
                 else if (mapDiff->hasErrorMessage) // if (missingAchievement) covered by this case
                 {
-                    SendTransferAborted(target_map, TRANSFER_ABORT_DIFFICULTY, target_difficulty);
+                    SendTransferAborted(target_map, TransferAbortReason::TRANSFER_ABORT_DIFFICULTY, target_difficulty);
                     GetSession()->SendNotification("%s", mapDiff->ErrorMessage.c_str());
                 }
                 else if (missingItem)
@@ -20285,7 +20241,7 @@ void Player::_SaveActions(SQLTransaction& trans)
     {
         switch (itr->second.uState)
         {
-            case ACTIONBUTTON_NEW:
+            case ActionButtonUpdateState::ACTIONBUTTON_NEW:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt8(1, GetActiveSpec());
@@ -20294,10 +20250,10 @@ void Player::_SaveActions(SQLTransaction& trans)
                 stmt->setUInt8(4, uint8(itr->second.GetType()));
                 trans->Append(stmt);
 
-                itr->second.uState = ACTIONBUTTON_UNCHANGED;
+                itr->second.uState = ActionButtonUpdateState::ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
-            case ACTIONBUTTON_CHANGED:
+            case ActionButtonUpdateState::ACTIONBUTTON_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_ACTION);
                 stmt->setUInt32(0, itr->second.GetAction());
                 stmt->setUInt8(1, uint8(itr->second.GetType()));
@@ -20306,10 +20262,10 @@ void Player::_SaveActions(SQLTransaction& trans)
                 stmt->setUInt8(4, GetActiveSpec());
                 trans->Append(stmt);
 
-                itr->second.uState = ACTIONBUTTON_UNCHANGED;
+                itr->second.uState = ActionButtonUpdateState::ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
-            case ACTIONBUTTON_DELETED:
+            case ActionButtonUpdateState::ACTIONBUTTON_DELETED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_ACTION_BY_BUTTON_SPEC);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt8(1, itr->first);
@@ -20694,7 +20650,6 @@ void Player::_SaveQuestStatus(SQLTransaction& trans)
             stmt->setUInt32(0, GetGUIDLow());
             stmt->setUInt32(1, saveItr->first);
             trans->Append(stmt);
-
         }
         else if (!keepAbandoned)
         {
@@ -21179,7 +21134,7 @@ void Player::SendResetFailedNotify(uint32 /*mapid*/)
 }
 
 /// Reset all solo instances and optionally send a message on success for each
-void Player::ResetInstances(uint8 method, bool isRaid)
+void Player::ResetInstances(InstanceResetMethod method, bool isRaid)
 {
     // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
 
@@ -21198,7 +21153,7 @@ void Player::ResetInstances(uint8 method, bool isRaid)
             continue;
         }
 
-        if (method == INSTANCE_RESET_ALL)
+        if (method == InstanceResetMethod::INSTANCE_RESET_ALL)
         {
             // the "reset all instances" method can only reset normal maps
             if (entry->map_type == MAP_RAID || diff == DIFFICULTY_HEROIC)
@@ -21218,7 +21173,7 @@ void Player::ResetInstances(uint8 method, bool isRaid)
             }
 
         // since this is a solo instance there should not be any players inside
-        if (method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+        if (method == InstanceResetMethod::INSTANCE_RESET_ALL || method == InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY)
             SendResetInstanceSuccess(p->GetMapId());
 
         p->DeleteFromDB();
@@ -22709,7 +22664,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
     return true;
 }
 
-bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count)
+bool Player::BuyCurrencyFromVendorSlot(ObjectGuid VendorGUID, uint32 vendorSlot, uint32 currency, uint32 count)
 {
     // cheating attempt
     if (count < 1) count = 1;
@@ -22720,28 +22675,28 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
     CurrencyTypesEntry const* proto = sCurrencyTypesStore.LookupEntry(currency);
     if (!proto)
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, 0, currency);
         return false;
     }
 
-    Creature* creature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
+    Creature* creature = GetNPCIfCanInteractWith(VendorGUID, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
     {
-        SF_LOG_DEBUG("network", "WORLD: BuyCurrencyFromVendorSlot - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(vendorGuid));
-        SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, NULL, currency, 0);
+        SF_LOG_DEBUG("network", "WORLD: BuyCurrencyFromVendorSlot - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(VendorGUID));
+        SendBuyFailed(BuyResult::BUY_ERR_DISTANCE_TOO_FAR, 0, currency);
         return false;
     }
 
     VendorItemData const* vItems = creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency);
         return false;
     }
 
     if (vendorSlot >= vItems->GetItemCount())
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency);
         return false;
     }
 
@@ -22749,7 +22704,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
     // store diff item (cheating)
     if (!crItem || crItem->item != currency || crItem->Type != ITEM_VENDOR_TYPE_CURRENCY)
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency);
         return false;
     }
 
@@ -22787,7 +22742,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
             if (!entry)
             {
-                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
+                SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, VendorGUID, currency); // Find correct error
                 return false;
             }
 
@@ -22814,7 +22769,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
 
         if (iece->RequiredFactionId && uint32(GetReputationRank(iece->RequiredFactionId)) < iece->RequiredFactionStanding)
         {
-            SendBuyError(BUY_ERR_REPUTATION_REQUIRE, creature, currency, 0);
+            SendBuyFailed(BuyResult::BUY_ERR_REPUTATION_REQUIRE, VendorGUID, currency);
             return false;
         }
 
@@ -22838,7 +22793,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
     }
     else // currencies have no price defined, can only be bought with ExtendedCost
     {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
+        SendBuyFailed(BuyResult::BUY_ERR_CANT_FIND_ITEM, 0, currency);
         return false;
     }
 
@@ -24272,9 +24227,10 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 1 + 4 + 1);
     data.WriteBit(!arg);
-    data.WriteBits(reason, 5); // transfer abort reason
+    data.WriteBits(uint8(reason), 5); // transfer abort reason
+    data.FlushBits();
     if (arg)
         data << uint8(arg);
     data << uint32(mapid);
@@ -24739,7 +24695,6 @@ void Player::ResetWeeklyQuestStatus()
     m_weeklyquests.clear();
     // DB data deleted in caller
     m_WeeklyQuestChanged = false;
-
 }
 
 void Player::ResetSeasonalQuestStatus(uint16 event_id)
@@ -25633,31 +25588,31 @@ PartyResult Player::CanUninviteFromGroup() const
 {
     Group const* grp = GetGroup();
     if (!grp)
-        return ERR_NOT_IN_GROUP;
+        return PartyResult::ERR_NOT_IN_GROUP;
 
     if (grp->isLFGGroup())
     {
         uint64 gguid = grp->GetGUID();
         if (!sLFGMgr->GetKicksLeft(gguid))
-            return ERR_PARTY_LFG_BOOT_LIMIT;
+            return PartyResult::ERR_PARTY_LFG_BOOT_LIMIT;
 
         lfg::LfgState state = sLFGMgr->GetState(gguid);
         if (sLFGMgr->IsVoteKickActive(gguid))
-            return ERR_PARTY_LFG_BOOT_IN_PROGRESS;
+            return PartyResult::ERR_PARTY_LFG_BOOT_IN_PROGRESS;
 
         if (grp->GetMembersCount() <= lfg::LFG_GROUP_KICK_VOTES_NEEDED)
-            return ERR_PARTY_LFG_BOOT_TOO_FEW_PLAYERS;
+            return PartyResult::ERR_PARTY_LFG_BOOT_TOO_FEW_PLAYERS;
 
         if (state == lfg::LFG_STATE_FINISHED_DUNGEON)
-            return ERR_PARTY_LFG_BOOT_DUNGEON_COMPLETE;
+            return PartyResult::ERR_PARTY_LFG_BOOT_DUNGEON_COMPLETE;
 
         if (grp->isRollLootActive())
-            return ERR_PARTY_LFG_BOOT_LOOT_ROLLS;
+            return PartyResult::ERR_PARTY_LFG_BOOT_LOOT_ROLLS;
 
         /// @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
         for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
             if (itr->GetSource() && itr->GetSource()->IsInCombat())
-                return ERR_PARTY_LFG_BOOT_IN_COMBAT;
+                return PartyResult::ERR_PARTY_LFG_BOOT_IN_COMBAT;
 
         /* Missing support for these types
             return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
@@ -25667,13 +25622,13 @@ PartyResult Player::CanUninviteFromGroup() const
     else
     {
         if (!grp->IsLeader(GetGUID()) && !grp->IsAssistant(GetGUID()))
-            return ERR_NOT_LEADER;
+            return PartyResult::ERR_NOT_LEADER;
 
         if (InBattleground())
-            return ERR_INVITE_RESTRICTED;
+            return PartyResult::ERR_INVITE_RESTRICTED;
     }
 
-    return ERR_PARTY_RESULT_OK;
+    return PartyResult::ERR_PARTY_RESULT_OK;
 }
 
 bool Player::isUsingLfg()
@@ -26028,7 +25983,6 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
         SetFlag(PLAYER_FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
         GetSession()->SendTitleEarned(title->bit_index);
     }
-
 }
 
 bool Player::isTotalImmunity()
@@ -26094,7 +26048,7 @@ uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
 
     AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == runeType)
+        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == int32(runeType))
             cooldown *= 1.0f - (*i)->GetAmount() / 100.0f;
 
     // Runes cooldown are now affected by player's haste from equipment ...
@@ -26188,12 +26142,12 @@ void Player::AddRunePower(uint8 index)
 
 static RuneType runeSlotTypes[MAX_RUNES] =
 {
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
+    /*0*/ RuneType::RUNE_BLOOD,
+    /*1*/ RuneType::RUNE_BLOOD,
+    /*2*/ RuneType::RUNE_UNHOLY,
+    /*3*/ RuneType::RUNE_UNHOLY,
+    /*4*/ RuneType::RUNE_FROST,
+    /*5*/ RuneType::RUNE_FROST
 };
 
 void Player::InitRunes()
@@ -26204,7 +26158,7 @@ void Player::InitRunes()
     m_runes = new Runes;
 
     m_runes->runeState = 0;
-    m_runes->lastUsedRune = RUNE_BLOOD;
+    m_runes->lastUsedRune = RuneType::RUNE_BLOOD;
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
@@ -26215,7 +26169,7 @@ void Player::InitRunes()
         m_runes->SetRuneState(i);
     }
 
-    for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
+    for (uint8 i = 0; i < uint8(RuneType::NUM_RUNE_TYPES); ++i)
         SetFloatValue(PLAYER_FIELD_RUNE_REGEN + i, 0.1f);                  // set a base regen timer equal to 10 sec
 }
 
@@ -26328,7 +26282,6 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         // LootItem is being removed (looted) from the container, delete it from the DB.
         if (loot->containerID > 0)
             loot->DeleteLootItemFromContainerItemDB(item->itemid);
-
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);
@@ -26924,8 +26877,6 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
         for (uint8 j = 0; j < MAX_GLYPH_SLOT_INDEX; ++j)
             *data << uint16(GetGlyph(i, j));               // GlyphProperties.dbc
 
-        uint32 const* talentTabIds = GetClassSpecializations(getClass());
-
         int32 talentCount = 0;
         for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
         {
@@ -27082,7 +27033,7 @@ void Player::SendEquipmentSetList()
 
     for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
     {
-        if (itr->second.state == EQUIPMENT_SET_DELETED)
+        if (itr->second.state == EquipmentSetUpdateState::EQUIPMENT_SET_DELETED)
             continue;
 
         ObjectGuid setGuid = itr->second.Guid;
@@ -27116,7 +27067,7 @@ void Player::SendEquipmentSetList()
 
     for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
     {
-        if (itr->second.state == EQUIPMENT_SET_DELETED)
+        if (itr->second.state == EquipmentSetUpdateState::EQUIPMENT_SET_DELETED)
             continue;
 
         ObjectGuid setGuid = itr->second.Guid;
@@ -27208,7 +27159,7 @@ void Player::SetEquipmentSet(uint32 index, EquipmentSet const& eqset)
         GetSession()->SendPacket(&data);
     }
 
-    eqslot.state = old_state == EQUIPMENT_SET_NEW ? EQUIPMENT_SET_NEW : EQUIPMENT_SET_CHANGED;
+    eqslot.state = old_state == EquipmentSetUpdateState::EQUIPMENT_SET_NEW ? EquipmentSetUpdateState::EQUIPMENT_SET_NEW : EquipmentSetUpdateState::EQUIPMENT_SET_CHANGED;
 }
 
 void Player::_SaveEquipmentSets(SQLTransaction& trans)
@@ -27221,10 +27172,10 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
         uint8 j = 0;
         switch (eqset.state)
         {
-            case EQUIPMENT_SET_UNCHANGED:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED:
                 ++itr;
                 break;                                      // nothing do
-            case EQUIPMENT_SET_CHANGED:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_EQUIP_SET);
                 stmt->setString(j++, eqset.Name.c_str());
                 stmt->setString(j++, eqset.IconName.c_str());
@@ -27235,10 +27186,10 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
                 stmt->setUInt64(j++, eqset.Guid);
                 stmt->setUInt32(j, index);
                 trans->Append(stmt);
-                eqset.state = EQUIPMENT_SET_UNCHANGED;
+                eqset.state = EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED;
                 ++itr;
                 break;
-            case EQUIPMENT_SET_NEW:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_NEW:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_EQUIP_SET);
                 stmt->setUInt32(j++, GetGUIDLow());
                 stmt->setUInt64(j++, eqset.Guid);
@@ -27249,10 +27200,10 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
                 for (uint8 i=0; i<EQUIPMENT_SLOT_END; ++i)
                     stmt->setUInt32(j++, eqset.Items[i]);
                 trans->Append(stmt);
-                eqset.state = EQUIPMENT_SET_UNCHANGED;
+                eqset.state = EquipmentSetUpdateState::EQUIPMENT_SET_UNCHANGED;
                 ++itr;
                 break;
-            case EQUIPMENT_SET_DELETED:
+            case EquipmentSetUpdateState::EQUIPMENT_SET_DELETED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EQUIP_SET);
                 stmt->setUInt64(0, eqset.Guid);
                 trans->Append(stmt);
@@ -27289,10 +27240,10 @@ void Player::DeleteEquipmentSet(uint64 setGuid)
     {
         if (itr->second.Guid == setGuid)
         {
-            if (itr->second.state == EQUIPMENT_SET_NEW)
+            if (itr->second.state == EquipmentSetUpdateState::EQUIPMENT_SET_NEW)
                 m_EquipmentSets.erase(itr);
             else
-                itr->second.state = EQUIPMENT_SET_DELETED;
+                itr->second.state = EquipmentSetUpdateState::EQUIPMENT_SET_DELETED;
             break;
         }
     }
@@ -27520,7 +27471,6 @@ void Player::UpdateSpecCount(uint8 count)
 
 void Player::ActivateSpec(uint8 spec)
 {
-
     if (GetActiveSpec() == spec)
         return;
 
@@ -27625,7 +27575,6 @@ void Player::ActivateSpec(uint8 spec)
             continue;
 
         learnSpell(talentInfo->SpellId, false); // add the talent to the PlayerSpellMap
-
     }
 /*
     std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(GetTalentSpecialization(GetActiveSpec()));
@@ -28246,7 +28195,7 @@ uint8 Player::AddVoidStorageItem(const VoidStorageItem& item)
 
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_FULL);
         return 255;
     }
 
@@ -28259,14 +28208,14 @@ void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
 {
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_FULL);
         return;
     }
 
     if (_voidStorageItems[slot])
     {
         SF_LOG_ERROR("misc", "Player::AddVoidStorageItemAtSlot - Player (GUID: %u, name: %s) tried to add an item to an used slot (item id: " UI64FMTD ", entry: %u, slot: %u).", GetGUIDLow(), GetName().c_str(), _voidStorageItems[slot]->ItemId, _voidStorageItems[slot]->ItemEntry, slot);
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
     }
 
@@ -28278,7 +28227,7 @@ void Player::DeleteVoidStorageItem(uint8 slot)
 {
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
     }
 
@@ -28299,7 +28248,7 @@ VoidStorageItem* Player::GetVoidStorageItem(uint8 slot) const
 {
     if (slot >= VOID_STORAGE_MAX_SLOT)
     {
-        GetSession()->SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        GetSession()->SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return NULL;
     }
 

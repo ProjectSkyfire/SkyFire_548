@@ -626,7 +626,7 @@ public:
         }
     }
 
-    std::string ReadString(uint32 length)
+    std::string ReadString(size_t length)
     {
         if (!length)
             return std::string();

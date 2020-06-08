@@ -562,7 +562,7 @@ struct npc_unleashed_ballAI : public ScriptedAI
         me->SetCanFly(true);
         SetCombatMovement(false);
         MoveToNextPoint();
-        RangeCheckTimer = 0.5*IN_MILLISECONDS;
+        RangeCheckTimer = 500;
     }
 
     void MovementInform(uint32 uiType, uint32 uiId) OVERRIDE
@@ -604,9 +604,9 @@ class npc_unleashed_dark : public CreatureScript
                     {
                         DoCastAOE(SPELL_UNLEASHED_DARK_HELPER);
                         me->GetMotionMaster()->MoveIdle();
-                        me->DespawnOrUnsummon(1*IN_MILLISECONDS);
+                        me->DespawnOrUnsummon(1000);
                     }
-                    RangeCheckTimer = 0.5*IN_MILLISECONDS;
+                    RangeCheckTimer = 500;
                 }
                 else
                     RangeCheckTimer -= diff;
@@ -636,9 +636,9 @@ class npc_unleashed_light : public CreatureScript
                     {
                         DoCastAOE(SPELL_UNLEASHED_LIGHT_HELPER);
                         me->GetMotionMaster()->MoveIdle();
-                        me->DespawnOrUnsummon(1*IN_MILLISECONDS);
+                        me->DespawnOrUnsummon(1000);
                     }
-                    RangeCheckTimer = 0.5*IN_MILLISECONDS;
+                    RangeCheckTimer = 500;
                 }
                 else
                     RangeCheckTimer -= diff;

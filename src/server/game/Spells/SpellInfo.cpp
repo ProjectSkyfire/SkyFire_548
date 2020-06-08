@@ -936,7 +936,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     Rank = spellEntry->Rank;
     SchoolMask = spellMisc ? spellMisc->SchoolMask : 0;
     RuneCostID = spellEntry->runeCostID;
-    SpellDifficultyId = spellEntry->SpellDifficultyId;
+    SpellDifficultyId = spellMisc ? spellMisc->SpellDifficultyID : 0;
     SpellScalingId = spellEntry->SpellScalingId;
     SpellAuraOptionsId = spellEntry->SpellAuraOptionsId;
     SpellAuraRestrictionsId = spellEntry->SpellAuraRestrictionsId;

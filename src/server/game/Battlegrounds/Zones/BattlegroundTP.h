@@ -182,7 +182,7 @@ class BattlegroundTP : public Battleground
 
 
         /* BG Flags */
-        uint64 GetFlagPickerGUID(int32 team) const
+        uint64 GetFlagPickerGUID(int32 team) const OVERRIDE
         {
             if (team == TEAM_ALLIANCE || team == TEAM_HORDE)
                 return m_FlagKeepers[team];

@@ -97,7 +97,7 @@ public:
             }
         }
 
-        void ProcessEvent(WorldObject* /*unit*/, uint32 eventId)
+        void ProcessEvent(WorldObject* /*unit*/, uint32 eventId) OVERRIDE
         {
             if (eventId != EVENT_CALL_DRAGON)
                 return;

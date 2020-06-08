@@ -444,11 +444,11 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         explicit Creature(bool isWorldObject = false);
         virtual ~Creature();
 
-        void AddToWorld();
+        void AddToWorld() OVERRIDE;
         void RemoveFromWorld() OVERRIDE;
 
-        void SetObjectScale(float scale);
-        void SetDisplayId(uint32 modelId);
+        void SetObjectScale(float scale) OVERRIDE;
+        void SetDisplayId(uint32 modelId) OVERRIDE;
 
         void DisappearAndDie();
 
@@ -459,7 +459,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
 
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
-        void Update(uint32 time);                         // overwrited Unit::Update
+        void Update(uint32 time) OVERRIDE;                         // overwrited Unit::Update
         void GetRespawnPosition(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
 
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
@@ -470,7 +470,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         bool IsGuard() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
         bool CanWalk() const { return GetCreatureTemplate()->InhabitType & INHABIT_GROUND; }
         bool CanSwim() const { return GetCreatureTemplate()->InhabitType & INHABIT_WATER || IsPet(); }
-        bool CanFly()  const { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
+        bool CanFly()  const OVERRIDE { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
 
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() { return m_reactState; }
@@ -481,14 +481,14 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* player) const;
         bool CanCreatureAttack(Unit const* victim, bool force = true) const;
-        bool IsImmunedToSpell(SpellInfo const* spellInfo) const;                     // override Unit::IsImmunedToSpell
-        bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const; // override Unit::IsImmunedToSpellEffect
+        bool IsImmunedToSpell(SpellInfo const* spellInfo) const OVERRIDE;                     // override Unit::IsImmunedToSpell
+        bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const OVERRIDE; // override Unit::IsImmunedToSpellEffect
         bool isElite() const;
         bool isWorldBoss() const;
 
         bool IsDungeonBoss() const;
 
-        uint8 getLevelForTarget(WorldObject const* target) const; // overwrite Unit::getLevelForTarget for boss level support
+        uint8 getLevelForTarget(WorldObject const* target) const OVERRIDE; // overwrite Unit::getLevelForTarget for boss level support
 
         bool IsInEvadeMode() const { return HasUnitState(UNIT_STATE_EVADE); }
 
@@ -497,7 +497,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
 
         CreatureAI* AI() const { return (CreatureAI*)i_AI; }
 
-        SpellSchoolMask GetMeleeDamageSchoolMask() const { return m_meleeDamageSchoolMask; }
+        SpellSchoolMask GetMeleeDamageSchoolMask() const OVERRIDE { return m_meleeDamageSchoolMask; }
         void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = SpellSchoolMask(1 << school); }
 
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
@@ -506,7 +506,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
         uint32 GetCreatureSpellCooldownDelay(uint32 spellId) const;
-        virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
+        virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) OVERRIDE;
 
         bool HasSpell(uint32 spellID) const OVERRIDE;
 

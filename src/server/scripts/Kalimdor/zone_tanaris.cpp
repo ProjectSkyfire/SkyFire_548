@@ -99,7 +99,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) OVERRIDE
         {
             Talk(AGGRO_YELL_AQUE, who);
         }
@@ -182,7 +182,7 @@ public:
     {
         npc_custodian_of_timeAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId)
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             if (Player* player = GetPlayerForEscort())
             {
@@ -249,7 +249,7 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             if (HasEscortState(STATE_ESCORT_ESCORTING))
                 return;
@@ -347,7 +347,7 @@ class npc_OOX17 : public CreatureScript
 public:
     npc_OOX17() : CreatureScript("npc_OOX17") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == Q_OOX17)
         {
@@ -372,7 +372,7 @@ public:
     {
         npc_OOX17AI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId)
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             if (Player* player = GetPlayerForEscort())
             {
@@ -442,7 +442,7 @@ class npc_tooga : public CreatureScript
 public:
     npc_tooga() : CreatureScript("npc_tooga") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_TOOGA)
         {
@@ -477,7 +477,7 @@ public:
             TortaGUID = 0;
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             FollowerAI::MoveInLineOfSight(who);
 
@@ -495,7 +495,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 MotionType, uint32 PointId)
+        void MovementInform(uint32 MotionType, uint32 PointId) OVERRIDE
         {
             FollowerAI::MovementInform(MotionType, PointId);
 
@@ -506,7 +506,7 @@ public:
                 SetFollowComplete();
         }
 
-        void UpdateFollowerAI(uint32 Diff)
+        void UpdateFollowerAI(uint32 Diff) OVERRIDE
         {
             if (!UpdateVictim())
             {

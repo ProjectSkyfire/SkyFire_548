@@ -178,7 +178,6 @@ class Object
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
-        void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
         void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
         void ApplyModSignedFloatValue(uint16 index, float val, bool apply);
         void ApplyPercentModFloatValue(uint16 index, float val, bool apply);
@@ -551,7 +550,7 @@ class FlaggedValuesArray32
         T_FLAGS m_flags;
 };
 
-enum MapObjectCellMoveState
+enum class MapObjectCellMoveState
 {
     MAP_OBJECT_CELL_MOVE_NONE, //not in move list
     MAP_OBJECT_CELL_MOVE_ACTIVE, //in move list
@@ -564,7 +563,7 @@ class MapObject
         friend class ObjectGridLoader; //grid loader for loading creatures
 
     protected:
-        MapObject() : _moveState(MAP_OBJECT_CELL_MOVE_NONE) { _newPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f); }
+        MapObject() : _moveState(MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE) { _newPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f); }
 
     private:
         Cell _currentCell;
@@ -575,7 +574,7 @@ class MapObject
         Position _newPosition;
         void SetNewCellPosition(float x, float y, float z, float o)
         {
-            _moveState = MAP_OBJECT_CELL_MOVE_ACTIVE;
+            _moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_ACTIVE;
             _newPosition.Relocate(x, y, z, o);
         }
 };

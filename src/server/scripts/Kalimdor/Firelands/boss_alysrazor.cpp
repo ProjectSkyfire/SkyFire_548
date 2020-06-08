@@ -180,7 +180,7 @@ class npc_harbinger_of_flame : public CreatureScript
             {
             }
 
-            void EnterCombat(Unit* /*target*/)
+            void EnterCombat(Unit* /*target*/) OVERRIDE
             {
                 if (Creature* bird = ObjectAccessor::GetCreature(*me, me->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)))
                     DoZoneInCombat(bird, 200.0f);
@@ -280,7 +280,7 @@ class npc_blazing_monstrosity : public CreatureScript
                 AlysrazorTrashEvaded(me);
             }
 
-            void EnterCombat(Unit* /*target*/)
+            void EnterCombat(Unit* /*target*/) OVERRIDE
             {
                 DoZoneInCombat();
                 me->RemoveAurasDueToSpell(SPELL_SLEEP_ULTRA_HIGH_PRIORITY);

@@ -38,7 +38,7 @@ enum GMTicketStatus
     GMTICKET_STATUS_DEFAULT = 0x0A
 };
 
-enum GMTicketResponse
+enum class GMTicketResponse
 {
     GMTICKET_RESPONSE_ALREADY_EXIST = 1,
     GMTICKET_RESPONSE_CREATE_SUCCESS = 2,
@@ -62,7 +62,7 @@ enum GMTicketEscalationStatus
 };
 
 // from blizzard lua
-enum GMTicketOpenedByGMStatus
+enum class GMTicketOpenedByGMStatus
 {
     GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED = 0,      // ticket has never been opened by a gm
     GMTICKET_OPENEDBYGM_STATUS_OPENED = 1       // ticket has been opened by a gm

@@ -1013,6 +1013,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.006f));
                     SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
                     SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
+                    break;
                 }
                 case 63508: // Invoke Xuen
                 {
@@ -1023,7 +1024,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    break;
                 }
+                default:
+                    break;
             }
             break;
         }

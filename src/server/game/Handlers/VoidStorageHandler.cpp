@@ -219,7 +219,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
 
     if (itemGuids.size() > player->GetNumOfVoidStorageFreeSlots())
     {
-        SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_FULL);
+        SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_FULL);
         return;
     }
 
@@ -237,13 +237,13 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
 
     if (itemIds.size() > freeBagSlots)
     {
-        SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INVENTORY_FULL);
+        SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INVENTORY_FULL);
         return;
     }
 
     if (!player->HasEnoughMoney(uint64(itemGuids.size() * VOID_STORAGE_STORE_ITEM)))
     {
-        SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_NOT_ENOUGH_MONEY);
+        SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_NOT_ENOUGH_MONEY);
         return;
     }
 
@@ -287,7 +287,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
         InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemVS->ItemEntry, 1);
         if (msg != EQUIP_ERR_OK)
         {
-            SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INVENTORY_FULL);
+            SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INVENTORY_FULL);
             SF_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) couldn't withdraw item id " UI64FMTD " because inventory was full.", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
             return;
         }
@@ -363,7 +363,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
 
     SendPacket(&data);
 
-    SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_NO_ERROR);
+    SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_NO_ERROR);
 }
 
 void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
@@ -427,7 +427,7 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
 
     if (!player->SwapVoidStorageItem(oldSlot, newSlot))
     {
-        SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
+        SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
     }
 

@@ -55,11 +55,9 @@ typedef struct BlackMarketAuctionTemplate BlackMarketAuctionTemplate;
 
 struct BlackMarketAuction
 {
-
-
 public:
-    BlackMarketAuction(uint32 auctionId, uint32 templateId, uint32 startTime, uint32 currentBidder, uint32 currentBid,
-        uint32 minIncrement, uint32 numBids) :
+    BlackMarketAuction(uint32 auctionId, uint32 templateId, uint32 startTime, uint32 currentBidder, uint64 currentBid,
+        uint64 minIncrement, uint32 numBids) :
         _auctionId(auctionId), _templateId(templateId), _startTime(startTime), _currentBidder(currentBidder), _currentBid(currentBid),
         _minIncrement(minIncrement), _numBids(numBids), _template(NULL) { }
 
@@ -78,11 +76,11 @@ public:
     void SetCurrentBidder(uint32 currentBidder) { _currentBidder = currentBidder; }
     uint32 GetCurrentBidder() const { return _currentBidder; }
 
-    void SetCurrentBid(uint32 currentBid) { _currentBid = currentBid; }
-    uint32 GetCurrentBid() const { return _currentBid; }
+    void SetCurrentBid(uint64 currentBid) { _currentBid = currentBid; }
+    uint64 GetCurrentBid() const { return _currentBid; }
 
-    void SetMinIncrement(uint32 minIncrement) { _minIncrement = minIncrement; }
-    uint32 GetMinIncrement() const { return _minIncrement; }
+    void SetMinIncrement(uint64 minIncrement) { _minIncrement = minIncrement; }
+    uint64 GetMinIncrement() const { return _minIncrement; }
 
     void SetNumBids(uint32 numBids) { _numBids = numBids; }
     uint32 GetNumBids() const { return _numBids; }
@@ -107,8 +105,8 @@ private:
     uint32 _templateId;
     uint32 _startTime;
     uint32 _currentBidder;
-    uint32 _currentBid;
-    uint32 _minIncrement;
+    uint64 _currentBid;
+    uint64 _minIncrement;
     uint32 _numBids;
     BlackMarketAuctionTemplate* _template;
 };
@@ -151,7 +149,7 @@ public:
     void BuildBlackMarketRequestItemsResult(WorldPacket& data, uint32 guidLow);
 
     void SendAuctionWon(BlackMarketAuction* auction, SQLTransaction& trans);
-    void SendAuctionOutbidded(BlackMarketAuction* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
+    void SendAuctionOutbidded(BlackMarketAuction* auction, SQLTransaction& trans);
     
     bool isBlackMarketOpen() { return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_BLACK_MARKET_OPEN); }
 };

@@ -143,7 +143,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
     if (!bracketEntry)
         return;
 
-    GroupJoinBattlegroundResult err = ERR_BATTLEGROUND_NONE;
+    GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE;
 
     // check queue conditions
     if (!asGroup)
@@ -151,7 +151,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         if (GetPlayer()->isUsingLfg())
         {
             WorldPacket data;
-            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_LFG_CANT_USE_BATTLEGROUND);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, GroupJoinBattlegroundResult::ERR_LFG_CANT_USE_BATTLEGROUND);
             GetPlayer()->GetSession()->SendPacket(&data);
             return;
         }
@@ -160,7 +160,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         if (!_player->CanJoinToBattleground(bg))
         {
             WorldPacket data;
-            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, GroupJoinBattlegroundResult::ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -169,7 +169,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         {
             // player is already in random queue
             WorldPacket data;
-            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_IN_RANDOM_BG);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, GroupJoinBattlegroundResult::ERR_IN_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -178,7 +178,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         {
             // player is already in queue, can't start random queue
             WorldPacket data;
-            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_IN_NON_RANDOM_BG);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, GroupJoinBattlegroundResult::ERR_IN_NON_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -192,7 +192,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         if (!_player->HasFreeBattlegroundQueueId())
         {
             WorldPacket data;
-            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, GroupJoinBattlegroundResult::ERR_BATTLEGROUND_TOO_MANY_QUEUES);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -230,7 +230,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         GroupQueueInfo* ginfo = NULL;
         uint32 avgTime = 0;
 
-        if (!err)
+        if (err == GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE)
         {
             SF_LOG_DEBUG("bg.battleground", "Battleground: the following players are joining as group:");
             ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
@@ -243,7 +243,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             if (!member)
                 continue;   // this should never happen
 
-            if (err)
+            if (err != GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE)
             {
                 WorldPacket data;
                 sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, err);
@@ -505,7 +505,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
         {
             //send bg command result to show nice message
             WorldPacket data2;
-            sBattlegroundMgr->BuildStatusFailedPacket(&data2, bg, _player, 0, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data2, bg, _player, 0, GroupJoinBattlegroundResult::ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
             _player->GetSession()->SendPacket(&data2);
             action = 0;
             SF_LOG_DEBUG("bg.battleground", "Player %s (%u) has a deserter debuff, do not port him to battleground!", _player->GetName().c_str(), _player->GetGUIDLow());
@@ -704,7 +704,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
     if (!bracketEntry)
         return;
 
-    GroupJoinBattlegroundResult err = ERR_BATTLEGROUND_NONE;
+    GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE;
 
     Group* grp = _player->GetGroup();
     // no group found, error
@@ -733,7 +733,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
     GroupQueueInfo* ginfo = NULL;
 
     err = grp->CanJoinBattlegroundQueue(bg, bgQueueTypeId, arenatype, arenatype, true, arenaslot);
-    if (!err)
+    if (err == GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE)
     {
         SF_LOG_DEBUG("bg.battleground", "Battleground: leader %s queued with matchmaker rating %u for type %u", _player->GetName().c_str(), matchmakerRating, arenatype);
 
@@ -747,7 +747,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
         if (!member)
             continue;
 
-        if (err)
+        if (err != GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE)
         {
             WorldPacket data;
             sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, err);

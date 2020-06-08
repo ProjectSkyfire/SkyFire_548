@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2019 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2020 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2020 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -13,8 +13,8 @@
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(CheckCXXCompilerFlag)
-  
-set(MSVC_EXPECTED_VERSION 19.22.27905.0)
+
+set(MSVC_EXPECTED_VERSION 19.26.28619.0)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
   message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2019) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()

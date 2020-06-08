@@ -1,6 +1,5 @@
-[![Stories in Ready](https://badge.waffle.io/ProjectSkyfire/SkyFire.548.png?label=ready&title=Ready)](https://waffle.io/ProjectSkyfire/SkyFire.548) [![Insight.io](https://insight.io/repoBadge/github.com/ProjectSkyfire/SkyFire.548)](https://insight.io/github.com/ProjectSkyfire/SkyFire.548)
-
 # ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
+# [![CodeFactor](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548/badge)](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly on C++.
@@ -44,7 +43,7 @@ For further information on the SkyFire project, please visit our project website
 + Processor with SSE2 support
 + ACE = 6.4.5  (Linux only)
 + MySQL = 8.0 (Windows / Linux)
-+ CMake = 3.13.1/3.10.2 (Windows / Linux)
++ CMake = 3.17.0/3.10.2 (Windows / Linux)
 + OpenSSL = 1.1.1 (Windows / Linux)
 + GCC = 9.2.1 (Linux only)
 + MS Visual Studio = 16 (2019) (Windows only)

@@ -124,7 +124,7 @@ class boss_skarvald_the_constructor : public CreatureScript
                 }
             }
 
-            void DoAction(int32 /*actionId*/)
+            void DoAction(int32 /*actionId*/) OVERRIDE
             {
                 summons.DespawnAll();
             }
@@ -271,7 +271,7 @@ class boss_dalronn_the_controller : public CreatureScript
                 }
             }
 
-            void DoAction(int32 /*actionId*/)
+            void DoAction(int32 /*actionId*/) OVERRIDE
             {
                 summons.DespawnAll();
             }

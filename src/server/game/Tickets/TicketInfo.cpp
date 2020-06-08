@@ -35,12 +35,9 @@
 // @ TicketInfo
 // Stores all common data needed for a Ticket : id, mapid, createtime, closedby, assignedTo, Position
 
-TicketInfo::TicketInfo() : _ticketId(0), _mapId(0), _ticketCreateTime(0), _closedBy(0), _assignedTo(0) { }
+TicketInfo::TicketInfo() : _ticketId(0), _ticketCreateTime(0), _mapId(0), _playerGuid(0), _closedBy(0), _assignedTo(0) { }
 
-TicketInfo::TicketInfo(Player* player) : _ticketId(0), _mapId(0), _ticketCreateTime(time(NULL)), _closedBy(0), _assignedTo(0)
-{
-    _playerGuid = player->GetGUID();
-}
+TicketInfo::TicketInfo(Player* player) : _ticketId(0), _ticketCreateTime(time(NULL)), _mapId(0), _playerGuid(player->GetGUID()), _closedBy(0), _assignedTo(0) { }
 
 TicketInfo::~TicketInfo() { }
 
@@ -68,11 +65,11 @@ void TicketInfo::SetPosition(uint32 MapID, G3D::Vector3 pos)
 // GM ticket
 
 GmTicket::GmTicket() : _lastModifiedTime(0), _escalatedStatus(TICKET_UNASSIGNED),
-_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), _completed(false), _viewed(false),
+_openedByGmStatus(GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), _completed(false), _viewed(false),
 _needResponse(false), _haveTicket(false) { }
 
 GmTicket::GmTicket(Player* player) : TicketInfo(player), _lastModifiedTime(time(NULL)),
-_escalatedStatus(TICKET_UNASSIGNED),_openedByGmStatus(GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED), 
+_escalatedStatus(TICKET_UNASSIGNED),_openedByGmStatus(GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED),
 _completed(false), _viewed(false), _needResponse(false), _haveTicket(false)
 {
     _ticketId = sTicketMgr->GenerateGmTicketId();
@@ -139,7 +136,7 @@ void GmTicket::LoadFromDB(Field* fields)
     _response = fields[++index].GetString();
     _completed = fields[++index].GetBool();
     _escalatedStatus = GMTicketEscalationStatus(fields[++index].GetUInt8());
-    _viewed = GMTicketOpenedByGMStatus(fields[++index].GetUInt8());
+    _viewed = fields[++index].GetUInt8();
     _haveTicket = fields[++index].GetBool();
 }
 

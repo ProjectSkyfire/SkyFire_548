@@ -542,7 +542,7 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
     Map* iMap = ((MapInstanced*)map)->FindInstanceMap(instanceId);
 
     if (iMap && iMap->IsInstance())
-        ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
+        ((InstanceMap*)iMap)->Reset(InstanceResetMethod::INSTANCE_RESET_RESPAWN_DELAY);
 
     if (iMap)
         iMap->DeleteRespawnTimes();
@@ -644,7 +644,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
             ((InstanceMap*)map2)->SendResetWarnings(timeLeft);
         }
         else
-            ((InstanceMap*)map2)->Reset(INSTANCE_RESET_GLOBAL);
+            ((InstanceMap*)map2)->Reset(InstanceResetMethod::INSTANCE_RESET_GLOBAL);
     }
 
     /// @todo delete creature/gameobject respawn times even if the maps are not loaded

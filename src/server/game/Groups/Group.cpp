@@ -438,8 +438,8 @@ bool Group::AddMember(Player* player)
     {
         // reset the new member's instances, unless he is currently in one of them
         // including raid/heroic instances that they are not permanently bound to!
-        player->ResetInstances(INSTANCE_RESET_GROUP_JOIN, false);
-        player->ResetInstances(INSTANCE_RESET_GROUP_JOIN, true);
+        player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_JOIN, false);
+        player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_JOIN, true);
 
         if (player->getLevel() >= LEVELREQUIREMENT_HEROIC)
         {
@@ -777,8 +777,8 @@ void Group::Disband(bool hideDestroy /* = false */)
 
         CharacterDatabase.CommitTransaction(trans);
 
-        ResetInstances(INSTANCE_RESET_GROUP_DISBAND, false, NULL);
-        ResetInstances(INSTANCE_RESET_GROUP_DISBAND, true, NULL);
+        ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND, false, NULL);
+        ResetInstances(InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND, true, NULL);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_LFG_DATA);
         stmt->setUInt32(0, m_dbStoreId);
@@ -2235,27 +2235,27 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
 {
     // check if this group is LFG group
     if (isLFGGroup())
-        return ERR_LFG_CANT_USE_BATTLEGROUND;
+        return GroupJoinBattlegroundResult::ERR_LFG_CANT_USE_BATTLEGROUND;
 
     BattlemasterListEntry const* bgEntry = sBattlemasterListStore.LookupEntry(uint32(bgOrTemplate->GetTypeID()));
     if (!bgEntry)
-        return ERR_BATTLEGROUND_JOIN_FAILED;            // shouldn't happen
+        return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_FAILED;            // shouldn't happen
 
     // check for min / max count
     uint32 memberscount = GetMembersCount();
 
     if (memberscount > bgEntry->maxGroupSize)                // no MinPlayerCount for battlegrounds
-        return ERR_BATTLEGROUND_NONE;                        // ERR_GROUP_JOIN_BATTLEGROUND_TOO_MANY handled on client side
+        return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE;                        // ERR_GROUP_JOIN_BATTLEGROUND_TOO_MANY handled on client side
 
     // get a player as reference, to compare other players' stats to (arena team id, queue id based on level, etc.)
     Player* reference = GetFirstMember()->GetSource();
     // no reference found, can't join this way
     if (!reference)
-        return ERR_BATTLEGROUND_JOIN_FAILED;
+        return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_FAILED;
 
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgOrTemplate->GetMapId(), reference->getLevel());
     if (!bracketEntry)
-        return ERR_BATTLEGROUND_JOIN_FAILED;
+        return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_FAILED;
 
     uint32 team = reference->GetTeam();
 
@@ -2268,39 +2268,39 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         Player* member = itr->GetSource();
         // offline member? don't let join
         if (!member)
-            return ERR_BATTLEGROUND_JOIN_FAILED;
+            return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_FAILED;
         // don't allow cross-faction join as group
         if (member->GetTeam() != team)
-            return ERR_BATTLEGROUND_JOIN_TIMED_OUT;
+            return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_TIMED_OUT;
         // not in the same battleground level braket, don't let join
         PvPDifficultyEntry const* memberBracketEntry = GetBattlegroundBracketByLevel(bracketEntry->mapId, member->getLevel());
         if (memberBracketEntry != bracketEntry)
-            return ERR_BATTLEGROUND_JOIN_RANGE_INDEX;
+            return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_RANGE_INDEX;
         // don't let join if someone from the group is already in that bg queue
         if (member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
-            return ERR_BATTLEGROUND_JOIN_FAILED;            // not blizz-like
+            return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_FAILED;            // not blizz-like
         // don't let join if someone from the group is in bg queue random
         if (member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRandom))
-            return ERR_IN_RANDOM_BG;
+            return GroupJoinBattlegroundResult::ERR_IN_RANDOM_BG;
         // don't let join to bg queue random if someone from the group is already in bg queue
         if (bgOrTemplate->GetTypeID() == BattlegroundTypeId::BATTLEGROUND_RB && member->InBattlegroundQueue())
-            return ERR_IN_NON_RANDOM_BG;
+            return GroupJoinBattlegroundResult::ERR_IN_NON_RANDOM_BG;
         // check for deserter debuff in case not arena queue
         if (bgOrTemplate->GetTypeID() != BattlegroundTypeId::BATTLEGROUND_AA && !member->CanJoinToBattleground(bgOrTemplate))
-            return ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;
+            return GroupJoinBattlegroundResult::ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;
         // check if member can join any more battleground queues
         if (!member->HasFreeBattlegroundQueueId())
-            return ERR_BATTLEGROUND_TOO_MANY_QUEUES;        // not blizz-like
+            return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_TOO_MANY_QUEUES;        // not blizz-like
         // check if someone in party is using dungeon system
         if (member->isUsingLfg())
-            return ERR_LFG_CANT_USE_BATTLEGROUND;
+            return GroupJoinBattlegroundResult::ERR_LFG_CANT_USE_BATTLEGROUND;
     }
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...
     if (bgOrTemplate->isArena() && memberscount != MinPlayerCount)
-        return ERR_ARENA_TEAM_PARTY_SIZE;
+        return GroupJoinBattlegroundResult::ERR_ARENA_TEAM_PARTY_SIZE;
 
-    return ERR_BATTLEGROUND_NONE;
+    return GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE;
 }
 
 //===================================================
@@ -2374,7 +2374,7 @@ bool Group::InCombatToInstance(uint32 instanceId)
     return false;
 }
 
-void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
+void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* SendMsgTo)
 {
     if (isBGGroup() || isBFGroup())
         return;
@@ -2392,13 +2392,13 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
     {
         InstanceSave* instanceSave = itr->second.save;
         const MapEntry* entry = sMapStore.LookupEntry(itr->first);
-        if (!entry || entry->IsRaid() != isRaid || (!instanceSave->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
+        if (!entry || entry->IsRaid() != isRaid || (!instanceSave->CanReset() && method != InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND))
         {
             ++itr;
             continue;
         }
 
-        if (method == INSTANCE_RESET_ALL)
+        if (method == InstanceResetMethod::INSTANCE_RESET_ALL)
         {
             // the "reset all instances" method can only reset normal maps
             if (entry->map_type == MAP_RAID || diff == DIFFICULTY_HEROIC)
@@ -2411,7 +2411,7 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
         bool isEmpty = true;
         // if the map is loaded, reset it
         Map* map = sMapMgr->FindMap(instanceSave->GetMapId(), instanceSave->GetInstanceId());
-        if (map && map->IsInstance() && !(method == INSTANCE_RESET_GROUP_DISBAND && !instanceSave->CanReset()))
+        if (map && map->IsInstance() && !(method == InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND && !instanceSave->CanReset()))
         {
             if (instanceSave->CanReset())
                 isEmpty = ((InstanceMap*)map)->Reset(method);
@@ -2439,7 +2439,7 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
                 SendMsgTo->SendResetInstanceSuccess(instanceSave->GetMapId());
         }
 
-        if (isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+        if (isEmpty || method == InstanceResetMethod::INSTANCE_RESET_GROUP_DISBAND || method == InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY)
         {
             // do not reset the instance, just unbind if others are permanently bound to it
             if (instanceSave->CanReset())

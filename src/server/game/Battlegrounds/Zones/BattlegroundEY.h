@@ -364,15 +364,15 @@ class BattlegroundEY : public Battleground
         uint64 GetDroppedFlagGUID() const           { return m_DroppedFlagGUID;}
 
         /* Battleground Events */
-        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj);
-        void EventPlayerDroppedFlag(Player* Source);
+        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
+        void EventPlayerDroppedFlag(Player* Source) OVERRIDE;
 
         /* achievement req. */
-        bool IsAllNodesControlledByTeam(uint32 team) const;
+        bool IsAllNodesControlledByTeam(uint32 team) const OVERRIDE;
 
-        uint32 GetPrematureWinner();
+        uint32 GetPrematureWinner() OVERRIDE;
     private:
-        void PostUpdateImpl(uint32 diff);
+        void PostUpdateImpl(uint32 diff) OVERRIDE;
 
         void EventPlayerCapturedFlag(Player* Source, uint32 BgObjectType);
         void EventTeamCapturedPoint(Player* Source, uint32 Point);

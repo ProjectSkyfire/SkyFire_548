@@ -290,7 +290,7 @@ public:
             return 0;
         }
 
-        void Load(char const* chrIn)
+        void Load(char const* chrIn) OVERRIDE
         {
             if (!chrIn)
             {

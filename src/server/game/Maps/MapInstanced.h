@@ -34,11 +34,11 @@ class MapInstanced : public Map
         ~MapInstanced() { }
 
         // functions overwrite Map versions
-        void Update(const uint32);
-        void DelayedUpdate(const uint32 diff);
+        void Update(const uint32) OVERRIDE;
+        void DelayedUpdate(const uint32 diff) OVERRIDE;
         //void RelocationNotify();
-        void UnloadAll();
-        bool CanEnter(Player* player);
+        void UnloadAll() OVERRIDE;
+        bool CanEnter(Player* player) OVERRIDE;
 
         Map* CreateInstanceForPlayer(const uint32 mapId, Player* player);
         Map* FindInstanceMap(uint32 instanceId) const
@@ -62,7 +62,7 @@ class MapInstanced : public Map
         }
 
         InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
-        virtual void InitVisibilityDistance();
+        virtual void InitVisibilityDistance() OVERRIDE;
 
     private:
         InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave* save, DifficultyID difficulty);

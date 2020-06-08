@@ -241,7 +241,7 @@ public:
             return strInstData;
         }
 
-        void Load(const char *chrIn)
+        void Load(const char *chrIn) OVERRIDE
         {
             if (!chrIn)
             {

@@ -965,7 +965,7 @@ void WorldSession::HandleGuildReplaceGuildMaster(WorldPacket& /*recvPacket*/)
         guild->HandleReplaceGuildMaster(this);
 }
 
-void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
+void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& /*recvPacket*/)
 {
     WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * 6 * 5);
     for (int i = 0; i < 6; i++)

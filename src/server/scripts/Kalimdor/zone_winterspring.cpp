@@ -448,7 +448,7 @@ public:
             }
         }
 
-        void JustDidDialogueStep(int32 entry)
+        void JustDidDialogueStep(int32 entry) OVERRIDE
         {
             switch (entry)
             {
@@ -547,7 +547,7 @@ public:
             }
         }
 
-        Creature* GetSpeakerByEntry(int32 entry)
+        Creature* GetSpeakerByEntry(int32 entry) OVERRIDE
         {
             switch (entry)
             {

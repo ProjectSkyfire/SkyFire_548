@@ -431,7 +431,7 @@ void TicketMgr::SendGmTicket(WorldSession* session, GmTicket* ticket) const
     if (ticket)
     {
         GMTicketEscalationStatus escaledstatus = ticket->GetEscalatedStatus();
-        bool viewed = ticket->GetViewed() ? GMTICKET_OPENEDBYGM_STATUS_OPENED : GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED;
+        GMTicketOpenedByGMStatus viewed = ticket->GetViewed() ? GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_OPENED : GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED;
         float OldestTicketTime = sTicketMgr->GetOldestOpenTicket() ? GetAge(sTicketMgr->GetOldestOpenTicket()->GetLastModifiedTime()) : 0.0f;
 
         data.WriteBit(1);                                   // Initilize

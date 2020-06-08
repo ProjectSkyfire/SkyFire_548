@@ -323,7 +323,7 @@ enum TrainerSpellState
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
-enum ActionButtonUpdateState
+enum class ActionButtonUpdateState
 {
     ACTIONBUTTON_UNCHANGED  = 0,
     ACTIONBUTTON_CHANGED    = 1,
@@ -331,7 +331,7 @@ enum ActionButtonUpdateState
     ACTIONBUTTON_DELETED    = 3
 };
 
-enum ActionButtonType : uint8
+enum class ActionButtonType : uint8
 {
     ACTION_BUTTON_SPELL    = 0x00,
     ACTION_BUTTON_C        = 0x01,
@@ -360,7 +360,7 @@ enum ReputationSource
 
 struct ActionButton
 {
-    ActionButton() : packedData(0), uState(ACTIONBUTTON_NEW) { }
+    ActionButton() : packedData(0), uState(ActionButtonUpdateState::ACTIONBUTTON_NEW) { }
 
     uint64 packedData;
     ActionButtonUpdateState uState;
@@ -372,7 +372,7 @@ struct ActionButton
     }
     uint32 GetHiType() const
     {
-        return uint32(GetType() << 24);
+        return uint32(uint8(GetType()) << 24);
     }
     uint32 GetAction() const 
     { 
@@ -382,11 +382,11 @@ struct ActionButton
     void SetActionAndType(uint32 action, ActionButtonType type)
     {
         uint64 newData = uint64(action) | (uint64(type) << 56);
-        if (newData != packedData || uState == ACTIONBUTTON_DELETED)
+        if (newData != packedData || uState == ActionButtonUpdateState::ACTIONBUTTON_DELETED)
         {
             packedData = newData;
-            if (uState != ACTIONBUTTON_NEW)
-                uState = ACTIONBUTTON_CHANGED;
+            if (uState != ActionButtonUpdateState::ACTIONBUTTON_NEW)
+                uState = ActionButtonUpdateState::ACTIONBUTTON_CHANGED;
         }
     }
 };
@@ -493,7 +493,7 @@ enum RuneCooldowns
     RUNE_MISS_COOLDOWN = 1500     // cooldown applied on runes when the spell misses
 };
 
-enum RuneType
+enum class RuneType
 {
     RUNE_BLOOD     = 0,
     RUNE_UNHOLY    = 1,
@@ -504,8 +504,8 @@ enum RuneType
 
 struct RuneInfo
 {
-    uint8 BaseRune;
-    uint8 CurrentRune;
+    RuneType BaseRune;
+    RuneType CurrentRune;
     uint32 Cooldown;
     AuraEffect const* ConvertAura;
 };
@@ -760,7 +760,7 @@ enum BuyBackSlots                                           // 12 slots
     BUYBACK_SLOT_END   = 94
 };
 
-enum EquipmentSetUpdateState
+enum class EquipmentSetUpdateState
 {
     EQUIPMENT_SET_UNCHANGED = 0,
     EQUIPMENT_SET_CHANGED   = 1,
@@ -770,7 +770,7 @@ enum EquipmentSetUpdateState
 
 struct EquipmentSet
 {
-    EquipmentSet() : Guid(0), Name(""), IconName(""), IgnoreMask(0), state(EQUIPMENT_SET_NEW)
+    EquipmentSet() : Guid(0), Name(""), IconName(""), IgnoreMask(0), state(EquipmentSetUpdateState::EQUIPMENT_SET_NEW)
     {
         for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
             Items [i] = 0;
@@ -806,7 +806,7 @@ enum TradeSlots
     TRADE_SLOT_INVALID      = -1
 };
 
-enum TransferAbortReason
+enum class TransferAbortReason
 {
     TRANSFER_ABORT_NONE                         = 0x00,
     TRANSFER_ABORT_ERROR                        = 0x01,
@@ -1728,8 +1728,8 @@ class Player : public Unit, public GridObject<Player>
     Item* GetItemFromBuyBackSlot(uint32 slot);
     void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
     void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = NULL, uint32 itemid = 0);
-    void SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 param);
-    void SendSellError(SellResult msg, Creature* creature, uint64 guid);
+    void SendBuyFailed(BuyResult msg, ObjectGuid VendorGUID, uint32 item);
+    void SendSellResponse(SellResult msg, ObjectGuid VendorGUID, ObjectGuid ItemGUID);
     void AddWeaponProficiency(uint32 newflag)
     {
         m_WeaponProficiency |= newflag;
@@ -1750,7 +1750,7 @@ class Player : public Unit, public GridObject<Player>
     bool IsTwoHandUsed() const;
     void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
     bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
-    bool BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count);
+    bool BuyCurrencyFromVendorSlot(ObjectGuid VendorGUID, uint32 vendorSlot, uint32 currency, uint32 count);
     bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore);
 
     float GetReputationPriceDiscount(Creature const* creature) const;
@@ -2297,7 +2297,7 @@ class Player : public Unit, public GridObject<Player>
         m_cinematic = cine;
     }
 
-    ActionButton* addActionButton(uint8 button, uint32 action, uint8 type);
+    ActionButton* addActionButton(uint8 button, uint32 action, ActionButtonType type);
     void removeActionButton(uint8 button);
     ActionButton const* GetActionButton(uint8 button);
     void SendInitialActionButtons() const
@@ -2305,7 +2305,7 @@ class Player : public Unit, public GridObject<Player>
         SendActionButtons(0);
     }
     void SendActionButtons(uint32 state) const;
-    bool IsActionButtonDataValid(uint8 button, uint32 action, uint8 type);
+    bool IsActionButtonDataValid(uint8 button, uint32 action, ActionButtonType type);
 
     PvPInfo pvpInfo;
     void UpdatePvPState(bool onlyFFA = false);
@@ -2497,7 +2497,7 @@ class Player : public Unit, public GridObject<Player>
 
     void SendDungeonDifficulty(/*bool IsInGroup*/);
     void SendRaidDifficulty(/*bool IsInGroup,*/ int32 forcedDifficulty = -1);
-    void ResetInstances(uint8 method, bool isRaid);
+    void ResetInstances(InstanceResetMethod method, bool isRaid);
     void SendResetInstanceSuccess(uint32 MapId);
     void SendResetInstanceFailed(uint32 reason, uint32 MapId);
     void SendResetFailedNotify(uint32 mapid);
@@ -3132,11 +3132,11 @@ class Player : public Unit, public GridObject<Player>
     }
     void SetBaseRune(uint8 index, RuneType baseRune)
     {
-        m_runes->runes [index].BaseRune = baseRune;
+        m_runes->runes[index].BaseRune = baseRune;
     }
     void SetCurrentRune(uint8 index, RuneType currentRune)
     {
-        m_runes->runes [index].CurrentRune = currentRune;
+        m_runes->runes[index].CurrentRune = currentRune;
     }
     void SetRuneCooldown(uint8 index, uint32 cooldown);
     void SetRuneConvertAura(uint8 index, AuraEffect const* aura);

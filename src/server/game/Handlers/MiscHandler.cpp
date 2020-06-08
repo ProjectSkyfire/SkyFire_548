@@ -599,7 +599,7 @@ void WorldSession::HandleSetPvP(WorldPacket& recvData)
         GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
     }
 }
-void WorldSession::HandleTogglePvP(WorldPacket& recvData)
+void WorldSession::HandleTogglePvP(WorldPacket& /*recvData*/)
 {
     GetPlayer()->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
     GetPlayer()->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
@@ -1284,24 +1284,8 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
     uint8 slotId;
 
     recvData >> slotId;
-
-    buttonStream[7] = recvData.ReadBit();
-    buttonStream[0] = recvData.ReadBit();
-    buttonStream[5] = recvData.ReadBit();
-    buttonStream[2] = recvData.ReadBit();
-    buttonStream[1] = recvData.ReadBit();
-    buttonStream[6] = recvData.ReadBit();
-    buttonStream[3] = recvData.ReadBit();
-    buttonStream[4] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(buttonStream[6]);
-    recvData.ReadByteSeq(buttonStream[7]);
-    recvData.ReadByteSeq(buttonStream[3]);
-    recvData.ReadByteSeq(buttonStream[5]);
-    recvData.ReadByteSeq(buttonStream[2]);
-    recvData.ReadByteSeq(buttonStream[1]);
-    recvData.ReadByteSeq(buttonStream[4]);
-    recvData.ReadByteSeq(buttonStream[0]);
+    recvData.ReadGuidMask(buttonStream, 7, 0, 5, 2, 1, 6, 3, 4);
+    recvData.ReadGuidBytes(buttonStream, 6, 7, 3, 5, 2, 1, 4, 0);
 
     ActionButtonPACKET* button = reinterpret_cast<ActionButtonPACKET*>(&buttonStream);
     button->id = ACTION_BUTTON_ACTION(buttonStream);
@@ -1312,7 +1296,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
     if (!button->id)
         GetPlayer()->removeActionButton(slotId);
     else
-        GetPlayer()->addActionButton(slotId, button->id, button->unk);
+        GetPlayer()->addActionButton(slotId, button->id, ActionButtonType(button->unk));
 }
 
 void WorldSession::HandleCompleteCinematic(WorldPacket& /*recvData*/)
@@ -1761,10 +1745,10 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recvData*/)
     if (Group* group = _player->GetGroup())
     {
         if (group->IsLeader(_player->GetGUID()))
-            group->ResetInstances(INSTANCE_RESET_ALL, false, _player);
+            group->ResetInstances(InstanceResetMethod::INSTANCE_RESET_ALL, false, _player);
     }
     else
-        _player->ResetInstances(INSTANCE_RESET_ALL, false);
+        _player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_ALL, false);
 }
 
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
@@ -1825,13 +1809,13 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
             }
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
-            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false, _player);
+            group->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, false, _player);
             group->SetDungeonDifficulty(DifficultyID(difficulty));
         }
     }
     else
     {
-        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false);
+        _player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, false);
         _player->SetDungeonDifficulty(DifficultyID(difficulty));
         _player->SendDungeonDifficulty();
     }
@@ -1892,13 +1876,13 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
             }
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
-            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
+            group->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
             group->SetRaidDifficulty(DifficultyID(difficulty));
         }
     }
     else
     {
-        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true);
+        _player->ResetInstances(InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY, true);
         _player->SetRaidDifficulty(DifficultyID(difficulty));
         _player->SendRaidDifficulty();
     }

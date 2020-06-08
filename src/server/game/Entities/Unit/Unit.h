@@ -2462,7 +2462,7 @@ class Unit : public WorldObject
     bool IsVisible() const;
     void SetVisible(bool x);
     void ClearPhases(bool update = false);
-    bool SetPhased(uint32 id, bool update, bool apply);
+    bool SetPhased(uint32 id, bool update, bool apply) OVERRIDE;
     // common function for visibility checks for player/creatures with detection code
     void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
     void UpdateObjectVisibility(bool forced = true) override;

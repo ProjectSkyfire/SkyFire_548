@@ -68,7 +68,7 @@ public:
     {
         npc_deathstalker_erlandAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId)
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -111,13 +111,13 @@ public:
 
         void Reset() OVERRIDE { }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) OVERRIDE
         {
             Talk(SAY_AGGRO, who);
         }
     };
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_ESCORTING)
         {

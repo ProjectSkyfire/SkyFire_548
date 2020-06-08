@@ -205,6 +205,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                             if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
                                 lang = Language::LANG_UNIVERSAL;
                             break;
+                        default:
+                            break;
                     }
                 }
 
@@ -268,6 +270,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             textLength = recvData.ReadBits(8);
             msg = recvData.ReadString(textLength);
             ignoreChecks = true;
+            break;
+        default:
             break;
     }
 

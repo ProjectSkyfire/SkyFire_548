@@ -379,8 +379,8 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                             return disabledModes & RAID_STATUSFLAG_25MAN_NORMAL;
                         case DIFFICULTY_25MAN_HEROIC:
                             return disabledModes & RAID_STATUSFLAG_25MAN_HEROIC;
-                        //case DIFFICULTY_10MAN_FLEX:
-                        //    return disabledModes & RAID_STATUSFLAG_10MAN_FLEX;
+                        case DIFFICULTY_FLEX:
+                            return disabledModes & RAID_STATUSFLAG_10MAN_FLEX;
                         case DIFFICULTY_25MAN_LFR:
                             return disabledModes & RAID_STATUSFLAG_25MAN_LFR;
                     }

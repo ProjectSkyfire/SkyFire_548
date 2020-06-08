@@ -49,7 +49,6 @@ enum Spells
 enum Misc
 {
     CREATURE_TREANT    = 19949,
-    TREANT_SPAWN_DIST  = 50 //50 yards from Warp Splinter's spawn point
 };
 
 float treant_pos[6][3] =
@@ -183,8 +182,8 @@ class boss_warp_splinter : public CreatureScript
                 {
                     float angle = (M_PI / 3) * i;
 
-                    float X = Treant_Spawn_Pos_X + TREANT_SPAWN_DIST * std::cos(angle);
-                    float Y = Treant_Spawn_Pos_Y + TREANT_SPAWN_DIST * std::sin(angle);
+                    float X = Treant_Spawn_Pos_X + 50.0f * std::cos(angle);
+                    float Y = Treant_Spawn_Pos_Y + 50.0f * std::sin(angle);
                     float O = - me->GetAngle(X, Y);
 
                     if (Creature* pTreant = me->SummonCreature(CREATURE_TREANT, treant_pos[i][0], treant_pos[i][1], treant_pos[i][2], O, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 25000))

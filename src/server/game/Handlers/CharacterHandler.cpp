@@ -1866,7 +1866,7 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
     eqSet.Guid = setGuid;
     eqSet.Name = name;
     eqSet.IconName = iconName;
-    eqSet.state = EQUIPMENT_SET_NEW;
+    eqSet.state = EquipmentSetUpdateState::EQUIPMENT_SET_NEW;
 
     _player->SetEquipmentSet(index, eqSet);
 }
@@ -1975,7 +1975,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
 void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    uint8 gender, skin, face, hairStyle, hairColor, facialHair, race = 0;
+    uint8 gender = 0, skin = 0, face = 0, hairStyle = 0, hairColor = 0, facialHair = 0, race = 0;
 
     recvData >> gender;
     recvData >> race;
@@ -2279,7 +2279,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
                 stmt->setUInt32(0, lowGuid);
 
-                PreparedQueryResult result = CharacterDatabase.Query(stmt);
+                result = CharacterDatabase.Query(stmt);
                 if (result)
                     if (Guild* guild = sGuildMgr->GetGuildById((result->Fetch()[0]).GetUInt32()))
                         guild->DeleteMember(MAKE_NEW_GUID(lowGuid, 0, HIGHGUID_PLAYER));
@@ -2431,7 +2431,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_REP_BY_FACTION);
                 stmt->setUInt32(0, oldReputation);
                 stmt->setUInt32(1, lowGuid);
-                PreparedQueryResult result = CharacterDatabase.Query(stmt);
+                result = CharacterDatabase.Query(stmt);
 
                 if (!result)
                 {
@@ -2441,7 +2441,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                     return;
                 }
 
-                Field* fields = result->Fetch();
+                fields = result->Fetch();
                 int32 oldDBRep = fields[0].GetInt32();
                 FactionEntry const* factionEntry = sFactionStore.LookupEntry(oldReputation);
 

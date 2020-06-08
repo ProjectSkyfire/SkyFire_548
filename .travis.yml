@@ -1,5 +1,5 @@
-# Copyright (C) 2011-2019 Project SkyFire <http://www.projectskyfire.org/
-# Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2011-2020 Project SkyFire <http://www.projectskyfire.org/
+# Copyright (C) 2008-2020 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -8,14 +8,37 @@
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+matrix:
+  include:
+    - compiler: clang
+      env: CXXCOMPILER=clang++-10 CCOMPILER=clang-10
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-10
+            - libc++-10-dev
+            - libc++abi-10-dev
+            - lldb-10
+            - lld-10
+    - compiler: gcc
+      env: CXXCOMPILER=g++-9 CCOMPILER=gcc-9
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-9
+            - g++-9
 
 os: linux
 dist: bionic
-sudo: required
-compiler: gcc
-group: stable
-
 language: cpp
+sudo: required
+group: stable
 
 git:
   depth: 1
@@ -25,24 +48,28 @@ branches:
     - master
 
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update
   - sudo rm -rf /var/lib/dpkg/lock
-  - sudo apt-get install gcc-9 g++-9
-  - export CXX=g++-9 CC=gcc-9
   - sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.14-1_all.deb
   - sudo dpkg -i mysql-apt-config_0.8.14-1_all.deb
   - sudo apt update
+  - sudo apt-get update
   - sudo apt-get install libncurses5-dev libace-dev
   - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
   - sudo apt-get install openssl libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
 
-  
-script:
+install:
+  - export CXX=${CXXCOMPILER}
+  - export CC=${CCOMPILER}
+  - ${CXX} --version
+  - ${CCOMPILER} --version
+
+before_script:
   - mkdir build
   - cd build
   - cmake ../ -DSCRIPTS=1 -DTOOLS=0 -DCMAKE_BUILD_TYPE=Release
-  - make -j16
+
+script:
+  - make -j2
 
 notifications:
   irc:

@@ -445,7 +445,7 @@ void AchievementMgr<Guild>::RemoveCriteriaProgress(CriteriaEntry const* entry)
 }
 
 template<class T>
-void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1, uint64 miscValue2, bool evenIfCriteriaComplete)
+void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1, uint64 miscValue2, bool /*evenIfCriteriaComplete*/)
 {
     SF_LOG_DEBUG("achievement", "ResetAchievementCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscValue1, miscValue2);
 
@@ -1601,7 +1601,6 @@ bool AchievementMgr<T>::IsCompletedCriteriaForAchievement(CriteriaEntry const* c
         default:
             return false;
     }
-    return false;
 }
 
 template<class T>
@@ -2777,7 +2776,7 @@ bool AchievementMgr<T>::RequirementsSatisfied(CriteriaEntry const* achievementCr
 }
 
 template<class T>
-bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* criteria, uint64 miscValue1, uint64 miscValue2, Unit const* unit, Player* referencePlayer) const
+bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* criteria, uint64 miscValue1, uint64 /*miscValue2*/, Unit const* unit, Player* referencePlayer) const
 {
 
     ModifierTreeEntry const* condition = sModifierTreeStore.LookupEntry(criteria->modifierTreeId);
@@ -2821,6 +2820,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA: // 10
                 if (!unit || !unit->HasAura(reqValue))
                     return false;
+                break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA_TYPE: // 11
                 if (!unit || !unit->HasAuraType(AuraType(reqValue)))
                     return false;
@@ -2912,6 +2912,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_ZONE: // 41
                 if (!unit || unit->GetZoneId() != reqValue)
                     return false;
+                break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HEALTH_PERCENT_BELOW: // 46
                 if (!unit || unit->GetHealthPct() >= reqValue)
                     return false;

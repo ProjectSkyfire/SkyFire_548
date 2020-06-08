@@ -147,7 +147,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
                     damage = 0;
             }
 
-            void DoAction(int32 actionId)
+            void DoAction(int32 actionId) OVERRIDE
             {
                 if (actionId == ACTION_START_PHASE_2)
                     StartZombiePhase();

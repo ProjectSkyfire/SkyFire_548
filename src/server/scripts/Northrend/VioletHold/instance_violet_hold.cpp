@@ -375,6 +375,8 @@ public:
                             case GOState::GO_STATE_ACTIVE_ALTERNATIVE:
                                 pMainDoor->SetGoState(GOState::GO_STATE_ACTIVE_ALTERNATIVE);
                                 break;
+                            default:
+                                break;
                         }
                     }
                     break;
@@ -824,7 +826,7 @@ public:
             }
         }
 
-        void ProcessEvent(WorldObject* /*go*/, uint32 uiEventId)
+        void ProcessEvent(WorldObject* /*go*/, uint32 uiEventId) OVERRIDE
         {
             switch (uiEventId)
             {

@@ -192,7 +192,7 @@ public:
             if (submitter->IsInWorld())
             {
                 WorldPacket data(SMSG_GM_TICKET_UPDATE, 4);
-                data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
+                data << uint32(GMTicketResponse::GMTICKET_RESPONSE_TICKET_DELETED);
                 submitter->GetSession()->SendPacket(&data);
             }
         }
@@ -276,7 +276,7 @@ public:
             {
                 // Force abandon ticket
                 WorldPacket data(SMSG_GM_TICKET_UPDATE, 4);
-                data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
+                data << uint32(GMTicketResponse::GMTICKET_RESPONSE_TICKET_DELETED);
                 player->GetSession()->SendPacket(&data);
             }
         }
@@ -465,7 +465,7 @@ public:
 
         // Inform player, who submitted this ticket, that it is closed
         if (Player* submitter = ticket->GetPlayer())
-            sTicketMgr->SendGmTicketUpdate(SMSG_GM_TICKET_UPDATE, GMTICKET_RESPONSE_TICKET_DELETED, submitter);
+            sTicketMgr->SendGmTicketUpdate(SMSG_GM_TICKET_UPDATE, GMTicketResponse::GMTICKET_RESPONSE_TICKET_DELETED, submitter);
 
         return true;
     }
@@ -550,7 +550,7 @@ public:
         sTicketMgr->RemoveTicket<T>(ticket->GetTicketId());
 
         if (Player* player = ticket->GetPlayer())
-            sTicketMgr->SendGmTicketUpdate(SMSG_GM_TICKET_UPDATE, GMTICKET_RESPONSE_TICKET_DELETED, player);
+            sTicketMgr->SendGmTicketUpdate(SMSG_GM_TICKET_UPDATE, GMTicketResponse::GMTICKET_RESPONSE_TICKET_DELETED, player);
 
         return true;
     }

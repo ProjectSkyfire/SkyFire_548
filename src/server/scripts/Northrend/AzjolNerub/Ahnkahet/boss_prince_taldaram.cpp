@@ -47,7 +47,6 @@ enum Misc
 {
     DATA_EMBRACE_DMG                              = 20000,
     H_DATA_EMBRACE_DMG                            = 40000,
-    DATA_SPHERE_DISTANCE                          = 15
 };
 
 #define DATA_SPHERE_ANGLE_OFFSET                  0.7f
@@ -125,41 +124,51 @@ class boss_taldaram : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        if (events.IsInPhase(PHASE_NORMAL))
+                        case EVENT_BLOODTHIRST:
                         {
-                            case EVENT_BLOODTHIRST:
-                                DoCast(me, SPELL_BLOODTHIRST);
-                                events.ScheduleEvent(EVENT_BLOODTHIRST, 10000);
+                            if (!events.IsInPhase(PHASE_NORMAL))
                                 break;
-                            case EVENT_FLAME_SPHERE:
-                                DoCastVictim(SPELL_CONJURE_FLAME_SPHERE);
-                                events.SetPhase(PHASE_SPECIAL);
-                                events.ScheduleEvent(EVENT_CASTING_FLAME_SPHERES, 3000);
-                                events.ScheduleEvent(EVENT_FLAME_SPHERE, 15000);
-                                break;
-                            case EVENT_VANISH:
-                            {
-                                Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                                uint32 targets = 0;
-                                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                                {
-                                    Player* player = i->GetSource();
-                                    if (player && player->IsAlive())
-                                        ++targets;
-                                }
 
-                                if (targets > 2)
-                                {
-                                    Talk(SAY_VANISH);
-                                    DoCast(me, SPELL_VANISH);
-                                    events.SetPhase(PHASE_SPECIAL);
-                                    events.ScheduleEvent(EVENT_JUST_VANISHED, 500);
-                                    if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                        _embraceTargetGUID = embraceTarget->GetGUID();
-                                }
-                                events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
+                            DoCast(me, SPELL_BLOODTHIRST);
+                            events.ScheduleEvent(EVENT_BLOODTHIRST, 10000);
+                            break;
+                        }
+                        case EVENT_FLAME_SPHERE:
+                        {
+                            if (!events.IsInPhase(PHASE_NORMAL))
                                 break;
+
+                            DoCastVictim(SPELL_CONJURE_FLAME_SPHERE);
+                            events.SetPhase(PHASE_SPECIAL);
+                            events.ScheduleEvent(EVENT_CASTING_FLAME_SPHERES, 3000);
+                            events.ScheduleEvent(EVENT_FLAME_SPHERE, 15000);
+                            break;
+                        }
+                        case EVENT_VANISH:
+                        {
+                            if (!events.IsInPhase(PHASE_NORMAL))
+                                break;
+
+                            Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                            uint32 targets = 0;
+                            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                            {
+                                Player* player = i->GetSource();
+                                if (player && player->IsAlive())
+                                    ++targets;
                             }
+
+                            if (targets > 2)
+                            {
+                                Talk(SAY_VANISH);
+                                DoCast(me, SPELL_VANISH);
+                                events.SetPhase(PHASE_SPECIAL);
+                                events.ScheduleEvent(EVENT_JUST_VANISHED, 500);
+                                if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                                    _embraceTargetGUID = embraceTarget->GetGUID();
+                            }
+                            events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
+                            break;
                         }
                         case EVENT_CASTING_FLAME_SPHERES:
                         {
@@ -174,8 +183,8 @@ class boss_taldaram : public CreatureScript
                             if (Creature* sphere = DoSpawnCreature(CREATURE_FLAME_SPHERE, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                             {
                                 angle = sphere->GetAngle(sphereTarget);
-                                x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE * std::cos(angle);
-                                y = sphere->GetPositionY() + DATA_SPHERE_DISTANCE * std::sin(angle);
+                                x = sphere->GetPositionX() + 15.0f * std::cos(angle);
+                                y = sphere->GetPositionY() + 15.0f * std::sin(angle);
                                 sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
                             }
 
@@ -185,8 +194,8 @@ class boss_taldaram : public CreatureScript
                                 if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_1, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                                 {
                                     angle = sphere->GetAngle(sphereTarget) + DATA_SPHERE_ANGLE_OFFSET;
-                                    x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE/2 * std::cos(angle);
-                                    y = sphere->GetPositionY() + DATA_SPHERE_DISTANCE/2 * std::sin(angle);
+                                    x = sphere->GetPositionX() + 15.0f / 2.0f * std::cos(angle);
+                                    y = sphere->GetPositionY() + 15.0f / 2.0f * std::sin(angle);
                                     sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
                                 }
 
@@ -194,8 +203,8 @@ class boss_taldaram : public CreatureScript
                                 if (Creature* sphere = DoSpawnCreature(H_CREATURE_FLAME_SPHERE_2, 0, 0, 5, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 10 * IN_MILLISECONDS))
                                 {
                                     angle = sphere->GetAngle(sphereTarget) - DATA_SPHERE_ANGLE_OFFSET;
-                                    x = sphere->GetPositionX() + DATA_SPHERE_DISTANCE/2 * std::cos(angle);
-                                    y = sphere->GetPositionY() + DATA_SPHERE_DISTANCE/2 * std::sin(angle);
+                                    x = sphere->GetPositionX() + 15.0f / 2 * std::cos(angle);
+                                    y = sphere->GetPositionY() + 15.0f / 2 * std::sin(angle);
                                     sphere->GetMotionMaster()->MovePoint(0, x, y, sphere->GetPositionZ());
                                 }
                             }
@@ -298,8 +307,8 @@ class boss_taldaram : public CreatureScript
             }
 
         private:
-            uint64 _embraceTargetGUID;
-            uint32 _embraceTakenDamage;
+            uint64 _embraceTargetGUID = 0;
+            uint32 _embraceTakenDamage = 0;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -349,7 +358,7 @@ class npc_taldaram_flamesphere : public CreatureScript
             }
 
         private:
-            uint32 _despawnTimer;
+            uint32 _despawnTimer = 0;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE

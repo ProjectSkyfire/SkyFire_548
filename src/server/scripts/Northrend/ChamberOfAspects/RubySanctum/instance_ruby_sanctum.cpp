@@ -60,7 +60,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 memset(BurningTreeGUID, 0, 4 * sizeof(uint64));
             }
 
-            void OnPlayerEnter(Player* /*player*/)
+            void OnPlayerEnter(Player* /*player*/) OVERRIDE
             {
                 if (!GetData64(DATA_HALION_CONTROLLER) && GetBossState(DATA_HALION) != DONE && GetBossState(DATA_GENERAL_ZARITHRIAN) == DONE)
                 {

@@ -496,13 +496,13 @@ void Map::InitializeObject(T* /*obj*/) { }
 template<>
 void Map::InitializeObject(Creature* obj)
 {
-    obj->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+    obj->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
 }
 
 template<>
 void Map::InitializeObject(GameObject* obj)
 {
-    obj->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+    obj->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
 }
 
 template<class T>
@@ -947,7 +947,7 @@ void Map::AddCreatureToMoveList(Creature* c, float x, float y, float z, float an
     if (_creatureToMoveLock) //can this happen?
         return;
 
-    if (c->_moveState == MAP_OBJECT_CELL_MOVE_NONE)
+    if (c->_moveState == MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE)
         _creaturesToMove.push_back(c);
     c->SetNewCellPosition(x, y, z, ang);
 }
@@ -957,8 +957,8 @@ void Map::RemoveCreatureFromMoveList(Creature* c)
     if (_creatureToMoveLock) //can this happen?
         return;
 
-    if (c->_moveState == MAP_OBJECT_CELL_MOVE_ACTIVE)
-        c->_moveState = MAP_OBJECT_CELL_MOVE_INACTIVE;
+    if (c->_moveState == MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_ACTIVE)
+        c->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_INACTIVE;
 }
 
 void Map::AddGameObjectToMoveList(GameObject* go, float x, float y, float z, float ang)
@@ -966,7 +966,7 @@ void Map::AddGameObjectToMoveList(GameObject* go, float x, float y, float z, flo
     if (_gameObjectsToMoveLock) //can this happen?
         return;
 
-    if (go->_moveState == MAP_OBJECT_CELL_MOVE_NONE)
+    if (go->_moveState == MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE)
         _gameObjectsToMove.push_back(go);
     go->SetNewCellPosition(x, y, z, ang);
 }
@@ -976,8 +976,8 @@ void Map::RemoveGameObjectFromMoveList(GameObject* go)
     if (_gameObjectsToMoveLock) //can this happen?
         return;
 
-    if (go->_moveState == MAP_OBJECT_CELL_MOVE_ACTIVE)
-        go->_moveState = MAP_OBJECT_CELL_MOVE_INACTIVE;
+    if (go->_moveState == MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_ACTIVE)
+        go->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_INACTIVE;
 }
 
 void Map::MoveAllCreaturesInMoveList()
@@ -989,13 +989,13 @@ void Map::MoveAllCreaturesInMoveList()
         if (c->FindMap() != this) //pet is teleported to another map
             continue;
 
-        if (c->_moveState != MAP_OBJECT_CELL_MOVE_ACTIVE)
+        if (c->_moveState != MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_ACTIVE)
         {
-            c->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+            c->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
             continue;
         }
 
-        c->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+        c->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
         if (!c->IsInWorld())
             continue;
 
@@ -1045,13 +1045,13 @@ void Map::MoveAllGameObjectsInMoveList()
         if (go->FindMap() != this) //transport is teleported to another map
             continue;
 
-        if (go->_moveState != MAP_OBJECT_CELL_MOVE_ACTIVE)
+        if (go->_moveState != MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_ACTIVE)
         {
-            go->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+            go->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
             continue;
         }
 
-        go->_moveState = MAP_OBJECT_CELL_MOVE_NONE;
+        go->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
         if (!go->IsInWorld())
             continue;
 
@@ -2669,7 +2669,7 @@ bool InstanceMap::CanEnter(Player* player)
     if (GetPlayersCountExceptGMs() >= maxPlayers)
     {
         SF_LOG_INFO("maps", "MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), maxPlayers, player->GetName().c_str());
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+        player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_MAX_PLAYERS);
         return false;
     }
 
@@ -2678,7 +2678,7 @@ bool InstanceMap::CanEnter(Player* player)
     if (!player->IsGameMaster() && group && group->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
     if (IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
     {
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
+        player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
     }
 
@@ -2695,13 +2695,13 @@ bool InstanceMap::CanEnter(Player* player)
                     continue;
                 if (!player->GetGroup()) // player has not group and there is someone inside, deny entry
                 {
-                    player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+                    player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_MAX_PLAYERS);
                     return false;
                 }
                 // player inside instance has no group or his groups is different to entering player's one, deny entry
                 if (!iPlayer->GetGroup() || iPlayer->GetGroup() != player->GetGroup())
                 {
-                    player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+                    player->SendTransferAborted(GetId(), TransferAbortReason::TRANSFER_ABORT_MAX_PLAYERS);
                     return false;
                 }
                 break;
@@ -2893,14 +2893,14 @@ void InstanceMap::CreateInstanceData(bool load)
 /*
     Returns true if there are no players in the instance
 */
-bool InstanceMap::Reset(uint8 method)
+bool InstanceMap::Reset(InstanceResetMethod method)
 {
     // note: since the map may not be loaded when the instance needs to be reset
     // the instance must be deleted from the DB by InstanceSaveManager
 
     if (HavePlayers())
     {
-        if (method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+        if (method == InstanceResetMethod::INSTANCE_RESET_ALL || method == InstanceResetMethod::INSTANCE_RESET_CHANGE_DIFFICULTY)
         {
             // notify the players to leave the instance so it can be reset
             for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
@@ -2908,7 +2908,7 @@ bool InstanceMap::Reset(uint8 method)
         }
         else
         {
-            if (method == INSTANCE_RESET_GLOBAL)
+            if (method == InstanceResetMethod::INSTANCE_RESET_GLOBAL)
                 // set the homebind timer for players inside (1 minute)
                 for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
                     itr->GetSource()->m_InstanceValid = false;

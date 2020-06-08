@@ -59,7 +59,6 @@ enum Sound
 
 enum Misc
 {
-    PULL_RANGE                    = 50,
     ABUSE_BUG_RANGE               = 20,
     VEKLOR_DIST                   = 20,                      // VL will not come to melee when attacking
     TELEPORTTIME                  = 30000
@@ -303,8 +302,8 @@ struct boss_twinemperorsAI : public ScriptedAI
         if (me->CanCreatureAttack(who))
         {
             float attackRadius = me->GetAttackDistance(who);
-            if (attackRadius < PULL_RANGE)
-                attackRadius = PULL_RANGE;
+            if (attackRadius < 50.0f)
+                attackRadius = 50.0f;
             if (me->IsWithinDistInMap(who, attackRadius) && me->GetDistanceZ(who) <= /*CREATURE_Z_ATTACK_RANGE*/7 /*there are stairs*/)
             {
                 //if (who->HasStealthAura())
@@ -401,7 +400,7 @@ public:
 
     struct boss_veknilashAI : public boss_twinemperorsAI
     {
-        bool IAmVeklor() {return false;}
+        bool IAmVeklor() OVERRIDE {return false;}
         boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature) { }
 
         uint32 UpperCut_Timer;
@@ -424,7 +423,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
         }
 
-        void CastSpellOnBug(Creature* target)
+        void CastSpellOnBug(Creature* target) OVERRIDE
         {
             target->setFaction(14);
             target->AI()->AttackStart(me->getThreatManager().getHostilTarget());
@@ -487,7 +486,7 @@ public:
 
     struct boss_veklorAI : public boss_twinemperorsAI
     {
-        bool IAmVeklor() {return true;}
+        bool IAmVeklor() OVERRIDE {return true;}
         boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature) { }
 
         uint32 ShadowBolt_Timer;
@@ -514,7 +513,7 @@ public:
             me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, 0);
         }
 
-        void CastSpellOnBug(Creature* target)
+        void CastSpellOnBug(Creature* target) OVERRIDE
         {
             target->setFaction(14);
             target->AddAura(SPELL_EXPLODEBUG, target);

@@ -99,7 +99,8 @@ void BattlegroundMgr::Update(uint32 diff)
             {
                 itrDelete->second = NULL;
                 bgs.erase(itrDelete);
-                BattlegroundClientIdsContainer& clients = itr1->second.m_ClientBattlegroundIds[bg->GetBracketId()];
+                uint8 BracketID = uint8(bg->GetBracketId());
+                BattlegroundClientIdsContainer& clients = itr1->second.m_ClientBattlegroundIds[BracketID];
                 if (!clients.empty())
                      clients.erase(bg->GetClientInstanceID());
 
@@ -138,7 +139,7 @@ void BattlegroundMgr::Update(uint32 diff)
             // forced update for rated arenas (scan all, but skipped non rated)
             SF_LOG_TRACE("bg.arena", "BattlegroundMgr: UPDATING ARENA QUEUES");
             for (int qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
-                for (int bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+                for (int bracket = 0; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
                     m_BattlegroundQueues[qtype].BattlegroundQueueUpdate(diff,
                         BattlegroundTypeId::BATTLEGROUND_AA, BattlegroundBracketId(bracket),
                         BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId(qtype)), true, 0);
@@ -756,6 +757,7 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
     if (IsArenaType(bgTypeId))
         return 0;                                           //arenas don't have client-instanceids
 
+    uint8 BracketID = uint8(bracket_id);
     // we create here an instanceid, which is just for
     // displaying this to the client and without any other use..
     // the client-instanceIds are unique for each battleground-type
@@ -763,7 +765,7 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
     // the following works, because std::set is default ordered with "<"
     // the optimalization would be to use as bitmask std::vector<uint32> - but that would only make code unreadable
 
-    BattlegroundClientIdsContainer& clientIds = bgDataStore[bgTypeId].m_ClientBattlegroundIds[bracket_id];
+    BattlegroundClientIdsContainer& clientIds = bgDataStore[bgTypeId].m_ClientBattlegroundIds[BracketID];
     uint32 lastId = 0;
     for (BattlegroundClientIdsContainer::const_iterator itr = clientIds.begin(); itr != clientIds.end();)
     {
@@ -1150,7 +1152,7 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
     data->WriteByteSeq(guidBytes[2]);
 
     uint32 count = 0;
-    BattlegroundBracketId bracketId = bracketEntry->GetBracketId();
+    uint8 bracketId = uint8(bracketEntry->GetBracketId());
     BattlegroundClientIdsContainer& clientIds = it->second.m_ClientBattlegroundIds[bracketId];
     for (BattlegroundClientIdsContainer::const_iterator itr = clientIds.begin(); itr != clientIds.end(); ++itr)
     {
@@ -1335,7 +1337,7 @@ void BattlegroundMgr::ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 ar
 {
     //This method must be atomic, @todo add mutex
     //we will use only 1 number created of bgTypeId and bracket_id
-    uint64 const scheduleId = ((uint64)arenaMatchmakerRating << 32) | (uint32(arenaType) << 24) | (bgQueueTypeId << 16) | (uint32(bgTypeId) << 8) | bracket_id;
+    uint64 const scheduleId = ((uint64)arenaMatchmakerRating << 32) | (uint32(arenaType) << 24) | (bgQueueTypeId << 16) | (uint32(bgTypeId) << 8) | uint8(bracket_id);
     if (std::find(m_QueueUpdateScheduler.begin(), m_QueueUpdateScheduler.end(), scheduleId) == m_QueueUpdateScheduler.end())
         m_QueueUpdateScheduler.push_back(scheduleId);
 }

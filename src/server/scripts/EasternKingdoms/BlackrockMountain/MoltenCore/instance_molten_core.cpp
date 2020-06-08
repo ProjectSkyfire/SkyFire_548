@@ -71,7 +71,7 @@ class instance_molten_core : public InstanceMapScript
                 delete _executusSchedule;
             }
 
-            void OnPlayerEnter(Player* /*player*/)
+            void OnPlayerEnter(Player* /*player*/) OVERRIDE
             {
                 if (_executusSchedule)
                 {
@@ -143,7 +143,7 @@ class instance_molten_core : public InstanceMapScript
                 return 0;
             }
 
-            bool SetBossState(uint32 bossId, EncounterState state)
+            bool SetBossState(uint32 bossId, EncounterState state) OVERRIDE
             {
                 if (!InstanceScript::SetBossState(bossId, state))
                     return false;
@@ -196,7 +196,7 @@ class instance_molten_core : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(char const* data)
+            void Load(char const* data) OVERRIDE
             {
                 if (!data)
                 {

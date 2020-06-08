@@ -5169,33 +5169,6 @@ void Spell::TakePower()
         m_caster->ModifyPower(powerType, -irand(0, m_powerCost/4));
 }
 
-/*void Spell::TakeAmmo()
-{
-    if (m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Item* pItem = m_caster->ToPlayer()->GetWeaponForAttack(RANGED_ATTACK);
-
-        // wands don't have ammo
-        if (!pItem  || pItem->IsBroken() || pItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_WAND)
-            return;
-
-        if (pItem->GetTemplate()->InventoryType == INVTYPE_THROWN)
-        {
-            if (pItem->GetMaxStackCount() == 1)
-            {
-                // decrease durability for non-stackable throw weapon
-                m_caster->ToPlayer()->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_RANGED);
-            }
-            else
-            {
-                // decrease items amount for stackable throw weapon
-                uint32 count = 1;
-                m_caster->ToPlayer()->DestroyItemCount(pItem, count, true);
-            }
-        }
-    }
-}*/
-
 SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
 {
     if (m_spellInfo->PowerType != POWER_RUNES || !runeCostID)
@@ -5214,30 +5187,30 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
 
     if (src->NoRuneCost())
         return SPELL_CAST_OK;
+    
+    int32 runeCost[uint8(RuneType::NUM_RUNE_TYPES)];                         // blood, frost, unholy, death
 
-    int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
-
-    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+    for (uint8 i = 0; i < uint8(RuneType::NUM_RUNE_TYPES); ++i)
     {
         runeCost[i] = src->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
     }
 
-    runeCost[RUNE_DEATH] = MAX_RUNES;                       // calculated later
+    runeCost[uint8(RuneType::RUNE_DEATH)] = MAX_RUNES;                       // calculated later
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
-        RuneType rune = player->GetCurrentRune(i);
+        uint8 rune = uint8(player->GetCurrentRune(i));
         if ((player->GetRuneCooldown(i) == 0) && (runeCost[rune] > 0))
             runeCost[rune]--;
     }
 
-    for (uint32 i = 0; i < RUNE_DEATH; ++i)
+    for (uint32 i = 0; i < uint8(RuneType::RUNE_DEATH); ++i)
         if (runeCost[i] > 0)
-            runeCost[RUNE_DEATH] += runeCost[i];
+            runeCost[uint8(RuneType::RUNE_DEATH)] += runeCost[i];
 
-    if (runeCost[RUNE_DEATH] > MAX_RUNES)
+    if (runeCost[uint8(RuneType::RUNE_DEATH)] > MAX_RUNES)
         return SPELL_FAILED_NO_POWER;                       // not sure if result code is correct
 
     return SPELL_CAST_OK;
@@ -5255,46 +5228,46 @@ void Spell::TakeRunePower(bool didHit)
     Player* player = m_caster->ToPlayer();
     m_runesState = player->GetRunesState();                 // store previous state
 
-    int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
+    int32 runeCost[uint8(RuneType::NUM_RUNE_TYPES)];                         // blood, frost, unholy, death
 
-    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+    for (uint32 i = 0; i < uint8(RuneType::NUM_RUNE_TYPES); ++i)
     {
         runeCost[i] = runeCostData->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
     }
 
-    runeCost[RUNE_DEATH] = 0;                               // calculated later
+    runeCost[uint8(RuneType::RUNE_DEATH)] = 0;                               // calculated later
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
-        RuneType rune = player->GetCurrentRune(i);
+        uint8 rune = uint8(player->GetCurrentRune(i));
         if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
         {
             player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
-            player->SetLastUsedRune(rune);
+            player->SetLastUsedRune(RuneType(rune));
             runeCost[rune]--;
         }
     }
 
-    runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    runeCost[uint8(RuneType::RUNE_DEATH)] = runeCost[uint8(RuneType::RUNE_BLOOD)] + runeCost[uint8(RuneType::RUNE_UNHOLY)] + runeCost[uint8(RuneType::RUNE_FROST)];
 
-    if (runeCost[RUNE_DEATH] > 0)
+    if (runeCost[uint8(RuneType::RUNE_DEATH)] > 0)
     {
         for (uint32 i = 0; i < MAX_RUNES; ++i)
         {
             RuneType rune = player->GetCurrentRune(i);
-            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
+            if (!player->GetRuneCooldown(i) && rune == RuneType::RUNE_DEATH)
             {
                 player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
                 player->SetLastUsedRune(rune);
-                runeCost[rune]--;
+                runeCost[uint8(rune)]--;
 
                 // keep Death Rune type if missed
                 if (didHit)
                     player->RestoreBaseRune(i);
 
-                if (runeCost[RUNE_DEATH] == 0)
+                if (runeCost[uint8(RuneType::RUNE_DEATH)] == 0)
                     break;
             }
         }

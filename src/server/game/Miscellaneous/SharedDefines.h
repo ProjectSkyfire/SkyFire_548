@@ -4185,7 +4185,7 @@ enum BattlegroundQueueTypeId
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
-enum GroupJoinBattlegroundResult
+enum class GroupJoinBattlegroundResult
 {
     ERR_BATTLEGROUND_NONE                           = 0,
     ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS           = 2,        // You cannot join the battleground yet because you or one of your party members is flagged as a Deserter.
@@ -4255,7 +4255,7 @@ enum DungeonStatusFlag
 #define VOID_STORAGE_MAX_WITHDRAW 9
 #define VOID_STORAGE_MAX_SLOT     80
 
-enum VoidTransferError
+enum class VoidTransferError
 {
     VOID_TRANSFER_ERROR_NO_ERROR          = 0,
     VOID_TRANSFER_ERROR_INTERNAL_ERROR_1  = 1, // Internal void storage Error.
@@ -4271,7 +4271,7 @@ enum VoidTransferError
 
 #define CURRENCY_PRECISION 100
 
-enum PartyResult
+enum class PartyResult
 {
     ERR_PARTY_RESULT_OK                 = 0,
     ERR_BAD_PLAYER_NAME_S               = 1,

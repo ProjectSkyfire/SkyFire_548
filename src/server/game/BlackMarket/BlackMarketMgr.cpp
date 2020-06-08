@@ -60,8 +60,8 @@ void BlackMarketAuction::SaveToDB(SQLTransaction& trans)
     stmt->setUInt32(1, GetTemplateId());
     stmt->setUInt32(2, GetStartTime());
     stmt->setUInt32(3, GetCurrentBidder());
-    stmt->setUInt32(4, GetCurrentBid());
-    stmt->setUInt32(5, GetMinIncrement());
+    stmt->setUInt64(4, GetCurrentBid());
+    stmt->setUInt64(5, GetMinIncrement());
     stmt->setUInt32(6, GetNumBids());
     trans->Append(stmt);
 }
@@ -77,8 +77,8 @@ void BlackMarketAuction::UpdateToDB(SQLTransaction& trans)
 {
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_BLACKMARKET_AUCTION);
     stmt->setUInt32(0, GetCurrentBidder());
-    stmt->setUInt32(1, GetCurrentBid());
-    stmt->setUInt32(2, GetMinIncrement());
+    stmt->setUInt64(1, GetCurrentBid());
+    stmt->setUInt64(2, GetMinIncrement());
     stmt->setUInt32(3, GetNumBids());
     stmt->setUInt32(4, GetAuctionId());
     trans->Append(stmt);
@@ -152,8 +152,8 @@ void BlackMarketMgr::LoadBlackMarketAuctions()
             uint32 templateId = fields[1].GetUInt32();
             uint32 startTime = fields[2].GetUInt32();
             uint32 currentBidder = fields[3].GetUInt32();
-            uint32 currentBid = fields[4].GetUInt32();
-            uint32 minIncrement = fields[5].GetUInt32();
+            uint64 currentBid = fields[4].GetUInt64();
+            uint64 minIncrement = fields[5].GetUInt64();
             uint32 numBids = fields[6].GetUInt32();
 
             BlackMarketAuction* auction = new BlackMarketAuction(auctionId, templateId, startTime, currentBidder, currentBid, minIncrement, numBids);
@@ -309,7 +309,7 @@ void BlackMarketMgr::UpdateAuction(BlackMarketAuction* auction, uint64 newPrice,
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     if (auction->GetCurrentBidder())
-        SendAuctionOutbidded(auction, newPrice, newBidder, trans);
+        SendAuctionOutbidded(auction, trans);
 
     auction->SetCurrentBid(currentBid);
     auction->SetCurrentBidder(newBidder->GetGUIDLow());
@@ -358,7 +358,7 @@ std::string BlackMarketAuction::BuildAuctionMailBody(uint32 lowGuid)
     return strm.str();
 }
 
-void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans)
+void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, SQLTransaction& trans)
 {
     uint64 bidder_guid = MAKE_NEW_GUID(auction->GetCurrentBidder(), 0, HIGHGUID_PLAYER);
     Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
@@ -407,8 +407,6 @@ void BlackMarketMgr::SendAuctionWon(BlackMarketAuction* auction, SQLTransaction&
         Item* pItem = Item::CreateItem(auction->GetTemplate()->ItemEntry, auction->GetTemplate()->Quantity, bidder);
 
         MailDraft draft(auction->BuildAuctionMailSubject(BMMailAuctionAnswers::BM_AUCTION_WON), auction->BuildAuctionMailBody(auction->GetCurrentBidder()));
-        
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
         if (pItem)
         {
             pItem->SaveToDB(trans);
