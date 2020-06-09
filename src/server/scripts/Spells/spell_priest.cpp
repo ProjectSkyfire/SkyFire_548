@@ -617,11 +617,6 @@ public:
         void HandleDamage()
         {
             int32 damage = GetHitDamage();
-
-            // Pain and Suffering reduces damage
-            if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_PAIN_AND_SUFFERING, EFFECT_1))
-                AddPct(damage, aurEff->GetAmount());
-
             GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &damage, 0, 0, true);
         }
 
