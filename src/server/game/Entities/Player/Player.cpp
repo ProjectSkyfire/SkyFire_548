@@ -161,7 +161,15 @@ PlayerTaxi::PlayerTaxi()
     memset(m_taximask, 0, sizeof(m_taximask));
 }
 
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
+void PlayerTaxi::InitTaxiNodes(uint32 race, uint32 chrClass, uint8 level)
+{
+    InitTaxiNodesForClass(chrClass);
+    InitTaxiNodesForRace(race);
+    InitTaxiNodesForFaction(Player::TeamForRace(race));
+    InitTaxiNodesForLvl(level);
+}
+
+void PlayerTaxi::InitTaxiNodesForClass(uint32 chrClass)
 {
     // class specific initial known nodes
     switch (chrClass)
@@ -173,7 +181,10 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
             break;
         }
     }
+}
 
+void PlayerTaxi::InitTaxiNodesForRace(uint32 race)
+{
     // race specific initial known nodes: capital and taxi hub masks
     switch (race)
     {
@@ -189,13 +200,20 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
         case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
         case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
     }
+}
 
+void PlayerTaxi::InitTaxiNodesForFaction(uint32 faction)
+{
     // new continent starting masks (It will be accessible only at new map)
-    switch (Player::TeamForRace(race))
+    switch (faction)
     {
         case ALLIANCE: SetTaximaskNode(100); break;
         case HORDE:    SetTaximaskNode(99);  break;
     }
+}
+
+void PlayerTaxi::InitTaxiNodesForLvl(uint8 level)
+{
     // level dependent taxi hubs
     if (level >= 68)
         SetTaximaskNode(213);                               //Shattered Sun Staging Area

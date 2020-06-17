@@ -1018,7 +1018,12 @@ class PlayerTaxi
     ~PlayerTaxi()
     { }
     // Nodes
-    void InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level);
+    void InitTaxiNodes(uint32 race, uint32 chrClass, uint8 level);
+    void InitTaxiNodesForClass(uint32 chrClass);
+    void InitTaxiNodesForRace(uint32 race);
+    void InitTaxiNodesForFaction(uint32 faction);
+    void InitTaxiNodesForLvl(uint8 level);
+
     void LoadTaxiMask(std::string const& data);
 
     bool IsTaximaskNodeKnown(uint32 nodeidx) const
@@ -1442,7 +1447,7 @@ class Player : public Unit, public GridObject<Player>
     PlayerTaxi m_taxi;
     void InitTaxiNodesForLevel()
     {
-        m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel());
+        m_taxi.InitTaxiNodes(getRace(), getClass(), getLevel());
     }
     bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 0);
     bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
