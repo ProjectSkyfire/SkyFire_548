@@ -1336,7 +1336,6 @@ struct CharmInfo
     void GetStayPosition(float &x, float &y, float &z);
 
     private:
-
     Unit* _unit;
     UnitActionBarEntry PetActionBar [MAX_UNIT_ACTION_BAR_INDEX];
     CharmSpellInfo _charmspells [4];
@@ -2988,7 +2987,6 @@ class Unit : public WorldObject
     uint32 m_movementCounter;       ///< Incrementing counter used in movement packets
 
     private:
-
     uint32 m_state;                                     // Even derived shouldn't modify
     uint32 m_CombatTimer;
     TimeTrackerSmall m_movesplineTimer;

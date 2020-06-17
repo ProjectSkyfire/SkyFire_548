@@ -3696,7 +3696,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 }
                 case 59317:                                 // Teleporting
                 {
-
                     if (!unitTarget || unitTarget->GetTypeId() != TypeID::TYPEID_PLAYER)
                         return;
 

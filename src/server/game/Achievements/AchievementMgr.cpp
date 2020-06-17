@@ -2778,7 +2778,6 @@ bool AchievementMgr<T>::RequirementsSatisfied(CriteriaEntry const* achievementCr
 template<class T>
 bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* criteria, uint64 miscValue1, uint64 /*miscValue2*/, Unit const* unit, Player* referencePlayer) const
 {
-
     ModifierTreeEntry const* condition = sModifierTreeStore.LookupEntry(criteria->modifierTreeId);
 
     if (!condition)
