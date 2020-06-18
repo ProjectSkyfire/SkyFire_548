@@ -2792,7 +2792,6 @@ void World::UpdateSessions(uint32 diff)
             RemoveQueuedPlayer(pSession);
             m_sessions.erase(itr);
             delete pSession;
-
         }
     }
 }
@@ -3253,7 +3252,6 @@ void World::LoadWorldStates()
     while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u world states in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 // Setting a worldstate will save it to DB

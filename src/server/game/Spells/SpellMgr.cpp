@@ -1668,8 +1668,8 @@ void SpellMgr::LoadSpellGroups()
 
         groups.insert(std::set<uint32>::value_type(group_id));
         mSpellGroupSpell.insert(SpellGroupSpellMap::value_type((SpellGroup)group_id, spell_id));
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     for (SpellGroupSpellMap::iterator itr = mSpellGroupSpell.begin(); itr!= mSpellGroupSpell.end();)
     {

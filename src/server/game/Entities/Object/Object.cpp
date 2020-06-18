@@ -616,7 +616,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetSpeed(MOVE_RUN));
         *data << float(self->GetSpeed(MOVE_SWIM));
         *data << float(self->GetPositionZMinusOffset());
-
     }
 
     if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
@@ -740,7 +739,6 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
     BuildDynamicValuesUpdate(data);
-
 }
 
 void Object::BuildDynamicValuesUpdate(ByteBuffer *data) const

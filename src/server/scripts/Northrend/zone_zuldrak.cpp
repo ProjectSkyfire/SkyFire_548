@@ -438,7 +438,6 @@ public:
             uint32 uiPhase;
             uint32 uiRemoveFlagTimer;
             uint32 uiQuest;
-
     };
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
@@ -594,7 +593,6 @@ public:
 
             if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 killer->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_TUSKARRMAGEDDON, killer);
-
         }
 
         private:
@@ -645,7 +643,6 @@ public:
             _enrage        = false;
             _chargeTimer   = 15000;
             _uppercutTimer = 12000;
-
         }
 
         void WaypointReached(uint32 waypointId) OVERRIDE
@@ -990,7 +987,6 @@ public:
                     SummonList.push_back(summon->GetGUID());
                 }
             }
-
         }
 
         void EnterCombat(Unit* unit) OVERRIDE
@@ -1114,7 +1110,6 @@ public:
         {
             if (Data == 1)
                 _spell = Boss[Value].uiAddSpell;
-
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

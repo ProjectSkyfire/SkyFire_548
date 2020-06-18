@@ -440,7 +440,6 @@ typedef std::map<uint32, time_t> CreatureSpellCooldowns;
 class Creature : public Unit, public GridObject<Creature>, public MapObject
 {
     public:
-
         explicit Creature(bool isWorldObject = false);
         virtual ~Creature();
 
