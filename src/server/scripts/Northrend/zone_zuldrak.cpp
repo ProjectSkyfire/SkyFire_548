@@ -1445,7 +1445,7 @@ public:
         {
             if (type == 1 && data == 1)
                 switch (_getingredienttry)
-               {
+                {
                     case 2:
                     case 3:
                         _events.ScheduleEvent(EVENT_EASY_123, 100);
@@ -1766,18 +1766,18 @@ public:
             }
         }
 
-    void RemoveItems(Player* player)
-    {
-        for (uint8 i = 0; i < 21; ++i)
-            if (player->HasItemCount(FetchIngredients[i][2], 1, true))
-                player->DestroyItemCount(FetchIngredients[i][2], 1, true);
-    }
+        void RemoveItems(Player* player)
+        {
+            for (uint8 i = 0; i < 21; ++i)
+                if (player->HasItemCount(FetchIngredients[i][2], 1, true))
+                    player->DestroyItemCount(FetchIngredients[i][2], 1, true);
+        }
 
-    void Register() OVERRIDE
-    {
-        OnEffectHitTarget += SpellEffectFn(spell_pot_check_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-    }
-};
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pot_check_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
 
     SpellScript* GetSpellScript() const OVERRIDE
     {
