@@ -870,7 +870,6 @@ int WorldSocket::HandleSendAuthSession()
     packet << uint32(m_Seed);
 
     return SendPacket(packet);
-
 }
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)

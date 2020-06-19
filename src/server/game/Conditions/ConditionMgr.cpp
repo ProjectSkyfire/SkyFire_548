@@ -615,7 +615,6 @@ bool ConditionMgr::IsObjectMeetToConditionList(ConditionSourceInfo& sourceInfo, 
                     SF_LOG_DEBUG("condition", "IsPlayerMeetToConditionList: Reference template -%u not found",
                         (*i)->ReferenceId);//checked at loading, should never happen
                 }
-
             }
             else //handle normal condition
             {
@@ -805,7 +804,6 @@ void ConditionMgr::LoadConditions(bool isReload)
 
         SF_LOG_INFO("misc", "Re-Loading `phase_area` Table for Conditions!");
         sObjectMgr->LoadAreaPhases();
-
     }
 
     QueryResult result = WorldDatabase.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, "
@@ -1062,7 +1060,6 @@ void ConditionMgr::LoadConditions(bool isReload)
     while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u conditions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 bool ConditionMgr::addToLootTemplate(Condition* cond, LootTemplate* loot)

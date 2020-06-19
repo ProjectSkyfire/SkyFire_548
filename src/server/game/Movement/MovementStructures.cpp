@@ -5131,7 +5131,6 @@ MovementStatusElements const MoveGravityEnable[] = // 5.4.8 18414
     MSEGuidByte4, //20
     MSECounter,   // uint32
     MSEGuidByte5, //21
-
 };
 
 MovementStatusElements const MoveWaterWalk[] = //5.4.8 18414

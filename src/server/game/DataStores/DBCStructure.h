@@ -840,7 +840,6 @@ struct ChrClassesEntry
     //uint32 unk1                                           // 15       Pandaria
     //uint32 unk1                                           // 16       Pandaria
     //uint32 unk1                                           // 17       Pandaria
-
 };
 
 struct ChrRacesEntry
@@ -1400,7 +1399,6 @@ struct DifficultyEntry
     //
     //
     //
-
 };
 
 enum diffflag
@@ -1422,7 +1420,6 @@ struct DungeonEncounterEntry
     //uint32 nameFlags;                                     // 6
     //uint32 unk1;                                          // 7
     //uint32 unk2;                                          // 8 - Pandaria
-
 };
 
 struct DurabilityCostsEntry
@@ -2422,7 +2419,6 @@ struct SpellCategoriesEntry
     uint32    PreventionType;                               // 7        m_preventionType
     uint32    StartRecoveryCategory;                        // 8        m_startRecoveryCategory
     //uint32 unk1;                                          // 9  - Pandaria
-
 };
 
 typedef std::set<uint32> SpellCategorySet;

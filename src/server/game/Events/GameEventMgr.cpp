@@ -262,7 +262,6 @@ void GameEventMgr::LoadFromDB()
         while (result->NextRow());
 
         SF_LOG_INFO("server.loading", ">> Loaded %u game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
     }
 
     SF_LOG_INFO("server.loading", "Loading Game Event Saves Data...");
@@ -305,7 +304,6 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             SF_LOG_INFO("server.loading", ">> Loaded %u game event saves in game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
         }
     }
 
@@ -353,7 +351,6 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             SF_LOG_INFO("server.loading", ">> Loaded %u game event prerequisites in game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
         }
     }
 
@@ -399,7 +396,6 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             SF_LOG_INFO("server.loading", ">> Loaded %u creatures in game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
         }
     }
 
@@ -989,7 +985,6 @@ void GameEventMgr::StartArenaSeason()
 
     StartEvent(eventId, true);
     SF_LOG_INFO("gameevent", "Arena Season %u started...", season);
-
 }
 
 uint32 GameEventMgr::Update()                               // return the next event delay in ms

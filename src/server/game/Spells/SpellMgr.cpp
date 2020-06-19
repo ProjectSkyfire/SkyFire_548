@@ -363,7 +363,6 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
                         }
                         return false;
                     }
-
                 }
                 // also possible IsLootCrafting case but fake item must exist anyway
                 else if (!sObjectMgr->GetItemTemplate(spellInfo->Effects[i].ItemType))
@@ -1137,7 +1136,6 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
                 return bf->IsWarTime();
             break;
         }
-
     }
 
     return true;
@@ -1330,7 +1328,6 @@ void SpellMgr::LoadSpellRequired()
     } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u spell required records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 void SpellMgr::LoadSpellLearnSkills()
@@ -1596,8 +1593,8 @@ void SpellMgr::LoadSpellTargetPositions()
             SF_LOG_ERROR("sql.sql", "Spell (Id: %u, effIndex: %u) listed in `spell_target_position` does not have target TARGET_DEST_DB (17).", Spell_ID, effIndex);
             continue;
         }
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     /*
     // Check all spells

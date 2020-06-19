@@ -643,7 +643,6 @@ void AchievementMgr<Player>::LoadFromDB(PreparedQueryResult achievementResult, P
                 if (uint32 titleId = reward->titleId[Player::TeamForRace(GetOwner()->getRace()) == ALLIANCE ? 0 : 1])
                     if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(titleId))
                         GetOwner()->SetTitle(titleEntry);
-
         }
         while (achievementResult->NextRow());
     }
@@ -1778,7 +1777,6 @@ void AchievementMgr<T>::SetCriteriaProgress(CriteriaEntry const* entry, uint64 c
 
         if (criteriaComplete && achievement->flags & ACHIEVEMENT_FLAG_SHOW_CRITERIA_MEMBERS && !progress->CompletedGUID)
             progress->CompletedGUID = referencePlayer->GetGUID();
-
     }
 
     SendCriteriaUpdate(entry, progress, timeElapsed, false);

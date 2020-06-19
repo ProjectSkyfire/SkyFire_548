@@ -6328,7 +6328,6 @@ void AuraEffect::HandleAuraOverrideAutoattackWithSpell(AuraApplication const* au
         SpellInfo const* overrideSpell = sSpellMgr->GetSpellInfo(m_spellInfo->Effects[GetEffIndex()].TriggerSpell);
         target->SetAutoattackOverrideRange(overrideSpell->GetMaxRange());
         target->SetAutoattackOverrideSpell(overrideSpell);
-
     }
     else
     {

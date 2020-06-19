@@ -5748,7 +5748,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     Unit* target = m_targets.GetUnitTarget();
                     if (!target || !target->IsFriendlyTo(m_caster) || target->getAttackers().empty())
                         return SPELL_FAILED_BAD_TARGETS;
-
                 }
                 break;
             }

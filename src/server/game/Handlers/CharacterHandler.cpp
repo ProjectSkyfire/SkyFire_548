@@ -2295,7 +2295,6 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SOCIAL_BY_FRIEND);
                 stmt->setUInt32(0, lowGuid);
                 trans->Append(stmt);
-
             }
 
             // Reset homebind and position

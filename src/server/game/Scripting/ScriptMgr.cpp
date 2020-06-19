@@ -46,7 +46,6 @@ template<class TScript>
 class ScriptRegistry
 {
     public:
-
         typedef std::map<uint32, TScript*> ScriptMap;
         typedef typename ScriptMap::iterator ScriptMapIterator;
 
@@ -136,7 +135,6 @@ class ScriptRegistry
         }
 
     private:
-
         // Counter used for code-only scripts.
         static uint32 _scriptIdCounter;
 };
@@ -508,7 +506,6 @@ void ScriptMgr::OnGroupRateCalculation(float& rate, uint32 count, bool isRaid)
                 continue; \
             if (C->MapID == V->GetId()) \
             {
-
 #define SCR_MAP_END \
                 return; \
             } \

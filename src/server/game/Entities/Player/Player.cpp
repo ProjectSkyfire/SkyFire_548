@@ -27477,7 +27477,6 @@ void Player::UpdateSpecCount(uint8 count)
         stmt->setUInt8(0, GetActiveSpec());
         stmt->setUInt32(1, GetGUIDLow());
         trans->Append(stmt);
-
     }
 
     CharacterDatabase.CommitTransaction(trans);

@@ -1110,7 +1110,6 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     SetFloatValue(UNIT_FIELD_MAX_RANGED_DAMAGE, cinfo->maxrangedmg);
 
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->attackpower);
-
 }
 
 float Creature::_GetHealthMod(int32 Rank)
