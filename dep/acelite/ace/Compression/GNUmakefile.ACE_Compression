@@ -123,6 +123,7 @@ endif
 #----------------------------------------------------------------------------
 #       Local targets
 #----------------------------------------------------------------------------
+.PHONY: lib_warning
 lib_warning:
 	@echo ACE_Compression will not be built due to the following missing library: $(LIBCHECK) >&2
 
@@ -211,18 +212,18 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#header_files:
-#Compressor.h
-#ACE_Compression_export.h
-#
-#source_files:
-#Compressor.cpp
+#build_files:
+#ACE_Compression.mpc
 #
 #inline_files:
 #Compressor.inl
 #
-#build_files:
-#ACE_Compression.mpc
+#source_files:
+#Compressor.cpp
+#
+#header_files:
+#Compressor.h
+#ACE_Compression_export.h
 #
 #lib_output:
 #../../lib ACE_Compression

@@ -45,7 +45,6 @@ class ACE_Sig_Set;
 class ACE_Export ACE_Reactor_Notify : public ACE_Event_Handler
 {
 public:
-  // = Initialization and termination methods.
   virtual int open (ACE_Reactor_Impl *,
                     ACE_Timer_Queue *timer_queue = 0,
                     int disable_notify = 0) = 0;
@@ -449,7 +448,7 @@ public:
    * Set the maximum number of times that ACE_Reactor_Impl will
    * iterate and dispatch the ACE_Event_Handlers that are passed in
    * via the notify queue before breaking out of its
-   * <ACE_Message_Queue::dequeue> loop.  By default, this is set to
+   * ACE_Message_Queue::dequeue() loop.  By default, this is set to
    * -1, which means "iterate until the queue is empty."  Setting this
    * to a value like "1 or 2" will increase "fairness" (and thus
    * prevent starvation) at the expense of slightly higher dispatching
@@ -461,7 +460,7 @@ public:
    * Get the maximum number of times that the ACE_Reactor_Impl will
    * iterate and dispatch the ACE_Event_Handlers that are passed in
    * via the notify queue before breaking out of its
-   * <ACE_Message_Queue::dequeue> loop.
+   * ACE_Message_Queue::dequeue() loop.
    */
   virtual int max_notify_iterations (void) = 0;
 

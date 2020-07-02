@@ -4,7 +4,7 @@
 /**
  *  @file    Thread_Manager.h
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -235,7 +235,6 @@ class ACE_Export ACE_Thread_Descriptor : public ACE_Thread_Descriptor_Base
   friend class ACE_Double_Linked_List<ACE_Thread_Descriptor>;
   friend class ACE_Double_Linked_List_Iterator<ACE_Thread_Descriptor>;
 public:
-  // = Initialization method.
   ACE_Thread_Descriptor (void);
 
   // = Accessor methods.

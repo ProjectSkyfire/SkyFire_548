@@ -4,7 +4,7 @@
 /**
  *  @file    Connector.h
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -38,7 +38,6 @@ template <class SVC_HANDLER>
 class ACE_Connector_Base
 {
 public:
-
   virtual ~ACE_Connector_Base (void) {}
 
   /// Initialize the Svc_Handler.
@@ -59,7 +58,6 @@ template <class SVC_HANDLER>
 class ACE_NonBlocking_Connect_Handler : public ACE_Event_Handler
 {
 public:
-
   /// Constructor.
   ACE_NonBlocking_Connect_Handler (ACE_Connector_Base<SVC_HANDLER> &connector,
                                    SVC_HANDLER *,
@@ -124,7 +122,6 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
 private:
-
   /// Connector base.
   ACE_Connector_Base<SVC_HANDLER> &connector_;
 
@@ -167,7 +164,6 @@ template <typename SVC_HANDLER, typename PEER_CONNECTOR>
 class ACE_Connector : public ACE_Connector_Base<SVC_HANDLER>, public ACE_Service_Object
 {
 public:
-
   // Useful STL-style traits.
   typedef typename SVC_HANDLER::addr_type addr_type;
   typedef PEER_CONNECTOR connector_type;
@@ -413,7 +409,6 @@ class ACE_Strategy_Connector
   : public ACE_Connector <SVC_HANDLER, PEER_CONNECTOR>
 {
 public:
-
   // Useful STL-style traits.
   typedef ACE_Creation_Strategy<SVC_HANDLER>
   creation_strategy_type;

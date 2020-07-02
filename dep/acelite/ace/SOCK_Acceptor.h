@@ -4,7 +4,7 @@
 /**
  *  @file    SOCK_Acceptor.h
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -37,7 +37,6 @@ class ACE_Accept_QoS_Params;
 class ACE_Export ACE_SOCK_Acceptor : public ACE_SOCK
 {
 public:
-  // = Initialization and termination methods.
   /// Default constructor.
   ACE_SOCK_Acceptor (void);
 
@@ -57,8 +56,7 @@ public:
                      int protocol = 0,
                      int ipv6_only = 0);
 
-  /// Initialize a passive-mode QoS-enabled acceptor socket.  Returns 0
-  /// on success and -1 on failure.
+  /// Initialize a passive-mode QoS-enabled acceptor socket.
   ACE_SOCK_Acceptor (const ACE_Addr &local_sap,
                      ACE_Protocol_Info *protocolinfo,
                      ACE_SOCK_GROUP g,

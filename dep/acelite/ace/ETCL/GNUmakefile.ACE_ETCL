@@ -124,6 +124,7 @@ endif
 #----------------------------------------------------------------------------
 #       Local targets
 #----------------------------------------------------------------------------
+.PHONY: lib_warning
 lib_warning:
 	@echo ACE_ETCL will not be built due to the following missing library: $(LIBCHECK) >&2
 
@@ -218,15 +219,15 @@ endif
 #ETCL_Constraint_Visitor.h
 #ace_etcl_export.h
 #
-#source_files:
-#ETCL_Constraint.cpp
-#ETCL_Constraint_Visitor.cpp
+#build_files:
+#ETCL.mpc
 #
 #inline_files:
 #ETCL_Constraint.inl
 #
-#build_files:
-#ETCL.mpc
+#source_files:
+#ETCL_Constraint.cpp
+#ETCL_Constraint_Visitor.cpp
 #
 #pkgconfig_files:
 #ACE_ETCL.pc.in

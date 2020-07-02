@@ -123,6 +123,7 @@ endif
 #----------------------------------------------------------------------------
 #       Local targets
 #----------------------------------------------------------------------------
+.PHONY: lib_warning
 lib_warning:
 	@echo ACE_RLECompression will not be built due to the following missing library: $(LIBCHECK) >&2
 

@@ -46,4 +46,5 @@ ACE_Event_T<TIME_POLICY>::~ACE_Event_T (void)
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+
 #endif

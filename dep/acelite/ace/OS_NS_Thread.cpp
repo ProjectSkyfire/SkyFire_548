@@ -17,13 +17,15 @@
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Guard_T.h"
+#ifdef ACE_HAS_GETTID
+#  include "ace/OS_NS_sys_resource.h" // syscall for gettid impl
+#endif
 
 extern "C" void
 ACE_MUTEX_LOCK_CLEANUP_ADAPTER_NAME (void *args)
 {
   ACE_VERSIONED_NAMESPACE_NAME::ACE_OS::mutex_lock_cleanup (args);
 }
-
 
 #if !defined(ACE_WIN32) && defined (__IBMCPP__) && (__IBMCPP__ >= 400)
 # define ACE_BEGINTHREADEX(STACK, STACKSIZE, ENTRY_POINT, ARGS, FLAGS, THR_ID) \
@@ -125,7 +127,6 @@ ACE_TSS_Emulation::tss_base (void* ts_storage[], u_int *ts_created)
 
       if (!key_created_)
         {
-          ACE_NO_HEAP_CHECK;
           if (ACE_OS::thr_keycreate_native (&native_tss_key_,
                                      &ACE_TSS_Emulation_cleanup) != 0)
             {
@@ -160,8 +161,6 @@ ACE_TSS_Emulation::tss_base (void* ts_storage[], u_int *ts_created)
       // storage array.
       if (ts_storage == 0)
         {
-          ACE_NO_HEAP_CHECK;
-
 #ifdef ACE_HAS_ALLOC_HOOKS
           const size_t n = ACE_TSS_THREAD_KEYS_MAX * sizeof (void *);
           ACE_Allocator *const alloc = ACE_Allocator::instance ();
@@ -598,7 +597,7 @@ public:
     USE,
     DESTROY
   };
-  TSS_Cleanup_Instance (Purpose purpose = USE);
+  explicit TSS_Cleanup_Instance (Purpose purpose = USE);
   ~TSS_Cleanup_Instance();
 
   bool valid();
@@ -1156,7 +1155,7 @@ ACE_OS::cond_broadcast (ACE_cond_t *cv)
         result = -1;
       // Wait for all the awakened threads to acquire their part of
       // the counting semaphore.
-#   if defined (ACE_VXWORKS)
+#   if defined (ACE_VXWORKS) || defined (ACE_MQX)
       else if (ACE_OS::sema_wait (&cv->waiters_done_) == -1)
 #   else
       else if (ACE_OS::event_wait (&cv->waiters_done_) == -1)
@@ -1180,7 +1179,7 @@ ACE_OS::cond_destroy (ACE_cond_t *cv)
 # if defined (ACE_HAS_THREADS)
 #   if defined (ACE_HAS_WTHREADS)
   ACE_OS::event_destroy (&cv->waiters_done_);
-#   elif defined (ACE_VXWORKS)
+#   elif defined (ACE_VXWORKS) || defined (ACE_MQX)
   ACE_OS::sema_destroy (&cv->waiters_done_);
 #   endif /* ACE_VXWORKS */
   int result = 0;
@@ -1230,7 +1229,7 @@ ACE_OS::cond_init (ACE_cond_t *cv, short type, const char *name, void *arg)
     result = -1;
   else if (ACE_OS::thread_mutex_init (&cv->waiters_lock_) == -1)
     result = -1;
-#   if defined (ACE_VXWORKS)
+#   if defined (ACE_VXWORKS) || defined (ACE_MQX)
   else if (ACE_OS::sema_init (&cv->waiters_done_, 0, type) == -1)
 #   else
   else if (ACE_OS::event_init (&cv->waiters_done_) == -1)
@@ -1260,7 +1259,7 @@ ACE_OS::cond_init (ACE_cond_t *cv, short type, const wchar_t *name, void *arg)
     result = -1;
   else if (ACE_OS::thread_mutex_init (&cv->waiters_lock_) == -1)
     result = -1;
-#     if defined (ACE_VXWORKS)
+#     if defined (ACE_VXWORKS) || defined (ACE_MQX)
   else if (ACE_OS::sema_init (&cv->waiters_done_, 0, type) == -1)
 #     else
   else if (ACE_OS::event_init (&cv->waiters_done_) == -1)
@@ -1391,7 +1390,7 @@ ACE_OS::cond_wait (ACE_cond_t *cv,
   // If we're the last waiter thread during this particular broadcast
   // then let all the other threads proceed.
   else if (last_waiter)
-#   if defined (ACE_VXWORKS)
+#   if defined (ACE_VXWORKS) || defined (ACE_MQX)
     ACE_OS::sema_post (&cv->waiters_done_);
 #   else
     ACE_OS::event_signal (&cv->waiters_done_);
@@ -1419,7 +1418,7 @@ ACE_OS::cond_timedwait (ACE_cond_t *cv,
   // Handle the easy case first.
   if (timeout == 0)
     return ACE_OS::cond_wait (cv, external_mutex);
-#   if defined (ACE_HAS_WTHREADS) || defined (ACE_VXWORKS)
+#   if defined (ACE_HAS_WTHREADS) || defined (ACE_VXWORKS) || defined (ACE_MQX)
 
   // Prevent race conditions on the <waiters_> count.
   if (ACE_OS::thread_mutex_lock (&cv->waiters_lock_) != 0)
@@ -1481,6 +1480,8 @@ ACE_OS::cond_timedwait (ACE_cond_t *cv,
       int const ticks_per_sec = ::sysClkRateGet ();
       int const ticks = msec_timeout * ticks_per_sec / ACE_ONE_SECOND_IN_MSECS;
       result = ::semTake (cv->sema_.sema_, ticks);
+#     else
+      result = ACE_OS::sema_wait (&cv->sema_, timeout);
 #     endif /* ACE_WIN32 || VXWORKS */
     }
 
@@ -3130,79 +3131,99 @@ ACE_OS::lwp_setparams (const ACE_Sched_Params &sched_params)
 #endif /* ! ACE_HAS_STHREADS && ! sun */
 }
 
+#if defined ACE_HAS_THREADS && defined ACE_LACKS_RWLOCK_T
+namespace {
+struct UniqueName {
+  explicit UniqueName (const void *addr)
+  {
+    ACE_OS::unique_name (addr, &this->buffer_[0], ACE_UNIQUE_NAME_LEN);
+  }
+
+  operator const ACE_TCHAR * () const { return &this->buffer_[0]; }
+
+  ACE_TCHAR buffer_[ACE_UNIQUE_NAME_LEN];
+};
+
+enum RWLockCleanup {RWLC_CondAttr, RWLC_Lock, RWLC_CondReaders, RWLC_CondWriters};
+
+struct RWLockCleaner {
+  RWLockCleaner (ACE_condattr_t &attr, ACE_rwlock_t *rw)
+    : state_ (RWLC_CondAttr)
+    , attr_ (attr)
+    , rw_ (rw)
+  {}
+
+  ~RWLockCleaner ()
+  {
+    ACE_Errno_Guard error (errno);
+    switch (this->state_)
+      {
+      case RWLC_CondWriters:
+        ACE_OS::cond_destroy (&this->rw_->waiting_writers_);
+        // FALLTHROUGH
+      case RWLC_CondReaders:
+        ACE_OS::cond_destroy (&this->rw_->waiting_readers_);
+        // FALLTHROUGH
+      case RWLC_Lock:
+        ACE_OS::mutex_destroy (&this->rw_->lock_);
+        // FALLTHROUGH
+      case RWLC_CondAttr:
+        ACE_OS::condattr_destroy (this->attr_);
+      }
+  }
+
+  RWLockCleanup state_;
+  ACE_condattr_t &attr_;
+  ACE_rwlock_t *rw_;
+};
+}
+#endif
+
 #if !defined (ACE_HAS_THREADS) || defined (ACE_LACKS_RWLOCK_T)
 int
 ACE_OS::rwlock_init (ACE_rwlock_t *rw,
                      int type,
-                     const ACE_TCHAR *name,
+                     const ACE_TCHAR *,
                      void *arg)
 {
   // ACE_OS_TRACE ("ACE_OS::rwlock_init");
 # if defined (ACE_HAS_THREADS) && defined (ACE_LACKS_RWLOCK_T)
   // NT, POSIX, and VxWorks don't support this natively.
-  ACE_UNUSED_ARG (name);
-  int result = -1;
-
-  // Since we cannot use the user specified name for all three
-  // objects, we will create three completely new names.
-  ACE_TCHAR name1[ACE_UNIQUE_NAME_LEN];
-  ACE_TCHAR name2[ACE_UNIQUE_NAME_LEN];
-  ACE_TCHAR name3[ACE_UNIQUE_NAME_LEN];
-  ACE_TCHAR name4[ACE_UNIQUE_NAME_LEN];
-
-  ACE_OS::unique_name ((const void *) &rw->lock_,
-                       name1,
-                       ACE_UNIQUE_NAME_LEN);
-  ACE_OS::unique_name ((const void *) &rw->waiting_readers_,
-                       name2,
-                       ACE_UNIQUE_NAME_LEN);
-  ACE_OS::unique_name ((const void *) &rw->waiting_writers_,
-                       name3,
-                       ACE_UNIQUE_NAME_LEN);
-  ACE_OS::unique_name ((const void *) &rw->waiting_important_writer_,
-                       name4,
-                       ACE_UNIQUE_NAME_LEN);
 
   ACE_condattr_t attributes;
-  if (ACE_OS::condattr_init (attributes, type) == 0)
-    {
-      if (ACE_OS::mutex_init (&rw->lock_, type, name1,
-                              (ACE_mutexattr_t *) arg) == 0
-          && ACE_OS::cond_init (&rw->waiting_readers_,
-                                attributes, name2, arg) == 0
-          && ACE_OS::cond_init (&rw->waiting_writers_,
-                                attributes, name3, arg) == 0
-          && ACE_OS::cond_init (&rw->waiting_important_writer_,
-                                attributes, name4, arg) == 0)
-        {
-          // Success!
-          rw->ref_count_ = 0;
-          rw->num_waiting_writers_ = 0;
-          rw->num_waiting_readers_ = 0;
-          rw->important_writer_ = false;
-          result = 0;
-        }
-      ACE_OS::condattr_destroy (attributes);
-    }
+  if (ACE_OS::condattr_init (attributes, type) != 0)
+    return -1;
 
-  if (result == -1)
-    {
-      // Save/restore errno.
-      ACE_Errno_Guard error (errno);
+  RWLockCleaner cleanup (attributes, rw);
 
-      /* We're about to return -1 anyway, so
-       * no need to check return values of these clean-up calls:
-       */
-      (void)ACE_OS::mutex_destroy (&rw->lock_);
-      (void)ACE_OS::cond_destroy (&rw->waiting_readers_);
-      (void)ACE_OS::cond_destroy (&rw->waiting_writers_);
-      (void)ACE_OS::cond_destroy (&rw->waiting_important_writer_);
-    }
-  return result;
+  if (ACE_OS::mutex_init (&rw->lock_, type, UniqueName (&rw->lock_),
+                          (ACE_mutexattr_t *) arg) != 0)
+    return -1;
+
+  cleanup.state_ = RWLC_Lock;
+  if (ACE_OS::cond_init (&rw->waiting_readers_, attributes,
+                         UniqueName (&rw->waiting_readers_), arg) != 0)
+    return -1;
+
+  cleanup.state_ = RWLC_CondReaders;
+  if (ACE_OS::cond_init (&rw->waiting_writers_, attributes,
+                         UniqueName (&rw->waiting_writers_), arg) != 0)
+    return -1;
+
+  cleanup.state_ = RWLC_CondWriters;
+  if (ACE_OS::cond_init (&rw->waiting_important_writer_, attributes,
+                         UniqueName (&rw->waiting_important_writer_), arg) != 0)
+    return -1;
+
+  cleanup.state_ = RWLC_CondAttr;
+  rw->ref_count_ = 0;
+  rw->num_waiting_writers_ = 0;
+  rw->num_waiting_readers_ = 0;
+  rw->important_writer_ = false;
+  return 0;
 # else
   ACE_UNUSED_ARG (rw);
   ACE_UNUSED_ARG (type);
-  ACE_UNUSED_ARG (name);
   ACE_UNUSED_ARG (arg);
   ACE_NOTSUP_RETURN (-1);
 # endif /* ACE_HAS_THREADS */
@@ -4053,7 +4074,7 @@ ACE_OS::thr_create (ACE_THR_FUNC func,
   else
 #   endif /* ACE_HAS_MFC */
     {
-      int start_suspended = ACE_BIT_ENABLED (flags, THR_SUSPENDED);
+      int const start_suspended = ACE_BIT_ENABLED (flags, THR_SUSPENDED);
 
       if (priority != ACE_DEFAULT_THREAD_PRIORITY)
         // If we need to set the priority, then we need to start the
@@ -4083,15 +4104,6 @@ ACE_OS::thr_create (ACE_THR_FUNC func,
             }
         }
     }
-#   if 0
-  *thr_handle = ::CreateThread
-    (0,
-     stacksize,
-     LPTHREAD_START_ROUTINE (thread_args->entry_point ()),
-     thread_args,
-     flags,
-     thr_id);
-#   endif /* 0 */
 
   // Close down the handle if no one wants to use it.
   if (thr_handle == &tmp_handle && tmp_handle != 0)
@@ -4808,6 +4820,16 @@ ACE_OS::unique_name (const void *object,
                     static_cast<int> (ACE_OS::getpid ()));
 }
 #endif
+
+pid_t
+ACE_OS::thr_gettid ()
+{
+#ifdef ACE_HAS_GETTID
+  return syscall (SYS_gettid);
+#else
+  ACE_NOTSUP_RETURN (-1);
+#endif
+}
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

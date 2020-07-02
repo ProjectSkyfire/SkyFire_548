@@ -6,7 +6,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # this file will be lost the next time it is generated.
 #
 # MPC Command:
-# /home/johnny/DOC_ROOT/stage-25640/ACE_wrappers/bin/mwc.pl -type vs2017 -recurse -hierarchy -relative ACE_ROOT=/home/johnny/DOC_ROOT/stage-25640/ACE_wrappers -relative TAO_ROOT=/home/johnny/DOC_ROOT/stage-25640/ACE_wrappers/TAO -workers 8 -name_modifier "*_vs2017"
+# /home/johnny/DOC_ROOT/stage-10021/ACE_wrappers/bin/mwc.pl -type vs2017 -recurse -hierarchy -relative ACE_ROOT=/home/johnny/DOC_ROOT/stage-10021/ACE_wrappers -relative TAO_ROOT=/home/johnny/DOC_ROOT/stage-10021/ACE_wrappers/TAO -workers 12 -name_modifier "*_vs2017"
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QoS", "QoS_vs2017.vcxproj", "{78A44094-FECA-1BAD-7781-8A636757A7A3}"
 EndProject
 Global

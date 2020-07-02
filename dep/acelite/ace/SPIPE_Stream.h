@@ -4,7 +4,7 @@
 /**
  *  @file    SPIPE_Stream.h
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -54,7 +54,6 @@ public:
   friend class ACE_SPIPE_Acceptor;
   friend class ACE_SPIPE_Connector;
 
-  // = Initialization method.
   /// Default constructor.
   ACE_SPIPE_Stream (void);
 

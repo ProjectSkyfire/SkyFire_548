@@ -165,6 +165,7 @@ LIBS += $(PLATFORM_FL_LIBS) $(PLATFORM_GL_LIBS) $(PLATFORM_X11_LIBS)
 LDFLAGS += $(PLATFORM_FL_LDFLAGS) $(PLATFORM_GL_LDFLAGS)
 LDFLAGS += $(PLATFORM_X11_LDFLAGS)
 
+.PHONY: lib_warning
 lib_warning:
 	@echo ACE_FlReactor will not be built due to the following missing library: $(LIBCHECK) >&2
 
@@ -177,6 +178,7 @@ endif
 ifneq ($(fl),1)
 requires_disabled_macros += fl
 endif
+.PHONY: require_warning
 require_warning:
 	@echo ACE_FlReactor will not be built due to the following disabled make macros: $(requires_disabled_macros)>&2
 
@@ -278,9 +280,8 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#header_files:
-#FlReactor.h
-#ACE_FlReactor_export.h
+#source_files:
+#FlReactor.cpp
 #
 #pkgconfig_files:
 #ACE_FlReactor.pc.in
@@ -288,8 +289,9 @@ endif
 #build_files:
 #ace_flreactor.mpc
 #
-#source_files:
-#FlReactor.cpp
+#header_files:
+#FlReactor.h
+#ACE_FlReactor_export.h
 #
 #lib_output:
 #../../lib ACE_FlReactor

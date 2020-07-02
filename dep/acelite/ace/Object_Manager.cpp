@@ -29,7 +29,8 @@
 #include "ace/Mutex.h"
 #include "ace/RW_Thread_Mutex.h"
 #if defined (ACE_DISABLE_WIN32_ERROR_WINDOWS) && !defined (ACE_HAS_WINCE)
-  #include "ace/OS_NS_stdlib.h"
+# include "ace/OS_NS_stdlib.h"
+# include /**/ <crtdbg.h>
 #endif // ACE_DISABLE_WIN32_ERROR_WINDOWS
 
 #if ! defined (ACE_APPLICATION_PREALLOCATED_OBJECT_DEFINITIONS)
@@ -169,12 +170,12 @@ ACE_Object_Manager::shutting_down (void)
 // Instead of popping up a window for exceptions, just print something out
 LONG WINAPI ACE_UnhandledExceptionFilter (PEXCEPTION_POINTERS pExceptionInfo)
 {
-  DWORD dwExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
+  DWORD const dwExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
 
   if (dwExceptionCode == EXCEPTION_ACCESS_VIOLATION)
-    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("\nERROR: ACCESS VIOLATION\n")));
+    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("\n(%P|%t) ERROR: ACCESS VIOLATION\n")));
   else
-    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("\nERROR: UNHANDLED EXCEPTION\n")));
+    ACELIB_ERROR ((LM_ERROR, ACE_TEXT ("\n(%P|%t) ERROR: UNHANDLED EXCEPTION\n")));
 
   return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -321,7 +322,6 @@ ACE_Object_Manager::init (void)
 #    endif // _M_IX86
 #  endif // (_MSC_VER >= 1400) // VC++ 8.0 and above.
 #endif /* ACE_DISABLE_WIN32_ERROR_WINDOWS */
-
 
 #     if !defined (ACE_LACKS_ACE_SVCCONF)
           ACE_NEW_RETURN (preallocations_,

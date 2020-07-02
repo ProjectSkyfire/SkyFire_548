@@ -16,7 +16,6 @@
 #include "ace/Timer_Queue_Iterator.inl"
 #endif /* __ACE_INLINE__ */
 
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Timer_Node_T)
