@@ -1164,7 +1164,6 @@ class spell_monk_healing_sphere : public SpellScriptLoader
                     }
                 }
             }
-
         }
 
         void Register()
@@ -1352,7 +1351,6 @@ class spell_monk_transcendence_transfer : public SpellScriptLoader
                     }
                 }
             }
-
         }
 
         void Register()

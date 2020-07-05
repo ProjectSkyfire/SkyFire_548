@@ -660,7 +660,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_lava_lash_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
         }
-
     };
 
     SpellScript* GetSpellScript() const OVERRIDE
@@ -733,7 +732,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_lava_surge_proc_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
-
     };
 
     SpellScript* GetSpellScript() const OVERRIDE

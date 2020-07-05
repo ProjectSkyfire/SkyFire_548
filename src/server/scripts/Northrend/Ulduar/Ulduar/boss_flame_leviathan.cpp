@@ -150,7 +150,6 @@ enum Misc
     DATA_ORBIT_ACHIEVEMENTS    = 1,
     VEHICLE_SPAWNS             = 5,
     FREYA_SPAWNS               = 4
-
 };
 
 enum Yells
@@ -998,7 +997,6 @@ public:
             }
         }
     };
-
 };
 
 class npc_hodirs_fury : public CreatureScript

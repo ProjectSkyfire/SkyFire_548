@@ -281,7 +281,6 @@ struct advisorbase_ai : public ScriptedAI
 class boss_kaelthas : public CreatureScript
 {
     public:
-
         boss_kaelthas()
             : CreatureScript("boss_kaelthas")
         {
@@ -1020,578 +1019,571 @@ class boss_kaelthas : public CreatureScript
 //Thaladred the Darkener AI
 class boss_thaladred_the_darkener : public CreatureScript
 {
-    public:
+public:
+    boss_thaladred_the_darkener()
+        : CreatureScript("boss_thaladred_the_darkener")
+    {
+    }
+    struct boss_thaladred_the_darkenerAI : public advisorbase_ai
+    {
+        boss_thaladred_the_darkenerAI(Creature* creature) : advisorbase_ai(creature) { }
 
-        boss_thaladred_the_darkener()
-            : CreatureScript("boss_thaladred_the_darkener")
+        uint32 Gaze_Timer;
+        uint32 Silence_Timer;
+        uint32 PsychicBlow_Timer;
+
+        void Reset() OVERRIDE
         {
+            Gaze_Timer = 100;
+            Silence_Timer = 20000;
+            PsychicBlow_Timer = 10000;
+
+            advisorbase_ai::Reset();
         }
-        struct boss_thaladred_the_darkenerAI : public advisorbase_ai
+
+        void EnterCombat(Unit* who) OVERRIDE
         {
-            boss_thaladred_the_darkenerAI(Creature* creature) : advisorbase_ai(creature) { }
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return;
 
-            uint32 Gaze_Timer;
-            uint32 Silence_Timer;
-            uint32 PsychicBlow_Timer;
+            if (!who || FakeDeath)
+                return;
 
-            void Reset() OVERRIDE
+            Talk(SAY_THALADRED_AGGRO);
+            me->AddThreat(who, 5000000.0f);
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                Talk(SAY_THALADRED_DEATH);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            advisorbase_ai::UpdateAI(diff);
+
+            //Faking death, don't do anything
+            if (FakeDeath)
+                return;
+
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            //Gaze_Timer
+            if (Gaze_Timer <= diff)
             {
-                Gaze_Timer = 100;
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                {
+                    DoResetThreat();
+                    me->AddThreat(target, 5000000.0f);
+                    Talk(EMOTE_THALADRED_GAZE, target);
+                    Gaze_Timer = 8500;
+                }
+            }
+            else
+                Gaze_Timer -= diff;
+
+            //Silence_Timer
+            if (Silence_Timer <= diff)
+            {
+                DoCastVictim(SPELL_SILENCE);
                 Silence_Timer = 20000;
-                PsychicBlow_Timer = 10000;
-
-                advisorbase_ai::Reset();
             }
+            else
+                Silence_Timer -= diff;
 
-            void EnterCombat(Unit* who) OVERRIDE
+            //PsychicBlow_Timer
+            if (PsychicBlow_Timer <= diff)
             {
-                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    return;
-
-                if (!who || FakeDeath)
-                    return;
-
-                Talk(SAY_THALADRED_AGGRO);
-                me->AddThreat(who, 5000000.0f);
+                DoCastVictim(SPELL_PSYCHIC_BLOW);
+                PsychicBlow_Timer = 20000+rand()%5000;
             }
+            else
+                PsychicBlow_Timer -= diff;
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
-                    Talk(SAY_THALADRED_DEATH);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                advisorbase_ai::UpdateAI(diff);
-
-                //Faking death, don't do anything
-                if (FakeDeath)
-                    return;
-
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                //Gaze_Timer
-                if (Gaze_Timer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    {
-                        DoResetThreat();
-                        me->AddThreat(target, 5000000.0f);
-                        Talk(EMOTE_THALADRED_GAZE, target);
-                        Gaze_Timer = 8500;
-                    }
-                }
-                else
-                    Gaze_Timer -= diff;
-
-                //Silence_Timer
-                if (Silence_Timer <= diff)
-                {
-                    DoCastVictim(SPELL_SILENCE);
-                    Silence_Timer = 20000;
-                }
-                else
-                    Silence_Timer -= diff;
-
-                //PsychicBlow_Timer
-                if (PsychicBlow_Timer <= diff)
-                {
-                    DoCastVictim(SPELL_PSYCHIC_BLOW);
-                    PsychicBlow_Timer = 20000+rand()%5000;
-                }
-                else
-                    PsychicBlow_Timer -= diff;
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new boss_thaladred_the_darkenerAI(creature);
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_thaladred_the_darkenerAI(creature);
+    }
 };
 
 //Lord Sanguinar AI
 class boss_lord_sanguinar : public CreatureScript
 {
-    public:
+public:
+    boss_lord_sanguinar()
+        : CreatureScript("boss_lord_sanguinar")
+    {
+    }
+    struct boss_lord_sanguinarAI : public advisorbase_ai
+    {
+        boss_lord_sanguinarAI(Creature* creature) : advisorbase_ai(creature) { }
 
-        boss_lord_sanguinar()
-            : CreatureScript("boss_lord_sanguinar")
+        uint32 Fear_Timer;
+
+        void Reset() OVERRIDE
         {
+            Fear_Timer = 20000;
+            advisorbase_ai::Reset();
         }
-        struct boss_lord_sanguinarAI : public advisorbase_ai
+
+        void EnterCombat(Unit* who) OVERRIDE
         {
-            boss_lord_sanguinarAI(Creature* creature) : advisorbase_ai(creature) { }
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return;
 
-            uint32 Fear_Timer;
+            if (!who || FakeDeath)
+                return;
 
-            void Reset() OVERRIDE
-            {
-                Fear_Timer = 20000;
-                advisorbase_ai::Reset();
-            }
-
-            void EnterCombat(Unit* who) OVERRIDE
-            {
-                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    return;
-
-                if (!who || FakeDeath)
-                    return;
-
-                Talk(SAY_SANGUINAR_AGGRO);
-            }
-
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
-                    Talk(SAY_SANGUINAR_DEATH);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                advisorbase_ai::UpdateAI(diff);
-
-                //Faking death, don't do anything
-                if (FakeDeath)
-                    return;
-
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                //Fear_Timer
-                if (Fear_Timer <= diff)
-                {
-                    DoCastVictim(SPELL_BELLOWING_ROAR);
-                    Fear_Timer = 25000+rand()%10000;                //approximately every 30 seconds
-                }
-                else
-                    Fear_Timer -= diff;
-
-                DoMeleeAttackIfReady();
-            }
-        };
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new boss_lord_sanguinarAI(creature);
+            Talk(SAY_SANGUINAR_AGGRO);
         }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                Talk(SAY_SANGUINAR_DEATH);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            advisorbase_ai::UpdateAI(diff);
+
+            //Faking death, don't do anything
+            if (FakeDeath)
+                return;
+
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            //Fear_Timer
+            if (Fear_Timer <= diff)
+            {
+                DoCastVictim(SPELL_BELLOWING_ROAR);
+                Fear_Timer = 25000+rand()%10000;                //approximately every 30 seconds
+            }
+            else
+                Fear_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_lord_sanguinarAI(creature);
+    }
 };
 //Grand Astromancer Capernian AI
 class boss_grand_astromancer_capernian : public CreatureScript
 {
-    public:
+public:
+    boss_grand_astromancer_capernian()
+        : CreatureScript("boss_grand_astromancer_capernian")
+    {
+    }
+    struct boss_grand_astromancer_capernianAI : public advisorbase_ai
+    {
+        boss_grand_astromancer_capernianAI(Creature* creature) : advisorbase_ai(creature) { }
 
-        boss_grand_astromancer_capernian()
-            : CreatureScript("boss_grand_astromancer_capernian")
+        uint32 Fireball_Timer;
+        uint32 Conflagration_Timer;
+        uint32 ArcaneExplosion_Timer;
+        uint32 Yell_Timer;
+        bool Yell;
+
+        void Reset() OVERRIDE
         {
+            Fireball_Timer = 2000;
+            Conflagration_Timer = 20000;
+            ArcaneExplosion_Timer = 5000;
+            Yell_Timer = 2000;
+            Yell = false;
+
+            advisorbase_ai::Reset();
         }
-        struct boss_grand_astromancer_capernianAI : public advisorbase_ai
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            boss_grand_astromancer_capernianAI(Creature* creature) : advisorbase_ai(creature) { }
-
-            uint32 Fireball_Timer;
-            uint32 Conflagration_Timer;
-            uint32 ArcaneExplosion_Timer;
-            uint32 Yell_Timer;
-            bool Yell;
-
-            void Reset() OVERRIDE
-            {
-                Fireball_Timer = 2000;
-                Conflagration_Timer = 20000;
-                ArcaneExplosion_Timer = 5000;
-                Yell_Timer = 2000;
-                Yell = false;
-
-                advisorbase_ai::Reset();
-            }
-
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
-                    Talk(SAY_CAPERNIAN_DEATH);
-            }
-
-            void AttackStart(Unit* who) OVERRIDE
-            {
-                if (!who || FakeDeath || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    return;
-
-                if (me->Attack(who, true))
-                {
-                    me->AddThreat(who, 0.0f);
-                    me->SetInCombatWith(who);
-                    who->SetInCombatWith(me);
-
-                    me->GetMotionMaster()->MoveChase(who, CAPERNIAN_DISTANCE);
-                }
-            }
-
-            void EnterCombat(Unit* who) OVERRIDE
-            {
-                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    return;
-
-                if (!who || FakeDeath)
-                    return;
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                advisorbase_ai::UpdateAI(diff);
-
-                //Faking Death, don't do anything
-                if (FakeDeath)
-                    return;
-
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                //Yell_Timer
-                if (!Yell)
-                {
-                    if (Yell_Timer <= diff)
-                    {
-                        Talk(SAY_CAPERNIAN_AGGRO);
-                        Yell = true;
-                    }
-                    else
-                        Yell_Timer -= diff;
-                }
-
-                //Fireball_Timer
-                if (Fireball_Timer <= diff)
-                {
-                    DoCastVictim(SPELL_CAPERNIAN_FIREBALL);
-                    Fireball_Timer = 4000;
-                }
-                else
-                    Fireball_Timer -= diff;
-
-                //Conflagration_Timer
-                if (Conflagration_Timer <= diff)
-                {
-                    Unit* target = NULL;
-                    target = SelectTarget(SELECT_TARGET_RANDOM, 0);
-
-                    if (target && me->IsWithinDistInMap(target, 30))
-                        DoCast(target, SPELL_CONFLAGRATION);
-                    else
-                        DoCastVictim(SPELL_CONFLAGRATION);
-
-                    Conflagration_Timer = 10000+rand()%5000;
-                }
-                else
-                    Conflagration_Timer -= diff;
-
-                //ArcaneExplosion_Timer
-                if (ArcaneExplosion_Timer <= diff)
-                {
-                    bool InMeleeRange = false;
-                    Unit* target = NULL;
-                    ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
-                    for (ThreatContainer::StorageType::const_iterator i = threatlist.begin(); i!= threatlist.end(); ++i)
-                    {
-                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                                                    //if in melee range
-                        if (unit && unit->IsWithinDistInMap(me, 5))
-                        {
-                            InMeleeRange = true;
-                            target = unit;
-                            break;
-                        }
-                    }
-
-                    if (InMeleeRange)
-                        DoCast(target, SPELL_ARCANE_EXPLOSION);
-
-                    ArcaneExplosion_Timer = 4000+rand()%2000;
-                }
-                else
-                    ArcaneExplosion_Timer -= diff;
-
-                //Do NOT deal any melee damage.
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new boss_grand_astromancer_capernianAI(creature);
+            if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                Talk(SAY_CAPERNIAN_DEATH);
         }
+
+        void AttackStart(Unit* who) OVERRIDE
+        {
+            if (!who || FakeDeath || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return;
+
+            if (me->Attack(who, true))
+            {
+                me->AddThreat(who, 0.0f);
+                me->SetInCombatWith(who);
+                who->SetInCombatWith(me);
+
+                me->GetMotionMaster()->MoveChase(who, CAPERNIAN_DISTANCE);
+            }
+        }
+
+        void EnterCombat(Unit* who) OVERRIDE
+        {
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return;
+
+            if (!who || FakeDeath)
+                return;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            advisorbase_ai::UpdateAI(diff);
+
+            //Faking Death, don't do anything
+            if (FakeDeath)
+                return;
+
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            //Yell_Timer
+            if (!Yell)
+            {
+                if (Yell_Timer <= diff)
+                {
+                    Talk(SAY_CAPERNIAN_AGGRO);
+                    Yell = true;
+                }
+                else
+                    Yell_Timer -= diff;
+            }
+
+            //Fireball_Timer
+            if (Fireball_Timer <= diff)
+            {
+                DoCastVictim(SPELL_CAPERNIAN_FIREBALL);
+                Fireball_Timer = 4000;
+            }
+            else
+                Fireball_Timer -= diff;
+
+            //Conflagration_Timer
+            if (Conflagration_Timer <= diff)
+            {
+                Unit* target = NULL;
+                target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+
+                if (target && me->IsWithinDistInMap(target, 30))
+                    DoCast(target, SPELL_CONFLAGRATION);
+                else
+                    DoCastVictim(SPELL_CONFLAGRATION);
+
+                Conflagration_Timer = 10000+rand()%5000;
+            }
+            else
+                Conflagration_Timer -= diff;
+
+            //ArcaneExplosion_Timer
+            if (ArcaneExplosion_Timer <= diff)
+            {
+                bool InMeleeRange = false;
+                Unit* target = NULL;
+                ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
+                for (ThreatContainer::StorageType::const_iterator i = threatlist.begin(); i!= threatlist.end(); ++i)
+                {
+                    Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                                                                //if in melee range
+                    if (unit && unit->IsWithinDistInMap(me, 5))
+                    {
+                        InMeleeRange = true;
+                        target = unit;
+                        break;
+                    }
+                }
+
+                if (InMeleeRange)
+                    DoCast(target, SPELL_ARCANE_EXPLOSION);
+
+                ArcaneExplosion_Timer = 4000+rand()%2000;
+            }
+            else
+                ArcaneExplosion_Timer -= diff;
+
+            //Do NOT deal any melee damage.
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_grand_astromancer_capernianAI(creature);
+    }
 };
 
 //Master Engineer Telonicus AI
 class boss_master_engineer_telonicus : public CreatureScript
 {
-    public:
+public:
+    boss_master_engineer_telonicus()
+        : CreatureScript("boss_master_engineer_telonicus")
+    {
+    }
+    struct boss_master_engineer_telonicusAI : public advisorbase_ai
+    {
+        boss_master_engineer_telonicusAI(Creature* creature) : advisorbase_ai(creature) { }
 
-        boss_master_engineer_telonicus()
-            : CreatureScript("boss_master_engineer_telonicus")
+        uint32 Bomb_Timer;
+        uint32 RemoteToy_Timer;
+
+        void Reset() OVERRIDE
         {
+            Bomb_Timer = 10000;
+            RemoteToy_Timer = 5000;
+
+            advisorbase_ai::Reset();
         }
-        struct boss_master_engineer_telonicusAI : public advisorbase_ai
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            boss_master_engineer_telonicusAI(Creature* creature) : advisorbase_ai(creature) { }
-
-            uint32 Bomb_Timer;
-            uint32 RemoteToy_Timer;
-
-            void Reset() OVERRIDE
-            {
-                Bomb_Timer = 10000;
-                RemoteToy_Timer = 5000;
-
-                advisorbase_ai::Reset();
-            }
-
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
-                    Talk(SAY_TELONICUS_DEATH);
-            }
-
-            void EnterCombat(Unit* who) OVERRIDE
-            {
-                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    return;
-
-                if (!who || FakeDeath)
-                    return;
-
-                Talk(SAY_TELONICUS_AGGRO);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                advisorbase_ai::UpdateAI(diff);
-
-                //Faking Death, do nothing
-                if (FakeDeath)
-                    return;
-
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                //Bomb_Timer
-                if (Bomb_Timer <= diff)
-                {
-                    DoCastVictim(SPELL_BOMB);
-                    Bomb_Timer = 25000;
-                }
-                else
-                    Bomb_Timer -= diff;
-
-                //RemoteToy_Timer
-                if (RemoteToy_Timer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(target, SPELL_REMOTE_TOY);
-
-                    RemoteToy_Timer = 10000+rand()%5000;
-                }
-                else
-                    RemoteToy_Timer -= diff;
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new boss_master_engineer_telonicusAI(creature);
+            if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                Talk(SAY_TELONICUS_DEATH);
         }
+
+        void EnterCombat(Unit* who) OVERRIDE
+        {
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return;
+
+            if (!who || FakeDeath)
+                return;
+
+            Talk(SAY_TELONICUS_AGGRO);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            advisorbase_ai::UpdateAI(diff);
+
+            //Faking Death, do nothing
+            if (FakeDeath)
+                return;
+
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            //Bomb_Timer
+            if (Bomb_Timer <= diff)
+            {
+                DoCastVictim(SPELL_BOMB);
+                Bomb_Timer = 25000;
+            }
+            else
+                Bomb_Timer -= diff;
+
+            //RemoteToy_Timer
+            if (RemoteToy_Timer <= diff)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, SPELL_REMOTE_TOY);
+
+                RemoteToy_Timer = 10000+rand()%5000;
+            }
+            else
+                RemoteToy_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_master_engineer_telonicusAI(creature);
+    }
 };
 
 //Flame Strike AI
 class npc_kael_flamestrike : public CreatureScript
 {
-    public:
-
-        npc_kael_flamestrike()
-            : CreatureScript("npc_kael_flamestrike")
+public:
+    npc_kael_flamestrike()
+        : CreatureScript("npc_kael_flamestrike")
+    {
+    }
+    struct npc_kael_flamestrikeAI : public ScriptedAI
+    {
+        npc_kael_flamestrikeAI(Creature* creature) : ScriptedAI(creature)
         {
+            SetCombatMovement(false);
         }
-        struct npc_kael_flamestrikeAI : public ScriptedAI
+
+        uint32 Timer;
+        bool Casting;
+        bool KillSelf;
+
+        void Reset() OVERRIDE
         {
-            npc_kael_flamestrikeAI(Creature* creature) : ScriptedAI(creature)
+            Timer = 5000;
+            Casting = false;
+            KillSelf = false;
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->setFaction(14);
+        }
+
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+
+
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!Casting)
             {
-                SetCombatMovement(false);
+                DoCast(me, SPELL_FLAME_STRIKE_VIS);
+                Casting = true;
             }
 
-            uint32 Timer;
-            bool Casting;
-            bool KillSelf;
-
-            void Reset() OVERRIDE
+            //Timer
+            if (Timer <= diff)
             {
-                Timer = 5000;
-                Casting = false;
-                KillSelf = false;
-
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->setFaction(14);
-            }
-
-            void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
-
-
-            void EnterCombat(Unit* /*who*/) OVERRIDE { }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                if (!Casting)
+                if (!KillSelf)
                 {
-                    DoCast(me, SPELL_FLAME_STRIKE_VIS);
-                    Casting = true;
-                }
-
-                //Timer
-                if (Timer <= diff)
-                {
-                    if (!KillSelf)
-                    {
-                        me->InterruptNonMeleeSpells(false);
-                        DoCast(me, SPELL_FLAME_STRIKE_DMG);
-                    }
-                    else
-                        me->Kill(me);
-
-                    KillSelf = true;
-                    Timer = 1000;
+                    me->InterruptNonMeleeSpells(false);
+                    DoCast(me, SPELL_FLAME_STRIKE_DMG);
                 }
                 else
-                    Timer -= diff;
-            }
-        };
+                    me->Kill(me);
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_kael_flamestrikeAI(creature);
+                KillSelf = true;
+                Timer = 1000;
+            }
+            else
+                Timer -= diff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_kael_flamestrikeAI(creature);
+    }
 };
 
 //Phoenix AI
 class npc_phoenix_tk : public CreatureScript
 {
-    public:
+public:
+    npc_phoenix_tk()
+        : CreatureScript("npc_phoenix_tk")
+    {
+    }
+    struct npc_phoenix_tkAI : public ScriptedAI
+    {
+        npc_phoenix_tkAI(Creature* creature) : ScriptedAI(creature) { }
 
-        npc_phoenix_tk()
-            : CreatureScript("npc_phoenix_tk")
+        uint32 Cycle_Timer;
+
+        void Reset() OVERRIDE
         {
+            Cycle_Timer = 2000;
+            DoCast(me, SPELL_BURN, true);
         }
-        struct npc_phoenix_tkAI : public ScriptedAI
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            npc_phoenix_tkAI(Creature* creature) : ScriptedAI(creature) { }
+            //is this spell in use anylonger?
+            //DoCast(me, SPELL_EMBER_BLAST, true);
+            me->SummonCreature(NPC_PHOENIX_EGG, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 16000);
+        }
 
-            uint32 Cycle_Timer;
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!UpdateVictim())
+                return;
 
-            void Reset() OVERRIDE
+            if (Cycle_Timer <= diff)
             {
+                //spell Burn should possible do this, but it doesn't, so do this for now.
+                uint32 dmg = urand(4500, 5500);
+                if (me->GetHealth() > dmg)
+                    me->ModifyHealth(-int32(dmg));
                 Cycle_Timer = 2000;
-                DoCast(me, SPELL_BURN, true);
             }
+            else
+                Cycle_Timer -= diff;
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                //is this spell in use anylonger?
-                //DoCast(me, SPELL_EMBER_BLAST, true);
-                me->SummonCreature(NPC_PHOENIX_EGG, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 16000);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (Cycle_Timer <= diff)
-                {
-                    //spell Burn should possible do this, but it doesn't, so do this for now.
-                    uint32 dmg = urand(4500, 5500);
-                    if (me->GetHealth() > dmg)
-                        me->ModifyHealth(-int32(dmg));
-                    Cycle_Timer = 2000;
-                }
-                else
-                    Cycle_Timer -= diff;
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_phoenix_tkAI(creature);
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_phoenix_tkAI(creature);
+    }
 };
 
 //Phoenix Egg AI
 class npc_phoenix_egg_tk : public CreatureScript
 {
-    public:
+public:
+    npc_phoenix_egg_tk()
+        : CreatureScript("npc_phoenix_egg_tk")
+    {
+    }
+    struct npc_phoenix_egg_tkAI : public ScriptedAI
+    {
+        npc_phoenix_egg_tkAI(Creature* creature) : ScriptedAI(creature) { }
 
-        npc_phoenix_egg_tk()
-            : CreatureScript("npc_phoenix_egg_tk")
+        uint32 Rebirth_Timer;
+
+        void Reset() OVERRIDE
         {
+            Rebirth_Timer = 15000;
         }
-        struct npc_phoenix_egg_tkAI : public ScriptedAI
+
+        //ignore any
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+
+
+        void AttackStart(Unit* who) OVERRIDE
         {
-            npc_phoenix_egg_tkAI(Creature* creature) : ScriptedAI(creature) { }
-
-            uint32 Rebirth_Timer;
-
-            void Reset() OVERRIDE
+            if (me->Attack(who, false))
             {
-                Rebirth_Timer = 15000;
+                me->SetInCombatWith(who);
+                who->SetInCombatWith(me);
+
+                DoStartNoMovement(who);
             }
-
-            //ignore any
-            void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
-
-
-            void AttackStart(Unit* who) OVERRIDE
-            {
-                if (me->Attack(who, false))
-                {
-                    me->SetInCombatWith(who);
-                    who->SetInCombatWith(me);
-
-                    DoStartNoMovement(who);
-                }
-            }
-
-            void JustSummoned(Creature* summoned) OVERRIDE
-            {
-                summoned->AddThreat(me->GetVictim(), 0.0f);
-                summoned->CastSpell(summoned, SPELL_REBIRTH, false);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                if (!Rebirth_Timer)
-                    return;
-
-                if (Rebirth_Timer <= diff)
-                {
-                    me->SummonCreature(NPC_PHOENIX, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 5000);
-                    Rebirth_Timer = 0;
-                }
-                else
-                    Rebirth_Timer -= diff;
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_phoenix_egg_tkAI(creature);
         }
+
+        void JustSummoned(Creature* summoned) OVERRIDE
+        {
+            summoned->AddThreat(me->GetVictim(), 0.0f);
+            summoned->CastSpell(summoned, SPELL_REBIRTH, false);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!Rebirth_Timer)
+                return;
+
+            if (Rebirth_Timer <= diff)
+            {
+                me->SummonCreature(NPC_PHOENIX, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                Rebirth_Timer = 0;
+            }
+            else
+                Rebirth_Timer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_phoenix_egg_tkAI(creature);
+    }
 };
 
 void AddSC_boss_kaelthas()

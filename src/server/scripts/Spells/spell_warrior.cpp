@@ -164,7 +164,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleCharge, EFFECT_0, SPELL_EFFECT_CHARGE);
-
         }
     };
 
@@ -581,7 +580,6 @@ public:
                 return;
 
             GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
-
         }
 
         void Register() OVERRIDE
@@ -589,7 +587,6 @@ public:
             DoCheckProc += AuraCheckProcFn(spell_warr_second_wind_proc_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_warr_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
-
     };
 
     AuraScript* GetAuraScript() const OVERRIDE

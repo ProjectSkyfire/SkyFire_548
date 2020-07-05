@@ -155,9 +155,7 @@ public:
                         break;
                 }
             } else phaseTimer -= diff;
-
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -290,9 +288,7 @@ public:
 
             player->CastSpell(player, SPELL_SUMMON_WYRMREST_SKYTALON, true);
             player->CastSpell(player, SPELL_WYRMREST_SKYTALON_RIDE_PERIODIC, true);
-
         }
-
         return true;
     }
 };
@@ -333,7 +329,6 @@ public:
                 player->CastSpell(player, SPELL_CREATURE_TOTEM_OF_ISSLIRUK, true);
                 player->CLOSE_GOSSIP_MENU();
                 break;
-
         }
         return true;
     }
@@ -2105,7 +2100,6 @@ enum BuryThoseCockroaches
 
     // Spells
     SPELL_SEAFORIUM_DEPTH_CHARGE_EXPLOSION  = 45502
-
 };
 
 class npc_seaforium_depth_charge : public CreatureScript
@@ -2516,7 +2510,6 @@ public:
 
         return true;
     }
-
 };
 
 void AddSC_borean_tundra()
