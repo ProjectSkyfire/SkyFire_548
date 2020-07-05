@@ -1275,7 +1275,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1 + 8 + (newName.size() + 1));
         data << uint8(result);
-        data.WriteGuisMask(guid, 6, 3, 4, 2, 0, 1, 7, 5);
+        data.WriteGuidMask(guid, 6, 3, 4, 2, 0, 1, 7, 5);
         data.WriteGuidBytes(guid, 5, 0, 4, 2, 1, 3, 6, 7);
         data << newName;
         SendPacket(&data);
@@ -1558,10 +1558,10 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     recvData.ReadGuidMask(guid, 2, 6, 1, 0, 7, 5);
     uint32 Namelen = recvData.ReadBits(6);            // Name size
-    recvData.ReadGuidmask(guid, 4, 3);
+    recvData.ReadGuidMask(guid, 4, 3);
     recvData.ReadGuidBytes(guid, 4);
     std::string newName = recvData.ReadString(Namelen);  // New Name
-    recvData.ReadGuidBytes(guid, 0, 2, 6, 5, 3, 1, 7):
+    recvData.ReadGuidBytes(guid, 0, 2, 6, 5, 3, 1, 7);
 
     if (!IsLegitCharacterForAccount(GUID_LOPART(guid)))
     {
