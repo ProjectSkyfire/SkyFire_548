@@ -995,6 +995,15 @@ class ObjectMgr
         PageText const* GetPageText(uint32 pageEntry);
 
         void LoadPlayerInfo();
+        bool IsValidPlayerCreateRace(uint32 currentRace);
+        bool IsValidPlayerCreateClass(uint32 currentClass);
+        void LoadPlayerCreateItemsData();
+        void LoadPlayerCreateSpellsData();
+        void LoadPlayerCreateActionData();
+        void LoadPlayerCreateLevelStatsData();
+        void LoadPlayerCreateXpData();
+        void LoadPlayerCreateCastSpellsData();
+
         void LoadPetLevelInfo();
         void LoadExplorationBaseXP();
         void LoadPetNames();
