@@ -41,6 +41,7 @@
 
 #include "Common.h"
 #include "AuthCrypt.h"
+#include "SharedDefines.h"
 
 class ACE_Message_Block;
 class WorldPacket;
@@ -166,7 +167,7 @@ class WorldSocket : public WorldHandler
         int HandleSendAuthSession();
 
     private:
-        void SendAuthResponseError(uint8);
+        void SendAuthResponseError(ResponseCodes code);
         /// Time in which the last ping was received
         ACE_Time_Value m_LastPingTime;
 

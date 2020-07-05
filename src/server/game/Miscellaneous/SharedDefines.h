@@ -3862,7 +3862,7 @@ enum EventId
     EVENT_CHARGE_PREPATH    = 1005
 };
 
-enum ResponseCodes
+enum class ResponseCodes
 {
     RESPONSE_SUCCESS                                       = 0,
     RESPONSE_FAILURE                                       = 1,

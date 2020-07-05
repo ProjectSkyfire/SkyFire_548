@@ -7342,29 +7342,29 @@ bool isValidString(const std::wstring& wstr, uint32 strictMask, bool numericOrSp
     return false;
 }
 
-uint8 ObjectMgr::CheckPlayerName(const std::string& name, bool create)
+ResponseCodes ObjectMgr::CheckPlayerName(const std::string& name, bool create)
 {
     std::wstring wname;
     if (!Utf8toWStr(name, wname))
-        return CHAR_NAME_INVALID_CHARACTER;
+        return ResponseCodes::CHAR_NAME_INVALID_CHARACTER;
 
     if (wname.size() > MAX_PLAYER_NAME)
-        return CHAR_NAME_TOO_LONG;
+        return ResponseCodes::CHAR_NAME_TOO_LONG;
 
     uint32 minName = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PLAYER_NAME);
     if (wname.size() < minName)
-        return CHAR_NAME_TOO_SHORT;
+        return ResponseCodes::CHAR_NAME_TOO_SHORT;
 
     uint32 strictMask = sWorld->getIntConfig(WorldIntConfigs::CONFIG_STRICT_PLAYER_NAMES);
     if (!isValidString(wname, strictMask, false, create))
-        return CHAR_NAME_MIXED_LANGUAGES;
+        return ResponseCodes::CHAR_NAME_MIXED_LANGUAGES;
 
     wstrToLower(wname);
     for (size_t i = 2; i < wname.size(); ++i)
         if (wname[i] == wname[i-1] && wname[i] == wname[i-2])
-            return CHAR_NAME_THREE_CONSECUTIVE;
+            return ResponseCodes::CHAR_NAME_THREE_CONSECUTIVE;
 
-    return CHAR_NAME_SUCCESS;
+    return ResponseCodes::CHAR_NAME_SUCCESS;
 }
 
 bool ObjectMgr::IsValidCharterName(const std::string& name)

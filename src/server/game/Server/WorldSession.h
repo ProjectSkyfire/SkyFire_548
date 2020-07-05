@@ -298,7 +298,7 @@ class WorldSession
         void SendGroupInviteNotification(const std::string& inviterName, bool inGroup);
         void SendRolePollInform(ObjectGuid guid, uint8 Index);
 
-        void SendAuthResponse(uint8 code, bool queued, uint32 queuePos = 0);
+        void SendAuthResponse(ResponseCodes code, bool queued, uint32 queuePos = 0);
         void SendClientCacheVersion(uint32 version);
 
         rbac::RBACData* GetRBACData();
