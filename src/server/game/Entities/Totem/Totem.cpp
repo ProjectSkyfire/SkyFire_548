@@ -27,10 +27,9 @@
 #include "SpellInfo.h"
 #include "WorldPacket.h"
 
-Totem::Totem(SummonPropertiesEntry const* properties, Unit* owner) : Minion(properties, owner, false)
+Totem::Totem(SummonPropertiesEntry const* properties, Unit* owner) : Minion(properties, owner, false), m_duration(0)
 {
     m_unitTypeMask |= UNIT_MASK_TOTEM;
-    m_duration = 0;
     m_type = TOTEM_PASSIVE;
 }
 
