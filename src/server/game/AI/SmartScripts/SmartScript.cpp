@@ -79,23 +79,11 @@ class SkyFireStringTextBuilder
         uint64 _targetGUID;
 };
 
-SmartScript::SmartScript()
+SmartScript::SmartScript() : go(NULL), me(NULL), trigger(NULL), mScriptType(SMART_SCRIPT_TYPE_CREATURE), mEventPhase(0),
+                            mPathId(0), mTextTimer(0), mLastTextID(0), mTalkerEntry(0), mUseTextTimer(false),
+                            mTemplate(SMARTAI_TEMPLATE_BASIC), meOrigGUID(0), goOrigGUID(0), mLastInvoker(0)
 {
-    go = NULL;
-    me = NULL;
-    trigger = NULL;
-    mEventPhase = 0;
-    mPathId = 0;
     mTargetStorage = new ObjectListMap();
-    mTextTimer = 0;
-    mLastTextID = 0;
-    mUseTextTimer = false;
-    mTalkerEntry = 0;
-    mTemplate = SMARTAI_TEMPLATE_BASIC;
-    meOrigGUID = 0;
-    goOrigGUID = 0;
-    mLastInvoker = 0;
-    mScriptType = SMART_SCRIPT_TYPE_CREATURE;
 }
 
 SmartScript::~SmartScript()
@@ -120,6 +108,28 @@ void SmartScript::OnReset()
     }
     ProcessEventsFor(SMART_EVENT_RESET);
     mLastInvoker = 0;
+}
+
+void SmartScript::ResetBaseObject()
+{
+    if (meOrigGUID)
+    {
+        if (Creature* m = HashMapHolder<Creature>::Find(meOrigGUID))
+        {
+            me = m;
+            go = NULL;
+        }
+    }
+    if (goOrigGUID)
+    {
+        if (GameObject* o = HashMapHolder<GameObject>::Find(goOrigGUID))
+        {
+            me = NULL;
+            go = o;
+        }
+    }
+    goOrigGUID = 0;
+    meOrigGUID = 0;
 }
 
 void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellInfo* spell, GameObject* gob)
@@ -3250,6 +3260,21 @@ void SmartScript::InstallEvents()
     }
 }
 
+void SmartScript::RemoveStoredEvent(uint32 id)
+{
+    if (!mStoredEvents.empty())
+    {
+        for (SmartAIEventList::iterator i = mStoredEvents.begin(); i != mStoredEvents.end(); ++i)
+        {
+            if (i->event_id == id)
+            {
+                mStoredEvents.erase(i);
+                return;
+            }
+        }
+    }
+}
+
 void SmartScript::OnUpdate(uint32 const diff)
 {
     if ((mScriptType == SMART_SCRIPT_TYPE_CREATURE || mScriptType == SMART_SCRIPT_TYPE_GAMEOBJECT) && !GetBaseObject())
@@ -3511,6 +3536,23 @@ Unit* SmartScript::DoFindClosestFriendlyInRange(float range, bool playerOnly)
     Skyfire::UnitLastSearcher<Skyfire::AnyFriendlyUnitInObjectRangeCheck> searcher(me, unit, u_check);
     me->VisitNearbyObject(range, searcher);
     return unit;
+}
+
+void SmartScript::StoreTargetList(ObjectList* targets, uint32 id)
+{
+    if (!targets)
+        return;
+
+    if (mTargetStorage->find(id) != mTargetStorage->end())
+    {
+        // check if already stored
+        if ((*mTargetStorage)[id] == targets)
+            return;
+
+        delete (*mTargetStorage)[id];
+    }
+
+    (*mTargetStorage)[id] = targets;
 }
 
 void SmartScript::SetScript9(SmartScriptHolder& e, uint32 entry)
