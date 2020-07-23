@@ -33,6 +33,7 @@ For further information on the SkyFire project, please visit our project website
 + Platform/Architecture:
   + Canonical:
     + Ubuntu 18.04 LTS: x86_32, x86_64
+    + Ubuntu 20.04 LTS: x86_32, x86_64
   + Debian:
     + Debian GNU/Linux 10: x86_32, x86_64
   + Windows / Windows Server:

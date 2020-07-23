@@ -8,9 +8,27 @@
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+os: linux
+
 matrix:
   include:
     - compiler: clang
+      dist: focal
+      env: CXXCOMPILER=clang++-10 CCOMPILER=clang-10
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-10
+            - libc++-10-dev
+            - libc++abi-10-dev
+            - lldb-10
+            - lld-10
+    - compiler: clang
+      dist: bionic
       env: CXXCOMPILER=clang++-10 CCOMPILER=clang-10
       addons:
         apt:
@@ -25,6 +43,16 @@ matrix:
             - lldb-10
             - lld-10
     - compiler: gcc
+      dist: focal
+      env: CXXCOMPILER=g++-9 CCOMPILER=gcc-9
+      addons:
+        apt:
+          sources:
+          packages:
+            - gcc-9
+            - g++-9
+    - compiler: gcc
+      dist: bionic
       env: CXXCOMPILER=g++-9 CCOMPILER=gcc-9
       addons:
         apt:
@@ -34,8 +62,6 @@ matrix:
             - gcc-9
             - g++-9
 
-os: linux
-dist: bionic
 language: cpp
 sudo: required
 group: stable
