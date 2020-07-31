@@ -104,7 +104,7 @@ public:
             AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(areaflag);
             if (areaEntry)
             {
-                std::string name = areaEntry->area_name;
+                std::string name = areaEntry->m_AreaName;
                 if (name.empty())
                     continue;
 
@@ -120,9 +120,9 @@ public:
                 // send area in "id - [name]" format
                 std::ostringstream ss;
                 if (handler->GetSession())
-                    ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << name<< "]|h|r";
+                    ss << areaEntry->m_ID << " - |cffffffff|Harea:" << areaEntry->m_ID << "|h[" << name<< "]|h|r";
                 else
-                    ss << areaEntry->ID << " - " << name;
+                    ss << areaEntry->m_ID << " - " << name;
 
                 handler->SendSysMessage(ss.str().c_str());
 

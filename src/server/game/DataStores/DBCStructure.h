@@ -642,39 +642,40 @@ struct AchievementCriteriaEntry
 
 struct AreaTableEntry
 {
-    uint32  ID;                                             // 0
-    uint32  mapid;                                          // 1
-    uint32  zone;                                           // 2 if 0 then it's zone, else it's zone id of this area
-    uint32  exploreFlag;                                    // 3, main index
-    uint32  flags;                                          // 5,
-    //uint32 unk1;                                          // 6, Pandaria
-    //uint32 soundPreferences;                              // 7,
-    //uint32 SoundPreferencesUnderwater;                    // 8,
-    //uint32 SoundAmbience;                                 // 9,
-    //char*   areaName2;                                    // 10, without whitespaces
-    //uint32 ZoneMusic;                                     // 11,
-    //uint32 ZoneIntroMusicTable;                           // 12
-    int32   area_level;                                     // 13
-    char*   area_name;                                      // 14
-    uint32  team;                                           // 15
-    uint32  LiquidTypeOverride[4];                          // 16-19 liquid override by type
-    float   MaxDepth;                                       // 20,
-    float   AmbientMultiplier;                              // 21 client only?
-    uint32  LightId;                                        // 22
-    //uint32 unk20;                                         // 23 4.0.0 - Mounting related
-    //uint32 unk21;                                         // 24 4.0.0
-    //uint32 unk22;                                         // 25 4.0.0
-    //uint32 unk23;                                         // 26 4.0.0
-    //uint32 unk24;                                         // 27 - worldStateId
-    //uint32 unk25;                                         // 28, Pandaria
-    //uint32 unk26;                                         // 29, Pandaria
+    uint32  m_ID;                                           // 0
+    uint32  m_ContinentID;                                  // 1
+    uint32  m_ParentAreaID;                                 // 2 if 0 then it's zone, else it's zone id of this area
+    uint32  m_AreaBit;                                      // 3, main index
+    uint32  m_flags;                                        // 5,
+    //uint32  m_flags2;                                     // 6, Pandaria
+    //uint32  m_SoundProviderPreferences;                   // 7,
+    //uint32  m_SoundProviderPreferencesUnderwater;         // 8,
+    //uint32  m_AmbienceID;                                 // 9,
+    //uint32  m_ZoneMusic;                                  // 10,
+    //char*   m_ZoneName;                                   // 11, without whitespaces
+    //uint32  m_IntroSound;                                 // 12
+    int32   m_ExplorationLevel;                             // 13
+    char*   m_AreaName;                                     // 14
+    uint32  m_FactionGroupMask;                             // 15
+    uint32  m_LiquidType[4];                                // 16-19 liquid override by type
+    float   m_MinElevation;                                 // 20,
+    float   m_AmbientMultiplier;                            // 21 client only?
+    uint32  m_LightId;                                      // 22
+    //uint32  m_MountFlags;                                 // 23 4.0.0 - Mounting related
+    //uint32  m_UwIntroSound;                               // 24 4.0.0
+    //uint32  m_UwZoneMusic;                                // 25 4.0.0
+    //uint32  m_UwAmbience;                                 // 26 4.0.0
+    //uint32  m_WorldPvPID;                                 // 27 Wintergrasp, TolBarad
+    //uint32  m_PvPCombatWorldStateID                       // 28 worldstateid
+    //uint32  m_WildPetLevelMin;                            // 28, Pandaria
+    //uint32  m_WildPetLevelmax;                            // 29, Pandaria
 
     // helpers
     bool IsSanctuary() const
     {
-        if (mapid == 609)
+        if (m_ContinentID == 609)
             return true;
-        return (flags & AREA_FLAG_SANCTUARY);
+        return (m_flags & AREA_FLAG_SANCTUARY);
     }
 };
 

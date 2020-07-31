@@ -353,9 +353,9 @@ public:
                 AreaTableEntry const* area = GetAreaEntryByAreaID(p->GetAreaId());
                 if (area)
                 {
-                    AreaTableEntry const* zone = GetAreaEntryByAreaID(area->zone);
+                    AreaTableEntry const* zone = GetAreaEntryByAreaID(area->m_ParentAreaID);
                     if (zone)
-                        zoneName = zone->area_name[locale];
+                        zoneName = zone->m_AreaName[locale];
                 }
             }
             else
