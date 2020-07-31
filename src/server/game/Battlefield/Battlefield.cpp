@@ -33,34 +33,6 @@
 #include "CreatureTextMgr.h"
 #include "GroupMgr.h"
 
-Battlefield::Battlefield()
-{
-    m_Timer = 0;
-    m_IsEnabled = true;
-    m_isActive = false;
-    m_DefenderTeam = TEAM_NEUTRAL;
-
-    m_Guid = 0;
-    m_TypeId = 0;
-    m_BattleId = 0;
-    m_ZoneId = 0;
-    m_Map = NULL;
-    m_MapId = 0;
-    m_MaxPlayer = 0;
-    m_MinPlayer = 0;
-    m_BattleTime = 0;
-    m_NoWarBattleTime = 0;
-    m_TimeForAcceptInvite = 20;
-    m_uiKickDontAcceptTimer = 1000;
-
-    m_uiKickAfkPlayersTimer = 1000;
-
-    m_LastResurectTimer = 30 * IN_MILLISECONDS;
-    m_StartGroupingTimer = 0;
-    m_StartGrouping = false;
-    StalkerGuid = 0;
-}
-
 Battlefield::~Battlefield()
 {
     for (BfCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)

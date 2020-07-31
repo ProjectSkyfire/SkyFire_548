@@ -252,8 +252,8 @@ enum BattlegroundStartingEventsIds
 enum BGHonorMode 
 {
     BG_NORMAL = 0,
-    BG_HOLIDAY,
-    BG_HONOR_MODE_NUM
+    BG_HOLIDAY = 1,
+    BG_HONOR_MODE_NUM = 2
 };
 
 struct BattlegroundScore
