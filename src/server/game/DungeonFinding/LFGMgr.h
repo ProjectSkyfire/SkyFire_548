@@ -77,7 +77,6 @@ enum LfgType
     LFG_TYPE_NONE                                = 0,
     LFG_TYPE_DUNGEON                             = 1,
     LFG_TYPE_RAID                                = 2,
-    LFG_TYPE_HEROIC                              = 5,
     LFG_TYPE_RANDOM                              = 6
 };
 
@@ -283,10 +282,10 @@ struct LFGDungeonData
     LFGDungeonData(): id(0), name(""), map(0), type(0), expansion(0), group(0), minlevel(0),
         maxlevel(0), difficulty(DIFFICULTY_NONE), seasonal(false), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
-    LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->ID), name(dbc->name), map(dbc->map),
-        type(dbc->type), expansion(dbc->expansion), group(dbc->grouptype),
-        minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(DifficultyID(dbc->difficulty)),
-        seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
+    LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->m_ID), name(dbc->m_Name), map(dbc->m_ContinentID),
+        type(dbc->m_Type), expansion(dbc->m_ExpansionLevel), group(dbc->m_GroupID),
+        minlevel(dbc->m_MinLevel), maxlevel(dbc->m_MaxLevel), difficulty(DifficultyID(dbc->m_DifficultyID)),
+        seasonal(dbc->m_Flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
 
     uint32 id;

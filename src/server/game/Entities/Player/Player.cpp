@@ -7115,11 +7115,11 @@ void Player::RewardReputation(Unit* victim, float rate)
         Map const* map = GetMap();
         if (map && map->IsNonRaidInstance())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 80 && GetChampioningType() == 1)
+                if (dungeon->m_TargetLevel == 80 && GetChampioningType() == 1)
                     ChampioningFaction = GetChampioningFaction();
-                else if (dungeon->reclevel == 85 && GetChampioningType() == 2)
+                else if (dungeon->m_TargetLevel == 85 && GetChampioningType() == 2)
                     ChampioningFaction = GetChampioningFaction();
-                else if (dungeon->reclevel == 90 && GetChampioningType() == 3)
+                else if (dungeon->m_TargetLevel == 90 && GetChampioningType() == 3)
                     ChampioningFaction = GetChampioningFaction();
                 else if (GetChampioningType() == 4)
                     ChampioningFaction = GetChampioningFaction();

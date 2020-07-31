@@ -1867,27 +1867,38 @@ struct ItemSetEntry
 
 struct LFGDungeonEntry
 {
-    uint32  ID;                                             // 0
-    char*   name;                                           // 1
-    uint32  minlevel;                                       // 2
-    uint32  maxlevel;                                       // 3
-    uint32  reclevel;                                       // 4
-    uint32  recminlevel;                                    // 5
-    uint32  recmaxlevel;                                    // 6
-    int32   map;                                            // 7
-    uint32  difficulty;                                     // 8
-    uint32  flags;                                          // 9
-    uint32  type;                                           // 10
-    //uint32  unk2;                                         // 11
-    //char*   iconname;                                     // 12
-    uint32  expansion;                                      // 13
-    //uint32  unk4;                                         // 14
-    uint32  grouptype;                                      // 15
-    //char*   desc;                                         // 16 Description
-    uint32  randomCategoryId;                               // 17 RandomDungeonID assigned for this dungeon
+    uint32  m_ID;                                           // 0
+    char*   m_Name;                                         // 1
+    uint32  m_MinLevel;                                     // 2
+    uint32  m_MaxLevel;                                     // 3
+    uint32  m_TargetLevel;                                  // 4
+    uint32  m_TargetMinLevel;                               // 5
+    uint32  m_TargetMaxLevel;                               // 6
+    int32   m_ContinentID;                                  // 7
+    uint32  m_DifficultyID;                                 // 8 Difficulty.dbc
+    uint32  m_Flags;                                        // 9
+    uint32  m_Type;                                         // 10 (1-Dungeon, 2-Raid, 4-OpenWorld, 6-Random)
+    //uint32  m_Faction;                                    // 11
+    //char*   m_TextureFileName;                            // 12
+    uint32  m_ExpansionLevel;                               // 13
+    //uint32  m_OrderIndex;                                 // 14
+    uint32  m_GroupID;                                      // 15
+    //char*   m_Description;                                // 16
+    uint32  m_RandomDungeonID;                              // 17 RandomDungeonID assigned for this dungeon
+    //uint32 m_CountTank;                                   // 18
+    //uint32 m_CountHealer;                                 // 19
+    //uint32 m_CountDamage;                                 // 20
+    //uint32 m_CountTankMin;                                // 21
+    //uint32 m_CountHealerMin;                              // 22
+    //uint32 m_CountDamageMin;                              // 23
+    //uint32 m_ScenarioID;                                  // 24
+    //uint32 m_SubType;                                     // 25
+    //uint32 m_BonusReputationAmount;                       // 26
+    //uint32 m_MentorLevel;                                 // 27
+    //uint32 m_MentorItemLevel;                             // 28
 
     // Helpers
-    uint32 Entry() const { return ID + (type << 24); }
+    uint32 Entry() const { return m_ID + (m_Type << 24); }
 };
 
 

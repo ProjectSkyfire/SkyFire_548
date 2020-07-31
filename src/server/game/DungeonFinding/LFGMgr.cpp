@@ -185,13 +185,12 @@ void LFGMgr::LoadLFGDungeons(bool reload /* = false */)
         if (!dungeon)
             continue;
 
-        switch (dungeon->type)
+        switch (dungeon->m_Type)
         {
             case LFG_TYPE_DUNGEON:
-            case LFG_TYPE_HEROIC:
             case LFG_TYPE_RAID:
             case LFG_TYPE_RANDOM:
-                LfgDungeonStore[dungeon->ID] = LFGDungeonData(dungeon);
+                LfgDungeonStore[dungeon->m_ID] = LFGDungeonData(dungeon);
                 break;
         }
     }
@@ -459,7 +458,6 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
                     else
                         rDungeonId = (*dungeons.begin());
                     // No break on purpose (Random can only be dungeon or heroic dungeon)
-                case LFG_TYPE_HEROIC:
                 case LFG_TYPE_DUNGEON:
                     if (isRaid)
                         joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;

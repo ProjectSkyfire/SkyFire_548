@@ -1479,7 +1479,7 @@ LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, DifficultyID difficulty)
         if (!dungeon)
             continue;
 
-        if (dungeon->map == int32(mapId) && DifficultyID(dungeon->difficulty) == difficulty)
+        if (dungeon->m_ContinentID == int32(mapId) && DifficultyID(dungeon->m_DifficultyID) == difficulty)
             return dungeon;
     }
 
