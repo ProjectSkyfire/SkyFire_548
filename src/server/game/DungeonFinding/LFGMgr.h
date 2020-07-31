@@ -55,10 +55,20 @@ enum LFGMgrEnum
 
 enum LfgFlags
 {
+    LFG_FLAG_NONE                                = 0x0,
     LFG_FLAG_UNK1                                = 0x1,
     LFG_FLAG_UNK2                                = 0x2,
     LFG_FLAG_SEASONAL                            = 0x4,
-    LFG_FLAG_UNK3                                = 0x8
+    LFG_FLAG_UNK3                                = 0x8,
+    LFG_FLAG_UNK4                                = 0x10,
+    LFG_FLAG_UNK5                                = 0x20,
+    LFG_FLAG_UNK6                                = 0x40,
+    LFG_FLAG_UNK7                                = 0x80,
+    LFG_FLAG_UNK8                                = 0x100,
+    LFG_FLAG_UNK9                                = 0x200,
+    LFG_FLAG_UNK10                               = 0x400,
+    LFG_FLAG_UNK11                               = 0x800,
+    LFG_FLAG_UNK12                               = 0x1000, // FLEX + HEROIC SCENARIOS, requires premade flag?
 };
 
 /// Determines the type of instance
