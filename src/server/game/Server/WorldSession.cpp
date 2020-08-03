@@ -228,7 +228,6 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
             if (packet->GetOpcode() == NULL_OPCODE)
             {
                 SF_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode(), true).c_str(), GetPlayerInfo().c_str());
-
             }
             else
             {

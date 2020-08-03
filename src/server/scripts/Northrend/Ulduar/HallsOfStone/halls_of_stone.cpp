@@ -123,7 +123,6 @@ enum Misc
     QUEST_HALLS_OF_STONE                = 13207,
 
     DATA_BRANN_SPARKLIN_NEWS            = 1
-
 };
 
 #define GOSSIP_ITEM_START               "Brann, it would be our honor!"

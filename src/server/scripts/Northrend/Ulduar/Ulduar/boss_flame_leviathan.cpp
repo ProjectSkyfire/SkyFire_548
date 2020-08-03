@@ -961,10 +961,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void WaypointReached(uint32 /*waypointId*/) OVERRIDE
-        {
-
-        }
+        void WaypointReached(uint32 /*waypointId*/) OVERRIDE { }
 
         void Reset() OVERRIDE
         {

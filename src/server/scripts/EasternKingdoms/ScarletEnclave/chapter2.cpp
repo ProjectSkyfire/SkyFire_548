@@ -143,8 +143,8 @@ public:
 
                     ++speechCounter;
                     DoCastAOE(SPELL_THREAT_PULSE, true);
-
-                } else
+                }
+                else
                     speechTimer -= diff;
 
                 return;
@@ -156,7 +156,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -347,7 +346,6 @@ public:
         uint8 wave;
         uint32 waveTimer;
         uint64 valrothGUID;
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -441,7 +439,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 //Koltira & Valroth- Breakout
@@ -527,7 +524,6 @@ public:
             killer->CastSpell(me, SPELL_SUMMON_VALROTH_REMAINS, true);
         }
     };
-
 };
 
 /*######

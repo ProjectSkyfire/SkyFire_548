@@ -421,7 +421,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_azure_saboteur : public CreatureScript

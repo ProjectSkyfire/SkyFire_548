@@ -93,7 +93,6 @@ void SmartWaypointMgr::LoadFromDB()
     while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u SmartAI waypoint paths (total %u waypoints) in %u ms", count, total, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 SmartWaypointMgr::~SmartWaypointMgr()
@@ -241,7 +240,6 @@ void SmartAIMgr::LoadSmartAIFromDB()
     SF_LOG_INFO("server.loading", ">> Loaded %u SmartAI scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
     UnLoadHelperStores();
-
 }
 
 bool SmartAIMgr::IsTargetValid(SmartScriptHolder const& e)

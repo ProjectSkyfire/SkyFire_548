@@ -457,7 +457,6 @@ struct MovementInfo
         uint32 fallTime;
 
         float zspeed, sinAngle, cosAngle, xyspeed;
-
     } jump;
 
     // spline
