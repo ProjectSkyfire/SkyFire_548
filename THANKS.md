@@ -10,8 +10,8 @@ them many times in the creation of this project. Keep up the good work guys.
 
 Thanks to the ScriptDev2 team (http://www.scriptdev2.com) for scripts.
 
-Thanks to the WCell team (especially Ralek) for research on realm reconnect
-sequence, item scaling stats algorithm, gameobject rotation issues.
+Thanks to the WCell team (especially Ralek) for research on the realm reconnect
+sequence, item scaling stats algorithm, game object rotation issues.
 
 Thanks go out to the following people for various patches/code (listed in the
 order they were added) (there may be duplicates or invalid names, most of them
