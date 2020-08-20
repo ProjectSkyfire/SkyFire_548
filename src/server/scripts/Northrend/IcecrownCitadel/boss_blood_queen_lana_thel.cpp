@@ -383,7 +383,6 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                             newOfftank->HasAura(SPELL_UNSATED_CRAVING) && !newOfftank->HasAura(SPELL_THIRST_QUENCHED) &&
                                             !newOfftank->HasAura(SPELL_GUSHING_WOUND))
                                             newOfftank->CastSpell(newOfftank, SPELL_GUSHING_WOUND, TRIGGERED_FULL_MASK);
-
                                     }
                                 }
                                 else

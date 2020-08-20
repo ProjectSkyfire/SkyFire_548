@@ -210,7 +210,6 @@ public:
             }
         }
     };
-
 };
 
 class npc_illidari_council : public CreatureScript
@@ -379,10 +378,8 @@ public:
                     CheckTimer = 2000;
                 } else CheckTimer -= diff;
             }
-
         }
     };
-
 };
 
 struct boss_illidari_councilAI : public ScriptedAI
@@ -600,7 +597,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class boss_high_nethermancer_zerevor : public CreatureScript
@@ -704,7 +700,6 @@ public:
             } else FlamestrikeTimer -= diff;
         }
     };
-
 };
 
 class boss_lady_malande : public CreatureScript
@@ -782,7 +777,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class boss_veras_darkshadow : public CreatureScript

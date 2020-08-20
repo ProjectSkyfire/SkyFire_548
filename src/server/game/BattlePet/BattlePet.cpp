@@ -91,3 +91,10 @@ void BattlePet::UnSetFlag(uint16 flag)
     m_flags &= ~flag;
     m_dbState = BattlePetDbState::BATTLE_PET_DB_STATE_SAVE;
 }
+
+//DEAD CODE
+void BattlePet::SetLevel(uint8 level)
+{
+    m_level = level;
+    CalculateStats(true);
+}

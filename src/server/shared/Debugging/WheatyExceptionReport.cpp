@@ -689,7 +689,6 @@ bool bWriteVariables, HANDLE pThreadHandle)                                     
             &sip.si))                                       // Address of the SYMBOL_INFO structure (inside "sip" object)
         {
             _tprintf(_T("%hs+%I64X"), sip.si.Name, symDisplacement);
-
         }
         else                                                // No symbol found.  Print out the logical address instead.
         {
@@ -732,7 +731,6 @@ bool bWriteVariables, HANDLE pThreadHandle)                                     
             _tprintf(_T("\r\n"));
         }
     }
-
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -745,7 +743,6 @@ PSYMBOL_INFO  pSymInfo,
 ULONG         /*SymbolSize*/,
 PVOID         UserContext)
 {
-
     char szBuffer[2048];
 
     __try

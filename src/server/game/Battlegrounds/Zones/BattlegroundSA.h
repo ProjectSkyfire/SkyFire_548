@@ -550,7 +550,6 @@ class BattlegroundSA : public Battleground
         TeamId Attackers;
 
     private:
-
         /**
          * \brief Called on setup and between the two round
          * -Delete all gameobject / creature

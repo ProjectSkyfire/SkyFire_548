@@ -101,7 +101,6 @@ void BattlegroundIC::DoAction(uint32 action, uint64 var)
 
 void BattlegroundIC::PostUpdateImpl(uint32 diff)
 {
-
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 

@@ -262,7 +262,6 @@ public:
             summoned->SetWalk(false);
             summoned->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
             summoned->AI()->AttackStart(me);
-
         }
 
         void SpellHitTarget(Unit* /*target*/, const SpellInfo* pSpell) OVERRIDE

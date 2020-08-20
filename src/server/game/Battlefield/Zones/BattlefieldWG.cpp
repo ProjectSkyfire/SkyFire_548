@@ -448,7 +448,6 @@ void BattlefieldWG::DoCompleteOrIncrementAchievement(uint32 achievement, Player*
             break;
         }
     }
-
 }
 
 void BattlefieldWG::OnStartGrouping()

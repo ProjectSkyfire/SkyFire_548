@@ -546,7 +546,6 @@ public:
             AggroAllPlayers(summon);
         }
     };
-
 };
 
 class boss_grubbis : public CreatureScript
@@ -594,7 +593,6 @@ public:
                     creature->AI()->SetData(2, 2);
         }
     };
-
 };
 
 void AddSC_gnomeregan()

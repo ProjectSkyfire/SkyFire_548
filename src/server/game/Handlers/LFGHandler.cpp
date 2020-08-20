@@ -279,7 +279,6 @@ void WorldSession::SendLfgPlayerLockInfo()
 
     for (lfg::LfgDungeonSet::const_iterator it = randomDungeons.begin(); it != randomDungeons.end(); ++it)
     {
-        
         data.WriteBit(0); // ShortageEligible
         data.WriteBit(0); // FirstReward
         data.WriteBits(0, 21);

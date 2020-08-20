@@ -92,11 +92,7 @@ typedef std::map<uint64, uint64> CubeMap;
 class npc_abyssal : public CreatureScript
 {
     public:
-
-        npc_abyssal()
-            : CreatureScript("npc_abyssal")
-        {
-        }
+        npc_abyssal() : CreatureScript("npc_abyssal") { }
 
         struct npc_abyssalAI : public ScriptedAI
         {
@@ -199,11 +195,7 @@ class npc_abyssal : public CreatureScript
 class boss_magtheridon : public CreatureScript
 {
     public:
-
-        boss_magtheridon()
-            : CreatureScript("boss_magtheridon")
-        {
-        }
+        boss_magtheridon() : CreatureScript("boss_magtheridon") { }
 
         struct boss_magtheridonAI : public ScriptedAI
         {
@@ -466,11 +458,7 @@ class boss_magtheridon : public CreatureScript
 class npc_hellfire_channeler : public CreatureScript
 {
     public:
-
-        npc_hellfire_channeler()
-            : CreatureScript("npc_hellfire_channeler")
-        {
-        }
+        npc_hellfire_channeler() : CreatureScript("npc_hellfire_channeler") { }
 
         struct npc_hellfire_channelerAI : public ScriptedAI
         {
