@@ -8,10 +8,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGroup
 (@CGUID-0, 63596, 0, 1, 0, 0, 0, 0, -8287.43, 515.474, 120.471, 1.47402, 300, 0, 0, 0, 0, 0, 0, 0, 0),
 (@CGUID-1, 63626, 1, 1, 0, 0, 0, 0, 1800.2, -4418.77, 102.744, 1.54004, 300, 0, 0, 0, 0, 0, 0, 0, 0);
 
-DELETE FROM `npc_trainer` WHERE `ID` IN (63596, 63626);
-INSERT INTO `npc_trainer` (`ID`, `SpellID`, `MoneyCost`, `ReqSkillLine`, `ReqSkillRank`, `ReqLevel`, `Index`) VALUES
-(63596, 119467, 1000000, 0, 0, 5, 0),
-(63626, 119467, 1000000, 0, 0, 5, 0);
+DELETE FROM `npc_trainer` WHERE `entry` IN (63596, 63626);
+INSERT INTO `npc_trainer` (`entry`, `spell`, `spellcost`, `reqskill`, `reqskillvalue`, `reqlevel`) VALUES
+(63596, 119467, 1000000, 0, 0, 5),
+(63626, 119467, 1000000, 0, 0, 5);
 
 DELETE FROM `spell_learn_spell` WHERE `entry`=119467;
 INSERT INTO `spell_learn_spell` (`entry`, `SpellID`) VALUES
