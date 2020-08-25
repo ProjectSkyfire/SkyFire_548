@@ -1046,6 +1046,66 @@ CreatureAddon const* ObjectMgr::GetCreatureAddon(uint32 lowguid)
     return NULL;
 }
 
+void ObjectMgr::LoadGameObjectAddons()
+{
+    uint32 oldMSTime = getMSTime();
+
+    //                                                0           1                 2
+    QueryResult result = WorldDatabase.Query("SELECT guid, invisibilityType, invisibilityValue FROM gameobject_addon");
+
+    if (!result)
+    {
+        SF_LOG_INFO("server.loading", ">> Loaded 0 gameobject addon definitions. DB table `gameobject_addon` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 guid = fields[0].GetUInt64();
+
+        const GameObjectData* goData = GetGOData(guid);
+        if (!goData)
+        {
+            SF_LOG_ERROR("sql.sql", "GameObject (GUID: %u) does not exist but has a record in `gameobject_addon`", guid);
+            continue;
+        }
+
+        GameObjectAddon& gameObjectAddon = _gameObjectAddonStore[guid];
+        gameObjectAddon.invisibilityType = InvisibilityType(fields[1].GetUInt8());
+        gameObjectAddon.invisibilityValue = fields[2].GetUInt32();
+
+        if (gameObjectAddon.invisibilityType >= TOTAL_INVISIBILITY_TYPES)
+        {
+            SF_LOG_ERROR("sql.sql", "GameObject (GUID: %u) has invalid InvisibilityType in `gameobject_addon`", guid);
+            gameObjectAddon.invisibilityType = INVISIBILITY_GENERAL;
+            gameObjectAddon.invisibilityValue = 0;
+        }
+
+        if (gameObjectAddon.invisibilityType && !gameObjectAddon.invisibilityValue)
+        {
+            SF_LOG_ERROR("sql.sql", "GameObject (GUID: %u) has InvisibilityType set but has no InvisibilityValue in `gameobject_addon`, set to 1", guid);
+            gameObjectAddon.invisibilityValue = 1;
+        }
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    SF_LOG_INFO("server.loading", ">> Loaded %u gameobject addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+GameObjectAddon const* ObjectMgr::GetGameObjectAddon(uint32 lowguid)
+{
+    GameObjectAddonContainer::const_iterator itr = _gameObjectAddonStore.find(lowguid);
+    if (itr != _gameObjectAddonStore.end())
+        return &(itr->second);
+
+    return NULL;
+}
+
 CreatureAddon const* ObjectMgr::GetCreatureTemplateAddon(uint32 entry)
 {
     CreatureAddonContainer::const_iterator itr = _creatureTemplateAddonStore.find(entry);
