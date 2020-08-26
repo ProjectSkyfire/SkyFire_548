@@ -7,20 +7,22 @@ INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
 
 DELETE FROM `conditions` WHERE SourceTypeOrReferenceId=26 AND SourceGroup=598 AND ConditionValue1=30027;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(26, 598, 5834, 0, 1, 8, 0, 30027, 0, 0, 0, 0, 0, '', 'Set Phase 598 in area 5834 if q30027 rewarded'),
-(26, 598, 5834, 0, 2, 28, 0, 30027, 0, 0, 0, 0, 0, '', 'Set Phase 598 in area 5834 if q30027 complete');
+(26, 598, 5834, 0, 1, 8, 0, 30027, 0, 0, 1, 0, 0, '', 'Set Phase 598 in area 5834 if q30027 not rewarded'),
+-- LOGICAL AND
+(26, 598, 5834, 0, 1, 15, 0, 512, 0, 0, 0, 0, 0, '', 'Set Phase 598 in area 5834 if player is monk');
 
 UPDATE creature_template SET AIName='SmartAI' WHERE entry=53566;
 DELETE FROM smart_scripts WHERE entryorguid=53566;
 INSERT INTO smart_scripts (entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_x, target_y, target_z, target_o, comment) VALUES
-(53566, 0, 0, 0, 20, 0, 100, 0, 30027, 0, 0, 0, 44, 598, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Master Shang Xi: On quest reward - set player phaseId 598');
+(53566, 0, 0, 0, 20, 0, 100, 0, 29406, 0, 0, 0, 44, 598, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Master Shang Xi: On quest reward 29406 - unset player phase'),
+(53566, 0, 1, 0, 20, 0, 100, 0, 29406, 0, 0, 0, 44, 169, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Master Shang Xi: On quest reward 29406 - set player phase');
 
-DELETE FROM `gameobject` WHERE id=209972 AND phaseId=0;
+DELETE FROM `gameobject` WHERE id=209970;
 DELETE FROM `gameobject` WHERE map=860 AND phaseId=598;
 DELETE FROM `gameobject` WHERE guid BETWEEN @OGUID-14 AND @OGUID-0;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@OGUID-0, 210986, 860, 1, 598, 0, 1421.91, 3377.98, 192.983, 5.97902, 0, 0, 0.151497, -0.988458, 120, 255, 1),
-(@OGUID-1, 209972, 860, 1, 598, 0, 1446.98, 3389.89, 173.35, 1.23918, 0, 0, 0.580701, 0.814117, 120, 255, 0),
+(@OGUID-1, 209972, 860, 1, 598, 0, 1446.98, 3389.89, 173.35, 1.23918, 0, 0, 0.580701, 0.814117, 120, 255, 1),
 (@OGUID-2, 211336, 860, 1, 598, 0, 1461.49, 3464.92, 181.63, 1.74269, 0, 0, 0.765196, 0.643798, 120, 255, 1),
 (@OGUID-3, 211337, 860, 1, 598, 0, 1461.14, 3464.87, 181.621, 3.81097, 0, 0, 0.944513, -0.328475, 120, 255, 1),
 (@OGUID-4, 210005, 860, 1, 598, 0, 1478.45, 3398.19, 171.242, 2.04204, 0, 0, 0.852641, 0.522496, 120, 255, 1),
@@ -33,7 +35,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGro
 (@OGUID-11, 210005, 860, 1, 598, 0, 1487.7, 3450.5, 171.175, 4.20625, 0, 0, 0.861627, -0.507541, 120, 255, 1),
 (@OGUID-12, 210005, 860, 1, 598, 0, 1443.33, 3450.59, 171.162, 4.11898, 0, 0, 0.882947, -0.469473, 120, 255, 1),
 (@OGUID-13, 210005, 860, 1, 598, 0, 1420.94, 3457.37, 171.185, 0.279252, 0, 0, 0.139173, 0.990268, 120, 255, 1),
-(@OGUID-14, 209971, 860, 1, 598, 0, 1435.17, 3353.44, 173.35, 4.39823, 0, 0, 0.809017, -0.587785, 120, 255, 1);
+(@OGUID-14, 209971, 860, 1, 598, 0, 1435.17, 3353.44, 173.35, 4.39823, 0, 0, 0.809017, -0.587785, 120, 255, 0);
 
 
 DELETE FROM `creature` WHERE guid BETWEEN @CGUID-84 AND @CGUID-0;
