@@ -53,10 +53,7 @@ class PlayerTextBuilder
 {
     public:
         PlayerTextBuilder(WorldObject* obj, WorldObject* speaker, ChatMsg msgtype, uint8 textGroup, uint32 id, Language language, WorldObject const* target)
-            : _source(obj), _talker(speaker), _msgType(msgtype), _textGroup(textGroup), _textId(id), _language(language), _target(target)
-        {
-
-        }
+            : _source(obj), _talker(speaker), _msgType(msgtype), _textGroup(textGroup), _textId(id), _language(language), _target(target) { }
 
         size_t operator()(WorldPacket* data, LocaleConstant locale) const
         {
@@ -145,7 +142,6 @@ void CreatureTextMgr::LoadCreatureTexts()
     } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u creature texts for %u creatures in %u ms", textCount, creatureCount, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 void CreatureTextMgr::LoadCreatureTextLocales()
@@ -175,7 +171,6 @@ void CreatureTextMgr::LoadCreatureTextLocales()
     } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u creature localized texts in %u ms", textCount, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup,  WorldObject const* whisperTarget /*= NULL*/, ChatMsg msgType /*= CHAT_MSG_ADDON*/, Language language /*= LANG_ADDON*/, CreatureTextRange range /*= TEXT_RANGE_NORMAL*/, uint32 sound /*= 0*/, Team team /*= TEAM_OTHER*/, bool gmOnly /*= false*/, Player* srcPlr /*= NULL*/)

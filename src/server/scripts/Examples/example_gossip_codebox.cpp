@@ -51,11 +51,7 @@ enum Spells
 class example_gossip_codebox : public CreatureScript
 {
     public:
-
-        example_gossip_codebox()
-            : CreatureScript("example_gossip_codebox")
-        {
-        }
+        example_gossip_codebox() : CreatureScript("example_gossip_codebox") { }
 
         bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
         {

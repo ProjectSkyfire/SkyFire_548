@@ -465,7 +465,6 @@ namespace MMAP
 
     void MMapData::AddSwap(PhasedTile* ptile, uint32 swap, uint32 packedXY)
     {
-
         uint32 x = (packedXY >> 16);
         uint32 y = (packedXY & 0x0000FFFF);
 

@@ -86,11 +86,7 @@ enum Factions
 class example_creature : public CreatureScript
 {
     public:
-
-        example_creature()
-            : CreatureScript("example_creature")
-        {
-        }
+        example_creature() : CreatureScript("example_creature") { }
 
         struct example_creatureAI : public ScriptedAI
         {

@@ -365,11 +365,7 @@ void OutdoorPvPHP::SetHordeTowersControlled(uint32 count)
 class OutdoorPvP_hellfire_peninsula : public OutdoorPvPScript
 {
     public:
-
-        OutdoorPvP_hellfire_peninsula()
-            : OutdoorPvPScript("outdoorpvp_hp")
-        {
-        }
+        OutdoorPvP_hellfire_peninsula() : OutdoorPvPScript("outdoorpvp_hp") { }
 
         OutdoorPvP* GetOutdoorPvP() const OVERRIDE
         {

@@ -67,11 +67,8 @@ float treant_pos[6][3] =
 class npc_warp_splinter_treant : public CreatureScript
 {
     public:
+        npc_warp_splinter_treant() : CreatureScript("npc_warp_splinter_treant") { }
 
-        npc_warp_splinter_treant()
-            : CreatureScript("npc_warp_splinter_treant")
-        {
-        }
         struct npc_warp_splinter_treantAI  : public ScriptedAI
         {
             npc_warp_splinter_treantAI(Creature* creature) : ScriptedAI(creature)
@@ -132,11 +129,8 @@ class npc_warp_splinter_treant : public CreatureScript
 class boss_warp_splinter : public CreatureScript
 {
     public:
+        boss_warp_splinter() : CreatureScript("boss_warp_splinter") { }
 
-        boss_warp_splinter()
-            : CreatureScript("boss_warp_splinter")
-        {
-        }
         struct boss_warp_splinterAI : public BossAI
         {
             boss_warp_splinterAI(Creature* creature) : BossAI(creature, DATA_WARP_SPLINTER)

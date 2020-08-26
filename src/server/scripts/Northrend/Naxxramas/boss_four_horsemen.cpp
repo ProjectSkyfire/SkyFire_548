@@ -393,7 +393,6 @@ public:
                 doDelayPunish = true;
         }
     };
-
 };
 
 class spell_four_horsemen_mark : public SpellScriptLoader

@@ -278,7 +278,6 @@ public:
                 DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_stalagg : public CreatureScript
@@ -372,7 +371,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_feugen : public CreatureScript
@@ -440,7 +438,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class spell_thaddius_pos_neg_charge : public SpellScriptLoader

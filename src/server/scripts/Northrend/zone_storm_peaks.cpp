@@ -454,7 +454,6 @@ class spell_close_rift : public SpellScriptLoader
 
         private:
             uint8 _counter;
-
         };
 
         AuraScript* GetAuraScript() const OVERRIDE

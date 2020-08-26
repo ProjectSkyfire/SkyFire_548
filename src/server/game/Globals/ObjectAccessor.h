@@ -48,7 +48,6 @@ template <class T>
 class HashMapHolder
 {
     public:
-
         typedef UNORDERED_MAP<uint64, T*> MapType;
 
         static void Insert(T* o);
@@ -63,7 +62,6 @@ class HashMapHolder
 
         
     private:
-
         //Non instanceable only static
         HashMapHolder() { }
         static SF_SHARED_MUTEX i_lock;

@@ -466,7 +466,6 @@ class instance_uldaman : public InstanceMapScript
                     case 2748:    // Archaedas
                         archaedasGUID = creature->GetGUID();
                         break;
-
                 }
             }
 

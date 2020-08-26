@@ -184,10 +184,7 @@ public:
             }
         }
 
-        void Reset() OVERRIDE
-        {
-
-        }
+        void Reset() OVERRIDE { }
 
         void EnterCombat(Unit* who) OVERRIDE
         {
@@ -380,7 +377,6 @@ public:
             } else eventTimer -= diff;
         }
     };
-
 };
 
 void AddSC_wailing_caverns()

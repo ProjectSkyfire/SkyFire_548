@@ -569,7 +569,6 @@ public:
         bool canDespawn;
         uint32 DespawnTimer;
         bool Phase3;
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
