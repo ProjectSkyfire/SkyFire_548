@@ -140,3 +140,8 @@ class instance_jade_serpent : public InstanceMapScript
             return new instance_jade_serpent_InstanceScript(map);
         }
 };
+
+void AddSC_instance_jade_serpent()
+{
+   new instance_jade_serpent();
+}

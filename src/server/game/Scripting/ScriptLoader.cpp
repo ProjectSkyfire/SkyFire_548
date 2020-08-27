@@ -636,6 +636,8 @@ void AddSC_kezan();
 void AddSC_event_childrens_week();
 
 // Pandaria
+// Temple of Jade Serpent
+void AddSC_instance_jade_serpent();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1328,11 +1330,13 @@ void AddEventScripts()
 #endif
 }
 
-//void AddPandariaScripts()
-//{
-//#ifdef SCRIPTS
-//#endif
-//}
+void AddPandariaScripts()
+{
+#ifdef SCRIPTS
+    // Temple of Jade Serpent - Temple of Jade Serpent
+    AddSC_instance_jade_serpent();
+#endif
+}
 
 void AddPetScripts()
 {
