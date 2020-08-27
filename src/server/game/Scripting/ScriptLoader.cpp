@@ -674,7 +674,7 @@ void AddScripts()
     AddNorthrendScripts();
     AddMaelstromScripts();
     AddEventScripts();
-    //AddPandariaScripts();
+    AddPandariaScripts();
     AddPetScripts();
     AddBattlegroundScripts();
     AddOutdoorPvPScripts();
