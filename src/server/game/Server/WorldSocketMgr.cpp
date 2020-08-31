@@ -55,7 +55,6 @@
 class ReactorRunnable : protected ACE_Task_Base
 {
     public:
-
         ReactorRunnable() :
             m_Reactor(0),
             m_Connections(0),
@@ -128,7 +127,6 @@ class ReactorRunnable : protected ACE_Task_Base
         }
 
     protected:
-
         void AddNewSockets()
         {
             std::lock_guard<std::mutex> guard(m_NewSockets_Lock);

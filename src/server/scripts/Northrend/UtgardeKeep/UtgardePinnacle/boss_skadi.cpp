@@ -482,7 +482,6 @@ public:
 
         return false;
     }
-
 };
 
 void AddSC_boss_skadi()

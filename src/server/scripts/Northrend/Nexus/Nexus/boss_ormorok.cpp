@@ -154,7 +154,6 @@ public:
 
     private:
         bool frenzy;
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -238,7 +237,6 @@ public:
     private:
         uint32 _count;
         uint32 _despawntimer;
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

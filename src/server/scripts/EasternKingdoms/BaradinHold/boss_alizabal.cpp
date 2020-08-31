@@ -257,7 +257,6 @@ class boss_alizabal : public CreatureScript
             bool _intro;
             bool _hate;
             bool _skewer;
-
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE

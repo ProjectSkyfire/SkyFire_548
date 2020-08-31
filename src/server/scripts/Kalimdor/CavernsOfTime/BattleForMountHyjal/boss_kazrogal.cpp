@@ -166,7 +166,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class MarkTargetFilter

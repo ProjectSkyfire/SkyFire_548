@@ -171,7 +171,6 @@ class OutdoorPvPZM;
 class OPvPCapturePointZM_Beacon : public OPvPCapturePoint
 {
     public:
-
         OPvPCapturePointZM_Beacon(OutdoorPvP* pvp, ZM_BeaconType type);
 
         void ChangeState();
@@ -187,7 +186,6 @@ class OPvPCapturePointZM_Beacon : public OPvPCapturePoint
         void UpdateTowerState();
 
     protected:
-
         ZM_BeaconType m_TowerType;
         uint32 m_TowerState;
 };
@@ -202,7 +200,6 @@ enum ZM_GraveYardState
 class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
 {
     public:
-
         OPvPCapturePointZM_GraveYard(OutdoorPvP* pvp);
 
         bool Update(uint32 diff);
@@ -226,11 +223,9 @@ class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
         uint32 GetGraveYardState() const;
 
     private:
-
         uint32 m_GraveYardState;
 
     protected:
-
         uint32 m_BothControllingFaction;
 
         uint64 m_FlagCarrierGUID;
@@ -239,7 +234,6 @@ class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
 class OutdoorPvPZM : public OutdoorPvP
 {
     public:
-
         OutdoorPvPZM();
 
         bool SetupOutdoorPvP();
@@ -262,7 +256,6 @@ class OutdoorPvPZM : public OutdoorPvP
         void SetHordeTowersControlled(uint32 count);
 
     private:
-
         OPvPCapturePointZM_GraveYard * m_GraveYard;
 
         uint32 m_AllianceTowersControlled;

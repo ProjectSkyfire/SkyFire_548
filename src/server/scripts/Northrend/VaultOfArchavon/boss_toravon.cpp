@@ -54,7 +54,6 @@ enum Events
 enum Creatures
 {
     NPC_FROZEN_ORB          = 38456 // 1 in 10 mode and 3 in 25 mode
-
 };
 
 class boss_toravon : public CreatureScript

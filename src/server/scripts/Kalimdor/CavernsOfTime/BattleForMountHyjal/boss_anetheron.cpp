@@ -172,7 +172,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_towering_infernal : public CreatureScript
@@ -255,7 +254,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_anetheron()

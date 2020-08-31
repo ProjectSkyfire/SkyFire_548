@@ -59,11 +59,12 @@ class AuraApplication
 
         explicit AuraApplication(Unit* target, Unit* caster, Aura* base, uint32 effMask);
         void _Remove();
+
     private:
         void _InitFlags(Unit* caster, uint32 effMask);
         void _HandleEffect(uint8 effIndex, bool apply);
-    public:
 
+    public:
         Unit* GetTarget() const { return _target; }
         Aura* GetBase() const { return _base; }
 

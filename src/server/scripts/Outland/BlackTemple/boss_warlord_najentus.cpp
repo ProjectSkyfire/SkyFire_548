@@ -50,7 +50,6 @@ enum Spells
     SPELL_CREATE_NAJENTUS_SPINE     = 39956,
     SPELL_HURL_SPINE                = 39948,
     SPELL_BERSERK                   = 26662
-
 };
 
 enum GameObjects
@@ -219,7 +218,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class go_najentus_spine : public GameObjectScript
@@ -238,7 +236,6 @@ public:
                 }
         return true;
     }
-
 };
 
 void AddSC_boss_najentus()

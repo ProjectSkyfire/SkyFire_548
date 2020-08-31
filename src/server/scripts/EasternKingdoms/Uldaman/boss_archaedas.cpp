@@ -56,11 +56,7 @@ enum Spells
 class boss_archaedas : public CreatureScript
 {
     public:
-
-        boss_archaedas()
-            : CreatureScript("boss_archaedas")
-        {
-        }
+        boss_archaedas() : CreatureScript("boss_archaedas") { }
 
         struct boss_archaedasAI : public ScriptedAI
         {
@@ -222,11 +218,7 @@ EndScriptData */
 class npc_archaedas_minions : public CreatureScript
 {
     public:
-
-        npc_archaedas_minions()
-            : CreatureScript("npc_archaedas_minions")
-        {
-        }
+        npc_archaedas_minions() : CreatureScript("npc_archaedas_minions") { }
 
         struct npc_archaedas_minionsAI : public ScriptedAI
         {
@@ -321,11 +313,7 @@ EndScriptData */
 class npc_stonekeepers : public CreatureScript
 {
     public:
-
-        npc_stonekeepers()
-            : CreatureScript("npc_stonekeepers")
-        {
-        }
+        npc_stonekeepers() : CreatureScript("npc_stonekeepers") { }
 
         struct npc_stonekeepersAI : public ScriptedAI
         {
@@ -384,11 +372,7 @@ EndScriptData */
 class go_altar_of_archaedas : public GameObjectScript
 {
     public:
-
-        go_altar_of_archaedas()
-            : GameObjectScript("go_altar_of_archaedas")
-        {
-        }
+        go_altar_of_archaedas() : GameObjectScript("go_altar_of_archaedas") { }
 
         bool OnGossipHello(Player* player, GameObject* /*go*/) OVERRIDE
         {

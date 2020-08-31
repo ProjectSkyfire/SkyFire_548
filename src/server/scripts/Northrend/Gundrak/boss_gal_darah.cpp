@@ -284,15 +284,12 @@ public:
             Talk(SAY_SLAY);
         }
     };
-
 };
 
 class achievement_share_the_love : public AchievementCriteriaScript
 {
     public:
-        achievement_share_the_love() : AchievementCriteriaScript("achievement_share_the_love")
-        {
-        }
+        achievement_share_the_love() : AchievementCriteriaScript("achievement_share_the_love") { }
 
         bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
         {

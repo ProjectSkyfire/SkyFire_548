@@ -169,7 +169,6 @@ class boss_pathaleon_the_calculator : public CreatureScript
 class npc_nether_wraith : public CreatureScript
 {
     public:
-
         npc_nether_wraith() : CreatureScript("npc_nether_wraith") { }
 
         struct npc_nether_wraithAI : public ScriptedAI

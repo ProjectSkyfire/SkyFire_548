@@ -209,7 +209,6 @@ public:
             return lWrappedPlayers.count(guid);
         }
     };
-
 };
 
 class npc_slad_ran_constrictor : public CreatureScript
@@ -260,7 +259,6 @@ public:
             } else uiGripOfSladRanTimer -= diff;
         }
     };
-
 };
 
 class npc_slad_ran_viper : public CreatureScript
@@ -296,15 +294,12 @@ public:
             } else uiVenomousBiteTimer -= diff;
         }
     };
-
 };
 
 class achievement_snakes_whyd_it_have_to_be_snakes : public AchievementCriteriaScript
 {
     public:
-        achievement_snakes_whyd_it_have_to_be_snakes() : AchievementCriteriaScript("achievement_snakes_whyd_it_have_to_be_snakes")
-        {
-        }
+        achievement_snakes_whyd_it_have_to_be_snakes() : AchievementCriteriaScript("achievement_snakes_whyd_it_have_to_be_snakes") { }
 
         bool OnCheck(Player* player, Unit* target) OVERRIDE
         {

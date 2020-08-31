@@ -32,7 +32,6 @@ EndScriptData */
 
 enum Spells
 {
-
     SPELL_ARCANE_SHIELD                           = 53813, //Dummy --> Channeled, shields the caster from damage.
     SPELL_EMPOWERED_ARCANE_EXPLOSION              = 51110,
     SPELL_EMPOWERED_ARCANE_EXPLOSION_2            = 59377,

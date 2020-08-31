@@ -422,7 +422,6 @@ void TransportMgr::SpawnContinentTransports()
                 if (!tInfo->inInstance)
                     if (CreateTransport(entry, guid))
                         ++count;
-
         } while (result->NextRow());
     }
 
