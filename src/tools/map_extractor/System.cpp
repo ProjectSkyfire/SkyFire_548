@@ -1260,7 +1260,6 @@ bool LoadLocaleMPQFile(int locale)
 
 void LoadCommonMPQFiles(uint32 build)
 {
-
     TCHAR filename[512];
     _stprintf(filename, _T("%s/Data/world.MPQ"), input_path);
     _tprintf(_T("Loading common MPQ files\n"));
@@ -1289,7 +1288,6 @@ void LoadCommonMPQFiles(uint32 build)
         }
         else
             _tprintf(_T("Loaded %s\n"), filename);
-
     }
 
     char const* prefix = NULL;
@@ -1309,7 +1307,6 @@ void LoadCommonMPQFiles(uint32 build)
         }
         else
             _tprintf(_T("Loaded %s\n"), filename);
-
     }
 
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)

@@ -927,15 +927,11 @@ void PoolMgr::LoadFromDB()
             while (result->NextRow());
 
             SF_LOG_DEBUG("pool", "Pool handling system initialized, %u pools spawned in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
         }
     }
 }
 
-void PoolMgr::LoadQuestPools()
-{
-
-}
+void PoolMgr::LoadQuestPools() { }
 
 void PoolMgr::SaveQuestsToDB()
 {

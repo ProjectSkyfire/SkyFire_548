@@ -304,7 +304,6 @@ void AuctionHouseMgr::LoadAuctionItems()
     while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u auction items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 void AuctionHouseMgr::LoadAuctions()
@@ -343,7 +342,6 @@ void AuctionHouseMgr::LoadAuctions()
     CharacterDatabase.CommitTransaction(trans);
 
     SF_LOG_INFO("server.loading", ">> Loaded %u auctions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 void AuctionHouseMgr::AddAItem(Item* it)
@@ -788,13 +786,10 @@ void AuctionHouseMgr::DeleteExpiredAuctionsAtStartup()
         // Release memory
         delete auction;
         ++expirecount;
-
     }
     while (expAuctions->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Deleted %u expired auctions in %u ms", expirecount, GetMSTimeDiffToNow(oldMSTime));
-
-
 }
 
 bool AuctionEntry::LoadFromFieldList(Field* fields)

@@ -201,8 +201,8 @@ public:
 
         handler->PSendSysMessage(LANG_MAP_POSITION,
             mapId, (mapEntry ? mapEntry->name : "<unknown>"),
-            zoneId, (zoneEntry ? zoneEntry->area_name : "<unknown>"),
-            areaId, (areaEntry ? areaEntry->area_name : "<unknown>"),
+            zoneId, (zoneEntry ? zoneEntry->m_AreaName : "<unknown>"),
+            areaId, (areaEntry ? areaEntry->m_AreaName : "<unknown>"),
             object->GetPhaseMask(),
             object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), object->GetOrientation(),
             cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), object->GetInstanceId(),
@@ -898,7 +898,6 @@ public:
 
         //Not a supported argument
         return false;
-
     }
 
     static bool HandleLinkGraveCommand(ChatHandler* handler, char const* args)
@@ -939,7 +938,7 @@ public:
         uint32 zoneId = player->GetZoneId();
 
         AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(zoneId);
-        if (!areaEntry || areaEntry->zone !=0)
+        if (!areaEntry || areaEntry->m_ParentAreaID !=0)
         {
             handler->PSendSysMessage(LANG_COMMAND_GRAVEYARDWRONGZONE, graveyardId, zoneId);
             handler->SetSentErrorMessage(true);
@@ -1727,11 +1726,11 @@ public:
         AreaTableEntry const* area = GetAreaEntryByAreaID(areaId);
         if (area)
         {
-            areaName = area->area_name;
+            areaName = area->m_AreaName;
 
-            AreaTableEntry const* zone = GetAreaEntryByAreaID(area->zone);
+            AreaTableEntry const* zone = GetAreaEntryByAreaID(area->m_ParentAreaID);
             if (zone)
-                zoneName = zone->area_name;
+                zoneName = zone->m_AreaName;
         }
 
         if (target)

@@ -286,7 +286,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_water_globule : public CreatureScript
@@ -352,7 +351,6 @@ public:
             //do NOT deal any melee damage to the target.
         }
     };
-
 };
 
 void AddSC_boss_morogrim_tidewalker()

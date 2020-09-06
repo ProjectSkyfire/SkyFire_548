@@ -4,7 +4,7 @@
 /**
  *  @file    Pipe.h
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -42,7 +42,6 @@ class ACE_Time_Value;
 class ACE_Export ACE_Pipe
 {
 public:
-  // = Initialization and termination.
   /// Default constructor (does nothing...).
   ACE_Pipe (void);
 

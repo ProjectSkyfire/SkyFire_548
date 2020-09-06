@@ -270,7 +270,6 @@ class boss_ragnaros : public CreatureScript
                                         _isBanished = true;
                                         //DoCast(me, SPELL_RAGSUBMERGE);
                                         _emergeTimer = 90000;
-
                                     }
                                     else
                                     {

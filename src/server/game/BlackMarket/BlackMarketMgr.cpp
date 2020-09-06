@@ -168,8 +168,8 @@ void BlackMarketMgr::LoadBlackMarketAuctions()
             _auctions[auction->GetAuctionId()] = auction;
 
             ++count;
-
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
         CharacterDatabase.CommitTransaction(trans);
     }

@@ -155,18 +155,21 @@ endif
 #----------------------------------------------------------------------------
 #       Local targets
 #----------------------------------------------------------------------------
+.PHONY: lib_warning
 lib_warning:
 	@echo SSL will not be built due to the following missing library: $(LIBCHECK) >&2
 
 ifneq ($(ssl),1)
 requires_disabled_macros += ssl
 endif
+.PHONY: require_warning
 require_warning:
 	@echo SSL will not be built due to the following disabled make macros: $(requires_disabled_macros)>&2
 
 ifeq ($(ace_for_tao),1)
 avoids_enabled_macros += ace_for_tao
 endif
+.PHONY: avoid_warning
 avoid_warning:
 	@echo SSL will not be built due to the following enabled make macros: $(avoids_enabled_macros)>&2
 
@@ -264,17 +267,8 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#header_files:
-#SSL_SOCK_Acceptor.h
-#SSL_Initializer.h
-#SSL_Asynch_BIO.h
-#SSL_SOCK_Stream.h
-#SSL_SOCK_Connector.h
-#SSL_Context.h
-#SSL_Asynch_Stream.h
-#SSL_SOCK.h
-#SSL_Export.h
-#sslconf.h
+#pkgconfig_files:
+#ACE_SSL.pc.in
 #
 #source_files:
 #SSL_Asynch_BIO.cpp
@@ -286,20 +280,29 @@ endif
 #SSL_SOCK_Connector.cpp
 #SSL_SOCK_Stream.cpp
 #
-#pkgconfig_files:
-#ACE_SSL.pc.in
-#
 #inline_files:
-#SSL_SOCK_Acceptor.inl
 #SSL_SOCK_Stream.inl
-#SSL_SOCK_Connector.inl
+#SSL_SOCK.inl
 #SSL_Context.inl
 #SSL_Asynch_Stream.inl
-#SSL_SOCK.inl
+#SSL_SOCK_Connector.inl
+#SSL_SOCK_Acceptor.inl
 #
 #build_files:
 #ssl.mpc
 #ssl_for_tao.mpc
+#
+#header_files:
+#SSL_SOCK_Stream.h
+#SSL_SOCK.h
+#SSL_Asynch_BIO.h
+#SSL_Context.h
+#SSL_Asynch_Stream.h
+#SSL_SOCK_Connector.h
+#SSL_SOCK_Acceptor.h
+#SSL_Initializer.h
+#SSL_Export.h
+#sslconf.h
 #
 #lib_output:
 #../../lib ACE_SSL

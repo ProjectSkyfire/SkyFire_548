@@ -464,7 +464,6 @@ public:
                 me->SummonCreature(NPC_TRIGGER, Location[i]);
         }
     };
-
 };
 
 class go_harpoon_launcher : public GameObjectScript
@@ -483,7 +482,6 @@ public:
 
         return false;
     }
-
 };
 
 void AddSC_boss_skadi()

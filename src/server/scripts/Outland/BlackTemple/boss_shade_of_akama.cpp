@@ -548,7 +548,6 @@ public:
             bool ShadeHasDied;
             bool StartCombat;
             bool HasYelledOnce;
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

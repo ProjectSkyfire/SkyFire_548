@@ -1050,10 +1050,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 /*waypointId*/) OVERRIDE
-        {
-
-        }
+        void WaypointReached(uint32 /*waypointId*/) OVERRIDE { }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {

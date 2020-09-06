@@ -337,7 +337,7 @@ public:
                 return false;
             }
 
-            if (ObjectMgr::CheckPlayerName(newName, true) != CHAR_NAME_SUCCESS)
+            if (ObjectMgr::CheckPlayerName(newName, true) != ResponseCodes::CHAR_NAME_SUCCESS)
             {
                 handler->SendSysMessage(LANG_BAD_VALUE);
                 handler->SetSentErrorMessage(true);
@@ -897,7 +897,7 @@ public:
                 return false;
             }
 
-            if (ObjectMgr::CheckPlayerName(name, true) != CHAR_NAME_SUCCESS)
+            if (ObjectMgr::CheckPlayerName(name, true) != ResponseCodes::CHAR_NAME_SUCCESS)
             {
                 handler->PSendSysMessage(LANG_INVALID_CHARACTER_NAME);
                 handler->SetSentErrorMessage(true);

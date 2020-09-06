@@ -336,7 +336,6 @@ namespace Movement
 
             //    NYI block here
             data << moveSpline.Duration();
-
         }
 
         Vector3 destination = moveSpline.isCyclic() ? Vector3::zero() : moveSpline.FinalDestination();
@@ -345,7 +344,6 @@ namespace Movement
         data << float(destination.z);
         data << moveSpline.GetId();
         data << float(destination.y);
-
     }
 
     void PacketBuilder::WriteFacingTargetPart(MoveSpline const& moveSpline, ByteBuffer& data)

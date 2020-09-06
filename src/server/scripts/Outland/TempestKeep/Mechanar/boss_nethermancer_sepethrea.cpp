@@ -63,7 +63,8 @@ enum Events
 
 class boss_nethermancer_sepethrea : public CreatureScript
 {
-    public: boss_nethermancer_sepethrea(): CreatureScript("boss_nethermancer_sepethrea") { }
+    public:
+        boss_nethermancer_sepethrea(): CreatureScript("boss_nethermancer_sepethrea") { }
 
         struct boss_nethermancer_sepethreaAI : public BossAI
         {
@@ -221,8 +222,8 @@ class npc_ragin_flames : public CreatureScript
 
                     DoMeleeAttackIfReady();
                 }
-
             };
+
             CreatureAI* GetAI(Creature* creature) const OVERRIDE
             {
                 return new npc_ragin_flamesAI(creature);

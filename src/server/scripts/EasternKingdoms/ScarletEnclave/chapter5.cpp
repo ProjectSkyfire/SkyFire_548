@@ -1662,7 +1662,6 @@ public:
                 }
         }
     };
-
 };
 
 /*######
@@ -1686,7 +1685,6 @@ public:
         void UpdateAI(uint32 /*diff*/) OVERRIDE { }
         void JustDied(Unit* /*killer*/) OVERRIDE { }
     };
-
 };
 
 void AddSC_the_scarlet_enclave_c5()

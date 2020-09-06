@@ -226,7 +226,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_ethereal_beacon : public CreatureScript
@@ -312,7 +311,6 @@ public:
             } else Apprentice_Timer -= diff;
         }
     };
-
 };
 
 enum Ethereal
@@ -364,7 +362,6 @@ public:
             } else Cast_Timer -= diff;
         }
     };
-
 };
 
 enum Yor

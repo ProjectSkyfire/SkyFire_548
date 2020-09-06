@@ -1,6 +1,6 @@
 This document is also available at the following URL:
 
-http://www.dre.vanderbilt.edu/~schmidt/ACE.html
+https://www.dre.vanderbilt.edu/~schmidt/ACE.html
 
 All software and documentation is available via both anonymous ftp and
 http.
@@ -148,7 +148,7 @@ applications provided with the ACE release include:
 OBTAINING ACE
 
 ACE may be obtained electronically from
-http://download.dre.vanderbilt.edu.  This release contains the source
+https://download.dre.vanderbilt.edu.  This release contains the source
 code, test drivers, and example applications (including JAWS) for C++
 wrapper libraries and the higher-level ACE network programming
 framework developed as part of the ADAPTIVE project at the University
@@ -184,8 +184,7 @@ A mailing list, ace-users@list.isis.vanderbilt.edu, is available for
 discussing bug fixes, enhancements, and porting issues regarding ACE.
 Please send mail to me at the
 ace-users-request@list.isis.vanderbilt.edu if you'd like to join the
-mailing list.  There is also a USENET newsgroup called
-comp.soft-sys.ace. Please see
+mailing list. Please see
 http://www.dre.vanderbilt.edu/~schmidt/ACE-mail.html for details on
 how to subscribe to the mailing list.
 
@@ -208,8 +207,6 @@ one of the following:
 1) Subscribe to the ace-users mail list, by sending email with
     contents "subscribe ace-users" to
     ace-users-request@list.isis.vanderbilt.edu.
-
-2) Or, monitor the comp.soft-sys.ace newsgroup for responses.
 
 ----------------------------------------
 

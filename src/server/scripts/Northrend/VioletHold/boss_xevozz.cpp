@@ -224,7 +224,6 @@ public:
             Talk(SAY_SLAY);
         }
     };
-
 };
 
 class npc_ethereal_sphere : public CreatureScript
@@ -301,7 +300,6 @@ public:
             else uiSummonPlayers_Timer -= uiDiff;
         }
     };
-
 };
 
 void AddSC_boss_xevozz()

@@ -1235,7 +1235,6 @@ public:
             {
                 if (unit->GetTypeId() != TypeID::TYPEID_PLAYER)
                 {
-
                     me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->SetDisableGravity(false);

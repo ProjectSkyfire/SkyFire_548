@@ -80,6 +80,7 @@ public:
     bool HasFlag(uint16 flag) const { return (m_flags & flag) != 0; }
     void SetFlag(uint16 flag);
     void UnSetFlag(uint16 flag);
+    void SetLevel(uint8 level);
 
     void CalculateStats(bool currentHealth = false);
 

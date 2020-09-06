@@ -294,7 +294,6 @@ class npc_enslaved_proto_drake : public CreatureScript
         private:
             bool _setData;
             EventMap _events;
-
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -339,7 +338,6 @@ class spell_uk_second_wind_proc : public SpellScriptLoader
                 DoCheckProc += AuraCheckProcFn(spell_uk_second_wind_proc_AuraScript::CheckProc);
                 OnEffectProc += AuraEffectProcFn(spell_uk_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
-
         };
 
         AuraScript* GetAuraScript() const OVERRIDE

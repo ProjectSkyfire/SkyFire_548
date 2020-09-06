@@ -187,7 +187,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 #define MAX_REPAIR_RANGE            (13.0f)                 //we should be at least at this range for repair
@@ -261,7 +260,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_mekgineer_steamrigger()

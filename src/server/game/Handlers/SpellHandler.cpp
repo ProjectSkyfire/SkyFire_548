@@ -899,7 +899,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
             recvPacket.ReadByteSeq(movementTransportGuid[0]);
             recvPacket >> movementInfo.transport.time;
-
         }
 
         recvPacket.ReadByteSeq(movementGuid[5]);

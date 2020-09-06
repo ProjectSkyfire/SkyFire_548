@@ -132,7 +132,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 enum ExarchMaladaar
@@ -222,9 +221,8 @@ public:
 
                 if (Unit* target = Unit::GetUnit(*me, soulholder))
                 {
-
-                CAST_AI(npc_stolen_soul::npc_stolen_soulAI, summoned->AI())->SetMyClass(soulclass);
-                 summoned->AI()->AttackStart(target);
+                    CAST_AI(npc_stolen_soul::npc_stolen_soulAI, summoned->AI())->SetMyClass(soulclass);
+                    summoned->AI()->AttackStart(target);
                 }
             }
         }
@@ -301,7 +299,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_avatar_of_martyred : public CreatureScript
@@ -343,7 +340,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_exarch_maladaar()

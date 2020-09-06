@@ -1133,7 +1133,6 @@ void Item::DeleteRefundDataFromDB(SQLTransaction* trans)
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_REFUND_INSTANCE);
         stmt->setUInt32(0, GetGUIDLow());
         (*trans)->Append(stmt);
-
     }
 }
 
@@ -1655,7 +1654,6 @@ bool Item::ItemContainerLoadLootFromDB()
 
                 // Increment unlooted count
                 loot.unlootedCount++;
-
             }
             while (item_result->NextRow());
         }

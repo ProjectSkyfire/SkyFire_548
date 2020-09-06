@@ -27,10 +27,9 @@
 #include "SpellInfo.h"
 #include "WorldPacket.h"
 
-Totem::Totem(SummonPropertiesEntry const* properties, Unit* owner) : Minion(properties, owner, false)
+Totem::Totem(SummonPropertiesEntry const* properties, Unit* owner) : Minion(properties, owner, false), m_duration(0)
 {
     m_unitTypeMask |= UNIT_MASK_TOTEM;
-    m_duration = 0;
     m_type = TOTEM_PASSIVE;
 }
 
@@ -87,9 +86,6 @@ void Totem::InitSummon()
     // Some totems can have both instant effect and passive spell
     if (GetSpell(1))
         CastSpell(this, GetSpell(1), true);
-
-    if (m_Properties->Id == SUMMON_TYPE_TOTEM_FIRE && GetOwner()->HasAura(SPELL_TOTEMIC_WRATH_TALENT))
-        CastSpell(this, SPELL_TOTEMIC_WRATH, true);
 }
 
 void Totem::UnSummon(uint32 msTime)

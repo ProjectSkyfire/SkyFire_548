@@ -55,10 +55,20 @@ enum LFGMgrEnum
 
 enum LfgFlags
 {
+    LFG_FLAG_NONE                                = 0x0,
     LFG_FLAG_UNK1                                = 0x1,
     LFG_FLAG_UNK2                                = 0x2,
     LFG_FLAG_SEASONAL                            = 0x4,
-    LFG_FLAG_UNK3                                = 0x8
+    LFG_FLAG_UNK3                                = 0x8,
+    LFG_FLAG_UNK4                                = 0x10,
+    LFG_FLAG_UNK5                                = 0x20,
+    LFG_FLAG_UNK6                                = 0x40,
+    LFG_FLAG_UNK7                                = 0x80,
+    LFG_FLAG_UNK8                                = 0x100,
+    LFG_FLAG_UNK9                                = 0x200,
+    LFG_FLAG_UNK10                               = 0x400,
+    LFG_FLAG_UNK11                               = 0x800,
+    LFG_FLAG_UNK12                               = 0x1000, // FLEX + HEROIC SCENARIOS, requires premade flag?
 };
 
 /// Determines the type of instance
@@ -67,7 +77,6 @@ enum LfgType
     LFG_TYPE_NONE                                = 0,
     LFG_TYPE_DUNGEON                             = 1,
     LFG_TYPE_RAID                                = 2,
-    LFG_TYPE_HEROIC                              = 5,
     LFG_TYPE_RANDOM                              = 6
 };
 
@@ -273,10 +282,10 @@ struct LFGDungeonData
     LFGDungeonData(): id(0), name(""), map(0), type(0), expansion(0), group(0), minlevel(0),
         maxlevel(0), difficulty(DIFFICULTY_NONE), seasonal(false), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
-    LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->ID), name(dbc->name), map(dbc->map),
-        type(dbc->type), expansion(dbc->expansion), group(dbc->grouptype),
-        minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(DifficultyID(dbc->difficulty)),
-        seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
+    LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->m_ID), name(dbc->m_Name), map(dbc->m_ContinentID),
+        type(dbc->m_Type), expansion(dbc->m_ExpansionLevel), group(dbc->m_GroupID),
+        minlevel(dbc->m_MinLevel), maxlevel(dbc->m_MaxLevel), difficulty(DifficultyID(dbc->m_DifficultyID)),
+        seasonal(dbc->m_Flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
 
     uint32 id;

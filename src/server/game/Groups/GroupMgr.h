@@ -26,7 +26,7 @@ class GroupMgr
 {
     friend class ACE_Singleton<GroupMgr, ACE_Null_Mutex>;
 private:
-    GroupMgr();
+    GroupMgr() : NextGroupId(1), NextGroupDbStoreId(1) { }
     ~GroupMgr();
 
 public:
@@ -46,7 +46,6 @@ public:
     uint32 GenerateGroupId();
     void   AddGroup(Group* group);
     void   RemoveGroup(Group* group);
-
 
 protected:
     uint32           NextGroupId;

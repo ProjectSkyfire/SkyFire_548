@@ -322,7 +322,6 @@ public:
 
         return false;
     }
-
 };
 
 /*######
@@ -501,7 +500,6 @@ public:
             CombatAI::UpdateAI(uiDiff);
         }
     };
-
 };
 
 /*######
@@ -671,7 +669,6 @@ public:
             }
         }
     };
-
 };
 
 /*######
@@ -724,7 +721,6 @@ public:
             }
         }
     };
-
 };
 
 // correct way: 52312 52314 52555 ...
@@ -774,7 +770,6 @@ public:
             }
         }
     };
-
 };
 
 class npc_scarlet_ghoul : public CreatureScript
@@ -854,7 +849,6 @@ public:
             }
         }
     };
-
 };
 
 /*####

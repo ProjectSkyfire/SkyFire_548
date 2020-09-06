@@ -36,17 +36,16 @@ enum ShamanSpells
     SPELL_MAGE_TEMPORAL_DISPLACEMENT            = 80354,
     SPELL_SHAMAN_ANCESTRAL_AWAKENING            = 52759,
     SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC       = 52752,
-    SPELL_SHAMAN_BIND_SIGHT                     = 6277,
+
     SPELL_SHAMAN_EARTH_SHIELD_HEAL              = 379,
     SPELL_SHAMAN_ELEMENTAL_MASTERY              = 16166,
     SPELL_SHAMAN_EXHAUSTION                     = 57723,
     SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1         = 8349,
     SPELL_SHAMAN_FLAME_SHOCK                    = 8050,
-    SPELL_SHAMAN_FOCUSED_INSIGHT                = 77800,
-    SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD          = 63279,
+
     SPELL_SHAMAN_GLYPH_OF_HEALING_STREAM_TOTEM  = 55456,
     SPELL_SHAMAN_GLYPH_OF_HEALING_WAVE          = 55533,
-    SPELL_SHAMAN_GLYPH_OF_MANA_TIDE             = 55441,
+
     SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM          = 62132,
     SPELL_SHAMAN_LAVA_BURST                     = 51505,
     SPELL_SHAMAN_LAVA_SURGE                     = 77762,
@@ -257,8 +256,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_EARTH_SHIELD_HEAL) ||
-                !sSpellMgr->GetSpellInfo(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD))
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_EARTH_SHIELD_HEAL))
                 return false;
             return true;
         }
@@ -269,12 +267,6 @@ public:
             {
                 amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), amount, HEAL);
                 amount = GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), amount, HEAL);
-
-                // Glyph of Earth Shield
-                //! WORKAROUND
-                //! this glyph is a proc
-                if (AuraEffect* glyph = caster->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD, EFFECT_0))
-                    AddPct(amount, glyph->GetAmount());
             }
         }
 
@@ -381,44 +373,6 @@ public:
     SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_sha_fire_nova_SpellScript();
-    }
-};
-
-// 77794 - Focused Insight
-class spell_sha_focused_insight : public SpellScriptLoader
-{
-public:
-    spell_sha_focused_insight() : SpellScriptLoader("spell_sha_focused_insight") { }
-
-    class spell_sha_focused_insight_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_sha_focused_insight_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FOCUSED_INSIGHT))
-                return false;
-            return true;
-        }
-
-        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-        {
-            PreventDefaultAction();
-            int32 basePoints0 = aurEff->GetAmount();
-            int32 basePoints1 = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue();
-
-            GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_FOCUSED_INSIGHT, &basePoints0, &basePoints1, &basePoints1, true, NULL, aurEff);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectProc += AuraEffectProcFn(spell_sha_focused_insight_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_sha_focused_insight_AuraScript();
     }
 };
 
@@ -706,7 +660,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_lava_lash_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
         }
-
     };
 
     SpellScript* GetSpellScript() const OVERRIDE
@@ -779,7 +732,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_lava_surge_proc_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
-
     };
 
     SpellScript* GetSpellScript() const OVERRIDE
@@ -1087,7 +1039,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_earth_shield();
     new spell_sha_feedback();
     new spell_sha_fire_nova();
-    new spell_sha_focused_insight();
     new spell_sha_glyph_of_healing_wave();
     new spell_sha_healing_stream_totem();
     new spell_sha_heroism();

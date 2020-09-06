@@ -546,7 +546,6 @@ public:
             }
         }
     };
-
 };
 
 // Enchanted Elemental
@@ -641,7 +640,6 @@ public:
             } else Move -= diff;
         }
     };
-
 };
 
 // Tainted Elemental
@@ -710,7 +708,6 @@ public:
             } else DespawnTimer -= diff;
         }
     };
-
 };
 
 //Toxic Sporebat
@@ -811,7 +808,6 @@ public:
                 CheckTimer -= diff;
         }
     };
-
 };
 
 class npc_shield_generator_channel : public CreatureScript
@@ -869,7 +865,6 @@ public:
             } else CheckTimer -= diff;
         }
     };
-
 };
 
 class item_tainted_core : public ItemScript
@@ -942,7 +937,6 @@ public:
         }
         return true;
     }
-
 };
 
 void AddSC_boss_lady_vashj()

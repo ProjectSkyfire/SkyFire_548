@@ -352,7 +352,6 @@ ACE_SSL_Context::filter_versions (const char* versionlist)
   return 0;
 }
 
-
 bool
 ACE_SSL_Context::check_host (const ACE_INET_Addr &host, SSL *peerssl)
 {
@@ -360,7 +359,6 @@ ACE_SSL_Context::check_host (const ACE_INET_Addr &host, SSL *peerssl)
 
   this->check_context ();
 
-  int result = 0;
   char name[MAXHOSTNAMELEN+1];
 
   if (peerssl == 0 || host.get_host_name (name, MAXHOSTNAMELEN) == -1)
@@ -379,13 +377,13 @@ ACE_SSL_Context::check_host (const ACE_INET_Addr &host, SSL *peerssl)
   int flags = X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT;
   size_t len = ACE_OS::strlen (name);
 
-  result = ::X509_check_host (cert, name, len, flags, peerarg);
+  int const result = ::X509_check_host (cert, name, len, flags, peerarg);
 
   if (ACE::debug ())
     {
       ACELIB_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("ACE (%P|%t) SSL_Context::check_host ")
-                  ACE_TEXT ("name <%s> returns %d, peer <%s>\n"),
+                  ACE_TEXT ("name <%C> returns %d, peer <%s>\n"),
                   name, result, peer));
     }
   if (peer != 0)
@@ -452,13 +450,13 @@ ACE_SSL_Context::load_trusted_ca (const char* ca_file,
       // change the CTX directly.
       STACK_OF (X509_NAME) * cert_names = 0;
       cert_names = ::SSL_CTX_get_client_CA_list (this->context_);
-      bool error = false;
 
       // Add CAs from both the file and dir, if specified. There should
       // already be a STACK_OF(X509_NAME) in the CTX, but if not, we create
       // one.
       if (ca_file)
         {
+          bool error = false;
           if (cert_names == 0)
             {
               if ((cert_names = ::SSL_load_client_CA_file (ca_file)) != 0)
@@ -515,7 +513,6 @@ ACE_SSL_Context::load_trusted_ca (const char* ca_file,
 
   return 0;
 }
-
 
 int
 ACE_SSL_Context::private_key (const char *file_name,
@@ -598,8 +595,7 @@ ACE_SSL_Context::set_verify_peer (int strict, int once, int depth)
 {
   this->check_context ();
 
-  // Setup the peer verififcation mode.
-
+  // Setup the peer verification mode.
   int verify_mode = SSL_VERIFY_PEER;
   if (once)
     verify_mode |= SSL_VERIFY_CLIENT_ONCE;
@@ -614,7 +610,6 @@ ACE_SSL_Context::set_verify_peer (int strict, int once, int depth)
   if (depth > 0)
     ::SSL_CTX_set_verify_depth (this->context_, depth + 1);
 }
-
 
 int
 ACE_SSL_Context::random_seed (const char * seed)

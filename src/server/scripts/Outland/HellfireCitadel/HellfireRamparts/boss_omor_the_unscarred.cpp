@@ -55,7 +55,6 @@ enum Spells
 class boss_omor_the_unscarred : public CreatureScript
 {
     public:
-
         boss_omor_the_unscarred() : CreatureScript("boss_omor_the_unscarred") { }
 
         struct boss_omor_the_unscarredAI : public BossAI

@@ -298,7 +298,7 @@ class WorldSession
         void SendGroupInviteNotification(const std::string& inviterName, bool inGroup);
         void SendRolePollInform(ObjectGuid guid, uint8 Index);
 
-        void SendAuthResponse(uint8 code, bool queued, uint32 queuePos = 0);
+        void SendAuthResponse(ResponseCodes code, bool queued, uint32 queuePos = 0);
         void SendClientCacheVersion(uint32 version);
 
         rbac::RBACData* GetRBACData();
@@ -466,7 +466,6 @@ class WorldSession
         z_stream_s* GetCompressionStream() { return _compressionStream; }
 
     public:                                                 // opcodes handlers
-
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
 		void Handle_EarlyProccessContinued(WorldPacket& recvPacket); //Found in sniffs

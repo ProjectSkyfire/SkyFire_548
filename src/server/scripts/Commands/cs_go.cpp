@@ -440,22 +440,22 @@ public:
         }
 
         // update to parent zone if exist (client map show only zones without parents)
-        AreaTableEntry const* zoneEntry = areaEntry->zone ? GetAreaEntryByAreaID(areaEntry->zone) : areaEntry;
+        AreaTableEntry const* zoneEntry = areaEntry->m_ParentAreaID ? GetAreaEntryByAreaID(areaEntry->m_ParentAreaID) : areaEntry;
 
-        Map const* map = sMapMgr->CreateBaseMap(zoneEntry->mapid);
+        Map const* map = sMapMgr->CreateBaseMap(zoneEntry->m_ContinentID);
 
         if (map->Instanceable())
         {
-            handler->PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->area_name, map->GetId(), map->GetMapName());
+            handler->PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->m_ID, areaEntry->m_AreaName, map->GetId(), map->GetMapName());
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        Zone2MapCoordinates(x, y, zoneEntry->ID);
+        Zone2MapCoordinates(x, y, zoneEntry->m_ID);
 
-        if (!MapManager::IsValidMapCoord(zoneEntry->mapid, x, y))
+        if (!MapManager::IsValidMapCoord(zoneEntry->m_ContinentID, x, y))
         {
-            handler->PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, zoneEntry->mapid);
+            handler->PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, zoneEntry->m_ContinentID);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -472,7 +472,7 @@ public:
 
         float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
 
-        player->TeleportTo(zoneEntry->mapid, x, y, z, player->GetOrientation());
+        player->TeleportTo(zoneEntry->m_ContinentID, x, y, z, player->GetOrientation());
         return true;
     }
 

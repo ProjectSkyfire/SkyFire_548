@@ -714,7 +714,6 @@ public:
 enum BloodFilledOrb
 {
     NPC_ZELEMAR     = 17830
-
 };
 
 class go_blood_filled_orb : public GameObjectScript

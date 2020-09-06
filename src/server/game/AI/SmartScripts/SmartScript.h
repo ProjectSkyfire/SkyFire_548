@@ -92,22 +92,7 @@ class SmartScript
         void DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellid);
         Unit* DoFindClosestFriendlyInRange(float range, bool playerOnly);
 
-        void StoreTargetList(ObjectList* targets, uint32 id)
-        {
-            if (!targets)
-                return;
-
-            if (mTargetStorage->find(id) != mTargetStorage->end())
-            {
-                // check if already stored
-                if ((*mTargetStorage)[id] == targets)
-                    return;
-
-                delete (*mTargetStorage)[id];
-            }
-
-            (*mTargetStorage)[id] = targets;
-        }
+        void StoreTargetList(ObjectList* targets, uint32 id);
 
         bool IsSmart(Creature* c = NULL)
         {
@@ -180,27 +165,7 @@ class SmartScript
         ObjectListMap* mTargetStorage;
 
         void OnReset();
-        void ResetBaseObject()
-        {
-            if (meOrigGUID)
-            {
-                if (Creature* m = HashMapHolder<Creature>::Find(meOrigGUID))
-                {
-                    me = m;
-                    go = NULL;
-                }
-            }
-            if (goOrigGUID)
-            {
-                if (GameObject* o = HashMapHolder<GameObject>::Find(goOrigGUID))
-                {
-                    me = NULL;
-                    go = o;
-                }
-            }
-            goOrigGUID = 0;
-            meOrigGUID = 0;
-        }
+        void ResetBaseObject();
 
         //TIMED_ACTIONLIST (script type 9 aka script9)
         void SetScript9(SmartScriptHolder& e, uint32 entry);
@@ -234,7 +199,7 @@ class SmartScript
         UNORDERED_MAP<int32, int32> mStoredDecimals;
         uint32 mPathId;
         SmartAIEventList mStoredEvents;
-        std::list<uint32>mRemIDs;
+        std::list<uint32> mRemIDs;
 
         uint32 mTextTimer;
         uint32 mLastTextID;
@@ -244,20 +209,8 @@ class SmartScript
         SMARTAI_TEMPLATE mTemplate;
         void InstallEvents();
 
-        void RemoveStoredEvent (uint32 id)
-        {
-            if (!mStoredEvents.empty())
-            {
-                for (SmartAIEventList::iterator i = mStoredEvents.begin(); i != mStoredEvents.end(); ++i)
-                {
-                    if (i->event_id == id)
-                    {
-                        mStoredEvents.erase(i);
-                        return;
-                    }
-                }
-            }
-        }
+        void RemoveStoredEvent(uint32 id);
+
         SmartScriptHolder FindLinkedEvent (uint32 link)
         {
             if (!mEvents.empty())

@@ -63,11 +63,8 @@ enum Spells
 class boss_harbinger_skyriss : public CreatureScript
 {
     public:
+        boss_harbinger_skyriss() : CreatureScript("boss_harbinger_skyriss") { }
 
-        boss_harbinger_skyriss()
-            : CreatureScript("boss_harbinger_skyriss")
-        {
-        }
         struct boss_harbinger_skyrissAI : public ScriptedAI
         {
             boss_harbinger_skyrissAI(Creature* creature) : ScriptedAI(creature)
@@ -284,11 +281,8 @@ class boss_harbinger_skyriss : public CreatureScript
 class boss_harbinger_skyriss_illusion : public CreatureScript
 {
     public:
+        boss_harbinger_skyriss_illusion() : CreatureScript("boss_harbinger_skyriss_illusion") { }
 
-        boss_harbinger_skyriss_illusion()
-            : CreatureScript("boss_harbinger_skyriss_illusion")
-        {
-        }
         struct boss_harbinger_skyriss_illusionAI : public ScriptedAI
         {
             boss_harbinger_skyriss_illusionAI(Creature* creature) : ScriptedAI(creature) { }

@@ -73,11 +73,7 @@ const float ShadowmoonChannelers[5][4]=
 class boss_kelidan_the_breaker : public CreatureScript
 {
     public:
-
-        boss_kelidan_the_breaker()
-            : CreatureScript("boss_kelidan_the_breaker")
-        {
-        }
+        boss_kelidan_the_breaker() : CreatureScript("boss_kelidan_the_breaker") { }
 
         struct boss_kelidan_the_breakerAI : public ScriptedAI
         {
@@ -297,7 +293,6 @@ enum Shadowmoon
 class npc_shadowmoon_channeler : public CreatureScript
 {
     public:
-
         npc_shadowmoon_channeler() : CreatureScript("npc_shadowmoon_channeler") { }
 
         struct npc_shadowmoon_channelerAI : public ScriptedAI

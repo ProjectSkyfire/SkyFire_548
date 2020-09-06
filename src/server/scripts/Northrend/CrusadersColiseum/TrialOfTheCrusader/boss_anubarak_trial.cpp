@@ -401,7 +401,6 @@ class boss_anubarak_trial : public CreatureScript
                         default:
                             break;
                     }
-
                 }
 
                 if (HealthBelowPct(30) && events.IsInPhase(PHASE_MELEE) && !_reachedPhase3)

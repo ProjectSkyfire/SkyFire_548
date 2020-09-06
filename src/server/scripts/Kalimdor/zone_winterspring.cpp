@@ -562,7 +562,6 @@ public:
                 default:
                     return NULL;
             }
-
         }
 
         void UpdateEscortAI(const uint32 diff) OVERRIDE

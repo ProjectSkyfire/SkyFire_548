@@ -10342,7 +10342,6 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
                         if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
                             if (!(repState->Flags & FACTION_FLAG_AT_WAR))
                                 return false;
-
             }
         }
     }
@@ -13329,7 +13328,6 @@ float Unit::CalculateDefaultCoefficient(SpellInfo const* spellInfo, DamageEffect
     float DotFactor = 1.0f;
     if (damagetype == DOT)
     {
-
         int32 DotDuration = spellInfo->GetDuration();
         if (!spellInfo->IsChanneled() && DotDuration > 0)
             DotFactor = DotDuration / 15000.0f;
@@ -13623,7 +13621,6 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura)
     // heal
     CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
     return true;
-
 }
 bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
 {

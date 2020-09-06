@@ -471,7 +471,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class boss_veklor : public CreatureScript
@@ -597,7 +596,6 @@ public:
             }
         }
     };
-
 };
 
 void AddSC_boss_twinemperors()

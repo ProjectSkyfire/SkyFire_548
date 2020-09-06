@@ -5,7 +5,7 @@
  *  @file    Future.h
  *
  *  @author Andres Kruse <Andres.Kruse@cern.ch>
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Per Andersson <Per.Andersson@hfera.ericsson.se> and
  *  @author John Tucker <johnny_tucker@yahoo.com>
  */
@@ -81,8 +81,8 @@ public:
 
   /// Declare the dynamic allocation hooks.
   ACE_ALLOC_HOOK_DECLARE;
-protected:
 
+protected:
   /// Constructor
   ACE_Future_Observer (void);
 };
@@ -217,13 +217,10 @@ private:
   mutable ACE_SYNCH_RECURSIVE_CONDITION value_ready_;
 
 private:
-
   ACE_Future_Rep (void);
 
 protected:
-
   ~ACE_Future_Rep (void);
-
 };
 
 /**
@@ -237,7 +234,6 @@ template <class T>
 class ACE_Future
 {
 public:
-  // = Initialization and termination methods.
   /// Constructor.
   ACE_Future (void);
 

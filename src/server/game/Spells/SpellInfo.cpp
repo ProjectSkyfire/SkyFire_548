@@ -2445,26 +2445,6 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         powerCost += (*i)->GetAmount();
     }*/
 
-    // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
-    if (AttributesEx4 & SPELL_ATTR4_SPELL_VS_EXTEND_COST)
-    {
-        uint32 speed = 0;
-/* REVIEW - MERGE
-        if (SpellShapeshiftEntry const* ss = sSpellShapeshiftStore.LookupEntry(caster->GetShapeshiftForm()))
-            speed = ss->attackSpeed;
-        else
-*/
-        {
-            WeaponAttackType slot = WeaponAttackType::BASE_ATTACK;
-            if (AttributesEx3 & SPELL_ATTR3_REQ_OFFHAND)
-                slot = WeaponAttackType::OFF_ATTACK;
-
-            speed = caster->GetAttackTime(slot);
-        }
-
-        powerCost += speed / 100;
-    }
-
     // Apply cost mod by spell
     if (Player* modOwner = caster->GetSpellModOwner())
         modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost);

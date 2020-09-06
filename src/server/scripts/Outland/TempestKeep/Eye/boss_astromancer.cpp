@@ -93,11 +93,7 @@ static float SolarianPos[4] = {432.909f, -373.424f, 17.9608f, 1.06421f};
 class boss_high_astromancer_solarian : public CreatureScript
 {
     public:
-
-        boss_high_astromancer_solarian()
-            : CreatureScript("boss_high_astromancer_solarian")
-        {
-        }
+        boss_high_astromancer_solarian() : CreatureScript("boss_high_astromancer_solarian") { }
 
         struct boss_high_astromancer_solarianAI : public ScriptedAI
         {
@@ -428,11 +424,7 @@ class boss_high_astromancer_solarian : public CreatureScript
 class npc_solarium_priest : public CreatureScript
 {
     public:
-
-        npc_solarium_priest()
-            : CreatureScript("npc_solarium_priest")
-        {
-        }
+        npc_solarium_priest() : CreatureScript("npc_solarium_priest") { }
 
         struct npc_solarium_priestAI : public ScriptedAI
         {

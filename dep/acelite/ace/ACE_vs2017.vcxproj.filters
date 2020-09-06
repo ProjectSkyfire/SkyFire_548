@@ -324,6 +324,9 @@
     <ClCompile Include="Log_Msg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Log_Msg_Android_Logcat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Log_Msg_Backend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -430,6 +433,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Monotonic_Time_Policy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MQX_Filesystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Msg_WFMO_Reactor.cpp">
@@ -1193,6 +1199,9 @@
     <ClInclude Include="config-kfreebsd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="config-linux-common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="config-linux.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1211,10 +1220,7 @@
     <ClInclude Include="config-macosx-highsierra.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config-macosx-iOS-hardware.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-macosx-iOS-simulator.h">
+    <ClInclude Include="config-macosx-iOS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-macosx-jaguar.h">
@@ -1254,6 +1260,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config-mqx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-netbsd.h">
@@ -1368,6 +1377,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-msvc-141.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config-win32-msvc-142.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-msvc-7.h">
@@ -1670,6 +1682,9 @@
     <ClInclude Include="Log_Msg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Log_Msg_Android_Logcat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Log_Msg_Backend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1818,6 +1833,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Monotonic_Time_Policy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MQX_Filesystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Msg_WFMO_Reactor.h">
@@ -2886,6 +2904,9 @@
     <None Include="..\bin\depgen.pl">
       <Filter>Installdata Files</Filter>
     </None>
+    <None Include="..\bin\generate_export_file.pl">
+      <Filter>Installdata Files</Filter>
+    </None>
     <None Include="..\bin\MakeProjectCreator">
       <Filter>Installdata Files</Filter>
     </None>
@@ -2916,7 +2937,7 @@
     <None Include="..\THANKS">
       <Filter>Installdata Files</Filter>
     </None>
-    <None Include="..\VERSION">
+    <None Include="..\VERSION.txt">
       <Filter>Installdata Files</Filter>
     </None>
   </ItemGroup>

@@ -235,7 +235,6 @@ uint32 DB2FileLoader::GetFormatStringsFields(const char * format)
 
 char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**& indexTable)
 {
-
     typedef char * ptr;
     if (strlen(format) != fieldCount)
         return NULL;

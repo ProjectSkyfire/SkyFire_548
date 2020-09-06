@@ -379,9 +379,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_winter_veil_px_238_winter_wondervolt_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
-
-    private:
-
     };
 
     SpellScript* GetSpellScript() const OVERRIDE

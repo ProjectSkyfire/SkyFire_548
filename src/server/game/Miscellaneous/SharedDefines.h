@@ -250,7 +250,6 @@ enum BattlePayDistribution
     CHARACTER_BOOST_TEXT_ID             = 88,
     CHARACTER_BOOST_SPEC_MASK           = 0xFFF,
     CHARACTER_BOOST_FACTION_ALLIANCE    = 0x1000000
-
 };
 
 #define CHARACTER_BOOST_BONUS_TEXT      "Boost your character to level 90!"
@@ -494,7 +493,7 @@ enum SpellAttr4
     SPELL_ATTR4_TRIGGERED                        = 0x00000080, //  7 spells forced to be triggered
     SPELL_ATTR4_FIXED_DAMAGE                     = 0x00000100, //  8 ignores taken percent damage mods?
     SPELL_ATTR4_TRIGGER_ACTIVATE                 = 0x00000200, //  9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
-    SPELL_ATTR4_SPELL_VS_EXTEND_COST             = 0x00000400, // 10 Rogue Shiv have this flag
+    SPELL_ATTR4_UNK10                            = 0x00000400, // 10
     SPELL_ATTR4_UNK11                            = 0x00000800, // 11
     SPELL_ATTR4_UNK12                            = 0x00001000, // 12
     SPELL_ATTR4_UNK13                            = 0x00002000, // 13
@@ -3863,7 +3862,7 @@ enum EventId
     EVENT_CHARGE_PREPATH    = 1005
 };
 
-enum ResponseCodes
+enum class ResponseCodes
 {
     RESPONSE_SUCCESS                                       = 0,
     RESPONSE_FAILURE                                       = 1,

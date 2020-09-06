@@ -820,7 +820,6 @@ class npc_slime_pool : public CreatureScript
             private:
                 InstanceScript* _instance;
                 bool _cast;
-
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE

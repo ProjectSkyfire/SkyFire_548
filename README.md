@@ -33,6 +33,7 @@ For further information on the SkyFire project, please visit our project website
 + Platform/Architecture:
   + Canonical:
     + Ubuntu 18.04 LTS: x86_32, x86_64
+    + Ubuntu 20.04 LTS: x86_32, x86_64
   + Debian:
     + Debian GNU/Linux 10: x86_32, x86_64
   + Windows / Windows Server:
@@ -52,7 +53,7 @@ For further information on the SkyFire project, please visit our project website
 Detailed installation guides are available in the wiki for
 
 [Windows](http://wiki.projectskyfire.org/index.php?title=Installation_Windows),
-[Linux](http://wiki.projectskyfire.org/index.php?title=Installation_Linux) and
+[Linux](http://wiki.projectskyfire.org/index.php?title=Installation_(Ubuntu_18.04_LTS)) and
 [Mac OSX](http://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
 
 

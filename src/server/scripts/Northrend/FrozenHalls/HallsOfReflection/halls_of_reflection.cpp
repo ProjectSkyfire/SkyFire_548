@@ -1825,7 +1825,6 @@ public:
             _doJump = false;
             if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
                 _instance->SetData(DATA_SUMMONS, 1);
-
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
@@ -1940,7 +1939,6 @@ public:
         {
             if (_instance)
                 _instance->SetData(DATA_SUMMONS, 0);
-
         }
 
         void AttackStart(Unit* who) OVERRIDE
@@ -2099,7 +2097,6 @@ public:
             if (_instance)
                 _instance->SetData(DATA_SUMMONS, 0);
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

@@ -256,7 +256,6 @@ class boss_sindragosa : public CreatureScript
 
                 if (Is25ManRaid() && me->HasAura(SPELL_SHADOWS_FATE))
                     DoCastAOE(SPELL_FROST_INFUSION_CREDIT, true);
-
             }
 
             void EnterCombat(Unit* victim) OVERRIDE
@@ -410,7 +409,6 @@ class boss_sindragosa : public CreatureScript
                     if (spellId == spell->Id)
                         if (Aura const* mysticBuffet = target->GetAura(spell->Id))
                             _mysticBuffetStack = std::max<uint8>(_mysticBuffetStack, mysticBuffet->GetStackAmount());
-
             }
 
             void UpdateAI(uint32 diff) OVERRIDE

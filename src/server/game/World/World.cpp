@@ -281,7 +281,7 @@ void World::AddSession_(WorldSession* s)
         return;
     }
 
-    s->SendAuthResponse(AUTH_OK, false);
+    s->SendAuthResponse(ResponseCodes::AUTH_OK, false);
     s->SendAddonsInfo();
     s->SendClientCacheVersion(sWorld->getIntConfig(WorldIntConfigs::CONFIG_CLIENTCACHE_VERSION));
     if (s->HasBoost())
@@ -340,7 +340,7 @@ void World::AddQueuedPlayer(WorldSession* sess)
     m_QueuedPlayer.push_back(sess);
 
     // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
-    sess->SendAuthResponse(AUTH_WAIT_QUEUE, true, GetQueuePos(sess));
+    sess->SendAuthResponse(ResponseCodes::AUTH_WAIT_QUEUE, true, GetQueuePos(sess));
 }
 
 bool World::RemoveQueuedPlayer(WorldSession* sess)
@@ -2792,7 +2792,6 @@ void World::UpdateSessions(uint32 diff)
             RemoveQueuedPlayer(pSession);
             m_sessions.erase(itr);
             delete pSession;
-
         }
     }
 }
@@ -3253,7 +3252,6 @@ void World::LoadWorldStates()
     while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u world states in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
 }
 
 // Setting a worldstate will save it to DB

@@ -285,10 +285,7 @@ public:
                     }
                     break;
                 case EVENT_UROK_DOOMHOWL:
-                    if (GetBossState(NPC_UROK_DOOMHOWL) == NOT_STARTED)
-                    {
-
-                    }
+                    if (GetBossState(NPC_UROK_DOOMHOWL) == NOT_STARTED) { }
                     break;
                 default:
                     break;

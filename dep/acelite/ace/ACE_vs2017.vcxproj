@@ -486,6 +486,8 @@
     </ClCompile>
     <ClCompile Include="Log_Msg.cpp">
     </ClCompile>
+    <ClCompile Include="Log_Msg_Android_Logcat.cpp">
+    </ClCompile>
     <ClCompile Include="Log_Msg_Backend.cpp">
     </ClCompile>
     <ClCompile Include="Log_Msg_Callback.cpp">
@@ -513,6 +515,8 @@
     <ClCompile Include="MEM_Stream.cpp">
     </ClCompile>
     <ClCompile Include="MMAP_Memory_Pool.cpp">
+    </ClCompile>
+    <ClCompile Include="MQX_Filesystem.cpp">
     </ClCompile>
     <ClCompile Include="Malloc.cpp">
     </ClCompile>
@@ -1624,6 +1628,7 @@
     <ClInclude Include="Lock_Adapter_T.h" />
     <ClInclude Include="Log_Category.h" />
     <ClInclude Include="Log_Msg.h" />
+    <ClInclude Include="Log_Msg_Android_Logcat.h" />
     <ClInclude Include="Log_Msg_Backend.h" />
     <ClInclude Include="Log_Msg_Callback.h" />
     <ClInclude Include="Log_Msg_IPC.h" />
@@ -1639,6 +1644,7 @@
     <ClInclude Include="MEM_SAP.h" />
     <ClInclude Include="MEM_Stream.h" />
     <ClInclude Include="MMAP_Memory_Pool.h" />
+    <ClInclude Include="MQX_Filesystem.h" />
     <ClInclude Include="Malloc.h" />
     <ClInclude Include="Malloc_Allocator.h" />
     <ClInclude Include="Malloc_Base.h" />
@@ -1924,14 +1930,14 @@
     <ClInclude Include="config-icc-common.h" />
     <ClInclude Include="config-integritySCA.h" />
     <ClInclude Include="config-kfreebsd.h" />
+    <ClInclude Include="config-linux-common.h" />
     <ClInclude Include="config-linux.h" />
     <ClInclude Include="config-lite.h" />
     <ClInclude Include="config-lynxos-178.h" />
     <ClInclude Include="config-lynxos.h" />
     <ClInclude Include="config-macosx-elcapitan.h" />
     <ClInclude Include="config-macosx-highsierra.h" />
-    <ClInclude Include="config-macosx-iOS-hardware.h" />
-    <ClInclude Include="config-macosx-iOS-simulator.h" />
+    <ClInclude Include="config-macosx-iOS.h" />
     <ClInclude Include="config-macosx-jaguar.h" />
     <ClInclude Include="config-macosx-leopard.h" />
     <ClInclude Include="config-macosx-lion.h" />
@@ -1945,6 +1951,7 @@
     <ClInclude Include="config-macosx-yosemite.h" />
     <ClInclude Include="config-macosx.h" />
     <ClInclude Include="config-macros.h" />
+    <ClInclude Include="config-mqx.h" />
     <ClInclude Include="config-netbsd.h" />
     <ClInclude Include="config-openbsd.h" />
     <ClInclude Include="config-openvms.h" />
@@ -1983,6 +1990,7 @@
     <ClInclude Include="config-win32-msvc-12.h" />
     <ClInclude Include="config-win32-msvc-14.h" />
     <ClInclude Include="config-win32-msvc-141.h" />
+    <ClInclude Include="config-win32-msvc-142.h" />
     <ClInclude Include="config-win32-msvc-7.h" />
     <ClInclude Include="config-win32-msvc-8.h" />
     <ClInclude Include="config-win32-msvc-9.h" />
@@ -2109,6 +2117,7 @@
     <None Include="..\bin\add_rel_link.sh" />
     <None Include="..\bin\DependencyGenerator" />
     <None Include="..\bin\depgen.pl" />
+    <None Include="..\bin\generate_export_file.pl" />
     <None Include="..\bin\MakeProjectCreator" />
     <None Include="..\bin\mpc.pl" />
     <None Include="..\bin\mwc.pl" />
@@ -2119,7 +2128,7 @@
     <None Include="..\PROBLEM-REPORT-FORM" />
     <None Include="..\README" />
     <None Include="..\THANKS" />
-    <None Include="..\VERSION" />
+    <None Include="..\VERSION.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ACE.pc.in" />

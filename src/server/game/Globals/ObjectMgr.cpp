@@ -321,8 +321,8 @@ void ObjectMgr::LoadGraveyardOrientations()
             continue;
         }
         _graveyardOrientations[id] = fields[1].GetFloat();
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %lu graveyard orientations in %u ms", (unsigned long)_graveyardOrientations.size(), GetMSTimeDiffToNow(oldMSTime));
 }
@@ -1576,8 +1576,8 @@ void ObjectMgr::LoadTempSummons()
         _tempSummonDataStore[key].push_back(data);
 
         ++count;
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u temp summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -1726,8 +1726,8 @@ void ObjectMgr::LoadCreatures()
             AddCreatureToGrid(guid, &data);
 
         ++count;
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u creatures in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -3088,26 +3088,14 @@ void ObjectMgr::LoadPlayerInfo()
                 float  positionZ     = fields[6].GetFloat();
                 float  orientation   = fields[7].GetFloat();
 
-                if (current_race >= MAX_RACES)
-                {
-                    SF_LOG_ERROR("sql.sql", "Wrong race %u in `playercreateinfo` table, ignoring.", current_race);
-                    continue;
-                }
-
                 ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
-                if (!rEntry)
+                if (!rEntry || !IsValidPlayerCreateRace(current_race))
                 {
                     SF_LOG_ERROR("sql.sql", "Wrong race %u in `playercreateinfo` table, ignoring.", current_race);
                     continue;
                 }
 
-                if (current_class >= MAX_CLASSES)
-                {
-                    SF_LOG_ERROR("sql.sql", "Wrong class %u in `playercreateinfo` table, ignoring.", current_class);
-                    continue;
-                }
-
-                if (!sChrClassesStore.LookupEntry(current_class))
+                if (!sChrClassesStore.LookupEntry(current_class) || !IsValidPlayerCreateClass(current_class))
                 {
                     SF_LOG_ERROR("sql.sql", "Wrong class %u in `playercreateinfo` table, ignoring.", current_class);
                     continue;
@@ -3145,6 +3133,32 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 
+    LoadPlayerCreateItemsData();
+    LoadPlayerCreateSpellsData();
+    LoadPlayerCreateActionData();
+    LoadPlayerCreateLevelStatsData();
+    LoadPlayerCreateXpData();
+    LoadPlayerCreateCastSpellsData();
+}
+
+bool ObjectMgr::IsValidPlayerCreateRace(uint32 currentRace)
+{
+    if (currentRace >= MAX_RACES)
+        return false;
+
+    return true;
+}
+
+bool ObjectMgr::IsValidPlayerCreateClass(uint32 currentClass)
+{
+    if (currentClass >= MAX_CLASSES)
+        return false;
+
+    return true;
+}
+
+void ObjectMgr::LoadPlayerCreateItemsData()
+{
     // Load playercreate items
     SF_LOG_INFO("server.loading", "Loading Player Create Items Data...");
     {
@@ -3165,14 +3179,14 @@ void ObjectMgr::LoadPlayerInfo()
                 Field* fields = result->Fetch();
 
                 uint32 current_race = fields[0].GetUInt8();
-                if (current_race >= MAX_RACES)
+                if (!IsValidPlayerCreateRace(current_race))
                 {
                     SF_LOG_ERROR("sql.sql", "Wrong race %u in `playercreateinfo_item` table, ignoring.", current_race);
                     continue;
                 }
 
                 uint32 current_class = fields[1].GetUInt8();
-                if (current_class >= MAX_CLASSES)
+                if (!IsValidPlayerCreateClass(current_class))
                 {
                     SF_LOG_ERROR("sql.sql", "Wrong class %u in `playercreateinfo_item` table, ignoring.", current_class);
                     continue;
@@ -3214,7 +3228,10 @@ void ObjectMgr::LoadPlayerInfo()
             SF_LOG_INFO("server.loading", ">> Loaded %u custom player create items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }
     }
+}
 
+void ObjectMgr::LoadPlayerCreateSpellsData()
+{
     // Load playercreate spells
     SF_LOG_INFO("server.loading", "Loading Player Create Spell Data...");
     {
@@ -3277,7 +3294,10 @@ void ObjectMgr::LoadPlayerInfo()
             SF_LOG_INFO("server.loading", ">> Loaded %u player create spells in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }
     }
+}
 
+void ObjectMgr::LoadPlayerCreateActionData()
+{
     // Load playercreate actions
     SF_LOG_INFO("server.loading", "Loading Player Create Action Data...");
     {
@@ -3299,14 +3319,14 @@ void ObjectMgr::LoadPlayerInfo()
                 Field* fields = result->Fetch();
 
                 uint32 current_race = fields[0].GetUInt8();
-                if (current_race >= MAX_RACES)
+                if (!IsValidPlayerCreateRace(current_race))
                 {
                     SF_LOG_ERROR("sql.sql", "Wrong race %u in `playercreateinfo_action` table, ignoring.", current_race);
                     continue;
                 }
 
                 uint32 current_class = fields[1].GetUInt8();
-                if (current_class >= MAX_CLASSES)
+                if (!IsValidPlayerCreateClass(current_class))
                 {
                     SF_LOG_ERROR("sql.sql", "Wrong class %u in `playercreateinfo_action` table, ignoring.", current_class);
                     continue;
@@ -3322,7 +3342,10 @@ void ObjectMgr::LoadPlayerInfo()
             SF_LOG_INFO("server.loading", ">> Loaded %u player create actions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }
     }
+}
 
+void ObjectMgr::LoadPlayerCreateLevelStatsData()
+{
     // Loading levels data (class/race dependent)
     SF_LOG_INFO("server.loading", "Loading Player Create Level Stats Data...");
     {
@@ -3344,15 +3367,15 @@ void ObjectMgr::LoadPlayerInfo()
             Field* fields = result->Fetch();
 
             uint32 current_race = fields[0].GetUInt8();
-            if (current_race >= MAX_RACES)
-            {
+            if (!IsValidPlayerCreateRace(current_race))
+                {
                 SF_LOG_ERROR("sql.sql", "Wrong race %u in `player_levelstats` table, ignoring.", current_race);
                 continue;
             }
 
             uint32 current_class = fields[1].GetUInt8();
-            if (current_class >= MAX_CLASSES)
-            {
+            if (!IsValidPlayerCreateClass(current_class))
+                {
                 SF_LOG_ERROR("sql.sql", "Wrong class %u in `player_levelstats` table, ignoring.", current_class);
                 continue;
             }
@@ -3434,7 +3457,10 @@ void ObjectMgr::LoadPlayerInfo()
 
         SF_LOG_INFO("server.loading", ">> Loaded %u level stats definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
+}
 
+void ObjectMgr::LoadPlayerCreateXpData()
+{
     // Loading xp per level data
     SF_LOG_INFO("server.loading", "Loading Player Create XP Data...");
     {
@@ -3491,7 +3517,10 @@ void ObjectMgr::LoadPlayerInfo()
 
         SF_LOG_INFO("server.loading", ">> Loaded %u xp for level definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
+}
 
+void ObjectMgr::LoadPlayerCreateCastSpellsData()
+{
     // Load playercreate cast spell
     SF_LOG_INFO("server.loading", "Loading Player Create Spell Cast Data...");
     {
@@ -4741,7 +4770,6 @@ void ObjectMgr::LoadSpellScriptNames()
 
     do
     {
-
         Field* fields = result->Fetch();
 
         int32 spellId          = fields[0].GetInt32();
@@ -4882,7 +4910,6 @@ void ObjectMgr::LoadPageTexts()
             PageTextContainer::const_iterator itr2 = _pageTextStore.find(itr->second.NextPage);
             if (itr2 == _pageTextStore.end())
                 SF_LOG_ERROR("sql.sql", "Page text (Id: %u) has not existing next page (Id: %u)", itr->first, itr->second.NextPage);
-
         }
     }
 
@@ -5353,8 +5380,8 @@ void ObjectMgr::LoadQuestAreaTriggers()
         }
 
         _questAreaTriggerStore[trigger_ID] = quest_ID;
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u quest trigger points in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -5577,7 +5604,7 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (areaEntry->zone != 0)
+        if (areaEntry->m_ParentAreaID != 0)
         {
             SF_LOG_ERROR("sql.sql", "Table `game_graveyard_zone` has a record for subzone id (%u) instead of zone, skipped.", zoneId);
             continue;
@@ -5876,8 +5903,8 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         }
 
         _areaTriggerStore[Trigger_ID] = at;
-
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u area trigger teleport definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -7344,29 +7371,29 @@ bool isValidString(const std::wstring& wstr, uint32 strictMask, bool numericOrSp
     return false;
 }
 
-uint8 ObjectMgr::CheckPlayerName(const std::string& name, bool create)
+ResponseCodes ObjectMgr::CheckPlayerName(const std::string& name, bool create)
 {
     std::wstring wname;
     if (!Utf8toWStr(name, wname))
-        return CHAR_NAME_INVALID_CHARACTER;
+        return ResponseCodes::CHAR_NAME_INVALID_CHARACTER;
 
     if (wname.size() > MAX_PLAYER_NAME)
-        return CHAR_NAME_TOO_LONG;
+        return ResponseCodes::CHAR_NAME_TOO_LONG;
 
     uint32 minName = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PLAYER_NAME);
     if (wname.size() < minName)
-        return CHAR_NAME_TOO_SHORT;
+        return ResponseCodes::CHAR_NAME_TOO_SHORT;
 
     uint32 strictMask = sWorld->getIntConfig(WorldIntConfigs::CONFIG_STRICT_PLAYER_NAMES);
     if (!isValidString(wname, strictMask, false, create))
-        return CHAR_NAME_MIXED_LANGUAGES;
+        return ResponseCodes::CHAR_NAME_MIXED_LANGUAGES;
 
     wstrToLower(wname);
     for (size_t i = 2; i < wname.size(); ++i)
         if (wname[i] == wname[i-1] && wname[i] == wname[i-2])
-            return CHAR_NAME_THREE_CONSECUTIVE;
+            return ResponseCodes::CHAR_NAME_THREE_CONSECUTIVE;
 
-    return CHAR_NAME_SUCCESS;
+    return ResponseCodes::CHAR_NAME_SUCCESS;
 }
 
 bool ObjectMgr::IsValidCharterName(const std::string& name)
@@ -8090,7 +8117,6 @@ void ObjectMgr::LoadVendors()
     QueryResult result = WorldDatabase.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type FROM npc_vendor ORDER BY entry, slot ASC");
     if (!result)
     {
-
         SF_LOG_ERROR("server.loading", ">>  Loaded 0 Vendors. DB table `npc_vendor` is empty!");
         return;
     }

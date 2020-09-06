@@ -361,7 +361,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_syth_shadow : public CreatureScript
@@ -416,7 +415,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_darkweaver_syth()

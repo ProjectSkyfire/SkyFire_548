@@ -116,48 +116,13 @@ void Battleground::BroadcastWorker(Do& _do)
             _do(player);
 }
 
-Battleground::Battleground()
+Battleground::Battleground() : m_Guid(0), m_TypeID(BattlegroundTypeId::BATTLEGROUND_TYPE_NONE), m_RandomTypeID(BattlegroundTypeId::BATTLEGROUND_TYPE_NONE),
+                               m_InstanceID(0), m_Status(STATUS_NONE), m_ClientInstanceID(0), m_EndTime(0), m_LastResurrectTime(0), m_BracketId(BattlegroundBracketId::BG_BRACKET_ID_FIRST),
+                               m_InvitedAlliance(0), m_InvitedHorde(0), m_ArenaType(0), m_IsArena(0), m_Winner(2), m_StartDelayTime(0), m_StartTime(0), m_CountdownTimer(0), m_ResetStatTimer(0),
+                               m_ValidStartPositionTimer(0), m_Events(0), m_IsRated(false), m_BuffChange(false), m_IsRandom(false), m_Name(""), m_LevelMin(0), m_LevelMax(0), m_InBGFreeSlotQueue(false),
+                               m_SetDeleteThis(false), m_MaxPlayersPerTeam(0), m_MaxPlayers(0), m_MinPlayersPerTeam(0), m_MinPlayers(0), m_MapId(0), m_Map(NULL), m_StartMaxDist(0.0f), ScriptId(0),
+                               m_PrematureCountDown(false), m_PrematureCountDownTimer(0), m_HonorMode(BGHonorMode::BG_NORMAL)
 {
-    m_Guid              = 0;
-    m_TypeID            = BattlegroundTypeId::BATTLEGROUND_TYPE_NONE;
-    m_RandomTypeID      = BattlegroundTypeId::BATTLEGROUND_TYPE_NONE;
-    m_InstanceID        = 0;
-    m_Status            = STATUS_NONE;
-    m_ClientInstanceID  = 0;
-    m_EndTime           = 0;
-    m_LastResurrectTime = 0;
-    m_BracketId         = BattlegroundBracketId::BG_BRACKET_ID_FIRST;
-    m_InvitedAlliance   = 0;
-    m_InvitedHorde      = 0;
-    m_ArenaType         = 0;
-    m_IsArena           = false;
-    m_Winner            = 2;
-    m_StartDelayTime    = 0;
-    m_StartTime         = 0;
-    m_CountdownTimer    = 0;
-    m_ResetStatTimer    = 0;
-    m_ValidStartPositionTimer = 0;
-    m_Events            = 0;
-    m_IsRated           = false;
-    m_BuffChange        = false;
-    m_IsRandom          = false;
-    m_Name              = "";
-    m_LevelMin          = 0;
-    m_LevelMax          = 0;
-    m_InBGFreeSlotQueue = false;
-    m_SetDeleteThis     = false;
-
-    m_MaxPlayersPerTeam = 0;
-    m_MaxPlayers        = 0;
-    m_MinPlayersPerTeam = 0;
-    m_MinPlayers        = 0;
-
-    m_MapId             = 0;
-    m_Map               = NULL;
-    m_StartMaxDist      = 0.0f;
-
-    ScriptId = 0;
-
     m_TeamStartLocX[TEAM_ALLIANCE]   = 0;
     m_TeamStartLocX[TEAM_HORDE]      = 0;
 
@@ -187,11 +152,6 @@ Battleground::Battleground()
 
     m_TeamScores[TEAM_ALLIANCE]      = 0;
     m_TeamScores[TEAM_HORDE]         = 0;
-
-    m_PrematureCountDown = false;
-    m_PrematureCountDownTimer = 0;
-
-    m_HonorMode = BG_NORMAL;
 
     StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_2M;
     StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_1M;
@@ -1951,7 +1911,7 @@ uint32 Battleground::GetAlivePlayersCountByTeam(uint32 Team) const
 
 void Battleground::SetHoliday(bool is_holiday)
 {
-    m_HonorMode = is_holiday ? BG_HOLIDAY : BG_NORMAL;
+    m_HonorMode = is_holiday ? BGHonorMode::BG_HOLIDAY : BGHonorMode::BG_NORMAL;
 }
 
 int32 Battleground::GetObjectType(uint64 guid)

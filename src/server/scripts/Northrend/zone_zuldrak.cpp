@@ -438,7 +438,6 @@ public:
             uint32 uiPhase;
             uint32 uiRemoveFlagTimer;
             uint32 uiQuest;
-
     };
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
@@ -594,7 +593,6 @@ public:
 
             if (killer->GetTypeId() == TypeID::TYPEID_PLAYER)
                 killer->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_TUSKARRMAGEDDON, killer);
-
         }
 
         private:
@@ -645,7 +643,6 @@ public:
             _enrage        = false;
             _chargeTimer   = 15000;
             _uppercutTimer = 12000;
-
         }
 
         void WaypointReached(uint32 waypointId) OVERRIDE
@@ -990,7 +987,6 @@ public:
                     SummonList.push_back(summon->GetGUID());
                 }
             }
-
         }
 
         void EnterCombat(Unit* unit) OVERRIDE
@@ -1114,7 +1110,6 @@ public:
         {
             if (Data == 1)
                 _spell = Boss[Value].uiAddSpell;
-
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -1432,113 +1427,113 @@ class npc_alchemist_finklestein : public CreatureScript
 public:
     npc_alchemist_finklestein() : CreatureScript("npc_alchemist_finklestein") { }
 
-        struct npc_alchemist_finklesteinAI : public ScriptedAI
+    struct npc_alchemist_finklesteinAI : public ScriptedAI
+    {
+        npc_alchemist_finklesteinAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() OVERRIDE
         {
-            npc_alchemist_finklesteinAI(Creature* creature) : ScriptedAI(creature) { }
+            _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(15000, 26000));
+        }
 
-            void Reset() OVERRIDE
-            {
-                _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(15000, 26000));
-            }
-
-            void SetData(uint32 type, uint32 data) OVERRIDE
-            {
-                if (type == 1 && data == 1)
-                    switch (_getingredienttry)
-                   {
-                        case 2:
-                        case 3:
-                            _events.ScheduleEvent(EVENT_EASY_123, 100);
-                            break;
-                        case 4:
-                            _events.ScheduleEvent(EVENT_MEDIUM_4, 100);
-                            break;
-                        case 5:
-                            _events.ScheduleEvent(EVENT_MEDIUM_5, 100);
-                            break;
-                        case 6:
-                            _events.ScheduleEvent(EVENT_HARD_6, 100);
-                            break;
-                        default:
-                            break;
-                    }
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                _events.Update(diff);
-
-                while (uint32 eventId = _events.ExecuteEvent())
+        void SetData(uint32 type, uint32 data) OVERRIDE
+        {
+            if (type == 1 && data == 1)
+                switch (_getingredienttry)
                 {
-                    switch (eventId)
-                    {
-                        case EVENT_TURN_TO_POT:
-                            me->SetFacingTo(6.230825f);
-                            me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING_NO_SHEATHE);
-                            _events.ScheduleEvent(EVENT_TURN_BACK, 11000);
-                            break;
-                        case EVENT_TURN_BACK:
-                            me->SetFacingTo(4.886922f);
-                            me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                            _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(25000, 41000));
-                            break;
-                        case EVENT_EASY_123:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                            {
-                                Talk(SAY_EASY_123, player);
-                                DoCast(player, SPELL_RANDOM_INGREDIENT_EASY_AURA);
-                                ++_getingredienttry;
-                            }
-                            break;
-                        case EVENT_MEDIUM_4:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                            {
-                                Talk(SAY_MEDIUM_4, player);
-                                DoCast(player, SPELL_RANDOM_INGREDIENT_MEDIUM_AURA);
-                                ++_getingredienttry;
-                            }
-                            break;
-                        case EVENT_MEDIUM_5:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                            {
-                                Talk(SAY_MEDIUM_5, player);
-                                DoCast(player, SPELL_RANDOM_INGREDIENT_MEDIUM_AURA);
-                                ++_getingredienttry;
-                            }
-                            break;
-                        case EVENT_HARD_6:
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                            {
-                                Talk(SAY_HARD_6, player);
-                                DoCast(player, SPELL_RANDOM_INGREDIENT_HARD_AURA);
-                                ++_getingredienttry;
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                    case 2:
+                    case 3:
+                        _events.ScheduleEvent(EVENT_EASY_123, 100);
+                        break;
+                    case 4:
+                        _events.ScheduleEvent(EVENT_MEDIUM_4, 100);
+                        break;
+                    case 5:
+                        _events.ScheduleEvent(EVENT_MEDIUM_5, 100);
+                        break;
+                    case 6:
+                        _events.ScheduleEvent(EVENT_HARD_6, 100);
+                        break;
+                    default:
+                        break;
+                }
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TURN_TO_POT:
+                        me->SetFacingTo(6.230825f);
+                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING_NO_SHEATHE);
+                        _events.ScheduleEvent(EVENT_TURN_BACK, 11000);
+                        break;
+                    case EVENT_TURN_BACK:
+                        me->SetFacingTo(4.886922f);
+                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                        _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(25000, 41000));
+                        break;
+                    case EVENT_EASY_123:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        {
+                            Talk(SAY_EASY_123, player);
+                            DoCast(player, SPELL_RANDOM_INGREDIENT_EASY_AURA);
+                            ++_getingredienttry;
+                        }
+                        break;
+                    case EVENT_MEDIUM_4:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        {
+                            Talk(SAY_MEDIUM_4, player);
+                            DoCast(player, SPELL_RANDOM_INGREDIENT_MEDIUM_AURA);
+                            ++_getingredienttry;
+                        }
+                        break;
+                    case EVENT_MEDIUM_5:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        {
+                            Talk(SAY_MEDIUM_5, player);
+                            DoCast(player, SPELL_RANDOM_INGREDIENT_MEDIUM_AURA);
+                            ++_getingredienttry;
+                        }
+                        break;
+                    case EVENT_HARD_6:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        {
+                            Talk(SAY_HARD_6, player);
+                            DoCast(player, SPELL_RANDOM_INGREDIENT_HARD_AURA);
+                            ++_getingredienttry;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
-
-            void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
-            {
-                player->CLOSE_GOSSIP_MENU();
-                DoCast(player, SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
-                _playerGUID = player->GetGUID();
-                _getingredienttry = 1;
-                _events.ScheduleEvent(EVENT_EASY_123, 100);
-            }
-
-        private:
-            EventMap _events;
-            uint64   _playerGUID;
-            uint8    _getingredienttry;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_alchemist_finklesteinAI(creature);
         }
+
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+        {
+            player->CLOSE_GOSSIP_MENU();
+            DoCast(player, SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
+            _playerGUID = player->GetGUID();
+            _getingredienttry = 1;
+            _events.ScheduleEvent(EVENT_EASY_123, 100);
+        }
+
+private:
+        EventMap _events;
+        uint64   _playerGUID;
+        uint8    _getingredienttry;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_alchemist_finklesteinAI(creature);
+    }
 };
 
 class go_finklesteins_cauldron : public GameObjectScript
@@ -1584,45 +1579,46 @@ uint32 const FetchIngredients[21][4] =
 
 class spell_random_ingredient_aura : public SpellScriptLoader
 {
-    public: spell_random_ingredient_aura() : SpellScriptLoader("spell_random_ingredient_aura") { }
+public:
+    spell_random_ingredient_aura() : SpellScriptLoader("spell_random_ingredient_aura") { }
 
-        class spell_random_ingredient_aura_AuraScript : public AuraScript
+    class spell_random_ingredient_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_random_ingredient_aura_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            PrepareAuraScript(spell_random_ingredient_aura_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_EASY) || !sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_MEDIUM) || !sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_HARD))
-                    return false;
-                return true;
-            }
-
-            void PeriodicTick(AuraEffect const* /*aurEff*/)
-            {
-                switch (GetSpellInfo()->Id)
-                {
-                    case SPELL_RANDOM_INGREDIENT_EASY_AURA:
-                        GetTarget()->CastSpell(GetTarget(), SPELL_RANDOM_INGREDIENT_EASY);
-                        break;
-                    case SPELL_RANDOM_INGREDIENT_MEDIUM_AURA:
-                        GetTarget()->CastSpell(GetTarget(), SPELL_RANDOM_INGREDIENT_MEDIUM);
-                        break;
-                    case SPELL_RANDOM_INGREDIENT_HARD_AURA:
-                        GetTarget()->CastSpell(GetTarget(), SPELL_RANDOM_INGREDIENT_HARD);
-                        break;
-                }
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_random_ingredient_aura_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_random_ingredient_aura_AuraScript();
+            if (!sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_EASY) || !sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_MEDIUM) || !sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_HARD))
+                return false;
+            return true;
         }
+
+        void PeriodicTick(AuraEffect const* /*aurEff*/)
+        {
+            switch (GetSpellInfo()->Id)
+            {
+                case SPELL_RANDOM_INGREDIENT_EASY_AURA:
+                    GetTarget()->CastSpell(GetTarget(), SPELL_RANDOM_INGREDIENT_EASY);
+                    break;
+                case SPELL_RANDOM_INGREDIENT_MEDIUM_AURA:
+                    GetTarget()->CastSpell(GetTarget(), SPELL_RANDOM_INGREDIENT_MEDIUM);
+                    break;
+                case SPELL_RANDOM_INGREDIENT_HARD_AURA:
+                    GetTarget()->CastSpell(GetTarget(), SPELL_RANDOM_INGREDIENT_HARD);
+                    break;
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_random_ingredient_aura_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_random_ingredient_aura_AuraScript();
+    }
 };
 
 /*#####
@@ -1631,62 +1627,63 @@ class spell_random_ingredient_aura : public SpellScriptLoader
 
 class spell_random_ingredient : public SpellScriptLoader
 {
-    public: spell_random_ingredient() : SpellScriptLoader("spell_random_ingredient") { }
+public:
+    spell_random_ingredient() : SpellScriptLoader("spell_random_ingredient") { }
 
-        class spell_random_ingredient_SpellScript : public SpellScript
+    class spell_random_ingredient_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_random_ingredient_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            PrepareSpellScript(spell_random_ingredient_SpellScript);
+            if (!sSpellMgr->GetSpellInfo(SPELL_FETCH_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPECKLED_GUANO) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PULVERIZED_GARGOYLE_TEETH) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_MUDDY_MIRE_MAGGOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPIKY_SPIDER_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_HAIRY_HERRING_HEAD) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_PUTRID_PIRATE_PERSPIRATION) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_ICECROWN_BOTTLED_WATER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_WASPS_WINGS) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_PRISMATIC_MOJO) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_RAPTOR_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_AMBERSEED) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_SHRUNKEN_DRAGONS_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CHILLED_SERPENT_MUCUS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRYSTALLIZED_HOGSNOT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRUSHED_BASILISK_CRYSTALS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_TROLLBANE) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_FROZEN_SPIDER_ICHOR))
+                return false;
+            return true;
+        }
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        void HandleScriptEffect(SpellEffIndex /* effIndex */)
+        {
+            if (Player* player = GetHitPlayer())
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_FETCH_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPECKLED_GUANO) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PULVERIZED_GARGOYLE_TEETH) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_MUDDY_MIRE_MAGGOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPIKY_SPIDER_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_HAIRY_HERRING_HEAD) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_PUTRID_PIRATE_PERSPIRATION) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_ICECROWN_BOTTLED_WATER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_WASPS_WINGS) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_PRISMATIC_MOJO) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_RAPTOR_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_AMBERSEED) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_SHRUNKEN_DRAGONS_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CHILLED_SERPENT_MUCUS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRYSTALLIZED_HOGSNOT) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRUSHED_BASILISK_CRYSTALS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_TROLLBANE) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_FROZEN_SPIDER_ICHOR))
-                    return false;
-                return true;
-            }
+                uint8 ingredient = 0;
 
-            void HandleScriptEffect(SpellEffIndex /* effIndex */)
-            {
-                if (Player* player = GetHitPlayer())
+                switch (GetSpellInfo()->Id)
                 {
-                    uint8 ingredient = 0;
+                    case SPELL_RANDOM_INGREDIENT_EASY:
+                        ingredient = urand(0, 10);
+                        break;
+                    case SPELL_RANDOM_INGREDIENT_MEDIUM:
+                        ingredient = urand(11, 15);
+                        break;
+                    case SPELL_RANDOM_INGREDIENT_HARD:
+                        ingredient = urand(16, 20);
+                        break;
+                }
 
-                    switch (GetSpellInfo()->Id)
-                    {
-                        case SPELL_RANDOM_INGREDIENT_EASY:
-                            ingredient = urand(0, 10);
-                            break;
-                        case SPELL_RANDOM_INGREDIENT_MEDIUM:
-                            ingredient = urand(11, 15);
-                            break;
-                        case SPELL_RANDOM_INGREDIENT_HARD:
-                            ingredient = urand(16, 20);
-                            break;
-                    }
-
-                    if (Creature* finklestein = GetClosestCreatureWithEntry(player, NPC_FINKLESTEIN, 25.0f))
-                    {
-                        finklestein->CastSpell(player, FetchIngredients[ingredient][0], true, NULL);
-                        finklestein->AI()->Talk(FetchIngredients[ingredient][3], player);
-                    }
+                if (Creature* finklestein = GetClosestCreatureWithEntry(player, NPC_FINKLESTEIN, 25.0f))
+                {
+                    finklestein->CastSpell(player, FetchIngredients[ingredient][0], true, NULL);
+                    finklestein->AI()->Talk(FetchIngredients[ingredient][3], player);
                 }
             }
+        }
 
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_random_ingredient_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_random_ingredient_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
     };
 
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_random_ingredient_SpellScript();
-        }
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_random_ingredient_SpellScript();
+    }
 };
 
 /*#####
@@ -1695,31 +1692,32 @@ class spell_random_ingredient : public SpellScriptLoader
 
 class spell_pot_check : public SpellScriptLoader
 {
-    public: spell_pot_check() : SpellScriptLoader("spell_pot_check") { }
+public:
+    spell_pot_check() : SpellScriptLoader("spell_pot_check") { }
 
-        class spell_pot_check_SpellScript : public SpellScript
+    class spell_pot_check_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pot_check_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            PrepareSpellScript(spell_pot_check_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_FETCH_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPECKLED_GUANO) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PULVERIZED_GARGOYLE_TEETH) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_MUDDY_MIRE_MAGGOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPIKY_SPIDER_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_HAIRY_HERRING_HEAD) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_PUTRID_PIRATE_PERSPIRATION) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_ICECROWN_BOTTLED_WATER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_WASPS_WINGS) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_PRISMATIC_MOJO) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_RAPTOR_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_AMBERSEED) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_SHRUNKEN_DRAGONS_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CHILLED_SERPENT_MUCUS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRYSTALLIZED_HOGSNOT) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRUSHED_BASILISK_CRYSTALS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_TROLLBANE) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_FROZEN_SPIDER_ICHOR) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_SPECKLED_GUANO) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_PULVERIZED_GARGOYLE_TEETH) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_MUDDY_MIRE_MAGGOT) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_SPIKY_SPIDER_EGG) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_HAIRY_HERRING_HEAD) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_PUTRID_PIRATE_PERSPIRATION) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_ICECROWN_BOTTLED_WATER) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_WASPS_WINGS) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_PRISMATIC_MOJO) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_RAPTOR_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_AMBERSEED) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_SHRUNKEN_DRAGONS_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_CHILLED_SERPENT_MUCUS) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_CRYSTALLIZED_HOGSNOT) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HAVE_CRUSHED_BASILISK_CRYSTALS) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_TROLLBANE) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_FROZEN_SPIDER_ICHOR))
-                    return false;
-                return true;
-            }
+            if (!sSpellMgr->GetSpellInfo(SPELL_FETCH_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPECKLED_GUANO) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PULVERIZED_GARGOYLE_TEETH) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_MUDDY_MIRE_MAGGOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPIKY_SPIDER_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_HAIRY_HERRING_HEAD) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_PUTRID_PIRATE_PERSPIRATION) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_ICECROWN_BOTTLED_WATER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_WASPS_WINGS) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_PRISMATIC_MOJO) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_RAPTOR_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_AMBERSEED) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_SHRUNKEN_DRAGONS_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CHILLED_SERPENT_MUCUS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRYSTALLIZED_HOGSNOT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_FETCH_CRUSHED_BASILISK_CRYSTALS) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_TROLLBANE) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_FROZEN_SPIDER_ICHOR) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_SPECKLED_GUANO) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_PULVERIZED_GARGOYLE_TEETH) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_MUDDY_MIRE_MAGGOT) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_SPIKY_SPIDER_EGG) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_HAIRY_HERRING_HEAD) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_PUTRID_PIRATE_PERSPIRATION) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_ICECROWN_BOTTLED_WATER) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_WASPS_WINGS) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_PRISMATIC_MOJO) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_RAPTOR_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_AMBERSEED) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_SHRUNKEN_DRAGONS_CLAW) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_CHILLED_SERPENT_MUCUS) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_CRYSTALLIZED_HOGSNOT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HAVE_CRUSHED_BASILISK_CRYSTALS) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_TROLLBANE) || !sSpellMgr->GetSpellInfo(SPELL_HAVE_FROZEN_SPIDER_ICHOR))
+                return false;
+            return true;
+        }
 
         void HandleScriptEffect(SpellEffIndex /* effIndex */)
         {
@@ -1759,9 +1757,9 @@ class spell_pot_check : public SpellScriptLoader
                             return;
                         }
                     }
-                 }
-             }
-         }
+                }
+            }
+        }
 
         void RemoveItems(Player* player)
         {
@@ -1776,10 +1774,10 @@ class spell_pot_check : public SpellScriptLoader
         }
     };
 
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_pot_check_SpellScript();
-        }
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_pot_check_SpellScript();
+    }
 };
 
 /*#####
@@ -1788,34 +1786,35 @@ class spell_pot_check : public SpellScriptLoader
 
 class spell_fetch_ingredient_aura : public SpellScriptLoader
 {
-    public: spell_fetch_ingredient_aura() : SpellScriptLoader("spell_fetch_ingredient_aura") { }
+public:
+    spell_fetch_ingredient_aura() : SpellScriptLoader("spell_fetch_ingredient_aura") { }
 
-        class spell_fetch_ingredient_aura_AuraScript : public AuraScript
+    class spell_fetch_ingredient_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fetch_ingredient_aura_AuraScript);
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            PrepareAuraScript(spell_fetch_ingredient_aura_AuraScript);
-
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* target = GetTarget();
-                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                    if (target->HasAura(SPELL_ALCHEMIST_APPRENTICE_INVISBUFF))
-                        if (Creature* finklestein = GetClosestCreatureWithEntry(target, NPC_FINKLESTEIN, 100.0f))
-                        {
-                            target->RemoveAura(SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
-                            finklestein->AI()->Talk(SAY_RUINED, target);
-                        }
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_fetch_ingredient_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_fetch_ingredient_aura_AuraScript();
+            Unit* target = GetTarget();
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                if (target->HasAura(SPELL_ALCHEMIST_APPRENTICE_INVISBUFF))
+                    if (Creature* finklestein = GetClosestCreatureWithEntry(target, NPC_FINKLESTEIN, 100.0f))
+                    {
+                        target->RemoveAura(SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
+                        finklestein->AI()->Talk(SAY_RUINED, target);
+                    }
         }
+
+        void Register() OVERRIDE
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_fetch_ingredient_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_fetch_ingredient_aura_AuraScript();
+    }
 };
 
 enum StormCloud

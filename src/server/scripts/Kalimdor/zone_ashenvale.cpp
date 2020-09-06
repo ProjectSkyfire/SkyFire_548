@@ -67,10 +67,7 @@ enum TorekMisc
 class npc_torek : public CreatureScript
 {
     public:
-
-        npc_torek() : CreatureScript("npc_torek")
-        {
-        }
+        npc_torek() : CreatureScript("npc_torek") { }
 
         struct npc_torekAI : public npc_escortAI
         {

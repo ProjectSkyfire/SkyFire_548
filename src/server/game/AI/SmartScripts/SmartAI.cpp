@@ -931,7 +931,6 @@ void SmartGameObjectAI::EventInform(uint32 eventId)
 class SmartTrigger : public AreaTriggerScript
 {
     public:
-
         SmartTrigger() : AreaTriggerScript("SmartTrigger") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)

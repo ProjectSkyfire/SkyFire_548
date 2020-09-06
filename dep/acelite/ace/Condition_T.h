@@ -6,7 +6,7 @@
  *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -140,7 +140,6 @@ template <class MUTEX>
 class ACE_Thread_Condition : public ACE_Condition<MUTEX>
 {
 public:
-  // = Initialization method.
   ACE_Thread_Condition (MUTEX &m, const ACE_TCHAR *name = 0, void *arg = 0);
 
   /// Dump the state of an object.

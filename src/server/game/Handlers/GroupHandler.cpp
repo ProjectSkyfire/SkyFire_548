@@ -442,7 +442,6 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recvData)
     // Everything's fine, accepted.
     group->ChangeLeader(guid);
     group->SendUpdate();
-
 }
 
 void WorldSession::HandleGroupSetRolesOpcode(WorldPacket& recvData)
@@ -1352,7 +1351,6 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             databuff << uint32(veh->GetVehicleInfo()->m_seatID[player->m_movementInfo.transport.seat]);
         else
             databuff << uint32(0);
-
     }
 
     if (mask & GROUP_UPDATE_FLAG_PHASE)

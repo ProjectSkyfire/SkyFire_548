@@ -23,12 +23,6 @@
 #include "World.h"
 #include "DBCStores.h"
 
-GroupMgr::GroupMgr()
-{
-    NextGroupDbStoreId = 1;
-    NextGroupId = 1;
-}
-
 GroupMgr::~GroupMgr()
 {
     for (GroupContainer::iterator itr = GroupStore.begin(); itr != GroupStore.end(); ++itr)

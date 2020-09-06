@@ -154,147 +154,6 @@ uint32 const MasterySpells[MAX_CLASSES] =
     87491,  // Druid
 };
 
-// == PlayerTaxi ================================================
-
-PlayerTaxi::PlayerTaxi()
-{
-    memset(m_taximask, 0, sizeof(m_taximask));
-}
-
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
-{
-    // class specific initial known nodes
-    switch (chrClass)
-    {
-        case CLASS_DEATH_KNIGHT:
-        {
-            for (uint8 i = 0; i < TaxiMaskSize; ++i)
-                m_taximask[i] |= sOldContinentsNodesMask[i];
-            break;
-        }
-    }
-
-    // race specific initial known nodes: capital and taxi hub masks
-    switch (race)
-    {
-        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
-        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
-        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
-        case RACE_NIGHTELF: SetTaximaskNode(26);
-                            SetTaximaskNode(27); break;     // Night Elf
-        case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
-        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
-        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
-        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
-        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
-        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
-    }
-
-    // new continent starting masks (It will be accessible only at new map)
-    switch (Player::TeamForRace(race))
-    {
-        case ALLIANCE: SetTaximaskNode(100); break;
-        case HORDE:    SetTaximaskNode(99);  break;
-    }
-    // level dependent taxi hubs
-    if (level >= 68)
-        SetTaximaskNode(213);                               //Shattered Sun Staging Area
-}
-
-void PlayerTaxi::LoadTaxiMask(std::string const &data)
-{
-    Tokenizer tokens(data, ' ');
-
-    uint8 index = 0;
-    for (Tokenizer::const_iterator iter = tokens.begin(); index < TaxiMaskSize && iter != tokens.end(); ++iter, ++index)
-    {
-        // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint32(atol(*iter));
-    }
-}
-
-void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
-{
-    if (all)
-    {
-        for (uint8 i = 0; i < TaxiMaskSize; ++i)
-            data << uint8(sTaxiNodesMask[i]);              // all existed nodes
-    }
-    else
-    {
-        for (uint8 i = 0; i < TaxiMaskSize; ++i)
-            data << uint8(m_taximask[i]);                  // known nodes
-    }
-}
-
-bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, uint32 team)
-{
-    ClearTaxiDestinations();
-
-    Tokenizer Tokenizer(values, ' ');
-
-    for (Tokenizer::const_iterator iter = Tokenizer.begin(); iter != Tokenizer.end(); ++iter)
-    {
-        uint32 node = uint32(atol(*iter));
-        AddTaxiDestination(node);
-    }
-
-    if (m_TaxiDestinations.empty())
-        return true;
-
-    // Check integrity
-    if (m_TaxiDestinations.size() < 2)
-        return false;
-
-    for (size_t i = 1; i < m_TaxiDestinations.size(); ++i)
-    {
-        uint32 cost;
-        uint32 path;
-        sObjectMgr->GetTaxiPath(m_TaxiDestinations[i-1], m_TaxiDestinations[i], path, cost);
-        if (!path)
-            return false;
-    }
-
-    // can't load taxi path without mount set (quest taxi path?)
-    if (!sObjectMgr->GetTaxiMountDisplayId(GetTaxiSource(), team, true))
-        return false;
-
-    return true;
-}
-
-std::string PlayerTaxi::SaveTaxiDestinationsToString()
-{
-    if (m_TaxiDestinations.empty())
-        return "";
-
-    std::ostringstream ss;
-
-    for (size_t i=0; i < m_TaxiDestinations.size(); ++i)
-        ss << m_TaxiDestinations[i] << ' ';
-
-    return ss.str();
-}
-
-uint32 PlayerTaxi::GetCurrentTaxiPath() const
-{
-    if (m_TaxiDestinations.size() < 2)
-        return 0;
-
-    uint32 path;
-    uint32 cost;
-
-    sObjectMgr->GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], path, cost);
-
-    return path;
-}
-
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
-{
-    for (uint8 i = 0; i < TaxiMaskSize; ++i)
-        ss << uint32(taxi.m_taximask[i]) << ' ';
-    return ss;
-}
-
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const
@@ -5748,7 +5607,7 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const* zone = GetAreaEntryByAreaID(GetAreaId());
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < (zone ? zone->MaxDepth : -500.0f))
+    if ((!IsAlive() && zone && zone->m_flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < (zone ? zone->m_MinElevation : -500.0f))
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
@@ -5786,16 +5645,16 @@ void Player::RepopAtGraveyard()
             GetSession()->SendPacket(&data);
         }
     }
-    else if (zone && GetPositionZ() < zone->MaxDepth)
+    else if (zone && GetPositionZ() < zone->m_MinElevation)
         TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());
 }
 
 bool Player::CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone)
 {
-    if (channel->flags & CHANNEL_DBC_FLAG_ZONE_DEP && zone->flags & AREA_FLAG_ARENA_INSTANCE)
+    if (channel->flags & CHANNEL_DBC_FLAG_ZONE_DEP && zone->m_flags & AREA_FLAG_ARENA_INSTANCE)
         return false;
 
-    if ((channel->flags & CHANNEL_DBC_FLAG_CITY_ONLY) && (!(zone->flags & AREA_FLAG_SLAVE_CAPITAL)))
+    if ((channel->flags & CHANNEL_DBC_FLAG_CITY_ONLY) && (!(zone->m_flags & AREA_FLAG_SLAVE_CAPITAL)))
         return false;
 
     if ((channel->flags & CHANNEL_DBC_FLAG_GUILD_REQ) && GetGuildId())
@@ -5840,7 +5699,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
     if (!cMgr)
         return;
 
-    std::string current_zone_name = current_zone->area_name;
+    std::string current_zone_name = current_zone->m_AreaName;
 
     for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
@@ -7087,16 +6946,16 @@ void Player::CheckAreaExploreAndOutdoor()
             return;
         }
 
-        if (areaEntry->area_level > 0)
+        if (areaEntry->m_ExplorationLevel > 0)
         {
-            uint32 area = areaEntry->ID;
+            uint32 area = areaEntry->m_ID;
             if (getLevel() >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
             {
                 SendExplorationExperience(area, 0);
             }
             else
             {
-                int32 diff = int32(getLevel()) - areaEntry->area_level;
+                int32 diff = int32(getLevel()) - areaEntry->m_ExplorationLevel;
                 uint32 XP = 0;
                 if (diff < -5)
                 {
@@ -7108,11 +6967,11 @@ void Player::CheckAreaExploreAndOutdoor()
                     if (exploration_percent < 0)
                         exploration_percent = 0;
 
-                    XP = uint32(sObjectMgr->GetBaseXP(areaEntry->area_level)*exploration_percent/100*sWorld->getRate(Rates::RATE_XP_EXPLORE));
+                    XP = uint32(sObjectMgr->GetBaseXP(areaEntry->m_ExplorationLevel)*exploration_percent/100*sWorld->getRate(Rates::RATE_XP_EXPLORE));
                 }
                 else
                 {
-                    XP = uint32(sObjectMgr->GetBaseXP(areaEntry->area_level)*sWorld->getRate(Rates::RATE_XP_EXPLORE));
+                    XP = uint32(sObjectMgr->GetBaseXP(areaEntry->m_ExplorationLevel)*sWorld->getRate(Rates::RATE_XP_EXPLORE));
                 }
 
                 GiveXP(XP, NULL);
@@ -7256,11 +7115,11 @@ void Player::RewardReputation(Unit* victim, float rate)
         Map const* map = GetMap();
         if (map && map->IsNonRaidInstance())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 80 && GetChampioningType() == 1)
+                if (dungeon->m_TargetLevel == 80 && GetChampioningType() == 1)
                     ChampioningFaction = GetChampioningFaction();
-                else if (dungeon->reclevel == 85 && GetChampioningType() == 2)
+                else if (dungeon->m_TargetLevel == 85 && GetChampioningType() == 2)
                     ChampioningFaction = GetChampioningFaction();
-                else if (dungeon->reclevel == 90 && GetChampioningType() == 3)
+                else if (dungeon->m_TargetLevel == 90 && GetChampioningType() == 3)
                     ChampioningFaction = GetChampioningFaction();
                 else if (GetChampioningType() == 4)
                     ChampioningFaction = GetChampioningFaction();
@@ -8096,7 +7955,7 @@ void Player::UpdateArea(uint32 newArea)
     m_areaUpdateId    = newArea;
 
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
-    pvpInfo.IsInFFAPvPArea = area && (area->flags & AREA_FLAG_ARENA);
+    pvpInfo.IsInFFAPvPArea = area && (area->m_flags & AREA_FLAG_ARENA);
     UpdatePvPState(true);
 
     UpdateAreaDependentAuras(newArea);
@@ -8143,11 +8002,11 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WEATHER) && !HasAuraType(SPELL_AURA_FORCE_WEATHER))
     {
-        if (Weather* weather = WeatherMgr::FindWeather(zone->ID))
+        if (Weather* weather = WeatherMgr::FindWeather(zone->m_ID))
             weather->SendWeatherUpdateToPlayer(this);
         else
         {
-            if (!WeatherMgr::AddWeather(zone->ID))
+            if (!WeatherMgr::AddWeather(zone->m_ID))
             {
                 // send fine weather packet to remove old zone's weather
                 WeatherMgr::SendFineWeatherUpdateToPlayer(this);
@@ -8159,17 +8018,17 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
-    switch (zone->team)
+    switch (zone->m_FactionGroupMask)
     {
         case AREATEAM_ALLY:
-            pvpInfo.IsInHostileArea = GetTeam() != ALLIANCE && (sWorld->IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            pvpInfo.IsInHostileArea = GetTeam() != ALLIANCE && (sWorld->IsPvPRealm() || zone->m_flags & AREA_FLAG_CAPITAL);
             break;
         case AREATEAM_HORDE:
-            pvpInfo.IsInHostileArea = GetTeam() != HORDE && (sWorld->IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            pvpInfo.IsInHostileArea = GetTeam() != HORDE && (sWorld->IsPvPRealm() || zone->m_flags & AREA_FLAG_CAPITAL);
             break;
         case AREATEAM_NONE:
             // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
-            pvpInfo.IsInHostileArea = sWorld->IsPvPRealm() || InBattleground() || zone->flags & AREA_FLAG_WINTERGRASP;
+            pvpInfo.IsInHostileArea = sWorld->IsPvPRealm() || InBattleground() || zone->m_flags & AREA_FLAG_WINTERGRASP;
             break;
         default:                                            // 6 in fact
             pvpInfo.IsInHostileArea = false;
@@ -8179,7 +8038,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Treat players having a quest flagging for PvP as always in hostile area
     pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
 
-    if (zone->flags & AREA_FLAG_CAPITAL)                     // Is in a capital city
+    if (zone->m_flags & AREA_FLAG_CAPITAL)                     // Is in a capital city
     {
         if (!pvpInfo.IsHostile || zone->IsSanctuary())
         {
@@ -17835,7 +17694,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     m_name = fields[2].GetString();
 
     // check name limitations
-    if (ObjectMgr::CheckPlayerName(m_name) != CHAR_NAME_SUCCESS ||
+    if (ObjectMgr::CheckPlayerName(m_name) != ResponseCodes::CHAR_NAME_SUCCESS ||
         (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) &&
          sObjectMgr->IsReservedName(m_name)))
     {
@@ -27459,7 +27318,6 @@ void Player::UpdateSpecCount(uint8 count)
         stmt->setUInt8(0, GetActiveSpec());
         stmt->setUInt32(1, GetGUIDLow());
         trans->Append(stmt);
-
     }
 
     CharacterDatabase.CommitTransaction(trans);
@@ -28326,9 +28184,9 @@ std::string Player::GetMapAreaAndZoneString()
     if (AreaTableEntry const* area = GetAreaEntryByAreaID(areaId))
     {
         int locale = GetSession()->GetSessionDbcLocale();
-        areaName = area->area_name[locale];
-        if (AreaTableEntry const* zone = GetAreaEntryByAreaID(area->zone))
-            zoneName = zone->area_name[locale];
+        areaName = area->m_AreaName[locale];
+        if (AreaTableEntry const* zone = GetAreaEntryByAreaID(area->m_ParentAreaID))
+            zoneName = zone->m_AreaName[locale];
     }
 
     std::ostringstream str;

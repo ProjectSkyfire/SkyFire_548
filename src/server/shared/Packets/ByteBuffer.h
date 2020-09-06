@@ -127,8 +127,8 @@ private:
         uint64 u64;
         uint8 byte[8];
     } _data;
-
 };
+
 class ByteBuffer
 {
 public:

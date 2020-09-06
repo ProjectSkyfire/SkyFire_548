@@ -995,6 +995,15 @@ class ObjectMgr
         PageText const* GetPageText(uint32 pageEntry);
 
         void LoadPlayerInfo();
+        bool IsValidPlayerCreateRace(uint32 currentRace);
+        bool IsValidPlayerCreateClass(uint32 currentClass);
+        void LoadPlayerCreateItemsData();
+        void LoadPlayerCreateSpellsData();
+        void LoadPlayerCreateActionData();
+        void LoadPlayerCreateLevelStatsData();
+        void LoadPlayerCreateXpData();
+        void LoadPlayerCreateCastSpellsData();
+
         void LoadPetLevelInfo();
         void LoadExplorationBaseXP();
         void LoadPetNames();
@@ -1233,7 +1242,7 @@ class ObjectMgr
         bool IsReservedName(std::string const& name) const;
 
         // name with valid structure and symbols
-        static uint8 CheckPlayerName(std::string const& name, bool create = false);
+        static ResponseCodes CheckPlayerName(std::string const& name, bool create = false);
         static PetNameInvalidReason CheckPetName(std::string const& name);
         static bool IsValidCharterName(std::string const& name);
 

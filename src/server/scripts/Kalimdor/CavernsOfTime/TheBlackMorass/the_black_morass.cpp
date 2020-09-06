@@ -248,7 +248,6 @@ public:
             //DoMeleeAttackIfReady();
         }
     };
-
 };
 
 struct Wave
@@ -289,7 +288,6 @@ public:
 
         void Reset() OVERRIDE
         {
-
             TimeRiftWave_Timer = 15000;
             mRiftWaveCount = 0;
 
@@ -303,8 +301,8 @@ public:
             else if (mPortalCount > 12)
                 mWaveId = 2;
             else mWaveId = 1;
-
         }
+
         void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void DoSummonAtRift(uint32 creature_entry)
@@ -370,7 +368,6 @@ public:
                 instance->SetData(TYPE_RIFT, SPECIAL);
         }
     };
-
 };
 
 enum Saat
@@ -418,7 +415,6 @@ public:
         player->SEND_GOSSIP_MENU(10002, creature->GetGUID());
         return true;
     }
-
 };
 
 void AddSC_the_black_morass()

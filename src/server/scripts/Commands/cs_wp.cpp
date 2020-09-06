@@ -236,7 +236,6 @@ public:
 
     static bool HandleWpUnLoadCommand(ChatHandler* handler, const char* /*args*/)
     {
-
         Creature* target = handler->getSelectedCreature();
 
         if (!target)
@@ -892,7 +891,6 @@ public:
                         creature->DeleteFromDB();
                         creature->AddObjectToRemoveList();
                     }
-
                 }
                 while (result2->NextRow());
 

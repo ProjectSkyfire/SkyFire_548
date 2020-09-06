@@ -28,23 +28,16 @@ enum TotemType
     TOTEM_ACTIVE     = 1,
     TOTEM_STATUE     = 2 // copied straight from MaNGOS, may need more implementation to work
 };
-// Some Totems cast spells that are not in creature DB
-enum TotemSpells
-{
-    // Totemic Wrath
-    SPELL_TOTEMIC_WRATH_TALENT  = 77746,
-    SPELL_TOTEMIC_WRATH         = 77747
-};
 
 class Totem : public Minion
 {
     public:
         Totem(SummonPropertiesEntry const* properties, Unit* owner);
         virtual ~Totem() { }
-        void Update(uint32 time);
-        void InitStats(uint32 duration);
-        void InitSummon();
-        void UnSummon(uint32 msTime = 0);
+        void Update(uint32 time) OVERRIDE;
+        void InitStats(uint32 duration) OVERRIDE;
+        void InitSummon() OVERRIDE;
+        void UnSummon(uint32 msTime = 0) OVERRIDE;
         uint32 GetSpell(uint8 slot = 0) const { return m_spells[slot]; }
         uint32 GetTotemDuration() const { return m_duration; }
         void SetTotemDuration(uint32 duration) { m_duration = duration; }

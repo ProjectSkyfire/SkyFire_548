@@ -3586,7 +3586,6 @@ void Guild::SendBankList(WorldSession* session, uint8 tabId, bool withContent, b
             {
                 if (Item* tabItem = tab->GetItem(slotId))
                 {
-
                     tabData << uint32(0);
                     tabData << uint32(0);
 

@@ -360,10 +360,7 @@ public:
             Start(false, true, 0, NULL);
         }
 
-        void WaypointReached(uint32 /*waypointId*/) OVERRIDE
-        {
-
-        }
+        void WaypointReached(uint32 /*waypointId*/) OVERRIDE { }
 
         void UpdateAI(uint32 uiDiff) OVERRIDE
         {
@@ -372,7 +369,6 @@ public:
             if (!UpdateVictim())
                 return;
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

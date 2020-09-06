@@ -951,7 +951,6 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
                 OnEffectApply += AuraEffectApplyFn(spell_gen_clone_weapon_auraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
                 OnEffectRemove += AuraEffectRemoveFn(spell_gen_clone_weapon_auraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
-
         };
 
         AuraScript* GetAuraScript() const OVERRIDE
@@ -3467,7 +3466,6 @@ class spell_gen_vendor_bark_trigger : public SpellScriptLoader
         {
             return new spell_gen_vendor_bark_trigger_SpellScript();
         }
-
 };
 
 class spell_gen_wg_water : public SpellScriptLoader

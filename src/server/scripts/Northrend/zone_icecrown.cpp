@@ -279,7 +279,6 @@ public:
                 who->CastSpell(who, SPELL_TRESPASSER_H, true);
             else
                 who->CastSpell(who, SPELL_TRESPASSER_A, true);
-
         }
     };
 
@@ -310,7 +309,6 @@ public:
         npc_vereth_the_cunningAI(Creature* creature) : ScriptedAI(creature) { }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
-
         {
             ScriptedAI::MoveInLineOfSight(who);
 
@@ -319,10 +317,9 @@ public:
                 if (Unit* owner = who->GetCharmer())
                 {
                     if (who->HasAura(SPELL_SUBDUED_LITHE_STALKER))
-                        {
-                            owner->ToPlayer()->KilledMonsterCredit(NPC_GEIST_RETURN_BUNNY_KC, 0);
-                            who->ToCreature()->DisappearAndDie();
-
+                    {
+                        owner->ToPlayer()->KilledMonsterCredit(NPC_GEIST_RETURN_BUNNY_KC, 0);
+                        who->ToCreature()->DisappearAndDie();
                     }
                 }
             }
@@ -485,14 +482,12 @@ class npc_tournament_training_dummy : public CreatureScript
             }
 
             void MoveInLineOfSight(Unit* /*who*/)OVERRIDE { }
-
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_tournament_training_dummyAI(creature);
         }
-
 };
 
 // Battle for Crusaders' Pinnacle

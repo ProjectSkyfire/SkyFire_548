@@ -125,6 +125,7 @@ endif
 #----------------------------------------------------------------------------
 #       Local targets
 #----------------------------------------------------------------------------
+.PHONY: lib_warning
 lib_warning:
 	@echo ACE_ETCL_Parser will not be built due to the following missing library: $(LIBCHECK) >&2
 
@@ -219,11 +220,11 @@ endif
 #ETCL_y.h
 #etcl_parser_export.h
 #
-#pkgconfig_files:
-#ACE_ETCL_Parser.pc.in
-#
 #build_files:
 #ETCL.mpc
+#
+#pkgconfig_files:
+#ACE_ETCL_Parser.pc.in
 #
 #source_files:
 #ETCL_Interpreter.cpp

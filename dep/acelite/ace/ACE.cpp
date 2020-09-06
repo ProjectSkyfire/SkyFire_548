@@ -1014,7 +1014,6 @@ ACE::recvv_n_i (ACE_HANDLE handle,
               if (result != -1)
                 {
                   // Blocking subsided.  Continue data transfer.
-                  n = 0;
                   continue;
                 }
             }
@@ -1078,7 +1077,6 @@ ACE::recvv_n_i (ACE_HANDLE handle,
                 {
                   // Blocking subsided in <timeout> period.  Continue
                   // data transfer.
-                  n = 0;
                   continue;
                 }
             }
@@ -1806,7 +1804,6 @@ ACE::sendv_n_i (ACE_HANDLE handle,
               if (result != -1)
                 {
                   // Blocking subsided.  Continue data transfer.
-                  n = 0;
                   continue;
                 }
             }
@@ -1876,7 +1873,6 @@ ACE::sendv_n_i (ACE_HANDLE handle,
                 {
                   // Blocking subsided in <timeout> period.  Continue
                   // data transfer.
-                  n = 0;
                   continue;
                 }
             }
@@ -2195,9 +2191,9 @@ ACE::writev_n (ACE_HANDLE handle,
 int
 ACE::handle_ready (ACE_HANDLE handle,
                    const ACE_Time_Value *timeout,
-                   int read_ready,
-                   int write_ready,
-                   int exception_ready)
+                   bool read_ready,
+                   bool write_ready,
+                   bool exception_ready)
 {
 #if defined (ACE_HAS_POLL)
   ACE_UNUSED_ARG (exception_ready);
@@ -2793,7 +2789,7 @@ ACE::fork (const ACE_TCHAR *program_name,
             {
             case 0: // grandchild returns 0.
               return 0;
-            case -1: // assumes all errnos are < 256
+            case static_cast<pid_t>(-1): // assumes all errnos are < 256
               ACE_OS::_exit (errno);
             default:  // child terminates, orphaning grandchild
               ACE_OS::_exit (0);
@@ -3240,11 +3236,18 @@ ACE::strndup (const wchar_t *str, size_t n)
        len++)
     continue;
 
-  wchar_t *s;
+  size_t const size = (len + 1) * sizeof (wchar_t);
+  wchar_t *s = 0;
+#if defined (ACE_HAS_ALLOC_HOOKS)
   ACE_ALLOCATOR_RETURN (s,
-                        static_cast<wchar_t *> (
-            ACE_OS::malloc ((len + 1) * sizeof (wchar_t))),
+                        static_cast<wchar_t*> (
+                          ACE_Allocator::instance ()->malloc (size)),
                         0);
+#else
+  ACE_ALLOCATOR_RETURN (s,
+                        static_cast<wchar_t*> (ACE_OS::malloc (size)),
+                        0);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   return ACE_OS::strsncpy (s, str, len + 1);
 }
 #endif /* ACE_HAS_WCHAR */
@@ -3346,10 +3349,19 @@ ACE::strnew (const wchar_t *s)
 {
   if (s == 0)
     return 0;
+
+  size_t const n = ACE_OS::strlen (s) + 1;
   wchar_t *t = 0;
-  ACE_NEW_RETURN (t,
-                  wchar_t[ACE_OS::strlen (s) + 1],
-                  0);
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (t,
+                        static_cast<wchar_t*> (
+                          ACE_Allocator::instance ()->malloc (
+                            sizeof (wchar_t) * (n))),
+                        0);
+#else
+  ACE_NEW_RETURN (t, wchar_t[n], 0);
+#endif  /* ACE_HAS_ALLOC_HOOKS */
+
   return ACE_OS::strcpy (t, s);
 }
 #endif /* ACE_HAS_WCHAR */

@@ -1,3 +1,110 @@
+USER VISIBLE CHANGES BETWEEN ACE-6.5.9 and ACE-6.5.10
+=====================================================
+
+. Add support for Embarcadero C++ Builder 10.4 Sydney using the
+  classic compiler. ACE/TAO compile with the new 32/64 bit clang
+  compilers but runtime tests show several runtime problems which
+  makes them not safe to use
+
+. Make a change in the ACE Process Manager to resolve an internal
+  compiler error with Visual Studio 2019 16.5.x compilers
+
+. Android enhancements for if_nameindex
+
+USER VISIBLE CHANGES BETWEEN ACE-6.5.8 and ACE-6.5.9
+====================================================
+
+. On Windows, ACE no longer defines _WIN32_WINNT.  ACE wrappers for
+  if_nametoindex and if_indextoname are available if the version of the
+  Windows SDK supports them.
+
+. IPv6 extended datagram receive info now supported on macOS.
+
+. ACE_(U)INT8/16/32/64 map to (u)int8/16/32/64_t when C++11 has been
+  enabled.
+
+. CDR_Base uses ACE_INT64 for LongLong, all old emulated support
+  has been removed
+
+. Updated debian and rpm packaging support
+
+USER VISIBLE CHANGES BETWEEN ACE-6.5.7 and ACE-6.5.8
+====================================================
+
+. Added instructions to ACE-INSTALL.html for building ACE/TAO for Android on
+  Windows.
+
+. Embarcadero C++ Builder Rio fixes
+
+. Renamed `VERSION` file to `VERSION.txt` to avoid conflicting with the
+  `version` standard header.
+
+USER VISIBLE CHANGES BETWEEN ACE-6.5.6 and ACE-6.5.7
+====================================================
+
+. Fixed compile problem with glibc 2.30 and newer
+
+. gnuace makefiles: Updated handling of generated files and
+  use requires/avoids to make postbuild steps conditional
+
+. Removed references to the ACE_LACKS_MONOTONIC_TIME preprocessor macro because
+  it was equivalent to ACE_LACKS_CLOCK_MONOTONIC.
+
+. Exposed support status of monotonic times features using preprocessor macros.
+  See "Testing for Monotonic Time Support" in docs/ACE-monotonic-timer.html for
+  details.
+
+. Added support for ARM and ARM64 stack traces with Microsoft Visual C++.
+
+. The "optional argument for the receive address in ACE_SOCK_Dgram::recv"
+  feature from ACE-6.5.5 is now supported on Windows.  This includes enhanced
+  support for sendmsg/recvmsg on Windows.
+
+USER VISIBLE CHANGES BETWEEN ACE-6.5.5 and ACE-6.5.6
+====================================================
+
+. On Linux, the ACE_Log_Msg format specifier `%t` is now replaced with the
+  system thread id provided by gettid(), instead of the much longer pthread id.
+
+. Added support for MQX
+
+. Enhanced Android support
+
+USER VISIBLE CHANGES BETWEEN ACE-6.5.4 and ACE-6.5.5
+====================================================
+
+. Fixed several broken links due to the removal of
+  Douglas Schmidt website at WashU
+
+. On Android:
+
+  . ACE_Log_Msg (and therefore ACE_DEBUG and ACE_ERROR) now uses
+    Android's logging system (aka Logcat) by default in addition to stderr
+    because stdout and stderr are discarded under normal circumstances.
+    To disable this at runtime, run:
+      ACE_LOG_MSG->clr_flags (ACE_Log_Msg::SYSLOG)
+    To disable this at compile time include these lines in config.h:
+      #define ACE_DEFAULT_LOG_FLAGS ACE_Log_Msg::STDERR
+      #define ACE_DEFAULT_LOG_BACKEND_FLAGS 0
+
+  . When statically linking to OpenSSL, prevent usage of the preloaded and
+    unpredictable system SSL library when using ace_openssl.
+
+. minizip has been moved from ACE to DANCE
+
+. Add initial support for Visual Studio 2019
+
+. Validated ACE for usage SLES15.0 x86_64 using 32bit g++ compiler
+
+. Add optional argument for the receive address in ACE_SOCK_Dgram::recv
+
+USER VISIBLE CHANGES BETWEEN ACE-6.5.3 and ACE-6.5.4
+====================================================
+
+. Fix ACE_Vector::end(), which now correctly
+  represents the end of the elements of the vector
+  instead of the end of the base array.
+
 USER VISIBLE CHANGES BETWEEN ACE-6.5.2 and ACE-6.5.3
 ====================================================
 

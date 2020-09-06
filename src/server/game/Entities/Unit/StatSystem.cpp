@@ -310,8 +310,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     {
         index = UNIT_FIELD_RANGED_ATTACK_POWER;
         index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS;
-        index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
-        
+        index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;        
     }
     if (!HasAuraType(SPELL_AURA_OVERRIDE_AP_BY_SPELL_POWER_PCT))
     {

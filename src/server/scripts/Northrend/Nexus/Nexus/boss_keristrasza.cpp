@@ -206,7 +206,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class containment_sphere : public GameObjectScript
@@ -229,7 +228,6 @@ public:
         }
         return true;
     }
-
 };
 
 class spell_intense_cold : public SpellScriptLoader

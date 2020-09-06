@@ -586,7 +586,6 @@ namespace MMAP
                 break;                                              //           |   \ |
             default: break;                                         //           |    \|
         }                                                           //          258---259 ... 515
-
     }
 
     /**************************************************************************/
@@ -918,7 +917,6 @@ namespace MMAP
                 meshData.offMeshConnectionsAreas.append((unsigned char)0xFF);
                 meshData.offMeshConnectionsFlags.append((unsigned short)0xFF);  // all movement masks can make this path
             }
-
         }
 
         delete [] buf;

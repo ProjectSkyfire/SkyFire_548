@@ -181,7 +181,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class spell_heigan_eruption : public SpellScriptLoader

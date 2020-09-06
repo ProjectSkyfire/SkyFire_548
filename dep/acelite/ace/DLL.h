@@ -41,8 +41,6 @@ class ACE_DLL_Handle;
 class ACE_Export ACE_DLL
 {
 public:
-  // = Initialization and termination methods.
-
   /**
    * Default constructor.  By default, the close() operation on the
    * object will be invoked before it is destroyed.
@@ -173,16 +171,13 @@ public:
                   bool close_handle_on_destruction = true);
 
 private:
-
   int open_i (const ACE_TCHAR *dll_name,
               int open_mode = ACE_DEFAULT_SHLIB_MODE,
               bool close_handle_on_destruction = true,
               ACE_SHLIB_HANDLE handle = 0);
 
 
-  //private:
 public:
-
   /// Open mode.
   int open_mode_;
 

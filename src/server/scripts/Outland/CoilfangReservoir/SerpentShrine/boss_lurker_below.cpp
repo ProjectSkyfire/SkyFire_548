@@ -327,7 +327,6 @@ public:
                     return;
 
                 DoMeleeAttackIfReady();
-
             }
             else // submerged
             {
@@ -425,7 +424,6 @@ public:
             } else ShootBowTimer -= diff;
         }
     };
-
 };
 
 class go_strange_pool : public GameObjectScript

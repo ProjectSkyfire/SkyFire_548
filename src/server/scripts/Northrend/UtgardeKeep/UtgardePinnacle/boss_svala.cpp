@@ -451,7 +451,6 @@ public:
             }
         }
     };
-
 };
 
 class npc_ritual_channeler : public CreatureScript

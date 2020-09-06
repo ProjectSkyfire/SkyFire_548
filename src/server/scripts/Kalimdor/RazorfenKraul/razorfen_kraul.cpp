@@ -138,7 +138,6 @@ public:
                 player->FailQuest(QUEST_WILLIX_THE_IMPORTER);
         }
     };
-
 };
 
 enum SnufflenoseGopher

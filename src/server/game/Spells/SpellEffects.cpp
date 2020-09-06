@@ -3336,7 +3336,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             aurEff->GetBase()->SetDuration(uint32(aurEff->GetBase()->GetDuration() + 3000));
                             aurEff->GetBase()->SetMaxDuration(countMin + 2000);
                         }
-
                     }
                     return;
                 }
@@ -3696,7 +3695,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 }
                 case 59317:                                 // Teleporting
                 {
-
                     if (!unitTarget || unitTarget->GetTypeId() != TypeID::TYPEID_PLAYER)
                         return;
 
@@ -3974,14 +3972,14 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
 
     // Players can only fight a duel in zones with this flag
     AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetAreaId());
-    if (casterAreaEntry && !(casterAreaEntry->flags & AREA_FLAG_ALLOW_DUELS))
+    if (casterAreaEntry && !(casterAreaEntry->m_flags & AREA_FLAG_ALLOW_DUELS))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
     }
 
     AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetAreaId());
-    if (targetAreaEntry && !(targetAreaEntry->flags & AREA_FLAG_ALLOW_DUELS))
+    if (targetAreaEntry && !(targetAreaEntry->m_flags & AREA_FLAG_ALLOW_DUELS))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;

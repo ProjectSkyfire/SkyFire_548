@@ -36,7 +36,6 @@ public:
 
     std::vector<ChatCommand> GetCommands() const OVERRIDE
     {
-
         static std::vector<ChatCommand> cheatCommandTable =
         {
             { "god",            rbac::RBAC_PERM_COMMAND_CHEAT_GOD,       false, &HandleGodModeCheatCommand,   "", },
@@ -47,7 +46,6 @@ public:
             { "status",         rbac::RBAC_PERM_COMMAND_CHEAT_STATUS,    false, &HandleCheatStatusCommand,    "", },
             { "taxi",           rbac::RBAC_PERM_COMMAND_CHEAT_TAXI,      false, &HandleTaxiCheatCommand,      "", },
             { "explore",        rbac::RBAC_PERM_COMMAND_CHEAT_EXPLORE,   false, &HandleExploreCheatCommand,   "", },
-
         };
 
         static std::vector<ChatCommand> commandTable =

@@ -642,39 +642,40 @@ struct AchievementCriteriaEntry
 
 struct AreaTableEntry
 {
-    uint32  ID;                                             // 0
-    uint32  mapid;                                          // 1
-    uint32  zone;                                           // 2 if 0 then it's zone, else it's zone id of this area
-    uint32  exploreFlag;                                    // 3, main index
-    uint32  flags;                                          // 5,
-    //uint32 unk1;                                          // 6, Pandaria
-    //uint32 soundPreferences;                              // 7,
-    //uint32 SoundPreferencesUnderwater;                    // 8,
-    //uint32 SoundAmbience;                                 // 9,
-    //char*   areaName2;                                    // 10, without whitespaces
-    //uint32 ZoneMusic;                                     // 11,
-    //uint32 ZoneIntroMusicTable;                           // 12
-    int32   area_level;                                     // 13
-    char*   area_name;                                      // 14
-    uint32  team;                                           // 15
-    uint32  LiquidTypeOverride[4];                          // 16-19 liquid override by type
-    float   MaxDepth;                                       // 20,
-    float   AmbientMultiplier;                              // 21 client only?
-    uint32  LightId;                                        // 22
-    //uint32 unk20;                                         // 23 4.0.0 - Mounting related
-    //uint32 unk21;                                         // 24 4.0.0
-    //uint32 unk22;                                         // 25 4.0.0
-    //uint32 unk23;                                         // 26 4.0.0
-    //uint32 unk24;                                         // 27 - worldStateId
-    //uint32 unk25;                                         // 28, Pandaria
-    //uint32 unk26;                                         // 29, Pandaria
+    uint32  m_ID;                                           // 0
+    uint32  m_ContinentID;                                  // 1
+    uint32  m_ParentAreaID;                                 // 2 if 0 then it's zone, else it's zone id of this area
+    uint32  m_AreaBit;                                      // 3, main index
+    uint32  m_flags;                                        // 5,
+    //uint32  m_flags2;                                     // 6, Pandaria
+    //uint32  m_SoundProviderPreferences;                   // 7,
+    //uint32  m_SoundProviderPreferencesUnderwater;         // 8,
+    //uint32  m_AmbienceID;                                 // 9,
+    //uint32  m_ZoneMusic;                                  // 10,
+    //char*   m_ZoneName;                                   // 11, without whitespaces
+    //uint32  m_IntroSound;                                 // 12
+    int32   m_ExplorationLevel;                             // 13
+    char*   m_AreaName;                                     // 14
+    uint32  m_FactionGroupMask;                             // 15
+    uint32  m_LiquidType[4];                                // 16-19 liquid override by type
+    float   m_MinElevation;                                 // 20,
+    float   m_AmbientMultiplier;                            // 21 client only?
+    uint32  m_LightId;                                      // 22
+    //uint32  m_MountFlags;                                 // 23 4.0.0 - Mounting related
+    //uint32  m_UwIntroSound;                               // 24 4.0.0
+    //uint32  m_UwZoneMusic;                                // 25 4.0.0
+    //uint32  m_UwAmbience;                                 // 26 4.0.0
+    //uint32  m_WorldPvPID;                                 // 27 Wintergrasp, TolBarad
+    //uint32  m_PvPCombatWorldStateID                       // 28 worldstateid
+    //uint32  m_WildPetLevelMin;                            // 28, Pandaria
+    //uint32  m_WildPetLevelmax;                            // 29, Pandaria
 
     // helpers
     bool IsSanctuary() const
     {
-        if (mapid == 609)
+        if (m_ContinentID == 609)
             return true;
-        return (flags & AREA_FLAG_SANCTUARY);
+        return (m_flags & AREA_FLAG_SANCTUARY);
     }
 };
 
@@ -840,7 +841,6 @@ struct ChrClassesEntry
     //uint32 unk1                                           // 15       Pandaria
     //uint32 unk1                                           // 16       Pandaria
     //uint32 unk1                                           // 17       Pandaria
-
 };
 
 struct ChrRacesEntry
@@ -1400,7 +1400,6 @@ struct DifficultyEntry
     //
     //
     //
-
 };
 
 enum diffflag
@@ -1422,7 +1421,6 @@ struct DungeonEncounterEntry
     //uint32 nameFlags;                                     // 6
     //uint32 unk1;                                          // 7
     //uint32 unk2;                                          // 8 - Pandaria
-
 };
 
 struct DurabilityCostsEntry
@@ -1869,27 +1867,38 @@ struct ItemSetEntry
 
 struct LFGDungeonEntry
 {
-    uint32  ID;                                             // 0
-    char*   name;                                           // 1
-    uint32  minlevel;                                       // 2
-    uint32  maxlevel;                                       // 3
-    uint32  reclevel;                                       // 4
-    uint32  recminlevel;                                    // 5
-    uint32  recmaxlevel;                                    // 6
-    int32   map;                                            // 7
-    uint32  difficulty;                                     // 8
-    uint32  flags;                                          // 9
-    uint32  type;                                           // 10
-    //uint32  unk2;                                         // 11
-    //char*   iconname;                                     // 12
-    uint32  expansion;                                      // 13
-    //uint32  unk4;                                         // 14
-    uint32  grouptype;                                      // 15
-    //char*   desc;                                         // 16 Description
-    uint32  randomCategoryId;                               // 17 RandomDungeonID assigned for this dungeon
+    uint32  m_ID;                                           // 0
+    char*   m_Name;                                         // 1
+    uint32  m_MinLevel;                                     // 2
+    uint32  m_MaxLevel;                                     // 3
+    uint32  m_TargetLevel;                                  // 4
+    uint32  m_TargetMinLevel;                               // 5
+    uint32  m_TargetMaxLevel;                               // 6
+    int32   m_ContinentID;                                  // 7
+    uint32  m_DifficultyID;                                 // 8 Difficulty.dbc
+    uint32  m_Flags;                                        // 9
+    uint32  m_Type;                                         // 10 (1-Dungeon, 2-Raid, 4-OpenWorld, 6-Random)
+    //uint32  m_Faction;                                    // 11
+    //char*   m_TextureFileName;                            // 12
+    uint32  m_ExpansionLevel;                               // 13
+    //uint32  m_OrderIndex;                                 // 14
+    uint32  m_GroupID;                                      // 15
+    //char*   m_Description;                                // 16
+    uint32  m_RandomDungeonID;                              // 17 RandomDungeonID assigned for this dungeon
+    //uint32 m_CountTank;                                   // 18
+    //uint32 m_CountHealer;                                 // 19
+    //uint32 m_CountDamage;                                 // 20
+    //uint32 m_CountTankMin;                                // 21
+    //uint32 m_CountHealerMin;                              // 22
+    //uint32 m_CountDamageMin;                              // 23
+    //uint32 m_ScenarioID;                                  // 24
+    //uint32 m_SubType;                                     // 25
+    //uint32 m_BonusReputationAmount;                       // 26
+    //uint32 m_MentorLevel;                                 // 27
+    //uint32 m_MentorItemLevel;                             // 28
 
     // Helpers
-    uint32 Entry() const { return ID + (type << 24); }
+    uint32 Entry() const { return m_ID + (m_Type << 24); }
 };
 
 
@@ -2422,7 +2431,6 @@ struct SpellCategoriesEntry
     uint32    PreventionType;                               // 7        m_preventionType
     uint32    StartRecoveryCategory;                        // 8        m_startRecoveryCategory
     //uint32 unk1;                                          // 9  - Pandaria
-
 };
 
 typedef std::set<uint32> SpellCategorySet;

@@ -653,7 +653,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         case ChatMsg::CHAT_MSG_PARTY:
         case ChatMsg::CHAT_MSG_RAID:
         {
-
             Group* group = sender->GetGroup();
             if (!group || group->isBGGroup())
                 break;

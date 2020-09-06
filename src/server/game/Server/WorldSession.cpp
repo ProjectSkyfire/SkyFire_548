@@ -228,7 +228,6 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
             if (packet->GetOpcode() == NULL_OPCODE)
             {
                 SF_LOG_ERROR("network.opcode", "Prevented sending disabled opcode %s to %s", GetOpcodeNameForLogging(packet->GetOpcode(), true).c_str(), GetPlayerInfo().c_str());
-
             }
             else
             {
@@ -732,7 +731,7 @@ void WorldSession::SendAuthWaitQue(uint32 position)
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet.WriteBit(0); // has account info
         packet.WriteBit(0); // has queue info
-        packet << uint8(AUTH_OK);
+        packet << uint8(ResponseCodes::AUTH_OK);
         packet.FlushBits();
         SendPacket(&packet);
     }
@@ -742,7 +741,7 @@ void WorldSession::SendAuthWaitQue(uint32 position)
         packet.WriteBit(0); // has account info
         packet.WriteBit(1); // has queue info
         packet.WriteBit(0); // unk queue bool
-        packet << uint8(AUTH_WAIT_QUEUE);
+        packet << uint8(ResponseCodes::AUTH_WAIT_QUEUE);
         packet.FlushBits();
         packet << uint32(position);
         SendPacket(&packet);

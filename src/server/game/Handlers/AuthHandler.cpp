@@ -22,7 +22,7 @@
 #include "WorldPacket.h"
 #include "Config.h"
 
-void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
+void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queuePos)
 {
     std::map<uint32, std::string> realmNamesToSend;
 
@@ -42,9 +42,9 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     SF_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
 
-    packet.WriteBit(code == AUTH_OK);
+    packet.WriteBit(code == ResponseCodes::AUTH_OK);
 
-    if (code == AUTH_OK)
+    if (code == ResponseCodes::AUTH_OK)
     {
         packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
 
@@ -75,7 +75,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     if (queued)
         packet << uint32(0);                            // Unknown
 
-    if (code == AUTH_OK)
+    if (code == ResponseCodes::AUTH_OK)
     {
         for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
         {

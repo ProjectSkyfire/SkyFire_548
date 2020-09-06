@@ -13,7 +13,9 @@
 #include "ace/Object_Manager_Base.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/os_include/sys/os_pstat.h"
-#include "ace/os_include/sys/os_sysctl.h"
+#if defined (ACE_HAS_SYSCTL)
+# include "ace/os_include/sys/os_sysctl.h"
+#endif /* ACE_HAS_SYSCTL */
 
 #if defined ACE_HAS_VXCPULIB
 # include "vxCpuLib.h"
@@ -357,7 +359,7 @@ ACE_OS::fork_exec (ACE_TCHAR *argv[])
 
       switch (result)
         {
-        case -1:
+        case static_cast<pid_t>(-1):
           // Error.
           return -1;
         case 0:
@@ -388,7 +390,7 @@ ACE_OS::fork_exec (ACE_TCHAR *argv[])
               ACE_OS::exit (errno);
             }
 #   endif /* ACE_HAS_WCHAR */
-
+          return result;
         default:
           // Server process.  The fork succeeded.
           return result;

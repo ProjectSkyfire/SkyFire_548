@@ -493,7 +493,37 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
     }
 
-    // 668 {}
+    /*
+    if (flags & UPDATEFLAG_HAS_AREATRIGGER) // 668
+    {
+        data->WriteBit(0); // 528
+        data->WriteBit(0); // 600
+        data->WriteBit(0); // 544
+        data->WriteBit(0); // 526
+        data->WriteBit(0); // 552
+        data->WriteBit(0); // 524
+        data->WriteBit(0); // 572
+        data->WriteBit(0); // 525
+        data->WriteBit(0); // 664 has664
+        data->WriteBit(0); // 527
+        
+        if (664) // 664
+            data->WriteBits(0, 20); // v70
+            
+        data->WriteBit(0); // 536
+        data->WriteBit(0); // 644 has644
+        data->WriteBit(0); // 560
+        
+        if (644) // 644
+        {
+            //v4 = sub_6652D0(v7, v6) << (13 - v3);
+            //v3 += 8;
+            //v2 |= v4;
+            data->WriteBits(0, 21); // v71 // 151
+            data->WriteBits(0, 21); // v72 // 155
+        }
+    }
+    */
 
     /*
     if (flags & UPDATEFLAG_ANIMKITS) // 498
@@ -616,7 +646,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetSpeed(MOVE_RUN));
         *data << float(self->GetSpeed(MOVE_SWIM));
         *data << float(self->GetPositionZMinusOffset());
-
     }
 
     if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
@@ -648,8 +677,66 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(transGuid[3]);
         data->WriteBit(transGuid[7]);
     }
-    
-    // 668
+
+    /*
+    if (flags & UPDATEFLAG_HAS_AREATRIGGER) // 668
+    {
+        if (664) 
+        {
+            //forloop12 162
+            *data << float(0.0f); //v107 // 4
+            *data << float(0.0f); //v108 // 0
+            *data << float(0.0f); //v109 // 8
+        }
+        if (600)
+        {
+            *data << float(0.0f); // 146
+            *data << float(0.0f); // 145
+            *data << float(0.0f); // 149
+            *data << float(0.0f); // 148
+            *data << float(0.0f); // 144
+            *data << float(0.0f); // 147
+        }
+        if (644)
+        {
+            if(151)
+            {
+                //forloop 151
+                *data << float(0.0f); //v110 // 0 // 152
+                *data << float(0.0f); //v111 // 4 // 152
+            }
+            
+            if (155)
+            {
+                //forloop 155
+                *data << float(0.0f); //v112 // 0 // 156
+                *data << float(0.0f); //v113 // 4 // 156
+            }
+        
+            *data << float(0.0f); // 160
+            *data << float(0.0f); // 159
+        }
+        *data << uint32(0); //130
+
+        if (544)
+            *data << uint32(0); //135
+
+        if (552)
+            *data << uint32(0); //137
+
+        if (536)
+            *data << uint32(0); //133
+
+        if (560)
+            *data << uint32(0); //139
+
+        if (572)
+        {
+            *data << float(0.0f); // 141
+            *data << float(0.0f); // 142
+        }
+    }
+    */
 
     if (flags & UPDATEFLAG_HAS_TARGET) // 464
     {
@@ -740,7 +827,6 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
     BuildDynamicValuesUpdate(data);
-
 }
 
 void Object::BuildDynamicValuesUpdate(ByteBuffer *data) const

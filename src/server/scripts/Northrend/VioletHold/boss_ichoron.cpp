@@ -335,7 +335,6 @@ public:
             Talk(SAY_SLAY);
         }
     };
-
 };
 
 class npc_ichor_globule : public CreatureScript
@@ -399,7 +398,6 @@ public:
                     pIchoron->AI()->DoAction(ACTION_WATER_ELEMENT_KILLED);
         }
     };
-
 };
 
 class achievement_dehydration : public AchievementCriteriaScript

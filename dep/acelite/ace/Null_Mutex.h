@@ -6,7 +6,7 @@
  *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -99,7 +99,6 @@ template<>
 class ACE_Export ACE_Guard<ACE_Null_Mutex>
 {
 public:
-  // = Initialization and termination methods.
   ACE_Guard (ACE_Null_Mutex &) {}
   ACE_Guard (ACE_Null_Mutex &, int) {}
   ACE_Guard (ACE_Null_Mutex &, int, int) {}

@@ -451,7 +451,6 @@ void BattlegroundSA::AddPlayer(Player* player)
                 player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);
             else
                 player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);
-
         }
         else
             player->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);

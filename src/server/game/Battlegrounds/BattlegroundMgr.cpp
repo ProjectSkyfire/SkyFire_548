@@ -556,7 +556,6 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
 
     if (bg->GetStatus() == STATUS_WAIT_LEAVE)
         *data << uint8(bg->GetWinner());
-
 }
 
 void BattlegroundMgr::BuildStatusFailedPacket(WorldPacket* data, Battleground* bg, Player* player, uint8 QueueSlot, GroupJoinBattlegroundResult result)

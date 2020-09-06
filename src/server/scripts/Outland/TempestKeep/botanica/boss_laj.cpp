@@ -56,11 +56,7 @@ enum Misc
 class boss_laj : public CreatureScript
 {
     public:
-
-        boss_laj()
-            : CreatureScript("boss_laj")
-        {
-        }
+        boss_laj() : CreatureScript("boss_laj") { }
 
         struct boss_lajAI : public BossAI
         {
