@@ -5,7 +5,7 @@ CREATE TABLE `scene_template` (
 	`ScriptPackageID` INT NOT NULL,
 	`ScriptName` TEXT NULL,
 	`comment` TEXT NULL
-)
+);
 COLLATE='utf8mb4_0900_ai_ci'
 ENGINE=InnoDB;
 
