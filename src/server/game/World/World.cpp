@@ -1590,6 +1590,9 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading Weather Data...");
     WeatherMgr::LoadWeatherData();
 
+    SF_LOG_INFO("server.loading", "Loading SceneTemplate Data..");
+    sObjectMgr->LoadSceneTemplates();
+
     SF_LOG_INFO("server.loading", "Loading Quests...");
     sObjectMgr->LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
 

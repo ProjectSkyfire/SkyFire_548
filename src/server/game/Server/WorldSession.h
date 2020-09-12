@@ -844,6 +844,8 @@ class WorldSession
         void HandlePageTextQueryOpcode(WorldPacket& recvPacket);
         void SendPageText(ObjectGuid GameObjectGUID);
 
+        void HandleSceneCompleted(WorldPacket& recvPacket);
+
         void HandleTutorialFlag (WorldPacket& recvData);
         void HandleTutorialClear(WorldPacket& recvData);
         void HandleTutorialReset(WorldPacket& recvData);

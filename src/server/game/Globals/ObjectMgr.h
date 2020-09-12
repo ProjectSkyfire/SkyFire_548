@@ -582,6 +582,16 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef UNORDERED_MAP<uint32, QuestPOIVector> QuestPOIContainer;
 
+struct SceneTemplate
+{
+    uint32 SceneId;
+    uint32 PlaybackFlags;
+    uint32 ScenePackageId;
+    uint32 ScriptId;
+};
+
+typedef UNORDERED_MAP<uint32, SceneTemplate> SceneTemplateContainer;
+
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -1034,6 +1044,8 @@ class ObjectMgr
         void LoadTerrainWorldMaps();
         void LoadAreaPhases();
 
+        void LoadSceneTemplates();
+
         std::vector<PhaseInfoStruct> const* GetPhaseTerrainSwaps(uint32 phaseid) const
         {
             auto itr = _terrainPhaseInfoStore.find(phaseid);
@@ -1361,6 +1373,7 @@ class ObjectMgr
 
         bool QuestObjectiveExists(uint32 objectiveId) const;
         uint32 GetQuestObjectiveQuestId(uint32 objectiveId) const;
+        SceneTemplate const* GetSceneTemplate(uint32 sceneId) const;
 
         void LoadResearchDigsiteInfo();
         void LoadArchaeologyFindInfo();
@@ -1565,6 +1578,7 @@ class ObjectMgr
         CacheVendorItemContainer _cacheVendorItemStore;
         CacheTrainerSpellContainer _cacheTrainerSpellStore;
 
+        SceneTemplateContainer _sceneTemplateStore;
         GraveyardOrientationContainer _graveyardOrientations;
 
         std::set<uint32> _difficultyEntries[4 - 1]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate

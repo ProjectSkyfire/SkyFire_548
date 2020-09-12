@@ -2524,3 +2524,14 @@ void WorldSession::SendPageText(ObjectGuid GameObjectGUID)
     data.WriteGuidBytes(GameObjectGUID, 6, 2, 7, 0, 5, 3, 1, 4);
     _player->SendDirectMessage(&data);
 }
+
+void WorldSession::HandleSceneCompleted(WorldPacket& recvPacket)
+{
+    SF_LOG_ERROR("network", "recv CMSG_SCENE_COMPLETED");
+    uint32 unk = 0;
+    uint8 unkbit = 0;
+    unkbit = recvPacket.ReadBit();
+    if (unkbit)
+        unk = recvPacket.read<uint32>();
+    SF_LOG_ERROR("network", "hasData %u", unkbit);
+}
