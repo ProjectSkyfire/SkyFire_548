@@ -117,10 +117,11 @@ public:
 
         void SendWeather(WeatherState weather, float grade) const
         {
-            WorldPacket data(SMSG_WEATHER, 9);
-            data << uint32(weather);
-            data << float(grade);
-            data << uint8(0);
+            WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
+            data << uint32(weather); // WeatherID
+            data << float(grade);    // Intensity
+            data.WriteBit(false);    // Abrupt
+            data.FlushBits();
             SendPacketToPlayers(&data);
         }
 

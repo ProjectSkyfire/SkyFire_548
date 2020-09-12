@@ -1116,10 +1116,11 @@ class boss_the_lich_king : public CreatureScript
 
             void SendWeather(WeatherState weather) const
             {
-                WorldPacket data(SMSG_WEATHER, 9);
-                data << uint32(weather);
-                data << float(0.5f);
-                data << uint8(0);
+                WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
+                data << uint32(weather); // WeatherID
+                data << float(0.5f);     // Intensity
+                data.WriteBit(false);    // Abrupt
+                data.FlushBits();
                 SendPacketToPlayers(&data);
             }
 
