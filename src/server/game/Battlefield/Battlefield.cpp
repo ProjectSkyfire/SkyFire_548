@@ -746,14 +746,6 @@ void Battlefield::SendAreaSpiritHealerQueryOpcode(Player* player, uint64 guid)
 // ----------------------
 // - BfGraveyard Method -
 // ----------------------
-BfGraveyard::BfGraveyard(Battlefield* battlefield)
-{
-    m_Bf = battlefield;
-    m_GraveyardId = 0;
-    m_ControlTeam = TEAM_NEUTRAL;
-    m_SpiritGuide[0] = 0;
-    m_SpiritGuide[1] = 0;
-}
 
 void BfGraveyard::Initialize(TeamId startControl, uint32 graveyardId)
 {
@@ -968,19 +960,6 @@ GameObject* Battlefield::GetGameObject(uint64 GUID)
 // ******************* CapturePoint **********************
 // *******************************************************
 
-BfCapturePoint::BfCapturePoint(Battlefield* battlefield) : m_Bf(battlefield), m_capturePointGUID(0)
-{
-    m_team = TEAM_NEUTRAL;
-    m_value = 0;
-    m_minValue = 0.0f;
-    m_maxValue = 0.0f;
-    m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL;
-    m_OldState = BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL;
-    m_capturePointEntry = 0;
-    m_neutralValuePct = 0;
-    m_maxSpeed = 0;
-}
-
 bool BfCapturePoint::HandlePlayerEnter(Player* player)
 {
     if (m_capturePointGUID)
@@ -1052,12 +1031,12 @@ bool BfCapturePoint::SetCapturePointData(GameObject* capturePoint)
     if (m_team == TEAM_ALLIANCE)
     {
         m_value = m_maxValue;
-        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE;
+        m_State = BattlefieldObjectiveStates::ALLIANCE;
     }
     else
     {
         m_value = -m_maxValue;
-        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE;
+        m_State = BattlefieldObjectiveStates::HORDE;
     }
 
     return true;
@@ -1131,7 +1110,7 @@ bool BfCapturePoint::Update(uint32 diff)
     if (fact_diff < 0)
     {
         // horde is in majority, but it's already horde-controlled -> no change
-        if (m_State == BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE && m_value <= -m_maxValue)
+        if (m_State == BattlefieldObjectiveStates::HORDE && m_value <= -m_maxValue)
             return false;
 
         if (fact_diff < -maxDiff)
@@ -1142,7 +1121,7 @@ bool BfCapturePoint::Update(uint32 diff)
     else
     {
         // ally is in majority, but it's already ally-controlled -> no change
-        if (m_State == BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE && m_value >= m_maxValue)
+        if (m_State == BattlefieldObjectiveStates::ALLIANCE && m_value >= m_maxValue)
             return false;
 
         if (fact_diff > maxDiff)
@@ -1162,33 +1141,33 @@ bool BfCapturePoint::Update(uint32 diff)
     {
         if (m_value < -m_maxValue)
             m_value = -m_maxValue;
-        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE;
+        m_State = BattlefieldObjectiveStates::HORDE;
         m_team = TEAM_HORDE;
     }
     else if (m_value > m_minValue)                          // blue
     {
         if (m_value > m_maxValue)
             m_value = m_maxValue;
-        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE;
+        m_State = BattlefieldObjectiveStates::ALLIANCE;
         m_team = TEAM_ALLIANCE;
     }
     else if (oldValue * m_value <= 0)                       // grey, go through mid point
     {
         // if challenger is ally, then n->a challenge
         if (Challenger == ALLIANCE)
-            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE;
+            m_State = BattlefieldObjectiveStates::NEUTRAL_ALLIANCE_CHALLENGE;
         // if challenger is horde, then n->h challenge
         else if (Challenger == HORDE)
-            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE;
+            m_State = BattlefieldObjectiveStates::NEUTRAL_HORDE_CHALLENGE;
         m_team = TEAM_NEUTRAL;
     }
     else                                                    // grey, did not go through mid point
     {
         // old phase and current are on the same side, so one team challenges the other
-        if (Challenger == ALLIANCE && (m_OldState == BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE || m_OldState == BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE))
-            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE;
-        else if (Challenger == HORDE && (m_OldState == BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE || m_OldState == BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE))
-            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE;
+        if (Challenger == ALLIANCE && (m_OldState == BattlefieldObjectiveStates::HORDE || m_OldState == BattlefieldObjectiveStates::NEUTRAL_HORDE_CHALLENGE))
+            m_State = BattlefieldObjectiveStates::HORDE_ALLIANCE_CHALLENGE;
+        else if (Challenger == HORDE && (m_OldState == BattlefieldObjectiveStates::ALLIANCE || m_OldState == BattlefieldObjectiveStates::NEUTRAL_ALLIANCE_CHALLENGE))
+            m_State = BattlefieldObjectiveStates::ALLIANCE_HORDE_CHALLENGE;
         m_team = TEAM_NEUTRAL;
     }
 
@@ -1219,10 +1198,10 @@ void BfCapturePoint::SendObjectiveComplete(uint32 id, uint64 guid)
     uint8 team;
     switch (m_State)
     {
-        case BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE:
+        case BattlefieldObjectiveStates::ALLIANCE:
             team = 0;
             break;
-        case BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE:
+        case BattlefieldObjectiveStates::HORDE:
             team = 1;
             break;
         default:

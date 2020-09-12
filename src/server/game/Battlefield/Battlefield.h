@@ -40,15 +40,15 @@ enum BattlefieldIDs
     BATTLEFIELD_BATTLEID_WG                      = 1        // Wintergrasp battle
 };
 
-enum BattlefieldObjectiveStates
+enum class BattlefieldObjectiveStates
 {
-    BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL = 0,
-    BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE,
-    BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE,
-    BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE,
-    BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE,
-    BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE,
-    BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE
+    NEUTRAL = 0,
+    ALLIANCE,
+    HORDE,
+    NEUTRAL_ALLIANCE_CHALLENGE,
+    NEUTRAL_HORDE_CHALLENGE,
+    ALLIANCE_HORDE_CHALLENGE,
+    HORDE_ALLIANCE_CHALLENGE
 };
 
 enum BattlefieldSounds
@@ -80,7 +80,9 @@ typedef std::map<uint64, time_t> PlayerTimerMap;
 class BfCapturePoint
 {
     public:
-        BfCapturePoint(Battlefield* bf);
+        BfCapturePoint(Battlefield* bf) : m_Bf(bf), m_capturePointGUID(0), m_team(TEAM_NEUTRAL), m_value(0), m_minValue(0.0f), m_maxValue(0.0f),
+                                          m_State(BattlefieldObjectiveStates::NEUTRAL), m_OldState(BattlefieldObjectiveStates::NEUTRAL),
+                                          m_capturePointEntry(0), m_neutralValuePct(0), m_maxSpeed(0) { }
 
         virtual ~BfCapturePoint() { }
 
@@ -147,7 +149,8 @@ class BfCapturePoint
 class BfGraveyard
 {
     public:
-        BfGraveyard(Battlefield* Bf);
+        BfGraveyard(Battlefield* Bf) : m_Bf(Bf), m_GraveyardId(0), m_ControlTeam(TEAM_NEUTRAL) { }
+        virtual ~BfGraveyard() { }
 
         // Method to changing who controls the graveyard
         void GiveControlTo(TeamId team);
@@ -186,7 +189,7 @@ class BfGraveyard
     protected:
         TeamId m_ControlTeam;
         uint32 m_GraveyardId;
-        uint64 m_SpiritGuide[2];
+        uint64 m_SpiritGuide[2] = {};
         GuidSet m_ResurrectQueue;
         Battlefield* m_Bf;
 };
