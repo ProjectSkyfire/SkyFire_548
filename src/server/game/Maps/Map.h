@@ -152,9 +152,15 @@ struct LiquidData
     float  depth_level;
 };
 
+#define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
+#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
+#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find VMap ground if it is available, just larger than MAX_HEIGHT - INVALID_HEIGHT
+#define DEFAULT_HEIGHT_SEARCH     50.0f                     // default search distance to find height at nearby locations
+#define MIN_UNLOAD_DELAY      1                             // immediate unload
+
 class GridMap
 {
-    uint32  _flags;
+    uint32  m_flags;
     union{
         float* m_V9;
         uint16* m_uint16_V9;
@@ -166,23 +172,23 @@ class GridMap
         uint8* m_uint8_V8;
     };
     // Height level data
-    float _gridHeight;
-    float _gridIntHeightMultiplier;
+    float m_gridHeight;
+    float m_gridIntHeightMultiplier;
 
     // Area data
-    uint16* _areaMap;
+    uint16* m_areaMap;
 
     // Liquid data
-    float _liquidLevel;
-    uint16* _liquidEntry;
-    uint8* _liquidFlags;
-    float* _liquidMap;
-    uint16 _gridArea;
-    uint16 _liquidType;
-    uint8 _liquidOffX;
-    uint8 _liquidOffY;
-    uint8 _liquidWidth;
-    uint8 _liquidHeight;
+    float m_liquidLevel;
+    uint16* m_liquidEntry;
+    uint8* m_liquidFlags;
+    float* m_liquidMap;
+    uint16 m_gridArea;
+    uint16 m_liquidType;
+    uint8 m_liquidOffX;
+    uint8 m_liquidOffY;
+    uint8 m_liquidWidth;
+    uint8 m_liquidHeight;
 
 
     bool loadAreaData(FILE* in, uint32 offset, uint32 size);
@@ -191,20 +197,25 @@ class GridMap
 
     // Get height functions and pointers
     typedef float (GridMap::*GetHeightPtr) (float x, float y) const;
-    GetHeightPtr _gridGetHeight;
+    GetHeightPtr m_gridGetHeight;
     float getHeightFromFloat(float x, float y) const;
     float getHeightFromUint16(float x, float y) const;
     float getHeightFromUint8(float x, float y) const;
     float getHeightFromFlat(float x, float y) const;
 
 public:
-    GridMap();
-    ~GridMap();
+    GridMap() : m_flags(0), m_V9(NULL), m_V8(NULL), m_gridHeight(INVALID_HEIGHT), m_gridIntHeightMultiplier(0.0f), m_areaMap(NULL), m_liquidLevel(INVALID_HEIGHT),
+                m_liquidEntry(NULL), m_liquidFlags(NULL), m_liquidMap(NULL), m_gridArea(0), m_liquidType(0), m_liquidOffX(0), m_liquidOffY(0), m_liquidWidth(0), m_liquidHeight(0)  
+    {
+        m_gridGetHeight = &GridMap::getHeightFromFlat;
+    }
+    ~GridMap() { unloadData(); }
+
     bool loadData(char* filaname);
     void unloadData();
 
     uint16 getArea(float x, float y) const;
-    inline float getHeight(float x, float y) const {return (this->*_gridGetHeight)(x, y);}
+    inline float getHeight(float x, float y) const {return (this->*m_gridGetHeight)(x, y);}
     float getLiquidLevel(float x, float y) const;
     uint8 getTerrainType(float x, float y) const;
     ZLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data = 0);
@@ -234,12 +245,6 @@ enum LevelRequirementVsMode
 #else
 #pragma pack(pop)
 #endif
-
-#define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
-#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find VMap ground if it is available, just larger than MAX_HEIGHT - INVALID_HEIGHT
-#define DEFAULT_HEIGHT_SEARCH     50.0f                     // default search distance to find height at nearby locations
-#define MIN_UNLOAD_DELAY      1                             // immediate unload
 
 typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHolderType;
 
