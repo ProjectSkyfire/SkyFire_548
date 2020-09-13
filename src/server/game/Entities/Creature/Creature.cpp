@@ -331,13 +331,13 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
     SetGender(minfo->gender);
 
     // Load creature equipment
-    if (!data || data->equipmentId == 0)
-        LoadEquipment(); // use default equipment (if available)
-    else if (data && data->equipmentId != 0)                // override, 0 means no equipment
+    if (data && data->equipmentId != 0)
     {
         m_originalEquipmentId = data->equipmentId;
         LoadEquipment(data->equipmentId);
     }
+    else
+        LoadEquipment(); // use default equipment (if available)
 
     SetName(normalInfo->Name);                              // at normal entry always
 
