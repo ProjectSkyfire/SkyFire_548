@@ -37,8 +37,6 @@ enum RogueSpells
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
-    SPELL_ROGUE_OVERKILL_TALENT                     = 58426,
-    SPELL_ROGUE_OVERKILL_POWER_REGEN                = 58427,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
@@ -411,43 +409,6 @@ public:
     }
 };
 
-// 58428 - Overkill
-class spell_rog_overkill : public SpellScriptLoader
-{
-public:
-    spell_rog_overkill() : SpellScriptLoader("spell_rog_overkill") { }
-
-    class spell_rog_overkill_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_rog_overkill_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_POWER_REGEN))
-                return false;
-            return true;
-        }
-
-        void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
-        {
-            Unit* target = GetTarget();
-
-            if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
-                target->RemoveAurasDueToSpell(SPELL_ROGUE_OVERKILL_POWER_REGEN);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_overkill_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_rog_overkill_AuraScript();
-    }
-};
-
 // 14185 - Preparation
 class spell_rog_preparation : public SpellScriptLoader
 {
@@ -608,9 +569,7 @@ public:
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE) ||
                 !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT) ||
-                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC) ||
-                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_TALENT) ||
-                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_OVERKILL_POWER_REGEN))
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC))
                 return false;
             return true;
         }
@@ -625,10 +584,6 @@ public:
                 int32 basepoints0 = aurEff->GetAmount();
                 target->CastCustomSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, &basepoints0, NULL, NULL, true);
             }
-
-            // Overkill
-            if (target->HasAura(SPELL_ROGUE_OVERKILL_TALENT))
-                target->CastSpell(target, SPELL_ROGUE_OVERKILL_POWER_REGEN, true);
         }
 
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -753,7 +708,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_deadly_poison();
     new spell_rog_master_of_subtlety();
     new spell_rog_nerves_of_steel();
-    new spell_rog_overkill();
     new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_rupture();
