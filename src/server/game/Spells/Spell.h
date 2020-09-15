@@ -466,7 +466,6 @@ class Spell
         uint64 m_castItemGUID;
         uint8 m_cast_count;
         uint32 m_glyphIndex;
-        uint32 m_preCastSpell;
         SpellCastTargets m_targets;
         int8 m_comboPointGain;
         SpellCustomErrors m_customError;
