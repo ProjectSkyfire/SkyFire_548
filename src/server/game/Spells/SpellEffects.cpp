@@ -664,6 +664,9 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                     unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
+                if (unitTarget->IsInCombat())
+                    unitTarget->CombatStop();
+
                 unitTarget->CastSpell(unitTarget, 1784, true);
                 return;
             }
