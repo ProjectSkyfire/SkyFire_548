@@ -3321,24 +3321,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         {
             switch (m_spellInfo->Id)
             {
-                // Glyph of Backstab
-                case 63975:
-                {
-                    // search our Rupture aura on target
-                    if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00100000, 0, 0, m_caster->GetGUID()))
-                    {
-                        uint32 countMin = aurEff->GetBase()->GetMaxDuration();
-                        uint32 countMax = 12000; // this can be wrong, duration should be based on combo-points
-                        countMax += m_caster->HasAura(56801) ? 4000 : 0;
-
-                        if (countMin < countMax)
-                        {
-                            aurEff->GetBase()->SetDuration(uint32(aurEff->GetBase()->GetDuration() + 3000));
-                            aurEff->GetBase()->SetMaxDuration(countMin + 2000);
-                        }
-                    }
-                    return;
-                }
                 // Glyph of Scourge Strike
                 case 69961:
                 {
@@ -3453,7 +3435,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     break;
                 }
                 case 20589: // Escape artist
-                case 30918: // Improved Sprint
                 {
                     // Removes snares and roots.
                     unitTarget->RemoveMovementImpairingAuras();
@@ -3753,39 +3734,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                     return;
                 }
-                // Stoneclaw Totem
-                case 55328: // Rank 1
-                case 55329: // Rank 2
-                case 55330: // Rank 3
-                case 55332: // Rank 4
-                case 55333: // Rank 5
-                case 55335: // Rank 6
-                case 55278: // Rank 7
-                case 58589: // Rank 8
-                case 58590: // Rank 9
-                case 58591: // Rank 10
-                {
-                    int32 basepoints0 = damage;
-                    // Cast Absorb on totems
-                    for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
-                    {
-                        if (!unitTarget->m_SummonSlot[slot])
-                            continue;
-
-                        Creature* totem = unitTarget->GetMap()->GetCreature(unitTarget->m_SummonSlot[slot]);
-                        if (totem && totem->IsTotem())
-                        {
-                            m_caster->CastCustomSpell(totem, 55277, &basepoints0, NULL, NULL, true);
-                        }
-                    }
-                    // Glyph of Stoneclaw Totem
-                    if (AuraEffect* aur=unitTarget->GetAuraEffect(63298, 0))
-                    {
-                        basepoints0 *= aur->GetAmount();
-                        m_caster->CastCustomSpell(unitTarget, 55277, &basepoints0, NULL, NULL, true);
-                    }
-                    break;
-                }
                 case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TypeID::TYPEID_UNIT)
@@ -3884,8 +3832,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
             {
                 // Get diseases on target of spell
-                if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
-                    (m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
+                if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
                 {
                     // And spread them on target
                     // Blood Plague
@@ -4021,40 +3968,24 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     ObjectGuid arbiterGuid = pGameObj->GetGUID();
     ObjectGuid casterGuid = caster->GetGUID();
 
-    WorldPacket data(SMSG_DUEL_REQUESTED, 9 + 9);
-    data.WriteBit(arbiterGuid[5]);
-    data.WriteBit(casterGuid[4]);
-    data.WriteBit(casterGuid[2]);
-    data.WriteBit(casterGuid[7]);
-    data.WriteBit(arbiterGuid[0]);
-    data.WriteBit(casterGuid[5]);
-    data.WriteBit(arbiterGuid[4]);
-    data.WriteBit(arbiterGuid[6]);
-    data.WriteBit(casterGuid[1]);
-    data.WriteBit(casterGuid[3]);
-    data.WriteBit(casterGuid[6]);
-    data.WriteBit(arbiterGuid[7]);
-    data.WriteBit(arbiterGuid[3]);
-    data.WriteBit(arbiterGuid[2]);
-    data.WriteBit(arbiterGuid[1]);
-    data.WriteBit(casterGuid[0]);
+    WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8);
+    data.WriteGuidMask(arbiterGuid, 5);
+    data.WriteGuidMask(casterGuid, 4, 2, 7);
+    data.WriteGuidMask(arbiterGuid, 0);
+    data.WriteGuidMask(casterGuid, 5);
+    data.WriteGuidMask(arbiterGuid, 4, 6);
+    data.WriteGuidMask(casterGuid, 1, 3, 6);
+    data.WriteGuidMask(arbiterGuid, 7, 3, 2, 1);
+    data.WriteGuidMask(casterGuid, 0);
 
-    data.WriteByteSeq(arbiterGuid[5]);
-    data.WriteByteSeq(arbiterGuid[3]);
-    data.WriteByteSeq(casterGuid[7]);
-    data.WriteByteSeq(casterGuid[4]);
-    data.WriteByteSeq(arbiterGuid[7]);
-    data.WriteByteSeq(casterGuid[3]);
-    data.WriteByteSeq(casterGuid[6]);
-    data.WriteByteSeq(casterGuid[0]);
-    data.WriteByteSeq(arbiterGuid[4]);
-    data.WriteByteSeq(casterGuid[2]);
-    data.WriteByteSeq(casterGuid[1]);
-    data.WriteByteSeq(arbiterGuid[0]);
-    data.WriteByteSeq(arbiterGuid[2]);
-    data.WriteByteSeq(arbiterGuid[6]);
-    data.WriteByteSeq(arbiterGuid[1]);
-    data.WriteByteSeq(casterGuid[5]);
+    data.WriteGuidBytes(arbiterGuid, 5, 3);
+    data.WriteGuidBytes(casterGuid, 7, 4);
+    data.WriteGuidBytes(arbiterGuid, 7);
+    data.WriteGuidBytes(casterGuid, 3, 6, 0);
+    data.WriteGuidBytes(arbiterGuid, 4);
+    data.WriteGuidBytes(casterGuid, 2, 1);
+    data.WriteGuidBytes(arbiterGuid, 0, 2, 6, 1);
+    data.WriteGuidBytes(casterGuid, 5);
 
     caster->GetSession()->SendPacket(&data);
     target->GetSession()->SendPacket(&data);
@@ -4127,31 +4058,17 @@ void Spell::EffectSummonPlayer(SpellEffIndex /*effIndex*/)
 
     float x, y, z;
     m_caster->GetPosition(x, y, z);
-
     unitTarget->ToPlayer()->SetSummonPoint(m_caster->GetMapId(), x, y, z);
 
-    WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
     ObjectGuid SummonerGUID = m_caster->GetGUID();
 
-    data.WriteBit(SummonerGUID[0]);
-    data.WriteBit(SummonerGUID[6]);
-    data.WriteBit(SummonerGUID[3]);
-    data.WriteBit(SummonerGUID[2]);
-    data.WriteBit(SummonerGUID[1]);
-    data.WriteBit(SummonerGUID[4]);
-    data.WriteBit(SummonerGUID[7]);
-    data.WriteBit(SummonerGUID[5]);
-
-    data.WriteByteSeq(SummonerGUID[4]);
+    WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
+    data.WriteGuidMask(SummonerGUID, 0, 6, 3, 2, 1, 4, 7, 5);
+    data.WriteGuidBytes(SummonerGUID, 4);
     data << uint32(m_caster->GetZoneId());                  // summoner zone
-    data.WriteByteSeq(SummonerGUID[7]);
-    data.WriteByteSeq(SummonerGUID[3]);
-    data.WriteByteSeq(SummonerGUID[1]);
+    data.WriteGuidBytes(SummonerGUID, 7, 3, 1);
     data << uint32(MAX_PLAYER_SUMMON_DELAY*IN_MILLISECONDS); // auto decline after msecs
-    data.WriteByteSeq(SummonerGUID[2]);
-    data.WriteByteSeq(SummonerGUID[6]);
-    data.WriteByteSeq(SummonerGUID[5]);
-    data.WriteByteSeq(SummonerGUID[0]);
+    data.WriteGuidBytes(SummonerGUID, 2, 6, 5, 0);
     unitTarget->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
@@ -4572,25 +4489,8 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
 
     WorldPacket data(SMSG_CLEAR_TARGET, 8);
     ObjectGuid CasterGUID = m_caster->GetGUID();
-
-    data.WriteBit(CasterGUID[6]);
-    data.WriteBit(CasterGUID[2]);
-    data.WriteBit(CasterGUID[0]);
-    data.WriteBit(CasterGUID[4]);
-    data.WriteBit(CasterGUID[7]);
-    data.WriteBit(CasterGUID[1]);
-    data.WriteBit(CasterGUID[3]);
-    data.WriteBit(CasterGUID[5]);
-
-    data.WriteByteSeq(CasterGUID[4]);
-    data.WriteByteSeq(CasterGUID[0]);
-    data.WriteByteSeq(CasterGUID[3]);
-    data.WriteByteSeq(CasterGUID[5]);
-    data.WriteByteSeq(CasterGUID[2]);
-    data.WriteByteSeq(CasterGUID[7]);
-    data.WriteByteSeq(CasterGUID[6]);
-    data.WriteByteSeq(CasterGUID[1]);
-
+    data.WriteGuidMask(CasterGUID, 6, 2, 0, 4, 7, 1, 3, 5);
+    data.WriteGuidBytes(CasterGUID, 4, 0, 3, 5, 2, 7, 6, 1);
     m_caster->SendMessageToSet(&data, true);
 }
 
@@ -5909,26 +5809,9 @@ void Spell::EffectBind(SpellEffIndex effIndex)
 
     // zone update
     data.Initialize(SMSG_PLAYERBOUND, 1 + 8 + 4);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[0]);
-
+    data.WriteGuidMask(guid, 2, 4, 0, 3, 6, 7, 5, 1);
+    data.WriteGuidMask(guid, 6, 1, 2, 3, 4, 5, 7, 0);
     data << uint32(areaId);
-
     player->SendDirectMessage(&data);
 }
 

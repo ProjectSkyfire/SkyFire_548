@@ -4890,26 +4890,11 @@ void Spell::SendChannelUpdate(uint32 time)
 
     ObjectGuid CasterGUID = m_caster->GetGUID();
 
-    WorldPacket data(SMSG_SPELL_CHANNEL_UPDATE, 8+4);
-
-    data.WriteBit(CasterGUID[0]);
-    data.WriteBit(CasterGUID[3]);
-    data.WriteBit(CasterGUID[4]);
-    data.WriteBit(CasterGUID[1]);
-    data.WriteBit(CasterGUID[5]);
-    data.WriteBit(CasterGUID[2]);
-    data.WriteBit(CasterGUID[6]);
-    data.WriteBit(CasterGUID[7]);
-
-    data.WriteByteSeq(CasterGUID[4]);
-    data.WriteByteSeq(CasterGUID[7]);
-    data.WriteByteSeq(CasterGUID[1]);
-    data.WriteByteSeq(CasterGUID[2]);
-    data.WriteByteSeq(CasterGUID[6]);
-    data.WriteByteSeq(CasterGUID[5]);
+    WorldPacket data(SMSG_SPELL_CHANNEL_UPDATE, 8 + 4);
+    data.WriteGuidMask(CasterGUID, 0, 3, 4, 1, 5, 2, 6, 7);
+    data.WriteGuidBytes(CasterGUID, 4, 7, 1, 2, 6, 5);
     data << uint32(time);
-    data.WriteByteSeq(CasterGUID[0]);
-    data.WriteByteSeq(CasterGUID[3]);
+    data.WriteGuidBytes(CasterGUID, 0, 3);
     m_caster->SendMessageToSet(&data, true);
 }
 
