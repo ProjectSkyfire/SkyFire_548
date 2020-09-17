@@ -6551,18 +6551,18 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
     switch (dummySpell->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
+        {
             switch (dummySpell->Id)
             {
                 // Nevermelting Ice Crystal
                 case 71564:
+                {
                     RemoveAuraFromStack(71564);
                     *handled = true;
                     break;
-                    // Gaseous Bloat
+                }
+                // Gaseous Bloat
                 case 70672:
-                case 72455:
-                case 72832:
-                case 72833:
                 {
                     *handled = true;
                     uint32 stack = triggeredByAura->GetStackAmount();
@@ -6576,13 +6576,12 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                 }
                 // Ball of Flames Proc
                 case 71756:
-                case 72782:
-                case 72783:
-                case 72784:
+                {
                     RemoveAuraFromStack(dummySpell->Id);
                     *handled = true;
                     break;
-                    // Discerning Eye of the Beast
+                }
+                // Discerning Eye of the Beast
                 case 59915:
                 {
                     CastSpell(this, 59914, true);   // 59914 already has correct basepoints in DBC, no need for custom bp
@@ -6592,14 +6591,14 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                 // Swift Hand of Justice
                 case 59906:
                 {
-                    int32 bp0 = CalculatePct(GetMaxHealth(), dummySpell->Effects [EFFECT_0].CalcValue());
+                    int32 bp0 = CalculatePct(GetMaxHealth(), dummySpell->Effects[EFFECT_0].CalcValue());
                     CastCustomSpell(this, 59913, &bp0, NULL, NULL, true);
                     *handled = true;
                     break;
                 }
             }
-
             break;
+        }
         case SPELLFAMILY_PALADIN:
         {
             // Judgements of the Just
@@ -6629,28 +6628,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     }
                 }
                 return true;
-            }
-            break;
-        }
-        case SPELLFAMILY_MAGE:
-        {
-            switch (dummySpell->Id)
-            {
-                // Empowered Fire
-                case 31656:
-                case 31657:
-                case 31658:
-                {
-                    *handled = true;
-
-                    SpellInfo const* spInfo = sSpellMgr->GetSpellInfo(67545);
-                    if (!spInfo)
-                        return false;
-
-                    int32 bp0 = int32(CalculatePct(GetCreateMana(), spInfo->Effects [0].CalcValue()));
-                    CastCustomSpell(this, 67545, &bp0, NULL, NULL, true, NULL, triggeredByAura->GetEffect(EFFECT_0), GetGUID());
-                    return true;
-                }
             }
             break;
         }
@@ -6897,18 +6874,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         }
                         break;
                     }
-                    // Druid T9 Feral Relic (Lacerate, Swipe, Mangle, and Shred)
-                    case 67353:
-                    {
-                        switch (GetShapeshiftForm())
-                        {
-                            case FORM_CAT:      trigger_spell_id = 67355; break;
-                            case FORM_BEAR:     trigger_spell_id = 67354; break;
-                            default:
-                                return false;
-                        }
-                        break;
-                    }
                     default:
                         break;
                 }
@@ -6921,7 +6886,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     switch (auraSpellInfo->Id)
                     {
                         case 53234:  // Rank 1
-                        case 53237:  // Rank 2
                         case 53238:  // Rank 3
                             trigger_spell_id = 63468;
                             break;
