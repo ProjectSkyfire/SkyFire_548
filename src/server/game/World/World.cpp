@@ -1584,6 +1584,9 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading Gameobject Data...");
     sObjectMgr->LoadGameobjects();
 
+    SF_LOG_INFO("server.loading", "Loading Creature Sparring Data...");
+    sObjectMgr->LoadCreatureSparringTemplate();
+
     SF_LOG_INFO("server.loading", "Loading Creature Linked Respawn...");
     sObjectMgr->LoadLinkedRespawn();                             // must be after LoadCreatures(), LoadGameObjects()
 
