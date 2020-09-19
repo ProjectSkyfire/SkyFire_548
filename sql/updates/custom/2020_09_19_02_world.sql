@@ -1,6 +1,6 @@
 DELETE FROM `creature_text` WHERE `entry`= 50039;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(50039, 0, 0, 'Die!', 41, 0, 100, 0, 0, 0, 'Dummy - Fear No Evil quest hint');
+(50039, 0, 0, 'Die!', 12, 0, 100, 0, 0, 0, 'Dummy - Fear No Evil quest hint');
 
 SET @ENTRY := 50039;
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`= @ENTRY;
