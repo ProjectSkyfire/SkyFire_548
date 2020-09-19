@@ -18,191 +18,287 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* ScriptData
-SDName: Elwynn_Forest
-SD%Complete: 50
-SDCategory: Elwynn Forest
-EndScriptData */
-
-/* ContentData
-npc_blackrock_spy
-npc_blackrock_invader
-npc_goblin_assassin
-EndContentData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "MoveSplineInit.h"
+#include "SpellScript.h"
+#include "CombatAI.h"
+#include "Player.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 enum Northshire
 {
-    SAY_BLACKROCK_COMBAT_1    = -1000015,
-    SAY_BLACKROCK_COMBAT_2    = -1000016,
-    SAY_BLACKROCK_COMBAT_3    = -1000017,
-    SAY_BLACKROCK_COMBAT_4    = -1000018,
-    SAY_BLACKROCK_COMBAT_5    = -1000019,
-    SAY_ASSASSIN_COMBAT_1     = -1000020,
-    SAY_ASSASSIN_COMBAT_2     = -1000021,
-    SPELL_SPYING              = 92857,
-    SPELL_SNEAKING            = 93046,
-    SPELL_SPYGLASS            = 80676
+    NPC_BLACKROCK_BATTLE_WORG               = 49871,
+    NPC_STORWIND_INFANTRY                   = 49869,
+    NPC_BROTHER_PAXTON                      = 951,
+    NPC_INJURED_NORTHSHIRE_INFANTRY_DUMMY   = 50378,
+
+    EVENT_ASK_FOR_HELP                      = 1,
+    EVENT_SELECT_INFANTRY,
+    EVENT_HEAL_INFANTRY,
+    EVENT_GIVE_RIGHT_CLICK_INSTRUCTIONS,
+
+    SAY_ASK_FOR_HELP                        = 0,
+    SAY_HEAL_INFANTRY                       = 0,
+    SAY_RIGHT_CLICK                         = 0,
+
+    SPELL_PRAYER_OF_HEALING                 = 93091,
+    SPELL_RENEW                             = 93094,
+    SPELL_FLASH_HEAL                        = 17843,
+
+    SPELL_GIVEN_RIGHT_CLICK_INSTRUCTION     = 93450,
 };
 
-/*######
-## npc_blackrock_spy
-######*/
+uint32 const FearNoEvilQuests[] =
+{
+    28806,
+    28807,
+    28808,
+    28809,
+    28810,
+    28811,
+    28812,
+    28813,
+    29082,
+};
 
-class npc_blackrock_spy : public CreatureScript
+class npc_stormwind_infantry : public CreatureScript
 {
 public:
-    npc_blackrock_spy() : CreatureScript("npc_blackrock_spy") { }
+    npc_stormwind_infantry() : CreatureScript("npc_stormwind_infantry") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    struct npc_stormwind_infantryAI : public ScriptedAI
     {
-        return new npc_blackrock_spyAI (creature);
-    }
-
-    struct npc_blackrock_spyAI : public ScriptedAI
-    {
-        npc_blackrock_spyAI(Creature* creature) : ScriptedAI(creature)
+        npc_stormwind_infantryAI(Creature* creature) : ScriptedAI(creature)
         {
-            CastSpying();
         }
 
-        void CastSpying()
+        void Reset() override
         {
-            GetCreature(-8868.88f, -99.1016f);
-            GetCreature(-8936.5f, -246.743f);
-            GetCreature(-8922.44f, -73.9883f);
-            GetCreature(-8909.68f, -40.0247f);
-            GetCreature(-8834.85f, -119.701f);
-            GetCreature(-9022.08f, -163.965f);
-            GetCreature(-8776.55f, -79.158f);
-            GetCreature(-8960.08f, -63.767f);
-            GetCreature(-8983.12f, -202.827f);
+            SetCombatMovement(false);
         }
 
-        void GetCreature(float X, float Y)
+        void EnterCombat(Unit* /*who*/) override
         {
-            if (me->GetHomePosition().GetPositionX() == X && me->GetHomePosition().GetPositionY() == Y)
-                if (!me->IsInCombat() && !me->HasAura(SPELL_SPYING))
-                    DoCast(me, SPELL_SPYING);
-
-            CastSpyglass();
+            events.ScheduleEvent(EVENT_ASK_FOR_HELP, (urand(1000, 10000) * 10));
         }
 
-        void CastSpyglass()
+        void EnterEvadeMode() override
         {
-            Spyglass(-8868.88f, -99.1016f, -8936.5f, -246.743f, -8922.44f, -73.9883f, -8909.68f, -40.0247f, -8834.85f,
-                -119.701f, -9022.08f, -163.965f, -8776.55f, -79.158f, -8960.08f, -63.767f, -8983.12f, -202.827f);
+            _EnterEvadeMode();
+            events.Reset();
         }
 
-        void Spyglass(float X1, float Y1, float X2, float Y2, float X3, float Y3, float X4, float Y4, float X5, float Y5,
-            float X6, float Y6, float X7, float Y7, float X8, float Y8, float X9, float Y9)
+        void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            if ((me->GetHomePosition().GetPositionX() != X1 && me->GetHomePosition().GetPositionY() != Y1) &&
-             (me->GetHomePosition().GetPositionX() != X2 && me->GetHomePosition().GetPositionY() != Y2) &&
-             (me->GetHomePosition().GetPositionX() != X3 && me->GetHomePosition().GetPositionY() != Y3) &&
-             (me->GetHomePosition().GetPositionX() != X4 && me->GetHomePosition().GetPositionY() != Y4) &&
-             (me->GetHomePosition().GetPositionX() != X5 && me->GetHomePosition().GetPositionY() != Y5) &&
-             (me->GetHomePosition().GetPositionX() != X6 && me->GetHomePosition().GetPositionY() != Y6) &&
-             (me->GetHomePosition().GetPositionX() != X7 && me->GetHomePosition().GetPositionY() != Y7) &&
-             (me->GetHomePosition().GetPositionX() != X8 && me->GetHomePosition().GetPositionY() != Y8) &&
-             (me->GetHomePosition().GetPositionX() != X9 && me->GetHomePosition().GetPositionY() != Y9))
-                if (me->GetHomePosition().GetPositionX() == me->GetPositionX() && me->GetHomePosition().GetPositionY() == me->GetPositionY())
-                    if (!me->IsInCombat() && !me->HasAura(SPELL_SPYGLASS))
-                        DoCast(me, SPELL_SPYGLASS);
+            if (me->GetHealthPct() <= 85 && attacker->GetEntry() == NPC_BLACKROCK_BATTLE_WORG)
+                damage = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
-            Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
-        }
+            events.Update(diff);
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
-        {
-            CastSpyglass();
-
-            if (!UpdateVictim())
-                return;
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ASK_FOR_HELP:
+                        Talk(SAY_ASK_FOR_HELP);
+                        events.ScheduleEvent(EVENT_ASK_FOR_HELP, (urand(3000, 10000) * 10));
+                        events.ScheduleEvent(EVENT_HEAL_INFANTRY, 2000);
+                        break;
+                    case EVENT_HEAL_INFANTRY:
+                        if (Creature* paxton = me->FindNearestCreature(NPC_BROTHER_PAXTON, 30.0f, true))
+                        {
+                            if (!paxton->HasUnitState(UNIT_STATE_CASTING))
+                            {
+                                paxton->AI()->Talk(SAY_HEAL_INFANTRY, me);
+                                if (me->GetHealthPct() <= 85)
+                                {
+                                    paxton->StopMoving();
+                                    switch (RAND(0, 2))
+                                    {
+                                        case 0: // Prayer of Healing
+                                            paxton->CastSpell(paxton, SPELL_PRAYER_OF_HEALING);
+                                            break;
+                                        case 1: // Renew
+                                            paxton->SetFacingToObject(me);
+                                            paxton->CastSpell(me, SPELL_RENEW);
+                                            break;
+                                        case 2: // Flash Heal
+                                            paxton->SetFacingToObject(me);
+                                            paxton->CastSpell(me, SPELL_FLASH_HEAL);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        EventMap events;
     };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_stormwind_infantryAI(creature);
+    }
 };
 
-/*######
-## npc_blackrock_invader
-######*/
-
-class npc_blackrock_invader : public CreatureScript
+class npc_blackrock_battle_worg : public CreatureScript
 {
 public:
-    npc_blackrock_invader() : CreatureScript("npc_blackrock_invader") { }
+    npc_blackrock_battle_worg() : CreatureScript("npc_blackrock_battle_worg") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    struct npc_blackrock_battle_worgAI : public ScriptedAI
     {
-        return new npc_blackrock_invaderAI (creature);
-    }
-
-    struct npc_blackrock_invaderAI : public ScriptedAI
-    {
-        npc_blackrock_invaderAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        npc_blackrock_battle_worgAI(Creature* creature) : ScriptedAI(creature)
         {
-            Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
         }
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
-            if (!UpdateVictim())
+            if (who->GetEntry() != NPC_STORWIND_INFANTRY)
+                isInfantry = false;
+            events.CancelEvent(EVENT_SELECT_INFANTRY);
+        }
+
+        void Reset() override
+        {
+            isInfantry = true;
+            events.ScheduleEvent(EVENT_SELECT_INFANTRY, 1000);
+        }
+
+        void SelectInfantry()
+        {
+            if (Creature* victim = me->FindNearestCreature(NPC_STORWIND_INFANTRY, 5.0f, true))
+            {
+                isInfantry = true;
+                victim->getThreatManager().getThreatList().empty();
+                me->AI()->AttackStart(victim);
+                victim->AI()->AttackStart(me);
+            }
+            else
+                events.ScheduleEvent(EVENT_SELECT_INFANTRY, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (me->GetHealthPct() <= 85 && attacker->GetEntry() == NPC_STORWIND_INFANTRY)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!isInfantry && !UpdateVictim())
                 return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SELECT_INFANTRY:
+                        SelectInfantry();
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        EventMap events;
+        bool isInfantry;
     };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_blackrock_battle_worgAI(creature);
+    }
 };
 
-/*######
-## npc_goblin_assassin
-######*/
-
-class npc_goblin_assassin : public CreatureScript
+class npc_injured_stormwind_infantry_dummy : public CreatureScript
 {
 public:
-    npc_goblin_assassin() : CreatureScript("npc_goblin_assassin") { }
+    npc_injured_stormwind_infantry_dummy() : CreatureScript("npc_injured_stormwind_infantry_dummy") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    struct npc_injured_stormwind_infantry_dummyAI : public ScriptedAI
     {
-        return new npc_goblin_assassinAI (creature);
-    }
-
-    struct npc_goblin_assassinAI : public ScriptedAI
-    {
-        npc_goblin_assassinAI(Creature* creature) : ScriptedAI(creature)
+        npc_injured_stormwind_infantry_dummyAI(Creature* creature) : ScriptedAI(creature)
         {
-            if (!me->IsInCombat() && !me->HasAura(SPELL_SPYING))
-                DoCast(SPELL_SNEAKING);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void Reset() override
         {
-            Talk(RAND(SAY_ASSASSIN_COMBAT_1, SAY_ASSASSIN_COMBAT_2), me);
+            events.ScheduleEvent(EVENT_GIVE_RIGHT_CLICK_INSTRUCTIONS, 1000);
         }
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
-        {
-            if (!UpdateVictim())
-                return;
 
-            DoMeleeAttackIfReady();
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_GIVE_RIGHT_CLICK_INSTRUCTIONS:
+                    {
+                        std::list<Player*> players;
+                        Skyfire::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+                        Skyfire::PlayerListSearcher<Skyfire::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+                        me->VisitNearbyWorldObject(50.0f, searcher);
+                        for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        {
+                            for (uint8 i = 0; i < 9; i++)
+                            {
+                                if ((*itr)->GetQuestStatus(FearNoEvilQuests[i]) == QUEST_STATUS_INCOMPLETE)
+                                {
+                                    if (!(*itr)->HasAura(SPELL_GIVEN_RIGHT_CLICK_INSTRUCTION))
+                                    {
+                                        me->CastSpell((*itr), SPELL_GIVEN_RIGHT_CLICK_INSTRUCTION, true);
+                                        Talk(SAY_RIGHT_CLICK, (*itr));
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         }
+
+    private:
+        EventMap events;
     };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_injured_stormwind_infantry_dummyAI(creature);
+    }
 };
 
 void AddSC_elwynn_forest()
 {
-    new npc_blackrock_spy();
-    new npc_goblin_assassin();
-    new npc_blackrock_invader();
+	new npc_stormwind_infantry();
+    new npc_blackrock_battle_worg();
+    new npc_injured_stormwind_infantry_dummy();
 }
