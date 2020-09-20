@@ -1977,14 +1977,9 @@ class Player : public Unit, public GridObject<Player>
         SetUInt64Value(UNIT_FIELD_TARGET, guid);
     }
 
-    uint8 GetComboPoints() const
-    {
-        return m_comboPoints;
-    }
-    uint64 GetComboTarget() const
-    {
-        return m_comboTarget;
-    }
+    void SetComboPoints(int8 cp) { m_comboPoints = cp; }
+    int8 GetComboPoints() const { return m_comboPoints; }
+    uint64 GetComboTarget() const { return m_comboTarget; }
 
     void AddComboPoints(Unit* target, int8 count, Spell* spell = NULL);
     void GainSpellComboPoints(int8 count);
