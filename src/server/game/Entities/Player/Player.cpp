@@ -3201,6 +3201,10 @@ void Player::GiveLevel(uint8 level)
             learnSpell(*iter, true);
     }
 
+    if (getLevel() >= 40)
+        if (HasSpell(119811) && !HasSpell(750)) // Warior/Paladin/DK Mail Armor
+            learnSpell(750, true); // Plate Armor
+
     sScriptMgr->OnPlayerLevelChanged(this, oldLevel);
 }
 
