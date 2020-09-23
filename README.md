@@ -74,12 +74,9 @@ Read file [COPYING](COPYING.md)
 ## Authors &amp; Contributors
 Read file [THANKS](THANKS.md)
 
-## To-Do List
-Read File [TO-DO](TODO.md)
-
 ## Links
 Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
 
-Database [https://forum.projectskyfire.org/index.php?/files/](https://forum.projectskyfire.org/index.php?/files/)
+Database [https://www.projectskyfire.org/index.php?/files/](https://www.projectskyfire.org/index.php?/files/)
 
 Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
