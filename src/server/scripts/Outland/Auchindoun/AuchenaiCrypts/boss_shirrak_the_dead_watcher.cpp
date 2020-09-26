@@ -159,7 +159,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_focus_fire : public CreatureScript
@@ -174,9 +173,7 @@ public:
 
     struct npc_focus_fireAI : public ScriptedAI
     {
-        npc_focus_fireAI(Creature* creature) : ScriptedAI(creature)
-        {
-        }
+        npc_focus_fireAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 FieryBlast_Timer;
         bool fiery1, fiery2;
@@ -210,7 +207,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_shirrak_the_dead_watcher()

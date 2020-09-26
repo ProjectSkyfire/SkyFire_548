@@ -172,7 +172,6 @@ public:
             Talk(SAY_SLAY);
         }
     };
-
 };
 
 class achievement_less_rabi : public AchievementCriteriaScript

@@ -225,7 +225,7 @@ public:
                             _player->CastSpell(target, SPELL_WARRIOR_DEEP_WOUNDS, true);
 
                     // Item - Warrior T16 DPS 4P Bonus - 144441
-                    if (GetSpellInfo()->Id == SPELL_WARRIOR_MORTAL_STRIKE_AURA || GetSpellInfo()->Id == SPELL_WARRIOR_BLOODTHIRST)
+                    if (GetSpellInfo()->Id == SPELL_WARRIOR_MORTAL_STRIKE_AURA || GetSpellInfo()->Id == SPELL_WARRIOR_BLOODTHIRST_DAMAGE)
                         if (_player->HasAura(SPELL_WARRIOR_T16_DPS_4P_BONUS))
                             if (roll_chance_i(10))
                                 _player->CastSpell(_player, SPELL_WARRIOR_T16_DPS_4P_BONUS_PROC, true);

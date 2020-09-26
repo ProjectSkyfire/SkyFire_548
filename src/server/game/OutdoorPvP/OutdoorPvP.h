@@ -92,7 +92,6 @@ typedef std::set<uint64> PlayerSet;
 class OPvPCapturePoint
 {
     public:
-
         OPvPCapturePoint(OutdoorPvP* pvp);
 
         virtual ~OPvPCapturePoint() { }
@@ -144,7 +143,6 @@ class OPvPCapturePoint
             float rotation0 = 0, float rotation1 = 0, float rotation2 = 0, float rotation3 = 0);
 
     protected:
-
         bool AddObject(uint32 type, uint32 entry, uint32 map, float x, float y, float z, float o,
             float rotation0, float rotation1, float rotation2, float rotation3);
         bool AddCreature(uint32 type, uint32 entry, uint32 teamval, uint32 map, float x, float y, float z, float o, uint32 spawntimedelay = 0);
@@ -155,7 +153,6 @@ class OPvPCapturePoint
         bool DelCapturePoint();
 
     protected:
-
         // active players in the area of the objective, 0 - alliance, 1 - horde
         PlayerSet m_activePlayers[2];
 
@@ -195,7 +192,6 @@ class OutdoorPvP : public ZoneScript
     friend class OutdoorPvPMgr;
 
     public:
-
         // ctor
         OutdoorPvP();
 
@@ -252,7 +248,6 @@ class OutdoorPvP : public ZoneScript
         void TeamApplyBuff(TeamId team, uint32 spellId, uint32 spellId2 = 0);
 
     protected:
-
         // the map of the objectives belonging to this outdoorpvp
         OPvPCapturePointMap m_capturePoints;
 

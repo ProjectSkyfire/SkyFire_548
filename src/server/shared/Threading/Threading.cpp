@@ -98,10 +98,7 @@ int ThreadPriority::getPriority(Priority p) const
 
 #define THREADFLAG (THR_NEW_LWP | THR_SCHED_DEFAULT| THR_JOINABLE)
 
-Thread::Thread(): m_iThreadId(0), m_hThreadHandle(0), m_task(0)
-{
-
-}
+Thread::Thread(): m_iThreadId(0), m_hThreadHandle(0), m_task(0) { }
 
 Thread::Thread(Runnable* instance): m_iThreadId(0), m_hThreadHandle(0), m_task(instance)
 {

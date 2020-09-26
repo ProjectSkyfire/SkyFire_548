@@ -42,7 +42,6 @@ class PositionFunc = PositionTrait<T>
 class RegularGrid2D
 {
 public:
-
     enum{
         CELL_NUMBER = 64,
     };

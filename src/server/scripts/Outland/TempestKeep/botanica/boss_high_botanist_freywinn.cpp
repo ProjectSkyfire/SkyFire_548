@@ -58,11 +58,7 @@ enum Creatures
 class boss_high_botanist_freywinn : public CreatureScript
 {
     public:
-
-        boss_high_botanist_freywinn()
-            : CreatureScript("boss_high_botanist_freywinn")
-        {
-        }
+        boss_high_botanist_freywinn() : CreatureScript("boss_high_botanist_freywinn") { }
 
         struct boss_high_botanist_freywinnAI : public BossAI
         {

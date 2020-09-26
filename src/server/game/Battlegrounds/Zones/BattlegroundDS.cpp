@@ -40,10 +40,7 @@ BattlegroundDS::BattlegroundDS()
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattlegroundDS::~BattlegroundDS()
-{
-
-}
+BattlegroundDS::~BattlegroundDS() { }
 
 void BattlegroundDS::PostUpdateImpl(uint32 diff)
 {

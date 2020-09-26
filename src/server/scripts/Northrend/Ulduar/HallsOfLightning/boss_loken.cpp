@@ -190,7 +190,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class spell_loken_pulsing_shockwave : public SpellScriptLoader
