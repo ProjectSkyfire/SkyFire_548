@@ -31,7 +31,6 @@
 enum WarriorSpells
 {
     SPELL_WARRIOR_ALLOW_RAGING_BLOW                 = 131116,
-    SPELL_WARRIOR_BLOODTHIRST                       = 23885,
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
     SPELL_WARRIOR_BLOODTHIRST_HEAL                  = 117313,
     SPELL_WARRIOR_CHARGE                            = 34846,
@@ -88,7 +87,8 @@ public:
 
         bool Validate(SpellInfo const* /*SpellEntry*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST))
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_HEAL))
                 return false;
             return true;
         }
