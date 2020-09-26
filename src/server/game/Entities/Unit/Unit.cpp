@@ -9085,6 +9085,16 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 // Custom crit by class
                 switch (spellProto->SpellFamilyName)
                 {
+                    case SPELLFAMILY_WARRIOR:
+                        // bloodthirst double crit chance
+                        if (spellProto->SpellFamilyFlags[1] & 0x00000400
+                            && spellProto->SpellIconID == 38)
+                        {
+                            crit_chance += (GetUnitCriticalChance(attackType, victim) * 2.0f);
+                            break;
+                        }
+                        break;
+
                     case SPELLFAMILY_DRUID:
                         // Rend and Tear - bonus crit chance for Ferocious Bite on bleeding targets
                         if (spellProto->SpellFamilyFlags [0] & 0x00800000
