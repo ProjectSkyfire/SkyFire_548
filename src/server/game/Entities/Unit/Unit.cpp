@@ -5015,11 +5015,30 @@ void Unit::SendSpellDamageResist(Unit* target, uint32 spellId)
 
 void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
 {
+    ObjectGuid guid = GetGUID();
+    ObjectGuid targetGuid = target->GetGUID();
     WorldPacket data(SMSG_SPELLORDAMAGE_IMMUNE, 8 + 8 + 4 + 1);
-    data << uint64(GetGUID());
-    data << uint64(target->GetGUID());
+    data.WriteGuidMask(guid, 5, 0);
+    data.WriteGuidMask(targetGuid, 6);
+    data.WriteBit(0); // bool - log format: 0-default, 1-debug
+    data.WriteGuidMask(guid, 7);
+    data.WriteGuidMask(targetGuid, 5, 2);
+    data.WriteGuidMask(guid, 2, 1, 3);
+    data.WriteGuidMask(targetGuid, 4);
+    data.WriteGuidMask(guid, 4);
+    data.WriteGuidMask(targetGuid, 7);
+    data.WriteGuidMask(guid, 6);
+    data.WriteGuidMask(targetGuid, 3, 1, 0);
+    data.FlushBits();
+    data.WriteGuidBytes(targetGuid, 4, 3);
+    data.WriteGuidBytes(guid, 2);
+    data.WriteGuidBytes(targetGuid, 6, 5);
+    data.WriteGuidBytes(guid, 3);
+    data.WriteGuidBytes(targetGuid, 7, 2, 0);
+    data.WriteGuidBytes(guid, 7, 5, 0, 1, 4);
     data << uint32(spellId);
-    data << uint8(0); // bool - log format: 0-default, 1-debug
+    data.WriteGuidBytes(targetGuid, 1);
+    data.WriteGuidBytes(guid, 6);
     SendMessageToSet(&data, true);
 }
 
