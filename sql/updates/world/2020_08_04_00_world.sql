@@ -1,4 +1,4 @@
-SET @CGUID := 100053;
+SET @CGUID := 100054;
 
 UPDATE `creature_template` SET `trainer_type`=2, `npcflag`=1|2|16 WHERE `entry` IN (63596, 63626);
 
