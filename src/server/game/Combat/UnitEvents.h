@@ -86,29 +86,20 @@ class ThreatRefStatusChangeEvent : public UnitBaseEvent
 {
     private:
         HostileReference* iHostileReference;
-        union
-        {
-            float iFValue;
-            int32 iIValue;
-            bool iBValue;
-        };
         ThreatManager* iThreatManager;
+        float iFValue;
+
     public:
-        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType), iThreatManager(NULL) { iHostileReference = NULL; }
+        ThreatRefStatusChangeEvent(uint32 pType) :
+            UnitBaseEvent(pType), iThreatManager(NULL), iHostileReference(NULL), iFValue(0.0f) { }
 
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType), iThreatManager(NULL) { iHostileReference = pHostileReference; }
+        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) :
+            UnitBaseEvent(pType), iThreatManager(NULL), iHostileReference(pHostileReference), iFValue(0.0f) { }
 
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType), iThreatManager(NULL) { iHostileReference = pHostileReference; iFValue = pValue; }
-
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, bool pValue) : UnitBaseEvent(pType), iThreatManager(NULL) { iHostileReference = pHostileReference; iBValue = pValue; }
-
-        int32 getIValue() const { return iIValue; }
+        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) :
+            UnitBaseEvent(pType), iThreatManager(NULL), iHostileReference(pHostileReference), iFValue(pValue) { }
 
         float getFValue() const { return iFValue; }
-
-        bool getBValue() const { return iBValue; }
-
-        void setBValue(bool pValue) { iBValue = pValue; }
 
         HostileReference* getReference() const { return iHostileReference; }
 

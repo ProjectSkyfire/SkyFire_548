@@ -10155,10 +10155,8 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         // Wintergrasp
         case 4197:
             if (bf && bf->GetTypeId() == BATTLEFIELD_WG)
-            {
                 bf->FillInitialWorldStates(builder);
-                break;
-            }
+            break;
         case 4820:
             if (instance && mapid == 668)
                 instance->FillInitialWorldStates(builder);

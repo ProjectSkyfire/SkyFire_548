@@ -129,6 +129,8 @@ enum Poi_Icon
 
 struct GossipMenuItem
 {
+    GossipMenuItem() : MenuItemIcon(0), IsCoded(false), Message(""), Sender(0), OptionType(0), BoxMessage(""), BoxMoney(0) { }
+
     uint8       MenuItemIcon;
     bool        IsCoded;
     std::string Message;
