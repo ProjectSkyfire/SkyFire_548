@@ -189,20 +189,7 @@ void AddSC_the_scarlet_enclave_c5();
 //void AddSC_boss_scorn();
 //void AddSC_instance_scarlet_monastery();
 //void AddSC_boss_mograine_and_whitemane();
-//void AddSC_boss_darkmaster_gandling();       //Scholomance
-//void AddSC_boss_death_knight_darkreaver();
-//void AddSC_boss_theolenkrastinov();
-//void AddSC_boss_illuciabarov();
-//void AddSC_boss_instructormalicia();
-//void AddSC_boss_jandicebarov();
-//void AddSC_boss_kormok();
-//void AddSC_boss_lordalexeibarov();
-//void AddSC_boss_lorekeeperpolkelt();
-//void AddSC_boss_rasfrost();
-//void AddSC_boss_theravenian();
-//void AddSC_boss_vectus();
-//void AddSC_boss_kirtonos_the_herald();
-//void AddSC_instance_scholomance();
+
 //void AddSC_shadowfang_keep();                //Shadowfang keep
 //void AddSC_instance_shadowfang_keep();
 void AddSC_boss_magistrate_barthilas();      //Stratholme
@@ -241,16 +228,6 @@ void AddSC_sunwell_plateau();
 //void AddSC_boss_daakara();
 //void AddSC_instance_zulaman();
 //void AddSC_zulaman();
-void AddSC_boss_grilek();                   // Zul'Gurub
-void AddSC_boss_hazzarah();
-void AddSC_boss_jindo_the_godbreaker();
-void AddSC_boss_kilnara();
-void AddSC_boss_mandokir();
-void AddSC_boss_renataki();
-void AddSC_boss_venoxis();
-void AddSC_boss_wushoolay();
-void AddSC_boss_zanzil();
-void AddSC_instance_zulgurub();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_eastern_plaguelands();
@@ -860,20 +837,7 @@ void AddEasternKingdomsScripts()
     //AddSC_boss_scorn();
     //AddSC_instance_scarlet_monastery();
     //AddSC_boss_mograine_and_whitemane();
-    //AddSC_boss_darkmaster_gandling();       //Scholomance
-    //AddSC_boss_death_knight_darkreaver();
-    //AddSC_boss_theolenkrastinov();
-    //AddSC_boss_illuciabarov();
-    //AddSC_boss_instructormalicia();
-    //AddSC_boss_jandicebarov();
-    //AddSC_boss_kormok();
-    //AddSC_boss_lordalexeibarov();
-    //AddSC_boss_lorekeeperpolkelt();
-    //AddSC_boss_rasfrost();
-    //AddSC_boss_theravenian();
-    //AddSC_boss_vectus();
-    //AddSC_boss_kirtonos_the_herald();
-    //AddSC_instance_scholomance();
+
     //AddSC_shadowfang_keep();                //Shadowfang keep
     //AddSC_instance_shadowfang_keep();
     AddSC_boss_magistrate_barthilas();      //Stratholme
@@ -912,16 +876,6 @@ void AddEasternKingdomsScripts()
     //AddSC_boss_daakara();
     //AddSC_instance_zulaman();
     //AddSC_zulaman();
-    AddSC_boss_grilek();                    // Zul'Gurub
-    AddSC_boss_hazzarah();
-    AddSC_boss_jindo_the_godbreaker();
-    AddSC_boss_kilnara();
-    AddSC_boss_mandokir();
-    AddSC_boss_renataki();
-    AddSC_boss_venoxis();
-    AddSC_boss_wushoolay();
-    AddSC_boss_zanzil();
-    AddSC_instance_zulgurub();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
