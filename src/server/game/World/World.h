@@ -691,40 +691,55 @@ class World
         /// Set a server configuration element (see #WorldConfigs)
         void SetBoolConfig(WorldBoolConfigs index, bool value)
         {
-            if (index < WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)
-                m_bool_configs[uint8(index)] = value;
+            if (index < WorldBoolConfigs::CONFIG_DURABILITY_LOSS_IN_PVP || index >= WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)
+                return;
+
+            m_bool_configs[uint8(index)] = value;
         }
 
         /// Get a server configuration element (see #WorldConfigs)
         bool GetBoolConfig(WorldBoolConfigs index) const
         {
-            return index < WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[uint8(index)] : false;
+            if (index < WorldBoolConfigs::CONFIG_DURABILITY_LOSS_IN_PVP || index >= WorldBoolConfigs::BOOL_CONFIG_VALUE_COUNT)
+                return false;
+
+            return m_bool_configs[uint8(index)];
         }
 
         /// Set a server configuration element (see #WorldConfigs)
         void SetFloatConfig(WorldFloatConfigs index, float value)
         {
-            if (index < WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)
-                m_float_configs[uint8(index)] = value;
+            if (index < WorldFloatConfigs::CONFIG_GROUP_XP_DISTANCE || index >= WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)
+                return;
+
+            m_float_configs[uint8(index)] = value;
         }
 
         /// Get a server configuration element (see #WorldConfigs)
         float GetFloatConfig(WorldFloatConfigs index) const
         {
-            return index < WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[uint8(index)] : 0;
+            if (index < WorldFloatConfigs::CONFIG_GROUP_XP_DISTANCE || index >= WorldFloatConfigs::FLOAT_CONFIG_VALUE_COUNT)
+                return 0.0f;
+
+            return m_float_configs[uint8(index)];
         }
 
         /// Set a server configuration element (see #WorldConfigs)
         void setIntConfig(WorldIntConfigs index, uint32 value)
         {
-            if (index < WorldIntConfigs::INT_CONFIG_VALUE_COUNT)
-                m_int_configs[uint8(index)] = value;
+            if (index < WorldIntConfigs::CONFIG_COMPRESSION || index >= WorldIntConfigs::INT_CONFIG_VALUE_COUNT)
+                return;
+
+            m_int_configs[uint8(index)] = value;
         }
 
         /// Get a server configuration element (see #WorldConfigs)
         uint32 getIntConfig(WorldIntConfigs index) const
         {
-            return index < WorldIntConfigs::INT_CONFIG_VALUE_COUNT ? m_int_configs[uint8(index)] : 0;
+            if (index < WorldIntConfigs::CONFIG_COMPRESSION || index >= WorldIntConfigs::INT_CONFIG_VALUE_COUNT)
+                return 0;
+
+            return m_int_configs[uint8(index)];
         }
 
         void setWorldState(uint32 index, uint64 value);
