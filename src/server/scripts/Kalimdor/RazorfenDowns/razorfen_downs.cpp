@@ -124,7 +124,6 @@ public:
 
         return false;
     }
-
 };
 
 enum TombCreature
@@ -182,7 +181,6 @@ public:
                 instance->SetData(DATA_GONG_WAVES, instance->GetData(DATA_GONG_WAVES)+1);
         }
     };
-
 };
 
 void AddSC_razorfen_downs()

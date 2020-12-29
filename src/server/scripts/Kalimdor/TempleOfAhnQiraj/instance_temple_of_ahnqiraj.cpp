@@ -181,7 +181,6 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                 }
             }
         };
-
 };
 
 void AddSC_instance_temple_of_ahnqiraj()

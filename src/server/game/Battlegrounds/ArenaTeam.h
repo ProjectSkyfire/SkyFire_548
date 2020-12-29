@@ -163,7 +163,6 @@ class ArenaTeam
         void FinishGame(int32 mod);
 
     protected:
-
         uint32 TeamId;
         uint8  Type;
         std::string TeamName;

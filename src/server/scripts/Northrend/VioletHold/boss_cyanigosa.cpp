@@ -159,7 +159,6 @@ public:
             Talk(SAY_SLAY);
         }
     };
-
 };
 
 class achievement_defenseless : public AchievementCriteriaScript

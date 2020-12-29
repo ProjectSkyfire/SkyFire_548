@@ -140,7 +140,6 @@ class instance_baradin_hold: public InstanceMapScript
 
                         SetBossState(i, EncounterState(tmpState));
                     }
-
                 }
                 else
                     OUT_LOAD_INST_DATA_FAIL;

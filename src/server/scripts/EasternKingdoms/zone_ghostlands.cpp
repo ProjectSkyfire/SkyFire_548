@@ -188,7 +188,6 @@ public:
     {
         return new npc_ranger_lilathaAI(creature);
     }
-
 };
 
 void AddSC_ghostlands()
