@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2011-2020 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2020 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2021 Project SkyFire <https://www.projectskyfire.org/>
+ * Copyright (C) 2008-2021 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2019 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
