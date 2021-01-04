@@ -1,7 +1,7 @@
 -- Quests: Join the Battle!
 UPDATE quest_template SET
 RequiredRaces=RequiredRaces|1,
-Flags=Flags|65536|262144|524288|134217728
+Flags=Flags|65536|262144|524288|134217728,
 OfferRewardText='It\'s true, we were ambushed. I don\'t dare send any more soldiers out there and risk losing them too. I need a volunteer. Someone willing to risk their life!',
 WDBVerified='18414' WHERE Id IN
 (28789, 28785, 28780, 28787, 28786, 29080, 28784, 28788, 31143);
