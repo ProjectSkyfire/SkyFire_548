@@ -271,7 +271,7 @@ struct ConjureRefreshmentData
     uint32 spellId;
 };
 
-uint8 const MAX_CONJURE_REFRESHMENT_SPELLS = 7;
+uint8 const MAX_CONJURE_REFRESHMENT_SPELLS = 8;
 ConjureRefreshmentData const _conjureData[MAX_CONJURE_REFRESHMENT_SPELLS] =
 {
     { 33, 43, 92739 },
@@ -279,8 +279,9 @@ ConjureRefreshmentData const _conjureData[MAX_CONJURE_REFRESHMENT_SPELLS] =
     { 54, 63, 92802 },
     { 64, 73, 92805 },
     { 74, 79, 74625 },
-    { 80, 84, 92822 },
-    { 85, 85, 92727 }
+    { 80, 84, 42956 },
+    { 85, 89, 92727 },
+    { 90, 90, 116130 }, 
 };
 
 // 42955 - Conjure Refreshment
