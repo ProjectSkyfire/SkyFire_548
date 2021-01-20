@@ -209,7 +209,7 @@ public:
     }
 };
 
-// 11958 - Cold Snap
+// 11958 - Cold Snap // 5.4.8
 class spell_mage_cold_snap : public SpellScriptLoader
 {
 public:
@@ -227,15 +227,21 @@ public:
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             Player* caster = GetCaster()->ToPlayer();
-            // immediately finishes the cooldown on Frost spells
+            // immediately finishes the cooldown of Frost Nova, Cone of Cold, Ice Block
             const SpellCooldowns& cm = caster->GetSpellCooldownMap();
             for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
                 if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
-                    (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST) &&
-                    spellInfo->Id != SPELL_MAGE_COLD_SNAP && spellInfo->GetRecoveryTime() > 0)
+                    (
+                        // Frost Nova
+                        (spellInfo->SpellIconID == 193 && spellInfo->SpellFamilyFlags[0] == 0x00000040) ||
+                        // Cone of Cold
+                        (spellInfo->SpellIconID == 35 && spellInfo->SpellFamilyFlags[0] == 0x00000200) ||
+                        // Ice Block
+                        (spellInfo->SpellIconID == 14 && spellInfo->SpellFamilyFlags[1] == 0x00000080 && spellInfo->SpellFamilyFlags[2] == 0x00000008)
+                    ))
                 {
                     caster->RemoveSpellCooldown((itr++)->first, true);
                 }

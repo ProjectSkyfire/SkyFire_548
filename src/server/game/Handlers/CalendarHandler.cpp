@@ -349,7 +349,6 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 {
     uint64 guid = _player->GetGUID();
-    time_t oldEventTime;
 
     ObjectGuid eventId;
     ObjectGuid inviteId;
@@ -412,9 +411,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
         eventPackedTime, flags);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
-    {
-        oldEventTime = calendarEvent->GetEventTime();
-
+    {        
         calendarEvent->SetType(CalendarEventType(type));
         calendarEvent->SetFlags(flags);
         calendarEvent->SetEventTime(time_t(eventPackedTime));
@@ -423,7 +420,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
         calendarEvent->SetDescription(description);
 
         sCalendarMgr->UpdateEvent(calendarEvent);
-        sCalendarMgr->SendCalendarEventUpdateAlert(*calendarEvent, oldEventTime);
+        sCalendarMgr->SendCalendarEventUpdateAlert(*calendarEvent, calendarEvent->GetEventTime());
     }
     else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);

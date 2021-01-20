@@ -163,8 +163,8 @@ typedef std::vector<QuestMenuItem> QuestMenuItemList;
 class GossipMenu
 {
     public:
-        GossipMenu();
-        ~GossipMenu();
+        GossipMenu() : _menuId(0) { }
+        ~GossipMenu() { ClearMenu(); }
 
         void AddMenuItem(int32 menuItemId, uint8 icon, std::string const& message, uint32 sender, uint32 action, std::string const& boxMessage, uint32 boxMoney, bool coded = false);
         void AddMenuItem(uint32 menuId, uint32 menuItemId, uint32 sender, uint32 action);

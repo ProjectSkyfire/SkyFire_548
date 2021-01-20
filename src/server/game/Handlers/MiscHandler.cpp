@@ -1023,28 +1023,28 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
     unk1 = recvData.ReadBit();
     unk2 = recvData.ReadBit();
 
-    SF_LOG_DEBUG("network", "CMSG_AREATRIGGER. Trigger ID: %u", triggerId);
+    SF_LOG_DEBUG("network", "CMSG_AREATRIGGER. Trigger ID: %u, Unk1: %u, Unk2: %u", triggerId, unk1, unk2);
 
     Player* player = GetPlayer();
     if (player->IsInFlight())
     {
-        SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u",
-            player->GetName().c_str(), player->GetGUIDLow(), triggerId);
+        SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u, unk1: %u, unk2: %u",
+            player->GetName().c_str(), player->GetGUIDLow(), triggerId, unk1, unk2);
         return;
     }
 
     AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(triggerId);
     if (!atEntry)
     {
-        SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID:%u",
-            player->GetName().c_str(), player->GetGUIDLow(), triggerId);
+        SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID:%u, unk1: %u, unk2: %u",
+            player->GetName().c_str(), player->GetGUIDLow(), triggerId, unk1, unk2);
         return;
     }
 
     if (player->GetMapId() != atEntry->mapid)
     {
-        SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u",
-            player->GetName().c_str(), atEntry->mapid, player->GetMapId(), player->GetGUIDLow(), triggerId);
+        SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u, unk1: %u, unk2: %u",
+            player->GetName().c_str(), atEntry->mapid, player->GetMapId(), player->GetGUIDLow(), triggerId, unk1, unk2);
         return;
     }
 
@@ -1057,8 +1057,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
         if (dist > atEntry->radius + delta)
         {
-            SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (radius: %f distance: %f), ignore Area Trigger ID: %u",
-                player->GetName().c_str(), player->GetGUIDLow(), atEntry->radius, dist, triggerId);
+            SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (radius: %f distance: %f), ignore Area Trigger ID: %u, unk1: %u, unk2: %u",
+                player->GetName().c_str(), player->GetGUIDLow(), atEntry->radius, dist, triggerId, unk1, unk2);
             return;
         }
     }
@@ -1088,8 +1088,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
             (fabs(dy) > atEntry->box_y / 2 + delta) ||
             (fabs(dz) > atEntry->box_z / 2 + delta))
         {
-            SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (1/2 box X: %f 1/2 box Y: %f 1/2 box Z: %f rotatedPlayerX: %f rotatedPlayerY: %f dZ:%f), ignore Area Trigger ID: %u",
-                player->GetName().c_str(), player->GetGUIDLow(), atEntry->box_x/2, atEntry->box_y/2, atEntry->box_z/2, rotPlayerX, rotPlayerY, dz, triggerId);
+            SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (1/2 box X: %f 1/2 box Y: %f 1/2 box Z: %f rotatedPlayerX: %f rotatedPlayerY: %f dZ:%f), ignore Area Trigger ID: %u, unk1: %u, unk2: %u",
+                player->GetName().c_str(), player->GetGUIDLow(), atEntry->box_x/2, atEntry->box_y/2, atEntry->box_z/2, rotPlayerX, rotPlayerY, dz, triggerId, unk1, unk2);
             return;
         }
     }

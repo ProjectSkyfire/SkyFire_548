@@ -25,16 +25,6 @@
 #include "WorldSession.h"
 #include "Formulas.h"
 
-GossipMenu::GossipMenu()
-{
-    _menuId = 0;
-}
-
-GossipMenu::~GossipMenu()
-{
-    ClearMenu();
-}
-
 void GossipMenu::AddMenuItem(int32 menuItemId, uint8 icon, std::string const& message, uint32 sender, uint32 action, std::string const& boxMessage, uint32 boxMoney, bool coded /*= false*/)
 {
     ASSERT(_menuItems.size() <= GOSSIP_MAX_MENU_ITEMS);
