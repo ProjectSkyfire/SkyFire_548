@@ -33,19 +33,14 @@ enum WarlockSpells
 {
     SPELL_WARLOCK_AFTERMATH_STUN                    = 85387,
     SPELL_WARLOCK_CREATE_HEALTHSTONE                = 34130,
-    SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT              = 18662,
-    SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST         = 62388,
+
+    SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST         = 62388, 
     SPELL_WARLOCK_DEMONIC_CIRCLE_SUMMON             = 48018,
     SPELL_WARLOCK_DEMONIC_CIRCLE_TELEPORT           = 48020,
 
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
 
-    SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
-
-
-
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE                 = 31818,
-    SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2               = 32553,
 
     SPELL_WARLOCK_RAIN_OF_FIRE                      = 42223,
     SPELL_WARLOCK_SHADOW_TRANCE                     = 17941,
@@ -361,7 +356,6 @@ public:
     }
 };
 
-
 // 1454 - Life Tap
 /// Updated 4.3.4
 class spell_warl_life_tap : public SpellScriptLoader
@@ -380,8 +374,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE) ||
-                !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2))
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE))
                 return false;
             return true;
         }
@@ -402,14 +395,6 @@ public:
                     AddPct(mana, aurEff->GetAmount());
 
                 caster->CastCustomSpell(target, SPELL_WARLOCK_LIFE_TAP_ENERGIZE, &mana, NULL, NULL, false);
-
-                // Mana Feed
-                if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, WARLOCK_ICON_ID_MANA_FEED, 0))
-                {
-                    int32 manaFeedVal = aurEff->GetAmount();
-                    ApplyPct(manaFeedVal, mana);
-                    caster->CastCustomSpell(caster, SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2, &manaFeedVal, NULL, NULL, true, NULL);
-                }
             }
         }
 
