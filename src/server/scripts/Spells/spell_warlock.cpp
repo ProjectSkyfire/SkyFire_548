@@ -77,6 +77,42 @@ enum MiscSpells
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409
 };
 
+// 111546 - Chaotic Energy
+class spell_warl_chaotic_energy : public SpellScriptLoader
+{
+public:
+    spell_warl_chaotic_energy() : SpellScriptLoader("spell_warl_chaotic_energy") { }
+
+    class spell_warl_chaotic_energy_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_chaotic_energy_AuraScript);
+
+        void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
+        {
+            if (!spellMod)
+            {
+                spellMod = new SpellModifier(GetAura());
+                spellMod->op = SPELLMOD_COST;
+                spellMod->type = SPELLMOD_PCT;
+                spellMod->spellId = GetId();
+                spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
+            }
+
+            spellMod->value = 1.0f + (aurEff->GetAmount() / 100);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_warl_chaotic_energy_AuraScript::HandleEffectCalcSpellMod, EFFECT_1, SPELL_AURA_ADD_PCT_MODIFIER);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_warl_chaotic_energy_AuraScript();
+    }
+};
+
 // 710 - Banish
 class spell_warl_banish : public SpellScriptLoader
 {
@@ -809,6 +845,8 @@ public:
 
 void AddSC_warlock_spell_scripts()
 {
+    new spell_warl_chaotic_energy();
+
     new spell_warl_banish();
 
     new spell_warl_create_healthstone();

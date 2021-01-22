@@ -2498,7 +2498,7 @@ void Player::RegenerateAll()
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
 
-        if (getClass() == CLASS_WARLOCK && GetSpecializationId(GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
+        if (getClass() == CLASS_WARLOCK && GetTalentSpecialization(GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
             Regenerate(POWER_DEMONIC_FURY);
 
         m_regenTimerCount -= 2000;

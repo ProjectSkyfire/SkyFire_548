@@ -322,42 +322,6 @@ public:
     }
 };
 
-// 33695 - Exorcism and Holy Wrath Damage
-class spell_pal_exorcism_and_holy_wrath_damage : public SpellScriptLoader
-{
-public:
-    spell_pal_exorcism_and_holy_wrath_damage() : SpellScriptLoader("spell_pal_exorcism_and_holy_wrath_damage") { }
-
-    class spell_pal_exorcism_and_holy_wrath_damage_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_exorcism_and_holy_wrath_damage_AuraScript);
-
-        void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
-        {
-            if (!spellMod)
-            {
-                spellMod = new SpellModifier(aurEff->GetBase());
-                spellMod->op = SPELLMOD_DAMAGE;
-                spellMod->type = SPELLMOD_FLAT;
-                spellMod->spellId = GetId();
-                spellMod->mask[1] = 0x200002;
-            }
-
-            spellMod->value = aurEff->GetAmount();
-        }
-
-        void Register() override
-        {
-            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_pal_exorcism_and_holy_wrath_damage_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_pal_exorcism_and_holy_wrath_damage_AuraScript();
-    }
-};
-
 // -75806 - Grand Crusader
 class spell_pal_grand_crusader : public SpellScriptLoader
 {
@@ -805,7 +769,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_aura_mastery_immune();
     new spell_pal_beacon_of_light();
     new spell_pal_blessing_of_faith();
-    new spell_pal_exorcism_and_holy_wrath_damage();
     new spell_pal_eye_for_an_eye();
     new spell_pal_grand_crusader();
     new spell_pal_hand_of_sacrifice();

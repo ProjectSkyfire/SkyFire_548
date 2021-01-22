@@ -1200,7 +1200,6 @@ struct PlayerTalentInfo
         {
             SpecInfo[i].Talents = new PlayerTalentMap();
             SpecInfo[i].TalentTree = 0;
-            SpecInfo[i].SpecializationId = 0;
         }
     }
 
@@ -1216,7 +1215,7 @@ struct PlayerTalentInfo
 
     struct TalentSpecInfo
     {
-        TalentSpecInfo() : Talents(NULL), TalentTree(0), SpecializationId(0)
+        TalentSpecInfo() : Talents(NULL), TalentTree(0)
         {
             for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
             {
@@ -1229,7 +1228,7 @@ struct PlayerTalentInfo
         PlayerTalentMap* Talents;
         uint32 Glyphs[MAX_GLYPH_SLOT_INDEX] = { };
         uint32 TalentTree;
-        uint32 SpecializationId;
+
     } SpecInfo[MAX_TALENT_SPECS] = { };
 
     uint32 UsedTalentCount;
@@ -2077,7 +2076,6 @@ class Player : public Unit, public GridObject<Player>
     void SetActiveSpec(uint8 spec) { _talentMgr->ActiveSpec = spec; }
     uint8 GetSpecsCount() const {  return _talentMgr->SpecsCount; }
     void SetSpecsCount(uint8 count) { _talentMgr->SpecsCount = count; }
-    uint32 GetSpecializationId(uint8 spec) const { return _talentMgr->SpecInfo [spec].SpecializationId; }
 
     void SendInspectResult(Player const* player);
 

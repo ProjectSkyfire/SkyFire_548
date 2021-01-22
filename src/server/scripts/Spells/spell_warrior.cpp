@@ -836,7 +836,7 @@ public:
         void HandleOnHit()
         {
             if (Player* _player = GetCaster()->ToPlayer())
-                if (_player->GetSpecializationId(_player->GetActiveSpec()) == TALENT_TREE_WARRIOR_FURY && _player->getLevel() >= 30)
+                if (_player->GetTalentSpecialization(_player->GetActiveSpec()) == TALENT_TREE_WARRIOR_FURY && _player->getLevel() >= 30)
                     _player->CastSpell(_player, SPELL_WARRIOR_ALLOW_RAGING_BLOW, true);
         }
 

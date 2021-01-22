@@ -1060,6 +1060,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     for (uint8 i = 0; i < 2; ++i)
         Totem[i] = _totem ? _totem->Totem[i] : 0;
 
+    /*
     // SpecializationSpellsEntry
     SpecializationSpellsEntry const* specializationInfo = NULL;
     for (uint32 i = 0; i < sSpecializationSpellsStore.GetNumRows(); i++)
@@ -1084,7 +1085,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
             OverrideSpellList.push_back(31801);
             break;
     }
-
+    */
     ChainEntry = NULL;
 }
 
@@ -2422,6 +2423,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
             case POWER_RAGE:
             case POWER_FOCUS:
             case POWER_ENERGY:
+            case POWER_DEMONIC_FURY:
                 powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
                 break;
             case POWER_RUNES:
@@ -2433,17 +2435,6 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
                 return 0;
         }
     }
-
-    /*// Flat mod from caster auras by spell school and power type
-    Unit::AuraEffectList const& auras = caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
-    for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
-    {
-        if (!((*i)->GetMiscValue() & schoolMask))
-            continue;
-        if (!((*i)->GetMiscValueB() & (1 << PowerType)))
-            continue;
-        powerCost += (*i)->GetAmount();
-    }*/
 
     // Apply cost mod by spell
     if (Player* modOwner = caster->GetSpellModOwner())
@@ -2460,20 +2451,6 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         }
     }
 
-    /*
-    // PCT mod from user auras by spell school and power type
-    Unit::AuraEffectList const& aurasPct = caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT);
-    for (Unit::AuraEffectList::const_iterator i = aurasPct.begin(); i != aurasPct.end(); ++i)
-    {
-        if (!((*i)->GetMiscValue() & schoolMask))
-            continue;
-        if (!((*i)->GetMiscValueB() & (1 << PowerType)))
-            continue;
-        powerCost += CalculatePct(powerCost, (*i)->GetAmount());
-    }
-    if (powerCost < 0)
-        powerCost = 0;
-        */
     return powerCost;
 }
 
@@ -2782,37 +2759,6 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                         case MECHANIC_MOUNT:
                         case MECHANIC_INVULNERABILITY:
                             return false;
-                        default:
-                            break;
-                    }
-                    break;
-                }
-                case SPELL_AURA_ADD_FLAT_MODIFIER:          // mods
-                case SPELL_AURA_ADD_PCT_MODIFIER:
-                {
-                    // non-positive mods
-                    switch (Effects[effIndex].MiscValue)
-                    {
-                        case SPELLMOD_COST:                 // dependent from bas point sign (negative -> positive)
-                            if (Effects[effIndex].CalcValue() > 0)
-                            {
-                                if (!deep)
-                                {
-                                    bool negative = true;
-                                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                    {
-                                        if (i != effIndex)
-                                            if (_IsPositiveEffect(i, true))
-                                            {
-                                                negative = false;
-                                                break;
-                                            }
-                                    }
-                                    if (negative)
-                                        return false;
-                                }
-                            }
-                            break;
                         default:
                             break;
                     }
