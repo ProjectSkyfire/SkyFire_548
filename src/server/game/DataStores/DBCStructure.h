@@ -2697,7 +2697,7 @@ struct TalentEntry
     //uint32    unk2;                                       // 6
     //uint32    unk3;                                       // 7
     uint32    playerClass;                                  // 8
-    //uint32 replacesSpell                                  // 9
+    uint32 OverrideSpellID;                                 // 9
     //char* description                                     // 10
 };
 
