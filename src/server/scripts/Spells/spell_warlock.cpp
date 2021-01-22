@@ -43,6 +43,7 @@ enum WarlockSpells
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE                 = 31818,
 
     SPELL_WARLOCK_RAIN_OF_FIRE                      = 42223,
+
     SPELL_WARLOCK_SHADOW_TRANCE                     = 17941,
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
     
@@ -447,8 +448,7 @@ public:
     }
 };
 
-// -18094 - Nightfall
-// 56218 - Glyph of Corruption
+// 108558 - Nightfall
 class spell_warl_shadow_trance_proc : public SpellScriptLoader
 {
 public:
@@ -468,7 +468,12 @@ public:
         void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_SHADOW_TRANCE, true, NULL, aurEff);
+
+            // get shadow trace proc chance
+            int32 procChance = std::max(aurEff->GetAmount(), 0);
+
+            if (roll_chance_i(procChance))
+                GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_SHADOW_TRANCE, true, NULL, aurEff);
         }
 
         void Register() OVERRIDE
