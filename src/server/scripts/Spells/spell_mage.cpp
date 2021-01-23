@@ -262,6 +262,73 @@ public:
     }
 };
 
+struct ConjureRefreshmentTableData
+{
+    uint32 minLevel;
+    uint32 maxLevel;
+    uint32 spellId;
+};
+
+uint8 const MAX_CONJURE_REFRESHMENT_TABLE_SPELLS = 4;
+ConjureRefreshmentTableData const _conjureTableData[MAX_CONJURE_REFRESHMENT_TABLE_SPELLS] =
+{
+    { 72, 79, 120056 }, // R5: Item: 43518, Spell: 43988, Object: 186812
+    { 80, 84, 120055 }, // R6: Item: 43523, Spell: 92822, Object: 207386
+    { 85, 89, 120054 }, // R7: Item: 65499, Spell: 92826, Object: 207387
+    { 90, 90, 120053 }, // R8: Item: 80610, Spell: 116136, Object: 211363
+};
+
+// 43987 - Conjure Refreshment Table
+class spell_mage_conjure_refreshment_table : public SpellScriptLoader
+{
+public:
+    spell_mage_conjure_refreshment_table() : SpellScriptLoader("spell_mage_conjure_refreshment_table") { }
+
+    class spell_mage_conjure_refreshment_table_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_conjure_refreshment_table_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            for (uint8 i = 0; i < MAX_CONJURE_REFRESHMENT_TABLE_SPELLS; ++i)
+                if (!sSpellMgr->GetSpellInfo(_conjureTableData[i].spellId))
+                    return false;
+            return true;
+        }
+
+        bool Load() override
+        {
+            if (GetCaster()->GetTypeId() != TypeID::TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            uint8 level = GetHitUnit()->getLevel();
+            for (uint8 i = 0; i < MAX_CONJURE_REFRESHMENT_TABLE_SPELLS; ++i)
+            {
+                ConjureRefreshmentTableData const& spellData = _conjureTableData[i];
+                if (level < spellData.minLevel || level > spellData.maxLevel)
+                    continue;
+                GetHitUnit()->CastSpell(GetHitUnit(), spellData.spellId);
+                break;
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_conjure_refreshment_table_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mage_conjure_refreshment_table_SpellScript();
+    }
+};
+
+
 // 42955 Conjure Refreshment
 /// Updated 4.3.4
 struct ConjureRefreshmentData
@@ -847,6 +914,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_time_warp(); // 5.4.8 18414
     new spell_mage_blast_wave();
     new spell_mage_cold_snap();
+    new spell_mage_conjure_refreshment_table();
     new spell_mage_conjure_refreshment();
     new spell_mage_frostbolt();
     new spell_mage_ignite();

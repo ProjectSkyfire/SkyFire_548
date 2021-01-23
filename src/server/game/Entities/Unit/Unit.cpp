@@ -11929,10 +11929,12 @@ int32 Unit::GetCreatePowers(Powers power) const
         case POWER_ECLIPSE:
             return 100;
         case POWER_HOLY_POWER:
+        case POWER_SHADOW_ORBS:
             return 3;
         case POWER_HEALTH:
             return 0;
         case POWER_CHI:
+        case POWER_ARCANE_CHARGES:
             return 4;
         case POWER_DEMONIC_FURY:
             return 1000;
