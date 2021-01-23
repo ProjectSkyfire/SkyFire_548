@@ -7080,31 +7080,19 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
-        // Deep Wounds
-        case 12834:
-        case 12849:
-        case 12867:
+        // Concussive Barrage
+        case 35102:
         {
-            if (GetTypeId() != TypeID::TYPEID_PLAYER)
+            if (!victim)
                 return false;
 
-            // now compute approximate weapon damage by formula from wowwiki.com
-            Item* item = NULL;
-            if (procFlags & PROC_FLAG_DONE_OFFHAND_ATTACK)
-                item = ToPlayer()->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            else
-                item = ToPlayer()->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-
-            // dunno if it's really needed but will prevent any possible crashes
-            if (!item)
+            // Proc only with Chimera Shot or Multi-Shot
+            if (!(((procSpell->SpellIconID == 3412) && (procSpell->SpellFamilyFlags[2] & 0x00000001)) ||
+                ((procSpell->SpellIconID == 85) && (procSpell->SpellFamilyFlags[0] & 0x00001000))))
                 return false;
 
-            ItemTemplate const* weapon = item->GetTemplate();
-
-            float weaponDPS = weapon->DPS;
-            float attackPower = GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) / 14.0f;
-            float weaponSpeed = float(weapon->Delay) / 1000.0f;
-            basepoints0 = int32((weaponDPS + attackPower) * weaponSpeed);
+            target = victim;
+            trigger_spell_id = 35101;
             break;
         }
         // Persistent Shield (Scarab Brooch trinket)
@@ -7161,14 +7149,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
-        // Decimation
-        case 63156:
-        case 63158:
-            // Can proc only if target has hp below 25%
-            if (!victim || !victim->HealthBelowPct(auraSpellInfo->Effects [EFFECT_1].CalcValue()))
-                return false;
-            break;
-            // Deathbringer Saurfang - Blood Beast's Blood Link
+        
+        // Deathbringer Saurfang - Blood Beast's Blood Link
         case 72176:
             basepoints0 = 3;
             break;
@@ -7201,14 +7183,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 7099:  // Curse of Mending
         case 39703: // Curse of Mending
         case 29494: // Temptation
-        case 20233: // Improved Lay on Hands (cast on target)
         {
             target = victim;
             break;
         }
         // Finish movies that add combo
         case 14189: // Seal Fate (Netherblade set)
-        case 14157: // Ruthlessness
         {
             if (!victim || victim == this)
                 return false;
@@ -7274,7 +7254,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             break;
         }
         // Body and Soul
-        case 64128:
         case 65081:
         {
             // Proc only from PW:S cast
@@ -11950,10 +11929,12 @@ int32 Unit::GetCreatePowers(Powers power) const
         case POWER_ECLIPSE:
             return 100;
         case POWER_HOLY_POWER:
+        case POWER_SHADOW_ORBS:
             return 3;
         case POWER_HEALTH:
             return 0;
         case POWER_CHI:
+        case POWER_ARCANE_CHARGES:
             return 4;
         case POWER_DEMONIC_FURY:
             return 1000;
