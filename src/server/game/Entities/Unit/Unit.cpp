@@ -7272,6 +7272,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 91021:
+        {
+            if (!(procSpell->SpellFamilyName == SPELLFAMILY_ROGUE))
+                return false;
+            if (!(procSpell->SpellIconID == 856 || procSpell->SpellIconID == 498 || procSpell->SpellIconID == 244))
+                return false;
+            break;
+        }
     }
 
     if (cooldown && GetTypeId() == TypeID::TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
