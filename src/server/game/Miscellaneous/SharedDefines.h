@@ -431,9 +431,9 @@ enum SpellAttr2
     SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS           = 0x00020000, // 17 don't reset timers for melee autoattacks (swings) or ranged autoattacks (autoshoots)
     SPELL_ATTR2_REQ_DEAD_PET                     = 0x00040000, // 18 Only Revive pet and Heart of the Pheonix
     SPELL_ATTR2_NOT_NEED_SHAPESHIFT              = 0x00080000, // 19 does not necessarly need shapeshift
-    SPELL_ATTR2_UNK20                            = 0x00100000, // 20
+    SPELL_ATTR2_UNK20                            = 0x00100000, // 20 Ambush, Backstab, Cheap Shot, Garrote, Pounce, Ravage, Shred
     SPELL_ATTR2_DAMAGE_REDUCED_SHIELD            = 0x00200000, // 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
-    SPELL_ATTR2_UNK22                            = 0x00400000, // 22 Ambush, Backstab, Cheap Shot, Death Grip, Garrote, Judgements, Mutilate, Pounce, Ravage, Shiv, Shred
+    SPELL_ATTR2_UNK22                            = 0x00400000, // 22
     SPELL_ATTR2_IS_ARCANE_CONCENTRATION          = 0x00800000, // 23 Only mage Arcane Concentration have this flag
     SPELL_ATTR2_UNK24                            = 0x01000000, // 24
     SPELL_ATTR2_UNK25                            = 0x02000000, // 25
