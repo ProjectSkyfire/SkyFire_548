@@ -2329,7 +2329,8 @@ class Player : public Unit, public GridObject<Player>
     uint32 GetSpellByProto(ItemTemplate* proto);
 
     float GetHealthBonusFromStamina();
-    float GetManaBonusFromIntellect();
+    void UpdateTalentSpecializationManaBonus();
+    float GetManaSpecializationMultiplier();
 
     bool UpdateStats(Stats stat) override;
     bool UpdateAllStats() override;

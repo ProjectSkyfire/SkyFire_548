@@ -262,10 +262,27 @@ float Player::GetHealthBonusFromStamina()
 
     return baseStam + moreStam * ratio;
 }
-
-float Player::GetManaBonusFromIntellect()
+void Player::UpdateTalentSpecializationManaBonus()
 {
-    return 0;
+    if (getPowerType() == POWER_MANA)
+    {
+        UpdateMaxPower(POWER_MANA);                         // Update max Mana (to add/reset bonus from specialization)
+    }
+}
+
+float Player::GetManaSpecializationMultiplier()
+{
+    switch (GetTalentSpecialization(GetActiveSpec()))
+    {
+        case SPEC_PALADIN_HOLY:
+        case SPEC_SHAMAN_ELEMENTAL:
+        case SPEC_SHAMAN_RESTORATION:
+        case SPEC_DRUID_BALANCE:
+        case SPEC_DRUID_RESTORATION:
+            return 5.0f;
+        break;
+    }
+    return 0.0f;
 }
 
 void Player::UpdateMaxHealth()
@@ -284,11 +301,11 @@ void Player::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
-    float bonusPower = (power == POWER_MANA && GetCreatePowers(power) > 0) ? GetManaBonusFromIntellect() : 0;
+    float bonusPower = (power == POWER_MANA && GetCreatePowers(power) > 0) ? GetManaSpecializationMultiplier() : 0;
 
-    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    float value = GetModifierValue(unitMod, BASE_VALUE) + (GetCreatePowers(power) * (bonusPower > 0 ? bonusPower : 1));
     value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE) +  bonusPower;
+    value += GetModifierValue(unitMod, TOTAL_VALUE);
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetMaxPower(power, uint32(value));

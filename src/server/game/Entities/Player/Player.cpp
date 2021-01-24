@@ -4560,6 +4560,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
         SetTalentSpecialization(GetActiveSpec(), 0);
         SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, 0);
+        UpdateTalentSpecializationManaBonus();
     }
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();

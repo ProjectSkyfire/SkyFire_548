@@ -43,6 +43,7 @@ void WorldSession::HandeSetTalentSpecialization(WorldPacket& recvData)
 
     _player->SetTalentSpecialization(_player->GetActiveSpec(), specializationId);
     _player->SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, specializationId);
+    _player->UpdateTalentSpecializationManaBonus();
     _player->SendTalentsInfoData();
 
     std::list<uint32> learnList = GetSpellsForLevels(0, _player->getRaceMask(), _player->GetTalentSpecialization(_player->GetActiveSpec()), 0, _player->getLevel());
