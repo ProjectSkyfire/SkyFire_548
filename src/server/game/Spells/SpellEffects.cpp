@@ -2998,13 +2998,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             // Hemorrhage
             if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
             {
-                if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
-                    m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
-                // 50% more damage with daggers
+                // 72% more damage with daggers
                 if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
                     if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
                         if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
-                            totalDamagePercentMod *= 1.5f;
+                            totalDamagePercentMod *= 1.45f;
             }
             break;
         }
