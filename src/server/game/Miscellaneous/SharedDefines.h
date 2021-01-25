@@ -215,6 +215,7 @@ enum Stats
 
 enum Powers
 {
+    POWER_HEALTH                        = -2,
     POWER_MANA                          = 0,
     POWER_RAGE                          = 1,
     POWER_FOCUS                         = 2,
@@ -234,7 +235,6 @@ enum Powers
     POWER_ARCANE_CHARGES                = 16,
     MAX_POWERS                          = 17,
     POWER_ALL                           = 127,
-    POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
 
 #define MAX_POWERS_PER_CLASS            5

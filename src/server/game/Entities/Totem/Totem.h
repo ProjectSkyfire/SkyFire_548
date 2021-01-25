@@ -43,16 +43,16 @@ class Totem : public Minion
         void SetTotemDuration(uint32 duration) { m_duration = duration; }
         TotemType GetTotemType() const { return m_type; }
 
-        bool UpdateStats(Stats /*stat*/) { return true; }
-        bool UpdateAllStats() { return true; }
-        void UpdateResistances(uint32 /*school*/) { }
-        void UpdateArmor() { }
-        void UpdateMaxHealth() { }
-        void UpdateMaxPower(Powers /*power*/) { }
-        void UpdateAttackPowerAndDamage(bool /*ranged*/) { }
-        void UpdateDamagePhysical(WeaponAttackType /*attType*/) { }
+        bool UpdateStats(Stats /*stat*/) OVERRIDE { return true; }
+        bool UpdateAllStats() OVERRIDE { return true; }
+        void UpdateResistances(uint32 /*school*/) OVERRIDE { }
+        void UpdateArmor() OVERRIDE { }
+        void UpdateMaxHealth() OVERRIDE { }
+        void UpdateMaxPower(Powers /*power*/) OVERRIDE { }
+        void UpdateAttackPowerAndDamage(bool /*ranged*/) OVERRIDE { }
+        void UpdateDamagePhysical(WeaponAttackType /*attType*/) OVERRIDE { }
 
-        bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const;
+        bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const OVERRIDE;
 
     protected:
         TotemType m_type;
