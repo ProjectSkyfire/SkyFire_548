@@ -357,6 +357,7 @@ public:
     uint32 ManaCostPerlevel;
     uint32 ManaPerSecond;
     float ManaCostPercentage;
+    uint32 ShapeShiftReqID;
     uint32 RuneCostID;
     SpellRangeEntry const* RangeEntry;
     float  Speed;

@@ -1033,6 +1033,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     ManaCostPerlevel = _power ? _power->manaCostPerlevel : 0;
     ManaCostPercentage = _power ? _power->ManaCostPercentageFloat : 0;
     ManaPerSecond = _power ? _power->manaPerSecond : 0;
+    ShapeShiftReqID = _power ? _power->ShapeShiftSpellID : 0;
     PowerType = _power ? _power->powerType : 0;
 
     // SpellReagentsEntry
