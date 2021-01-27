@@ -46,8 +46,10 @@ enum PriestSpells
     SPELL_PRIEST_PENANCE_R1                         = 47540,
     SPELL_PRIEST_PENANCE_R1_DAMAGE                  = 47758,
     SPELL_PRIEST_PENANCE_R1_HEAL                    = 47757,
-    SPELL_PRIEST_REFLECTIVE_SHIELD_R1               = 33201, // obsolete
+
+    SPELL_PRIEST_REFLECTIVE_SHIELD_GLYPH            = 33202,
     SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED        = 33619,
+
     SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH    = 107903,
     SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH       = 107904,
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409,
@@ -463,7 +465,7 @@ public:
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED))
                 return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_R1))
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_GLYPH))
                 return false;
             return true;
         }
@@ -500,9 +502,9 @@ public:
             if (dmgInfo.GetAttacker() == target)
                 return;
 
-            if (AuraEffect const* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_R1, EFFECT_0))
+            if (AuraEffect const* glyphAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_GLYPH, EFFECT_0))
             {
-                int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
+                int32 bp = CalculatePct(absorbAmount, glyphAurEff->GetAmount());
                 target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
             }
         }
