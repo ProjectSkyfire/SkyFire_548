@@ -776,6 +776,16 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
+    /* -- 5.4.8 PAPERDOLL
+    local base, casting = GetManaRegen();
+    --All mana regen stats are displayed as mana / 5 sec.
+        base = floor(base * 5.0);
+    casting = BreakUpLargeNumbers(floor(casting * 5.0));
+    text:SetText(casting);
+    statFrame.tooltip = HIGHLIGHT_FONT_COLOR_CODE ..MANA_REGEN_COMBAT ..FONT_COLOR_CODE_CLOSE;
+    statFrame.tooltip2 = format(MANA_COMBAT_REGEN_TOOLTIP, casting);
+    statFrame:Show();
+    */
     // base regen since pandaria is 2% aka 6000 MP @90.
     float base_regen = GetMaxPower(POWER_MANA) * 0.02f;
     // Mana regen from spirit
@@ -788,6 +798,7 @@ void Player::UpdateManaRegen()
 
     // mp5
     spirit_regen /= 5.0f;
+    base_regen /= 5.0f;
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
