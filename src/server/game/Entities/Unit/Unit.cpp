@@ -4894,7 +4894,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     data.WriteByteSeq(targetGuid [0]);
     data.WriteByteSeq(attackerGuid [4]);
     data << uint32(log->damage);
-    data << uint8(log->schoolMask);
+    data << uint8(log->schoolMask);              
     data.WriteByteSeq(targetGuid [7]);
     data << uint32(log->HitInfo);
     data.WriteByteSeq(targetGuid [1]);
@@ -4930,7 +4930,6 @@ void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVict
 
 void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 {
-    std::vector<SpellPeriodicAuraLogInfo> Entries;
     AuraEffect const* aura = pInfo->auraEff;
     ObjectGuid CasterGUID = aura->GetCasterGUID();
     ObjectGuid TargetGUID = GetGUID();
@@ -4940,45 +4939,54 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     data.WriteGuidMask(TargetGUID, 7);
     data.WriteGuidMask(CasterGUID, 0, 7);
     data.WriteGuidMask(TargetGUID, 1);
-    data.WriteBits(Entries.size(), 21); // SpellPeriodicAuraLogInfo
+    data.WriteBits(1, 21); // PeriodicAuraLogEffect
     data.WriteGuidMask(TargetGUID, 0);
 
-    for (SpellPeriodicAuraLogInfo const& entry : Entries)
+    //PeriodicAuraLogEffect
     {
-        data.WriteBit(!entry.overDamage);
-        data.WriteBit(!entry.absorb);
-        data.WriteBit(entry.critical);
-        data.WriteBit(!entry.resist);
-        data.WriteBit(!entry.power);
+        
+        data.WriteBit(!pInfo->overDamage); // 8
+        data.WriteBit(!pInfo->absorb); // 16
+        data.WriteBit(pInfo->critical); // 24
+        data.WriteBit(!pInfo->resist); // 20
+        data.WriteBit(!pInfo->power); // 12
     }
 
     data.WriteGuidMask(TargetGUID, 5, 3);
     data.WriteGuidMask(CasterGUID, 1);
     data.WriteGuidMask(TargetGUID, 2);
     data.WriteGuidMask(CasterGUID, 6, 3, 4);
-    data.WriteBit(0); // PeriodicAuraLogEffectDebugInfo
+    data.WriteBit(0); // SpellCastLogData
     data.WriteGuidMask(CasterGUID, 2);
     data.WriteGuidMask(TargetGUID, 6);
     data.WriteGuidMask(CasterGUID, 5);
+    //SpellCastLogData
+    {
+        //data.WriteBits(0, 21); // SpellLogPowerData
+    }
     data.WriteGuidMask(TargetGUID, 4);
     data.FlushBits();
 
-    for (SpellPeriodicAuraLogInfo const& entry : Entries)
+    //PeriodicAuraLogEffect
     {
-        if (entry.overDamage)
-            data << uint32(pInfo->overDamage);              // overkill
+        //if8
+        if (pInfo->overDamage)
+            data << pInfo->overDamage;
 
-        data << uint32(pInfo->damage);                      // amount
-        data << uint32(aura->GetAuraType());
+        data << uint32(pInfo->damage); // 4
+        data << uint32(aura->GetAuraType()); // 0
 
-        if (entry.resist)
-            data << uint32(pInfo->resist);                  // resist
+        //if20
+        if (pInfo->resist)
+            data << uint32(pInfo->resist);
 
-        if (entry.absorb)
-            data << uint32(pInfo->absorb);                  // absorb
+        //if16
+        if (pInfo->absorb)
+            data << uint32(pInfo->absorb);
+        //if12
+        if (pInfo->power)
+            data << uint32(pInfo->power);
 
-        if (entry.power)
-            data << uint32(pInfo->power);                   // power
     }
 
     data.WriteGuidBytes(CasterGUID, 5, 3);
@@ -4987,7 +4995,18 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     data.WriteGuidBytes(TargetGUID, 6);
     data.WriteGuidBytes(CasterGUID, 7, 1);
 
-    // for (PeriodicAuraLogEffectDebugInfo : DebugInfo)
+    // SpellCastLogData
+    {
+        //SpellLogPowerData
+        {
+            //data << uint32(0); //40.4
+            //data << uint32(0); //40.0
+        }
+
+        //data << uint32(0); //28
+        //data << uint32(0); //24
+        //data << uint32(0); //32
+    }
 
     data.WriteGuidBytes(TargetGUID, 5);
     data.WriteGuidBytes(CasterGUID, 0); 
@@ -4998,6 +5017,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     data.WriteGuidBytes(TargetGUID, 0, 2);
     data.WriteGuidBytes(CasterGUID, 6); 
     SendMessageToSet(&data, true);
+
 }
 
 struct SpellLogMissEntry
@@ -5075,7 +5095,7 @@ void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
 
 void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 {
-    SF_LOG_DEBUG("entities.unit", "WORLD: Sending SMSG_ATTACKER_STATE_UPDATE");
+    SF_LOG_ERROR("entities.unit", "WORLD: Sending SMSG_ATTACKER_STATE_UPDATE");
 
     ObjectGuid guid = GetGUID();
     uint32 count = 1;
@@ -8507,10 +8527,10 @@ void Unit::UnsummonAllTotems()
 void Unit::SendHealSpellLog(ObjectGuid CasterGUID, ObjectGuid TargetGUID, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical)
 {
     WorldPacket data(SMSG_SPELL_HEAL_LOG, 8 + 8 + 4 + 4 + 4 + 4 + 1 + 1 + 1 /*+ SpellCastLogData.size()*/);
-    data << uint32(Absorb);   // Absorbed
-    data << uint32(OverHeal); // OverHeal
-    data << uint32(SpellID);  // SpellID
-    data << uint32(Damage);   // Health
+    data << uint32(SpellID);   // SpellID
+    data << uint32(Absorb);    // Absorb
+    data << uint32(Damage);    // Health
+    data << uint32(OverHeal);  // OverHeal
     data.WriteGuidMask(TargetGUID, 0);
     data.WriteGuidMask(CasterGUID, 2, 6);
     data.WriteGuidMask(TargetGUID, 2);
