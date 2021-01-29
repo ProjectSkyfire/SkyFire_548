@@ -289,7 +289,7 @@ enum Swing
     TWOHANDEDSWING = 2
 };
 
-enum VictimState
+enum class VictimState
 {
     VICTIMSTATE_INTACT = 0, // set when attacker misses
     VICTIMSTATE_HIT = 1, // victim got clear/blocked hit
@@ -1047,7 +1047,7 @@ struct CalcDamageInfo
     uint32 resist;
     uint32 blocked_amount;
     uint32 HitInfo;
-    uint32 TargetState;
+    VictimState TargetState;
     // Helper
     WeaponAttackType attackType; //
     uint32 procAttacker;
