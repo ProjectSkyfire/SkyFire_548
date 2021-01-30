@@ -291,15 +291,15 @@ enum Swing
 
 enum class VictimState
 {
-    VICTIMSTATE_INTACT = 0, // set when attacker misses
-    VICTIMSTATE_HIT = 1, // victim got clear/blocked hit
-    VICTIMSTATE_DODGE = 2,
-    VICTIMSTATE_PARRY = 3,
+    VICTIMSTATE_MISS      = 0, // set when attacker misses
+    VICTIMSTATE_WOUND     = 1, // victim got clear/blocked hit
+    VICTIMSTATE_DODGE     = 2,
+    VICTIMSTATE_PARRY     = 3,
     VICTIMSTATE_INTERRUPT = 4,
-    VICTIMSTATE_BLOCKS = 5, // unused? not set when blocked, even on full block
-    VICTIMSTATE_EVADES = 6,
-    VICTIMSTATE_IS_IMMUNE = 7,
-    VICTIMSTATE_DEFLECTS = 8
+    VICTIMSTATE_BLOCK     = 5, // unused? not set when blocked, even on full block
+    VICTIMSTATE_EVADE     = 6,
+    VICTIMSTATE_IMMUNE    = 7,
+    VICTIMSTATE_DEFLECT   = 8
 };
 
 enum HitInfo

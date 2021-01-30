@@ -1135,7 +1135,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     damageInfo->resist = 0;
     damageInfo->blocked_amount = 0;
 
-    damageInfo->TargetState = VictimState::VICTIMSTATE_INTACT;
+    damageInfo->TargetState = VictimState::VICTIMSTATE_MISS;
     damageInfo->HitInfo = 0;
     damageInfo->procAttacker = PROC_FLAG_NONE;
     damageInfo->procVictim = PROC_FLAG_NONE;
@@ -1168,7 +1168,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     if (damageInfo->target->IsImmunedToDamage(SpellSchoolMask(damageInfo->damageSchoolMask)))
     {
         damageInfo->HitInfo |= HITINFO_NORMALSWING;
-        damageInfo->TargetState = VictimState::VICTIMSTATE_IS_IMMUNE;
+        damageInfo->TargetState = VictimState::VICTIMSTATE_IMMUNE;
 
         damageInfo->procEx |= PROC_EX_IMMUNE;
         damageInfo->damage = 0;
@@ -1199,26 +1199,26 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     {
         case MELEE_HIT_EVADE:
             damageInfo->HitInfo |= HITINFO_MISS | HITINFO_SWINGNOHITSOUND;
-            damageInfo->TargetState = VictimState::VICTIMSTATE_EVADES;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_EVADE;
             damageInfo->procEx |= PROC_EX_EVADE;
             damageInfo->damage = 0;
             damageInfo->cleanDamage = 0;
             return;
         case MELEE_HIT_MISS:
             damageInfo->HitInfo |= HITINFO_MISS;
-            damageInfo->TargetState = VictimState::VICTIMSTATE_INTACT;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_MISS;
             damageInfo->procEx |= PROC_EX_MISS;
             damageInfo->damage = 0;
             damageInfo->cleanDamage = 0;
             break;
         case MELEE_HIT_NORMAL:
-            damageInfo->TargetState = VictimState::VICTIMSTATE_HIT;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
             break;
         case MELEE_HIT_CRIT:
         {
             damageInfo->HitInfo |= HITINFO_CRITICALHIT;
-            damageInfo->TargetState = VictimState::VICTIMSTATE_HIT;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
 
             damageInfo->procEx |= PROC_EX_CRITICAL_HIT;
             // Crit bonus calc
@@ -1250,7 +1250,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
             damageInfo->damage = 0;
             break;
         case MELEE_HIT_BLOCK:
-            damageInfo->TargetState = VictimState::VICTIMSTATE_HIT;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
             damageInfo->HitInfo |= HITINFO_BLOCK;
             damageInfo->procEx |= PROC_EX_BLOCK | PROC_EX_NORMAL_HIT;
             // 30% damage blocked, double blocked amount if block is critical
@@ -1261,7 +1261,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         case MELEE_HIT_GLANCING:
         {
             damageInfo->HitInfo |= HITINFO_GLANCING;
-            damageInfo->TargetState = VictimState::VICTIMSTATE_HIT;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
             int32 leveldif = int32(victim->getLevel()) - int32(getLevel());
             if (leveldif > 3)
@@ -1273,7 +1273,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         }
         case MELEE_HIT_CRUSHING:
             damageInfo->HitInfo |= HITINFO_CRUSHING;
-            damageInfo->TargetState = VictimState::VICTIMSTATE_HIT;
+            damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
             // 150% normal damage
             damageInfo->damage += (damageInfo->damage / 2);
@@ -1281,10 +1281,6 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         default:
             break;
     }
-
-    // Always apply HITINFO_AFFECTS_VICTIM in case its not a miss
-    if (!(damageInfo->HitInfo & HITINFO_MISS))
-        damageInfo->HitInfo |= HITINFO_AFFECTS_VICTIM;
 
     int32 resilienceReduction = damageInfo->damage;
     ApplyResilience(victim, &resilienceReduction, damageInfo->hitOutCome == MELEE_HIT_CRIT);
@@ -1302,6 +1298,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         if (damageInfo->absorb)
         {
             damageInfo->HitInfo |= ((damageInfo->damage - damageInfo->absorb) == 0 ? HITINFO_FULL_ABSORB : HITINFO_PARTIAL_ABSORB);
+            damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
             damageInfo->procEx |= PROC_EX_ABSORB;
         }
 
@@ -1312,6 +1309,10 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     }
     else // Impossible get negative result but....
         damageInfo->damage = 0;
+
+    // Always apply HITINFO_AFFECTS_VICTIM in case its not a miss or full absorb
+    if (!(damageInfo->HitInfo & HITINFO_MISS | HITINFO_FULL_ABSORB))
+        damageInfo->HitInfo |= HITINFO_AFFECTS_VICTIM;
 }
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
@@ -1324,7 +1325,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     // Hmmmm dont like this emotes client must by self do all animations
     if (damageInfo->HitInfo & HITINFO_CRITICALHIT)
         victim->HandleEmoteCommand(EMOTE_ONESHOT_WOUND_CRITICAL);
-    if (damageInfo->blocked_amount && damageInfo->TargetState != VictimState::VICTIMSTATE_BLOCKS)
+    if (damageInfo->blocked_amount && damageInfo->TargetState != VictimState::VICTIMSTATE_BLOCK)
         victim->HandleEmoteCommand(EMOTE_ONESHOT_PARRY_SHIELD);
 
     if (damageInfo->TargetState == VictimState::VICTIMSTATE_PARRY)
