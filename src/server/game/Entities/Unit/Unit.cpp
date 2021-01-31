@@ -1681,59 +1681,63 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     RoundToInterval(auraAbsorbMod, 0.0f, 100.0f);
 
-    // We're going to call functions which can modify content of the list during iteration over it's elements
-    // Let's copy the list so we can prevent iterator invalidation
-    AuraEffectList vSchoolAbsorbCopy(victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
-    vSchoolAbsorbCopy.sort(Skyfire::AbsorbAuraOrderPred());
-
-    // absorb without mana cost
-    for (AuraEffectList::iterator itr = vSchoolAbsorbCopy.begin(); (itr != vSchoolAbsorbCopy.end()) && (dmgInfo.GetDamage() > 0); ++itr)
+    if (damagetype != DIRECT_DAMAGE)
     {
-        AuraEffect* absorbAurEff = *itr;
-        // Check if aura was removed during iteration - we don't need to work on such auras
-        AuraApplication const* aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(victim->GetGUID());
-        if (!aurApp)
-            continue;
-        if (!(absorbAurEff->GetMiscValue() & schoolMask))
-            continue;
+        // We're going to call functions which can modify content of the list during iteration over it's elements
+// Let's copy the list so we can prevent iterator invalidation
+        AuraEffectList vSchoolAbsorbCopy(victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
+        vSchoolAbsorbCopy.sort(Skyfire::AbsorbAuraOrderPred());
 
-        // get amount which can be still absorbed by the aura
-        int32 currentAbsorb = absorbAurEff->GetAmount();
-        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
-        if (currentAbsorb < 0)
-            currentAbsorb = 0;
-
-        uint32 tempAbsorb = uint32(currentAbsorb);
-
-        bool defaultPrevented = false;
-
-        absorbAurEff->GetBase()->CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb, defaultPrevented);
-        currentAbsorb = tempAbsorb;
-
-        if (defaultPrevented)
-            continue;
-
-        // Apply absorb mod auras
-        AddPct(currentAbsorb, -auraAbsorbMod);
-
-        // absorb must be smaller than the damage itself
-        currentAbsorb = RoundToInterval(currentAbsorb, 0, int32(dmgInfo.GetDamage()));
-
-        dmgInfo.AbsorbDamage(currentAbsorb);
-
-        tempAbsorb = currentAbsorb;
-        absorbAurEff->GetBase()->CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb);
-
-        // Check if our aura is using amount to count damage
-        if (absorbAurEff->GetAmount() >= 0)
+        // absorb without mana cost
+        for (AuraEffectList::iterator itr = vSchoolAbsorbCopy.begin(); (itr != vSchoolAbsorbCopy.end()) && (dmgInfo.GetDamage() > 0); ++itr)
         {
-            // Reduce shield amount
-            absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
-            // Aura cannot absorb anything more - remove it
-            if (absorbAurEff->GetAmount() <= 0)
-                absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            AuraEffect* absorbAurEff = *itr;
+            // Check if aura was removed during iteration - we don't need to work on such auras
+            AuraApplication const* aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(victim->GetGUID());
+            if (!aurApp)
+                continue;
+            if (!(absorbAurEff->GetMiscValue() & schoolMask))
+                continue;
+
+            // get amount which can be still absorbed by the aura
+            int32 currentAbsorb = absorbAurEff->GetAmount();
+            // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+            if (currentAbsorb < 0)
+                currentAbsorb = 0;
+
+            uint32 tempAbsorb = uint32(currentAbsorb);
+
+            bool defaultPrevented = false;
+
+            absorbAurEff->GetBase()->CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb, defaultPrevented);
+            currentAbsorb = tempAbsorb;
+
+            if (defaultPrevented)
+                continue;
+
+            // Apply absorb mod auras
+            AddPct(currentAbsorb, -auraAbsorbMod);
+
+            // absorb must be smaller than the damage itself
+            currentAbsorb = RoundToInterval(currentAbsorb, 0, int32(dmgInfo.GetDamage()));
+
+            dmgInfo.AbsorbDamage(currentAbsorb);
+
+            tempAbsorb = currentAbsorb;
+            absorbAurEff->GetBase()->CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb);
+
+            // Check if our aura is using amount to count damage
+            if (absorbAurEff->GetAmount() >= 0)
+            {
+                // Reduce shield amount
+                absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
+                // Aura cannot absorb anything more - remove it
+                if (absorbAurEff->GetAmount() <= 0)
+                    absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            }
         }
     }
+
 
     // absorb by mana cost
     AuraEffectList vManaShieldCopy(victim->GetAuraEffectsByType(SPELL_AURA_MANA_SHIELD));
@@ -5122,10 +5126,6 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
     data << uint32(damageInfo->damage);                     // Full damage
     int32 overkill = damageInfo->damage - damageInfo->target->GetHealth();
     data << uint32(overkill < 0 ? 0 : overkill);            // Overkill
-
-    if (damageInfo->damage || damageInfo->absorb || damageInfo->resist)
-        ++count;
-
     data << uint8(count);                                   // Sub damage count
 
     for (uint32 i = 0; i < count; ++i)
