@@ -137,8 +137,6 @@ uint32 const pandarenLanguageSpellsHorde[] =
 
 #define PANDAREN_FACTION_LANGUAGE_COUNT 3
 
-extern uint32 const MasterySpells [MAX_CLASSES];
-
 enum TalentTree // talent tabs
 {
     TALENT_TREE_WARRIOR_ARMS         = 746,
@@ -2348,7 +2346,6 @@ class Player : public Unit, public GridObject<Player>
     void UpdateAllRatings();
     void UpdateMastery();
     void UpdatePvpPower();
-    bool CanUseMastery() const;
 
     void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
 
