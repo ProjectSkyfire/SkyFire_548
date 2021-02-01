@@ -1681,63 +1681,59 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     RoundToInterval(auraAbsorbMod, 0.0f, 100.0f);
 
-    if (damagetype != DIRECT_DAMAGE)
+    // We're going to call functions which can modify content of the list during iteration over it's elements
+    // Let's copy the list so we can prevent iterator invalidation
+    AuraEffectList vSchoolAbsorbCopy(victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
+    vSchoolAbsorbCopy.sort(Skyfire::AbsorbAuraOrderPred());
+
+    // absorb without mana cost
+    for (AuraEffectList::iterator itr = vSchoolAbsorbCopy.begin(); (itr != vSchoolAbsorbCopy.end()) && (dmgInfo.GetDamage() > 0); ++itr)
     {
-        // We're going to call functions which can modify content of the list during iteration over it's elements
-// Let's copy the list so we can prevent iterator invalidation
-        AuraEffectList vSchoolAbsorbCopy(victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
-        vSchoolAbsorbCopy.sort(Skyfire::AbsorbAuraOrderPred());
+        AuraEffect* absorbAurEff = *itr;
+        // Check if aura was removed during iteration - we don't need to work on such auras
+        AuraApplication const* aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(victim->GetGUID());
+        if (!aurApp)
+            continue;
+        if (!(absorbAurEff->GetMiscValue() & schoolMask))
+            continue;
 
-        // absorb without mana cost
-        for (AuraEffectList::iterator itr = vSchoolAbsorbCopy.begin(); (itr != vSchoolAbsorbCopy.end()) && (dmgInfo.GetDamage() > 0); ++itr)
+        // get amount which can be still absorbed by the aura
+        int32 currentAbsorb = absorbAurEff->GetAmount();
+        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+        if (currentAbsorb < 0)
+            currentAbsorb = 0;
+
+        uint32 tempAbsorb = uint32(currentAbsorb);
+
+        bool defaultPrevented = false;
+
+        absorbAurEff->GetBase()->CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb, defaultPrevented);
+        currentAbsorb = tempAbsorb;
+
+        if (defaultPrevented)
+            continue;
+
+        // Apply absorb mod auras
+        AddPct(currentAbsorb, -auraAbsorbMod);
+
+        // absorb must be smaller than the damage itself
+        currentAbsorb = RoundToInterval(currentAbsorb, 0, int32(dmgInfo.GetDamage()));
+
+        dmgInfo.AbsorbDamage(currentAbsorb);
+
+        tempAbsorb = currentAbsorb;
+        absorbAurEff->GetBase()->CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb);
+
+        // Check if our aura is using amount to count damage
+        if (absorbAurEff->GetAmount() >= 0)
         {
-            AuraEffect* absorbAurEff = *itr;
-            // Check if aura was removed during iteration - we don't need to work on such auras
-            AuraApplication const* aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(victim->GetGUID());
-            if (!aurApp)
-                continue;
-            if (!(absorbAurEff->GetMiscValue() & schoolMask))
-                continue;
-
-            // get amount which can be still absorbed by the aura
-            int32 currentAbsorb = absorbAurEff->GetAmount();
-            // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
-            if (currentAbsorb < 0)
-                currentAbsorb = 0;
-
-            uint32 tempAbsorb = uint32(currentAbsorb);
-
-            bool defaultPrevented = false;
-
-            absorbAurEff->GetBase()->CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb, defaultPrevented);
-            currentAbsorb = tempAbsorb;
-
-            if (defaultPrevented)
-                continue;
-
-            // Apply absorb mod auras
-            AddPct(currentAbsorb, -auraAbsorbMod);
-
-            // absorb must be smaller than the damage itself
-            currentAbsorb = RoundToInterval(currentAbsorb, 0, int32(dmgInfo.GetDamage()));
-
-            dmgInfo.AbsorbDamage(currentAbsorb);
-
-            tempAbsorb = currentAbsorb;
-            absorbAurEff->GetBase()->CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb);
-
-            // Check if our aura is using amount to count damage
-            if (absorbAurEff->GetAmount() >= 0)
-            {
-                // Reduce shield amount
-                absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
-                // Aura cannot absorb anything more - remove it
-                if (absorbAurEff->GetAmount() <= 0)
-                    absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
-            }
+            // Reduce shield amount
+            absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
+            // Aura cannot absorb anything more - remove it
+            if (absorbAurEff->GetAmount() <= 0)
+                absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
         }
     }
-
 
     // absorb by mana cost
     AuraEffectList vManaShieldCopy(victim->GetAuraEffectsByType(SPELL_AURA_MANA_SHIELD));
@@ -5086,102 +5082,79 @@ void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
 void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 {
     SF_LOG_ERROR("entities.unit", "WORLD: Sending SMSG_ATTACKER_STATE_UPDATE");
-
-    ObjectGuid guid = GetGUID();
     uint32 count = 1;
-    size_t maxsize = 4 + 5 + 5 + 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 * 12;
-    WorldPacket data(SMSG_ATTACKER_STATE_UPDATE, maxsize);    // we guess size
 
-    bool hasUnkFlags = damageInfo->HitInfo & HITINFO_UNK26;
-    uint32 unkCounter = 0;
+    ByteBuffer buff;
+    buff << uint32(damageInfo->HitInfo);
+    buff.append(damageInfo->attacker->GetPackGUID());
+    buff.append(damageInfo->target->GetPackGUID());
 
-    data.WriteBit(hasUnkFlags);
+    
+    buff << uint32(damageInfo->damage);  // Full damage
 
-    if (hasUnkFlags)
-    {
-        data.WriteBits(unkCounter, 21);
-        data.FlushBits();
-
-        data << uint32(0);
-
-        for (uint32 i = 0; i < unkCounter; ++i)
-        {
-            data << uint32(0);
-            data << uint32(0);
-        }
-
-        data << uint32(0);
-        data << uint32(0);
-    }
-
-    // Needs to be flushed because data.wpos() wouldnt return the correct placeholder
-    data.FlushBits();
-
-    size_t size = data.wpos();
-    data << uint32(0); // Placeholder
-
-    data << uint32(damageInfo->HitInfo);
-    data.append(damageInfo->attacker->GetPackGUID());
-    data.append(damageInfo->target->GetPackGUID());
-    data << uint32(damageInfo->damage);                     // Full damage
     int32 overkill = damageInfo->damage - damageInfo->target->GetHealth();
-    data << uint32(overkill < 0 ? 0 : overkill);            // Overkill
-    data << uint8(count);                                   // Sub damage count
+    buff << uint32(overkill < 0 ? 0 : overkill);            // Overkill
+    buff << uint8(count);                                   // Sub damage count
 
     for (uint32 i = 0; i < count; ++i)
     {
-        data << uint32(damageInfo->damageSchoolMask);       // School of sub damage
-        data << float(damageInfo->damage);                  // sub damage
-        data << uint32(damageInfo->damage);                 // Sub Damage
+        buff << uint32(damageInfo->damageSchoolMask);       // School of sub damage
+        buff << float(damageInfo->damage);                  // sub damage
+        buff << uint32(damageInfo->damage);                 // Sub Damage
     }
 
     if (damageInfo->HitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
     {
         for (uint32 i = 0; i < count; ++i)
-            data << uint32(damageInfo->absorb);             // Absorb
+            buff << uint32(damageInfo->absorb);             // Absorb
     }
 
     if (damageInfo->HitInfo & (HITINFO_FULL_RESIST | HITINFO_PARTIAL_RESIST))
     {
         for (uint32 i = 0; i < count; ++i)
-            data << uint32(damageInfo->resist);             // Resist
+            buff << uint32(damageInfo->resist);             // Resist
     }
-    
-    data << uint8(damageInfo->TargetState);
-    data << uint32(0);  // Unknown attackerstate
-    data << uint32(0);  // Melee spellid
+
+    buff << uint8(damageInfo->TargetState);
+    buff << uint32(0);  // Unknown attackerstate
+    buff << uint32(0);  // Melee spellid
 
     if (damageInfo->HitInfo & HITINFO_BLOCK)
-        data << uint32(damageInfo->blocked_amount);
+        buff << uint32(damageInfo->blocked_amount);
 
     if (damageInfo->HitInfo & HITINFO_RAGE_GAIN)
-        data << uint32(0);
+        buff << uint32(0);
 
     //! Probably used for debugging purposes, as it is not known to appear on retail servers
     if (damageInfo->HitInfo & HITINFO_UNK1)
     {
-        data << uint32(0);
-        data << float(0);
-        data << float(0);
-        data << float(0);
-        data << float(0);
-        data << float(0);
-        data << float(0);
-        data << float(0);
-        data << float(0);
+        buff << uint32(0);
+        buff << float(0);
+        buff << float(0);
+        buff << float(0);
+        buff << float(0);
+        buff << float(0);
+        buff << float(0);
+        buff << float(0);
+        buff << float(0);
 
         for (uint8 i = 0; i < 2; ++i)
         {
-            data << float(0);
-            data << float(0);
+            buff << float(0);
+            buff << float(0);
         }
-        data << uint32(0);
+        buff << uint32(0);
     }
 
     if (damageInfo->HitInfo & (HITINFO_BLOCK | HITINFO_UNK12))
-        data << float(0);
+        buff << float(0);
 
-    data.put(size, data.wpos() - size - 4); // Blizz - Weird and Lazy people....
+
+    WorldPacket data(SMSG_ATTACKER_STATE_UPDATE, buff.size() + 1+4);
+    data.WriteBit(0); // hasSpellCastLogData
+    data.FlushBits();
+    data << uint32(buff.size());
+    data.append(buff);
     SendMessageToSet(&data, true);
 }
 
