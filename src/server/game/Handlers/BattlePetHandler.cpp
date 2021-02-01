@@ -29,6 +29,53 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 
+void WorldSession::HandlePetBattleStartPvpMatchmaking(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_PET_BATTLE_START_PVP_MATCHMAKING");
+
+    WorldPacket data(SMSG_PET_BATTLE_QUEUE_STATUS, 4+4+4+4+4+4+4+4+4+8+1);
+
+    //CliRideTicket.RequesterGuid
+    ObjectGuid guid = GetPlayer()->GetGUID();
+
+    data.WriteGuidMask(guid, 7, 2, 6, 1);
+    data.WriteBit(0); // 20 hasAverageWaitTime
+    data.WriteGuidMask(guid, 4);
+    data.WriteBits(0, 22);
+    data.WriteGuidMask(guid, 0);
+    data.WriteBit(0); // 48 hasClientWaitTime
+    data.WriteGuidMask(guid, 3, 5);
+
+    data.FlushBits();
+    data.WriteGuidBytes(guid, 2, 4);
+    data << uint32(0); // 72 CliRideTicket.Time
+    data.WriteGuidBytes(guid, 3);
+    data << uint32(1); // 24 Status // ERR_PETBATTLE_QUEUE_ status, 1 = ERR_PETBATTLE_QUEUE_QUEUED
+    data.WriteGuidBytes(guid, 6);
+    //if (hasClientWaitTime)
+    //data << uint32(0) // 44
+    data.WriteGuidBytes(guid, 1);
+    data << uint32(0); // 68 CliRideTicket.Type
+    data.WriteGuidBytes(guid, 5, 7);
+    data << uint32(0); // 64 CliRideTicket.Id
+    data.WriteGuidBytes(guid, 0);
+    
+    for (uint8 i = 0; i < 3; i++)
+        data << uint32(1); // SlotResult
+
+    //if (hasAverageWaitTime)
+    // data << uint32(0); // 16
+
+    SendPacket(&data);
+
+}
+
+void WorldSession::HandlePetBattleStopPvpMatchmaking(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_PET_BATTLE_STOP_PVP_MATCHMAKING");
+    //CliRideTicket
+}
+
 void WorldSession::HandleBattlePetDelete(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PET_DELETE");

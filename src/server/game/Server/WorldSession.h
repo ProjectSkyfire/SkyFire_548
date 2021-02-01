@@ -1065,6 +1065,8 @@ class WorldSession
         void SendLoadCUFProfiles();
 
         // Battle Pets
+        void HandlePetBattleStartPvpMatchmaking(WorldPacket& recvData);
+        void HandlePetBattleStopPvpMatchmaking(WorldPacket& recvData);
         void HandleBattlePetDelete(WorldPacket& recvData);
         void HandleBattlePetModifyName(WorldPacket& recvData);
         void HandleBattlePetQueryName(WorldPacket& recvData);
