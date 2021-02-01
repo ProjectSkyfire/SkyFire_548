@@ -558,11 +558,12 @@ void Player::UpdateAllCritPercentages()
 
 void Player::UpdateMastery()
 {
-    float value = GetTotalAuraModifier(SPELL_AURA_MASTERY);
+    float value = 8.0f;
+    value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
     value += GetRatingBonusValue(CR_MASTERY);
     SetFloatValue(PLAYER_FIELD_MASTERY, value);
-    
 }
+
 
 const float m_diminishing_k[MAX_CLASSES] =
 {
