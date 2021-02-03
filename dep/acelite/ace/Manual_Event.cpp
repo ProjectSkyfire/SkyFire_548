@@ -1,5 +1,5 @@
-#ifndef MANUALEVENTCPP
-#define MANUALEVENTCPP
+#ifndef ACE_MANUAL_EVENT_CPP
+#define ACE_MANUAL_EVENT_CPP
 
 #include "ace/Manual_Event.h"
 
@@ -47,7 +47,7 @@ ACE_Manual_Event_T<TIME_POLICY>::ACE_Manual_Event_T (
 
 template <class TIME_POLICY>
 void
-ACE_Manual_Event_T<TIME_POLICY>::dump (void) const
+ACE_Manual_Event_T<TIME_POLICY>::dump () const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_Event_T<TIME_POLICY>::dump ();
@@ -55,4 +55,5 @@ ACE_Manual_Event_T<TIME_POLICY>::dump (void) const
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
-#endif
+
+#endif /* ACE_MANUAL_EVENT_CPP */

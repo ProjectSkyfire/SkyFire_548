@@ -1019,7 +1019,7 @@ ACE_OS::socketpair (int domain, int type,
                      int, -1);
 #endif /* ACE_LACKS_SOCKETPAIR */
 }
-/*
+#if defined (ACE_HAS_IPV6)
 ACE_INLINE unsigned int
 ACE_OS::if_nametoindex (const char *ifname)
 {
@@ -1030,8 +1030,8 @@ ACE_OS::if_nametoindex (const char *ifname)
 #else
   ACE_OSCALL_RETURN (::if_nametoindex (ifname), int, 0);
 #endif /* ACE_LACKS_IF_NAMETOINDEX */
-//}
-/*
+}
+
 ACE_INLINE char *
 ACE_OS::if_indextoname (unsigned int ifindex, char *ifname)
 {
@@ -1043,10 +1043,11 @@ ACE_OS::if_indextoname (unsigned int ifindex, char *ifname)
 #else
   ACE_OSCALL_RETURN (::if_indextoname (ifindex, ifname), char *, 0);
 #endif /* ACE_LACKS_IF_NAMETOINDEX */
-//}
+}
+#endif (ACE_HAS_IPV6)
 
 ACE_INLINE struct if_nameindex *
-ACE_OS::if_nameindex (void)
+ACE_OS::if_nameindex ()
 {
   ACE_OS_TRACE ("ACE_OS::if_nameindex");
 #ifdef ACE_LACKS_IF_NAMEINDEX

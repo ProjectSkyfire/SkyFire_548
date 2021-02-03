@@ -1,5 +1,5 @@
-#ifndef AUTOEVENTCPP
-#define AUTOEVENTCPP
+#ifndef ACE_AUTO_EVENT_CPP
+#define ACE_AUTO_EVENT_CPP
 
 #include "ace/Auto_Event.h"
 
@@ -47,7 +47,7 @@ ACE_Auto_Event_T<TIME_POLICY>::ACE_Auto_Event_T (
 
 template <class TIME_POLICY>
 void
-ACE_Auto_Event_T<TIME_POLICY>::dump (void) const
+ACE_Auto_Event_T<TIME_POLICY>::dump () const
 {
 #if defined (ACE_HAS_DUMP)
   ACE_Event_T<TIME_POLICY>::dump ();
@@ -55,4 +55,5 @@ ACE_Auto_Event_T<TIME_POLICY>::dump (void) const
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
-#endif
+
+#endif /*ACE_AUTO_EVENT_CPP*/

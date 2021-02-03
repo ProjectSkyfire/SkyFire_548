@@ -23,7 +23,6 @@
 #include <openssl/bn.h>
 #include <openssl/crypto.h>
 #include <algorithm>
-#include <ace/Auto_Ptr.h>
 
 BigNumber::BigNumber()
     : _bn(BN_new())
@@ -171,7 +170,8 @@ bool BigNumber::isZero() const
     return BN_is_zero(_bn);
 }
 
-ACE_Auto_Array_Ptr<uint8> BigNumber::AsByteArray(int32 minSize, bool littleEndian)
+
+uint8* BigNumber::AsByteArray(int32 minSize, bool littleEndian)
 {
     int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
@@ -181,13 +181,15 @@ ACE_Auto_Array_Ptr<uint8> BigNumber::AsByteArray(int32 minSize, bool littleEndia
     if (length > GetNumBytes())
         memset((void*)array, 0, length);
 
-    BN_bn2bin(_bn, (unsigned char *)array);
+    int paddingOffset = length - GetNumBytes();
+
+    BN_bn2bin(_bn, (unsigned char *)array + paddingOffset);
 
     // openssl's BN stores data internally in big endian format, reverse if little endian desired
     if (littleEndian)
         std::reverse(array, array + length);
 
-    ACE_Auto_Array_Ptr<uint8> ret(array);
+    uint8* ret(array);
     return ret;
 }
 

@@ -1190,6 +1190,9 @@
     <ClInclude Include="config-hpux-11.00.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="config-hurd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="config-icc-common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1346,31 +1349,13 @@
     <ClInclude Include="config-win32-borland.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config-win32-cegcc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config-win32-common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-dmc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-interix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-mingw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-mingw64.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-msvc-10.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-msvc-11.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-msvc-12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-msvc-14.h">
@@ -1380,15 +1365,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-msvc-142.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-msvc-7.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-msvc-8.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-win32-msvc-9.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-msvc.h">
@@ -3119,9 +3095,6 @@
       <Filter>Inline Files</Filter>
     </None>
     <None Include="Event_Base.inl">
-      <Filter>Inline Files</Filter>
-    </None>
-    <None Include="Event_Handler.inl">
       <Filter>Inline Files</Filter>
     </None>
     <None Include="Event_Handler_Handle_Timeout_Upcall.inl">

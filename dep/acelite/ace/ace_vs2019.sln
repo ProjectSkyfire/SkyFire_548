@@ -6,7 +6,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # this file will be lost the next time it is generated.
 #
 # MPC Command:
-# /home/johnny/DOC_ROOT/stage-10021/ACE_wrappers/bin/mwc.pl -type vs2019 -recurse -hierarchy -relative ACE_ROOT=/home/johnny/DOC_ROOT/stage-10021/ACE_wrappers -relative TAO_ROOT=/home/johnny/DOC_ROOT/stage-10021/ACE_wrappers/TAO -workers 12 -name_modifier "*_vs2019"
+# /home/johnny/DOC_ROOT/stage-10811/ACE_wrappers/bin/mwc.pl -type vs2019 -recurse -hierarchy -relative ACE_ROOT=/home/johnny/DOC_ROOT/stage-10811/ACE_wrappers -relative TAO_ROOT=/home/johnny/DOC_ROOT/stage-10811/ACE_wrappers/TAO -workers 12 -name_modifier "*_vs2019"
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ACE", "ACE_vs2019.vcxproj", "{18A441B7-FECA-1BAD-6757-8A6300006755}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ACE_Compression", "Compression\ACE_Compression_vs2019.vcxproj", "{0BB10B40-FECA-1BAD-EA06-BB371373EA04}"

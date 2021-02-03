@@ -38,7 +38,7 @@ class ACE_Export ACE_SOCK_Dgram : public ACE_SOCK
 {
 public:
   /// Default constructor.
-  ACE_SOCK_Dgram (void);
+  ACE_SOCK_Dgram ();
 
   /// This is a BSD-style method (i.e., no QoS) for initiating a socket
   /// dgram that will accept datagrams at the <local> address.
@@ -85,7 +85,7 @@ public:
             int ipv6_only = 0);
 
   /// Default dtor.
-  ~ACE_SOCK_Dgram (void);
+  ~ACE_SOCK_Dgram ();
 
   // = Data transfer routines.
   /// Send an @a n byte @a buf to the datagram socket (uses <sendto(3)>).
@@ -204,7 +204,7 @@ public:
   typedef ACE_INET_Addr PEER_ADDR;
 
   /// Dump the state of an object.
-  void dump (void) const;
+  void dump () const;
 
   /// Set NIC to use as multicast interface.
   int set_nic (const ACE_TCHAR *net_if,
@@ -219,13 +219,13 @@ protected:
                    int protocol_family,
                    int ipv6_only = 0);
 
+#if defined (ACE_HAS_IPV6)
   /// Create a multicast addr/if pair, in format useful for system calls.
   /// If mreq param is NULL, just verify the passed addr/interface specs.
   int make_multicast_ifaddr (ip_mreq *mreq,     // Put result here, if != NULL.
                              const ACE_INET_Addr &mcast_addr,
                              const ACE_TCHAR *net_if);
 
-#if defined (ACE_HAS_IPV6)
   /// Create a multicast addr/if pair, in format useful for system calls.
   /// If mreq param is NULL, just verify the passed addr/interface specs.
   int make_multicast_ifaddr6 (ipv6_mreq *mreq,   // Put result here, if != NULL.

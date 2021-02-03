@@ -2577,6 +2577,7 @@
     <ClInclude Include="config-freebsd.h" />
     <ClInclude Include="config-g++-common.h" />
     <ClInclude Include="config-hpux-11.00.h" />
+    <ClInclude Include="config-hurd.h" />
     <ClInclude Include="config-icc-common.h" />
     <ClInclude Include="config-integritySCA.h" />
     <ClInclude Include="config-kfreebsd.h" />
@@ -2629,21 +2630,12 @@
     <ClInclude Include="config-vxworks6.9.h" />
     <ClInclude Include="config-vxworks7.0.h" />
     <ClInclude Include="config-win32-borland.h" />
-    <ClInclude Include="config-win32-cegcc.h" />
     <ClInclude Include="config-win32-common.h" />
-    <ClInclude Include="config-win32-dmc.h" />
-    <ClInclude Include="config-win32-interix.h" />
     <ClInclude Include="config-win32-mingw.h" />
     <ClInclude Include="config-win32-mingw64.h" />
-    <ClInclude Include="config-win32-msvc-10.h" />
-    <ClInclude Include="config-win32-msvc-11.h" />
-    <ClInclude Include="config-win32-msvc-12.h" />
     <ClInclude Include="config-win32-msvc-14.h" />
     <ClInclude Include="config-win32-msvc-141.h" />
     <ClInclude Include="config-win32-msvc-142.h" />
-    <ClInclude Include="config-win32-msvc-7.h" />
-    <ClInclude Include="config-win32-msvc-8.h" />
-    <ClInclude Include="config-win32-msvc-9.h" />
     <ClInclude Include="config-win32-msvc.h" />
     <ClInclude Include="config-win32.h" />
     <ClInclude Include="config-windows.h" />
@@ -2841,7 +2833,6 @@
     <None Include="Env_Value_T.inl" />
     <None Include="Event.inl" />
     <None Include="Event_Base.inl" />
-    <None Include="Event_Handler.inl" />
     <None Include="Event_Handler_Handle_Timeout_Upcall.inl" />
     <None Include="Event_Handler_T.inl" />
     <None Include="FIFO.inl" />

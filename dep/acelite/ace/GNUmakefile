@@ -8,7 +8,7 @@
 # this file will be lost the next time it is generated.
 #
 # MPC Command:
-# /home/johnny/DOC_ROOT/stage-10021/ACE_wrappers/bin/mwc.pl -type gnuace -exclude TAO/TAO_ACE.mwc -workers 12 -recurse -hierarchy -relative ACE_ROOT=/home/johnny/DOC_ROOT/stage-10021/ACE_wrappers -relative TAO_ROOT=/home/johnny/DOC_ROOT/stage-10021/ACE_wrappers/TAO
+# /home/johnny/DOC_ROOT/stage-10811/ACE_wrappers/bin/mwc.pl -type gnuace -exclude TAO/TAO_ACE.mwc -workers 12 -recurse -hierarchy -relative ACE_ROOT=/home/johnny/DOC_ROOT/stage-10811/ACE_wrappers -relative TAO_ROOT=/home/johnny/DOC_ROOT/stage-10811/ACE_wrappers/TAO
 #
 #----------------------------------------------------------------------------
 

@@ -106,9 +106,9 @@ include $(TGT_DIR)/h/make/rules.$(PRJ_TYPE)
 endif
 
 ifeq ($(VXWORKSLINK),1)
-LDLIBPATH     = -L. -L../../../lib
+LDLIBPATH     = -L. -L../../../lib $(if $(android_abi),-llog)
 else
-LDFLAGS      += -L. $(if $(ARCH),-L./$(ARCH)) -L../../../lib $(if $(ARCH),-L../../../lib/$(ARCH))
+LDFLAGS      += -L. $(if $(ARCH),-L./$(ARCH)) -L../../../lib $(if $(ARCH),-L../../../lib/$(ARCH)) $(if $(android_abi),-llog)
 endif
 CPPFLAGS     += -I../../..
 ifeq ($(shared_libs),1)
@@ -152,7 +152,7 @@ endif
 
 realclean: clean
 ifneq ($(GENERATED_DIRTY),)
-	-$(RM) -r $(GENERATED_DIRTY)
+	-$(RM) -r $(filter-out $(PRECIOUS_FILES),$(GENERATED_DIRTY))
 endif
 
 __prebuild__:
@@ -212,15 +212,15 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#header_files:
-#RLECompressor.h
-#ACE_RLECompression_export.h
+#build_files:
+#ACE_RLECompression.mpc
 #
 #source_files:
 #RLECompressor.cpp
 #
-#build_files:
-#ACE_RLECompression.mpc
+#header_files:
+#RLECompressor.h
+#ACE_RLECompression_export.h
 #
 #lib_output:
 #../../../lib ACE_RLECompression

@@ -137,9 +137,9 @@ include $(TGT_DIR)/h/make/rules.$(PRJ_TYPE)
 endif
 
 ifeq ($(VXWORKSLINK),1)
-LDLIBPATH     = -L. -L../../lib $(PLATFORM_SSL_LDFLAGS)
+LDLIBPATH     = -L. -L../../lib $(if $(android_abi),-llog) $(PLATFORM_SSL_LDFLAGS)
 else
-LDFLAGS      += -L. $(if $(ARCH),-L./$(ARCH)) -L../../lib $(if $(ARCH),-L../../lib/$(ARCH)) $(PLATFORM_SSL_LDFLAGS)
+LDFLAGS      += -L. $(if $(ARCH),-L./$(ARCH)) -L../../lib $(if $(ARCH),-L../../lib/$(ARCH)) $(if $(android_abi),-llog) $(PLATFORM_SSL_LDFLAGS)
 endif
 CPPFLAGS     += -I../..
 CPPFLAGS     += $(PLATFORM_SSL_CPPFLAGS)
@@ -198,7 +198,7 @@ endif
 
 realclean: clean
 ifneq ($(GENERATED_DIRTY),)
-	-$(RM) -r $(GENERATED_DIRTY)
+	-$(RM) -r $(filter-out $(PRECIOUS_FILES),$(GENERATED_DIRTY))
 endif
 
 __prebuild__:
@@ -270,6 +270,30 @@ endif
 #pkgconfig_files:
 #ACE_SSL.pc.in
 #
+#inline_files:
+#SSL_SOCK_Stream.inl
+#SSL_Asynch_Stream.inl
+#SSL_SOCK.inl
+#SSL_SOCK_Connector.inl
+#SSL_SOCK_Acceptor.inl
+#SSL_Context.inl
+#
+#build_files:
+#ssl.mpc
+#ssl_for_tao.mpc
+#
+#header_files:
+#SSL_Initializer.h
+#SSL_SOCK_Stream.h
+#SSL_Asynch_Stream.h
+#SSL_SOCK.h
+#SSL_Asynch_BIO.h
+#SSL_SOCK_Connector.h
+#SSL_SOCK_Acceptor.h
+#SSL_Context.h
+#SSL_Export.h
+#sslconf.h
+#
 #source_files:
 #SSL_Asynch_BIO.cpp
 #SSL_Asynch_Stream.cpp
@@ -279,30 +303,6 @@ endif
 #SSL_SOCK_Acceptor.cpp
 #SSL_SOCK_Connector.cpp
 #SSL_SOCK_Stream.cpp
-#
-#inline_files:
-#SSL_SOCK_Stream.inl
-#SSL_SOCK.inl
-#SSL_Context.inl
-#SSL_Asynch_Stream.inl
-#SSL_SOCK_Connector.inl
-#SSL_SOCK_Acceptor.inl
-#
-#build_files:
-#ssl.mpc
-#ssl_for_tao.mpc
-#
-#header_files:
-#SSL_SOCK_Stream.h
-#SSL_SOCK.h
-#SSL_Asynch_BIO.h
-#SSL_Context.h
-#SSL_Asynch_Stream.h
-#SSL_SOCK_Connector.h
-#SSL_SOCK_Acceptor.h
-#SSL_Initializer.h
-#SSL_Export.h
-#sslconf.h
 #
 #lib_output:
 #../../lib ACE_SSL

@@ -107,9 +107,9 @@ include $(TGT_DIR)/h/make/rules.$(PRJ_TYPE)
 endif
 
 ifeq ($(VXWORKSLINK),1)
-LDLIBPATH     = -L. -L../../lib
+LDLIBPATH     = -L. -L../../lib $(if $(android_abi),-llog)
 else
-LDFLAGS      += -L. $(if $(ARCH),-L./$(ARCH)) -L../../lib $(if $(ARCH),-L../../lib/$(ARCH))
+LDFLAGS      += -L. $(if $(ARCH),-L./$(ARCH)) -L../../lib $(if $(ARCH),-L../../lib/$(ARCH)) $(if $(android_abi),-llog)
 endif
 CPPFLAGS     += -I../..
 ifeq ($(shared_libs),1)
@@ -153,7 +153,7 @@ endif
 
 realclean: clean
 ifneq ($(GENERATED_DIRTY),)
-	-$(RM) -r $(GENERATED_DIRTY)
+	-$(RM) -r $(filter-out $(PRECIOUS_FILES),$(GENERATED_DIRTY))
 endif
 
 __prebuild__:
@@ -214,6 +214,10 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
+#source_files:
+#ETCL_Constraint.cpp
+#ETCL_Constraint_Visitor.cpp
+#
 #header_files:
 #ETCL_Constraint.h
 #ETCL_Constraint_Visitor.h
@@ -224,10 +228,6 @@ endif
 #
 #inline_files:
 #ETCL_Constraint.inl
-#
-#source_files:
-#ETCL_Constraint.cpp
-#ETCL_Constraint_Visitor.cpp
 #
 #pkgconfig_files:
 #ACE_ETCL.pc.in

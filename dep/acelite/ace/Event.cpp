@@ -1,5 +1,5 @@
-#ifndef EVENTCPP
-#define EVENTCPP
+#ifndef ACE_EVENT_CPP
+#define ACE_EVENT_CPP
 
 #include "ace/Event.h"
 
@@ -41,10 +41,10 @@ ACE_Event_T<TIME_POLICY>::ACE_Event_T (int manual_reset,
 }
 
 template <class TIME_POLICY>
-ACE_Event_T<TIME_POLICY>::~ACE_Event_T (void)
+ACE_Event_T<TIME_POLICY>::~ACE_Event_T ()
 {
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
-#endif
+#endif /*ACE_EVENT_CPP*/

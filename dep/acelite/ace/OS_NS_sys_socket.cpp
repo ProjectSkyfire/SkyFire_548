@@ -1,6 +1,3 @@
-#ifndef OSNSSYSSOCKETCPP
-#define OSNSSYSSOCKETCPP
-
 #include "ace/OS_NS_sys_socket.h"
 
 #if !defined (ACE_HAS_INLINED_OSCALLS)
@@ -131,7 +128,7 @@ ACE_OS::socket_init (int version_high, int version_low)
 }
 
 int
-ACE_OS::socket_fini (void)
+ACE_OS::socket_fini ()
 {
 # if defined (ACE_WIN32)
   if (ACE_OS::socket_initialized_ != 0)
@@ -358,4 +355,3 @@ int ACE_OS::sendmsg_win32_i (ACE_HANDLE handle,
 #endif
 
 ACE_END_VERSIONED_NAMESPACE_DECL
-#endif

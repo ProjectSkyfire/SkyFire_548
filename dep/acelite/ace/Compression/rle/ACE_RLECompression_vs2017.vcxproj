@@ -22,7 +22,7 @@
     <ProjectName>ACE_RLECompression</ProjectName>
     <ProjectGuid>{7F40810B-FECA-1BAD-4E51-F42FEA0697D6}</ProjectGuid>
     <RootNamespace>ACE_RLECompression</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
