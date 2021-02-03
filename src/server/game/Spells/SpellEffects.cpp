@@ -3846,6 +3846,20 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 107574: // Avatar
+                {
+                    // Removes snares and roots.
+                    unitTarget->RemoveMovementImpairingAuras();
+                    break;
+                }
+                break;
+            }
+            break;
+        }
     }
 
     // normal DB scripted effect
