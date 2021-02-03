@@ -54,13 +54,11 @@ enum HunterSpells
     SPELL_HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED = 54114,
     SPELL_HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF    = 55711,
     SPELL_HUNTER_PET_CARRION_FEEDER_TRIGGERED       = 54045,
-    SPELL_HUNTER_RAPID_RECUPERATION                 = 58883, // obsolete
-    SPELL_HUNTER_READINESS                          = 23989,
+
     SPELL_HUNTER_SERPENT_STING                      = 1978,
 
     SPELL_HUNTER_STEADY_SHOT_FOCUS                  = 77443,
     SPELL_HUNTER_THRILL_OF_THE_HUNT                 = 34720,
-    SPELL_DRAENEI_GIFT_OF_THE_NAARU                 = 59543,
 };
 
 class spell_hun_a_murder_of_crows : public SpellScriptLoader
@@ -572,103 +570,6 @@ public:
     }
 };
 
-// -53228 - Rapid Recuperation
-class spell_hun_rapid_recuperation : public SpellScriptLoader
-{
-public:
-    spell_hun_rapid_recuperation() : SpellScriptLoader("spell_hun_rapid_recuperation") { }
-
-    class spell_hun_rapid_recuperation_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_hun_rapid_recuperation_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION))
-                return false;
-            return true;
-        }
-
-        void HandleAbilityCast(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
-        {
-            // This effect only from Rapid Fire (ability cast)
-            if (!(eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x20))
-                PreventDefaultAction();
-        }
-
-        void HandleFocusRegen(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-            // This effect only from Rapid Killing (focus regen)
-            if (!(eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[1] & 0x01000000))
-                return;
-
-            int32 focus = aurEff->GetAmount();
-            GetTarget()->CastCustomSpell(SPELL_HUNTER_RAPID_RECUPERATION, SPELLVALUE_BASE_POINT0, focus, GetTarget(), true, NULL, aurEff);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectProc += AuraEffectProcFn(spell_hun_rapid_recuperation_AuraScript::HandleAbilityCast, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
-            OnEffectProc += AuraEffectProcFn(spell_hun_rapid_recuperation_AuraScript::HandleFocusRegen, EFFECT_1, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_hun_rapid_recuperation_AuraScript();
-    }
-};
-
-// 23989 - Readiness
-class spell_hun_readiness : public SpellScriptLoader
-{
-public:
-    spell_hun_readiness() : SpellScriptLoader("spell_hun_readiness") { }
-
-    class spell_hun_readiness_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_hun_readiness_SpellScript);
-
-        bool Load() OVERRIDE
-        {
-            return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Player* caster = GetCaster()->ToPlayer();
-            // immediately finishes the cooldown on your other Hunter abilities except Bestial Wrath
-            const SpellCooldowns& cm = caster->ToPlayer()->GetSpellCooldownMap();
-            for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
-            {
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-
-                ///! If spellId in cooldown map isn't valid, the above will return a null pointer.
-                if (spellInfo &&
-                    spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
-                    spellInfo->Id != SPELL_HUNTER_READINESS &&
-                    spellInfo->Id != SPELL_HUNTER_BESTIAL_WRATH &&
-                    spellInfo->Id != SPELL_DRAENEI_GIFT_OF_THE_NAARU &&
-                    spellInfo->GetRecoveryTime() > 0)
-                    caster->RemoveSpellCooldown((itr++)->first, true);
-                else
-                    ++itr;
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_hun_readiness_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_hun_readiness_SpellScript();
-    }
-};
-
 // 82925 - Ready, Set, Aim...
 class spell_hun_ready_set_aim : public SpellScriptLoader
 {
@@ -834,37 +735,6 @@ public:
     }
 };
 
-//  53434 - Call of the Wild
-class spell_hun_target_only_pet_and_owner : public SpellScriptLoader
-{
-public:
-    spell_hun_target_only_pet_and_owner() : SpellScriptLoader("spell_hun_target_only_pet_and_owner") { }
-
-    class spell_hun_target_only_pet_and_owner_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_hun_target_only_pet_and_owner_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            targets.clear();
-            targets.push_back(GetCaster());
-            if (Unit* owner = GetCaster()->GetOwner())
-                targets.push_back(owner);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hun_target_only_pet_and_owner_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hun_target_only_pet_and_owner_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_PARTY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_hun_target_only_pet_and_owner_SpellScript();
-    }
-};
-
 // 34497 - Thrill of the Hunt
 class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
 {
@@ -903,47 +773,6 @@ public:
     }
 };
 
-// -56333 - T.N.T.
-class spell_hun_tnt : public SpellScriptLoader
-{
-public:
-    spell_hun_tnt() : SpellScriptLoader("spell_hun_tnt") { }
-
-    class spell_hun_tnt_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_hun_tnt_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_LOCK_AND_LOAD))
-                return false;
-            return true;
-        }
-
-        bool CheckProc(ProcEventInfo& /*eventInfo*/)
-        {
-            return roll_chance_i(GetEffect(EFFECT_0)->GetAmount());
-        }
-
-        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-        {
-            PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_HUNTER_LOCK_AND_LOAD, true, NULL, aurEff);
-        }
-
-        void Register() OVERRIDE
-        {
-            DoCheckProc += AuraCheckProcFn(spell_hun_tnt_AuraScript::CheckProc);
-            OnEffectProc += AuraEffectProcFn(spell_hun_tnt_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_hun_tnt_AuraScript();
-    }
-};
-
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_a_murder_of_crows();
@@ -960,13 +789,11 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_pet_carrion_feeder();
     new spell_hun_pet_heart_of_the_phoenix();
     new spell_hun_rapid_recuperation();
-    new spell_hun_readiness();
+
     new spell_hun_ready_set_aim();
     new spell_hun_scatter_shot();
 
     new spell_hun_steady_shot();
     new spell_hun_tame_beast();
-    new spell_hun_target_only_pet_and_owner();
     new spell_hun_thrill_of_the_hunt();
-    new spell_hun_tnt();
 }
