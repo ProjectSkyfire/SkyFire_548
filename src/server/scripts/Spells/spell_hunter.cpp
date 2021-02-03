@@ -788,7 +788,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_misdirection_proc();
     new spell_hun_pet_carrion_feeder();
     new spell_hun_pet_heart_of_the_phoenix();
-    new spell_hun_rapid_recuperation();
 
     new spell_hun_ready_set_aim();
     new spell_hun_scatter_shot();
