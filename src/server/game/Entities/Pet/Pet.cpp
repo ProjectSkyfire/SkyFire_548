@@ -2105,7 +2105,7 @@ uint16 Pet::GetPetSpecByTalentTab(uint16 talenttab)
         if (!specializationInfo || specializationInfo->classId != 0)
             continue;
 
-        if (!specializationInfo->PetTabPage == talenttab)
+        if (specializationInfo->PetTabPage != talenttab)
             continue;
 
         if (specializationInfo->Id == m_petSpec)
