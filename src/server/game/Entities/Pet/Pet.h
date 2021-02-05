@@ -113,6 +113,12 @@ class Pet : public Guardian
         void _LoadSpells();
         void _SaveSpells(SQLTransaction& trans);
 
+
+        uint16 m_petSpec;
+        uint16 GetPetSpecByTalentTab(uint16 talenttab);
+        uint16 GetSpecialization() { return m_petSpec; }
+        void SetSpec(uint16 spec);
+
         bool addSpell(uint32 spellId, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
         bool learnSpell(uint32 spell_id);
         void learnSpellHighRank(uint32 spellid);

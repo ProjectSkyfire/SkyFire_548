@@ -37,7 +37,7 @@
 #define PET_XP_FACTOR 0.05f
 
 Pet::Pet(Player* owner, PetType type) :
-    Guardian(NULL, owner, true), m_usedTalentCount(0), m_removed(false),
+    Guardian(NULL, owner, true), m_petSpec(0), m_usedTalentCount(0), m_removed(false),
     m_petType(type), m_duration(0), m_auraRaidUpdateMask(0), m_loading(false),
     m_declinedname(NULL)
 {
@@ -305,6 +305,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     owner->SetMinion(this, true);
     map->AddToMap(this->ToCreature());
 
+    uint16 specId = fields[16].GetUInt16();
+    SetSpec(specId);
+
     InitTalentForLevel();                                   // set original talents points before spell loading
 
     uint32 timediff = uint32(time(NULL) - fields[13].GetUInt32());
@@ -439,7 +442,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
 
         // save pet
         std::ostringstream ss;
-        ss  << "INSERT INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType) "
+        ss  << "INSERT INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId) "
             << "VALUES ("
             << m_charmInfo->GetPetNumber() << ','
             << GetEntry() << ','
@@ -463,7 +466,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
         ss  << "', "
             << time(NULL) << ','
             << GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL) << ','
-            << uint32(getPetType()) << ')';
+            << uint32(getPetType()) << ','
+            << uint16(m_petSpec) << ')';
 
         trans->Append(ss.str().c_str());
         CharacterDatabase.CommitTransaction(trans);
@@ -2090,4 +2094,51 @@ void Pet::SetDisplayId(uint32 modelId)
         if (Player* player = owner->ToPlayer())
             if (player->GetGroup())
                 player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MODEL_ID);
+}
+
+uint16 Pet::GetPetSpecByTalentTab(uint16 talenttab)
+{
+    uint16 specId = 0;
+    for (uint32 j = 0; j < sChrSpecializationStore.GetNumRows(); j++)
+    {
+        ChrSpecializationEntry const* specializationInfo = sChrSpecializationStore.LookupEntry(j);
+        if (!specializationInfo || specializationInfo->classId != 0)
+            continue;
+
+        if (!specializationInfo->PetTabPage == talenttab)
+            continue;
+
+        specId = specializationInfo->Id;
+    }
+    return specId;
+}
+
+void Pet::SetSpec(uint16 spec)
+{
+    if (m_petSpec == spec)
+        return;
+
+    // remove all the old spec's specalization spells, set the new spec, then add the new spec's spells
+    // clearActionBars is false because we'll be updating the pet actionbar later so we don't have to do it now.
+
+    //TODO RemoveSpecSpells
+    if (!sChrSpecializationStore.LookupEntry(spec))
+    {
+        m_petSpec = 0;
+        return;
+    }
+
+    m_petSpec = spec;
+    //TODO: LearnSpecSpells
+
+    // resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet action bar
+    CleanupActionBar();
+    GetOwner()->PetSpellInitialize();
+
+    if (Player* owner = GetOwner())
+    {
+        WorldPacket data(SMSG_SET_PET_SPEC, 2);
+        data << uint16(m_petSpec);
+        owner->GetSession()->SendPacket(&data);
+    }
 }

@@ -21466,7 +21466,7 @@ void Player::PetSpellInitialize()
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[3]);
     data << uint16(pet->GetCreatureTemplate()->family); // Creature Family
-    data << uint16(0);                                  // Creature Specialization need implementation
+    data << uint16(pet->GetSpecialization());           // Creature Specialization need implementation
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[6]);

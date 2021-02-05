@@ -931,3 +931,24 @@ void WorldSession::HandleLearnPreviewTalentsPet(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS_PET");
 }
+
+void WorldSession::HandleSetPetSpecialization(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "CMSG_SET_PET_SPECIALIZATION");
+    uint32 talenttab;
+    ObjectGuid petGuid;
+
+    recvData >> talenttab;
+    recvData.ReadGuidMask(petGuid, 5, 7, 3, 0, 6, 4, 1, 2);
+    recvData.ReadGuidBytes(petGuid, 7, 5, 4, 3, 0, 2, 6, 1);
+
+    if (!_player->IsInWorld())
+        return;
+
+    Pet* pet = ObjectAccessor::GetPet(*_player, petGuid);
+    if (!pet || !pet->IsPet() || ((Pet*)pet)->getPetType() != HUNTER_PET ||
+        pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
+        return;
+
+    pet->SetSpec(pet->GetPetSpecByTalentTab(talenttab));
+}
