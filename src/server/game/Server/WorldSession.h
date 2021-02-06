@@ -701,7 +701,7 @@ class WorldSession
         void HandleSpiritHealerActivateOpcode(WorldPacket& recvPacket);
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
-        void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
+        void HandleRequestStabledPetsOpcode(WorldPacket& recvPacket);
         void HandleStablePet(WorldPacket& recvPacket);
         void HandleStablePetCallback(PreparedQueryResult result);
         void HandleUnstablePet(WorldPacket& recvPacket);

@@ -404,6 +404,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SPELLCLICK,                                   0x067A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSpellClick                          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SPIRIT_HEALER_ACTIVATE,                       0x0340, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSpiritHealerActivateOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                                   0x02EC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode                     ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_STABLED_PETS,                         0x02CA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestStabledPetsOpcode            );// 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_STAND_STATE_CHANGE,                           0x03E6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleStandStateChangeOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUBMIT_BUG,                                   0x0861, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSubmitBugOpcode                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SUGGESTION_SUBMIT,                            0x0A12, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSubmitSuggestOpcode                 ); // 5.4.8 18414
@@ -628,7 +629,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_TELEPORT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWorldTeleportOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_WRAP_ITEM, 0x02DF, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWrapItemOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_ZONEUPDATE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleZoneUpdateOpcode);
-    DEFINE_OPCODE_HANDLER(MSG_LIST_STABLED_PETS, 0x02CA, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleListStabledPetsOpcode);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_CHARM_TELEPORT_CHEAT, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_RUN_MODE, 0x0979, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_WALK_MODE, 0x08D1, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
@@ -948,6 +948,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_PET_NAME_INVALID,                   0x028E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PET_NAME_QUERY_RESPONSE,            0x0ABE, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PET_SPELLS_MESSAGE,                 0x095A, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_PET_STABLE_LIST,                    0x1613, STATUS_UNHANDLED    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PLAYED_TIME,                        0x11E2, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PLAYERBOUND,                        0x088E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PLAYER_MOVE,                        0x1A32, STATUS_NEVER    ); // 5.4.8 18414

@@ -620,12 +620,13 @@ void WorldSession::SendBindPoint(Creature* npc)
     _player->PlayerTalkClass->SendCloseGossip();
 }
 
-void WorldSession::HandleListStabledPetsOpcode(WorldPacket& recvData)
+void WorldSession::HandleRequestStabledPetsOpcode(WorldPacket& recvData)
 {
-    SF_LOG_DEBUG("network", "WORLD: Recv MSG_LIST_STABLED_PETS");
-    uint64 npcGUID;
+    SF_LOG_DEBUG("network", "WORLD: Recv CMSG_REQUEST_STABLED_PETS");
+    ObjectGuid npcGUID;
 
-    recvData >> npcGUID;
+    recvData.ReadGuidMask(npcGUID, 0, 5, 1, 3, 6, 7, 2, 4);
+    recvData.ReadGuidBytes(npcGUID, 0, 5, 7, 1, 2, 3, 4, 6);
 
     if (!CheckStableMaster(npcGUID))
         return;
@@ -660,7 +661,7 @@ void WorldSession::SendStablePetCallback(PreparedQueryResult result, uint64 guid
 
     SF_LOG_DEBUG("network", "WORLD: Recv MSG_LIST_STABLED_PETS Send.");
 
-    WorldPacket data(MSG_LIST_STABLED_PETS, 200);           // guess size
+    WorldPacket data(SMSG_PET_STABLE_LIST, 200);           // guess size
 
     data << uint64 (guid);
 
