@@ -1544,6 +1544,9 @@ void Pet::InitLevelupSpellsForLevel()
                 learnSpell(spellInfo->Id);
         }
     }
+
+    UnlearnSpecializationSpells();
+    LearnSpecializationSpells();
 }
 
 bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
@@ -2116,6 +2119,37 @@ uint16 Pet::GetPetSpecByTalentTab(uint16 talenttab)
     return specId;
 }
 
+void Pet::UnlearnSpecializationSpells()
+{
+    if (std::vector<uint32> const* spells = GetSpecializationSpells(m_petSpec))
+    {
+        for (std::vector<uint32>::const_iterator iter = spells->begin(); iter != spells->end(); iter++)
+        {
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(*iter);
+            if (!spellInfo)
+                continue;
+
+            if (HasSpell(*iter))
+                removeSpell(*iter, false, true);
+        }
+    }
+}
+void Pet::LearnSpecializationSpells()
+{
+    if (std::vector<uint32> const* spells = GetSpecializationSpells(m_petSpec))
+    {
+        for (std::vector<uint32>::const_iterator iter = spells->begin(); iter != spells->end(); iter++)
+        {
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(*iter);
+            if (!spellInfo || spellInfo->SpellLevel > getLevel())
+                continue;
+
+            if (!HasSpell(*iter))
+                learnSpell(*iter);
+        }
+    }
+}
+
 void Pet::SetSpec(uint16 spec)
 {
     if (m_petSpec == spec)
@@ -2124,7 +2158,10 @@ void Pet::SetSpec(uint16 spec)
     // remove all the old spec's specalization spells, set the new spec, then add the new spec's spells
     // clearActionBars is false because we'll be updating the pet actionbar later so we don't have to do it now.
 
-    //TODO RemoveSpecSpells
+    // remove spec spells
+    UnlearnSpecializationSpells();
+    
+    
     if (!sChrSpecializationStore.LookupEntry(spec))
     {
         m_petSpec = 0;
@@ -2132,7 +2169,10 @@ void Pet::SetSpec(uint16 spec)
     }
 
     m_petSpec = spec;
-    //TODO: LearnSpecSpells
+
+    
+    // learn spec spells
+    LearnSpecializationSpells();
 
     // resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet action bar
     CleanupActionBar();
