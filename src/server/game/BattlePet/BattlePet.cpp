@@ -62,7 +62,7 @@ void BattlePet::CalculateStats(bool currentHealth)
     m_dbState = BattlePetDbState::BATTLE_PET_DB_STATE_SAVE;
 }
 
-void BattlePet::SetNickname(std::string nickname)
+void BattlePet::SetNickname(std::string const& nickname)
 {
     m_nickname = nickname;
     m_dbState = BattlePetDbState::BATTLE_PET_DB_STATE_SAVE;

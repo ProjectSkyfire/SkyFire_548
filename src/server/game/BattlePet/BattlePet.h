@@ -115,7 +115,7 @@ public:
     uint8 GetQuality() const { return m_quality; }
     uint8 GetBreed() const { return m_breed; }
 
-    void SetNickname(std::string nickname);
+    void SetNickname(std::string const& nickname);
     void SetTimestamp(uint32 timestamp) { m_timestamp = timestamp; }
     void SetQuality(ItemQualities quality);
 

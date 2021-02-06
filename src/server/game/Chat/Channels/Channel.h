@@ -182,8 +182,8 @@ class Channel
         void Invite(Player const* player, std::string const& newp);
         void Voice(uint64 guid1, uint64 guid2);
         void DeVoice(uint64 guid1, uint64 guid2);
-        void JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, uint8 UserFlags, const std::string ChannelName); // invisible notify                                          // invisible notify
-        void LeaveNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, const std::string ChannelName);                 // invisible notify  
+        void JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, uint8 UserFlags, std::string const& ChannelName); // invisible notify                                          // invisible notify
+        void LeaveNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, std::string const& ChannelName);                 // invisible notify  
         void SetOwnership(bool ownership) { _ownership = ownership; };
         static void CleanOldChannelsInDB();
 

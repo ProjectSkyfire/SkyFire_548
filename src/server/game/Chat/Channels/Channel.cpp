@@ -963,7 +963,7 @@ void Channel::MakeVoiceOff(WorldPacket* data, uint64 guid)
     *data << uint64(guid);
 }
 
-void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, uint8 UserFlags, const std::string ChannelName)
+void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, uint8 UserFlags, std::string const& ChannelName)
 {
     WorldPacket data(IsConstant() ? SMSG_USERLIST_ADD : SMSG_USERLIST_UPDATE, 8 + 1 + 1 + 4 + ChannelName.size());
     if (IsConstant())
@@ -996,7 +996,7 @@ void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFla
     }
 }
 
-void Channel::LeaveNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, const std::string ChannelName)
+void Channel::LeaveNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFlags, std::string const& ChannelName)
 {
     WorldPacket data(SMSG_USERLIST_REMOVE, 8 + 1 + 4 + ChannelName.size());
 
