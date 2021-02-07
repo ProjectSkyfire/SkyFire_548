@@ -272,10 +272,13 @@ namespace MMAP
         float* verts = new float[verticesCount];
         int* inds = new int[indicesCount];
 
-        if (fread(verts, sizeof(float), verticesCount, file) != verticesCount)
+        if ((fread(verts, sizeof(float), verticesCount, file) != verticesCount) || 
+            (fread(inds, sizeof(int), indicesCount, file) != indicesCount))
+        {
+            delete[] verts;
+            delete[] inds;
             return;
-        if (fread(inds, sizeof(int), indicesCount, file) != indicesCount)
-            return;
+        }
 
         MeshData data;
 
@@ -284,6 +287,9 @@ namespace MMAP
 
         for (uint32 i = 0; i < indicesCount; ++i)
             data.solidTris.append(inds[i]);
+
+        delete[] verts;
+        delete[] inds;
 
         TerrainBuilder::cleanVertices(data.solidVerts, data.solidTris);
         // get bounds of current tile
