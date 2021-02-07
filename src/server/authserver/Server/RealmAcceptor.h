@@ -25,6 +25,7 @@
 
 #include "RealmSocket.h"
 #include "AuthSocket.h"
+#include "Log.h"
 
 class RealmAcceptor : public ACE_Acceptor<RealmSocket, ACE_SOCK_Acceptor>
 {
