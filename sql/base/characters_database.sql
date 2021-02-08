@@ -975,6 +975,7 @@ CREATE TABLE `character_pet` (
   `curmana` int(10) unsigned NOT NULL DEFAULT '0',
   `savetime` int(10) unsigned NOT NULL DEFAULT '0',
   `abdata` text,
+  `PetSpecId` smallint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `owner` (`owner`),
   KEY `idx_slot` (`slot`)
