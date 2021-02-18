@@ -85,7 +85,7 @@ public:
                 // Increase crit from SPELL_AURA_MOD_CRIT_PCT
                 CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit spell from spell crit ratings
-                CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+                CritSpell += owner->GetRatingBonusValue(CombatRating::CR_CRIT_SPELL);
 
                 amount += int32(CritSpell);
             }
@@ -104,7 +104,7 @@ public:
                 // Increase crit from SPELL_AURA_MOD_CRIT_PCT
                 CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit melee from melee crit ratings
-                CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
+                CritMelee += owner->GetRatingBonusValue(CombatRating::CR_CRIT_MELEE);
 
                 amount += int32(CritMelee);
             }
@@ -119,7 +119,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
                 HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
                 // Increase hit melee from meele hit ratings
-                HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+                HitMelee += owner->GetRatingBonusValue(CombatRating::CR_HIT_MELEE);
 
                 amount += int32(HitMelee);
             }
@@ -134,7 +134,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                HitSpell += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(HitSpell);
             }
@@ -149,7 +149,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_EXPERTISE
                 Expertise += owner->GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE);
                 // Increase Expertise from Expertise ratings
-                Expertise += owner->GetRatingBonusValue(CR_EXPERTISE);
+                Expertise += owner->GetRatingBonusValue(CombatRating::CR_EXPERTISE);
 
                 amount += int32(Expertise);
             }
@@ -561,7 +561,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                HitMelee += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                HitMelee += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(HitMelee);
             }
@@ -576,7 +576,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                HitSpell += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(HitSpell);
             }
@@ -591,7 +591,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 Expertise += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                Expertise += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                Expertise += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(Expertise);
             }
@@ -640,7 +640,7 @@ public:
                 // Increase crit from SPELL_AURA_MOD_CRIT_PCT
                 CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit spell from spell crit ratings
-                CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+                CritSpell += owner->GetRatingBonusValue(CombatRating::CR_CRIT_SPELL);
 
                 if (AuraApplication* improvedDemonicTacticsApp = owner->GetAuraApplicationOfRankedSpell(54347))
                     if (Aura* improvedDemonicTactics = improvedDemonicTacticsApp->GetBase())
@@ -662,7 +662,7 @@ public:
                 // Increase crit from SPELL_AURA_MOD_CRIT_PCT
                 CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit melee from melee crit ratings
-                CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
+                CritMelee += owner->GetRatingBonusValue(CombatRating::CR_CRIT_MELEE);
 
                 if (AuraApplication* improvedDemonicTacticsApp = owner->GetAuraApplicationOfRankedSpell(54347))
                     if (Aura* improvedDemonicTactics = improvedDemonicTacticsApp->GetBase())
@@ -760,7 +760,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
                 HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
                 // Increase hit melee from meele hit ratings
-                HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+                HitMelee += owner->GetRatingBonusValue(CombatRating::CR_HIT_MELEE);
 
                 amount += int32(HitMelee);
             }
@@ -775,7 +775,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                HitSpell += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(HitSpell);
             }
@@ -1121,7 +1121,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
                 HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
                 // Increase hit melee from meele hit ratings
-                HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+                HitMelee += owner->GetRatingBonusValue(CombatRating::CR_HIT_MELEE);
 
                 amount += int32(HitMelee);
             }
@@ -1138,7 +1138,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                HitSpell += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(HitSpell);
             }
@@ -1155,7 +1155,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_EXPERTISE
                 Expertise += owner->GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE);
                 // Increase Expertise from Expertise ratings
-                Expertise += owner->GetRatingBonusValue(CR_EXPERTISE);
+                Expertise += owner->GetRatingBonusValue(CombatRating::CR_EXPERTISE);
 
                 amount += int32(Expertise);
             }
@@ -1453,7 +1453,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
                 HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
                 // Increase hit melee from meele hit ratings
-                HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+                HitMelee += owner->GetRatingBonusValue(CombatRating::CR_HIT_MELEE);
 
                 amount += int32(HitMelee);
             }
@@ -1470,7 +1470,7 @@ public:
                 // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
                 HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
                 // Increase hit spell from spell hit ratings
-                HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+                HitSpell += owner->GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 
                 amount += int32(HitSpell);
             }

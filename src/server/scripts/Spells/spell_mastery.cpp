@@ -104,7 +104,7 @@ public:
             if (Unit* caster = GetCaster()->ToPlayer())
             {
                 if (caster->HasAura(MASTERY_WARRIOR_FURY) && caster->getLevel() >= 80)
-                    amount = caster->GetFloatValue(PLAYER_FIELD_MASTERY) + caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    amount = caster->GetFloatValue(PLAYER_FIELD_MASTERY) + caster->ToPlayer()->GetRatingBonusValue(CombatRating::CR_MASTERY);
             }
         }
 

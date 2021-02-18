@@ -120,7 +120,7 @@ bool Player::UpdateStats(Stats stat)
 void Player::UpdatePvpPower()
 {
     float precision = 100.0f;
-    float value = GetRatingBonusValue(CR_PVP_POWER);
+    float value = GetRatingBonusValue(CombatRating::CR_PVP_POWER);
     value += GetTotalAuraModifier(SPELL_AURA_MOD_RATING);
 
     float pvpHealing = value / precision;
@@ -200,7 +200,7 @@ bool Player::UpdateAllStats()
     UpdateManaRegen();
     UpdateExpertise(WeaponAttackType::BASE_ATTACK);
     UpdateExpertise(WeaponAttackType::OFF_ATTACK);
-    RecalculateRating(CR_ARMOR_PENETRATION);
+    RecalculateRating(CombatRating::CR_ARMOR_PENETRATION);
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
 
@@ -496,7 +496,7 @@ void Player::UpdateBlockPercentage()
         // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
         value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
         // Increase from rating
-        value += GetRatingBonusValue(CR_BLOCK);
+        value += GetRatingBonusValue(CombatRating::CR_BLOCK);
 
         if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_LIMITS_ENABLE))
              value = value > sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_BLOCK) ? sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_STATS_LIMITS_BLOCK) : value;
@@ -517,18 +517,18 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
         case WeaponAttackType::OFF_ATTACK:
             modGroup = OFFHAND_CRIT_PERCENTAGE;
             index = PLAYER_FIELD_OFFHAND_CRIT_PERCENTAGE;
-            cr = CR_CRIT_MELEE;
+            cr = CombatRating::CR_CRIT_MELEE;
             break;
         case WeaponAttackType::RANGED_ATTACK:
             modGroup = RANGED_CRIT_PERCENTAGE;
             index = PLAYER_FIELD_RANGED_CRIT_PERCENTAGE;
-            cr = CR_CRIT_RANGED;
+            cr = CombatRating::CR_CRIT_RANGED;
             break;
         case WeaponAttackType::BASE_ATTACK:
         default:
             modGroup = CRIT_PERCENTAGE;
             index = PLAYER_FIELD_CRIT_PERCENTAGE;
-            cr = CR_CRIT_MELEE;
+            cr = CombatRating::CR_CRIT_MELEE;
             break;
     }
 
@@ -560,7 +560,7 @@ void Player::UpdateMastery()
 {
     float value = 8.0f;
     value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
-    value += GetRatingBonusValue(CR_MASTERY);
+    value += GetRatingBonusValue(CombatRating::CR_MASTERY);
     SetFloatValue(PLAYER_FIELD_MASTERY, value);
 }
 
@@ -604,7 +604,7 @@ void Player::UpdateParryPercentage()
     {
         float nondiminishing  = 5.0f;
         // Parry from rating
-        float diminishing = GetRatingBonusValue(CR_PARRY);
+        float diminishing = GetRatingBonusValue(CombatRating::CR_PARRY);
         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
         nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         // apply diminishing formula to diminishing parry chance
@@ -640,7 +640,7 @@ void Player::UpdateDodgePercentage()
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating
-    diminishing += GetRatingBonusValue(CR_DODGE);
+    diminishing += GetRatingBonusValue(CombatRating::CR_DODGE);
     // apply diminishing formula to diminishing dodge chance
     uint32 pclass = getClass()-1;
     float value = nondiminishing + (diminishing * dodge_cap[pclass] / (diminishing + dodge_cap[pclass] * m_diminishing_k[pclass]));
@@ -669,7 +669,7 @@ void Player::UpdateSpellCritChance(uint32 school)
     // Increase crit from SPELL_AURA_MOD_CRIT_PCT
     crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
     // Increase crit from spell crit ratings
-    crit += GetRatingBonusValue(CR_CRIT_SPELL);
+    crit += GetRatingBonusValue(CombatRating::CR_CRIT_SPELL);
 
     // Store crit value
     SetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE + school, crit);
@@ -678,25 +678,25 @@ void Player::UpdateSpellCritChance(uint32 school)
 void Player::UpdateArmorPenetration(int32 amount)
 {
     // Store Rating Value
-    SetUInt32Value(PLAYER_FIELD_COMBAT_RATINGS + CR_ARMOR_PENETRATION, amount);
+    SetUInt32Value(PLAYER_FIELD_COMBAT_RATINGS + uint8(CombatRating::CR_ARMOR_PENETRATION), amount);
 }
 
 void Player::UpdateMeleeHitChances()
 {
     m_modMeleeHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
-    m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
+    m_modMeleeHitChance += GetRatingBonusValue(CombatRating::CR_HIT_MELEE);
 }
 
 void Player::UpdateRangedHitChances()
 {
     m_modRangedHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
-    m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
+    m_modRangedHitChance += GetRatingBonusValue(CombatRating::CR_HIT_RANGED);
 }
 
 void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
-    m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+    m_modSpellHitChance += GetRatingBonusValue(CombatRating::CR_HIT_SPELL);
 }
 
 void Player::UpdateAllSpellCritChances()
@@ -707,7 +707,7 @@ void Player::UpdateAllSpellCritChances()
 
 void Player::UpdateExpertise(WeaponAttackType attack)
 {
-    int32 expertise = int32(GetRatingBonusValue(CR_EXPERTISE));
+    int32 expertise = int32(GetRatingBonusValue(CombatRating::CR_EXPERTISE));
 
     Item* weapon = GetWeaponForAttack(attack, true);
 

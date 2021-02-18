@@ -579,7 +579,7 @@ enum class WeaponAttackType
     MAX_ATTACK = 3
 };
 
-enum CombatRating
+enum class CombatRating
 {
     CR_WEAPON_SKILL = 0,
     CR_DEFENSE_SKILL = 1, // Removed in 4.0.1
@@ -1811,11 +1811,11 @@ class Unit : public WorldObject
     // player or player's pet resilience (-1%)
     uint32 GetCritDamageReduction(uint32 damage) const
     {
-        return GetCombatRatingDamageReduction(CR_RESILIENCE_CRIT_TAKEN, 2.2f, 33.0f, damage);
+        return GetCombatRatingDamageReduction(CombatRating::CR_RESILIENCE_CRIT_TAKEN, 2.2f, 33.0f, damage);
     }
     uint32 GetDamageReduction(uint32 damage) const
     {
-        return GetCombatRatingDamageReduction(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN, 2.0f, 100.0f, damage);
+        return GetCombatRatingDamageReduction(CombatRating::CR_RESILIENCE_PLAYER_DAMAGE_TAKEN, 2.0f, 100.0f, damage);
     }
 
     void ApplyResilience(Unit const* victim, int32 * damage, bool isCrit) const;

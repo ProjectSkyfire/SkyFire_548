@@ -899,7 +899,7 @@ public:
             if (Unit* caster = GetCaster())
             {
                 int32 value = amount;
-                uint32 defValue = uint32(caster->ToPlayer()->GetSkillValue(SKILL_DEFENSE) + caster->ToPlayer()->GetRatingBonusValue(CR_DEFENSE_SKILL));
+                uint32 defValue = uint32(caster->ToPlayer()->GetSkillValue(SKILL_DEFENSE) + caster->ToPlayer()->GetRatingBonusValue(CombatRating::CR_DEFENSE_SKILL));
 
                 if (defValue > 400)
                     value -= int32((defValue - 400) * 0.15);
