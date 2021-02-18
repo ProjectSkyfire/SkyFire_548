@@ -25,7 +25,7 @@
 #include "WorldPacket.h"
 #include "GameObject.h"
 
-BattlegroundRV::BattlegroundRV()
+BattlegroundRV::BattlegroundRV() : Timer(0), State(0), PillarCollision(false)
 {
     BgObjects.resize(BG_RV_OBJECT_MAX);
 
