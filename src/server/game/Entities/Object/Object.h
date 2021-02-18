@@ -682,7 +682,7 @@ class WorldObject : public Object, public WorldLocation
         void MonsterTextEmote(int32 textId, WorldObject const* target, bool IsBossEmote = false);
         void MonsterWhisper(int32 textId, Player const* target, bool IsBossWhisper = false);
 
-        void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
+        void PlayDistanceSound(uint32 sound_id, Player* target);
         void PlayDirectSound(uint32 sound_id, Player* target = NULL);
 
         void SendObjectDeSpawnAnim(uint64 guid);

@@ -4485,7 +4485,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         target->CastSpell(target, 51581, true, NULL, this);
                     break;
                 case 43873:                                     // Headless Horseman Laugh
-                    target->PlayDistanceSound(11965);
+                    target->PlayDistanceSound(11965, target->ToPlayer());
                     break;
                 case 46354:                                     // Blood Elf Illusion
                     if (caster)

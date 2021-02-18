@@ -3384,7 +3384,7 @@ bool WorldObject::InSamePhase(WorldObject const* obj) const
     return IsPhased(obj);
 }
 
-void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target /*= NULL*/)
+void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target)
 {
     ObjectGuid TargetGUID = target->GetGUID();
     ObjectGuid SourceGUID = GetGUID();
@@ -3406,11 +3406,7 @@ void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target /*= NULL*/)
     data.WriteGuidBytes(TargetGUID, 4);
     data.WriteGuidBytes(SourceGUID, 4, 7, 0, 6);
     data.WriteGuidBytes(TargetGUID, 0);
-
-    if (target)
-        target->SendDirectMessage(&data);
-    else
-        SendMessageToSet(&data, true);
+    target->SendDirectMessage(&data);
 }
 
 void WorldObject::PlayDirectSound(uint32 sound_id, Player* target /*= NULL*/)
