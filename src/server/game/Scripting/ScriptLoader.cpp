@@ -237,6 +237,7 @@ void AddSC_hinterlands();
 void AddSC_isle_of_queldanas();
 void AddSC_silverpine_forest();
 void AddSC_stranglethorn_vale();
+void AddSC_tol_barad();
 void AddSC_undercity();
 void AddSC_elwynn_forest();
 
@@ -886,6 +887,7 @@ void AddEasternKingdomsScripts()
     AddSC_isle_of_queldanas();
     AddSC_silverpine_forest();
     AddSC_stranglethorn_vale();
+    AddSC_tol_barad();
     AddSC_undercity();
 	AddSC_elwynn_forest();
 #endif

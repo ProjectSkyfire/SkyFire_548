@@ -3576,6 +3576,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 108055: // Remove Weapon
                 spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 break;
+            case 85123: // Siege Cannon (Tol Barad)
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                break;
             default:
                 break;
         }

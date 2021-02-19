@@ -144,6 +144,7 @@ set(scripts_STAT_SRCS
   #EasternKingdoms/ScarletMonastery/boss_arcanist_doan.cpp
   #EasternKingdoms/ScarletMonastery/boss_herod.cpp
   #EasternKingdoms/ScarletMonastery/boss_scorn.cpp
+  EasternKingdoms/zone_tol_barad.cpp 
   EasternKingdoms/zone_undercity.cpp
   #REWORKED IN CATACLYSM
   #EasternKingdoms/ShadowfangKeep/shadowfang_keep.cpp
