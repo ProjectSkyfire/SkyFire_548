@@ -487,7 +487,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
     if (GameObject* door = GetGameObject(m_gateCursedDepthsGUID))
         door->SetGoState(m_iCellblockRandom == CELLBLOCK_CURSED_DEPTHS ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
 
-    if (GetState() == BATTLEFIELD_INACTIVE)
+    if (GetState() == BattlefieldState::BATTLEFIELD_INACTIVE)
     {
         // Delete capture points
         for (BfCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
@@ -662,7 +662,7 @@ void BattlefieldTB::OnGameObjectCreate(GameObject* go)
         case GO_TB_INSTANCE_VISUAL_3:
         case GO_TB_INSTANCE_VISUAL_4:
             BattleInactiveGOs.insert(go->GetGUID());
-            if (GetState() == BATTLEFIELD_WARMUP) // If battle is about to start, we must hide these.
+            if (GetState() == BattlefieldState::BATTLEFIELD_WARMUP) // If battle is about to start, we must hide these.
                 go->SetRespawnTime(RESPAWN_ONE_DAY);
             break;
         default:

@@ -659,10 +659,10 @@ class BattlefieldTB : public Battlefield
  
         bool Update(uint32 diff) OVERRIDE;
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE;
+        void OnCreatureCreate(Creature* creature);
         //void OnCreatureRemove(Creature* creature) OVERRIDE;
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE;
+        void OnGameObjectCreate(GameObject* go);
 
         void UpdateCapturedBaseCount();
         //void UpdatedDestroyedTowerCount(TeamId team);
@@ -681,7 +681,7 @@ class BattlefieldTB : public Battlefield
         void PromotePlayer(Player* killer);
         void RemoveAurasFromPlayer(Player* player);
 
-        void ProcessEvent(WorldObject* obj, uint32 eventId) OVERRIDE;
+        void ProcessEvent(WorldObject* obj, uint32 eventId);
 
         void TowerDamaged(TBTowerId tbTowerId);
         void TowerDestroyed(TBTowerId tbTowerId);

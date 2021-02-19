@@ -41,7 +41,7 @@ enum BattlefieldIDs
     BATTLEFIELD_BATTLEID_TB                      = 21       // Tol Barad
 };
 
-enum BattlefieldState : int8
+enum class BattlefieldState
 {
     BATTLEFIELD_INACTIVE = 0,
     BATTLEFIELD_WARMUP = 1,
@@ -253,7 +253,7 @@ class Battlefield : public ZoneScript
         /// Return true if battle is start, false if battle is not started
         bool IsWarTime() const { return m_isActive; }
 
-        int8 GetState() const { return m_isActive ? BattlefieldState::BATTLEFIELD_IN_PROGRESS : (m_Timer <= m_StartGroupingTimer ? BattlefieldState::BATTLEFIELD_WARMUP : BattlefieldState::BATTLEFIELD_INACTIVE); }
+        BattlefieldState GetState() const { return m_isActive ? BattlefieldState::BATTLEFIELD_IN_PROGRESS : (m_Timer <= m_StartGroupingTimer ? BattlefieldState::BATTLEFIELD_WARMUP : BattlefieldState::BATTLEFIELD_INACTIVE); }
 
         /// Enable or Disable battlefield
         void ToggleBattlefield(bool enable) { m_IsEnabled = enable; }
