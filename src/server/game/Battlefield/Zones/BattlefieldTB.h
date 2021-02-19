@@ -122,10 +122,11 @@ enum TolBaradNpcs
     NPC_TB_GY_SPIRIT_SOUTH_SPIRE_H                  = 45079,
 
     // Stalker, dummies
-    NPC_DEBUG_ANNOUNCER = 43679,
-    NPC_TOWER_RANGE_FINDER = 45492,
-    NPC_TOWER_CANNON_TARGET = 45561,
-    NPC_SIEGE_ENGINE_TURRET = 45564,
+    NPC_DEBUG_ANNOUNCER                             = 43679,
+    NPC_TOWER_RANGE_FINDER                          = 45492,
+    NPC_TOWER_CANNON_TARGET                         = 45561,
+    NPC_SIEGE_ENGINE_TURRET                         = 45564,
+    NPC_ABANDONED_SIEGE_ENGINE                      = 45344
 };
 
 enum TolBaradGOs
@@ -517,12 +518,6 @@ TBTowerInfo const TBTowers[TB_TOWERS_COUNT] =
     { -950.4097f, 1469.101f, 176.596f, 4.180066f, GO_WEST_SPIRE, TB_TEXT_WEST_SPIRE_DAMAGED, TB_TEXT_WEST_SPIRE_DESTROYED, { TB_WS_WEST_INTACT_ALLIANCE, TB_WS_WEST_INTACT_HORDE }, { TB_WS_WEST_DAMAGED_ALLIANCE, TB_WS_WEST_DAMAGED_HORDE }, TB_WS_WEST_DESTROYED_NEUTRAL },
 };
 
-// Vehicles
-enum TBVehicles
-{
-    NPC_ABANDONED_SIEGE_ENGINE = 45344,
-};
-
 int8 const TB_ABANDONED_SIEGE_ENGINE_COUNT = 6;
 Position const TBAbandonedSiegeEngineSpawnData[TB_ABANDONED_SIEGE_ENGINE_COUNT] =
 {
@@ -640,7 +635,7 @@ class TolBaradCapturePoint : public BfCapturePoint
     public:
         TolBaradCapturePoint(BattlefieldTB* battlefield, TeamId teamInControl);
 
-        void ChangeTeam(TeamId /*oldteam*/);
+        void ChangeTeam(TeamId /*oldteam*/) OVERRIDE;
 };
 
 /* ##################### *
@@ -652,41 +647,41 @@ class BattlefieldTB : public Battlefield
     public:
         ~BattlefieldTB();
 
-        void OnStartGrouping();
-        void OnBattleStart();
-        void OnBattleEnd(bool endByTimer);
+        void OnStartGrouping() OVERRIDE;
+        void OnBattleStart() OVERRIDE;
+        void OnBattleEnd(bool endByTimer) OVERRIDE;
 
-        void OnPlayerEnterZone(Player* player);
-        void OnPlayerLeaveZone(Player* player);
+        void OnPlayerEnterZone(Player* player) OVERRIDE;
+        void OnPlayerLeaveZone(Player* player) OVERRIDE;
 
-        void OnPlayerJoinWar(Player* player);
-        void OnPlayerLeaveWar(Player* player);
+        void OnPlayerJoinWar(Player* player) OVERRIDE;
+        void OnPlayerLeaveWar(Player* player) OVERRIDE;
+ 
+        bool Update(uint32 diff) OVERRIDE;
 
-        bool Update(uint32 diff);
+        void OnCreatureCreate(Creature* creature) OVERRIDE;
+        //void OnCreatureRemove(Creature* creature) OVERRIDE;
 
-        void OnCreatureCreate(Creature* creature);
-        //void OnCreatureRemove(Creature* creature) override;
-
-        void OnGameObjectCreate(GameObject* go);
+        void OnGameObjectCreate(GameObject* go) OVERRIDE;
 
         void UpdateCapturedBaseCount();
         //void UpdatedDestroyedTowerCount(TeamId team);
 
-        //void DoCompleteOrIncrementAchievement(uint32 achievement, Player* player, uint8 incrementNumber = 1);
+        //void DoCompleteOrIncrementAchievement(uint32 achievement, Player* player, uint8 incrementNumber = 1) OVERRIDE;
 
-        bool SetupBattlefield();
+        bool SetupBattlefield() OVERRIDE;
 
         void SendInitWorldStatesTo(Player* player);
-        void SendInitWorldStatesToAll();
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        void SendInitWorldStatesToAll() OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
         void UpdateWorldStates();
 
-        void HandleKill(Player* killer, Unit* victim);
-        //void OnUnitDeath(Unit* unit) override;
+        void HandleKill(Player* killer, Unit* victim) OVERRIDE;
+        //void OnUnitDeath(Unit* unit) OVERRIDE;
         void PromotePlayer(Player* killer);
         void RemoveAurasFromPlayer(Player* player);
 
-        void ProcessEvent(WorldObject* obj, uint32 eventId);
+        void ProcessEvent(WorldObject* obj, uint32 eventId) OVERRIDE;
 
         void TowerDamaged(TBTowerId tbTowerId);
         void TowerDestroyed(TBTowerId tbTowerId);

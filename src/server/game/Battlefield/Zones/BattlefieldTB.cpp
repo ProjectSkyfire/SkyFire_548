@@ -138,7 +138,7 @@ bool BattlefieldTB::Update(uint32 diff)
     bool m_return = Battlefield::Update(diff);
 
     // Minutes till battle preparation warnings
-    if (GetState() == BATTLEFIELD_INACTIVE)
+    if (GetState() == BattlefieldState::BATTLEFIELD_INACTIVE)
     {
         if (m_Timer <= 5 * MINUTE * IN_MILLISECONDS + m_StartGroupingTimer && !warnedFiveMinutes)
         {
@@ -298,7 +298,7 @@ void BattlefieldTB::FillInitialWorldStates(WorldStateBuilder& builder)
     builder.AppendState(uint32(TB_WS_TIME_BATTLE_END_SHOW), int32(IsWarTime() ? 1 : 0));
 
     builder.AppendState(uint32(TB_WS_STATE_BATTLE), int32(IsWarTime() ? 1 : 0));
-    builder.AppendState(uint32(TB_WS_STATE_PREPARATIONS), int32(GetState() == BATTLEFIELD_WARMUP ? 1 : 0));
+    builder.AppendState(uint32(TB_WS_STATE_PREPARATIONS), int32(GetState() == BattlefieldState::BATTLEFIELD_WARMUP ? 1 : 0));
 
     // Not sure if TB
     //packet.Worldstates.emplace_back(uint32(TB_WS_35_UNKNOWN), int32(0));
@@ -466,14 +466,14 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
 
     // Tol Barad gates - closed during warmup
     if (GameObject* gates = GetGameObject(TBGatesGUID))
-        gates->SetGoState(GetState() == BATTLEFIELD_WARMUP ? GOState::GO_STATE_READY : GOState::GO_STATE_ACTIVE);
+        gates->SetGoState(GetState() == BattlefieldState::BATTLEFIELD_WARMUP ? GOState::GO_STATE_READY : GOState::GO_STATE_ACTIVE);
 
     // Baradin Hold door - open when inactive
     if (GameObject* door = GetGameObject(TBDoorGUID))
-        door->SetGoState(GetState() == BATTLEFIELD_INACTIVE ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
+        door->SetGoState(GetState() == BattlefieldState::BATTLEFIELD_INACTIVE ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
 
     // Decide which cellblock and questgiver will be active.
-    m_iCellblockRandom = GetState() == BATTLEFIELD_INACTIVE ? urand(0, CELLBLOCK_MAX - 1) : CELLBLOCK_NONE;
+    m_iCellblockRandom = GetState() == BattlefieldState::BATTLEFIELD_INACTIVE ? urand(0, CELLBLOCK_MAX - 1) : CELLBLOCK_NONE;
 
     // To The Hole gate
     if (GameObject* door = GetGameObject(m_gateToTheHoleGUID))
@@ -545,7 +545,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
             if (GameObject* go = GetGameObject(guid))
                 go->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
     }
-    else if (GetState() == BATTLEFIELD_IN_PROGRESS)
+    else if (GetState() == BattlefieldState::BATTLEFIELD_IN_PROGRESS)
     {
         for (uint8 i = 0; i < TB_ABANDONED_SIEGE_ENGINE_COUNT; i++)
             if (Creature* creature = SpawnCreature(NPC_ABANDONED_SIEGE_ENGINE, TBAbandonedSiegeEngineSpawnData[i], GetDefenderTeam()))
@@ -593,7 +593,7 @@ void BattlefieldTB::OnCreatureCreate(Creature* creature)
         case NPC_CROCOLISK:
         case NPC_PROBLIM:
             BattleInactiveNPCs.insert(creature->GetGUID());
-            if (GetState() == BATTLEFIELD_WARMUP) // If battle is about to start, we must hide these.
+            if (GetState() == BattlefieldState::BATTLEFIELD_WARMUP) // If battle is about to start, we must hide these.
                 HideNpc(creature);
             break;
         case NPC_ABANDONED_SIEGE_ENGINE:
@@ -635,11 +635,11 @@ void BattlefieldTB::OnGameObjectCreate(GameObject* go)
     {
         case GO_TOLBARAD_GATES:
             TBGatesGUID = go->GetGUID();
-            go->SetGoState(GetState() == BATTLEFIELD_WARMUP ? GOState::GO_STATE_READY : GOState::GO_STATE_ACTIVE);
+            go->SetGoState(GetState() == BattlefieldState::BATTLEFIELD_WARMUP ? GOState::GO_STATE_READY : GOState::GO_STATE_ACTIVE);
             break;
         case GO_TOLBARAD_DOOR:
             TBDoorGUID = go->GetGUID();
-            go->SetGoState(GetState() == BATTLEFIELD_INACTIVE ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
+            go->SetGoState(GetState() == BattlefieldState::BATTLEFIELD_INACTIVE ? GOState::GO_STATE_ACTIVE : GOState::GO_STATE_READY);
             break;
         case GO_GATE_TO_THE_HOLE:
             m_gateToTheHoleGUID = go->GetGUID();

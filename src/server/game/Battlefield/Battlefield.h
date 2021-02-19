@@ -41,7 +41,7 @@ enum BattlefieldIDs
     BATTLEFIELD_BATTLEID_TB                      = 21       // Tol Barad
 };
 
-enum BattlefieldState
+enum BattlefieldState : int8
 {
     BATTLEFIELD_INACTIVE = 0,
     BATTLEFIELD_WARMUP = 1,
@@ -251,9 +251,9 @@ class Battlefield : public ZoneScript
         void TeamApplyBuff(TeamId team, uint32 spellId, uint32 spellId2 = 0);
 
         /// Return true if battle is start, false if battle is not started
-        bool IsWarTime() { return m_isActive; }
+        bool IsWarTime() const { return m_isActive; }
 
-        int8 GetState() { return m_isActive ? BattlefieldState::BATTLEFIELD_IN_PROGRESS : (m_Timer <= m_StartGroupingTimer ? BattlefieldState::BATTLEFIELD_WARMUP : BattlefieldState::BATTLEFIELD_INACTIVE); }
+        int8 GetState() const { return m_isActive ? BattlefieldState::BATTLEFIELD_IN_PROGRESS : (m_Timer <= m_StartGroupingTimer ? BattlefieldState::BATTLEFIELD_WARMUP : BattlefieldState::BATTLEFIELD_INACTIVE); }
 
         /// Enable or Disable battlefield
         void ToggleBattlefield(bool enable) { m_IsEnabled = enable; }
