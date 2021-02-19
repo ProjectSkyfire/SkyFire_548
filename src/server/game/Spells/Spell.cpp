@@ -3001,15 +3001,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
     // Fill cost data (not use power for item casts)
-    //if (m_CastItem || (m_spellInfo->ShapeShiftReqID && !m_caster->ToPlayer()->GetAura(m_spellInfo->ShapeShiftReqID)))
-    //{
-    //    m_powerCost = 0;
-    //}
-    //else
-    //{
-    //    m_powerCost = m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask);
-    //}
-
     m_powerCost = m_CastItem ? 0 : m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask);
 
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
