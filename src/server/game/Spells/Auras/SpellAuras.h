@@ -243,6 +243,7 @@ class Aura
     private:
         void _DeleteRemovedApplications();
     protected:
+        Spell const* const m_spell;
         SpellInfo const* const m_spellInfo;
         uint64 const m_casterGuid;
         uint64 const m_castItemGuid;                        // it is NOT safe to keep a pointer to the item because it may get deleted

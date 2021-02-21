@@ -94,6 +94,7 @@ void Vehicle::Install()
                 _me->SetMaxPower(POWER_ENERGY, 50);
                 break;
             default:
+                /*
                 for (uint32 i = 0; i < MAX_SPELL_VEHICLE; ++i)
                 {
                     if (!creature->m_spells[i])
@@ -109,7 +110,7 @@ void Vehicle::Install()
                         _me->SetMaxPower(POWER_ENERGY, 100);
                         break;
                     }
-                }
+                }*/
                 break;
         }
     }

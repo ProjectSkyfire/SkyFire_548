@@ -5880,6 +5880,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     break;
                 }
                 // Healing Touch (Dreamwalker Raiment set)
+                /*
                 case 28719:
                 {
                     // mana back
@@ -5887,7 +5888,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = this;
                     triggered_spell_id = 28742;
                     break;
-                }
+                }*/
                 // Mana Restore (Malorne Raiment set / Malorne Regalia set)
                 case 37288:
                 case 37295:
@@ -7188,7 +7189,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Enlightenment (trigger only from mana cost spells)
         case 35095:
         {
-            if (!procSpell || procSpell->PowerType != POWER_MANA || (procSpell->ManaCost == 0 && procSpell->ManaCostPercentage == 0 && procSpell->ManaCostPerlevel == 0))
+            if (!procSpell /*|| procSpell->PowerType != POWER_MANA || (procSpell->ManaCost == 0 && procSpell->ManaCostPercentage == 0 && procSpell->ManaCostPerlevel == 0)*/)
                 return false;
             break;
         }
@@ -11899,8 +11900,8 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     /// POWER_RAGE, so we enforce the class to hunter so that they
     /// effectively get focus power.
     uint32 classId = getClass();
-    if (ToPet() && ToPet()->getPetType() == HUNTER_PET)
-        classId = CLASS_HUNTER;
+    //if (ToPet() && ToPet()->getPetType() == HUNTER_PET)
+    //    classId = CLASS_HUNTER;
 
     return GetPowerIndexByClass(powerType, classId);
 }
@@ -12735,7 +12736,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_MOD_POWER_COST_SCHOOL:
                         // Skip melee hits and spells ws wrong school or zero cost
                         if (procSpell &&
-                            (procSpell->ManaCost != 0 || procSpell->ManaCostPercentage != 0) && // Cost check
+                            //(procSpell->ManaCost != 0 || procSpell->ManaCostPercentage != 0) && // Cost check
                             (triggeredByAura->GetMiscValue() & procSpell->SchoolMask))          // School check
                             takeCharges = true;
                         break;

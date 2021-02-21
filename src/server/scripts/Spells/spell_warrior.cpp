@@ -260,6 +260,7 @@ public:
             Unit* caster = GetCaster();
             if (GetHitUnit())
             {
+                /*
                 SpellInfo const* spellInfo = GetSpellInfo();
                 int32 rageUsed = std::min<int32>(200 - spellInfo->CalcPowerCost(caster, SpellSchoolMask(spellInfo->SchoolMask)), caster->GetPower(POWER_RAGE));
                 int32 newRage = std::max<int32>(0, caster->GetPower(POWER_RAGE) - rageUsed);
@@ -278,6 +279,7 @@ public:
                 /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
                 int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
                 SetHitDamage(baseDamage + moreDamage);
+                */
             }
         }
 

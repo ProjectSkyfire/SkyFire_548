@@ -2551,7 +2551,7 @@ struct SpellLevelsEntry
 struct SpellPowerEntry
 {
     //uint32    Id;                                         // 0        m_ID
-    //uint32    spellId;                                    // 1  - Pandaria
+    uint32    spellId;                                    // 1  - Pandaria
     //uint32    RaidDifficulty;                             // 2  - Pandaria RaidDifficultyID
     uint32    powerType;                                    // 3       m_powerType
     uint32    manaCost;                                     // 4       m_manaCost
