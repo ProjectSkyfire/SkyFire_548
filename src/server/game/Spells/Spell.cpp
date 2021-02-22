@@ -3024,12 +3024,17 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         {
             // If power type - health drain all
             if (m_powerType == POWER_HEALTH)
-                m_caster->GetHealth();
+                m_powerCost = m_caster->GetHealth();
             // Else drain all power
             if (spellPower->powerType < MAX_POWERS)
-                m_caster->GetPower(Powers(m_powerType));
-            SF_LOG_ERROR("spells", "SpellInfo::CalcPowerCost: Unknown power type '%d' in spell %d", m_powerType, m_spellInfo->Id);
-            m_powerCost = 0;
+            {
+                m_powerCost = m_caster->GetPower(Powers(m_powerType));
+            }
+            else
+            {
+                SF_LOG_ERROR("spells", "Spell::prepare: Unknown power type '%d' in spell %d", m_powerType, m_spellInfo->Id);
+                m_powerCost = 0;
+            }
         }
 
         // PCT cost from total amount
