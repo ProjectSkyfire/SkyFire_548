@@ -591,6 +591,7 @@ m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(PathGenerator(m_ca
 
     m_runesState = 0;
     m_powerType = 0;
+    m_periodicPowerTimer = 0;
     m_periodicPowerCost = 0;
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, must not be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, must not be used before.
@@ -3709,7 +3710,21 @@ void Spell::update(uint32 difftime)
                         m_timer = 0;
                     else
                     {
-                        m_caster->ModifyPower(Powers(m_powerType), -int32(m_periodicPowerCost / 4));
+                        m_periodicPowerTimer += difftime;
+                        if (m_periodicPowerTimer >= 1000)
+                        {
+                            // Check power amount
+                            Powers powerType = Powers(m_powerType);
+                            if (int32(m_caster->GetPower(powerType)) < (m_periodicPowerCost))
+                            {
+                                SF_LOG_ERROR("spells", "Channeled spell %d is removed due to lack of power", m_spellInfo->Id);
+                                SendChannelUpdate(0);
+                                finish();
+                            }
+                            m_caster->ModifyPower(Powers(m_powerType), -int32(m_periodicPowerCost));
+                            m_periodicPowerTimer = 0;
+                        }
+
                         m_timer -= difftime;
                     }
                 }
