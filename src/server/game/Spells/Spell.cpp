@@ -3045,7 +3045,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             case POWER_DEMONIC_FURY:
                 tmpPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
                 break;
-            case POWER_RUNES:
             case POWER_RUNIC_POWER:
                 SF_LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
                 break;
