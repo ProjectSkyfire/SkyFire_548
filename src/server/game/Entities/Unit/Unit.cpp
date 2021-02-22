@@ -11814,7 +11814,7 @@ void Unit::SetPower(Powers power, int32 val)
     if (maxPower < val)
         val = maxPower;
 
-    //SetInt32Value(UNIT_FIELD_POWER + powerIndex, val);
+    SetInt32Value(UNIT_FIELD_POWER + powerIndex, val);
 
     if (IsInWorld())
     {

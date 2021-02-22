@@ -3017,7 +3017,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             continue;
 
         m_powerType = spellPower->powerType;
-        m_powerCostPerSecond = spellPower->manaPerSecond;
         tmpPowerCost = spellPower->manaCost;
 
         // Spell drain all exist power on cast (Only paladin lay of Hands)
@@ -3043,14 +3042,9 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
                 tmpPowerCost += int32(CalculatePct(m_caster->GetCreateHealth(), spellPower->ManaCostPercentageFloat));
                 break;
             case POWER_MANA:
-                tmpPowerCost += int32(CalculatePct(m_caster->GetCreateMana(), spellPower->ManaCostPercentageFloat));
-                break;
-            case POWER_RAGE:
-            case POWER_FOCUS:
-            case POWER_ENERGY:
             case POWER_DEMONIC_FURY:
-                //tmpPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
-                //break;
+                tmpPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
+                break;
             case POWER_RUNES:
             case POWER_RUNIC_POWER:
                 SF_LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
