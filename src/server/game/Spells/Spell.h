@@ -499,7 +499,6 @@ class Spell
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
         int32 GetPowerCost() const { return m_powerCost; }
         int32 GetPowerType() const { return m_powerType; }
-        int32 GetPowerCostPerSecond() const { return m_powerCostPerSecond; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 

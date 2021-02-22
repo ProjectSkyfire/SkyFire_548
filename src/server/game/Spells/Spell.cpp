@@ -591,7 +591,6 @@ m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(PathGenerator(m_ca
 
     m_runesState = 0;
     m_powerType = 0;
-    m_powerCostPerSecond = 0;
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, must not be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, must not be used before.
     m_timer = 0;                                            // will set to castime in prepare
