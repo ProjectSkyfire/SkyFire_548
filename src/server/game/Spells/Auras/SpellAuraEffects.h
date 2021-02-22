@@ -44,6 +44,7 @@ class AuraEffect
         void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
         SpellModifier* GetSpellModifier() const { return m_spellmod; }
 
+        Spell const* GetSpell() const { return m_spell; }
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
         uint32 GetId() const { return m_spellInfo->Id; }
         uint32 GetEffIndex() const { return m_effIndex; }
@@ -95,6 +96,7 @@ class AuraEffect
     private:
         Aura* const m_base;
 
+        Spell const* const m_spell;
         SpellInfo const* const m_spellInfo;
         int32 const m_baseAmount;
 

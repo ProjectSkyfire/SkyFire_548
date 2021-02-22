@@ -591,6 +591,7 @@ m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(PathGenerator(m_ca
 
     m_runesState = 0;
     m_powerType = 0;
+    m_powerCostPerSecond = 0;
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, must not be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, must not be used before.
     m_timer = 0;                                            // will set to castime in prepare
@@ -3016,6 +3017,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             continue;
 
         m_powerType = spellPower->powerType;
+        m_powerCostPerSecond = spellPower->manaPerSecond;
         tmpPowerCost = spellPower->manaCost;
 
         // Spell drain all exist power on cast (Only paladin lay of Hands)
@@ -3047,8 +3049,8 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             case POWER_FOCUS:
             case POWER_ENERGY:
             case POWER_DEMONIC_FURY:
-                tmpPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
-                break;
+                //tmpPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
+                //break;
             case POWER_RUNES:
             case POWER_RUNIC_POWER:
                 SF_LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
@@ -5204,8 +5206,8 @@ void Spell::TakePower()
 
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
-    else
-        m_caster->ModifyPower(powerType, -irand(0, m_powerCost/4));
+    //else
+    //    m_caster->ModifyPower(powerType, -irand(0, m_powerCost/4));
 }
 
 SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
