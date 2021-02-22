@@ -591,6 +591,7 @@ m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(PathGenerator(m_ca
 
     m_runesState = 0;
     m_powerType = 0;
+    m_periodicPowerCost = 0;
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, must not be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, must not be used before.
     m_timer = 0;                                            // will set to castime in prepare
@@ -3003,6 +3004,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
 
     uint32 tmpPowerCost = 0;
+    uint32 tmpPeriodicPowerCost = 0;
     for (uint32 i = 0; i < sSpellPowerStore.GetNumRows(); ++i)
     {
         const SpellPowerEntry* spellPower = sSpellPowerStore.LookupEntry(i);
@@ -3016,7 +3018,13 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             continue;
 
         m_powerType = spellPower->powerType;
+        tmpPeriodicPowerCost = spellPower->manaPerSecond;
         tmpPowerCost = spellPower->manaCost;
+
+        if (spellPower->ChannelCostPercentageFloat)
+        {
+            tmpPeriodicPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ChannelCostPercentageFloat));
+        }
 
         // PCT cost from total amount
         if (spellPower->ManaCostPercentageFloat)
@@ -3077,6 +3085,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     // Fill cost data (not use power for item casts)
     m_powerCost = m_CastItem ? 0 : tmpPowerCost;
+    m_periodicPowerCost = tmpPeriodicPowerCost;
     
 
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
@@ -3699,7 +3708,10 @@ void Spell::update(uint32 difftime)
                     if (difftime >= (uint32)m_timer)
                         m_timer = 0;
                     else
+                    {
+                        m_caster->ModifyPower(Powers(m_powerType), -int32(m_periodicPowerCost / 4));
                         m_timer -= difftime;
+                    }
                 }
             }
 
@@ -5203,8 +5215,8 @@ void Spell::TakePower()
 
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
-    //else
-    //    m_caster->ModifyPower(powerType, -irand(0, m_powerCost/4));
+    else
+        m_caster->ModifyPower(powerType, -irand(0, m_powerCost / 4));
 }
 
 SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)

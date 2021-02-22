@@ -2560,7 +2560,7 @@ struct SpellPowerEntry
     uint32    manaPerSecondPerLevel;                        // 7       m_manaPerSecondPerLevel
     //uint32    PowerDisplayId;                             // 8       m_powerDisplayID - id from PowerDisplay.dbc, new in 3.1
     float     ManaCostPercentageFloat;                      // 9       4.3.0
-    //float     ChannelCostPercentageFloat;                 // 10 - Pandaria - ChannelCostPercentageFloat
+    float     ChannelCostPercentageFloat;                   // 10 - Pandaria - ChannelCostPercentageFloat
     uint32     ShapeShiftSpellID;                           // 11 - Pandaria - ShapeShiftSpellID
     //float     HealthCostPercentageFloat;                  // 12 - Pandaria - HealthCostPercentageFloat
 };
