@@ -3019,24 +3019,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_powerType = spellPower->powerType;
         tmpPowerCost = spellPower->manaCost;
 
-        // Spell drain all exist power on cast (Only paladin lay of Hands)
-        if (m_spellInfo->AttributesEx & SPELL_ATTR1_DRAIN_ALL_POWER)
-        {
-            // If power type - health drain all
-            if (m_powerType == POWER_HEALTH)
-                m_powerCost = m_caster->GetHealth();
-            // Else drain all power
-            if (spellPower->powerType < MAX_POWERS)
-            {
-                m_powerCost = m_caster->GetPower(Powers(m_powerType));
-            }
-            else
-            {
-                SF_LOG_ERROR("spells", "Spell::prepare: Unknown power type '%d' in spell %d", m_powerType, m_spellInfo->Id);
-                m_powerCost = 0;
-            }
-        }
-
         // PCT cost from total amount
         if (spellPower->ManaCostPercentageFloat)
         {
@@ -3055,7 +3037,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
                 break;
             default:
                 SF_LOG_ERROR("spells", "CalculateManaCost: Unknown power type '%d' in spell %d", m_powerType, m_spellInfo->Id);
-                m_powerCost = 0;
+                tmpPowerCost = 0;
             }
         }
 
@@ -3072,6 +3054,24 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
                 GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(m_caster->getLevel() - 1);
                 if (spellScaler && casterScaler)
                     tmpPowerCost *= casterScaler->ratio / spellScaler->ratio;
+            }
+        }
+
+        // Spell drain all exist power on cast (Bunyanize)
+        if (m_spellInfo->AttributesEx & SPELL_ATTR1_DRAIN_ALL_POWER)
+        {
+            // If power type - health drain all
+            if (m_powerType == POWER_HEALTH)
+                tmpPowerCost = m_caster->GetHealth();
+            // Else drain all power
+            if (spellPower->powerType < MAX_POWERS)
+            {
+                tmpPowerCost = m_caster->GetPower(Powers(m_powerType));
+            }
+            else
+            {
+                SF_LOG_ERROR("spells", "Spell::prepare: Unknown power type '%d' in spell %d", m_powerType, m_spellInfo->Id);
+                tmpPowerCost = 0;
             }
         }
     }
