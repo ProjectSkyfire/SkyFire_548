@@ -32,45 +32,14 @@
 #include "SmartAI.h"
 #include "ScriptMgr.h"
 
-SmartAI::SmartAI(Creature* c) : CreatureAI(c)
+SmartAI::SmartAI(Creature* c) : CreatureAI(c), mWayPoints(NULL), mEscortState(SMART_ESCORT_NONE), mCurrentWPID(0), mWPReached(false), mWPPauseTimer(0),
+                                mLastWP(NULL), mCanRepeatPath(false), mRun(false), mCanAutoAttack(true), mCanCombatMove(true), mForcedPaused(false), mLastWPIDReached(0),
+                                mEscortQuestID(0), mDespawnTime(0), mDespawnState(0), mEscortInvokerCheckTimer(1000), mFollowGuid(0), mFollowDist(0), mFollowAngle(0),
+                                mFollowCredit(0), mFollowArrivedEntry(0), mFollowArrivedTimer(0), mFollowCreditType(0), mInvincibilityHpLevel(0)
 {
-    // copy script to local (protection for table reload)
-
-    mWayPoints = NULL;
-    mEscortState = SMART_ESCORT_NONE;
-    mCurrentWPID = 0;//first wp id is 1 !!
-    mWPReached = false;
-    mWPPauseTimer = 0;
-    mLastWP = NULL;
-
-    mCanRepeatPath = false;
-
     // spawn in run mode
     me->SetWalk(false);
-    mRun = false;
-
     me->GetPosition(&mLastOOCPos);
-
-    mCanAutoAttack = true;
-    mCanCombatMove = true;
-
-    mForcedPaused = false;
-    mLastWPIDReached = 0;
-
-    mEscortQuestID = 0;
-
-    mDespawnTime = 0;
-    mDespawnState = 0;
-
-    mEscortInvokerCheckTimer = 1000;
-    mFollowGuid = 0;
-    mFollowDist = 0;
-    mFollowAngle = 0;
-    mFollowCredit = 0;
-    mFollowArrivedEntry = 0;
-    mFollowArrivedTimer = 0;
-    mFollowCreditType = 0;
-    mInvincibilityHpLevel = 0;
 }
 
 void SmartAI::UpdateDespawn(const uint32 diff)

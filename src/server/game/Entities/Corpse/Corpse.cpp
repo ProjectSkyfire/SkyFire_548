@@ -27,7 +27,7 @@
 #include "GossipDef.h"
 #include "World.h"
 
-Corpse::Corpse(CorpseType type) : WorldObject(type != CorpseType::CORPSE_BONES), m_type(type)
+Corpse::Corpse(CorpseType type) : WorldObject(type != CorpseType::CORPSE_BONES), m_type(type), m_time(time(NULL)), lootForBody(false), lootRecipient(NULL)
 {
     m_objectType |= TYPEMASK_CORPSE;
     m_objectTypeId = TypeID::TYPEID_CORPSE;
@@ -35,11 +35,6 @@ Corpse::Corpse(CorpseType type) : WorldObject(type != CorpseType::CORPSE_BONES),
     m_updateFlag = UPDATEFLAG_STATIONARY_POSITION;
 
     m_valuesCount = CORPSE_END;
-
-    m_time = time(NULL);
-
-    lootForBody = false;
-    lootRecipient = NULL;
 }
 
 Corpse::~Corpse() { }

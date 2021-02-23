@@ -244,7 +244,8 @@ bool ItemCanGoIntoBag(ItemTemplate const* pProto, ItemTemplate const* pBagProto)
     return false;
 }
 
-Item::Item()
+Item::Item() : m_slot(0), uState(ITEM_NEW), uQueuePos(-1), m_container(NULL), m_lootGenerated(false), mb_in_trade(false), m_lastPlayedTimeUpdate(time(NULL)),
+                m_refundRecipient(0), m_paidMoney(0), m_paidExtendedCost(0)
 {
     m_objectType |= TYPEMASK_ITEM;
     m_objectTypeId = TypeID::TYPEID_ITEM;
@@ -252,17 +253,6 @@ Item::Item()
     m_updateFlag = 0;
 
     m_valuesCount = ITEM_END;
-    m_slot = 0;
-    uState = ITEM_NEW;
-    uQueuePos = -1;
-    m_container = NULL;
-    m_lootGenerated = false;
-    mb_in_trade = false;
-    m_lastPlayedTimeUpdate = time(NULL);
-
-    m_refundRecipient = 0;
-    m_paidMoney = 0;
-    m_paidExtendedCost = 0;
 
     m_dynamicTab.resize(ITEM_DYNAMIC_END);
     m_dynamicChange.resize(ITEM_DYNAMIC_END);

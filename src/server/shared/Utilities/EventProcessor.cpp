@@ -19,17 +19,6 @@
 
 #include "EventProcessor.h"
 
-EventProcessor::EventProcessor()
-{
-    m_time = 0;
-    m_aborting = false;
-}
-
-EventProcessor::~EventProcessor()
-{
-    KillAllEvents(true);
-}
-
 void EventProcessor::Update(uint32 p_time)
 {
     // update time

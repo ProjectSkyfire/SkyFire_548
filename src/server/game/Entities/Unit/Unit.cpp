@@ -16882,7 +16882,7 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     Creature const* creature = ToCreature();
     for (uint16 index = 0; index < valCount; ++index)
     {
-        if ((_fieldNotifyFlags & flags [index] ||
+        if ((m_fieldNotifyFlags & flags [index] ||
             ((flags [index] & visibleFlag) & UF_FLAG_SPECIAL_INFO) ||
             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values [index]) && (flags [index] & visibleFlag)) ||
             (index == UNIT_FIELD_AURA_STATE && HasFlag(UNIT_FIELD_AURA_STATE, PER_CASTER_AURA_STATE_MASK))))

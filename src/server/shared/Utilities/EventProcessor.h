@@ -54,8 +54,8 @@ typedef std::multimap<uint64, BasicEvent*> EventList;
 class EventProcessor
 {
     public:
-        EventProcessor();
-        ~EventProcessor();
+        EventProcessor() : m_time(0), m_aborting(false) { }
+        ~EventProcessor() { KillAllEvents(true); }
 
         void Update(uint32 p_time);
         void KillAllEvents(bool force);

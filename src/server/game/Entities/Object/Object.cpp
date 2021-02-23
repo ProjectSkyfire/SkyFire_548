@@ -73,18 +73,9 @@ TypeID GuidHigh2TypeId(uint32 guid_hi)
     return TypeID::NUM_CLIENT_OBJECT_TYPES;                         // unknown
 }
 
-Object::Object() : m_PackGUID(sizeof(uint64)+1)
+Object::Object() : m_PackGUID(sizeof(uint64)+1), m_objectTypeId(TypeID::TYPEID_OBJECT), m_objectType(TYPEMASK_OBJECT), m_uint32Values(NULL),
+                    m_valuesCount(0), m_fieldNotifyFlags(UF_FLAG_URGENT), m_inWorld(false), m_objectUpdated(false)
 {
-    m_objectTypeId      = TypeID::TYPEID_OBJECT;
-    m_objectType        = TYPEMASK_OBJECT;
-
-    m_uint32Values      = NULL;
-    m_valuesCount       = 0;
-    _fieldNotifyFlags   = UF_FLAG_URGENT;
-
-    m_inWorld           = false;
-    m_objectUpdated     = false;
-
     m_PackGUID.appendPackGUID(0);
 }
 
@@ -815,7 +806,7 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
 
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {
-        if ((_fieldNotifyFlags & flags[index] ||
+        if ((m_fieldNotifyFlags & flags[index] ||
              ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag))))
         {
             updateMask.SetBit(index);

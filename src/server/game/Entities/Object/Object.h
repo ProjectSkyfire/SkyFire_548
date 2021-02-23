@@ -208,8 +208,8 @@ class Object
         virtual void BuildUpdate(UpdateDataMapType&) { }
         void BuildFieldsUpdate(Player*, UpdateDataMapType &) const;
 
-        void SetFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags |= flag; }
-        void RemoveFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags &= ~flag; }
+        void SetFieldNotifyFlag(uint16 flag) { m_fieldNotifyFlags |= flag; }
+        void RemoveFieldNotifyFlag(uint16 flag) { m_fieldNotifyFlags &= ~flag; }
 
         // FG: some hacky helpers
         void ForceValuesUpdateAtIndex(uint32);
@@ -268,7 +268,7 @@ class Object
 
         uint16 m_valuesCount;
 
-        uint16 _fieldNotifyFlags;
+        uint16 m_fieldNotifyFlags;
 
         bool m_objectUpdated;
 

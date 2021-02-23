@@ -406,12 +406,6 @@ namespace MMAP
         return mmap->navMeshQueries[instanceId];
     }
 
-    MMapData::MMapData(dtNavMesh* mesh, uint32 mapId)
-    {
-        navMesh = mesh;
-        _mapId = mapId;
-    }
-
     MMapData::~MMapData()
     {
         for (NavMeshQuerySet::iterator i = navMeshQueries.begin(); i != navMeshQueries.end(); ++i)

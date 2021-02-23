@@ -2172,7 +2172,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
 
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {
-        if ((_fieldNotifyFlags & flags[index] ||
+        if ((m_fieldNotifyFlags & flags[index] ||
             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag)) ||
             (index == GAMEOBJECT_FIELD_FLAGS && forcedFlags)))
         {

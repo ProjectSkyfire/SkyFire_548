@@ -65,7 +65,8 @@ namespace MMAP
     class MMapData
     {
     public:
-        MMapData(dtNavMesh* mesh, uint32 mapId);
+        MMapData(dtNavMesh* mesh, uint32 mapId) : navMesh(mesh), _mapId(mapId) { }
+        
         ~MMapData();
 
         dtNavMesh* GetNavMesh(TerrainSet swaps);

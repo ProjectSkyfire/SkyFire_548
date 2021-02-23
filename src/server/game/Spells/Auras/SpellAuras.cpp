@@ -2181,9 +2181,8 @@ void Aura::CallScriptAfterEffectProcHandlers(AuraEffect const* aurEff, AuraAppli
 }
 
 UnitAura::UnitAura(SpellInfo const* spellproto, uint32 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID)
-    : Aura(spellproto, owner, caster, castItem, casterGUID)
+    : Aura(spellproto, owner, caster, castItem, casterGUID), m_AuraDRGroup(DIMINISHING_NONE)
 {
-    m_AuraDRGroup = DIMINISHING_NONE;
     LoadScripts();
     _InitEffects(effMask, caster, baseAmount);
     GetUnitOwner()->_AddAura(this, caster);

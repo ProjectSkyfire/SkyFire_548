@@ -353,24 +353,14 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 //
 
 // Constructor, copies most fields from LootStoreItem and generates random count
-LootItem::LootItem(LootStoreItem const& li)
+LootItem::LootItem(LootStoreItem const& li) : itemid(li.itemid), conditions(li.conditions), needs_quest(li.needs_quest), is_looted(0), is_blocked(0),
+                                              is_underthreshold(0), is_counted(0), canSave(true)
 {
-    itemid      = li.itemid;
-    conditions   = li.conditions;
-
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemid);
     freeforall  = proto && (proto->Flags & ITEM_PROTO_FLAG_PARTY_LOOT);
     follow_loot_rules = proto && (proto->FlagsCu & ITEM_FLAGS_CU_FOLLOW_LOOT_RULES && !(proto->Flags & ITEM_PROTO_FLAG_PARTY_LOOT));
-
-    needs_quest = li.needs_quest;
-
     randomSuffix = GenerateEnchSuffixFactor(itemid);
     randomPropertyId = Item::GenerateItemRandomPropertyId(itemid);
-    is_looted = 0;
-    is_blocked = 0;
-    is_underthreshold = 0;
-    is_counted = 0;
-    canSave = true;
 }
 
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
