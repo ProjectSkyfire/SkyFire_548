@@ -36,6 +36,7 @@ enum MonkSpells
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID = 117666, // 5.4.8 18414
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY = 117667, // 5.4.8 18414
     SPELL_MONK_DISABLE_ROOT = 116706,               // 5.4.8 18414
+    SPELL_MONK_PARALYSIS = 115078,                  // 5.4.8 18414
     //
 
     SPELL_MONK_PROVOKE = 118635,
@@ -81,7 +82,6 @@ enum MonkSpells
 
     SPELL_MONK_EXPEL_HARM_AREA_DMG = 115129,
     SPELL_MONK_TOUCH_OF_DEATH_PLAYER = 124490,
-    SPELL_MONK_PARALYSIS = 115078,
     SPELL_MONK_SPINNING_CRANE_KICK = 107270,
     SPELL_MONK_SPINNING_CRANE_KICK_ENERGIZE = 129881,
     SPELL_MONK_BREWING_TIGEREYE_BREW = 123980,
@@ -90,6 +90,49 @@ enum MonkSpells
     SPELL_MONK_ZEN_PILGRIMAGE = 126892,
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN = 126895,
     SPELL_MONK_HEALING_SPHERE = 115460,
+};
+
+// 5.4.8 18414
+// 115078 - Paralysis
+class spell_monk_paralysis : public SpellScriptLoader
+{
+public:
+    spell_monk_paralysis() : SpellScriptLoader("spell_monk_paralysis") { }
+
+    class spell_monk_paralysis_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_paralysis_SpellScript);
+
+        void HandleOnHit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (target->isInBack(caster))
+                    {
+                        if (AuraApplication* aura = target->GetAuraApplication(SPELL_MONK_PARALYSIS))
+                        {
+                            int32 maxDuration = aura->GetBase()->GetMaxDuration();
+                            int32 newDuration = maxDuration * 1.5;
+                            aura->GetBase()->SetDuration(newDuration);
+                            aura->GetBase()->SetMaxDuration(newDuration);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_monk_paralysis_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_paralysis_SpellScript();
+    }
 };
 
 // 5.4.8 18414
@@ -524,63 +567,6 @@ class spell_monk_touch_of_death : public SpellScriptLoader
 
 
 
-// Paralysis - 115078
-class spell_monk_paralysis : public SpellScriptLoader
-{
-    public:
-    spell_monk_paralysis() : SpellScriptLoader("spell_monk_paralysis")
-    { }
-
-    class spell_monk_paralysis_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_paralysis_SpellScript);
-
-        void HandleOnHit()
-        {
-            if (Unit* caster = GetCaster())
-            {
-                if (Unit* target = GetHitUnit())
-                {
-                    if (target->isInBack(caster))
-                    {
-                        if (AuraApplication* aura = target->GetAuraApplication(SPELL_MONK_PARALYSIS))
-                        {
-                            Aura* Paralysis = aura->GetBase();
-                            int32 maxDuration = Paralysis->GetMaxDuration();
-                            int32 newDuration = maxDuration * 2;
-                            Paralysis->SetDuration(newDuration);
-
-                            if (newDuration > maxDuration)
-                                Paralysis->SetMaxDuration(newDuration);
-                        }
-                    }
-
-                    if (target->ToPlayer())
-                    {
-                        if (AuraApplication* aura = target->GetAuraApplication(SPELL_MONK_PARALYSIS))
-                        {
-                            Aura* Paralysis = aura->GetBase();
-                            int32 maxDuration = Paralysis->GetMaxDuration();
-                            int32 newDuration = maxDuration / 2;
-                            Paralysis->SetDuration(newDuration);
-                            Paralysis->SetMaxDuration(newDuration);
-                        }
-                    }
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnHit += SpellHitFn(spell_monk_paralysis_SpellScript::HandleOnHit);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_paralysis_SpellScript();
-    }
-};
 
 /*
 // Spinning Crane Kick - 107270
