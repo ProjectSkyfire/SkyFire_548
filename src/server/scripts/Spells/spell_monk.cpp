@@ -31,8 +31,10 @@
 
 enum MonkSpells
 {
-    SPELL_MONK_ROLL_TRIGGER = 107427, // 5.4.8 18414
-    SPELL_MONK_ITEM_PVP_GLOVES_BONUS = 124489,
+    SPELL_MONK_ROLL_TRIGGER = 107427,               // 5.4.8 18414
+    SPELL_MONK_ITEM_PVP_GLOVES_BONUS = 124489,      // 5.4.8 18414
+    SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID = 117666, // 5.4.8 18414
+    SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY = 117667, // 5.4.8 18414
     //
 
     SPELL_MONK_PROVOKE = 118635,
@@ -74,8 +76,8 @@ enum MonkSpells
     SPELL_MONK_BREATH_OF_FIRE_PERIODIC = 123725,
     SPELL_MONK_BREATH_OF_FIRE_CONFUSE = 123393,
     SPELL_MONK_GLYPH_OF_BREATH_OF_FIRE = 123394,
-    SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID = 117666,
-    SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY = 117667,
+
+
     SPELL_MONK_EXPEL_HARM_AREA_DMG = 115129,
     SPELL_MONK_TOUCH_OF_DEATH_PLAYER = 124490,
     SPELL_MONK_DISABLE = 116095,
@@ -89,6 +91,49 @@ enum MonkSpells
     SPELL_MONK_ZEN_PILGRIMAGE = 126892,
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN = 126895,
     SPELL_MONK_HEALING_SPHERE = 115460,
+};
+
+// 5.4.8 18414
+// 115921 - Legacy of the Emperor
+class spell_monk_legacy_of_the_emperor : public SpellScriptLoader
+{
+public:
+    spell_monk_legacy_of_the_emperor() : SpellScriptLoader("spell_monk_legacy_of_the_emperor")
+    { }
+
+    class spell_monk_legacy_of_the_emperor_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_legacy_of_the_emperor_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID) ||
+                !sSpellMgr->GetSpellInfo(SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (GetCaster()->IsInRaidWith(GetHitUnit()))
+                GetCaster()->CastSpell(GetCaster(), SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID, true);
+            else
+                GetCaster()->CastSpell(GetHitUnit(), SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY, true);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_monk_legacy_of_the_emperor_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_monk_legacy_of_the_emperor_SpellScript();
+    }
 };
 
 // 5.4.8 18414
@@ -339,45 +384,7 @@ class spell_monk_breath_of_fire : public SpellScriptLoader
     }
 };
 
-class spell_monk_legacy_of_the_emperor : public SpellScriptLoader
-{
-    public:
-    spell_monk_legacy_of_the_emperor() : SpellScriptLoader("spell_monk_legacy_of_the_emperor")
-    { }
 
-    class spell_monk_legacy_of_the_emperor_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_legacy_of_the_emperor_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            if (!GetHitUnit())
-                return;
-
-            if (GetCaster()->IsInRaidWith(GetHitUnit()))
-                GetCaster()->CastSpell(GetCaster(), SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID, true);
-            else
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY, true);
-        }
-
-        void Register() override
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_monk_legacy_of_the_emperor_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const override
-    {
-        return new spell_monk_legacy_of_the_emperor_SpellScript();
-    }
-};
 
 class spell_monk_expel_harm : public SpellScriptLoader
 {
