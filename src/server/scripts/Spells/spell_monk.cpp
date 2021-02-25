@@ -35,6 +35,7 @@ enum MonkSpells
     SPELL_MONK_ITEM_PVP_GLOVES_BONUS = 124489,      // 5.4.8 18414
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID = 117666, // 5.4.8 18414
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY = 117667, // 5.4.8 18414
+    SPELL_MONK_DISABLE_ROOT = 116706,               // 5.4.8 18414
     //
 
     SPELL_MONK_PROVOKE = 118635,
@@ -80,8 +81,6 @@ enum MonkSpells
 
     SPELL_MONK_EXPEL_HARM_AREA_DMG = 115129,
     SPELL_MONK_TOUCH_OF_DEATH_PLAYER = 124490,
-    SPELL_MONK_DISABLE = 116095,
-    SPELL_MONK_DISABLE_ROOT = 116706,
     SPELL_MONK_PARALYSIS = 115078,
     SPELL_MONK_SPINNING_CRANE_KICK = 107270,
     SPELL_MONK_SPINNING_CRANE_KICK_ENERGIZE = 129881,
@@ -94,12 +93,60 @@ enum MonkSpells
 };
 
 // 5.4.8 18414
+// 116095 - Disable
+class spell_monk_disable : public SpellScriptLoader
+{
+public:
+    spell_monk_disable() : SpellScriptLoader("spell_monk_disable") { }
+
+    class spell_monk_disable_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_monk_disable_AuraScript);
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_DISABLE_ROOT))
+                return false;
+            return true;
+        }
+
+        void OnPeriodic(AuraEffect const* aurEff)
+        {
+            if (aurEff->GetTickNumber() % aurEff->GetTotalTicks() != 0) // last tick of duration
+                return;
+
+            if (Unit* caster = GetCaster())
+                if (Unit* owner = GetUnitOwner())
+                    if ((owner->GetDistance2d(caster) < 10.0f) && caster->IsAlive())
+                        aurEff->GetBase()->RefreshDuration();
+        }
+
+        void AfterReapply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetTarget())
+                    caster->CastSpell(target, SPELL_MONK_DISABLE_ROOT, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_disable_AuraScript::OnPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            AfterEffectApply += AuraEffectRemoveFn(spell_monk_disable_AuraScript::AfterReapply, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAPPLY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_monk_disable_AuraScript();
+    }
+};
+
+// 5.4.8 18414
 // 115921 - Legacy of the Emperor
 class spell_monk_legacy_of_the_emperor : public SpellScriptLoader
 {
 public:
-    spell_monk_legacy_of_the_emperor() : SpellScriptLoader("spell_monk_legacy_of_the_emperor")
-    { }
+    spell_monk_legacy_of_the_emperor() : SpellScriptLoader("spell_monk_legacy_of_the_emperor") { }
 
     class spell_monk_legacy_of_the_emperor_SpellScript : public SpellScript
     {
@@ -475,55 +522,7 @@ class spell_monk_touch_of_death : public SpellScriptLoader
 
 
 
-// Disable - 116095
-class spell_monk_disable : public SpellScriptLoader
-{
-    public:
-    spell_monk_disable() : SpellScriptLoader("spell_monk_disable")
-    { }
 
-    class spell_monk_disable_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_monk_disable_AuraScript);
-
-        bool Validate(SpellInfo const* /*spell*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_DISABLE))
-                return false;
-            return true;
-        }
-
-        void OnPeriodic(AuraEffect const* aurEff)
-        {
-            if (aurEff->GetTickNumber() % aurEff->GetTotalTicks() != 0) // last tick of duration
-                return;
-
-            if (Unit* caster = GetCaster())
-                if (Unit* owner = GetUnitOwner())
-                    if ((owner->GetDistance2d(caster) < 10.0f) && caster->IsAlive())
-                        aurEff->GetBase()->RefreshDuration();
-        }
-
-        void AfterReapply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* caster = GetCaster())
-                if (Unit* target = GetTarget())
-                    caster->CastSpell(target, SPELL_MONK_DISABLE_ROOT, true);
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_disable_AuraScript::OnPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-            AfterEffectApply += AuraEffectRemoveFn(spell_monk_disable_AuraScript::AfterReapply, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAPPLY);
-        }
-    };
-
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_monk_disable_AuraScript();
-    }
-};
 
 // Paralysis - 115078
 class spell_monk_paralysis : public SpellScriptLoader
