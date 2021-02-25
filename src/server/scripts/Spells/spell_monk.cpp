@@ -31,6 +31,10 @@
 
 enum MonkSpells
 {
+    SPELL_MONK_ROLL_TRIGGER = 107427, // 5.4.8 18414
+    SPELL_MONK_ITEM_PVP_GLOVES_BONUS = 124489,
+    //
+
     SPELL_MONK_PROVOKE = 118635,
     SPELL_MONK_SOOTHING_MIST_VISUAL = 125955,
     SPELL_MONK_SOOTHING_MIST_ENERGIZE = 116335,
@@ -74,9 +78,6 @@ enum MonkSpells
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY = 117667,
     SPELL_MONK_EXPEL_HARM_AREA_DMG = 115129,
     SPELL_MONK_TOUCH_OF_DEATH_PLAYER = 124490,
-    SPELL_MONK_ROLL = 109132,
-    SPELL_MONK_ROLL_TRIGGER = 107427,
-    SPELL_MONK_ITEM_PVP_GLOVES_BONUS = 124489,
     SPELL_MONK_DISABLE = 116095,
     SPELL_MONK_DISABLE_ROOT = 116706,
     SPELL_MONK_PARALYSIS = 115078,
@@ -89,6 +90,65 @@ enum MonkSpells
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN = 126895,
     SPELL_MONK_HEALING_SPHERE = 115460,
 };
+
+// 5.4.8 18414
+// Roll - 109132
+class spell_monk_roll : public SpellScriptLoader
+{
+public:
+    spell_monk_roll() : SpellScriptLoader("spell_monk_roll") { }
+
+    class spell_monk_roll_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_roll_SpellScript);
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_ROLL_TRIGGER) ||
+                !sSpellMgr->GetSpellInfo(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
+                return false;
+            return true;
+        }
+
+        void HandleBeforeCast()
+        {
+            Aura* aur = GetCaster()->AddAura(SPELL_MONK_ROLL_TRIGGER, GetCaster());
+            if (!aur)
+                return;
+
+            AuraApplication* app = aur->GetApplicationOfTarget(GetCaster()->GetGUID());
+            if (!app)
+                return;
+
+            app->ClientUpdate();
+        }
+
+        void HandleAfterCast()
+        {
+            Player* caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            if (caster->HasAura(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
+                caster->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+
+            caster->CastSpell(caster, SPELL_MONK_ROLL_TRIGGER, true);
+        }
+
+        void Register()
+        {
+            BeforeCast += SpellCastFn(spell_monk_roll_SpellScript::HandleBeforeCast);
+            AfterCast += SpellCastFn(spell_monk_roll_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_roll_SpellScript();
+    }
+};
+
+
 
 // 117952 - Crackling Jade Lightning
 class spell_monk_crackling_jade_lightning : public SpellScriptLoader
@@ -406,61 +466,7 @@ class spell_monk_touch_of_death : public SpellScriptLoader
     }
 };
 
-// Roll - 109132 or Roll (3 charges) - 121827
-class spell_monk_roll : public SpellScriptLoader
-{
-    public:
-    spell_monk_roll() : SpellScriptLoader("spell_monk_roll")
-    { }
 
-    class spell_monk_roll_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_roll_SpellScript);
-
-        bool Validate(SpellInfo const* /*spell*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_ROLL))
-                return false;
-            return true;
-        }
-
-        void HandleBeforeCast()
-        {
-            Aura* aur = GetCaster()->AddAura(SPELL_MONK_ROLL_TRIGGER, GetCaster());
-            if (!aur)
-                return;
-
-            AuraApplication* app = aur->GetApplicationOfTarget(GetCaster()->GetGUID());
-            if (!app)
-                return;
-
-            app->ClientUpdate();
-        }
-
-        void HandleAfterCast()
-        {
-            Unit* caster = GetCaster();
-            if (!caster || caster->GetTypeId() != TypeID::TYPEID_PLAYER)
-                return;
-
-            caster->CastSpell(caster, SPELL_MONK_ROLL_TRIGGER, true);
-
-            if (caster->HasAura(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
-                caster->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-        }
-
-        void Register()
-        {
-            BeforeCast += SpellCastFn(spell_monk_roll_SpellScript::HandleBeforeCast);
-            AfterCast += SpellCastFn(spell_monk_roll_SpellScript::HandleAfterCast);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_roll_SpellScript();
-    }
-};
 
 // Disable - 116095
 class spell_monk_disable : public SpellScriptLoader
