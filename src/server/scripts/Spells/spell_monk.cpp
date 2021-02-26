@@ -38,6 +38,8 @@ enum MonkSpells
     SPELL_MONK_DISABLE_ROOT = 116706,               // 5.4.8 18414
     SPELL_MONK_PARALYSIS = 115078,                  // 5.4.8 18414
 
+    SPELL_MONK_FLYING_SERPENT_KICK = 101545,            // 5.4.8 18414
+    SPELL_MONK_FLYING_SERPENT_KICK_AOE = 123586,        // 5.4.8 18414
     SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE = 124280, // 5.4.8 18414
     //
 
@@ -49,9 +51,6 @@ enum MonkSpells
     SPELL_MONK_HEAVY_STAGGER = 124273,
     SPELL_MONK_CHI_TORPEDO_HEAL = 124040,
     SPELL_MONK_CHI_TORPEDO_DAMAGE = 117993,
-    SPELL_MONK_FLYING_SERPENT_KICK = 101545,
-    SPELL_MONK_FLYING_SERPENT_KICK_NEW = 115057,
-    SPELL_MONK_FLYING_SERPENT_KICK_AOE = 123586,
     SPELL_MONK_TIGEREYE_BREW = 116740,
     SPELL_MONK_TIGEREYE_BREW_STACKS = 125195,
     SPELL_MONK_ELUSIVE_BREW_STACKS = 128939,
@@ -95,12 +94,61 @@ enum MonkSpells
 };
 
 // 5.4.8 18414
+// 115057 - Flying Serpent Kick
+class spell_monk_flying_serpent_kick : public SpellScriptLoader
+{
+public:
+    spell_monk_flying_serpent_kick() : SpellScriptLoader("spell_monk_flying_serpent_kick") { }
+
+    class spell_monk_flying_serpent_kick_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_flying_serpent_kick_SpellScript);
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_FLYING_SERPENT_KICK) ||
+                !sSpellMgr->GetSpellInfo(SPELL_MONK_ITEM_PVP_GLOVES_BONUS) ||
+                !sSpellMgr->GetSpellInfo(SPELL_MONK_FLYING_SERPENT_KICK_AOE))
+                return false;
+            return true;
+        }
+
+        void HandleOnCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Player* _player = caster->ToPlayer())
+                {
+                    if (_player->HasAura(SPELL_MONK_FLYING_SERPENT_KICK))
+                    {
+                        _player->CastSpell(_player, SPELL_MONK_FLYING_SERPENT_KICK_AOE, true);
+                        _player->RemoveAura(SPELL_MONK_FLYING_SERPENT_KICK);
+                    }
+
+                    if (caster->HasAura(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
+                        caster->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_monk_flying_serpent_kick_SpellScript::HandleOnCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_flying_serpent_kick_SpellScript();
+    }
+};
+
+// 5.4.8 18414
 // 122470 - Touch of Karma
 class spell_monk_touch_of_karma : public SpellScriptLoader
 {
 public:
-    spell_monk_touch_of_karma() : SpellScriptLoader("spell_monk_touch_of_karma")
-    { }
+    spell_monk_touch_of_karma() : SpellScriptLoader("spell_monk_touch_of_karma") { }
 
     class spell_monk_touch_of_karma_AuraScript : public AuraScript
     {
@@ -850,7 +898,7 @@ class spell_monk_tiger_strikes : public SpellScriptLoader
 // Zen Pilgrimage - 126892
 class spell_monk_zen_pilgrimage : public SpellScriptLoader
 {
-    public:
+public:
     spell_monk_zen_pilgrimage() : SpellScriptLoader("spell_monk_zen_pilgrimage")
     { }
 
@@ -887,7 +935,7 @@ class spell_monk_zen_pilgrimage : public SpellScriptLoader
 // Zen Pilgrimage: Return - 126895
 class spell_monk_zen_pilgrimage_return : public SpellScriptLoader
 {
-    public:
+public:
     spell_monk_zen_pilgrimage_return() : SpellScriptLoader("spell_monk_zen_pilgrimage_return")
     { }
 
@@ -3173,52 +3221,6 @@ class spell_monk_tigers_lust : public SpellScriptLoader
     }
 };
 
-// Flying Serpent Kick - 115057
-class spell_monk_flying_serpent_kick : public SpellScriptLoader
-{
-    public:
-    spell_monk_flying_serpent_kick() : SpellScriptLoader("spell_monk_flying_serpent_kick")
-    { }
-
-    class spell_monk_flying_serpent_kick_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_flying_serpent_kick_SpellScript);
-
-        bool Validate(SpellInfo const* /*spell*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_FLYING_SERPENT_KICK_NEW))
-                return false;
-            return true;
-        }
-
-        void HandleOnCast()
-        {
-            if (Unit* caster = GetCaster())
-            {
-                if (Player* _player = caster->ToPlayer())
-                {
-                    if (_player->HasAura(SPELL_MONK_FLYING_SERPENT_KICK))
-                        _player->RemoveAura(SPELL_MONK_FLYING_SERPENT_KICK);
-
-                    if (caster->HasAura(SPELL_MONK_ITEM_PVP_GLOVES_BONUS))
-                        caster->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-
-                    _player->CastSpell(_player, SPELL_MONK_FLYING_SERPENT_KICK_AOE, true);
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnCast += SpellCastFn(spell_monk_flying_serpent_kick_SpellScript::HandleOnCast);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_flying_serpent_kick_SpellScript();
-    }
-};
 
 // Chi Torpedo - 115008 or Chi Torpedo (3 charges) - 121828
 class spell_monk_chi_torpedo : public SpellScriptLoader
@@ -3698,6 +3700,13 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
 
 void AddSC_monk_spell_scripts()
 {
+
+    new spell_monk_roll();
+    new spell_monk_touch_of_karma();
+    new spell_monk_legacy_of_the_emperor();
+    new spell_monk_paralysis();
+    new spell_monk_flying_serpent_kick();
+
     //new spell_monk_fists_of_fury_stun();
     new spell_monk_expel_harm();
     //new spell_monk_chi_wave_healing_bolt();
@@ -3717,7 +3726,6 @@ void AddSC_monk_spell_scripts()
     new spell_monk_glyph_of_zen_flight();
     new spell_monk_power_strikes();
     new spell_monk_crackling_jade_lightning();
-    new spell_monk_touch_of_karma();
     new spell_monk_spinning_fire_blossom_damage();
     new spell_monk_spinning_fire_blossom();
     //new spell_monk_thunder_focus_tea();
@@ -3737,7 +3745,6 @@ void AddSC_monk_spell_scripts()
     new spell_monk_spear_hand_strike();
     new spell_monk_tigereye_brew();
     new spell_monk_tigers_lust();
-    new spell_monk_flying_serpent_kick();
     new spell_monk_chi_torpedo();
     new spell_monk_purifying_brew();
     new spell_monk_clash();
@@ -3748,12 +3755,9 @@ void AddSC_monk_spell_scripts()
     new spell_monk_disable();
     new spell_monk_zen_pilgrimage();
     new spell_monk_blackout_kick();
-    new spell_monk_legacy_of_the_emperor();
     new spell_monk_fortifying_brew();
     new spell_monk_touch_of_death();
-    new spell_monk_paralysis();
     new spell_monk_provoke();
-    new spell_monk_roll();
     new spell_monk_tigereye_brew_stacks();
     //new spell_monk_healing_sphere();
 }
