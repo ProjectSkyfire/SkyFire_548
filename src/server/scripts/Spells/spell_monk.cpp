@@ -99,6 +99,58 @@ enum MonkSpells
 };
 
 // 5.4.8 18414
+// 122278 - Dampen Harm
+class spell_monk_dampen_harm : public SpellScriptLoader
+{
+public:
+    spell_monk_dampen_harm() : SpellScriptLoader("spell_monk_dampen_harm")
+    { }
+
+    class spell_monk_dampen_harm_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_monk_dampen_harm_AuraScript);
+
+        uint32 healthPct;
+
+        bool Load()
+        {
+            healthPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+            return GetUnitOwner()->ToPlayer();
+        }
+
+        void CalculateAmount(AuraEffect const* /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect* auraEffect, DamageInfo& dmgInfo, uint32& absorbAmount)
+        {
+            Unit* target = GetTarget();
+
+            uint32 health = target->CountPctFromMaxHealth(healthPct);
+
+            if (dmgInfo.GetDamage() < health)
+                return;
+
+            // The next 3 attacks within 45 sec that deal damage equal to 10% or more of your total health are reduced by half
+            absorbAmount = dmgInfo.GetDamage() / 2;
+            auraEffect->GetBase()->DropCharge();
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_dampen_harm_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_monk_dampen_harm_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_monk_dampen_harm_AuraScript();
+    }
+};
+
+// 5.4.8 18414
 // Provoke - 115546
 class spell_monk_provoke : public SpellScriptLoader
 {
@@ -2156,56 +2208,7 @@ class spell_monk_serpents_zeal : public SpellScriptLoader
     }
 };
 
-// Dampen Harm - 122278
-class spell_monk_dampen_harm : public SpellScriptLoader
-{
-    public:
-    spell_monk_dampen_harm() : SpellScriptLoader("spell_monk_dampen_harm")
-    { }
 
-    class spell_monk_dampen_harm_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_monk_dampen_harm_AuraScript);
-
-        uint32 healthPct;
-
-        bool Load()
-        {
-            healthPct = GetSpellInfo()->Effects [EFFECT_0].CalcValue(GetCaster());
-            return GetUnitOwner()->ToPlayer();
-        }
-
-        void CalculateAmount(AuraEffect const* /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
-        {
-            amount = -1;
-        }
-
-        void Absorb(AuraEffect* auraEffect, DamageInfo& dmgInfo, uint32& absorbAmount)
-        {
-            Unit* target = GetTarget();
-
-            uint32 health = target->CountPctFromMaxHealth(healthPct);
-
-            if (dmgInfo.GetDamage() < health)
-                return;
-
-            // The next 3 attacks within 45 sec that deal damage equal to 10% or more of your total health are reduced by half
-            absorbAmount = dmgInfo.GetDamage() / 2;
-            auraEffect->GetBase()->DropCharge();
-        }
-
-        void Register()
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_dampen_harm_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-            OnEffectAbsorb += AuraEffectAbsorbFn(spell_monk_dampen_harm_AuraScript::Absorb, EFFECT_0);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_monk_dampen_harm_AuraScript();
-    }
-};
 
 enum bearHug
 {
@@ -3499,6 +3502,9 @@ void AddSC_monk_spell_scripts()
     new spell_monk_legacy_of_the_emperor();
     new spell_monk_paralysis();
     new spell_monk_flying_serpent_kick();
+    new spell_monk_provoke();
+    new spell_monk_disable();
+    new spell_monk_dampen_harm();
 
     //new spell_monk_fists_of_fury_stun();
     new spell_monk_expel_harm();
@@ -3507,7 +3513,6 @@ void AddSC_monk_spell_scripts()
     //new spell_monk_transcendence();
     //new spell_monk_transcendence_transfer();
     new spell_monk_serpents_zeal();
-    new spell_monk_dampen_harm();
     new spell_monk_diffuse_magic();
     new spell_monk_black_ox_statue();
     new spell_monk_guard();
@@ -3542,12 +3547,10 @@ void AddSC_monk_spell_scripts()
     new spell_monk_elusive_brew();
     new spell_monk_breath_of_fire();
     new spell_monk_soothing_mist();
-    new spell_monk_disable();
     new spell_monk_zen_pilgrimage();
     new spell_monk_blackout_kick();
     new spell_monk_fortifying_brew();
     new spell_monk_touch_of_death();
-    new spell_monk_provoke();
     new spell_monk_tigereye_brew_stacks();
     //new spell_monk_healing_sphere();
 }
