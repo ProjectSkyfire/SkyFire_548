@@ -31,6 +31,9 @@
 
 enum MonkSpells
 {
+
+    MONK_NPC_BLACK_OX_STATUE = 61146,
+
     SPELL_MONK_ROLL_TRIGGER = 107427,               // 5.4.8 18414
     SPELL_MONK_ITEM_PVP_GLOVES_BONUS = 124489,      // 5.4.8 18414
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_RAID = 117666, // 5.4.8 18414
@@ -41,9 +44,11 @@ enum MonkSpells
     SPELL_MONK_FLYING_SERPENT_KICK = 101545,            // 5.4.8 18414
     SPELL_MONK_FLYING_SERPENT_KICK_AOE = 123586,        // 5.4.8 18414
     SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE = 124280, // 5.4.8 18414
+
+    SPELL_MONK_PROVOKE_AOE = 118635,    // 5.4.8 18414
+    SPELL_MONK_PROVOKE_TARGET = 116189, // 5.4.8 18414
     //
 
-    SPELL_MONK_PROVOKE = 118635,
     SPELL_MONK_SOOTHING_MIST_VISUAL = 125955,
     SPELL_MONK_SOOTHING_MIST_ENERGIZE = 116335,
     SPELL_MONK_LIGHT_STAGGER = 124275,
@@ -92,6 +97,52 @@ enum MonkSpells
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN = 126895,
     SPELL_MONK_HEALING_SPHERE = 115460,
 };
+
+// 5.4.8 18414
+// Provoke - 115546
+class spell_monk_provoke : public SpellScriptLoader
+{
+public:
+    spell_monk_provoke() : SpellScriptLoader("spell_monk_provoke") { }
+
+    class spell_monk_provoke_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_provoke_SpellScript);
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_PROVOKE_AOE) ||
+                !sSpellMgr->GetSpellInfo(SPELL_MONK_PROVOKE_TARGET))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* target = GetHitUnit()->ToCreature())
+                {
+                    if (target == GetCaster()->FindNearestCreature(MONK_NPC_BLACK_OX_STATUE, 40.0f))
+                        caster->CastSpell(target, SPELL_MONK_PROVOKE_AOE, true);
+                    else
+                        caster->CastSpell(target, SPELL_MONK_PROVOKE_TARGET, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_monk_provoke_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_provoke_SpellScript();
+    }
+};
+
 
 // 5.4.8 18414
 // 115057 - Flying Serpent Kick
@@ -1572,7 +1623,6 @@ class spell_monk_diffuse_magic : public SpellScriptLoader
 
 enum BlackOx // tehee
 {
-    MONK_NPC_BLACK_OX_STATUE = 61146,
     SPELL_MONK_GUARD = 115295
 };
 
@@ -3609,50 +3659,6 @@ class spell_monk_blackout_kick : public SpellScriptLoader
     SpellScript* GetSpellScript() const
     {
         return new spell_monk_blackout_kick_SpellScript();
-    }
-};
-
-// Provoke - 115546
-class spell_monk_provoke : public SpellScriptLoader
-{
-    public:
-    spell_monk_provoke() : SpellScriptLoader("spell_monk_provoke")
-    { }
-
-    class spell_monk_provoke_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_provoke_SpellScript);
-
-        SpellCastResult CheckCast()
-        {
-            Unit* target = GetExplTargetUnit();
-            if (!target)
-                return SPELL_FAILED_NO_VALID_TARGETS;
-            else if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
-                return SPELL_FAILED_BAD_TARGETS;
-            else if (!target->IsWithinLOSInMap(GetCaster()))
-                return SPELL_FAILED_LINE_OF_SIGHT;
-            return SPELL_CAST_OK;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* caster = GetCaster())
-                if (caster->getClass() == CLASS_MONK && caster->GetTypeId() == TypeID::TYPEID_PLAYER)
-                    if (Unit* target = GetHitUnit())
-                        caster->CastSpell(target, SPELL_MONK_PROVOKE, true);
-        }
-
-        void Register()
-        {
-            OnCheckCast += SpellCheckCastFn(spell_monk_provoke_SpellScript::CheckCast);
-            OnEffectHitTarget += SpellEffectFn(spell_monk_provoke_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_provoke_SpellScript();
     }
 };
 
