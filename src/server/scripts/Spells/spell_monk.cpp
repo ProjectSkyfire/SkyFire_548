@@ -37,6 +37,8 @@ enum MonkSpells
     SPELL_MONK_LEGACY_OF_THE_EMPEROR_ALLY = 117667, // 5.4.8 18414
     SPELL_MONK_DISABLE_ROOT = 116706,               // 5.4.8 18414
     SPELL_MONK_PARALYSIS = 115078,                  // 5.4.8 18414
+
+    SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE = 124280, // 5.4.8 18414
     //
 
     SPELL_MONK_PROVOKE = 118635,
@@ -90,6 +92,66 @@ enum MonkSpells
     SPELL_MONK_ZEN_PILGRIMAGE = 126892,
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN = 126895,
     SPELL_MONK_HEALING_SPHERE = 115460,
+};
+
+// 5.4.8 18414
+// 122470 - Touch of Karma
+class spell_monk_touch_of_karma : public SpellScriptLoader
+{
+public:
+    spell_monk_touch_of_karma() : SpellScriptLoader("spell_monk_touch_of_karma")
+    { }
+
+    class spell_monk_touch_of_karma_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_monk_touch_of_karma_AuraScript);
+
+        uint32 totalAbsorbAmount;
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            totalAbsorbAmount = 0;
+            return true;
+        }
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            if (GetCaster())
+                amount = GetCaster()->GetMaxHealth();
+        }
+
+        void OnAbsorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
+        {
+            if (Unit* caster = dmgInfo.GetVictim())
+            {
+                if (Unit* attacker = dmgInfo.GetAttacker())
+                {
+                    totalAbsorbAmount += dmgInfo.GetDamage();
+
+                    if (attacker->HasAura(aurEff->GetSpellInfo()->Id, caster->GetGUID()))
+                        caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, SPELLVALUE_BASE_POINT0, (totalAbsorbAmount / 6), attacker);
+                }
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_touch_of_karma_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_monk_touch_of_karma_AuraScript::OnAbsorb, EFFECT_1);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_monk_touch_of_karma_AuraScript();
+    }
 };
 
 // 5.4.8 18414
@@ -518,8 +580,7 @@ class spell_monk_expel_harm : public SpellScriptLoader
 class spell_monk_touch_of_death : public SpellScriptLoader
 {
     public:
-    spell_monk_touch_of_death() : SpellScriptLoader("spell_monk_touch_of_death")
-    { }
+    spell_monk_touch_of_death() : SpellScriptLoader("spell_monk_touch_of_death") { }
 
     class spell_monk_touch_of_death_SpellScript : public SpellScript
     {
@@ -1365,62 +1426,8 @@ class spell_monk_transcendence_transfer : public SpellScriptLoader
     }
 };
 */
-enum Karma
-{
-    SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE = 124280
-};
 
-// Touch of Karma - 122470
-class spell_monk_touch_of_karma : public SpellScriptLoader
-{
-    public:
-    spell_monk_touch_of_karma() : SpellScriptLoader("spell_monk_touch_of_karma")
-    { }
 
-    class spell_monk_touch_of_karma_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_monk_touch_of_karma_AuraScript);
-
-        uint32 totalAbsorbAmount;
-
-        bool Load()
-        {
-            totalAbsorbAmount = 0;
-            return true;
-        }
-
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-        {
-            if (GetCaster())
-                amount = GetCaster()->GetMaxHealth();
-        }
-
-        void OnAbsorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
-        {
-            if (Unit* caster = dmgInfo.GetVictim())
-            {
-                if (Unit* attacker = dmgInfo.GetAttacker())
-                {
-                    totalAbsorbAmount += dmgInfo.GetDamage();
-
-                    if (attacker->HasAura(aurEff->GetSpellInfo()->Id, caster->GetGUID()))
-                        caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, SPELLVALUE_BASE_POINT0, (totalAbsorbAmount / 16), attacker);
-                }
-            }
-        }
-
-        void Register()
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_touch_of_karma_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
-            OnEffectAbsorb += AuraEffectAbsorbFn(spell_monk_touch_of_karma_AuraScript::OnAbsorb, EFFECT_1);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_monk_touch_of_karma_AuraScript();
-    }
-};
 
 struct auraData
 {
