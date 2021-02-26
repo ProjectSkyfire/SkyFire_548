@@ -1678,154 +1678,6 @@ enum BlackOx // tehee
     SPELL_MONK_GUARD = 115295
 };
 
-// Summon Black Ox Statue - 115315
-class spell_monk_black_ox_statue : public SpellScriptLoader
-{
-    public:
-    spell_monk_black_ox_statue() : SpellScriptLoader("spell_monk_black_ox_statue")
-    { }
-
-    class spell_monk_black_ox_statue_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_black_ox_statue_SpellScript)
-
-            void HandleSummon(SpellEffIndex effIndex)
-        {
-            if (Player* player = GetCaster()->ToPlayer())
-            {
-                PreventHitDefaultEffect(effIndex);
-
-                const SpellInfo* spell = GetSpellInfo();
-                std::list<Creature*> tempList;
-                std::list<Creature*> blackOxList;
-
-                player->GetCreatureListWithEntryInGrid(tempList, MONK_NPC_BLACK_OX_STATUE, 500.0f);
-
-                for (auto itr : tempList)
-                    blackOxList.push_back(itr);
-
-                // Remove other players jade statue
-                for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
-                {
-                    Unit* owner = (*i)->GetOwner();
-                    if (owner && owner == player && (*i)->IsSummon())
-                        continue;
-
-                    blackOxList.remove((*i));
-                }
-
-                // 1 statue max
-                if ((int32) blackOxList.size() >= spell->Effects [effIndex].BasePoints)
-                    blackOxList.back()->ToTempSummon()->UnSummon();
-
-                Position pos;
-                GetExplTargetDest()->GetPosition(&pos);
-                const SummonPropertiesEntry* properties = sSummonPropertiesStore.LookupEntry(spell->Effects [effIndex].MiscValueB);
-                TempSummon* summon = player->SummonCreature(spell->Effects [effIndex].MiscValue, pos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, spell->GetDuration());
-                if (!summon)
-                    return;
-
-                summon->SetUInt64Value(UNIT_FIELD_SUMMONED_BY, player->GetGUID());
-                summon->setFaction(player->getFaction());
-                summon->SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, GetSpellInfo()->Id);
-                summon->SetMaxHealth(player->CountPctFromMaxHealth(50));
-                summon->SetHealth(summon->GetMaxHealth());
-            }
-        }
-
-        void Register()
-        {
-            OnEffectHit += SpellEffectFn(spell_monk_black_ox_statue_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_black_ox_statue_SpellScript();
-    }
-
-    class spell_monk_black_ox_statue_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_monk_black_ox_statue_AuraScript);
-
-        uint32 damageDealed;
-
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            damageDealed = 0;
-        }
-
-        void SetData(uint32 type, uint32 data)
-        {
-            if (!GetCaster())
-                return;
-
-            if (Player* _plr = GetCaster()->ToPlayer())
-            {
-                uint32 value = _plr->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 16;
-
-                damageDealed += data;
-
-                if (damageDealed >= value)
-                {
-                    damageDealed = 0;
-
-                    std::list<Creature*> tempList;
-                    std::list<Creature*> statueList;
-
-                    _plr->GetCreatureListWithEntryInGrid(tempList, MONK_NPC_BLACK_OX_STATUE, 100.0f);
-                    _plr->GetCreatureListWithEntryInGrid(statueList, MONK_NPC_BLACK_OX_STATUE, 100.0f);
-
-                    // Remove other players' ox statue
-                    for (auto itr : tempList)
-                    {
-                        Unit* owner = itr->GetOwner();
-                        if (owner && owner->GetGUID() == _plr->GetGUID() && itr->IsSummon())
-                            continue;
-
-                        statueList.remove(itr);
-                    }
-
-                    if (!statueList.empty() && statueList.size() == 1)
-                    {
-                        for (auto itr : statueList)
-                        {
-                            if (itr && (itr->IsPet() || itr->IsGuardian()))
-                            {
-                                if (itr->GetOwner() && itr->GetOwner()->GetGUID() == _plr->GetGUID())
-                                {
-                                    if (Group* _grp = _plr->GetGroup())
-                                    {
-                                        for (GroupReference* itr = _grp->GetFirstMember(); itr != NULL; itr = itr->next())
-                                            if (Player* member = itr->GetSource())
-                                            {
-                                                if (member->GetGUID() == _plr->GetGUID())
-                                                    continue;
-
-                                                member->CastSpell(member, SPELL_MONK_GUARD, true);
-                                                break;
-                                            }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        void Register()
-        {
-            AfterEffectApply += AuraEffectApplyFn(spell_monk_black_ox_statue_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_monk_black_ox_statue_AuraScript();
-    }
-};
-
 // Guard - 115295
 class spell_monk_guard : public SpellScriptLoader
 {
@@ -1910,70 +1762,7 @@ enum Serpent
     MONK_NPC_JADE_SERPENT_STATUE = 60849
 };
 
-// Summon Jade Serpent Statue - 115313
-class spell_monk_jade_serpent_statue : public SpellScriptLoader
-{
-    public:
-    spell_monk_jade_serpent_statue() : SpellScriptLoader("spell_monk_jade_serpent_statue")
-    { }
 
-    class spell_monk_jade_serpent_statue_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_jade_serpent_statue_SpellScript)
-
-            void HandleSummon(SpellEffIndex effIndex)
-        {
-            if (Player* player = GetCaster()->ToPlayer())
-            {
-                PreventHitDefaultEffect(effIndex);
-
-                const SpellInfo* spell = GetSpellInfo();
-                std::list<Creature*> tempList;
-                std::list<Creature*> jadeSerpentlist;
-
-                player->GetCreatureListWithEntryInGrid(tempList, MONK_NPC_JADE_SERPENT_STATUE, 500.0f);
-                player->GetCreatureListWithEntryInGrid(jadeSerpentlist, MONK_NPC_JADE_SERPENT_STATUE, 500.0f);
-
-                // Remove other players jade statue
-                for (std::list<Creature*>::iterator i = tempList.begin(); i != tempList.end(); ++i)
-                {
-                    Unit* owner = (*i)->GetOwner();
-                    if (owner && owner == player && (*i)->IsSummon())
-                        continue;
-
-                    jadeSerpentlist.remove((*i));
-                }
-
-                // 1 statue max
-                if ((int32) jadeSerpentlist.size() >= spell->Effects [effIndex].BasePoints)
-                    jadeSerpentlist.back()->ToTempSummon()->UnSummon();
-
-                Position pos;
-                GetExplTargetDest()->GetPosition(&pos);
-                const SummonPropertiesEntry* properties = sSummonPropertiesStore.LookupEntry(spell->Effects [effIndex].MiscValueB);
-                TempSummon* summon = player->SummonCreature(spell->Effects [effIndex].MiscValue, pos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, spell->GetDuration());
-                if (!summon)
-                    return;
-
-                summon->SetUInt64Value(UNIT_FIELD_SUMMONED_BY, player->GetGUID());
-                summon->setFaction(player->getFaction());
-                summon->SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, GetSpellInfo()->Id);
-                summon->SetMaxHealth(player->CountPctFromMaxHealth(50));
-                summon->SetHealth(summon->GetMaxHealth());
-            }
-        }
-
-        void Register()
-        {
-            OnEffectHit += SpellEffectFn(spell_monk_jade_serpent_statue_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_jade_serpent_statue_SpellScript();
-    }
-};
 
 /*
 enum Fists
@@ -3514,7 +3303,6 @@ void AddSC_monk_spell_scripts()
     //new spell_monk_transcendence_transfer();
     new spell_monk_serpents_zeal();
     new spell_monk_diffuse_magic();
-    new spell_monk_black_ox_statue();
     new spell_monk_guard();
     new spell_monk_bear_hug();
     new spell_monk_zen_flight_check();
@@ -3524,7 +3312,6 @@ void AddSC_monk_spell_scripts()
     new spell_monk_spinning_fire_blossom_damage();
     new spell_monk_spinning_fire_blossom();
     //new spell_monk_thunder_focus_tea();
-    new spell_monk_jade_serpent_statue();
     new spell_monk_teachings_of_the_monastery();
     new spell_monk_mana_tea();
     new spell_monk_glyph_of_mana_tea();

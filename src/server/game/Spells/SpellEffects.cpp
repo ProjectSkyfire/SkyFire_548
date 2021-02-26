@@ -2096,12 +2096,16 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 case SUMMON_TYPE_VEHICLE2:
                     summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id);
                     break;
+                case SUMMON_TYPE_STATUE:
                 case SUMMON_TYPE_LIGHTWELL:
                 case SUMMON_TYPE_TOTEM:
                 {
                     summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id);
                     if (!summon || !summon->IsTotem())
                         return;
+
+                    if (m_spellInfo->Id == 115313 || m_spellInfo->Id == 115315)
+                        damage = m_caster->CountPctFromMaxHealth(30);
 
                     // Mana Tide Totem
                     if (m_spellInfo->Id == 16190)

@@ -1383,7 +1383,10 @@ enum PlayerTotemType
     SUMMON_TYPE_TOTEM_FIRE = 63,
     SUMMON_TYPE_TOTEM_EARTH = 81,
     SUMMON_TYPE_TOTEM_WATER = 82,
-    SUMMON_TYPE_TOTEM_AIR = 83
+    SUMMON_TYPE_TOTEM_AIR = 83,
+
+    SUMMON_TYPE_STATUE_JADE = 3216,
+    SUMMON_TYPE_STATUE_OX = 3223
 };
 
 // delay time next attack to prevent client attack animation problems

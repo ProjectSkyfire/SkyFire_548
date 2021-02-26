@@ -3848,7 +3848,18 @@ enum SummonType
     SUMMON_TYPE_VEHICLE2    = 10,   // Oculus and Argent Tournament vehicles (3.3.5a)
     SUMMON_TYPE_LIGHTWELL   = 11,
     SUMMON_TYPE_JEEVES      = 12,
-    SUMMON_TYPE_UNK13       = 13
+    SUMMON_TYPE_UNK13       = 13,
+    SUMMON_TYPE_UNK14       = 14,
+    SUMMON_TYPE_UNK15       = 15,
+    SUMMON_TYPE_STATUE      = 16,
+    SUMMON_TYPE_UNK17       = 17,
+    SUMMON_TYPE_UNK18       = 18,
+    SUMMON_TYPE_UNK19       = 19,
+    SUMMON_TYPE_UNK20       = 20,
+    SUMMON_TYPE_UNK21       = 21,
+    SUMMON_TYPE_UNK22       = 22,
+    //SUMMON_TYPE_UNK23       = 23, // does not exist in 5.4.8
+    SUMMON_TYPE_UNK24       = 24,
 };
 
 enum EventId

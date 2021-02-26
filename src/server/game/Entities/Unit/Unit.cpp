@@ -15461,6 +15461,14 @@ uint32 Unit::GetModelForTotem(uint32 totemType) const
     if (totemType == 3400)
         totemType = SUMMON_TYPE_TOTEM_EARTH;
 
+    // jade serpent statue
+    if (totemType == SUMMON_TYPE_STATUE_JADE)
+        return 42449;
+
+    // black ox statue
+    if (totemType == SUMMON_TYPE_STATUE_OX)
+        return 41853;
+
     switch (getRace())
     {
         case RACE_ORC:
