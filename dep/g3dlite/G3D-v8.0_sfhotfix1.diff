@@ -1,0 +1,12 @@
+index cfccf9a0cc..ee771d4ff2 100644
+--- a/dep/g3dlite/source/debugAssert.cpp
++++ b/dep/g3dlite/source/debugAssert.cpp
+@@ -103,7 +103,7 @@ static void createErrorMessage(
+         if (NULL != formatMsg) {
+             realLastErr = formatMsg;
+         } else {
+-            realLastErr = _T("Last error code does not exist.");
++            realLastErr = (LPTSTR)_T("Last error code does not exist.");
+         }
+ 
+         if (lastErr != 0) {
