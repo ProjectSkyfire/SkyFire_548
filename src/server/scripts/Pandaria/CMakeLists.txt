@@ -11,6 +11,9 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  Pandaria/StormstoutBrewery/stormstout_brewery.cpp
+  Pandaria/StormstoutBrewery/instance_stormstout_brewery.cpp
+  Pandaria/StormstoutBrewery/stormstout_brewery.h
   Pandaria/TempleOfJadeSerpent/temple_of_jade_serpent.h
   Pandaria/TempleOfJadeSerpent/instance_temple_of_jade_serpent.cpp
 )

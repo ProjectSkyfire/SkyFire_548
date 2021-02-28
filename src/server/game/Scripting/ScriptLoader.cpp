@@ -615,6 +615,9 @@ void AddSC_event_childrens_week();
 // Pandaria
 // Temple of Jade Serpent
 void AddSC_instance_jade_serpent();
+// Stormstout Brewery
+void AddSC_instance_stormstout_brewery();
+void AddSC_stormstout_brewery();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1289,6 +1292,9 @@ void AddPandariaScripts()
 #ifdef SCRIPTS
     // Temple of Jade Serpent - Temple of Jade Serpent
     AddSC_instance_jade_serpent();
+    // Stormstout Brewery
+    AddSC_instance_stormstout_brewery();
+    AddSC_stormstout_brewery();
 #endif
 }
 
