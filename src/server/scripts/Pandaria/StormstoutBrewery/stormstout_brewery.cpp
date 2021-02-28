@@ -38,10 +38,14 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
         killer->CastSpell(killer, 107347, true);
         instance->SetBossState(DATA_BANANA_EVENT, DONE);
 
-        if (Creature* pOakOak = creature->SummonCreature(NPC_OOK_OOK, -750.555f, 1334.4f, 162.71f, 1.83f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
+        if (Creature* pOokOok = creature->SummonCreature(NPC_OOK_OOK, -750.555f, 1334.4f, 162.71f, 1.83f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
         {
             // Note: should be Yell instead of Say
-            pOakOak->MonsterSay(SAY_OOK_OOK_1, Language::LANG_UNIVERSAL, 0);
+            pOokOok->MonsterSay(SAY_OOK_OOK_1, Language::LANG_UNIVERSAL, 0);
+            
+            if (Creature* JumpTarget = creature->SummonCreature(18721, -754.695, 1348.25f, 147.35f, 1.83f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10 * IN_MILLISECONDS))
+                pOokOok->JumpTo(JumpTarget, 5.0f);
+
             //if (creature->GetVictim())
             //    pOakOak->AI()->AttackStart(creature->GetVictim());
         }
