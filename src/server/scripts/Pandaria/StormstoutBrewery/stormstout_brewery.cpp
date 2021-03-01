@@ -105,6 +105,19 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            if (instance->GetBossState(DATA_BANANA_EVENT) == DONE)
+            {
+                if (me->GetEntry() == NPC_ANIMAL1 || me->GetEntry() == NPC_ANIMAL2)
+                {
+                    if (!me->isMoving())
+                    {
+                        me->SetSpeed(MOVE_RUN, 1.5f);
+                        me->GetMotionMaster()->MovePoint(1, BananaFleePos);
+                        me->DespawnOrUnsummon(15000);
+                    }
+                }
+            }
+
             if (!UpdateVictim())
                 return;
 

@@ -34,6 +34,9 @@ enum DataTypes
 enum CreatureIds
 {
     NPC_OOK_OOK       = 56637,
+    NPC_ANIMAL1       = 56927,
+    NPC_ANIMAL2       = 59684,
+
     NPC_HOPTALLUS     = 56717,
     NPC_YAN_ZHU       = 59479,
 };
@@ -44,6 +47,7 @@ enum GameObjectIds
 };
 
 Position const OokOokLandPos = { -754.695, 1348.25f, 147.35f, 1.83f };
+Position const BananaFleePos = { -771.177, 1407.86f, 139.57f, 1.86f };
 
 template<class AI>
 AI* GetStormstoutBreweryAI(Creature* creature)
