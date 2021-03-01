@@ -60,6 +60,9 @@ public:
         // Only trigger once
         if (InstanceScript* instance = player->GetInstanceScript())
         {
+            if (instance->GetData(DATA_BANANA_EVENT) == DONE)
+                return false;
+
             if (player->IsAlive())
             {
                 player->CastSpell(player, SPELL_SSB_BANANA_BAR, true);
