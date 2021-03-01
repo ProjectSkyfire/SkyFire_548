@@ -43,6 +43,8 @@ enum GameObjectIds
     // doors
 };
 
+Position const OokOokLandPos = { -754.695, 1348.25f, 147.35f, 1.83f };
+
 template<class AI>
 AI* GetStormstoutBreweryAI(Creature* creature)
 {

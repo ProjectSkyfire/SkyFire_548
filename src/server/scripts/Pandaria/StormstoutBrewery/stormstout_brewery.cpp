@@ -35,20 +35,18 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
 
     if (instance->GetData64(DATA_BANANA_EVENT) > 39)
     {
-        killer->CastSpell(killer, 107347, true);
-        instance->SetBossState(DATA_BANANA_EVENT, DONE);
-
         if (Creature* pOokOok = creature->SummonCreature(NPC_OOK_OOK, -750.555f, 1334.4f, 162.71f, 1.83f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
         {
             // Note: should be Yell instead of Say
             pOokOok->MonsterSay(SAY_OOK_OOK_1, Language::LANG_UNIVERSAL, 0);
             
-            if (Creature* JumpTarget = creature->SummonCreature(18721, -754.695, 1348.25f, 147.35f, 1.83f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10 * IN_MILLISECONDS))
-                pOokOok->JumpTo(JumpTarget, 5.0f);
-
+            pOokOok->GetMotionMaster()->MoveJump(OokOokLandPos, pOokOok->GetExactDist2d(OokOokLandPos.GetPositionX(), OokOokLandPos.GetPositionY()) * 10.0f / 5.0f, 5.0f);
+            pOokOok->SetHomePosition(OokOokLandPos);
             //if (creature->GetVictim())
             //    pOakOak->AI()->AttackStart(creature->GetVictim());
         }
+        killer->CastSpell(killer, 107347, true);
+        instance->SetBossState(DATA_BANANA_EVENT, DONE);
     }
 };
 
