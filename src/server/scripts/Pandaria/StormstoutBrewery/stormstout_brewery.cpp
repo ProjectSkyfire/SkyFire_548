@@ -45,7 +45,7 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
             //if (creature->GetVictim())
             //    pOakOak->AI()->AttackStart(creature->GetVictim());
         }
-        killer->CastSpell(killer, 107347, true);
+        killer->CastSpell(killer, SPELL_SSB_BANANA_BAR_REMOVE, true);
         instance->SetBossState(DATA_BANANA_EVENT, DONE);
     }
 };
@@ -132,8 +132,6 @@ public:
         return new npc_banana_hozenAI(creature);
     }
 };
-
-
 
 void AddSC_stormstout_brewery()
 {

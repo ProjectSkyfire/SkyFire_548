@@ -11,6 +11,7 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  Pandaria/StormstoutBrewery/boss_ook_ook.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/instance_stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.h
