@@ -32,6 +32,7 @@
 
 enum MageSpells
 {
+    SPELL_MAGE_FROSTJAW                          = 102051,
     SPELL_MAGE_COLD_SNAP                         = 11958,
     SPELL_MAGE_FROST_NOVA                        = 122,
     SPELL_MAGE_IGNITE                            = 12654,
@@ -72,6 +73,47 @@ enum MageIcons
 enum MiscSpells
 {
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409
+};
+
+// Frostjaw - 102051 // 5.4.8
+class spell_mage_frostjaw : public SpellScriptLoader
+{
+public:
+    spell_mage_frostjaw() : SpellScriptLoader("spell_mage_frostjaw") { }
+
+    class spell_mage_frostjaw_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_frostjaw_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FROSTJAW))
+                return false;
+            return true;
+        }
+
+        void HandleOnHit()
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+                if (Unit* target = GetHitUnit())
+                    if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
+                        if (Aura* aura = target->GetAura(SPELL_MAGE_FROSTJAW, player->GetGUID()))
+                        {
+                            aura->SetDuration(aura->GetDuration() / 2);
+                            aura->SetMaxDuration(aura->GetMaxDuration() / 2);
+                        }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_mage_frostjaw_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_mage_frostjaw_SpellScript();
+    }
 };
 
 // Pyroblast - 11366 // 5.4.8
@@ -910,6 +952,7 @@ public:
 
 void AddSC_mage_spell_scripts()
 {
+    new spell_mage_frostjaw(); // 5.4.8 18414
     new spell_mage_pyroblast(); // 5.4.8 18414
     new spell_mage_time_warp(); // 5.4.8 18414
     new spell_mage_blast_wave();
