@@ -290,6 +290,18 @@ void BattlegroundVOP::HandleKillPlayer(Player* player, Player* killer)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
+    if (killer->GetBGTeam() == ALLIANCE)
+    {
+        m_TeamScores[TEAM_ALLIANCE] += BG_VOP_PK_VP;
+        UpdateWorldState(BG_VOP_OP_RESOURCES_A, m_TeamScores[TEAM_ALLIANCE]);
+    }
+    else if (killer->GetBGTeam() == HORDE)
+    {
+        m_TeamScores[TEAM_HORDE] += BG_VOP_PK_VP;
+        UpdateWorldState(BG_VOP_OP_RESOURCES_H, m_TeamScores[TEAM_HORDE]);
+    }
+    UpdatePlayerScore(killer, SCORE_ORB_SCORE, BG_VOP_PK_VP);
+
     Battleground::HandleKillPlayer(player, killer);
 }
 

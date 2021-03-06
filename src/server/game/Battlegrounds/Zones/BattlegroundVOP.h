@@ -78,6 +78,8 @@ enum BG_VOP_WorldStates
 const uint32 BG_VOP_TickIntervals[5] = { 15000, 12000, 9000, 6000, 3000 };
 const uint32 BG_VOP_TickPoints[5] = { 0, 10, 10, 10, 10 };
 
+const uint32 BG_VOP_PK_VP = 10;
+
 struct BattlegroundVOPScore : public BattlegroundScore
 {
     BattlegroundVOPScore() : OrbControl(0), OrbScore(0) { }
@@ -96,7 +98,6 @@ public:
     void AddPlayer(Player* player) OVERRIDE;
     void StartingEventCloseDoors() OVERRIDE;
     void StartingEventOpenDoors() OVERRIDE;
-
     /* Battleground Events */
     void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
     void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
