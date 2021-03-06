@@ -59,17 +59,20 @@ void BattlegroundVOP::PostUpdateImpl(uint32 diff)
                 m_TeamScores[team] += BG_VOP_TickPoints[points];
                 m_HonorScoreTics[team] += BG_VOP_TickPoints[points];
 
-                for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+                for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                 {
-                    if (Player* player = _GetPlayerForTeam((team == TEAM_ALLIANCE) ? ALLIANCE : HORDE, itr, "RewardVictoryPointsToTeam"))
+                    if (Player* player = ObjectAccessor::FindPlayer(itr->first))
                     {
-                        if (player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_1) ||
-                            player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_2) ||
-                            player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_3) ||
-                            player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_4))
+                        if (player->GetTeamId() == team)
                         {
-                            m_TeamScores[team] += BG_VOP_TickPoints[points];
-                            UpdatePlayerScore(player, SCORE_ORB_SCORE, BG_VOP_TickPoints[points]);
+                            if (player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_1) ||
+                                player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_2) ||
+                                player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_3) ||
+                                player->HasAura(BG_VOP_SPELL_ORB_PICKED_UP_4))
+                            {
+                                m_TeamScores[team] += BG_VOP_TickPoints[points];
+                                UpdatePlayerScore(player, SCORE_ORB_SCORE, BG_VOP_TickPoints[points]);
+                            }
                         }
                     }
                 }
