@@ -211,7 +211,10 @@ enum ScoreType
     SCORE_SECONDARY_OBJECTIVES  = 17,
     //SOTA
     SCORE_DESTROYED_DEMOLISHER  = 18,
-    SCORE_DESTROYED_WALL        = 19
+    SCORE_DESTROYED_WALL        = 19,
+    //VOP
+    SCORE_ORB_CONTROL           = 20,
+    SCORE_ORB_SCORE             = 21
 };
 
 

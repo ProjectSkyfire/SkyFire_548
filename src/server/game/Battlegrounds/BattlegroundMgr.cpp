@@ -39,6 +39,7 @@
 #include "BattlegroundTP.h"
 #include "BattlegroundTV.h"
 #include "BattlegroundBFG.h"
+#include "BattlegroundVOP.h"
 #include "Chat.h"
 #include "Map.h"
 #include "MapInstanced.h"
@@ -116,16 +117,15 @@ void BattlegroundMgr::Update(uint32 diff)
     // update scheduled queues
     if (!m_QueueUpdateScheduler.empty())
     {
-        std::vector<uint64> scheduled;
+        std::vector<ScheduledQueueUpdate> scheduled;
         std::swap(scheduled, m_QueueUpdateScheduler);
-
         for (uint8 i = 0; i < scheduled.size(); i++)
         {
-            uint32 arenaMMRating = scheduled[i] >> 32;
-            uint8 arenaType = scheduled[i] >> 24 & 255;
-            BattlegroundQueueTypeId bgQueueTypeId = BattlegroundQueueTypeId(scheduled[i] >> 16 & 255);
-            BattlegroundTypeId bgTypeId = BattlegroundTypeId((scheduled[i] >> 8) & 255);
-            BattlegroundBracketId bracket_id = BattlegroundBracketId(scheduled[i] & 255);
+            uint32 arenaMMRating = scheduled[i].ArenaMMRating;
+            uint8 arenaType = scheduled[i].ArenaType;
+            BattlegroundQueueTypeId bgQueueTypeId = BattlegroundQueueTypeId(scheduled[i].QueueId);
+            BattlegroundTypeId bgTypeId = BattlegroundTypeId(scheduled[i].TypeId);
+            BattlegroundBracketId bracket_id = BattlegroundBracketId(scheduled[i].BracketId);
             m_BattlegroundQueues[bgQueueTypeId].BattlegroundQueueUpdate(diff, bgTypeId, bracket_id, arenaType, arenaMMRating > 0, arenaMMRating);
         }
     }
@@ -464,6 +464,10 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                         buff << uint32(((BattlegroundBFGScore*)score)->BasesAssaulted);      // bases assaulted
                         buff << uint32(((BattlegroundBFGScore*)score)->BasesDefended);       // bases defended
                         break;
+                    case 998:
+                        data->WriteBits(2, 22);
+                        buff << uint32(((BattlegroundTPScore*)score)->FlagCaptures);         // flag captures
+                        buff << uint32(((BattlegroundVOPScore*)score)->OrbScore);
                     default:
                         data->WriteBits(0, 22);
                         break;
@@ -510,6 +514,11 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 data->WriteBits(2, 22);
                 buff << uint32(((BattlegroundBFGScore*)score)->BasesAssaulted);      // bases assaulted
                 buff << uint32(((BattlegroundBFGScore*)score)->BasesDefended);       // bases defended
+                break;
+            case BattlegroundTypeId::BATTLEGROUND_VOP:
+                data->WriteBits(2, 22);
+                buff << uint32(((BattlegroundTPScore*)score)->FlagCaptures);         // flag captures
+                buff << uint32(((BattlegroundVOPScore*)score)->OrbScore);
                 break;
             case BattlegroundTypeId::BATTLEGROUND_NA:
             case BattlegroundTypeId::BATTLEGROUND_BE:
@@ -847,6 +856,9 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
         case BattlegroundTypeId::BATTLEGROUND_BFG:
             bg = new BattlegroundBFG(*(BattlegroundBFG*)bg_template);
             break;
+        case BattlegroundTypeId::BATTLEGROUND_VOP:
+            bg = new BattlegroundVOP(*(BattlegroundVOP*)bg_template);
+            break;
         case BattlegroundTypeId::BATTLEGROUND_TV:
             bg = new BattlegroundTV(*(BattlegroundTV*)bg_template);
             break;
@@ -949,6 +961,9 @@ bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
             break;
         case BattlegroundTypeId::BATTLEGROUND_BFG:
             bg = new BattlegroundBFG;
+            break;
+        case BattlegroundTypeId::BATTLEGROUND_VOP:
+            bg = new BattlegroundVOP;
             break;
         default:
             return false;
@@ -1240,6 +1255,8 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
             return BATTLEGROUND_QUEUE_SA;
         case BattlegroundTypeId::BATTLEGROUND_WS:
             return BATTLEGROUND_QUEUE_WS;
+        case BattlegroundTypeId::BATTLEGROUND_VOP:
+            return BATTLEGROUND_QUEUE_VOP;
         case BattlegroundTypeId::BATTLEGROUND_AA:
         case BattlegroundTypeId::BATTLEGROUND_BE:
         case BattlegroundTypeId::BATTLEGROUND_DS:
@@ -1285,6 +1302,8 @@ BattlegroundTypeId BattlegroundMgr::BGTemplateId(BattlegroundQueueTypeId bgQueue
             return BattlegroundTypeId::BATTLEGROUND_BFG;
         case BATTLEGROUND_QUEUE_RB:
             return BattlegroundTypeId::BATTLEGROUND_RB;
+        case BATTLEGROUND_QUEUE_VOP:
+            return BattlegroundTypeId::BATTLEGROUND_VOP;
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:
@@ -1336,7 +1355,7 @@ void BattlegroundMgr::ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 ar
 {
     //This method must be atomic, @todo add mutex
     //we will use only 1 number created of bgTypeId and bracket_id
-    uint64 const scheduleId = (uint64(arenaMatchmakerRating) << 32) | (uint64(arenaType) << 24) | (uint64(bgQueueTypeId) << 16) | (uint64(bgTypeId) << 8) | uint8(bracket_id);
+    ScheduledQueueUpdate scheduleId = { arenaMatchmakerRating, arenaType, bgQueueTypeId, bgTypeId, bracket_id };
     if (std::find(m_QueueUpdateScheduler.begin(), m_QueueUpdateScheduler.end(), scheduleId) == m_QueueUpdateScheduler.end())
         m_QueueUpdateScheduler.push_back(scheduleId);
 }
@@ -1410,7 +1429,7 @@ HolidayIds BattlegroundMgr::BGTypeToWeekendHolidayId(BattlegroundTypeId bgTypeId
         case BattlegroundTypeId::BATTLEGROUND_TP: return HolidayIds::HOLIDAY_CALL_TO_ARMS_TP;
         case BattlegroundTypeId::BATTLEGROUND_BFG: return HolidayIds::HOLIDAY_CALL_TO_ARMS_BFG;
         case BattlegroundTypeId::BATTLEGROUND_SM: return HolidayIds::HOLIDAY_CALL_TO_ARMS_SM;
-        case BattlegroundTypeId::BATTLEGROUND_TOK: return HolidayIds::HOLIDAY_CALL_TO_ARMS_TK;
+        case BattlegroundTypeId::BATTLEGROUND_VOP: return HolidayIds::HOLIDAY_CALL_TO_ARMS_TK;
         case BattlegroundTypeId::BATTLEGROUND_DG: return HolidayIds::HOLIDAY_CALL_TO_ARMS_DG;
         default: return HolidayIds::HOLIDAY_NONE;
     }
@@ -1429,7 +1448,7 @@ BattlegroundTypeId BattlegroundMgr::WeekendHolidayIdToBGType(HolidayIds holiday)
         case HolidayIds::HOLIDAY_CALL_TO_ARMS_TP: return BattlegroundTypeId::BATTLEGROUND_TP;
         case HolidayIds::HOLIDAY_CALL_TO_ARMS_BFG: return BattlegroundTypeId::BATTLEGROUND_BFG;
         case HolidayIds::HOLIDAY_CALL_TO_ARMS_SM: return BattlegroundTypeId::BATTLEGROUND_SM;
-        case HolidayIds::HOLIDAY_CALL_TO_ARMS_TK: return BattlegroundTypeId::BATTLEGROUND_TOK;
+        case HolidayIds::HOLIDAY_CALL_TO_ARMS_TK: return BattlegroundTypeId::BATTLEGROUND_VOP;
         case HolidayIds::HOLIDAY_CALL_TO_ARMS_DG: return BattlegroundTypeId::BATTLEGROUND_DG;
         default: return BattlegroundTypeId::BATTLEGROUND_TYPE_NONE;
     }

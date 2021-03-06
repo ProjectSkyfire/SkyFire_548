@@ -144,10 +144,24 @@ class BattlegroundMgr
 
         BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES];
 
+        struct ScheduledQueueUpdate
+        {
+            uint32 ArenaMMRating;
+            uint8 ArenaType;
+            BattlegroundQueueTypeId QueueId;
+            BattlegroundTypeId TypeId;
+            BattlegroundBracketId BracketId;
+
+            bool operator==(ScheduledQueueUpdate const& right) const
+            {
+                return ArenaMMRating == right.ArenaMMRating && QueueId == right.QueueId && BracketId == right.BracketId;
+            }
+        };
+
         typedef std::map<BattlegroundTypeId, uint8> BattlegroundSelectionWeightMap; // TypeId and its selectionWeight
         BattlegroundSelectionWeightMap m_ArenaSelectionWeights;
         BattlegroundSelectionWeightMap m_BGSelectionWeights;
-        std::vector<uint64> m_QueueUpdateScheduler;
+        std::vector<ScheduledQueueUpdate> m_QueueUpdateScheduler;
         uint32 m_NextRatedArenaUpdate;
         bool   m_ArenaTesting;
         bool   m_Testing;

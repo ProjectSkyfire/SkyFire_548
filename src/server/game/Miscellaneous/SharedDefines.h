@@ -4036,7 +4036,7 @@ enum class BattlegroundTypeId
     // 441 = "Icecrown Citadel"
     // 443 = "The Ruby Sanctum"
     // 656 = "Rated Eye of the Storm"
-    BATTLEGROUND_TOK           = 699, // 5.x Temple of Kotmogu
+    BATTLEGROUND_VOP           = 699, // Valley of Power 
     BATTLEGROUND_CTF           = 706, // 5.x CTF3
     BATTLEGROUND_SM            = 708, // 5.x Silvershard Mines
     BATTLEGROUND_TV            = 719, // 5.x Tol'Vir Arena
@@ -4188,10 +4188,11 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_IC       = 6,
     BATTLEGROUND_QUEUE_TP       = 7,
     BATTLEGROUND_QUEUE_BFG      = 8,
-    BATTLEGROUND_QUEUE_RB       = 9,
-    BATTLEGROUND_QUEUE_2v2      = 10,
-    BATTLEGROUND_QUEUE_3v3      = 11,
-    BATTLEGROUND_QUEUE_5v5      = 12,
+    BATTLEGROUND_QUEUE_VOP      = 9,
+    BATTLEGROUND_QUEUE_RB       = 10,
+    BATTLEGROUND_QUEUE_2v2      = 11,
+    BATTLEGROUND_QUEUE_3v3      = 12,
+    BATTLEGROUND_QUEUE_5v5      = 13,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 

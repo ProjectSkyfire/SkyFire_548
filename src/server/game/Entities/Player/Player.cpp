@@ -10138,6 +10138,11 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_BFG)
                 bg->FillInitialWorldStates(builder);
             break;
+        // Valley of Power
+        case 6051:
+            if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_VOP)
+                bg->FillInitialWorldStates(builder);
+            break;
         // Wintergrasp
         case 4197:
             if (bf && bf->GetTypeId() == BATTLEFIELD_WG)
