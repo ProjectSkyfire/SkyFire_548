@@ -18,7 +18,7 @@ UPDATE `quest_template` SET `RewardItemId2`='73213', `RewardItemCount2`='1' WHER
 UPDATE `quest_template` SET `RewardItemId1`='73209', `RewardItemCount1`='1' WHERE  `Id`=30027;
 
 -- Two Hand Sword (Warrior)
-UPDATE `quest_template` SET `RequiredSourceItemId1`='73210', `RequiredSourceItemCount1`='0' WHERE  `Id`=30038;
+UPDATE `quest_template` SET `RequiredSourceItemId1`='73210', `RequiredSourceItemCount1`='1' WHERE  `Id`=30038;
 UPDATE `quest_template` SET `RequiredSourceItemId2`='0', `RequiredSourceItemCount2`='0' WHERE  `Id`=30038;
 UPDATE `quest_template` SET `RequiredSourceItemId3`='0', `RequiredSourceItemCount3`='0' WHERE  `Id`=30038;
 UPDATE `quest_template` SET `RequiredSourceItemId4`='0', `RequiredSourceItemCount4`='0' WHERE  `Id`=30038;
@@ -54,5 +54,7 @@ UPDATE `quest_template` SET `RequiredSourceItemId3`='0', `RequiredSourceItemCoun
 UPDATE `quest_template` SET `RequiredSourceItemId4`='0', `RequiredSourceItemCount4`='0' WHERE `Id`=30027;
 
 -- Tushui Trainee / Huojin Trainee
-UPDATE creature_template SET faction_A=2136, faction_H=2136 WHERE entry=65471;
-UPDATE creature_template SET faction_A=2136, faction_H=2136 WHERE entry=54587;
+UPDATE creature_template SET faction_A=2136, faction_H=2136, ScriptName='' WHERE entry=65471;
+UPDATE creature_template SET faction_A=2136, faction_H=2136, ScriptName='' WHERE entry=54587;
+-- Jaomin Ro
+UPDATE creature_template SET faction_A=2136, faction_H=2136, ScriptName='' WHERE entry=54587;
