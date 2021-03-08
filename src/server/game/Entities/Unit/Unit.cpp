@@ -2241,7 +2241,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
 
     ObjectGuid attackerGuid = GetGUID();
     ObjectGuid victimGuid = victim ? victim->GetGUID() : 0;
-
+    
     data.WriteBit(victimGuid [5]);
     data.WriteBit(victimGuid [6]);
     data.WriteBit(attackerGuid [3]);
@@ -5082,7 +5082,7 @@ void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
 
 void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 {
-    SF_LOG_ERROR("entities.unit", "WORLD: Sending SMSG_ATTACKER_STATE_UPDATE");
+    SF_LOG_DEBUG("entities.unit", "WORLD: Sending SMSG_ATTACKER_STATE_UPDATE");
     uint32 count = 1;
 
     ByteBuffer buff;
