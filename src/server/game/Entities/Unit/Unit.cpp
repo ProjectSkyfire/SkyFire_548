@@ -11938,6 +11938,8 @@ int32 Unit::GetCreatePowers(Powers power) const
             return 4;
         case POWER_DEMONIC_FURY:
             return 1000;
+        case POWER_BURNING_EMBERS:
+            return 40;
         default:
             break;
     }
@@ -12508,6 +12510,23 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     ToPlayer()->AddComboPoints(target, 1);
                     StartReactiveTimer(REACTIVE_OVERPOWER);
                 }
+            }
+        }
+    }
+
+    if (getClass() == CLASS_WARLOCK)
+    {
+        float mult = 1.0f;
+        if (procSpell && procSpell->SpellFamilyName == SPELLFAMILY_WARLOCK)
+        {
+            if (procExtra & PROC_EX_CRITICAL_HIT)
+                mult = 2.0f;
+            
+            if ((procSpell->SpellIconID == 2128 && procSpell->SpellFamilyFlags[1] == 0x00000040) ||
+                (procSpell->SpellIconID == 12 && procSpell->SpellFamilyFlags[1] == 0x00800000) ||
+                (procSpell->SpellIconID == 31 && procSpell->SpellFamilyFlags[0] == 0x00000004))
+            {
+                SetPower(POWER_BURNING_EMBERS, GetPower(POWER_BURNING_EMBERS) + (mult * 2));
             }
         }
     }
