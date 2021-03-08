@@ -1078,7 +1078,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (!swaps.empty())
     {
-        SF_LOG_ERROR("network", "WORLD: PreAuraOverrideSpellID: %u", spellId);
         for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
         {
             if ((*itr)->IsAffectingSpell(spellInfo))
@@ -1099,14 +1098,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 break;
             }
         }
-        SF_LOG_ERROR("network", "WORLD: PostAuraOverrideSpellID: %u", spellId);
     }
 
     // Specialization Overriden Spells
     uint32 SpecializationID = caster->ToPlayer()->GetTalentSpecialization(caster->ToPlayer()->GetActiveSpec());
     if (SpecializationID)
     {
-        SF_LOG_ERROR("network", "WORLD: PreSpecOverrideSpellID: %u SpecID: %u", spellId, SpecializationID);
         for (uint32 i = 0; i < sSpecializationSpellsStore.GetNumRows(); i++)
         {
             SpecializationSpellsEntry const* specializationInfo = sSpecializationSpellsStore.LookupEntry(i);
@@ -1134,14 +1131,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 break;
             }
         }
-        SF_LOG_ERROR("network", "WORLD: PostSpecOverrideSpellID: %u SpecID: %u", spellId, SpecializationID);
     }
 
     // Talent Overriden Spells
     uint32 ClassID = caster->ToPlayer()->getClass();
     if (ClassID)
     {
-        SF_LOG_ERROR("network", "WORLD: PreTalentOverrideSpellID: %u ClassID: %u", spellId, ClassID);
         for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)
         {
             TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
@@ -1173,7 +1168,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 break;
             }
         }
-        SF_LOG_ERROR("network", "WORLD: PostTalentOverrideSpellID: %u ClassID: %u", spellId, ClassID);
     }
 
     // Client is resending autoshot cast opcode when other spell is casted during shoot rotation
