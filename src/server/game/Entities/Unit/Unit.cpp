@@ -592,6 +592,7 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel) cons
 
     return (HasBreakableByDamageAuraType(SPELL_AURA_MOD_CONFUSE, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_FEAR, excludeAura)
+            || HasBreakableByDamageAuraType(SPELL_AURA_MOD_FEAR_2, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_STUN, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_ROOT, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_TRANSFORM, excludeAura));
@@ -12373,6 +12374,7 @@ bool InitTriggerAuraData()
     isTriggerAura [SPELL_AURA_MOD_RESISTANCE] = true;
     isTriggerAura [SPELL_AURA_MOD_STEALTH] = true;
     isTriggerAura [SPELL_AURA_MOD_FEAR] = true; // Aura does not have charges but needs to be removed on trigger
+    isTriggerAura [SPELL_AURA_MOD_FEAR_2] = true;
     isTriggerAura [SPELL_AURA_MOD_ROOT] = true;
     isTriggerAura [SPELL_AURA_TRANSFORM] = true;
     isTriggerAura [SPELL_AURA_REFLECT_SPELLS] = true;
@@ -12408,6 +12410,7 @@ bool InitTriggerAuraData()
 
     isAlwaysTriggeredAura [SPELL_AURA_OVERRIDE_CLASS_SCRIPTS] = true;
     isAlwaysTriggeredAura [SPELL_AURA_MOD_FEAR] = true;
+    isAlwaysTriggeredAura [SPELL_AURA_MOD_FEAR_2] = true;
     isAlwaysTriggeredAura [SPELL_AURA_MOD_ROOT] = true;
     isAlwaysTriggeredAura [SPELL_AURA_MOD_STUN] = true;
     isAlwaysTriggeredAura [SPELL_AURA_TRANSFORM] = true;
@@ -12778,6 +12781,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                         // Are there any more auras which need this?
                     case SPELL_AURA_MOD_CONFUSE:
                     case SPELL_AURA_MOD_FEAR:
+                    case SPELL_AURA_MOD_FEAR_2:
                     case SPELL_AURA_MOD_STUN:
                     case SPELL_AURA_MOD_ROOT:
                     case SPELL_AURA_TRANSFORM:
@@ -14136,7 +14140,7 @@ void Unit::SetControlled(bool apply, UnitState state)
                 SetConfused(false);
                 break;
             case UNIT_STATE_FLEEING:
-                if (HasAuraType(SPELL_AURA_MOD_FEAR))
+                if (HasAuraType(SPELL_AURA_MOD_FEAR) || HasAuraType(SPELL_AURA_MOD_FEAR_2))
                     return;
 
                 SetFeared(false);
@@ -14225,10 +14229,21 @@ void Unit::SetFeared(bool apply)
         Unit* caster = NULL;
         Unit::AuraEffectList const& fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
         if (!fearAuras.empty())
+        {
             caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
-        if (!caster)
-            caster = getAttackerForHelper();
-        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);             // caster == NULL processed in MoveFleeing
+            if (!caster)
+                caster = getAttackerForHelper();
+            GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);             // caster == NULL processed in MoveFleeing
+        }
+
+        Unit::AuraEffectList const& fearAuras2 = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR_2);
+        if (!fearAuras2.empty())
+        {
+            caster = ObjectAccessor::GetUnit(*this, fearAuras2.front()->GetCasterGUID());
+            if (!caster)
+                caster = getAttackerForHelper();
+            GetMotionMaster()->MoveFleeing(caster, fearAuras2.empty() ? sWorld->getIntConfig(WorldIntConfigs::CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);             // caster == NULL processed in MoveFleeing
+        }
     }
     else
     {

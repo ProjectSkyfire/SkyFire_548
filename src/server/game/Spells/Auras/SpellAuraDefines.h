@@ -466,7 +466,7 @@ enum AuraType
     SPELL_AURA_OVERRIDE_AP_BY_SPELL_POWER_PCT               = 404,  // Sets attack power equal to % of spellpower
     SPELL_AURA_405                                          = 405,
     SPELL_AURA_406                                          = 406,
-    SPELL_AURA_407                                          = 407,
+    SPELL_AURA_MOD_FEAR_2                                   = 407,
     SPELL_AURA_408                                          = 408,
     SPELL_AURA_409                                          = 409,
     SPELL_AURA_410                                          = 410,
