@@ -1238,9 +1238,12 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         case FORM_SHADOW:
             spellId = 49868;
             break;
+        case FORM_STEALTH:
+            if (target->HasAura(108209)) // Shadow Focus Dummy Talent
+                spellId = 112942; // Shadow Focus Aura.
+            break;
         case FORM_GHOUL:
         case FORM_AMBIENT:
-        case FORM_STEALTH:
         case FORM_CREATURECAT:
         case FORM_CREATUREBEAR:
             break;

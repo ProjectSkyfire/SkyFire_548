@@ -3065,6 +3065,32 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             }
         }
 
+        // Flat mod from caster auras by spell school and power type
+        Unit::AuraEffectList const& auras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
+        for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+        {
+            if (!((*i)->GetMiscValue() & m_spellInfo->SchoolMask))
+                continue;
+
+            if (!((*i)->GetMiscValueB() & (1 << m_powerType)))
+                continue;
+
+            tmpPowerCost += (*i)->GetAmount();
+        }
+
+        // PCT mod from user auras by spell school and power type
+        Unit::AuraEffectList const& aurasPct = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT);
+        for (Unit::AuraEffectList::const_iterator i = aurasPct.begin(); i != aurasPct.end(); ++i)
+        {
+            if (!((*i)->GetMiscValue() & m_spellInfo->SchoolMask))
+                continue;
+
+            if (!((*i)->GetMiscValueB() & (1 << m_powerType)))
+                continue;
+
+            tmpPowerCost += CalculatePct(tmpPowerCost, (*i)->GetAmount());
+        }
+
         // Spell drain all exist power on cast (Bunyanize)
         if (m_spellInfo->AttributesEx & SPELL_ATTR1_DRAIN_ALL_POWER)
         {
