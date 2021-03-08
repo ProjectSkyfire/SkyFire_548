@@ -7273,6 +7273,32 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 12880: // Enrage
+        {
+            if (!(procSpell->SpellFamilyName == SPELLFAMILY_WARRIOR))
+                return false;
+
+            // check if we're doing a critical hit
+            if (procEx != PROC_EX_CRITICAL_HIT)
+                return false;
+
+            if (!(procSpell->SpellFamilyFlags[0] & 0x20000000 ||
+                procSpell->SpellFamilyFlags[1] & 0x00000400 ||
+                procSpell->SpellFamilyFlags[1] & 0x40000000 ||
+                procSpell->SpellFamilyFlags[1] & 0x00000040 ||
+                procSpell->SpellFamilyFlags[1] & 0x00000200))
+                return false;
+
+            if (!(procSpell->SpellIconID == 564 ||
+                procSpell->SpellIconID == 38 ||
+                procSpell->SpellIconID == 5288 ||
+                procSpell->SpellIconID == 1508 ||
+                procSpell->SpellIconID == 413))
+                return false;
+
+            CastSpell(this, 131116, true);
+            break;
+        }
     }
 
     if (cooldown && GetTypeId() == TypeID::TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
