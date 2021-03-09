@@ -1890,6 +1890,17 @@ SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject c
         return SPELL_CAST_OK;
     }
 
+    if (GameObject const* gameobjectTarget = target->ToGameObject())
+    {
+        if (neededTargets & (TARGET_FLAG_GAMEOBJECT))
+        {
+            if (caster->GetDistance(target) > (GetMaxRange()))
+                return SPELL_FAILED_OUT_OF_RANGE;
+
+            return SPELL_CAST_OK;
+        }
+    }
+
     if (Unit const* unitTarget = target->ToUnit())
     {
         if (neededTargets & (TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT_RAID | TARGET_FLAG_UNIT_PARTY | TARGET_FLAG_UNIT_MINIPET | TARGET_FLAG_UNIT_PASSENGER))
