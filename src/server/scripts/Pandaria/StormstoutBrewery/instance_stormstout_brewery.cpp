@@ -87,7 +87,7 @@ class instance_stormstout_brewery : public InstanceMapScript
                         if (data == SPECIAL)
                             ++BananaCount;
                         else if (data == IN_PROGRESS)
-                            BananaCount = 35;
+                            BananaCount = 0;
                         break;
                 }
             }

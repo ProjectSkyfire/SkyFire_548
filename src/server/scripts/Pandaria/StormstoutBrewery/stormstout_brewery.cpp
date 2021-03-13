@@ -50,6 +50,21 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
     }
 };
 
+void SummonHoptallusIfReady(InstanceScript* instance, Creature* creature, Unit* killer)
+{
+    if (instance->GetBossState(DATA_RABBIT_EVENT) == DONE)
+        return;
+
+    if (Creature* pHoptalus = creature->SummonCreature(NPC_HOPTALLUS, -726.259f, 1250.96f, 165.235f, 0.27f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
+    {
+        pHoptalus->GetMotionMaster()->MoveJump(HoptallusLandPos, pHoptalus->GetExactDist2d(HoptallusLandPos.GetPositionX(), HoptallusLandPos.GetPositionY()) * 10.0f / 5.0f, 5.0f);
+        pHoptalus->SetHomePosition(HoptallusLandPos);
+        //if (creature->GetVictim())
+        //    pOakOak->AI()->AttackStart(creature->GetVictim());
+    }
+    instance->SetBossState(DATA_RABBIT_EVENT, DONE);
+};
+
 class AreaTrigger_at_ssb_banana_bar : public AreaTriggerScript
 {
 public:
@@ -60,7 +75,7 @@ public:
         // Only trigger once
         if (InstanceScript* instance = player->GetInstanceScript())
         {
-            if (instance->GetData(DATA_BANANA_EVENT) == DONE)
+            if (instance->GetBossState(DATA_BANANA_EVENT) == DONE)
                 return false;
 
             if (player->IsAlive())
@@ -84,7 +99,6 @@ class npc_banana_hozen : public CreatureScript
 {
 public:
     npc_banana_hozen() : CreatureScript("npc_banana_hozen") { }
-
 
     struct npc_banana_hozenAI : public ScriptedAI
     {
@@ -133,8 +147,48 @@ public:
     }
 };
 
+class npc_bopper : public CreatureScript
+{
+public:
+    npc_bopper() : CreatureScript("npc_bopper") { }
+
+    struct npc_bopperAI : public ScriptedAI
+    {
+        npc_bopperAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        void Reset() OVERRIDE { }
+
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+
+        void JustDied(Unit* killer) OVERRIDE
+        {
+            if (instance)
+                SummonHoptallusIfReady(instance, me, killer);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        InstanceScript* instance;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_bopperAI(creature);
+    }
+};
+
 void AddSC_stormstout_brewery()
 {
     new AreaTrigger_at_ssb_banana_bar();
     new npc_banana_hozen();
+    new npc_bopper();
 }

@@ -20,15 +20,16 @@
 
 #define StormstoutBreweryScriptName "instance_stormstout_brewery"
 
-uint32 const EncounterCount = 4;
+uint32 const EncounterCount = 5;
 
 enum DataTypes
 {
     // Encounter States/Boss GUIDs
     DATA_BANANA_EVENT = 0,
     DATA_OOK_OOK      = 1,
-    DATA_HOPTALLUS    = 2,
-    DATA_YAN_ZHU      = 3,
+    DATA_RABBIT_EVENT = 2,
+    DATA_HOPTALLUS    = 3,
+    DATA_YAN_ZHU      = 4,
 };
 
 enum CreatureIds
@@ -48,6 +49,8 @@ enum GameObjectIds
 
 Position const OokOokLandPos = { -754.695, 1348.25f, 147.35f, 1.83f };
 Position const BananaFleePos = { -771.177, 1407.86f, 139.57f, 1.86f };
+
+Position const HoptallusLandPos = { -697.232f, 1260.42f, 162.79f, 0.33f };
 
 template<class AI>
 AI* GetStormstoutBreweryAI(Creature* creature)
