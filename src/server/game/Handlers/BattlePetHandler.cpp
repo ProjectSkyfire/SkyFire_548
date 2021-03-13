@@ -67,7 +67,6 @@ void WorldSession::HandlePetBattleStartPvpMatchmaking(WorldPacket& recvData)
     // data << uint32(0); // 16
 
     SendPacket(&data);
-
 }
 
 void WorldSession::HandlePetBattleStopPvpMatchmaking(WorldPacket& recvData)

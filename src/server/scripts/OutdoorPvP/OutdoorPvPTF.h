@@ -126,64 +126,44 @@ enum TFTowerStates
 class OPvPCapturePointTF : public OPvPCapturePoint
 {
     public:
-
         OPvPCapturePointTF(OutdoorPvP* pvp, OutdoorPvPTF_TowerType type);
-
-        bool Update(uint32 diff);
-
-        void ChangeState();
-
-        void SendChangePhase();
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        bool Update(uint32 diff) OVERRIDE;
+        void ChangeState() OVERRIDE;
+        void SendChangePhase() OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
         // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player);
-        void HandlePlayerLeave(Player* player);
-
+        bool HandlePlayerEnter(Player* player) OVERRIDE;
+        void HandlePlayerLeave(Player* player) OVERRIDE;
         void UpdateTowerState();
 
     protected:
-
         OutdoorPvPTF_TowerType m_TowerType;
-
         uint32 m_TowerState;
 };
 
 class OutdoorPvPTF : public OutdoorPvP
 {
     public:
-
         OutdoorPvPTF();
-
-        bool SetupOutdoorPvP();
-
-        void HandlePlayerEnterZone(Player* player, uint32 zone);
-        void HandlePlayerLeaveZone(Player* player, uint32 zone);
-
-        bool Update(uint32 diff);
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
-
-        void SendRemoveWorldStates(Player* player);
-
+        bool SetupOutdoorPvP() OVERRIDE;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
+        bool Update(uint32 diff) OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void SendRemoveWorldStates(Player* player) OVERRIDE;
         uint32 GetAllianceTowersControlled() const;
         void SetAllianceTowersControlled(uint32 count);
-
         uint32 GetHordeTowersControlled() const;
         void SetHordeTowersControlled(uint32 count);
-
         bool IsLocked() const;
 
     private:
-
         bool m_IsLocked;
         uint32 m_LockTimer;
         uint32 m_LockTimerUpdate;
-
         uint32 m_AllianceTowersControlled;
         uint32 m_HordeTowersControlled;
-
         uint32 hours_left, second_digit, first_digit;
 };
 

@@ -94,7 +94,6 @@ class BigNumber
 
     private:
         struct bignum_st *_bn;
-
 };
 #endif
 

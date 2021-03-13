@@ -241,7 +241,6 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
     }
 
     // *** poly path generating logic ***
-
     // start and end are on same polygon
     // just need to move in straight line
     if (startPoly == endPoly)

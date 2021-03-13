@@ -90,51 +90,38 @@ const go_type HPTowerFlags[HP_TOWER_NUM] =
 class OPvPCapturePointHP : public OPvPCapturePoint
 {
     public:
-
         OPvPCapturePointHP(OutdoorPvP* pvp, OutdoorPvPHPTowerType type);
-
-        void ChangeState();
-
-        void SendChangePhase();
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        void ChangeState() OVERRIDE;
+        void SendChangePhase() OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
         // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player);
-        void HandlePlayerLeave(Player* player);
+        bool HandlePlayerEnter(Player* player) OVERRIDE;
+        void HandlePlayerLeave(Player* player) OVERRIDE;
 
     private:
-
         OutdoorPvPHPTowerType m_TowerType;
 };
 
 class OutdoorPvPHP : public OutdoorPvP
 {
     public:
-
         OutdoorPvPHP();
 
-        bool SetupOutdoorPvP();
-
-        void HandlePlayerEnterZone(Player* player, uint32 zone);
-        void HandlePlayerLeaveZone(Player* player, uint32 zone);
-
-        bool Update(uint32 diff);
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
-
-        void SendRemoveWorldStates(Player* player);
-
-        void HandleKillImpl(Player* player, Unit* killed);
+        bool SetupOutdoorPvP() OVERRIDE;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
+        bool Update(uint32 diff) OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void SendRemoveWorldStates(Player* player) OVERRIDE;
+        void HandleKillImpl(Player* player, Unit* killed) OVERRIDE;
 
         uint32 GetAllianceTowersControlled() const;
         void SetAllianceTowersControlled(uint32 count);
-
         uint32 GetHordeTowersControlled() const;
         void SetHordeTowersControlled(uint32 count);
 
     private:
-
         // how many towers are controlled
         uint32 m_AllianceTowersControlled;
         uint32 m_HordeTowersControlled;

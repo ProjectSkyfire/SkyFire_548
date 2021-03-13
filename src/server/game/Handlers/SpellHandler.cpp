@@ -1151,7 +1151,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
             if (talentInfo->OverrideSpellID == spellId)
             {
-
                 if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo(talentInfo->SpellId))
                 {
                     if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||

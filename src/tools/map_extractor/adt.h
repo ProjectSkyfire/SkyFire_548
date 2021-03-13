@@ -220,7 +220,6 @@ public:
         else
             return 0xFFFFFFFFFFFFFFFFuLL;
     }
-
 };
 
 #pragma pack(pop)

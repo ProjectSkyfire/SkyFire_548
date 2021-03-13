@@ -56,33 +56,22 @@ enum SI_WorldStates
 class OutdoorPvPSI : public OutdoorPvP
 {
     public:
-
         OutdoorPvPSI();
 
-        bool SetupOutdoorPvP();
-
-        void HandlePlayerEnterZone(Player* player, uint32 zone);
-        void HandlePlayerLeaveZone(Player* player, uint32 zone);
-
-        bool Update(uint32 diff);
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
-
-        void SendRemoveWorldStates(Player* player);
-
-        bool HandleAreaTrigger(Player* player, uint32 trigger);
-
-        bool HandleDropFlag(Player* player, uint32 spellId);
-
-        bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go);
-
+        bool SetupOutdoorPvP() OVERRIDE;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
+        bool Update(uint32 diff) OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void SendRemoveWorldStates(Player* player) OVERRIDE;
+        bool HandleAreaTrigger(Player* player, uint32 trigger) OVERRIDE;
+        bool HandleDropFlag(Player* player, uint32 spellId) OVERRIDE;
+        bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go) OVERRIDE;
         void UpdateWorldState();
 
     private:
-
         uint32 m_Gathered_A;
         uint32 m_Gathered_H;
-
         uint32 m_LastController;
 };
 

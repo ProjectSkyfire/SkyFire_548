@@ -4946,7 +4946,6 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 
     //PeriodicAuraLogEffect
     {
-        
         data.WriteBit(!pInfo->overDamage); // 8
         data.WriteBit(!pInfo->absorb); // 16
         data.WriteBit(pInfo->critical); // 24
@@ -4988,7 +4987,6 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
         //if12
         if (pInfo->power)
             data << uint32(pInfo->power);
-
     }
 
     data.WriteGuidBytes(CasterGUID, 5, 3);
@@ -5019,7 +5017,6 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     data.WriteGuidBytes(TargetGUID, 0, 2);
     data.WriteGuidBytes(CasterGUID, 6); 
     SendMessageToSet(&data, true);
-
 }
 
 void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)

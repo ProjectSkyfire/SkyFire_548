@@ -1226,7 +1226,6 @@ struct PlayerTalentInfo
         PlayerTalentMap* Talents;
         uint32 Glyphs[MAX_GLYPH_SLOT_INDEX] = { };
         uint32 TalentTree;
-
     } SpecInfo[MAX_TALENT_SPECS] = { };
 
     uint32 UsedTalentCount;

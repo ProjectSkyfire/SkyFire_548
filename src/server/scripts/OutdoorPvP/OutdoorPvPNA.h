@@ -257,21 +257,16 @@ class OPvPCapturePointNA : public OPvPCapturePoint
     public:
         OPvPCapturePointNA(OutdoorPvP* pvp);
 
-        bool Update(uint32 diff);
-
-        void ChangeState();
-
-        void SendChangePhase();
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+        bool Update(uint32 diff) OVERRIDE;
+        void ChangeState() OVERRIDE;
+        void SendChangePhase() OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
         // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player);
-        void HandlePlayerLeave(Player* player);
-
-        bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go);
-
-        int32 HandleOpenGo(Player* player, uint64 guid);
+        bool HandlePlayerEnter(Player* player) OVERRIDE;
+        void HandlePlayerLeave(Player* player) OVERRIDE;
+        bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go) OVERRIDE;
+        int32 HandleOpenGo(Player* player, uint64 guid) OVERRIDE;
 
         uint32 GetAliveGuardsCount();
         uint32 GetControllingFaction() const;
@@ -279,32 +274,23 @@ class OPvPCapturePointNA : public OPvPCapturePoint
     protected:
         // called when a faction takes control
         void FactionTakeOver(uint32 team);
-
         void DeSpawnNPCs();
         void DeSpawnGOs();
-
         void SpawnNPCsForTeam(uint32 team);
         void SpawnGOsForTeam(uint32 team);
-
         void UpdateWyvernRoostWorldState(uint32 roost);
         void UpdateHalaaWorldState();
 
     private:
         bool m_capturable;
-
         uint32 m_GuardsAlive;
-
         uint32 m_ControllingFaction;
-
         uint32 m_WyvernStateNorth;
         uint32 m_WyvernStateSouth;
         uint32 m_WyvernStateEast;
         uint32 m_WyvernStateWest;
-
         uint32 m_HalaaState;
-
         uint32 m_RespawnTimer;
-
         uint32 m_GuardCheckTimer;
 };
 
@@ -313,18 +299,13 @@ class OutdoorPvPNA : public OutdoorPvP
     public:
         OutdoorPvPNA();
 
-        bool SetupOutdoorPvP();
-
-        void HandlePlayerEnterZone(Player* player, uint32 zone);
-        void HandlePlayerLeaveZone(Player* player, uint32 zone);
-
-        bool Update(uint32 diff);
-
-        void FillInitialWorldStates(WorldStateBuilder& builder);
-
-        void SendRemoveWorldStates(Player* player);
-
-        void HandleKillImpl(Player* player, Unit* killed);
+        bool SetupOutdoorPvP() OVERRIDE;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
+        bool Update(uint32 diff) OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void SendRemoveWorldStates(Player* player) OVERRIDE;
+        void HandleKillImpl(Player* player, Unit* killed) OVERRIDE;
 
     private:
         OPvPCapturePointNA * m_obj;
