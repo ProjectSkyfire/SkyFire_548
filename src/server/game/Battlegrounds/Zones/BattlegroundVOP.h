@@ -113,6 +113,7 @@ public:
     void PostUpdateImpl(uint32 diff) OVERRIDE;
 
 private:
+    uint64 m_FlagKeeper[4] = { };
     uint32 m_HonorScoreTics[BG_TEAMS_COUNT] = { };
     uint32 m_HonorTics; 
     uint32 m_lastTick[BG_TEAMS_COUNT] = { };
