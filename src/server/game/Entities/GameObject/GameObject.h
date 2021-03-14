@@ -637,14 +637,14 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         explicit GameObject();
         ~GameObject();
 
-        void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
+        void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const OVERRIDE;
 
-        void AddToWorld();
-        void RemoveFromWorld();
-        void CleanupsBeforeDelete(bool finalCleanup = true);
+        void AddToWorld() OVERRIDE;
+        void RemoveFromWorld() OVERRIDE;
+        void CleanupsBeforeDelete(bool finalCleanup = true) OVERRIDE;
 
         bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
-        void Update(uint32 p_time);
+        void Update(uint32 p_time) OVERRIDE;
         static GameObject* GetGameObject(WorldObject& object, uint64 guid);
         GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
         GameObjectData const* GetGOData() const { return m_goData; }
@@ -760,7 +760,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         uint32 GetUseCount() const { return m_usetimes; }
         uint32 GetUniqueUseCount() const { return m_unique_users.size(); }
 
-        void SaveRespawnTime();
+        void SaveRespawnTime() OVERRIDE;
 
         Loot        loot;
 
@@ -772,8 +772,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 lootingGroupLowGUID;                         // used to find group which is looting
 
-        bool hasQuest(uint32 quest_id) const;
-        bool hasInvolvedQuest(uint32 quest_id) const;
+        bool hasQuest(uint32 quest_id) const OVERRIDE;
+        bool hasInvolvedQuest(uint32 quest_id) const OVERRIDE;
         bool ActivateToQuest(Player* target) const;
         void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false, Unit* user = NULL);
                                                             // 0 = use `gameobject`.`spawntimesecs`
