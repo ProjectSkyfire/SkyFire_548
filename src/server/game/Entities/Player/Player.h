@@ -177,12 +177,12 @@ enum TalentTree // talent tabs
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
-    SpellModifier(Aura* _ownerAura = NULL) : op(SPELLMOD_DAMAGE), type(SPELLMOD_FLAT), charges(0), value(0), mask(), spellId(0), ownerAura(_ownerAura)
+    SpellModifier(Aura* _ownerAura = NULL) : op(SPELLMOD_DAMAGE), type(SPELLMOD_FLAT), charges(0), value(0.0f), mask(), spellId(0), ownerAura(_ownerAura)
     { }
     SpellModOp   op : 8;
     SpellModType type : 8;
     int16 charges : 16;
-    int32 value;
+    float value;
     flag128 mask;
     uint32 spellId;
     Aura* const ownerAura;
@@ -3596,7 +3596,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
     if (!spellInfo)
         return 0;
     float totalmul = 1.0f;
-    int32 totalflat = 0;
+    float totalflat = 0;
 
     // Drop charges for triggering spells instead of triggered ones
     if (m_spellModTakingSpell)

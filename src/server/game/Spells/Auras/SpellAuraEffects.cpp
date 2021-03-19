@@ -709,7 +709,7 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
                 m_spellmod->charges = GetBase()->GetCharges();
             }
-            m_spellmod->value = GetAmount();
+            m_spellmod->value = (float)GetAmount();
             break;
         default:
             break;

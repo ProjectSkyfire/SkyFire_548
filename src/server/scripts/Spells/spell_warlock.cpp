@@ -90,7 +90,7 @@ public:
                 spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
             }
 
-            spellMod->value = 1.0f + (aurEff->GetAmount() / 100);
+            spellMod->value = (float)(aurEff->GetAmount() / 100);
         }
 
         void Register() OVERRIDE

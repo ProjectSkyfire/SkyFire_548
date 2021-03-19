@@ -215,7 +215,7 @@ public:
                 spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
             }
 
-            spellMod->value = -aurEff->GetAmount();
+            spellMod->value = -(float)aurEff->GetAmount();
         }
 
         void Register() OVERRIDE
@@ -251,7 +251,7 @@ public:
                 spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
             }
 
-            spellMod->value = aurEff->GetAmount();
+            spellMod->value = (float)aurEff->GetAmount();
         }
 
         void Register() OVERRIDE

@@ -21771,11 +21771,22 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
         _mask[i] = uint32(1) << (eff - (32 * i));
         if (mod->mask & _mask)
         {
-            int32 val = 0;
-            for (SpellModList::iterator itr = m_spellMods[mod->op].begin(); itr != m_spellMods[mod->op].end(); ++itr)
-                if ((*itr)->type == mod->type && (*itr)->mask & _mask)
-                    val += (*itr)->value;
-            val += apply ? mod->value : -(mod->value);
+            float val = 0.0f;
+            if (mod->type == SPELLMOD_FLAT)
+            {
+                for (SpellModList::iterator itr = m_spellMods[mod->op].begin(); itr != m_spellMods[mod->op].end(); ++itr)
+                    if ((*itr)->type == mod->type && (*itr)->mask & _mask)
+                        val += (*itr)->value;
+                val += apply ? mod->value : -(mod->value);
+            }
+            else
+            {
+                val = 1.0f;
+                for (SpellModList::iterator itr = m_spellMods[mod->op].begin(); itr != m_spellMods[mod->op].end(); ++itr)
+                    if ((*itr)->type == mod->type && (*itr)->mask & _mask)
+                        AddPct(val, (*itr)->value);
+                AddPct(val, apply ? mod->value : -(mod->value));
+            }
 
             data << float(val);
             data << uint8(eff);
