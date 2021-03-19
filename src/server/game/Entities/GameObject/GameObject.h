@@ -659,7 +659,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
 
         // overwrite WorldObject function for proper name localization
-        std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const;
+        std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const OVERRIDE;
 
         void SaveToDB();
         void SaveToDB(uint32 mapid, uint32 spawnMask);
@@ -781,10 +781,10 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         void TriggeringLinkedGameObject(uint32 trapEntry, Unit* target);
 
-        bool IsAlwaysVisibleFor(WorldObject const* seer) const;
-        bool IsInvisibleDueToDespawn() const;
+        bool IsAlwaysVisibleFor(WorldObject const* seer) const OVERRIDE;
+        bool IsInvisibleDueToDespawn() const OVERRIDE;
 
-        uint8 getLevelForTarget(WorldObject const* target) const
+        uint8 getLevelForTarget(WorldObject const* target) const OVERRIDE
         {
             if (Unit* owner = GetOwner())
                 return owner->getLevelForTarget(target);
@@ -826,10 +826,10 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
         Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
 
-        float GetStationaryX() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
-        float GetStationaryY() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
-        float GetStationaryZ() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
-        float GetStationaryO() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
+        float GetStationaryX() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
+        float GetStationaryY() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
+        float GetStationaryZ() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
+        float GetStationaryO() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
 
         void UpdateModelPosition();
 
@@ -870,7 +870,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void SwitchDoorOrButton(bool activate, bool alternative = false);
 
         //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
-        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const
+        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const OVERRIDE
         {
             //! Following check does check 3d distance
             return IsInRange(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), dist2compare);
