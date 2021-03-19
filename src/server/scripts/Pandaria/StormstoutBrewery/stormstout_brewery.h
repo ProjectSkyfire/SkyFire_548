@@ -47,8 +47,8 @@ enum GameObjectIds
     // doors
 };
 
-Position const OokOokLandPos = { -754.695, 1348.25f, 147.35f, 1.83f };
-Position const BananaFleePos = { -771.177, 1407.86f, 139.57f, 1.86f };
+Position const OokOokLandPos = { -754.695f, 1348.25f, 147.35f, 1.83f };
+Position const BananaFleePos = { -771.177f, 1407.86f, 139.57f, 1.86f };
 
 Position const HoptallusLandPos = { -697.232f, 1260.42f, 162.79f, 0.33f };
 
