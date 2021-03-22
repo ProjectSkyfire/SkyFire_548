@@ -9060,9 +9060,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     {
                         // Shatter // 5.4.8
                         case 911:
-                            if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
-                                break;
-                            AddPct(crit_chance, (*i)->GetAmount() * 20);
+                            if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                                ApplyPct(crit_chance, (*i)->GetAmount() * 25);
                             break;
                         default:
                             break;
