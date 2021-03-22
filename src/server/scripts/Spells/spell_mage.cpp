@@ -443,42 +443,6 @@ public:
     }
 };
 
-// 116 - Frostbolt
-/// Updated 4.3.4
-class spell_mage_frostbolt : public SpellScriptLoader
-{
-public:
-    spell_mage_frostbolt() : SpellScriptLoader("spell_mage_frostbolt") { }
-
-    class spell_mage_frostbolt_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_mage_frostbolt_SpellScript);
-
-        void RecalculateDamage(SpellEffIndex /*effIndex*/)
-        {
-            if (GetHitUnit() && GetHitUnit()->HasAuraState(AURA_STATE_FROZEN, GetSpellInfo(), GetCaster()))
-            {
-                if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, ICON_MAGE_SHATTER, EFFECT_1))
-                {
-                    int32 damage = GetHitDamage();
-                    AddPct(damage, aurEff->GetAmount());
-                    SetHitDamage(damage);
-                }
-            }
-        }
-
-        void Register() override
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_mage_frostbolt_SpellScript::RecalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_mage_frostbolt_SpellScript();
-    }
-};
-
 // 56372 - Glyph of Ice Block
 class spell_mage_glyph_of_ice_block : public SpellScriptLoader
 {
@@ -959,7 +923,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_cold_snap();
     new spell_mage_conjure_refreshment_table();
     new spell_mage_conjure_refreshment();
-    new spell_mage_frostbolt();
     new spell_mage_ignite();
     new spell_mage_glyph_of_ice_block();
     new spell_mage_glyph_of_polymorph();
