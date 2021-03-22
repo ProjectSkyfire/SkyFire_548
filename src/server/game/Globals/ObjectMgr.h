@@ -1228,8 +1228,8 @@ class ObjectMgr
 
         SkyFireStringLocale const* GetSkyFireStringLocale(int32 entry) const
         {
-            SkyFireStringLocaleContainer::const_iterator itr = _trinityStringLocaleStore.find(entry);
-            if (itr == _trinityStringLocaleStore.end()) return NULL;
+            SkyFireStringLocaleContainer::const_iterator itr = _SkyfireStringLocaleStore.find(entry);
+            if (itr == _SkyfireStringLocaleStore.end()) return NULL;
             return &itr->second;
         }
         const char *GetSkyFireString(int32 entry, LocaleConstant locale_idx) const;
@@ -1570,7 +1570,7 @@ class ObjectMgr
         QuestLocaleContainer _questLocaleStore;
         NpcTextLocaleContainer _npcTextLocaleStore;
         PageTextLocaleContainer _pageTextLocaleStore;
-        SkyFireStringLocaleContainer _trinityStringLocaleStore;
+        SkyFireStringLocaleContainer _SkyfireStringLocaleStore;
         GossipMenuItemsLocaleContainer _gossipMenuItemsLocaleStore;
         PointOfInterestLocaleContainer _pointOfInterestLocaleStore;
         QuestObjectiveLocaleContainer m_questObjectiveLocaleStore;

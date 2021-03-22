@@ -7523,10 +7523,10 @@ bool ObjectMgr::LoadSkyFireStrings(const char* table, int32 min_value, int32 max
     }
 
     // cleanup affected map part for reloading case
-    for (SkyFireStringLocaleContainer::iterator itr = _trinityStringLocaleStore.begin(); itr != _trinityStringLocaleStore.end();)
+    for (SkyFireStringLocaleContainer::iterator itr = _SkyfireStringLocaleStore.begin(); itr != _SkyfireStringLocaleStore.end();)
     {
         if (itr->first >= start_value && itr->first < end_value)
-            _trinityStringLocaleStore.erase(itr++);
+            _SkyfireStringLocaleStore.erase(itr++);
         else
             ++itr;
     }
@@ -7562,7 +7562,7 @@ bool ObjectMgr::LoadSkyFireStrings(const char* table, int32 min_value, int32 max
             continue;
         }
 
-        SkyFireStringLocale& data = _trinityStringLocaleStore[entry];
+        SkyFireStringLocale& data = _SkyfireStringLocaleStore[entry];
 
         if (!data.Content.empty())
         {
