@@ -132,12 +132,12 @@ enum class WintergraspWorldStates
     BATTLEFIELD_WG_WORLD_STATE_ATTACKER          = 3803,
     BATTLEFIELD_WG_WORLD_STATE_SHOW_WORLDSTATE   = 3710,
 
-    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NE                       = 3701,
-    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NW                       = 3700,
-    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SE                       = 3703,
-    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SW                       = 3702,
-    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_W                      = 3698,
-    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_E                      = 3699
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NE       = 3701,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NW       = 3700,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SE       = 3703,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SW       = 3702,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_W      = 3698,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_E      = 3699
 };
 
 enum class WintergraspAreaIds
@@ -454,7 +454,7 @@ uint8 const WG_MAX_KEEP_NPC         = 39;
 uint8 const WG_MAX_OUTSIDE_NPC      = 14;
 uint8 const WG_OUTSIDE_ALLIANCE_NPC = 7;
 uint8 const WG_MAX_TELEPORTER       = 12;
-uint8 const WG_MAX_WORKSHOP = 6;
+uint8 const WG_MAX_WORKSHOP         = 6;
 
 enum class WintergraspGameObjectBuildingType
 {
@@ -1047,9 +1047,9 @@ const WGWorkshopData WorkshopsData[WG_MAX_WORKSHOP] =
     // SW
     { BATTLEFIELD_WG_WORKSHOP_SW, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW },
     // KEEP WEST - It can't be taken, so it doesn't have a textid
-    { BATTLEFIELD_WG_WORKSHOP_KEEP_WEST, WORLDSTATE_WORKSHOP_K_W, 0 },
+    { BATTLEFIELD_WG_WORKSHOP_KEEP_WEST, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_W, 0 },
     // KEEP EAST - It can't be taken, so it doesn't have a textid
-    { BATTLEFIELD_WG_WORKSHOP_KEEP_EAST, WORLDSTATE_WORKSHOP_K_E, 0 }
+    { BATTLEFIELD_WG_WORKSHOP_KEEP_EAST, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_E, 0 }
 };
 
 // ********************************************************************
