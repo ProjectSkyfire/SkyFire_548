@@ -38,13 +38,13 @@ typedef std::set<WGWorkshop*> Workshop;
 typedef std::set<Group*> GroupSet;
 //typedef std::set<WintergraspCapturePoint *> CapturePointSet; unused ?
 
-enum WintergraspData
+enum class WintergraspData
 {
     BATTLEFIELD_WG_ZONEID                        = 4197,             // Wintergrasp
     BATTLEFIELD_WG_MAPID                         = 571               // Northrend
 };
 
-enum WintergraspSpells
+enum class WintergraspSpells
 {
     // Wartime auras
     SPELL_RECRUIT                               = 37795,
@@ -88,7 +88,7 @@ enum WintergraspSpells
     SPELL_ALLIANCE_CONTROL_PHASE_SHIFT          = 55774  // ADDS PHASE 128
 };
 
-enum WintergraspData
+enum class WintergraspData
 {
     BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF,
     BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF,
@@ -101,7 +101,7 @@ enum WintergraspData
     BATTLEFIELD_WG_DATA_MAX
 };
 
-enum WintergraspAchievements
+enum class WintergraspAchievements
 {
     ACHIEVEMENTS_WIN_WG                          = 1717,
     ACHIEVEMENTS_WIN_WG_100                      = 1718, /// @todo: Has to be implemented
@@ -121,7 +121,7 @@ enum WintergraspAchievements
     ACHIEVEMENTS_WG_MASTER_H                     = 2776  /// @todo: Has to be implemented
 };
 
-enum WintergraspWorldStates
+enum class WintergraspWorldStates
 {
     BATTLEFIELD_WG_WORLD_STATE_VEHICLE_H         = 3490,
     BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_H     = 3491,
@@ -130,10 +130,17 @@ enum WintergraspWorldStates
     BATTLEFIELD_WG_WORLD_STATE_ACTIVE            = 3801,
     BATTLEFIELD_WG_WORLD_STATE_DEFENDER          = 3802,
     BATTLEFIELD_WG_WORLD_STATE_ATTACKER          = 3803,
-    BATTLEFIELD_WG_WORLD_STATE_SHOW_WORLDSTATE   = 3710
+    BATTLEFIELD_WG_WORLD_STATE_SHOW_WORLDSTATE   = 3710,
+
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NE                       = 3701,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NW                       = 3700,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SE                       = 3703,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SW                       = 3702,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_W                      = 3698,
+    BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_K_E                      = 3699
 };
 
-enum WintergraspAreaIds
+enum class WintergraspAreaIds
 {
     AREA_WINTERGRASP_FORTRESS       = 4575,
     AREA_THE_SUNKEN_RING            = 4538,
@@ -159,7 +166,7 @@ class BfGraveyardWG : public BfGraveyard
         int32 m_GossipTextId;
 };
 
-enum WGGraveyardId
+enum class WGGraveyardId
 {
     BATTLEFIELD_WG_GY_WORKSHOP_NE,
     BATTLEFIELD_WG_GY_WORKSHOP_NW,
@@ -171,7 +178,7 @@ enum WGGraveyardId
     BATTLEFIELD_WG_GRAVEYARD_MAX
 };
 
-enum WGGossipText
+enum class WGGossipText
 {
     BATTLEFIELD_WG_GOSSIPTEXT_GY_NE              = 20071,
     BATTLEFIELD_WG_GOSSIPTEXT_GY_NW              = 20072,
@@ -182,7 +189,7 @@ enum WGGossipText
     BATTLEFIELD_WG_GOSSIPTEXT_GY_ALLIANCE        = 20076
 };
 
-enum WintergraspNpcs
+enum class WintergraspNpcs
 {
     BATTLEFIELD_WG_NPC_GUARD_H                      = 30739,
     BATTLEFIELD_WG_NPC_GUARD_A                      = 30740,
@@ -449,7 +456,7 @@ uint8 const WG_OUTSIDE_ALLIANCE_NPC = 7;
 uint8 const WG_MAX_TELEPORTER       = 12;
 uint8 const WG_MAX_WORKSHOP = 6;
 
-enum WintergraspGameObjectBuildingType
+enum class WintergraspGameObjectBuildingType
 {
     BATTLEFIELD_WG_OBJECTTYPE_DOOR,
     BATTLEFIELD_WG_OBJECTTYPE_TITANRELIC,
@@ -459,7 +466,7 @@ enum WintergraspGameObjectBuildingType
     BATTLEFIELD_WG_OBJECTTYPE_TOWER
 };
 
-enum WintergraspGameObjectState
+enum class WintergraspGameObjectState
 {
     BATTLEFIELD_WG_OBJECTSTATE_NONE,
     BATTLEFIELD_WG_OBJECTSTATE_NEUTRAL_INTACT,
@@ -473,7 +480,7 @@ enum WintergraspGameObjectState
     BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_DESTROY
 };
 
-enum WintergraspWorkshopIds
+enum class WintergraspWorkshopIds
 {
     BATTLEFIELD_WG_WORKSHOP_NE,
     BATTLEFIELD_WG_WORKSHOP_NW,
@@ -483,17 +490,7 @@ enum WintergraspWorkshopIds
     BATTLEFIELD_WG_WORKSHOP_KEEP_EAST
 };
 
-enum WGWorkshopWorldStates
-{
-    WORLDSTATE_WORKSHOP_NE      = 3701,
-    WORLDSTATE_WORKSHOP_NW      = 3700,
-    WORLDSTATE_WORKSHOP_SE      = 3703,
-    WORLDSTATE_WORKSHOP_SW      = 3702,
-    WORLDSTATE_WORKSHOP_K_W     = 3698,
-    WORLDSTATE_WORKSHOP_K_E     = 3699
-};
-
-enum WintergraspTeamControl
+enum class WintergraspTeamControl
 {
     BATTLEFIELD_WG_TEAM_ALLIANCE,
     BATTLEFIELD_WG_TEAM_HORDE,
@@ -501,7 +498,7 @@ enum WintergraspTeamControl
 };
 
 /// @todo: Can this be handled with creature_text or SmartAI ?
-enum WintergraspText
+enum class WintergraspText
 {
     BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE         = 12055,
     BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW         = 12052,
@@ -528,7 +525,7 @@ enum WintergraspText
     BATTLEFIELD_WG_TEXT_WIN_KEEP                 = 12072
 };
 
-enum WintergraspGameObject
+enum class WintergraspGameObject
 {
     GO_WINTERGRASP_FACTORY_BANNER_NE             = 190475,
     GO_WINTERGRASP_FACTORY_BANNER_NW             = 190487,
@@ -1042,13 +1039,13 @@ struct WGWorkshopData
 const WGWorkshopData WorkshopsData[WG_MAX_WORKSHOP] =
 {
     // NE
-    { BATTLEFIELD_WG_WORKSHOP_NE, WORLDSTATE_WORKSHOP_NE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE },
+    { BATTLEFIELD_WG_WORKSHOP_NE, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE },
     // NW
-    { BATTLEFIELD_WG_WORKSHOP_NW, WORLDSTATE_WORKSHOP_NW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW },
+    { BATTLEFIELD_WG_WORKSHOP_NW, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_NW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW },
     // SE
-    { BATTLEFIELD_WG_WORKSHOP_SE, WORLDSTATE_WORKSHOP_SE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE },
+    { BATTLEFIELD_WG_WORKSHOP_SE, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE },
     // SW
-    { BATTLEFIELD_WG_WORKSHOP_SW, WORLDSTATE_WORKSHOP_SW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW },
+    { BATTLEFIELD_WG_WORKSHOP_SW, BATTLEFIELD_WG_WORLD_STATE_WORKSHOP_SW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW },
     // KEEP WEST - It can't be taken, so it doesn't have a textid
     { BATTLEFIELD_WG_WORKSHOP_KEEP_WEST, WORLDSTATE_WORKSHOP_K_W, 0 },
     // KEEP EAST - It can't be taken, so it doesn't have a textid
