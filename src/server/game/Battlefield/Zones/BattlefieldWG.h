@@ -38,7 +38,7 @@ typedef std::set<WGWorkshop*> Workshop;
 typedef std::set<Group*> GroupSet;
 //typedef std::set<WintergraspCapturePoint *> CapturePointSet; unused ?
 
-enum WintergrastData
+enum WintergraspData
 {
     BATTLEFIELD_WG_ZONEID                        = 4197,             // Wintergrasp
     BATTLEFIELD_WG_MAPID                         = 571               // Northrend
@@ -483,7 +483,7 @@ enum WintergraspWorkshopIds
     BATTLEFIELD_WG_WORKSHOP_KEEP_EAST
 };
 
-enum WintergraspWorldstates
+enum WGWorkshopWorldStates
 {
     WORLDSTATE_WORKSHOP_NE      = 3701,
     WORLDSTATE_WORKSHOP_NW      = 3700,
@@ -973,19 +973,19 @@ const WintergraspTowerCannonData TowerCannon[WG_MAX_TOWER_CANNON] =
         190356,
         2,
         {
-            {4537.380371f, 3599.531738f, 402.886993f, 3.998462f},
-            {4581.497559f, 3604.087158f, 402.886963f, 5.651723f},
-            {0, 0, 0, 0},
-            {0, 0, 0, 0},
-            {0, 0, 0, 0},
+            { 4537.380371f, 3599.531738f, 402.886993f, 3.998462f },
+            { 4581.497559f, 3604.087158f, 402.886963f, 5.651723f },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
         },
         2,
         {
-            {4469.448242f, 1966.623779f, 465.647217f, 1.153573f},
-            {4581.895996f, 3626.438477f, 426.539062f, 0.117806f},
-            {0, 0, 0, 0},
-            {0, 0, 0, 0},
-            {0, 0, 0, 0},
+            { 4469.448242f, 1966.623779f, 465.647217f, 1.153573f },
+            { 4581.895996f, 3626.438477f, 426.539062f, 0.117806f },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
         },
     },
     {
@@ -1042,17 +1042,17 @@ struct WGWorkshopData
 const WGWorkshopData WorkshopsData[WG_MAX_WORKSHOP] =
 {
     // NE
-    {BATTLEFIELD_WG_WORKSHOP_NE, WORLDSTATE_WORKSHOP_NE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE},
+    { BATTLEFIELD_WG_WORKSHOP_NE, WORLDSTATE_WORKSHOP_NE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE },
     // NW
-    {BATTLEFIELD_WG_WORKSHOP_NW, WORLDSTATE_WORKSHOP_NW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW},
+    { BATTLEFIELD_WG_WORKSHOP_NW, WORLDSTATE_WORKSHOP_NW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW },
     // SE
-    {BATTLEFIELD_WG_WORKSHOP_SE, WORLDSTATE_WORKSHOP_SE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE},
+    { BATTLEFIELD_WG_WORKSHOP_SE, WORLDSTATE_WORKSHOP_SE, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE },
     // SW
-    {BATTLEFIELD_WG_WORKSHOP_SW, WORLDSTATE_WORKSHOP_SW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW},
+    { BATTLEFIELD_WG_WORKSHOP_SW, WORLDSTATE_WORKSHOP_SW, BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW },
     // KEEP WEST - It can't be taken, so it doesn't have a textid
-    {BATTLEFIELD_WG_WORKSHOP_KEEP_WEST, WORLDSTATE_WORKSHOP_K_W, 0},
+    { BATTLEFIELD_WG_WORKSHOP_KEEP_WEST, WORLDSTATE_WORKSHOP_K_W, 0 },
     // KEEP EAST - It can't be taken, so it doesn't have a textid
-    {BATTLEFIELD_WG_WORKSHOP_KEEP_EAST, WORLDSTATE_WORKSHOP_K_E, 0}
+    { BATTLEFIELD_WG_WORKSHOP_KEEP_EAST, WORLDSTATE_WORKSHOP_K_E, 0 }
 };
 
 // ********************************************************************
