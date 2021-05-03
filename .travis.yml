@@ -13,55 +13,21 @@ os: linux
 
 matrix:
   include:
-    - compiler: clang
-      dist: focal
-      env: CXXCOMPILER=clang++-10 CCOMPILER=clang-10
-      addons:
-        apt:
-          sources:
-            - sourceline: 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main'
-              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
-          packages:
-            - clang-10
-            - libc++-10-dev
-            - libc++abi-10-dev
-            - lldb-10
-            - lld-10
-    - compiler: clang
-      dist: bionic
-      env: CXXCOMPILER=clang++-10 CCOMPILER=clang-10
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
-              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
-          packages:
-            - clang-10
-            - libc++-10-dev
-            - libc++abi-10-dev
-            - lldb-10
-            - lld-10
-    - compiler: gcc
-      dist: focal
-      env: CXXCOMPILER=g++-9 CCOMPILER=gcc-9
-      addons:
-        apt:
-          sources:
-          packages:
-            - gcc-9
-            - g++-9
-    - compiler: gcc
-      dist: bionic
-      env: CXXCOMPILER=g++-9 CCOMPILER=gcc-9
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-9
-            - g++-9
-
+   - name: "Ubuntu 21.04 (Hirsute Hippo) with GCC"
+     os: linux
+     dist: focal
+     group: travis_latest
+     env: DOCKER="ubuntu:hirsute" VARIANT="ubuntu" TOOL="compile" COMPILER_C="gcc" COMPILER_CXX="g++"
+   - name: "Ubuntu 20.04 (Focal Fossa) with GCC"
+     os: linux
+     dist: focal
+     group: travis_latest
+     env: DOCKER="ubuntu:focal" VARIANT="ubuntu" TOOL="compile" COMPILER_C="gcc" COMPILER_CXX="g++"
+   - name: "Ubuntu 20.10 (Groovy Gorilla) with GCC"
+     os: linux
+     dist: focal
+     group: travis_latest
+     env: DOCKER="ubuntu:groovy" VARIANT="ubuntu" TOOL="compile" COMPILER_C="gcc" COMPILER_CXX="g++"
 language: cpp
 sudo: required
 group: stable
@@ -84,10 +50,10 @@ before_install:
   - sudo apt-get install openssl libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
 
 install:
-  - export CXX=${CXXCOMPILER}
-  - export CC=${CCOMPILER}
-  - ${CXX} --version
-  - ${CCOMPILER} --version
+  - export CXX=${COMPILER_CXX}
+  - export CC=${COMPILER_C}
+  - ${COMPILER_CXX} --version
+  - ${COMPILER_C} --version
 
 before_script:
   - mkdir build
