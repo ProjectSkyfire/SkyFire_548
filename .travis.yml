@@ -10,39 +10,32 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 os: linux
+dist: focal
+group: travis_latest
+language: cpp
+sudo: required
 
 matrix:
   include:
    - name: "Ubuntu 21.04 (Hirsute Hippo) with GCC"
-     os: linux
-     dist: focal
-     group: travis_latest
      env: DOCKER="ubuntu:hirsute" VARIANT="ubuntu" TOOL="compile" COMPILER_C="gcc" COMPILER_CXX="g++"
    - name: "Ubuntu 20.04 (Focal Fossa) with GCC"
-     os: linux
-     dist: focal
-     group: travis_latest
      env: DOCKER="ubuntu:focal" VARIANT="ubuntu" TOOL="compile" COMPILER_C="gcc" COMPILER_CXX="g++"
    - name: "Ubuntu 20.10 (Groovy Gorilla) with GCC"
-     os: linux
-     dist: focal
-     group: travis_latest
      env: DOCKER="ubuntu:groovy" VARIANT="ubuntu" TOOL="compile" COMPILER_C="gcc" COMPILER_CXX="g++"
-language: cpp
-sudo: required
-group: stable
 
 git:
   depth: 1
 
 branches:
   only:
-    - master
+    - main
+    - trunk
 
 before_install:
   - sudo rm -rf /var/lib/dpkg/lock
-  - sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.14-1_all.deb
-  - sudo dpkg -i mysql-apt-config_0.8.14-1_all.deb
+  - sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.17-1_all.deb
+  - sudo dpkg -i mysql-apt-config_0.8.17-1_all.deb
   - sudo apt update
   - sudo apt-get update
   - sudo apt-get install libncurses5-dev libace-dev
@@ -62,10 +55,3 @@ before_script:
 
 script:
   - make -j2
-
-notifications:
-  irc:
-    channels:
-      - "irc.rizon.net#project_skyfire"
-    on_success: always
-    on_failure: always
