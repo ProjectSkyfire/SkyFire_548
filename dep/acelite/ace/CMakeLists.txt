@@ -145,7 +145,7 @@ set(ace_STAT_SRCS
   IO_SAP.cpp
   IOStream.cpp
   IOStream_T.cpp
-  IPC_SAP
+  IPC_SAP.cpp
   Lib_Find.cpp
   Local_Memory_Pool.cpp
   Local_Name_Space.cpp
