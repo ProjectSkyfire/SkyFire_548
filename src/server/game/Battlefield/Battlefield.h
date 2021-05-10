@@ -37,7 +37,15 @@ enum BattlefieldTypes
 
 enum BattlefieldIDs
 {
-    BATTLEFIELD_BATTLEID_WG                      = 1        // Wintergrasp battle
+    BATTLEFIELD_BATTLEID_WG                      = 1,       // Wintergrasp battle
+    BATTLEFIELD_BATTLEID_TB                      = 21       // Tol Barad
+};
+
+enum class BattlefieldState
+{
+    BATTLEFIELD_INACTIVE = 0,
+    BATTLEFIELD_WARMUP = 1,
+    BATTLEFIELD_IN_PROGRESS = 2
 };
 
 enum class BattlefieldObjectiveStates
@@ -108,12 +116,13 @@ class BfCapturePoint
         virtual void SendChangePhase();
 
         bool SetCapturePointData(GameObject* capturePoint);
+        bool DelCapturePoint();
         GameObject* GetCapturePointGo();
         uint32 GetCapturePointEntry(){ return m_capturePointEntry; }
 
         TeamId GetTeamId() { return m_team; }
+        BattlefieldObjectiveStates GetObjectiveState() const { return m_State; }
     protected:
-        bool DelCapturePoint();
 
         // active Players in the area of the objective, 0 - alliance, 1 - horde
         GuidSet m_activePlayers[2];
@@ -242,7 +251,9 @@ class Battlefield : public ZoneScript
         void TeamApplyBuff(TeamId team, uint32 spellId, uint32 spellId2 = 0);
 
         /// Return true if battle is start, false if battle is not started
-        bool IsWarTime() { return m_isActive; }
+        bool IsWarTime() const { return m_isActive; }
+
+        BattlefieldState GetState() const { return m_isActive ? BattlefieldState::BATTLEFIELD_IN_PROGRESS : (m_Timer <= m_StartGroupingTimer ? BattlefieldState::BATTLEFIELD_WARMUP : BattlefieldState::BATTLEFIELD_INACTIVE); }
 
         /// Enable or Disable battlefield
         void ToggleBattlefield(bool enable) { m_IsEnabled = enable; }
@@ -319,6 +330,8 @@ class Battlefield : public ZoneScript
         virtual void OnPlayerLeaveZone(Player* /*player*/) { }
         /// Called when a player enter in battlefield zone
         virtual void OnPlayerEnterZone(Player* /*player*/) { }
+
+        void SendWarning(uint8 id, WorldObject const* target = nullptr);
 
         WorldPacket BuildWarningAnnPacket(std::string const& msg);
         void SendWarningToAllInZone(uint32 entry);

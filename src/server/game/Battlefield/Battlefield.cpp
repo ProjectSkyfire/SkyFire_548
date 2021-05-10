@@ -544,6 +544,12 @@ void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)
             sCreatureTextMgr->SendChat(stalker, (uint8)entry, player);
 }
 
+void Battlefield::SendWarning(uint8 id, WorldObject const* target /*= nullptr*/)
+{
+    if (Creature* stalker = GetCreature(StalkerGuid))
+        sCreatureTextMgr->SendChat(stalker, id, target);
+}
+
 void Battlefield::SendUpdateWorldState(uint32 field, uint32 value)
 {
     for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)

@@ -25,6 +25,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "BattlefieldWG.h"
+#include "BattlefieldTB.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
 #include "BattlePetMgr.h"
@@ -10142,6 +10143,21 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 6051:
             if (bg && bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_VOP)
                 bg->FillInitialWorldStates(builder);
+        // Tol Barad Peninsula
+        case 5389:
+            if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_TOLBARAD_ENABLE))
+            {
+                builder.AppendState(5385, sWorld->getWorldState(5385)); // TB_WS_ALLIANCE_CONTROLS_SHOW
+                builder.AppendState(5384, sWorld->getWorldState(5384)); // TB_WS_HORDE_CONTROLS_SHOW
+                builder.AppendState(5387, sWorld->getWorldState(5387)); // TB_WS_TIME_NEXT_BATTLE_SHOW
+                builder.AppendState(5546, sWorld->getWorldState(5546)); // TB_WS_ALLIANCE_ATTACKING_SHOW
+                builder.AppendState(5547, sWorld->getWorldState(5547)); // TB_WS_HORDE_ATTACKING_SHOW
+            }
+            break;
+        // Tol Barad
+        case 5095:
+            if (bf && bf->GetTypeId() == BATTLEFIELD_TB)
+                bf->FillInitialWorldStates(builder);
             break;
         // Wintergrasp
         case 4197:
@@ -10202,6 +10218,17 @@ void Player::SendBattlefieldWorldStates()
                 uint32 timer = wg->GetTimer() / 1000;
                 SendUpdateWorldState(ClockWorldState[1], time(NULL) + timer);
             }
+        }
+    }
+
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_TOLBARAD_ENABLE))
+    {
+        if (Battlefield* tb = (BattlefieldTB*)sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_TB))
+        {
+            SendUpdateWorldState(TB_WS_FACTION_CONTROLLING, uint32(tb->GetDefenderTeam() + 1));
+            uint32 timer = tb->GetTimer() / 1000;
+            SendUpdateWorldState(TB_WS_TIME_BATTLE_END, uint32(tb->IsWarTime() ? uint32(time(nullptr) + timer) : 0));
+            SendUpdateWorldState(TB_WS_TIME_NEXT_BATTLE, uint32(!tb->IsWarTime() ? uint32(time(nullptr) + timer) : 0));
         }
     }
 }
