@@ -13,7 +13,7 @@ UPDATE `quest_template` SET `RewardItemId1`='76391', `RewardItemCount1`='1' WHER
 UPDATE `quest_template` SET `RewardItemId2`='73213', `RewardItemCount2`='1' WHERE  `Id`=30037;
 -- Blade and Fan (Mage)
 UPDATE `quest_template` SET `RewardItemId1`='76390', `RewardItemCount1`='1' WHERE  `Id`=30033;
-UPDATE `quest_template` SET `RewardItemId2`='73213', `RewardItemCount2`='1' WHERE  `Id`=30033;
+UPDATE `quest_template` SET `RewardItemId2`='76392', `RewardItemCount2`='1' WHERE  `Id`=30033;
 -- Staff (Monk)
 UPDATE `quest_template` SET `RewardItemId1`='73209', `RewardItemCount1`='1' WHERE  `Id`=30027;
 
@@ -44,7 +44,7 @@ UPDATE `quest_template` SET `RequiredSourceItemId3`='0', `RequiredSourceItemCoun
 UPDATE `quest_template` SET `RequiredSourceItemId4`='0', `RequiredSourceItemCount4`='0' WHERE `Id`=30037;
 -- Blade and Fan (Mage)
 UPDATE `quest_template` SET `RequiredSourceItemId1`='76390', `RequiredSourceItemCount1`='1' WHERE `Id`=30033;
-UPDATE `quest_template` SET `RequiredSourceItemId2`='73213', `RequiredSourceItemCount2`='1' WHERE `Id`=30033;
+UPDATE `quest_template` SET `RequiredSourceItemId2`='76392', `RequiredSourceItemCount2`='1' WHERE `Id`=30033;
 UPDATE `quest_template` SET `RequiredSourceItemId3`='0', `RequiredSourceItemCount3`='0' WHERE `Id`=30033;
 UPDATE `quest_template` SET `RequiredSourceItemId4`='0', `RequiredSourceItemCount4`='0' WHERE `Id`=30033;
 -- Staff (Monk)
