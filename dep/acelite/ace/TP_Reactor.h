@@ -54,7 +54,7 @@ public:
             ACE_Reactor_Mask mask,
             ACE_EH_PTMF callback);
 
-  bool dispatch (void) const;
+  bool dispatch () const;
 
   ACE_HANDLE handle_;
   ACE_Event_Handler *event_handler_;
@@ -115,9 +115,7 @@ public:
   int acquire_token (ACE_Time_Value *max_wait_time = 0);
 
 private:
-  // Disallow default construction.
-  ACE_TP_Token_Guard (void);
-
+  ACE_TP_Token_Guard () = delete;
   ACE_TP_Token_Guard (const ACE_TP_Token_Guard &) = delete;
   ACE_TP_Token_Guard &operator= (const ACE_TP_Token_Guard &) = delete;
   ACE_TP_Token_Guard (ACE_TP_Token_Guard &&) = delete;
@@ -302,9 +300,8 @@ private:
   int post_process_socket_event (ACE_EH_Dispatch_Info &dispatch_info,int status);
 
 private:
-  /// Deny access since member-wise won't work...
-  ACE_TP_Reactor (const ACE_TP_Reactor &);
-  ACE_TP_Reactor &operator = (const ACE_TP_Reactor &);
+  ACE_TP_Reactor (const ACE_TP_Reactor &) = delete;
+  ACE_TP_Reactor &operator = (const ACE_TP_Reactor &) = delete;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

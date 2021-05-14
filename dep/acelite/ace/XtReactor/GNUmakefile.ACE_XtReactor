@@ -259,11 +259,11 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_XtReactor.pc.in
-#
 #build_files:
 #ace_xtreactor.mpc
+#
+#pkgconfig_files:
+#ACE_XtReactor.pc.in
 #
 #source_files:
 #XtReactor.cpp

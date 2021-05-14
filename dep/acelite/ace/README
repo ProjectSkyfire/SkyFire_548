@@ -785,15 +785,9 @@ ACE_LACKS_EXEC                          Platform lacks the exec()
                                         Win32, VxWorks, Chorus)
 ACE_LACKS_FILELOCKS                     Platform lacks file locking
                                         mechanism
-ACE_LACKS_FLOATING_POINT                Platform does not support
-                                        floating point operations
-                                        (e.g., certain Chorus hardware
-                                        platforms)
 ACE_LACKS_FORK                          Platform lacks the fork()
                                         system call (e.g., Win32,
                                         VxWorks, Chorus)
-ACE_LACKS_GETOPT_PROTOTYPE              Platform lacks the getopt()
-                                        prototype (e.g., LynxOS)
 ACE_LACKS_GETPGID                       Platform lacks getpgid() call
                                         (e.g., Win32, Chorus, and
                                         FreeBSD).
@@ -804,9 +798,6 @@ ACE_LACKS_GETIPNODEBYADDR               Platform lacks getipnodebyaddr().
 ACE_LACKS_GETIPNODEBYNAME               Platform lacks getipnodebyname().
 ACE_LACKS_INET_ATON                     Platform lacks the inet_aton()
                                         function.
-ACE_LACKS_INET_ATON_PROTOTYPE           Platform/compiler lacks the
-                                        inet_aton() prototype (e.g.,
-                                        LynxOS)
 ACE_LACKS_IOSTREAM_FX                   iostream header does not
                                         declare ipfx (), opfx (),
                                         etc.
@@ -814,9 +805,6 @@ ACE_LACKS_KEY_T                         Platform lacks key_t (e.g.,
                                         Chorus, VxWorks, Win32)
 ACE_LACKS_LINEBUFFERED_STREAMBUF        Platform lacks streambuf
                                         "linebuffered ()".
-ACE_LACKS_LONGLONG_T                    Compiler/platform does not
-                                        support the signed or unsigned long
-                                        long datatype.
 ACE_LACKS_LSTAT                         Platform lacks the lstat() function.
 ACE_LACKS_MADVISE                       Platform lacks madvise()
                                         (e.g., Linux)
@@ -826,13 +814,7 @@ ACE_LACKS_MEMORY_H                      Platform lacks memory.h (e.g.,
 ACE_LACKS_MKFIFO                        Platform lacks mkfifo() e.g.,
                                         VxWorks, Chorus, pSoS, and WinNT.
 ACE_LACKS_MKTEMP                        Platform lacks the mktemp() function.
-ACE_LACKS_MKTEMP_PROTOTYPE              Platform/compiler lacks the
-                                        mktemp() prototype (e.g.,
-                                        LynxOS)
-ACE_LACKS_MKSTEMP      Platform lacks the mkstemp() function.
-ACE_LACKS_MKSTEMP_PROTOTYPE             Platform/compiler lacks the
-                                        mkstemp() prototype (e.g.,
-                                        LynxOS)
+ACE_LACKS_MKSTEMP                       Platform lacks the mkstemp() function.
 ACE_LACKS_MMAP                          The platform doesn't have
                                         mmap(2) (e.g., SCO UNIX).
 ACE_LACKS_MODE_MASKS                    Platform/compiler doesn't have
@@ -958,22 +940,12 @@ ACE_LACKS_SYSV_SHMEM                    Platform lacks System V shared
                                         VxWorks)
 ACE_LACKS_SIGINFO_H                     Platform lacks the siginfo.h
                                         include file (e.g., MVS)
-ACE_LACKS_SOCKET_BUFSIZ                 Platform doesn't support
-                                        SO_SNDBUF/SO_RCVBUF
 ACE_LACKS_SOCKETPAIR                    Platform lacks the
                                         socketpair() call (e.g., SCO
                                         UNIX)
-ACE_LACKS_STATIC_DATA_MEMBER_TEMPLATES  Compiler doesn't support
-                                        static data member templates
 ACE_LACKS_STRCASECMP                    Compiler/platform lacks
                                         strcasecmp() (e.g., DG/UX,
                                         UNIXWARE, VXWORKS)
-ACE_LACKS_STRCASECMP_PROTOTYPE          Platform/compiler lacks the
-                                        strcasecmp() prototype (e.g.,
-                                        LynxOS)
-ACE_LACKS_STRNCASECMP_PROTOTYPE         Platform/compiler lacks the
-                                        strncasecmp() prototype (e.g.,
-                                        LynxOS)
 ACE_LACKS_STRRECVFD                     Platform doesn't define struct
                                         strrecvfd.
 ACE_LACKS_SYSCALL                       Platform doesn't have

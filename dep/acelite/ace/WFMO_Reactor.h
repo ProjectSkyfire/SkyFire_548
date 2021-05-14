@@ -188,10 +188,10 @@ public:
     bool suspend_entry_;
 
     /// Default constructor
-    Current_Info (void);
+    Current_Info ();
 
     /// Reset the state of the structure
-    void reset (void);
+    void reset ();
 
     /// Set the structure to these new values
     void set (bool io_entry,
@@ -227,10 +227,10 @@ public:
     bool suspend_entry_;
 
     /// Default constructor
-    To_Be_Added_Info (void);
+    To_Be_Added_Info ();
 
     /// Reset the state of the structure
-    void reset (void);
+    void reset ();
 
     /// Set the structure to these new values
     void set (ACE_HANDLE event_handle,
@@ -268,10 +268,10 @@ public:
     bool resume_entry_;
 
     /// Constructor used for initializing the structure
-    Suspended_Info (void);
+    Suspended_Info ();
 
     /// Reset the state of the structure
-    void reset (void);
+    void reset ();
 
     /// Set the structure to these new values
     void set (ACE_HANDLE event_handle,
@@ -335,15 +335,15 @@ public:
 
   // = Accessors.
   /// Maximum ACE_HANDLE value, plus 1.
-  DWORD max_handlep1 (void) const;
+  DWORD max_handlep1 () const;
 
   /// Pointer to the beginning of the current array of ACE_HANDLE
   /// *'s.
-  ACE_HANDLE *handles (void) const;
+  ACE_HANDLE *handles () const;
 
   /// Pointer to the beginning of the current array of
   /// ACE_Event_Handler *'s.
-  Current_Info *current_info (void) const;
+  Current_Info *current_info () const;
 
   /// Check if changes to the handle set are required.
   virtual bool changes_required (void);
@@ -519,7 +519,7 @@ public:
                                       ACE_Handle_Set &rd_mask);
 
   /// Returns a handle to the ACE_Auto_Event.
-  virtual ACE_HANDLE get_handle (void) const;
+  virtual ACE_HANDLE get_handle () const;
 
   /// Returns the ACE_HANDLE of the notify pipe on which the reactor
   /// is listening for notifications so that other threads can unblock
@@ -704,7 +704,7 @@ public:
   virtual int timer_queue (ACE_Timer_Queue *tq);
 
   /// Return the current ACE_Timer_Queue.
-  virtual ACE_Timer_Queue *timer_queue (void) const;
+  virtual ACE_Timer_Queue *timer_queue () const;
 
   /// Close down the ACE_WFMO_Reactor and release all of its resources.
   virtual int close (void);
@@ -1100,7 +1100,7 @@ public:
 
   /// Returns the current size of the WFMO_Reactor's internal
   /// descriptor table.
-  virtual size_t size (void) const;
+  virtual size_t size () const;
 
   /// Returns a reference to the WFMO_Reactor's internal lock.
   virtual ACE_Lock &lock (void);
@@ -1343,9 +1343,8 @@ protected:
   sig_atomic_t deactivated_;
 
 private:
-  /// Deny access since member-wise won't work...
-  ACE_WFMO_Reactor (const ACE_WFMO_Reactor &);
-  ACE_WFMO_Reactor &operator = (const ACE_WFMO_Reactor &);
+  ACE_WFMO_Reactor (const ACE_WFMO_Reactor &) = delete;
+  ACE_WFMO_Reactor &operator = (const ACE_WFMO_Reactor &) = delete;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

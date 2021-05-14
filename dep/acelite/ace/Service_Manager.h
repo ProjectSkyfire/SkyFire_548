@@ -73,7 +73,7 @@ protected:
   // = Dynamic linking hooks.
   virtual int init (int argc, ACE_TCHAR *argv[]);
   virtual int info (ACE_TCHAR **info_string, size_t length) const;
-  virtual int fini (void);
+  virtual int fini ();
 
   // = Scheduling hooks.
   virtual int suspend (void);
@@ -86,7 +86,7 @@ protected:
   int open (const ACE_INET_Addr &sia);
 
   // = Demultiplexing hooks.
-  virtual ACE_HANDLE get_handle (void) const;
+  virtual ACE_HANDLE get_handle () const;
   virtual int handle_input (ACE_HANDLE fd);
   virtual int handle_close (ACE_HANDLE fd, ACE_Reactor_Mask);
   virtual int handle_signal (int signum, siginfo_t *, ucontext_t *);

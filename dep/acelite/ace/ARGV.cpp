@@ -302,7 +302,6 @@ ACE_ARGV_T<CHAR_TYPE>::add (CHAR_TYPE *argv[], bool quote_args)
 }
 
 // Free up argv_ and buf_
-
 template <typename CHAR_TYPE>
 ACE_ARGV_T<CHAR_TYPE>::~ACE_ARGV_T ()
 {

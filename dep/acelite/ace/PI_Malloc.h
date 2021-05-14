@@ -120,7 +120,7 @@ public:
                           void *base_addr);
 
     /// Return a pointer to the name of this node.
-    const char *name (void) const;
+    const char *name () const;
 
     /// Assign a name;
     void name (const char *);
@@ -189,8 +189,7 @@ public:
   void dump () const;
 
 private:
-  // Disallow assignment.
-  void operator= (const ACE_Control_Block &);
+  void operator= (const ACE_Control_Block &) = delete;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

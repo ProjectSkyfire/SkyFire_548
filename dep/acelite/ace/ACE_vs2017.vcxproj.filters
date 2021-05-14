@@ -3331,9 +3331,6 @@
     <None Include="NT_Service.inl">
       <Filter>Inline Files</Filter>
     </None>
-    <None Include="Obchunk.inl">
-      <Filter>Inline Files</Filter>
-    </None>
     <None Include="Object_Manager.inl">
       <Filter>Inline Files</Filter>
     </None>

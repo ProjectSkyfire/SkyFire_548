@@ -1,3 +1,21 @@
+USER VISIBLE CHANGES BETWEEN ACE-7.0.1 and ACE-7.0.2
+====================================================
+
+. Fixed various warnings given by newer compilers
+
+. Use more C++11 features
+
+. Various cleanup
+
+USER VISIBLE CHANGES BETWEEN ACE-7.0.0 and ACE-7.0.1
+====================================================
+
+. Cleanup of ACE_* macros which are not used anymore
+
+. Removed support for LynxOS 4 which has gcc3
+
+. Make sure C++11 is enabled on MacOSX
+
 USER VISIBLE CHANGES BETWEEN ACE-6.5.12 and ACE-7.0.0
 =====================================================
 

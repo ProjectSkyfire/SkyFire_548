@@ -240,11 +240,11 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_TkReactor.pc.in
-#
 #build_files:
 #ace_tkreactor.mpc
+#
+#pkgconfig_files:
+#ACE_TkReactor.pc.in
 #
 #source_files:
 #TkReactor.cpp

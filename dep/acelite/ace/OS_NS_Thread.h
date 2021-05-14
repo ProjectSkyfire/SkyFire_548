@@ -7,8 +7,6 @@
  *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
- *
- *  Originally in OS.h.
  */
 //=============================================================================
 
@@ -344,7 +342,7 @@ class ACE_Export ACE_cond_t
 public:
 
   /// Returns the number of waiters.
-  long waiters (void) const;
+  long waiters () const;
 
 //protected:
   /// Number of waiting threads.
@@ -965,7 +963,7 @@ public:
   ACE_TSS_Info (void);
 
   /// Returns 1 if the key is in use, 0 if not.
-  int key_in_use (void) const { return thread_count_ != -1; }
+  int key_in_use () const { return thread_count_ != -1; }
 
   /// Mark the key as being in use if the flag is non-zero, or
   /// not in use if the flag is 0.
@@ -2030,9 +2028,8 @@ protected:
   /// Keeps track of whether we acquired the lock or failed.
   int owner_;
 
-  // = Prevent assignment and initialization.
-  ACE_OS_Thread_Mutex_Guard &operator= (const ACE_OS_Thread_Mutex_Guard &);
-  ACE_OS_Thread_Mutex_Guard (const ACE_OS_Thread_Mutex_Guard &);
+  ACE_OS_Thread_Mutex_Guard &operator= (const ACE_OS_Thread_Mutex_Guard &) = delete;
+  ACE_OS_Thread_Mutex_Guard (const ACE_OS_Thread_Mutex_Guard &) = delete;
 };
 
 /**
@@ -2075,11 +2072,8 @@ protected:
   /// Keeps track of whether we acquired the lock or failed.
   int owner_;
 
-  // = Prevent assignment and initialization.
-  ACE_OS_Recursive_Thread_Mutex_Guard &operator= (
-    const ACE_OS_Recursive_Thread_Mutex_Guard &);
-  ACE_OS_Recursive_Thread_Mutex_Guard (
-    const ACE_OS_Recursive_Thread_Mutex_Guard &);
+  ACE_OS_Recursive_Thread_Mutex_Guard &operator= (const ACE_OS_Recursive_Thread_Mutex_Guard &) = delete;
+  ACE_OS_Recursive_Thread_Mutex_Guard (const ACE_OS_Recursive_Thread_Mutex_Guard &) = delete;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

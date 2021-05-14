@@ -7,8 +7,6 @@
  *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
- *
- *  Originally in OS.h.
  */
 //=============================================================================
 
@@ -274,13 +272,12 @@ namespace ACE_OS
   int shutdown (ACE_HANDLE handle,
                 int how);
 
-#if defined (ACE_HAS_IPV6)
   ACE_NAMESPACE_INLINE_FUNCTION
   unsigned int if_nametoindex (const char *ifname);
 
   ACE_NAMESPACE_INLINE_FUNCTION
   char *if_indextoname (unsigned int ifindex, char *ifname);
-#endif
+
   ACE_NAMESPACE_INLINE_FUNCTION
   struct if_nameindex *if_nameindex ();
 

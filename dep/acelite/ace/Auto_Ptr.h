@@ -72,9 +72,9 @@ ACE_END_VERSIONED_NAMESPACE_DECL
      defined (ACE_HAS_STANDARD_CPP_LIBRARY) && \
             (ACE_HAS_STANDARD_CPP_LIBRARY != 0)
 #include <memory>
-#if defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB) && \
+#if !defined (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB) && \
             (ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB != 0)
-using std::unique_ptr;
+using std::auto_ptr;
 #endif /* ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB */
 #else /* ACE_HAS_STANDARD_CPP_LIBRARY */
 

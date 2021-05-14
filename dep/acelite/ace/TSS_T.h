@@ -4,8 +4,6 @@
 /**
  *  @file    TSS_T.h
  *
- *   Moved from Synch.h.
- *
  *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
@@ -198,7 +196,7 @@ protected:
 
   /// Obtains a plain value stored in the thread-specific storage.
 # if defined (ACE_HAS_THR_C_DEST)
-  ACE_TSS_Adapter *ts_value (void) const;
+  ACE_TSS_Adapter *ts_value () const;
 # else
   TYPE *ts_value () const;
 # endif /* ACE_HAS_THR_C_DEST */

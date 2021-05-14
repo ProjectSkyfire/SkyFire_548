@@ -1019,7 +1019,7 @@ ACE_OS::socketpair (int domain, int type,
                      int, -1);
 #endif /* ACE_LACKS_SOCKETPAIR */
 }
-#if defined (ACE_HAS_IPV6)
+
 ACE_INLINE unsigned int
 ACE_OS::if_nametoindex (const char *ifname)
 {
@@ -1044,7 +1044,6 @@ ACE_OS::if_indextoname (unsigned int ifindex, char *ifname)
   ACE_OSCALL_RETURN (::if_indextoname (ifindex, ifname), char *, 0);
 #endif /* ACE_LACKS_IF_NAMETOINDEX */
 }
-#endif (ACE_HAS_IPV6)
 
 ACE_INLINE struct if_nameindex *
 ACE_OS::if_nameindex ()

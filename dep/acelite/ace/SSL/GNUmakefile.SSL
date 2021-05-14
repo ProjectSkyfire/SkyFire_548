@@ -267,30 +267,15 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_SSL.pc.in
-#
-#inline_files:
-#SSL_SOCK_Stream.inl
-#SSL_Asynch_Stream.inl
-#SSL_SOCK.inl
-#SSL_SOCK_Connector.inl
-#SSL_SOCK_Acceptor.inl
-#SSL_Context.inl
-#
-#build_files:
-#ssl.mpc
-#ssl_for_tao.mpc
-#
 #header_files:
-#SSL_Initializer.h
 #SSL_SOCK_Stream.h
-#SSL_Asynch_Stream.h
-#SSL_SOCK.h
+#SSL_Initializer.h
 #SSL_Asynch_BIO.h
 #SSL_SOCK_Connector.h
+#SSL_Asynch_Stream.h
 #SSL_SOCK_Acceptor.h
 #SSL_Context.h
+#SSL_SOCK.h
 #SSL_Export.h
 #sslconf.h
 #
@@ -303,6 +288,21 @@ endif
 #SSL_SOCK_Acceptor.cpp
 #SSL_SOCK_Connector.cpp
 #SSL_SOCK_Stream.cpp
+#
+#inline_files:
+#SSL_SOCK_Stream.inl
+#SSL_SOCK_Connector.inl
+#SSL_Asynch_Stream.inl
+#SSL_SOCK_Acceptor.inl
+#SSL_Context.inl
+#SSL_SOCK.inl
+#
+#build_files:
+#ssl.mpc
+#ssl_for_tao.mpc
+#
+#pkgconfig_files:
+#ACE_SSL.pc.in
 #
 #lib_output:
 #../../lib ACE_SSL

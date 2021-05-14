@@ -289,8 +289,8 @@ public:
   /// of files and paths etc.
   /// Query the location of trusted certification authority
   /// certificates.
-  // const char* ca_file_name(void) const;
-  // const char* ca_dir_name(void) const;
+  // const char* ca_file_name() const;
+  // const char* ca_dir_name() const;
 
   /**
    * Set and query the default verify mode for this context, it is
@@ -367,11 +367,8 @@ private:
   void ssl_library_init ();
   void ssl_library_fini ();
 
-  // = Prevent assignment and copy initialization.
-  //@{
-  ACE_SSL_Context (const ACE_SSL_Context &);
-  ACE_SSL_Context & operator= (const ACE_SSL_Context &);
-  //@}
+  ACE_SSL_Context (const ACE_SSL_Context &) = delete;
+  ACE_SSL_Context & operator= (const ACE_SSL_Context &) = delete;
 
 private:
   /// The SSL_CTX structure

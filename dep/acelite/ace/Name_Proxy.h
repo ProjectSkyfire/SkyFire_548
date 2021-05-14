@@ -67,7 +67,7 @@ public:
   int recv_reply (ACE_Name_Request &reply);
 
   /// Obtain underlying handle.
-  virtual ACE_HANDLE get_handle (void) const;
+  virtual ACE_HANDLE get_handle () const;
 
   /// Close down the connection to the server.
   virtual ~ACE_Name_Proxy (void);
@@ -76,7 +76,6 @@ public:
   void dump () const;
 
 private:
-
   /// ACE_Connector factory used to establish connections actively.
   ACE_SOCK_Connector connector_;
 
@@ -87,9 +86,8 @@ private:
   ACE_Reactor *reactor_;
 
 private:
-  // Prevent copying
-  ACE_Name_Proxy (const ACE_Name_Proxy &);
-  ACE_Name_Proxy &operator= (const ACE_Name_Proxy &);
+  ACE_Name_Proxy (const ACE_Name_Proxy &) = delete;
+  ACE_Name_Proxy &operator= (const ACE_Name_Proxy &) = delete;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

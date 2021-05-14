@@ -214,6 +214,15 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
+#pkgconfig_files:
+#ACE_ETCL.pc.in
+#
+#build_files:
+#ETCL.mpc
+#
+#inline_files:
+#ETCL_Constraint.inl
+#
 #source_files:
 #ETCL_Constraint.cpp
 #ETCL_Constraint_Visitor.cpp
@@ -222,15 +231,6 @@ endif
 #ETCL_Constraint.h
 #ETCL_Constraint_Visitor.h
 #ace_etcl_export.h
-#
-#build_files:
-#ETCL.mpc
-#
-#inline_files:
-#ETCL_Constraint.inl
-#
-#pkgconfig_files:
-#ACE_ETCL.pc.in
 #
 #lib_output:
 #../../lib ACE_ETCL

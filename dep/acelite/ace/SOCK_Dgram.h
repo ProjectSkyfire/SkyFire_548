@@ -225,7 +225,8 @@ protected:
   int make_multicast_ifaddr (ip_mreq *mreq,     // Put result here, if != NULL.
                              const ACE_INET_Addr &mcast_addr,
                              const ACE_TCHAR *net_if);
-
+#endif
+#if defined (ACE_HAS_IPV6)
   /// Create a multicast addr/if pair, in format useful for system calls.
   /// If mreq param is NULL, just verify the passed addr/interface specs.
   int make_multicast_ifaddr6 (ipv6_mreq *mreq,   // Put result here, if != NULL.
