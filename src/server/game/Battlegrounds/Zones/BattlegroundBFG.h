@@ -168,8 +168,8 @@ enum GILNEAS_BG_Objectives
 const float GILNEAS_BG_NodePositions[GILNEAS_BG_DYNAMIC_NODES_COUNT][4] =
 {
     {1057.790f, 1278.285f, 3.1500f, 1.945662f},        // Lighthouse
-    {1251.010f, 958.2685f, 5.6000f, 5.892280f},        // Waterworks
-    {980.0446f, 948.7411f, 12.650f, 5.904071f}         // Mine
+    {980.0446f, 948.7411f, 12.650f, 5.904071f},        // Waterworks
+    {1251.010f, 958.2685f, 5.6000f, 5.892280f}         // Mine
 };
 
 // x, y, z, o, rot0, rot1, rot2, rot3

@@ -237,28 +237,19 @@ void BattlegroundBFG::HandleAreaTrigger(Player* player, uint32 trigger)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    switch (trigger) {
-    case 6447:                                          // Alliance start
-        if (player->GetTeam() != ALLIANCE)
-            player->GetSession()->SendNotification("Only The Alliance can use that portal");
-        else
-            player->LeaveBattleground();
-        break;
-    case 6448:                                          // Horde start
-        if (player->GetTeam() != HORDE)
-            player->GetSession()->SendNotification("Only The Horde can use that portal");
-        else
-            player->LeaveBattleground();
-        break;
-    case 6265:                                          // Waterworks heal
-    case 6266:                                          // Mine speed
-    case 6267:                                          // Waterworks speed
-    case 6268:                                          // Mine berserk
-    case 6269:                                          // Lighthouse berserk
-        //break;
-    default:
-        Battleground::HandleAreaTrigger(player, trigger);
-        break;
+    switch (trigger)
+    {
+        case 6447:                                          // Alliance start
+        case 6448:                                          // Horde start
+        case 6265:                                          // Waterworks heal
+        case 6266:                                          // Mine speed
+        case 6267:                                          // Waterworks speed
+        case 6268:                                          // Mine berserk
+        case 6269:                                          // Lighthouse berserk
+            break;
+        default:
+            Battleground::HandleAreaTrigger(player, trigger);
+            break;
     }
 }
 
