@@ -545,8 +545,6 @@ public:
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
                 return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
-                return false;
             return true;
         }
 
@@ -556,18 +554,37 @@ public:
             if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
                 return;
 
+            if (!GetCaster())
+                return;
+
+            if (GetCaster()->ToPlayer()->HasSpellCooldown(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
+                return;
+
+
             // final heal
             int32 stack = GetStackAmount();
             int32 healAmount = aurEff->GetAmount();
-            if (Unit* caster = GetCaster())
+            if (Player* caster = GetCaster()->ToPlayer())
             {
                 healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
                 healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
 
+                if (caster->HasAura(SPELL_DRUID_GLYPH_OF_BLOOMING))
+                    AddPct(healAmount, 50);
+
                 GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+
+                caster->AddSpellCooldown(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, 0, 1 * IN_MILLISECONDS);
+
+                return;
             }
 
+            // Increase final heal by 50%
+            if (GetCaster()->HasAura(SPELL_DRUID_GLYPH_OF_BLOOMING))
+                AddPct(healAmount, 50);
+
             GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+            GetCaster()->ToPlayer()->AddSpellCooldown(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, 0, 1 * IN_MILLISECONDS);
         }
 
         void HandleDispel(DispelInfo* dispelInfo)
@@ -583,6 +600,8 @@ public:
                         healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                         healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                         target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+
+                        return;
                     }
 
                     target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
