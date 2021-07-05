@@ -56,7 +56,43 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
     SPELL_DRUID_STAMPEDE_CAT_RANK_1         = 81021,
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
-    SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178
+    SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
+    SPELL_DRUID_PROWL                       = 5215,
+};
+
+// Cat Form - 768
+class spell_dru_cat_form : public SpellScriptLoader
+{
+public:
+    spell_dru_cat_form() : SpellScriptLoader("spell_dru_cat_form") { }
+
+    class spell_dru_cat_form_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_cat_form_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_PROWL))
+                return false;
+            return true;
+        }
+
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            GetTarget()->RemoveOwnedAura(SPELL_DRUID_PROWL);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_dru_cat_form_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_cat_form_AuraScript();
+    }
 };
 
 // 1850 - Dash
@@ -934,6 +970,7 @@ public:
 
 void AddSC_druid_spell_scripts()
 {
+    new spell_dru_cat_form();
     new spell_dru_dash();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
