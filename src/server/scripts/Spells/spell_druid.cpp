@@ -58,6 +58,8 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_PROWL                       = 5215,
+    SPELL_DRUID_CAT_FORM                    = 768,
+    SPELL_DRUID_DASH                        = 1850,
 };
 
 // Cat Form - 768
@@ -77,14 +79,38 @@ public:
             return true;
         }
 
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetTarget();
+
+            SpellInfo const* dash = sSpellMgr->GetSpellInfo(SPELL_DRUID_DASH);
+            if (!dash)
+                return;
+
+            // if we have dash, restore increased movement speed
+            if (AuraEffect* dashAura = caster->GetAuraEffect(SPELL_DRUID_DASH, EFFECT_0))
+                dashAura->SetAmount(dash->Effects[EFFECT_0].BasePoints);
+        }
+
 
         void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            GetTarget()->RemoveOwnedAura(SPELL_DRUID_PROWL);
+            // remove prowl on leaving catform
+            if (Unit* caster = GetTarget())
+            {
+                caster->RemoveOwnedAura(SPELL_DRUID_PROWL);
+
+                // remove dash leaving catform. temp. fix
+                if (AuraEffect* dashAura = caster->GetAuraEffect(SPELL_DRUID_DASH, EFFECT_0))
+                    dashAura->SetAmount(0);
+            }
+
+            
         }
 
         void Register()
         {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_cat_form_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
             OnEffectRemove += AuraEffectRemoveFn(spell_dru_cat_form_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
         }
     };
@@ -121,6 +147,28 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_dash_AuraScript();
+    }
+
+    class spell_dru_dash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_dash_SpellScript);
+
+        void HandleOnHit()
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+                player->RemoveMovementImpairingAuras();
+        }
+
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_dash_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_dash_SpellScript();
     }
 };
 
