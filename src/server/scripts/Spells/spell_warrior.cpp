@@ -747,7 +747,6 @@ public:
 };
 
 // 32216 - Victorious
-// 82368 - Victorious
 class spell_warr_victorious : public SpellScriptLoader
 {
 public:
@@ -775,6 +774,7 @@ public:
     }
 };
 
+// 60503 - Taste for Blood
 class spell_warr_taste_for_blood : public SpellScriptLoader
 {
 public:
@@ -793,7 +793,7 @@ public:
 
         int32 stacks;
 
-        bool checkProc(ProcEventInfo& eventInfo)
+        bool CheckProc(ProcEventInfo& eventInfo)
         {
             auto const caster = eventInfo.GetActor();
             auto const target = eventInfo.GetActionTarget();
@@ -817,7 +817,7 @@ public:
             return false;
         }
 
-        void onProc(AuraEffect const*, ProcEventInfo& eventInfo)
+        void HandleEffectProc(AuraEffect const*, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
 
@@ -830,8 +830,8 @@ public:
 
         void Register()
         {
-            DoCheckProc += AuraCheckProcFn(spell_warr_taste_for_blood_AuraScript::checkProc);
-            OnEffectProc += AuraEffectProcFn(spell_warr_taste_for_blood_AuraScript::onProc, EFFECT_0, SPELL_AURA_DUMMY);
+            DoCheckProc += AuraCheckProcFn(spell_warr_taste_for_blood_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_warr_taste_for_blood_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
@@ -841,7 +841,7 @@ public:
     }
 };
 
-// Mortal strike - 12294
+// 12294 - Mortal strike
 class spell_warr_mortal_strike : public SpellScriptLoader
 {
 public:
