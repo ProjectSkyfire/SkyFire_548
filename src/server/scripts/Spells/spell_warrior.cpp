@@ -37,6 +37,7 @@ enum WarriorSpells
     SPELL_WARRIOR_COLOSSUS_SMASH                    = 86346,
     SPELL_WARRIOR_TASTE_FOR_BLOOD_AURA              = 56636,
     SPELL_WARRIOR_TASTE_FOR_BLOOD                   = 60503,
+    SPELL_WARRIOR_VICTORIOUS                        = 32216,
 
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976, // obsolete
     SPELL_WARRIOR_RALLYING_CRY                      = 97463,
@@ -930,6 +931,43 @@ public:
     }
 };
 
+// 34428 - Victory Rush
+class spell_warr_victory_rush : public SpellScriptLoader
+{
+public:
+    spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
+
+    class spell_warr_victory_rush_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_victory_rush_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORIOUS))
+                return false;
+            return true;
+        }
+
+        void HandleOnHit()
+        {
+            if (Unit* caster = GetCaster()->ToPlayer())
+            {
+                caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+       return new spell_warr_victory_rush_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -953,4 +991,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_taste_for_blood();
     new spell_warr_mortal_strike();
     new spell_warr_overpower();
+    new spell_warr_victory_rush();
 }
