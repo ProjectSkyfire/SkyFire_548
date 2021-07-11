@@ -11196,7 +11196,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellInfo const* spellProto
 
 int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
 {
-    uint32 comboPoints = m_movedPlayer ? m_movedPlayer->GetComboPoints() : 0;
+    uint8 comboPoints = m_movedPlayer ? m_movedPlayer->GetComboPoints() : 0;
 
     int32 minduration = spellProto->GetDuration();
     int32 maxduration = spellProto->GetMaxDuration();
@@ -11204,16 +11204,7 @@ int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
     int32 duration;
 
     if (comboPoints && minduration != -1 && minduration != maxduration)
-    {
-        if (spellProto->Id == 5171)
-        {
-            duration = minduration + int32((maxduration - minduration) * comboPoints / 4);
-        }
-        else
-        {
-            duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
-        }
-    }
+        duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
     else
         duration = minduration;
 
