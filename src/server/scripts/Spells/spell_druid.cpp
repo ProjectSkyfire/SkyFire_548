@@ -62,6 +62,7 @@ enum DruidSpells
     SPELL_DRUID_DASH                        = 1850,
     SPELL_DRUID_LIFEBLOOM                   = 33763,
     SPELL_DRUID_GLYPH_OF_BLOOMING           = 121840,
+    SPELL_DRUID_PREDATORY_SWIFTNESS_TRIGGER = 69369,
 };
 
 // Called by Regrowth - 8936, Nourish - 50464, Healing Touch - 5185
@@ -722,6 +723,40 @@ public:
     }
 };
 
+// Called by Healing touch - 5185, Entangling roots - 339, Hibernate - 2637, Rebirth - 20484
+// Predatory swiftness - 16974
+class spell_dru_predatory_swiftness : public SpellScriptLoader
+{
+public:
+    spell_dru_predatory_swiftness() : SpellScriptLoader("spell_dru_predatory_swiftness") { }
+
+    class spell_dru_predatory_swiftness_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_predatory_swiftness_SpellScript);
+
+        void HandleOnHit()
+        {   
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_DRUID_PREDATORY_SWIFTNESS_TRIGGER))
+                {
+                    caster->RemoveAurasDueToSpell(SPELL_DRUID_PREDATORY_SWIFTNESS_TRIGGER);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_dru_predatory_swiftness_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_predatory_swiftness_SpellScript();
+    }
+};
+
 // 62606 - Savage Defense
 class spell_dru_savage_defense : public SpellScriptLoader
 {
@@ -1086,6 +1121,7 @@ public:
 
 void AddSC_druid_spell_scripts()
 {
+    new spell_dru_predatory_swiftness();
     new spell_dru_lifebloom_refresh();
     new spell_dru_cat_form();
     new spell_dru_dash();
