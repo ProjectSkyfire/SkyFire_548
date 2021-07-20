@@ -98,7 +98,7 @@ public:
             /// Force the player to spawn corpse scarabs via spell, @todo Check percent chance for scarabs, 20% at the moment
             if (!(rand()%5))
                 if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
-                    victim->CastSpell(victim, SPELL_SUMMON_CORPSE_SCARABS_PLR, true, NULL, NULL, me->GetGUID());
+                    victim->CastSpell(victim, SPELL_SUMMON_CORPSE_SCARABS_PLR,  me->GetGUID());
 
             Talk(SAY_SLAY);
         }
@@ -142,7 +142,7 @@ public:
             if (!me->IsAlive() || summon->IsAlive() || summon->GetEntry() != NPC_CRYPT_GUARD)
                 return;
 
-            summon->CastSpell(summon, SPELL_SUMMON_CORPSE_SCARABS_MOB, true, NULL, NULL, me->GetGUID());
+            summon->CastSpell(summon, SPELL_SUMMON_CORPSE_SCARABS_MOB, me->GetGUID());
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

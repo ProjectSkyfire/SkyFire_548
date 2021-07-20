@@ -437,7 +437,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     }
                 }
 
-                spell->prepare(&(spell->m_targets));
+                spell->prepare(spell->m_targets);
             }
             else
             {
@@ -876,7 +876,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
             }
         }
 
-        spell->prepare(&(spell->m_targets));
+        spell->prepare(spell->m_targets);
     }
     else
     {

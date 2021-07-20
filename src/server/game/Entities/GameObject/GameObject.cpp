@@ -1703,8 +1703,7 @@ void GameObject::Use(Unit* user)
     if (!spellId)
         return;
 
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    if (!spellInfo)
+    if (!sSpellMgr->GetSpellInfo(spellId))
     {
         if (user->GetTypeId() != TypeID::TYPEID_PLAYER || !sOutdoorPvPMgr->HandleCustomSpell(user->ToPlayer(), spellId, this))
             SF_LOG_ERROR("misc", "WORLD: unknown spell id %u at use action for gameobject (Entry: %u GoType: %u)", spellId, GetEntry(), GetGoType());
@@ -1714,12 +1713,17 @@ void GameObject::Use(Unit* user)
     }
 
     if (spellCaster)
-        spellCaster->CastSpell(user, spellInfo, triggered);
+        spellCaster->CastSpell(user, spellId, triggered);
     else
         CastSpell(user, spellId);
 }
 
-void GameObject::CastSpell(Unit* target, uint32 spellId)
+void GameObject::CastSpell(Unit* target, uint32 spellId, bool triggered /* = true*/)
+{
+    CastSpell(target, spellId, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+}
+
+void GameObject::CastSpell(Unit* target, uint32 spellId, TriggerCastFlags triggered)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
@@ -1738,7 +1742,7 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
     if (self)
     {
         if (target)
-            target->CastSpell(target, spellInfo, true);
+            target->CastSpell(target, spellInfo->Id, true);
         return;
     }
 
@@ -1747,19 +1751,25 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
     if (!trigger)
         return;
 
+    CastSpellExtraArgs args;
+    args.TriggerFlags = triggered;
     if (Unit* owner = GetOwner())
     {
         trigger->setFaction(owner->getFaction());
         // needed for GO casts for proper target validation checks
         trigger->SetOwnerGUID(owner->GetGUID());
-        trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, owner->GetGUID());
+        
+        args.OriginalCaster = owner->GetGUID();
+        trigger->CastSpell(target ? target : trigger, spellInfo->Id, args);
     }
     else
     {
         trigger->setFaction(14);
         // Set owner guid for target if no owner available - needed by trigger auras
         // - trigger gets despawned and there's no caster avalible (see AuraEffect::TriggerSpell())
-        trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, target ? target->GetGUID() : 0);
+
+        args.OriginalCaster = target ? target->GetGUID() : ObjectGuid::Empty;
+        trigger->CastSpell(target ? target : trigger, spellInfo->Id, args);
     }
 }
 

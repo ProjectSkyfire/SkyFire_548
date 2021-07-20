@@ -82,6 +82,8 @@ public:
     ObjectGuid(uint64 guid) { _data.u64 = guid; }
     ObjectGuid(ObjectGuid const& other) { _data.u64 = other._data.u64; }
 
+    static ObjectGuid const Empty;
+
     uint8& operator[](uint32 index)
     {
         ASSERT(index < sizeof(uint64));

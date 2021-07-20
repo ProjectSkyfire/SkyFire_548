@@ -465,7 +465,7 @@ class spell_general_vezax_mark_of_the_faceless : public SpellScriptLoader
             void HandleEffectPeriodic(AuraEffect const* aurEff)
             {
                 if (Unit* caster = GetCaster())
-                    caster->CastCustomSpell(SPELL_MARK_OF_THE_FACELESS_DAMAGE, SPELLVALUE_BASE_POINT1, aurEff->GetAmount(), GetTarget(), true);
+                    caster->CastSpell(GetTarget(), SPELL_MARK_OF_THE_FACELESS_DAMAGE, CastSpellExtraArgs(true).AddSpellMod(SPELLVALUE_BASE_POINT0 ,aurEff->GetAmount()));
             }
 
             void Register() OVERRIDE
@@ -531,8 +531,8 @@ class spell_general_vezax_saronite_vapors : public SpellScriptLoader
                 {
                     int32 mana = int32(aurEff->GetAmount() * pow(2.0f, GetStackAmount())); // mana restore - bp * 2^stackamount
                     int32 damage = mana * 2;
-                    caster->CastCustomSpell(GetTarget(), SPELL_SARONITE_VAPORS_ENERGIZE, &mana, NULL, NULL, true);
-                    caster->CastCustomSpell(GetTarget(), SPELL_SARONITE_VAPORS_DAMAGE, &damage, NULL, NULL, true);
+                    caster->CastSpell(GetTarget(), SPELL_SARONITE_VAPORS_ENERGIZE, CastSpellExtraArgs(true).AddSpellBP0(mana));
+                    caster->CastSpell(GetTarget(), SPELL_SARONITE_VAPORS_DAMAGE, CastSpellExtraArgs(true).AddSpellBP0(damage));
                 }
             }
 

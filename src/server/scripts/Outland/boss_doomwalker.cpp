@@ -74,7 +74,7 @@ class boss_doomwalker : public CreatureScript
 
             void KilledUnit(Unit* victim) OVERRIDE
             {
-                victim->CastSpell(victim, SPELL_MARK_DEATH, 0);
+                victim->CastSpell(victim, SPELL_MARK_DEATH, true);
 
                 if (urand(0, 4))
                     return;

@@ -1668,7 +1668,7 @@ public:
 
                 if (Creature* finklestein = GetClosestCreatureWithEntry(player, NPC_FINKLESTEIN, 25.0f))
                 {
-                    finklestein->CastSpell(player, FetchIngredients[ingredient][0], true, NULL);
+                    finklestein->CastSpell(player, FetchIngredients[ingredient][0], true);
                     finklestein->AI()->Talk(FetchIngredients[ingredient][3], player);
                 }
             }

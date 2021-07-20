@@ -60,7 +60,7 @@ class spell_item_trigger_spell : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 if (Item* item = GetCastItem())
-                    caster->CastSpell(caster, _triggeredSpellId, true, item);
+                    caster->CastSpell(caster, _triggeredSpellId, item);
             }
 
             void Register() OVERRIDE
@@ -100,7 +100,7 @@ class spell_item_aegis_of_preservation : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(GetTarget(), SPELL_AEGIS_HEAL, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), SPELL_AEGIS_HEAL, aurEff);
             }
 
             void Register() OVERRIDE
@@ -185,7 +185,7 @@ class spell_item_blessing_of_ancient_kings : public SpellScriptLoader
                     protEff->GetBase()->RefreshDuration();
                 }
                 else
-                    GetTarget()->CastCustomSpell(SPELL_PROTECTION_OF_ANCIENT_KINGS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, NULL, aurEff);
+                    GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_PROTECTION_OF_ANCIENT_KINGS, CastSpellExtraArgs(aurEff).AddSpellBP0(absorb));
             }
 
             void Register() OVERRIDE
@@ -235,7 +235,7 @@ class spell_item_defibrillate : public SpellScriptLoader
                 {
                     PreventHitDefaultEffect(effIndex);
                     if (_failSpell)
-                        GetCaster()->CastSpell(GetCaster(), _failSpell, true, GetCastItem());
+                        GetCaster()->CastSpell(GetCaster(), _failSpell, GetCastItem());
                 }
             }
 
@@ -284,7 +284,7 @@ class spell_item_desperate_defense : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(GetTarget(), SPELL_DESPERATE_RAGE, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), SPELL_DESPERATE_RAGE, aurEff);
             }
 
             void Register() OVERRIDE
@@ -336,7 +336,7 @@ class spell_item_deviate_fish : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 uint32 spellId = urand(SPELL_SLEEPY, SPELL_HEALTHY_SPIRIT);
-                caster->CastSpell(caster, spellId, true, NULL);
+                caster->CastSpell(caster, spellId, true);
             }
 
             void Register() OVERRIDE
@@ -406,7 +406,7 @@ class spell_item_flask_of_the_north : public SpellScriptLoader
                         break;
                 }
 
-                caster->CastSpell(caster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, NULL);
+                caster->CastSpell(caster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true);
             }
 
             void Register() OVERRIDE
@@ -451,9 +451,9 @@ class spell_item_gnomish_death_ray : public SpellScriptLoader
                 if (Unit* target = GetHitUnit())
                 {
                     if (urand(0, 99) < 15)
-                        caster->CastSpell(caster, SPELL_GNOMISH_DEATH_RAY_SELF, true, NULL);    // failure
+                        caster->CastSpell(caster, SPELL_GNOMISH_DEATH_RAY_SELF, true);    // failure
                     else
-                        caster->CastSpell(target, SPELL_GNOMISH_DEATH_RAY_TARGET, true, NULL);
+                        caster->CastSpell(target, SPELL_GNOMISH_DEATH_RAY_TARGET, true);
                 }
             }
 
@@ -512,7 +512,7 @@ class spell_item_make_a_wish : public SpellScriptLoader
                     case 3: spellId = SPELL_SUMMON_FURIOUS_MR_PINCHY; break;
                     case 4: spellId = SPELL_TINY_MAGICAL_CRAWDAD; break;
                 }
-                caster->CastSpell(caster, spellId, true, NULL);
+                caster->CastSpell(caster, spellId, true);
             }
 
             void Register() OVERRIDE
@@ -614,7 +614,7 @@ class spell_item_necrotic_touch : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 int32 bp = CalculatePct(int32(eventInfo.GetDamageInfo()->GetDamage()), aurEff->GetAmount());
-                GetTarget()->CastCustomSpell(SPELL_ITEM_NECROTIC_TOUCH_PROC, SPELLVALUE_BASE_POINT0, bp, eventInfo.GetProcTarget(), true, NULL, aurEff);
+                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_ITEM_NECROTIC_TOUCH_PROC, CastSpellExtraArgs(aurEff).AddSpellBP0(bp));
             }
 
             void Register() OVERRIDE
@@ -666,7 +666,7 @@ class spell_item_net_o_matic : public SpellScriptLoader
                     else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like chance unknown)
                         spellId = SPELL_NET_O_MATIC_TRIGGERED2;
 
-                    GetCaster()->CastSpell(target, spellId, true, NULL);
+                    GetCaster()->CastSpell(target, spellId, true);
                 }
             }
 
@@ -722,7 +722,7 @@ class spell_item_noggenfogger_elixir : public SpellScriptLoader
                     case 2: spellId = SPELL_NOGGENFOGGER_ELIXIR_TRIGGERED2; break;
                 }
 
-                caster->CastSpell(caster, spellId, true, NULL);
+                caster->CastSpell(caster, spellId, true);
             }
 
             void Register() OVERRIDE
@@ -809,7 +809,7 @@ class spell_item_savory_deviate_delight : public SpellScriptLoader
                     // Yaaarrrr - pirate
                     case 2: spellId = (caster->getGender() == GENDER_MALE ? SPELL_YAAARRRR_MALE : SPELL_YAAARRRR_FEMALE); break;
                 }
-                caster->CastSpell(caster, spellId, true, NULL);
+                caster->CastSpell(caster, spellId, true);
             }
 
             void Register() OVERRIDE
@@ -1009,14 +1009,14 @@ class spell_item_shadowmourne : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(GetTarget(), SPELL_SHADOWMOURNE_SOUL_FRAGMENT, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), SPELL_SHADOWMOURNE_SOUL_FRAGMENT, aurEff);
 
                 // this can't be handled in AuraScript of SoulFragments because we need to know victim
                 if (Aura* soulFragments = GetTarget()->GetAura(SPELL_SHADOWMOURNE_SOUL_FRAGMENT))
                 {
                     if (soulFragments->GetStackAmount() >= 10)
                     {
-                        GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE, true, NULL, aurEff);
+                        GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE, aurEff);
                         soulFragments->Remove();
                     }
                 }
@@ -1148,7 +1148,7 @@ class spell_item_six_demon_bag : public SpellScriptLoader
                         target = caster;
                     }
 
-                    caster->CastSpell(target, spellId, true, GetCastItem());
+                    caster->CastSpell(target, spellId, GetCastItem());
                 }
             }
 
@@ -1231,7 +1231,7 @@ class spell_item_underbelly_elixir : public SpellScriptLoader
                     case 1: spellId = SPELL_UNDERBELLY_ELIXIR_TRIGGERED1; break;
                     case 2: spellId = SPELL_UNDERBELLY_ELIXIR_TRIGGERED2; break;
                 }
-                caster->CastSpell(caster, spellId, true, NULL);
+                caster->CastSpell(caster, spellId, true);
             }
 
             void Register() OVERRIDE
@@ -1689,7 +1689,7 @@ class spell_item_purify_helboar_meat : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                caster->CastSpell(caster, roll_chance_i(50) ? SPELL_SUMMON_PURIFIED_HELBOAR_MEAT : SPELL_SUMMON_TOXIC_HELBOAR_MEAT, true, NULL);
+                caster->CastSpell(caster, roll_chance_i(50) ? SPELL_SUMMON_PURIFIED_HELBOAR_MEAT : SPELL_SUMMON_TOXIC_HELBOAR_MEAT, true);
             }
 
             void Register() OVERRIDE
@@ -1843,9 +1843,9 @@ class spell_item_nigh_invulnerability : public SpellScriptLoader
                 if (Item* castItem = GetCastItem())
                 {
                     if (roll_chance_i(86))                  // Nigh-Invulnerability   - success
-                        caster->CastSpell(caster, SPELL_NIGH_INVULNERABILITY, true, castItem);
+                        caster->CastSpell(caster, SPELL_NIGH_INVULNERABILITY, castItem);
                     else                                    // Complete Vulnerability - backfire in 14% casts
-                        caster->CastSpell(caster, SPELL_COMPLETE_VULNERABILITY, true, castItem);
+                        caster->CastSpell(caster, SPELL_COMPLETE_VULNERABILITY, castItem);
                 }
             }
 
@@ -1886,7 +1886,7 @@ class spell_item_poultryizer : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 if (GetCastItem() && GetHitUnit())
-                    GetCaster()->CastSpell(GetHitUnit(), roll_chance_i(80) ? SPELL_POULTRYIZER_SUCCESS : SPELL_POULTRYIZER_BACKFIRE, true, GetCastItem());
+                    GetCaster()->CastSpell(GetHitUnit(), roll_chance_i(80) ? SPELL_POULTRYIZER_SUCCESS : SPELL_POULTRYIZER_BACKFIRE, GetCastItem());
             }
 
             void Register() OVERRIDE
@@ -2043,7 +2043,7 @@ class spell_item_complete_raptor_capture : public SpellScriptLoader
                     GetHitCreature()->DespawnOrUnsummon();
 
                     //cast spell Raptor Capture Credit
-                    caster->CastSpell(caster, SPELL_RAPTOR_CAPTURE_CREDIT, true, NULL);
+                    caster->CastSpell(caster, SPELL_RAPTOR_CAPTURE_CREDIT, true);
                 }
             }
 
@@ -2199,7 +2199,7 @@ class spell_item_nitro_boots : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                caster->CastSpell(caster, roll_chance_i(95) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
+                caster->CastSpell(caster, roll_chance_i(95) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, GetCastItem());
             }
 
             void Register() OVERRIDE
@@ -2294,7 +2294,7 @@ class spell_item_rocket_boots : public SpellScriptLoader
                     bg->EventPlayerDroppedFlag(caster);
 
                 caster->RemoveSpellCooldown(SPELL_ROCKET_BOOTS_PROC);
-                caster->CastSpell(caster, SPELL_ROCKET_BOOTS_PROC, true, NULL);
+                caster->CastSpell(caster, SPELL_ROCKET_BOOTS_PROC, true);
             }
 
             SpellCastResult CheckCast()

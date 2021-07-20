@@ -345,7 +345,7 @@ class spell_ulduar_rubble_summon : public SpellScriptLoader
                 uint64 originalCaster = caster->GetInstanceScript() ? caster->GetInstanceScript()->GetData64(BOSS_KOLOGARN) : 0;
                 uint32 spellId = GetEffectValue();
                 for (uint8 i = 0; i < 5; ++i)
-                    caster->CastSpell(caster, spellId, true, NULL, NULL, originalCaster);
+                    caster->CastSpell(caster, spellId, originalCaster);
             }
 
             void Register() OVERRIDE

@@ -647,7 +647,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr, ++i)
                     {
                         Unit* target = *itr;
-                        target->CastCustomSpell(BoneSpikeSummonId[i], SPELLVALUE_BASE_POINT0, 0, target, true);
+                        target->CastSpell(target, BoneSpikeSummonId[i], CastSpellExtraArgs(true).AddSpellBP0(0));
                     }
 
                     marrowgarAI->Talk(SAY_BONESPIKE);

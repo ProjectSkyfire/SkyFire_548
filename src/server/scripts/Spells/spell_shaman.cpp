@@ -91,7 +91,7 @@ public:
             PreventDefaultAction();
             int32 heal = int32(CalculatePct(eventInfo.GetHealInfo()->GetHeal(), aurEff->GetAmount()));
 
-            GetTarget()->CastCustomSpell(SPELL_SHAMAN_ANCESTRAL_AWAKENING, SPELLVALUE_BASE_POINT0, heal, (Unit*)NULL, true, NULL, aurEff);
+            GetTarget()->CastSpell(NULL, SPELL_SHAMAN_ANCESTRAL_AWAKENING, CastSpellExtraArgs(aurEff).AddSpellBP0(heal));
         }
 
         void Register() OVERRIDE
@@ -126,7 +126,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            GetCaster()->CastCustomSpell(SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC, SPELLVALUE_BASE_POINT0, GetEffectValue(), GetHitUnit(), true);
+            GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC, CastSpellExtraArgs(true).AddSpellBP0(GetEffectValue()));
         }
 
         void Register() OVERRIDE
@@ -283,7 +283,7 @@ public:
         {
             PreventDefaultAction();
 
-            GetTarget()->CastCustomSpell(SPELL_SHAMAN_EARTH_SHIELD_HEAL, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetTarget(), true, NULL, aurEff, GetCasterGUID());
+            GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_EARTH_SHIELD_HEAL, CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()).AddSpellBP0(aurEff->GetAmount()));
 
             /// @hack: due to currenct proc system implementation
             if (Player* player = GetTarget()->ToPlayer())
@@ -404,7 +404,7 @@ public:
             PreventDefaultAction();
             int32 heal = CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal()), aurEff->GetAmount());
 
-            GetTarget()->CastCustomSpell(SPELL_SHAMAN_GLYPH_OF_HEALING_WAVE, SPELLVALUE_BASE_POINT0, heal, (Unit*)NULL, true, NULL, aurEff);
+            GetTarget()->CastSpell(NULL, SPELL_SHAMAN_GLYPH_OF_HEALING_WAVE, CastSpellExtraArgs(aurEff).AddSpellBP0(heal));
         }
 
         void Register() OVERRIDE
@@ -454,7 +454,7 @@ public:
 
                         damage = int32(target->SpellHealingBonusTaken(owner, triggeringSpell, damage, HEAL));
                     }
-                    caster->CastCustomSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
+                    caster->CastSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, CastSpellExtraArgs(GetOriginalCaster()->GetGUID()).AddSpellBP0(damage));
                 }
         }
 
@@ -536,7 +536,7 @@ public:
         void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD, true, NULL, aurEff);
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD, aurEff);
         }
 
         void Register() OVERRIDE
@@ -571,7 +571,7 @@ public:
         void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD_DAMAGE, true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD_DAMAGE, aurEff);
         }
 
         void Register() OVERRIDE
@@ -803,7 +803,7 @@ public:
             PreventDefaultAction();
             int32 basePoints0 = GetTarget()->CountPctFromMaxHealth(aurEff->GetAmount());
 
-            GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_NATURE_GUARDIAN, &basePoints0, NULL, NULL, true);
+            GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_NATURE_GUARDIAN, CastSpellExtraArgs(true).AddSpellBP0(basePoints0));
 
             if (eventInfo.GetProcTarget() && eventInfo.GetProcTarget()->IsAlive())
                 eventInfo.GetProcTarget()->getThreatManager().modifyThreatPercent(GetTarget(), -10);
@@ -885,7 +885,7 @@ public:
             PreventDefaultAction();
             int32 basePoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
 
-            GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_TELLURIC_CURRENTS, &basePoints0, NULL, NULL, true);
+            GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_TELLURIC_CURRENTS, CastSpellExtraArgs(true).AddSpellBP0(basePoints0));
         }
 
         void Register() OVERRIDE
@@ -952,7 +952,7 @@ public:
             int32 basePoints0 = -aurEff->GetAmount();
             int32 basePoints1 = aurEff->GetAmount();
 
-            GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_TIDAL_WAVES, &basePoints0, &basePoints1, NULL, true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_TIDAL_WAVES, CastSpellExtraArgs(aurEff).AddSpellBP0(basePoints0).AddSpellMod(SPELLVALUE_BASE_POINT1, basePoints1));
         }
 
         void Register() OVERRIDE

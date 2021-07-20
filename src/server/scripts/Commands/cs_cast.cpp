@@ -181,7 +181,7 @@ public:
         float x, y, z;
         handler->GetSession()->GetPlayer()->GetClosePoint(x, y, z, dist);
 
-        handler->GetSession()->GetPlayer()->CastSpell(x, y, z, spellId, triggered);
+        handler->GetSession()->GetPlayer()->CastSpell({ x, y, z }, spellId, triggered);
 
         return true;
     }
@@ -301,7 +301,7 @@ public:
 
         bool triggered = (triggeredStr != NULL);
 
-        caster->CastSpell(x, y, z, spellId, triggered);
+        caster->CastSpell({ x, y, z }, spellId, triggered);
 
         return true;
     }

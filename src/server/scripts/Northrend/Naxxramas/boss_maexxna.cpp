@@ -172,7 +172,7 @@ public:
             victimGUID = guid;
             if (me->m_spells[0] && victimGUID)
                 if (Unit* victim = Unit::GetUnit(*me, victimGUID))
-                    victim->CastSpell(victim, me->m_spells[0], true, NULL, NULL, me->GetGUID());
+                    victim->CastSpell(victim, me->m_spells[0], me->GetGUID());
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE

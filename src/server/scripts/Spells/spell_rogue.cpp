@@ -83,7 +83,7 @@ public:
             SF_LOG_ERROR("misc", "damage: %u procSpell: %u",
                 eventInfo.GetDamageInfo()->GetDamage(), eventInfo.GetDamageInfo()->GetSpellInfo() ? eventInfo.GetDamageInfo()->GetSpellInfo()->Id : 0);
 
-            GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, eventInfo.GetDamageInfo()->GetDamage(), _procTarget, true, NULL, aurEff);
+            GetTarget()->CastSpell(_procTarget, SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, CastSpellExtraArgs(aurEff).AddSpellBP0(eventInfo.GetDamageInfo()->GetDamage()));
         }
 
         void Register() OVERRIDE
@@ -188,7 +188,7 @@ public:
         void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_ROGUE_CRIPPLING_POISON, true, NULL, aurEff);
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_ROGUE_CRIPPLING_POISON, aurEff);
         }
 
         void Register() OVERRIDE
@@ -305,9 +305,9 @@ public:
                             continue;
 
                         if (spellInfo->IsPositive())
-                            player->CastSpell(player, enchant->spellid[s], true, item);
+                            player->CastSpell(player, enchant->spellid[s], item);
                         else
-                            player->CastSpell(target, enchant->spellid[s], true, item);
+                            player->CastSpell(target, enchant->spellid[s], item);
                     }
                 }
             }
@@ -538,7 +538,7 @@ public:
             if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0))
             {
                 int32 basepoints0 = aurEff->GetAmount();
-                target->CastCustomSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, &basepoints0, NULL, NULL, true);
+                target->CastSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, CastSpellExtraArgs(true).AddSpellBP0(basepoints0));
             }
         }
 

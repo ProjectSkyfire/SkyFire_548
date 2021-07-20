@@ -1229,7 +1229,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         spell->m_researchData = researchData;
     }*/
 
-    spell->prepare(&targets);
+    spell->prepare(targets);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
@@ -1420,7 +1420,7 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recvData*/)
     {
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_player->GetUInt32Value(PLAYER_FIELD_SELF_RES_SPELL));
         if (spellInfo)
-            _player->CastSpell(_player, spellInfo, false, 0);
+            _player->CastSpell(_player, spellInfo->Id);
 
         _player->SetUInt32Value(PLAYER_FIELD_SELF_RES_SPELL, 0);
     }

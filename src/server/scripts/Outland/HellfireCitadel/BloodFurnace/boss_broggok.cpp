@@ -82,7 +82,7 @@ public:
             summoned->setFaction(16);
             summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            summoned->CastSpell(summoned, SPELL_POISON, false, 0, 0, me->GetGUID());
+            summoned->CastSpell(summoned, SPELL_POISON, CastSpellExtraArgs(false).SetOriginalCaster(me->GetGUID()));
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

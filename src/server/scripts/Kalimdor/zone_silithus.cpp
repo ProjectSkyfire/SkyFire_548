@@ -664,7 +664,7 @@ public:
                         DoCast(player, 23017, true);//Arcane Channeling
                         break;
                     case 35:
-                        me->CastSpell(-8088, 1520.43f, 2.67f, 25158, true);
+                        me->CastSpell({ -8088, 1520.43f, 2.67f }, 25158, true);
                         break;
                     case 36:
                         DoCast(player, 25159, true);
@@ -714,7 +714,7 @@ public:
                         break;
                     case 50:
                         Fandral->AI()->Talk(FANDRAL_EMOTE_2);
-                        Fandral->CastSpell(-8127, 1525, 17.5f, 33806, true);
+                        Fandral->CastSpell({ -8127, 1525, 17.5f }, 33806, true);
                         break;
                     case 51:
                     {

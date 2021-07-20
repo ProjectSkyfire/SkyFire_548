@@ -24,6 +24,8 @@
 #include <ace/Stack_Trace.h>
 #include <sstream>
 
+ObjectGuid const ObjectGuid::Empty = ObjectGuid();
+
 ByteBufferPositionException::ByteBufferPositionException(bool add, size_t pos,
                                                          size_t size, size_t valueSize)
 {

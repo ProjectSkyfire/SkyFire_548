@@ -2320,7 +2320,11 @@ void Player::ProcessDelayedOperations()
         SetPower(POWER_ECLIPSE, 0);
 
         if (uint32 aura = _resurrectionData->Aura)
-            CastSpell(this, aura, true, NULL, NULL, _resurrectionData->GUID);
+        {
+            CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
+            args.SetOriginalCaster(_resurrectionData->GUID);
+            CastSpell(this, aura, args);
+        }
 
         SpawnCorpseBones();
     }
@@ -8704,7 +8708,7 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
 
         SF_LOG_DEBUG("entities.player", "WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->Id);
 
-        CastSpell(this, spellInfo, true, item);
+        CastSpell(this, spellInfo->Id, item);
     }
     else
     {
@@ -8830,7 +8834,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 chance = GetWeaponProcChance();
 
             if (roll_chance_f(chance))
-                CastSpell(target, spellInfo->Id, true, item);
+                CastSpell(target, spellInfo->Id, item);
         }
     }
 
@@ -8894,9 +8898,9 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
             if (roll_chance_f(chance))
             {
                 if (spellInfo->IsPositive())
-                    CastSpell(this, spellInfo, true, item);
+                    CastSpell(this, spellInfo->Id, item);
                 else
-                    CastSpell(target, spellInfo, true, item);
+                    CastSpell(target, spellInfo->Id, item);
             }
         }
     }
@@ -8934,7 +8938,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   //set count of casts
         spell->SetSpellValue(SPELLVALUE_BASE_POINT0, learning_spell_id);
-        spell->prepare(&targets);
+        spell->prepare(targets);
         return;
     }
 
@@ -8965,7 +8969,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
-        spell->prepare(&targets);
+        spell->prepare(targets);
 
         ++count;
     }
@@ -8996,7 +9000,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             spell->m_CastItem = item;
             spell->m_cast_count = cast_count;               // set count of casts
             spell->m_glyphIndex = glyphIndex;               // glyph index
-            spell->prepare(&targets);
+            spell->prepare(targets);
 
             ++count;
         }
@@ -12488,7 +12492,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
             if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE && proto->Spells[i].SpellId > 0) // On obtain trigger
                 if (bag == INVENTORY_SLOT_BAG_0 || (bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END))
                     if (!HasAura(proto->Spells[i].SpellId))
-                        CastSpell(this, proto->Spells[i].SpellId, true, pItem);
+                        CastSpell(this, proto->Spells[i].SpellId, pItem);
 
         return pItem;
     }
@@ -12531,7 +12535,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
             if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE && proto->Spells[i].SpellId > 0) // On obtain trigger
                 if (bag == INVENTORY_SLOT_BAG_0 || (bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END))
                     if (!HasAura(proto->Spells[i].SpellId))
-                        CastSpell(this, proto->Spells[i].SpellId, true, pItem2);
+                        CastSpell(this, proto->Spells[i].SpellId, pItem2);
 
         return pItem2;
     }
@@ -14443,11 +14447,12 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                                     }
                                 }
                             }
+                            CastSpellExtraArgs args(item);
                             // Cast custom spell vs all equal basepoints got from enchant_amount
                             if (basepoints)
-                                CastCustomSpell(this, enchant_spell_id, &basepoints, &basepoints, &basepoints, true, item);
-                            else
-                                CastSpell(this, enchant_spell_id, true, item);
+                                for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                    args.SpellValueOverrides.AddMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), basepoints);
+                            CastSpell(this, enchant_spell_id, args);
                         }
                         else
                             RemoveAurasDueToItemSpell(enchant_spell_id, item->GetGUID());
@@ -15092,7 +15097,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if (isDead())
-                source->ToCreature()->CastSpell(source->ToCreature(), 17251, true, NULL, NULL, GetGUID());
+                source->ToCreature()->CastSpell(source->ToCreature(), 17251, GetGUID());
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             PrepareQuestMenu(guid);
@@ -15113,8 +15118,8 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             {
                 // Cast spells that teach dual spec
                 // Both are also ImplicitTarget self and must be cast by player
-                CastSpell(this, 63680, true, NULL, NULL, GetGUID());
-                CastSpell(this, 63624, true, NULL, NULL, GetGUID());
+                CastSpell(this, 63680, GetGUID());
+                CastSpell(this, 63624, GetGUID());
 
                 // Should show another Gossip text with "Congratulations..."
                 PlayerTalkClass->SendCloseGossip();
@@ -25188,7 +25193,7 @@ bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
 
 void Player::ResurectUsingRequestData()
 {
-    /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
+    // Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
     float x, y, z, o;
     _resurrectionData->Location.GetPosition(x, y, z, o);
     TeleportTo(_resurrectionData->Location.GetMapId(), x, y, z, o);
@@ -25217,7 +25222,11 @@ void Player::ResurectUsingRequestData()
     SetPower(POWER_ECLIPSE, 0);
 
     if (uint32 aura = _resurrectionData->Aura)
-        CastSpell(this, aura, true, NULL, NULL, _resurrectionData->GUID);
+    {
+        CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
+        args.SetOriginalCaster(_resurrectionData->GUID);
+        CastSpell(this, aura, args);
+    }
 
     SpawnCorpseBones();
 }

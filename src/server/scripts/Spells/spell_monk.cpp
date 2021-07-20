@@ -287,7 +287,7 @@ public:
                     totalAbsorbAmount += dmgInfo.GetDamage();
 
                     if (attacker->HasAura(aurEff->GetSpellInfo()->Id, caster->GetGUID()))
-                        caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, SPELLVALUE_BASE_POINT0, (totalAbsorbAmount / 6), attacker);
+                        caster->CastSpell(attacker, SPELL_MONK_TOUCH_OF_KARMA_REDIRECT_DAMAGE, { SPELLVALUE_BASE_POINT0, int32(totalAbsorbAmount / 6) });
                 }
             }
         }
@@ -521,7 +521,7 @@ class spell_monk_crackling_jade_lightning : public SpellScriptLoader
             if (GetCaster())
             {
                 GetCaster()->CastSpell(GetCaster(), SPELL_MONK_CRACKLING_JADE_LIGHTNING_AURA, true);
-                GetCaster()->CastSpell(GetCaster(), SPELL_MONK_CRACKLING_JADE_LIGHTNING_AURA, true, NULL, aurEff);
+                GetCaster()->CastSpell(GetCaster(), SPELL_MONK_CRACKLING_JADE_LIGHTNING_AURA, aurEff);
                 GetCaster()->CastSpell(GetCaster(), SPELL_MONK_CRACKLING_JADE_LIGHTNING_CHI_PROC, true);
             }
         }
@@ -629,7 +629,7 @@ class spell_monk_fortifying_brew : public SpellScriptLoader
                 }
 
                 bp0 = CalculatePct(target->GetMaxHealth(), bp0);
-                target->CastCustomSpell(target, SPELL_MONK_FORTIFYING_BREW_AURA, &bp0, &bp1, NULL, true);
+                target->CastSpell(target, SPELL_MONK_FORTIFYING_BREW_AURA, CastSpellExtraArgs(true).AddSpellBP0(bp0).AddSpellMod(SPELLVALUE_BASE_POINT1, bp1));
             }
         }
 
@@ -713,7 +713,7 @@ class spell_monk_expel_harm : public SpellScriptLoader
 
             int32 dmg = GetHitHeal() / 2;
             if (dmg > 0)
-                GetHitUnit()->CastCustomSpell(SPELL_MONK_EXPEL_HARM_AREA_DMG, SPELLVALUE_BASE_POINT0, dmg, GetHitUnit(), true);
+                GetHitUnit()->CastSpell(GetHitUnit(), SPELL_MONK_EXPEL_HARM_AREA_DMG, CastSpellExtraArgs(true).AddSpellBP0(dmg));
         }
 
         void Register() override
@@ -1971,7 +1971,7 @@ class spell_monk_serpents_zeal : public SpellScriptLoader
                 }
 
                 // you gain Serpent's Zeal causing you to heal nearby injured targets equal to 25% of your auto-attack damage. Stacks up to 2 times.
-                _player->CastCustomSpell(_player, SPELL_MONK_EMINENCE_HEAL, &bp, NULL, NULL, true);
+                _player->CastSpell(_player, SPELL_MONK_EMINENCE_HEAL, CastSpellExtraArgs(true).AddSpellBP0(bp));
 
                 if (statueList.size() == 1)
                 {
@@ -1980,7 +1980,7 @@ class spell_monk_serpents_zeal : public SpellScriptLoader
 
                     if (statue && (statue->IsPet() || statue->IsGuardian()))
                         if (statue->GetOwner() && statue->GetOwner()->GetGUID() == _player->GetGUID())
-                            statue->CastCustomSpell(statue, SPELL_MONK_EMINENCE_HEAL, &bp, NULL, NULL, true, 0, NULL, _player->GetGUID()); // Eminence - statue
+                            statue->CastSpell(statue, SPELL_MONK_EMINENCE_HEAL, CastSpellExtraArgs(_player->GetGUID()).AddSpellBP0(bp)); // Eminence - statue
                 }
             }
         }
@@ -2594,7 +2594,7 @@ class spell_monk_healing_elixirs : public SpellScriptLoader
 
                     if (!_player->HasSpellCooldown(SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH))
                     {
-                        _player->CastCustomSpell(_player, SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH, &bp, NULL, NULL, true);
+                        _player->CastSpell(_player, SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH, CastSpellExtraArgs(true).AddSpellBP0(bp));
                         // This effect cannot occur more than once per 18s
                         _player->AddSpellCooldown(SPELL_MONK_HEALING_ELIXIRS_RESTORE_HEALTH, 0, time(NULL) + 18);
                     }
@@ -2960,7 +2960,7 @@ class spell_monk_clash : public SpellScriptLoader
                     if (Unit* target = GetHitUnit())
                     {
                         int32 basePoint = 2;
-                        _player->CastCustomSpell(target, SPELL_MONK_CLASH_CHARGE, &basePoint, NULL, NULL, true);
+                        _player->CastSpell(target, SPELL_MONK_CLASH_CHARGE, CastSpellExtraArgs(true).AddSpellBP0(basePoint));
                         target->CastSpell(_player, SPELL_MONK_CLASH_CHARGE, true);
                     }
                 }
@@ -3204,7 +3204,7 @@ class spell_monk_blackout_kick : public SpellScriptLoader
                         if (caster->HasAura(SPELL_MONK_GLYPH_OF_BLACKOUT_KICK))
                         {
                             int32 bp = int32(GetHitDamage() * 0.2f) / 4;
-                            caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
+                            caster->CastSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, CastSpellExtraArgs(true).AddSpellBP0(bp));
                         }
                         else
                         {
@@ -3212,13 +3212,13 @@ class spell_monk_blackout_kick : public SpellScriptLoader
                             if (target->isInBack(caster))
                             {
                                 int32 bp = int32(GetHitDamage() * 0.2f) / 4;
-                                caster->CastCustomSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, &bp, NULL, NULL, true);
+                                caster->CastSpell(target, SPELL_MONK_BLACKOUT_KICK_DOT, CastSpellExtraArgs(true).AddSpellBP0(bp));
                             }
                             // else : 20% damage on instant heal
                             else
                             {
                                 int32 bp = int32(GetHitDamage() * 0.2f);
-                                caster->CastCustomSpell(caster, SPELL_MONK_BLACKOUT_KICK_HEAL, &bp, NULL, NULL, true);
+                                caster->CastSpell(caster, SPELL_MONK_BLACKOUT_KICK_HEAL, CastSpellExtraArgs(true).AddSpellBP0(bp));
                             }
                         }
                     }

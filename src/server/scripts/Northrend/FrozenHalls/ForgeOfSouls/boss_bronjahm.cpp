@@ -177,7 +177,7 @@ class boss_bronjahm : public CreatureScript
                             break;
                         case EVENT_FEAR:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
-                                me->CastCustomSpell(SPELL_FEAR, SPELLVALUE_MAX_TARGETS, 1, target, false);
+                                me->CastSpell(NULL, SPELL_FEAR, { SPELLVALUE_MAX_TARGETS, 1 });
                             events.ScheduleEvent(EVENT_FEAR, urand(8000, 12000), 0, PHASE_2);
                             break;
                         default:

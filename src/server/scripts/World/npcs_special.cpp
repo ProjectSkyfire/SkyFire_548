@@ -1316,8 +1316,8 @@ public:
 
                         // Cast spells that teach dual spec
                         // Both are also ImplicitTarget self and must be cast by player
-                        player->CastSpell(player, 63680, true, NULL, NULL, player->GetGUID());
-                        player->CastSpell(player, 63624, true, NULL, NULL, player->GetGUID());
+                        player->CastSpell(player, 63680, player->GetGUID());
+                        player->CastSpell(player, 63624, player->GetGUID());
 
                         // Should show another Gossip text with "Congratulations..."
                         player->PlayerTalkClass->SendCloseGossip();
@@ -2339,7 +2339,7 @@ public:
             }
             else
                 //me->CastSpell(me, GetFireworkSpell(me->GetEntry()), true);
-                me->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), GetFireworkSpell(me->GetEntry()), true);
+                me->CastSpell({ me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() }, GetFireworkSpell(me->GetEntry()), true);
         }
     };
 

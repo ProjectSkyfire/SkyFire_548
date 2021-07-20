@@ -234,7 +234,7 @@ public:
 
                             bp = std::min(uint32(bp), target->GetMaxHealth());
 
-                            _plr->CastCustomSpell(target, MASTERY_SPELL_BLOOD_SHIELD, &bp, NULL, NULL, true);
+                            _plr->CastSpell(target, MASTERY_SPELL_BLOOD_SHIELD, CastSpellExtraArgs(true).AddSpellBP0(bp));
                         }
                     }
                 }
@@ -286,7 +286,7 @@ public:
                                 bp = int32(bp * 0.66f);
                             }
 
-                            caster->CastCustomSpell(target, MASTERY_SPELL_IGNITE, &bp, NULL, NULL, true);
+                            caster->CastSpell(target, MASTERY_SPELL_IGNITE, CastSpellExtraArgs(true).AddSpellBP0(bp));
                         }
                     }
                 }
@@ -331,7 +331,7 @@ public:
 
                             int32 bp = int32(GetHitDamage() * value / 100);
 
-                            caster->CastCustomSpell(target, MASTERY_SPELL_HAND_OF_LIGHT, &bp, NULL, NULL, true);
+                            caster->CastSpell(target, MASTERY_SPELL_HAND_OF_LIGHT, CastSpellExtraArgs(true).AddSpellBP0(bp));
                         }
                     }
                 }

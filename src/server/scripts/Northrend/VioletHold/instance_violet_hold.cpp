@@ -764,7 +764,7 @@ public:
                             break;
                         case 3:
                             pCyanigosa->RemoveAurasDueToSpell(CYANIGOSA_BLUE_AURA);
-                            pCyanigosa->CastSpell(pCyanigosa, CYANIGOSA_SPELL_TRANSFORM, 0);
+                            pCyanigosa->CastSpell(pCyanigosa, CYANIGOSA_SPELL_TRANSFORM, true);
                             pCyanigosa->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
                             pCyanigosa->SetReactState(REACT_AGGRESSIVE);
                             uiCyanigosaEventTimer = 2*IN_MILLISECONDS;
@@ -815,7 +815,7 @@ public:
                 return;
 
             // visuals
-            trigger->CastSpell(trigger, spellInfoLightning, true, 0, 0, trigger->GetGUID());
+            trigger->CastSpell(trigger, SPELL_ARCANE_LIGHTNING, trigger->GetGUID());
 
             // Kill all mobs registered with SetData64(ADD_TRASH_MOB)
             for (std::set<uint64>::const_iterator itr = trashMobs.begin(); itr != trashMobs.end(); ++itr)
