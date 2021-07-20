@@ -69,7 +69,7 @@ class icecrown_citadel_teleport : public GameObjectScript
             }
 
             if (sender == GOSSIP_SENDER_ICC_PORT)
-                player->CastSpell(player, spell, true);
+                player->CastSpell(player, spell->Id, true);
 
             return true;
         }

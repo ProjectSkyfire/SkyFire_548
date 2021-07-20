@@ -387,7 +387,7 @@ class npc_tournament_training_dummy : public CreatureScript
                         DoCast(SPELL_CHARGE_DEFEND);
                         break;
                     case NPC_RANGED_TARGET:
-                        me->CastCustomSpell(SPELL_RANGED_DEFEND, SPELLVALUE_AURA_STACK, 3, me);
+                        DoCastSelf(SPELL_RANGED_DEFEND, { SPELLVALUE_AURA_STACK, 3 });
                         break;
                 }
 

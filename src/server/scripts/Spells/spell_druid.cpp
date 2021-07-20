@@ -176,7 +176,7 @@ public:
                 if ((!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                     || caster->GetPower(POWER_ECLIPSE) == 0)
                 {
-                    caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
+                    caster->CastSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, CastSpellExtraArgs(true).AddSpellBP0(energizeAmount));
                     // If the energize was due to 0 power, cast the eclipse marker aura
                     if (!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                         caster->CastSpell(caster, SPELL_DRUID_LUNAR_ECLIPSE_MARKER, true);
@@ -193,7 +193,7 @@ public:
                 if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
                     || caster->GetPower(POWER_ECLIPSE) == 0)
                 {
-                    caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
+                    caster->CastSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, CastSpellExtraArgs(true).AddSpellBP0(energizeAmount));
                     // If the energize was due to 0 power, cast the eclipse marker aura
                     if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
                         caster->CastSpell(caster, SPELL_DRUID_SOLAR_ECLIPSE_MARKER, true);
@@ -210,7 +210,7 @@ public:
                     || caster->GetPower(POWER_ECLIPSE) == 0)
                 {
                     energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 15
-                    caster->CastCustomSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, &energizeAmount, 0, 0, true);
+                    caster->CastSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, CastSpellExtraArgs(true).AddSpellBP0(energizeAmount));
 
                     // If the energize was due to 0 power, cast the eclipse marker aura
                     if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
@@ -219,7 +219,7 @@ public:
                 else if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                 {
                     energizeAmount = -GetSpellInfo()->Effects[effIndex].BasePoints; // -15
-                    caster->CastCustomSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, &energizeAmount, 0, 0, true);
+                    caster->CastSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, CastSpellExtraArgs(true).AddSpellBP0(energizeAmount));
                 }
                 // The energizing effect brought us out of the lunar eclipse, remove the aura
                 if (caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE) && caster->GetPower(POWER_ECLIPSE) >= 0)
@@ -270,7 +270,7 @@ public:
         void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_GLYPH_OF_INNERVATE, true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_GLYPH_OF_INNERVATE, aurEff);
         }
 
         void Register() override
@@ -356,7 +356,7 @@ public:
         void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_DRUID_GLYPH_OF_STARFIRE, true, NULL, aurEff);
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_DRUID_GLYPH_OF_STARFIRE, aurEff);
         }
 
         void Register() override
@@ -431,10 +431,10 @@ public:
                 healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
                 healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
 
-                GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+                GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()).AddSpellBP0(healAmount));
             }
 
-            GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+            GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()).AddSpellBP0(healAmount));
         }
 
         void HandleDispel(DispelInfo* dispelInfo)
@@ -449,10 +449,10 @@ public:
                     {
                         healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                         healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                        target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                        target->CastSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, CastSpellExtraArgs().SetOriginalCaster(GetCasterGUID()).AddSpellBP0(healAmount));
                     }
 
-                    target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                    target->CastSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, CastSpellExtraArgs().SetOriginalCaster(GetCasterGUID()).AddSpellBP0(healAmount));
                 }
             }
         }
@@ -491,7 +491,7 @@ public:
         {
             PreventDefaultAction();
             int32 amount = CalculatePct(eventInfo.GetHealInfo()->GetHeal(), aurEff->GetAmount());
-            GetTarget()->CastCustomSpell(SPELL_DRUID_LIVING_SEED_PROC, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_DRUID_LIVING_SEED_PROC, CastSpellExtraArgs(aurEff).AddSpellBP0(amount));
         }
 
         void Register() override
@@ -526,7 +526,7 @@ public:
         void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastCustomSpell(SPELL_DRUID_LIVING_SEED_HEAL, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetTarget(), true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_LIVING_SEED_HEAL, CastSpellExtraArgs(aurEff).AddSpellBP0(aurEff->GetAmount()));
         }
 
         void Register() override
@@ -652,7 +652,7 @@ public:
         void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
             Unit* target = GetTarget();
-            target->CastSpell(target, SPELL_DRUID_SAVAGE_ROAR, true, NULL, aurEff, GetCasterGUID());
+            target->CastSpell(target, SPELL_DRUID_SAVAGE_ROAR, aurEff);
         }
 
         void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -751,8 +751,8 @@ public:
             if (GetTarget()->GetShapeshiftForm() != FORM_CAT || eventInfo.GetDamageInfo()->GetSpellInfo()->Id != SPELL_DRUID_FERAL_CHARGE_CAT)
                 return;
 
-            GetTarget()->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRank(SPELL_DRUID_STAMPEDE_CAT_RANK_1, GetSpellInfo()->GetRank()), true, NULL, aurEff);
-            GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_STAMPEDE_CAT_STATE, true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRank(SPELL_DRUID_STAMPEDE_CAT_RANK_1, GetSpellInfo()->GetRank()), aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_STAMPEDE_CAT_STATE, aurEff);
         }
 
         void HandleEffectBearProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -761,7 +761,7 @@ public:
             if (GetTarget()->GetShapeshiftForm() != FORM_BEAR || eventInfo.GetDamageInfo()->GetSpellInfo()->Id != SPELL_DRUID_FERAL_CHARGE_BEAR)
                 return;
 
-            GetTarget()->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRank(SPELL_DRUID_STAMPEDE_BAER_RANK_1, GetSpellInfo()->GetRank()), true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRank(SPELL_DRUID_STAMPEDE_BAER_RANK_1, GetSpellInfo()->GetRank()), aurEff);
         }
 
         void Register() override
@@ -817,7 +817,7 @@ public:
         {
             Unit* target = GetTarget();
             int32 bp0 = target->CountPctFromMaxHealth(aurEff->GetAmount());
-            target->CastCustomSpell(target, SPELL_DRUID_SURVIVAL_INSTINCTS, &bp0, NULL, NULL, true);
+            target->CastSpell(target, SPELL_DRUID_SURVIVAL_INSTINCTS, CastSpellExtraArgs(true).AddSpellBP0(bp0));
         }
 
         void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)

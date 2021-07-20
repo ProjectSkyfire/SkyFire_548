@@ -330,7 +330,7 @@ class spell_uk_second_wind_proc : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastCustomSpell(SPELL_UK_SECOUND_WIND_TRIGGER, SPELLVALUE_BASE_POINT0, 5, GetTarget(), true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), SPELL_UK_SECOUND_WIND_TRIGGER, CastSpellExtraArgs(aurEff).AddSpellBP0(5));
             }
 
             void Register() OVERRIDE

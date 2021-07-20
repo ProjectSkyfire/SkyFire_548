@@ -425,7 +425,7 @@ class npc_snobold_vassal : public CreatureScript
                         case EVENT_FIRE_BOMB:
                             if (me->GetVehicleBase())
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -me->GetVehicleBase()->GetCombatReach(), true))
-                                    me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_FIRE_BOMB, true);
+                                    me->CastSpell({ target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() }, SPELL_FIRE_BOMB, true);
                             _events.ScheduleEvent(EVENT_FIRE_BOMB, 20*IN_MILLISECONDS);
                             return;
                         case EVENT_HEAD_CRACK:

@@ -134,7 +134,7 @@ public:
                 summoned->GetMotionMaster()->MoveFollow(temp, 0, 0);
 
             //spells are SUMMON_TYPE_GUARDIAN, so using setOwner should be ok
-            summoned->CastSpell(summoned, SPELL_ENERGY_BOLT, false, 0, 0, me->GetGUID());
+            summoned->CastSpell(summoned, SPELL_ENERGY_BOLT, CastSpellExtraArgs(false).SetOriginalCaster(me->GetGUID()));
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -230,7 +230,7 @@ public:
             if (Unit* temp = me->GetOwner())
             {
                 if (temp && temp->IsAlive())
-                    slayer->CastSpell(slayer, SPELL_ENERGY_FEEDBACK, true, 0, 0, temp->GetGUID());
+                    slayer->CastSpell(slayer, SPELL_ENERGY_FEEDBACK, temp->GetGUID());
             }
         }
 

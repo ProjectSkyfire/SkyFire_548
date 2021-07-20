@@ -207,7 +207,7 @@ public:
                         if (Aura* aur = _player->GetAura(SPELL_DK_RUNIC_CORRUPTION_REGEN))
                             aur->SetDuration(aur->GetDuration() + 3000);
                         else
-                            _player->CastCustomSpell(_player, SPELL_DK_RUNIC_CORRUPTION_REGEN, &basepoints0, NULL, NULL, true);
+                            _player->CastSpell(_player, SPELL_DK_RUNIC_CORRUPTION_REGEN, CastSpellExtraArgs(true).AddSpellBP0(basepoints0));
                     }
                 }
             }
@@ -344,7 +344,7 @@ public:
             // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
             // This, if I'm not mistaken, shows that we get back ~20% of the absorbed damage as runic power.
             int32 bp = absorbAmount * 2 / 10;
-            target->CastCustomSpell(target, SPELL_DK_RUNIC_POWER_ENERGIZE, &bp, NULL, NULL, true, NULL, aurEff);
+            target->CastSpell(target, SPELL_DK_RUNIC_POWER_ENERGIZE, CastSpellExtraArgs(aurEff).AddSpellBP0(bp));
         }
 
         void Register() OVERRIDE
@@ -493,7 +493,7 @@ public:
         void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             int32 heal = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), 150));
-            GetTarget()->CastCustomSpell(SPELL_DK_BLOOD_GORGED_HEAL, SPELLVALUE_BASE_POINT0, heal, _procTarget, true, NULL, aurEff);
+            GetTarget()->CastSpell(_procTarget, SPELL_DK_BLOOD_GORGED_HEAL, CastSpellExtraArgs(aurEff).AddSpellBP0(heal));
         }
 
         void Register() OVERRIDE
@@ -539,10 +539,10 @@ public:
                 if (caster->IsFriendlyTo(target))
                 {
                     int32 bp = int32(damage * 1.5f);
-                    caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_HEAL, &bp, NULL, NULL, true);
+                    caster->CastSpell(target, SPELL_DK_DEATH_COIL_HEAL, CastSpellExtraArgs(true).AddSpellBP0(bp));
                 }
                 else
-                    caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
+                    caster->CastSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, CastSpellExtraArgs(true).AddSpellBP0(damage));
             }
         }
 
@@ -636,7 +636,7 @@ public:
             if (Unit* target = GetHitUnit())
             {
                 if (!target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS)) // Deterrence
-                    target->CastSpell(pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ(), damage, true);
+                    target->CastSpell({ pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ() }, damage, true);
             }
         }
 
@@ -741,14 +741,14 @@ public:
                     heal = AddPct(heal, aurEff->GetAmount());
 
                 heal = std::max(heal, int32(GetCaster()->CountPctFromMaxHealth(GetEffectValue())));
-                GetCaster()->CastCustomSpell(SPELL_DK_DEATH_STRIKE_HEAL, SPELLVALUE_BASE_POINT0, heal, GetCaster(), true);
+                GetCaster()->CastSpell(GetCaster(), SPELL_DK_DEATH_STRIKE_HEAL, CastSpellExtraArgs(true).AddSpellBP0(heal));
             }
 
             if (!GetCaster()->HasAura(SPELL_DK_BLOOD_PRESENCE))
                 return;
 
             if (AuraEffect const* aurEff = GetCaster()->GetAuraEffect(SPELL_DK_BLOOD_SHIELD_MASTERY, EFFECT_0))
-                GetCaster()->CastCustomSpell(SPELL_DK_BLOOD_SHIELD_ABSORB, SPELLVALUE_BASE_POINT0, GetCaster()->CountPctFromMaxHealth(aurEff->GetAmount()), GetCaster());
+                GetCaster()->CastSpell(GetCaster(), SPELL_DK_BLOOD_SHIELD_ABSORB, CastSpellExtraArgs(true).AddSpellBP0(GetCaster()->CountPctFromMaxHealth(aurEff->GetAmount())));
         }
 
         void Register() OVERRIDE
@@ -1005,7 +1005,7 @@ public:
         void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_DK_SCENT_OF_BLOOD, true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_DK_SCENT_OF_BLOOD, aurEff);
             GetTarget()->RemoveAuraFromStack(GetId());
         }
 
@@ -1064,7 +1064,7 @@ public:
             if (Unit* unitTarget = GetHitUnit())
             {
                 int32 bp = GetHitDamage() * multiplier;
-                caster->CastCustomSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
+                caster->CastSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, CastSpellExtraArgs(true).AddSpellBP0(bp));
             }
         }
 

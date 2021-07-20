@@ -21,6 +21,7 @@
 #define SKYFIRE_UNITAI_H
 
 #include "Define.h"
+#include "SpellDefines.h"
 #include "Unit.h"
 #include "Containers.h"
 #include "UnaryFunction.h"
@@ -243,10 +244,11 @@ class UnitAI
 
         void DoAddAuraToAllHostilePlayers(uint32 spellid);
         void DoCast(uint32 spellId);
-        void DoCast(Unit* victim, uint32 spellId, bool triggered = false);
         void DoCastToAllHostilePlayers(uint32 spellid, bool triggered = false);
-        void DoCastVictim(uint32 spellId, bool triggered = false);
-        void DoCastAOE(uint32 spellId, bool triggered = false);
+        void DoCast(Unit* victim, uint32 spellId, CastSpellExtraArgs const& args = {});
+        void DoCastSelf(uint32 spellId, CastSpellExtraArgs const& args = {}) { DoCast(me, spellId, args); }
+        void DoCastVictim(uint32 spellId, CastSpellExtraArgs const& args = {});
+        void DoCastAOE(uint32 spellId, CastSpellExtraArgs const& args = {}) { DoCast(nullptr, spellId, args); }
 
         float DoGetSpellMaxRange(uint32 spellId, bool positive = false);
 

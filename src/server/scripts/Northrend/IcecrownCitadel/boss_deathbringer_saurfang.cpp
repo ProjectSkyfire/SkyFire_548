@@ -412,7 +412,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     case 72445:
                     case 72446:
                         if (me->GetPower(POWER_ENERGY) != me->GetMaxPower(POWER_ENERGY))
-                            target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, me, true);
+                            target->CastSpell(me, SPELL_BLOOD_LINK_DUMMY, CastSpellExtraArgs(true).AddSpellBP0(1));
                         break;
                     default:
                         break;
@@ -1014,7 +1014,7 @@ class spell_deathbringer_blood_link : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_POWER, SPELLVALUE_BASE_POINT0, GetEffectValue(), GetHitUnit(), true);
+                GetHitUnit()->CastSpell(GetHitUnit(), SPELL_BLOOD_LINK_POWER, CastSpellExtraArgs(true).AddSpellBP0(GetEffectValue()));
                 PreventHitDefaultEffect(EFFECT_0);
             }
 
@@ -1135,7 +1135,7 @@ class spell_deathbringer_rune_of_blood : public SpellScriptLoader
             {
                 PreventHitDefaultEffect(effIndex);  // make this the default handler
                 if (GetCaster()->GetPower(POWER_ENERGY) != GetCaster()->GetMaxPower(POWER_ENERGY))
-                    GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, GetCaster(), true);
+                    GetHitUnit()->CastSpell(GetCaster(), SPELL_BLOOD_LINK_DUMMY, CastSpellExtraArgs(true).AddSpellBP0(1));
             }
 
             void Register() OVERRIDE
@@ -1170,7 +1170,7 @@ class spell_deathbringer_blood_nova : public SpellScriptLoader
             {
                 PreventHitDefaultEffect(effIndex);  // make this the default handler
                 if (GetCaster()->GetPower(POWER_ENERGY) != GetCaster()->GetMaxPower(POWER_ENERGY))
-                    GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 2, GetCaster(), true);
+                    GetHitUnit()->CastSpell(GetCaster(), SPELL_BLOOD_LINK_DUMMY, CastSpellExtraArgs(true).AddSpellBP0(2));
             }
 
             void Register() OVERRIDE

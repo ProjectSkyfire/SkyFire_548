@@ -794,7 +794,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         GameObject* LookupFishingHoleAround(float range);
 
-        void CastSpell(Unit* target, uint32 spell);
+        void CastSpell(Unit* target, uint32 spell, TriggerCastFlags triggered);
+        void CastSpell(Unit* target, uint32 spellId, bool triggered = true);
         void SendCustomAnim(uint32 anim);
         bool IsInRange(float x, float y, float z, float radius) const;
 

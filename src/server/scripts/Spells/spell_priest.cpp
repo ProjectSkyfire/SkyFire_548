@@ -93,7 +93,7 @@ public:
                 eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x00000080))
                 return;
 
-            GetTarget()->CastCustomSpell(SPELL_PRIEST_EVANGELISM_PROC, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), eventInfo.GetProcTarget(), true, NULL, aurEff);
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_PRIEST_EVANGELISM_PROC, CastSpellExtraArgs(aurEff).AddSpellBP0(aurEff->GetAmount()));
         }
         void Register() OVERRIDE
         {
@@ -140,7 +140,7 @@ public:
 
             absorb = std::min(absorb, eventInfo.GetProcTarget()->getLevel() * 125);
 
-            GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, NULL, aurEff);
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_PRIEST_DIVINE_AEGIS, CastSpellExtraArgs(aurEff).AddSpellBP0(absorb));
         }
 
         void Register() OVERRIDE
@@ -176,7 +176,7 @@ public:
         void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_PRIEST_ITEM_EFFICIENCY, true, NULL, aurEff);
+            GetTarget()->CastSpell(GetTarget(), SPELL_PRIEST_ITEM_EFFICIENCY, aurEff);
         }
 
         void Register() OVERRIDE
@@ -222,7 +222,7 @@ public:
             SpellCastTargets targets;
             targets.SetDst(destPos);
             targets.SetUnitTarget(GetCaster());
-            GetHitUnit()->CastSpell(targets, sSpellMgr->GetSpellInfo(SPELL_PRIEST_LEAP_OF_FAITH_EFFECT), NULL);
+            GetHitUnit()->CastSpell(targets, SPELL_PRIEST_LEAP_OF_FAITH_EFFECT);
 
             if (GetCaster()->HasAura(SPELL_PRIEST_BODY_AND_SOUL_PASSIVE))
                 GetCaster()->CastSpell(GetHitUnit(), SPELL_PRIEST_BODY_AND_SOUL_SPEED, true);
@@ -308,7 +308,7 @@ public:
         void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(_procTarget, SPELL_PRIEST_MANA_LEECH_PROC, true, NULL, aurEff);
+            GetTarget()->CastSpell(_procTarget, SPELL_PRIEST_MANA_LEECH_PROC, aurEff);
         }
 
         void Register() OVERRIDE
@@ -485,7 +485,7 @@ public:
             if (AuraEffect const* glyphAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_GLYPH, EFFECT_0))
             {
                 int32 bp = CalculatePct(absorbAmount, glyphAurEff->GetAmount());
-                target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+                target->CastSpell(dmgInfo.GetAttacker(), SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED, CastSpellExtraArgs(aurEff).AddSpellBP0(bp));
             }
         }
 
@@ -497,7 +497,7 @@ public:
             if (AuraEffect const* bodyandsoul = GetCaster()->GetAuraEffectOfRankedSpell(64129, EFFECT_0))
             {
                 int32 bp = bodyandsoul->GetAmount();
-                GetTarget()->CastCustomSpell(SPELL_PRIEST_BODY_AND_SOUL_SPEED, SPELLVALUE_BASE_POINT0, bp, NULL, true, NULL, aurEff);
+                GetTarget()->CastSpell(NULL, SPELL_PRIEST_BODY_AND_SOUL_SPEED, CastSpellExtraArgs(aurEff).AddSpellBP0(bp));
             }
         }
 
@@ -582,7 +582,7 @@ public:
                     uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), DOT);
                     heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT);
                     int32 basepoints0 = CalculatePct(int32(heal) * aurEff->GetTotalTicks(), empoweredRenewAurEff->GetAmount());
-                    caster->CastCustomSpell(GetTarget(), SPELL_PRIEST_DIVINE_TOUCH, &basepoints0, NULL, NULL, true, NULL, aurEff);
+                    caster->CastSpell(GetTarget(), SPELL_PRIEST_DIVINE_TOUCH, CastSpellExtraArgs(aurEff).AddSpellBP0(basepoints0));
                 }
             }
         }
@@ -612,7 +612,7 @@ public:
         void HandleDamage()
         {
             int32 damage = GetHitDamage();
-            GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &damage, 0, 0, true);
+            GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, CastSpellExtraArgs(true).AddSpellBP0(damage));
         }
 
         void Register() OVERRIDE
@@ -697,7 +697,7 @@ public:
             int32 self = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()));
             int32 team = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount() / 2));
 
-            GetTarget()->CastCustomSpell((Unit*)NULL, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, &team, &self, NULL, true, NULL, aurEff);
+            GetTarget()->CastSpell(NULL, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, CastSpellExtraArgs(aurEff).AddSpellBP0(team).AddSpellMod(SPELLVALUE_BASE_POINT1,self));
         }
 
         void Register() OVERRIDE
@@ -764,7 +764,7 @@ public:
 
         void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
-            eventInfo.GetProcTarget()->CastSpell((Unit*)NULL, SPELL_GEN_REPLENISHMENT, true, NULL, aurEff);
+            eventInfo.GetProcTarget()->CastSpell(NULL, SPELL_GEN_REPLENISHMENT, aurEff);
         }
 
         void Register() OVERRIDE

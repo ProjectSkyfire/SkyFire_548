@@ -244,7 +244,7 @@ void PetAI::UpdateAI(uint32 diff)
 
             me->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
 
-            spell->prepare(&targets);
+            spell->prepare(targets);
         }
 
         // deleted cached Spell objects

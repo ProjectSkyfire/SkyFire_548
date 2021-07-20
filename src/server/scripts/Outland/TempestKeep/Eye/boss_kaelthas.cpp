@@ -756,7 +756,7 @@ class boss_kaelthas : public CreatureScript
                                         //interruptable
                                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                                         int32 dmg = 20000+rand()%5000;
-                                        me->CastCustomSpell(me->GetVictim(), SPELL_FIREBALL, &dmg, 0, 0, false);
+                                        me->CastSpell(me->GetVictim(), SPELL_FIREBALL, CastSpellExtraArgs().AddSpellBP0(dmg));
                                         IsCastingFireball = true;
                                         Fireball_Timer = 2500;
                                     }
@@ -932,8 +932,8 @@ class boss_kaelthas : public CreatureScript
                                                 DoCast(unit, SPELL_KNOCKBACK, true);
                                                 //Gravity lapse - needs an exception in Spell system to work
 
-                                                unit->CastSpell(unit, SPELL_GRAVITY_LAPSE, true, 0, 0, me->GetGUID());
-                                                unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_AURA, true, 0, 0, me->GetGUID());
+                                                unit->CastSpell(unit, SPELL_GRAVITY_LAPSE, true);
+                                                unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_AURA, true);
 
                                                 //Using packet workaround
                                                 WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);

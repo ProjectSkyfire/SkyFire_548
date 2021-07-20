@@ -191,7 +191,7 @@ public:
             if (timer <= diff)
             {
                 if (spell)
-                    me->CastSpell(me, spell, true);
+                    me->CastSpell(me, me->m_spells[0], true);
                 timer = interval;
             }
             else

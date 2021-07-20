@@ -414,7 +414,7 @@ class boss_halion : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_TWILIGHT_REALM))
                         {
                             target->GetPosition(&_meteorStrikePos);
-                            me->CastSpell(_meteorStrikePos.GetPositionX(), _meteorStrikePos.GetPositionY(), _meteorStrikePos.GetPositionZ(), SPELL_METEOR_STRIKE, true, NULL, NULL, me->GetGUID());
+                            me->CastSpell({ _meteorStrikePos.GetPositionX(), _meteorStrikePos.GetPositionY(), _meteorStrikePos.GetPositionZ() }, SPELL_METEOR_STRIKE, me->GetGUID());
                             Talk(SAY_METEOR_STRIKE);
                         }
                         events.ScheduleEvent(EVENT_METEOR_STRIKE, 40000);
@@ -1161,11 +1161,11 @@ class npc_combustion_consumption : public CreatureScript
                 if (type != DATA_STACKS_DISPELLED || !_damageSpell || !_explosionSpell || !summoner)
                     return;
 
-                me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, stackAmount, me);
-                DoCast(me, _damageSpell);
+                me->CastSpell(me, SPELL_SCALE_AURA, { SPELLVALUE_AURA_STACK, int32(stackAmount + 1) });
+                DoCastSelf(_damageSpell);
 
                 int32 damage = 1200 + (stackAmount * 1290); // Needs more researches.
-                summoner->CastCustomSpell(_explosionSpell, SPELLVALUE_BASE_POINT0, damage, summoner);
+                summoner->CastSpell(summoner, _explosionSpell, { SPELLVALUE_BASE_POINT0, damage });
             }
 
             void UpdateAI(uint32 /*diff*/) OVERRIDE { }
@@ -1458,7 +1458,7 @@ class spell_halion_marks : public SpellScriptLoader
                     return;
 
                 // Stacks marker
-                GetTarget()->CastCustomSpell(_summonSpellId, SPELLVALUE_BASE_POINT1, aurEff->GetBase()->GetStackAmount(), GetTarget(), TRIGGERED_FULL_MASK, NULL, NULL, GetCasterGUID());
+                GetTarget()->CastSpell(GetTarget(), _summonSpellId, CastSpellExtraArgs(GetCasterGUID()).AddSpellMod(SPELLVALUE_BASE_POINT1, aurEff->GetBase()->GetStackAmount()));
             }
 
             void Register() OVERRIDE
@@ -1683,7 +1683,7 @@ class spell_halion_twilight_phasing : public SpellScriptLoader
             void Phase()
             {
                 Unit* caster = GetCaster();
-                caster->CastSpell(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_TWILIGHT_PORTAL, true);
+                caster->CastSpell({ caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ() }, SPELL_SUMMON_TWILIGHT_PORTAL, true);
                 caster->GetMap()->SummonCreature(NPC_TWILIGHT_HALION, HalionSpawnPos);
             }
 

@@ -1350,7 +1350,7 @@ public:
                 {
                     if (StrikeTimer <= diff)
                     {
-                        me->CastSpell(DummyTarget[0], DummyTarget[1], DummyTarget[2], SPELL_GARGOYLE_STRIKE, false);
+                        me->CastSpell({ DummyTarget[0], DummyTarget[1], DummyTarget[2] }, SPELL_GARGOYLE_STRIKE);
                         StrikeTimer = 2000+rand()%1000;
                     } else StrikeTimer -= diff;
                     }
@@ -1449,7 +1449,7 @@ public:
                     return;
                 }
                 int dmg = 500+rand()%700;
-                me->CastCustomSpell(me->GetVictim(), SPELL_EXPLODING_SHOT, &dmg, 0, 0, false);
+                me->CastSpell(me->GetVictim(), SPELL_EXPLODING_SHOT, { SPELLVALUE_BASE_POINT0, dmg });
                 ExplodeTimer = 5000+rand()%5000;
             } else ExplodeTimer -= diff;
             DoMeleeAttackIfReady();

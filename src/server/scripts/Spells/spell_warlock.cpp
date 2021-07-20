@@ -313,7 +313,7 @@ public:
             PreventDefaultAction();
 
             int32 heal = CalculatePct(int32(eventInfo.GetDamageInfo()->GetDamage()), aurEff->GetAmount());
-            GetTarget()->CastCustomSpell(SPELL_WARLOCK_FEL_SYNERGY_HEAL, SPELLVALUE_BASE_POINT0, heal, (Unit*)NULL, true, NULL, aurEff); // TARGET_UNIT_PET
+            GetTarget()->CastSpell(NULL, SPELL_WARLOCK_FEL_SYNERGY_HEAL, CastSpellExtraArgs(aurEff).AddSpellBP0(heal)); // TARGET_UNIT_PET
         }
 
         void Register() OVERRIDE
@@ -395,7 +395,7 @@ public:
                 if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, WARLOCK_ICON_ID_IMPROVED_LIFE_TAP, 0))
                     AddPct(mana, aurEff->GetAmount());
 
-                caster->CastCustomSpell(target, SPELL_WARLOCK_LIFE_TAP_ENERGIZE, &mana, NULL, NULL, false);
+                caster->CastSpell(target, SPELL_WARLOCK_LIFE_TAP_ENERGIZE, { SPELLVALUE_BASE_POINT0, mana });
             }
         }
 
@@ -473,7 +473,7 @@ public:
             int32 procChance = std::max(aurEff->GetAmount(), 0);
 
             if (roll_chance_i(procChance))
-                GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_SHADOW_TRANCE, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_SHADOW_TRANCE, aurEff);
         }
 
         void Register() OVERRIDE
@@ -750,7 +750,7 @@ public:
                 {
                     int32 damage = aurEff->GetAmount() * 9;
                     // backfire damage and silence
-                    caster->CastCustomSpell(dispelInfo->GetDispeller(), SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
+                    caster->CastSpell(dispelInfo->GetDispeller(), SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL, CastSpellExtraArgs(aurEff).AddSpellBP0(damage));
                 }
         }
 

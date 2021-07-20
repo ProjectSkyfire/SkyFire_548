@@ -532,7 +532,7 @@ public:
             {
                 Unit* unit = Unit::GetUnit(*me, Council[i]);
                 if (unit)
-                    unit->CastSpell(unit, spellid, true, 0, 0, me->GetGUID());
+                    unit->CastSpell(unit, spellid, me->GetGUID());
             }
         }
 
@@ -909,7 +909,7 @@ public:
             if (dmgInfo.GetAttacker() == target)
                 return;
             int32 bp = absorbAmount / 2;
-            target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_REFLECTIVE_SHIELD_T, &bp, NULL, NULL, true, NULL, aurEff);
+            target->CastSpell(dmgInfo.GetAttacker(), SPELL_REFLECTIVE_SHIELD_T, CastSpellExtraArgs(aurEff).AddSpellBP0(bp));
         }
 
         void Register() OVERRIDE

@@ -149,7 +149,7 @@ class spell_gen_adaptive_warding : public SpellScriptLoader
                     default:
                         return;
                 }
-                GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), spellId, aurEff);
             }
 
             void Register() OVERRIDE
@@ -209,7 +209,7 @@ class spell_gen_alchemist_stone : public SpellScriptLoader
                 if (!spellId)
                     return;
 
-                GetTarget()->CastCustomSpell(spellId, SPELLVALUE_BASE_POINT0, bp, GetTarget(), true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), spellId, CastSpellExtraArgs(aurEff).AddSpellBP0(bp));
             }
 
 
@@ -746,7 +746,7 @@ class spell_gen_chaos_blast : public SpellScriptLoader
                 int32 basepoints0 = 100;
                 Unit* caster = GetCaster();
                 if (Unit* target = GetHitUnit())
-                    caster->CastCustomSpell(target, SPELL_CHAOS_BLAST, &basepoints0, NULL, NULL, true);
+                    caster->CastSpell(target, SPELL_CHAOS_BLAST, CastSpellExtraArgs(true).AddSpellBP0(basepoints0));
             }
 
             void Register() OVERRIDE
@@ -1187,7 +1187,7 @@ class spell_gen_defend : public SpellScriptLoader
                     for (uint8 i = 0; i < GetSpellInfo()->StackAmount; ++i)
                         target->RemoveAurasDueToSpell(SPELL_VISUAL_SHIELD_1 + i);
 
-                    target->CastSpell(target, SPELL_VISUAL_SHIELD_1 + GetAura()->GetStackAmount() - 1, true, NULL, aurEff);
+                    target->CastSpell(target, SPELL_VISUAL_SHIELD_1 + GetAura()->GetStackAmount() - 1, aurEff);
                 }
                 else
                     GetTarget()->RemoveAurasDueToSpell(GetId());
@@ -1382,7 +1382,7 @@ class spell_gen_dummy_trigger : public SpellScriptLoader
                 if (Unit* target = GetHitUnit())
                     if (SpellInfo const* triggeredByAuraSpell = GetTriggeringSpell())
                         if (triggeredByAuraSpell->Id == SPELL_PERSISTANT_SHIELD_TRIGGERED)
-                            caster->CastCustomSpell(target, SPELL_PERSISTANT_SHIELD_TRIGGERED, &damage, NULL, NULL, true);
+                            caster->CastSpell(target, SPELL_PERSISTANT_SHIELD_TRIGGERED, CastSpellExtraArgs(true).AddSpellBP0(damage));
             }
 
             void Register() OVERRIDE
@@ -1496,7 +1496,7 @@ class spell_gen_elune_candle : public SpellScriptLoader
                 else
                     spellId = SPELL_ELUNE_CANDLE_NORMAL;
 
-                GetCaster()->CastSpell(GetHitUnit(), spellId, true, NULL);
+                GetCaster()->CastSpell(GetHitUnit(), spellId, true);
             }
 
             void Register() OVERRIDE
@@ -1714,7 +1714,7 @@ class spell_gen_interrupt : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_GEN_THROW_INTERRUPT, true, NULL, aurEff);
+                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_GEN_THROW_INTERRUPT, aurEff);
             }
 
             void Register() OVERRIDE
@@ -1845,7 +1845,7 @@ class spell_gen_lifebloom : public SpellScriptLoader
                     return;
 
                 // final heal
-                GetTarget()->CastSpell(GetTarget(), _spellId, true, NULL, aurEff, GetCasterGUID());
+                GetTarget()->CastSpell(GetTarget(), _spellId, CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
             }
 
             void Register() OVERRIDE
@@ -2204,7 +2204,7 @@ class spell_gen_obsidian_armor : public SpellScriptLoader
                     default:
                         return;
                 }
-                GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), spellId, aurEff);
             }
 
             void Register() OVERRIDE
@@ -2905,7 +2905,7 @@ class spell_gen_two_forms : public SpellScriptLoader
                 if (target->HasAuraType(SPELL_AURA_WORGEN_ALTERED_FORM))
                     target->RemoveAurasByType(SPELL_AURA_WORGEN_ALTERED_FORM);
                 else    // Basepoints 1 for this aura control whether to trigger transform transition animation or not.
-                    target->CastCustomSpell(SPELL_ALTERED_FORM, SPELLVALUE_BASE_POINT0, 1, target, TRIGGERED_FULL_MASK);
+                    target->CastSpell(target, SPELL_ALTERED_FORM, CastSpellExtraArgs(true).AddSpellBP0(1));
             }
 
             void Register() OVERRIDE
@@ -3301,7 +3301,7 @@ class spell_gen_turkey_marker : public SpellScriptLoader
 
                 // on stack 15 cast the achievement crediting spell
                 if (GetStackAmount() >= 15)
-                    target->CastSpell(target, SPELL_TURKEY_VENGEANCE, true, NULL, aurEff, GetCasterGUID());
+                    target->CastSpell(target, SPELL_TURKEY_VENGEANCE, CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
             }
 
             void OnPeriodic(AuraEffect const* /*aurEff*/)
