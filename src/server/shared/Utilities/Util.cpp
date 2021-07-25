@@ -506,12 +506,12 @@ void utf8printf(FILE* out, const char *str, ...)
 void vutf8printf(FILE* out, const char *str, va_list* ap)
 {
 #if PLATFORM == PLATFORM_WINDOWS
-    char temp_buf[32*1024];
-    wchar_t wtemp_buf[32*1024];
+    char temp_buf[4*1024];
+    wchar_t wtemp_buf[4*1024];
 
-    size_t temp_len = vsnprintf(temp_buf, 32*1024, str, *ap);
+    size_t temp_len = vsnprintf(temp_buf, 4*1024, str, *ap);
 
-    size_t wtemp_len = 32*1024-1;
+    size_t wtemp_len = 4*1024-1;
     Utf8toWStr(temp_buf, temp_len, wtemp_buf, wtemp_len);
 
     CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len+1);
