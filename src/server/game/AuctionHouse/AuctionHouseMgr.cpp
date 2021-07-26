@@ -63,7 +63,7 @@ AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(uint32 factionTemplateId)
         return &mNeutralAuctions;
 }
 
-uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count)
+uint64 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count)
 {
     uint32 MSV = pItem->GetTemplate()->SellPrice;
 
@@ -72,12 +72,13 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
 
     float multiplier = CalculatePct(float(entry->depositPercent), 3);
     uint32 timeHr = (((time / 60) / 60) / 12);
-    uint32 deposit = uint32(((multiplier * MSV * count / 3) * timeHr * 3) * sWorld->getRate(Rates::RATE_AUCTION_DEPOSIT));
+    //TODO: Fix this arithmetic overflow
+    uint64 deposit = uint64(((multiplier * MSV * count / 3) * timeHr * 3) * sWorld->getRate(Rates::RATE_AUCTION_DEPOSIT));
 
     SF_LOG_DEBUG("auctionHouse", "MSV:        %u", MSV);
     SF_LOG_DEBUG("auctionHouse", "Items:      %u", count);
     SF_LOG_DEBUG("auctionHouse", "Multiplier: %f", multiplier);
-    SF_LOG_DEBUG("auctionHouse", "Deposit:    %u", deposit);
+    SF_LOG_DEBUG("auctionHouse", "Deposit:    %lu", deposit);
 
     if (deposit < AH_MINIMUM_DEPOSIT)
         return AH_MINIMUM_DEPOSIT;
@@ -122,7 +123,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
 
         uint32 ownerAccId = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
 
-        sLog->outCommand(bidderAccId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
+        sLog->outCommand(bidderAccId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %lu. Original owner %s (Account: %u)",
             bidderName.c_str(), bidderAccId, pItem->GetTemplate()->Name1.c_str(), pItem->GetEntry(), pItem->GetCount(), auction->bid, ownerName.c_str(), ownerAccId);
     }
 
@@ -143,7 +144,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
             bidder->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WON_AUCTIONS, 1);
         }
 
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_WON), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, 0, 0))
+        MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_WON), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, 0, 0))
             .AddItem(pItem)
             .SendMailTo(trans, MailReceiver(bidder, auction->bidder), auction, MAIL_CHECK_MASK_COPIED);
     }
@@ -156,7 +157,7 @@ void AuctionHouseMgr::SendAuctionSalePendingMail(AuctionEntry* auction, SQLTrans
     uint32 owner_accId = sObjectMgr->GetPlayerAccountIdByGUID(owner_guid);
     // owner exist (online or offline)
     if (owner || owner_accId)
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_SALE_PENDING), AuctionEntry::BuildAuctionMailBody(auction->bidder, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()))
+        MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_SALE_PENDING), AuctionEntry::BuildAuctionMailBody(auction->bidder, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()))
             .SendMailTo(trans, MailReceiver(owner, auction->owner), auction, MAIL_CHECK_MASK_COPIED);
 }
 
@@ -169,7 +170,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransa
     // owner exist
     if (owner || owner_accId)
     {
-        uint32 profit = auction->bid + auction->deposit - auction->GetAuctionCut();
+        uint64 profit = auction->bid + auction->deposit - auction->GetAuctionCut();
 
         //FIXME: what do if owner offline
         if (owner)
@@ -180,7 +181,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransa
             owner->GetSession()->SendAuctionOwnerNotification(auction);
         }
 
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_SUCCESSFUL), AuctionEntry::BuildAuctionMailBody(auction->bidder, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()))
+        MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_SUCCESSFUL), AuctionEntry::BuildAuctionMailBody(auction->bidder, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()))
             .AddMoney(profit)
             .SendMailTo(trans, MailReceiver(owner, auction->owner), auction, MAIL_CHECK_MASK_COPIED, sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAIL_DELIVERY_DELAY));
     }
@@ -203,7 +204,7 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction, SQLTransacti
         if (owner)
             owner->GetSession()->SendAuctionOwnerNotification(auction);
 
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_EXPIRED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
+        MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_EXPIRED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
             .AddItem(pItem)
             .SendMailTo(trans, MailReceiver(owner, auction->owner), auction, MAIL_CHECK_MASK_COPIED, 0);
     }
@@ -225,7 +226,7 @@ void AuctionHouseMgr::SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 new
         if (oldBidder && newBidder)
             oldBidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, newBidder->GetGUID(), newPrice, auction->GetAuctionOutBid(), auction->itemEntry);
 
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_OUTBIDDED), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()))
+        MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_OUTBIDDED), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()))
             .AddMoney(auction->bid)
             .SendMailTo(trans, MailReceiver(oldBidder, auction->bidder), auction, MAIL_CHECK_MASK_COPIED);
     }
@@ -246,7 +247,7 @@ void AuctionHouseMgr::SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQ
 
     // bidder exist
     if (bidder || bidder_accId)
-        MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELLED_TO_BIDDER), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, auction->deposit, 0))
+        MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_CANCELLED_TO_BIDDER), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, auction->deposit, 0))
             .AddMoney(auction->bid)
             .SendMailTo(trans, MailReceiver(bidder, auction->bidder), auction, MAIL_CHECK_MASK_COPIED);
 }
@@ -640,16 +641,17 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
     return true;
 }
 
-uint32 AuctionEntry::GetAuctionCut() const
+uint64 AuctionEntry::GetAuctionCut() const
 {
-    int32 cut = int32(CalculatePct(bid, auctionHouseEntry->cutPercent) * sWorld->getRate(Rates::RATE_AUCTION_CUT));
-    return std::max(cut, 0);
+    //TODO: Fix this arithmetic overflow.
+    uint64 cut = uint64(CalculatePct(bid, auctionHouseEntry->cutPercent) * sWorld->getRate(Rates::RATE_AUCTION_CUT));
+    return std::max<uint64>(cut, 0);
 }
 
 /// the sum of outbid is (1% from current bid)*5, if bid is very small, it is 1c
-uint32 AuctionEntry::GetAuctionOutBid() const
+uint64 AuctionEntry::GetAuctionOutBid() const
 {
-    uint32 outbid = CalculatePct(bid, 5);
+    uint64 outbid = CalculatePct(bid, 5);
     return outbid ? outbid : 1;
 }
 
@@ -667,12 +669,12 @@ void AuctionEntry::SaveToDB(SQLTransaction& trans) const
     stmt->setUInt32(1, auctioneer);
     stmt->setUInt32(2, itemGUIDLow);
     stmt->setUInt32(3, owner);
-    stmt->setUInt32(4, buyout);
+    stmt->setUInt64(4, buyout);
     stmt->setUInt32(5, uint32(expire_time));
     stmt->setUInt32(6, bidder);
-    stmt->setUInt32(7, bid);
-    stmt->setUInt32(8, startbid);
-    stmt->setUInt32(9, deposit);
+    stmt->setUInt64(7, bid);
+    stmt->setUInt64(8, startbid);
+    stmt->setUInt64(9, deposit);
     trans->Append(stmt);
 }
 
@@ -684,12 +686,12 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     itemEntry = fields[3].GetUInt32();
     itemCount = fields[4].GetUInt32();
     owner = fields[5].GetUInt32();
-    buyout = fields[6].GetUInt32();
+    buyout = fields[6].GetUInt64();
     expire_time = fields[7].GetUInt32();
     bidder = fields[8].GetUInt32();
-    bid = fields[9].GetUInt32();
-    startbid = fields[10].GetUInt32();
-    deposit = fields[11].GetUInt32();
+    bid = fields[9].GetUInt64();
+    startbid = fields[10].GetUInt64();
+    deposit = fields[11].GetUInt64();
 
     CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
     if (!auctioneerData)
@@ -804,12 +806,12 @@ bool AuctionEntry::LoadFromFieldList(Field* fields)
     itemEntry = fields[3].GetUInt32();
     itemCount = fields[4].GetUInt32();
     owner = fields[5].GetUInt32();
-    buyout = fields[6].GetUInt32();
+    buyout = fields[6].GetUInt64();
     expire_time = fields[7].GetUInt32();
     bidder = fields[8].GetUInt32();
-    bid = fields[9].GetUInt32();
-    startbid = fields[10].GetUInt32();
-    deposit = fields[11].GetUInt32();
+    bid = fields[9].GetUInt64();
+    startbid = fields[10].GetUInt64();
+    deposit = fields[11].GetUInt64();
 
     CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
     if (!auctioneerData)
@@ -837,14 +839,14 @@ bool AuctionEntry::LoadFromFieldList(Field* fields)
     return true;
 }
 
-std::string AuctionEntry::BuildAuctionMailSubject(MailAuctionAnswers response) const
+std::string AuctionEntry::BuildAuctionMailSubject(MailAuctionAnswer response) const
 {
     std::ostringstream strm;
-    strm << itemEntry << ":0:" << response << ':' << Id << ':' << itemCount;
+    strm << itemEntry << ":0:" << uint8(response) << ':' << Id << ':' << itemCount;
     return strm.str();
 }
 
-std::string AuctionEntry::BuildAuctionMailBody(uint32 lowGuid, uint32 bid, uint32 buyout, uint32 deposit, uint32 cut)
+std::string AuctionEntry::BuildAuctionMailBody(uint32 lowGuid, uint64 bid, uint64 buyout, uint64 deposit, uint64 cut)
 {
     std::ostringstream strm;
     strm.width(16);

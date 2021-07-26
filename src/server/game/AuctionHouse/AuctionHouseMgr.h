@@ -54,7 +54,7 @@ enum AuctionAction
     AUCTION_PLACE_BID   = 2
 };
 
-enum MailAuctionAnswers
+enum class MailAuctionAnswer
 {
     AUCTION_OUTBIDDED           = 0,
     AUCTION_WON                 = 1,
@@ -73,27 +73,27 @@ struct AuctionEntry
     uint32 itemEntry;
     uint32 itemCount;
     uint32 owner;
-    uint32 startbid;                                        //maybe useless
-    uint32 bid;
-    uint32 buyout;
+    uint64 startbid;                                        //maybe useless
+    uint64 bid;
+    uint64 buyout;
     time_t expire_time;
     uint32 bidder;
-    uint32 deposit;                                         //deposit can be calculated only when creating auction
+    uint64 deposit;                                         //deposit can be calculated only when creating auction
     AuctionHouseEntry const* auctionHouseEntry;             // in AuctionHouse.dbc
     uint32 factionTemplateId;
 
     // helpers
     uint32 GetHouseId() const { return auctionHouseEntry->houseId; }
     uint32 GetHouseFaction() const { return auctionHouseEntry->faction; }
-    uint32 GetAuctionCut() const;
-    uint32 GetAuctionOutBid() const;
+    uint64 GetAuctionCut() const;
+    uint64 GetAuctionOutBid() const;
     bool BuildAuctionInfo(WorldPacket & data) const;
     void DeleteFromDB(SQLTransaction& trans) const;
     void SaveToDB(SQLTransaction& trans) const;
     bool LoadFromDB(Field* fields);
     bool LoadFromFieldList(Field* fields);
-    std::string BuildAuctionMailSubject(MailAuctionAnswers response) const;
-    static std::string BuildAuctionMailBody(uint32 lowGuid, uint32 bid, uint32 buyout, uint32 deposit, uint32 cut);
+    std::string BuildAuctionMailSubject(MailAuctionAnswer response) const;
+    static std::string BuildAuctionMailBody(uint32 lowGuid, uint64 bid, uint64 buyout, uint64 deposit, uint64 cut);
 };
 
 //this class is used as auctionhouse instance
@@ -167,7 +167,7 @@ class AuctionHouseMgr
         void SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
         void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans, Item* item);
 
-        static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count);
+        static uint64 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count);
         static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
 
     public:

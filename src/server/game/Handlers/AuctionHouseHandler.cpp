@@ -388,7 +388,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
     uint32 auctionTime = uint32(etime * sWorld->getRate(Rates::RATE_AUCTION_TIME));
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(creature->getFaction());
 
-    uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, item, finalCount);
+    uint64 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, item, finalCount);
     if (!_player->HasEnoughMoney((uint64)deposit))
     {
         SendAuctionCommandResult(NULL, AUCTION_SELL_ITEM, ERR_AUCTION_NOT_ENOUGHT_MONEY);
@@ -631,7 +631,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_AUCTION_BID);
         stmt->setUInt32(0, auction->bidder);
-        stmt->setUInt32(1, auction->bid);
+        stmt->setUInt64(1, auction->bid);
         stmt->setUInt32(2, auction->Id);
         trans->Append(stmt);
 
@@ -729,7 +729,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
             }
 
             // item will deleted or added to received mail list
-            MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
+            MailDraft(auction->BuildAuctionMailSubject(MailAuctionAnswer::AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
                 .AddItem(pItem)
                 .SendMailTo(trans, player, auction, MAIL_CHECK_MASK_COPIED);
         }
