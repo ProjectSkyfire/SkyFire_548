@@ -131,7 +131,7 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5,
 };
 
-enum BarberShopResult
+enum class BarberShopResult
 {
     BARBER_SHOP_SUCCESS          = 0,
     BARBER_SHOP_NOT_ENOUGH_MONEY = 1,
@@ -1035,7 +1035,7 @@ class WorldSession
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
         void HandleAlterAppearance(WorldPacket& recvData);
         void SendBarberShopResult(BarberShopResult result);
-        void HandleRemoveGlyph(WorldPacket& recvData);
+
         void HandleCharCustomize(WorldPacket& recvData);
         void HandleQueryInspectAchievements(WorldPacket& recvData);
         void HandleGuildAchievementProgressQuery(WorldPacket& recvData);

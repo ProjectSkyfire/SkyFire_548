@@ -1487,24 +1487,24 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     GameObject* go = _player->FindNearestGameObjectOfType(GAMEOBJECT_TYPE_BARBER_CHAIR, 5.0f);
     if (!go)
     {
-        SendBarberShopResult(BARBER_SHOP_NOT_SITTING);
+        SendBarberShopResult(BarberShopResult::BARBER_SHOP_NOT_SITTING);
         return;
     }
 
     if (_player->getStandState() != UNIT_STAND_STATE_SIT_LOW_CHAIR + go->GetGOInfo()->barberChair.chairheight)
     {
-        SendBarberShopResult(BARBER_SHOP_NOT_SITTING);
+        SendBarberShopResult(BarberShopResult::BARBER_SHOP_NOT_SITTING);
         return;
     }
 
     uint32 cost = _player->GetBarberShopCost(bs_hair->hair_id, Color, bs_facialHair->hair_id, bs_skinColor);
     if (!_player->HasEnoughMoney((uint64)cost))
     {
-        SendBarberShopResult(BARBER_SHOP_NOT_ENOUGH_MONEY);
+        SendBarberShopResult(BarberShopResult::BARBER_SHOP_NOT_ENOUGH_MONEY);
         return;
     }
 
-    SendBarberShopResult(BARBER_SHOP_SUCCESS);
+    SendBarberShopResult(BarberShopResult::BARBER_SHOP_SUCCESS);
 
     _player->ModifyMoney(-int64(cost));                     // it isn't free
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_AT_BARBER, cost);
@@ -1525,28 +1525,6 @@ void WorldSession::SendBarberShopResult(BarberShopResult result)
     WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
     data << uint32(result);
     SendPacket(&data);
-}
-
-void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
-{
-    uint32 slot;
-    recvData >> slot;
-
-    if (slot >= MAX_GLYPH_SLOT_INDEX)
-    {
-        SF_LOG_DEBUG("network", "Client sent wrong glyph slot number in opcode CMSG_REMOVE_GLYPH %u", slot);
-        return;
-    }
-
-    if (uint32 glyph = _player->GetGlyph(_player->GetActiveSpec(), slot))
-    {
-        if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
-        {
-            _player->RemoveAurasDueToSpell(gp->SpellId);
-            _player->SetGlyph(slot, 0);
-            _player->SendTalentsInfoData();
-        }
-    }
 }
 
 void WorldSession::HandleCharCustomize(WorldPacket& recvData)
