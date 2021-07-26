@@ -38,7 +38,7 @@ enum ShamanSpells
     SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC       = 52752,
 
     SPELL_SHAMAN_EARTH_SHIELD_HEAL              = 379,
-    SPELL_SHAMAN_ELEMENTAL_MASTERY              = 16166,
+
     SPELL_SHAMAN_EXHAUSTION                     = 57723,
     SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1         = 8349,
     SPELL_SHAMAN_FLAME_SHOCK                    = 8050,
@@ -301,42 +301,6 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_sha_earth_shield_AuraScript();
-    }
-};
-
-// 86185 Feedback
-class spell_sha_feedback : public SpellScriptLoader
-{
-public:
-    spell_sha_feedback() : SpellScriptLoader("spell_sha_feedback") { }
-
-    class spell_sha_feedback_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_sha_feedback_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_ELEMENTAL_MASTERY))
-                return false;
-            return true;
-        }
-
-        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-        {
-            PreventDefaultAction(); // will prevent default effect execution
-            if (Player* target = GetTarget()->ToPlayer())
-                target->ModifySpellCooldown(SPELL_SHAMAN_ELEMENTAL_MASTERY, aurEff->GetBaseAmount());
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectProc += AuraEffectProcFn(spell_sha_feedback_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_sha_feedback_AuraScript();
     }
 };
 
@@ -1037,7 +1001,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_bloodlust();
     new spell_sha_chain_heal();
     new spell_sha_earth_shield();
-    new spell_sha_feedback();
     new spell_sha_fire_nova();
     new spell_sha_glyph_of_healing_wave();
     new spell_sha_healing_stream_totem();
