@@ -1004,9 +1004,9 @@ bool Guardian::UpdateStats(Stats stat)
     Unit* owner = GetOwner();
 
     // Handle Death Knight Ghoul
-    float mod = 0.75f;
     if (IsPetGhoul() && (stat == STAT_STAMINA || stat == STAT_STRENGTH))
     {
+        float mod = 0.75f;
         if (stat == STAT_STAMINA)
             mod = 0.3f; // Default Owner's Stamina scale
         else
