@@ -23,12 +23,6 @@
 #include "DisableMgr.h"
 #include "ScriptMgr.h"
 
-OutdoorPvPMgr::OutdoorPvPMgr()
-{
-    m_UpdateTimer = 0;
-    //SF_LOG_DEBUG("outdoorpvp", "Instantiating OutdoorPvPMgr");
-}
-
 void OutdoorPvPMgr::Die()
 {
     //SF_LOG_DEBUG("outdoorpvp", "Deleting OutdoorPvPMgr");

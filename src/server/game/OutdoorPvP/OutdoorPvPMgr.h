@@ -43,7 +43,7 @@ class OutdoorPvPMgr
     friend class ACE_Singleton<OutdoorPvPMgr, ACE_Null_Mutex>;
 
     private:
-        OutdoorPvPMgr();
+        OutdoorPvPMgr() : m_UpdateTimer(0) { };
         ~OutdoorPvPMgr() { };
 
     public:
