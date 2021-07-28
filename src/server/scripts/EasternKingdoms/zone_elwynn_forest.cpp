@@ -37,11 +37,6 @@ EndContentData */
 
 enum Northshire
 {
-    SAY_BLACKROCK_COMBAT_1    = -1000015,
-    SAY_BLACKROCK_COMBAT_2    = -1000016,
-    SAY_BLACKROCK_COMBAT_3    = -1000017,
-    SAY_BLACKROCK_COMBAT_4    = -1000018,
-    SAY_BLACKROCK_COMBAT_5    = -1000019,
     SAY_ASSASSIN_COMBAT_1     = -1000020,
     SAY_ASSASSIN_COMBAT_2     = -1000021,
     NPC_BLACKROCK_BATTLE_WORG = 49871,      //Blackrock Battle Worg NPC ID
@@ -75,14 +70,13 @@ public:
 
     struct npc_blackrock_spyAI : public ScriptedAI
     {
-
         npc_blackrock_spyAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* who) OVERRIDE
         {
-            Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
+            me->AI()->Talk(0, who);
         }
 
         void Reset() OVERRIDE
