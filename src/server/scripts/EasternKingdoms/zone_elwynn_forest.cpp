@@ -37,8 +37,6 @@ EndContentData */
 
 enum Northshire
 {
-    SAY_ASSASSIN_COMBAT_1     = -1000020,
-    SAY_ASSASSIN_COMBAT_2     = -1000021,
     NPC_BLACKROCK_BATTLE_WORG = 49871,      //Blackrock Battle Worg NPC ID
     NPC_STORMWIND_INFANTRY    = 49869,      //Stormwind Infantry NPC ID
     WORG_FIGHTING_FACTION     = 232,        //Faction used by worgs to be able to attack infantry
@@ -137,7 +135,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
+            //Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
         }
 
 		void UpdateAI(uint32 /*diff*/) OVERRIDE
@@ -176,9 +174,9 @@ public:
                 DoCast(NPC_GOBLIN_ASSASSIN_SPELL_SNEAKING);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* who) OVERRIDE
         {
-            Talk(RAND(SAY_ASSASSIN_COMBAT_1, SAY_ASSASSIN_COMBAT_2), me);
+            me->AI()->Talk(0, who);
         }
 
 		void UpdateAI(uint32 /*diff*/) OVERRIDE
