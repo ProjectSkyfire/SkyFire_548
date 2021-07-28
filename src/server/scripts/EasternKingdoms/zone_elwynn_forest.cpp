@@ -44,7 +44,6 @@ enum Northshire
     SAY_BLACKROCK_COMBAT_5    = -1000019,
     SAY_ASSASSIN_COMBAT_1     = -1000020,
     SAY_ASSASSIN_COMBAT_2     = -1000021,
-    SPELL_SNEAKING            = 93046,
     NPC_BLACKROCK_BATTLE_WORG = 49871,      //Blackrock Battle Worg NPC ID
     NPC_STORMWIND_INFANTRY    = 49869,      //Stormwind Infantry NPC ID
     WORG_FIGHTING_FACTION     = 232,        //Faction used by worgs to be able to attack infantry
@@ -56,6 +55,8 @@ enum Northshire
 
     NPC_BLACKROCK_SPY_SPELL_SPYING = 92857,
     NPC_BLACKROCK_SPY_SPELL_SPYGLASS = 80676,
+
+    NPC_GOBLIN_ASSASSIN_SPELL_SNEAKING = 93046,
 };
 
 /*######
@@ -173,8 +174,12 @@ public:
     {
         npc_goblin_assassinAI(Creature* creature) : ScriptedAI(creature)
         {
-            if (!me->IsInCombat() && !me->HasAura(NPC_BLACKROCK_SPY_SPELL_SPYING))
-                DoCast(SPELL_SNEAKING);
+        }
+
+        void Reset() OVERRIDE
+        {
+            if (!me->HasAura(NPC_BLACKROCK_SPY_SPELL_SPYING))
+                DoCast(NPC_GOBLIN_ASSASSIN_SPELL_SNEAKING);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE

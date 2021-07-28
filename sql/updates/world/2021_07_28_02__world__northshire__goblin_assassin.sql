@@ -1,0 +1,2 @@
+/* Set fraction for the worg that player can hit */
+UPDATE `creature_template` SET `faction_A` = '25', `faction_H` = '25', `ScriptName` = 'npc_goblin_assassin' WHERE `creature_template`.`entry` = 50039;
