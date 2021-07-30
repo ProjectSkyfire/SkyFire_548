@@ -43,7 +43,7 @@ class BattlegroundRL : public Battleground
 {
     public:
         BattlegroundRL();
-        ~BattlegroundRL();
+        ~BattlegroundRL() { }
 
         /* inherited from BattlegroundClass */
         void AddPlayer(Player* player) OVERRIDE;

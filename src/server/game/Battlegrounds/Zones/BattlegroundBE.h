@@ -47,7 +47,7 @@ class BattlegroundBE : public Battleground
 {
     public:
         BattlegroundBE();
-        ~BattlegroundBE();
+        ~BattlegroundBE() { }
 
         /* inherited from BattlegroundClass */
         void AddPlayer(Player* player) OVERRIDE;

@@ -37,11 +37,6 @@ BattlegroundTV::BattlegroundTV()
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattlegroundTV::~BattlegroundTV()
-{
-
-}
-
 void BattlegroundTV::StartingEventCloseDoors()
 {
 	for (uint32 i = BG_TV_OBJECT_DOOR_1; i <= BG_TV_OBJECT_DOOR_2; ++i)

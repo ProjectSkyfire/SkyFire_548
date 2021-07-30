@@ -47,7 +47,7 @@ class BattlegroundNA : public Battleground
 {
     public:
         BattlegroundNA();
-        ~BattlegroundNA();
+        ~BattlegroundNA() { }
 
         /* inherited from BattlegroundClass */
         void AddPlayer(Player* player) OVERRIDE;

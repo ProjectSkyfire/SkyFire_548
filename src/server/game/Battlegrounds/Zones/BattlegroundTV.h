@@ -43,7 +43,7 @@ class BattlegroundTV : public Battleground
 {
     public:
         BattlegroundTV();
-        ~BattlegroundTV();
+        ~BattlegroundTV() { }
 
         /* inherited from BattlegroundClass */
         void AddPlayer(Player* player) OVERRIDE;

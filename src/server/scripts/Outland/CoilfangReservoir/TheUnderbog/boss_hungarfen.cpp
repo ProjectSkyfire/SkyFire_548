@@ -103,7 +103,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_underbog_mushroom : public CreatureScript
@@ -159,7 +158,6 @@ public:
             } else Shrink_Timer -= diff;
         }
     };
-
 };
 
 void AddSC_boss_hungarfen()

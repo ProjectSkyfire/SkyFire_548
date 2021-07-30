@@ -26,53 +26,37 @@
 
 class WDBThreadStartReq1 : public ACE_Method_Request
 {
-    public:
+public:
+    WDBThreadStartReq1() { }
 
-        WDBThreadStartReq1()
-        {
-        }
-
-        virtual int call()
-        {
-            return 0;
-        }
+    virtual int call() { return 0; }
 };
 
 class WDBThreadEndReq1 : public ACE_Method_Request
 {
-    public:
+public:
+    WDBThreadEndReq1() { }
 
-        WDBThreadEndReq1()
-        {
-        }
-
-        virtual int call()
-        {
-            return 0;
-        }
+    virtual int call() { return 0; }
 };
 
 class MapUpdateRequest : public ACE_Method_Request
 {
-    private:
+private:
+    Map& m_map;
+    MapUpdater& m_updater;
+    ACE_UINT32 m_diff;
 
-        Map& m_map;
-        MapUpdater& m_updater;
-        ACE_UINT32 m_diff;
+public:
+    MapUpdateRequest(Map& m, MapUpdater& u, ACE_UINT32 d)
+        : m_map(m), m_updater(u), m_diff(d) { }
 
-    public:
-
-        MapUpdateRequest(Map& m, MapUpdater& u, ACE_UINT32 d)
-            : m_map(m), m_updater(u), m_diff(d)
-        {
-        }
-
-        virtual int call()
-        {
-            m_map.Update (m_diff);
-            m_updater.update_finished();
-            return 0;
-        }
+    virtual int call()
+    {
+        m_map.Update(m_diff);
+        m_updater.update_finished();
+        return 0;
+    }
 };
 
 MapUpdater::MapUpdater():
@@ -91,7 +75,6 @@ int MapUpdater::activate(size_t num_threads)
 int MapUpdater::deactivate()
 {
     wait();
-
     return m_executor.deactivate();
 }
 

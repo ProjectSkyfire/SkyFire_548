@@ -39,11 +39,6 @@ BattlegroundRL::BattlegroundRL()
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattlegroundRL::~BattlegroundRL()
-{
-
-}
-
 void BattlegroundRL::StartingEventCloseDoors()
 {
     for (uint32 i = BG_RL_OBJECT_DOOR_1; i <= BG_RL_OBJECT_DOOR_2; ++i)

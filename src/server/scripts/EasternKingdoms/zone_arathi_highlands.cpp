@@ -66,104 +66,100 @@ enum ProfessorPhizzlethorpe
 
 class npc_professor_phizzlethorpe : public CreatureScript
 {
-    public:
+public:
+    npc_professor_phizzlethorpe() : CreatureScript("npc_professor_phizzlethorpe") { }
 
-        npc_professor_phizzlethorpe()
-            : CreatureScript("npc_professor_phizzlethorpe")
+    struct npc_professor_phizzlethorpeAI : public npc_escortAI
+    {
+        npc_professor_phizzlethorpeAI(Creature* creature) : npc_escortAI(creature) { }
+
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+            switch (waypointId)
+            {
+            case 6:
+                Talk(SAY_PROGRESS_2, player);
+                events.ScheduleEvent(EVENT_SAY_3, 3000);
+                break;
+            case 8:
+                Talk(EMOTE_PROGRESS_4);
+                me->SummonCreature(NPC_VENGEFUL_SURGE, -2065.505f, -2136.88f, 22.20362f, 1.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
+                me->SummonCreature(NPC_VENGEFUL_SURGE, -2059.249f, -2134.88f, 21.51582f, 1.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
+                break;
+            case 11:
+                Talk(SAY_PROGRESS_5, player);
+                events.ScheduleEvent(EVENT_SAY_6, 11000);
+                break;
+            case 17:
+                Talk(SAY_PROGRESS_7, player);
+                events.ScheduleEvent(EVENT_SAY_8, 6000);
+                break;
+            }
         }
 
-        struct npc_professor_phizzlethorpeAI : public npc_escortAI
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
-            npc_professor_phizzlethorpeAI(Creature* creature) : npc_escortAI(creature) { }
+            summoned->AI()->AttackStart(me);
+        }
 
-            void WaypointReached(uint32 waypointId) OVERRIDE
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            Talk(SAY_AGGRO);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+            events.Update(diff);
+
+            while (uint32 event = events.ExecuteEvent())
             {
-                Player* player = GetPlayerForEscort();
-                if (!player)
-                    return;
-
-                switch (waypointId)
+                switch (event)
                 {
-                    case 6:
-                        Talk(SAY_PROGRESS_2, player);
-                        events.ScheduleEvent(EVENT_SAY_3, 3000);
-                        break;
-                    case 8:
-                        Talk(EMOTE_PROGRESS_4);
-                        me->SummonCreature(NPC_VENGEFUL_SURGE, -2065.505f, -2136.88f, 22.20362f, 1.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
-                        me->SummonCreature(NPC_VENGEFUL_SURGE, -2059.249f, -2134.88f, 21.51582f, 1.0f, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
-                        break;
-                    case 11:
-                        Talk(SAY_PROGRESS_5, player);
-                        events.ScheduleEvent(EVENT_SAY_6, 11000);
-                        break;
-                    case 17:
-                        Talk(SAY_PROGRESS_7, player);
-                        events.ScheduleEvent(EVENT_SAY_8, 6000);
-                        break;
+                case EVENT_SAY_3:
+                    Talk(SAY_PROGRESS_3, player);
+                    break;
+                case EVENT_SAY_6:
+                    Talk(SAY_PROGRESS_6, player);
+                    SetRun();
+                    break;
+                case EVENT_SAY_8:
+                    Talk(EMOTE_PROGRESS_8);
+                    Talk(SAY_PROGRESS_9, player);
+                    player->GroupEventHappens(QUEST_GOGGLE_BOGGLE, me);
+                    break;
                 }
             }
-
-            void JustSummoned(Creature* summoned) OVERRIDE
-            {
-                summoned->AI()->AttackStart(me);
-            }
-
-            void EnterCombat(Unit* /*who*/) OVERRIDE
-            {
-                Talk(SAY_AGGRO);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                Player* player = GetPlayerForEscort();
-                if (!player)
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 event = events.ExecuteEvent())
-                {
-                    switch (event)
-                    {
-                        case EVENT_SAY_3:
-                            Talk(SAY_PROGRESS_3, player);
-                            break;
-                        case EVENT_SAY_6:
-                            Talk(SAY_PROGRESS_6, player);
-                            SetRun();
-                            break;
-                        case EVENT_SAY_8:
-                            Talk(EMOTE_PROGRESS_8);
-                            Talk(SAY_PROGRESS_9, player);
-                            player->GroupEventHappens(QUEST_GOGGLE_BOGGLE, me);
-                            break;
-                    }
-                }
-                npc_escortAI::UpdateAI(diff);
-            }
-
-            EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_professor_phizzlethorpeAI(creature);
+            npc_escortAI::UpdateAI(diff);
         }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
-        {
-            if (quest->GetQuestId() == QUEST_GOGGLE_BOGGLE)
-            {
-                creature->AI()->Talk(SAY_PROGRESS_1, player);
-                if (npc_escortAI* pEscortAI = CAST_AI(npc_professor_phizzlethorpeAI, (creature->AI())))
-                    pEscortAI->Start(false, false, player->GetGUID(), quest);
+        EventMap events;
+    };
 
-                creature->setFaction(42);
-            }
-            return true;
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_professor_phizzlethorpeAI(creature);
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() == QUEST_GOGGLE_BOGGLE)
+        {
+            creature->AI()->Talk(SAY_PROGRESS_1, player);
+            if (npc_escortAI* pEscortAI = CAST_AI(npc_professor_phizzlethorpeAI, (creature->AI())))
+                pEscortAI->Start(false, false, player->GetGUID(), quest);
+
+            creature->setFaction(42);
         }
+        return true;
+    }
 };
 
 void AddSC_arathi_highlands()

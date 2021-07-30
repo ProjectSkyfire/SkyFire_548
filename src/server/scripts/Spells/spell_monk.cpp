@@ -31,7 +31,6 @@
 
 enum MonkSpells
 {
-
     MONK_NPC_BLACK_OX_STATUE = 61146,
 
     SPELL_MONK_ROLL_TRIGGER = 107427,               // 5.4.8 18414
@@ -3285,7 +3284,6 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
 
 void AddSC_monk_spell_scripts()
 {
-
     new spell_monk_roll();
     new spell_monk_touch_of_karma();
     new spell_monk_legacy_of_the_emperor();

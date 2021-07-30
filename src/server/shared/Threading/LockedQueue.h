@@ -41,17 +41,11 @@ namespace ACE_Based
         volatile bool _canceled;
 
         public:
-
             //! Create a LockedQueue.
-            LockedQueue()
-                : _canceled(false)
-            {
-            }
+            LockedQueue() : _canceled(false) { }
 
             //! Destroy a LockedQueue.
-            virtual ~LockedQueue()
-            {
-            }
+            virtual ~LockedQueue() { }
 
             //! Adds an item to the queue.
             void add(const T& item)

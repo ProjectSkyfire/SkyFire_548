@@ -133,7 +133,6 @@ class DBCFile
                 }
             private:
                 Record record;
-
         };
 
         // Get record by id

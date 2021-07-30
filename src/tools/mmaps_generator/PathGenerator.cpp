@@ -244,7 +244,6 @@ int finish(const char* message, int returnValue)
 
 int main(int argc, char** argv)
 {
-
     unsigned int threads = std::thread::hardware_concurrency();
     int mapnum = -1;
     float maxAngle = 55.0f;
