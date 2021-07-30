@@ -62,9 +62,9 @@ std::string GetScriptsTableNameByType(ScriptsType type)
     std::string res = "";
     switch (type)
     {
-        case SCRIPTS_SPELL:         res = "spell_scripts";      break;
-        case SCRIPTS_EVENT:         res = "event_scripts";      break;
-        case SCRIPTS_WAYPOINT:      res = "waypoint_scripts";   break;
+        case ScriptsType::SCRIPTS_SPELL:         res = "spell_scripts";      break;
+        case ScriptsType::SCRIPTS_EVENT:         res = "event_scripts";      break;
+        case ScriptsType::SCRIPTS_WAYPOINT:      res = "waypoint_scripts";   break;
         default: break;
     }
     return res;
@@ -75,9 +75,9 @@ ScriptMapMap* GetScriptsMapByType(ScriptsType type)
     ScriptMapMap* res = NULL;
     switch (type)
     {
-        case SCRIPTS_SPELL:         res = &sSpellScripts;       break;
-        case SCRIPTS_EVENT:         res = &sEventScripts;       break;
-        case SCRIPTS_WAYPOINT:      res = &sWaypointScripts;    break;
+        case ScriptsType::SCRIPTS_SPELL:         res = &sSpellScripts;       break;
+        case ScriptsType::SCRIPTS_EVENT:         res = &sEventScripts;       break;
+        case ScriptsType::SCRIPTS_WAYPOINT:      res = &sWaypointScripts;    break;
         default: break;
     }
     return res;
@@ -88,34 +88,34 @@ std::string GetScriptCommandName(ScriptCommands command)
     std::string res = "";
     switch (command)
     {
-        case SCRIPT_COMMAND_TALK: res = "SCRIPT_COMMAND_TALK"; break;
-        case SCRIPT_COMMAND_EMOTE: res = "SCRIPT_COMMAND_EMOTE"; break;
-        case SCRIPT_COMMAND_FIELD_SET: res = "SCRIPT_COMMAND_FIELD_SET"; break;
-        case SCRIPT_COMMAND_MOVE_TO: res = "SCRIPT_COMMAND_MOVE_TO"; break;
-        case SCRIPT_COMMAND_FLAG_SET: res = "SCRIPT_COMMAND_FLAG_SET"; break;
-        case SCRIPT_COMMAND_FLAG_REMOVE: res = "SCRIPT_COMMAND_FLAG_REMOVE"; break;
-        case SCRIPT_COMMAND_TELEPORT_TO: res = "SCRIPT_COMMAND_TELEPORT_TO"; break;
-        case SCRIPT_COMMAND_QUEST_EXPLORED: res = "SCRIPT_COMMAND_QUEST_EXPLORED"; break;
-        case SCRIPT_COMMAND_KILL_CREDIT: res = "SCRIPT_COMMAND_KILL_CREDIT"; break;
-        case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT: res = "SCRIPT_COMMAND_RESPAWN_GAMEOBJECT"; break;
-        case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE: res = "SCRIPT_COMMAND_TEMP_SUMMON_CREATURE"; break;
-        case SCRIPT_COMMAND_OPEN_DOOR: res = "SCRIPT_COMMAND_OPEN_DOOR"; break;
-        case SCRIPT_COMMAND_CLOSE_DOOR: res = "SCRIPT_COMMAND_CLOSE_DOOR"; break;
-        case SCRIPT_COMMAND_ACTIVATE_OBJECT: res = "SCRIPT_COMMAND_ACTIVATE_OBJECT"; break;
-        case SCRIPT_COMMAND_REMOVE_AURA: res = "SCRIPT_COMMAND_REMOVE_AURA"; break;
-        case SCRIPT_COMMAND_CAST_SPELL: res = "SCRIPT_COMMAND_CAST_SPELL"; break;
-        case SCRIPT_COMMAND_PLAY_SOUND: res = "SCRIPT_COMMAND_PLAY_SOUND"; break;
-        case SCRIPT_COMMAND_CREATE_ITEM: res = "SCRIPT_COMMAND_CREATE_ITEM"; break;
-        case SCRIPT_COMMAND_DESPAWN_SELF: res = "SCRIPT_COMMAND_DESPAWN_SELF"; break;
-        case SCRIPT_COMMAND_LOAD_PATH: res = "SCRIPT_COMMAND_LOAD_PATH"; break;
-        case SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT: res = "SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT"; break;
-        case SCRIPT_COMMAND_KILL: res = "SCRIPT_COMMAND_KILL"; break;
+        case ScriptCommands::SCRIPT_COMMAND_TALK: res = "SCRIPT_COMMAND_TALK"; break;
+        case ScriptCommands::SCRIPT_COMMAND_EMOTE: res = "SCRIPT_COMMAND_EMOTE"; break;
+        case ScriptCommands::SCRIPT_COMMAND_FIELD_SET: res = "SCRIPT_COMMAND_FIELD_SET"; break;
+        case ScriptCommands::SCRIPT_COMMAND_MOVE_TO: res = "SCRIPT_COMMAND_MOVE_TO"; break;
+        case ScriptCommands::SCRIPT_COMMAND_FLAG_SET: res = "SCRIPT_COMMAND_FLAG_SET"; break;
+        case ScriptCommands::SCRIPT_COMMAND_FLAG_REMOVE: res = "SCRIPT_COMMAND_FLAG_REMOVE"; break;
+        case ScriptCommands::SCRIPT_COMMAND_TELEPORT_TO: res = "SCRIPT_COMMAND_TELEPORT_TO"; break;
+        case ScriptCommands::SCRIPT_COMMAND_QUEST_EXPLORED: res = "SCRIPT_COMMAND_QUEST_EXPLORED"; break;
+        case ScriptCommands::SCRIPT_COMMAND_KILL_CREDIT: res = "SCRIPT_COMMAND_KILL_CREDIT"; break;
+        case ScriptCommands::SCRIPT_COMMAND_RESPAWN_GAMEOBJECT: res = "SCRIPT_COMMAND_RESPAWN_GAMEOBJECT"; break;
+        case ScriptCommands::SCRIPT_COMMAND_TEMP_SUMMON_CREATURE: res = "SCRIPT_COMMAND_TEMP_SUMMON_CREATURE"; break;
+        case ScriptCommands::SCRIPT_COMMAND_OPEN_DOOR: res = "SCRIPT_COMMAND_OPEN_DOOR"; break;
+        case ScriptCommands::SCRIPT_COMMAND_CLOSE_DOOR: res = "SCRIPT_COMMAND_CLOSE_DOOR"; break;
+        case ScriptCommands::SCRIPT_COMMAND_ACTIVATE_OBJECT: res = "SCRIPT_COMMAND_ACTIVATE_OBJECT"; break;
+        case ScriptCommands::SCRIPT_COMMAND_REMOVE_AURA: res = "SCRIPT_COMMAND_REMOVE_AURA"; break;
+        case ScriptCommands::SCRIPT_COMMAND_CAST_SPELL: res = "SCRIPT_COMMAND_CAST_SPELL"; break;
+        case ScriptCommands::SCRIPT_COMMAND_PLAY_SOUND: res = "SCRIPT_COMMAND_PLAY_SOUND"; break;
+        case ScriptCommands::SCRIPT_COMMAND_CREATE_ITEM: res = "SCRIPT_COMMAND_CREATE_ITEM"; break;
+        case ScriptCommands::SCRIPT_COMMAND_DESPAWN_SELF: res = "SCRIPT_COMMAND_DESPAWN_SELF"; break;
+        case ScriptCommands::SCRIPT_COMMAND_LOAD_PATH: res = "SCRIPT_COMMAND_LOAD_PATH"; break;
+        case ScriptCommands::SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT: res = "SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT"; break;
+        case ScriptCommands::SCRIPT_COMMAND_KILL: res = "SCRIPT_COMMAND_KILL"; break;
         // TrinityCore only
-        case SCRIPT_COMMAND_ORIENTATION: res = "SCRIPT_COMMAND_ORIENTATION"; break;
-        case SCRIPT_COMMAND_EQUIP: res = "SCRIPT_COMMAND_EQUIP"; break;
-        case SCRIPT_COMMAND_MODEL: res = "SCRIPT_COMMAND_MODEL"; break;
-        case SCRIPT_COMMAND_CLOSE_GOSSIP: res = "SCRIPT_COMMAND_CLOSE_GOSSIP"; break;
-        case SCRIPT_COMMAND_PLAYMOVIE: res = "SCRIPT_COMMAND_PLAYMOVIE"; break;
+        case ScriptCommands::SCRIPT_COMMAND_ORIENTATION: res = "SCRIPT_COMMAND_ORIENTATION"; break;
+        case ScriptCommands::SCRIPT_COMMAND_EQUIP: res = "SCRIPT_COMMAND_EQUIP"; break;
+        case ScriptCommands::SCRIPT_COMMAND_MODEL: res = "SCRIPT_COMMAND_MODEL"; break;
+        case ScriptCommands::SCRIPT_COMMAND_CLOSE_GOSSIP: res = "SCRIPT_COMMAND_CLOSE_GOSSIP"; break;
+        case ScriptCommands::SCRIPT_COMMAND_PLAYMOVIE: res = "SCRIPT_COMMAND_PLAYMOVIE"; break;
         default:
         {
             char sz[32];
@@ -4357,7 +4357,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
 
     scripts->clear();                                       // need for reload support
 
-    bool isSpellScriptTable = (type == SCRIPTS_SPELL);
+    bool isSpellScriptTable = (type == ScriptsType::SCRIPTS_SPELL);
     //                                                 0    1       2         3         4          5    6  7  8  9
     QueryResult result = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, dataint, x, y, z, o%s FROM %s", isSpellScriptTable ? ", effIndex" : "", tableName.c_str());
 
@@ -4390,7 +4390,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
         // generic command args check
         switch (tmp.command)
         {
-            case SCRIPT_COMMAND_TALK:
+            case ScriptCommands::SCRIPT_COMMAND_TALK:
             {
                 if (tmp.Talk.ChatType > CHAT_TYPE_WHISPER && tmp.Talk.ChatType != CHAT_TYPE_BOSS_WHISPER)
                 {
@@ -4414,7 +4414,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_EMOTE:
+            case ScriptCommands::SCRIPT_COMMAND_EMOTE:
             {
                 if (!sEmotesStore.LookupEntry(tmp.Emote.EmoteID))
                 {
@@ -4425,7 +4425,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_TELEPORT_TO:
+            case ScriptCommands::SCRIPT_COMMAND_TELEPORT_TO:
             {
                 if (!sMapStore.LookupEntry(tmp.TeleportTo.MapID))
                 {
@@ -4443,7 +4443,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_QUEST_EXPLORED:
+            case ScriptCommands::SCRIPT_COMMAND_QUEST_EXPLORED:
             {
                 Quest const* quest = GetQuestTemplate(tmp.QuestExplored.QuestID);
                 if (!quest)
@@ -4488,7 +4488,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_KILL_CREDIT:
+            case ScriptCommands::SCRIPT_COMMAND_KILL_CREDIT:
             {
                 if (!GetCreatureTemplate(tmp.KillCredit.CreatureEntry))
                 {
@@ -4499,7 +4499,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
+            case ScriptCommands::SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
             {
                 GameObjectData const* data = GetGOData(tmp.RespawnGameobject.GOGuid);
                 if (!data)
@@ -4530,7 +4530,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
+            case ScriptCommands::SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
             {
                 if (!Skyfire::IsValidMapCoord(tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation))
                 {
@@ -4548,8 +4548,8 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_OPEN_DOOR:
-            case SCRIPT_COMMAND_CLOSE_DOOR:
+            case ScriptCommands::SCRIPT_COMMAND_OPEN_DOOR:
+            case ScriptCommands::SCRIPT_COMMAND_CLOSE_DOOR:
             {
                 GameObjectData const* data = GetGOData(tmp.ToggleDoor.GOGuid);
                 if (!data)
@@ -4577,7 +4577,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_REMOVE_AURA:
+            case ScriptCommands::SCRIPT_COMMAND_REMOVE_AURA:
             {
                 if (!sSpellMgr->GetSpellInfo(tmp.RemoveAura.SpellID))
                 {
@@ -4594,7 +4594,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_CAST_SPELL:
+            case ScriptCommands::SCRIPT_COMMAND_CAST_SPELL:
             {
                 if (!sSpellMgr->GetSpellInfo(tmp.CastSpell.SpellID))
                 {
@@ -4623,7 +4623,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
                 break;
             }
 
-            case SCRIPT_COMMAND_CREATE_ITEM:
+            case ScriptCommands::SCRIPT_COMMAND_CREATE_ITEM:
             {
                 if (!GetItemTemplate(tmp.CreateItem.ItemEntry))
                 {
@@ -4659,7 +4659,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
 
 void ObjectMgr::LoadSpellScripts()
 {
-    LoadScripts(SCRIPTS_SPELL);
+    LoadScripts(ScriptsType::SCRIPTS_SPELL);
 
     // check ids
     for (ScriptMapMap::const_iterator itr = sSpellScripts.begin(); itr != sSpellScripts.end(); ++itr)
@@ -4682,7 +4682,7 @@ void ObjectMgr::LoadSpellScripts()
 
 void ObjectMgr::LoadEventScripts()
 {
-    LoadScripts(SCRIPTS_EVENT);
+    LoadScripts(ScriptsType::SCRIPTS_EVENT);
 
     std::set<uint32> evt_scripts;
     // Load all possible script entries from gameobjects
@@ -4726,7 +4726,7 @@ void ObjectMgr::LoadEventScripts()
 //Load WP Scripts
 void ObjectMgr::LoadWaypointScripts()
 {
-    LoadScripts(SCRIPTS_WAYPOINT);
+    LoadScripts(ScriptsType::SCRIPTS_WAYPOINT);
 
     std::set<uint32> actionSet;
 
@@ -8462,7 +8462,7 @@ void ObjectMgr::CheckScripts(ScriptsType type, std::set<int32>& ids)
         {
             switch (itrM->second.command)
             {
-                case SCRIPT_COMMAND_TALK:
+                case ScriptCommands::SCRIPT_COMMAND_TALK:
                 {
                     if (!GetSkyFireStringLocale (itrM->second.Talk.TextID))
                         SF_LOG_ERROR("sql.sql", "Table `%s` references invalid text id %u from `db_script_string`, script id: %u.", GetScriptsTableNameByType(type).c_str(), itrM->second.Talk.TextID, itrMM->first);
@@ -8487,8 +8487,9 @@ void ObjectMgr::LoadDbScriptStrings()
         if (GetSkyFireStringLocale(i))
             ids.insert(i);
 
-    for (int type = SCRIPTS_FIRST; type < SCRIPTS_LAST; ++type)
-        CheckScripts(ScriptsType(type), ids);
+    CheckScripts(ScriptsType::SCRIPTS_SPELL, ids);
+    CheckScripts(ScriptsType::SCRIPTS_EVENT, ids);
+    CheckScripts(ScriptsType::SCRIPTS_WAYPOINT, ids);
 
     for (std::set<int32>::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)
         SF_LOG_ERROR("sql.sql", "Table `db_script_string` has unused string id  %u", *itr);

@@ -226,8 +226,8 @@ inline void Map::_ScriptProcessDoor(Object* source, Object* target, const Script
     int32 nTimeToToggle = std::max(15, int32(scriptInfo->ToggleDoor.ResetDelay));
     switch (scriptInfo->command)
     {
-        case SCRIPT_COMMAND_OPEN_DOOR: bOpen = true; break;
-        case SCRIPT_COMMAND_CLOSE_DOOR: break;
+        case ScriptCommands::SCRIPT_COMMAND_OPEN_DOOR: bOpen = true; break;
+        case ScriptCommands::SCRIPT_COMMAND_CLOSE_DOOR: break;
         default:
             SF_LOG_ERROR("scripts", "%s unknown command for _ScriptProcessDoor.", scriptInfo->GetDebugInfo().c_str());
             return;
@@ -373,7 +373,7 @@ void Map::ScriptsProcess()
 
         switch (step.script->command)
         {
-            case SCRIPT_COMMAND_TALK:
+            case ScriptCommands::SCRIPT_COMMAND_TALK:
                 if (step.script->Talk.ChatType > CHAT_TYPE_WHISPER && step.script->Talk.ChatType != CHAT_TYPE_BOSS_WHISPER)
                 {
                     SF_LOG_ERROR("scripts", "%s invalid chat type (%u) specified, skipping.", step.script->GetDebugInfo().c_str(), step.script->Talk.ChatType);
@@ -452,7 +452,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_EMOTE:
+            case ScriptCommands::SCRIPT_COMMAND_EMOTE:
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
@@ -463,7 +463,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_FIELD_SET:
+            case ScriptCommands::SCRIPT_COMMAND_FIELD_SET:
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
@@ -477,7 +477,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_MOVE_TO:
+            case ScriptCommands::SCRIPT_COMMAND_MOVE_TO:
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
@@ -492,7 +492,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_FLAG_SET:
+            case ScriptCommands::SCRIPT_COMMAND_FLAG_SET:
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
@@ -506,7 +506,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_FLAG_REMOVE:
+            case ScriptCommands::SCRIPT_COMMAND_FLAG_REMOVE:
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
@@ -520,7 +520,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_TELEPORT_TO:
+            case ScriptCommands::SCRIPT_COMMAND_TELEPORT_TO:
                 if (step.script->TeleportTo.Flags & SF_TELEPORT_USE_CREATURE)
                 {
                     // Source or target must be Creature.
@@ -535,7 +535,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_QUEST_EXPLORED:
+            case ScriptCommands::SCRIPT_COMMAND_QUEST_EXPLORED:
             {
                 if (!source)
                 {
@@ -593,7 +593,7 @@ void Map::ScriptsProcess()
                 break;
             }
 
-            case SCRIPT_COMMAND_KILL_CREDIT:
+            case ScriptCommands::SCRIPT_COMMAND_KILL_CREDIT:
                 // Source or target must be Player.
                 if (Player* player = _GetScriptPlayerSourceOrTarget(source, target, step.script))
                 {
@@ -604,7 +604,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
+            case ScriptCommands::SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
                 if (!step.script->RespawnGameobject.GOGuid)
                 {
                     SF_LOG_ERROR("scripts", "%s gameobject guid (datalong) is not specified.", step.script->GetDebugInfo().c_str());
@@ -643,7 +643,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
+            case ScriptCommands::SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
             {
                 // Source must be WorldObject.
                 if (WorldObject* pSummoner = _GetScriptWorldObject(source, true, step.script))
@@ -664,12 +664,12 @@ void Map::ScriptsProcess()
                 break;
             }
 
-            case SCRIPT_COMMAND_OPEN_DOOR:
-            case SCRIPT_COMMAND_CLOSE_DOOR:
+            case ScriptCommands::SCRIPT_COMMAND_OPEN_DOOR:
+            case ScriptCommands::SCRIPT_COMMAND_CLOSE_DOOR:
                 _ScriptProcessDoor(source, target, step.script);
                 break;
 
-            case SCRIPT_COMMAND_ACTIVATE_OBJECT:
+            case ScriptCommands::SCRIPT_COMMAND_ACTIVATE_OBJECT:
                 // Source must be Unit.
                 if (Unit* unit = _GetScriptUnit(source, true, step.script))
                 {
@@ -692,7 +692,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_REMOVE_AURA:
+            case ScriptCommands::SCRIPT_COMMAND_REMOVE_AURA:
             {
                 // Source (datalong2 != 0) or target (datalong2 == 0) must be Unit.
                 bool bReverse = step.script->RemoveAura.Flags & SF_REMOVEAURA_REVERSE;
@@ -701,7 +701,7 @@ void Map::ScriptsProcess()
                 break;
             }
 
-            case SCRIPT_COMMAND_CAST_SPELL:
+            case ScriptCommands::SCRIPT_COMMAND_CAST_SPELL:
             {
                 /// @todo Allow gameobjects to be targets and casters
                 if (!source && !target)
@@ -756,7 +756,7 @@ void Map::ScriptsProcess()
                 break;
             }
 
-            case SCRIPT_COMMAND_PLAY_SOUND:
+            case ScriptCommands::SCRIPT_COMMAND_PLAY_SOUND:
                 // Source must be WorldObject.
                 if (WorldObject* object = _GetScriptWorldObject(source, true, step.script))
                 {
@@ -778,7 +778,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_CREATE_ITEM:
+            case ScriptCommands::SCRIPT_COMMAND_CREATE_ITEM:
                 // Target or source must be Player.
                 if (Player* pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script))
                 {
@@ -794,13 +794,13 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_DESPAWN_SELF:
+            case ScriptCommands::SCRIPT_COMMAND_DESPAWN_SELF:
                 // Target or source must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true))
                     cSource->DespawnOrUnsummon(step.script->DespawnSelf.DespawnDelay);
                 break;
 
-            case SCRIPT_COMMAND_LOAD_PATH:
+            case ScriptCommands::SCRIPT_COMMAND_LOAD_PATH:
                 // Source must be Unit.
                 if (Unit* unit = _GetScriptUnit(source, true, step.script))
                 {
@@ -811,7 +811,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT:
+            case ScriptCommands::SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT:
             {
                 if (!step.script->CallScript.CreatureEntry)
                 {
@@ -864,7 +864,7 @@ void Map::ScriptsProcess()
                 break;
             }
 
-            case SCRIPT_COMMAND_KILL:
+            case ScriptCommands::SCRIPT_COMMAND_KILL:
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
@@ -880,7 +880,7 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_ORIENTATION:
+            case ScriptCommands::SCRIPT_COMMAND_ORIENTATION:
                 // Source must be Unit.
                 if (Unit* sourceUnit = _GetScriptUnit(source, true, step.script))
                 {
@@ -898,25 +898,25 @@ void Map::ScriptsProcess()
                 }
                 break;
 
-            case SCRIPT_COMMAND_EQUIP:
+            case ScriptCommands::SCRIPT_COMMAND_EQUIP:
                 // Source must be Creature.
                 if (Creature* cSource = _GetScriptCreature(source, true, step.script))
                     cSource->LoadEquipment(step.script->Equip.EquipmentID);
                 break;
 
-            case SCRIPT_COMMAND_MODEL:
+            case ScriptCommands::SCRIPT_COMMAND_MODEL:
                 // Source must be Creature.
                 if (Creature* cSource = _GetScriptCreature(source, true, step.script))
                     cSource->SetDisplayId(step.script->Model.ModelID);
                 break;
 
-            case SCRIPT_COMMAND_CLOSE_GOSSIP:
+            case ScriptCommands::SCRIPT_COMMAND_CLOSE_GOSSIP:
                 // Source must be Player.
                 if (Player* player = _GetScriptPlayer(source, true, step.script))
                     player->PlayerTalkClass->SendCloseGossip();
                 break;
 
-            case SCRIPT_COMMAND_PLAYMOVIE:
+            case ScriptCommands::SCRIPT_COMMAND_PLAYMOVIE:
                 // Source must be Player.
                 if (Player* player = _GetScriptPlayer(source, true, step.script))
                     player->SendMovieStart(step.script->PlayMovie.MovieID);

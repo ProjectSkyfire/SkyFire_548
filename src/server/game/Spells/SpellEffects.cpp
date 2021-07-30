@@ -4100,7 +4100,7 @@ void Spell::EffectActivateObject(SpellEffIndex /*effIndex*/)
         return;
 
     ScriptInfo activateCommand;
-    activateCommand.command = SCRIPT_COMMAND_ACTIVATE_OBJECT;
+    activateCommand.command = ScriptCommands::SCRIPT_COMMAND_ACTIVATE_OBJECT;
 
     // int32 unk = m_spellInfo->Effects[effIndex].MiscValue; // This is set for EffectActivateObject spells; needs research
 

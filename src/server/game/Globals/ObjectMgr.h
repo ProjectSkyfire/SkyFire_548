@@ -94,7 +94,7 @@ private:
 #endif
 
 // DB scripting commands
-enum ScriptCommands
+enum class ScriptCommands
 {
     SCRIPT_COMMAND_TALK                  = 0,                // source/target = Creature, target = any, datalong = talk type (0=say, 1=whisper, 2=yell, 3=emote text, 4=boss emote text), datalong2 & 1 = player talk (instead of creature), dataint = string_id
     SCRIPT_COMMAND_EMOTE                 = 1,                // source/target = Creature, datalong = emote id, datalong2 = 0: set emote state; > 0: play emote state
@@ -148,15 +148,11 @@ struct GameTele
 
 typedef UNORDERED_MAP<uint32, GameTele > GameTeleContainer;
 
-enum ScriptsType
+enum class ScriptsType
 {
-    SCRIPTS_FIRST = 1,
-
-    SCRIPTS_SPELL = SCRIPTS_FIRST,
-    SCRIPTS_EVENT,
-    SCRIPTS_WAYPOINT,
-
-    SCRIPTS_LAST
+    SCRIPTS_SPELL = 1,
+    SCRIPTS_EVENT = 2,
+    SCRIPTS_WAYPOINT = 3
 };
 
 enum eScriptFlags
