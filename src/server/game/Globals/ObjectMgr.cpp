@@ -1168,7 +1168,11 @@ uint32 ObjectMgr::ChooseDisplayId(CreatureTemplate const* cinfo, CreatureData co
     if (data && data->displayid)
         return data->displayid;
 
-    return cinfo->GetRandomValidModelId();
+    if (!(cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER))
+        return cinfo->GetRandomValidModelId();
+
+    // Triggers by default receive the invisible model
+    return cinfo->GetFirstInvisibleModel();
 }
 
 void ObjectMgr::ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, const CreatureData* data /*= NULL*/)
@@ -1233,6 +1237,12 @@ void ObjectMgr::LoadCreatureModelInfo()
         Field* fields = result->Fetch();
 
         uint32 modelId = fields[0].GetUInt32();
+        CreatureDisplayInfoEntry const* creatureDisplay = sCreatureDisplayInfoStore.LookupEntry(modelId);
+        if (!creatureDisplay)
+        {
+            SF_LOG_ERROR("sql.sql", "Table `creature_model_info` has model for nonexistent display id (%u).", modelId);
+            continue;
+        }
 
         CreatureModelInfo& modelInfo = _creatureModelStore[modelId];
 
@@ -1240,11 +1250,9 @@ void ObjectMgr::LoadCreatureModelInfo()
         modelInfo.combat_reach         = fields[2].GetFloat();
         modelInfo.gender               = fields[3].GetUInt8();
         modelInfo.modelid_other_gender = fields[4].GetUInt32();
+        modelInfo.is_trigger           = false;
 
         // Checks
-
-        if (!sCreatureDisplayInfoStore.LookupEntry(modelId))
-            SF_LOG_ERROR("sql.sql", "Table `creature_model_info` has model for not existed display id (%u).", modelId);
 
         if (modelInfo.gender > GENDER_NONE)
         {

@@ -145,6 +145,8 @@ struct CreatureTemplate
     bool    ModLevel;
     uint32  GetRandomValidModelId() const;
     uint32  GetFirstValidModelId() const;
+    uint32  GetFirstInvisibleModel() const;
+    uint32  GetFirstVisibleModel() const;
 
     // helpers
     SkillType GetRequiredLootSkill() const
@@ -300,6 +302,7 @@ struct CreatureModelInfo
     float combat_reach;
     uint8 gender;
     uint32 modelid_other_gender;
+    bool is_trigger;
 };
 
 // Benchmarked: Faster than std::map (insert/find)
