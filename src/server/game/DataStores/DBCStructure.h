@@ -967,26 +967,36 @@ struct CreatureFamilyEntry
 
 struct CreatureModelDataEntry
 {
-    uint32 Id;
-    //uint32 Flags;
-    //char* ModelPath
-    //uint32 Unk1;
-    //float Scale;                                             // Used in calculation of unit collision data
-    //int32 Unk2
-    //int32 Unk3
-    //uint32 Unk4
-    //uint32 Unk5
-    //float Unk6
-    //uint32 Unk7
-    //float Unk8
-    //uint32 Unk9
-    //uint32 Unk10
-    //float CollisionWidth;
-    float CollisionHeight;
-    float MountHeight;                                       // Used in calculation of unit collision data when mounted
-    //float Unks[11]
-    //uint32 unk11
-    //uint32 unk12
+    uint32  ID;                                                 // Used: no
+    uint32  flags;                                              // Used: no
+    uint32  fileDataID;                                         // Used: no
+    uint32  sizeClass;                                          // Used: no
+    float   modelScale;                                         // Used: no
+    uint32  bloodID;                                            // Used: no
+    uint32  footprintTextureID;                                 // Used: no
+    float   footprintTextureLength;                             // Used: no
+    float   footprintTextureWidth;                              // Used: no
+    float   footprintParticleScale;                             // Used: no
+    uint32  foleyMaterialID;                                    // Used: no
+    uint32  footstepShakeSize;                                  // Used: no
+    uint32  deathThudShakeSize;                                 // Used: no
+    uint32  soundID;                                            // Used: no
+    float   collisionWidth;                                     // Used: no
+    float   collisionHeight;                                    // Used: in calculation of unit collision data when mounted (Player.cpp::GetCollisionHeight)
+    float   mountHeight;                                        // Used: in calculation of unit collision data when mounted (Player.cpp::GetCollisionHeight)
+    float   geoBoxMin[3];                                       // Used: no
+    float   geoBoxMax[3];                                       // Used: no
+    float   worldEffectScale;                                   // Used: no
+    float   attachedEffectScale;                                // Used: no
+    float   missileCollisionRadius;                             // Used: no
+    float   missileCollisionPush;                               // Used: no
+    float   missileCollisionRaise;                              // Used: no
+    float   overrideLootEffectScale;                            // Used: no
+    float   overrideNameScale;                                  // Used: no
+    float   overrideSelectionRadius;                            // Used: no
+    float   tamedPetBaseScale;                                  // Used: no
+    uint32  creatureGeosetDataID;                               // Used: no
+    float   hoverHeight;                                        // Used: no
 };
 
 #define MAX_CREATURE_SPELL_DATA_SLOT 4
