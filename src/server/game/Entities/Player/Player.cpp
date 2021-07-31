@@ -15291,6 +15291,7 @@ void Player::SendPreparedQuest(uint64 guid)
     {
         QuestMenuItem const& qmi0 = questMenu.GetItem(0);
         uint32 questId = qmi0.QuestId;
+        Object* object = ObjectAccessor::GetObjectByTypeMask(*this, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM);
 
         // Auto open -- maybe also should verify there is no greeting
         if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
@@ -15299,23 +15300,14 @@ void Player::SendPreparedQuest(uint64 guid)
                 PlayerTalkClass->SendQuestGiverRequestItems(quest, guid, CanRewardQuest(quest, false), true);
             // Send completable on repeatable and autoCompletable quest if player don't have quest
             /// @todo verify if check for !quest->IsDaily() is really correct (possibly not)
+            else if (!object || (!object->hasQuest(questId) && !object->hasInvolvedQuest(questId)))
+                PlayerTalkClass->SendCloseGossip();
             else
             {
-                Object* object = ObjectAccessor::GetObjectByTypeMask(*this, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM);
-                if (!object || (!object->hasQuest(questId) && !object->hasInvolvedQuest(questId)))
-                {
-                    PlayerTalkClass->SendCloseGossip();
-                    return;
-                }
-
                 if (quest->IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
-                {
-                    AddQuest(quest, object);
-                    if (CanCompleteQuest(questId))
-                        CompleteQuest(questId);
-                }
+                    AddQuestAndCheckCompletion(quest, object);
 
-                if ((quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly()) || quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
+                if ((quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly()))
                     PlayerTalkClass->SendQuestGiverRequestItems(quest, guid, CanCompleteRepeatableQuest(quest), true);
                 else
                     PlayerTalkClass->SendQuestGiverQuestDetails(quest, guid, true);
@@ -15666,6 +15658,17 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     }
 
     return true;
+}
+
+void Player::AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver)
+{
+    AddQuest(quest, questGiver);
+
+    if (CanCompleteQuest(quest->GetQuestId()))
+        CompleteQuest(quest->GetQuestId());
+
+    if (!questGiver)
+        return;
 }
 
 void Player::AddQuest(Quest const* quest, Object* questGiver)
@@ -28166,7 +28169,7 @@ float Player::GetCollisionHeight(bool mounted) const
 
         float scaleMod = GetObjectScale(); // 99% sure about this
 
-        return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
+        return scaleMod * mountModelData->mountHeight + modelData->collisionHeight * 0.5f;
     }
     else
     {
@@ -28176,7 +28179,7 @@ float Player::GetCollisionHeight(bool mounted) const
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
         ASSERT(modelData);
 
-        return modelData->CollisionHeight;
+        return modelData->collisionHeight;
     }
 }
 
