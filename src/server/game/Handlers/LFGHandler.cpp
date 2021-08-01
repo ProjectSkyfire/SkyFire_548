@@ -130,8 +130,14 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     SF_LOG_DEBUG("lfg", "CMSG_LFD_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
         GetPlayerInfo().c_str(), roles, uint8(newDungeons.size()), comment.c_str());
 
-    if (GetPlayer()->GetGroup() && QueueAsGroup)
-        SendRolePollInform(GetPlayer()->GetObjectGUID(), PartyIndex);
+    if (GetPlayer()->GetGroup())
+    {
+        if (!GetPlayer()->GetGroup()->RoleCheckAllResponded())
+        {
+            SendRolePollInform(GetPlayer()->GetObjectGUID(), PartyIndex);
+            return;
+        }
+    }
 
     sLFGMgr->JoinLfg(GetPlayer(), uint8(roles), newDungeons, comment);
 }
@@ -439,7 +445,7 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
             join = true;
             break;
         case lfg::LFG_UPDATETYPE_UPDATE_STATUS:
-            join = updateData.state != lfg::LFG_STATE_ROLECHECK && updateData.state != lfg::LFG_STATE_NONE;
+            join = updateData.state != lfg::LFG_STATE_NONE;
             queued = updateData.state == lfg::LFG_STATE_QUEUED;
             break;
         default:

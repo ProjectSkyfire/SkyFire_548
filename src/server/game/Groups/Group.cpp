@@ -2917,6 +2917,15 @@ uint32 Group::GetMemberRole(uint64 guid) const
     return itr->roles;
 }
 
+bool Group::RoleCheckAllResponded() const
+{
+    for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+        if (!itr->roles)
+            return false;
+
+    return true;
+}
+
 void Group::ReadyCheckMemberHasResponded(uint64 guid)
 {
     member_witerator itr = _getMemberWSlot(guid);

@@ -513,7 +513,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
         // Create new rolecheck
         LfgRoleCheck& roleCheck = RoleChecksStore[gguid];
         roleCheck.cancelTime = time_t(time(NULL)) + LFG_TIME_ROLECHECK;
-        roleCheck.state = LFG_ROLECHECK_INITIALITING;
+        roleCheck.state = grp->RoleCheckAllResponded() ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_INITIALITING;
         roleCheck.leader = guid;
         roleCheck.dungeons = dungeons;
         roleCheck.rDungeonId = rDungeonId;
@@ -532,11 +532,11 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
             if (Player* plrg = itr->GetSource())
             {
                 uint64 pguid = plrg->GetGUID();
-                plrg->GetSession()->SendLfgUpdateStatus(updateData, true);
+                plrg->GetSession()->SendLfgUpdateStatus(updateData, false);
                 SetState(pguid, LFG_STATE_ROLECHECK);
                 if (!isContinue)
                     SetSelectedDungeons(pguid, dungeons);
-                roleCheck.roles[pguid] = 0;
+                roleCheck.roles[pguid] = grp->GetMemberRole(pguid);
                 if (!debugNames.empty())
                     debugNames.append(", ");
                 debugNames.append(plrg->GetName());

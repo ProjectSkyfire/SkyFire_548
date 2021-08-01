@@ -259,6 +259,7 @@ class Group
 
         void SetMemberRole(uint64 guid, uint32 role);
         uint32 GetMemberRole(uint64 guid) const;
+        bool RoleCheckAllResponded() const;
 
         DifficultyID GetDifficulty(MapEntry const* mapEntry) const;
         DifficultyID GetDungeonDifficulty() const { return m_dungeonDifficulty; }
