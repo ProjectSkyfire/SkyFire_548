@@ -68,6 +68,9 @@ public:
 
     struct npc_blackrock_spyAI : public ScriptedAI
     {
+        bool isSpellGlass;
+        uint32 spyGlassResetUpTimer;
+
         npc_blackrock_spyAI(Creature* creature) : ScriptedAI(creature)
         {
         }
@@ -79,32 +82,54 @@ public:
 
         void Reset() OVERRIDE
         {
-            CastGlassOrSpy();
+            spyGlassResetUpTimer = 0;
+
+            ChooseBehaviorAndCast();
         }
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
+		void UpdateAI(uint32 diff) OVERRIDE
         {
+            // need update reset if rogue use pickpocketing
+            if (isSpellGlass && !me->HasAura(NPC_BLACKROCK_SPY_SPELL_SPYGLASS)) {
+                spyGlassResetUpTimer += diff;
+
+                // wait some time for reset up
+                if (spyGlassResetUpTimer > 2500) {
+                    spyGlassResetUpTimer = 0;
+                    DoCast(me, NPC_BLACKROCK_SPY_SPELL_SPYGLASS);
+                }
+            }
+
             if (!UpdateVictim())
                 return;
 
             DoMeleeAttackIfReady();
         }
 
+        void ChooseBehaviorAndCast()
+        {
+            ChooseBehavior();
+            CastGlassOrSpy();
+        }
+
+        void ChooseBehavior()
+        {
+            isSpellGlass = rand() % 2 == 0;
+        }
+
         void CastGlassOrSpy()
         {
-            const bool isSpellGlass = rand() % 2 == 0;
-
-            (isSpellGlass) ? 
-                CastSpyGlass() : 
-                CastSpy();
+            (isSpellGlass) ? CastSpyGlass() : CastSpy();
         }
 
         void CastSpy()
         {
-            if (!me->IsInCombat() && !me->HasAura(NPC_BLACKROCK_SPY_SPELL_SPYING)) {
+            // was added `isSpellGlass` that fix bug when they
+            // is moving with a spy glass
+            if (!isSpellGlass && !me->IsInCombat() && !me->HasAura(NPC_BLACKROCK_SPY_SPELL_SPYING)) {
                 DoCast(me, NPC_BLACKROCK_SPY_SPELL_SPYING);
                 me->SetDefaultMovementType(MovementGeneratorType::RANDOM_MOTION_TYPE);
-                me->GetMotionMaster()->MoveRandom(15.0f);
+                me->GetMotionMaster()->MoveRandom(9.0f);
             }
         }
         void CastSpyGlass()
