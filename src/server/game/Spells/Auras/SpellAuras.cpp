@@ -1470,6 +1470,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (caster && caster->HasAura(56845))
                         target->CastSpell(target, 61394, true);
                 break;
+            case SPELLFAMILY_DRUID:
+                switch (m_spellInfo->Id)
+                {
+                    case 768: // catform
+                        // remove prowl when leaving catform
+                        if (caster->HasAura(5215))
+                            caster->RemoveOwnedAura(5215);
+                        break;
+                }
+                break;
         }
     }
 
