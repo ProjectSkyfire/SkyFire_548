@@ -1245,7 +1245,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 5215:   // Prowl
                     {
                         // check for catform
-                        if (!caster->HasAura(768))
+                        if (caster->GetShapeshiftForm() != FORM_CAT)
                             caster->CastSpell(caster, 768, true);
                         break;
                     }
