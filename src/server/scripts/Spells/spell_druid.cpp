@@ -56,7 +56,8 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
     SPELL_DRUID_STAMPEDE_CAT_RANK_1         = 81021,
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
-    SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178
+    SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
+    SPELL_DRUID_BEAR_FORM                   = 5487,
 };
 
 // 1850 - Dash
@@ -541,6 +542,49 @@ public:
     }
 };
 
+// 106922 - Might of Ursoc
+class spell_dru_might_of_ursoc: public SpellScriptLoader
+{
+public:
+    spell_dru_might_of_ursoc() : SpellScriptLoader("spell_dru_might_of_ursoc") { }
+
+    class spell_dru_might_of_ursoc_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_might_of_ursoc_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_BEAR_FORM))
+                return false;
+            return true;
+        }
+
+        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // cast bear form first
+                if (caster->GetShapeshiftForm() != FORM_BEAR)
+                    caster->CastSpell(caster, SPELL_DRUID_BEAR_FORM, true); // activate bear form
+                // then calculate amount
+                amount = aurEff->GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
+            }
+ 
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_might_of_ursoc_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_INCREASE_HEALTH_2);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_might_of_ursoc_AuraScript();
+    }
+
+};
+
 // -16972 - Predatory Strikes
 class spell_dru_predatory_strikes : public SpellScriptLoader
 {
@@ -945,6 +989,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_lifebloom();
     new spell_dru_living_seed();
     new spell_dru_living_seed_proc();
+    new spell_dru_might_of_ursoc();
     new spell_dru_predatory_strikes();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();

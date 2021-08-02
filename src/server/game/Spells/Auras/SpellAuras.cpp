@@ -1249,7 +1249,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             caster->CastSpell(caster, 768, true);
                         break;
                     }
-                    break;
+                    case 102795: // Bear Hug
+                    {
+                        // check for bear form
+                        if (caster->GetShapeshiftForm() != FORM_BEAR)
+                            caster->CastSpell(caster, 5487, true); // activate bear form
+                        break;
+                    }
+                    default:
+                        break;           
                 }
                 break;
             case SPELLFAMILY_MAGE:
