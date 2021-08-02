@@ -1249,6 +1249,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             caster->CastSpell(caster, 768, true);
                         break;
                     }
+                    case 106898: // Stampeding Roar
+                    {
+                        caster->CastSpell(caster, 5487, true);
+                        target->RemoveMovementImpairingAuras();
+                        break;
+                    }
+                    case 77761: // Stampeding roar Bearform
+                    case 77764: // Stampeding roar Catform
+                    {
+                        target->RemoveMovementImpairingAuras();
+                        break;
+                    }
                     break;
                 }
                 break;
