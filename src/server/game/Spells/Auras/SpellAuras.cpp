@@ -1251,6 +1251,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     case 106898: // Stampeding Roar
                     {
+                        // activates bear form
                         caster->CastSpell(caster, 5487, true);
                         target->RemoveMovementImpairingAuras();
                         break;
@@ -1259,6 +1260,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 77764: // Stampeding roar Catform
                     {
                         target->RemoveMovementImpairingAuras();
+                        break;
+                    }
+                    case 102795: // Bear Hug
+                    {
+                        // check for bear form
+                        if (caster->GetShapeshiftForm() != FORM_BEAR)
+                            caster->CastSpell(caster, 5487, true); // activate bear form
                         break;
                     }
                     break;
