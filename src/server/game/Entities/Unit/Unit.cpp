@@ -15517,6 +15517,9 @@ uint32 Unit::GetModelForTotem(uint32 totemType) const
     if (totemType == 3400)
         totemType = SUMMON_TYPE_TOTEM_EARTH;
 
+    if (totemType == SUMMON_TYPE_LIGHTSPRING)
+        return 27769;
+
     // jade serpent statue
     if (totemType == SUMMON_TYPE_STATUE_JADE)
         return 42449;
