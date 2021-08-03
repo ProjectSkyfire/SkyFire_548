@@ -11205,6 +11205,9 @@ int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
     else
         duration = minduration;
 
+    if (spellProto->Id == 5171)
+        duration = minduration + (minduration * comboPoints);
+
     return duration;
 }
 
