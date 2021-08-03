@@ -159,45 +159,6 @@ public:
     }
 };
 
-// 6201 - Create Healthstone
-class spell_warl_create_healthstone : public SpellScriptLoader
-{
-public:
-    spell_warl_create_healthstone() : SpellScriptLoader("spell_warl_create_healthstone") { }
-
-    class spell_warl_create_healthstone_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_warl_create_healthstone_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_CREATE_HEALTHSTONE))
-                return false;
-            return true;
-        }
-
-        bool Load() OVERRIDE
-        {
-            return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
-        }
-
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_CREATE_HEALTHSTONE, true);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_create_healthstone_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_warl_create_healthstone_SpellScript();
-    }
-};
-
 // 48018 - Demonic Circle: Summon
 /// Updated 4.3.4
 class spell_warl_demonic_circle_summon : public SpellScriptLoader
@@ -772,7 +733,6 @@ void AddSC_warlock_spell_scripts()
 
     new spell_warl_banish();
 
-    new spell_warl_create_healthstone();
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();
     

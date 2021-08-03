@@ -3864,6 +3864,20 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 6201: //Create Healthstone
+                case 34130: //Create Healthstone
+                {
+                    m_caster->CastSpell(unitTarget, 23517, true);
+                    break;
+                }
+                break;
+            }
+            break;
+        }
     }
 
     // normal DB scripted effect

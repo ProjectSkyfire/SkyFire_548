@@ -35,10 +35,8 @@ go_tele_to_violet_stand
 go_scourge_cage
 go_jotunheim_cage
 go_table_theka
-go_soulwell
 go_bashir_crystalforge
 go_ethereal_teleport_pad
-go_soulwell
 go_dragonflayer_cage
 go_tadpole_cage
 go_amberpine_outhouse
@@ -866,40 +864,6 @@ public:
 };
 
 /*######
-## go_soulwell
-######*/
-
-class go_soulwell : public GameObjectScript
-{
-    public:
-        go_soulwell() : GameObjectScript("go_soulwell") { }
-
-        struct go_soulwellAI : public GameObjectAI
-        {
-            go_soulwellAI(GameObject* go) : GameObjectAI(go)
-            {
-            }
-
-            /// Due to the fact that this GameObject triggers CMSG_GAMEOBJECT_USE
-            /// _and_ CMSG_GAMEOBJECT_REPORT_USE, this GossipHello hook is called
-            /// twice. The script's handling is fine as it won't remove two charges
-            /// on the well. We have to find how to segregate REPORT_USE and USE.
-            bool GossipHello(Player* player) OVERRIDE
-            {
-                Unit* owner = go->GetOwner();
-                if (!owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER || !player->IsInSameRaidWith(owner->ToPlayer()))
-                    return true;
-                return false;
-            }
-        };
-
-        GameObjectAI* GetAI(GameObject* go) const OVERRIDE
-        {
-            return new go_soulwellAI(go);
-        }
-};
-
-/*######
 ## Quest 11255: Prisoners of Wyrmskull
 ## go_dragonflayer_cage
 ######*/
@@ -1265,7 +1229,6 @@ void AddSC_go_scripts()
     new go_table_theka();
     new go_inconspicuous_landmark();
     new go_ethereal_teleport_pad();
-    new go_soulwell();
     new go_tadpole_cage();
     new go_dragonflayer_cage();
     new go_amberpine_outhouse();
