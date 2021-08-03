@@ -50,6 +50,9 @@ enum Northshire
     NPC_BLACKROCK_SPY_SPELL_SPYGLASS = 80676,
 
     NPC_GOBLIN_ASSASSIN_SPELL_SNEAKING = 93046,
+
+    NPC_NORTHSHIRE_PEASANT_MODEL_CHOPWOOD = 11354,
+    NPC_NORTHSHIRE_PEASANT_MODEL_WOODLOGS = 11355,
 };
 
 /*######
@@ -378,6 +381,171 @@ public:
     };
 };
 
+/*######
+## npc_northshire_peasant
+######*/
+
+class npc_northshire_peasant : public CreatureScript
+{
+public:
+    npc_northshire_peasant() : CreatureScript("npc_northshire_peasant") {}
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_northshire_peasantAI(creature);
+    }
+
+    struct npc_northshire_peasantAI : public ScriptedAI
+    {
+        const uint32 m_woods_stack = 100;
+
+        uint32 m_phase;
+        uint32 m_woods;
+        uint32 m_time;
+
+        enum {
+            PHASE_CHOPWOOD = 0,
+            PHASE_PICKETUP_WOODLOGS,
+            PHASE_MOVE_TO_UNLOADING_START,
+            PHASE_MOVE_TO_UNLOADING_STOP,
+            PHASE_BACKUP_START,
+            PHASE_BACKUP_STOP,
+        };
+
+        typedef uint32 time_throttle;
+        typedef bool is_running;
+        typedef std::vector<std::pair<time_throttle, is_running>> EventStore;
+        
+        // current event and throttle before do next event
+        EventStore events = {
+            {1000, false},  // PHASE_CHOPWOOD
+            {1000, false},  // PHASE_PICKETUP_WOODLOGS
+            {   0, false},  // PHASE_MOVE_TO_UNLOADING_START
+            {1000, false},  // PHASE_MOVE_TO_UNLOADING_STOP
+            {1000, false},  // PHASE_BACKUP_START
+            {   0, false},  // PHASE_BACKUP_STOP
+        };
+
+        npc_northshire_peasantAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset() OVERRIDE
+        {
+            m_phase = 0;
+            m_woods = 0;
+            m_time = 0;
+            me->SetDefaultMovementType(IDLE_MOTION_TYPE);
+
+            for (uint32 i = 0; i != events.size(); ++i)
+                events[i].second = false;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!me->isMoving())
+                m_time += diff;
+
+            switch (m_phase)
+            {
+                case PHASE_CHOPWOOD:                    PhaseChopwood();                break;
+                case PHASE_PICKETUP_WOODLOGS:           PhasePicketUpWoodlogs();        break;
+                case PHASE_MOVE_TO_UNLOADING_START:     PhaseMoveToUnloadingStart();    break;
+                case PHASE_MOVE_TO_UNLOADING_STOP:      PhaseMoveToUnloadingStop();     break;
+                case PHASE_BACKUP_START:                PhaseBackupStart();             break;
+                case PHASE_BACKUP_STOP:                 PhaseBackupStop();              break;
+
+                default:                                Reset();                        break;
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        bool CanCallNextPhase() const
+        {
+            return events[m_phase].first < m_time;
+        }
+        bool isEvenRunning()
+        {
+            return events[m_phase].second == true;
+        }
+        void NextPhaseThrottle()
+        {
+            if (isEvenRunning() && CanCallNextPhase() && !me->isMoving()) {
+                ++m_phase;
+                m_time = 0;
+            }
+        }
+        void EventRun()
+        {
+            events[m_phase].second = true;
+        };
+
+        void PhaseChopwood()
+        {
+            if (!isEvenRunning())
+                EventRun();
+
+            if (m_woods >= m_woods_stack)
+                NextPhaseThrottle();
+            else {
+                me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK2HTIGHT);
+                ++m_woods;
+            }
+        }
+        void PhasePicketUpWoodlogs()
+        {
+            if (!isEvenRunning()) {
+                me->SetDisplayId(NPC_NORTHSHIRE_PEASANT_MODEL_WOODLOGS);
+                EventRun();
+            }
+
+            NextPhaseThrottle();
+        }
+        void PhaseMoveToUnloadingStart()
+        {
+            if (!isEvenRunning()) {
+                me->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
+                // start to move
+                me->GetMotionMaster()->MovePath(me->GetGUIDLow() * 100, false);
+                EventRun();
+            }
+
+            NextPhaseThrottle();
+        }
+        void PhaseMoveToUnloadingStop()
+        {
+            if (!isEvenRunning())
+                EventRun();
+
+            NextPhaseThrottle();
+        }
+        void PhaseBackupStart()
+        {
+            if (!isEvenRunning()) {
+                me->SetDisplayId(NPC_NORTHSHIRE_PEASANT_MODEL_CHOPWOOD);
+                // WARNING:
+                // i'm split the ways to unload woodlogs and backup to work
+                // that why path_id = +1 and why you got error like this
+                // WaypointMovementGenerator::LoadPath: creature Northshire Peasant (Entry: 11260 GUID: 168426 DB GUID: 168426) doesn't have waypoint path id: 0
+                // TODO: need fix WaypointMovementGenerator that we can to split different ways to one entry
+                me->GetMotionMaster()->MovePath((me->GetGUIDLow() * 100) + 1, false);
+                EventRun();
+            }
+
+            NextPhaseThrottle();
+        }
+        void PhaseBackupStop()
+        {
+            if (!isEvenRunning())
+                EventRun();
+
+            NextPhaseThrottle();
+        }
+    };
+};
+
 void AddSC_elwynn_forest()
 {
     new npc_blackrock_spy();
@@ -385,4 +553,5 @@ void AddSC_elwynn_forest()
     new npc_blackrock_invader();
     new npc_stormwind_infantry();
     new npc_blackrock_battle_worg();
+    new npc_northshire_peasant();
 }
