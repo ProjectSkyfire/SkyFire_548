@@ -1245,8 +1245,28 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 5215:   // Prowl
                     {
                         // check for catform
-                        if (!caster->HasAura(768))
+                        if (caster->GetShapeshiftForm() != FORM_CAT)
                             caster->CastSpell(caster, 768, true);
+                        break;
+                    }
+                    case 106898: // Stampeding Roar
+                    {
+                        // activates bear form
+                        caster->CastSpell(caster, 5487, true);
+                        target->RemoveMovementImpairingAuras();
+                        break;
+                    }
+                    case 77761: // Stampeding roar Bearform
+                    case 77764: // Stampeding roar Catform
+                    {
+                        target->RemoveMovementImpairingAuras();
+                        break;
+                    }
+                    case 102795: // Bear Hug
+                    {
+                        // check for bear form
+                        if (caster->GetShapeshiftForm() != FORM_BEAR)
+                            caster->CastSpell(caster, 5487, true); // activate bear form
                         break;
                     }
                     break;
@@ -1457,6 +1477,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008)
                     if (caster && caster->HasAura(56845))
                         target->CastSpell(target, 61394, true);
+                break;
+            case SPELLFAMILY_DRUID:
+                switch (m_spellInfo->Id)
+                {
+                    case 768: // catform
+                        // remove prowl when leaving catform
+                        if (caster->HasAura(5215))
+                            caster->RemoveOwnedAura(5215);
+                        break;
+                }
                 break;
         }
     }
