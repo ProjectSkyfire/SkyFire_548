@@ -4400,8 +4400,20 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
     if (target->IsRessurectRequested())       // already have one active request
         return;
 
-    uint32 health = target->CountPctFromMaxHealth(damage);
-    uint32 mana   = CalculatePct(target->GetMaxPower(POWER_MANA), damage);
+    uint32 health = 0;
+    uint32 mana = 0;
+
+    // check for spells that use different health and mana % on some resurrection
+    if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_COMBAT_RESURECTION_LIMIT)
+    {
+        health = target->CountPctFromMaxHealth(m_spellInfo->Effects[EFFECT_1].BasePoints);
+        mana = CalculatePct(target->GetMaxPower(POWER_MANA), m_spellInfo->Effects[EFFECT_0].BasePoints);       
+    }
+    else 
+    {
+        health = target->CountPctFromMaxHealth(damage);
+        mana = CalculatePct(target->GetMaxPower(POWER_MANA), damage);
+    }
 
     ExecuteLogEffectResurrect(effIndex, target);
 
@@ -4542,18 +4554,27 @@ void Spell::EffectSelfResurrect(SpellEffIndex effIndex)
     uint32 health = 0;
     uint32 mana = 0;
 
-    // flat case
-    if (damage < 0)
+    // check for spells that use different health and mana % on some battle resurrection
+    if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_COMBAT_RESURECTION_LIMIT)
     {
-        health = uint32(-damage);
-        mana = m_spellInfo->Effects[effIndex].MiscValue;
+        health = m_caster->CountPctFromMaxHealth(m_spellInfo->Effects[EFFECT_1].BasePoints);
+        mana = CalculatePct(m_caster->GetMaxPower(POWER_MANA), m_spellInfo->Effects[EFFECT_0].BasePoints);
     }
-    // percent case
     else
     {
-        health = m_caster->CountPctFromMaxHealth(damage);
-        if (m_caster->GetMaxPower(POWER_MANA) > 0)
-            mana = CalculatePct(m_caster->GetMaxPower(POWER_MANA), damage);
+        // flat case
+        if (damage < 0)
+        {
+            health = uint32(-damage);
+            mana = m_spellInfo->Effects[effIndex].MiscValue;
+        }
+        // percent case
+        else
+        {
+            health = m_caster->CountPctFromMaxHealth(damage);
+            if (m_caster->GetMaxPower(POWER_MANA) > 0)
+                mana = CalculatePct(m_caster->GetMaxPower(POWER_MANA), damage);
+        }
     }
 
     Player* player = m_caster->ToPlayer();
