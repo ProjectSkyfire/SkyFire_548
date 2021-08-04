@@ -710,7 +710,6 @@ public:
                     savageRoar->SetDuration(duration);
                 }
             }
-
         }
 
         void Register() override
