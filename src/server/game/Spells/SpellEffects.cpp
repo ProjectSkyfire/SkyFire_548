@@ -5928,7 +5928,7 @@ void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
-    Unit* caster = m_caster;
+    Unit* caster = m_caster->GetEntry() == WORLD_TRIGGER ? m_originalCaster : m_caster;
     float radius = m_spellInfo->Effects[effIndex].CalcRadius(caster);
 
     DynamicObject* dynObj = new DynamicObject(false);
