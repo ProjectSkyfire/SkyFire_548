@@ -58,6 +58,7 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_BEAR_FORM                   = 5487,
+    SPELL_DRUID_BERSERK_AURA                = 106951,
 };
 
 // 1850 - Dash
@@ -921,6 +922,51 @@ public:
     }
 };
 
+// 5217 - Tiger's Fury
+class spell_dru_tigers_fury : public SpellScriptLoader
+{
+public:
+    spell_dru_tigers_fury() : SpellScriptLoader("spell_dru_tigers_fury") { }
+
+    class spell_dru_tigers_fury_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_tigers_fury_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_BERSERK_AURA))
+                return false;
+            return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetShapeshiftForm() != FORM_CAT)
+                {
+                    SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_BE_IN_CAT_FORM);
+                    return SPELL_FAILED_CUSTOM_ERROR;
+                }
+
+                if (caster->HasAura(SPELL_DRUID_BERSERK_AURA))
+                    return SPELL_FAILED_DONT_REPORT;
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_tigers_fury_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_tigers_fury_SpellScript();
+    }
+};
+
 // 70691 - Item T10 Restoration 4P Bonus
 class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 {
@@ -997,5 +1043,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_stampede();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
+    new spell_dru_tigers_fury();
     new spell_dru_t10_restoration_4p_bonus();
 }
