@@ -52,7 +52,8 @@ enum DruidSpells
     SPELL_DRUID_NATURES_GRACE               = 16880,
     SPELL_DRUID_NATURES_GRACE_TRIGGER       = 16886,
     SPELL_DRUID_SURVIVAL_INSTINCTS          = 50322,
-    SPELL_DRUID_SAVAGE_ROAR                 = 62071,
+    SPELL_DRUID_SAVAGE_ROAR                 = 52610,
+    SPELL_DRUID_SAVAGE_ROAR_TRIGGER         = 62071,
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
     SPELL_DRUID_STAMPEDE_CAT_RANK_1         = 81021,
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
@@ -693,21 +694,28 @@ public:
             return true;
         }
 
-        void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            Unit* target = GetTarget();
-            target->CastSpell(target, SPELL_DRUID_SAVAGE_ROAR, true, NULL, aurEff, GetCasterGUID());
-        }
+            if (Player* caster = GetCaster()->ToPlayer())
+            {
+                if (Aura* savageRoar = caster->GetAura(SPELL_DRUID_SAVAGE_ROAR))
+                {
+                    caster->CastSpell(caster, SPELL_DRUID_SAVAGE_ROAR_TRIGGER, true, NULL, aurEff, GetCasterGUID());
+                    uint8 comboPoints = caster ? caster->GetComboPoints() : 0;
 
-        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            GetTarget()->RemoveAurasDueToSpell(SPELL_DRUID_SAVAGE_ROAR);
+                    int32 minduration = GetSpellInfo()->GetDuration();
+                    int32 maxduration = GetSpellInfo()->GetMaxDuration();
+                    int32 duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
+
+                    savageRoar->SetDuration(duration);
+                }
+            }
+
         }
 
         void Register() override
         {
-            AfterEffectApply += AuraEffectApplyFn(spell_dru_savage_roar_AuraScript::AfterApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            AfterEffectRemove += AuraEffectRemoveFn(spell_dru_savage_roar_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_dru_savage_roar_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
