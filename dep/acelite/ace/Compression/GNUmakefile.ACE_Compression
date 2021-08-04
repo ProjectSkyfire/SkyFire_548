@@ -212,18 +212,18 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#build_files:
-#ACE_Compression.mpc
-#
-#inline_files:
-#Compressor.inl
-#
 #source_files:
 #Compressor.cpp
 #
 #header_files:
 #Compressor.h
 #ACE_Compression_export.h
+#
+#inline_files:
+#Compressor.inl
+#
+#build_files:
+#ACE_Compression.mpc
 #
 #lib_output:
 #../../lib ACE_Compression

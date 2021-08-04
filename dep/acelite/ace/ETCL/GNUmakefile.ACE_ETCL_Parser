@@ -215,21 +215,21 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_ETCL_Parser.pc.in
-#
 #build_files:
 #ETCL.mpc
-#
-#header_files:
-#ETCL_Interpreter.h
-#ETCL_y.h
-#etcl_parser_export.h
 #
 #source_files:
 #ETCL_Interpreter.cpp
 #ETCL_l.cpp
 #ETCL_y.cpp
+#
+#pkgconfig_files:
+#ACE_ETCL_Parser.pc.in
+#
+#header_files:
+#ETCL_Interpreter.h
+#ETCL_y.h
+#etcl_parser_export.h
 #
 #lib_output:
 #../../lib ACE_ETCL_Parser

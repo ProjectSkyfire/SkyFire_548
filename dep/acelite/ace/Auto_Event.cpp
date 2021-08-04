@@ -1,5 +1,6 @@
 #ifndef ACE_AUTO_EVENT_CPP
 #define ACE_AUTO_EVENT_CPP
+
 #include "ace/Auto_Event.h"
 
 #if !defined (__ACE_INLINE__)

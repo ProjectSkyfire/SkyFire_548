@@ -55,4 +55,5 @@ ACE_Manual_Event_T<TIME_POLICY>::dump () const
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+
 #endif

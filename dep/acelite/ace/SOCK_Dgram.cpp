@@ -16,7 +16,7 @@
 #  include "ace/SOCK_Dgram.inl"
 #endif /* __ACE_INLINE__ */
 
-#if !defined (ACE_HAS_IPV6) && defined (ACE_WIN32)
+#if defined (ACE_HAS_IPV6) && defined (ACE_WIN32)
 #include /**/ <iphlpapi.h>
 #endif
 
@@ -406,7 +406,6 @@ ACE_SOCK_Dgram::recv (iovec iov[],
 
 // Send an iovec of size N to ADDR as a datagram (connectionless
 // version).
-
 ssize_t
 ACE_SOCK_Dgram::send (const iovec iov[],
                       int n,
@@ -420,8 +419,8 @@ ACE_SOCK_Dgram::send (const iovec iov[],
 
   // Determine the total length of all the buffers in <iov>.
   for (i = 0; i < n; i++)
-#if ! (defined(__BORLANDC__) || defined(ACE_LINUX) || defined(ACE_HAS_RTEMS))
-    // The iov_len is unsigned on Linux, RTEMS and with Borland. If we go
+#if ! (defined(ACE_LACKS_IOVEC) || defined(ACE_LINUX) || defined(ACE_HAS_RTEMS))
+    // The iov_len is unsigned on Linux, RTEMS and when using the ACE iovec struct. If we go
     // ahead and try the if, it will emit a warning.
     if (iov[i].iov_len < 0)
       return -1;
@@ -481,8 +480,8 @@ ACE_SOCK_Dgram::recv (iovec iov[],
   ACE_UNUSED_ARG (to_addr);
 
   for (i = 0; i < n; i++)
-#if ! (defined(__BORLANDC__) || defined(ACE_LINUX) || defined(ACE_HAS_RTEMS))
-    // The iov_len is unsigned on Linux, RTEMS and with Borland. If we go
+#if ! (defined(ACE_LACKS_IOVEC) || defined(ACE_LINUX) || defined(ACE_HAS_RTEMS))
+    // The iov_len is unsigned on Linux, RTEMS and when using the ACE iovec struct. If we go
     // ahead and try the if, it will emit a warning.
     if (iov[i].iov_len < 0)
       return -1;
@@ -575,195 +574,7 @@ ACE_SOCK_Dgram::send (const void *buf,
     }
 }
 
-int
-ACE_SOCK_Dgram::set_nic (const ACE_TCHAR *net_if,
-                         int addr_family)
-{
-#if defined (IP_MULTICAST_IF) && (IP_MULTICAST_IF != 0)
-# if defined (ACE_HAS_IPV6)
-  bool ipv6_mif_set = false;
-  if (addr_family == AF_INET6 || addr_family == AF_UNSPEC)
-    {
-      ACE_INET_Addr addr;
-      addr.set (static_cast<u_short> (0), ACE_IPV6_ANY);
-      ipv6_mreq send_mreq;
-      if (this->make_multicast_ifaddr6 (&send_mreq,
-                                        addr,
-                                        net_if) == -1)
-        return -1;
 
-      // Only let this attempt to set unknown interface when INET6 is
-      // specifically requested. Otherwise we will just try INET.
-      if (send_mreq.ipv6mr_interface != 0 || addr_family == AF_INET6)
-        {
-          if (this->ACE_SOCK::set_option
-                              (IPPROTO_IPV6, IPV6_MULTICAST_IF,
-                               &(send_mreq.ipv6mr_interface),
-                               sizeof send_mreq.ipv6mr_interface) == -1)
-            return -1;
-        }
-      ipv6_mif_set = send_mreq.ipv6mr_interface != 0;
-    }
-
-#   if defined (ACE_WIN32)
-  // For Win32 net_if is distintly different between INET6 and INET
-  // so it is always either an INET6 if or an INET if.
-  if (!ipv6_mif_set && (addr_family == AF_INET || addr_family == AF_UNSPEC))
-#   else
-  if (addr_family == AF_INET || addr_family == AF_UNSPEC)
-#   endif
-    {
-      ACE_INET_Addr addr (static_cast<u_short> (0));
-      ip_mreq  send_mreq;
-      if (this->make_multicast_ifaddr (&send_mreq,
-                                       addr,
-                                       net_if) == -1)
-        {
-          if (!ipv6_mif_set)
-            return -1;
-        }
-      else if (this->ACE_SOCK::set_option (IPPROTO_IP,
-                                           IP_MULTICAST_IF,
-                                           &(send_mreq.imr_interface),
-                                           sizeof send_mreq.imr_interface) == -1)
-        {
-          if (!ipv6_mif_set)
-            return -1;
-        }
-    }
-# else /* ACE_HAS_IPV6 */
-  ACE_UNUSED_ARG (addr_family);
-  ACE_INET_Addr addr (static_cast<u_short> (0));
-  ip_mreq  send_mreq;
-  /*
-  if (this->make_multicast_ifaddr (&send_mreq,
-                                   addr,
-                                   net_if) == -1)
-    return -1;
-*/
-  if (this->ACE_SOCK::set_option (IPPROTO_IP,
-                                  IP_MULTICAST_IF,
-                                  &(send_mreq.imr_interface),
-                                  sizeof send_mreq.imr_interface) == -1)
-    return -1;
-# endif /* !ACE_HAS_IPV6 */
-#else /* IP_MULTICAST_IF */
-  // Send interface option not supported - ignore it.
-  // (We may have been invoked by ::subscribe, so we have to allow
-  // a non-null interface parameter in this function.)
-  ACE_UNUSED_ARG (net_if);
-  ACE_UNUSED_ARG (addr_family);
-  ACELIB_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("Send interface specification not ")
-              ACE_TEXT ("supported - IGNORED.\n")));
-#endif /* !IP_MULTICAST_IF */
-
-  return 0;
-}
-#if defined (ACE_HAS_IPV6)
-int
-ACE_SOCK_Dgram::make_multicast_ifaddr (ip_mreq *ret_mreq,
-                                       const ACE_INET_Addr &mcast_addr,
-                                       const ACE_TCHAR *net_if)
-{
-  ACE_TRACE ("ACE_SOCK_Dgram::make_multicast_ifaddr");
-  ip_mreq  lmreq;       // Scratch copy.
-  if (net_if != 0)
-    {
-#if defined (ACE_WIN32)
-      // This port number is not necessary, just convenient
-      ACE_INET_Addr interface_addr;
-      if (interface_addr.set (mcast_addr.get_port_number (), net_if) == -1)
-        {
-#if defined (ACE_WIN32)
-          IP_ADAPTER_ADDRESSES tmp_addrs;
-          // Initial call to determine actual memory size needed
-          ULONG bufLen = 0;
-          if (GetAdaptersAddresses (AF_INET, 0, 0, &tmp_addrs, &bufLen)
-              != ERROR_BUFFER_OVERFLOW)
-            {
-              return -1; // With output bufferlength 0 this can't be right.
-            }
-
-          // Get required output buffer and retrieve info for real.
-          char *buf = 0;
-          ACE_NEW_RETURN (buf, char[bufLen], -1);
-          PIP_ADAPTER_ADDRESSES pAddrs = reinterpret_cast<PIP_ADAPTER_ADDRESSES> (buf);
-          if (GetAdaptersAddresses (AF_INET, 0, 0, pAddrs, &bufLen) != NO_ERROR)
-            {
-              delete[] buf; // clean up
-              return -1;
-            }
-
-          interface_addr = ACE_INET_Addr ();
-          int set_result = -1;
-          while (pAddrs && set_result == -1)
-            {
-              if (ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (net_if), pAddrs->AdapterName) == 0 ||
-                  ACE_OS::strcmp (ACE_TEXT_ALWAYS_WCHAR (net_if), pAddrs->FriendlyName) == 0)
-                {
-                  PIP_ADAPTER_UNICAST_ADDRESS pUnicast = pAddrs->FirstUnicastAddress;
-                  LPSOCKADDR sa = pUnicast->Address.lpSockaddr;
-                  if (sa->sa_family == AF_INET)
-                    {
-                      const void *addr = &(((sockaddr_in *)sa)->sin_addr);
-                      set_result = interface_addr.set_address ((const char*) addr, 4, 0);
-                    }
-                }
-              pAddrs = pAddrs->Next;
-            }
-
-          delete[] buf; // clean up
-          if (set_result == -1)
-            {
-              errno = EINVAL;
-              return -1;
-            }
-#else
-          ACE_NOTSUP_RETURN (-1);
-#endif /* ACE_WIN32 */
-        }
-      lmreq.imr_interface.s_addr =
-        ACE_HTONL (interface_addr.get_ip_address ());
-#else
-      ifreq if_address;
-      ACE_OS::strcpy (if_address.ifr_name, ACE_TEXT_ALWAYS_CHAR (net_if));
-      if (ACE_OS::ioctl (this->get_handle (),
-                         SIOCGIFADDR,
-                         &if_address) == -1)
-        {
-          // The net_if name failed to be found. It seems that older linux
-          // kernals only support the actual interface name (eg. "eth0"),
-          // not the IP address string of the interface (eg. "192.168.0.1"),
-          // which newer kernals seem to automatically translate.
-          // So assume that we have been given an IP Address and translate
-          // that instead, similar to the above for windows.
-          ACE_INET_Addr interface_addr;
-          if (interface_addr.set (mcast_addr.get_port_number (), net_if) == -1)
-            return -1;  // Still doesn't work, unknown device specified.
-          lmreq.imr_interface.s_addr =
-            ACE_HTONL (interface_addr.get_ip_address ());
-        }
-      else
-        {
-          sockaddr_in *socket_address =
-            reinterpret_cast<sockaddr_in*> (&if_address.ifr_addr);
-          lmreq.imr_interface.s_addr = socket_address->sin_addr.s_addr;
-        }
-#endif /* ACE_WIN32 */
-    }
-  else
-    lmreq.imr_interface.s_addr = INADDR_ANY;
-
-  lmreq.IMR_MULTIADDR.s_addr = ACE_HTONL (mcast_addr.get_ip_address ());
-
-  // Set return info, if requested.
-  if (ret_mreq)
-    *ret_mreq = lmreq;
-
-  return 0;
-}
-#endif
 #if defined (ACE_HAS_IPV6)
 // XXX: This will not work on any operating systems that do not support
 //      if_nametoindex or that is not Win32 >= Windows XP/Server 2003

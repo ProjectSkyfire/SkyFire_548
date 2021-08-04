@@ -280,12 +280,12 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
+#source_files:
+#FlReactor.cpp
+#
 #header_files:
 #FlReactor.h
 #ACE_FlReactor_export.h
-#
-#source_files:
-#FlReactor.cpp
 #
 #pkgconfig_files:
 #ACE_FlReactor.pc.in

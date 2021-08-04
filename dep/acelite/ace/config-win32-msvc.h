@@ -49,24 +49,6 @@
 #endif
 //FUZZ: enable check_for_msc_ver
 
-// MFC changes the behavior of operator new at all MSVC versions from 6 up
-// by throwing a static CMemoryException* instead of std::bad_alloc
-// (see ace/OS_Memory.h). This MFC exception object needs to be cleaned up
-// by calling its Delete() method.
-#if defined (ACE_HAS_MFC) && (ACE_HAS_MFC == 1)
-#  if !defined (ACE_NEW_THROWS_EXCEPTIONS)
-#    define ACE_NEW_THROWS_EXCEPTIONS
-#  endif
-#  if defined (ACE_bad_alloc)
-#    undef ACE_bad_alloc
-#  endif
-#  define ACE_bad_alloc CMemoryException *e
-#  if defined (ACE_del_bad_alloc)
-#    undef ACE_del_bad_alloc
-#  endif
-#  define ACE_del_bad_alloc e->Delete();
-#endif /* ACE_HAS_MFC && ACE_HAS_MFC==1 */
-
 #if defined(ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
 // must have _MT defined to include multithreading
 // features from win32 headers
@@ -131,6 +113,8 @@
 #define ACE_LACKS_ISWBLANK
 #define ACE_LACKS_CORRECT_ISWPRINT_TAB
 #define ACE_ISCTYPE_EQUIVALENT ::_isctype
+
+#define ACE_HAS_WIN32_STRUCTURED_EXCEPTIONS
 
 // Turn off warnings for /W4
 // To resume any of these warning: #pragma warning(default: 4xxx)
