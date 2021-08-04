@@ -5928,18 +5928,24 @@ void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
-    Position pos;
-    if (!m_targets.HasDst())
-        GetCaster()->GetPosition(&pos);
-    else
-        destTarget->GetPosition(&pos);
+    Unit* caster = m_caster;
+    float radius = m_spellInfo->Effects[effIndex].CalcRadius(caster);
 
+    DynamicObject* dynObj = new DynamicObject(false);
+    if (!dynObj->CreateDynamicObject(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo, *destTarget, radius, DYNAMIC_OBJECT_AREA_SPELL))
+    {
+        delete dynObj;
+        return;
+    }
+
+    /*
     // trigger entry/miscvalue relation is currently unknown, for now use MiscValue as trigger entry
     uint32 triggerEntry = GetSpellInfo()->Effects[effIndex].MiscValue;
 
     AreaTrigger * areaTrigger = new AreaTrigger;
     if (!areaTrigger->CreateAreaTrigger(sObjectMgr->GenerateLowGuid(HIGHGUID_AREATRIGGER), triggerEntry, GetCaster(), GetSpellInfo(), pos))
         delete areaTrigger;
+    */
 }
 
 void Spell::EffectRemoveTalent(SpellEffIndex /*effIndex*/)
