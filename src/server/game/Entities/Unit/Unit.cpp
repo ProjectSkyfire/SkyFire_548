@@ -11201,12 +11201,14 @@ int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
     int32 duration;
 
     if (comboPoints && minduration != -1 && minduration != maxduration)
-        duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
+    {
+        if (minduration)
+            duration = minduration + (minduration * comboPoints);
+        else
+            duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
+    }
     else
         duration = minduration;
-
-    if (spellProto->Id == 5171)
-        duration = minduration + (minduration * comboPoints);
 
     return duration;
 }
