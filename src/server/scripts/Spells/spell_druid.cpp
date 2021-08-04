@@ -51,6 +51,7 @@ enum DruidSpells
     SPELL_DRUID_LIVING_SEED_PROC            = 48504,
     SPELL_DRUID_NATURES_GRACE               = 16880,
     SPELL_DRUID_NATURES_GRACE_TRIGGER       = 16886,
+    SPELL_DRUID_PREDATORY_SWIFTNESS         = 69369,
     SPELL_DRUID_SURVIVAL_INSTINCTS          = 50322,
     SPELL_DRUID_SAVAGE_ROAR                 = 62071,
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
@@ -614,6 +615,40 @@ public:
     }
 };
 
+// Called by Healing Touch - 5185, Entangling Roots - 339, Hibernate - 2637, Rebirth - 20484
+// Predatory Swiftness
+class spell_dru_predatory_swiftness : public SpellScriptLoader
+{
+public:
+    spell_dru_predatory_swiftness() : SpellScriptLoader("spell_dru_predatory_swiftness") { }
+
+    class spell_dru_predatory_swiftness_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_predatory_swiftness_SpellScript);
+
+        void HandleHit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_DRUID_PREDATORY_SWIFTNESS))
+                {
+                    caster->RemoveAurasDueToSpell(SPELL_DRUID_PREDATORY_SWIFTNESS);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_predatory_swiftness_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_predatory_swiftness_SpellScript();
+    }
+};
+
 // 62606 - Savage Defense
 class spell_dru_savage_defense : public SpellScriptLoader
 {
@@ -991,6 +1026,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_living_seed_proc();
     new spell_dru_might_of_ursoc();
     new spell_dru_predatory_strikes();
+    new spell_dru_predatory_swiftness();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
     new spell_dru_starfall_dummy();
