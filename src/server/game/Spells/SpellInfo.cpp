@@ -592,7 +592,10 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             {
                 GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(_spellInfo->SpellLevel - 1);
                 GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(caster->getLevel() - 1);
-                if (spellScaler && casterScaler)
+                // TODO: FIX-ME
+                // WTF is this?
+                // value got NaN if spellScaler->ratio == 0.000000f
+                if (spellScaler && casterScaler && spellScaler->ratio > 1.0f)
                     value *= casterScaler->ratio / spellScaler->ratio;
             }
         }
