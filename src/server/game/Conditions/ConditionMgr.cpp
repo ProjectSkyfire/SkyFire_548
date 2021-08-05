@@ -914,7 +914,7 @@ void ConditionMgr::LoadConditions(bool isReload)
 
         if ((cond->ErrorType != SpellCastResult::SPELL_FAILED_SUCCESS) && cond->SourceType != CONDITION_SOURCE_TYPE_SPELL)
         {
-            SF_LOG_ERROR("sql.sql", "Condition type %u entry %i can't have ErrorType (%u), set to 0!", uint32(cond->SourceType), cond->SourceEntry, cond->ErrorType);
+            SF_LOG_ERROR("sql.sql", "Condition type %u entry %i can't have ErrorType (%u), set to 0!", uint32(cond->SourceType), cond->SourceEntry, uint32(cond->ErrorType));
             cond->ErrorType = SpellCastResult::SPELL_FAILED_SUCCESS;
         }
 
