@@ -1534,15 +1534,15 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
     // (this requirement only for client-side stance show in talent description)
     if (GetTalentSpellCost(Id) > 0 &&
         (Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[1].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[2].Effect == SPELL_EFFECT_LEARN_SPELL))
-        return SPELL_CAST_OK;
+        return SpellCastResult::SPELL_CAST_OK;
 
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
 
     if (stanceMask & StancesNot)                 // can explicitly not be casted in this stance
-        return SPELL_FAILED_NOT_SHAPESHIFT;
+        return SpellCastResult::SPELL_FAILED_NOT_SHAPESHIFT;
 
     if (stanceMask & Stances)                    // can explicitly be casted in this stance
-        return SPELL_CAST_OK;
+        return SpellCastResult::SPELL_CAST_OK;
 
     bool actAsShifted = false;
     SpellShapeshiftFormEntry const* shapeInfo = NULL;
@@ -1552,7 +1552,7 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
         if (!shapeInfo)
         {
             SF_LOG_ERROR("spells", "GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
         actAsShifted = !(shapeInfo->flags1 & 1);            // shapeshift acts as normal form for spells
     }
@@ -1560,15 +1560,15 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
     if (actAsShifted)
     {
         if (Attributes & SPELL_ATTR0_NOT_SHAPESHIFT) // not while shapeshifted
-            return SPELL_FAILED_NOT_SHAPESHIFT;
+            return SpellCastResult::SPELL_FAILED_NOT_SHAPESHIFT;
         else if (Stances != 0)                   // needs other shapeshift
-            return SPELL_FAILED_ONLY_SHAPESHIFT;
+            return SpellCastResult::SPELL_FAILED_ONLY_SHAPESHIFT;
     }
     else
     {
         // needs shapeshift
         if (!(AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && Stances != 0)
-            return SPELL_FAILED_ONLY_SHAPESHIFT;
+            return SpellCastResult::SPELL_FAILED_ONLY_SHAPESHIFT;
     }
 
     // Check if stance disables cast of not-stance spells
@@ -1577,10 +1577,10 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
     if (shapeInfo && shapeInfo->flags1 & 0x400)
     {
         if (!(stanceMask & Stances))
-            return SPELL_FAILED_ONLY_SHAPESHIFT;
+            return SpellCastResult::SPELL_FAILED_ONLY_SHAPESHIFT;
     }
 
-    return SPELL_CAST_OK;
+    return SpellCastResult::SPELL_CAST_OK;
 }
 
 SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player) const
@@ -1602,7 +1602,7 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         }
 
         if (!found)
-            return SPELL_FAILED_INCORRECT_AREA;
+            return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
     }
 
     // continent limitation (virtual continent)
@@ -1611,7 +1611,7 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         uint32 v_map = GetVirtualMapForMapAndZone(map_id, zone_id);
         MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
         if (!mapEntry || mapEntry->addon < 1 || !mapEntry->IsContinent())
-            return SPELL_FAILED_INCORRECT_AREA;
+            return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
     }
 
     // raid instance limitation
@@ -1619,7 +1619,7 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
     {
         MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
         if (!mapEntry || mapEntry->IsRaid())
-            return SPELL_FAILED_NOT_IN_RAID_INSTANCE;
+            return SpellCastResult::SPELL_FAILED_NOT_IN_RAID_INSTANCE;
     }
 
     // DB base check (if non empty then must fit at least single for allow)
@@ -1629,9 +1629,9 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         for (SpellAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
         {
             if (itr->second.IsFitToRequirements(player, zone_id, area_id))
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
         }
-        return SPELL_FAILED_INCORRECT_AREA;
+        return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
     }
 
     // bg spell checks
@@ -1639,9 +1639,9 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
     {
         case 23333:                                         // Warsong Flag
         case 23335:                                         // Silverwing Flag
-            return ((map_id == 489 || map_id == 726) && player && player->InBattleground()) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return ((map_id == 489 || map_id == 726) && player && player->InBattleground()) ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
         case 34976:                                         // Netherstorm Flag
-            return map_id == 566 && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return map_id == 566 && player && player->InBattleground() ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
         case 2584:                                          // Waiting to Resurrect
         case 22011:                                         // Spirit Heal Channel
         case 22012:                                         // Spirit Heal
@@ -1652,24 +1652,24 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return SPELL_FAILED_INCORRECT_AREA;
+                return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
 
-            return zone_id == 4197 || (mapEntry->IsBattleground() && player && player->InBattleground()) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return zone_id == 4197 || (mapEntry->IsBattleground() && player && player->InBattleground()) ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
         }
         case 44521:                                         // Preparation
         {
             if (!player)
-                return SPELL_FAILED_REQUIRES_AREA;
+                return SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
 
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return SPELL_FAILED_INCORRECT_AREA;
+                return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
 
             if (!mapEntry->IsBattleground())
-                return SPELL_FAILED_REQUIRES_AREA;
+                return SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
 
             Battleground* bg = player->GetBattleground();
-            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
         }
         case 32724:                                         // Gold Team (Alliance)
         case 32725:                                         // Green Team (Alliance)
@@ -1678,24 +1678,24 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return SPELL_FAILED_INCORRECT_AREA;
+                return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
 
-            return mapEntry->IsBattleArena() && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return mapEntry->IsBattleArena() && player && player->InBattleground() ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
         }
         case 32727:                                         // Arena Preparation
         {
             if (!player)
-                return SPELL_FAILED_REQUIRES_AREA;
+                return SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
 
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return SPELL_FAILED_INCORRECT_AREA;
+                return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
 
             if (!mapEntry->IsBattleArena())
-                return SPELL_FAILED_REQUIRES_AREA;
+                return SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
 
             Battleground* bg = player->GetBattleground();
-            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_REQUIRES_AREA;
         }
     }
 
@@ -1712,7 +1712,7 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
                 case SPELL_AURA_FLY:
                 {
                     if (!player->IsKnowHowFlyIn(map_id, zone_id))
-                        return SPELL_FAILED_INCORRECT_AREA;
+                        return SpellCastResult::SPELL_FAILED_INCORRECT_AREA;
                     break;
                 }
                 case SPELL_AURA_MOD_SHAPESHIFT:
@@ -1720,30 +1720,30 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
                     if (SpellShapeshiftFormEntry const* spellShapeshiftForm = sSpellShapeshiftFormStore.LookupEntry(Effects[i].MiscValue))
                         if (uint32 mountType = spellShapeshiftForm->mount_type)
                             if (!player->GetMountCapability(mountType))
-                                return SPELL_FAILED_NOT_HERE;
+                                return SpellCastResult::SPELL_FAILED_NOT_HERE;
                     break;
                 }
                 case SPELL_AURA_MOUNTED:
                 {
                     if (Effects[i].MiscValueB && !player->GetMountCapability(Effects[i].MiscValueB))
-                        return SPELL_FAILED_NOT_HERE;
+                        return SpellCastResult::SPELL_FAILED_NOT_HERE;
                     break;
                 }
             }
         }
     }
 
-    return SPELL_CAST_OK;
+    return SpellCastResult::SPELL_CAST_OK;
 }
 
 SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* target, bool implicit) const
 {
     if (AttributesEx & SPELL_ATTR1_CANT_TARGET_SELF && caster == target)
-        return SPELL_FAILED_BAD_TARGETS;
+        return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
     // check visibility - ignore stealth for implicit (area) targets
     if (!(AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE) && !caster->CanSeeOrDetect(target, implicit))
-        return SPELL_FAILED_BAD_TARGETS;
+        return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
     Unit const* unitTarget = target->ToUnit();
 
@@ -1751,15 +1751,15 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     if (unitTarget)
     {
         if (AttributesEx & SPELL_ATTR1_CANT_TARGET_IN_COMBAT && unitTarget->IsInCombat())
-            return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
+            return SpellCastResult::SPELL_FAILED_TARGET_AFFECTING_COMBAT;
 
         // only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can target ghosts
         if (((AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_GHOSTS) != 0) != unitTarget->HasAuraType(SPELL_AURA_GHOST))
         {
             if (AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_GHOSTS)
-                return SPELL_FAILED_TARGET_NOT_GHOST;
+                return SpellCastResult::SPELL_FAILED_TARGET_NOT_GHOST;
             else
-                return SPELL_FAILED_BAD_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
         }
 
         if (caster != unitTarget)
@@ -1770,14 +1770,14 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
                 if (AttributesEx2 & SPELL_ATTR2_CANT_TARGET_TAPPED)
                     if (Creature const* targetCreature = unitTarget->ToCreature())
                         if (targetCreature->hasLootRecipient() && !targetCreature->isTappedBy(caster->ToPlayer()))
-                            return SPELL_FAILED_CANT_CAST_ON_TAPPED;
+                            return SpellCastResult::SPELL_FAILED_CANT_CAST_ON_TAPPED;
 
                 if (AttributesCu & SPELL_ATTR0_CU_PICKPOCKET)
                 {
                      if (unitTarget->GetTypeId() == TypeID::TYPEID_PLAYER)
-                         return SPELL_FAILED_BAD_TARGETS;
+                         return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
                      else if ((unitTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
-                         return SPELL_FAILED_TARGET_NO_POCKETS;
+                         return SpellCastResult::SPELL_FAILED_TARGET_NO_POCKETS;
                 }
 
                 // Not allow disarm unarmed player
@@ -1787,10 +1787,10 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
                     {
                         Player const* player = unitTarget->ToPlayer();
                         if (!player->GetWeaponForAttack(WeaponAttackType::BASE_ATTACK) || !player->IsUseEquipedWeapon(true))
-                            return SPELL_FAILED_TARGET_NO_WEAPONS;
+                            return SpellCastResult::SPELL_FAILED_TARGET_NO_WEAPONS;
                     }
                     else if (!unitTarget->GetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID))
-                        return SPELL_FAILED_TARGET_NO_WEAPONS;
+                        return SpellCastResult::SPELL_FAILED_TARGET_NO_WEAPONS;
                 }
             }
         }
@@ -1800,27 +1800,27 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     {
         // cannot target bare bones
         if (corpseTarget->GetType() == CorpseType::CORPSE_BONES)
-            return SPELL_FAILED_BAD_TARGETS;
+            return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
         // we have to use owner for some checks (aura preventing resurrection for example)
         if (Player* owner = ObjectAccessor::FindPlayer(corpseTarget->GetOwnerGUID()))
             unitTarget = owner;
         // we're not interested in corpses without owner
         else
-            return SPELL_FAILED_BAD_TARGETS;
+            return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
     }
     // other types of objects - always valid
-    else return SPELL_CAST_OK;
+    else return SpellCastResult::SPELL_CAST_OK;
 
     // corpseOwner and unit specific target checks
     if (AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_PLAYERS && !unitTarget->ToPlayer())
-       return SPELL_FAILED_TARGET_NOT_PLAYER;
+       return SpellCastResult::SPELL_FAILED_TARGET_NOT_PLAYER;
 
     if (!IsAllowingDeadTarget() && !unitTarget->IsAlive())
-       return SPELL_FAILED_TARGETS_DEAD;
+       return SpellCastResult::SPELL_FAILED_TARGETS_DEAD;
 
     // check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
     if (implicit && AttributesEx6 & SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED && !unitTarget->CanFreeMove())
-       return SPELL_FAILED_BAD_TARGETS;
+       return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
     // checked in Unit::IsValidAttack/AssistTarget, shouldn't be checked for ENTRY targets
     //if (!(AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
@@ -1831,24 +1831,24 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     if (!CheckTargetCreatureType(unitTarget))
     {
         if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
-            return SPELL_FAILED_TARGET_IS_PLAYER;
+            return SpellCastResult::SPELL_FAILED_TARGET_IS_PLAYER;
         else
-            return SPELL_FAILED_BAD_TARGETS;
+            return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
     }
 
     // check GM mode and GM invisibility - only for player casts (npc casts are controlled by AI) and negative spells
     if (unitTarget != caster && (caster->IsControlledByPlayer() || !IsPositive()) && unitTarget->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
         if (!unitTarget->ToPlayer()->IsVisible())
-            return SPELL_FAILED_BM_OR_INVISGOD;
+            return SpellCastResult::SPELL_FAILED_BM_OR_INVISGOD;
 
         if (unitTarget->ToPlayer()->IsGameMaster())
-            return SPELL_FAILED_BM_OR_INVISGOD;
+            return SpellCastResult::SPELL_FAILED_BM_OR_INVISGOD;
     }
 
     // not allow casting on flying player
     if (unitTarget->HasUnitState(UNIT_STATE_IN_FLIGHT))
-        return SPELL_FAILED_BAD_TARGETS;
+        return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
     /* TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
     not allow passengers to be implicitly hit by spells, however this target type should be an exception,
@@ -1860,23 +1860,23 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     if (!caster->IsVehicle() && !(caster->GetCharmerOrOwner() == target))
     {
         if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
-            return SPELL_FAILED_TARGET_AURASTATE;
+            return SpellCastResult::SPELL_FAILED_TARGET_AURASTATE;
 
         if (TargetAuraStateNot && unitTarget->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))
-            return SPELL_FAILED_TARGET_AURASTATE;
+            return SpellCastResult::SPELL_FAILED_TARGET_AURASTATE;
     }
 
     if (TargetAuraSpell && !unitTarget->HasAura(sSpellMgr->GetSpellIdForDifficulty(TargetAuraSpell, caster)))
-        return SPELL_FAILED_TARGET_AURASTATE;
+        return SpellCastResult::SPELL_FAILED_TARGET_AURASTATE;
 
     if (ExcludeTargetAuraSpell && unitTarget->HasAura(sSpellMgr->GetSpellIdForDifficulty(ExcludeTargetAuraSpell, caster)))
-        return SPELL_FAILED_TARGET_AURASTATE;
+        return SpellCastResult::SPELL_FAILED_TARGET_AURASTATE;
 
     if (unitTarget->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
         if (HasEffect(SPELL_EFFECT_SELF_RESURRECT) || HasEffect(SPELL_EFFECT_RESURRECT) || HasEffect(SPELL_EFFECT_RESURRECT_NEW))
-            return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+            return SpellCastResult::SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
 
-    return SPELL_CAST_OK;
+    return SpellCastResult::SPELL_CAST_OK;
 }
 
 SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject const* target, Item const* itemTarget) const
@@ -1886,8 +1886,8 @@ SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject c
     {
         if (neededTargets & (TARGET_FLAG_UNIT_MASK | TARGET_FLAG_GAMEOBJECT_MASK | TARGET_FLAG_CORPSE_MASK))
             if (!(neededTargets & TARGET_FLAG_GAMEOBJECT_ITEM) || !itemTarget)
-                return SPELL_FAILED_BAD_TARGETS;
-        return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+        return SpellCastResult::SPELL_CAST_OK;
     }
 
     if (GameObject const* gameobjectTarget = target->ToGameObject())
@@ -1895,9 +1895,9 @@ SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject c
         if (neededTargets & (TARGET_FLAG_GAMEOBJECT))
         {
             if (caster->GetDistance(target) > (GetMaxRange()))
-                return SPELL_FAILED_OUT_OF_RANGE;
+                return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
     }
 
@@ -1907,29 +1907,29 @@ SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject c
         {
             if (neededTargets & TARGET_FLAG_UNIT_ENEMY)
                 if (caster->_IsValidAttackTarget(unitTarget, this))
-                    return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_CAST_OK;
             if (neededTargets & TARGET_FLAG_UNIT_ALLY
                 || (neededTargets & TARGET_FLAG_UNIT_PARTY && caster->IsInPartyWith(unitTarget))
                 || (neededTargets & TARGET_FLAG_UNIT_RAID && caster->IsInRaidWith(unitTarget)))
                     if (caster->_IsValidAssistTarget(unitTarget, this))
-                        return SPELL_CAST_OK;
+                        return SpellCastResult::SPELL_CAST_OK;
             if (neededTargets & TARGET_FLAG_UNIT_MINIPET)
                 if (unitTarget->GetGUID() == caster->GetCritterGUID())
-                    return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_CAST_OK;
             if (neededTargets & TARGET_FLAG_UNIT_PASSENGER)
                 if (unitTarget->IsOnVehicle(caster))
-                    return SPELL_CAST_OK;
-            return SPELL_FAILED_BAD_TARGETS;
+                    return SpellCastResult::SPELL_CAST_OK;
+            return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
         }
     }
-    return SPELL_CAST_OK;
+    return SpellCastResult::SPELL_CAST_OK;
 }
 
 SpellCastResult SpellInfo::CheckVehicle(Unit const* caster) const
 {
     // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
     if (caster->GetTypeId() != TypeID::TYPEID_PLAYER)
-        return SPELL_CAST_OK;
+        return SpellCastResult::SPELL_CAST_OK;
 
     Vehicle* vehicle = caster->GetVehicle();
     if (vehicle)
@@ -1955,7 +1955,7 @@ SpellCastResult SpellInfo::CheckVehicle(Unit const* caster) const
         VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(caster);
         if (!(AttributesEx6 & SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE) && !(Attributes & SPELL_ATTR0_CASTABLE_WHILE_MOUNTED)
             && (vehicleSeat->m_flags & checkMask) != checkMask)
-            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
         // Can only summon uncontrolled minions/guardians when on controlled vehicle
         if (vehicleSeat->m_flags & (VEHICLE_SEAT_FLAG_CAN_CONTROL | VEHICLE_SEAT_FLAG_UNK2))
@@ -1967,12 +1967,12 @@ SpellCastResult SpellInfo::CheckVehicle(Unit const* caster) const
 
                 SummonPropertiesEntry const* props = sSummonPropertiesStore.LookupEntry(Effects[i].MiscValueB);
                 if (props && props->Category != SUMMON_CATEGORY_WILD)
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
             }
         }
     }
 
-    return SPELL_CAST_OK;
+    return SpellCastResult::SPELL_CAST_OK;
 }
 
 bool SpellInfo::CheckTargetCreatureType(Unit const* target) const

@@ -494,7 +494,7 @@ class spell_general_vezax_mark_of_the_faceless_leech : public SpellScriptLoader
                 targets.remove(GetExplTargetWorldObject());
 
                 if (targets.empty())
-                    FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
+                    FinishCast(SpellCastResult::SPELL_FAILED_NO_VALID_TARGETS);
             }
 
             void Register()

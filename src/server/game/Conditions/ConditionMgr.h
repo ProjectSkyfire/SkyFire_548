@@ -183,7 +183,7 @@ struct Condition
     uint32                  ConditionValue1;
     uint32                  ConditionValue2;
     uint32                  ConditionValue3;
-    uint32                  ErrorType;
+    SpellCastResult         ErrorType;
     uint32                  ErrorTextId;
     uint32                  ReferenceId;
     uint32                  ScriptId;
@@ -203,7 +203,7 @@ struct Condition
         ConditionValue2    = 0;
         ConditionValue3    = 0;
         ReferenceId        = 0;
-        ErrorType          = 0;
+        ErrorType          = SpellCastResult::SPELL_FAILED_SUCCESS;
         ErrorTextId        = 0;
         ScriptId           = 0;
         NegativeCondition  = false;

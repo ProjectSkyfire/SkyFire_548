@@ -1074,7 +1074,7 @@ enum SpellEffects
     TOTAL_SPELL_EFFECTS                             = 214,
 };
 
-enum SpellCastResult
+enum class SpellCastResult
 {
     SPELL_FAILED_SUCCESS                         = 0,
     SPELL_FAILED_AFFECTING_COMBAT                = 1,

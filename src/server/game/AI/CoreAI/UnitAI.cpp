@@ -289,7 +289,7 @@ bool SpellTargetSelector::operator()(Unit const* target) const
     if (!target)
         return false;
 
-    if (_spellInfo->CheckTarget(_caster, target) != SPELL_CAST_OK)
+    if (_spellInfo->CheckTarget(_caster, target) != SpellCastResult::SPELL_CAST_OK)
         return false;
 
     // copypasta from Spell::CheckRange

@@ -545,15 +545,15 @@ public:
             if (Unit* target = GetExplTargetUnit())
             {
                 if (!caster->IsFriendlyTo(target) && !caster->isInFront(target))
-                    return SPELL_FAILED_UNIT_NOT_INFRONT;
+                    return SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT;
 
                 if (target->IsFriendlyTo(caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
-                    return SPELL_FAILED_BAD_TARGETS;
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
             }
             else
-                return SPELL_FAILED_BAD_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() OVERRIDE
@@ -584,10 +584,10 @@ public:
             if (GetCaster()->getClass() != CLASS_DEATH_KNIGHT)
             {
                 SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_BE_DEATH_KNIGHT);
-                return SPELL_FAILED_CUSTOM_ERROR;
+                return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
             }
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void HandleScript(SpellEffIndex effIndex)
@@ -663,9 +663,9 @@ public:
                             undeadPet->GetOwnerGUID() == player->GetGUID() &&
                             undeadPet->GetCreatureType() == CREATURE_TYPE_UNDEAD &&
                             undeadPet->IsWithinDist(player, 100.0f, false))
-                            return SPELL_CAST_OK;
+                            return SpellCastResult::SPELL_CAST_OK;
 
-            return SPELL_FAILED_NO_PET;
+            return SpellCastResult::SPELL_FAILED_NO_PET;
         }
 
         void FilterTargets(std::list<WorldObject*>& targetList)

@@ -951,13 +951,13 @@ public:
                 case TALENT_TREE_SHAMAN_ENHANCEMENT:
                 case TALENT_TREE_SHAMAN_ELEMENTAL:
                 case TALENT_TREE_SHAMAN_RESTORATION:
-                    return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_CAST_OK;
                 default:
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 }
             }
 
-            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
         }
 
         void HandleOnHit()

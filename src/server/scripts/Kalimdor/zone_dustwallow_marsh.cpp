@@ -617,12 +617,12 @@ class spell_ooze_zap : public SpellScriptLoader
             SpellCastResult CheckRequirement()
             {
                 if (!GetCaster()->HasAura(GetSpellInfo()->Effects[EFFECT_1].CalcValue()))
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW; // This is actually correct
+                    return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW; // This is actually correct
 
                 if (!GetExplTargetUnit())
-                    return SPELL_FAILED_BAD_TARGETS;
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void HandleDummy(SpellEffIndex effIndex)

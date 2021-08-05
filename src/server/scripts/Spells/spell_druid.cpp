@@ -672,9 +672,9 @@ public:
         {
             Unit* caster = GetCaster();
             if (caster->GetShapeshiftForm() != FORM_CAT)
-                return SPELL_FAILED_ONLY_SHAPESHIFT;
+                return SpellCastResult::SPELL_FAILED_ONLY_SHAPESHIFT;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() override
@@ -842,9 +842,9 @@ public:
         {
             Unit* caster = GetCaster();
             if (!caster->IsInFeralForm())
-                return SPELL_FAILED_ONLY_SHAPESHIFT;
+                return SpellCastResult::SPELL_FAILED_ONLY_SHAPESHIFT;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() override
@@ -961,7 +961,7 @@ public:
                 if (tempTargets.empty())
                 {
                     targets.clear();
-                    FinishCast(SPELL_FAILED_DONT_REPORT);
+                    FinishCast(SpellCastResult::SPELL_FAILED_DONT_REPORT);
                     return;
                 }
 

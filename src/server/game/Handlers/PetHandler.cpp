@@ -387,7 +387,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
             SpellCastResult result = spell->CheckPetCast(unit_target);
 
             //auto turn to target unless possessed
-            if (result == SPELL_FAILED_UNIT_NOT_INFRONT && !pet->isPossessed() && !pet->IsVehicle())
+            if (result == SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT && !pet->isPossessed() && !pet->IsVehicle())
             {
                 if (unit_target)
                 {
@@ -406,10 +406,10 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     if (Player* player = powner->ToPlayer())
                         pet->SendUpdateToPlayer(player);
 
-                result = SPELL_CAST_OK;
+                result = SpellCastResult::SPELL_CAST_OK;
             }
 
-            if (result == SPELL_CAST_OK)
+            if (result == SpellCastResult::SPELL_CAST_OK)
             {
                 pet->ToCreature()->AddCreatureSpellCooldown(spellid);
 
@@ -860,7 +860,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     SpellCastResult result = spell->CheckPetCast(NULL);
 
-    if (result == SPELL_CAST_OK)
+    if (result == SpellCastResult::SPELL_CAST_OK)
     {
         if (Creature* creature = caster->ToCreature())
         {

@@ -500,8 +500,8 @@ public:
             Skyfire::WorldObjectSearcher<Skyfire::AnyDeadUnitSpellTargetInRangeCheck> searcher(caster, result, check);
             caster->GetMap()->VisitFirstFound(caster->m_positionX, caster->m_positionY, max_range, searcher);
             if (!result)
-                return SPELL_FAILED_NO_EDIBLE_CORPSES;
-            return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_FAILED_NO_EDIBLE_CORPSES;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -697,30 +697,30 @@ public:
         {
             Unit* caster = GetCaster();
             if (caster->GetTypeId() != TypeID::TYPEID_PLAYER)
-                return SPELL_FAILED_DONT_REPORT;
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
 
             if (!GetExplTargetUnit())
-                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
             if (Creature* target = GetExplTargetUnit()->ToCreature())
             {
                 if (target->getLevel() > caster->getLevel())
-                    return SPELL_FAILED_HIGHLEVEL;
+                    return SpellCastResult::SPELL_FAILED_HIGHLEVEL;
 
                 // use SMSG_PET_TAME_FAILURE?
                 if (!target->GetCreatureTemplate()->IsTameable(caster->ToPlayer()->CanTameExoticPets()))
-                    return SPELL_FAILED_BAD_TARGETS;
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
                 if (caster->GetPetGUID())
-                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                    return SpellCastResult::SPELL_FAILED_ALREADY_HAVE_SUMMON;
 
                 if (caster->GetCharmGUID())
-                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+                    return SpellCastResult::SPELL_FAILED_ALREADY_HAVE_CHARM;
             }
             else
-                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() OVERRIDE

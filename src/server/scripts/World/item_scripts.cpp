@@ -68,7 +68,7 @@ public:
                 break;
             case 34475:
                 if (const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(SPELL_ARCANE_CHARGES))
-                    Spell::SendCastResult(player, spellInfo, 1, SPELL_FAILED_NOT_ON_GROUND);
+                    Spell::SendCastResult(player, spellInfo, 1, SpellCastResult::SPELL_FAILED_NOT_ON_GROUND);
                 break;
         }
 
@@ -277,7 +277,7 @@ public:
         if (!player->GetTransport() || player->GetAreaId() != AREA_ID_SHATTERED_STRAITS)
         {
             if (const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(SPELL_PETROV_BOMB))
-                Spell::SendCastResult(player, spellInfo, 1, SPELL_FAILED_NOT_HERE);
+                Spell::SendCastResult(player, spellInfo, 1, SpellCastResult::SPELL_FAILED_NOT_HERE);
 
             return true;
         }

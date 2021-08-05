@@ -852,10 +852,10 @@ public:
         {
             if (Unit* target = GetExplTargetUnit())
                 if (target->GetEntry() == NPC_LUCKY_WILHELM)
-                    return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_CAST_OK;
 
             SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_TARGET_WILHELM);
-            return SPELL_FAILED_CUSTOM_ERROR;
+            return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)

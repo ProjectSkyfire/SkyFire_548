@@ -627,7 +627,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
 
             SpellCastResult CheckCast()
             {
-                return GetCaster()->GetAI()->SelectTarget(SELECT_TARGET_RANDOM, 0, BoneSpikeTargetSelector(GetCaster()->GetAI())) ? SPELL_CAST_OK : SPELL_FAILED_NO_VALID_TARGETS;
+                return GetCaster()->GetAI()->SelectTarget(SELECT_TARGET_RANDOM, 0, BoneSpikeTargetSelector(GetCaster()->GetAI())) ? SpellCastResult::SPELL_CAST_OK : SpellCastResult::SPELL_FAILED_NO_VALID_TARGETS;
             }
 
             void HandleSpikes(SpellEffIndex effIndex)

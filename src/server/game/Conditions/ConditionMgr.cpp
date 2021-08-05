@@ -833,7 +833,7 @@ void ConditionMgr::LoadConditions(bool isReload)
         cond->ConditionValue2           = fields[8].GetUInt32();
         cond->ConditionValue3           = fields[9].GetUInt32();
         cond->NegativeCondition         = fields[10].GetUInt8();
-        cond->ErrorType                 = fields[11].GetUInt32();
+        cond->ErrorType                 = SpellCastResult(fields[11].GetUInt32());
         cond->ErrorTextId               = fields[12].GetUInt32();
         cond->ScriptId                  = sObjectMgr->GetScriptId(fields[13].GetCString());
 
@@ -912,13 +912,13 @@ void ConditionMgr::LoadConditions(bool isReload)
             continue;
         }
 
-        if (cond->ErrorType && cond->SourceType != CONDITION_SOURCE_TYPE_SPELL)
+        if ((cond->ErrorType != SpellCastResult::SPELL_FAILED_SUCCESS) && cond->SourceType != CONDITION_SOURCE_TYPE_SPELL)
         {
             SF_LOG_ERROR("sql.sql", "Condition type %u entry %i can't have ErrorType (%u), set to 0!", uint32(cond->SourceType), cond->SourceEntry, cond->ErrorType);
-            cond->ErrorType = 0;
+            cond->ErrorType = SpellCastResult::SPELL_FAILED_SUCCESS;
         }
 
-        if (cond->ErrorTextId && !cond->ErrorType)
+        if (cond->ErrorTextId && (cond->ErrorType == SpellCastResult::SPELL_FAILED_SUCCESS))
         {
             SF_LOG_ERROR("sql.sql", "Condition type %u entry %i has any ErrorType, ErrorTextId (%u) is set, set to 0!", uint32(cond->SourceType), cond->SourceEntry, cond->ErrorTextId);
             cond->ErrorTextId = 0;

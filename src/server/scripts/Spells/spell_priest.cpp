@@ -410,8 +410,8 @@ public:
             Player* caster = GetCaster()->ToPlayer();
             if (Unit* target = GetExplTargetUnit())
                 if (!caster->IsFriendlyTo(target) && !caster->IsValidAttackTarget(target))
-                    return SPELL_FAILED_BAD_TARGETS;
-            return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() OVERRIDE

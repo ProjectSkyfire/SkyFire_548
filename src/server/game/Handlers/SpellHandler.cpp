@@ -1054,7 +1054,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // If the vehicle creature does not have the spell but it allows the passenger to cast own spells
         // change caster to player and let him cast
-        if (!_player->IsOnVehicle(caster) || spellInfo->CheckVehicle(_player) != SPELL_CAST_OK)
+        if (!_player->IsOnVehicle(caster) || spellInfo->CheckVehicle(_player) != SpellCastResult::SPELL_CAST_OK)
         {
             recvPacket.rfinish(); // prevent spam at ignore packet
             return;

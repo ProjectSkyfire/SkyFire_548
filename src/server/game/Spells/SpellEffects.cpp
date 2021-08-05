@@ -1860,7 +1860,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     int32 skillValue;
 
     SpellCastResult res = CanOpenLock(effIndex, lockId, skillId, reqSkillValue, skillValue);
-    if (res != SPELL_CAST_OK)
+    if (res != SpellCastResult::SPELL_CAST_OK)
     {
         SendCastResult(res);
         return;
@@ -2925,7 +2925,7 @@ void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)
     if (!unitTarget || !unitTarget->CanHaveThreatList()
         || unitTarget->GetVictim() == m_caster)
     {
-        SendCastResult(SPELL_FAILED_DONT_REPORT);
+        SendCastResult(SpellCastResult::SPELL_FAILED_DONT_REPORT);
         return;
     }
 
@@ -3954,14 +3954,14 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetAreaId());
     if (casterAreaEntry && !(casterAreaEntry->m_flags & AREA_FLAG_ALLOW_DUELS))
     {
-        SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
+        SendCastResult(SpellCastResult::SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
     }
 
     AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetAreaId());
     if (targetAreaEntry && !(targetAreaEntry->m_flags & AREA_FLAG_ALLOW_DUELS))
     {
-        SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
+        SendCastResult(SpellCastResult::SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
     }
 
@@ -4153,7 +4153,7 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
 
     if (minLevel && m_caster->getLevel() < minLevel)
     {
-        SendCastResult(SPELL_FAILED_GLYPH_SOCKET_LOCKED);
+        SendCastResult(SpellCastResult::SPELL_FAILED_GLYPH_SOCKET_LOCKED);
         return;
     }
 
@@ -4166,7 +4166,7 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
             {
                 if (newGlyphProperties->TypeFlags != newGlyphSlot->TypeFlags)
                 {
-                    SendCastResult(SPELL_FAILED_INVALID_GLYPH);
+                    SendCastResult(SpellCastResult::SPELL_FAILED_INVALID_GLYPH);
                     return;                                 // glyph slot mismatch
                 }
             }

@@ -1547,8 +1547,8 @@ class spell_q11010_q11102_q11023_q11008_check_fly_mount : public SpellScriptLoad
                 Unit* caster = GetCaster();
                 // This spell will be cast only if caster has one of these auras
                 if (!(caster->HasAuraType(SPELL_AURA_FLY) || caster->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED)))
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-                return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void Register() OVERRIDE

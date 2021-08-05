@@ -8691,7 +8691,7 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
     if (apply)
     {
         // Cannot be used in this stance/form
-        if (spellInfo->CheckShapeshift(GetShapeshiftForm()) != SPELL_CAST_OK)
+        if (spellInfo->CheckShapeshift(GetShapeshiftForm()) != SpellCastResult::SPELL_CAST_OK)
             return;
 
         if (form_change)                                    // check aura active state from other form
@@ -8711,7 +8711,7 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
         if (form_change)                                     // check aura compatibility
         {
             // Cannot be used in this stance/form
-            if (spellInfo->CheckShapeshift(GetShapeshiftForm()) == SPELL_CAST_OK)
+            if (spellInfo->CheckShapeshift(GetShapeshiftForm()) == SpellCastResult::SPELL_CAST_OK)
                 return;                                     // and remove only not compatible at form change
         }
 
@@ -25303,7 +25303,7 @@ void Player::UpdateAreaDependentAuras(uint32 newArea)
     for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {
         // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
-        if (iter->second->GetSpellInfo()->CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SPELL_CAST_OK)
+        if (iter->second->GetSpellInfo()->CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult::SPELL_CAST_OK)
             RemoveOwnedAura(iter);
         else
             ++iter;

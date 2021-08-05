@@ -490,15 +490,15 @@ public:
                 if (!caster->IsFriendlyTo(target))
                 {
                     if (!caster->IsValidAttackTarget(target))
-                        return SPELL_FAILED_BAD_TARGETS;
+                        return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
                     if (!caster->isInFront(target))
-                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+                        return SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT;
                 }
             }
             else
-                return SPELL_FAILED_BAD_TARGETS;
-            return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() override
@@ -570,17 +570,17 @@ public:
         {
             Unit* caster = GetCaster();
             if (caster->GetTypeId() != TypeID::TYPEID_PLAYER)
-                return SPELL_FAILED_DONT_REPORT;
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
 
             if (Unit* target = GetExplTargetUnit())
             {
                 if (!target->IsFriendlyTo(caster) || target->getAttackers().empty())
-                    return SPELL_FAILED_BAD_TARGETS;
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
             }
             else
-                return SPELL_FAILED_BAD_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void HandleTriggerSpellLaunch(SpellEffIndex effIndex)
@@ -627,12 +627,12 @@ public:
         {
             Unit* caster = GetCaster();
             if (caster->GetTypeId() != TypeID::TYPEID_PLAYER)
-                return SPELL_FAILED_DONT_REPORT;
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
 
             if (!caster->HealthBelowPct(30))
-                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() override

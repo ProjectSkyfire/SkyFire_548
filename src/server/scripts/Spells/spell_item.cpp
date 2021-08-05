@@ -1368,10 +1368,10 @@ class spell_item_book_of_glyph_mastery : public SpellScriptLoader
                 if (HasDiscoveredAllSpells(GetSpellInfo()->Id, GetCaster()->ToPlayer()))
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_LEARNED_EVERYTHING);
-                    return SPELL_FAILED_CUSTOM_ERROR;
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
                 }
 
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
@@ -1419,10 +1419,10 @@ class spell_item_gift_of_the_harvester : public SpellScriptLoader
                 if (ghouls.size() >= MAX_GHOULS)
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_TOO_MANY_GHOULS);
-                    return SPELL_FAILED_CUSTOM_ERROR;
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
                 }
 
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void Register() OVERRIDE
@@ -1459,10 +1459,10 @@ class spell_item_map_of_the_geyser_fields : public SpellScriptLoader
                 if (caster->FindNearestCreature(NPC_SOUTH_SINKHOLE, 30.0f, true) ||
                     caster->FindNearestCreature(NPC_NORTHEAST_SINKHOLE, 30.0f, true) ||
                     caster->FindNearestCreature(NPC_NORTHWEST_SINKHOLE, 30.0f, true))
-                    return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_CAST_OK;
 
                 SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_BE_CLOSE_TO_SINKHOLE);
-                return SPELL_FAILED_CUSTOM_ERROR;
+                return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
             }
 
             void Register() OVERRIDE
@@ -1993,12 +1993,12 @@ class spell_item_demon_broiled_surprise : public SpellScriptLoader
             {
                 Player* player = GetCaster()->ToPlayer();
                 if (player->GetQuestStatus(QUEST_SUPER_HOT_STEW) != QUEST_STATUS_INCOMPLETE)
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
                 if (Creature* creature = player->FindNearestCreature(NPC_ABYSSAL_FLAMEBRINGER, 10, false))
                     if (creature->isDead())
-                        return SPELL_CAST_OK;
-                return SPELL_FAILED_NOT_HERE;
+                        return SpellCastResult::SPELL_CAST_OK;
+                return SpellCastResult::SPELL_FAILED_NOT_HERE;
             }
 
             void Register() OVERRIDE
@@ -2300,8 +2300,8 @@ class spell_item_rocket_boots : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 if (GetCaster()->IsInWater())
-                    return SPELL_FAILED_ONLY_ABOVEWATER;
-                return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_FAILED_ONLY_ABOVEWATER;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void Register() OVERRIDE

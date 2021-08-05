@@ -747,19 +747,19 @@ class spell_monk_touch_of_death : public SpellScriptLoader
                         if (caster->HasAura(SPELL_MONK_TOUCH_OF_DEATH_PLAYER))
                         {
                             if (target->HealthAbovePct(GetSpellInfo()->Effects [EFFECT_1].BasePoints))
-                                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                                return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                         }
                         else
-                            return SPELL_FAILED_TARGET_IS_PLAYER;
+                            return SpellCastResult::SPELL_FAILED_TARGET_IS_PLAYER;
                     }
                     else
                     {
                         if (target->GetHealth() > caster->GetHealth())
-                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                            return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                     }
                 }
             }
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register() override
@@ -2051,18 +2051,18 @@ class spell_monk_zen_flight_check : public SpellScriptLoader
             if (Player* _player = GetCaster()->ToPlayer())
             {
                 if (_player->GetMap()->IsBattlegroundOrArena())
-                    return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                    return SpellCastResult::SPELL_FAILED_NOT_IN_BATTLEGROUND;
 
                 // In Kalimdor or Eastern Kingdom with Flight Master's License
                 if (!_player->HasSpell(90267) && (_player->GetMapId() == 1 || _player->GetMapId() == 0))
-                    return SPELL_FAILED_NOT_HERE;
+                    return SpellCastResult::SPELL_FAILED_NOT_HERE;
 
                 // In Pandaria with Wisdom of the Four Winds
                 if (!_player->HasSpell(115913) && (_player->GetMapId() == 870))
-                    return SPELL_FAILED_NOT_HERE;
+                    return SpellCastResult::SPELL_FAILED_NOT_HERE;
             }
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register()
@@ -2186,9 +2186,9 @@ class spell_monk_spinning_fire_blossom_damage : public SpellScriptLoader
             if (Player* _player = GetCaster()->ToPlayer())
                 if (Unit* target = GetExplTargetUnit())
                     if (_player->IsFriendlyTo(target))
-                        return SPELL_FAILED_BAD_TARGETS;
+                        return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void HandleAfterHit()
@@ -2765,8 +2765,8 @@ class spell_monk_energizing_brew : public SpellScriptLoader
         SpellCastResult CheckFight()
         {
             if (!GetCaster()->IsInCombat())
-                return SPELL_FAILED_CASTER_AURASTATE;
-            return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_FAILED_CASTER_AURASTATE;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void Register()

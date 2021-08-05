@@ -2869,7 +2869,7 @@ void Unit::_UpdateAutoRepeatSpell()
     if (isAttackReady(WeaponAttackType::RANGED_ATTACK))
     {
         // Check if able to cast
-        if (m_currentSpells [CURRENT_AUTOREPEAT_SPELL]->CheckCast(true) != SPELL_CAST_OK)
+        if (m_currentSpells [CURRENT_AUTOREPEAT_SPELL]->CheckCast(true) != SpellCastResult::SPELL_CAST_OK)
         {
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
@@ -8329,8 +8329,8 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
     for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
     {
         if (Unit* magnet = (*itr)->GetBase()->GetCaster())
-            if (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-                && spellInfo->CheckTarget(this, magnet, false) == SPELL_CAST_OK
+            if (spellInfo->CheckExplicitTarget(this, magnet) == SpellCastResult::SPELL_CAST_OK
+                && spellInfo->CheckTarget(this, magnet, false) == SpellCastResult::SPELL_CAST_OK
                 && _IsValidAttackTarget(magnet, spellInfo))
             {
                 /// @todo handle this charge drop by proc in cast phase on explicit target
@@ -8348,8 +8348,8 @@ Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
     {
         if (Unit* magnet = (*i)->GetBase()->GetCaster())
             if (_IsValidAttackTarget(magnet, spellInfo) && magnet->IsWithinLOSInMap(this)
-                && (!spellInfo || (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-                && spellInfo->CheckTarget(this, magnet, false) == SPELL_CAST_OK)))
+                && (!spellInfo || (spellInfo->CheckExplicitTarget(this, magnet) == SpellCastResult::SPELL_CAST_OK
+                && spellInfo->CheckTarget(this, magnet, false) == SpellCastResult::SPELL_CAST_OK)))
                 if (roll_chance_i((*i)->GetAmount()))
                 {
                     (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);

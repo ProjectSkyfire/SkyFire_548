@@ -363,8 +363,8 @@ public:
         SpellCastResult CheckCast()
         {
             if (int32(GetCaster()->GetHealth()) > int32(GetCaster()->CountPctFromMaxHealth(GetSpellInfo()->Effects[EFFECT_2].CalcValue())))
-                return SPELL_CAST_OK;
-            return SPELL_FAILED_FIZZLE;
+                return SpellCastResult::SPELL_CAST_OK;
+            return SpellCastResult::SPELL_FAILED_FIZZLE;
         }
 
         void Register() OVERRIDE
@@ -601,9 +601,9 @@ public:
 
             // Soul Swap Exhale can't be cast on the same target than Soul Swap
             if (swapTarget && currentTarget && swapTarget == currentTarget)
-                return SPELL_FAILED_BAD_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void OnEffectHit(SpellEffIndex /*effIndex*/)

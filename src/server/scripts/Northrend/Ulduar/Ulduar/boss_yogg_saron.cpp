@@ -3079,12 +3079,12 @@ class spell_yogg_saron_in_the_maws_of_the_old_god : public SpellScriptLoader    
                         if (yogg->FindCurrentSpellBySpellId(SPELL_DEAFENING_ROAR))
                         {
                             if (GetCaster()->GetDistance(yogg) > 20.0f)
-                                return SPELL_FAILED_OUT_OF_RANGE;
+                                return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
                             else
-                                return SPELL_CAST_OK;
+                                return SpellCastResult::SPELL_CAST_OK;
                         }
 
-                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
             }
 
             void Register() OVERRIDE

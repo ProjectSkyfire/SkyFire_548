@@ -590,7 +590,7 @@ SpellInfo const* SpellScript::GetTriggeringSpell()
 void SpellScript::FinishCast(SpellCastResult result)
 {
     m_spell->SendCastResult(result);
-    m_spell->finish(result == SPELL_CAST_OK);
+    m_spell->finish(result == SpellCastResult::SPELL_CAST_OK);
 }
 
 void SpellScript::SetCustomCastResultMessage(SpellCustomErrors result)

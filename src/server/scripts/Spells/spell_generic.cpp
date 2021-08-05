@@ -238,8 +238,8 @@ class spell_gen_allow_cast_from_item_only : public SpellScriptLoader
             SpellCastResult CheckRequirement()
             {
                 if (!GetCastItem())
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-                return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void Register() OVERRIDE
@@ -460,9 +460,9 @@ class spell_gen_bandage : public SpellScriptLoader
                 if (Unit* target = GetExplTargetUnit())
                 {
                     if (target->HasAura(SPELL_RECENTLY_BANDAGED))
-                        return SPELL_FAILED_TARGET_AURASTATE;
+                        return SpellCastResult::SPELL_FAILED_TARGET_AURASTATE;
                 }
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void HandleScript()
@@ -699,8 +699,8 @@ class spell_gen_cannibalize : public SpellScriptLoader
                 Skyfire::WorldObjectSearcher<Skyfire::AnyDeadUnitSpellTargetInRangeCheck> searcher(caster, result, check);
                 caster->GetMap()->VisitFirstFound(caster->m_positionX, caster->m_positionY, max_range, searcher);
                 if (!result)
-                    return SPELL_FAILED_NO_EDIBLE_CORPSES;
-                return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_FAILED_NO_EDIBLE_CORPSES;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -2732,10 +2732,10 @@ class spell_gen_profession_research : public SpellScriptLoader
                 if (HasDiscoveredAllSpells(GetSpellInfo()->Id, GetCaster()->ToPlayer()))
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_NOTHING_TO_DISCOVER);
-                    return SPELL_FAILED_CUSTOM_ERROR;
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
                 }
 
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
@@ -2885,17 +2885,17 @@ class spell_gen_two_forms : public SpellScriptLoader
                 if (GetCaster()->IsInCombat())
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_CANT_TRANSFORM);
-                    return SPELL_FAILED_CUSTOM_ERROR;
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
                 }
 
                 // Player cannot transform to human form if he is forced to be worgen for some reason (Darkflight)
                 if (GetCaster()->GetAuraEffectsByType(SPELL_AURA_WORGEN_ALTERED_FORM).size() > 1)
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_CANT_TRANSFORM);
-                    return SPELL_FAILED_CUSTOM_ERROR;
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
                 }
 
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void HandleTransform(SpellEffIndex effIndex)
@@ -3126,10 +3126,10 @@ class spell_gen_summon_tournament_mount : public SpellScriptLoader
                 if (!GetCaster()->HasAura(SPELL_LANCE_EQUIPPED))
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_HAVE_LANCE_EQUIPPED);
-                    return SPELL_FAILED_CUSTOM_ERROR;
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
                 }
 
-                return SPELL_CAST_OK;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void Register() OVERRIDE
@@ -3480,8 +3480,8 @@ class spell_gen_wg_water : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 if (!GetSpellInfo()->CheckTargetCreatureType(GetCaster()))
-                    return SPELL_FAILED_DONT_REPORT;
-                return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+                return SpellCastResult::SPELL_CAST_OK;
             }
 
             void Register() OVERRIDE
