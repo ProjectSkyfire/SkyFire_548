@@ -65,8 +65,7 @@ enum DeathKnightSpells
 class spell_dk_gorefiends_grasp : public SpellScriptLoader
 {
 public:
-    spell_dk_gorefiends_grasp() : SpellScriptLoader("spell_dk_gorefiends_grasp")
-    { }
+    spell_dk_gorefiends_grasp() : SpellScriptLoader("spell_dk_gorefiends_grasp") { }
 
     class spell_dk_gorefiends_grasp_SpellScript : public SpellScript
     {
@@ -140,8 +139,7 @@ public:
 class spell_dk_runic_empowerment : public SpellScriptLoader
 {
 public:
-    spell_dk_runic_empowerment() : SpellScriptLoader("spell_dk_runic_empowerment")
-    { }
+    spell_dk_runic_empowerment() : SpellScriptLoader("spell_dk_runic_empowerment") { }
 
     class spell_dk_runic_empowerment_SpellScript : public SpellScript
     {
@@ -188,8 +186,7 @@ public:
 class spell_dk_runic_corruption : public SpellScriptLoader
 {
 public:
-    spell_dk_runic_corruption() : SpellScriptLoader("spell_dk_runic_corruption")
-    { }
+    spell_dk_runic_corruption() : SpellScriptLoader("spell_dk_runic_corruption") { }
 
     class spell_dk_runic_corruption_SpellScript : public SpellScript
     {
@@ -229,8 +226,7 @@ public:
 class spell_dk_raise_dead : public SpellScriptLoader
 {
 public:
-    spell_dk_raise_dead() : SpellScriptLoader("spell_dk_raise_dead")
-    { }
+    spell_dk_raise_dead() : SpellScriptLoader("spell_dk_raise_dead") { }
 
     class spell_dk_raise_dead_SpellScript : public SpellScript
     {
@@ -263,14 +259,11 @@ public:
 class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
 {
 public:
-    spell_dk_anti_magic_shell_raid() : SpellScriptLoader("spell_dk_anti_magic_shell_raid")
-    { }
+    spell_dk_anti_magic_shell_raid() : SpellScriptLoader("spell_dk_anti_magic_shell_raid") { }
 
     class spell_dk_anti_magic_shell_raid_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_dk_anti_magic_shell_raid_AuraScript);
-
-        uint32 absorbPct;
 
         bool Load() OVERRIDE
         {
@@ -294,6 +287,8 @@ public:
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_shell_raid_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_raid_AuraScript::Absorb, EFFECT_0);
         }
+    private:
+        uint32 absorbPct = 0;
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
@@ -306,14 +301,12 @@ public:
 class spell_dk_anti_magic_shell_self : public SpellScriptLoader
 {
 public:
-    spell_dk_anti_magic_shell_self() : SpellScriptLoader("spell_dk_anti_magic_shell_self")
-    { }
+    spell_dk_anti_magic_shell_self() : SpellScriptLoader("spell_dk_anti_magic_shell_self") { }
 
     class spell_dk_anti_magic_shell_self_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_dk_anti_magic_shell_self_AuraScript);
 
-        uint32 absorbPct, hpPct;
         bool Load() OVERRIDE
         {
             absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
@@ -353,6 +346,9 @@ public:
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_self_AuraScript::Absorb, EFFECT_0);
             AfterEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_self_AuraScript::Trigger, EFFECT_0);
         }
+    private:
+        uint32 absorbPct = 0;
+        uint32 hpPct = 0;
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
@@ -365,14 +361,11 @@ public:
 class spell_dk_anti_magic_zone : public SpellScriptLoader
 {
 public:
-    spell_dk_anti_magic_zone() : SpellScriptLoader("spell_dk_anti_magic_zone")
-    { }
+    spell_dk_anti_magic_zone() : SpellScriptLoader("spell_dk_anti_magic_zone") { }
 
     class spell_dk_anti_magic_zone_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_dk_anti_magic_zone_AuraScript);
-
-        uint32 absorbPct;
 
         bool Load() OVERRIDE
         {
@@ -405,6 +398,8 @@ public:
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_zone_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_zone_AuraScript::Absorb, EFFECT_0);
         }
+    private:
+        uint32 absorbPct = 0;
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
@@ -417,8 +412,7 @@ public:
 class spell_dk_blood_boil : public SpellScriptLoader
 {
 public:
-    spell_dk_blood_boil() : SpellScriptLoader("spell_dk_blood_boil")
-    { }
+    spell_dk_blood_boil() : SpellScriptLoader("spell_dk_blood_boil") { }
 
     class spell_dk_blood_boil_SpellScript : public SpellScript
     {
@@ -451,7 +445,8 @@ public:
             AfterHit += SpellHitFn(spell_dk_blood_boil_SpellScript::HandleAfterHit);
         }
 
-        bool _executed;
+    private:
+        bool _executed = false;
     };
 
     SpellScript* GetSpellScript() const OVERRIDE
@@ -464,8 +459,7 @@ public:
 class spell_dk_blood_gorged : public SpellScriptLoader
 {
 public:
-    spell_dk_blood_gorged() : SpellScriptLoader("spell_dk_blood_gorged")
-    { }
+    spell_dk_blood_gorged() : SpellScriptLoader("spell_dk_blood_gorged") { }
 
     class spell_dk_blood_gorged_AuraScript : public AuraScript
     {
@@ -503,7 +497,7 @@ public:
         }
 
     private:
-        Unit* _procTarget;
+        Unit* _procTarget = NULL;
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
@@ -516,8 +510,7 @@ public:
 class spell_dk_death_coil : public SpellScriptLoader
 {
 public:
-    spell_dk_death_coil() : SpellScriptLoader("spell_dk_death_coil")
-    { }
+    spell_dk_death_coil() : SpellScriptLoader("spell_dk_death_coil") { }
 
     class spell_dk_death_coil_SpellScript : public SpellScript
     {
@@ -580,8 +573,7 @@ public:
 class spell_dk_death_gate : public SpellScriptLoader
 {
 public:
-    spell_dk_death_gate() : SpellScriptLoader("spell_dk_death_gate")
-    { }
+    spell_dk_death_gate() : SpellScriptLoader("spell_dk_death_gate") { }
 
     class spell_dk_death_gate_SpellScript : public SpellScript
     {
@@ -622,8 +614,7 @@ public:
 class spell_dk_death_grip : public SpellScriptLoader
 {
 public:
-    spell_dk_death_grip() : SpellScriptLoader("spell_dk_death_grip")
-    { }
+    spell_dk_death_grip() : SpellScriptLoader("spell_dk_death_grip") { }
 
     class spell_dk_death_grip_SpellScript : public SpellScript
     {
@@ -656,8 +647,7 @@ public:
 class spell_dk_death_pact : public SpellScriptLoader
 {
 public:
-    spell_dk_death_pact() : SpellScriptLoader("spell_dk_death_pact")
-    { }
+    spell_dk_death_pact() : SpellScriptLoader("spell_dk_death_pact") { }
 
     class spell_dk_death_pact_SpellScript : public SpellScript
     {
@@ -713,8 +703,7 @@ public:
 class spell_dk_death_strike : public SpellScriptLoader
 {
 public:
-    spell_dk_death_strike() : SpellScriptLoader("spell_dk_death_strike")
-    { }
+    spell_dk_death_strike() : SpellScriptLoader("spell_dk_death_strike") { }
 
     class spell_dk_death_strike_SpellScript : public SpellScript
     {
@@ -767,8 +756,7 @@ public:
 class spell_dk_death_strike_enabler : public SpellScriptLoader
 {
 public:
-    spell_dk_death_strike_enabler() : SpellScriptLoader("spell_dk_death_strike_enabler")
-    { }
+    spell_dk_death_strike_enabler() : SpellScriptLoader("spell_dk_death_strike_enabler") { }
 
     class spell_dk_death_strike_enabler_AuraScript : public AuraScript
     {
@@ -828,8 +816,8 @@ public:
             OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_dk_death_strike_enabler_AuraScript::Update, EFFECT_0, SPELL_AURA_DUMMY);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_death_strike_enabler_AuraScript::HandleCalcAmount, EFFECT_0, SPELL_AURA_DUMMY);
         }
-
-        uint32 _damagePerSecond[5];
+    private:
+        uint32 _damagePerSecond[5] = { };
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
@@ -842,8 +830,7 @@ public:
 class spell_dk_ghoul_explode : public SpellScriptLoader
 {
 public:
-    spell_dk_ghoul_explode() : SpellScriptLoader("spell_dk_ghoul_explode")
-    { }
+    spell_dk_ghoul_explode() : SpellScriptLoader("spell_dk_ghoul_explode") { }
 
     class spell_dk_ghoul_explode_SpellScript : public SpellScript
     {
@@ -881,8 +868,7 @@ public:
 class spell_dk_icebound_fortitude : public SpellScriptLoader
 {
 public:
-    spell_dk_icebound_fortitude() : SpellScriptLoader("spell_dk_icebound_fortitude")
-    { }
+    spell_dk_icebound_fortitude() : SpellScriptLoader("spell_dk_icebound_fortitude") { }
 
     class spell_dk_icebound_fortitude_AuraScript : public AuraScript
     {
@@ -931,8 +917,7 @@ public:
 class spell_dk_necrotic_strike : public SpellScriptLoader
 {
 public:
-    spell_dk_necrotic_strike() : SpellScriptLoader("spell_dk_necrotic_strike")
-    { }
+    spell_dk_necrotic_strike() : SpellScriptLoader("spell_dk_necrotic_strike") { }
 
     class spell_dk_necrotic_strike_AuraScript : public AuraScript
     {
@@ -960,8 +945,7 @@ public:
 class spell_dk_rune_tap_party : public SpellScriptLoader
 {
 public:
-    spell_dk_rune_tap_party() : SpellScriptLoader("spell_dk_rune_tap_party")
-    { }
+    spell_dk_rune_tap_party() : SpellScriptLoader("spell_dk_rune_tap_party") { }
 
     class spell_dk_rune_tap_party_SpellScript : public SpellScript
     {
@@ -988,8 +972,7 @@ public:
 class spell_dk_scent_of_blood : public SpellScriptLoader
 {
 public:
-    spell_dk_scent_of_blood() : SpellScriptLoader("spell_dk_scent_of_blood")
-    { }
+    spell_dk_scent_of_blood() : SpellScriptLoader("spell_dk_scent_of_blood") { }
 
     class spell_dk_scent_of_blood_AuraScript : public AuraScript
     {
@@ -1030,7 +1013,6 @@ public:
     class spell_dk_scourge_strike_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
-        float multiplier;
 
         bool Load() OVERRIDE
         {
@@ -1073,6 +1055,8 @@ public:
             OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
         }
+    private:
+        float multiplier = 0.0f;
     };
 
     SpellScript* GetSpellScript() const OVERRIDE
@@ -1085,8 +1069,7 @@ public:
 class spell_dk_vampiric_blood : public SpellScriptLoader
 {
 public:
-    spell_dk_vampiric_blood() : SpellScriptLoader("spell_dk_vampiric_blood")
-    { }
+    spell_dk_vampiric_blood() : SpellScriptLoader("spell_dk_vampiric_blood") { }
 
     class spell_dk_vampiric_blood_AuraScript : public AuraScript
     {
