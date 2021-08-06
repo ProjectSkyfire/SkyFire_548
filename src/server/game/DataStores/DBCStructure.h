@@ -883,11 +883,10 @@ struct ChrRacesEntry
 
 struct ChrPowerTypesEntry
 {
-   uint32 entry;                                               // 0
+   //uint32 entry;                                             // 0
    uint32 classId;                                             // 1
    uint32 power;                                               // 2
 };
-
 
 struct ChrSpecializationEntry
 {
@@ -898,7 +897,7 @@ struct ChrSpecializationEntry
     // uint32 unk                                           // 4 - prolly MasterySpellId[1] - always 0
     uint32 TabPage;                                         // 5
     uint32 PetTabPage;                                      // 6
-    uint32 RoleMask;                                        // 7
+    //uint32 RoleMask;                                      // 7
     // uint32 iconId                                        // 8
     // uint32 unk1                                          // 9
     // uint32 unk2                                          // 10
@@ -930,7 +929,7 @@ struct CinematicSequencesEntry
 
 struct CreatureDisplayInfoEntry
 {
-    uint32      Displayid;                                  // 0        m_ID
+    //uint32      Displayid;                                // 0        m_ID
     uint32      ModelId;                                    // 1        m_modelID
                                                             // 2        m_soundID
                                                             // 3        m_extendedDisplayInfoID
@@ -966,7 +965,7 @@ struct CreatureFamilyEntry
 
 struct CreatureModelDataEntry
 {
-    uint32 Id;
+    //uint32 Id;
     //uint32 Flags;
     //char* ModelPath
     //uint32 Unk1;
@@ -992,7 +991,7 @@ struct CreatureModelDataEntry
 
 struct CreatureSpellDataEntry
 {
-    uint32    ID;                                           // 0        m_ID
+    //uint32    ID;                                           // 0        m_ID
     uint32    spellId[MAX_CREATURE_SPELL_DATA_SLOT];        // 1-4      m_spells[4]
     //uint32    availability[MAX_CREATURE_SPELL_DATA_SLOT]; // 4-7      m_availability[4]
 };
@@ -1314,9 +1313,9 @@ union
     //uint32 unk;                                           // 6
     //uint32 unk;                                           // 7
     uint32 modifierTreeId;                                  // 8
-    uint32 completionFlag;                                  // 9
-    uint32 worldStateId;                                    // 10
-    uint32 worldStateValue;                                 // 11
+    //uint32 completionFlag;                                // 9
+    //uint32 worldStateId;                                  // 10
+    //uint32 worldStateValue;                               // 11
 };
 
 struct CriteriaTreeEntry
@@ -1325,20 +1324,10 @@ struct CriteriaTreeEntry
     uint32 criteriaID;                                      // 1
     uint32 criteriaCount;                                   // 2
     //uint32 unk;                                           // 3
-    uint32 op;                                              // 4
+    //uint32 op;                                            // 4
     uint32 parentID;                                        // 5
-    uint32 treeFlags;                                       // 6
-    char* name;                                             // 7
-};
-
-struct ModifierTreeEntry
-{
-    uint32 ID;                                              // 0
-    uint32 conditionType;                                   // 1
-    uint32 conditionValue[2];                               // 2 - 3
-    uint32 op;                                              // 4
-    // uint32 unk;                                          // 5
-    uint32 parent;                                          // 6
+    //uint32 treeFlags;                                     // 6
+    //char* name;                                           // 7
 };
 
 struct CurrencyTypesEntry
@@ -1348,8 +1337,8 @@ struct CurrencyTypesEntry
     //char* name;                                           // 2
     //char* iconName;                                       // 3
     //uint32 unk4;                                          // 4        all 0
-    uint32 HasSubstitution;                                 // 5        archaeology-related (?)
-    uint32 SubstitutionId;                                  // 6
+    //uint32 HasSubstitution;                               // 5        archaeology-related (?)
+    //uint32 SubstitutionId;                                // 6
     uint32 TotalCap;                                        // 7
     uint32 WeekCap;                                         // 8
     uint32 Flags;                                           // 9
@@ -1359,8 +1348,8 @@ struct CurrencyTypesEntry
 
 struct DestructibleModelDataEntry
 {
-    uint32  Id;
-    uint32  DamagedDisplayId;
+    //uint32  Id;
+    uint32  DamagedDisplayId; 
     //uint32  DamagedUnk1;
     //uint32  DamagedUnk2;
     //uint32  DamagedUnk3;
@@ -1374,7 +1363,7 @@ struct DestructibleModelDataEntry
     //uint32  RebuildingUnk2;
     //uint32  RebuildingUnk3;
     //uint32  RebuildingUnk4;
-    uint32  SmokeDisplayId;
+    //uint32  SmokeDisplayId;
     //uint32  SmokeUnk1;
     //uint32  SmokeUnk2;
     //uint32  SmokeUnk3;
@@ -1400,18 +1389,18 @@ struct DifficultyEntry
     //
     //
 };
-
+/*
 enum diffflag
 {
+    DIFFICULTY_FLAG_HEROIC = 0x01,
+    DIFFICULTY_FLAG_DEFAULT = 0x02,
     DIFFICULTY_FLAG_CAN_SELECT = 0x04, // Player can select this difficulty in dropdown menu
-    DIFFICULTY_FLAG_HEROIC = 0x05,
-    DIFFICULTY_FLAG_DEFAULT = 0x06,
-    DIFFICULTY_FLAG_CHALLENGE_MODE = 0x0D,
+    DIFFICULTY_FLAG_CHALLENGE_MODE = 0x08,
 };
-
+*/
 struct DungeonEncounterEntry
 {
-    uint32 id;                                              // 0        unique id
+    //uint32 id;                                            // 0        unique id
     uint32 mapId;                                           // 1        map id
     int32 difficulty;                                       // 2        instance mode
     //uint32 unk0;                                          // 3
@@ -1424,13 +1413,13 @@ struct DungeonEncounterEntry
 
 struct DurabilityCostsEntry
 {
-    uint32    Itemlvl;                                      // 0
+    //uint32    Itemlvl;                                    // 0
     uint32    multiplier[29];                               // 1-29
 };
 
 struct DurabilityQualityEntry
 {
-    uint32    Id;                                           // 0
+    //uint32    Id;                                         // 0
     float     quality_mod;                                  // 1
 };
 
@@ -1439,16 +1428,16 @@ struct EmotesEntry
     uint32  Id;                                             // 0
     //char* Name;                                           // 1, internal name
     //uint32 AnimationId;                                   // 2, ref to animationData
-    uint32  Flags;                                          // 3, bitmask, may be unit_flags
-    uint32  EmoteType;                                      // 4, Can be 0, 1 or 2 (determine how emote are shown)
-    uint32  UnitStandState;                                 // 5, uncomfirmed, may be enum UnitStandStateType
+    //uint32  Flags;                                          // 3, bitmask, may be unit_flags
+    //uint32  EmoteType;                                      // 4, Can be 0, 1 or 2 (determine how emote are shown)
+    //uint32  UnitStandState;                                 // 5, uncomfirmed, may be enum UnitStandStateType
     //uint32 SoundId;                                       // 6, ref to soundEntries
     //uint32 unk7                                           // 7
 };
 
 struct EmotesTextEntry
 {
-    uint32  Id;
+    //uint32  Id;
     uint32  textid;
 };
 
@@ -1467,7 +1456,7 @@ struct FactionEntry
     //uint32    spilloverRank_unk;                          // 22       It does not seem to be the max standing at which a faction outputs spillover ...so no idea
     char*       name;                                       // 23       m_name_lang
     //char*     description;                                // 24       m_description_lang
-    uint32      GroupExpansion;                             // 25       m_factionGroupExpansion
+    //uint32    GroupExpansion;                             // 25       m_factionGroupExpansion
     //uint      unk1                                        // 26 - Pandaria
     //uint      unk2                                        // 27 - Pandaria
 
@@ -1482,15 +1471,14 @@ struct FactionEntry
 
 struct FactionTemplateEntry
 {
-    uint32      ID;                                         // 0        m_ID
-    uint32      faction;                                    // 1        m_faction
-    uint32      factionFlags;                               // 2        m_flags
-    uint32      ourMask;                                    // 3        m_factionGroup
-    uint32      friendlyMask;                               // 4        m_friendGroup
-    uint32      hostileMask;                                // 5        m_enemyGroup
-    uint32      enemyFaction[MAX_FACTION_RELATIONS];        // 6        m_enemies[MAX_FACTION_RELATIONS]
-    uint32      friendFaction[MAX_FACTION_RELATIONS];       // 10       m_friend[MAX_FACTION_RELATIONS]
-    //-------------------------------------------------------  end structure
+    uint32 ID;                                              // 0    m_ID
+    uint32 faction;                                         // 1    m_faction
+    uint32 factionFlags;                                    // 2    m_flags
+    uint32 ourMask;                                         // 3    m_factionGroup
+    uint32 friendlyMask;                                    // 4    m_friendGroup
+    uint32 hostileMask;                                     // 5    m_enemyGroup
+    uint32 enemyFaction[MAX_FACTION_RELATIONS];             // 6    m_enemies[MAX_FACTION_RELATIONS]
+    uint32 friendFaction[MAX_FACTION_RELATIONS];            // 10   m_friend[MAX_FACTION_RELATIONS]
 
     // helpers
     bool IsFriendlyTo(FactionTemplateEntry const& entry) const
@@ -1536,26 +1524,26 @@ struct FactionTemplateEntry
 
 struct GameObjectDisplayInfoEntry
 {
-    uint32      Displayid;                                  // 0        m_ID
-    char* filename;                                         // 1
-    //uint32  unk1[10];                                     //2-11
-    float   minX;
-    float   minY;
-    float   minZ;
-    float   maxX;
-    float   maxY;
-    float   maxZ;
-    //uint32  transport;                                    //18
+    //uint32   Displayid;                                // 0    m_ID
+    //char*    filename;                                 // 1
+    //uint32 unk1[10];                                   //2-11
+    float    minX;
+    float    minY;
+    float    minZ;
+    float    maxX;
+    float    maxY;
+    float    maxZ;
+    //uint32  transport;                                 //18
 };
 
 struct GemPropertiesEntry
 {
-    uint32      ID;                                         // 0        m_id
+    //uint32      ID;                                         // 0        m_id
     uint32      spellitemenchantement;                      // 1        m_enchant_id
                                                             // 2        m_maxcount_inv
                                                             // 3        m_maxcount_item
     uint32      color;                                      // 4        m_type
-    uint32      minJewelCraftingSkill;                      // 5        m_minJewelCraftingSkill
+    //uint32      minJewelCraftingSkill;                      // 5        m_minJewelCraftingSkill
 };
 
 struct GlyphPropertiesEntry
@@ -2020,6 +2008,17 @@ struct MapDifficultyEntry
     uint32      resetTime;                                  // 4,       m_raidDuration in secs, 0 if no fixed reset time
     uint32      maxPlayers;                                 // 5,       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
     //char*       difficultyString;                         // 6        m_difficultystring
+};
+
+
+struct ModifierTreeEntry
+{
+    uint32 ID;                                              // 0
+    uint32 conditionType;                                   // 1
+    uint32 conditionValue[2];                               // 2 - 3
+    uint32 op;                                              // 4
+    // uint32 unk;                                          // 5
+    uint32 parent;                                          // 6
 };
 
 struct MountCapabilityEntry

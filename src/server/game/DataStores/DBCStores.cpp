@@ -1205,7 +1205,7 @@ MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId)
         if (!difficulty)
             continue;
 
-        if (difficulty->flags & 0x06)
+        if (difficulty->flags & 0x02)
             return &p.second;
     }
 
