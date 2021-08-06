@@ -57,7 +57,7 @@ struct BattlePetAbilityTurnEntry
     //uint32 Unk4;                                          // 4
     //uint32 Unk5;                                          // 5
 };
-*/
+
 struct BattlePetBreedQualityEntry
 {
     uint32 ID;                                              // 0
@@ -65,7 +65,7 @@ struct BattlePetBreedQualityEntry
     //uint32 Unk2;                                          // 2
     //uint32 Unk3;                                          // 3
 };
-/*
+
 struct BattlePetEffectPropertiesEntry
 {
     uint32 ID;                                              // 0
@@ -214,7 +214,7 @@ struct BattlePetAbilityStateEntry
 */
 struct BattlePetBreedStateEntry
 {
-    uint32 Id;                                              // 0
+    //uint32 Id;                                            // 0
     uint32 BreedId;                                         // 1 - battle pet breed id
     uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
     uint32 Value;                                           // 3 - value for state
@@ -224,20 +224,20 @@ typedef std::set<uint32> BattlePetBreedSet;
 
 struct BattlePetSpeciesEntry
 {
-    uint32 SpeciesId;                                       // 0 - battle pet species id
+    //uint32 SpeciesId;                                     // 0 - battle pet species id
     uint32 NpcId;                                           // 1 - npc id
-    uint32 IconId;                                          // 2 - icon id
+    //uint32 IconId;                                        // 2 - icon id
     uint32 SpellId;                                         // 3 - summon spell id (Spell.dbc)
-    uint32 FamilyId;                                        // 4 - battle pet family id
+    //uint32 FamilyId;                                      // 4 - battle pet family id
     //int32 Unk1;                                           // 5
     uint32 Flags;                                           // 6 - flags (see BattlePetSpeciesFlags enum)
-    LocalizedString* Description;                           // 7 - description text, contains method to obtain and cost
-    LocalizedString* Flavor;                                // 8 - flavor text
+    //LocalizedString* Description;                         // 7 - description text, contains method to obtain and cost
+    //LocalizedString* Flavor;                              // 8 - flavor text
 };
 
 struct BattlePetSpeciesStateEntry
 {
-    uint32 Id;                                              // 0
+    //uint32 Id;                                            // 0
     uint32 SpeciesId;                                       // 1 - battle pet species id (BattlePetSpecies.db2)
     uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
     int32 Modifier;                                         // 3 - modifier value for state
@@ -287,14 +287,14 @@ struct BroadcastTextEntry
 */
 struct ItemEntry
 {
-    uint32   ID;                                             // 0
+    //uint32   ID;                                             // 0
     uint32   Class;                                          // 1
     uint32   SubClass;                                       // 2
     int32    SoundOverrideSubclass;                          // 3
-    int32    Material;                                       // 4
+    //int32    Material;                                     // 4
     uint32   DisplayId;                                      // 5
     uint32   InventoryType;                                  // 6
-    uint32   Sheath;                                         // 7
+    //uint32   Sheath;                                       // 7
 };
 
 struct ItemCurrencyCostEntry
@@ -346,9 +346,9 @@ struct ItemSparseEntry
     int32      SpellCategoryCooldown[MAX_ITEM_PROTO_SPELLS]; // 94 - 98
     uint32     Bonding;                                      // 99
     LocalizedString* Name;                                   // 100
-    LocalizedString* Name2;                                  // 101
-    LocalizedString* Name3;                                  // 102
-    LocalizedString* Name4;                                  // 103
+    //LocalizedString* Name2;                                  // 101
+    //LocalizedString* Name3;                                  // 102
+    //LocalizedString* Name4;                                  // 103
     LocalizedString* Description;                            // 104
     uint32     PageText;                                     // 105
     uint32     LanguageID;                                   // 106
@@ -418,6 +418,7 @@ struct KeyChainEntry
 };
 
 // QuestPackageItem.db2
+/*
 struct QuestPackageItemEntry
 {
     uint32      ID;                                         // 0
@@ -425,7 +426,7 @@ struct QuestPackageItemEntry
     uint32      ItemID;                                     // 2
     uint32      Unk1;                                       // 3
     uint32      Unk2;                                       // 4
-};
+};*/
 /*
 // SceneScript.db2
 struct SceneScriptEntry

@@ -30,7 +30,7 @@
 //DB2Storage<BattlePetAbilityEntry>           sBattlePetAbilityStore(BattlePetAbilityfmt);
 //DB2Storage<BattlePetAbilityStateEntry>      sBattlePetAbilityStateStore(BattlePetAbilityStatefmt);
 //DB2Storage<BattlePetAbilityTurnEntry>       sBattlePetAbilityTurnStore(BattlePetAbilityTurnfmt);
-DB2Storage<BattlePetBreedQualityEntry>      sBattlePetBreedQualityStore(BattlePetBreedQualityfmt);
+//DB2Storage<BattlePetBreedQualityEntry>      sBattlePetBreedQualityStore(BattlePetBreedQualityfmt);
 DB2Storage<BattlePetBreedStateEntry>        sBattlePetBreedStateStore(BattlePetBreedStatefmt);
 //DB2Storage<BattlePetEffectPropertiesEntry>  sBattlePetEffectPropertiesStore(BattlePetEffectPropertiesfmt);
 DB2Storage<BattlePetSpeciesEntry>           sBattlePetSpeciesStore(BattlePetSpeciesfmt);
@@ -50,7 +50,7 @@ DB2Storage<ItemToBattlePetEntry>            sItemToBattlePetStore(ItemToBattlePe
 //DB2Storage<ItemToMountSpellEntry>           sItemToMountSpellStore(ItemToMountSpellfmt);
 //DB2Storage<ItemUpgradeEntry>                sItemUpgradeStore(ItemUpgradefmt);
 DB2Storage<KeyChainEntry>                   sKeyChainStore(KeyChainfmt);
-DB2Storage<QuestPackageItemEntry>           sQuestPackageItemStore(QuestPackageItemfmt);
+//DB2Storage<QuestPackageItemEntry>           sQuestPackageItemStore(QuestPackageItemfmt);
 //DB2Storage<RulesetItemUpgradeEntry>         sRulesetItemUpgradeStore(RulesetItemUpgradefmt);
 //DB2Storage<RulesetRaidLootUpgradeEntry>     sRulesetRaidLootUpgradeStore(RulesetRaidLootUpgradefmt);
 //DB2Storage<SceneScriptEntry>                sSceneScriptStore(SceneScriptfmt);
@@ -133,7 +133,7 @@ void LoadDB2Stores(std::string const& dataPath)
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityStateStore,    db2Path, "BattlePetAbilityState.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityStore,         db2Path, "BattlePetAbility.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityTurnStore,     db2Path, "BattlePetAbilityTurn.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedQualityStore,    db2Path, "BattlePetBreedQuality.db2");
+    //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedQualityStore,    db2Path, "BattlePetBreedQuality.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedStateStore,      db2Path, "BattlePetBreedState.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetEffectPropertiesStore,db2Path, "BattlePetEffectProperties.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStateStore,    db2Path, "BattlePetSpeciesState.db2");
@@ -153,7 +153,7 @@ void LoadDB2Stores(std::string const& dataPath)
     //LoadDB2(availableDb2Locales, bad_db2_files, sItemToMountSpellStore,         db2Path, "ItemToMountSpell.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sItemUpgradeStore,              db2Path, "ItemUpgrade.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sKeyChainStore,                 db2Path, "KeyChain.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sQuestPackageItemStore,         db2Path, "QuestPackageItem.db2");
+    //LoadDB2(availableDb2Locales, bad_db2_files, sQuestPackageItemStore,         db2Path, "QuestPackageItem.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sRulesetItemUpgradeStore,       db2Path, "RulesetItemUpgrade.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sRulesetRaidLootUpgradeStore,   db2Path, "RulesetRaidLootUpgrade.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sSceneScriptPackageMemberStore, db2Path, "SceneScriptPackageMember.db2");
