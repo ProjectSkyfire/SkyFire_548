@@ -23,25 +23,25 @@
 // x - skip<uint32>, X - skip<uint8>, s - char*, f - float, i - uint32, b - uint8, d - index (not included)
 // n - index (included), l - bool, p - field present in sql dbc, a - field absent in sql dbc
 
-char const Achievementfmt[] = "niixsxiixixxiii";
+char const Achievementfmt[] = "niixsxxixixxiii";
 //const std::string CustomAchievementfmt = "pppaaaapapaappa";
 //const std::string CustomAchievementIndex = "ID";
 //char const AchievementCriteriafmt[] = "niiiixiiiisiiiiixxiiiii";
-char const AreaTableEntryfmt[] = "iiinixxxxxxxisiiiiiffixxxxxxxx";
+char const AreaTableEntryfmt[] = "iiinixxxxxxxisiiiiifxxxxxxxxxx";
 char const AreaGroupEntryfmt[] = "niiiiiii";
 //char const AreaPOIEntryfmt[] = "niiiiiiiiiiiffixixxixxx";
 char const AreaTriggerEntryfmt[] = "nifffxxxfffffxxx";
-char const ArmorLocationfmt[] = "nfffff";
+char const ArmorLocationfmt[] = "dfffff";
 char const AuctionHouseEntryfmt[] = "niiix";
-char const BankBagSlotPricesEntryfmt[] = "ni";
+char const BankBagSlotPricesEntryfmt[] = "di";
 char const BannedAddOnsfmt[] = "nxxxxxxxxxx";
-char const BarberShopStyleEntryfmt[] = "nixxxiii";
-char const BattlemasterListEntryfmt[] = "niiiiiiiiiiiiiiiiixsiiiixxxxxx";
-char const CharStartOutfitEntryfmt[] = "dbbbXiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxii";
-char const CharTitlesEntryfmt[] = "nxsxix";
+char const BarberShopStyleEntryfmt[] = "dixxxiii";
+char const BattlemasterListEntryfmt[] = "niiiiiiiiiiiiiiiiixsiixxxxxxxx";
+char const CharStartOutfitEntryfmt[] = "dbbbXiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+char const CharTitlesEntryfmt[] = "dxsxix";
 char const ChatChannelsEntryfmt[] = "nixsx";
-char const ChrClassesEntryfmt[] = "nixsxxxixiiiixxxxx";
-char const ChrRacesEntryfmt[] = "nxixiixixxxxixsxxxxxxxxxxxxxxxxxxxxx";
+char const ChrClassesEntryfmt[] = "dixsxxxixiiiixxxxx";
+char const ChrRacesEntryfmt[] = "dxixiixxxxxxiisxxxxxxxxxxxxxxxxxxxxx";
 char const ChrClassesXPowerTypesfmt[] = "nii";
 char const CinematicSequencesEntryfmt[] = "nxxxxxxxxx";
 char const CreatureDisplayInfofmt[] = "nixxfxxxxxxxxxxxxxxx";

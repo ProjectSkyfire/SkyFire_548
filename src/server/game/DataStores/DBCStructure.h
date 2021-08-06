@@ -48,7 +48,7 @@ struct AchievementEntry
     //uint32 parentAchievement;                             // 3 its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
     char* name;                                             // 4
     //char* description;                                    // 5
-    uint32    categoryId;                                   // 6
+    //uint32    categoryId;                                 // 6
     uint32    points;                                       // 7 reward points
     //uint32 OrderInCategory;                               // 8
     uint32    flags;                                        // 9
@@ -661,8 +661,8 @@ struct AreaTableEntry
     uint32  m_FactionGroupMask;                             // 15
     uint32  m_LiquidType[4];                                // 16-19 liquid override by type
     float   m_MinElevation;                                 // 20,
-    float   m_AmbientMultiplier;                            // 21 client only?
-    uint32  m_LightId;                                      // 22
+    //float   m_AmbientMultiplier;                          // 21 client only?
+    //uint32  m_LightId;                                    // 22
     //uint32  m_MountFlags;                                 // 23 4.0.0 - Mounting related
     //uint32  m_UwIntroSound;                               // 24 4.0.0
     //uint32  m_UwZoneMusic;                                // 25 4.0.0
@@ -730,7 +730,7 @@ struct AreaTriggerEntry
 
 struct ArmorLocationEntry
 {
-  uint32    InventoryType;                                  // 0
+  //uint32    InventoryType;                                // 0
   float     Value[5];                                       // 1-5 multiplier for armor types (cloth...plate, no armor?)
 };
 
@@ -745,7 +745,7 @@ struct AuctionHouseEntry
 
 struct BankBagSlotPricesEntry
 {
-    uint32  ID;
+    //uint32  ID;
     uint32  price;
 };
 
@@ -760,7 +760,7 @@ struct BannedAddOnsEntry
 
 struct BarberShopStyleEntry
 {
-    uint32  Id;                                             // 0
+    //uint32  Id;                                           // 0
     uint32  type;                                           // 1 value 0 -> hair, value 2 -> facialhair
     //char*   name;                                         // 2        m_DisplayName_lang
     //uint32  unk_name;                                     // 3        m_Description_lang
@@ -779,8 +779,8 @@ struct BattlemasterListEntry
     char* name;                                             // 19
     uint32 maxGroupSize;                                    // 20 maxGroupSize, used for checking if queue as group
     uint32 HolidayWorldStateId;                             // 21 new 3.1
-    uint32 minLevel;                                        // 22, min level (sync with PvPDifficulty.dbc content)
-    uint32 maxLevel;                                        // 23, max level (sync with PvPDifficulty.dbc content)
+    //uint32 minLevel;                                        // 22, min level (sync with PvPDifficulty.dbc content)
+    //uint32 maxLevel;                                        // 23, max level (sync with PvPDifficulty.dbc content)
     //uint32 maxGroupSizeRated;                             // 24 4.0.1
     //uint32 unk;                                           // 25 - 4.0.6.13596
     //uint32 maxPlayers;                                    // 26 4.0.1
@@ -801,13 +801,13 @@ struct CharStartOutfitEntry
     int32 ItemId[MAX_OUTFIT_ITEMS];                         // 5-28
     //int32 ItemDisplayId[MAX_OUTFIT_ITEMS];                // 29-52 not required at server side
     //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 53-76 not required at server side
-    uint32 PetDisplayId;                                    // 77 Pet Model ID for starting pet
-    uint32 PetFamilyEntry;                                  // 78 Pet Family Entry for starting pet
+    //uint32 PetDisplayId;                                  // 77 Pet Model ID for starting pet
+    //uint32 PetFamilyEntry;                                // 78 Pet Family Entry for starting pet
 };
 
 struct CharTitlesEntry
 {
-    uint32  ID;                                             // 0, title ids, for example in Quest::GetCharTitleId()
+    //uint32  ID;                                           // 0, title ids, for example in Quest::GetCharTitleId()
     //uint32      unk1;                                     // 1 flags?
     char* name;                                             // 2        m_name_lang
     //char*       name2;                                    // 3        m_name1_lang
@@ -826,7 +826,7 @@ struct ChatChannelsEntry
 
 struct ChrClassesEntry
 {
-    uint32  ClassID;                                        // 0
+    //uint32  ClassID;                                      // 0
     uint32  powerType;                                      // 1        m_DisplayPower
                                                             // 2        m_petNameToken
     char* name;                                             // 3        m_name_lang
@@ -848,41 +848,37 @@ struct ChrClassesEntry
 
 struct ChrRacesEntry
 {
-    uint32 RaceID;                                          // 0
-    //uint32 unk0;                                          // 1
+    //uint32 RaceID;                                        // 0
+    //uint32 Flags;                                         // 1 0x4 canMount, 0x8 hasBald, 0x10 bindStartArea 0x80 ForceHDModel 0x400 ReputationBonus 0x4000 NoStartingWeapon
     uint32 FactionID;                                       // 2 facton template id
-    //uin32 unk1;                                           // 3
+    //uin32 ExplorationSoundID;                             // 3
     uint32 model_m;                                         // 4
     uint32 model_f;                                         // 5
-    //uint32 unk2;                                          // 6
-    uint32 TeamID;                                          // 7 (42-Neutral 7-Alliance 1-Horde)
-    //uint32 unk3;                                          // 8 (All 7)
-    //uint32 unk4;                                          // 9 (All 15007)
-    //uint32 unk5;                                          // 10 (All 1096)
-    //uint32 unk6;                                          // 11
+    //char* ClientPrefix;                                   // 6
+    //uint32 BaseLanguage;                                  // 7 (42-Neutral 7-Alliance 1-Horde)
+    //uint32 CreatureType;                                  // 8 (All 7)
+    //uint32 ResSickSpell;                                  // 9 (All 15007)
+    //uint32 SplashSoundID;                                 // 10 (All 1096)
+    //char* ClientFileString;                               // 11
     uint32 CinematicSequence;                               // 12 id from CinematicSequences.dbc
-    //uint32 m_charType;                                    // 13 (0 alliance, 1 horde, 2 neutral)
+    uint32 TeamID;                                          // 13 (0 alliance, 1 horde, 2 neutral)
     char* name;                                             // 14 m_name_lang used for DBC language detection/selection
     //char* nameFemale;                                     // 15 ""
     //char* nameNeutralGender;                              // 16 ""
     //uint32 m_facialHairCustomization[2]                   // 17-18
     //uint32 m_hairCustomization                            // 19
     //uint32 m_enemyRace;                                   // 20 m_enemyRace
-    //uint32 m_linkedRace;                                  // 21 (23 for worgens = Gilnean)
-    //uint32 unk7;                                          // 22 (Gilnean 3133)
-    //uint32 unk8;                                          // 23 (Gilnean 3134)
-    //uint32 unk9;                                          // 24 (All 1, Pandaren 2)
-    //uint32 defaultClassForRace                            // 25
-    //uint32 unk10;                                         // 26
-    //uint32 unk11;                                         // 27
-    //float unk12;                                          // 28
-    //uint32 unk13;                                         // 29 unused
-    //float unk14;                                          // 30
-    //float unk15;                                          // 31
-    //uint32 unk16;                                         // 32 unused
-    //float unk17;                                          // 33
-    //uint32 unk18;                                         // 34
-    //uint32 unk19;                                         // 35
+    //uint32 UnalteredVisualRaceID;                         // 21 (23 for worgens = Gilnean)
+    //uint32 UaMaleCreatureSoundDataID;                     // 22 (Gilnean 3133)
+    //uint32 UaFemaleCreatureSoundDataID;                   // 23 (Gilnean 3134)
+    //uint32 CharComponentTextureLayout;                    // 24 (All 1, Pandaren 2)
+    //uint32 DefaultClassID                                 // 25
+    //uint32 CreateScreenFileDataID;                        // 26
+    //uint32 SelectScreenFileDataID;                        // 27
+    //float MaleCustomizeOffset[3];                         // 28 - 30
+    //float FemaleCustomizeOffset[3];                       // 31 - 33
+    //uint32 NeutralRaceID;                                 // 34
+    //uint32 LowResScreenFileDataID;                        // 35
 };
 
 struct ChrPowerTypesEntry
