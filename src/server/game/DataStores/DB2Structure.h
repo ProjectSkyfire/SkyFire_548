@@ -31,7 +31,7 @@
 #endif
 
 // Structures used to access raw DB2 data and required packing to portability
-
+/*
 struct BattlePetAbilityEffectEntry
 {
     uint32 ID;                                              // 0
@@ -57,7 +57,7 @@ struct BattlePetAbilityTurnEntry
     //uint32 Unk4;                                          // 4
     //uint32 Unk5;                                          // 5
 };
-
+*/
 struct BattlePetBreedQualityEntry
 {
     uint32 ID;                                              // 0
@@ -65,7 +65,7 @@ struct BattlePetBreedQualityEntry
     //uint32 Unk2;                                          // 2
     //uint32 Unk3;                                          // 3
 };
-
+/*
 struct BattlePetEffectPropertiesEntry
 {
     uint32 ID;                                              // 0
@@ -176,13 +176,13 @@ struct RulesetRaidLootUpgradeEntry
     //uint32 Unk3;                                          // 3
     //uint32 Unk4;                                          // 4
 };
-
+*/
 struct SceneScriptPackageEntry
 {
     uint32 ID;                                              // 0
     //LocalizedString* Nane;                                // 1
 };
-
+/*
 struct SceneScriptPackageMemberEntry
 {
     uint32 ID;                                              // 0
@@ -211,7 +211,7 @@ struct BattlePetAbilityStateEntry
     uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
     uint32 Value;                                           // 3 - value for state
 };
-
+*/
 struct BattlePetBreedStateEntry
 {
     uint32 Id;                                              // 0
@@ -242,7 +242,7 @@ struct BattlePetSpeciesStateEntry
     uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
     int32 Modifier;                                         // 3 - modifier value for state
 };
-
+/*
 struct BattlePetSpeciesXAbilityEntry
 {
     uint32 Id;                                              // 0
@@ -259,7 +259,7 @@ struct BattlePetStateEntry
     LocalizedString* Name;                                  // 2 - name text
     uint32 Flags;                                           // 3 - flags
 };
-
+*/
 typedef std::map<uint32, uint16> BattlePetItemXSpeciesStore;
 
 struct ItemToBattlePetEntry
@@ -267,7 +267,7 @@ struct ItemToBattlePetEntry
     uint32 ItemId;                                          // 0 - item id
     uint32 SpeciesId;                                       // 1 - battle pet species id (BattlePetSpecies.db2)
 };
-
+/*
 struct BroadcastTextEntry
 {
     uint32   ID;                                             // 0
@@ -284,7 +284,7 @@ struct BroadcastTextEntry
     //uint32   Unk7;                                         // 11
     //uint32   Unk8;                                         // 12
 };
-
+*/
 struct ItemEntry
 {
     uint32   ID;                                             // 0
@@ -376,7 +376,7 @@ struct ItemSparseEntry
     int32      CurrencySubstitutionId;                       // 132
     int32      CurrencySubstitutionCount;                    // 133
 };
-
+/*
 struct ItemUpgradeEntry
 {
     uint32     UpgradeID;                                    // 0
@@ -386,7 +386,7 @@ struct ItemUpgradeEntry
     uint32     CurrencyType;                                 // 4 CurrencyType cost
     uint32     CurrencyCost;                                 // 5 CurrencyCost amount
 };
-
+*/
 #define MAX_ITEM_EXT_COST_ITEMS         5
 #define MAX_ITEM_EXT_COST_CURRENCIES    5
 
@@ -426,7 +426,7 @@ struct QuestPackageItemEntry
     uint32      Unk1;                                       // 3
     uint32      Unk2;                                       // 4
 };
-
+/*
 // SceneScript.db2
 struct SceneScriptEntry
 {
@@ -436,7 +436,7 @@ struct SceneScriptEntry
     uint32 m_prevScriptPartID;                               // 3         m_prevScriptPartID - Prev Script Part Id From Chain
     uint32 m_nextScriptPartID;                               // 4         m_nextScriptPartID - Next Script Part Id From Chain
 };
-
+*/
 #define MAX_SPELL_REAGENTS 8
 #define MAX_SPELL_REAGENTS2 10
 

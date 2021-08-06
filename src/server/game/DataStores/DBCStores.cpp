@@ -54,14 +54,14 @@ typedef std::map<WMOAreaTableTripple, WMOAreaTableEntry const*> WMOAreaInfoByTri
 
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 DBCStorage <AreaGroupEntry> sAreaGroupStore(AreaGroupEntryfmt);
-DBCStorage <AreaPOIEntry> sAreaPOIStore(AreaPOIEntryfmt);
+//DBCStorage <AreaPOIEntry> sAreaPOIStore(AreaPOIEntryfmt);
 static AreaFlagByAreaID sAreaFlagByAreaID;
 static AreaFlagByMapID sAreaFlagByMapID;                    // for instances without generated *.map files
 
 static WMOAreaInfoByTripple sWMOAreaInfoByTripple;
 
 DBCStorage <AchievementEntry> sAchievementStore(Achievementfmt);
-DBCStorage <AchievementCriteriaEntry> sAchievementCriteriaStore(AchievementCriteriafmt);
+//DBCStorage <AchievementCriteriaEntry> sAchievementCriteriaStore(AchievementCriteriafmt);
 DBCStorage <AreaTriggerEntry> sAreaTriggerStore(AreaTriggerEntryfmt);
 DBCStorage <ArmorLocationEntry> sArmorLocationStore(ArmorLocationfmt);
 DBCStorage <AuctionHouseEntry> sAuctionHouseStore(AuctionHouseEntryfmt);
@@ -134,7 +134,7 @@ DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore(ItemArmorQualit
 DBCStorage <ItemArmorShieldEntry>         sItemArmorShieldStore(ItemArmorShieldfmt);
 DBCStorage <ItemArmorTotalEntry>          sItemArmorTotalStore(ItemArmorTotalfmt);
 DBCStorage <ItemClassEntry>               sItemClassStore(ItemClassfmt);
-DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore(ItemBagFamilyfmt);
+//DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore(ItemBagFamilyfmt);
 DBCStorage <ItemDamageEntry>              sItemDamageAmmoStore(ItemDamagefmt);
 DBCStorage <ItemDamageEntry>              sItemDamageOneHandStore(ItemDamagefmt);
 DBCStorage <ItemDamageEntry>              sItemDamageOneHandCasterStore(ItemDamagefmt);
@@ -179,10 +179,10 @@ DBCStorage <QuestFactionRewEntry>  sQuestFactionRewardStore(QuestFactionRewardfm
 DBCStorage <QuestPOIPointEntry> sQuestPOIPointStore(QuestPOIPointfmt);
 DBCStorage <RandomPropertiesPointsEntry> sRandomPropertiesPointsStore(RandomPropertiesPointsfmt);
 
-DBCStorage <ResearchBranchEntry>  sResearchBranchStore(ResearchBranchfmt);
-DBCStorage <ResearchProjectEntry> sResearchProjectStore(ResearchProjectfmt);
-DBCStorage <ResearchSiteEntry>    sResearchSiteStore(ResearchSitefmt);
-static DigsitePOIPolygonContainer sDigsitePOIPolygons;
+//DBCStorage <ResearchBranchEntry>  sResearchBranchStore(ResearchBranchfmt);
+//DBCStorage <ResearchProjectEntry> sResearchProjectStore(ResearchProjectfmt);
+//DBCStorage <ResearchSiteEntry>    sResearchSiteStore(ResearchSitefmt);
+//static DigsitePOIPolygonContainer sDigsitePOIPolygons;
 
 DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore(ScalingStatDistributionfmt);
 DBCStorage <ScalingStatValuesEntry> sScalingStatValuesStore(ScalingStatValuesfmt);
@@ -353,10 +353,10 @@ void LoadDBCStores(const std::string& dataPath)
     }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sAchievementStore,            dbcPath, "Achievement.dbc"/*, &CustomAchievementfmt, &CustomAchievementIndex*/);//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sAchievementCriteriaStore,    dbcPath, "Achievement_Criteria.dbc");//15595
+    //LoadDBC(availableDbcLocales, bad_dbc_files, sAchievementCriteriaStore,    dbcPath, "Achievement_Criteria.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sAreaTriggerStore,            dbcPath, "AreaTrigger.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sAreaGroupStore,              dbcPath, "AreaGroup.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sAreaPOIStore,                dbcPath, "AreaPOI.dbc");//15595
+    //LoadDBC(availableDbcLocales, bad_dbc_files, sAreaPOIStore,                dbcPath, "AreaPOI.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sAuctionHouseStore,           dbcPath, "AuctionHouse.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sArmorLocationStore,          dbcPath, "ArmorLocation.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sBankBagSlotPricesStore,      dbcPath, "BankBagSlotPrices.dbc");//15595
@@ -457,7 +457,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sImportPriceWeaponStore,      dbcPath, "ImportPriceWeapon.dbc"); // 15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemPriceBaseStore,          dbcPath, "ItemPriceBase.dbc"); // 15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemReforgeStore,            dbcPath, "ItemReforge.dbc"); // 15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sItemBagFamilyStore,          dbcPath, "ItemBagFamily.dbc");//15595
+    //LoadDBC(availableDbcLocales, bad_dbc_files, sItemBagFamilyStore,          dbcPath, "ItemBagFamily.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemClassStore,              dbcPath, "ItemClass.dbc"); // 15595
     //LoadDBC(dbcCount, availableDbcLocales, bad_dbc_files, sItemDisplayInfoStore,        dbcPath, "ItemDisplayInfo.dbc");     -- not used currently
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemLimitCategoryStore,      dbcPath, "ItemLimitCategory.dbc");//15595
@@ -524,7 +524,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sQuestPOIPointStore,          dbcPath, "QuestPOIPoint.dbc");//15595
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sRandomPropertiesPointsStore, dbcPath, "RandPropPoints.dbc");//15595
-
+    /*
     LoadDBC(availableDbcLocales, bad_dbc_files, sResearchBranchStore,         dbcPath, "ResearchBranch.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sResearchProjectStore,        dbcPath, "ResearchProject.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sResearchSiteStore,           dbcPath, "ResearchSite.dbc");//15595
@@ -539,7 +539,7 @@ void LoadDBCStores(const std::string& dataPath)
                     if (siteEntry->QuestPOIBlobId == pointEntry->BlobId)
                         sDigsitePOIPolygons [siteEntry->Id].push_back(std::make_pair(pointEntry->X, pointEntry->Y));
         }
-    }
+    }*/
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatDistributionStore, dbcPath, "ScalingStatDistribution.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sScalingStatValuesStore,      dbcPath, "ScalingStatValues.dbc");//15595
@@ -1460,7 +1460,7 @@ uint32 ScalingStatValuesEntry::GetDPSAndDamageMultiplier(uint32 subClass, bool i
     }
     return 0;
 }
-
+/*
 DigsitePOIPolygon const* GetDigsitePOIPolygon(uint32 digsiteId)
 {
     DigsitePOIPolygonContainer::const_iterator itr = sDigsitePOIPolygons.find(digsiteId);
@@ -1468,7 +1468,7 @@ DigsitePOIPolygon const* GetDigsitePOIPolygon(uint32 digsiteId)
         return &itr->second;
 
     return NULL;
-}
+}*/
 
 /// Returns LFGDungeonEntry for a specific map and difficulty. Will return first found entry if multiple dungeons use the same map (such as Scarlet Monastery)
 LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, DifficultyID difficulty)

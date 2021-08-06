@@ -59,6 +59,7 @@ struct AchievementEntry
     uint32 criteriaTreeID;                                  // 14 - Pandaria
 };
 
+/*
 struct AchievementCategoryEntry
 {
     uint32    ID;                                           // 0
@@ -66,6 +67,7 @@ struct AchievementCategoryEntry
     //char* name;                                           // 2
     //uint32    sortOrder;                                  // 3
 };
+
 
 struct AchievementCriteriaEntry
 {
@@ -639,7 +641,7 @@ struct AchievementCriteriaEntry
     uint32 additionalConditionType[MAX_ADDITIONAL_CRITERIA_CONDITIONS];      // 18-20
     uint32 additionalConditionValue[MAX_ADDITIONAL_CRITERIA_CONDITIONS - 1]; // 21-22 WTF one column was cut off here in 4.3.4
 };
-
+*/
 struct AreaTableEntry
 {
     uint32  m_ID;                                           // 0
@@ -688,6 +690,7 @@ struct AreaGroupEntry
     uint32  nextGroup;                                      // 7 index of next group
 };
 
+/*
 struct AreaPOIEntry
 {
     uint32 id;              // 0
@@ -704,7 +707,7 @@ struct AreaPOIEntry
     // uint32 unk;          // 21
     // uint32 unk2;         // 21 - Pandaria
 };
-
+*/
 struct AreaTriggerEntry
 {
     uint32  id;                                             // 0        m_ID
@@ -1628,11 +1631,12 @@ struct gtOCTHpPerStaminaEntry
     float    ratio;
 };
 
+/*
 struct GtRegenHPPerSptEntry
 {
     float    ratio;
 };
-
+*/
 struct GtRegenMPPerSptEntry
 {
     float    ratio;
@@ -1790,6 +1794,7 @@ struct ItemClassEntry
     //char*   Name;                                           // 4 class name
 };
 
+/*
 struct ItemBagFamilyEntry
 {
     uint32   ID;                                            // 0
@@ -1811,7 +1816,7 @@ struct ItemDisplayInfoEntry
                                                             // 10       m_itemVisual[8]
                                                             // 11       m_particleColorID
 };
-
+*/
 struct ItemDisenchantLootEntry
 {
     uint32 Id;
@@ -2114,7 +2119,7 @@ struct RandomPropertiesPointsEntry
     uint32    RarePropertiesPoints[5];                      // 7-11
     uint32    UncommonPropertiesPoints[5];                  // 12-16
 };
-
+/*
 struct ResearchBranchEntry
 {
     uint32 Id;                                            // 0
@@ -2153,7 +2158,7 @@ struct ResearchSiteEntry
     //char* SiteName;                                       // 3
     //uint32 IconId;                                        // 4
 };
-
+*/
 struct ScalingStatDistributionEntry
 {
     uint32  Id;                                             // 0
