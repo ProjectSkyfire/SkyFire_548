@@ -589,14 +589,9 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             }
 
             if (canEffectScale)
-            {
-                GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(_spellInfo->SpellLevel - 1);
-                GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(caster->getLevel() - 1);
-                if (spellScaler && casterScaler)
-                    value *= casterScaler->ratio / spellScaler->ratio;
-            }
+                value *= 0.25f * exp(caster->getLevel() * (100 - _spellInfo->SpellLevel) / 1000.0f);
         }
-// REVIEW - MERGE >>>>>>> master
+        // REVIEW - MERGE >>>>>>> master
     }
 
     return int32(value);
