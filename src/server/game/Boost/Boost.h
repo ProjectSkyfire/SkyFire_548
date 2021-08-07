@@ -24,6 +24,14 @@
 
 typedef std::map<uint8, uint32> SlotEquipmentMap;
 
+SlotEquipmentMap const embersilkBags =
+{
+    { INVENTORY_SLOT_BAG_START + 0, 54443 },
+    { INVENTORY_SLOT_BAG_START + 1, 54443 },
+    { INVENTORY_SLOT_BAG_START + 2, 54443 },
+    { INVENTORY_SLOT_BAG_START + 3, 54443 }
+};
+
 SlotEquipmentMap const deathKnightEquipmentBlood =
 {
     { EQUIPMENT_SLOT_HEAD, 100996 },

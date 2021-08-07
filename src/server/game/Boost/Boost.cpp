@@ -25,9 +25,6 @@ CharacterBooster::CharacterBooster(WorldSession* session) : m_session(session), 
 
 SlotEquipmentMap const* CharacterBooster::_GetCharBoostItems(std::vector<std::pair<uint32, uint32> >& itemsToMail) const
 {
-    for (uint8 i = 0; i < 4; i++) // BagCount
-        itemsToMail.push_back(std::make_pair(EMBERSILK_BAG_ID, 1));
-
     itemsToMail.push_back(std::make_pair(LEMON_FLAVOUR_PUDING_ID, LEMON_FLAVOUR_PUDING_COUNT));
 
     switch (m_charBoostInfo.specialization)
@@ -52,7 +49,7 @@ SlotEquipmentMap const* CharacterBooster::_GetCharBoostItems(std::vector<std::pa
         case SPEC_MAGE_ARCANE:
         case SPEC_MAGE_FIRE:
         case SPEC_MAGE_FROST:
-            itemsToMail.push_back(std::make_pair(101081, 1));
+            //itemsToMail.push_back(std::make_pair(101081, 1));
             return &mageEquipment;
         case SPEC_MONK_BREWMASTER:
             return &monkEquipmentBrewmaster;
@@ -68,10 +65,10 @@ SlotEquipmentMap const* CharacterBooster::_GetCharBoostItems(std::vector<std::pa
             return &paladinEquipmentRetribution;
         case SPEC_PRIEST_DISCIPLINE:
         case SPEC_PRIEST_HOLY:
-            itemsToMail.push_back(std::make_pair(101172, 1));
+            //itemsToMail.push_back(std::make_pair(101172, 1));
             return &priestEquipmentDisciplineAndHoly;
         case SPEC_PRIEST_SHADOW:
-            itemsToMail.push_back(std::make_pair(101172, 1));
+            //itemsToMail.push_back(std::make_pair(101172, 1));
             return &priestEquipmentShadow;
         case SPEC_ROGUE_ASSASSINATION:
             return &rogueEquipmentAssassionation;
@@ -88,7 +85,7 @@ SlotEquipmentMap const* CharacterBooster::_GetCharBoostItems(std::vector<std::pa
         case SPEC_WARLOCK_AFFLICTION:
         case SPEC_WARLOCK_DEMONOLOGY:
         case SPEC_WARLOCK_DESTRUCTION:
-            itemsToMail.push_back(std::make_pair(101275, 1));
+            //itemsToMail.push_back(std::make_pair(101275, 1));
             return &warlockEquipment;
         case SPEC_WARRIOR_ARMS:
             return &warriorEquipmentArms;
@@ -403,10 +400,15 @@ void CharacterBooster::_HandleCharacterBoost() const
     if (!itemsToEquip)
         return;
 
+    SlotEquipmentMap const* bagsToEquip = &embersilkBags;
+    if (!bagsToEquip)
+        return;
+
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _MailEquipedItems(trans);
     _SendMail(trans, itemsToMail);
     _LearnSpells(trans, raceId, classId);
+    _EquipItems(trans, bagsToEquip);
     _SaveBoostedChar(trans, _EquipItems(trans, itemsToEquip), raceId, classId);
     CharacterDatabase.CommitTransaction(trans);
     m_session->SetBoosting(false);
