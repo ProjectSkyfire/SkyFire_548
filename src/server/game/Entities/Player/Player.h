@@ -697,7 +697,7 @@ enum PlayerSlots
     // first slot for item stored (in any way in player m_items data)
     PLAYER_SLOT_START  = 0,
     // last+1 slot for item stored (in any way in player m_items data)
-    PLAYER_SLOT_END    = 94,
+    PLAYER_SLOT_END    = 86,
     PLAYER_SLOTS_COUNT = (PLAYER_SLOT_END - PLAYER_SLOT_START)
 };
 
@@ -734,29 +734,29 @@ enum InventorySlots                                         // 4 slots
     INVENTORY_SLOT_BAG_END   = 23
 };
 
-enum InventoryPackSlots                                     // 24 slots
+enum InventoryPackSlots                                     // 16 slots
 {
     INVENTORY_SLOT_ITEM_START = 23,
-    INVENTORY_SLOT_ITEM_END   = 47
+    INVENTORY_SLOT_ITEM_END   = 39
 };
 
 enum BankItemSlots                                          // 28 slots
 {
-    BANK_SLOT_ITEM_START = 47,
-    BANK_SLOT_ITEM_END   = 75
+    BANK_SLOT_ITEM_START = 39,
+    BANK_SLOT_ITEM_END   = 67
 };
 
 enum BankBagSlots                                           // 7 slots
 {
-    BANK_SLOT_BAG_START = 75,
-    BANK_SLOT_BAG_END   = 82
+    BANK_SLOT_BAG_START = 67,
+    BANK_SLOT_BAG_END   = 74
 };
 
 enum BuyBackSlots                                           // 12 slots
 {
     // stored in m_buybackitems
-    BUYBACK_SLOT_START = 82,
-    BUYBACK_SLOT_END   = 94
+    BUYBACK_SLOT_START = 74,
+    BUYBACK_SLOT_END   = 86
 };
 
 enum class EquipmentSetUpdateState

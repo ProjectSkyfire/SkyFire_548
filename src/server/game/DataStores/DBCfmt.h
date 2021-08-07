@@ -64,9 +64,9 @@ char const FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiiffixsxxxx";
 char const FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
 char const GameObjectDisplayInfofmt[] = "dxxxxxxxxxxxffffffxxx";
 char const GemPropertiesEntryfmt[] = "dixxix";
+char const GlyphPropertiesfmt[] = "diix";
+char const GlyphSlotfmt[] = "nix";
 
-char const GlyphPropertiesfmt[] = "niii";
-char const GlyphSlotfmt[] = "nii";
 char const GtBarberShopCostBasefmt[] = "xf";
 char const GtCombatRatingsfmt[] = "xf";
 char const GtOCTHpPerStaminafmt[] = "df";
