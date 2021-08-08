@@ -345,6 +345,7 @@ void WorldSession::HandleGetChannelMemberCount(WorldPacket &recvPacket)
     }
 }
 
+/*
 void WorldSession::HandleSetChannelWatch(WorldPacket& recvPacket)
 {
     std::string channelName;
@@ -353,9 +354,10 @@ void WorldSession::HandleSetChannelWatch(WorldPacket& recvPacket)
     SF_LOG_DEBUG("chat.system", "CMSG_SET_CHANNEL_WATCH %s Channel: %s",
         GetPlayerInfo().c_str(), channelName.c_str());
 
-    /*
+    
     if (ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if (Channel* channel = cMgr->GetChannel(channelName, GetPlayer()))
             channel->JoinNotify(GetPlayer());
-    */
+    
 }
+*/
