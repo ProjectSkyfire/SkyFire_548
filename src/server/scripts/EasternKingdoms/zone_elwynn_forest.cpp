@@ -161,7 +161,7 @@ public:
 
         void ChooseBehavior()
         {
-            isSpellGlass = rand() % 2 == 0;
+            isSpellGlass = urand(0, 100) > 50;
         }
 
         void CastGlassOrSpy()
@@ -308,8 +308,8 @@ public:
             else tMoving -= diff;
 
             // diff to first support
-            if (tSupport < diff) {
-
+            if (tSupport < diff) 
+            {
                 // reset up diff for support
                 tSupport = 1 * IN_MILLISECONDS;
 
@@ -360,12 +360,12 @@ public:
         {
             auto it = std::find_if(g_paxtonGroup.begin(), g_paxtonGroup.end(), [&](auto pair) { return pair.second == true; });
             if (it != g_paxtonGroup.end()) {
-                if (!(*it).first->HasAura(NPC_BROTHER_PAXTON_SPELL_RENEW)) {
-                    
+                if (!(*it).first->HasAura(NPC_BROTHER_PAXTON_SPELL_RENEW)) 
+                {
                     DoCast((*it).first, NPC_BROTHER_PAXTON_SPELL_RENEW, false);
                     
                     (*it).second = false;
-
+                    
                     // chance
                     sChanse = urand(0, 100);
 
@@ -486,8 +486,8 @@ public:
             else tHelp -= diff;
 
             //Chance to yell every 5 to 10 seconds
-            if (tYell <= diff) {
-
+            if (tYell <= diff) 
+            {
                 // generate a chance
                 cYell = urand(0, 100);
 
