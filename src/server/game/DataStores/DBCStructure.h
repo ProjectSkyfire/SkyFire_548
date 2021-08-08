@@ -1919,30 +1919,16 @@ struct LiquidTypeEntry
 
 struct LockEntry
 {
-    //uint32      ID;                                         // 0        m_ID
+    //uint32      ID;                                       // 0        m_ID
     uint32      Type[MAX_LOCK_CASE];                        // 1-8      m_Type
     uint32      Index[MAX_LOCK_CASE];                       // 9-16     m_Index
     uint32      Skill[MAX_LOCK_CASE];                       // 17-24    m_Skill
     //uint32      Action[MAX_LOCK_CASE];                    // 25-32    m_Action
 };
 
-struct PhaseEntry
-{
-    uint32    ID;                                           // 0
-    char*     Name;                                         // 1
-    uint32    flag;                                         // 2
-};
-
-struct PhaseGroupEntry
-{
-    uint32 ID;
-    uint32 PhaseId;
-    uint32 GroupId;
-};
-
 struct MailTemplateEntry
 {
-    uint32      ID;                                         // 0
+    //uint32      ID;                                       // 0
     //char*       subject;                                  // 1        m_subject_lang
     char* content;                                          // 2        m_body_lang
 };
@@ -1958,14 +1944,14 @@ struct MapEntry
     uint32  linked_zone;                                    // 6        m_areaTableID
     //char*     hordeIntro;                                 // 7        m_MapDescription0_lang
     //char*     allianceIntro;                              // 8        m_MapDescription1_lang
-    uint32  multimap_id;                                    // 9        m_LoadingScreenID (LoadingScreens.dbc)
+    //uint32  multimap_id;                                  // 9        m_LoadingScreenID (LoadingScreens.dbc)
     //float   BattlefieldMapIconScale;                      // 10       m_minimapIconScale
     int32   entrance_map;                                   // 11       m_corpseMapID map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
     float   entrance_x;                                     // 12       m_corpseX entrance x coordinate in ghost mode  (in most cases = normal entrance)
     float   entrance_y;                                     // 13       m_corpseY entrance y coordinate in ghost mode  (in most cases = normal entrance)
     //uint32  timeOfDayOverride;                            // 14       m_timeOfDayOverride
     uint32  addon;                                          // 15       m_expansionID
-    uint32  expireTime;                                     // 16       m_raidOffset
+    //uint32  expireTime;                                   // 16       m_raidOffset
     //uint32 maxPlayers;                                    // 17       m_maxPlayers
     int32 rootPhaseMap;                                     // 18 new 4.0.0, mapid, related to phasing
 
@@ -2017,7 +2003,7 @@ struct ModifierTreeEntry
     uint32 ID;                                              // 0
     uint32 conditionType;                                   // 1
     uint32 conditionValue[2];                               // 2 - 3
-    uint32 op;                                              // 4
+    //uint32 op;                                              // 4
     // uint32 unk;                                          // 5
     uint32 parent;                                          // 6
 };
@@ -2038,7 +2024,7 @@ struct MountCapabilityEntry
 
 struct MountTypeEntry
 {
-    uint32 Id;
+    //uint32 Id;
     uint32 MountCapability[MAX_MOUNT_CAPABILITIES];
 };
 
@@ -2062,10 +2048,24 @@ struct NameGenEntry
 
 struct OverrideSpellDataEntry
 {
-    uint32      id;                                         // 0
+    //uint32      id;                                         // 0
     uint32      spellId[MAX_OVERRIDE_SPELL];                // 1-10
     //uint32      unk0;                                     // 11
     //char*     SpellBarName;                               // 12
+};
+
+struct PhaseEntry
+{
+    uint32 ID;                                            // 0
+    //char* Name;                                         // 1
+    //uint32 flag;                                        // 2
+};
+
+struct PhaseGroupEntry
+{
+    //uint32 ID;
+    uint32 PhaseId;
+    uint32 GroupId;
 };
 
 struct PvPDifficultyEntry
@@ -2081,6 +2081,20 @@ struct PvPDifficultyEntry
     BattlegroundBracketId GetBracketId() const { return BattlegroundBracketId(bracketId); }
 };
 
+struct QuestFactionRewEntry
+{
+    //uint32      id;
+    int32       QuestRewFactionValue[10];
+};
+
+struct QuestPOIPointEntry
+{
+    uint32 Id;                                              // 0
+    //int32 X;                                              // 1
+    //int32 Y;                                              // 2
+    //uint32 BlobId;                                        // 3
+};
+
 struct QuestSortEntry
 {
     uint32      id;                                         // 0        m_ID
@@ -2089,31 +2103,16 @@ struct QuestSortEntry
 
 struct QuestXPEntry
 {
-  uint32      id;
-  uint32      Exp[10];
-};
-
-struct QuestFactionRewEntry
-{
-  uint32      id;
-  int32       QuestRewFactionValue[10];
-};
-
-struct QuestPOIPointEntry
-{
-    //uint32 Id;                                            // 0
-    int32 X;                                                // 1
-    int32 Y;                                                // 2
-    uint32 BlobId;                                          // 3
+    //uint32      id;
+    uint32      Exp[10];
 };
 
 struct RandomPropertiesPointsEntry
 {
     //uint32  Id;                                           // 0 hidden key
-    uint32    itemLevel;                                    // 1
-    uint32    EpicPropertiesPoints[5];                      // 2-6
-    uint32    RarePropertiesPoints[5];                      // 7-11
-    uint32    UncommonPropertiesPoints[5];                  // 12-16
+    uint32    EpicPropertiesPoints[5];                      // 1-5
+    uint32    RarePropertiesPoints[5];                      // 6-10
+    uint32    UncommonPropertiesPoints[5];                  // 11-15
 };
 /*
 struct ResearchBranchEntry
@@ -2157,7 +2156,7 @@ struct ResearchSiteEntry
 */
 struct ScalingStatDistributionEntry
 {
-    uint32  Id;                                             // 0
+    //uint32  Id;                                           // 0
     int32   StatMod[10];                                    // 1-10
     uint32  Modifier[10];                                   // 11-20
     //uint32 unk1;                                          // 21
@@ -2166,14 +2165,15 @@ struct ScalingStatDistributionEntry
 
 struct ScalingStatValuesEntry
 {
-    uint32 Id;                                              // 0
-    uint32 Level;                                           // 1
-    uint32 dpsMod[7];                                       // 2-8 DPS mod for level
+    //uint32 Id;                                            // 0
+    //uint32 Level;                                         // 1
+    //uint32 ilvl;
+    uint32 dpsMod[6];                                       // 2-8 DPS mod for level
     uint32 Spellpower;                                      // 9 spell power for level
     uint32 StatMultiplier[5];                               // 10-11 Multiplier for ScalingStatDistribution
     uint32 Armor[8][4];                                     // 12-47 Armor for level
     uint32 CloakArmor;                                      // 48 armor for cloak
-    uint32 unk;                                             // 49 - Pandaria
+    uint32 ShieldArmor;                                     // 49 - Pandaria
 
     uint32 GetStatMultiplier(uint32 inventoryType) const;
     uint32 GetArmor(uint32 inventoryType, uint32 armorType) const;

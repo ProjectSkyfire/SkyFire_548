@@ -1369,7 +1369,6 @@ uint32 ScalingStatValuesEntry::GetArmor(uint32 inventoryType, uint32 armorType) 
             case INVTYPE_FINGER:
             case INVTYPE_TRINKET:
             case INVTYPE_WEAPON:
-            case INVTYPE_SHIELD:
             case INVTYPE_RANGED:
             case INVTYPE_2HWEAPON:
             case INVTYPE_BAG:
@@ -1394,6 +1393,8 @@ uint32 ScalingStatValuesEntry::GetArmor(uint32 inventoryType, uint32 armorType) 
                 return Armor[7][armorType];
             case INVTYPE_CLOAK:
                 return CloakArmor;
+            case INVTYPE_SHIELD:
+                return ShieldArmor;
             default:
                 break;
         }
