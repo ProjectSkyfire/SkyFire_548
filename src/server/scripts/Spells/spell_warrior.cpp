@@ -44,7 +44,9 @@ enum WarriorSpells
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1       = 29841, // obsolete
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2       = 29842, // Arms/Fury Passive Unbridled Wrath
     SPELL_WARRIOR_SHIELD_SLAM                       = 23922,
-    SPELL_WARRIOR_SPELL_REFLECT                     = 23920,
+    SPELL_WARRIOR_SHIELD_WALL_HORDE                 = 146127,
+    SPELL_WARRIOR_SHIELD_WALL_ALLIANCE              = 147925,
+    SPELL_WARRIOR_SHIELD_WALL_SHIELD                = 146128,
     SPELL_WARRIOR_SPELL_REFLECT_HORDE               = 146122,
     SPELL_WARRIOR_SPELL_REFLECT_ALLIANCE            = 147923,
     SPELL_WARRIOR_SPELL_REFLECT_SHIELD              = 146120,
@@ -625,7 +627,72 @@ public:
     }
 };
 
-// 23920 - Spell Reflect
+// 871 - Shield Wall Visual
+class spell_warr_shield_wall : public SpellScriptLoader
+{
+public:
+    spell_warr_shield_wall() : SpellScriptLoader("spell_warr_shield_wall") { }
+
+    class spell_warr_shield_wall_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_shield_wall_AuraScript);
+
+        bool Load() override
+        {
+            if (Player* caster = GetCaster()->ToPlayer())
+            {
+                // use player's current shield if they already have one equip
+                if (Item* shield = caster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                {
+                    if (shield->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                    {
+                        spellVisual = SPELL_WARRIOR_SHIELD_WALL_SHIELD;
+                    }
+                }
+                // else check team and use appropriate visual
+                else
+                {
+                    spellVisual = caster->GetTeam() == ALLIANCE ? SPELL_WARRIOR_SHIELD_WALL_ALLIANCE : SPELL_WARRIOR_SHIELD_WALL_HORDE;
+                }
+            }
+            return true;
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (spellVisual)
+                    caster->CastSpell(caster, spellVisual, true);
+            }
+        }
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (spellVisual)
+                    caster->RemoveAurasDueToSpell(spellVisual);
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warr_shield_wall_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_warr_shield_wall_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+        }
+
+    private:
+        uint32 spellVisual = 0;
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_shield_wall_AuraScript();
+    }
+};
+
+// 23920 - Spell Reflect Visual
 class spell_warr_spell_reflect : public SpellScriptLoader
 {
 public:
@@ -858,6 +925,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_second_wind_proc();
     new spell_warr_second_wind_trigger();
     new spell_warr_shattering_throw();
+    new spell_warr_shield_wall();
     new spell_warr_spell_reflect();
     new spell_warr_sudden_death();
     new spell_warr_sweeping_strikes();
