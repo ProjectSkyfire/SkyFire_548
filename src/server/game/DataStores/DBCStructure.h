@@ -1551,7 +1551,7 @@ struct GlyphPropertiesEntry
     //uint32  Id;
     uint32  SpellId;
     uint32  TypeFlags;
-    //uint32  IconId;                                         // GlyphIconId (SpellIcon.dbc)
+    //uint32  IconId;                                       // GlyphIconId (SpellIcon.dbc)
 };
 
 struct GlyphSlotEntry
@@ -1671,23 +1671,23 @@ struct HolidayNamesEntry
 struct HolidaysEntry
 {
     uint32 Id;                                              // 0        m_ID
-    uint32 Duration[MAX_HOLIDAY_DURATIONS];                 // 1-10     m_duration
-    uint32 Date[MAX_HOLIDAY_DATES];                         // 11-36    m_date (dates in unix time starting at January, 1, 2000)
-    uint32 Region;                                          // 37       m_region (wow region)
-    uint32 Looping;                                         // 38       m_looping
-    uint32 CalendarFlags[MAX_HOLIDAY_FLAGS];                // 39-48    m_calendarFlags
+    //uint32 Duration[MAX_HOLIDAY_DURATIONS];               // 1-10     m_duration
+    //uint32 Date[MAX_HOLIDAY_DATES];                       // 11-36    m_date (dates in unix time starting at January, 1, 2000)
+    //uint32 Region;                                        // 37       m_region (wow region)
+    //uint32 Looping;                                       // 38       m_looping
+    //uint32 CalendarFlags[MAX_HOLIDAY_FLAGS];              // 39-48    m_calendarFlags
     //uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
     //uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
-    char* TextureFilename;                                  // 51       m_textureFilename
-    uint32 Priority;                                        // 52       m_priority
-    uint32 CalendarFilterType;                              // 53       m_calendarFilterType (-1 = Fishing Contest, 0 = Unk, 1 = Darkmoon Festival, 2 = Yearly holiday)
+    //char* TextureFilename;                                // 51       m_textureFilename
+    //uint32 Priority;                                      // 52       m_priority
+    //uint32 CalendarFilterType;                            // 53       m_calendarFilterType (-1 = Fishing Contest, 0 = Unk, 1 = Darkmoon Festival, 2 = Yearly holiday)
     //uint32 flags;                                         // 54       m_flags (0 = Darkmoon Faire, Fishing Contest and Wotlk Launch, rest is 1)
 };
 
 // ImportPriceArmor.dbc
 struct ImportPriceArmorEntry
 {
-    uint32 InventoryType;                                   // 1        Id/InventoryType
+    //uint32 InventoryType;                                 // 1        Id/InventoryType
     float ClothFactor;                                      // 2        Price factor cloth
     float LeatherFactor;                                    // 3        Price factor leather
     float MailFactor;                                       // 4        Price factor mail
@@ -1697,39 +1697,70 @@ struct ImportPriceArmorEntry
 // ImportPriceQuality.dbc
 struct ImportPriceQualityEntry
 {
-    uint32 QualityId;                                       // 1        Quality Id (+1?)
+    //uint32 QualityId;                                     // 1        Quality Id (+1?)
     float Factor;                                           // 2        Price factor
 };
 
 // ImportPriceShield.dbc
 struct ImportPriceShieldEntry
 {
-    uint32 Id;                                              // 1        Unk id (only 1 and 2)
+    //uint32 Id;                                            // 1        Unk id (only 1 and 2)
     float Factor;                                           // 2        Price factor
 };
 
 // ImportPriceWeapon.dbc
 struct ImportPriceWeaponEntry
 {
-    uint32 Id;                                              // 1        Unk id (mainhand - 0, offhand - 1, weapon - 2, 2hweapon - 3, ranged/rangedright/relic - 4)
+    //uint32 Id;                                            // 1        Unk id (mainhand - 0, offhand - 1, weapon - 2, 2hweapon - 3, ranged/rangedright/relic - 4)
     float Factor;                                           // 2        Price factor
 };
 
 // ItemPriceBase.dbc
 struct ItemPriceBaseEntry
 {
-    uint32 ItemLevel;                                       // 2        Item level (1 - 1000)
+    //uint32 id
+    //uint32 ItemLevel;                                       // 2        Item level (1 - 1000)
     float ArmorFactor;                                      // 3        Price factor for armor
     float WeaponFactor;                                     // 4        Price factor for weapons
 };
 
 struct ItemReforgeEntry
 {
-    uint32 Id;
+    //uint32 Id;
     uint32 SourceStat;
     float SourceMultiplier;
     uint32 FinalStat;
     float FinalMultiplier;
+};
+
+struct ItemArmorQualityEntry
+{
+    //uint32    Id;                                             // 0 item level
+    float     Value[7];                                       // 1-7 multiplier for item quality
+    //uint32    Id2;                                            // 8 item level
+};
+
+struct ItemArmorShieldEntry
+{
+    //uint32    Id;                                             // 0 item level
+    //uint32    Id2;                                            // 1 item level
+    float     Value[7];                                       // 2-8 multiplier for item quality
+};
+
+struct ItemArmorTotalEntry
+{
+    //uint32    Id;                                             // 0 item level
+    //uint32    Id2;                                            // 1 item level
+    float     Value[4];                                       // 2-5 multiplier for armor types (cloth...plate)
+};
+
+// ItemClass.dbc
+struct ItemClassEntry
+{
+    //uint32    Class;                                          // 1 item class id
+    //uint32  IsWeapon;                                       // 2 1 for weapon, 0 for everything else
+    float     PriceFactor;                                    // 3 used to calculate certain prices
+    //char*   Name;                                           // 4 class name
 };
 
 // common struct for:
@@ -1743,39 +1774,9 @@ struct ItemReforgeEntry
 // ItemDamageWand.dbc
 struct ItemDamageEntry
 {
-    uint32    Id;                                             // 0 item level
+    //uint32    Id;                                             // 0 item level
     float     DPS[7];                                         // 1-7 multiplier for item quality
-    uint32    Id2;                                            // 8 item level
-};
-
-struct ItemArmorQualityEntry
-{
-    uint32    Id;                                             // 0 item level
-    float     Value[7];                                       // 1-7 multiplier for item quality
-    uint32    Id2;                                            // 8 item level
-};
-
-struct ItemArmorShieldEntry
-{
-    uint32    Id;                                             // 0 item level
-    uint32    Id2;                                            // 1 item level
-    float     Value[7];                                       // 2-8 multiplier for item quality
-};
-
-struct ItemArmorTotalEntry
-{
-    uint32    Id;                                             // 0 item level
-    uint32    Id2;                                            // 1 item level
-    float     Value[4];                                       // 2-5 multiplier for armor types (cloth...plate)
-};
-
-// ItemClass.dbc
-struct ItemClassEntry
-{
-    uint32    Class;                                          // 1 item class id
-    //uint32  IsWeapon;                                       // 2 1 for weapon, 0 for everything else
-    float     PriceFactor;                                    // 3 used to calculate certain prices
-    //char*   Name;                                           // 4 class name
+    //uint32    Id2;                                            // 8 item level
 };
 
 /*
@@ -1805,7 +1806,7 @@ struct ItemDisenchantLootEntry
 {
     uint32 Id;
     uint32 ItemClass;
-    int32 ItemSubClass;
+    //int32 ItemSubClass;
     uint32 ItemQuality;
     uint32 MinItemLevel;
     uint32 MaxItemLevel;
@@ -1814,7 +1815,7 @@ struct ItemDisenchantLootEntry
 
 struct ItemLimitCategoryEntry
 {
-    uint32      ID;                                         // 0 Id
+    //uint32      ID;                                       // 0 Id
     //char*     name;                                       // 1        m_name_lang
     uint32      maxCount;                                   // 2,       m_quantity max allowed equipped as item or in gem slot
     uint32      mode;                                       // 3,       m_flags 0 = have, 1 = equip (enum ItemLimitCategoryMode)
@@ -1840,14 +1841,14 @@ struct ItemRandomSuffixEntry
     uint32    prefix[5];                                    // 8-12     m_allocationPct
 };
 
-#define MAX_ITEM_SET_ITEMS 10
+//#define MAX_ITEM_SET_ITEMS 17
 #define MAX_ITEM_SET_SPELLS 8
 
 struct ItemSetEntry
 {
     //uint32    id                                          // 0        m_ID
     char* name;                                             // 1        m_name_lang
-    uint32    itemId[MAX_ITEM_SET_ITEMS];                   // 2-18     m_itemID
+    //uint32    itemId[MAX_ITEM_SET_ITEMS];                 // 2-18     m_itemID
     uint32    spells[MAX_ITEM_SET_SPELLS];                  // 19-26    m_setSpellID
     uint32    items_to_triggerspell[MAX_ITEM_SET_SPELLS];   // 27-34    m_setThreshold
     uint32    required_skill_id;                            // 35       m_requiredSkill
@@ -1861,8 +1862,8 @@ struct LFGDungeonEntry
     uint32  m_MinLevel;                                     // 2
     uint32  m_MaxLevel;                                     // 3
     uint32  m_TargetLevel;                                  // 4
-    uint32  m_TargetMinLevel;                               // 5
-    uint32  m_TargetMaxLevel;                               // 6
+    //uint32  m_TargetMinLevel;                               // 5
+    //uint32  m_TargetMaxLevel;                               // 6
     int32   m_ContinentID;                                  // 7
     uint32  m_DifficultyID;                                 // 8 Difficulty.dbc
     uint32  m_Flags;                                        // 9
@@ -1873,7 +1874,7 @@ struct LFGDungeonEntry
     //uint32  m_OrderIndex;                                 // 14
     uint32  m_GroupID;                                      // 15
     //char*   m_Description;                                // 16
-    uint32  m_RandomDungeonID;                              // 17 RandomDungeonID assigned for this dungeon
+    //uint32  m_RandomDungeonID;                              // 17 RandomDungeonID assigned for this dungeon
     //uint32 m_CountTank;                                   // 18
     //uint32 m_CountHealer;                                 // 19
     //uint32 m_CountDamage;                                 // 20
@@ -1918,7 +1919,7 @@ struct LiquidTypeEntry
 
 struct LockEntry
 {
-    uint32      ID;                                         // 0        m_ID
+    //uint32      ID;                                         // 0        m_ID
     uint32      Type[MAX_LOCK_CASE];                        // 1-8      m_Type
     uint32      Index[MAX_LOCK_CASE];                       // 9-16     m_Index
     uint32      Skill[MAX_LOCK_CASE];                       // 17-24    m_Skill
