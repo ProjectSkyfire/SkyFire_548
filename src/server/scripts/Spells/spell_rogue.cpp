@@ -524,6 +524,58 @@ public:
     }
 };
 
+// 73981 - Redirect
+class spell_rog_redirect : public SpellScriptLoader
+{
+public:
+    spell_rog_redirect() : SpellScriptLoader("spell_rog_redirect") { }
+
+    class spell_rog_redirect_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_redirect_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (!caster->ToPlayer()->GetComboPoints())
+                    return SPELL_FAILED_NO_COMBO_POINTS;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleOnHit()
+        {
+            if (Player* caster = GetCaster()->ToPlayer())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (comboPoints = caster->GetComboPoints())
+                    {
+                        caster->ClearComboPoints();
+                        caster->AddComboPoints(target, comboPoints);
+                    }
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_redirect_SpellScript::CheckCast);
+            OnHit += SpellHitFn(spell_rog_redirect_SpellScript::HandleOnHit);
+        }
+
+    private:
+        uint8 comboPoints = 0;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_redirect_SpellScript();
+    }
+};
+
 // 1943 - Rupture
 class spell_rog_rupture : public SpellScriptLoader
 {
@@ -731,6 +783,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_nerve_strike();
     new spell_rog_preparation();
     new spell_rog_recuperate();
+    new spell_rog_redirect();
     new spell_rog_rupture();
     new spell_rog_stealth();
     new spell_rog_tricks_of_the_trade();
