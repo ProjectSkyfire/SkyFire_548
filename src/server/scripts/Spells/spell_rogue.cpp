@@ -45,7 +45,11 @@ enum RogueSpells
 
 enum RogueSpellIcons
 {
-    ICON_ROGUE_IMPROVED_RECUPERATE                  = 4819
+    ICON_ROGUE_DISMANTLE                            = 2908,
+    ICON_ROGUE_EVASION                              = 178,
+    ICON_ROGUE_IMPROVED_RECUPERATE                  = 4819,
+    ICON_ROGUE_SPRINT                               = 516,
+    ICON_ROGUE_VANISH                               = 252,
 };
 
 // 13877, 33735, (check 51211, 65956) - Blade Flurry
@@ -399,17 +403,27 @@ public:
         {
             Player* caster = GetCaster()->ToPlayer();
 
-            // immediately finishes the cooldown on certain Rogue abilities
-            SpellCooldowns const& cm = caster->GetSpellCooldownMap();
+            // immediately finishes the cooldown of Vanish, Sprint, Evasion, and Dismantle
+            const SpellCooldowns& cm = caster->GetSpellCooldownMap();
             for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-                if (!spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE)
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
+                    (
+                        // Vanish
+                        (spellInfo->SpellIconID == ICON_ROGUE_VANISH && spellInfo->SpellFamilyFlags[0] == 0x00000800) ||
+                        // Sprint
+                        (spellInfo->SpellIconID == ICON_ROGUE_SPRINT && spellInfo->SpellFamilyFlags[0] == 0x00000040) ||
+                        // Evasion
+                        (spellInfo->SpellIconID == ICON_ROGUE_EVASION && spellInfo->SpellFamilyFlags[0] == 0x00000020) ||
+                        // Dismantle
+                        (spellInfo->SpellIconID == ICON_ROGUE_DISMANTLE && spellInfo->SpellFamilyFlags[1] == 0x00100000)
+                        ))
                 {
-                    ++itr;
-                    continue;
+                    caster->RemoveSpellCooldown((itr++)->first, true);
                 }
-                ++itr;
+                else
+                    ++itr;
             }
         }
 
