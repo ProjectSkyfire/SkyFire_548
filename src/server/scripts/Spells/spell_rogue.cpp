@@ -38,6 +38,8 @@ enum RogueSpells
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
+    SPELL_ROGUE_NERVE_STRIKE                        = 108210,
+    SPELL_ROGUE_NERVE_STRIKE_AURA                   = 112947,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
@@ -384,6 +386,40 @@ public:
     }
 };
 
+// Called by Kidney Shot - 408 and Cheap Shot - 1833
+// 108210 - Nerve Strike
+class spell_rog_nerve_strike : public SpellScriptLoader
+{
+public:
+    spell_rog_nerve_strike() : SpellScriptLoader("spell_rog_nerve_strike") { }
+
+    class spell_rog_nerve_strike_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_nerve_strike_AuraScript);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (caster->HasAura(SPELL_ROGUE_NERVE_STRIKE))
+                        caster->CastSpell(target, SPELL_ROGUE_NERVE_STRIKE_AURA, true);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_nerve_strike_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_nerve_strike_AuraScript();
+    }
+};
 // 14185 - Preparation
 class spell_rog_preparation : public SpellScriptLoader
 {
@@ -692,6 +728,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
     new spell_rog_master_of_subtlety();
+    new spell_rog_nerve_strike();
     new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_rupture();
