@@ -129,42 +129,44 @@ char const SkillLineAbilityfmt[] = "diiiiiiiiixxx";
 char const SoundEntriesfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 char const SpecializationSpellsfmt[] = "diiix";
 
-//
-char const SpellCastTimefmt[] = "nixx";
+
+char const SpellAuraOptionsEntryfmt[] = "dxxiiiixx";
+char const SpellAuraRestrictionsEntryfmt[] = "dxxiiiiiiii";
+char const SpellCastingRequirementsEntryfmt[] = "dixxixi";
+char const SpellCastTimefmt[] = "dixx";
 char const SpellCategoriesEntryfmt[] = "dxxiiiiiix";
 char const SpellCategoryfmt[] = "nixxxx";
+char const SpellClassOptionsEntryfmt[] = "dxiiiii";
+char const SpellCooldownsEntryfmt[] = "dxxiii";
+char const SpellDurationfmt[] = "diii";
+char const SpellEntryfmt[] = "nsxxxixxxiiiiiiiiiiiiiixi";
+char const SpellEquippedItemsEntryfmt[] = "dxxiii";
+char const SpellInterruptsEntryfmt[] = "dxxixixi";
+char const SpellLevelsEntryfmt[] = "dxxiii";
+char const SpellMiscfmt[] = "dxxiiiiiiiiiixxxxiiifiiiii";
+char const SpellRangefmt[] = "nffffixx";
+char const SpellScalingEntryfmt[] = "diiiifixx";
+char const SpellShapeshiftEntryfmt[] = "dixixx";
+char const SpellTargetRestrictionsEntryfmt[] = "dxxxxixii";
+char const SpellTotemsEntryfmt[] = "diiii";
+
+//
 char const SpellDifficultyfmt[] = "niiii";
 const std::string CustomSpellDifficultyfmt = "ppppp";
 const std::string CustomSpellDifficultyIndex = "id";
-char const SpellDurationfmt[] = "niii";
 //                                             0         10        20    26
 char const SpellEffectEntryfmt[] =            "nxifiiiffiiiiiifiifiiiiixiiiix";
 const std::string CustomSpellEffectEntryfmt = "ppppppppppapppappppppppppp";
 const std::string CustomSpellEffectEntryIndex = "Id";
-char const SpellEntryfmt[] =            "nssxxixxfiiiiiiiiiiiiiiii";
 //const std::string CustomSpellEntryfmt = "ppppppppppppppapaaaaaaaaapaaaaaapapppaapppaaapa";
 //const std::string CustomSpellEntryIndex = "Id";
-char const SpellMiscfmt[] = "nxiiiiiiiiiiiiiiiiiifiiiii";
 char const SpellEffectScalingfmt[] = "nfffxi";
 char const SpellFocusObjectfmt[] = "nx";
 char const SpellItemEnchantmentfmt[] = "nxiiiiiiiiisiiiiiiiixxxxxx";
 char const SpellItemEnchantmentConditionfmt[] = "nbbbbbxxxxxbbbbbbbbbbiiiiiXXXXX";
 char const SpellRadiusfmt[] = "nffxf";
-char const SpellRangefmt[] = "nffffixx";
-char const SpellScalingEntryfmt[] = "diiiifixx";
-char const SpellTotemsEntryfmt[] = "niiii";
-char const SpellTargetRestrictionsEntryfmt[] = "nxxxxiiii";
 char const SpellPowerEntryfmt[] = "dixiiiiixffix";
-char const SpellInterruptsEntryfmt[] = "dxxixixi";
-char const SpellEquippedItemsEntryfmt[] = "dxxiii";
-char const SpellAuraOptionsEntryfmt[] = "nxxiiiixx";
-char const SpellAuraRestrictionsEntryfmt[] = "dxxiiiiiiii";
-char const SpellCastingRequirementsEntryfmt[] = "dixxixi";
-char const SpellClassOptionsEntryfmt[] = "dxiiiii";
-char const SpellCooldownsEntryfmt[] = "dxxiii";
-char const SpellLevelsEntryfmt[] = "dxxiii";
 char const SpellRuneCostfmt[] = "niiiii";
-char const SpellShapeshiftEntryfmt[] = "nixixx";
 char const SpellShapeshiftFormfmt[] = "nxxiixiiixxiiiiiiiiix";
 
 char const SummonPropertiesfmt[] = "niiiii";

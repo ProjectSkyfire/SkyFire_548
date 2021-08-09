@@ -907,9 +907,10 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     AttributesEx7 = spellMisc ? spellMisc->AttributesEx7 : 0;
     AttributesEx8 = spellMisc ? spellMisc->AttributesEx8 : 0;
     AttributesEx9 = spellMisc ? spellMisc->AttributesEx9 : 0;
-    AttributesEx10 = spellMisc ? spellMisc->AttributesEx10 : 0;
-    AttributesEx11 = spellMisc ? spellMisc->AttributesEx11 : 0;
-    AttributesEx12 = spellMisc ? spellMisc->AttributesEx12 : 0;
+    //AttributesEx10 = spellMisc ? spellMisc->AttributesEx10 : 0;
+    //AttributesEx11 = spellMisc ? spellMisc->AttributesEx11 : 0;
+    //AttributesEx12 = spellMisc ? spellMisc->AttributesEx12 : 0;
+    //AttributesEx13 = spellMisc ? spellMisc->AttributesEx13 : 0;
     AttributesCu = 0;
 
     uint32 _castingTimeIndex = spellMisc ? spellMisc->CastingTimeIndex :0;
@@ -928,10 +929,10 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     SpellIconID = spellMisc ? spellMisc->SpellIconID : 0;
     ActiveIconID = spellMisc ? spellMisc->activeIconID: 0;
     SpellName = spellEntry->SpellName;
-    Rank = spellEntry->Rank;
+    //Rank = spellEntry->Rank;
     SchoolMask = spellMisc ? spellMisc->SchoolMask : 0;
     RuneCostID = spellEntry->runeCostID;
-    SpellDifficultyId = spellMisc ? spellMisc->SpellDifficultyID : 0;
+    //SpellDifficultyId = spellMisc ? spellMisc->SpellDifficultyID : 0;
     SpellScalingId = spellEntry->SpellScalingId;
     SpellAuraOptionsId = spellEntry->SpellAuraOptionsId;
     SpellAuraRestrictionsId = spellEntry->SpellAuraRestrictionsId;

@@ -319,9 +319,10 @@ public:
     uint32 AttributesEx7;
     uint32 AttributesEx8;
     uint32 AttributesEx9;
-    uint32 AttributesEx10;
-    uint32 AttributesEx11;
-    uint32 AttributesEx12;
+    //uint32 AttributesEx10;
+    //uint32 AttributesEx11;
+    //uint32 AttributesEx12;
+    //uint32 AttributesEx13;
     uint32 AttributesCu;
     uint32 Stances;
     uint32 StancesNot;
@@ -367,8 +368,8 @@ public:
     uint32 SpellIconID;
     uint32 ActiveIconID;
     char* SpellName;
-    char* Rank;
-    uint32 MaxTargetLevel;
+    //char* Rank;
+    //uint32 MaxTargetLevel;
     uint32 MaxAffectedTargets;
     uint32 SpellFamilyName;
     flag128 SpellFamilyFlags;
@@ -376,7 +377,7 @@ public:
     uint32 PreventionType;
     int32  AreaGroupId;
     uint32 SchoolMask;
-    uint32 SpellDifficultyId;
+    //uint32 SpellDifficultyId;
     uint32 SpellScalingId;
     uint32 SpellAuraOptionsId;
     uint32 SpellAuraRestrictionsId;
@@ -391,7 +392,7 @@ public:
     uint32 SpellShapeshiftId;
     uint32 SpellTargetRestrictionsId;
     uint32 SpellTotemsId;
-    uint32 ResearchProject;
+    //uint32 ResearchProject;
     // SpellScalingEntry
     int32  CastTimeMin;
     int32  CastTimeMax;
@@ -402,7 +403,7 @@ public:
     SpellEffectInfo Effects[MAX_SPELL_EFFECTS];
     uint32 ExplicitTargetMask;
     SpellChainNode const* ChainEntry;
-
+    
     // SpecializationSpellsEntry
     std::list<uint32> SpecializationIdList;
     std::list<uint32> OverrideSpellList;
