@@ -123,12 +123,13 @@ char const RandomPropertiesPointsfmt[] = "diiiiiiiiiiiiiii";
 //char const ResearchProjectfmt [] = "nxxiixxxi";
 //char const ResearchSitefmt [] = "niixx";
 char const ScalingStatDistributionfmt[] = "diiiiiiiiiiiiiiiiiiiixi";
-
 char const ScalingStatValuesfmt[] = "xdxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
-char const SkillLinefmt[] = "nisxixixx";
-char const SkillLineAbilityfmt[] = "niiiiiiiiiixx";
+char const SkillLinefmt[] = "nisxxxixx";
+char const SkillLineAbilityfmt[] = "diiiiiiiiixxx";
 char const SoundEntriesfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-char const SpecializationSpellsfmt[] = "niiix";
+char const SpecializationSpellsfmt[] = "diiix";
+
+//
 char const SpellCastTimefmt[] = "nixx";
 char const SpellCategoriesEntryfmt[] = "dxxiiiiiix";
 char const SpellCategoryfmt[] = "nixxxx";
@@ -165,20 +166,21 @@ char const SpellLevelsEntryfmt[] = "dxxiii";
 char const SpellRuneCostfmt[] = "niiiii";
 char const SpellShapeshiftEntryfmt[] = "nixixx";
 char const SpellShapeshiftFormfmt[] = "nxxiixiiixxiiiiiiiiix";
+
 char const SummonPropertiesfmt[] = "niiiii";
-char const TalentEntryfmt[] = "nxiiixxxiix";
-char const TaxiNodesEntryfmt[] = "nifffsiixixx";
+char const TalentEntryfmt[] = "nxixixxxiix";
+char const TaxiNodesEntryfmt[] = "difffsiixxxx";
 char const TaxiPathEntryfmt[] = "niii";
 char const TaxiPathNodeEntryfmt[] = "diiifffiiii";
-char const TotemCategoryEntryfmt[] = "nxii";
-char const UnitPowerBarfmt[] = "niixxxxxxxxxxxxxxxxxxxxxxxx";
-char const TransportAnimationfmt[] = "diifffx";
+char const TotemCategoryEntryfmt[] = "dxii";
+char const UnitPowerBarfmt[] = "dxixxxxxxxxxxxxxxxxxxxxxxxx";
+char const TransportAnimationfmt[] = "diixxxx";
 char const TransportRotationfmt[] = "diiffff";
-char const VehicleEntryfmt[] = "nixffffiiiiiiiifffffffffffffffssssfifiixx";
-char const VehicleSeatEntryfmt[] = "niiffffffffffiiiiiifffffffiiifffiiiiiiiffiiiixxxxxxxxxxxxxxxxxxxxx";
-char const WMOAreaTableEntryfmt[] = "niiixxxxxiixxxx";
-char const WorldMapAreaEntryfmt[] = "xinxffffixxxxx";
-char const WorldMapOverlayEntryfmt[] = "nxiiiixxxxxxxxxx";
+char const VehicleEntryfmt[] = "nixxxxxiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxixx";
+char const VehicleSeatEntryfmt[] = "nixfffxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixxxxxxxxxxxxxxxxxxxxx";
+char const WMOAreaTableEntryfmt[] = "diiixxxxxiixxxx";
+char const WorldMapAreaEntryfmt[] = "xidxffffixxxxx";
+char const WorldMapOverlayEntryfmt[] = "dxiiiixxxxxxxxxx";
 char const WorldSafeLocsEntryfmt[] = "nifffxx";
 
 #endif
