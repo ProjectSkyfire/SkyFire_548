@@ -15729,6 +15729,9 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         UpdatePvPState();
     }
 
+    if (quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
+        CompleteQuest(questId);
+
     SetQuestSlot(logSlot, questId, qtime);
 
     m_QuestStatusSave[questId] = true;
