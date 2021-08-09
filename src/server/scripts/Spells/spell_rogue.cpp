@@ -33,6 +33,7 @@ enum RogueSpells
     SPELL_ROGUE_BLADE_FLURRY                        = 13877,
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
+    SPELL_ROGUE_CUT_TO_THE_CHASE                    = 51667,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
@@ -168,6 +169,49 @@ public:
     }
 };
 
+// 51667 - Cut to the Chase
+class spell_rog_cut_to_the_chase : public SpellScriptLoader
+{
+public:
+    spell_rog_cut_to_the_chase() : SpellScriptLoader("spell_rog_cut_to_the_chase") { }
+
+    class spell_rog_cut_to_the_chase_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_cut_to_the_chase_AuraScript);
+
+        void HandleAbilityCast(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            // Proc with Envenom only
+            if (!(eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x00800000 &&
+                eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[1] & 0x00000008))
+                return;
+
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_ROGUE_CUT_TO_THE_CHASE))
+                {
+                    if (Aura* aura = caster->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
+                    {
+                        aura->SetDuration(aura->GetSpellInfo()->GetDuration() + aura->GetSpellInfo()->GetMaxDuration());
+                    }
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_rog_cut_to_the_chase_AuraScript::HandleAbilityCast, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_cut_to_the_chase_AuraScript();
+    }
+
+};
+
 // -51625 - Deadly Brew
 class spell_rog_crippling_poison : public SpellScriptLoader
 {
@@ -200,35 +244,6 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_rog_crippling_poison_AuraScript();
-    }
-};
-
-// -51664 - Cut to the Chase
-class spell_rog_cut_to_the_chase : public SpellScriptLoader
-{
-public:
-    spell_rog_cut_to_the_chase() : SpellScriptLoader("spell_rog_cut_to_the_chase") { }
-
-    class spell_rog_cut_to_the_chase_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_rog_cut_to_the_chase_AuraScript);
-
-        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-        {
-            PreventDefaultAction();
-            if (Aura* aur = GetTarget()->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
-                aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectProc += AuraEffectProcFn(spell_rog_cut_to_the_chase_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_rog_cut_to_the_chase_AuraScript();
     }
 };
 
