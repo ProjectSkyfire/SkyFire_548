@@ -812,6 +812,7 @@ enum SheathTypes
 
 #define MAX_SHEATHETYPE                  8
 
+/*
 enum CharacterSlot
 {
     SLOT_HEAD                          = 0,
@@ -835,7 +836,7 @@ enum CharacterSlot
     SLOT_TABARD                        = 18,
     SLOT_EMPTY                         = 19
 };
-
+*/
 enum class Language
 {
     LANG_ADDON             = -1,  // used by addons, in 2.4.0 not exist, replaced by messagetype?
@@ -1451,7 +1452,6 @@ enum StealthType
 {
     STEALTH_GENERAL     = 0,
     STEALTH_TRAP        = 1,
-
     TOTAL_STEALTH_TYPES = 2
 };
 
