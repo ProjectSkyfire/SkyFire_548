@@ -216,7 +216,6 @@ public:
     {
         return new spell_rog_cut_to_the_chase_AuraScript();
     }
-
 };
 
 // -51625 - Deadly Brew
