@@ -40,6 +40,7 @@ enum RogueSpells
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
     SPELL_ROGUE_NERVE_STRIKE                        = 108210,
     SPELL_ROGUE_NERVE_STRIKE_AURA                   = 112947,
+    SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE         = 98440,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
@@ -576,6 +577,34 @@ public:
     }
 };
 
+// 14181 - Relentless Strikes
+class spell_rog_relentless_strikes : public SpellScriptLoader
+{
+public:
+    spell_rog_relentless_strikes() : SpellScriptLoader("spell_rog_relentless_strikes") { }
+
+    class spell_rog_relentless_strikes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_relentless_strikes_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_rog_relentless_strikes_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_relentless_strikes_SpellScript();
+    }
+};
+
 // 1943 - Rupture
 class spell_rog_rupture : public SpellScriptLoader
 {
@@ -784,6 +813,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_redirect();
+    new spell_rog_relentless_strikes();
     new spell_rog_rupture();
     new spell_rog_stealth();
     new spell_rog_tricks_of_the_trade();
