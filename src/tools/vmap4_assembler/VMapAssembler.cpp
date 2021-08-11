@@ -20,12 +20,42 @@
 #include <string>
 #include <iostream>
 
+#ifdef _WIN32
+#include "direct.h"
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#define ERROR_PATH_NOT_FOUND ERROR_FILE_NOT_FOUND
+#endif
+
 #include "TileAssembler.h"
+
+char output_path[128] = ".";
+
+void CreateDir(std::string const& path)
+{
+    if (chdir(path.c_str()) == 0)
+    {
+        chdir("../");
+        return;
+    }
+
+#ifdef _WIN32
+    _mkdir(path.c_str());
+#else
+    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO); // 0777
+#endif
+}
 
 int main(int argc, char* argv[])
 {
     std::string src = "Buildings";
     std::string dest = "vmaps";
+
+    std::string path = output_path;
+    path += "/vmaps/";
+    CreateDir(path);
+
     if(argc > 3)
     {
         //printf("\nusage: %s <raw data dir> <vmap dest dir> [config file name]\n", argv[0]);
