@@ -20,10 +20,35 @@
 #include <iostream>
 #include <thread>
 
+#ifdef _WIN32
+#include "direct.h"
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#define ERROR_PATH_NOT_FOUND ERROR_FILE_NOT_FOUND
+#endif
+
 #include "PathCommon.h"
 #include "MapBuilder.h"
 
 using namespace MMAP;
+
+char output_path[128] = ".";
+
+void CreateDir(std::string const& path)
+{
+    if (chdir(path.c_str()) == 0)
+    {
+        chdir("../");
+        return;
+    }
+
+#ifdef _WIN32
+    _mkdir(path.c_str());
+#else
+    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO); // 0777
+#endif
+}
 
 bool checkDirectories(bool debugOutput)
 {
@@ -41,6 +66,10 @@ bool checkDirectories(bool debugOutput)
         printf("'vmaps' directory is empty or does not exist\n");
         return false;
     }
+
+    std::string path_mmaps = output_path;
+    path_mmaps += "/mmaps/";
+    CreateDir(path_mmaps);
 
     dirFiles.clear();
     if (getDirContents(dirFiles, "mmaps") == LISTFILE_DIRECTORY_NOT_FOUND)
