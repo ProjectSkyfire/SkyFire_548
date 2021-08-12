@@ -6,3 +6,6 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGro
 (263963, 176500, 870, 1, 0, 0, 1746.19, 872.543, 487.444, 1.34181, 0, 0, 0.621694, 0.78326, 300, 0, 1),
 (263964, 182352, 870, 1, 0, 0, 1717.91, 867.215, 487.444, 2.50418, 0, 0, 0.949641, 0.313339, 300, 0, 1),
 (263965, 191164, 870, 1, 0, 0, 1745.76, 904.07, 487.429, 4.78892, 0, 0, 0.679539, -0.733639, 300, 0, 1);
+
+-- Temporary Fix : InhabitType 7 is broken!
+UPDATE creature_template SET InhabitType = 4 WHERE InhabitType = 7;
