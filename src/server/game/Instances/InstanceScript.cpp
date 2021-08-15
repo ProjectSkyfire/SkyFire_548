@@ -230,10 +230,14 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
     return false;
 }
 
-std::string InstanceScript::LoadBossState(const char * data)
+void InstanceScript::LoadBossState(const char * data)
 {
     if (!data)
-        return NULL;
+    {
+        //OUT_LOAD_INST_DATA_FAIL
+        return;
+    }
+    //OUT_LOAD_INST_DATA(data);
     std::istringstream loadStream(data);
     uint32 buff;
     uint32 bossId = 0;
@@ -243,7 +247,7 @@ std::string InstanceScript::LoadBossState(const char * data)
         if (buff < TO_BE_DECIDED)
             SetBossState(bossId, (EncounterState)buff);
     }
-    return loadStream.str();
+    //OUT_LOAD_INST_DATA_COMPLETE
 }
 
 std::string InstanceScript::GetBossSaveData()
