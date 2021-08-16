@@ -156,31 +156,31 @@ struct ScriptedAI : public CreatureAI
     void AttackStartNoMove(Unit* target);
 
     // Called at any Damage from any attacker (before damage apply)
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override { }
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE { }
 
     //Called at World update tick
-    virtual void UpdateAI(uint32 diff) override;
+    void UpdateAI(uint32 diff) OVERRIDE;
 
     //Called at creature death
-    void JustDied(Unit* /*killer*/) override { }
+    void JustDied(Unit* /*killer*/) OVERRIDE { }
 
     //Called at creature killing another unit
-    void KilledUnit(Unit* /*victim*/) override { }
+    void KilledUnit(Unit* /*victim*/) OVERRIDE { }
 
     // Called when the creature summon successfully other creature
-    void JustSummoned(Creature* /*summon*/) override { }
+    void JustSummoned(Creature* /*summon*/) OVERRIDE { }
 
     // Called when a summoned creature is despawned
-    void SummonedCreatureDespawn(Creature* /*summon*/) override { }
+    void SummonedCreatureDespawn(Creature* /*summon*/) OVERRIDE { }
 
     // Called when hit by a spell
-    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) override { }
+    void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) OVERRIDE { }
 
     // Called when spell hits a target
-    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) override { }
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) OVERRIDE { }
 
     //Called at waypoint reached or PointMovement end
-    void MovementInform(uint32 /*type*/, uint32 /*id*/) override { }
+    void MovementInform(uint32 /*type*/, uint32 /*id*/) OVERRIDE { }
 
     // Called when AI is temporarily replaced or put back when possess is applied or removed
     void OnPossess(bool /*apply*/)
@@ -201,13 +201,13 @@ struct ScriptedAI : public CreatureAI
     // *************
 
     //Called at creature reset either by death or evade
-    void Reset() override { }
+    void Reset() OVERRIDE { }
 
     //Called at creature aggro either by MoveInLOS or Attack Start
-    void EnterCombat(Unit* /*victim*/) override { }
+    void EnterCombat(Unit* /*victim*/) OVERRIDE { }
 
     // Called before EnterCombat even before the creature is in combat.
-    void AttackStart(Unit* /*target*/) override;
+    void AttackStart(Unit* /*target*/) OVERRIDE;
 
     // *************
     //AI Helper Functions
