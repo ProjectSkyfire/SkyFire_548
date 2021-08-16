@@ -8138,6 +8138,7 @@ void Player::DuelComplete(DuelCompleteType type)
         data.WriteBit(type != DuelCompleteType::DUEL_WON);                    // 0 = just won; 1 = fled
         data.WriteBits(duel->opponent->GetName().length(), 6);
         data.WriteBits(GetName().length(), 6);
+        data.FlushBits();
         data << uint32(realmID);
         data.WriteString(duel->opponent->GetName());
         data << uint32(realmID);

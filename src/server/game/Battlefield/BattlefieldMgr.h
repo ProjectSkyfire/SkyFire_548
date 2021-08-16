@@ -34,7 +34,7 @@ class BattlefieldMgr
 {
   public:
     // ctor
-    BattlefieldMgr();
+    BattlefieldMgr() : m_UpdateTimer(0) { }
     // dtor
     ~BattlefieldMgr();
 

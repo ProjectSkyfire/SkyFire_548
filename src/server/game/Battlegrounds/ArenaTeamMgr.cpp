@@ -26,11 +26,6 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 
-ArenaTeamMgr::ArenaTeamMgr()
-{
-    NextArenaTeamId = 1;
-}
-
 ArenaTeamMgr::~ArenaTeamMgr()
 {
     for (ArenaTeamContainer::iterator itr = ArenaTeamStore.begin(); itr != ArenaTeamStore.end(); ++itr)

@@ -25,7 +25,7 @@
 class ArenaTeamMgr
 {
     friend class ACE_Singleton<ArenaTeamMgr, ACE_Null_Mutex>;
-    ArenaTeamMgr();
+    ArenaTeamMgr() : NextArenaTeamId(1) { }
     ~ArenaTeamMgr();
 
 public:

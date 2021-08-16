@@ -22,12 +22,6 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 
-BattlefieldMgr::BattlefieldMgr()
-{
-    m_UpdateTimer = 0;
-    //SF_LOG_DEBUG("bg.battlefield", "Instantiating BattlefieldMgr");
-}
-
 BattlefieldMgr::~BattlefieldMgr()
 {
     //SF_LOG_DEBUG("bg.battlefield", "Deleting BattlefieldMgr");
