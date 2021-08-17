@@ -27823,31 +27823,32 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
 {
     ObjectGuid guid = item->GetGUID();
     WorldPacket data(SMSG_ITEM_PURCHASE_REFUND_RESULT, 1 + 1 + 8 + 4 * 8 + 4 + 4 * 8);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
+    data.WriteGuidMask(guid, 3, 1, 5, 6, 4, 0, 7);
     data.WriteBit(!error);
-    data.WriteBit(guid[2]);
-    data.WriteBit(item->GetPaidMoney() > 0);
+    data.WriteGuidMask(guid, 2);
     data.FlushBits();
 
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
+    data << uint8(error);
+    data.WriteGuidBytes(guid, 5, 3);
+
     if (!error)
     {
+        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i) // item cost data
+        {
+            data << uint32(iece->RequiredItemCount[i]);
+            data << uint32(iece->RequiredItem[i]);
+        }
+
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
         {
+            
             if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
             {
                 data << uint32(0);
                 data << uint32(0);
                 continue;
             }
-
+            
             CurrencyTypesEntry const* currencyType = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
             uint32 precision = (currencyType && currencyType->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
@@ -27855,22 +27856,10 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
             data << uint32(iece->RequiredCurrency[i]);
         }
 
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i) // item cost data
-        {
-            data << uint32(iece->RequiredItemCount[i]);
-            data << uint32(iece->RequiredItem[i]);
-        }
-
         data << uint32(item->GetPaidMoney());               // money cost
     }
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[2]);
-
+    data.WriteGuidBytes(guid, 1, 7, 4, 6, 0, 2);
     GetSession()->SendPacket(&data);
 }
 
@@ -27884,6 +27873,7 @@ void Player::RefundItem(Item* item)
 
     if (item->IsRefundExpired())    // item refund has expired
     {
+        SF_LOG_DEBUG("entities.player.items", "Item refund: item refund expired!");
         item->SetNotRefundable(this);
         SendItemRefundResult(item, NULL, 10);
         return;
