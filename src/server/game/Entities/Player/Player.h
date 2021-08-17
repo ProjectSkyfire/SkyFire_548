@@ -198,12 +198,12 @@ enum class PlayerCurrencyState
 
 struct PlayerCurrency
 {
-    PlayerCurrency() : state(PlayerCurrencyState::PLAYERCURRENCY_UNCHANGED), totalCount(0), weekCount(0), seasonCount(0), flags(0) { }
+    PlayerCurrency() : state(PlayerCurrencyState::PLAYERCURRENCY_UNCHANGED), Quantity(0), WeeklyQuantity(0), TrackedQuantity(0), Flags(0) { }
     PlayerCurrencyState state;
-    uint32 totalCount;
-    uint32 weekCount;
-    uint32 seasonCount;
-    uint8 flags;
+    uint32 Quantity;
+    uint32 WeeklyQuantity;
+    uint32 TrackedQuantity;
+    uint8 Flags;
 };
 
 typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;

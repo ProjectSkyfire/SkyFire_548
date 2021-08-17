@@ -7328,8 +7328,9 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     // victim_rank [0, 20+] HK: <>
     WorldPacket data(SMSG_PVP_CREDIT, 4+8+4);
     data << uint32(honor);
-    data << uint64(victim_guid);
     data << uint32(victim_rank);
+    data.WriteGuidMask(victim_guid, 4, 2, 5, 3, 0, 6, 1, 7);
+    data.WriteGuidBytes(victim_guid, 6, 7, 5, 0, 1, 3, 4, 2);
 
     GetSession()->SendPacket(&data);
 
@@ -7386,10 +7387,10 @@ void Player::_LoadCurrency(PreparedQueryResult result)
 
         PlayerCurrency cur;
         cur.state = PlayerCurrencyState::PLAYERCURRENCY_UNCHANGED;
-        cur.weekCount = fields[1].GetUInt32();
-        cur.totalCount = fields[2].GetUInt32();
-        cur.seasonCount = fields [3].GetUInt32();
-        cur.flags = fields [4].GetUInt8();
+        cur.Quantity = fields[1].GetUInt32();
+        cur.WeeklyQuantity = fields[2].GetUInt32();
+        cur.TrackedQuantity = fields[3].GetUInt32();
+        cur.Flags = fields[4].GetUInt8();
 
         // load total conquest cap. should be after insert.
         if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
@@ -7417,18 +7418,18 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_PLAYER_CURRENCY);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt16(1, itr->first);
-                stmt->setUInt32(2, itr->second.weekCount);
-                stmt->setUInt32(3, itr->second.totalCount);
-                stmt->setUInt32(4, itr->second.seasonCount);
-                stmt->setUInt8(5, itr->second.flags);
+                stmt->setUInt32(2, itr->second.Quantity);
+                stmt->setUInt32(3, itr->second.WeeklyQuantity);
+                stmt->setUInt32(4, itr->second.TrackedQuantity);
+                stmt->setUInt8(5, itr->second.Flags);
                 trans->Append(stmt);
                 break;
             case PlayerCurrencyState::PLAYERCURRENCY_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_PLAYER_CURRENCY);
-                stmt->setUInt32(0, itr->second.weekCount);
-                stmt->setUInt32(1, itr->second.totalCount);
-                stmt->setUInt32(2, GetGUIDLow());
-                stmt->setUInt16(3, itr->first);
+                stmt->setUInt32(0, itr->second.Quantity);
+                stmt->setUInt32(1, itr->second.WeeklyQuantity);
+                stmt->setUInt32(2, itr->second.TrackedQuantity);
+                stmt->setUInt8(3, itr->second.Flags);
                 stmt->setUInt32(4, GetGUIDLow());
                 stmt->setUInt16(5, itr->first);
                 trans->Append(stmt);
@@ -7447,7 +7448,6 @@ void Player::SendNewCurrency(uint32 id) const
     if (itr == _currencyStorage.end())
         return;
 
-    ByteBuffer currencyData;
     WorldPacket packet(SMSG_SETUP_CURRENCY, 3 + 1 + 4 + 4 + 4 + 4);
     packet.WriteBits(1, 21);
 
@@ -7456,36 +7456,37 @@ void Player::SendNewCurrency(uint32 id) const
         return;
 
     uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-    uint32 weekCount = itr->second.weekCount / precision;
-    uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-    uint32 seasonCount = 0;
+    uint32 WeeklyQuantity = itr->second.WeeklyQuantity / precision;
+    uint32 weekCap = GetCurrencyWeekCap(entry);
+    uint32 TrackedQuantity = itr->second.TrackedQuantity;
+        
 
-    packet.WriteBit(seasonCount);
-    packet.WriteBits(0, 5); // some flags
-    packet.WriteBit(weekCap);
-    packet.WriteBit(weekCount);
-
-    if (weekCount)
-        currencyData << uint32(weekCount);
-
-    currencyData << uint32(entry->ID);
-
-    if (seasonCount)
-        currencyData << uint32(seasonCount);
-
-    currencyData << uint32(itr->second.totalCount / precision);
-
-    if (weekCap)
-        currencyData << uint32(weekCap);
+    packet.WriteBit(TrackedQuantity); //28
+    packet.WriteBits(0, 5); // some flags 32
+    packet.WriteBit(weekCap); //20
+    packet.WriteBit(WeeklyQuantity); //12
 
     packet.FlushBits();
-    packet.append(currencyData);
+
+    if (WeeklyQuantity) //12
+        packet << uint32(WeeklyQuantity); //8
+
+    packet << uint32(entry->ID);
+
+    if (TrackedQuantity) //28
+        packet << uint32(TrackedQuantity);  //24
+
+    packet << uint32(itr->second.Quantity);
+
+    if (weekCap) //20
+        packet << uint32(weekCap); //16
+
     GetSession()->SendPacket(&packet);
 }
 
 void Player::SendCurrencies() const
 {
-    ByteBuffer currencyData;
+    ByteBuffer buff;
     WorldPacket packet(SMSG_SETUP_CURRENCY, 3 + (_currencyStorage.size() * (1 + 4 + 4 + 4 + 4)));
     size_t count_pos = packet.bitwpos();
     packet.WriteBits(_currencyStorage.size(), 21);
@@ -7500,34 +7501,34 @@ void Player::SendCurrencies() const
             continue;
 
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-        uint32 weekCount = itr->second.weekCount / precision;
-        uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-        uint32 seasonCount = 0;
+        uint32 WeeklyQuantity = itr->second.WeeklyQuantity / precision;
+        uint32 weekCap = GetCurrencyWeekCap(entry);
+        uint32 TrackedQuantity = itr->second.TrackedQuantity;
 
-        packet.WriteBit(seasonCount);
+        packet.WriteBit(TrackedQuantity);
         packet.WriteBits(0, 5); // some flags
         packet.WriteBit(weekCap);
-        packet.WriteBit(weekCount);
+        packet.WriteBit(WeeklyQuantity);
 
-        if (weekCount)
-            currencyData << uint32(weekCount);
+        if (WeeklyQuantity)
+            buff << uint32(WeeklyQuantity);
 
-        currencyData << uint32(entry->ID);
+        buff << uint32(entry->ID);
 
-        if (seasonCount)
-            currencyData << uint32(seasonCount);
+        if (TrackedQuantity)
+            buff << uint32(TrackedQuantity);
 
-        currencyData << uint32(itr->second.totalCount / precision);
+        buff << uint32(itr->second.Quantity);
 
         if (weekCap)
-            currencyData << uint32(weekCap);
+            buff << uint32(weekCap);
 
         ++count;
     }
 
-    packet.FlushBits();
-    packet.append(currencyData);
     packet.PutBits(count_pos, count, 21);
+    packet.FlushBits();
+    packet.append(buff);
     GetSession()->SendPacket(&packet);
 }
 
@@ -7556,7 +7557,7 @@ uint32 Player::GetCurrency(uint32 id, bool usePrecision) const
     CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
     uint32 precision = (usePrecision && currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-    return itr->second.totalCount / precision;
+    return itr->second.Quantity / precision;
 }
 
 uint32 Player::GetCurrencyOnWeek(uint32 id, bool usePrecision) const
@@ -7568,13 +7569,13 @@ uint32 Player::GetCurrencyOnWeek(uint32 id, bool usePrecision) const
     CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
     uint32 precision = (usePrecision && currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
 
-    return itr->second.weekCount / precision;
+    return itr->second.WeeklyQuantity / precision;
 }
 
 bool Player::HasCurrency(uint32 id, uint32 count) const
 {
     PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
-    return itr != _currencyStorage.end() && itr->second.totalCount >= count;
+    return itr != _currencyStorage.end() && itr->second.Quantity >= count;
 }
 
 void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/)
@@ -7588,23 +7589,27 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     if (!ignoreMultipliers)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
-    int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
-    uint32 oldTotalCount = 0;
-    uint32 oldWeekCount = 0;
+    //int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
+    uint32 oldQuantity = 0;
+    uint32 oldWeekQuantity = 0;
+    uint32 oldTrackedQuantity = 0;
     PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
     if (itr == _currencyStorage.end())
     {
         PlayerCurrency cur;
         cur.state = PlayerCurrencyState::PLAYERCURRENCY_NEW;
-        cur.totalCount = 0;
-        cur.weekCount = 0;
+        cur.Quantity = 0;
+        cur.WeeklyQuantity = 0;
+        cur.TrackedQuantity = 0;
+        cur.Flags = 0;
         _currencyStorage[id] = cur;
         itr = _currencyStorage.find(id);
     }
     else
     {
-        oldTotalCount = itr->second.totalCount;
-        oldWeekCount = itr->second.weekCount;
+        oldQuantity = itr->second.Quantity;
+        oldWeekQuantity = itr->second.WeeklyQuantity;
+        oldTrackedQuantity = itr->second.TrackedQuantity;
     }
 
     // count can't be more then weekCap if used (weekCap > 0)
@@ -7617,36 +7622,41 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     if (totalCap && count > int32(totalCap))
         count = totalCap;
 
-    int32 newTotalCount = int32(oldTotalCount) + count;
-    if (newTotalCount < 0)
-        newTotalCount = 0;
+    int32 newQuantity = int32(oldQuantity) + count;
+    if (newQuantity < 0)
+        newQuantity = 0;
 
-    int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count : 0);
-    if (newWeekCount < 0)
-        newWeekCount = 0;
+    int32 newWeekQuantity = int32(oldWeekQuantity) + (count > 0 ? count : 0);
+    if (newWeekQuantity < 0)
+        newWeekQuantity = 0;
+
+    int32 newTrackedQuantity = int32(oldTrackedQuantity) + (count > 0 ? count : 0);
+    if (newTrackedQuantity < 0)
+        newTrackedQuantity = 0;
 
     // if we get more then weekCap just set to limit
-    if (weekCap && int32(weekCap) < newWeekCount)
+    if (weekCap && int32(weekCap) < newWeekQuantity)
     {
-        newWeekCount = int32(weekCap);
+        newWeekQuantity = int32(weekCap);
         // weekCap - oldWeekCount always >= 0 as we set limit before!
-        newTotalCount = oldTotalCount + (weekCap - oldWeekCount);
+        newQuantity = oldQuantity + (weekCap - oldWeekQuantity);
     }
 
     // if we get more then totalCap set to maximum;
-    if (totalCap && int32(totalCap) < newTotalCount)
+    if (totalCap && int32(totalCap) < newQuantity)
     {
-        newTotalCount = int32(totalCap);
-        newWeekCount = weekCap;
+        newQuantity = int32(totalCap);
+        newWeekQuantity = weekCap;
     }
 
-    if (uint32(newTotalCount) != oldTotalCount)
+    if (uint32(newQuantity) != oldQuantity)
     {
         if (itr->second.state != PlayerCurrencyState::PLAYERCURRENCY_NEW)
             itr->second.state = PlayerCurrencyState::PLAYERCURRENCY_CHANGED;
 
-        itr->second.totalCount = newTotalCount;
-        itr->second.weekCount = newWeekCount;
+        itr->second.Quantity = newQuantity;
+        itr->second.WeeklyQuantity = newWeekQuantity;
+        itr->second.TrackedQuantity = newTrackedQuantity;
 
         if (count > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
@@ -7663,6 +7673,23 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
         WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 
+        packet << uint32(id); // 44 Type
+        packet << int32(newQuantity); // 16 Quantity
+        packet << uint32(itr->second.Flags); // 24 Flags
+
+        packet.WriteBit(newTrackedQuantity); //32
+        packet.WriteBit(!printLog); //20 SuppressChatLog
+        packet.WriteBit(newWeekQuantity); //40
+
+        packet.FlushBits();
+
+        if (newTrackedQuantity)
+            packet << uint32(newTrackedQuantity); // 28 TrackedQuantity
+
+        if (newWeekQuantity)
+            packet << uint32(newWeekQuantity); // 36 WeeklyQuantity
+
+        /*
         packet.WriteBit(weekCap != 0);
         packet.WriteBit(0); // hasSeasonCount
         packet.WriteBit(!printLog); // print in log
@@ -7673,7 +7700,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         packet << uint32(id);
         if (weekCap)
             packet << uint32(newWeekCount / precision);
-
+            */
         GetSession()->SendPacket(&packet);
     }
 }
@@ -7685,8 +7712,7 @@ void Player::SetCurrency(uint32 id, uint32 count, bool /*printLog*/ /*= true*/)
     {
         PlayerCurrency cur;
         cur.state = PlayerCurrencyState::PLAYERCURRENCY_NEW;
-        cur.totalCount = count;
-        cur.weekCount = 0;
+        cur.Quantity = count;
         _currencyStorage[id] = cur;
     }
 }
@@ -7718,7 +7744,7 @@ void Player::ResetCurrencyWeekCap()
 
     for (PlayerCurrenciesMap::iterator itr = _currencyStorage.begin(); itr != _currencyStorage.end(); ++itr)
     {
-        itr->second.weekCount = 0;
+        itr->second.WeeklyQuantity = 0;
         itr->second.state = PlayerCurrencyState::PLAYERCURRENCY_CHANGED;
     }
 
