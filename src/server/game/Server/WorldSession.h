@@ -957,7 +957,7 @@ class WorldSession
 
         void HandleItemRefundInfoRequest(WorldPacket& recvData);
         void HandleItemRefund(WorldPacket& recvData);
-        void SendItemExpirePurchaseRefund(ObjectGuid itemGuid);
+        //void SendItemExpirePurchaseRefund(ObjectGuid itemGuid);
 
         void HandleChannelVoiceOnOpcode(WorldPacket& recvData);
         void HandleVoiceSessionEnableOpcode(WorldPacket& recvData);

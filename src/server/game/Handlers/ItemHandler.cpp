@@ -1914,6 +1914,7 @@ void WorldSession::SendReforgeResult(bool success)
     SendPacket(&data);
 }
 
+/*
 void WorldSession::SendItemExpirePurchaseRefund(ObjectGuid itemGuid)
 {
     WorldPacket data(SMSG_ITEM_EXPIRE_PURCHASE_REFUND, 8);
@@ -1938,3 +1939,4 @@ void WorldSession::SendItemExpirePurchaseRefund(ObjectGuid itemGuid)
 
     SendPacket(&data);
 }
+*/
