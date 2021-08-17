@@ -10352,12 +10352,8 @@ void Player::SetSheath(SheathState sheathed)
 uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) const
 {
     uint8 playerClass = getClass();
+    uint8 slots[4] = { NULL_SLOT, NULL_SLOT, NULL_SLOT, NULL_SLOT };
 
-    uint8 slots[4] = { };
-    slots[0] = NULL_SLOT;
-    slots[1] = NULL_SLOT;
-    slots[2] = NULL_SLOT;
-    slots[3] = NULL_SLOT;
     switch (proto->InventoryType)
     {
         case INVTYPE_HEAD:
