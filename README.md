@@ -44,10 +44,10 @@ For further information on the SkyFire project, please visit our project website
 + Processor with SSE2 support
 + ACE = 6.4.5  (Linux only)
 + MySQL = 8.0 (Windows / Linux)
-+ CMake = 3.20.2/3.16.3 (Windows / Linux)
++ CMake = 3.21.1/3.16.3 (Windows / Linux)
 + OpenSSL = 1.1.1 (Windows / Linux)
-+ GCC = 9.2.1 (Linux only)
-+ MS Visual Studio = 16 (2019) (Windows only)
++ GCC = 11.2.0 (Linux only)
++ MS Visual Studio = 17 (2022) (Windows only)
 
 ## Install
 Detailed installation guides are available in the wiki for
