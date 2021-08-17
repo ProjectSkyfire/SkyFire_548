@@ -188,7 +188,7 @@ struct SpellModifier
     Aura* const ownerAura;
 };
 
-enum PlayerCurrencyState
+enum class PlayerCurrencyState
 {
     PLAYERCURRENCY_UNCHANGED = 0,
     PLAYERCURRENCY_CHANGED   = 1,
@@ -198,6 +198,7 @@ enum PlayerCurrencyState
 
 struct PlayerCurrency
 {
+    PlayerCurrency() : state(PlayerCurrencyState::PLAYERCURRENCY_UNCHANGED), totalCount(0), weekCount(0), seasonCount(0), flags(0) { }
     PlayerCurrencyState state;
     uint32 totalCount;
     uint32 weekCount;
@@ -307,6 +308,7 @@ struct CUFProfile
 
 struct SpellCooldown
 {
+    SpellCooldown() : end(time(NULL)), itemid(0) { }
     time_t end;
     uint16 itemid;
 };

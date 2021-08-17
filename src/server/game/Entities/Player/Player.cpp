@@ -6653,7 +6653,7 @@ void Player::SendActionButtons(uint32 state) const
 {
     WorldPacket data(SMSG_UPDATE_ACTION_BUTTONS, 1+(MAX_ACTION_BUTTONS*8));
 
-    uint8 buttons [MAX_ACTION_BUTTONS][8];
+    uint8 buttons[MAX_ACTION_BUTTONS][8] = { };
     ActionButtonPACKET* buttonsTab = (ActionButtonPACKET*)buttons;
     memset(buttons, 0, MAX_ACTION_BUTTONS*8);
 
@@ -7385,7 +7385,7 @@ void Player::_LoadCurrency(PreparedQueryResult result)
             continue;
 
         PlayerCurrency cur;
-        cur.state = PLAYERCURRENCY_UNCHANGED;
+        cur.state = PlayerCurrencyState::PLAYERCURRENCY_UNCHANGED;
         cur.weekCount = fields[1].GetUInt32();
         cur.totalCount = fields[2].GetUInt32();
         cur.seasonCount = fields [3].GetUInt32();
@@ -7413,7 +7413,7 @@ void Player::_SaveCurrency(SQLTransaction& trans)
 
         switch (itr->second.state)
         {
-            case PLAYERCURRENCY_NEW:
+            case PlayerCurrencyState::PLAYERCURRENCY_NEW:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_PLAYER_CURRENCY);
                 stmt->setUInt32(0, GetGUIDLow());
                 stmt->setUInt16(1, itr->first);
@@ -7423,7 +7423,7 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 stmt->setUInt8(5, itr->second.flags);
                 trans->Append(stmt);
                 break;
-            case PLAYERCURRENCY_CHANGED:
+            case PlayerCurrencyState::PLAYERCURRENCY_CHANGED:
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_PLAYER_CURRENCY);
                 stmt->setUInt32(0, itr->second.weekCount);
                 stmt->setUInt32(1, itr->second.totalCount);
@@ -7437,7 +7437,7 @@ void Player::_SaveCurrency(SQLTransaction& trans)
                 break;
         }
 
-        itr->second.state = PLAYERCURRENCY_UNCHANGED;
+        itr->second.state = PlayerCurrencyState::PLAYERCURRENCY_UNCHANGED;
     }
 }
 
@@ -7595,7 +7595,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     if (itr == _currencyStorage.end())
     {
         PlayerCurrency cur;
-        cur.state = PLAYERCURRENCY_NEW;
+        cur.state = PlayerCurrencyState::PLAYERCURRENCY_NEW;
         cur.totalCount = 0;
         cur.weekCount = 0;
         _currencyStorage[id] = cur;
@@ -7642,8 +7642,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
     if (uint32(newTotalCount) != oldTotalCount)
     {
-        if (itr->second.state != PLAYERCURRENCY_NEW)
-            itr->second.state = PLAYERCURRENCY_CHANGED;
+        if (itr->second.state != PlayerCurrencyState::PLAYERCURRENCY_NEW)
+            itr->second.state = PlayerCurrencyState::PLAYERCURRENCY_CHANGED;
 
         itr->second.totalCount = newTotalCount;
         itr->second.weekCount = newWeekCount;
@@ -7684,7 +7684,7 @@ void Player::SetCurrency(uint32 id, uint32 count, bool /*printLog*/ /*= true*/)
     if (itr == _currencyStorage.end())
     {
         PlayerCurrency cur;
-        cur.state = PLAYERCURRENCY_NEW;
+        cur.state = PlayerCurrencyState::PLAYERCURRENCY_NEW;
         cur.totalCount = count;
         cur.weekCount = 0;
         _currencyStorage[id] = cur;
@@ -7719,7 +7719,7 @@ void Player::ResetCurrencyWeekCap()
     for (PlayerCurrenciesMap::iterator itr = _currencyStorage.begin(); itr != _currencyStorage.end(); ++itr)
     {
         itr->second.weekCount = 0;
-        itr->second.state = PLAYERCURRENCY_CHANGED;
+        itr->second.state = PlayerCurrencyState::PLAYERCURRENCY_CHANGED;
     }
 
     WorldPacket data(SMSG_WEEKLY_RESET_CURRENCY, 0);
@@ -10353,7 +10353,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
 {
     uint8 playerClass = getClass();
 
-    uint8 slots[4];
+    uint8 slots[4] = { };
     slots[0] = NULL_SLOT;
     slots[1] = NULL_SLOT;
     slots[2] = NULL_SLOT;
@@ -18427,8 +18427,8 @@ void Player::_LoadAuras(PreparedQueryResult result, uint32 timediff)
         do
         {
             Field* fields = result->Fetch();
-            int32 damage[3];
-            int32 baseDamage[3];
+            int32 damage[3] = { };
+            int32 baseDamage[3] = { };
             uint64 caster_guid = fields[0].GetUInt64();
             uint32 spellid = fields[1].GetUInt32();
             uint32 effMask = fields[2].GetUInt32();
@@ -20150,8 +20150,8 @@ void Player::_SaveAuras(SQLTransaction& trans)
 
         Aura* aura = itr->second;
 
-        int32 damage[MAX_SPELL_EFFECTS];
-        int32 baseDamage[MAX_SPELL_EFFECTS];
+        int32 damage[MAX_SPELL_EFFECTS] = { };
+        int32 baseDamage[MAX_SPELL_EFFECTS] = { };
         uint32 effMask = 0;
         uint8 recalculateMask = 0;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)

@@ -22,6 +22,7 @@
 
 struct QEmote
 {
+    QEmote() : _Emote(0), _Delay(0) { }
     uint32 _Emote;
     uint32 _Delay;
 };
