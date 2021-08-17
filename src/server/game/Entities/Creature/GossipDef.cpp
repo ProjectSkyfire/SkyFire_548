@@ -443,23 +443,19 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         objData << uint32(objective->ObjectId);
     }
 
-    uint32 RewardItemDisplayId[QUEST_REWARDS_COUNT];
-    uint32 RewardChoiceItemDisplayId[QUEST_REWARD_CHOICES_COUNT];
+    uint32 RewardItemDisplayId[QUEST_REWARDS_COUNT] = { };
+    uint32 RewardChoiceItemDisplayId[QUEST_REWARD_CHOICES_COUNT] = { };
 
     for (uint8 i = 0; i < QUEST_REWARDS_COUNT; i++)
     {
         if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardItemId[i]))
             RewardItemDisplayId[i] = itemTemplate->DisplayInfoID;
-        else
-            RewardItemDisplayId[i] = 0;
     }
 
     for (uint8 i = 0; i < QUEST_REWARD_CHOICES_COUNT; i++)
     {
         if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[i]))
             RewardChoiceItemDisplayId[i] = itemTemplate->DisplayInfoID;
-        else
-            RewardChoiceItemDisplayId[i] = 0;
     }
 
     ObjectGuid QuestGiverGUID = npcGUID;
@@ -821,18 +817,18 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
-    uint32 rewItemDisplayId[QUEST_REWARDS_COUNT];
+    uint32 rewItemDisplayId[QUEST_REWARDS_COUNT] = { };
     for (uint8 i = 0; i < QUEST_REWARDS_COUNT; i++)
     {
-        ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardItemId[i]);
-        rewItemDisplayId[i] = itemTemplate ? itemTemplate->DisplayInfoID : 0;
+        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardItemId[i]))
+            rewItemDisplayId[i] = itemTemplate->DisplayInfoID;
     }
 
-    uint32 rewChoiceItemDisplayId[QUEST_REWARD_CHOICES_COUNT];
+    uint32 rewChoiceItemDisplayId[QUEST_REWARD_CHOICES_COUNT] = { };
     for (uint8 i = 0; i < QUEST_REWARD_CHOICES_COUNT; i++)
     {
-        ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[i]);
-        rewChoiceItemDisplayId[i] = itemTemplate ? itemTemplate->DisplayInfoID : 0;
+        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[i]))
+            rewChoiceItemDisplayId[i] = itemTemplate->DisplayInfoID;
     }
 
     uint32 rewEmoteCount = 0;

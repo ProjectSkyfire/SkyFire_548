@@ -51,7 +51,7 @@ class Corpse : public WorldObject, public GridObject<Corpse>
 {
     public:
         explicit Corpse(CorpseType type = CorpseType::CORPSE_BONES);
-        ~Corpse();
+        ~Corpse() { }
 
         void AddToWorld();
         void RemoveFromWorld();

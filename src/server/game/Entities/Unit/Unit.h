@@ -376,6 +376,7 @@ typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
 
 struct SpellImmune
 {
+    SpellImmune() : type(0), spellId(0) { }
     uint32 type;
     uint32 spellId;
 };
@@ -829,7 +830,7 @@ struct DiminishingReturn
     uint32                  hitCount;
 };
 
-enum MeleeHitOutcome
+enum class MeleeHitOutcome
 {
     MELEE_HIT_EVADE, MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY,
     MELEE_HIT_GLANCING, MELEE_HIT_CRIT, MELEE_HIT_CRUSHING, MELEE_HIT_NORMAL
@@ -1039,8 +1040,12 @@ class ProcEventInfo
 // Need create structure like in SMSG_ATTACKER_STATE_UPDATE opcode
 struct CalcDamageInfo
 {
-    Unit  *attacker;             // Attacker
-    Unit  *target;               // Target for damage
+    CalcDamageInfo() : attacker(NULL), target(NULL), damageSchoolMask(0), damage(0), absorb(0), resist(0), blocked_amount(0),
+        HitInfo(0), TargetState(VictimState::VICTIMSTATE_MISS), attackType(WeaponAttackType::BASE_ATTACK), procAttacker(0),
+        procVictim(0), procEx(0), cleanDamage(0), hitOutCome(MeleeHitOutcome::MELEE_HIT_EVADE) { }
+
+    Unit*  attacker;             // Attacker
+    Unit*  target;               // Target for damage
     uint32 damageSchoolMask;
     uint32 damage;
     uint32 absorb;

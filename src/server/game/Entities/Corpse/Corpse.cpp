@@ -37,8 +37,6 @@ Corpse::Corpse(CorpseType type) : WorldObject(type != CorpseType::CORPSE_BONES),
     m_valuesCount = CORPSE_END;
 }
 
-Corpse::~Corpse() { }
-
 void Corpse::AddToWorld()
 {
     ///- Register the corpse for guid lookup

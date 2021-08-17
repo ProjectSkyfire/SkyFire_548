@@ -29,7 +29,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>
 {
     public:
         AreaTrigger();
-        ~AreaTrigger();
+        ~AreaTrigger() { }
 
         void AddToWorld();
         void RemoveFromWorld();

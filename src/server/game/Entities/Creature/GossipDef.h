@@ -154,6 +154,7 @@ typedef std::map<uint32, GossipMenuItemData> GossipMenuItemDataContainer;
 
 struct QuestMenuItem
 {
+    QuestMenuItem() : QuestId(0), QuestIcon(0) { }
     uint32  QuestId;
     uint8   QuestIcon;
 };

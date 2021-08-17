@@ -33,10 +33,6 @@ AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0)
     m_valuesCount = AREATRIGGER_END;
 }
 
-AreaTrigger::~AreaTrigger()
-{
-}
-
 void AreaTrigger::AddToWorld()
 {
     ///- Register the AreaTrigger for guid lookup and for caster

@@ -91,7 +91,7 @@ VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint32 extend
 uint32 CreatureTemplate::GetRandomValidModelId() const
 {
     uint8 c = 0;
-    uint32 modelIDs[4];
+    uint32 modelIDs[4] = { };
 
     if (Modelid1) modelIDs[c++] = Modelid1;
     if (Modelid2) modelIDs[c++] = Modelid2;
