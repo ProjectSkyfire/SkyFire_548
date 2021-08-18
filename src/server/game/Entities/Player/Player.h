@@ -1242,6 +1242,7 @@ struct PlayerTalentInfo
     PlayerTalentInfo(PlayerTalentInfo const&);
 };
 
+/*
 #define RESEARCH_CONTINENT_COUNT    5
 #define RESEARCH_BRANCH_COUNT       10
 #define MAX_DIGSITES_PER_CONTINENT  4
@@ -1292,9 +1293,10 @@ struct ResearchProjectHistory
     uint32 researchCount;
     uint32 firstResearchTimestamp;
 };
+*/
 
-typedef UNORDERED_MAP<uint32 /*projectId*/, ResearchProjectHistory> ResearchHistoryMap;
-typedef UNORDERED_MAP<uint32 /*branchId*/, uint32 /*projectId*/> ResearchProjectMap;
+//typedef UNORDERED_MAP<uint32 /*projectId*/, ResearchProjectHistory> ResearchHistoryMap;
+//typedef UNORDERED_MAP<uint32 /*branchId*/, uint32 /*projectId*/> ResearchProjectMap;
 
 enum AttackSwingError
 {
@@ -3482,11 +3484,12 @@ class Player : public Unit, public GridObject<Player>
 
     CUFProfile* _CUFProfiles [MAX_CUF_PROFILES];
 
+    /*
     // Archaeology
     ResearchDigsite* _researchDigsites [RESEARCH_CONTINENT_COUNT] [MAX_DIGSITES_PER_CONTINENT];
     ResearchProjectMap _researchProjects;
     ResearchHistoryMap _researchHistory;
-
+    */
     private:
     // internal common parts for CanStore/StoreItem functions
     InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
