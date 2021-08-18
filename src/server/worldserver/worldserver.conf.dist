@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2020012200
+ConfVersion=2021081800
 
 ###################################################################################################
 # SECTION INDEX
@@ -2937,11 +2937,11 @@ Currency.StartHonorPoints = 0
 
 #
 #    Currency.MaxHonorPoints
-#        Amount honor points a player can have
-#        Default: 4000
+#        Amount honor points a player can have without precision.
+#        Default: 400000
 #
 
-Currency.MaxHonorPoints = 4000
+Currency.MaxHonorPoints = 400000
 
 #
 #    Currency.StartJusticePoints

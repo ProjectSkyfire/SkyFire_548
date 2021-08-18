@@ -7469,14 +7469,14 @@ void Player::SendNewCurrency(uint32 id) const
     packet.FlushBits();
 
     if (WeeklyQuantity) //12
-        packet << uint32(WeeklyQuantity); //8
+        packet << uint32(WeeklyQuantity / precision); //8
 
     packet << uint32(entry->ID);
 
     if (TrackedQuantity) //28
-        packet << uint32(TrackedQuantity);  //24
+        packet << uint32(TrackedQuantity / precision);  //24
 
-    packet << uint32(itr->second.Quantity);
+    packet << uint32(itr->second.Quantity / precision);
 
     if (weekCap) //20
         packet << uint32(weekCap); //16
@@ -7511,14 +7511,14 @@ void Player::SendCurrencies() const
         packet.WriteBit(WeeklyQuantity);
 
         if (WeeklyQuantity)
-            buff << uint32(WeeklyQuantity);
+            buff << uint32(WeeklyQuantity / precision);
 
         buff << uint32(entry->ID);
 
         if (TrackedQuantity)
-            buff << uint32(TrackedQuantity);
+            buff << uint32(TrackedQuantity / precision);
 
-        buff << uint32(itr->second.Quantity);
+        buff << uint32(itr->second.Quantity / precision);
 
         if (weekCap)
             buff << uint32(weekCap);
@@ -7589,7 +7589,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     if (!ignoreMultipliers)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
-    //int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
+    int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
     uint32 oldQuantity = 0;
     uint32 oldWeekQuantity = 0;
     uint32 oldTrackedQuantity = 0;
@@ -7674,7 +7674,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 
         packet << uint32(id); // 44 Type
-        packet << int32(newQuantity); // 16 Quantity
+        packet << int32(newQuantity / precision); // 16 Quantity
         packet << uint32(itr->second.Flags); // 24 Flags
 
         packet.WriteBit(newTrackedQuantity); //32
@@ -7684,10 +7684,10 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         packet.FlushBits();
 
         if (newTrackedQuantity)
-            packet << uint32(newTrackedQuantity); // 28 TrackedQuantity
+            packet << uint32(newTrackedQuantity / precision); // 28 TrackedQuantity
 
         if (newWeekQuantity)
-            packet << uint32(newWeekQuantity); // 36 WeeklyQuantity
+            packet << uint32(newWeekQuantity / precision); // 36 WeeklyQuantity
 
         /*
         packet.WriteBit(weekCap != 0);
