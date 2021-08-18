@@ -3797,7 +3797,7 @@ enum DiminishingReturnsType
 };
 
 // Diminishing Return Groups
-enum DiminishingGroup
+enum class DiminishingGroup
 {
     DIMINISHING_NONE                = 0,
     DIMINISHING_BANISH              = 1,

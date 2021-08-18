@@ -2225,7 +2225,7 @@ void Aura::CallScriptAfterEffectProcHandlers(AuraEffect const* aurEff, AuraAppli
 }
 
 UnitAura::UnitAura(SpellInfo const* spellproto, uint32 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID)
-    : Aura(spellproto, owner, caster, castItem, casterGUID), m_AuraDRGroup(DIMINISHING_NONE)
+    : Aura(spellproto, owner, caster, castItem, casterGUID), m_AuraDRGroup(DiminishingGroup::DIMINISHING_NONE)
 {
     LoadScripts();
     _InitEffects(effMask, caster, baseAmount);
@@ -2237,7 +2237,8 @@ void UnitAura::_ApplyForTarget(Unit* target, Unit* caster, AuraApplication * aur
     Aura::_ApplyForTarget(target, caster, aurApp);
 
     // register aura diminishing on apply
-    if (DiminishingGroup group = GetDiminishGroup())
+    DiminishingGroup group = GetDiminishGroup();
+    if (group != DiminishingGroup::DIMINISHING_NONE)
         target->ApplyDiminishingAura(group, true);
 }
 
@@ -2246,7 +2247,8 @@ void UnitAura::_UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * a
     Aura::_UnapplyForTarget(target, caster, aurApp);
 
     // unregister aura diminishing (and store last time)
-    if (DiminishingGroup group = GetDiminishGroup())
+    DiminishingGroup group = GetDiminishGroup();
+    if (group != DiminishingGroup::DIMINISHING_NONE)
         target->ApplyDiminishingAura(group, false);
 }
 

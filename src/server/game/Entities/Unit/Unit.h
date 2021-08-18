@@ -820,9 +820,7 @@ enum UnitTypeMask
 
 struct DiminishingReturn
 {
-    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count)
-        : DRGroup(group), stack(0), hitTime(t), hitCount(count)
-    { }
+    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count) : DRGroup(group), stack(0), hitTime(t), hitCount(count) { }
 
     DiminishingGroup        DRGroup : 16;
     uint16                  stack : 16;
@@ -2212,9 +2210,9 @@ class Unit : public WorldObject
     void _ApplyAura(AuraApplication * aurApp, uint32 effMask);
     void _UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMode);
     void _UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode);
-    void _RemoveNoStackAuraApplicationsDueToAura(Aura* aura);
+    
     void _RemoveNoStackAurasDueToAura(Aura* aura);
-    bool _IsNoStackAuraDueToAura(Aura* appliedAura, Aura* existingAura) const;
+
     void _RegisterAuraEffect(AuraEffect* aurEff, bool apply);
 
     // m_ownedAuras container management

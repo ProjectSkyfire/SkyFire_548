@@ -11357,7 +11357,7 @@ void Unit::IncrDiminishing(DiminishingGroup group)
 
 float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration)
 {
-    if (duration == -1 || group == DIMINISHING_NONE)
+    if (duration == -1 || group == DiminishingGroup::DIMINISHING_NONE)
         return 1.0f;
 
     // test pet/charm masters instead pets/charmeds
@@ -11378,7 +11378,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
 
     float mod = 1.0f;
 
-    if (group == DIMINISHING_TAUNT)
+    if (group == DiminishingGroup::DIMINISHING_TAUNT)
     {
         if (GetTypeId() == TypeID::TYPEID_UNIT && (ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))
         {

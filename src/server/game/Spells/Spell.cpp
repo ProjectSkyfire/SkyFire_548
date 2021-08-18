@@ -2676,7 +2676,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
     m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell);
-    if (m_diminishGroup)
+    if (m_diminishGroup != DiminishingGroup::DIMINISHING_NONE)
     {
         m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
         DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
@@ -3597,7 +3597,7 @@ void Spell::_handle_immediate_phase()
     m_spellAura = NULL;
     // initialize Diminishing Returns Data
     m_diminishLevel = DIMINISHING_LEVEL_1;
-    m_diminishGroup = DIMINISHING_NONE;
+    m_diminishGroup = DiminishingGroup::DIMINISHING_NONE;
 
     // handle some immediate features of the spell here
     HandleThreatSpells();
