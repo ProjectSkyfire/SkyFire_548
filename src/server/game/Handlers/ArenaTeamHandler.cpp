@@ -17,6 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+ /*
 #include "Player.h"
 #include "World.h"
 #include "WorldPacket.h"
@@ -39,7 +40,7 @@ void WorldSession::SendNotInArenaTeamPacket(uint8 type)
         data << uint8(type);                                // team type (2=2v2, 3=3v3, 5=5v5), can be used for custom types...
     SendPacket(&data);
 }
-
+*/
 /*
 +ERR_ARENA_NO_TEAM_II "You are not in a %dv%d arena team"
 
