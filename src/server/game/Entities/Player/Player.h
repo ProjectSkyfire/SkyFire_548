@@ -791,8 +791,7 @@ typedef std::map<uint32, EquipmentSet> EquipmentSets;
 
 struct ItemPosCount
 {
-    ItemPosCount(uint16 _pos, uint32 _count) : pos(_pos), count(_count)
-    { }
+    ItemPosCount(uint16 _pos, uint32 _count) : pos(_pos), count(_count) { }
     bool isContainedIn(std::vector<ItemPosCount> const& vec) const;
     uint16 pos;
     uint32 count;
@@ -1915,7 +1914,6 @@ class Player : public Unit, public GridObject<Player>
     void SaveGoldToDB(SQLTransaction& trans);
 
     static void SetUInt32ValueInArray(Tokenizer& data, uint16 index, uint32 value);
-    static void SetFloatValueInArray(Tokenizer& data, uint16 index, float value);
     static void Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
     static void SavePositionInDB(uint32 mapid, float x, float y, float z, float o, uint32 zone, uint64 guid);
 
@@ -2326,8 +2324,6 @@ class Player : public Unit, public GridObject<Player>
     bool UpdateCraftSkill(uint32 spellid);
     bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
     bool UpdateFishingSkill();
-
-    uint32 GetSpellByProto(ItemTemplate* proto);
 
     float GetHealthBonusFromStamina();
     void UpdateTalentSpecializationManaBonus();
@@ -3076,7 +3072,7 @@ class Player : public Unit, public GridObject<Player>
     uint32 GetAchievementPoints() const;
     bool HasAchieved(uint32 achievementId) const;
     void ResetAchievements();
-    void CheckAllAchievementCriteria();
+
     void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, bool evenIfCriteriaComplete = false);
     void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, uint64 miscValue3 = 0, Unit* unit = NULL);
     void StartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry, uint32 timeLost = 0);
@@ -3192,20 +3188,7 @@ class Player : public Unit, public GridObject<Player>
     void UpdateResearchProjects();
     void SendSurveryCastInfo(ResearchDigsite* digsite, bool success);
     */
-
-    void SetKnockBackTime(uint32 timer) { m_knockBackTimer = timer; }
-    uint32 GetKnockBackTime() const { return m_knockBackTimer;}
-
-    Creature* GetTransSpirit() { return transcendence_spirit; }
-    void SetTransSpirit(Creature* creature) { transcendence_spirit = creature; }
-
-    void setCurrentCustomVendorEntry(uint32 entry) { m_currentCustomVendorEntry = entry; }
-    uint32 getCurrentCustomVendorEntry() { return m_currentCustomVendorEntry; }
-    void setCurrentEnchanterEntry(uint32 entry) { m_currentEnchanterEntry = entry; }
-    uint32 getCurrentEnchanterEntry() { return m_currentEnchanterEntry; }
-    uint32 getEnchanterSlot() const { return m_currentEnchanterEntrySlot; }
-    void setEnchanterSlot(uint32 slot) { m_currentEnchanterEntrySlot = slot; }
-
+    
     protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;
@@ -3581,14 +3564,6 @@ class Player : public Unit, public GridObject<Player>
     uint32 _ConquestCurrencytotalWeekCap;
 
     BattlePetMgr* m_battlePetMgr;
-
-    uint32 m_knockBackTimer;
-
-    Creature* transcendence_spirit;
-
-    uint32 m_currentCustomVendorEntry;
-    uint32 m_currentEnchanterEntrySlot;
-    uint32 m_currentEnchanterEntry;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

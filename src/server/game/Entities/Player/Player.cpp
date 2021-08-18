@@ -37,7 +37,7 @@
 #include "ConditionMgr.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
-#include "DBCStructure.h"
+//#include "DBCStructure.h"
 #include "DB2Stores.h"
 #include "DisableMgr.h"
 #include "Formulas.h"
@@ -737,10 +737,6 @@ Player::Player(WorldSession* session): Unit(true)
     m_battlePetMgr = new BattlePetMgr(this);
 
     _ConquestCurrencytotalWeekCap = 0;
-
-    m_knockBackTimer = 0;
-
-    transcendence_spirit = NULL;
 }
 
 Player::~Player()

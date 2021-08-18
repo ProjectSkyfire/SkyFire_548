@@ -59,7 +59,6 @@ class Vehicle : public TransportBase
         uint8 GetAvailableSeatCount() const;
 
         bool AddPassenger(Unit* passenger, int8 seatId = -1);
-        void EjectPassenger(Unit* passenger, Unit* controller);
         Vehicle* RemovePassenger(Unit* passenger);
         void RelocatePassengers();
         void RemoveAllPassengers();
