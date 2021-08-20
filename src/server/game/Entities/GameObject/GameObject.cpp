@@ -802,6 +802,10 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
     if (!Create(guid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state, artKit))
         return false;
 
+    // unset flag 0x04 for questgiver objects if they have it. no idea why they have it.
+    if ((GetGOInfo()->type == GAMEOBJECT_TYPE_QUESTGIVER) && (GetGOInfo()->flags & GO_FLAG_INTERACT_COND))
+        RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
+
     if (data->phaseid)
         SetPhased(data->phaseid, false, true);
 
