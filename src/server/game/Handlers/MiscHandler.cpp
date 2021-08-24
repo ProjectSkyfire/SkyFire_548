@@ -240,8 +240,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
     for (uint8 i = 0; i < wordCount; i++)
         wordLens[i] = recvData.ReadBits(7);
 
-    recvData.FlushBits();
-
     std::wstring wWords[4];
     for (uint32 i = 0; i < wordCount; ++i)
     {
