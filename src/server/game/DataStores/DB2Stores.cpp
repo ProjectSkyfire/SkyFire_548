@@ -38,7 +38,7 @@ DB2Storage<BattlePetSpeciesStateEntry>      sBattlePetSpeciesStateStore(BattlePe
 //DB2Storage<BattlePetSpeciesXAbilityEntry>   sBattlePetSpeciesXAbilityStore(BattlePetSpeciesXAbilityfmt);
 //DB2Storage<BattlePetStateEntry>             sBattlePetStateStore(BattlePetStatefmt);
 //DB2Storage<BattlePetVisualEntry>            sBattlePetVisualStore(BattlePetVisualfmt);
-//DB2Storage<BroadcastTextEntry>              sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
+DB2Storage<BroadcastTextEntry>              sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
 //DB2Storage<CreatureDifficultyEntry>         sCreatureDifficultyStore(CreatureDifficultyfmt);
 //DB2Storage<CreatureEntry>                   sCreatureStore(Creaturefmt);
 //DB2Storage<GameObjectsEntry>                sGameObjectsStore(GameObjectsfmt);
@@ -141,7 +141,7 @@ void LoadDB2Stores(std::string const& dataPath)
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesXAbilityStore, db2Path, "BattlePetSpeciesXAbility.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetStateStore,           db2Path, "BattlePetState.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetVisualStore,          db2Path, "BattlePetVisual.db2");
-    //LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore,            db2Path, "BroadcastText.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore,            db2Path, "BroadcastText.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sCreatureDifficultyStore,       db2Path, "CreatureDifficulty.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sCreatureStore,                 db2Path, "Creature.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sGameObjectsStore,              db2Path, "GameObjects.db2");

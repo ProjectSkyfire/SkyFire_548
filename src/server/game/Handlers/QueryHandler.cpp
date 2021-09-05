@@ -467,46 +467,52 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     ObjectGuid guid;
 
     recvData >> textID;
+    recvData.ReadGuidMask(guid, 4, 5, 1, 7, 0, 2, 6, 3);
+    recvData.ReadGuidBytes(guid, 4, 0, 2, 5, 1, 7, 3, 7);
 
-    SF_LOG_DEBUG("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
-
-    guid[4] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[6]);
+    SF_LOG_ERROR("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u', %lu", textID, uint64(guid));
+    //SendBroadcastText(textID);
 
     GossipText const* pGossip = sObjectMgr->GetGossipText(textID);
 
-    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 1 + 4 + 64);
-    data << textID;
-    data << uint32(64);                                 // size (8 * 4) * 2
+    // WNPC collumns should be in this buffer
+    ByteBuffer buf; 
+    if (!pGossip)
+    {
+        buf << uint32(1);
+        for (uint8 i = 0; i < 7; i++)
+            buf << uint32(0);
 
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
-        data << float(pGossip ? pGossip->Options[i].Probability : 0);
+        buf << uint32(1);
 
-    data << textID;                                     // should be a broadcast id
+        for (uint8 i = 0; i < 7; i++)
+            buf << uint32(0);
 
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS - 1; i++)
-        data << uint32(0);
+        buf << std::string("Help help! I'm being repressed!");
+    }
+    else
+    {
+        buf << uint32(1);
+        for (uint8 i = 0; i < 7; i++)
+            buf << uint32(0);
 
-    data.WriteBit(1);                                   // has data
+        buf << uint32(textID);// ADB cache entry
+        for (uint8 i = 0; i < 7; i++)
+            buf << uint32(0); // ADB cache entry
+
+        buf << std::string(pGossip->Options[0].Text_0);
+    }
+    
+    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 1 + 4 + buf.size());
+    data << uint32(textID);
+    data << uint32(buf.size());// sizeofbuf
+
+    data.append(buf); // data collumns to write to cache
+    data.WriteBit(1); // write record to WNPC cache
     data.FlushBits();
 
     SendPacket(&data);
-
+    
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
 }
 
