@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2021 Project SkyFire <https://www.projectskyfire.org/>
+ * Copyright (C) 2011-2022 Project SkyFire <https://www.projectskyfire.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

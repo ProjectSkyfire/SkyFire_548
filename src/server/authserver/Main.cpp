@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011-2021 Project SkyFire <https://www.projectskyfire.org/>
- * Copyright (C) 2008-2021 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2021 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2011-2022 Project SkyFire <https://www.projectskyfire.org/>
+ * Copyright (C) 2008-2022 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2022 MaNGOS <https://www.getmangos.eu/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -120,7 +120,7 @@ extern int main(int argc, char** argv)
     SF_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
     SF_LOG_INFO("server.authserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
     SF_LOG_INFO("server.authserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
-    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2021(c) Open-sourced Game Emulation ");
+    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2022(c) Open-sourced Game Emulation ");
     SF_LOG_INFO("server.authserver", "           <http://www.projectskyfire.org/> \n");
 
     SF_LOG_INFO("server.authserver", "Using configuration file %s.", configFile);
