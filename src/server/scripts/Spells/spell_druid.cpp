@@ -51,6 +51,7 @@ enum DruidSpells
     SPELL_DRUID_LIVING_SEED_PROC            = 48504,
     SPELL_DRUID_NATURES_GRACE               = 16880,
     SPELL_DRUID_NATURES_GRACE_TRIGGER       = 16886,
+    SPELL_DRUID_PREDATORY_SWIFTNESS         = 69369,
     SPELL_DRUID_SURVIVAL_INSTINCTS          = 50322,
     SPELL_DRUID_SAVAGE_ROAR                 = 52610,
     SPELL_DRUID_SAVAGE_ROAR_TRIGGER         = 62071,
@@ -59,6 +60,7 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_BEAR_FORM                   = 5487,
+    SPELL_DRUID_BERSERK_AURA                = 106951,
 };
 
 // 1850 - Dash
@@ -615,6 +617,40 @@ public:
     }
 };
 
+// Called by Healing Touch - 5185, Entangling Roots - 339, Hibernate - 2637, Rebirth - 20484
+// Predatory Swiftness
+class spell_dru_predatory_swiftness : public SpellScriptLoader
+{
+public:
+    spell_dru_predatory_swiftness() : SpellScriptLoader("spell_dru_predatory_swiftness") { }
+
+    class spell_dru_predatory_swiftness_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_predatory_swiftness_SpellScript);
+
+        void HandleHit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_DRUID_PREDATORY_SWIFTNESS))
+                {
+                    caster->RemoveAurasDueToSpell(SPELL_DRUID_PREDATORY_SWIFTNESS);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_predatory_swiftness_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_predatory_swiftness_SpellScript();
+    }
+};
+
 // 62606 - Savage Defense
 class spell_dru_savage_defense : public SpellScriptLoader
 {
@@ -928,6 +964,51 @@ public:
     }
 };
 
+// 5217 - Tiger's Fury
+class spell_dru_tigers_fury : public SpellScriptLoader
+{
+public:
+    spell_dru_tigers_fury() : SpellScriptLoader("spell_dru_tigers_fury") { }
+
+    class spell_dru_tigers_fury_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_tigers_fury_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_BERSERK_AURA))
+                return false;
+            return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetShapeshiftForm() != FORM_CAT)
+                {
+                    SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_BE_IN_CAT_FORM);
+                    return SPELL_FAILED_CUSTOM_ERROR;
+                }
+
+                if (caster->HasAura(SPELL_DRUID_BERSERK_AURA))
+                    return SPELL_FAILED_DONT_REPORT;
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_tigers_fury_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_tigers_fury_SpellScript();
+    }
+};
+
 // 70691 - Item T10 Restoration 4P Bonus
 class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 {
@@ -998,11 +1079,13 @@ void AddSC_druid_spell_scripts()
     new spell_dru_living_seed_proc();
     new spell_dru_might_of_ursoc();
     new spell_dru_predatory_strikes();
+    new spell_dru_predatory_swiftness();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
     new spell_dru_starfall_dummy();
     new spell_dru_stampede();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
+    new spell_dru_tigers_fury();
     new spell_dru_t10_restoration_4p_bonus();
 }
