@@ -18,7 +18,7 @@ make pull requests to our
 [Github repository](https://github.com/ProjectSkyfire/SkyFire.548).
 
 For further information on the SkyFire project, please visit our project website at 
-[projectskyfire.org](http://www.projectskyfire.org).
+[projectskyfire.org](https://www.projectskyfire.org).
 
 ## Supported Client Version
 **MoP 5.4.8 Build 18414**
@@ -52,9 +52,9 @@ For further information on the SkyFire project, please visit our project website
 ## Install
 Detailed installation guides are available in the wiki for
 
-[Windows](http://wiki.projectskyfire.org/index.php?title=Installation_Windows),
-[Linux](http://wiki.projectskyfire.org/index.php?title=Installation_(Ubuntu_18.04_LTS)) and
-[Mac OSX](http://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
+[Windows](https://wiki.projectskyfire.org/index.php?title=Installation_Windows),
+[Linux](https://wiki.projectskyfire.org/index.php?title=Installation_(Ubuntu_18.04_LTS)) and
+[Mac OSX](https://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
 
 
 ## Reporting issues
@@ -75,8 +75,8 @@ Read file [COPYING](COPYING.md)
 Read file [THANKS](THANKS.md)
 
 ## Links
-Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
+Forum [https://www.projectskyfire.org/](https://www.projectskyfire.org/)
 
 Database [https://www.projectskyfire.org/index.php?/files/](https://www.projectskyfire.org/index.php?/files/)
 
-Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
+Wiki [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
