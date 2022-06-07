@@ -4,7 +4,7 @@ UPDATE creature_template SET mindmg=38931, maxdmg=66185 WHERE minlevel=94;
 UPDATE creature_template SET mindmg=30500, maxdmg=51852 WHERE minlevel=93;
 UPDATE creature_template SET mindmg=23895, maxdmg=40623 WHERE minlevel=92;
 UPDATE creature_template SET mindmg=18720, maxdmg=31825 WHERE minlevel=91;
-UPDATE creature_template SET mindmg=14666, maxdmg=24933 WHERE minlevel=90
+UPDATE creature_template SET mindmg=14666, maxdmg=24933 WHERE minlevel=90;
 UPDATE creature_template SET mindmg=11490, maxdmg=19534 WHERE minlevel=89;
 UPDATE creature_template SET mindmg=9001, maxdmg=15302 WHERE minlevel=88;
 UPDATE creature_template SET mindmg=7052, maxdmg=11989 WHERE minlevel=87;
@@ -101,7 +101,7 @@ UPDATE creature_template SET maxdmg=66185 WHERE maxlevel=94;
 UPDATE creature_template SET maxdmg=51852 WHERE maxlevel=93;
 UPDATE creature_template SET maxdmg=40623 WHERE maxlevel=92;
 UPDATE creature_template SET maxdmg=31825 WHERE maxlevel=91;
-UPDATE creature_template SET maxdmg=24933 WHERE maxlevel=90
+UPDATE creature_template SET maxdmg=24933 WHERE maxlevel=90;
 UPDATE creature_template SET maxdmg=19534 WHERE maxlevel=89;
 UPDATE creature_template SET maxdmg=15302 WHERE maxlevel=88;
 UPDATE creature_template SET maxdmg=11989 WHERE maxlevel=87;
