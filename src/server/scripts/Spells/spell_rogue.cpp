@@ -33,10 +33,14 @@ enum RogueSpells
     SPELL_ROGUE_BLADE_FLURRY                        = 13877,
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
+    SPELL_ROGUE_CUT_TO_THE_CHASE                    = 51667,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
+    SPELL_ROGUE_NERVE_STRIKE                        = 108210,
+    SPELL_ROGUE_NERVE_STRIKE_AURA                   = 112947,
+    SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE         = 98440,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
@@ -44,7 +48,11 @@ enum RogueSpells
 
 enum RogueSpellIcons
 {
-    ICON_ROGUE_IMPROVED_RECUPERATE                  = 4819
+    ICON_ROGUE_DISMANTLE                            = 2908,
+    ICON_ROGUE_EVASION                              = 178,
+    ICON_ROGUE_IMPROVED_RECUPERATE                  = 4819,
+    ICON_ROGUE_SPRINT                               = 516,
+    ICON_ROGUE_VANISH                               = 252,
 };
 
 // 13877, 33735, (check 51211, 65956) - Blade Flurry
@@ -168,6 +176,48 @@ public:
     }
 };
 
+// 51667 - Cut to the Chase
+class spell_rog_cut_to_the_chase : public SpellScriptLoader
+{
+public:
+    spell_rog_cut_to_the_chase() : SpellScriptLoader("spell_rog_cut_to_the_chase") { }
+
+    class spell_rog_cut_to_the_chase_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_cut_to_the_chase_AuraScript);
+
+        void HandleAbilityCast(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            // Proc with Envenom only
+            if (!(eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x00800000 &&
+                eventInfo.GetDamageInfo()->GetSpellInfo()->SpellFamilyFlags[1] & 0x00000008))
+                return;
+
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_ROGUE_CUT_TO_THE_CHASE))
+                {
+                    if (Aura* aura = caster->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
+                    {
+                        aura->SetDuration(aura->GetSpellInfo()->GetDuration() + aura->GetSpellInfo()->GetMaxDuration());
+                    }
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_rog_cut_to_the_chase_AuraScript::HandleAbilityCast, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_cut_to_the_chase_AuraScript();
+    }
+};
+
 // -51625 - Deadly Brew
 class spell_rog_crippling_poison : public SpellScriptLoader
 {
@@ -200,35 +250,6 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_rog_crippling_poison_AuraScript();
-    }
-};
-
-// -51664 - Cut to the Chase
-class spell_rog_cut_to_the_chase : public SpellScriptLoader
-{
-public:
-    spell_rog_cut_to_the_chase() : SpellScriptLoader("spell_rog_cut_to_the_chase") { }
-
-    class spell_rog_cut_to_the_chase_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_rog_cut_to_the_chase_AuraScript);
-
-        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-        {
-            PreventDefaultAction();
-            if (Aura* aur = GetTarget()->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
-                aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectProc += AuraEffectProcFn(spell_rog_cut_to_the_chase_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_rog_cut_to_the_chase_AuraScript();
     }
 };
 
@@ -365,6 +386,40 @@ public:
     }
 };
 
+// Called by Kidney Shot - 408 and Cheap Shot - 1833
+// 108210 - Nerve Strike
+class spell_rog_nerve_strike : public SpellScriptLoader
+{
+public:
+    spell_rog_nerve_strike() : SpellScriptLoader("spell_rog_nerve_strike") { }
+
+    class spell_rog_nerve_strike_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_nerve_strike_AuraScript);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (caster->HasAura(SPELL_ROGUE_NERVE_STRIKE))
+                        caster->CastSpell(target, SPELL_ROGUE_NERVE_STRIKE_AURA, true);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_nerve_strike_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_nerve_strike_AuraScript();
+    }
+};
 // 14185 - Preparation
 class spell_rog_preparation : public SpellScriptLoader
 {
@@ -384,17 +439,27 @@ public:
         {
             Player* caster = GetCaster()->ToPlayer();
 
-            // immediately finishes the cooldown on certain Rogue abilities
-            SpellCooldowns const& cm = caster->GetSpellCooldownMap();
+            // immediately finishes the cooldown of Vanish, Sprint, Evasion, and Dismantle
+            const SpellCooldowns& cm = caster->GetSpellCooldownMap();
             for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-                if (!spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE)
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
+                    (
+                        // Vanish
+                        (spellInfo->SpellIconID == ICON_ROGUE_VANISH && spellInfo->SpellFamilyFlags[0] == 0x00000800) ||
+                        // Sprint
+                        (spellInfo->SpellIconID == ICON_ROGUE_SPRINT && spellInfo->SpellFamilyFlags[0] == 0x00000040) ||
+                        // Evasion
+                        (spellInfo->SpellIconID == ICON_ROGUE_EVASION && spellInfo->SpellFamilyFlags[0] == 0x00000020) ||
+                        // Dismantle
+                        (spellInfo->SpellIconID == ICON_ROGUE_DISMANTLE && spellInfo->SpellFamilyFlags[1] == 0x00100000)
+                        ))
                 {
-                    ++itr;
-                    continue;
+                    caster->RemoveSpellCooldown((itr++)->first, true);
                 }
-                ++itr;
+                else
+                    ++itr;
             }
         }
 
@@ -456,6 +521,86 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_rog_recuperate_AuraScript();
+    }
+};
+
+// 73981 - Redirect
+class spell_rog_redirect : public SpellScriptLoader
+{
+public:
+    spell_rog_redirect() : SpellScriptLoader("spell_rog_redirect") { }
+
+    class spell_rog_redirect_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_redirect_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (!caster->ToPlayer()->GetComboPoints())
+                    return SPELL_FAILED_NO_COMBO_POINTS;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleOnHit()
+        {
+            if (Player* caster = GetCaster()->ToPlayer())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (comboPoints = caster->GetComboPoints())
+                    {
+                        caster->ClearComboPoints();
+                        caster->AddComboPoints(target, comboPoints);
+                    }
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_redirect_SpellScript::CheckCast);
+            OnHit += SpellHitFn(spell_rog_redirect_SpellScript::HandleOnHit);
+        }
+
+    private:
+        uint8 comboPoints = 0;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_redirect_SpellScript();
+    }
+};
+
+// 14181 - Relentless Strikes
+class spell_rog_relentless_strikes : public SpellScriptLoader
+{
+public:
+    spell_rog_relentless_strikes() : SpellScriptLoader("spell_rog_relentless_strikes") { }
+
+    class spell_rog_relentless_strikes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_relentless_strikes_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_rog_relentless_strikes_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_relentless_strikes_SpellScript();
     }
 };
 
@@ -663,8 +808,11 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
     new spell_rog_master_of_subtlety();
+    new spell_rog_nerve_strike();
     new spell_rog_preparation();
     new spell_rog_recuperate();
+    new spell_rog_redirect();
+    new spell_rog_relentless_strikes();
     new spell_rog_rupture();
     new spell_rog_stealth();
     new spell_rog_tricks_of_the_trade();
