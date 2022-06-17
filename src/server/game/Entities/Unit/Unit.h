@@ -1454,7 +1454,7 @@ class Unit : public WorldObject
     float GetSpellMaxRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
     float GetSpellMinRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
 
-    void Update(uint32 time) OVERRIDE;
+    void Update(uint32 time) override;
 
     void setAttackTimer(WeaponAttackType type, uint32 time)
     {
@@ -2468,7 +2468,7 @@ class Unit : public WorldObject
     bool IsVisible() const;
     void SetVisible(bool x);
     void ClearPhases(bool update = false);
-    bool SetPhased(uint32 id, bool update, bool apply) OVERRIDE;
+    bool SetPhased(uint32 id, bool update, bool apply) override;
     // common function for visibility checks for player/creatures with detection code
     void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
     void UpdateObjectVisibility(bool forced = true) override;

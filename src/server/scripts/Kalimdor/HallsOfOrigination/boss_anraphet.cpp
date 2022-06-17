@@ -144,7 +144,7 @@ public:
             events.ScheduleEvent(EVENT_ANRAPHET_OMEGA_STANCE, 35000, 0, PHASE_COMBAT);
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _Reset();
             me->SetWalk(false);
@@ -159,14 +159,14 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             Talk(ANRAPHET_SAY_AGGRO);
             _EnterCombat();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             Talk(ANRAPHET_SAY_DEATH);
@@ -177,26 +177,26 @@ public:
             _JustDied();
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                 Talk(ANRAPHET_SAY_KILL);
         }
 
-        void JustReachedHome() OVERRIDE
+        void JustReachedHome() override
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustReachedHome();
             instance->SetBossState(DATA_ANRAPHET, FAIL);
         }
 
-        void DoAction(int32 action) OVERRIDE
+        void DoAction(int32 action) override
         {
             if (action == ACTION_ANRAPHET_INTRO)
                 events.ScheduleEvent(EVENT_ANRAPHET_APPEAR, 6000, 0, PHASE_INTRO);
         }
 
-        void MovementInform(uint32 type, uint32 point) OVERRIDE
+        void MovementInform(uint32 type, uint32 point) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -208,7 +208,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if ((events.GetPhaseMask() & PHASE_MASK_COMBAT) && (!UpdateVictim() || !CheckInRoom()))
                 return;
@@ -267,7 +267,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetHallsOfOriginationAI<boss_anraphetAI>(creature);
     }
@@ -282,15 +282,15 @@ class npc_omega_stance : public CreatureScript
         {
             npc_omega_stanceAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void IsSummonedBy(Unit* /*who*/) OVERRIDE
+            void IsSummonedBy(Unit* /*who*/) override
             {
                 DoCast(me, SPELL_OMEGA_STANCE_SPIDER_TRIGGER, true);
             }
 
-            void EnterEvadeMode() OVERRIDE { }
+            void EnterEvadeMode() override { }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_omega_stanceAI(creature);
         }
@@ -305,19 +305,19 @@ class npc_alpha_beam : public CreatureScript
         {
             npc_alpha_beamAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()) { }
 
-            void IsSummonedBy(Unit* /*summoner*/) OVERRIDE
+            void IsSummonedBy(Unit* /*summoner*/) override
             {
                 if (Creature* anraphet = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ANRAPHET_GUID)))
                     anraphet->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST);
             }
 
-            void EnterEvadeMode() OVERRIDE { } // Never evade
+            void EnterEvadeMode() override { } // Never evade
 
             private:
                 InstanceScript* _instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetHallsOfOriginationAI<npc_alpha_beamAI>(creature);
         }
@@ -332,7 +332,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
         {
             npc_brann_bronzebeard_anraphetAI(Creature* creature) : CreatureAI(creature), _currentPoint(0), _instance(creature->GetInstanceScript()) { }
 
-            void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action) OVERRIDE
+            void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action) override
             {
                 if (_instance->GetBossState(DATA_VAULT_OF_LIGHTS) == DONE)
                     return;
@@ -349,7 +349,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                 }
             }
 
-            void DoAction(int32 action) OVERRIDE
+            void DoAction(int32 action) override
             {
                 switch (action)
                 {
@@ -372,7 +372,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 events.Update(diff);
 
@@ -422,7 +422,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                 }
             }
 
-            void MovementInform(uint32 movementType, uint32 pointId) OVERRIDE
+            void MovementInform(uint32 movementType, uint32 pointId) override
             {
                 if (movementType != POINT_MOTION_TYPE)
                     return;
@@ -460,7 +460,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
             InstanceScript* _instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetHallsOfOriginationAI<npc_brann_bronzebeard_anraphetAI>(creature);
         }

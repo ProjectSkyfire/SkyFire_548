@@ -1331,7 +1331,7 @@ class spell_monk_renewing_mist : public SpellScriptLoader
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_renewing_mist_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
             OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_monk_renewing_mist_AuraScript::Update, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
@@ -1339,7 +1339,7 @@ class spell_monk_renewing_mist : public SpellScriptLoader
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_monk_renewing_mist_AuraScript();
     }

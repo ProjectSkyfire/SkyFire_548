@@ -123,12 +123,12 @@ public:
                         DoCast(me, SPELL_SPYGLASS);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
         }
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
+		void UpdateAI(uint32 /*diff*/) override
         {
             CastSpyglass();
 
@@ -158,12 +158,12 @@ public:
     {
         npc_blackrock_invaderAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(RAND(SAY_BLACKROCK_COMBAT_1, SAY_BLACKROCK_COMBAT_2, SAY_BLACKROCK_COMBAT_3, SAY_BLACKROCK_COMBAT_4, SAY_BLACKROCK_COMBAT_5), me);
         }
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
+		void UpdateAI(uint32 /*diff*/) override
         {
             if (!UpdateVictim())
                 return;
@@ -195,12 +195,12 @@ public:
                 DoCast(SPELL_SNEAKING);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(RAND(SAY_ASSASSIN_COMBAT_1, SAY_ASSASSIN_COMBAT_2), me);
         }
 
-		void UpdateAI(uint32 /*diff*/) OVERRIDE
+		void UpdateAI(uint32 /*diff*/) override
         {
             if (!UpdateVictim())
                 return;
@@ -230,14 +230,14 @@ public:
 
         uint32 tSeek, cYell,tYell;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             tSeek=urand(1000,2000);
             cYell=urand(0, 100);
             tYell=urand(5000, 60000);
         }
 
-        void DamageTaken(Unit* who, uint32& damage) OVERRIDE
+        void DamageTaken(Unit* who, uint32& damage) override
         {
             if (who->GetTypeId() == TypeID::TYPEID_PLAYER)//If damage taken from player
             {
@@ -260,7 +260,7 @@ public:
             }
         }
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -306,14 +306,14 @@ public:
 
         uint32 tSeek, tGrowl;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             tSeek=urand(1000,2000);
             tGrowl=urand(8500,10000);
             me->setFaction(WORG_FACTION_RESTORE);//Restore our faction on reset
         }
 
-        void DamageTaken(Unit* who, uint32& damage) OVERRIDE
+        void DamageTaken(Unit* who, uint32& damage) override
         {
             if (who->GetTypeId() == TypeID::TYPEID_PLAYER)//If damage taken from player
             {
@@ -336,7 +336,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (tSeek <= diff)
             {

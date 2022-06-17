@@ -94,7 +94,7 @@ class boss_urom : public CreatureScript
 public:
     boss_urom() : CreatureScript("boss_urom") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_uromAI(creature);
     }
@@ -103,7 +103,7 @@ public:
     {
         boss_uromAI(Creature* creature) : BossAI(creature, DATA_UROM_EVENT) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->CastSpell(me, SPELL_EVOCATE);
 
@@ -129,7 +129,7 @@ public:
             timeBombTimer = urand(20000, 25000);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
 
@@ -141,7 +141,7 @@ public:
                 instance->SetData(DATA_UROM_PLATAFORM, instance->GetData(DATA_UROM_PLATAFORM)+1);
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (!who)
                 return;
@@ -237,12 +237,12 @@ public:
             DoCast(TeleportSpells[instance->GetData(DATA_UROM_PLATAFORM)]);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_PLAYER_KILL);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             if (!UpdateVictim())
                 return;
@@ -310,7 +310,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
             Talk(SAY_DEATH);
@@ -324,7 +324,7 @@ public:
             me->DeleteThreatList();
         }
 
-        void SpellHit(Unit* /*pCaster*/, const SpellInfo* pSpell) OVERRIDE
+        void SpellHit(Unit* /*pCaster*/, const SpellInfo* pSpell) override
         {
             switch (pSpell->Id)
             {

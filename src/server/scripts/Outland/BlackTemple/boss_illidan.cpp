@@ -381,14 +381,14 @@ public:
     {
         flame_of_azzinothAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             FlameBlastTimer = 15000;
             CheckTimer = 5000;
             GlaiveGUID = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             DoZoneInCombat();
         }
@@ -433,7 +433,7 @@ public:
             GlaiveGUID = guid;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -462,7 +462,7 @@ public:
         uint64 GlaiveGUID;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new flame_of_azzinothAI(creature);
     }
@@ -483,11 +483,11 @@ public:
             AkamaGUID = 0;
         }
 
-        void Reset() OVERRIDE;
+        void Reset() override;
 
-        void JustSummoned(Creature* summon) OVERRIDE;
+        void JustSummoned(Creature* summon) override;
 
-        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
+        void SummonedCreatureDespawn(Creature* summon) override
         {
             if (summon->GetCreatureTemplate()->Entry == FLAME_OF_AZZINOTH)
             {
@@ -504,7 +504,7 @@ public:
             Summons.Despawn(summon);
         }
 
-        void MovementInform(uint32 /*MovementType*/, uint32 /*Data*/) OVERRIDE
+        void MovementInform(uint32 /*MovementType*/, uint32 /*Data*/) override
         {
             if (FlightCount == 7) // change hover point
             {
@@ -519,13 +519,13 @@ public:
                 Timer[EVENT_FLIGHT_SEQUENCE] = 1000;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             me->setActive(true);
             DoZoneInCombat();
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (!who || Phase >= PHASE_TALK_SEQUENCE)
                 return;
@@ -536,10 +536,10 @@ public:
                 ScriptedAI::AttackStart(who);
         }
 
-        void MoveInLineOfSight(Unit*) OVERRIDE { }
+        void MoveInLineOfSight(Unit*) override { }
 
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
@@ -552,7 +552,7 @@ public:
                 instance->HandleGameObject(instance->GetData64(i), true);
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
@@ -560,7 +560,7 @@ public:
             Talk(SAY_ILLIDAN_KILL);
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (damage >= me->GetHealth() && done_by != me)
                 damage = 0;
@@ -568,7 +568,7 @@ public:
                 done_by->AddThreat(me, -(3*(float)damage)/4); // do not let maiev tank him
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_GLAIVE_RETURNS) // Re-equip our warblades!
             {
@@ -922,7 +922,7 @@ public:
             ++TransformCount;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if ((!UpdateVictim()) && Phase < PHASE_TALK_SEQUENCE)
                 return;
@@ -1126,7 +1126,7 @@ public:
         SummonList Summons;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_illidan_stormrageAI(creature);
     }
@@ -1144,7 +1144,7 @@ public:
     {
         boss_maievAI(Creature* creature) : ScriptedAI(creature) { };
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             MaxTimer = 0;
             Phase = PHASE_NORMAL_MAIEV;
@@ -1156,17 +1156,17 @@ public:
             me->SetUInt32Value(UNIT_FIELD_VIRTUAL_ITEM_ID + 2, 45738);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
-        void EnterEvadeMode() OVERRIDE { }
+        void EnterEvadeMode() override { }
 
         void GetIllidanGUID(uint64 guid)
         {
             IllidanGUID = guid;
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (done_by->GetGUID() != IllidanGUID)
                 damage = 0;
@@ -1181,7 +1181,7 @@ public:
             }
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (!who || Timer[EVENT_MAIEV_STEALTH])
                 return;
@@ -1199,7 +1199,7 @@ public:
                 ScriptedAI::AttackStart(who);
         }
 
-        void DoAction(int32 param) OVERRIDE
+        void DoAction(int32 param) override
         {
             if (param > PHASE_ILLIDAN_NULL && param < PHASE_ILLIDAN_MAX)
                 EnterPhase(PhaseIllidan(param));
@@ -1271,7 +1271,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if ((!UpdateVictim())
                 && !Timer[EVENT_MAIEV_STEALTH])
@@ -1348,7 +1348,7 @@ public:
         uint32 MaxTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_maievAI(creature);
     }
@@ -1367,7 +1367,7 @@ public:
             JustCreated = true;
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             WalkCount = 0;
             if (instance)
@@ -1423,24 +1423,24 @@ public:
         }
 
         // Do not call reset in Akama's evade mode, as this will stop him from summoning minions after he kills the first bit
-        void EnterEvadeMode() OVERRIDE
+        void EnterEvadeMode() override
         {
             me->RemoveAllAuras();
             me->DeleteThreatList();
             me->CombatStop(true);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void MovementInform(uint32 MovementType, uint32 /*Data*/) OVERRIDE
+        void MovementInform(uint32 MovementType, uint32 /*Data*/) override
         {
             if (MovementType == POINT_MOTION_TYPE)
                 Timer = 1;
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (damage > me->GetHealth() || done_by->GetGUID() != IllidanGUID)
                 damage = 0;
@@ -1688,7 +1688,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!me->IsVisible())
             {
@@ -1771,7 +1771,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) override
         {
             player->CLOSE_GOSSIP_MENU();
             EnterPhase(PHASE_CHANNEL);
@@ -1794,7 +1794,7 @@ public:
         uint32 Check_Timer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_akama_illidanAI(creature);
     }
@@ -1980,7 +1980,7 @@ public:
     {
         cage_trap_triggerAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             IllidanGUID = 0;
 
@@ -1992,9 +1992,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/)override { }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!Active)
@@ -2019,7 +2019,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (DespawnTimer)
             {
@@ -2045,7 +2045,7 @@ public:
         bool SummonedBeams;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new cage_trap_triggerAI(creature);
     }
@@ -2056,7 +2056,7 @@ class gameobject_cage_trap : public GameObjectScript
 public:
     gameobject_cage_trap() : GameObjectScript("gameobject_cage_trap") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         float x, y, z;
         player->GetPosition(x, y, z);
@@ -2078,24 +2078,24 @@ public:
     {
         shadow_demonAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             DoZoneInCombat();
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             TargetGUID = 0;
             DoCast(me, SPELL_SHADOW_DEMON_PASSIVE, true);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (Unit* target = Unit::GetUnit(*me, TargetGUID))
                 target->RemoveAurasDueToSpell(SPELL_PARALYZE);
         }
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        void UpdateAI(uint32 /*diff*/) override
         {
             if (!UpdateVictim())
                 return;
@@ -2119,7 +2119,7 @@ public:
         uint64 TargetGUID;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new shadow_demonAI(creature);
     }
@@ -2134,14 +2134,14 @@ public:
     {
         blade_of_azzinothAI(Creature* creature) : NullCreatureAI(creature) { }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_THROW_GLAIVE2 || spell->Id == SPELL_THROW_GLAIVE)
                 me->SetDisplayId(MODEL_BLADE);// appear when hit by Illidan's glaive
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new blade_of_azzinothAI(creature);
     }
@@ -2160,7 +2160,7 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (instance)
                 IllidanGUID = instance->GetData64(DATA_ILLIDAN_STORMRAGE);
@@ -2171,7 +2171,7 @@ public:
             DoCast(me, SPELL_SHADOWFIEND_PASSIVE, true);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             DoZoneInCombat();
         }
@@ -2192,7 +2192,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!me->GetVictim())
             {
@@ -2228,7 +2228,7 @@ public:
         uint32 CheckTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_parasitic_shadowfiendAI(creature);
     }

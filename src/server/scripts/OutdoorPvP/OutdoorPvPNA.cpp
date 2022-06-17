@@ -665,7 +665,7 @@ class OutdoorPvP_nagrand : public OutdoorPvPScript
     public:
         OutdoorPvP_nagrand() : OutdoorPvPScript("outdoorpvp_na") { }
 
-        OutdoorPvP* GetOutdoorPvP() const OVERRIDE
+        OutdoorPvP* GetOutdoorPvP() const override
         {
             return new OutdoorPvPNA();
         }

@@ -60,7 +60,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 memset(BurningTreeGUID, 0, 4 * sizeof(uint64));
             }
 
-            void OnPlayerEnter(Player* /*player*/) OVERRIDE
+            void OnPlayerEnter(Player* /*player*/) override
             {
                 if (!GetData64(DATA_HALION_CONTROLLER) && GetBossState(DATA_HALION) != DONE && GetBossState(DATA_GENERAL_ZARITHRIAN) == DONE)
                 {
@@ -70,7 +70,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 }
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -115,7 +115,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) OVERRIDE
+            void OnGameObjectCreate(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -158,7 +158,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectRemove(GameObject* go) OVERRIDE
+            void OnGameObjectRemove(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -170,7 +170,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 }
             }
 
-            void OnUnitDeath(Unit* unit) OVERRIDE
+            void OnUnitDeath(Unit* unit) override
             {
                 Creature* creature = unit->ToCreature();
                 if (!creature)
@@ -184,7 +184,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 }
             }
 
-            uint64 GetData64(uint32 type) const OVERRIDE
+            uint64 GetData64(uint32 type) const override
             {
                 switch (type)
                 {
@@ -227,7 +227,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 return 0;
             }
 
-            bool SetBossState(uint32 type, EncounterState state) OVERRIDE
+            bool SetBossState(uint32 type, EncounterState state) override
             {
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
@@ -281,7 +281,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 return true;
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 if (type != DATA_BALTHARUS_SHARED_HEALTH)
                     return;
@@ -289,7 +289,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 BaltharusSharedHealth = data;
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                 if (type != DATA_BALTHARUS_SHARED_HEALTH)
                     return 0;
@@ -297,7 +297,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 return BaltharusSharedHealth;
             }
 
-            std::string GetSaveData() OVERRIDE
+            std::string GetSaveData() override
             {
                 OUT_SAVE_INST_DATA;
 
@@ -308,14 +308,14 @@ class instance_ruby_sanctum : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
+            void FillInitialWorldStates(WorldStateBuilder& builder) override
             {
                 builder.AppendState(WORLDSTATE_CORPOREALITY_MATERIAL, 50);
                 builder.AppendState(WORLDSTATE_CORPOREALITY_TWILIGHT, 50);
                 builder.AppendState(WORLDSTATE_CORPOREALITY_TOGGLE, 0);
             }
 
-            void Load(char const* str) OVERRIDE
+            void Load(char const* str) override
             {
                 if (!str)
                 {
@@ -368,7 +368,7 @@ class instance_ruby_sanctum : public InstanceMapScript
             uint32 BaltharusSharedHealth;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_ruby_sanctum_InstanceMapScript(map);
         }

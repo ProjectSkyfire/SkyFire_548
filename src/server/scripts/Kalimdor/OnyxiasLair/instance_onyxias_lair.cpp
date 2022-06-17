@@ -39,7 +39,7 @@ class instance_onyxias_lair : public InstanceMapScript
 public:
     instance_onyxias_lair() : InstanceMapScript("instance_onyxias_lair", 249) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_onyxias_lair_InstanceMapScript(map);
     }
@@ -51,7 +51,7 @@ public:
         //Eruption is a BFS graph problem
         //One map to remember all floor, one map to keep floor that still need to erupt and one queue to know what needs to be removed
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             SetBossNumber(EncounterCount);
 
@@ -64,7 +64,7 @@ public:
             achievSheDeepBreathMore  = true;
         }
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE
+        void OnCreatureCreate(Creature* creature) override
         {
             switch (creature->GetEntry())
             {
@@ -74,7 +74,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             if ((go->GetGOInfo()->displayId == 4392 || go->GetGOInfo()->displayId == 4472) && go->GetGOInfo()->trap.spellId == 17731)
             {
@@ -96,7 +96,7 @@ public:
             }
         }
 
-        void OnGameObjectRemove(GameObject* go) OVERRIDE
+        void OnGameObjectRemove(GameObject* go) override
         {
             if ((go->GetGOInfo()->displayId == 4392 || go->GetGOInfo()->displayId == 4472) && go->GetGOInfo()->trap.spellId == 17731)
             {
@@ -136,7 +136,7 @@ public:
             FloorEruptionGUID[1].erase(floorEruptedGUID);
         }
 
-        bool SetBossState(uint32 type, EncounterState state) OVERRIDE
+        bool SetBossState(uint32 type, EncounterState state) override
         {
             if (!InstanceScript::SetBossState(type, state))
                 return false;
@@ -151,7 +151,7 @@ public:
             return true;
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             switch (type)
             {
@@ -176,7 +176,7 @@ public:
             }
         }
 
-        void SetData64(uint32 type, uint64 data) OVERRIDE
+        void SetData64(uint32 type, uint64 data) override
         {
             switch (type)
             {
@@ -188,7 +188,7 @@ public:
             }
         }
 
-        uint64 GetData64(uint32 data) const OVERRIDE
+        uint64 GetData64(uint32 data) const override
         {
             switch (data)
             {
@@ -199,7 +199,7 @@ public:
             return 0;
         }
 
-        void Update(uint32 diff) OVERRIDE
+        void Update(uint32 diff) override
         {
             if (GetBossState(DATA_ONYXIA) == IN_PROGRESS)
             {
@@ -229,7 +229,7 @@ public:
             }
         }
 
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* /*source*/, Unit const* /*target = NULL*/, uint32 /*miscValue1 = 0*/) OVERRIDE
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* /*source*/, Unit const* /*target = NULL*/, uint32 /*miscValue1 = 0*/) override
         {
             switch (criteriaId)
             {
@@ -243,7 +243,7 @@ public:
             return false;
         }
 
-        std::string GetSaveData() OVERRIDE
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
 
@@ -254,7 +254,7 @@ public:
             return saveStream.str();
         }
 
-        void Load(const char* strIn) OVERRIDE
+        void Load(const char* strIn) override
         {
             if (!strIn)
             {

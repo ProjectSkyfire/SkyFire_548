@@ -83,7 +83,7 @@ public:
         uint32 StatuesState;
         uint8 felCristalIndex;
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             memset(&Encounter, 0, sizeof(Encounter));
 
@@ -105,7 +105,7 @@ public:
             felCristalIndex = 0;
         }
 
-        bool IsEncounterInProgress() const OVERRIDE
+        bool IsEncounterInProgress() const override
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (Encounter[i] == IN_PROGRESS)
@@ -113,7 +113,7 @@ public:
             return false;
         }
 
-        uint32 GetData(uint32 identifier) const OVERRIDE
+        uint32 GetData(uint32 identifier) const override
         {
             switch (identifier)
             {
@@ -133,7 +133,7 @@ public:
             return 0;
         }
 
-        void SetData(uint32 identifier, uint32 data) OVERRIDE
+        void SetData(uint32 identifier, uint32 data) override
         {
             switch (identifier)
             {
@@ -185,7 +185,7 @@ public:
             SaveToDB();
         }
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE
+        void OnCreatureCreate(Creature* creature) override
         {
             switch (creature->GetEntry())
             {
@@ -201,7 +201,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             switch (go->GetEntry())
             {
@@ -232,7 +232,7 @@ public:
             }
         }
 
-        std::string GetSaveData() OVERRIDE
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
 
@@ -243,7 +243,7 @@ public:
             return saveStream.str();
         }
 
-        void Load(const char* str) OVERRIDE
+        void Load(const char* str) override
         {
             if (!str)
             {
@@ -270,7 +270,7 @@ public:
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
-        uint64 GetData64(uint32 identifier) const OVERRIDE
+        uint64 GetData64(uint32 identifier) const override
         {
             switch (identifier)
             {
@@ -302,14 +302,14 @@ public:
             return 0;
         }
 
-        void SetData64(uint32 identifier, uint64 value) OVERRIDE
+        void SetData64(uint32 identifier, uint64 value) override
         {
             if (identifier == DATA_FEL_CRYSTAL)
                 felCristalIndex = value;
         }
     };
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_magisters_terrace_InstanceMapScript(map);
     }

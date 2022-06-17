@@ -68,7 +68,7 @@ class boss_baron_rivendare : public CreatureScript
 public:
     boss_baron_rivendare() : CreatureScript("boss_baron_rivendare") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_baron_rivendareAI(creature);
     }
@@ -88,7 +88,7 @@ public:
         //    uint32 RaiseDead_Timer;
         uint32 SummonSkeletons_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             ShadowBolt_Timer = 5000;
             Cleave_Timer = 8000;
@@ -99,26 +99,26 @@ public:
                 instance->SetData(TYPE_BARON, NOT_STARTED);
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (instance)//can't use entercombat(), boss' dmg aura sets near players in combat, before entering the room's door
                 instance->SetData(TYPE_BARON, IN_PROGRESS);
             ScriptedAI::AttackStart(who);
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 summoned->AI()->AttackStart(target);
         }
 
-         void JustDied(Unit* /*killer*/) OVERRIDE
+         void JustDied(Unit* /*killer*/) override
          {
              if (instance)
                  instance->SetData(TYPE_BARON, DONE);
          }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;

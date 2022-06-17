@@ -70,97 +70,97 @@ class SmartAI : public CreatureAI
         bool IsEscortInvokerInRange();
 
         // Called when creature is spawned or respawned
-        void JustRespawned() OVERRIDE;
+        void JustRespawned() override;
 
         // Called after InitializeAI(), EnterEvadeMode() for resetting variables
-        void Reset() OVERRIDE;
+        void Reset() override;
 
         // Called at reaching home after evade
-        void JustReachedHome() OVERRIDE;
+        void JustReachedHome() override;
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be NULL)
-        void EnterCombat(Unit* enemy) OVERRIDE;
+        void EnterCombat(Unit* enemy) override;
 
         // Called for reaction at stopping attack at no attackers or targets
-        void EnterEvadeMode() OVERRIDE;
+        void EnterEvadeMode() override;
 
         // Called when the creature is killed
-        void JustDied(Unit* killer) OVERRIDE;
+        void JustDied(Unit* killer) override;
 
         // Called when the creature kills a unit
-        void KilledUnit(Unit* victim) OVERRIDE;
+        void KilledUnit(Unit* victim) override;
 
         // Called when the creature summon successfully other creature
-        void JustSummoned(Creature* creature) OVERRIDE;
+        void JustSummoned(Creature* creature) override;
 
         // Tell creature to attack and follow the victim
-        void AttackStart(Unit* who) OVERRIDE;
+        void AttackStart(Unit* who) override;
 
         // Called if IsVisible(Unit* who) is true at each *who move, reaction at visibility zone enter
-        void MoveInLineOfSight(Unit* who) OVERRIDE;
+        void MoveInLineOfSight(Unit* who) override;
 
         // Called when hit by a spell
-        void SpellHit(Unit* unit, const SpellInfo* spellInfo) OVERRIDE;
+        void SpellHit(Unit* unit, const SpellInfo* spellInfo) override;
 
         // Called when spell hits a target
-        void SpellHitTarget(Unit* target, const SpellInfo* spellInfo) OVERRIDE;
+        void SpellHitTarget(Unit* target, const SpellInfo* spellInfo) override;
 
         // Called at any Damage from any attacker (before damage apply)
-        void DamageTaken(Unit* doneBy, uint32& damage) OVERRIDE;
+        void DamageTaken(Unit* doneBy, uint32& damage) override;
 
         // Called when the creature receives heal
-        void HealReceived(Unit* doneBy, uint32& addhealth) OVERRIDE;
+        void HealReceived(Unit* doneBy, uint32& addhealth) override;
 
         // Called at World update tick
-        void UpdateAI(uint32 diff) OVERRIDE;
+        void UpdateAI(uint32 diff) override;
 
         // Called at text emote receive from player
-        void ReceiveEmote(Player* player, uint32 textEmote) OVERRIDE;
+        void ReceiveEmote(Player* player, uint32 textEmote) override;
 
         // Called at waypoint reached or point movement finished
-        void MovementInform(uint32 MovementType, uint32 Data) OVERRIDE;
+        void MovementInform(uint32 MovementType, uint32 Data) override;
 
         // Called when creature is summoned by another unit
-        void IsSummonedBy(Unit* summoner) OVERRIDE;
+        void IsSummonedBy(Unit* summoner) override;
 
         // Called at any Damage to any victim (before damage apply)
-        void DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damagetype*/) OVERRIDE;
+        void DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damagetype*/) override;
 
         // Called when a summoned creature dissapears (UnSommoned)
-        void SummonedCreatureDespawn(Creature* unit) OVERRIDE;
+        void SummonedCreatureDespawn(Creature* unit) override;
 
         // called when the corpse of this creature gets removed
-        void CorpseRemoved(uint32& respawnDelay) OVERRIDE;
+        void CorpseRemoved(uint32& respawnDelay) override;
 
         // Called at World update tick if creature is charmed
         void UpdateAIWhileCharmed(const uint32 diff);
 
         // Called when a Player/Creature enters the creature (vehicle)
-        void PassengerBoarded(Unit* who, int8 seatId, bool apply) OVERRIDE;
+        void PassengerBoarded(Unit* who, int8 seatId, bool apply) override;
 
         // Called when gets initialized, when creature is added to world
-        void InitializeAI() OVERRIDE;
+        void InitializeAI() override;
 
         // Called when creature gets charmed by another unit
-        void OnCharmed(bool apply) OVERRIDE;
+        void OnCharmed(bool apply) override;
 
         // Called when victim is in line of sight
-        bool CanAIAttack(const Unit* who) const OVERRIDE;
+        bool CanAIAttack(const Unit* who) const override;
 
         // Used in scripts to share variables
-        void DoAction(int32 param = 0) OVERRIDE;
+        void DoAction(int32 param = 0) override;
 
         // Used in scripts to share variables
-        uint32 GetData(uint32 id = 0) const OVERRIDE;
+        uint32 GetData(uint32 id = 0) const override;
 
         // Used in scripts to share variables
-        void SetData(uint32 id, uint32 value) OVERRIDE;
+        void SetData(uint32 id, uint32 value) override;
 
         // Used in scripts to share variables
-        void SetGUID(uint64 guid, int32 id = 0) OVERRIDE;
+        void SetGUID(uint64 guid, int32 id = 0) override;
 
         // Used in scripts to share variables
-        uint64 GetGUID(int32 id = 0) const OVERRIDE;
+        uint64 GetGUID(int32 id = 0) const override;
 
         //core related
         static int Permissible(const Creature*);
@@ -177,15 +177,15 @@ class SmartAI : public CreatureAI
 
         void SetInvincibilityHpLevel(uint32 level) { mInvincibilityHpLevel = level; }
 
-        void sGossipHello(Player* player) OVERRIDE;
-        void sGossipSelect(Player* player, uint32 sender, uint32 action) OVERRIDE;
-        void sGossipSelectCode(Player* player, uint32 sender, uint32 action, const char* code) OVERRIDE;
-        void sQuestAccept(Player* player, Quest const* quest) OVERRIDE;
-        //void sQuestSelect(Player* player, Quest const* quest) OVERRIDE;
-        //void sQuestComplete(Player* player, Quest const* quest) OVERRIDE;
-        void sQuestReward(Player* player, Quest const* quest, uint32 opt) OVERRIDE;
-        bool sOnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex) OVERRIDE;
-        void sOnGameEvent(bool start, uint16 eventId) OVERRIDE;
+        void sGossipHello(Player* player) override;
+        void sGossipSelect(Player* player, uint32 sender, uint32 action) override;
+        void sGossipSelectCode(Player* player, uint32 sender, uint32 action, const char* code) override;
+        void sQuestAccept(Player* player, Quest const* quest) override;
+        //void sQuestSelect(Player* player, Quest const* quest) override;
+        //void sQuestComplete(Player* player, Quest const* quest) override;
+        void sQuestReward(Player* player, Quest const* quest, uint32 opt) override;
+        bool sOnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex) override;
+        void sOnGameEvent(bool start, uint16 eventId) override;
 
         uint32 mEscortQuestID;
 
@@ -198,7 +198,7 @@ class SmartAI : public CreatureAI
 
         void RemoveAuras();
 
-        void OnSpellClick(Unit* clicker, bool& result) OVERRIDE;
+        void OnSpellClick(Unit* clicker, bool& result) override;
 
     private:
         uint32 mFollowCreditType;
@@ -241,24 +241,24 @@ class SmartGameObjectAI : public GameObjectAI
         SmartGameObjectAI(GameObject* g) : GameObjectAI(g), go(g) { }
         ~SmartGameObjectAI() { }
 
-        void UpdateAI(uint32 diff) OVERRIDE;
-        void InitializeAI() OVERRIDE;
-        void Reset() OVERRIDE;
+        void UpdateAI(uint32 diff) override;
+        void InitializeAI() override;
+        void Reset() override;
         SmartScript* GetScript() { return &mScript; }
         static int Permissible(const GameObject* g);
 
-        bool GossipHello(Player* player) OVERRIDE;
-        bool GossipSelect(Player* player, uint32 sender, uint32 action) OVERRIDE;
-        bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/) OVERRIDE;
-        bool QuestAccept(Player* player, Quest const* quest) OVERRIDE;
-        bool QuestReward(Player* player, Quest const* quest, uint32 opt) OVERRIDE;
-        uint32 GetDialogStatus(Player* /*player*/) OVERRIDE;
-        void Destroyed(Player* player, uint32 eventId) OVERRIDE;
-        void SetData(uint32 id, uint32 value) OVERRIDE;
+        bool GossipHello(Player* player) override;
+        bool GossipSelect(Player* player, uint32 sender, uint32 action) override;
+        bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/) override;
+        bool QuestAccept(Player* player, Quest const* quest) override;
+        bool QuestReward(Player* player, Quest const* quest, uint32 opt) override;
+        uint32 GetDialogStatus(Player* /*player*/) override;
+        void Destroyed(Player* player, uint32 eventId) override;
+        void SetData(uint32 id, uint32 value) override;
         void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
-        void OnGameEvent(bool start, uint16 eventId) OVERRIDE;
-        void OnStateChanged(uint32 state, Unit* unit) OVERRIDE;
-        void EventInform(uint32 eventId) OVERRIDE;
+        void OnGameEvent(bool start, uint16 eventId) override;
+        void OnStateChanged(uint32 state, Unit* unit) override;
+        void EventInform(uint32 eventId) override;
 
     protected:
         GameObject* const go;

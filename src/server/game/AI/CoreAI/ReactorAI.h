@@ -29,8 +29,8 @@ class ReactorAI : public CreatureAI
     public:
         explicit ReactorAI(Creature* c) : CreatureAI(c) { }
 
-        void MoveInLineOfSight(Unit*) OVERRIDE { }
-        void UpdateAI(uint32 diff) OVERRIDE;
+        void MoveInLineOfSight(Unit*) override { }
+        void UpdateAI(uint32 diff) override;
 
         static int Permissible(const Creature*);
 };

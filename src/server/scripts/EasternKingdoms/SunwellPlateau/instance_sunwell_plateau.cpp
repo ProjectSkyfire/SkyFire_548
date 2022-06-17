@@ -46,7 +46,7 @@ class instance_sunwell_plateau : public InstanceMapScript
 public:
     instance_sunwell_plateau() : InstanceMapScript("instance_sunwell_plateau", 580) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_sunwell_plateau_InstanceMapScript(map);
     }
@@ -83,7 +83,7 @@ public:
         uint32 SpectralRealmTimer;
         std::vector<uint64> SpectralRealmList;
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
@@ -115,7 +115,7 @@ public:
             SpectralRealmTimer = 5000;
         }
 
-        bool IsEncounterInProgress() const OVERRIDE
+        bool IsEncounterInProgress() const override
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
@@ -143,7 +143,7 @@ public:
             return NULL;
         }
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE
+        void OnCreatureCreate(Creature* creature) override
         {
             switch (creature->GetEntry())
             {
@@ -163,7 +163,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             switch (go->GetEntry())
             {
@@ -184,7 +184,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 id) const OVERRIDE
+        uint32 GetData(uint32 id) const override
         {
             switch (id)
             {
@@ -198,7 +198,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 id) const OVERRIDE
+        uint64 GetData64(uint32 id) const override
         {
             switch (id)
             {
@@ -223,7 +223,7 @@ public:
             return 0;
         }
 
-        void SetData(uint32 id, uint32 data) OVERRIDE
+        void SetData(uint32 id, uint32 data) override
         {
             switch (id)
             {
@@ -274,7 +274,7 @@ public:
                 SaveToDB();
         }
 
-        std::string GetSaveData() OVERRIDE
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
             std::ostringstream stream;
@@ -285,7 +285,7 @@ public:
             return stream.str();
         }
 
-        void Load(char const* in) OVERRIDE
+        void Load(char const* in) override
         {
             if (!in)
             {

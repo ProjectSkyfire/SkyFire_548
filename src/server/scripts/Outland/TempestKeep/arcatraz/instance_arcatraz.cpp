@@ -77,7 +77,7 @@ class instance_arcatraz : public InstanceMapScript
             uint64 GoSphereGUID;
             uint64 MellicharGUID;
 
-            void Initialize() OVERRIDE
+            void Initialize() override
             {
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
@@ -93,7 +93,7 @@ class instance_arcatraz : public InstanceMapScript
                         MellicharGUID = 0;
             }
 
-            bool IsEncounterInProgress() const OVERRIDE
+            bool IsEncounterInProgress() const override
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                     if (m_auiEncounter[i] == IN_PROGRESS)
@@ -102,7 +102,7 @@ class instance_arcatraz : public InstanceMapScript
                 return false;
             }
 
-            void OnGameObjectCreate(GameObject* go) OVERRIDE
+            void OnGameObjectCreate(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -144,13 +144,13 @@ class instance_arcatraz : public InstanceMapScript
                 }
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 if (creature->GetEntry() == MELLICHAR)
                     MellicharGUID = creature->GetGUID();
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 switch (type)
                 {
@@ -232,7 +232,7 @@ class instance_arcatraz : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -246,7 +246,7 @@ class instance_arcatraz : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 data) const OVERRIDE
+            uint64 GetData64(uint32 data) const override
             {
                 switch (data)
                 {
@@ -257,7 +257,7 @@ class instance_arcatraz : public InstanceMapScript
             }
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_arcatraz_InstanceMapScript(map);
         }

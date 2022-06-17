@@ -33,7 +33,7 @@ class boss_general_angerforge : public CreatureScript
 public:
     boss_general_angerforge() : CreatureScript("boss_general_angerforge") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_general_angerforgeAI(creature);
     }
@@ -48,7 +48,7 @@ public:
         uint32 Adds_Timer;
         bool Medics;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             MightyBlow_Timer = 8000;
             HamString_Timer = 12000;
@@ -57,7 +57,7 @@ public:
             Medics = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
         void SummonAdds(Unit* victim)
         {
@@ -71,7 +71,7 @@ public:
                 SummonedMedic->AI()->AttackStart(victim);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())

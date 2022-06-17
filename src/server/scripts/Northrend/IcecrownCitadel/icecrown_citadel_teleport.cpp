@@ -32,7 +32,7 @@ class icecrown_citadel_teleport : public GameObjectScript
     public:
         icecrown_citadel_teleport() : GameObjectScript("icecrown_citadel_teleport") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to Light's Hammer.", GOSSIP_SENDER_ICC_PORT, LIGHT_S_HAMMER_TELEPORT);
             if (InstanceScript* instance = go->GetInstanceScript())
@@ -54,7 +54,7 @@ class icecrown_citadel_teleport : public GameObjectScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 sender, uint32 action) OVERRIDE
+        bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 sender, uint32 action) override
         {
             player->PlayerTalkClass->ClearMenus();
             player->CLOSE_GOSSIP_MENU();
@@ -80,7 +80,7 @@ class at_frozen_throne_teleport : public AreaTriggerScript
     public:
         at_frozen_throne_teleport() : AreaTriggerScript("at_frozen_throne_teleport") { }
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) OVERRIDE
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) override
         {
             if (player->IsInCombat())
             {

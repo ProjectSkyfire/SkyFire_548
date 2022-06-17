@@ -133,7 +133,7 @@ public:
                 uiPhase = uiPhaseStep;
         }
 
-        void SetData(uint32 uiType, uint32 /*uiData*/) OVERRIDE
+        void SetData(uint32 uiType, uint32 /*uiData*/) override
         {
             switch (uiType)
             {
@@ -188,7 +188,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 uiType, uint32 uiPointId) OVERRIDE
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE)
                 return;
@@ -411,7 +411,7 @@ public:
             }
         }
 
-       void UpdateAI(uint32 uiDiff) OVERRIDE
+       void UpdateAI(uint32 uiDiff) override
         {
             ScriptedAI::UpdateAI(uiDiff);
 
@@ -443,7 +443,7 @@ public:
                 return;
         }
 
-        void JustSummoned(Creature* summon) OVERRIDE
+        void JustSummoned(Creature* summon) override
         {
             if (instance && instance->GetData(BOSS_GRAND_CHAMPIONS) == NOT_STARTED)
             {
@@ -452,7 +452,7 @@ public:
             }
         }
 
-        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
+        void SummonedCreatureDespawn(Creature* summon) override
         {
             switch (summon->GetEntry())
             {
@@ -472,12 +472,12 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_announcer_toc5AI(creature);
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         InstanceScript* instance = creature->GetInstanceScript();
 
@@ -502,7 +502,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF+1)

@@ -176,13 +176,13 @@ class BattlegroundTP : public Battleground
 
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player) OVERRIDE;
-        void StartingEventCloseDoors() OVERRIDE;
-        void StartingEventOpenDoors() OVERRIDE;
+        void AddPlayer(Player* player) override;
+        void StartingEventCloseDoors() override;
+        void StartingEventOpenDoors() override;
 
 
         /* BG Flags */
-        uint64 GetFlagPickerGUID(int32 team) const OVERRIDE
+        uint64 GetFlagPickerGUID(int32 team) const override
         {
             if (team == TEAM_ALLIANCE || team == TEAM_HORDE)
                 return m_FlagKeepers[team];
@@ -198,25 +198,25 @@ class BattlegroundTP : public Battleground
 
 
         /* Battleground Events */
-        void EventPlayerDroppedFlag(Player* Source) OVERRIDE;
-        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
+        void EventPlayerDroppedFlag(Player* Source) override;
+        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) override;
         void EventPlayerCapturedFlag(Player* Source);
 
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-        void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
-        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
-        bool SetupBattleground() OVERRIDE;
-        void Reset() OVERRIDE;
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) override;
+        void HandleAreaTrigger(Player* Source, uint32 Trigger) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        bool SetupBattleground() override;
+        void Reset() override;
         void EndBattleground(uint32 winner);
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
 
         void UpdateFlagState(uint32 team, uint32 value);
         void SetLastFlagCapture(uint32 team)                { _lastFlagCaptureTeam = team; }
         void UpdateTeamScore(uint32 team);
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
-        void SetDroppedFlagGUID(uint64 guid, int32 team = -1) OVERRIDE
+        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) override;
+        void SetDroppedFlagGUID(uint64 guid, int32 team = -1) override
         {
             if (team == TEAM_ALLIANCE || team == TEAM_HORDE)
                 m_DroppedFlagGUID[team] = guid;
@@ -224,7 +224,7 @@ class BattlegroundTP : public Battleground
 
 
         uint64 GetDroppedFlagGUID(uint32 TeamID)             { return m_DroppedFlagGUID[GetTeamIndexByTeamId(TeamID)];}
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
 
 
         /* Scorekeeping */
@@ -233,7 +233,7 @@ class BattlegroundTP : public Battleground
         void RemovePoint(uint32 TeamID, uint32 Points = 1)  { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
 
 
-        uint32 GetPrematureWinner() OVERRIDE;
+        uint32 GetPrematureWinner() override;
     private:
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
         uint64 m_DroppedFlagGUID[2];
@@ -252,7 +252,7 @@ class BattlegroundTP : public Battleground
         uint8 _minutesElapsed;
 
 
-        void PostUpdateImpl(uint32 diff) OVERRIDE;
+        void PostUpdateImpl(uint32 diff) override;
 };
 
 #endif

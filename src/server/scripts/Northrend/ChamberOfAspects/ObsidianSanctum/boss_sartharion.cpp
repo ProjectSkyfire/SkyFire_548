@@ -222,7 +222,7 @@ class boss_sartharion : public CreatureScript
 public:
     boss_sartharion() : CreatureScript("boss_sartharion") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_sartharionAI(creature);
     }
@@ -258,7 +258,7 @@ public:
 
         uint8 drakeCount;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             m_bIsBerserk = false;
             m_bIsSoftEnraged = false;
@@ -350,13 +350,13 @@ public:
             }
         }
 
-        void JustReachedHome() OVERRIDE
+        void JustReachedHome() override
         {
             if (instance)
                 instance->SetData(TYPE_SARTHARION_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_SARTHARION_AGGRO);
             DoZoneInCombat();
@@ -368,7 +368,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_SARTHARION_DEATH);
 
@@ -388,7 +388,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SARTHARION_SLAY);
         }
@@ -405,7 +405,7 @@ public:
                 me->AddLootMode(LOOT_MODE_HARD_MODE_1);      // Add 1st Drake loot mode
         }
 
-        uint32 GetData(uint32 type) const OVERRIDE
+        uint32 GetData(uint32 type) const override
         {
             if (type == TWILIGHT_ACHIEVEMENTS)
                 return drakeCount;
@@ -552,7 +552,7 @@ public:
             (*itr)->CastSpell(target, SPELL_LAVA_STRIKE, true);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -744,7 +744,7 @@ struct dummy_dragonAI : public ScriptedAI
     bool m_bCanMoveFree;
     bool m_bCanLoot;
 
-    void Reset() OVERRIDE
+    void Reset() override
     {
         if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -756,13 +756,13 @@ struct dummy_dragonAI : public ScriptedAI
         m_bCanLoot = true;
     }
 
-    void SetData(uint32 type, uint32 value) OVERRIDE
+    void SetData(uint32 type, uint32 value) override
     {
         if (type == DATA_CAN_LOOT)
             m_bCanLoot = value;
     }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId) OVERRIDE
+    void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (!instance || uiType != POINT_MOTION_TYPE)
             return;
@@ -902,7 +902,7 @@ struct dummy_dragonAI : public ScriptedAI
         //Refresh respawnTime so time again are set to 30secs?
     }
 
-    void JustDied(Unit* /*killer*/) OVERRIDE
+    void JustDied(Unit* /*killer*/) override
     {
         if (!m_bCanLoot)
             me->SetLootRecipient(NULL);
@@ -958,7 +958,7 @@ struct dummy_dragonAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(uint32 uiDiff) OVERRIDE
+    void UpdateAI(uint32 uiDiff) override
     {
         if (m_bCanMoveFree && m_uiMoveNextTimer)
         {
@@ -986,7 +986,7 @@ class npc_tenebron : public CreatureScript
 public:
     npc_tenebron() : CreatureScript("npc_tenebron") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_tenebronAI(creature);
     }
@@ -1001,7 +1001,7 @@ public:
 
         bool m_bHasPortalOpen;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             dummy_dragonAI::Reset();
 
@@ -1012,18 +1012,18 @@ public:
             m_bHasPortalOpen = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_TENEBRON_AGGRO);
             DoZoneInCombat();
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_TENEBRON_SLAY);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             //if no target, update dummy and return
             if (!UpdateVictim())
@@ -1076,7 +1076,7 @@ class npc_shadron : public CreatureScript
 public:
     npc_shadron() : CreatureScript("npc_shadron") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_shadronAI(creature);
     }
@@ -1091,7 +1091,7 @@ public:
 
         bool m_bHasPortalOpen;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             dummy_dragonAI::Reset();
 
@@ -1108,18 +1108,18 @@ public:
             m_bHasPortalOpen = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_SHADRON_AGGRO);
             DoZoneInCombat();
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SHADRON_SLAY);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             //if no target, update dummy and return
             if (!UpdateVictim())
@@ -1181,7 +1181,7 @@ class npc_vesperon : public CreatureScript
 public:
     npc_vesperon() : CreatureScript("npc_vesperon") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_vesperonAI(creature);
     }
@@ -1196,7 +1196,7 @@ public:
 
         bool m_bHasPortalOpen;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             dummy_dragonAI::Reset();
 
@@ -1207,18 +1207,18 @@ public:
             m_bHasPortalOpen = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_VESPERON_AGGRO);
             DoZoneInCombat();
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_VESPERON_SLAY);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             //if no target, update dummy and return
             if (!UpdateVictim())
@@ -1277,7 +1277,7 @@ class npc_acolyte_of_shadron : public CreatureScript
 public:
     npc_acolyte_of_shadron() : CreatureScript("npc_acolyte_of_shadron") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_acolyte_of_shadronAI(creature);
     }
@@ -1292,7 +1292,7 @@ public:
         InstanceScript* instance;
         uint32 uiDespawnTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             uiDespawnTimer = 28000;
             if (instance)
@@ -1316,7 +1316,7 @@ public:
             me->AddAura(SPELL_TWILIGHT_SHIFT_ENTER, me);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (instance)
             {
@@ -1359,7 +1359,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             if (uiDespawnTimer < uiDiff)
             {
@@ -1386,7 +1386,7 @@ class npc_acolyte_of_vesperon : public CreatureScript
 public:
     npc_acolyte_of_vesperon() : CreatureScript("npc_acolyte_of_vesperon") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_acolyte_of_vesperonAI(creature);
     }
@@ -1401,7 +1401,7 @@ public:
         InstanceScript* instance;
         uint32 uiDespawnTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             uiDespawnTimer = 28000;
             if (instance)
@@ -1409,7 +1409,7 @@ public:
             DoCast(me, SPELL_TWILIGHT_TORMENT_VESP_ACO);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             me->RemoveAurasDueToSpell(SPELL_TWILIGHT_TORMENT_VESP_ACO);
 
@@ -1451,7 +1451,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             if (uiDespawnTimer < uiDiff)
             {
@@ -1478,7 +1478,7 @@ class npc_twilight_eggs : public CreatureScript
 public:
     npc_twilight_eggs() : CreatureScript("npc_twilight_eggs") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_twilight_eggsAI(creature);
     }
@@ -1496,7 +1496,7 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (instance)
                 me->AddAura(SPELL_TWILIGHT_SHIFT_ENTER, me);
@@ -1515,12 +1515,12 @@ public:
             me->DealDamage(me, me->GetHealth());
         }
 
-        void JustSummoned(Creature* who) OVERRIDE
+        void JustSummoned(Creature* who) override
         {
             who->SetInCombatWithZone();
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             if (m_uiHatchEggTimer <= uiDiff)
             {
@@ -1533,8 +1533,8 @@ public:
                 m_uiHatchEggTimer -= uiDiff;
         }
 
-        void AttackStart(Unit* /*who*/) OVERRIDE { }
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void AttackStart(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
     };
 };
 
@@ -1546,7 +1546,7 @@ class npc_flame_tsunami : public CreatureScript
 public:
     npc_flame_tsunami() : CreatureScript("npc_flame_tsunami") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_flame_tsunamiAI(creature);
     }
@@ -1563,7 +1563,7 @@ public:
         uint32 TsunamiBuff_timer;
         uint32 entry;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetReactState(REACT_PASSIVE);
             Tsunami_Timer = 100;
@@ -1573,7 +1573,7 @@ public:
             entry = 0;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (Tsunami_Timer <= diff)
             {
@@ -1597,7 +1597,7 @@ class npc_twilight_fissure : public CreatureScript
 public:
     npc_twilight_fissure() : CreatureScript("npc_twilight_fissure") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_twilight_fissureAI(creature);
     }
@@ -1611,7 +1611,7 @@ public:
 
         uint32 VoidBlast_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -1620,7 +1620,7 @@ public:
             VoidBlast_Timer = 5000;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (VoidBlast_Timer <= diff)
             {
@@ -1645,7 +1645,7 @@ class npc_twilight_whelp : public CreatureScript
 public:
     npc_twilight_whelp() : CreatureScript("npc_twilight_whelp") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_twilight_whelpAI(creature);
     }
@@ -1659,14 +1659,14 @@ public:
 
         uint32 m_uiFadeArmorTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->RemoveAllAuras();
             me->SetInCombatWithZone();
             m_uiFadeArmorTimer = 1000;
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -1693,7 +1693,7 @@ class achievement_twilight_assist : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        bool OnCheck(Player* /*player*/, Unit* target) override
         {
             if (!target)
                 return false;
@@ -1713,7 +1713,7 @@ class achievement_twilight_duo : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        bool OnCheck(Player* /*player*/, Unit* target) override
         {
             if (!target)
                 return false;
@@ -1733,7 +1733,7 @@ class achievement_twilight_zone : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        bool OnCheck(Player* /*player*/, Unit* target) override
         {
             if (!target)
                 return false;

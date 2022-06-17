@@ -173,13 +173,13 @@ class OPvPCapturePointZM_Beacon : public OPvPCapturePoint
     public:
         OPvPCapturePointZM_Beacon(OutdoorPvP* pvp, ZM_BeaconType type);
 
-        void ChangeState() OVERRIDE;
-        void SendChangePhase() OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void ChangeState() override;
+        void SendChangePhase() override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
 
         // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player) OVERRIDE;
-        void HandlePlayerLeave(Player* player) OVERRIDE;
+        bool HandlePlayerEnter(Player* player) override;
+        void HandlePlayerLeave(Player* player) override;
         void UpdateTowerState();
 
     protected:
@@ -199,15 +199,15 @@ class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
     public:
         OPvPCapturePointZM_GraveYard(OutdoorPvP* pvp);
 
-        bool Update(uint32 diff) OVERRIDE;
-        void ChangeState() OVERRIDE { }
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        bool Update(uint32 diff) override;
+        void ChangeState() override { }
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
         void UpdateTowerState();
-        int32 HandleOpenGo(Player* player, uint64 guid) OVERRIDE;
+        int32 HandleOpenGo(Player* player, uint64 guid) override;
         void SetBeaconState(uint32 controlling_team); // not good atm
-        bool HandleGossipOption(Player* player, uint64 guid, uint32 gossipid) OVERRIDE;
-        bool HandleDropFlag(Player* player, uint32 spellId) OVERRIDE;
-        bool CanTalkTo(Player* player, Creature* creature, GossipMenuItems const& gso) OVERRIDE;
+        bool HandleGossipOption(Player* player, uint64 guid, uint32 gossipid) override;
+        bool HandleDropFlag(Player* player, uint32 spellId) override;
+        bool CanTalkTo(Player* player, Creature* creature, GossipMenuItems const& gso) override;
         uint32 GetGraveYardState() const;
 
     private:
@@ -223,13 +223,13 @@ class OutdoorPvPZM : public OutdoorPvP
     public:
         OutdoorPvPZM();
 
-        bool SetupOutdoorPvP() OVERRIDE;
-        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
-        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
-        bool Update(uint32 diff) OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
-        void SendRemoveWorldStates(Player* player) OVERRIDE;
-        void HandleKillImpl(Player* player, Unit* killed) OVERRIDE;
+        bool SetupOutdoorPvP() override;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) override;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) override;
+        bool Update(uint32 diff) override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
+        void SendRemoveWorldStates(Player* player) override;
+        void HandleKillImpl(Player* player, Unit* killed) override;
         uint32 GetAllianceTowersControlled() const;
         void SetAllianceTowersControlled(uint32 count);
         uint32 GetHordeTowersControlled() const;

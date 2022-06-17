@@ -62,7 +62,7 @@ public:
         uint32 PoisonBolt_Timer;
         bool canAttack;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _Reset();
             AcidSpray_Timer = 10000;
@@ -72,12 +72,12 @@ public:
             instance->SetData(TYPE_BROGGOK_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->setFaction(16);
             summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -85,7 +85,7 @@ public:
             summoned->CastSpell(summoned, SPELL_POISON, false, 0, 0, me->GetGUID());
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -118,7 +118,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (instance)
             {
@@ -128,7 +128,7 @@ public:
             }
         }
 
-        void DoAction(int32 action) OVERRIDE
+        void DoAction(int32 action) override
         {
             switch (action)
             {
@@ -149,7 +149,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_broggokAI(creature);
     }
@@ -160,7 +160,7 @@ class go_broggok_lever : public GameObjectScript
 public:
     go_broggok_lever() : GameObjectScript("go_broggok_lever") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* /*player*/, GameObject* go) override
     {
         if (InstanceScript* instance = go->GetInstanceScript())
             if (instance->GetData(TYPE_BROGGOK_EVENT) != DONE && instance->GetData(TYPE_BROGGOK_EVENT) != IN_PROGRESS)

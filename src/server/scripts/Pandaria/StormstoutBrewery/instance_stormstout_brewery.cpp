@@ -37,7 +37,7 @@ class instance_stormstout_brewery : public InstanceMapScript
                 BananaCount      = 0;
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -55,13 +55,13 @@ class instance_stormstout_brewery : public InstanceMapScript
                 }
             }
 
-            //void OnGameObjectCreate(GameObject* go) OVERRIDE
+            //void OnGameObjectCreate(GameObject* go) override
             //{}
 
-            //void OnGameObjectRemove(GameObject* go) OVERRIDE
+            //void OnGameObjectRemove(GameObject* go) override
             //{}
 
-            uint64 GetData64(uint32 type) const OVERRIDE
+            uint64 GetData64(uint32 type) const override
             {
                 switch (type)
                 {
@@ -79,7 +79,7 @@ class instance_stormstout_brewery : public InstanceMapScript
                 return 0;
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 switch (type)
                 {
@@ -92,7 +92,7 @@ class instance_stormstout_brewery : public InstanceMapScript
                 }
             }
 
-            std::string GetSaveData() OVERRIDE
+            std::string GetSaveData() override
             {
                 OUT_SAVE_INST_DATA;
 
@@ -103,7 +103,7 @@ class instance_stormstout_brewery : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(char const* str) OVERRIDE
+            void Load(char const* str) override
             {
                 if (!str)
                 {
@@ -142,7 +142,7 @@ class instance_stormstout_brewery : public InstanceMapScript
             uint64 BananaCount;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_stormstout_brewery_InstanceScript(map);
         }

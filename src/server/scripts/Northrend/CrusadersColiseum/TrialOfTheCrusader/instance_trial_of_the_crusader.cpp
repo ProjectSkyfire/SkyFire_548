@@ -33,7 +33,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
         {
             instance_trial_of_the_crusader_InstanceMapScript(Map* map) : InstanceScript(map) { }
 
-            void Initialize() OVERRIDE
+            void Initialize() override
             {
                 SetBossNumber(MAX_ENCOUNTERS);
                 TrialCounter = 50;
@@ -71,7 +71,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 FloorGUID = 0;
             }
 
-            bool IsEncounterInProgress() const OVERRIDE
+            bool IsEncounterInProgress() const override
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                     if (GetBossState(i) == IN_PROGRESS)
@@ -84,7 +84,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 return false;
             }
 
-            void OnPlayerEnter(Player* player) OVERRIDE
+            void OnPlayerEnter(Player* player) override
             {
                 if (instance->IsHeroic())
                 {
@@ -124,7 +124,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     go->SetGoState(GOState::GO_STATE_READY);
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -181,7 +181,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) OVERRIDE
+            void OnGameObjectCreate(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -229,7 +229,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 }
             }
 
-            bool SetBossState(uint32 type, EncounterState state) OVERRIDE
+            bool SetBossState(uint32 type, EncounterState state) override
             {
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
@@ -405,7 +405,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 return true;
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 switch (type)
                 {
@@ -474,7 +474,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 }
             }
 
-            uint64 GetData64(uint32 type) const OVERRIDE
+            uint64 GetData64(uint32 type) const override
             {
                 switch (type)
                 {
@@ -525,7 +525,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 return 0;
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -631,7 +631,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 return 0;
             }
 
-            void Update(uint32 diff) OVERRIDE
+            void Update(uint32 diff) override
             {
                 if (GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL && NotOneButTwoJormungarsTimer)
                 {
@@ -667,12 +667,12 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 NeedSave = false;
             }
 
-            std::string GetSaveData() OVERRIDE
+            std::string GetSaveData() override
             {
                 return SaveDataBuffer;
             }
 
-            void Load(const char* strIn) OVERRIDE
+            void Load(const char* strIn) override
             {
                 if (!strIn)
                 {
@@ -699,7 +699,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
-            bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) OVERRIDE
+            bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) override
             {
                 switch (criteria_id)
                 {
@@ -776,7 +776,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 bool   TributeToImmortalityEligible;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_trial_of_the_crusader_InstanceMapScript(map);
         }

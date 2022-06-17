@@ -108,13 +108,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mastery_unshackled_fury_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_mastery_unshackled_fury_AuraScript();
     }
@@ -143,13 +143,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mastery_shield_discipline_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_mastery_shield_discipline_AuraScript();
     }
@@ -188,13 +188,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_mastery_combo_breaker_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mastery_combo_breaker_SpellScript();
     }
@@ -241,13 +241,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterHit += SpellHitFn(spell_mastery_blood_shield_SpellScript::HandleAfterHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mastery_blood_shield_SpellScript();
     }
@@ -293,13 +293,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterHit += SpellHitFn(spell_mastery_ignite_SpellScript::HandleAfterHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mastery_ignite_SpellScript();
     }
@@ -338,13 +338,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterHit += SpellHitFn(spell_mastery_hand_of_light_SpellScript::HandleAfterHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mastery_hand_of_light_SpellScript();
     }
@@ -361,7 +361,7 @@ public:
     {
         PrepareSpellScript(spell_mastery_elemental_overload_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellEntry*/) override
         {
             if (!sSpellMgr->GetSpellInfo(403) || !sSpellMgr->GetSpellInfo(421) || !sSpellMgr->GetSpellInfo(51505) || !sSpellMgr->GetSpellInfo(117014))
                 return false;
@@ -435,13 +435,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_mastery_elemental_overload_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mastery_elemental_overload_SpellScript();
     }

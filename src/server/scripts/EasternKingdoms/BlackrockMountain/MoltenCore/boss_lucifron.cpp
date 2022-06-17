@@ -55,7 +55,7 @@ class boss_lucifron : public CreatureScript
             {
             }
 
-            void EnterCombat(Unit* victim) OVERRIDE
+            void EnterCombat(Unit* victim) override
             {
                 BossAI::EnterCombat(victim);
                 events.ScheduleEvent(EVENT_IMPENDING_DOOM, 10000);
@@ -63,7 +63,7 @@ class boss_lucifron : public CreatureScript
                 events.ScheduleEvent(EVENT_SHADOW_SHOCK, 6000);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -98,7 +98,7 @@ class boss_lucifron : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_lucifronAI(creature);
         }

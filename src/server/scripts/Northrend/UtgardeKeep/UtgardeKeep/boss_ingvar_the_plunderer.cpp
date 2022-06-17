@@ -113,7 +113,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
                 _isUndead = false;
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _isUndead = false;
 
@@ -128,7 +128,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
                 events.ScheduleEvent(EVENT_SMASH, urand(12, 17)*IN_MILLISECONDS, 0, PHASE_HUMAN);
             }
 
-            void DamageTaken(Unit* /*doneBy*/, uint32& damage) OVERRIDE
+            void DamageTaken(Unit* /*doneBy*/, uint32& damage) override
             {
                 if (damage >= me->GetHealth() && events.IsInPhase(PHASE_HUMAN))
                 {
@@ -147,7 +147,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
                     damage = 0;
             }
 
-            void DoAction(int32 actionId) OVERRIDE
+            void DoAction(int32 actionId) override
             {
                 if (actionId == ACTION_START_PHASE_2)
                     StartZombiePhase();
@@ -163,7 +163,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
                 Talk(SAY_AGGRO_2);
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 _EnterCombat();
 
@@ -171,7 +171,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
                     Talk(SAY_AGGRO_1);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 Talk(SAY_DEATH_2);
@@ -186,12 +186,12 @@ class boss_ingvar_the_plunderer : public CreatureScript
                 events.ScheduleEvent(EVENT_SHADOW_AXE, 30*IN_MILLISECONDS, 0, PHASE_UNDEAD);
             }
 
-            void KilledUnit(Unit* /*victim*/) OVERRIDE
+            void KilledUnit(Unit* /*victim*/) override
             {
                 Talk(_isUndead ? SAY_SLAY_1 : SAY_SLAY_2);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim() && !events.IsInPhase(PHASE_EVENT))
                     return;
@@ -260,7 +260,7 @@ class boss_ingvar_the_plunderer : public CreatureScript
             bool _isUndead;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetUtgardeKeepAI<boss_ingvar_the_plundererAI>(creature);
         }
@@ -278,7 +278,7 @@ class npc_annhylde_the_caller : public CreatureScript
                 _instance = creature->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _events.Reset();
 
@@ -290,7 +290,7 @@ class npc_annhylde_the_caller : public CreatureScript
                 me->GetMotionMaster()->MovePoint(1, x, y, z+15);
             }
 
-            void MovementInform(uint32 type, uint32 id) OVERRIDE
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type != POINT_MOTION_TYPE)
                     return;
@@ -315,11 +315,11 @@ class npc_annhylde_the_caller : public CreatureScript
                 }
             }
 
-            void AttackStart(Unit* /*who*/) OVERRIDE { }
-            void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
-            void EnterCombat(Unit* /*who*/) OVERRIDE { }
+            void AttackStart(Unit* /*who*/) override { }
+            void MoveInLineOfSight(Unit* /*who*/) override { }
+            void EnterCombat(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 _events.Update(diff);
 
@@ -356,7 +356,7 @@ class npc_annhylde_the_caller : public CreatureScript
             float x, y, z;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetUtgardeKeepAI<npc_annhylde_the_callerAI>(creature);
         }
@@ -374,7 +374,7 @@ class npc_ingvar_throw_dummy : public CreatureScript
 public:
     npc_ingvar_throw_dummy() : CreatureScript("npc_ingvar_throw_dummy") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_ingvar_throw_dummyAI(creature);
     }
@@ -385,7 +385,7 @@ public:
         {
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (Creature* target = me->FindNearestCreature(NPC_THROW_TARGET, 50.0f))
             {
@@ -398,7 +398,7 @@ public:
                 me->DisappearAndDie();
         }
 
-        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type == EFFECT_MOTION_TYPE && id == POINT_TARGET)
             {

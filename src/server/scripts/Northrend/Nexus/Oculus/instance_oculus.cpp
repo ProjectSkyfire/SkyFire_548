@@ -37,7 +37,7 @@ class instance_oculus : public InstanceMapScript
 public:
     instance_oculus() : InstanceMapScript("instance_oculus", 578) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_oculus_InstanceMapScript(map);
     }
@@ -46,7 +46,7 @@ public:
     {
         instance_oculus_InstanceMapScript(Map* map) : InstanceScript(map) { }
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             SetBossNumber(MAX_ENCOUNTER);
 
@@ -68,7 +68,7 @@ public:
             verdisaGUID = 0;
 }
 
-        void OnUnitDeath(Unit* unit) OVERRIDE
+        void OnUnitDeath(Unit* unit) override
         {
             Creature* creature = unit->ToCreature();
             if (!creature)
@@ -84,7 +84,7 @@ public:
                     varos->RemoveAllAuras();
         }
 
-        void OnPlayerEnter(Player* player) OVERRIDE
+        void OnPlayerEnter(Player* player) override
         {
             if (GetBossState(DATA_DRAKOS_EVENT) == DONE && GetBossState(DATA_VAROS_EVENT) != DONE)
             {
@@ -97,7 +97,7 @@ public:
             }
         }
 
-        void ProcessEvent(WorldObject* /*unit*/, uint32 eventId) OVERRIDE
+        void ProcessEvent(WorldObject* /*unit*/, uint32 eventId) override
         {
             if (eventId != EVENT_CALL_DRAGON)
                 return;
@@ -111,7 +111,7 @@ public:
                 drake->AI()->DoAction(ACTION_CALL_DRAGON_EVENT);
         }
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE
+        void OnCreatureCreate(Creature* creature) override
         {
             switch (creature->GetEntry())
             {
@@ -174,7 +174,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             switch (go->GetEntry())
             {
@@ -194,7 +194,7 @@ public:
             }
         }
 
-        bool SetBossState(uint32 type, EncounterState state) OVERRIDE
+        bool SetBossState(uint32 type, EncounterState state) override
         {
             if (!InstanceScript::SetBossState(type, state))
                 return false;
@@ -239,7 +239,7 @@ public:
             return true;
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             switch (type)
             {
@@ -249,7 +249,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const OVERRIDE
+        uint32 GetData(uint32 type) const override
         {
             switch (type)
             {
@@ -261,7 +261,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 identifier) const OVERRIDE
+        uint64 GetData64(uint32 identifier) const override
         {
             switch (identifier)
             {
@@ -309,7 +309,7 @@ public:
                     gwhelp->SetPhaseMask(1, true);
         }
 
-        std::string GetSaveData() OVERRIDE
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
 
@@ -322,7 +322,7 @@ public:
             return str_data;
         }
 
-        void Load(const char* in) OVERRIDE
+        void Load(const char* in) override
         {
             if (!in)
             {

@@ -33,10 +33,10 @@ class Bag : public Item
         Bag();
         ~Bag();
 
-        void AddToWorld() OVERRIDE;
-        void RemoveFromWorld() OVERRIDE;
+        void AddToWorld() override;
+        void RemoveFromWorld() override;
 
-        bool Create(uint32 guidlow, uint32 itemid, Player const* owner) OVERRIDE;
+        bool Create(uint32 guidlow, uint32 itemid, Player const* owner) override;
 
         void StoreItem(uint8 slot, Item* pItem, bool update);
         void RemoveItem(uint8 slot, bool update);
@@ -52,13 +52,13 @@ class Bag : public Item
 
         // DB operations
         // overwrite virtual Item::SaveToDB
-        void SaveToDB(SQLTransaction& trans) OVERRIDE;
+        void SaveToDB(SQLTransaction& trans) override;
         // overwrite virtual Item::LoadFromDB
-        bool LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry) OVERRIDE;
+        bool LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry) override;
         // overwrite virtual Item::DeleteFromDB
-        void DeleteFromDB(SQLTransaction& trans) OVERRIDE;
+        void DeleteFromDB(SQLTransaction& trans) override;
 
-        void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const OVERRIDE;
+        void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const override;
 
     protected:
 

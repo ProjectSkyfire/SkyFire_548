@@ -52,7 +52,7 @@ class boss_grobbulus : public CreatureScript
 public:
     boss_grobbulus() : CreatureScript("boss_grobbulus") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_grobbulusAI(creature);
     }
@@ -64,7 +64,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_POISON_CLOUD_ADD, true);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_CLOUD, 15000);
@@ -73,7 +73,7 @@ public:
             events.ScheduleEvent(EVENT_BERSERK, 12*60000);
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* spell) OVERRIDE
+        void SpellHitTarget(Unit* target, const SpellInfo* spell) override
         {
             if (spell->Id == uint32(SPELL_SLIME_SPRAY))
             {
@@ -82,7 +82,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -122,7 +122,7 @@ class npc_grobbulus_poison_cloud : public CreatureScript
 public:
     npc_grobbulus_poison_cloud() : CreatureScript("npc_grobbulus_poison_cloud") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_grobbulus_poison_cloudAI(creature);
     }
@@ -136,13 +136,13 @@ public:
 
         uint32 Cloud_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Cloud_Timer = 1000;
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (Cloud_Timer <= diff)
             {

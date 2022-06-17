@@ -55,14 +55,14 @@ public:
     {
         npc_agitated_earth_spiritAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             events.Reset();
             playerGUID = 0;
             me->setFaction(190);
         }
 
-        void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
+        void SpellHit(Unit* caster, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_SOOTHE_EARTH_SPIRIT && me->getFaction() == 190)
             {
@@ -73,7 +73,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 pointId) OVERRIDE
+        void MovementInform(uint32 type, uint32 pointId) override
         {
             if (type == POINT_MOTION_TYPE && pointId == 1)
             {
@@ -100,12 +100,12 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*victim*/) OVERRIDE
+        void EnterCombat(Unit* /*victim*/) override
         {
             events.ScheduleEvent(EVENT_ROCK_BARRAGE, urand(4000, 5000));
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -132,7 +132,7 @@ public:
         EventMap events;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_agitated_earth_spiritAI(creature);
     }

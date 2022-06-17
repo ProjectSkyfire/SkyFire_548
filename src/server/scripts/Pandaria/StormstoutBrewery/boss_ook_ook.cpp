@@ -42,7 +42,7 @@ public:
     {
         boss_ook_ookAI(Creature* creature) : BossAI(creature, DATA_OOK_OOK) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             BossAI::Reset();
             me->SetReactState(REACT_DEFENSIVE);
@@ -50,31 +50,31 @@ public:
             events.ScheduleEvent(EVENT_BANANA_AURA, DUNGEON_MODE(12000, 7000));
         }
 
-        void JustDied(Unit* /* killer */) OVERRIDE
+        void JustDied(Unit* /* killer */) override
         {
             _JustDied();
             //Talk(SAY_DEATH);
             instance->SetBossState(DATA_OOK_OOK, DONE);
         }
 
-        void EnterCombat(Unit* victim) OVERRIDE
+        void EnterCombat(Unit* victim) override
         {
             BossAI::EnterCombat(victim);
             //Talk(SAY_AGGRO);
         }
 
-        void JustReachedHome() OVERRIDE
+        void JustReachedHome() override
         {
             BossAI::JustReachedHome();
             instance->SetBossState(DATA_OOK_OOK, FAIL);
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             //Talk(SAY_KILL);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim() || !CheckInRoom())
                 return;
@@ -108,7 +108,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetStormstoutBreweryAI<boss_ook_ookAI>(creature);
     }

@@ -257,16 +257,16 @@ class OPvPCapturePointNA : public OPvPCapturePoint
     public:
         OPvPCapturePointNA(OutdoorPvP* pvp);
 
-        bool Update(uint32 diff) OVERRIDE;
-        void ChangeState() OVERRIDE;
-        void SendChangePhase() OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        bool Update(uint32 diff) override;
+        void ChangeState() override;
+        void SendChangePhase() override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
 
         // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player) OVERRIDE;
-        void HandlePlayerLeave(Player* player) OVERRIDE;
-        bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go) OVERRIDE;
-        int32 HandleOpenGo(Player* player, uint64 guid) OVERRIDE;
+        bool HandlePlayerEnter(Player* player) override;
+        void HandlePlayerLeave(Player* player) override;
+        bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go) override;
+        int32 HandleOpenGo(Player* player, uint64 guid) override;
 
         uint32 GetAliveGuardsCount();
         uint32 GetControllingFaction() const;
@@ -299,13 +299,13 @@ class OutdoorPvPNA : public OutdoorPvP
     public:
         OutdoorPvPNA();
 
-        bool SetupOutdoorPvP() OVERRIDE;
-        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
-        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
-        bool Update(uint32 diff) OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
-        void SendRemoveWorldStates(Player* player) OVERRIDE;
-        void HandleKillImpl(Player* player, Unit* killed) OVERRIDE;
+        bool SetupOutdoorPvP() override;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) override;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) override;
+        bool Update(uint32 diff) override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
+        void SendRemoveWorldStates(Player* player) override;
+        void HandleKillImpl(Player* player, Unit* killed) override;
 
     private:
         OPvPCapturePointNA * m_obj;

@@ -116,7 +116,7 @@ public:
 
         SummonList Summons;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             CarrionBeetlesTimer = 8*IN_MILLISECONDS;
             LeechingSwarmTimer = 20*IN_MILLISECONDS;
@@ -157,7 +157,7 @@ public:
             return NULL;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
             DelayTimer = 0;
@@ -171,7 +171,7 @@ public:
                 instance->SetBossState(DATA_ANUBARAK, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -334,7 +334,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
             Summons.DespawnAll();
@@ -342,7 +342,7 @@ public:
                 instance->SetBossState(DATA_ANUBARAK, DONE);
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
@@ -350,13 +350,13 @@ public:
             Talk(SAY_SLAY);
         }
 
-        void JustSummoned(Creature* summon) OVERRIDE
+        void JustSummoned(Creature* summon) override
         {
             Summons.Summon(summon);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_anub_arakAI(creature);
     }

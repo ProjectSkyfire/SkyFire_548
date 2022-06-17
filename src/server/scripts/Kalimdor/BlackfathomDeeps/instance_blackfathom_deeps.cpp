@@ -59,7 +59,7 @@ class instance_blackfathom_deeps : public InstanceMapScript
 public:
     instance_blackfathom_deeps() : InstanceMapScript("instance_blackfathom_deeps", 48) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_blackfathom_deeps_InstanceMapScript(map);
     }
@@ -81,7 +81,7 @@ public:
         uint8 countFires;
         uint8 deathTimes;
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             memset(&encounter, 0, sizeof(encounter));
 
@@ -97,7 +97,7 @@ public:
             deathTimes = 0;
         }
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE
+        void OnCreatureCreate(Creature* creature) override
         {
             switch (creature->GetEntry())
             {
@@ -110,7 +110,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             switch (go->GetEntry())
             {
@@ -144,7 +144,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             switch (type)
             {
@@ -214,7 +214,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const OVERRIDE
+        uint32 GetData(uint32 type) const override
         {
             switch (type)
             {
@@ -235,7 +235,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 data) const OVERRIDE
+        uint64 GetData64(uint32 data) const override
         {
             switch (data)
             {

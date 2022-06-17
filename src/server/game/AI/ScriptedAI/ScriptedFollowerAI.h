@@ -41,19 +41,19 @@ class FollowerAI : public ScriptedAI
 
         //virtual void WaypointReached(uint32 uiPointId) = 0;
 
-        void MovementInform(uint32 motionType, uint32 pointId) OVERRIDE;
+        void MovementInform(uint32 motionType, uint32 pointId) override;
 
-        void AttackStart(Unit*) OVERRIDE;
+        void AttackStart(Unit*) override;
 
-        void MoveInLineOfSight(Unit*) OVERRIDE;
+        void MoveInLineOfSight(Unit*) override;
 
-        void EnterEvadeMode() OVERRIDE;
+        void EnterEvadeMode() override;
 
-        void JustDied(Unit*) OVERRIDE;
+        void JustDied(Unit*) override;
 
-        void JustRespawned() OVERRIDE;
+        void JustRespawned() override;
 
-        void UpdateAI(uint32) OVERRIDE;                        //the "internal" update, calls UpdateFollowerAI()
+        void UpdateAI(uint32) override;                        //the "internal" update, calls UpdateFollowerAI()
         virtual void UpdateFollowerAI(uint32);        //used when it's needed to add code in update (abilities, scripted events, etc)
 
         void StartFollow(Player* player, uint32 factionForFollower = 0, const Quest* quest = NULL);

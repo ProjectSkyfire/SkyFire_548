@@ -113,7 +113,7 @@ class npc_verdisa_beglaristrasz_eternos : public CreatureScript
 public:
     npc_verdisa_beglaristrasz_eternos() : CreatureScript("npc_verdisa_beglaristrasz_eternos") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         switch (creature->GetEntry())
@@ -219,7 +219,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -240,7 +240,7 @@ public:
     {
         npc_verdisa_beglaristrasz_eternosAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void MovementInform(uint32 /*type*/, uint32 id) OVERRIDE
+        void MovementInform(uint32 /*type*/, uint32 id) override
         {
             if (id)
                 return;
@@ -254,7 +254,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_verdisa_beglaristrasz_eternosAI(creature);
     }
@@ -269,7 +269,7 @@ public:
     {
         npc_image_belgaristraszAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void IsSummonedBy(Unit* summoner) OVERRIDE
+        void IsSummonedBy(Unit* summoner) override
         {
             if (summoner->GetEntry() == NPC_VAROS)
             {
@@ -284,7 +284,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_image_belgaristraszAI(creature);
     }
@@ -317,7 +317,7 @@ public:
             bool HealthWarningOff;
             bool DisableTakeOff;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             summonerGUID = 0;
             WelcomeTimer = 4500;
@@ -333,7 +333,7 @@ public:
             DisableTakeOff = false;
         }
 
-        void IsSummonedBy(Unit* summoner) OVERRIDE
+        void IsSummonedBy(Unit* summoner) override
         {
             if (instance->GetBossState(DATA_EREGOS_EVENT) == IN_PROGRESS)
                 if (Creature* eregos = me->FindNearestCreature(NPC_EREGOS, 450.0f, true))
@@ -354,13 +354,13 @@ public:
             me->GetMotionMaster()->MovePoint(0, pos);
         }
 
-        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type == POINT_MOTION_TYPE && id == 0)
                 me->SetDisableGravity(false); // Needed this for proper animation after spawn, the summon in air fall to ground bug leave no other option for now, if this isn't used the drake will only walk on move.
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!(instance->GetBossState(DATA_VAROS_EVENT) == DONE))
             {
@@ -447,7 +447,7 @@ public:
         };
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_ruby_emerald_amber_drakeAI(creature);
     }
@@ -472,13 +472,13 @@ public:
                 caster->CastSpell(target, SPELL_SHOCK_CHARGE, false);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterEffectApply += AuraEffectApplyFn(spell_gen_stop_time_AuraScript::Apply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_gen_stop_time_AuraScript();
     }
@@ -510,14 +510,14 @@ public:
             const_cast<WorldLocation*>(GetExplTargetDest())->RelocateOffset(offset);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHit += SpellEffectFn(spell_call_ruby_emerald_amber_drake_SpellScript::ChangeSummonPos, EFFECT_0, SPELL_EFFECT_SUMMON);
             OnEffectLaunch += SpellEffectFn(spell_call_ruby_emerald_amber_drake_SpellScript::ModDestHeight, EFFECT_0, SPELL_EFFECT_SUMMON);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_call_ruby_emerald_amber_drake_SpellScript();
     }
@@ -538,13 +538,13 @@ class spell_oculus_touch_the_nightmare : public SpellScriptLoader
                 SetHitDamage(int32(GetCaster()->CountPctFromMaxHealth(30)));
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnEffectHitTarget += SpellEffectFn(spell_oculus_touch_the_nightmare_SpellScript::HandleDamageCalc, EFFECT_2, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_oculus_touch_the_nightmare_SpellScript();
         }
@@ -567,14 +567,14 @@ class spell_oculus_dream_funnel: public SpellScriptLoader
                 canBeRecalculated = false;
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_oculus_dream_funnel_AuraScript::HandleEffectCalcAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_oculus_dream_funnel_AuraScript::HandleEffectCalcAmount, EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
 
-        AuraScript* GetAuraScript() const OVERRIDE
+        AuraScript* GetAuraScript() const override
         {
             return new spell_oculus_dream_funnel_AuraScript();
         }

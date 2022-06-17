@@ -79,17 +79,17 @@ class npc_warp_splinter_treant : public CreatureScript
             uint64 WarpGuid;
             uint32 check_Timer;
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 check_Timer = 0;
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE { }
+            void EnterCombat(Unit* /*who*/) override { }
 
-            void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+            void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                 {
@@ -117,7 +117,7 @@ class npc_warp_splinter_treant : public CreatureScript
                     DoMeleeAttackIfReady();
             }
         };
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_warp_splinter_treantAI(creature);
         }
@@ -146,7 +146,7 @@ class boss_warp_splinter : public CreatureScript
             float Treant_Spawn_Pos_X;
             float Treant_Spawn_Pos_Y;
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 War_Stomp_Timer = urand(25000, 40000);
                 Summon_Treants_Timer = 45000;
@@ -155,17 +155,17 @@ class boss_warp_splinter : public CreatureScript
                 me->SetSpeed(MOVE_RUN, 0.7f, true);
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 Talk(SAY_AGGRO);
             }
 
-            void KilledUnit(Unit* /*victim*/) OVERRIDE
+            void KilledUnit(Unit* /*victim*/) override
             {
                 Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 Talk(SAY_DEATH);
             }
@@ -186,7 +186,7 @@ class boss_warp_splinter : public CreatureScript
                 Talk(SAY_SUMMON);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -222,7 +222,7 @@ class boss_warp_splinter : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_warp_splinterAI(creature);
         }

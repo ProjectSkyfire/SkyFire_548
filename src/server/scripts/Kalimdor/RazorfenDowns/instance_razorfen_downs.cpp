@@ -31,7 +31,7 @@ class instance_razorfen_downs : public InstanceMapScript
 public:
     instance_razorfen_downs() : InstanceMapScript("instance_razorfen_downs", 129) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_razorfen_downs_InstanceMapScript(map);
     }
@@ -50,7 +50,7 @@ public:
 
         std::string str_data;
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             uiGongGUID = 0;
 
@@ -59,7 +59,7 @@ public:
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
         }
 
-        std::string GetSaveData() OVERRIDE
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
 
@@ -74,7 +74,7 @@ public:
             return str_data;
         }
 
-        void Load(const char* in) OVERRIDE
+        void Load(const char* in) override
         {
             if (!in)
             {
@@ -104,7 +104,7 @@ public:
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             switch (go->GetEntry())
             {
@@ -118,7 +118,7 @@ public:
             }
         }
 
-        void SetData(uint32 uiType, uint32 uiData) OVERRIDE
+        void SetData(uint32 uiType, uint32 uiData) override
         {
             if (uiType == DATA_GONG_WAVES)
             {
@@ -190,7 +190,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 uiType) const OVERRIDE
+        uint32 GetData(uint32 uiType) const override
         {
             switch (uiType)
             {
@@ -201,7 +201,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 uiType) const OVERRIDE
+        uint64 GetData64(uint32 uiType) const override
         {
             switch (uiType)
             {

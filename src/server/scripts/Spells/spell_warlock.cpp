@@ -93,13 +93,13 @@ public:
             spellMod->value = (float)(aurEff->GetAmount() / 100);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_warl_chaotic_energy_AuraScript::HandleEffectCalcSpellMod, EFFECT_1, SPELL_AURA_ADD_PCT_MODIFIER);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_chaotic_energy_AuraScript();
     }
@@ -115,7 +115,7 @@ public:
     {
         PrepareSpellScript(spell_warl_banish_SpellScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             _removed = false;
             return true;
@@ -144,7 +144,7 @@ public:
                 PreventHitAura();
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             BeforeHit += SpellHitFn(spell_warl_banish_SpellScript::HandleBanish);
             AfterHit += SpellHitFn(spell_warl_banish_SpellScript::RemoveAura);
@@ -153,7 +153,7 @@ public:
         bool _removed;
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_banish_SpellScript();
     }
@@ -199,14 +199,14 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectRemove += AuraEffectApplyFn(spell_warl_demonic_circle_summon_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_demonic_circle_summon_AuraScript::HandleDummyTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_demonic_circle_summon_AuraScript();
     }
@@ -235,13 +235,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectApply += AuraEffectApplyFn(spell_warl_demonic_circle_teleport_AuraScript::HandleTeleport, EFFECT_0, SPELL_AURA_MECHANIC_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_demonic_circle_teleport_AuraScript();
     }
@@ -257,7 +257,7 @@ public:
     {
         PrepareAuraScript(spell_warl_fel_synergy_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_FEL_SYNERGY_HEAL))
                 return false;
@@ -277,14 +277,14 @@ public:
             GetTarget()->CastCustomSpell(SPELL_WARLOCK_FEL_SYNERGY_HEAL, SPELLVALUE_BASE_POINT0, heal, (Unit*)NULL, true, NULL, aurEff); // TARGET_UNIT_PET
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_warl_fel_synergy_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_warl_fel_synergy_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_fel_synergy_AuraScript();
     }
@@ -306,13 +306,13 @@ public:
             SetHitHeal(heal);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_warl_healthstone_heal_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_healthstone_heal_SpellScript();
     }
@@ -329,12 +329,12 @@ public:
     {
         PrepareSpellScript(spell_warl_life_tap_SpellScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
         }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE))
                 return false;
@@ -367,14 +367,14 @@ public:
             return SpellCastResult::SPELL_FAILED_FIZZLE;
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_warl_life_tap_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             OnCheckCast += SpellCheckCastFn(spell_warl_life_tap_SpellScript::CheckCast);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_life_tap_SpellScript();
     }
@@ -397,13 +397,13 @@ public:
                 targets.remove(GetExplTargetUnit());
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warl_seed_of_corruption_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_seed_of_corruption_SpellScript();
     }
@@ -419,7 +419,7 @@ public:
     {
         PrepareAuraScript(spell_warl_shadow_trance_proc_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SHADOW_TRANCE))
                 return false;
@@ -437,13 +437,13 @@ public:
                 GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_SHADOW_TRANCE, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectProc += AuraEffectProcFn(spell_warl_shadow_trance_proc_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_shadow_trance_proc_AuraScript();
     }
@@ -459,7 +459,7 @@ public:
     {
         PrepareSpellScript(spell_warl_soul_swap_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_CD_MARKER) ||
                 !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
@@ -473,13 +473,13 @@ public:
             GetHitUnit()->CastSpell(GetCaster(), SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER, true);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_soul_swap_SpellScript();
     }
@@ -495,14 +495,14 @@ public:
     {
         PrepareAuraScript(spell_warl_soul_swap_override_AuraScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             _swapCaster = NULL;
             return true;
         }
 
         //! Forced to, pure virtual functions must have a body when linking
-        void Register() OVERRIDE { }
+        void Register() override { }
 
     public:
         void AddDot(uint32 id) { _dotList.push_back(id); }
@@ -515,7 +515,7 @@ public:
         Unit* _swapCaster;
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_soul_swap_override_AuraScript();
     }
@@ -561,13 +561,13 @@ public:
             swapSpellScript->SetOriginalSwapSource(swapVictim);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_dot_marker_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_soul_swap_dot_marker_SpellScript();
     }
@@ -583,7 +583,7 @@ public:
     {
         PrepareSpellScript(spell_warl_soul_swap_exhale_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_MOD_COST) ||
                 !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
@@ -635,14 +635,14 @@ public:
             GetCaster()->RemoveAurasDueToSpell(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_exhale_SpellScript::CheckCast);
             OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_soul_swap_exhale_SpellScript();
     }
@@ -659,7 +659,7 @@ public:
     {
         PrepareSpellScript(spell_warl_soulshatter_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOULSHATTER))
                 return false;
@@ -674,13 +674,13 @@ public:
                     caster->CastSpell(target, SPELL_WARLOCK_SOULSHATTER, true);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_warl_soulshatter_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warl_soulshatter_SpellScript();
     }
@@ -697,7 +697,7 @@ public:
     {
         PrepareAuraScript(spell_warl_unstable_affliction_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL))
                 return false;
@@ -715,13 +715,13 @@ public:
                 }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterDispel += AuraDispelFn(spell_warl_unstable_affliction_AuraScript::HandleDispel);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_warl_unstable_affliction_AuraScript();
     }

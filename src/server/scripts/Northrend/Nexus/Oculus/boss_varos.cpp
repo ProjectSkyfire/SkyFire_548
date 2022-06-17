@@ -59,7 +59,7 @@ class boss_varos : public CreatureScript
 public:
     boss_varos() : CreatureScript("boss_varos") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_varosAI(creature);
     }
@@ -72,7 +72,7 @@ public:
                 DoCast(me, SPELL_CENTRIFUGE_SHIELD);
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _Reset();
 
@@ -85,7 +85,7 @@ public:
             coreEnergizeOrientation = 0.0f;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
 
@@ -97,7 +97,7 @@ public:
             return coreEnergizeOrientation;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -145,7 +145,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
             Talk(SAY_DEATH);
@@ -169,7 +169,7 @@ class npc_azure_ring_captain : public CreatureScript
                 instance = creature->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 targetGUID = 0;
 
@@ -179,7 +179,7 @@ class npc_azure_ring_captain : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
             }
 
-            void SpellHitTarget(Unit* target, SpellInfo const* spell) OVERRIDE
+            void SpellHitTarget(Unit* target, SpellInfo const* spell) override
             {
                 if (spell->Id == SPELL_ICE_BEAM)
                 {
@@ -188,7 +188,7 @@ class npc_azure_ring_captain : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 /*diff*/) OVERRIDE
+            void UpdateAI(uint32 /*diff*/) override
             {
                 if (!UpdateVictim())
                     return;
@@ -196,7 +196,7 @@ class npc_azure_ring_captain : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
-            void MovementInform(uint32 type, uint32 id) OVERRIDE
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type != POINT_MOTION_TYPE ||
                     id != ACTION_CALL_DRAGON_EVENT)
@@ -208,7 +208,7 @@ class npc_azure_ring_captain : public CreatureScript
                     DoCast(target, SPELL_ICE_BEAM);
             }
 
-            void DoAction(int32 action) OVERRIDE
+            void DoAction(int32 action) override
             {
                 switch (action)
                 {
@@ -235,7 +235,7 @@ class npc_azure_ring_captain : public CreatureScript
             InstanceScript* instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_azure_ring_captainAI(creature);
         }
@@ -250,7 +250,7 @@ class spell_varos_centrifuge_shield : public SpellScriptLoader
         {
             PrepareAuraScript(spell_varos_centrifuge_shield_AuraScript);
 
-            bool Load() OVERRIDE
+            bool Load() override
             {
                 Unit* caster = GetCaster();
                 return (caster && caster->ToCreature());
@@ -279,14 +279,14 @@ class spell_varos_centrifuge_shield : public SpellScriptLoader
                 }
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnEffectRemove += AuraEffectRemoveFn(spell_varos_centrifuge_shield_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 OnEffectApply += AuraEffectApplyFn(spell_varos_centrifuge_shield_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const OVERRIDE
+        AuraScript* GetAuraScript() const override
         {
             return new spell_varos_centrifuge_shield_AuraScript();
         }
@@ -327,13 +327,13 @@ class spell_varos_energize_core_area_enemy : public SpellScriptLoader
                 }
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_varos_energize_core_area_enemySpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_varos_energize_core_area_enemySpellScript();
         }
@@ -374,13 +374,13 @@ class spell_varos_energize_core_area_entry : public SpellScriptLoader
                 }
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_varos_energize_core_area_entrySpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_varos_energize_core_area_entrySpellScript();
         }

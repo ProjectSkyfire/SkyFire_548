@@ -78,7 +78,7 @@ public:
     {
         PrepareAuraScript(spell_pri_evangelism_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_EVANGELISM_PROC))
                 return false;
@@ -95,12 +95,12 @@ public:
 
             GetTarget()->CastCustomSpell(SPELL_PRIEST_EVANGELISM_PROC, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), eventInfo.GetProcTarget(), true, NULL, aurEff);
         }
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectProc += AuraEffectProcFn(spell_pri_evangelism_AuraScript::HandleEffectStackProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_evangelism_AuraScript();
     }
@@ -116,7 +116,7 @@ public:
     {
         PrepareAuraScript(spell_pri_divine_aegis_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_DIVINE_AEGIS))
                 return false;
@@ -143,14 +143,14 @@ public:
             GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_pri_divine_aegis_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_pri_divine_aegis_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_divine_aegis_AuraScript();
     }
@@ -166,7 +166,7 @@ public:
     {
         PrepareAuraScript(spell_pri_item_greater_heal_refund_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_ITEM_EFFICIENCY))
                 return false;
@@ -179,13 +179,13 @@ public:
             GetTarget()->CastSpell(GetTarget(), SPELL_PRIEST_ITEM_EFFICIENCY, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectProc += AuraEffectProcFn(spell_pri_item_greater_heal_refund_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_item_greater_heal_refund_AuraScript();
     }
@@ -201,7 +201,7 @@ public:
     {
         PrepareSpellScript(spell_pri_leap_of_faith_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_LEAP_OF_FAITH_EFFECT))
                 return false;
@@ -232,13 +232,13 @@ public:
         }
 
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_pri_leap_of_faith_SpellScript::HandleEffectDummy, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pri_leap_of_faith_SpellScript();
     }
@@ -264,13 +264,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_lightwell_renew_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_lightwell_renew_AuraScript();
     }
@@ -286,14 +286,14 @@ public:
     {
         PrepareAuraScript(spell_pri_mana_leech_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_MANA_LEECH_PROC))
                 return false;
             return true;
         }
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             _procTarget = NULL;
             return true;
@@ -311,7 +311,7 @@ public:
             GetTarget()->CastSpell(_procTarget, SPELL_PRIEST_MANA_LEECH_PROC, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_pri_mana_leech_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_pri_mana_leech_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
@@ -321,7 +321,7 @@ public:
         Unit* _procTarget;
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_mana_leech_AuraScript();
     }
@@ -342,13 +342,13 @@ public:
             unitList.remove_if(Skyfire::ObjectGUIDCheck(GetCaster()->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)));
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_mind_sear_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pri_mind_sear_SpellScript();
     }
@@ -364,12 +364,12 @@ public:
     {
         PrepareSpellScript(spell_pri_penance_SpellScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
         }
 
-        bool Validate(SpellInfo const* spellInfo) OVERRIDE
+        bool Validate(SpellInfo const* spellInfo) override
         {
             SpellInfo const* firstRankSpellInfo = sSpellMgr->GetSpellInfo(SPELL_PRIEST_PENANCE_R1);
             if (!firstRankSpellInfo)
@@ -414,14 +414,14 @@ public:
             return SpellCastResult::SPELL_CAST_OK;
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_pri_penance_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             OnCheckCast += SpellCheckCastFn(spell_pri_penance_SpellScript::CheckCast);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pri_penance_SpellScript;
     }
@@ -437,7 +437,7 @@ public:
     {
         PrepareAuraScript(spell_pri_power_word_shield_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED))
                 return false;
@@ -501,7 +501,7 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_power_word_shield_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_power_word_shield_AuraScript::ReflectDamage, EFFECT_0);
@@ -509,7 +509,7 @@ public:
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_power_word_shield_AuraScript();
     }
@@ -538,13 +538,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_pri_prayer_of_mending_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pri_prayer_of_mending_heal_SpellScript();
     }
@@ -560,14 +560,14 @@ public:
     {
         PrepareAuraScript(spell_pri_renew_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_DIVINE_TOUCH))
                 return false;
             return true;
         }
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             return GetCaster() && GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
         }
@@ -587,13 +587,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectApply += AuraEffectApplyFn(spell_pri_renew_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_renew_AuraScript();
     }
@@ -615,13 +615,13 @@ public:
             GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &damage, 0, 0, true);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleDamage);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pri_shadow_word_death_SpellScript();
     }
@@ -637,7 +637,7 @@ public:
     {
         PrepareAuraScript(spell_pri_shadowform_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH))
@@ -655,14 +655,14 @@ public:
             GetTarget()->RemoveAurasDueToSpell(GetTarget()->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOW) ? SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterEffectApply += AuraEffectApplyFn(spell_pri_shadowform_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             AfterEffectRemove += AuraEffectRemoveFn(spell_pri_shadowform_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_shadowform_AuraScript();
     }
@@ -678,7 +678,7 @@ public:
     {
         PrepareAuraScript(spell_pri_vampiric_embrace_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL))
                 return false;
@@ -700,14 +700,14 @@ public:
             GetTarget()->CastCustomSpell((Unit*)NULL, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, &team, &self, NULL, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_pri_vampiric_embrace_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_pri_vampiric_embrace_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_vampiric_embrace_AuraScript();
     }
@@ -728,13 +728,13 @@ public:
             unitList.remove(GetCaster());
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_vampiric_embrace_target_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pri_vampiric_embrace_target_SpellScript();
     }
@@ -750,7 +750,7 @@ public:
     {
         PrepareAuraScript(spell_pri_vampiric_touch_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_GEN_REPLENISHMENT))
                 return false;
@@ -767,14 +767,14 @@ public:
             eventInfo.GetProcTarget()->CastSpell((Unit*)NULL, SPELL_GEN_REPLENISHMENT, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_pri_vampiric_touch_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_pri_vampiric_touch_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_pri_vampiric_touch_AuraScript();
     }

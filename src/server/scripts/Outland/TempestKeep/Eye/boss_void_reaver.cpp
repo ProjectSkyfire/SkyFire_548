@@ -66,7 +66,7 @@ public:
 
         bool Enraged;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Pounding_Timer = 15000;
             ArcaneOrb_Timer = 3000;
@@ -79,12 +79,12 @@ public:
                 instance->SetData(DATA_VOIDREAVEREVENT, NOT_STARTED);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
             DoZoneInCombat();
@@ -93,7 +93,7 @@ public:
                 instance->SetData(DATA_VOIDREAVEREVENT, DONE);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
@@ -101,7 +101,7 @@ public:
                 instance->SetData(DATA_VOIDREAVEREVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -168,7 +168,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_void_reaverAI(creature);
     }

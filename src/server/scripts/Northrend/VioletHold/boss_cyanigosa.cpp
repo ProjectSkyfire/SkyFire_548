@@ -51,7 +51,7 @@ class boss_cyanigosa : public CreatureScript
 public:
     boss_cyanigosa() : CreatureScript("boss_cyanigosa") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_cyanigosaAI(creature);
     }
@@ -71,7 +71,7 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             uiArcaneVacuumTimer = 10000;
             uiBlizzardTimer = 15000;
@@ -82,7 +82,7 @@ public:
                 instance->SetData(DATA_CYANIGOSA_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
@@ -90,10 +90,10 @@ public:
                 instance->SetData(DATA_CYANIGOSA_EVENT, IN_PROGRESS);
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (instance && instance->GetData(DATA_REMOVE_NPC) == 1)
             {
@@ -143,7 +143,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
 
@@ -151,7 +151,7 @@ public:
                 instance->SetData(DATA_CYANIGOSA_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
@@ -168,7 +168,7 @@ class achievement_defenseless : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        bool OnCheck(Player* /*player*/, Unit* target) override
         {
             if (!target)
                 return false;

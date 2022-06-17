@@ -2290,13 +2290,13 @@ class GameObjectModelOwnerImpl : public GameObjectModelOwnerBase
 public:
     explicit GameObjectModelOwnerImpl(GameObject const* owner) : _owner(owner) { }
 
-    bool isSpawned() const OVERRIDE { return _owner->isSpawned(); }
-    uint32 GetDisplayId() const OVERRIDE { return _owner->GetDisplayId(); }
-    uint32 GetPhaseMask() const OVERRIDE { return _owner->GetPhaseMask(); }
-    G3D::Vector3 GetPosition() const OVERRIDE { return G3D::Vector3(_owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ()); }
-    float GetOrientation() const OVERRIDE { return _owner->GetOrientation(); }
-    float GetScale() const OVERRIDE { return _owner->GetObjectScale(); }
-    void DebugVisualizeCorner(G3D::Vector3 const& corner) const OVERRIDE { _owner->SummonCreature(1, corner.x, corner.y, corner.z, 0, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN); }
+    bool isSpawned() const override { return _owner->isSpawned(); }
+    uint32 GetDisplayId() const override { return _owner->GetDisplayId(); }
+    uint32 GetPhaseMask() const override { return _owner->GetPhaseMask(); }
+    G3D::Vector3 GetPosition() const override { return G3D::Vector3(_owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ()); }
+    float GetOrientation() const override { return _owner->GetOrientation(); }
+    float GetScale() const override { return _owner->GetObjectScale(); }
+    void DebugVisualizeCorner(G3D::Vector3 const& corner) const override { _owner->SummonCreature(1, corner.x, corner.y, corner.z, 0, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN); }
 
 private:
     GameObject const* _owner;

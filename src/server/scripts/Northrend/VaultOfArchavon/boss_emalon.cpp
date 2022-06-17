@@ -83,7 +83,7 @@ class boss_emalon : public CreatureScript
             {
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _Reset();
 
@@ -91,7 +91,7 @@ class boss_emalon : public CreatureScript
                     me->SummonCreature(NPC_TEMPEST_MINION, TempestMinions[i], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
 
-            void JustSummoned(Creature* summoned) OVERRIDE
+            void JustSummoned(Creature* summoned) override
             {
                 BossAI::JustSummoned(summoned);
 
@@ -100,7 +100,7 @@ class boss_emalon : public CreatureScript
                     summoned->AI()->AttackStart(me->GetVictim());
             }
 
-            void EnterCombat(Unit* who) OVERRIDE
+            void EnterCombat(Unit* who) override
             {
                 if (!summons.empty())
                 {
@@ -120,7 +120,7 @@ class boss_emalon : public CreatureScript
                 _EnterCombat();
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -169,7 +169,7 @@ class boss_emalon : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_emalonAI(creature);
         }
@@ -190,13 +190,13 @@ class npc_tempest_minion : public CreatureScript
                 instance = creature->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 events.Reset();
                 OverchargedTimer = 0;
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 if (Creature* emalon = Unit::GetCreature(*me, instance ? instance->GetData64(DATA_EMALON) : 0))
                 {
@@ -208,7 +208,7 @@ class npc_tempest_minion : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* who) OVERRIDE
+            void EnterCombat(Unit* who) override
             {
                 DoZoneInCombat();
                 events.ScheduleEvent(EVENT_SHOCK, 20000);
@@ -220,7 +220,7 @@ class npc_tempest_minion : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 //Return since we have no target
                 if (!UpdateVictim())
@@ -269,7 +269,7 @@ class npc_tempest_minion : public CreatureScript
             uint32 OverchargedTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_tempest_minionAI(creature);
         }
