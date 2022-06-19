@@ -45,7 +45,6 @@ enum DruidSpells
     SPELL_DRUID_GLYPH_OF_INNERVATE          = 54833,
     SPELL_DRUID_GLYPH_OF_STARFIRE           = 54846,
     SPELL_DRUID_INCREASED_MOONFIRE_DURATION = 38414,
-    SPELL_DRUID_LIFEBLOOM_ENERGIZE          = 64372,
     SPELL_DRUID_LIFEBLOOM_FINAL_HEAL        = 33778,
     SPELL_DRUID_LIFEBLOOM                   = 33763,
     SPELL_DRUID_LIVING_SEED_HEAL            = 48503,
@@ -457,14 +456,12 @@ public:
     {
         PrepareAuraScript(spell_dru_lifebloom_AuraScript);
 
-        /*bool Validate(SpellInfo const* spell) override
+        bool Validate(SpellInfo const* spell) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
                 return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
-                return false;
             return true;
-        }*/
+        }
 
         void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
