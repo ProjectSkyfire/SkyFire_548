@@ -47,6 +47,7 @@ enum DruidSpells
     SPELL_DRUID_INCREASED_MOONFIRE_DURATION = 38414,
     SPELL_DRUID_LIFEBLOOM_ENERGIZE          = 64372,
     SPELL_DRUID_LIFEBLOOM_FINAL_HEAL        = 33778,
+    SPELL_DRUID_LIFEBLOOM                   = 33763,
     SPELL_DRUID_LIVING_SEED_HEAL            = 48503,
     SPELL_DRUID_LIVING_SEED_PROC            = 48504,
     SPELL_DRUID_NATURES_GRACE               = 16880,
@@ -410,14 +411,14 @@ public:
     {
         PrepareAuraScript(spell_dru_lifebloom_AuraScript);
 
-        bool Validate(SpellInfo const* /*spell*/) override
+        /*bool Validate(SpellInfo const* spell) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
                 return false;
             if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
                 return false;
             return true;
-        }
+        }*/
 
         void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
@@ -437,6 +438,39 @@ public:
             }
 
             GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+        }
+
+        // Lifebloom is considered a single target spell, however it is missing the attribute in DBC so single target is handled here.
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* unitTarget = GetTarget())
+                {
+                    Aura* aura = unitTarget->GetAura(SPELL_DRUID_LIFEBLOOM);
+                    // lets keep track of applied auras
+                    Unit::AuraList& appliedAuras = caster->GetSingleCastAuras();
+                    for (Unit::AuraList::iterator iter = appliedAuras.begin(); iter != appliedAuras.end();)
+                    {
+                        if ((*iter) != unitTarget->GetAura(SPELL_DRUID_LIFEBLOOM))
+                        {
+                            uint32 stackAmount = (*iter)->GetStackAmount();
+                            aura->SetStackAmount(stackAmount);
+                            (*iter)->Remove();
+                            iter = appliedAuras.begin();
+                        }
+                        else
+                            ++iter;
+                    }
+
+                    if (caster->GetSingleCastAuras().empty())
+                    {
+                        // set single target in aura so it's properly removed from list when unapplying
+                        aura->SetIsSingleTarget(true);
+                        caster->GetSingleCastAuras().push_back(aura);
+                    }
+                }
+            }
         }
 
         void HandleDispel(DispelInfo* dispelInfo)
@@ -463,6 +497,7 @@ public:
         {
             AfterEffectRemove += AuraEffectRemoveFn(spell_dru_lifebloom_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             AfterDispel += AuraDispelFn(spell_dru_lifebloom_AuraScript::HandleDispel);
+            OnEffectApply += AuraEffectApplyFn(spell_dru_lifebloom_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
