@@ -31,36 +31,36 @@
 
 enum DruidSpells
 {
-    SPELL_DRUID_WRATH                       = 5176,
-    SPELL_DRUID_STARFIRE                    = 2912,
-    SPELL_DRUID_STARSURGE                   = 78674,
+    SPELL_DRUID_BEAR_FORM                   = 5487,
+    SPELL_DRUID_BERSERK_AURA                = 106951,
+    SPELL_DRUID_CAT_FORM                    = 768,
     SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE    = 89265,
-    SPELL_DRUID_STARSURGE_ENERGIZE          = 86605,
-    SPELL_DRUID_LUNAR_ECLIPSE_MARKER        = 67484, // Will make the yellow arrow on eclipse bar point to the blue side (lunar)
-    SPELL_DRUID_SOLAR_ECLIPSE_MARKER        = 67483, // Will make the yellow arrow on eclipse bar point to the yellow side (solar)
-    SPELL_DRUID_SOLAR_ECLIPSE               = 48517,
-    SPELL_DRUID_LUNAR_ECLIPSE               = 48518,
     SPELL_DRUID_FERAL_CHARGE_BEAR           = 16979,
     SPELL_DRUID_FERAL_CHARGE_CAT            = 49376,
     SPELL_DRUID_GLYPH_OF_INNERVATE          = 54833,
     SPELL_DRUID_GLYPH_OF_STARFIRE           = 54846,
     SPELL_DRUID_INCREASED_MOONFIRE_DURATION = 38414,
-    SPELL_DRUID_LIFEBLOOM_FINAL_HEAL        = 33778,
     SPELL_DRUID_LIFEBLOOM                   = 33763,
+    SPELL_DRUID_LIFEBLOOM_FINAL_HEAL        = 33778,
     SPELL_DRUID_LIVING_SEED_HEAL            = 48503,
     SPELL_DRUID_LIVING_SEED_PROC            = 48504,
+    SPELL_DRUID_LUNAR_ECLIPSE               = 48518,
+    SPELL_DRUID_LUNAR_ECLIPSE_MARKER        = 67484, // Will make the yellow arrow on eclipse bar point to the blue side (lunar)
     SPELL_DRUID_NATURES_GRACE               = 16880,
     SPELL_DRUID_NATURES_GRACE_TRIGGER       = 16886,
+    SPELL_DRUID_WRATH                       = 5176,
+    SPELL_DRUID_STARFIRE                    = 2912,
+    SPELL_DRUID_STARSURGE                   = 78674,
+    SPELL_DRUID_STARSURGE_ENERGIZE          = 86605, 
+    SPELL_DRUID_SOLAR_ECLIPSE_MARKER        = 67483, // Will make the yellow arrow on eclipse bar point to the yellow side (solar)
+    SPELL_DRUID_SOLAR_ECLIPSE               = 48517,
     SPELL_DRUID_SURVIVAL_INSTINCTS          = 50322,
     SPELL_DRUID_SAVAGE_ROAR                 = 52610,
     SPELL_DRUID_SAVAGE_ROAR_TRIGGER         = 62071,
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
     SPELL_DRUID_STAMPEDE_CAT_RANK_1         = 81021,
-    SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
-    SPELL_DRUID_BERSERK_AURA                = 106951,
-    SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
-    SPELL_DRUID_BEAR_FORM                   = 5487,
-    SPELL_DRUID_CAT_FORM                    = 768,
+    SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881, 
+    SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,   
 };
 
 // 5217 - Tiger's Fury
@@ -1085,7 +1085,6 @@ public:
 
 void AddSC_druid_spell_scripts()
 {
-    new spell_dru_tigers_fury();
     new spell_dru_dash();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
@@ -1105,5 +1104,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_stampede();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
+    new spell_dru_tigers_fury();
     new spell_dru_t10_restoration_4p_bonus();
 }
