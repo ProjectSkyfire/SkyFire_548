@@ -58,8 +58,54 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
     SPELL_DRUID_STAMPEDE_CAT_RANK_1         = 81021,
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
+    SPELL_DRUID_BERSERK_AURA                = 106951,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_BEAR_FORM                   = 5487,
+};
+
+// 5217 - Tiger's Fury
+class spell_dru_tigers_fury : public SpellScriptLoader
+{
+public:
+    spell_dru_tigers_fury() : SpellScriptLoader("spell_dru_tigers_fury") { }
+
+    class spell_dru_tigers_fury_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_tigers_fury_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_BERSERK_AURA))
+                return false;
+            return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetShapeshiftForm() != FORM_CAT)
+                {
+                    SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_BE_IN_CAT_FORM);
+                    return SpellCastResult::SPELL_FAILED_CUSTOM_ERROR;
+                }
+
+                if (caster->HasAura(SPELL_DRUID_BERSERK_AURA))
+                    return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+            }
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_tigers_fury_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_tigers_fury_SpellScript();
+    }
 };
 
 // 1850 - Dash
@@ -1020,6 +1066,7 @@ public:
 
 void AddSC_druid_spell_scripts()
 {
+    new spell_dru_tigers_fury();
     new spell_dru_dash();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
