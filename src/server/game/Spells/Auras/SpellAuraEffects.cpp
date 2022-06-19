@@ -1845,6 +1845,11 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
 
     if (target->getClass() == CLASS_DRUID)
     {
+
+        // Dash
+        if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPEED_ALWAYS, SPELLFAMILY_DRUID, 0, 0, 0x8))
+            aurEff->RecalculateAmount();
+
         // Disarm handling
         // If druid shifts while being disarmed we need to deal with that since forms aren't affected by disarm
         // and also HandleAuraModDisarm is not triggered
