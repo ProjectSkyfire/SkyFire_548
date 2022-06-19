@@ -60,6 +60,7 @@ enum DruidSpells
     SPELL_DRUID_BERSERK_AURA                = 106951,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_BEAR_FORM                   = 5487,
+    SPELL_DRUID_CAT_FORM                    = 768,
 };
 
 // 5217 - Tiger's Fury
@@ -117,16 +118,37 @@ public:
     {
         PrepareAuraScript(spell_dru_dash_AuraScript);
 
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_CAT_FORM))
+                return false;
+            return true;
+        }
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (!caster->HasAura(SPELL_DRUID_CAT_FORM))
+                {
+                    caster->CastSpell(caster, SPELL_DRUID_CAT_FORM, true);
+                }
+            }
+        }
+
         void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             // do not set speed if not in cat form
             if (GetUnitOwner()->GetShapeshiftForm() != FORM_CAT)
+            {
                 amount = 0;
+            }
         }
 
         void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_dash_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_SPEED_ALWAYS);
+            OnEffectApply += AuraEffectApplyFn(spell_dru_dash_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_SPEED_ALWAYS, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 

@@ -1240,7 +1240,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                 switch (m_spellInfo->Id)
                 {
-                    case 1850:   // Dash
                     case 137452: // Displacer Beast
                     case 5215:   // Prowl
                     {
