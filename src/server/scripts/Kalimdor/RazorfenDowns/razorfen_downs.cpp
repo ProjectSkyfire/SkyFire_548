@@ -62,7 +62,7 @@ public:
     {
         npc_henry_sternAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) OVERRIDE
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) override
         {
             if (action == 0)
             {
@@ -96,7 +96,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_henry_sternAI(creature);
     }
@@ -111,7 +111,7 @@ class go_gong : public GameObjectScript
 public:
     go_gong() : GameObjectScript("go_gong") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* /*player*/, GameObject* go) override
     {
         //basic support, not blizzlike data is missing...
         InstanceScript* instance = go->GetInstanceScript();
@@ -136,7 +136,7 @@ class npc_tomb_creature : public CreatureScript
 public:
     npc_tomb_creature() : CreatureScript("npc_tomb_creature") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_tomb_creatureAI(creature);
     }
@@ -152,12 +152,12 @@ public:
 
         uint32 uiWebTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             uiWebTimer = urand(5000, 8000);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             if (!UpdateVictim())
                 return;
@@ -175,7 +175,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (instance)
                 instance->SetData(DATA_GONG_WAVES, instance->GetData(DATA_GONG_WAVES)+1);

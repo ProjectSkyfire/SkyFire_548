@@ -43,7 +43,7 @@ class boss_hungarfen : public CreatureScript
 public:
     boss_hungarfen() : CreatureScript("boss_hungarfen") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_hungarfenAI(creature);
     }
@@ -58,18 +58,18 @@ public:
         uint32 Mushroom_Timer;
         uint32 AcidGeyser_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Root = false;
             Mushroom_Timer = 5000;                              // 1 mushroom after 5s, then one per 10s. This should be different in heroic mode
             AcidGeyser_Timer = 10000;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -110,7 +110,7 @@ class npc_underbog_mushroom : public CreatureScript
 public:
     npc_underbog_mushroom() : CreatureScript("npc_underbog_mushroom") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_underbog_mushroomAI(creature);
     }
@@ -123,7 +123,7 @@ public:
         uint32 Grow_Timer;
         uint32 Shrink_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Stop = false;
             Grow_Timer = 0;
@@ -133,14 +133,14 @@ public:
             DoCast(me, SPELL_SPORE_CLOUD, true);
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void AttackStart(Unit* /*who*/) OVERRIDE { }
+        void AttackStart(Unit* /*who*/) override { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (Stop)
                 return;

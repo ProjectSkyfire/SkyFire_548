@@ -34,7 +34,7 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
     public:
         instance_temple_of_ahnqiraj() : InstanceMapScript("instance_temple_of_ahnqiraj", 531) { }
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_temple_of_ahnqiraj_InstanceMapScript(map);
         }
@@ -58,7 +58,7 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
 
             uint32 CthunPhase;
 
-            void Initialize() OVERRIDE
+            void Initialize() override
             {
                 IsBossDied[0] = false;
                 IsBossDied[1] = false;
@@ -76,7 +76,7 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                 CthunPhase = 0;
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -101,13 +101,13 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                 }
             }
 
-            bool IsEncounterInProgress() const OVERRIDE
+            bool IsEncounterInProgress() const override
             {
                 //not active in AQ40
                 return false;
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -135,7 +135,7 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 identifier) const OVERRIDE
+            uint64 GetData64(uint32 identifier) const override
             {
                 switch (identifier)
                 {
@@ -155,7 +155,7 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                 return 0;
             }                                                       // end GetData64
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 switch (type)
                 {

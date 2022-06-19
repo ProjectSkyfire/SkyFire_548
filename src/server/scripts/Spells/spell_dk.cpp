@@ -122,13 +122,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_dk_gorefiends_grasp_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_gorefiends_grasp_SpellScript();
     }
@@ -169,13 +169,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_dk_runic_empowerment_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_runic_empowerment_SpellScript();
     }
@@ -210,13 +210,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_dk_runic_corruption_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_runic_corruption_SpellScript();
     }
@@ -243,13 +243,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHit += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_raise_dead_SpellScript();
     }
@@ -265,7 +265,7 @@ public:
     {
         PrepareAuraScript(spell_dk_anti_magic_shell_raid_AuraScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
             return true;
@@ -282,7 +282,7 @@ public:
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_shell_raid_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_raid_AuraScript::Absorb, EFFECT_0);
@@ -291,7 +291,7 @@ public:
         uint32 absorbPct = 0;
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_anti_magic_shell_raid_AuraScript();
     }
@@ -307,14 +307,14 @@ public:
     {
         PrepareAuraScript(spell_dk_anti_magic_shell_self_AuraScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
             hpPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
             return true;
         }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_RUNIC_POWER_ENERGIZE))
                 return false;
@@ -340,7 +340,7 @@ public:
             target->CastCustomSpell(target, SPELL_DK_RUNIC_POWER_ENERGIZE, &bp, NULL, NULL, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_shell_self_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_self_AuraScript::Absorb, EFFECT_0);
@@ -351,7 +351,7 @@ public:
         uint32 hpPct = 0;
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_anti_magic_shell_self_AuraScript();
     }
@@ -367,13 +367,13 @@ public:
     {
         PrepareAuraScript(spell_dk_anti_magic_zone_AuraScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
             return true;
         }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT))
                 return false;
@@ -393,7 +393,7 @@ public:
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_zone_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_zone_AuraScript::Absorb, EFFECT_0);
@@ -402,7 +402,7 @@ public:
         uint32 absorbPct = 0;
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_anti_magic_zone_AuraScript();
     }
@@ -418,14 +418,14 @@ public:
     {
         PrepareSpellScript(spell_dk_blood_boil_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_BOIL_TRIGGERED))
                 return false;
             return true;
         }
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             _executed = false;
             return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DEATH_KNIGHT;
@@ -440,7 +440,7 @@ public:
             GetCaster()->CastSpell(GetCaster(), SPELL_DK_BLOOD_BOIL_TRIGGERED, true);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             AfterHit += SpellHitFn(spell_dk_blood_boil_SpellScript::HandleAfterHit);
         }
@@ -449,7 +449,7 @@ public:
         bool _executed = false;
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_blood_boil_SpellScript();
     }
@@ -465,14 +465,14 @@ public:
     {
         PrepareAuraScript(spell_dk_blood_gorged_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_GORGED_HEAL))
                 return false;
             return true;
         }
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             _procTarget = NULL;
             return true;
@@ -490,7 +490,7 @@ public:
             GetTarget()->CastCustomSpell(SPELL_DK_BLOOD_GORGED_HEAL, SPELLVALUE_BASE_POINT0, heal, _procTarget, true, NULL, aurEff);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_dk_blood_gorged_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_dk_blood_gorged_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
@@ -500,7 +500,7 @@ public:
         Unit* _procTarget = NULL;
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_blood_gorged_AuraScript();
     }
@@ -516,7 +516,7 @@ public:
     {
         PrepareSpellScript(spell_dk_death_coil_SpellScript);
 
-        bool Validate(SpellInfo const* /*spell*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spell*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_COIL_DAMAGE) || !sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_COIL_HEAL))
                 return false;
@@ -556,14 +556,14 @@ public:
             return SpellCastResult::SPELL_CAST_OK;
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnCheckCast += SpellCheckCastFn(spell_dk_death_coil_SpellScript::CheckCast);
             OnEffectHitTarget += SpellEffectFn(spell_dk_death_coil_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_death_coil_SpellScript();
     }
@@ -597,14 +597,14 @@ public:
                 target->CastSpell(target, GetEffectValue(), false);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnCheckCast += SpellCheckCastFn(spell_dk_death_gate_SpellScript::CheckClass);
             OnEffectHitTarget += SpellEffectFn(spell_dk_death_gate_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_death_gate_SpellScript();
     }
@@ -631,13 +631,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_dk_death_grip_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_death_grip_SpellScript();
     }
@@ -686,14 +686,14 @@ public:
                 targetList.push_back(target);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnCheckCast += SpellCheckCastFn(spell_dk_death_pact_SpellScript::CheckCast);
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_death_pact_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ALLY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_death_pact_SpellScript();
     }
@@ -709,7 +709,7 @@ public:
     {
         PrepareSpellScript(spell_dk_death_strike_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_STRIKE_ENABLER) ||
                 !sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_STRIKE_HEAL) ||
@@ -740,13 +740,13 @@ public:
                 GetCaster()->CastCustomSpell(SPELL_DK_BLOOD_SHIELD_ABSORB, SPELLVALUE_BASE_POINT0, GetCaster()->CountPctFromMaxHealth(aurEff->GetAmount()), GetCaster());
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_dk_death_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_death_strike_SpellScript();
     }
@@ -762,7 +762,7 @@ public:
     {
         PrepareAuraScript(spell_dk_death_strike_enabler_AuraScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             for (uint8 i = 0; i < 5; ++i)
                 _damagePerSecond[i] = 0;
@@ -808,7 +808,7 @@ public:
                 amount += int32(_damagePerSecond[i]);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_dk_death_strike_enabler_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_dk_death_strike_enabler_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
@@ -820,7 +820,7 @@ public:
         uint32 _damagePerSecond[5] = { };
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_death_strike_enabler_AuraScript();
     }
@@ -836,7 +836,7 @@ public:
     {
         PrepareSpellScript(spell_dk_ghoul_explode_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_CORPSE_EXPLOSION_TRIGGERED))
                 return false;
@@ -852,13 +852,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_dk_ghoul_explode_SpellScript::Suicide, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_ghoul_explode_SpellScript();
     }
@@ -874,7 +874,7 @@ public:
     {
         PrepareAuraScript(spell_dk_icebound_fortitude_AuraScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             Unit* caster = GetCaster();
             return caster && caster->GetTypeId() == TypeID::TYPEID_PLAYER;
@@ -901,13 +901,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_icebound_fortitude_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_icebound_fortitude_AuraScript();
     }
@@ -929,13 +929,13 @@ public:
                 amount = int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.7f);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_necrotic_strike_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_necrotic_strike_AuraScript();
     }
@@ -956,13 +956,13 @@ public:
             targets.remove(GetCaster());
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_rune_tap_party_SpellScript::CheckTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_rune_tap_party_SpellScript();
     }
@@ -978,7 +978,7 @@ public:
     {
         PrepareAuraScript(spell_dk_scent_of_blood_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCENT_OF_BLOOD))
                 return false;
@@ -992,13 +992,13 @@ public:
             GetTarget()->RemoveAuraFromStack(GetId());
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectProc += AuraEffectProcFn(spell_dk_scent_of_blood_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_scent_of_blood_AuraScript();
     }
@@ -1014,13 +1014,13 @@ public:
     {
         PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             multiplier = 1.0f;
             return true;
         }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCOURGE_STRIKE_TRIGGERED) ||
                 !sSpellMgr->GetSpellInfo(SPELL_DK_ITEM_T8_MELEE_4P_BONUS))
@@ -1050,7 +1050,7 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
@@ -1059,7 +1059,7 @@ public:
         float multiplier = 0.0f;
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_dk_scourge_strike_SpellScript();
     }
@@ -1080,13 +1080,13 @@ public:
             amount = GetUnitOwner()->CountPctFromMaxHealth(amount);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_vampiric_blood_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_INCREASE_HEALTH);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_dk_vampiric_blood_AuraScript();
     }

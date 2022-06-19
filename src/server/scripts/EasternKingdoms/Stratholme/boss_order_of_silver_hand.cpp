@@ -58,7 +58,7 @@ class boss_silver_hand_bosses : public CreatureScript
 public:
     boss_silver_hand_bosses() : CreatureScript("boss_silver_hand_bosses") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_silver_hand_bossesAI(creature);
     }
@@ -75,7 +75,7 @@ public:
         uint32 HolyLight_Timer;
         uint32 DivineShield_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             HolyLight_Timer = 20000;
             DivineShield_Timer = 20000;
@@ -103,11 +103,11 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (!instance)
                 return;
@@ -138,7 +138,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())

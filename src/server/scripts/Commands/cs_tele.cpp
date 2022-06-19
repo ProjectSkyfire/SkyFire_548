@@ -37,7 +37,7 @@ class tele_commandscript : public CommandScript
 public:
     tele_commandscript() : CommandScript("tele_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const OVERRIDE
+    std::vector<ChatCommand> GetCommands() const override
     {
         static std::vector<ChatCommand> teleCommandTable =
         {

@@ -46,15 +46,15 @@ class BattlegroundRL : public Battleground
         ~BattlegroundRL() { }
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player) OVERRIDE;
-        void Reset() OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
-        void StartingEventCloseDoors() OVERRIDE;
-        void StartingEventOpenDoors() OVERRIDE;
+        void AddPlayer(Player* player) override;
+        void Reset() override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
+        void StartingEventCloseDoors() override;
+        void StartingEventOpenDoors() override;
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-        void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
-        bool SetupBattleground() OVERRIDE;
-        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) override;
+        void HandleAreaTrigger(Player* Source, uint32 Trigger) override;
+        bool SetupBattleground() override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
 };
 #endif

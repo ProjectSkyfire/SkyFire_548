@@ -104,7 +104,7 @@ class netherspite_infernal : public CreatureScript
 public:
     netherspite_infernal() : CreatureScript("netherspite_infernal") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new netherspite_infernalAI(creature);
     }
@@ -119,12 +119,12 @@ public:
         uint64 malchezaar;
         InfernalPoint *point;
 
-        void Reset() OVERRIDE { }
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void Reset() override { }
+        void EnterCombat(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (HellfireTimer)
             {
@@ -146,14 +146,14 @@ public:
             }
         }
 
-        void KilledUnit(Unit* who) OVERRIDE
+        void KilledUnit(Unit* who) override
         {
             if (Unit* unit = Unit::GetUnit(*me, malchezaar))
                 if (Creature* creature = unit->ToCreature())
                     creature->AI()->KilledUnit(who);
         }
 
-        void SpellHit(Unit* /*who*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*who*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_INFERNAL_RELAY)
             {
@@ -164,7 +164,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (done_by->GetGUID() != malchezaar)
                 damage = 0;
@@ -179,7 +179,7 @@ class boss_malchezaar : public CreatureScript
 public:
     boss_malchezaar() : CreatureScript("boss_malchezaar") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_malchezaarAI(creature);
     }
@@ -213,7 +213,7 @@ public:
 
         uint32 phase;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             AxesCleanup();
             ClearWeapons();
@@ -245,12 +245,12 @@ public:
                 instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
 
@@ -266,7 +266,7 @@ public:
                 instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
@@ -387,7 +387,7 @@ public:
             Talk(SAY_SUMMON);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;

@@ -85,7 +85,7 @@ public:
     {
         PrepareSpellScript(spell_mage_frostjaw_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FROSTJAW))
                 return false;
@@ -104,13 +104,13 @@ public:
                         }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnHit += SpellHitFn(spell_mage_frostjaw_SpellScript::HandleOnHit);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_mage_frostjaw_SpellScript();
     }

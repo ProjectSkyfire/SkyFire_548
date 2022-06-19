@@ -163,12 +163,12 @@ class BattlegroundWS : public Battleground
         ~BattlegroundWS();
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player) OVERRIDE;
-        void StartingEventCloseDoors() OVERRIDE;
-        void StartingEventOpenDoors() OVERRIDE;
+        void AddPlayer(Player* player) override;
+        void StartingEventCloseDoors() override;
+        void StartingEventOpenDoors() override;
 
         /* BG Flags */
-        uint64 GetFlagPickerGUID(int32 team) const OVERRIDE
+        uint64 GetFlagPickerGUID(int32 team) const override
         {
             if (team == TEAM_ALLIANCE || team == TEAM_HORDE)
                 return m_FlagKeepers[team];
@@ -183,40 +183,40 @@ class BattlegroundWS : public Battleground
         uint8 GetFlagState(uint32 team)             { return _flagState[GetTeamIndexByTeamId(team)]; }
 
         /* Battleground Events */
-        void EventPlayerDroppedFlag(Player* player) OVERRIDE;
-        void EventPlayerClickedOnFlag(Player* player, GameObject* target_obj) OVERRIDE;
+        void EventPlayerDroppedFlag(Player* player) override;
+        void EventPlayerClickedOnFlag(Player* player, GameObject* target_obj) override;
         void EventPlayerCapturedFlag(Player* player);
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-        void HandleAreaTrigger(Player* player, uint32 trigger) OVERRIDE;
-        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
-        bool SetupBattleground() OVERRIDE;
-        void Reset() OVERRIDE;
+        void RemovePlayer(Player* player, uint64 guid, uint32 team) override;
+        void HandleAreaTrigger(Player* player, uint32 trigger) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        bool SetupBattleground() override;
+        void Reset() override;
         void EndBattleground(uint32 winner);
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
         void UpdateFlagState(uint32 team, uint32 value);
         void SetLastFlagCapture(uint32 team)                { _lastFlagCaptureTeam = team; }
         void UpdateTeamScore(uint32 team);
-        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
-        void SetDroppedFlagGUID(uint64 guid, int32 team = -1) OVERRIDE
+        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) override;
+        void SetDroppedFlagGUID(uint64 guid, int32 team = -1) override
         {
             if (team == TEAM_ALLIANCE || team == TEAM_HORDE)
                 m_DroppedFlagGUID[team] = guid;
         }
 
         uint64 GetDroppedFlagGUID(uint32 TeamID)             { return m_DroppedFlagGUID[GetTeamIndexByTeamId(TeamID)];}
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
 
         /* Scorekeeping */
         void AddPoint(uint32 TeamID, uint32 Points = 1)     { m_TeamScores[GetTeamIndexByTeamId(TeamID)] += Points; }
         void SetTeamPoint(uint32 TeamID, uint32 Points = 0) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] = Points; }
         void RemovePoint(uint32 TeamID, uint32 Points = 1)  { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
 
-        uint32 GetPrematureWinner() OVERRIDE;
+        uint32 GetPrematureWinner() override;
 
         /* Achievements*/
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0) OVERRIDE;
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0) override;
 
     private:
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
@@ -234,6 +234,6 @@ class BattlegroundWS : public Battleground
         uint8 _flagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
         uint8 _minutesElapsed;
 
-        void PostUpdateImpl(uint32 diff) OVERRIDE;
+        void PostUpdateImpl(uint32 diff) override;
 };
 #endif

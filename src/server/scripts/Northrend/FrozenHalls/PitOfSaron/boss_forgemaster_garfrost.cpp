@@ -87,7 +87,7 @@ class boss_garfrost : public CreatureScript
         {
             boss_garfrostAI(Creature* creature) : BossAI(creature, DATA_GARFROST) { }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _Reset();
                 events.SetPhase(PHASE_ONE);
@@ -95,7 +95,7 @@ class boss_garfrost : public CreatureScript
                 _permafrostStack = 0;
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
@@ -104,13 +104,13 @@ class boss_garfrost : public CreatureScript
                 events.ScheduleEvent(EVENT_THROW_SARONITE, 7000);
             }
 
-            void KilledUnit(Unit* victim) OVERRIDE
+            void KilledUnit(Unit* victim) override
             {
                 if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 Talk(SAY_DEATH);
@@ -119,7 +119,7 @@ class boss_garfrost : public CreatureScript
                     tyrannus->AI()->Talk(SAY_TYRANNUS_DEATH);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*uiDamage*/) OVERRIDE
+            void DamageTaken(Unit* /*attacker*/, uint32& /*uiDamage*/) override
             {
                 if (events.IsInPhase(PHASE_ONE) && !HealthAbovePct(66))
                 {
@@ -142,7 +142,7 @@ class boss_garfrost : public CreatureScript
                 }
             }
 
-            void MovementInform(uint32 type, uint32 id) OVERRIDE
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type != EFFECT_MOTION_TYPE || id != POINT_FORGE)
                     return;
@@ -161,7 +161,7 @@ class boss_garfrost : public CreatureScript
                 events.ScheduleEvent(EVENT_RESUME_ATTACK, 5000);
             }
 
-            void SpellHitTarget(Unit* target, const SpellInfo* spell) OVERRIDE
+            void SpellHitTarget(Unit* target, const SpellInfo* spell) override
             {
                 if (spell->Id == SPELL_PERMAFROST_HELPER)
                 {
@@ -170,12 +170,12 @@ class boss_garfrost : public CreatureScript
                 }
             }
 
-            uint32 GetData(uint32 /*type*/) const OVERRIDE
+            uint32 GetData(uint32 /*type*/) const override
             {
                 return _permafrostStack;
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -235,7 +235,7 @@ class boss_garfrost : public CreatureScript
             uint32 _permafrostStack;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetPitOfSaronAI<boss_garfrostAI>(creature);
         }
@@ -250,7 +250,7 @@ class spell_garfrost_permafrost : public SpellScriptLoader
         {
             PrepareSpellScript(spell_garfrost_permafrost_SpellScript);
 
-            bool Load() OVERRIDE
+            bool Load() override
             {
                 prevented = false;
                 return true;
@@ -296,7 +296,7 @@ class spell_garfrost_permafrost : public SpellScriptLoader
                 }
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 BeforeHit += SpellHitFn(spell_garfrost_permafrost_SpellScript::PreventHitByLoS);
                 AfterHit += SpellHitFn(spell_garfrost_permafrost_SpellScript::RestoreImmunity);
@@ -305,7 +305,7 @@ class spell_garfrost_permafrost : public SpellScriptLoader
             bool prevented;
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_garfrost_permafrost_SpellScript();
         }
@@ -316,7 +316,7 @@ class achievement_doesnt_go_to_eleven : public AchievementCriteriaScript
     public:
         achievement_doesnt_go_to_eleven() : AchievementCriteriaScript("achievement_doesnt_go_to_eleven") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target) OVERRIDE
+        bool OnCheck(Player* /*source*/, Unit* target) override
         {
             if (target)
                 if (Creature* garfrost = target->ToCreature())

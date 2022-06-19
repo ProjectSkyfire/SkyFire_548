@@ -39,7 +39,7 @@ class disable_commandscript : public CommandScript
 public:
     disable_commandscript() : CommandScript("disable_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const OVERRIDE
+    std::vector<ChatCommand> GetCommands() const override
     {
         static std::vector<ChatCommand> removeDisableCommandTable =
         {

@@ -127,14 +127,14 @@ class OPvPCapturePointTF : public OPvPCapturePoint
 {
     public:
         OPvPCapturePointTF(OutdoorPvP* pvp, OutdoorPvPTF_TowerType type);
-        bool Update(uint32 diff) OVERRIDE;
-        void ChangeState() OVERRIDE;
-        void SendChangePhase() OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+        bool Update(uint32 diff) override;
+        void ChangeState() override;
+        void SendChangePhase() override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
 
         // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player) OVERRIDE;
-        void HandlePlayerLeave(Player* player) OVERRIDE;
+        bool HandlePlayerEnter(Player* player) override;
+        void HandlePlayerLeave(Player* player) override;
         void UpdateTowerState();
 
     protected:
@@ -146,12 +146,12 @@ class OutdoorPvPTF : public OutdoorPvP
 {
     public:
         OutdoorPvPTF();
-        bool SetupOutdoorPvP() OVERRIDE;
-        void HandlePlayerEnterZone(Player* player, uint32 zone) OVERRIDE;
-        void HandlePlayerLeaveZone(Player* player, uint32 zone) OVERRIDE;
-        bool Update(uint32 diff) OVERRIDE;
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
-        void SendRemoveWorldStates(Player* player) OVERRIDE;
+        bool SetupOutdoorPvP() override;
+        void HandlePlayerEnterZone(Player* player, uint32 zone) override;
+        void HandlePlayerLeaveZone(Player* player, uint32 zone) override;
+        bool Update(uint32 diff) override;
+        void FillInitialWorldStates(WorldStateBuilder& builder) override;
+        void SendRemoveWorldStates(Player* player) override;
         uint32 GetAllianceTowersControlled() const;
         void SetAllianceTowersControlled(uint32 count);
         uint32 GetHordeTowersControlled() const;

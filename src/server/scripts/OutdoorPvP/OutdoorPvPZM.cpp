@@ -459,7 +459,7 @@ class OutdoorPvP_zangarmarsh : public OutdoorPvPScript
     public:
         OutdoorPvP_zangarmarsh() : OutdoorPvPScript("outdoorpvp_zm") { }
 
-        OutdoorPvP* GetOutdoorPvP() const OVERRIDE
+        OutdoorPvP* GetOutdoorPvP() const override
         {
             return new OutdoorPvPZM();
         }

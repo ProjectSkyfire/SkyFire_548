@@ -79,7 +79,7 @@ class instance_blood_furnace : public InstanceMapScript
             uint32 m_auiEncounter[MAX_ENCOUNTER];
             std::string str_data;
 
-            void Initialize() OVERRIDE
+            void Initialize() override
             {
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
@@ -116,7 +116,7 @@ class instance_blood_furnace : public InstanceMapScript
                 BroggokLeverGUID = 0;
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -135,13 +135,13 @@ class instance_blood_furnace : public InstanceMapScript
                 }
             }
 
-            void OnUnitDeath(Unit* unit) OVERRIDE
+            void OnUnitDeath(Unit* unit) override
             {
                 if (unit && unit->GetTypeId() == TypeID::TYPEID_UNIT && unit->GetEntry() == 17398)
                     PrisonerDied(unit->GetGUID());
             }
 
-            void OnGameObjectCreate(GameObject* go) OVERRIDE
+            void OnGameObjectCreate(GameObject* go) override
             {
                  if (go->GetEntry() == 181766)                //Final exit door
                      Door1GUID = go->GetGUID();
@@ -177,7 +177,7 @@ class instance_blood_furnace : public InstanceMapScript
                      BroggokLeverGUID = go->GetGUID();       //Broggok lever
             }
 
-            uint64 GetData64(uint32 data) const OVERRIDE
+            uint64 GetData64(uint32 data) const override
             {
                 switch (data)
                 {
@@ -203,7 +203,7 @@ class instance_blood_furnace : public InstanceMapScript
                 return 0;
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                  switch (type)
                  {
@@ -233,7 +233,7 @@ class instance_blood_furnace : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -249,7 +249,7 @@ class instance_blood_furnace : public InstanceMapScript
                 return str_data.c_str();
             }
 
-            void Load(const char* in) OVERRIDE
+            void Load(const char* in) override
             {
                 if (!in)
                 {
@@ -411,7 +411,7 @@ class instance_blood_furnace : public InstanceMapScript
             }
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_blood_furnace_InstanceMapScript(map);
         }

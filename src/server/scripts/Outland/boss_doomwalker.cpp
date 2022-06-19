@@ -61,7 +61,7 @@ class boss_doomwalker : public CreatureScript
             {
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_ENRAGE, 0);
@@ -72,7 +72,7 @@ class boss_doomwalker : public CreatureScript
                 _inEnrage = false;
             }
 
-            void KilledUnit(Unit* victim) OVERRIDE
+            void KilledUnit(Unit* victim) override
             {
                 victim->CastSpell(victim, SPELL_MARK_DEATH, 0);
 
@@ -82,17 +82,17 @@ class boss_doomwalker : public CreatureScript
                 Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 Talk(SAY_DEATH);
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 Talk(SAY_AGGRO);
             }
 
-            void MoveInLineOfSight(Unit* who) OVERRIDE
+            void MoveInLineOfSight(Unit* who) override
 
             {
                 if (who && who->GetTypeId() == TypeID::TYPEID_PLAYER && me->IsValidAttackTarget(who))
@@ -100,7 +100,7 @@ class boss_doomwalker : public CreatureScript
                         who->CastSpell(who, SPELL_AURA_DEATH, 1);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -161,7 +161,7 @@ class boss_doomwalker : public CreatureScript
                 bool _inEnrage;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_doomwalkerAI(creature);
         }

@@ -34,7 +34,7 @@ class cheat_commandscript : public CommandScript
 public:
     cheat_commandscript() : CommandScript("cheat_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const OVERRIDE
+    std::vector<ChatCommand> GetCommands() const override
     {
         static std::vector<ChatCommand> cheatCommandTable =
         {

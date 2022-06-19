@@ -95,22 +95,22 @@ public:
     ~BattlegroundVOP() { }
 
     /* inherited from BattlegroundClass */
-    void AddPlayer(Player* player) OVERRIDE;
-    void StartingEventCloseDoors() OVERRIDE;
-    void StartingEventOpenDoors() OVERRIDE;
+    void AddPlayer(Player* player) override;
+    void StartingEventCloseDoors() override;
+    void StartingEventOpenDoors() override;
     /* Battleground Events */
-    void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
-    void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-    void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
-    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
-    bool SetupBattleground() OVERRIDE;
-    void Reset() OVERRIDE;
+    void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) override;
+    void RemovePlayer(Player* player, uint64 guid, uint32 team) override;
+    void HandleKillPlayer(Player* player, Player* killer) override;
+    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+    bool SetupBattleground() override;
+    void Reset() override;
     void UpdateTeamScore(uint32 Team);
     void EndBattleground(uint32 winner);
-    void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
-    void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
-    uint32 GetPrematureWinner() OVERRIDE;
-    void PostUpdateImpl(uint32 diff) OVERRIDE;
+    void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) override;
+    void FillInitialWorldStates(WorldStateBuilder& builder) override;
+    uint32 GetPrematureWinner() override;
+    void PostUpdateImpl(uint32 diff) override;
 
 private:
     uint64 m_FlagKeeper[4] = { };

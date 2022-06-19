@@ -277,13 +277,13 @@ class PlayerAI : public UnitAI
     public:
         explicit PlayerAI(Player* player) : UnitAI((Unit*)player), me(player) { }
 
-        void OnCharmed(bool apply) OVERRIDE;
+        void OnCharmed(bool apply) override;
 };
 
 class SimpleCharmedAI : public PlayerAI
 {
     public:
-        void UpdateAI(uint32 diff) OVERRIDE;
+        void UpdateAI(uint32 diff) override;
         SimpleCharmedAI(Player* player): PlayerAI(player) { }
 };
 

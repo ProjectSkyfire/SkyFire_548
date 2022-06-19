@@ -52,7 +52,7 @@ class boss_pit_lord_argaloth : public CreatureScript
         {
             boss_pit_lord_argalothAI(Creature* creature) : BossAI(creature, DATA_ARGALOTH) { }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -61,14 +61,14 @@ class boss_pit_lord_argaloth : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 5 * MINUTE * IN_MILLISECONDS);
             }
 
-            void EnterEvadeMode() OVERRIDE
+            void EnterEvadeMode() override
             {
                 me->GetMotionMaster()->MoveTargetedHome();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 _DespawnAtEvade();
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) override
             {
                 if (me->HealthBelowPctDamaged(33, damage) ||
                     me->HealthBelowPctDamaged(66, damage))
@@ -77,13 +77,13 @@ class boss_pit_lord_argaloth : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -117,7 +117,7 @@ class boss_pit_lord_argaloth : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetBaradinHoldAI<boss_pit_lord_argalothAI>(creature);
         }
@@ -138,13 +138,13 @@ class spell_argaloth_consuming_darkness : public SpellScriptLoader
                 Skyfire::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 8 : 3);
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_argaloth_consuming_darkness_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_argaloth_consuming_darkness_SpellScript();
         }
@@ -160,7 +160,7 @@ class spell_argaloth_meteor_slash : public SpellScriptLoader
         {
             PrepareSpellScript(spell_argaloth_meteor_slash_SpellScript);
 
-            bool Load() OVERRIDE
+            bool Load() override
             {
                 _targetCount = 0;
                 return true;
@@ -179,7 +179,7 @@ class spell_argaloth_meteor_slash : public SpellScriptLoader
                 SetHitDamage(GetHitDamage() / _targetCount);
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_argaloth_meteor_slash_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
                 OnHit += SpellHitFn(spell_argaloth_meteor_slash_SpellScript::SplitDamage);
@@ -189,7 +189,7 @@ class spell_argaloth_meteor_slash : public SpellScriptLoader
             uint32 _targetCount;
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_argaloth_meteor_slash_SpellScript();
         }

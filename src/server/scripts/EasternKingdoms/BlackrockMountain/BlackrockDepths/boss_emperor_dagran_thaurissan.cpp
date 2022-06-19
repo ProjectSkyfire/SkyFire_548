@@ -39,7 +39,7 @@ class boss_emperor_dagran_thaurissan : public CreatureScript
 public:
     boss_emperor_dagran_thaurissan() : CreatureScript("boss_emperor_dagran_thaurissan") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_draganthaurissanAI(creature);
     }
@@ -56,25 +56,25 @@ public:
         uint32 AvatarOfFlame_Timer;
         //uint32 Counter;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             HandOfThaurissan_Timer = 4000;
             AvatarOfFlame_Timer = 25000;
             //Counter= 0;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
             me->CallForHelp(VISIBLE_RANGE);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (Creature* Moira = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOIRA) : 0))
             {
@@ -83,7 +83,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())

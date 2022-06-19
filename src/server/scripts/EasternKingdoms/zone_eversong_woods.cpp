@@ -51,7 +51,7 @@ class npc_apprentice_mirveda : public CreatureScript
 public:
     npc_apprentice_mirveda() : CreatureScript("npc_apprentice_mirveda") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
         if (quest->GetQuestId() == QUEST_UNEXPECTED_RESULT)
         {
@@ -61,7 +61,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_apprentice_mirvedaAI(creature);
     }
@@ -75,7 +75,7 @@ public:
         bool Summon;
         SummonList Summons;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             KillCount = 0;
             PlayerGUID = 0;
@@ -83,28 +83,28 @@ public:
             Summon = false;
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/)override { }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->AI()->AttackStart(me);
             Summons.Summon(summoned);
         }
 
-        void SummonedCreatureDespawn(Creature* summoned) OVERRIDE
+        void SummonedCreatureDespawn(Creature* summoned) override
         {
             Summons.Despawn(summoned);
             ++KillCount;
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (PlayerGUID)
                 if (Player* player = ObjectAccessor::GetPlayer(*me, PlayerGUID))
                     player->FailQuest(QUEST_UNEXPECTED_RESULT);
         }
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        void UpdateAI(uint32 /*diff*/) override
         {
             if (KillCount >= 3 && PlayerGUID)
                 if (Player* player = ObjectAccessor::GetPlayer(*me, PlayerGUID))
@@ -159,7 +159,7 @@ class npc_infused_crystal : public CreatureScript
 public:
     npc_infused_crystal() : CreatureScript("npc_infused_crystal") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_infused_crystalAI(creature);
     }
@@ -177,7 +177,7 @@ public:
         bool Progress;
         uint64 PlayerGUID;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             EndTimer = 0;
             Completed = false;
@@ -186,7 +186,7 @@ public:
             WaveTimer = 0;
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!Progress && who->GetTypeId() == TypeID::TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
@@ -201,19 +201,19 @@ public:
             }
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->AI()->AttackStart(me);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (PlayerGUID && !Completed)
                 if (Player* player = ObjectAccessor::GetPlayer(*me, PlayerGUID))
                     player->FailQuest(QUEST_POWERING_OUR_DEFENSES);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (EndTimer < diff && Progress)
             {

@@ -92,13 +92,13 @@ public:
         EventMap events;
         Phase phase;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             events.Reset();
             phase = PHASE_NORMAL;
         }
 
-        void DoAction(int32 actionId) OVERRIDE
+        void DoAction(int32 actionId) override
         {
             switch (actionId)
             {
@@ -112,7 +112,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (phase == PHASE_INTRO)
             {
@@ -164,7 +164,7 @@ public:
         }
     };
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -178,7 +178,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -194,7 +194,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_sylvanas_fosAI(creature);
     }
@@ -218,13 +218,13 @@ public:
         EventMap events;
         Phase phase;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             events.Reset();
             phase = PHASE_NORMAL;
         }
 
-        void DoAction(int32 actionId) OVERRIDE
+        void DoAction(int32 actionId) override
         {
             switch (actionId)
             {
@@ -238,7 +238,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (phase == PHASE_INTRO)
             {
@@ -301,7 +301,7 @@ public:
         }
     };
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -315,7 +315,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -331,7 +331,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_jaina_fosAI(creature);
     }

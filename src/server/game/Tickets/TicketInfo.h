@@ -153,9 +153,9 @@ public:
     bool IsCompleted() const { return _completed; }
     bool GetViewed(){ return _viewed; }
 
-    void  LoadFromDB(Field* fields) OVERRIDE;
-    void  SaveToDB(SQLTransaction& trans) const OVERRIDE;
-    void  DeleteFromDB() OVERRIDE;
+    void  LoadFromDB(Field* fields) override;
+    void  SaveToDB(SQLTransaction& trans) const override;
+    void  DeleteFromDB() override;
 
     std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const override;
     std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const override;
@@ -192,12 +192,12 @@ public:
     void SetOrientation(float Orientation) { _Orientation = Orientation; }
     void SetNote(std::string const& bugnote) { _bugnote = bugnote; }
 
-    void LoadFromDB(Field* fields) OVERRIDE;
-    void SaveToDB(SQLTransaction& trans) const OVERRIDE;
-    void DeleteFromDB() OVERRIDE;
+    void LoadFromDB(Field* fields) override;
+    void SaveToDB(SQLTransaction& trans) const override;
+    void DeleteFromDB() override;
 
     using TicketInfo::FormatMessageString;
-    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const OVERRIDE;
+    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const override;
 
 private:
     float _Orientation;
@@ -216,12 +216,12 @@ public:
     void SetOrientation(float Orientation) { _Orientation = Orientation; }
     void SetNote(std::string const& suggestnote) { _suggestnote = suggestnote; }
 
-    void LoadFromDB(Field* fields) OVERRIDE;
-    void SaveToDB(SQLTransaction& trans) const OVERRIDE;
-    void DeleteFromDB() OVERRIDE;
+    void LoadFromDB(Field* fields) override;
+    void SaveToDB(SQLTransaction& trans) const override;
+    void DeleteFromDB() override;
 
     using TicketInfo::FormatMessageString;
-    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const OVERRIDE;
+    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const override;
 
 private:
     float _Orientation;

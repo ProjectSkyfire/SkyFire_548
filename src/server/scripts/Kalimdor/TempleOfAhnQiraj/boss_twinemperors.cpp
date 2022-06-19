@@ -110,7 +110,7 @@ struct boss_twinemperorsAI : public ScriptedAI
             return NULL;
     }
 
-    void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
+    void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
     {
         Unit* pOtherBoss = GetOtherBoss();
         if (pOtherBoss)
@@ -127,7 +127,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*killer*/) OVERRIDE
+    void JustDied(Unit* /*killer*/) override
     {
         Creature* pOtherBoss = GetOtherBoss();
         if (pOtherBoss)
@@ -141,12 +141,12 @@ struct boss_twinemperorsAI : public ScriptedAI
             DoPlaySoundToSet(me, IAmVeklor() ? SOUND_VL_DEATH : SOUND_VN_DEATH);
     }
 
-    void KilledUnit(Unit* /*victim*/) OVERRIDE
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoPlaySoundToSet(me, IAmVeklor() ? SOUND_VL_KILL : SOUND_VN_KILL);
     }
 
-    void EnterCombat(Unit* who) OVERRIDE
+    void EnterCombat(Unit* who) override
     {
         DoZoneInCombat();
         Creature* pOtherBoss = GetOtherBoss();
@@ -164,7 +164,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         }
     }
 
-    void SpellHit(Unit* caster, const SpellInfo* entry) OVERRIDE
+    void SpellHit(Unit* caster, const SpellInfo* entry) override
     {
         if (caster == me)
             return;
@@ -293,7 +293,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         }
     }
 
-    void MoveInLineOfSight(Unit* who) OVERRIDE
+    void MoveInLineOfSight(Unit* who) override
 
     {
         if (!who || me->GetVictim())
@@ -393,14 +393,14 @@ class boss_veknilash : public CreatureScript
 public:
     boss_veknilash() : CreatureScript("boss_veknilash") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_veknilashAI(creature);
     }
 
     struct boss_veknilashAI : public boss_twinemperorsAI
     {
-        bool IAmVeklor() OVERRIDE {return false;}
+        bool IAmVeklor() override {return false;}
         boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature) { }
 
         uint32 UpperCut_Timer;
@@ -412,7 +412,7 @@ public:
 
         Creature* Summoned;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             TwinReset();
             UpperCut_Timer = urand(14000, 29000);
@@ -423,7 +423,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
         }
 
-        void CastSpellOnBug(Creature* target) OVERRIDE
+        void CastSpellOnBug(Creature* target) override
         {
             target->setFaction(14);
             target->AI()->AttackStart(me->getThreatManager().getHostilTarget());
@@ -431,7 +431,7 @@ public:
             target->SetFullHealth();
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -478,14 +478,14 @@ class boss_veklor : public CreatureScript
 public:
     boss_veklor() : CreatureScript("boss_veklor") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_veklorAI(creature);
     }
 
     struct boss_veklorAI : public boss_twinemperorsAI
     {
-        bool IAmVeklor() OVERRIDE {return true;}
+        bool IAmVeklor() override {return true;}
         boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature) { }
 
         uint32 ShadowBolt_Timer;
@@ -498,7 +498,7 @@ public:
 
         Creature* Summoned;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             TwinReset();
             ShadowBolt_Timer = 0;
@@ -512,14 +512,14 @@ public:
             me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, 0);
         }
 
-        void CastSpellOnBug(Creature* target) OVERRIDE
+        void CastSpellOnBug(Creature* target) override
         {
             target->setFaction(14);
             target->AddAura(SPELL_EXPLODEBUG, target);
             target->SetFullHealth();
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -580,7 +580,7 @@ public:
             //DoMeleeAttackIfReady();
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (!who)
                 return;

@@ -70,7 +70,7 @@ class boss_brutallus : public CreatureScript
 public:
     boss_brutallus() : CreatureScript("boss_brutallus") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_brutallusAI(creature);
     }
@@ -98,7 +98,7 @@ public:
         bool IsIntro;
         bool Enraged;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             SlashTimer = 11000;
             StompTimer = 30000;
@@ -118,7 +118,7 @@ public:
                 instance->SetData(DATA_BRUTALLUS_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(YELL_AGGRO);
 
@@ -126,12 +126,12 @@ public:
                 instance->SetData(DATA_BRUTALLUS_EVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(YELL_KILL);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(YELL_DEATH);
 
@@ -144,7 +144,7 @@ public:
             }
         }
 
-        void EnterEvadeMode() OVERRIDE
+        void EnterEvadeMode() override
         {
             if (!Intro)
                 ScriptedAI::EnterEvadeMode();
@@ -181,7 +181,7 @@ public:
             IsIntro = false;
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (!who || Intro || IsIntro)
                 return;
@@ -266,7 +266,7 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!me->IsValidAttackTarget(who))
@@ -280,7 +280,7 @@ public:
                 ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (IsIntro)
             {

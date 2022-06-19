@@ -59,7 +59,7 @@ class boss_zuramat : public CreatureScript
 public:
     boss_zuramat() : CreatureScript("boss_zuramat") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_zuramatAI(creature);
     }
@@ -78,7 +78,7 @@ public:
         uint32 SpellShroudOfDarknessTimer;
         bool voidDance;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (instance)
             {
@@ -94,7 +94,7 @@ public:
             voidDance = true;
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 return;
@@ -108,7 +108,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
             if (instance)
@@ -126,10 +126,10 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -157,13 +157,13 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void SummonedCreatureDies(Creature* summoned, Unit* /*who*/) OVERRIDE
+        void SummonedCreatureDies(Creature* summoned, Unit* /*who*/) override
         {
             if (summoned->GetEntry() == NPC_VOID_SENTRY)
                 voidDance = false;
         }
 
-        uint32 GetData(uint32 type) const OVERRIDE
+        uint32 GetData(uint32 type) const override
         {
             if (type == DATA_VOID_DANCE)
                 return voidDance ? 1 : 0;
@@ -171,7 +171,7 @@ public:
             return 0;
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
 
@@ -190,7 +190,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() != TypeID::TYPEID_PLAYER)
                 return;
@@ -198,7 +198,7 @@ public:
             Talk(SAY_SLAY);
         }
 
-        void JustSummoned(Creature* summon) OVERRIDE
+        void JustSummoned(Creature* summon) override
         {
             summon->AI()->AttackStart(me->GetVictim());
             summon->AI()->DoCastAOE(SPELL_ZURAMAT_ADD_2);
@@ -212,7 +212,7 @@ class achievement_void_dance : public AchievementCriteriaScript
     public:
         achievement_void_dance() : AchievementCriteriaScript("achievement_void_dance") { }
 
-        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        bool OnCheck(Player* /*player*/, Unit* target) override
         {
             if (!target)
                 return false;

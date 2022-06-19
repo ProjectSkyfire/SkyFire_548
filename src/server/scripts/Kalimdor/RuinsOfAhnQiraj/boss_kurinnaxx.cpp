@@ -58,7 +58,7 @@ class boss_kurinnaxx : public CreatureScript
             {
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _Reset();
                 _enraged = false;
@@ -68,7 +68,7 @@ class boss_kurinnaxx : public CreatureScript
                 events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override
             {
                 if (!_enraged && HealthBelowPct(30))
                 {
@@ -77,14 +77,14 @@ class boss_kurinnaxx : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 if (Creature* Ossirian = me->GetMap()->GetCreature(instance->GetData64(DATA_OSSIRIAN)))
                     sCreatureTextMgr->SendChat(Ossirian, SAY_KURINAXX_DEATH, 0, ChatMsg::CHAT_MSG_ADDON, Language::LANG_ADDON, TEXT_RANGE_ZONE);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -128,7 +128,7 @@ class boss_kurinnaxx : public CreatureScript
                 bool _enraged;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_kurinnaxxAI(creature);
         }

@@ -89,14 +89,14 @@ class boss_alizabal : public CreatureScript
                 _intro = false;
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _Reset();
                 _hate = false;
                 _skewer = false;
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
@@ -104,27 +104,27 @@ class boss_alizabal : public CreatureScript
                 events.ScheduleEvent(EVENT_RANDOM_CAST, 10000);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 Talk(SAY_DEATH);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
-            void KilledUnit(Unit* who) OVERRIDE
+            void KilledUnit(Unit* who) override
             {
                 if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void EnterEvadeMode() OVERRIDE
+            void EnterEvadeMode() override
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 _DespawnAtEvade();
             }
 
-            void DoAction(int32 action) OVERRIDE
+            void DoAction(int32 action) override
             {
                 switch (action)
                 {
@@ -138,7 +138,7 @@ class boss_alizabal : public CreatureScript
                 }
             }
 
-            void MovementInform(uint32 /*type*/, uint32 pointId) OVERRIDE
+            void MovementInform(uint32 /*type*/, uint32 pointId) override
             {
                 switch (pointId)
                 {
@@ -148,7 +148,7 @@ class boss_alizabal : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -259,7 +259,7 @@ class boss_alizabal : public CreatureScript
             bool _skewer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetBaradinHoldAI<boss_alizabalAI>(creature);
         }

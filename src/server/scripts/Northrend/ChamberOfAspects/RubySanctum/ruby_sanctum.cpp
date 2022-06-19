@@ -63,13 +63,13 @@ class npc_xerestrasza : public CreatureScript
                 _introDone = false;
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _events.Reset();
                 me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
             }
 
-            void DoAction(int32 action) OVERRIDE
+            void DoAction(int32 action) override
             {
                 if (action == ACTION_BALTHARUS_DEATH)
                 {
@@ -95,7 +95,7 @@ class npc_xerestrasza : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (_isIntro)
                     return;
@@ -141,7 +141,7 @@ class npc_xerestrasza : public CreatureScript
             bool _introDone;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetRubySanctumAI<npc_xerestraszaAI>(creature);
         }
@@ -152,7 +152,7 @@ class at_baltharus_plateau : public AreaTriggerScript
     public:
         at_baltharus_plateau() : AreaTriggerScript("at_baltharus_plateau") { }
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) OVERRIDE
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) override
         {
             // Only trigger once
             if (InstanceScript* instance = player->GetInstanceScript())

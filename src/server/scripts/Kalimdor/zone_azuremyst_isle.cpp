@@ -62,7 +62,7 @@ class npc_draenei_survivor : public CreatureScript
 public:
     npc_draenei_survivor() : CreatureScript("npc_draenei_survivor") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_draenei_survivorAI(creature);
     }
@@ -79,7 +79,7 @@ public:
 
         bool CanSayHelp;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             pCaster = 0;
 
@@ -97,9 +97,9 @@ public:
             me->SetStandState(UNIT_STAND_STATE_SLEEP);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (CanSayHelp && who->GetTypeId() == TypeID::TYPEID_PLAYER && me->IsFriendlyTo(who) && me->IsWithinDistInMap(who, 25.0f))
@@ -112,7 +112,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* Caster, const SpellInfo* Spell) OVERRIDE
+        void SpellHit(Unit* Caster, const SpellInfo* Spell) override
         {
             if (Spell->SpellFamilyFlags[2] & 0x080000000)
             {
@@ -127,7 +127,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (SayThanksTimer)
             {
@@ -195,7 +195,7 @@ class npc_engineer_spark_overgrind : public CreatureScript
 public:
     npc_engineer_spark_overgrind() : CreatureScript("npc_engineer_spark_overgrind") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF)
@@ -207,7 +207,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (player->GetQuestStatus(QUEST_GNOMERCY) == QUEST_STATUS_INCOMPLETE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_FIGHT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
@@ -216,7 +216,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_engineer_spark_overgrindAI(creature);
     }
@@ -240,7 +240,7 @@ public:
 
         bool IsTreeEvent;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             DynamiteTimer = 8000;
             EmoteTimer = urand(120000, 150000);
@@ -251,12 +251,12 @@ public:
             IsTreeEvent = false;
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             Talk(ATTACK_YELL, who);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!me->IsInCombat() && !IsTreeEvent)
             {
@@ -293,7 +293,7 @@ class npc_injured_draenei : public CreatureScript
 public:
     npc_injured_draenei() : CreatureScript("npc_injured_draenei") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_injured_draeneiAI(creature);
     }
@@ -302,7 +302,7 @@ public:
     {
         npc_injured_draeneiAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             me->SetHealth(me->CountPctFromMaxHealth(15));
@@ -318,12 +318,12 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE { }
+        void UpdateAI(uint32 /*diff*/) override { }
     };
 };
 
@@ -348,7 +348,7 @@ class npc_magwin : public CreatureScript
 public:
     npc_magwin() : CreatureScript("npc_magwin") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
         if (quest->GetQuestId() == QUEST_A_CRY_FOR_SAY_HELP)
         {
@@ -359,7 +359,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_magwinAI(creature);
     }
@@ -368,7 +368,7 @@ public:
     {
         npc_magwinAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (Player* player = GetPlayerForEscort())
             {
@@ -392,12 +392,12 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             Talk(SAY_AGGRO, who);
         }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
     };
 };
 
@@ -432,7 +432,7 @@ class npc_geezle : public CreatureScript
 public:
     npc_geezle() : CreatureScript("npc_geezle") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_geezleAI(creature);
     }
@@ -448,14 +448,14 @@ public:
 
         bool EventStarted;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             SparkGUID = 0;
             Step = 0;
             StartEvent();
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/)override { }
 
         void StartEvent()
         {
@@ -555,7 +555,7 @@ public:
                 SF_LOG_ERROR("scripts", "SD2 ERROR: FlagList is empty!");
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (SayTimer <= diff)
             {
@@ -583,7 +583,7 @@ class go_ravager_cage : public GameObjectScript
 public:
     go_ravager_cage() : GameObjectScript("go_ravager_cage") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         go->UseDoorOrButton();
         if (player->GetQuestStatus(QUEST_STRENGTH_ONE) == QUEST_STATUS_INCOMPLETE)
@@ -604,7 +604,7 @@ class npc_death_ravager : public CreatureScript
 public:
     npc_death_ravager() : CreatureScript("npc_death_ravager") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_death_ravagerAI(creature);
     }
@@ -616,7 +616,7 @@ public:
         uint32 RendTimer;
         uint32 EnragingBiteTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             RendTimer = 30000;
             EnragingBiteTimer = 20000;
@@ -625,7 +625,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -674,7 +674,7 @@ class npc_stillpine_capitive : public CreatureScript
         {
             npc_stillpine_capitiveAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 if (GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f))
                 {
@@ -698,7 +698,7 @@ class npc_stillpine_capitive : public CreatureScript
                 me->GetMotionMaster()->MovePoint(POINT_INIT, pos);
             }
 
-            void MovementInform(uint32 type, uint32 id) OVERRIDE
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type != POINT_MOTION_TYPE || id != POINT_INIT)
                     return;
@@ -710,7 +710,7 @@ class npc_stillpine_capitive : public CreatureScript
                 _events.ScheduleEvent(EVENT_DESPAWN, 3500);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!_movementComplete)
                     return;
@@ -727,7 +727,7 @@ class npc_stillpine_capitive : public CreatureScript
             bool _movementComplete;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_stillpine_capitiveAI(creature);
         }
@@ -738,7 +738,7 @@ class go_bristlelimb_cage : public GameObjectScript
     public:
         go_bristlelimb_cage() : GameObjectScript("go_bristlelimb_cage") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             go->SetGoState(GOState::GO_STATE_READY);
             if (player->GetQuestStatus(QUEST_THE_PROPHECY_OF_AKIDA) == QUEST_STATUS_INCOMPLETE)

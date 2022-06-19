@@ -128,7 +128,7 @@ class boss_high_astromancer_solarian : public CreatureScript
             bool AppearDelay;
             bool BlindingLight;
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 ArcaneMissiles_Timer = 2000;
                 m_uiWrathOfTheAstromancer_Timer = 15000;
@@ -156,12 +156,12 @@ class boss_high_astromancer_solarian : public CreatureScript
                 Summons.DespawnAll();
             }
 
-            void KilledUnit(Unit* /*victim*/) OVERRIDE
+            void KilledUnit(Unit* /*victim*/) override
             {
                 Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 me->SetObjectScale(defaultsize);
                 me->SetDisplayId(MODEL_HUMAN);
@@ -170,7 +170,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                     instance->SetData(DATA_HIGHASTROMANCERSOLARIANEVENT, DONE);
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 Talk(SAY_AGGRO);
                 DoZoneInCombat();
@@ -206,7 +206,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                 return (z*sqrt(radius*radius - (x - CENTER_X)*(x - CENTER_X)) + CENTER_Y);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -415,7 +415,7 @@ class boss_high_astromancer_solarian : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_high_astromancer_solarianAI(creature);
         }
@@ -439,18 +439,18 @@ class npc_solarium_priest : public CreatureScript
             uint32 holysmiteTimer;
             uint32 aoesilenceTimer;
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 healTimer = 9000;
                 holysmiteTimer = 1;
                 aoesilenceTimer = 15000;
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -498,7 +498,7 @@ class npc_solarium_priest : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_solarium_priestAI(creature);
         }
@@ -513,7 +513,7 @@ class spell_astromancer_wrath_of_the_astromancer : public SpellScriptLoader
         {
             PrepareAuraScript(spell_astromancer_wrath_of_the_astromancer_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WRATH_OF_THE_ASTROMANCER_DOT))
                     return false;
@@ -530,13 +530,13 @@ class spell_astromancer_wrath_of_the_astromancer : public SpellScriptLoader
                 target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_1].CalcValue(), false);
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 AfterEffectRemove += AuraEffectRemoveFn(spell_astromancer_wrath_of_the_astromancer_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const OVERRIDE
+        AuraScript* GetAuraScript() const override
         {
             return new spell_astromancer_wrath_of_the_astromancer_AuraScript();
         }

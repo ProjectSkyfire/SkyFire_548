@@ -48,7 +48,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
     public:
         instance_culling_of_stratholme() : InstanceMapScript("instance_culling_of_stratholme", 595) { }
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_culling_of_stratholme_InstanceMapScript(map);
         }
@@ -73,7 +73,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 _crateCount = 0;
             }
 
-            bool IsEncounterInProgress() const OVERRIDE
+            bool IsEncounterInProgress() const override
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                     if (_encounterState[i] == IN_PROGRESS)
@@ -82,7 +82,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 return false;
             }
 
-            void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
+            void FillInitialWorldStates(WorldStateBuilder& builder) override
             {
                 builder.AppendState(WORLDSTATE_SHOW_CRATES, 1);
                 builder.AppendState(WORLDSTATE_CRATES_REVEALED, _crateCount);
@@ -91,7 +91,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 builder.AppendState(WORLDSTATE_TIME_GUARDIAN_SHOW, 0);
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -119,7 +119,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) OVERRIDE
+            void OnGameObjectCreate(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -146,7 +146,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 switch (type)
                 {
@@ -201,7 +201,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     SaveToDB();
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -221,7 +221,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 identifier) const OVERRIDE
+            uint64 GetData64(uint32 identifier) const override
             {
                 switch (identifier)
                 {
@@ -251,7 +251,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData() OVERRIDE
+            std::string GetSaveData() override
             {
                 OUT_SAVE_INST_DATA;
 
@@ -263,7 +263,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* in) OVERRIDE
+            void Load(const char* in) override
             {
                 if (!in)
                 {

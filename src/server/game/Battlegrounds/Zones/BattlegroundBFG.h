@@ -224,31 +224,31 @@ public:
     BattlegroundBFG();
     ~BattlegroundBFG();
 
-    void AddPlayer(Player* player) OVERRIDE;
-    void StartingEventCloseDoors() OVERRIDE;
-    void StartingEventOpenDoors() OVERRIDE;
-    void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-    void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
-    bool SetupBattleground() OVERRIDE;
-    void Reset() OVERRIDE;
+    void AddPlayer(Player* player) override;
+    void StartingEventCloseDoors() override;
+    void StartingEventOpenDoors() override;
+    void RemovePlayer(Player* player, uint64 guid, uint32 team) override;
+    void HandleAreaTrigger(Player* Source, uint32 Trigger) override;
+    bool SetupBattleground() override;
+    void Reset() override;
     void EndBattleground(uint32 winner);
-    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
+    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
     /* Scorekeeping */
-    void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
+    void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) override;
 
-    void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+    void FillInitialWorldStates(WorldStateBuilder& builder) override;
 
     /* Nodes occupying */
-    void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) OVERRIDE;
+    void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
     /* achievement req. */
-    bool IsAllNodesControlledByTeam(uint32 team) const OVERRIDE;
-    bool CheckAchievementCriteriaMeet(uint32 /*criteriaId*/, Player const* /*player*/, Unit const* /*target*/ = NULL, uint32 /*miscvalue1*/ = 0) OVERRIDE;
+    bool IsAllNodesControlledByTeam(uint32 team) const override;
+    bool CheckAchievementCriteriaMeet(uint32 /*criteriaId*/, Player const* /*player*/, Unit const* /*target*/ = NULL, uint32 /*miscvalue1*/ = 0) override;
 
-    uint32 GetPrematureWinner() OVERRIDE;
+    uint32 GetPrematureWinner() override;
 private:
-    void PostUpdateImpl(uint32 diff) OVERRIDE;
+    void PostUpdateImpl(uint32 diff) override;
     /* Gameobject spawning/despawning */
     void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
     void _DelBanner(uint8 node, uint8 type, uint8 teamIndex);

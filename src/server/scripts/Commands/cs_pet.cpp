@@ -29,7 +29,7 @@ class pet_commandscript : public CommandScript
 public:
     pet_commandscript() : CommandScript("pet_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const OVERRIDE
+    std::vector<ChatCommand> GetCommands() const override
     {
         static std::vector<ChatCommand> petCommandTable =
         {

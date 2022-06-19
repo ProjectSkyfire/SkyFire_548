@@ -32,7 +32,7 @@ class go_shadowforge_brazier : public GameObjectScript
 public:
     go_shadowforge_brazier() : GameObjectScript("go_shadowforge_brazier") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* /*player*/, GameObject* go) override
     {
         if (InstanceScript* instance = go->GetInstanceScript())
         {
@@ -85,7 +85,7 @@ class at_ring_of_law : public AreaTriggerScript
 public:
     at_ring_of_law() : AreaTriggerScript("at_ring_of_law") { }
 
-    bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/) OVERRIDE
+    bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/) override
     {
         if (InstanceScript* instance = player->GetInstanceScript())
         {
@@ -118,7 +118,7 @@ class npc_grimstone : public CreatureScript
 public:
     npc_grimstone() : CreatureScript("npc_grimstone") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_grimstoneAI(creature);
     }
@@ -145,7 +145,7 @@ public:
 
         bool CanWalk;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -184,7 +184,7 @@ public:
             MobDeath_Timer = 2500;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
@@ -225,7 +225,7 @@ public:
             instance->HandleGameObject(instance->GetData64(id), open);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!instance)
                 return;
@@ -355,7 +355,7 @@ class npc_phalanx : public CreatureScript
 public:
     npc_phalanx() : CreatureScript("npc_phalanx") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_phalanxAI(creature);
     }
@@ -368,14 +368,14 @@ public:
         uint32 FireballVolley_Timer;
         uint32 MightyBlow_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             ThunderClap_Timer = 12000;
             FireballVolley_Timer = 0;
             MightyBlow_Timer = 15000;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -433,7 +433,7 @@ class npc_kharan_mighthammer : public CreatureScript
 public:
     npc_kharan_mighthammer() : CreatureScript("npc_kharan_mighthammer") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -482,7 +482,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -527,7 +527,7 @@ class npc_lokhtos_darkbargainer : public CreatureScript
 public:
     npc_lokhtos_darkbargainer() : CreatureScript("npc_lokhtos_darkbargainer") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
@@ -541,7 +541,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -580,7 +580,7 @@ class npc_dughal_stormwing : public CreatureScript
 public:
     npc_dughal_stormwing() : CreatureScript("npc_dughal_stormwing") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         npc_dughal_stormwingAI* dughal_stormwingAI = new npc_dughal_stormwingAI(creature);
 
@@ -591,7 +591,7 @@ public:
         return dughal_stormwingAI;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
@@ -604,7 +604,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (player->GetQuestStatus(QUEST_JAIL_BREAK) == QUEST_STATUS_INCOMPLETE && instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_IN_PROGRESS)
         {
@@ -618,7 +618,7 @@ public:
     {
         npc_dughal_stormwingAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
@@ -637,10 +637,10 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who) OVERRIDE { }
-        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* who) override { }
+        void Reset() override { }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (IsBeingEscorted && killer == me)
             {
@@ -651,7 +651,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_NOT_STARTED) return;
             if ((instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_IN_PROGRESS || instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_FAILED || instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_ENDED)&& instance->GetData(DATA_DUGHAL) == ENCOUNTER_STATE_ENDED)
@@ -696,7 +696,7 @@ class npc_marshal_windsor : public CreatureScript
 public:
     npc_marshal_windsor() : CreatureScript("npc_marshal_windsor") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         npc_marshal_windsorAI* marshal_windsorAI = new npc_marshal_windsorAI(creature);
 
@@ -724,7 +724,7 @@ public:
         return marshal_windsorAI;
     }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
         if (quest->GetQuestId() == 4322)
         {
@@ -746,7 +746,7 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
@@ -791,7 +791,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             switch (urand(0, 2))
             {
@@ -807,14 +807,14 @@ public:
             }
         }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void JustDied(Unit* slayer) OVERRIDE
+        void JustDied(Unit* slayer) override
         {
             instance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_FAILED);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_NOT_STARTED)
                 return;
@@ -880,7 +880,7 @@ class npc_marshal_reginald_windsor : public CreatureScript
 public:
     npc_marshal_reginald_windsor() : CreatureScript("npc_marshal_reginald_windsor") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         npc_marshal_reginald_windsorAI* marshal_reginald_windsorAI = new npc_marshal_reginald_windsorAI(creature);
 
@@ -929,7 +929,7 @@ public:
         {
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             wp = waypointId;
             switch (waypointId)
@@ -987,7 +987,7 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (HasEscortState(STATE_ESCORT_ESCORTING))
@@ -1007,7 +1007,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             switch (urand(0, 2))
             {
@@ -1022,14 +1022,14 @@ public:
                     break;
             }
         }
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void JustDied(Unit* slayer) OVERRIDE
+        void JustDied(Unit* slayer) override
         {
             instance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_FAILED);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_NOT_STARTED)
                 return;
@@ -1090,7 +1090,7 @@ class npc_tobias_seecher : public CreatureScript
 public:
     npc_tobias_seecher() : CreatureScript("npc_tobias_seecher") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         npc_tobias_seecherAI* tobias_seecherAI = new npc_tobias_seecherAI(creature);
 
@@ -1103,7 +1103,7 @@ public:
         return tobias_seecherAI;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
@@ -1116,7 +1116,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (player->GetQuestStatus(QUEST_JAIL_BREAK) == QUEST_STATUS_INCOMPLETE && instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_IN_PROGRESS)
         {
@@ -1130,10 +1130,10 @@ public:
     {
         npc_tobias_seecherAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void EnterCombat(Unit* who) OVERRIDE { }
-        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* who) override { }
+        void Reset() override { }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (IsBeingEscorted && killer == me)
             {
@@ -1144,7 +1144,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
@@ -1163,7 +1163,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (instance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_NOT_STARTED)
                 return;
@@ -1208,7 +1208,7 @@ class npc_rocknot : public CreatureScript
 public:
     npc_rocknot() : CreatureScript("npc_rocknot") { }
 
-    bool OnQuestReward(Player* /*player*/, Creature* creature, Quest const* quest, uint32 /*item*/) OVERRIDE
+    bool OnQuestReward(Player* /*player*/, Creature* creature, Quest const* quest, uint32 /*item*/) override
     {
         InstanceScript* instance = creature->GetInstanceScript();
         if (!instance)
@@ -1238,7 +1238,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_rocknotAI(creature);
     }
@@ -1255,7 +1255,7 @@ public:
         uint32 BreakKeg_Timer;
         uint32 BreakDoor_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (HasEscortState(STATE_ESCORT_ESCORTING))
                 return;
@@ -1270,7 +1270,7 @@ public:
                 go->SetGoState((GOState)state);
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (!instance)
                 return;
@@ -1296,7 +1296,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!instance)
                 return;

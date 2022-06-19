@@ -70,7 +70,7 @@ class AreaTrigger_at_ssb_banana_bar : public AreaTriggerScript
 public:
     AreaTrigger_at_ssb_banana_bar() : AreaTriggerScript("at_ssb_banana_bar") { }
 
-    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) override
     {
         // Only trigger once
         if (InstanceScript* instance = player->GetInstanceScript())
@@ -107,17 +107,17 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (instance)
                 SummonOokOokIfReady(instance, me, killer);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (instance->GetBossState(DATA_BANANA_EVENT) == DONE)
             {
@@ -141,7 +141,7 @@ public:
         InstanceScript* instance;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_banana_hozenAI(creature);
     }
@@ -159,17 +159,17 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (instance)
                 SummonHoptallusIfReady(instance, me, killer);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -180,7 +180,7 @@ public:
         InstanceScript* instance;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_bopperAI(creature);
     }

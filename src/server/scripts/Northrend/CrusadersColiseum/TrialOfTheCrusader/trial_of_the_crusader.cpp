@@ -117,7 +117,7 @@ class npc_announcer_toc10 : public CreatureScript
             {
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 if (Creature* pAlly = GetClosestCreatureWithEntry(me, NPC_THRALL, 300.0f))
@@ -126,10 +126,10 @@ class npc_announcer_toc10 : public CreatureScript
                     pAlly->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
-            void AttackStart(Unit* /*who*/) OVERRIDE { }
+            void AttackStart(Unit* /*who*/) override { }
         };
 
-        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+        bool OnGossipHello(Player* player, Creature* creature) override
         {
             InstanceScript* instance = creature->GetInstanceScript();
             if (!instance)
@@ -158,7 +158,7 @@ class npc_announcer_toc10 : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 /*action*/) override
         {
             player->PlayerTalkClass->ClearMenus();
             player->CLOSE_GOSSIP_MENU();
@@ -222,7 +222,7 @@ class npc_announcer_toc10 : public CreatureScript
             return true;
         }
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_announcer_toc10AI(creature);
         }
@@ -240,7 +240,7 @@ class boss_lich_king_toc : public CreatureScript
                 _instance = creature->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _updateTimer = 0;
                 me->SetReactState(REACT_PASSIVE);
@@ -254,7 +254,7 @@ class boss_lich_king_toc : public CreatureScript
                 me->SetWalk(true);
             }
 
-            void MovementInform(uint32 uiType, uint32 uiId) OVERRIDE
+            void MovementInform(uint32 uiType, uint32 uiId) override
             {
                 if (uiType != POINT_MOTION_TYPE || !_instance)
                     return;
@@ -272,7 +272,7 @@ class boss_lich_king_toc : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 uiDiff) OVERRIDE
+            void UpdateAI(uint32 uiDiff) override
             {
                 if (!_instance)
                     return;
@@ -357,7 +357,7 @@ class boss_lich_king_toc : public CreatureScript
                 uint32 _updateTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_lich_king_tocAI(creature);
         }
@@ -375,7 +375,7 @@ class npc_fizzlebang_toc : public CreatureScript
                 _instance = me->GetInstanceScript();
             }
 
-            void JustDied(Unit* killer) OVERRIDE
+            void JustDied(Unit* killer) override
             {
                 Talk(SAY_STAGE_1_06, killer);
                 _instance->SetData(TYPE_EVENT, 1180);
@@ -387,14 +387,14 @@ class npc_fizzlebang_toc : public CreatureScript
                 }
             }
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 me->SetWalk(true);
                 _portalGUID = 0;
                 me->GetMotionMaster()->MovePoint(1, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY()-60, ToCCommonLoc[10].GetPositionZ());
             }
 
-            void MovementInform(uint32 uiType, uint32 uiId) OVERRIDE
+            void MovementInform(uint32 uiType, uint32 uiId) override
             {
                 if (uiType != POINT_MOTION_TYPE)
                     return;
@@ -415,12 +415,12 @@ class npc_fizzlebang_toc : public CreatureScript
                 }
             }
 
-            void JustSummoned(Creature* summoned) OVERRIDE
+            void JustSummoned(Creature* summoned) override
             {
                 _summons.Summon(summoned);
             }
 
-            void UpdateAI(uint32 uiDiff) OVERRIDE
+            void UpdateAI(uint32 uiDiff) override
             {
                 if (!_instance)
                     return;
@@ -531,7 +531,7 @@ class npc_fizzlebang_toc : public CreatureScript
                 uint64 _triggerGUID;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_fizzlebang_tocAI(creature);
         }
@@ -549,11 +549,11 @@ class npc_tirion_toc : public CreatureScript
                 _instance = me->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE { }
+            void Reset() override { }
 
-            void AttackStart(Unit* /*who*/) OVERRIDE { }
+            void AttackStart(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 uiDiff) OVERRIDE
+            void UpdateAI(uint32 uiDiff) override
             {
                 if (!_instance)
                     return;
@@ -819,7 +819,7 @@ class npc_tirion_toc : public CreatureScript
                 uint32 _updateTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_tirion_tocAI(creature);
         }
@@ -837,11 +837,11 @@ class npc_garrosh_toc : public CreatureScript
                 _instance = me->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE { }
+            void Reset() override { }
 
-            void AttackStart(Unit* /*who*/) OVERRIDE { }
+            void AttackStart(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 uiDiff) OVERRIDE
+            void UpdateAI(uint32 uiDiff) override
             {
                 if (!_instance)
                     return;
@@ -903,7 +903,7 @@ class npc_garrosh_toc : public CreatureScript
                 uint32 _updateTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_garrosh_tocAI(creature);
         }
@@ -921,11 +921,11 @@ class npc_varian_toc : public CreatureScript
                 _instance = me->GetInstanceScript();
             }
 
-            void Reset() OVERRIDE { }
+            void Reset() override { }
 
-            void AttackStart(Unit* /*who*/) OVERRIDE { }
+            void AttackStart(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 uiDiff) OVERRIDE
+            void UpdateAI(uint32 uiDiff) override
             {
                 if (!_instance)
                     return;
@@ -987,7 +987,7 @@ class npc_varian_toc : public CreatureScript
                 uint32 _updateTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_varian_tocAI(creature);
         }

@@ -60,7 +60,7 @@ class boss_anubrekhan : public CreatureScript
 public:
     boss_anubrekhan() : CreatureScript("boss_anubrekhan") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_anubrekhanAI(creature);
     }
@@ -71,7 +71,7 @@ public:
 
         bool hasTaunted;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _Reset();
 
@@ -93,7 +93,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             /// Force the player to spawn corpse scarabs via spell, @todo Check percent chance for scarabs, 20% at the moment
             if (!(rand()%5))
@@ -103,7 +103,7 @@ public:
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
 
@@ -111,7 +111,7 @@ public:
             if (instance)
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
         }
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
@@ -123,7 +123,7 @@ public:
                 events.ScheduleEvent(EVENT_SPAWN_GUARDIAN_NORMAL, urand(15000, 20000));
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!hasTaunted && me->IsWithinDistInMap(who, 60.0f) && who->GetTypeId() == TypeID::TYPEID_PLAYER)
@@ -134,7 +134,7 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
+        void SummonedCreatureDespawn(Creature* summon) override
         {
             BossAI::SummonedCreatureDespawn(summon);
 
@@ -145,7 +145,7 @@ public:
             summon->CastSpell(summon, SPELL_SUMMON_CORPSE_SCARABS_MOB, true, NULL, NULL, me->GetGUID());
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim() || !CheckInRoom())
                 return;

@@ -59,13 +59,13 @@ public:
         uint64 balindaGUID;
         uint32 resetTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             waterBoltTimer            = 3 * IN_MILLISECONDS;
             resetTimer                = 5 * IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -89,7 +89,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_water_elementalAI(creature);
     }
@@ -113,7 +113,7 @@ public:
 
         SummonList summons;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             arcaneExplosionTimer      = urand(5 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
             coneOfColdTimer           = 8 * IN_MILLISECONDS;
@@ -125,17 +125,17 @@ public:
             summons.DespawnAll();
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(YELL_AGGRO);
         }
 
-        void JustRespawned() OVERRIDE
+        void JustRespawned() override
         {
             Reset();
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             CAST_AI(npc_water_elemental::npc_water_elementalAI, summoned->AI())->balindaGUID = me->GetGUID();
             summoned->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true));
@@ -143,12 +143,12 @@ public:
             summons.Summon(summoned);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             summons.DespawnAll();
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -199,7 +199,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_balindaAI(creature);
     }

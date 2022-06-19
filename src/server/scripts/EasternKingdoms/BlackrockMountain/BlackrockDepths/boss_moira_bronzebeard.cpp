@@ -36,7 +36,7 @@ class boss_moira_bronzebeard : public CreatureScript
 public:
     boss_moira_bronzebeard() : CreatureScript("boss_moira_bronzebeard") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_moira_bronzebeardAI(creature);
     }
@@ -50,7 +50,7 @@ public:
         uint32 ShadowWordPain_Timer;
         uint32 Smite_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Heal_Timer = 12000;                                 //These times are probably wrong
             MindBlast_Timer = 16000;
@@ -58,9 +58,9 @@ public:
             Smite_Timer = 8000;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())

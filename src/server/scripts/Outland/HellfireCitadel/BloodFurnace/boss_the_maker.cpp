@@ -63,7 +63,7 @@ public:
         uint32 Domination_Timer;
         uint32 Knockdown_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             AcidSpray_Timer = 15000;
             ExplodingBreaker_Timer = 6000;
@@ -77,7 +77,7 @@ public:
             instance->HandleGameObject(instance->GetData64(DATA_DOOR2), true);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
@@ -88,12 +88,12 @@ public:
             instance->HandleGameObject(instance->GetData64(DATA_DOOR2), false);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_KILL);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DIE);
 
@@ -105,7 +105,7 @@ public:
             instance->HandleGameObject(instance->GetData64(DATA_DOOR3), true);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -151,7 +151,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_the_makerAI(creature);
     }

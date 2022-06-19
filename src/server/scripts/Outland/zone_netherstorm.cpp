@@ -76,7 +76,7 @@ class npc_manaforge_control_console : public CreatureScript
 public:
     npc_manaforge_control_console() : CreatureScript("npc_manaforge_control_console") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_manaforge_control_consoleAI(creature);
     }
@@ -93,7 +93,7 @@ public:
         uint64 goConsole;
         Creature* add;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Event_Timer = 3000;
             Wave_Timer = 0;
@@ -104,9 +104,9 @@ public:
             add = NULL;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        /*void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
+        /*void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
             //we have no way of telling the Creature was hit by spell -> got aura applied after 10-12 seconds
             //then no way for the mobs to actually stop the shutdown as intended.
@@ -114,7 +114,7 @@ public:
                 DoSay("Silence! I kill you!", LANG_UNIVERSAL, NULL);
         }*/
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(EMOTE_ABORT);
 
@@ -236,7 +236,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (Event_Timer <= diff)
             {
@@ -313,7 +313,7 @@ class go_manaforge_control_console : public GameObjectScript
 public:
     go_manaforge_control_console() : GameObjectScript("go_manaforge_control_console") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         if (go->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
         {
@@ -395,7 +395,7 @@ class npc_commander_dawnforge : public CreatureScript
 public:
     npc_commander_dawnforge() : CreatureScript("npc_commander_dawnforge") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_commander_dawnforgeAI(creature);
     }
@@ -416,7 +416,7 @@ public:
         float angle_dawnforge;
         float angle_ardonis;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             PlayerGUID = 0;
             ardonisGUID = 0;
@@ -428,9 +428,9 @@ public:
             isEvent = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             pathaleonGUID = summoned->GetGUID();
         }
@@ -508,7 +508,7 @@ public:
             return false;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Is event even running?
             if (!isEvent)
@@ -646,7 +646,7 @@ class at_commander_dawnforge : public AreaTriggerScript
 public:
     at_commander_dawnforge() : AreaTriggerScript("at_commander_dawnforge") { }
 
-    bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/) OVERRIDE
+    bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/) override
     {
         //if player lost aura or not have at all, we should not try start event.
         if (!player->HasAura(SPELL_SUNFURY_DISGUISE))
@@ -689,7 +689,7 @@ public:
     //if (quest->GetQuestId() == QUEST_DIMENSIUS)
         //creature->AI()->Talk(WHISPER_DABIRI, player);
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF+1)
@@ -701,7 +701,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -741,7 +741,7 @@ class npc_phase_hunter : public CreatureScript
 public:
     npc_phase_hunter() : CreatureScript("npc_phase_hunter") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_phase_hunterAI(creature);
     }
@@ -759,7 +759,7 @@ public:
 
         uint32 ManaBurnTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Weak = false;
             Materialize = false;
@@ -774,18 +774,18 @@ public:
                 me->UpdateEntry(NPC_PHASE_HUNTER_ENTRY);
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             if (who->GetTypeId() == TypeID::TYPEID_PLAYER)
                 PlayerGUID = who->GetGUID();
         }
 
-        //void SpellHit(Unit* /*caster*/, const SpellInfo* /*spell*/) OVERRIDE
+        //void SpellHit(Unit* /*caster*/, const SpellInfo* /*spell*/) override
         //{
         //    DoCast(me, SPELL_DE_MATERIALIZE);
         //}
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!Materialize)
             {
@@ -866,7 +866,7 @@ class npc_bessy : public CreatureScript
 public:
     npc_bessy() : CreatureScript("npc_bessy") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
         if (quest->GetQuestId() == Q_ALMABTRIEB)
         {
@@ -877,7 +877,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_bessyAI(creature);
     }
@@ -886,13 +886,13 @@ public:
     {
         npc_bessyAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (Player* player = GetPlayerForEscort())
                 player->FailQuest(Q_ALMABTRIEB);
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -921,12 +921,12 @@ public:
             }
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->AI()->AttackStart(me);
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->RestoreFaction();
         }
@@ -948,7 +948,7 @@ class npc_maxx_a_million_escort : public CreatureScript
 public:
     npc_maxx_a_million_escort() : CreatureScript("npc_maxx_a_million_escort") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_maxx_a_million_escortAI(creature);
     }
@@ -960,13 +960,13 @@ public:
         bool bTake;
         uint32 uiTakeTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             bTake=false;
             uiTakeTimer=3000;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -992,13 +992,13 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (Player* player = GetPlayerForEscort())
                 player->FailQuest(QUEST_MARK_V_IS_ALIVE);
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             npc_escortAI::UpdateAI(uiDiff);
 
@@ -1022,7 +1022,7 @@ public:
         }
     };
 
-    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
     {
         if (quest->GetQuestId() == QUEST_MARK_V_IS_ALIVE)
         {
@@ -1051,7 +1051,7 @@ class go_captain_tyralius_prison : public GameObjectScript
     public:
         go_captain_tyralius_prison() : GameObjectScript("go_captain_tyralius_prison") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             go->UseDoorOrButton();
             if (Creature* tyralius = go->FindNearestCreature(NPC_CAPTAIN_TYRALIUS, 1.0f))

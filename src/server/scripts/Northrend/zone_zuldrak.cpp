@@ -52,7 +52,7 @@ public:
     {
         npc_drakuru_shacklesAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _rageclawGUID = 0;
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -90,7 +90,7 @@ public:
             me->setDeathState(DeathState::DEAD);
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_UNLOCK_SHACKLE)
             {
@@ -112,7 +112,7 @@ public:
             uint64 _rageclawGUID;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_drakuru_shacklesAI(creature);
     }
@@ -138,16 +138,16 @@ public:
     {
         npc_captured_rageclawAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->setFaction(35);
             DoCast(me, SPELL_KNEEL, true); // Little Hack for kneel - Thanks Illy :P
         }
 
-        void MoveInLineOfSight(Unit* /*who*/)OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/)override { }
 
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_FREE_RAGECLAW)
             {
@@ -163,7 +163,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_captured_rageclawAI(creature);
     }
@@ -272,7 +272,7 @@ public:
     {
         npc_gurgthockAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _summonGUID = 0;
             _playerGUID = 0;
@@ -288,12 +288,12 @@ public:
             _removeFlag = false;
         }
 
-        void SetGUID(uint64 guid, int32 /*id*/) OVERRIDE
+        void SetGUID(uint64 guid, int32 /*id*/) override
         {
             _playerGUID = guid;
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             _removeFlag = true;
             me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
@@ -331,7 +331,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             ScriptedAI::UpdateAI(diff);
 
@@ -440,7 +440,7 @@ public:
             uint32 uiQuest;
     };
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
         switch (quest->GetQuestId())
         {
@@ -467,7 +467,7 @@ public:
         return false;
     }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_gurgthockAI(creature);
     }
@@ -501,7 +501,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _summoned           = false;
             _battleShout        = false;
@@ -512,13 +512,13 @@ public:
             _affectedGUID       = 0;
         }
 
-        void EnterEvadeMode() OVERRIDE
+        void EnterEvadeMode() override
         {
             if (Creature* whisker = me->GetCreature(*me, _whiskerGUID))
                 whisker->RemoveFromWorld();
         }
 
-        void MovementInform(uint32 type, uint32 /*pointId*/) OVERRIDE
+        void MovementInform(uint32 type, uint32 /*pointId*/) override
         {
             if (type != EFFECT_MOTION_TYPE)
                 return;
@@ -529,12 +529,12 @@ public:
             uiBattleShoutTimer  = 7000;
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             DoCast(who, SPELL_IMPALE);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -568,7 +568,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustSummoned(Creature* summon) OVERRIDE
+        void JustSummoned(Creature* summon) override
         {
             switch (summon->GetEntry())
             {
@@ -585,7 +585,7 @@ public:
             }
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (_whiskerGUID)
                 if (Creature* whisker = me->GetCreature(*me, _whiskerGUID))
@@ -605,7 +605,7 @@ public:
             uint64 _whiskerGUID;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_orinoko_tuskbreakerAI(creature);
     }
@@ -636,7 +636,7 @@ public:
             SetDespawnAtEnd(false);
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             me->SetReactState(REACT_PASSIVE);
@@ -645,7 +645,7 @@ public:
             _uppercutTimer = 12000;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
@@ -657,12 +657,12 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             DoCast(me, SPELL_GROW);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             npc_escortAI::UpdateAI(diff);
 
@@ -691,7 +691,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
                 player->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_KORRAK_BLOODRAGER, killer);
@@ -702,7 +702,7 @@ public:
             uint32 _uppercutTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_korrak_bloodragerAI(creature);
     }
@@ -728,13 +728,13 @@ public:
     {
         npc_yggdrasAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _cleaveTimer       = 9000;
             _corrodeFleshTimer = 6000;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -772,7 +772,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (Unit* summoner = me->ToTempSummon()->GetSummoner())
             {
@@ -794,7 +794,7 @@ public:
             uint32 _corrodeFleshTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_yggdrasAI(creature);
     }
@@ -828,7 +828,7 @@ public:
             SetDespawnAtEnd(false);
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->AddAura(SPELL_THUNDERBLADE, me);
             uiKnockAwayTimer   = 10000;
@@ -837,7 +837,7 @@ public:
             _thunderClap       = false;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
@@ -849,7 +849,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             npc_escortAI::UpdateAI(uiDiff);
 
@@ -911,7 +911,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
                 player->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR, killer);
@@ -926,7 +926,7 @@ public:
             uint32 uiStinkyBeardTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_stinkbeardAI(creature);
     }
@@ -954,7 +954,7 @@ public:
 
         bool bAddAttack;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             uiBossRandom = 0;
             uiSpellInfo = 0;
@@ -963,7 +963,7 @@ public:
             bAddAttack = false;
         }
 
-        void SetData(uint32 uiData, uint32 uiValue) OVERRIDE
+        void SetData(uint32 uiData, uint32 uiValue) override
         {
             if (uiData == 1)
             {
@@ -989,7 +989,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* unit) OVERRIDE
+        void EnterCombat(Unit* unit) override
         {
             if (!SummonList.empty())
                 for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
@@ -1002,7 +1002,7 @@ public:
                 }
         }
 
-        void UpdateAI(uint32 uiDiff) OVERRIDE
+        void UpdateAI(uint32 uiDiff) override
         {
             if (!UpdateVictim())
                 return;
@@ -1053,7 +1053,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (!SummonList.empty())
                 for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
@@ -1070,7 +1070,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_elemental_lordAI(creature);
     }
@@ -1089,7 +1089,7 @@ public:
     {
         npc_fiend_elementalAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (me->GetPositionZ() >= 287.0f)
                 me->GetMotionMaster()->MoveIdle();
@@ -1098,7 +1098,7 @@ public:
             _missleTimer = urand(2000, 7000);
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             if (!who)
                 return;
@@ -1106,13 +1106,13 @@ public:
             AttackStartNoMove(who);
         }
 
-        void SetData(uint32 Data, uint32 Value) OVERRIDE
+        void SetData(uint32 Data, uint32 Value) override
         {
             if (Data == 1)
                 _spell = Boss[Value].uiAddSpell;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -1135,7 +1135,7 @@ public:
             uint32 _spell;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_fiend_elementalAI(creature);
     }
@@ -1154,14 +1154,14 @@ public:
     {
         npc_released_offspring_harkoaAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             float x, y, z;
             me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 25.0f);
             me->GetMotionMaster()->MovePoint(0, x, y, z);
         }
 
-        void MovementInform(uint32 Type, uint32 /*uiId*/) OVERRIDE
+        void MovementInform(uint32 Type, uint32 /*uiId*/) override
         {
             if (Type != POINT_MOTION_TYPE)
                 return;
@@ -1169,7 +1169,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_released_offspring_harkoaAI(creature);
     }
@@ -1200,14 +1200,14 @@ public:
     {
         npc_crusade_recruitAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_COWER);
             _heading = me->GetOrientation();
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
 
@@ -1235,7 +1235,7 @@ public:
                 return;
         }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) override
         {
             _events.ScheduleEvent(EVENT_RECRUIT_1, 100);
             player->CLOSE_GOSSIP_MENU();
@@ -1248,7 +1248,7 @@ public:
         float    _heading; // Store creature heading
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_crusade_recruitAI(creature);
     }
@@ -1271,7 +1271,7 @@ class go_scourge_enclosure : public GameObjectScript
 public:
     go_scourge_enclosure() : GameObjectScript("go_scourge_enclosure") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         go->UseDoorOrButton();
         if (player->GetQuestStatus(QUEST_OUR_ONLY_HOPE) == QUEST_STATUS_INCOMPLETE)
@@ -1431,12 +1431,12 @@ public:
     {
         npc_alchemist_finklesteinAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(15000, 26000));
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             if (type == 1 && data == 1)
                 switch (_getingredienttry)
@@ -1459,7 +1459,7 @@ public:
                 }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
 
@@ -1515,7 +1515,7 @@ public:
             }
         }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) override
         {
             player->CLOSE_GOSSIP_MENU();
             DoCast(player, SPELL_ALCHEMIST_APPRENTICE_INVISBUFF);
@@ -1530,7 +1530,7 @@ private:
         uint8    _getingredienttry;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_alchemist_finklesteinAI(creature);
     }
@@ -1541,7 +1541,7 @@ class go_finklesteins_cauldron : public GameObjectScript
 public:
     go_finklesteins_cauldron() : GameObjectScript("go_finklesteins_cauldron") { }
 
-    bool OnGossipHello(Player* player, GameObject* /*go*/) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* /*go*/) override
     {
         player->CastSpell(player, SPELL_POT_CHECK);
         return true;
@@ -1586,7 +1586,7 @@ public:
     {
         PrepareAuraScript(spell_random_ingredient_aura_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_EASY) || !sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_MEDIUM) || !sSpellMgr->GetSpellInfo(SPELL_RANDOM_INGREDIENT_HARD))
                 return false;
@@ -1609,13 +1609,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_random_ingredient_aura_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_random_ingredient_aura_AuraScript();
     }
@@ -1634,7 +1634,7 @@ public:
     {
         PrepareSpellScript(spell_random_ingredient_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_FETCH_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPECKLED_GUANO) ||
                 !sSpellMgr->GetSpellInfo(SPELL_FETCH_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PULVERIZED_GARGOYLE_TEETH) ||
@@ -1674,13 +1674,13 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_random_ingredient_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_random_ingredient_SpellScript();
     }
@@ -1699,7 +1699,7 @@ public:
     {
         PrepareSpellScript(spell_pot_check_SpellScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_FETCH_KNOTROOT) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PICKLED_EAGLE_EGG) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SPECKLED_GUANO) ||
                 !sSpellMgr->GetSpellInfo(SPELL_FETCH_WITHERED_BATWING) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_SEASONED_SLIDER_CIDER) || !sSpellMgr->GetSpellInfo(SPELL_FETCH_PULVERIZED_GARGOYLE_TEETH) ||
@@ -1768,13 +1768,13 @@ public:
                     player->DestroyItemCount(FetchIngredients[i][2], 1, true);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_pot_check_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_pot_check_SpellScript();
     }
@@ -1805,13 +1805,13 @@ public:
                     }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectRemove += AuraEffectRemoveFn(spell_fetch_ingredient_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_fetch_ingredient_aura_AuraScript();
     }
@@ -1835,17 +1835,17 @@ public:
     {
         npc_storm_cloudAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->CastSpell(me, STORM_VISUAL, true);
         }
 
-        void JustRespawned() OVERRIDE
+        void JustRespawned() override
         {
             Reset();
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
             if (spell->Id != GYMERS_GRAB)
                 return;
@@ -1859,7 +1859,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_storm_cloudAI(creature);
     }

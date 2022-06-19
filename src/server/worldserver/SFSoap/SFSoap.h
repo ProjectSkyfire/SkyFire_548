@@ -31,7 +31,7 @@ class SFSoapRunnable : public ACE_Based::Runnable
     public:
         SFSoapRunnable() : _port(0) { }
 
-        void run() OVERRIDE;
+        void run() override;
 
         void SetListenArguments(const std::string& host, uint16 port)
         {

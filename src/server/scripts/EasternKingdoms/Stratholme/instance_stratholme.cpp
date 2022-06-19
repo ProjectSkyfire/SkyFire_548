@@ -74,7 +74,7 @@ class instance_stratholme : public InstanceMapScript
             std::set<uint64> abomnationGUID;
             EventMap events;
 
-            void Initialize() OVERRIDE
+            void Initialize() override
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                     EncounterState[i] = NOT_STARTED;
@@ -128,7 +128,7 @@ class instance_stratholme : public InstanceMapScript
                 }
             }
 
-            void OnCreatureCreate(Creature* creature) OVERRIDE
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -148,7 +148,7 @@ class instance_stratholme : public InstanceMapScript
                 }
             }
 
-            void OnCreatureRemove(Creature* creature) OVERRIDE
+            void OnCreatureRemove(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -162,7 +162,7 @@ class instance_stratholme : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) OVERRIDE
+            void OnGameObjectCreate(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -215,7 +215,7 @@ class instance_stratholme : public InstanceMapScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data) OVERRIDE
+            void SetData(uint32 type, uint32 data) override
             {
                 switch (type)
                 {
@@ -355,7 +355,7 @@ class instance_stratholme : public InstanceMapScript
                     SaveToDB();
             }
 
-            std::string GetSaveData() OVERRIDE
+            std::string GetSaveData() override
             {
                 OUT_SAVE_INST_DATA;
 
@@ -367,7 +367,7 @@ class instance_stratholme : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* in) OVERRIDE
+            void Load(const char* in) override
             {
                 if (!in)
                 {
@@ -392,7 +392,7 @@ class instance_stratholme : public InstanceMapScript
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
-            uint32 GetData(uint32 type) const OVERRIDE
+            uint32 GetData(uint32 type) const override
             {
                   switch (type)
                   {
@@ -416,7 +416,7 @@ class instance_stratholme : public InstanceMapScript
                   return 0;
             }
 
-            uint64 GetData64(uint32 data) const OVERRIDE
+            uint64 GetData64(uint32 data) const override
             {
                 switch (data)
                 {
@@ -428,7 +428,7 @@ class instance_stratholme : public InstanceMapScript
                 return 0;
             }
 
-            void Update(uint32 diff) OVERRIDE
+            void Update(uint32 diff) override
             {
                 events.Update(diff);
 
@@ -459,7 +459,7 @@ class instance_stratholme : public InstanceMapScript
             }
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
         {
             return new instance_stratholme_InstanceMapScript(map);
         }

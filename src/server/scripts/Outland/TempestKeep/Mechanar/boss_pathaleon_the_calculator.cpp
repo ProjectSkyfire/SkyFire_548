@@ -77,7 +77,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
         {
             boss_pathaleon_the_calculatorAI(Creature* creature) : BossAI(creature, DATA_PATHALEON_THE_CALCULATOR) { }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 _EnterCombat();
                 events.ScheduleEvent(EVENT_SUMMON, 30000);
@@ -88,18 +88,18 @@ class boss_pathaleon_the_calculator : public CreatureScript
                 Talk(SAY_AGGRO);
             }
 
-            void KilledUnit(Unit* /*victim*/) OVERRIDE
+            void KilledUnit(Unit* /*victim*/) override
             {
                 Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) override
             {
                 if (me->HealthBelowPctDamaged(20, damage) && !me->HasAura(SPELL_FRENZY))
                 {
@@ -108,7 +108,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -160,7 +160,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_pathaleon_the_calculatorAI(creature);
         }
@@ -180,7 +180,7 @@ class npc_nether_wraith : public CreatureScript
             uint32 Die_Timer;
             bool Detonation;
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 ArcaneMissiles_Timer = urand(1000, 4000);
                 Detonation_Timer = 20000;
@@ -188,9 +188,9 @@ class npc_nether_wraith : public CreatureScript
                 Detonation = false;
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE { }
+            void EnterCombat(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -231,7 +231,7 @@ class npc_nether_wraith : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_nether_wraithAI(creature);
         }

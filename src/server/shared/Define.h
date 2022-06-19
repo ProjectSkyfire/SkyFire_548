@@ -72,7 +72,6 @@
 #endif //COMPILER == COMPILER_GNU
 
 
-#define OVERRIDE override
 #define FINAL final
 
 

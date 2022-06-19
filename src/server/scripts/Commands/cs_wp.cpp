@@ -36,7 +36,7 @@ class wp_commandscript : public CommandScript
 public:
     wp_commandscript() : CommandScript("wp_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const OVERRIDE
+    std::vector<ChatCommand> GetCommands() const override
     {
         static std::vector<ChatCommand> wpCommandTable =
         {
