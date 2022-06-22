@@ -59,45 +59,34 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     SendPacket(&data);
 }
 
-void WorldSession::SendGroupInviteNotification(const std::string& inviterName, bool inGroup)
+void WorldSession::SendGroupInviteNotification(ObjectGuid InviterGUID, const std::string& inviterName, bool inGroup)
 {
     SF_LOG_DEBUG("network", "WORLD: sending SMSG_GROUP_INVITE");
     
-    ObjectGuid invitedGuid = GetPlayer()->GetGUID();
-
     WorldPacket data(SMSG_GROUP_INVITE, 6 + 1 + 8 + 8 + 4 + 4 + 4 + inviterName.size());
     data.WriteBits(0, 8);
     data.WriteBits(0, 8);
-    data.WriteBit(invitedGuid[2]);
+    data.WriteGuidMask(InviterGUID, 2);
     data.WriteBit(0);
     data.WriteBits(inviterName.size(), 6);              // inviter name length
-    data.WriteBit(invitedGuid[7]);
-    data.WriteBit(invitedGuid[5]);
+    data.WriteGuidMask(InviterGUID, 7, 5);
     data.WriteBit(!inGroup);                            // inverse already in group
     data.WriteBit(0);                                   // auto decline
-    data.WriteBit(invitedGuid[1]);
+    data.WriteGuidMask(InviterGUID, 1);
     data.WriteBit(0);                                   // cross realm invite (includes hyphen between inviter and server name)
     data.WriteBit(0);                                   // realm transfer warning("Accepting this invitation may transfer you to another realm")
     data.WriteBits(0, 22);                              // counter
-    data.WriteBit(invitedGuid[3]);
-    data.WriteBit(invitedGuid[0]);
-    data.WriteBit(invitedGuid[4]);
-    data.WriteBit(invitedGuid[6]);
+    data.WriteGuidMask(InviterGUID, 3, 0, 4, 6);
     data.FlushBits();
 
-    data.WriteByteSeq(invitedGuid[6]);
-    data.WriteByteSeq(invitedGuid[7]);
-    data.WriteByteSeq(invitedGuid[2]);
-    data.WriteByteSeq(invitedGuid[0]);
+    data.WriteGuidBytes(InviterGUID, 6, 7, 2, 0);
     data << uint64(0);
     data << uint32(0);
     data << uint32(0);
-    data.WriteByteSeq(invitedGuid[1]);
-    data.WriteByteSeq(invitedGuid[5]);
-    data.WriteByteSeq(invitedGuid[4]);
+    data.WriteGuidBytes(InviterGUID, 1, 5, 4);
     data << int32(0);
     data.WriteString(inviterName);
-    data.WriteByteSeq(invitedGuid[3]);
+    data.WriteGuidBytes(InviterGUID, 3);
     data << uint32(0);
 
     /*for (int i = 0; i < counter; i++)
@@ -204,7 +193,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         if (group2)
         {
             // tell the player that they were invited but it failed as they were already in a group
-            player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetName(), true);
+            player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetObjectGUID(), GetPlayer()->GetName(), true);
         }
 
         return;
@@ -254,7 +243,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     }
 
     // ok, we do it
-    player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetName(), false);
+    player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetObjectGUID(), GetPlayer()->GetName(), false);
 
     SendPartyResult(PartyOperation::PARTY_OP_INVITE, memberName, PartyResult::ERR_PARTY_RESULT_OK);
 }

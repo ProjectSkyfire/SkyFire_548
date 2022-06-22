@@ -295,7 +295,7 @@ class WorldSession
         void SendPartyResult(PartyOperation operation, std::string const& member, PartyResult res, uint32 val = 0);
         void SendSetPhaseShift(ObjectGuid PlayerGUID, std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps, std::set<uint32> const& worldAreas);
         void SendQueryTimeResponse();
-        void SendGroupInviteNotification(const std::string& inviterName, bool inGroup);
+        void SendGroupInviteNotification(ObjectGuid InviterGUID, const std::string& inviterName, bool inGroup);
         void SendRolePollInform(ObjectGuid guid, uint8 Index);
 
         void SendAuthResponse(ResponseCodes code, bool queued, uint32 queuePos = 0);
