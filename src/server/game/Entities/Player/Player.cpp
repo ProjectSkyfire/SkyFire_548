@@ -29195,5 +29195,5 @@ void Player::UpdatePhasing()
 
     RebuildTerrainSwaps(); // to set default map swaps
 
-    GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
+    GetSession()->SendSetPhaseShift(GetObjectGUID(), GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
 }

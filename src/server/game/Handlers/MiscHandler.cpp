@@ -2004,37 +2004,25 @@ void WorldSession::HandleReadyForAccountDataTimes(WorldPacket& /*recvData*/)
     SendAccountDataTimes(GLOBAL_CACHE_MASK);
 }
 
-void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps, std::set<uint32> const& worldMapAreas)
+void WorldSession::SendSetPhaseShift(ObjectGuid PlayerGUID, std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps, std::set<uint32> const& worldMapAreas)
 {
-    ObjectGuid guid = _player->GetGUID();
-
     WorldPacket data(SMSG_PHASE_SHIFT_CHANGE, 1 + 8 + 2 * phaseIds.size() + 4 + 2 * worldMapAreas.size() + 2 * terrainswaps.size() + 4);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
 
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
+    data.WriteGuidMask(PlayerGUID, 0, 3, 1, 4, 6, 2, 7, 5);
+
+    data.WriteGuidBytes(PlayerGUID, 4, 3, 2);
 
     data << uint32(phaseIds.size()) * 2;        // Phase.dbc ids
     for (std::set<uint32>::const_iterator itr = phaseIds.begin(); itr != phaseIds.end(); ++itr)
         data << uint16(*itr);
 
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
+    data.WriteGuidBytes(PlayerGUID, 0, 6);
 
     data << uint32(0);                          // Inactive terrain swaps
     //for (uint8 i = 0; i < inactiveSwapsCount; ++i)
     //    data << uint16(0);
 
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[7]);
+    data.WriteGuidBytes(PlayerGUID, 1, 7);
 
     data << uint32(worldMapAreas.size()) * 2;     // WorldMapArea.dbc id (controls map display)
     for (std::set<uint32>::const_iterator itr = worldMapAreas.begin(); itr != worldMapAreas.end(); ++itr)
@@ -2044,7 +2032,7 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
         data << uint16(*itr);
 
-    data.WriteByteSeq(guid[5]);
+    data.WriteGuidBytes(PlayerGUID, 5);
 
     data << uint32(phaseIds.size() ? 0 : 8);  // flags (not phasemask)
 

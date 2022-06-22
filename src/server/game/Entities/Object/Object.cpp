@@ -3302,7 +3302,7 @@ void WorldObject::UpdateAreaPhase()
     // only update visibility and send packets if there was a change in the phase list
 
     if (updateNeeded && GetTypeId() == TypeID::TYPEID_PLAYER && IsInWorld())
-        ToPlayer()->GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
+        ToPlayer()->GetSession()->SendSetPhaseShift(GetObjectGUID(), GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
 
     // only update visibilty once, to prevent objects appearing for a moment while adding in multiple phases
     if (updateNeeded && IsInWorld())
