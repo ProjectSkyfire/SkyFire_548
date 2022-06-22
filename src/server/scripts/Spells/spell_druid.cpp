@@ -34,6 +34,7 @@ enum DruidSpells
     SPELL_DRUID_BEAR_FORM                   = 5487,
     SPELL_DRUID_BERSERK_AURA                = 106951,
     SPELL_DRUID_CAT_FORM                    = 768,
+    SPELL_DRUID_DASH                        = 1850,
     SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE    = 89265,
     SPELL_DRUID_FERAL_CHARGE_BEAR           = 16979,
     SPELL_DRUID_FERAL_CHARGE_CAT            = 49376,
@@ -49,6 +50,8 @@ enum DruidSpells
     SPELL_DRUID_NATURES_GRACE               = 16880,
     SPELL_DRUID_NATURES_GRACE_TRIGGER       = 16886,
     SPELL_DRUID_WRATH                       = 5176,
+    SPELL_DRUID_SKULL_BASH                  = 106839,
+    SPELL_DRUID_SKULL_BASH_CHARGE           = 93983,
     SPELL_DRUID_STARFIRE                    = 2912,
     SPELL_DRUID_STARSURGE                   = 78674,
     SPELL_DRUID_STARSURGE_ENERGIZE          = 86605, 
@@ -59,8 +62,83 @@ enum DruidSpells
     SPELL_DRUID_SAVAGE_ROAR_TRIGGER         = 62071,
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
     SPELL_DRUID_STAMPEDE_CAT_RANK_1         = 81021,
-    SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881, 
+    SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
+    SPELL_DRUID_STAMPEDING_ROAR             = 77764,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,   
+};
+
+// Stampeding Roar - 77764
+class spell_dru_stampeding_roar : public SpellScriptLoader
+{
+public:
+    spell_dru_stampeding_roar() : SpellScriptLoader("spell_dru_stampeding_roar") { }
+
+    class spell_dru_stampeding_roar_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_stampeding_roar_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_DASH))
+                return false;
+            return true;
+        }
+
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTarget()->HasAura(SPELL_DRUID_DASH))
+            {
+                GetTarget()->RemoveAura(SPELL_DRUID_STAMPEDING_ROAR);
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_stampeding_roar_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_stampeding_roar_AuraScript();
+    }
+
+};
+
+// Skull Bash (cat) - 80965
+// Skull Bash (bear) - 80964
+class spell_dru_skull_bash : public SpellScriptLoader
+{
+public:
+    spell_dru_skull_bash() : SpellScriptLoader("spell_dru_skull_bash_charge") { }
+
+    class spell_dru_skull_bash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_skull_bash_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_SKULL_BASH_CHARGE))
+                return false;
+            return true;
+        }
+
+        void HandleCast(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->CastSpell(GetHitUnit(), SPELL_DRUID_SKULL_BASH_CHARGE, true);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_skull_bash_SpellScript::HandleCast, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_skull_bash_SpellScript();
+    }
 };
 
 // 5217 - Tiger's Fury
@@ -132,6 +210,11 @@ public:
                 if (!caster->HasAura(SPELL_DRUID_CAT_FORM))
                 {
                     caster->CastSpell(caster, SPELL_DRUID_CAT_FORM, true);
+                }
+
+                if (caster->HasAura(SPELL_DRUID_STAMPEDING_ROAR))
+                {
+                    caster->RemoveAura(SPELL_DRUID_STAMPEDING_ROAR);
                 }
             }
         }
@@ -1098,10 +1181,12 @@ void AddSC_druid_spell_scripts()
     new spell_dru_living_seed_proc();
     new spell_dru_might_of_ursoc();
     new spell_dru_predatory_strikes();
+    new spell_dru_skull_bash();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
     new spell_dru_starfall_dummy();
     new spell_dru_stampede();
+    new spell_dru_stampeding_roar();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
     new spell_dru_tigers_fury();
