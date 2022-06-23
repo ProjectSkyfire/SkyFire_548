@@ -2146,7 +2146,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
-            SendTeleportPacket(oldPos); !GetSession()->PlayerLogout() this automatically relocates to oldPos in order to broadcast the packet in the right place
+            SendTeleportPacket(oldPos);  // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
     }
     else
