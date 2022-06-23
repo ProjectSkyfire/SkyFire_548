@@ -935,6 +935,11 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
 }
 
 void Spell::CalculateJumpSpeeds(uint8 i, float dist, float & speedXY, float & speedZ)

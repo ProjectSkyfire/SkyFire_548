@@ -58,6 +58,7 @@
 #include "DB2Stores.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "AnticheatMgr.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -5960,6 +5961,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
                     else if (!result || m_preGeneratedPath.GetPathType() & PATHFIND_NOPATH)
                         return SpellCastResult::SPELL_FAILED_NOPATH;
+                }
+                if (Player* player = m_caster->ToPlayer())
+                {
+                    // To prevent false positives in the Anticheat system
+                    sAnticheatMgr->SetAllowedMovement(player, true);
                 }
                 break;
             }

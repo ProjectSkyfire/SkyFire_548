@@ -17,6 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AnticheatMgr.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -378,6 +379,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     if (m_clientTimeDelay == 0)
         m_clientTimeDelay = mstime - movementInfo.time;
 
+    if (plrMover)
+        sAnticheatMgr->OnPlayerMove(plrMover, movementInfo, opcode);
+
     /* process position-change */
     movementInfo.time = movementInfo.time + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY;
 
@@ -591,6 +595,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
     WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 66);
     _player->WriteMovementInfo(data);
     _player->SendMessageToSet(&data, false);
+    _player->SetCanTeleport(true);
 }
 
 void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)

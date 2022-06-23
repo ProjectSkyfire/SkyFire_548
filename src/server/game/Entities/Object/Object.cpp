@@ -54,6 +54,8 @@
 #include "BattlefieldMgr.h"
 #include "Chat.h"
 
+constexpr float Z_OFFSET_FIND_HEIGHT = 1.5f;
+
 TypeID GuidHigh2TypeId(uint32 guid_hi)
 {
     switch (guid_hi)
@@ -3515,6 +3517,21 @@ struct WorldObjectChangeAccumulator
 
     template<class SKIP> void Visit(GridRefManager<SKIP> &) { }
 };
+
+float WorldObject::GetFloorZ() const
+{
+    if (!IsInWorld())
+        return m_staticFloorZ;
+    return std::max<float>(m_staticFloorZ, GetMap()->GetGameObjectFloor(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ() + Z_OFFSET_FIND_HEIGHT));
+}
+
+float WorldObject::GetMapHeight(float x, float y, float z, bool vmap/* = true*/, float distanceToSearch/* = DEFAULT_HEIGHT_SEARCH*/) const
+{
+    if (z != MAX_HEIGHT)
+        z += Z_OFFSET_FIND_HEIGHT;
+
+    return GetMap()->GetHeight(GetPhaseMask(), x, y, z, vmap, distanceToSearch);
+}
 
 void WorldObject::BuildUpdate(UpdateDataMapType& data_map)
 {

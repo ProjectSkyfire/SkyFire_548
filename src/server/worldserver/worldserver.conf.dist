@@ -3110,3 +3110,138 @@ Boost.StartLevel = 90
 
 #
 ###################################################################################################
+
+###################################################################################################
+#
+#
+#     Anticheat.Enable
+#       Description: Enables or disables the Anticheat System functionality
+#       Default:     1 - (Enabled)
+#                    0 - (Disabled)
+
+Anticheat.Enable = 1
+
+#     Anticheat.EnabledOnGmAccounts
+#       Description: Enables detection for GM accounts
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.EnabledOnGmAccounts = 0
+
+#     Anticheat.ReportsForIngameWarnings
+#       Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.
+#       Default:     70
+
+Anticheat.ReportsForIngameWarnings = 70
+
+#     Anticheat.MaxReportsForDailyReport
+#       Description: How many reports must the player have to make a report that it is in DB for a day (not only during the player's session).
+#       Default:     70
+
+Anticheat.MaxReportsForDailyReport = 70
+
+#     Anticheat.ReportinChat
+#       Description: min and max total reports to trigger gm chat message spam.
+#       Default:     So with 70 being min and 80 being max, it will spam gm in chat 10 times.
+#                    Anticheat.ReportinChat.Min = 70
+#                    Anticheat.ReportinChat.Max = 80
+
+Anticheat.ReportinChat.Min = 70
+Anticheat.ReportinChat.Max = 80
+
+#     Anticheat.AlertFrequency
+#       Description: Once Ingame warngings and report in chat min is met, this will throttle to alert the gms every other count
+#       Default:     So with 1 being the default, u will get a message alert for every 1 violations.
+#       Anticheat.AlertFrequency = 1
+
+Anticheat.AlertFrequency = 1
+
+#     Anticheat.WriteLog
+#       Description: Enable writing to log when a player is detected using hacks
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.WriteLog = 0
+
+#     Anticheat.Detect
+#       Description: It represents which detections are enabled (ClimbHack disabled by default).
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.DetectFlyHack = 0
+Anticheat.DetectWaterWalkHack = 0
+Anticheat.DetectJumpHack = 0
+Anticheat.DetectTelePlaneHack = 0
+Anticheat.DetectSpeedHack = 0
+Anticheat.DetectClimbHack = 0
+Anticheat.DetectTelePortHack = 0
+Anticheat.IgnoreControlHack = 0
+Anticheat.DetectZaxisHack = 0
+Anticheat.AntiSwimHack = 0
+Anticheat.DetectGravityHack = 0
+
+#     Anticheat.StricterFlyHackCheck
+#       Description: Checks moveflag ascending (may give false positives)
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.StricterFlyHackCheck = 0
+
+#     Automatic Moderation Features
+#
+#     Anticheat.KickPlayer
+#     Anticheat.ReportsForKick
+#
+#       Description: Enables and Auto kick when reports reach threshhold
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+#       Default:    70 - (Kicks at 70 auto reports)
+#
+
+Anticheat.KickPlayer = 0
+Anticheat.ReportsForKick = 75
+
+#     Anticheat.BanPlayer
+#     Anticheat.ReportsForBan
+#
+#       Description: Enables and Auto ban when reports reach threshhold
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+#       Default:    70 - (Bans at 70 auto reports)
+#
+
+Anticheat.BanPlayer = 0
+Anticheat.ReportsForBan = 70
+
+#     Anticheat.JailPlayer
+#     Anticheat.ReportsForJail
+#
+#       Description: Enables and Auto Jail when reports reach threshhold
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+#       Default:    70 - (Jails at 70 auto reports)
+#
+
+Anticheat.JailPlayer = 0
+Anticheat.ReportsForJail = 70
+
+#     Anticheat.AnnounceKick
+#     Anticheat.AnnounceBan
+#     Anticheat.AnnounceJail
+#       Description: Send a message to all players when a user kicked, banned, jailed.
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.AnnounceKick = 0
+Anticheat.AnnounceBan = 0
+Anticheat.AnnounceJail = 0
+
+# Anticheat Logging\Appenders
+# Currently spams into its own file
+# If you want world console spam just use Logger.anticheat=3,Console Server Anticheat
+
+Appender.Anticheat=2,3,15,anticheat.log,a
+Logger.anticheat=3,Server Anticheat
+
+#
+###################################################################################################

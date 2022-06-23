@@ -318,7 +318,7 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     std::vector<uint32> nodes;
     nodes.resize(2);
-
+    GetPlayer()->SetCanTeleport(true);
     recvData >> nodes[1] >> nodes[0];
     recvData.ReadGuidMask(guid, 4, 0, 1, 2, 5, 6, 7, 3);
     recvData.ReadGuidBytes(guid, 1, 0, 6, 5, 2, 4, 3, 7);
@@ -336,6 +336,7 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
+    GetPlayer()->SetCanTeleport(true);
     WorldPacket data(SMSG_ACTIVATE_TAXI_REPLY, 4);
     data.WriteBits(reply, 4);
     data.FlushBits();

@@ -10823,6 +10823,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
     if (GetTypeId() == TypeID::TYPEID_PLAYER)
     {
+        ToPlayer()->SetCanTeleport(true);
         // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
         // and do it only for real sent packets and use run for run/mounted as client expected
         ++ToPlayer()->m_forced_speed_changes [mtype];
@@ -15831,6 +15832,11 @@ void Unit::ExitVehicle(Position const* /*exitPosition*/)
     //! init spline movement based on those coordinates in unapply handlers, and
     //! relocate exiting passengers based on Unit::moveSpline data. Either way,
     //! Coming Soon(TM)
+
+    if (Player* player = ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
 }
 
 void Unit::_ExitVehicle(Position const* exitPosition)

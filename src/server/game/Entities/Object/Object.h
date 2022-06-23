@@ -735,6 +735,8 @@ class WorldObject : public Object, public WorldLocation
 
         void DestroyForNearbyPlayers();
         virtual void UpdateObjectVisibility(bool forced = true);
+        float GetFloorZ() const;
+        float GetMapHeight(float x, float y, float z, bool vmap = true, float distanceToSearch = 50.0f) const; // DEFAULT_HEIGHT_SEARCH in map.h
         void BuildUpdate(UpdateDataMapType&);
 
         //relocation and visibility system functions
@@ -791,6 +793,7 @@ class WorldObject : public Object, public WorldLocation
 
         // transports
         Transport* m_transport;
+        float m_staticFloorZ;
 
         //these functions are used mostly for Relocate() and Corpse/Player specific stuff...
         //use them ONLY in LoadFromDB()/Create() funcs and nowhere else!

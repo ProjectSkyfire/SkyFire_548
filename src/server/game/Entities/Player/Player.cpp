@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
+#include "AnticheatMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battlefield.h"
@@ -584,7 +585,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_bCanDelayTeleport = false;
     m_bHasDelayedTeleport = false;
     m_teleport_options = 0;
-
+    m_canTeleport = false;
     m_trade = NULL;
 
     m_cinematic = 0;
@@ -2141,10 +2142,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
         {
+            SetCanTeleport(true);
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
-            SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
+            SendTeleportPacket(oldPos); !GetSession()->PlayerLogout() this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
     }
     else
@@ -2256,6 +2258,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             if (!GetSession()->PlayerLogout())
             {
+                SetCanTeleport(true);
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
                 data << float(m_teleport_dest.GetPositionX());
                 data << uint32(mapid);
@@ -20085,6 +20088,9 @@ void Player::SaveToDB(bool create /*=false*/)
         _SaveStats(trans);
 
     CharacterDatabase.CommitTransaction(trans);
+
+    // we save the data here to prevent spamming
+    sAnticheatMgr->SavePlayerData(this);
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
