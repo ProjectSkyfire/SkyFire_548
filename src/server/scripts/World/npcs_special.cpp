@@ -2497,6 +2497,221 @@ public:
     }
 };
 
+// NPC 56661
+class npc_aysa : public CreatureScript
+{
+    enum
+    {
+        QUEST_WAY_OF_THE_TUSHUI = 29414,
+        NPC_AYSA_LAKE_ESCORT = 56661,
+        NPC_MASTER_LI_FEI = 54856,
+        SPELL_MEDITATION_BAR = 116421,
+        NPC_TROUBLEMAKER = 59637,
+
+        SAY_INTRO = 0,
+        SAY_END
+    };
+
+    enum eEvents
+    {
+        EVENT_START = 1,
+        EVENT_SPAWN_MOBS = 2,
+        EVENT_PROGRESS = 3,
+        EVENT_END = 4,
+    };
+
+public:
+    npc_aysa() : CreatureScript("npc_aysa") { }
+
+    struct npc_aysaAI : public ScriptedAI
+    {
+        npc_aysaAI(Creature* creature) : ScriptedAI(creature)
+        {
+            if (me->GetAreaId() == 5848) // Cave of Meditation
+                events.ScheduleEvent(EVENT_START, 600); //Begin script
+            inCombat = false;
+            timer = 0;
+            lifeiGUID = 0;
+            me->SetReactState(REACT_DEFENSIVE);
+            me->setFaction(2263);
+        }
+
+        EventMap events;
+        std::vector<Player*> playersInvolved;
+
+        uint64 lifeiGUID;
+
+        bool inCombat;
+        uint32 timer;
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (me->HealthBelowPctDamaged(5, damage))
+            {
+                DespawnLifei();
+                damage = 0;
+                me->SetFullHealth();
+                me->SetReactState(REACT_DEFENSIVE);
+
+                std::list<Creature*> unitlist;
+                GetCreatureListWithEntryInGrid(unitlist, me, NPC_TROUBLEMAKER, 50.0f);
+                for (auto&& creature : unitlist)
+                    me->Kill(creature);
+
+                events.ScheduleEvent(EVENT_START, 20000);
+                events.CancelEvent(EVENT_SPAWN_MOBS);
+                events.CancelEvent(EVENT_PROGRESS);
+                events.CancelEvent(EVENT_END);
+            }
+        }
+
+        void UpdatePlayerList()
+        {
+            playersInvolved.clear();
+
+            std::list<Player*> PlayerList;
+            GetPlayerListInGrid(PlayerList, me, 20.0f);
+
+            for (auto&& player : PlayerList)
+                if (!player->IsGameMaster() && player->GetQuestStatus(QUEST_WAY_OF_THE_TUSHUI) == QUEST_STATUS_INCOMPLETE)
+                    playersInvolved.push_back(player);
+        }
+
+        Creature* GetLifei()
+        {
+            if (lifeiGUID != 0)
+                return Creature::GetCreature(*me, lifeiGUID);
+            else
+            {
+                TempSummon* temp = me->SummonCreature(NPC_MASTER_LI_FEI, 1130.162231f, 3435.905518f, 105.496597f, 0.0f, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN);
+                temp->GetMotionMaster()->Clear();
+                temp->GetMotionMaster()->MoveRandom(10.0f);
+                lifeiGUID = temp->GetGUID();
+                return temp;
+            }
+        }
+
+        void DespawnLifei()
+        {
+            if (lifeiGUID)
+            {
+                if (Creature* lifei = GetLifei())
+                {
+                    lifei->DespawnOrUnsummon();
+                    lifeiGUID = 0;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_START: //Begin script if playersInvolved is not empty
+                {
+                    UpdatePlayerList();
+                    if (playersInvolved.empty())
+                        events.ScheduleEvent(EVENT_START, 600); // reschedule
+                    else
+                    {
+                        Talk(SAY_INTRO);
+                        me->SetReactState(REACT_PASSIVE);
+                        timer = 0;
+                        events.ScheduleEvent(EVENT_SPAWN_MOBS, 5000); //spawn mobs
+                        events.ScheduleEvent(EVENT_PROGRESS, 1000); //update time
+                        events.ScheduleEvent(EVENT_END, 90000); //end quest
+                    }
+                    break;
+                }
+                case EVENT_SPAWN_MOBS: //Spawn 3 mobs
+                {
+                    UpdatePlayerList();
+
+                    auto const maxSize = std::min<size_t>(playersInvolved.size(), 5);
+                    auto const maxSpawns = std::max<size_t>(maxSize * 3, 3);
+
+                    for (size_t i = 0; i < maxSpawns; ++i)
+                        if (TempSummon* temp = me->SummonCreature(NPC_TROUBLEMAKER, 1155.625f, 3438.559f, 104.97f, 3.3f, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        {
+                            if (temp->AI())
+                                temp->AI()->AttackStart(me);
+
+                            temp->AddThreat(me, 250.0f);
+                            temp->GetMotionMaster()->Clear();
+                            temp->GetMotionMaster()->MoveChase(me);
+                        }
+
+                    events.ScheduleEvent(EVENT_SPAWN_MOBS, 20000); //spawn mobs
+                    break;
+                }
+                case EVENT_PROGRESS: //update energy
+                {
+                    timer++;
+
+                    uint8 lafeiTalkThreshold[7] = { 25, 30, 42, 54, 66, 78, 85 };
+
+                    for (int i = 0; i < 7; ++i)
+                        if (timer == lafeiTalkThreshold[i])
+                        {
+                            Creature* lifei = GetLifei();
+                            lifei->AI()->Talk(i);
+
+                            if (i == 6)
+                            {
+                                lifei->DespawnOrUnsummon(500);
+                                lifeiGUID = 0;
+                            }
+                            break;
+                        }
+
+                    UpdatePlayerList();
+                    for (auto&& player : playersInvolved)
+                    {
+                        if (!player->HasAura(SPELL_MEDITATION_BAR))
+                            player->CastSpell(player, SPELL_MEDITATION_BAR);
+
+                        player->SetPower(POWER_ALTERNATE_POWER, timer);
+                        player->SetMaxPower(POWER_ALTERNATE_POWER, 90);
+                    }
+
+                    events.ScheduleEvent(EVENT_PROGRESS, 1000);
+                    break;
+                }
+                case EVENT_END: //script end
+                {
+                    if (Creature* lifei = GetLifei())
+                    {
+                        lifei->DespawnOrUnsummon();
+                        lifeiGUID = 0;
+                    }
+
+                    events.ScheduleEvent(EVENT_START, 10000);
+                    events.CancelEvent(EVENT_SPAWN_MOBS);
+                    events.CancelEvent(EVENT_PROGRESS);
+                    Talk(SAY_END);
+                    me->SetReactState(REACT_DEFENSIVE);
+
+                    UpdatePlayerList();
+                    for (auto&& player : playersInvolved)
+                    {
+                        player->KilledMonsterCredit(NPC_MASTER_LI_FEI, 0);
+                        player->RemoveAura(SPELL_MEDITATION_BAR);
+                    }
+                    break;
+                }
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_aysaAI(creature);
+    }
+};
 
 void AddSC_npcs_special()
 {
@@ -2523,4 +2738,5 @@ void AddSC_npcs_special()
     new npc_Spirit_of_Master_Shang_Xi();
     new npc_spring_rabbit();
     new npc_training_target();
+    new npc_aysa();
 }
