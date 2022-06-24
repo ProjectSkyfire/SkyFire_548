@@ -763,17 +763,6 @@ void AnticheatMgr::OnPlayerMove(Player* player, MovementInfo mi, uint32 opcode)
         sAnticheatMgr->StartHackDetection(player, mi, opcode);
 }
 
-void AnticheatMgr::SavePlayerDataDaily(Player* player)
-{
-    CharacterDatabase.PExecute("REPLACE INTO daily_players_reports (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID(), m_Players[player->GetGUID()].GetAverage(), m_Players[player->GetGUID()].GetTotalReports(), m_Players[player->GetGUID()].GetTypeReports(SPEED_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(FLY_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(JUMP_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(WALK_WATER_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(TELEPORT_PLANE_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(CLIMB_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(TELEPORT_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(IGNORE_CONTROL_REPORT), m_Players[player->GetGUID()].GetTypeReports(ZAXIS_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(ANTISWIM_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(GRAVITY_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
-}
-
-void AnticheatMgr::OnPlayerMove(Player* player, MovementInfo mi, uint32 opcode)
-{
-    if (!AccountMgr::IsAdminAccount(player->GetSession()->GetSecurity()) || sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_ENABLE_ON_GM))
-        sAnticheatMgr->StartHackDetection(player, mi, opcode);
-}
-
 uint32 AnticheatMgr::GetTotalReports(uint32 lowGUID)
 {
     return m_Players[lowGUID].GetTotalReports();
