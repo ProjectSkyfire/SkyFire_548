@@ -3034,11 +3034,13 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             {
                 // health as power used
             case POWER_HEALTH:
-                tmpPowerCost += int32(CalculatePct(m_caster->GetCreateHealth(), spellPower->ManaCostPercentageFloat));
+                tmpPowerCost = int32(CalculatePct(m_caster->GetCreateHealth(), spellPower->ManaCostPercentageFloat));
                 break;
             case POWER_MANA:
+                tmpPowerCost = int32(CalculatePct(m_caster->GetCreateMana(), spellPower->ManaCostPercentageFloat));
+                break;
             case POWER_DEMONIC_FURY:
-                tmpPowerCost += int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
+                tmpPowerCost = int32(CalculatePct(m_caster->GetMaxPower(Powers(m_powerType)), spellPower->ManaCostPercentageFloat));
                 break;
             case POWER_RUNIC_POWER:
                 SF_LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
