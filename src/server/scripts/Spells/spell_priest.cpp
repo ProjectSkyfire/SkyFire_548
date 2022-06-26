@@ -17,6 +17,8 @@
 
 enum PriestSpells
 {
+    SPELL_PRIEST_INNER_FOCUS                        = 89485,
+
     SPELL_PRIEST_EVANGELISM_PROC                    = 81661,
     SPELL_PRIEST_BODY_AND_SOUL_PASSIVE              = 64129,
     SPELL_PRIEST_BODY_AND_SOUL_SPEED                = 65081,
@@ -53,6 +55,99 @@ enum PriestSpellIcons
 enum MiscSpells
 {
     SPELL_GEN_REPLENISHMENT                         = 57669
+};
+
+class spell_pri_prayer_of_healing : public SpellScriptLoader
+{
+public:
+    spell_pri_prayer_of_healing() : SpellScriptLoader("spell_pri_prayer_of_healing") { }
+    class spell_pri_prayer_of_healing_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_prayer_of_healing_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_INNER_FOCUS))
+                return false;
+            return true;
+        }
+        void HandleRemoveAura(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PRIEST_INNER_FOCUS))
+                GetCaster()->RemoveAura(SPELL_PRIEST_INNER_FOCUS);
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pri_prayer_of_healing_SpellScript::HandleRemoveAura, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pri_prayer_of_healing_SpellScript();
+    }
+};
+
+class spell_pri_greater_heal : public SpellScriptLoader
+{
+public:
+    spell_pri_greater_heal() : SpellScriptLoader("spell_pri_greater_heal") { }
+    class spell_pri_greater_heal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_greater_heal_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_INNER_FOCUS))
+                return false;
+            return true;
+        }
+        void HandleRemoveAura(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PRIEST_INNER_FOCUS))
+                GetCaster()->RemoveAura(SPELL_PRIEST_INNER_FOCUS);
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pri_greater_heal_SpellScript::HandleRemoveAura, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pri_greater_heal_SpellScript();
+    }
+};
+
+class spell_pri_flash_heal : public SpellScriptLoader
+{
+public:
+    spell_pri_flash_heal() : SpellScriptLoader("spell_pri_flash_heal") { }
+    class spell_pri_flash_heal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_flash_heal_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_INNER_FOCUS))
+                return false;
+            return true;
+        }
+        void HandleRemoveAura(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PRIEST_INNER_FOCUS))
+                GetCaster()->RemoveAura(SPELL_PRIEST_INNER_FOCUS);
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pri_flash_heal_SpellScript::HandleRemoveAura, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pri_flash_heal_SpellScript();
+    }
 };
 
 class spell_pri_evangelism : public SpellScriptLoader
@@ -768,6 +863,10 @@ public:
 
 void AddSC_priest_spell_scripts()
 {
+    new spell_pri_prayer_of_healing();
+    new spell_pri_greater_heal();
+    new spell_pri_flash_heal();
+
     new spell_pri_evangelism();
     new spell_pri_divine_aegis();
     new spell_pri_item_greater_heal_refund();
