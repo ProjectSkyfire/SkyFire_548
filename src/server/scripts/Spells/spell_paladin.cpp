@@ -31,6 +31,9 @@
 
 enum PaladinSpells
 {
+    SPELL_PALADIN_LONG_ARM_OF_THE_LAW_TALENT     = 87172,
+    SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF  = 87173,
+
     SPELL_PALADIN_AVENGERS_SHIELD                = 31935,
     SPELL_PALADIN_AURA_MASTERY_IMMUNE            = 64364,
     SPELL_PALADIN_BEACON_OF_LIGHT_MARKER         = 53563,
@@ -51,6 +54,42 @@ enum PaladinSpells
     SPELL_PALADIN_ITEM_HEALING_TRANCE            = 37706,
     SPELL_PALADIN_RIGHTEOUS_DEFENSE_TAUNT        = 31790,
     SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
+};
+
+class spell_pal_judgment : public SpellScriptLoader
+{
+public:
+    spell_pal_judgment() : SpellScriptLoader("spell_pal_judgment") { }
+
+    class spell_pal_judgment_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_judgment_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_TALENT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_TALENT))
+                GetCaster()->CastSpell(GetCaster(), SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_judgment_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            
+        }
+    }; 
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pal_judgment_SpellScript();
+    }
 };
 
 /*
@@ -764,6 +803,7 @@ public:
 
 void AddSC_paladin_spell_scripts()
 {
+    new spell_pal_judgment();
     //new spell_pal_ardent_defender();
     new spell_pal_aura_mastery();
     new spell_pal_aura_mastery_immune();
