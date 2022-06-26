@@ -17,6 +17,11 @@
 
 enum PaladinSpells
 {
+    SPELL_PALADIN_SELFLESS_HEALER_TALENT         = 85804,
+    SPELL_PALADIN_SELFLESS_HEALER_BUFF           = 114250,
+    SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE       = 148502,
+    SPELL_PALADIN_SELFLESS_HEALER_CHECKER        = 128863,
+
     SPELL_PALADIN_LONG_ARM_OF_THE_LAW_TALENT     = 87172,
     SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF  = 87173,
 
@@ -42,6 +47,111 @@ enum PaladinSpells
     SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
 };
 
+class spell_pal_holy_radiance : public SpellScriptLoader
+{
+public:
+    spell_pal_holy_radiance() : SpellScriptLoader("spell_pal_holy_radiance") { }
+    class spell_pal_holy_radiance_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_holy_radiance_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_BUFF) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+                return false;
+            return true;
+        }
+        void HandleRemoveAura(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+            {
+                GetCaster()->RemoveAura(SPELL_PALADIN_SELFLESS_HEALER_BUFF);
+                GetCaster()->RemoveAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER);
+            }
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_holy_radiance_SpellScript::HandleRemoveAura, EFFECT_1, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pal_holy_radiance_SpellScript();
+    }
+};
+
+class spell_pal_divine_light : public SpellScriptLoader
+{
+public:
+    spell_pal_divine_light() : SpellScriptLoader("spell_pal_divine_light") { }
+    class spell_pal_divine_light_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_divine_light_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_BUFF) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+                return false;
+            return true;
+        }
+        void HandleRemoveAura(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+            {
+                GetCaster()->RemoveAura(SPELL_PALADIN_SELFLESS_HEALER_BUFF);
+                GetCaster()->RemoveAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER);
+            }
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_divine_light_SpellScript::HandleRemoveAura, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pal_divine_light_SpellScript();
+    }
+};
+
+class spell_pal_flash_of_light : public SpellScriptLoader
+{
+public:
+    spell_pal_flash_of_light() : SpellScriptLoader("spell_pal_flash_of_light") { }
+    class spell_pal_flash_of_light_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_flash_of_light_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_BUFF) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+                return false;
+            return true;
+        }
+        void HandleRemoveAura(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+            {
+                GetCaster()->RemoveAura(SPELL_PALADIN_SELFLESS_HEALER_BUFF);
+                GetCaster()->RemoveAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER);
+            }
+        }
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_flash_of_light_SpellScript::HandleRemoveAura, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pal_flash_of_light_SpellScript();
+    }
+};
+
 class spell_pal_judgment : public SpellScriptLoader
 {
 public:
@@ -54,7 +164,10 @@ public:
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_TALENT) ||
-                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF))
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_TALENT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_BUFF) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE))
                 return false;
             return true;
         }
@@ -63,6 +176,11 @@ public:
         {
             if (GetCaster()->HasAura(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_TALENT))
                 GetCaster()->CastSpell(GetCaster(), SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF);
+            
+            if (GetCaster()->HasAura(SPELL_PALADIN_SELFLESS_HEALER_TALENT))
+            {
+                GetCaster()->CastSpell(GetCaster(), SPELL_PALADIN_SELFLESS_HEALER_CHECKER);
+            }
         }
 
         void Register() override
@@ -77,6 +195,48 @@ public:
         return new spell_pal_judgment_SpellScript();
     }
 };
+
+class spell_pal_selfless_healer : public SpellScriptLoader
+{
+public:
+    spell_pal_selfless_healer() : SpellScriptLoader("spell_pal_selfless_healer") { }
+    class spell_pal_selfless_healer_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_selfless_healer_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_BUFF) || 
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+                return false;
+            return true;
+        }
+
+        void HandleEffectStackProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            
+            if (!GetTarget()->HasAura(SPELL_PALADIN_SELFLESS_HEALER_CHECKER))
+                return;
+
+            GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_SELFLESS_HEALER_BUFF);
+            
+            if (GetTarget()->GetAffectingPlayer()->GetTalentSpecialization(SPEC_PALADIN_HOLY))
+                GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE);
+                
+        }
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_pal_selfless_healer_AuraScript::HandleEffectStackProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_pal_selfless_healer_AuraScript();
+    }
+};
+
 
 /*
 // 31850 - Ardent Defender
@@ -789,7 +949,11 @@ public:
 
 void AddSC_paladin_spell_scripts()
 {
+    new spell_pal_holy_radiance();
+    new spell_pal_divine_light();
+    new spell_pal_flash_of_light();
     new spell_pal_judgment();
+    new spell_pal_selfless_healer();
     //new spell_pal_ardent_defender();
     new spell_pal_aura_mastery();
     new spell_pal_aura_mastery_immune();
