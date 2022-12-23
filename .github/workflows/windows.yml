@@ -1,0 +1,97 @@
+name: windows-build
+
+on:
+  push:
+    branches: [ main, trunk ]
+    paths-ignore:
+      - 'sql/**'
+      
+concurrency:
+  group: ${{ github.head_ref }} || concat(${{ github.ref }}, ${{ github.workflow }})
+  cancel-in-progress: true
+
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  REPO_DIR : ${{github.workspace}}
+  BUILD_DIR: ${{github.workspace}}/bin/builddir
+    
+jobs:
+  build:
+    runs-on: windows-2019
+    
+    steps:
+    #git checkout
+    - uses: actions/checkout@v2
+
+    - uses: FranzDiebold/github-env-vars-action@v2
+    - name: Create Build Environment
+      run: |
+        
+        echo "ARCHIVE_FILENAME=$env:CI_REPOSITORY_NAME-${{matrix.TYPE}}-$env:CI_SHA_SHORT.zip" >> $env:GITHUB_ENV
+        cmake -E make_directory ${{ env.BUILD_DIR }}
+    # install dependencies
+            
+    - name: windows dependencies
+      #Sets versions for ACE
+      #env:
+      #  ACE_VERSION: 6.5.11
+      #  ACE_VERSION2: 6_5_11
+
+      run: |
+        #make
+        choco install -y make
+        #cmake
+        choco install -y cmake
+        #openssl
+        choco install -y openssl
+      #git bash shell
+      shell: bash
+
+    #build and install
+    - name: windows build & install
+      run: |
+        cd $GITHUB_WORKSPACE
+        
+        mkdir -p build && cd build
+        cmake .. -DTOOLS=ON-A x64
+        cmake --build . --config RelWithDebInfo --parallel 4
+      #git bash shell
+      shell: bash
+    - name: Create Upload File Name
+      run: |
+          echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $env:GITHUB_ENV
+    - name: Archive files
+      run: |
+          #data is in Release folder
+          cd ${{github.workspace}}/build/bin
+          dir
+          copy c:/mysql/lib/libmysql.dll ${{github.workspace}}/build/bin/RelWithDebInfo/libmysql.dll
+          copy "c:/Program Files/OpenSSL-Win64/bin/libssl-1_1-x64.dll" ${{github.workspace}}/build/bin/RelWithDebInfo/libssl-1_1-x64.dll
+          copy "c:/Program Files/OpenSSL-Win64/bin/libcrypto-1_1-x64.dll" ${{github.workspace}}/build/bin/RelWithDebInfo/libcrypto-1_1-x64.dll
+          7z a -tzip ${{env.ARCHIVE_FILENAME}} RelWithDebInfo
+    - name: Archive this artefact
+      uses: actions/upload-artifact@v2
+      with:
+          name: snapshot-devbuild
+          path: "${{github.workspace}}/build/bin/${{env.ARCHIVE_FILENAME}}"
+
+    - name: Download artifact snapshot-Release
+      uses: actions/download-artifact@v1
+      with:
+        name: snapshot-devbuild
+        path: all_snapshots
+
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+    - name: Upload snapshot
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build(${{ steps.date.outputs.date }})"
+        files: all_snapshots
