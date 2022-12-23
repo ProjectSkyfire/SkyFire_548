@@ -8,6 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
+    - uses: actions/checkout@v2
+    - name: Dependencies
     - name: Setup
       run: |
         mkdir bin
@@ -17,7 +19,7 @@ jobs:
     - name: Build
       run: |
         cd bin
-        make -j 4 -k && make install
+        make -k && make install
     #- name: Check executables
     #  run: |
     #    cd bin/check_install/bin
