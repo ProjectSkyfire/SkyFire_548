@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Dependencies
-      run: |
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
     - name: Setup
       run: |
         mkdir bin
