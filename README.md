@@ -1,4 +1,5 @@
 # ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
+[![windows-build](https://github.com/ProjectSkyfire/SkyFire_548/actions/workflows/windows.yml/badge.svg)](https://github.com/ProjectSkyfire/SkyFire_548/actions/workflows/windows.yml)
 # [![CodeFactor](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548/badge)](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548)
 # [![Codacy Badge](https://app.codacy.com/project/badge/Grade/57a11392c3ed42dcae439669e893565f)](https://www.codacy.com/gh/ProjectSkyfire/SkyFire_548/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ProjectSkyfire/SkyFire_548&amp;utm_campaign=Badge_Grade)
 
