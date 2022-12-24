@@ -72,7 +72,7 @@ Fixes are submitted as pull requests via Github.
 ## Copyright
 License: GPL 3.0
 
-Read file [COPYING](COPYING.md)
+Read file [LICENSE](LICENSE.md)
 
 ## Authors &amp; Contributors
 Read file [THANKS](THANKS.md)
