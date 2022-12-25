@@ -106,7 +106,7 @@ extern int main(int argc, char** argv)
     SF_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
     SF_LOG_INFO("server.authserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
     SF_LOG_INFO("server.authserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
-    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2021(c) Open-sourced Game Emulation ");
+    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2023(c) Open-sourced Game Emulation ");
     SF_LOG_INFO("server.authserver", "           <http://www.projectskyfire.org/> \n");
 
     SF_LOG_INFO("server.authserver", "Using configuration file %s.", configFile);
