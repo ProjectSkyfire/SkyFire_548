@@ -1,0 +1,27 @@
+name: GCC
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Dependencies
+    - name: Setup
+      run: |
+        mkdir bin
+        cd bin
+        cmake ../ -DCMAKE_INSTALL_PREFIX=check_install
+        cd ..
+    - name: Build
+      run: |
+        cd bin
+        make -k && make install
+    #- name: Check executables
+    #  run: |
+    #    cd bin/check_install/bin
+    #    ./authserver --version
+    #    ./worldserver --version
