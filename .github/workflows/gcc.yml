@@ -2,6 +2,8 @@ name: G++
 
 on:
   push:
+    branches: [ main, trunk ]
+
   pull_request:
 
 jobs:
