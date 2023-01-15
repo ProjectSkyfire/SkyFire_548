@@ -1,4 +1,4 @@
-name: GCC
+name: G++
 
 on:
   push:
@@ -6,11 +6,22 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Dependencies
+      run: | 
+        sudo rm -rf /var/lib/dpkg/lock
+        sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
+        sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
+        sudo apt update
+        sudo apt-get update
+        sudo apt-get install libncurses5-dev libace-dev
+        sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
+        sudo apt-get install openssl libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
+
     - name: Setup
       run: |
         mkdir build
