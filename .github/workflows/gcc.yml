@@ -36,7 +36,7 @@ jobs:
         sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
         sudo apt-get install libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
 
-        sudo apt-get install openssl libssl-dev
+        sudo apt-get install -y openssl libssl-dev
 
     - name: Setup
       run: |
