@@ -1,4 +1,4 @@
-name: G++9
+name: G++11
 
 on:
   push:
