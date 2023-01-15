@@ -32,7 +32,7 @@ jobs:
         sudo apt update
         sudo apt-get update
       
-        sudo apt-get install openssl libssl1.1 libssl-dev
+        #sudo apt-get install openssl libssl1.1 libssl-dev
         
         sudo apt-get install libncurses5-dev libace-dev
         sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
