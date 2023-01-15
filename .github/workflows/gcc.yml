@@ -13,41 +13,37 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: OpenSSL
-      run: |
-         # check version pre
-        /usr/local/ssl/bin/openssl <<< version
         
+    - name: Dependencies
+      run: | 
+        # MySQL
+        sudo rm -rf /var/lib/dpkg/lock
+        sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
+        sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
+
+        #OpenSSL
         #sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
         #sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
         
         #sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1f-1ubuntu2_amd64.deb
         #sudo dpkg -i libssl-dev_1.1.1f-1ubuntu2_amd64.deb
 
-        # install openssl
+        #install openssl
         wget https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/openssl/1.1.1l-1ubuntu1.6/openssl_1.1.1l.orig.tar.gz
         tar -xvf openssl_1.1.1l.orig.tar.gz
         cd /tmp/openssl-1.1.1l/
         ./config shared enable-ec_nistp_64_gcc_128 -Wl,-rpath=/usr/local/ssl/lib --prefix=/usr/local/ssl
         make -j4
         sudo make install
-
-        # check version post
-        /usr/local/ssl/bin/openssl <<< version
-        
-        sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.1.1f-1ubuntu2_amd64.deb
-        sudo dpkg -i openssl_1.1.1f-1ubuntu2_amd64.deb
+      
+        #sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.1.1f-1ubuntu2_amd64.deb
+        #sudo dpkg -i openssl_1.1.1f-1ubuntu2_amd64.deb
         
         sudo apt update
         sudo apt-get update
       
-        sudo apt-get install openssl libssl1.1 libssl-dev
+        #sudo apt-get install openssl libssl1.1 libssl-dev1.1
 
-    - name: Dependencies
-      run: | 
-        sudo rm -rf /var/lib/dpkg/lock
-        sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
-        sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
 
         sudo apt update
         sudo apt-get update
