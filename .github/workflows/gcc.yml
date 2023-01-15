@@ -6,20 +6,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+
     steps:
     - uses: actions/checkout@v2
     - name: Dependencies
     - name: Setup
       run: |
-        mkdir bin
-        cd bin
-        cmake ../ -DCMAKE_INSTALL_PREFIX=check_install
-        cd ..
-    - name: Build
-      run: |
-        cd bin
-        make -k && make install
+        mkdir build
+        cd build
+        cmake ../ -DSCRIPTS=1 -DTOOLS=0 -DCMAKE_BUILD_TYPE=Release
+        make -j2
+
     #- name: Check executables
     #  run: |
     #    cd bin/check_install/bin
