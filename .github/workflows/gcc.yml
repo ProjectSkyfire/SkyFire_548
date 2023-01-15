@@ -27,12 +27,12 @@ jobs:
         # install downloaded binary packages 
         sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
         sudo dpkg -i libssl-dev_1.1.1f-1ubuntu2.16_amd64.deb
-        sudo dpkg -i -y openssl_1.1.1f-1ubuntu2.16_amd64.deb
+        sudo dpkg -i openssl_1.1.1f-1ubuntu2.16_amd64.deb
         
         sudo apt update
         sudo apt-get update
         
-        sudo apt-get install openssl libssl-dev
+        sudo apt-get install -y openssl libssl-dev
         
         sudo apt-get install libncurses5-dev libace-dev
         sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
