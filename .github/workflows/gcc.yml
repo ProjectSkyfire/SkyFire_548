@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -31,13 +31,8 @@ jobs:
         sudo apt update
         sudo apt-get update
       
-        #sudo apt-get install libssl1.1 libssl-dev1.1
+        sudo apt-get install openssl libssl1.1 libssl-dev1.1
 
-        sudo apt update
-        sudo apt-get update
-      
-        
-        
         sudo apt-get install libncurses5-dev libace-dev
         sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
         sudo apt-get install libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
@@ -48,7 +43,7 @@ jobs:
         mkdir build
         cd build
         cmake ../ -DSCRIPTS=1 -DTOOLS=0 -DCMAKE_BUILD_TYPE=Release
-        make -j2
+        make -j4
 
     #- name: Check executables
     #  run: |
