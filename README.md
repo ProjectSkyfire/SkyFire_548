@@ -1,4 +1,6 @@
 # ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
+
+## Build Status
 [![windows-build](https://github.com/ProjectSkyfire/SkyFire_548/actions/workflows/windows.yml/badge.svg)](https://github.com/ProjectSkyfire/SkyFire_548/actions/workflows/windows.yml)
 [![GCC](https://github.com/ProjectSkyfire/SkyFire_548/actions/workflows/gcc.yml/badge.svg)](https://github.com/ProjectSkyfire/SkyFire_548/actions/workflows/gcc.yml)
 # [![CodeFactor](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548/badge)](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548)
@@ -28,9 +30,6 @@ For further information on the SkyFire project, please visit our project website
 
 ## Client Patch
 [SkyFire-Community-Tools](https://github.com/ProjectSkyfire/SkyFire-Community-Tools).
-
-## Build Status
-# [![Build Status](https://travis-ci.org/ProjectSkyfire/SkyFire_548.png)](https://travis-ci.org/ProjectSkyfire/SkyFire_548)
 
 ## Requirements
 + Platform/Architecture:
