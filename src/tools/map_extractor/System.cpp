@@ -10,6 +10,7 @@
 #include <list>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #ifdef _WIN32
 #include "direct.h"
@@ -64,11 +65,12 @@ uint32 maxAreaId = 0;
 enum Extract
 {
     EXTRACT_MAP = 1,
-    EXTRACT_DBC = 2
+    EXTRACT_DBC = 2,
+    EXTRACT_CAMERA = 4
 };
 
 // Select data for extract
-int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC;
+int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC | EXTRACT_CAMERA;
 
 // This option allow limit minimum height to some value (Allow save some memory)
 bool  CONF_allow_height_limit = true;
@@ -157,7 +159,7 @@ void Usage(char const* prg)
         "%s -[var] [value]\n"\
         "-i set input path\n"\
         "-o set output path\n"\
-        "-e extract only MAP(1)/DBC(2) - standard: both(3)\n"\
+        "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(7)\n"\
         "-f height stored as int (less map size but lost some accuracy) 1 by default\n"\
         "-b target build (default %u)\n"\
         "Example: %s -f 0 -i \"c:\\games\\game\"", prg, CONF_TargetBuild, prg);
@@ -201,7 +203,7 @@ void HandleArgs(int argc, char* arg[])
                 if (c + 1 < argc)                            // all ok
                 {
                     CONF_extract = atoi(arg[c++ + 1]);
-                    if (!(CONF_extract > 0 && CONF_extract < 4))
+                    if (!(CONF_extract > 0 && CONF_extract < 8))
                         Usage(arg[0]);
                 }
                 else
@@ -1094,6 +1096,73 @@ void ExtractDBCFiles(int l, bool basicLocale)
     printf("Extracted %u DBC files\n\n", count);
 }
 
+void ExtractCameraFiles(int locale, bool basicLocale)
+{
+    printf("Extracting camera files...\n");
+    HANDLE dbcFile;
+    if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\CinematicCamera.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    {
+        printf("Fatal error: Cannot find Map.dbc in archive!\n");
+        exit(1);
+    }
+
+    DBCFile camdbc(dbcFile);
+
+    if (!camdbc.open())
+    {
+        printf("Unable to open CinematicCamera.dbc. Camera extract aborted.\n");
+        return;
+    }
+
+    // get camera file list from DBC
+    std::vector<std::string> camerafiles;
+    size_t cam_count = camdbc.getRecordCount();
+
+    for (size_t i = 0; i < cam_count; ++i)
+    {
+        std::string camFile(camdbc.getRecord(i).getString(1));
+        size_t loc = camFile.find(".mdx");
+        if (loc != std::string::npos)
+            camFile.replace(loc, 4, ".m2");
+        camerafiles.push_back(std::string(camFile));
+    }
+    SFileCloseFile(dbcFile);
+
+    std::string path = output_path;
+    path += "/cameras/";
+    CreateDir(path);
+    if (!basicLocale)
+    {
+        path += Locales[locale];
+        path += "/";
+        CreateDir(path);
+    }
+
+    // extract M2s
+    uint32 count = 0;
+    for (std::string thisFile : camerafiles)
+    {
+        std::string filename = path;
+        HANDLE dbcFile = NULL;
+        filename += (thisFile.c_str() + strlen("Cameras\\"));
+
+        if (FileExists(filename.c_str()))
+            continue;
+
+        if (!SFileOpenFileEx(WorldMpq, thisFile.c_str(), SFILE_OPEN_PATCHED_FILE, &dbcFile))
+        {
+            printf("Unable to open file %s in the archive\n", thisFile.c_str());
+            continue;
+        }
+
+        if (ExtractFile(dbcFile, filename.c_str()))
+            ++count;
+
+        SFileCloseFile(dbcFile);
+    }
+    printf("Extracted %u camera files\n", count);
+}
+
 void ExtractDB2Files(int l, bool basicLocale)
 {
     printf("Extracting db2 files...\n");
@@ -1380,6 +1449,20 @@ int main(int argc, char * arg[])
     {
         printf("No locales detected\n");
         return 0;
+    }
+
+    if (CONF_extract & EXTRACT_CAMERA)
+    {
+        printf("Using locale: %s\n", Locales[FirstLocale]);
+
+        // Open MPQs
+        LoadLocaleMPQFile(FirstLocale);
+        LoadCommonMPQFiles(build);
+
+        ExtractCameraFiles(FirstLocale, true);
+        // Close MPQs
+        SFileCloseArchive(WorldMpq);
+        SFileCloseArchive(LocaleMpq);
     }
 
     if (CONF_extract & EXTRACT_MAP)

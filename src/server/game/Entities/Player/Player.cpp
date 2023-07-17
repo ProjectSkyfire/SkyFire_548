@@ -715,6 +715,10 @@ Player::Player(WorldSession* session): Unit(true)
     _activeCheats = CHEAT_NONE;
     _maxPersonalArenaRate = 0;
 
+    cinematicSequence = NULL;
+    inCinematic = false;
+    cinematicClientStartTime = 0;
+
     memset(_voidStorageItems, 0, VOID_STORAGE_MAX_SLOT * sizeof(VoidStorageItem*));
     memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
 
@@ -1402,6 +1406,27 @@ void Player::Update(uint32 p_time)
 {
     if (!IsInWorld())
         return;
+
+    if (inCinematic && cinematicSequence)
+    {
+        bool l_StartedAtClient = getMSTime() > cinematicClientStartTime;
+        uint32 l_Time = getMSTime() - cinematicClientStartTime;
+
+        if (l_StartedAtClient)
+        {
+            if (l_Time > cinematicSequence->Duration)
+                StopCinematic();
+            else if (l_StartedAtClient)
+            {
+                Position l_NewPosition;
+                cinematicSequence->GetPositionAtTime(l_Time, &l_NewPosition.m_positionX, &l_NewPosition.m_positionY, &l_NewPosition.m_positionZ);
+
+                Unit::UpdatePosition(l_NewPosition.m_positionX, l_NewPosition.m_positionY, l_NewPosition.m_positionZ, 0, true);
+                UpdateObjectVisibility();
+                SetFall(false);
+            }
+        }
+    }
 
     // undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
@@ -6864,11 +6889,49 @@ void Player::SendDirectMessage(WorldPacket* data)
     m_session->SendPacket(data);
 }
 
+void Player::StopCinematic()
+{
+    if (cinematicSequence && IsInWorld())
+    {
+        cinematicSequence         = NULL;
+        inCinematic               = false;
+        cinematicClientStartTime  = 0;
+
+        Unit::UpdatePosition(cinematicStartX, cinematicStartY, cinematicStartZ, cinematicStartO, true);
+
+        getHostileRefManager().setOnlineOfflineState(true);
+
+        SetFall(true);
+
+        RemoveAura(60190);
+    }
+}
 void Player::SendCinematicStart(uint32 CinematicSequenceId)
 {
     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
     data << uint32(CinematicSequenceId);
     SendDirectMessage(&data);
+
+    StopCinematic();
+
+    cinematicSequence = const_cast<CinematicSequence*>(sCinematicSequenceMgr->GetSequence(CinematicSequenceId));
+
+    if (cinematicSequence)
+    {
+        cinematicClientStartTime  = (getMSTime() - GetSession()->GetLatency()) + 1500;
+        inCinematic               = true;
+
+        cinematicStartX = m_positionX;
+        cinematicStartY = m_positionY;
+        cinematicStartZ = m_positionZ;
+        cinematicStartO = GetOrientation();
+
+        getHostileRefManager().setOnlineOfflineState(false);
+
+        SetFall(false);
+
+        AddAura(60190, this);
+    }
 }
 
 void Player::SendMovieStart(uint32 MovieId)

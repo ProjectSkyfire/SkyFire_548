@@ -6,6 +6,7 @@
 #ifndef SF_PLAYER_H
 #define SF_PLAYER_H
 
+#include "CinematicPathMgr.h"
 #include "DBCStores.h"
 #include "GroupReference.h"
 #include "MapReference.h"
@@ -2865,7 +2866,10 @@ class Player : public Unit, public GridObject<Player>
     void ResummonPetTemporaryUnSummonedIfAny();
     bool IsPetNeedBeTemporaryUnsummoned() const;
 
+    void StopCinematic();
     void SendCinematicStart(uint32 CinematicSequenceId);
+    bool IsInCinematic() const { return inCinematic && cinematicSequence; }
+
     void SendMovieStart(uint32 MovieId);
 
     /*********************************************************/
@@ -3548,6 +3552,12 @@ class Player : public Unit, public GridObject<Player>
     uint32 _maxPersonalArenaRate;
 
     uint32 _ConquestCurrencytotalWeekCap;
+
+    CinematicSequence * cinematicSequence;
+    bool                inCinematic;
+    uint32              cinematicClientStartTime;
+    float               cinematicStartX, cinematicStartY, cinematicStartZ, cinematicStartO;
+    bool                m_FlyingBeforeCinematic;
 
     BattlePetMgr* m_battlePetMgr;
 };

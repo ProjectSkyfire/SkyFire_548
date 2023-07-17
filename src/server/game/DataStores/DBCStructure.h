@@ -892,25 +892,22 @@ struct ChrSpecializationEntry
     // char* unkName2                                       // 13
 };
 
-/* not used
 struct CinematicCameraEntry
 {
     uint32      id;                                         // 0 index
     char*       filename;                                   // 1
     uint32      soundid;                                    // 2 in SoundEntries.dbc or 0
-    float       start_x;                                    // 3
-    float       start_y;                                    // 4
-    float       start_z;                                    // 5
-    float       unk6;                                       // 6 speed?
+    float       EndPosX;                                    // 3
+    float       EndPosY;                                    // 4
+    float       EndPosZ;                                    // 5
+    float       GlobalRotation;                             // 6
 };
-*/
 
 struct CinematicSequencesEntry
 {
     uint32      Id;                                         // 0 index
     //uint32      unk1;                                     // 1 always 0
-    //uint32      cinematicCamera;                          // 2 id in CinematicCamera.dbc
-                                                            // 3-9 always 0
+    uint32      cinematicCamera;                            // 2 id in CinematicCamera.dbc
 };
 
 struct CreatureDisplayInfoEntry
