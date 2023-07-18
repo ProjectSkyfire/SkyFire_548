@@ -629,6 +629,15 @@ void Map::Update(const uint32 t_diff)
         player->Update(t_diff);
 
         VisitNearbyCellsOf(player, grid_object_update, world_object_update);
+
+        // If player is using far sight, visit that object too
+        if (WorldObject* viewPoint = player->GetViewpoint())
+        {
+            if (Creature* viewCreature = viewPoint->ToCreature())
+                VisitNearbyCellsOf(viewCreature, grid_object_update, world_object_update);
+            else if (DynamicObject* viewObject = viewPoint->ToDynObject())
+                VisitNearbyCellsOf(viewObject, grid_object_update, world_object_update);
+        }
     }
 
     // non-player active objects, increasing iterator in the loop in case of object removal

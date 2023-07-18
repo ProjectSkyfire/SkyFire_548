@@ -15,6 +15,7 @@ file(GLOB_RECURSE sources_Boost Boost/*.cpp Boost/*.h)
 file(GLOB_RECURSE sources_BlackMarket BlackMarket/*.cpp BlackMarket/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
 file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
+file(GLOB_RECURSE sources_Cinematic Cinematic/*.cpp Cinematic/*.h)
 file(GLOB_RECURSE sources_Combat Combat/*.cpp Combat/*.h)
 file(GLOB_RECURSE sources_Conditions Conditions/*.cpp Conditions/*.h)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
@@ -60,6 +61,7 @@ source_group(Boost FILES ${sources_Boost})
 source_group(BlackMarket FILES ${sources_BlackMarket})
 source_group(Calendar FILES ${sources_Calendar})
 source_group(Chat FILES ${sources_Chat})
+source_group(Cinematic FILES ${sources_Cinematic})
 source_group(Combat FILES ${sources_Combat})
 source_group(Conditions FILES ${sources_Conditions})
 source_group(DataStores FILES ${sources_DataStores})
@@ -112,6 +114,7 @@ set(game_STAT_SRCS
   ${sources_BlackMarket}
   ${sources_Calendar}
   ${sources_Chat}
+  ${sources_Cinematic}
   ${sources_Combat}
   ${sources_Conditions}
   ${sources_DataStores}
@@ -188,6 +191,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Calendar
   ${CMAKE_CURRENT_SOURCE_DIR}/Chat
   ${CMAKE_CURRENT_SOURCE_DIR}/Chat/Channels
+  ${CMAKE_CURRENT_SOURCE_DIR}/Cinematic
   ${CMAKE_CURRENT_SOURCE_DIR}/Combat
   ${CMAKE_CURRENT_SOURCE_DIR}/Conditions
   ${CMAKE_CURRENT_SOURCE_DIR}/DataStores

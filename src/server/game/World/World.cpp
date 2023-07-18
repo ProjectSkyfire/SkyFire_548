@@ -11,6 +11,7 @@
 #include "Memory.h"
 #include "DatabaseEnv.h"
 #include "Config.h"
+#include "CinematicPathMgr.h"
 #include "SystemConfig.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -1862,6 +1863,10 @@ void World::SetInitialWorldSettings()
 
     SF_LOG_INFO("server.loading", "Loading Battle Pet quality data...");
     sObjectMgr->LoadBattlePetQualityData();
+
+
+    SF_LOG_INFO("server.loading", "Loading Cinematic path ...");
+    sCinematicSequenceMgr->Load();
 
     ///- Initialize game time and timers
     SF_LOG_INFO("server.loading", "Initialize game time and timers");
