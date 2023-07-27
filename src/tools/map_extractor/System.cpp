@@ -89,6 +89,7 @@ uint32 CONF_TargetBuild = 18273;              // 5.4.8 18273 -- current build is
 char const* CONF_mpq_list[] =
 {
     "world.MPQ",
+    "model.MPQ",
     "misc.MPQ",
     "expansion1.MPQ",
     "expansion2.MPQ",
@@ -1102,7 +1103,7 @@ void ExtractCameraFiles(int locale, bool basicLocale)
     HANDLE dbcFile;
     if (!SFileOpenFileEx(LocaleMpq, "DBFilesClient\\CinematicCamera.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
     {
-        printf("Fatal error: Cannot find Map.dbc in archive!\n");
+        printf("Fatal error: Cannot find CinematicCamera.dbc in archive!\n");
         exit(1);
     }
 
@@ -1459,7 +1460,9 @@ int main(int argc, char * arg[])
         LoadLocaleMPQFile(FirstLocale);
         LoadCommonMPQFiles(build);
 
+        // Extract cameras
         ExtractCameraFiles(FirstLocale, true);
+
         // Close MPQs
         SFileCloseArchive(WorldMpq);
         SFileCloseArchive(LocaleMpq);
