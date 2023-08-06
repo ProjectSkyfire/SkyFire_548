@@ -1578,8 +1578,11 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recvData)
 
     std::string msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
 
-    WorldPacket data(SMSG_WHOIS, msg.size()+1);
-    data << msg;
+    WorldPacket data(SMSG_WHOIS, msg.size() + 1);
+    data.WriteBits(msg.size(), 11);
+    data.FlushBits();
+    if (msg.size())
+        data.WriteString(msg);
     SendPacket(&data);
 
     SF_LOG_DEBUG("network", "Received whois command from player %s for character %s",
