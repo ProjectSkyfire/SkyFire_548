@@ -3,14 +3,14 @@
 # See COPYRIGHT file for Copyright information
 #
 
-# Set projectname (must be done AFTER setting configurationtypes)
-project(Project_Skyfire)
-
 if( UNIX )
   cmake_minimum_required(VERSION 3.16.3)
 else()
-  cmake_minimum_required(VERSION 3.21.1)
+  cmake_minimum_required(VERSION 3.28.0)
 endif()
+
+# Set projectname (must be done AFTER setting configurationtypes)
+project(Project_Skyfire)
 
 # CMake policies (can not be handled elsewhere)
 cmake_policy(SET CMP0005 OLD)
