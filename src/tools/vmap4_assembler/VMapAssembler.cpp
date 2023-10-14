@@ -2,16 +2,40 @@
 * This file is part of Project SkyFire https://www.projectskyfire.org. 
 * See LICENSE.md file for Copyright information
 */
- 
+
+#ifdef _WIN32
+  #include "direct.h"
+#endif
+
 #include <string>
 #include <iostream>
 
 #include "TileAssembler.h"
 
+void CreateDir(std::string const& path)
+{
+    if (chdir(path.c_str()) == 0)
+    {
+        chdir("../");
+        return;
+    }
+
+#ifdef _WIN32
+    _mkdir(path.c_str());
+#else
+    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO); // 0777
+#endif
+}
+
 int main(int argc, char* argv[])
 {
     std::string src = "Buildings";
     std::string dest = "vmaps";
+
+    std::string path = "./" + dest + "/";
+    
+    CreateDir(path);
+
     if(argc > 3)
     {
         //printf("\nusage: %s <raw data dir> <vmap dest dir> [config file name]\n", argv[0]);
