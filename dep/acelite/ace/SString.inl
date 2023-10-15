@@ -1,7 +1,5 @@
 // -*- C++ -*-
-// Include ACE.h only if it hasn't already been included, e.g., if
-// ACE_TEMPLATES_REQUIRE_SOURCE, ACE.h won't have been pulled in by
-// String_Base.cpp.
+// Include ACE.h only if it hasn't already been included
 #ifndef ACE_ACE_H
 #  include "ace/ACE.h"
 #endif /* !ACE_ACE_H */
@@ -121,7 +119,6 @@ ACE_SString::operator== (const ACE_SString &s) const
 }
 
 // Less than comparison operator.
-
 ACE_INLINE bool
 ACE_SString::operator < (const ACE_SString &s) const
 {

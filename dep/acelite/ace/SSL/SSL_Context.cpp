@@ -89,7 +89,7 @@ extern "C"
   // Return the current thread ID.  OpenSSL uses this on platforms
   // that need it.
   unsigned long
-  ACE_SSL_THREAD_ID_NAME (void)
+  ACE_SSL_THREAD_ID_NAME ()
   {
     return (unsigned long) ACE_VERSIONED_NAMESPACE_NAME::ACE_OS::thr_self ();
   }
@@ -105,7 +105,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_SSL_Context::lock_type * ACE_SSL_Context::locks_ = 0;
 #endif  /* ACE_HAS_THREADS  && (OPENSSL_VERSION_NUMBER < 0x10100000L) */
 
-ACE_SSL_Context::ACE_SSL_Context (void)
+ACE_SSL_Context::ACE_SSL_Context ()
   : context_ (0),
     mode_ (-1),
     default_verify_mode_ (SSL_VERIFY_NONE),
@@ -117,7 +117,7 @@ ACE_SSL_Context::ACE_SSL_Context (void)
   ACE_SSL_Context::ssl_library_init ();
 }
 
-ACE_SSL_Context::~ACE_SSL_Context (void)
+ACE_SSL_Context::~ACE_SSL_Context ()
 {
   ACE_TRACE ("ACE_SSL_Context::~ACE_SSL_Context");
 
@@ -131,7 +131,7 @@ ACE_SSL_Context::~ACE_SSL_Context (void)
 }
 
 ACE_SSL_Context *
-ACE_SSL_Context::instance (void)
+ACE_SSL_Context::instance ()
 {
   ACE_TRACE ("ACE_SSL_Context::instance");
 
@@ -139,7 +139,7 @@ ACE_SSL_Context::instance (void)
 }
 
 void
-ACE_SSL_Context::close (void)
+ACE_SSL_Context::close ()
 {
   ACE_TRACE ("ACE_SSL_Context::close");
 
@@ -147,7 +147,7 @@ ACE_SSL_Context::close (void)
 }
 
 void
-ACE_SSL_Context::ssl_library_init (void)
+ACE_SSL_Context::ssl_library_init ()
 {
   ACE_TRACE ("ACE_SSL_Context::ssl_library_init");
 
@@ -214,7 +214,7 @@ ACE_SSL_Context::ssl_library_init (void)
 }
 
 void
-ACE_SSL_Context::ssl_library_fini (void)
+ACE_SSL_Context::ssl_library_fini ()
 {
   ACE_TRACE ("ACE_SSL_Context::ssl_library_fini");
 
@@ -408,8 +408,8 @@ ACE_SSL_Context::check_host (const ACE_INET_Addr &host, SSL *peerssl)
 
   char *peer = 0;
   char **peerarg = ACE::debug () ? &peer : 0;
-  int flags = X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT;
-  size_t len = ACE_OS::strlen (name);
+  int const flags = X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT;
+  size_t const len = ACE_OS::strlen (name);
 
   int const result = ::X509_check_host (cert, name, len, flags, peerarg);
 
@@ -417,7 +417,7 @@ ACE_SSL_Context::check_host (const ACE_INET_Addr &host, SSL *peerssl)
     {
       ACELIB_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("ACE (%P|%t) SSL_Context::check_host ")
-                  ACE_TEXT ("name <%C> returns %d, peer <%s>\n"),
+                  ACE_TEXT ("name <%C> returns %d, peer <%C>\n"),
                   name, result, peer));
     }
   if (peer != 0)
@@ -516,10 +516,10 @@ ACE_SSL_Context::load_trusted_ca (const char* ca_file,
         }
 
       // SSL_add_dir_cert_subjects_to_stack is defined at 0.9.8a (but not
-      // on OpenVMS or Mac Classic); it may be available earlier. Change
+      // on Mac Classic); it may be available earlier. Change
       // this comparison if so. It's still (1.0.1g) broken on windows too.
 #if defined (OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x0090801fL)
-#  if !defined (OPENSSL_SYS_VMS) && !defined (OPENSSL_SYS_MACINTOSH_CLASSIC)
+#  if !defined (OPENSSL_SYS_MACINTOSH_CLASSIC)
 #    if !defined (OPENSSL_SYS_WIN32)
 
       if (ca_dir != 0)
@@ -542,7 +542,7 @@ ACE_SSL_Context::load_trusted_ca (const char* ca_file,
             }
         }
 #    endif /* !OPENSSL_SYS_WIN32 */
-#  endif /* !OPENSSL_SYS_VMS && !OPENSSL_SYS_MACINTOSH_CLASSIC */
+#  endif /* !OPENSSL_SYS_MACINTOSH_CLASSIC */
 #endif /* OPENSSL_VERSION_NUMBER >= 0.9.8a release */
 
     }
@@ -575,7 +575,7 @@ ACE_SSL_Context::private_key (const char *file_name,
 }
 
 int
-ACE_SSL_Context::verify_private_key (void)
+ACE_SSL_Context::verify_private_key ()
 {
   ACE_TRACE ("ACE_SSL_Context::verify_private_key");
 
@@ -755,11 +755,11 @@ ACE_SSL_Context::report_error (unsigned long error_code)
 }
 
 void
-ACE_SSL_Context::report_error (void)
+ACE_SSL_Context::report_error ()
 {
   ACE_TRACE ("ACE_SSL_Context::report_error");
 
-  unsigned long err = ::ERR_get_error ();
+  unsigned long const err = ::ERR_get_error ();
   ACE_SSL_Context::report_error (err);
   ACE_OS::last_error (err);
 }
@@ -783,8 +783,8 @@ ACE_SSL_Context::dh_params (const char *file_name,
 
   {
     // Swiped from Rescorla's examples and the OpenSSL s_server.c app
-    DH * ret=0;
-    BIO * bio = 0;
+    DH * ret = nullptr;
+    BIO * bio = nullptr;
 
     if ((bio = ::BIO_new_file (this->dh_params_.file_name (), "r")) == 0)
       {

@@ -18,7 +18,7 @@
 #endif
 
 #if defined (ACE_HAS_GETIFADDRS)
-#  if defined (ACE_VXWORKS)
+#  if defined (ACE_VXWORKS) && (ACE_VXWORKS < 0x700)
 #    include /**/ <net/ifaddrs.h>
 #  else
 #    include /**/ <ifaddrs.h>
@@ -136,8 +136,8 @@ ACE_SOCK_Dgram_Mcast::dump () const
 // Constructor.
 ACE_SOCK_Dgram_Mcast::ACE_SOCK_Dgram_Mcast
   (ACE_SOCK_Dgram_Mcast::options opts)
-  :  opts_ (opts),
-     send_net_if_ (0)
+ : send_addr_ ()
+ , opts_ (opts)
 {
   ACE_TRACE ("ACE_SOCK_Dgram_Mcast::ACE_SOCK_Dgram_Mcast");
 }
@@ -466,7 +466,6 @@ ACE_SOCK_Dgram_Mcast::subscribe_ifs (const ACE_INET_Addr &mcast_addr,
     }
 
   return 0;
-
 }
 
 int
@@ -626,10 +625,7 @@ ACE_SOCK_Dgram_Mcast::unsubscribe_ifs (const ACE_INET_Addr &mcast_addr,
         {
           size_t nr_unsubscribed = 0;
 # if defined(ACE_LINUX)
-
-          struct if_nameindex *intf;
-
-          intf = ACE_OS::if_nameindex ();
+          struct if_nameindex *intf = ACE_OS::if_nameindex ();
 
           if (intf == 0)
             return -1;
@@ -694,8 +690,6 @@ ACE_SOCK_Dgram_Mcast::unsubscribe_ifs (const ACE_INET_Addr &mcast_addr,
             }
 
           return 1;
-
-
         }
       else
         {
@@ -746,7 +740,6 @@ ACE_SOCK_Dgram_Mcast::unsubscribe_ifs (const ACE_INET_Addr &mcast_addr,
             }
 
           return 1;
-
         }
 #else /* ACE_HAS_IPV6 */
       // Unsubscribe on all local multicast-capable network interfaces, by

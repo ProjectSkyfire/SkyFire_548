@@ -36,7 +36,7 @@ class ACE_Free_List
 {
 public:
   /// Destructor - removes all the elements from the free_list.
-  virtual ~ACE_Free_List ();
+  virtual ~ACE_Free_List () = default;
 
   /// Inserts an element onto the free list (if it isn't past the high
   /// water mark).
@@ -137,13 +137,7 @@ private:
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "ace/Free_List.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma implementation ("Free_List.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #include /**/ "ace/post.h"
 #endif /* ACE_FREE_LIST_H */

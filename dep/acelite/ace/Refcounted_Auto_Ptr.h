@@ -45,7 +45,7 @@ template <class X, class ACE_LOCK>
 class ACE_Refcounted_Auto_Ptr
 {
   /// Used to define a proper boolean conversion for "if (sp) ..."
-  static void unspecified_bool(ACE_Refcounted_Auto_Ptr<X, ACE_LOCK>***){};
+  static void unspecified_bool(ACE_Refcounted_Auto_Ptr<X, ACE_LOCK>***){}
   typedef void (*unspecified_bool_type)(ACE_Refcounted_Auto_Ptr<X, ACE_LOCK>***);
 
 public:
@@ -183,13 +183,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include "ace/Refcounted_Auto_Ptr.inl"
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "ace/Refcounted_Auto_Ptr.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma implementation ("Refcounted_Auto_Ptr.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #include /**/ "ace/post.h"
 

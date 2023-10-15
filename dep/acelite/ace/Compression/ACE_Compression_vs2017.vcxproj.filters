@@ -15,7 +15,11 @@
     </Filter>
     <Filter Include="Inline Files">
       <UniqueIdentifier>{763028EF-FECA-1BAD-EA06-BB371373EA04}</UniqueIdentifier>
-      <Extensions>i;ipp;inl</Extensions>
+      <Extensions>i;ipp;ixx;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{502A2050-FECA-1BAD-EA06-BB371373EA04}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -40,5 +44,10 @@
     <None Include="Compressor.inl">
       <Filter>Inline Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ACE_Compression.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

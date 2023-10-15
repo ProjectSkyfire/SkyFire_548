@@ -55,11 +55,11 @@ public:
   /// Error stack. Fixed size should suffice. Ignores any errors exceeding the size.
   typedef ACE_Fixed_Stack <ACE_TString, 10> ERROR_STACK;
 
-  /// Default construtor.
-  ACE_DLL_Handle (void);
+  /// Default constructor.
+  ACE_DLL_Handle ();
 
   /// Destructor.
-  ~ACE_DLL_Handle (void);
+  ~ACE_DLL_Handle ();
 
   /// Returns the name of the shared library (without prefixes or suffixes).
   const ACE_TCHAR *dll_name () const;
@@ -271,13 +271,13 @@ protected:
   ACE_DLL_Manager (int size = ACE_DLL_Manager::DEFAULT_SIZE);
 
   /// Destructor.
-  ~ACE_DLL_Manager (void);
+  ~ACE_DLL_Manager ();
 
   /// Allocate handle_vector_.
   int open (int size);
 
   /// Close all open dlls and deallocate memory.
-  int close (void);
+  int close ();
 
   /// Find dll in handle_vector_.
   ACE_DLL_Handle *find_dll (const ACE_TCHAR *dll_name) const;
@@ -287,7 +287,7 @@ protected:
 
 private:
   /// Close the singleton instance.
-  static void close_singleton (void);
+  static void close_singleton ();
 
   ACE_DLL_Manager (const ACE_DLL_Manager &) = delete;
   void operator= (const ACE_DLL_Manager &) = delete;
@@ -314,7 +314,6 @@ private:
   /// Synchronization variable for the MT_SAFE Repository
   ACE_Thread_Mutex lock_;
 #endif /* ACE_MT_SAFE */
-
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

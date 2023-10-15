@@ -316,8 +316,6 @@
     </ClCompile>
     <ClCompile Include="Packets_Sent_Monitor.cpp">
     </ClCompile>
-    <ClCompile Include="Solaris_Network_Interface_Monitor.cpp">
-    </ClCompile>
     <ClCompile Include="Windows_Monitor.cpp">
     </ClCompile>
     <ClCompile Include="Windows_Multi_Instance_Monitor.cpp">
@@ -343,12 +341,17 @@
     <ClInclude Include="Num_Threads_Monitor.h" />
     <ClInclude Include="Packets_Received_Monitor.h" />
     <ClInclude Include="Packets_Sent_Monitor.h" />
-    <ClInclude Include="Solaris_Network_Interface_Monitor.h" />
     <ClInclude Include="Windows_Monitor.h" />
     <ClInclude Include="Windows_Multi_Instance_Monitor.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Monitor_Control.mpc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ACE_Monitor_Control.pc.in" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Monitor_Control.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

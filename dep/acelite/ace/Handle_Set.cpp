@@ -1,4 +1,3 @@
-// Handle_Set.cpp
 #include "ace/Handle_Set.h"
 #if defined (ACE_HAS_ALLOC_HOOKS)
 # include "ace/Malloc_Base.h"
@@ -118,7 +117,6 @@ ACE_Handle_Set::ACE_Handle_Set (const fd_set &fd_mask)
 int
 ACE_Handle_Set::count_bits (u_long n)
 {
-
  ACE_TRACE ("ACE_Handle_Set::count_bits");
 #if defined (ACE_HAS_HANDLE_SET_OPTIMIZED_FOR_SELECT)
   int rval = 0;

@@ -22,7 +22,7 @@
     </Filter>
     <Filter Include="Inline Files">
       <UniqueIdentifier>{763028EF-FECA-1BAD-6757-8A6300006755}</UniqueIdentifier>
-      <Extensions>i;ipp;inl</Extensions>
+      <Extensions>i;ipp;ixx;inl</Extensions>
     </Filter>
     <Filter Include="Template Files">
       <UniqueIdentifier>{5635C877-FECA-1BAD-6757-8A6300006755}</UniqueIdentifier>
@@ -91,9 +91,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Atomic_Op.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Atomic_Op_Sparc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Barrier.cpp">
@@ -690,9 +687,6 @@
     <ClCompile Include="Remote_Tokens.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rtems_init.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RW_Mutex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -826,9 +820,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="String_Base_Const.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SUN_Proactor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SV_Message.cpp">
@@ -1061,9 +1052,6 @@
     <ClInclude Include="Atomic_Op_GCC_T.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Atomic_Op_Sparc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Atomic_Op_T.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1124,9 +1112,6 @@
     <ClInclude Include="CDR_Stream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CE_Screen_Output.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="checked_iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1160,12 +1145,6 @@
     <ClInclude Include="Condition_Thread_Mutex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config-aix-5.x.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-aix-7.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config-all.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1185,9 +1164,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-g++-common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-hpux-11.00.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-hurd.h">
@@ -1274,12 +1250,6 @@
     <ClInclude Include="config-openbsd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config-openvms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-pharlap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config-posix-nonetworking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1289,40 +1259,13 @@
     <ClInclude Include="config-qnx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config-rtems.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-suncc-common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.10.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.11.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.4-g++.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.4-sunc++-4.x.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.5.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.6.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.7.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.8.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-sunos5.9.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config-vxworks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config-vxworks21.03.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config-vxworks22.03.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-vxworks6.4.h">
@@ -1358,22 +1301,19 @@
     <ClInclude Include="config-win32-mingw64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config-win32-msvc-14.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config-win32-msvc-141.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32-msvc-142.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="config-win32-msvc-143.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="config-win32-msvc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-win32.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config-WinCE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config-windows.h">
@@ -1964,9 +1904,6 @@
     <ClInclude Include="os_include\os_iso646.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="os_include\os_kstat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="os_include\os_langinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2108,16 +2045,10 @@
     <ClInclude Include="os_include\sys\os_ipc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="os_include\sys\os_loadavg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="os_include\sys\os_mman.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="os_include\sys\os_msg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="os_include\sys\os_pstat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="os_include\sys\os_resource.h">
@@ -2567,9 +2498,6 @@
     <ClInclude Include="String_Base_Const.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SUN_Proactor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SV_Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2983,9 +2911,6 @@
     <None Include="Atomic_Op_T.inl">
       <Filter>Inline Files</Filter>
     </None>
-    <None Include="Auto_Event.inl">
-      <Filter>Inline Files</Filter>
-    </None>
     <None Include="Auto_Functor.inl">
       <Filter>Inline Files</Filter>
     </None>
@@ -2993,9 +2918,6 @@
       <Filter>Inline Files</Filter>
     </None>
     <None Include="Auto_Ptr.inl">
-      <Filter>Inline Files</Filter>
-    </None>
-    <None Include="Barrier.inl">
       <Filter>Inline Files</Filter>
     </None>
     <None Include="Base_Thread_Adapter.inl">
@@ -3172,9 +3094,6 @@
     <None Include="Hash_Multi_Map_Manager_T.inl">
       <Filter>Inline Files</Filter>
     </None>
-    <None Include="Hashable.inl">
-      <Filter>Inline Files</Filter>
-    </None>
     <None Include="High_Res_Timer.inl">
       <Filter>Inline Files</Filter>
     </None>
@@ -3245,9 +3164,6 @@
       <Filter>Inline Files</Filter>
     </None>
     <None Include="Managed_Object.inl">
-      <Filter>Inline Files</Filter>
-    </None>
-    <None Include="Manual_Event.inl">
       <Filter>Inline Files</Filter>
     </None>
     <None Include="Map_Manager.inl">

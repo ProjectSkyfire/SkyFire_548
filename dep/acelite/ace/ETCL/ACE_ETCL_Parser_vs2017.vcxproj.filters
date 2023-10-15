@@ -17,6 +17,10 @@
       <UniqueIdentifier>{8441A3A3-FECA-1BAD-007E-8A67757B007A}</UniqueIdentifier>
       <Extensions>pcin</Extensions>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{502A2050-FECA-1BAD-007E-8A67757B007A}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ETCL_Interpreter.cpp">
@@ -49,5 +53,10 @@
     <None Include="ACE_ETCL_Parser.pc.in">
       <Filter>Pkgconfig Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ACE_ETCL.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

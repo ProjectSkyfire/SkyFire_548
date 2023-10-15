@@ -19,10 +19,14 @@
     </Filter>
     <Filter Include="Inline Files">
       <UniqueIdentifier>{763028EF-FECA-1BAD-7781-8A636757A7A3}</UniqueIdentifier>
-      <Extensions>i;ipp;inl</Extensions>
+      <Extensions>i;ipp;ixx;inl</Extensions>
     </Filter>
     <Filter Include="Documentation">
       <UniqueIdentifier>{B14BBA74-FECA-1BAD-7781-8A636757A7A3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{502A2050-FECA-1BAD-7781-8A636757A7A3}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,5 +91,10 @@
     <CustomBuild Include="README">
       <Filter>Documentation</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ACE_QoS.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

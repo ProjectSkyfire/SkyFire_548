@@ -13,6 +13,14 @@
       <UniqueIdentifier>{A1909F1C-FECA-1BAD-D619-74620E01B14C}</UniqueIdentifier>
       <Extensions>mpc;mpb;mwc</Extensions>
     </Filter>
+    <Filter Include="Pkgconfig Files">
+      <UniqueIdentifier>{8441A3A3-FECA-1BAD-D619-74620E01B14C}</UniqueIdentifier>
+      <Extensions>pcin</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{502A2050-FECA-1BAD-D619-74620E01B14C}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Auto_Update_Starter.cpp">
@@ -61,9 +69,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Packets_Sent_Monitor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Solaris_Network_Interface_Monitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows_Monitor.cpp">
@@ -131,9 +136,6 @@
     <ClInclude Include="Packets_Sent_Monitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Solaris_Network_Interface_Monitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Windows_Monitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -145,5 +147,15 @@
     <None Include="Monitor_Control.mpc">
       <Filter>Build Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ACE_Monitor_Control.pc.in">
+      <Filter>Pkgconfig Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Monitor_Control.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -3,11 +3,11 @@
 #include "ace/Dynamic.h"
 #include "ace/Object_Manager.h"
 #include "ace/Singleton.h"
-#include "ace/Auto_Ptr.h"
 #include "ace/Guard_T.h"
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_sys_time.h"
 #include "ace/Truncate.h"
+#include <memory>
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Thread_Manager.inl"
@@ -653,8 +653,6 @@ ACE_Thread_Manager::spawn_i (ACE_THR_FUNC func,
 
 #if defined (ACE_HAS_WTHREADS)
   // Have to duplicate handle if client asks for it.
-  // @@ How are thread handles implemented on AIX?  Do they
-  // also need to be duplicated?
   if (t_handle != 0)
 # if defined (ACE_LACKS_DUPLICATEHANDLE)
     *t_handle = thr_handle;
@@ -1714,7 +1712,7 @@ ACE_Thread_Manager::wait (const ACE_Time_Value *timeout,
 {
   ACE_TRACE ("ACE_Thread_Manager::wait");
 
-  ACE_Auto_Ptr<ACE_Time_Value> local_timeout;
+  std::unique_ptr<ACE_Time_Value> local_timeout;
   // Check to see if we're using absolute time or not.
   if (!use_absolute_time && timeout != 0)
     {

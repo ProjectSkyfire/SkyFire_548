@@ -59,8 +59,7 @@ class ACE_Allocator;
 template <class KEY, class VALUE, class HASH_KEY, class COMPARE_KEYS, class CACHING_STRATEGY, class ATTRIBUTES>
 class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
 {
- public:
-
+public:
   /**
    * The actual value mapped to the key in the map. The <attributes>
    * are used by the strategy and is transparent to the user of this
@@ -79,7 +78,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
 
   /// Close down a <Cache_Map_Manager> and release dynamically allocated
   /// resources.
-  ~ACE_Hash_Cache_Map_Manager (void);
+  ~ACE_Hash_Cache_Map_Manager () = default;
 
   /**
    * Associate @a key with @a value.  If @a key is already in the
@@ -197,13 +196,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #include "ace/Hash_Cache_Map_Manager_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "ace/Hash_Cache_Map_Manager_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma implementation ("Hash_Cache_Map_Manager_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #include /**/ "ace/post.h"
 

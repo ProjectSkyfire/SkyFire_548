@@ -297,6 +297,9 @@
   <ItemGroup>
     <None Include="Compressor.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ACE_Compression.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

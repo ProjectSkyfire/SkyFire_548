@@ -91,7 +91,6 @@ inline int ace_rand_r_helper (unsigned *seed)
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE_OS {
-
   /** @name Non-standard functions
    *
    *  These functions aren't in the standard.
@@ -310,11 +309,9 @@ namespace ACE_OS {
   extern ACE_Export
   ACE_TCHAR *strenvdup (const ACE_TCHAR *str);
 
-#if !defined (ACE_LACKS_STRTOD)
   /// Converts a string to a double value (char version).
   ACE_NAMESPACE_INLINE_FUNCTION
   double strtod (const char *s, char **endptr);
-#endif /* !ACE_LACKS_STRTOD */
 
 #if defined (ACE_HAS_WCHAR) && !defined (ACE_LACKS_WCSTOD)
   /// Converts a string to a double value (wchar_t version).

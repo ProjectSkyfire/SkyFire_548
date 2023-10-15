@@ -73,6 +73,8 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 using std::auto_ptr;
 #else /* !ACE_LACKS_AUTO_PTR */
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
 /**
  * @class auto_ptr
  *
@@ -89,6 +91,8 @@ public:
 
   X *operator-> () const;
 };
+
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* !ACE_LACKS_AUTO_PTR */
 
@@ -188,13 +192,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #include "ace/Auto_Ptr.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "ace/Auto_Ptr.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma implementation ("Auto_Ptr.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #if defined (_MSC_VER)
 // Restore the warning state to what it was before entry.

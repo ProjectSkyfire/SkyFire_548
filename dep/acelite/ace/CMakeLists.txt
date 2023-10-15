@@ -34,7 +34,7 @@ set(ace_STAT_SRCS
   ATM_Stream.cpp
   Atomic_Op.cpp
   Atomic_Op_GCC_T.cpp
-  Atomic_Op_Sparc.c
+  
   Atomic_Op_T.cpp
   Auto_Event.cpp
   Auto_Functor.cpp
@@ -55,7 +55,7 @@ set(ace_STAT_SRCS
   CDR_Base.cpp
   CDR_Size.cpp
   CDR_Stream.cpp
-  CE_Screen_Output.cpp
+  
   Cleanup.cpp
   Cleanup_Strategies_T.cpp
   Codecs.cpp
@@ -286,7 +286,7 @@ set(ace_STAT_SRCS
   Remote_Name_Space.cpp
   Remote_Tokens.cpp
   Reverse_Lock_T.cpp
-  Rtems_init.c
+  
   RW_Mutex.cpp
   RW_Process_Mutex.cpp
   RW_Thread_Mutex.cpp
@@ -337,7 +337,7 @@ set(ace_STAT_SRCS
   Stream_Modules.cpp
   String_Base.cpp
   String_Base_Const.cpp
-  SUN_Proactor.cpp
+  
   SV_Message.cpp
   SV_Message_Queue.cpp
   SV_Semaphore_Complex.cpp

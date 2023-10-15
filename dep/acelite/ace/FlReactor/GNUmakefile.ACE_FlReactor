@@ -54,9 +54,6 @@ include $(ACE_ROOT)/include/makeinclude/wrapper_macros.GNU
 
 GNUACE_PROJECT_VERSION ?= $(ACE_VERSION)
 
-# To build multiple targets in the same directory on AIX, it works
-# best to have a template directory per project.
-# The compiler/linker isn't too smart about instantiating templates...
 ifdef TEMPINCDIR
 TEMPINCDIR := $(TEMPINCDIR)/ACE_FlReactor
 all: $(TEMPINCDIR)
@@ -280,15 +277,15 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#source_files:
-#FlReactor.cpp
+#pkgconfig_files:
+#ACE_FlReactor.pc.in
 #
 #header_files:
 #FlReactor.h
 #ACE_FlReactor_export.h
 #
-#pkgconfig_files:
-#ACE_FlReactor.pc.in
+#source_files:
+#FlReactor.cpp
 #
 #build_files:
 #ace_flreactor.mpc

@@ -598,8 +598,6 @@
     </ClCompile>
     <ClCompile Include="Atomic_Op.cpp">
     </ClCompile>
-    <ClCompile Include="Atomic_Op_Sparc.c">
-    </ClCompile>
     <ClCompile Include="Barrier.cpp">
     </ClCompile>
     <ClCompile Include="Base_Thread_Adapter.cpp">
@@ -1002,8 +1000,6 @@
     </ClCompile>
     <ClCompile Include="Remote_Tokens.cpp">
     </ClCompile>
-    <ClCompile Include="Rtems_init.c">
-    </ClCompile>
     <ClCompile Include="SOCK.cpp">
     </ClCompile>
     <ClCompile Include="SOCK_Acceptor.cpp">
@@ -1041,8 +1037,6 @@
     <ClCompile Include="SPIPE_Stream.cpp">
     </ClCompile>
     <ClCompile Include="SString.cpp">
-    </ClCompile>
-    <ClCompile Include="SUN_Proactor.cpp">
     </ClCompile>
     <ClCompile Include="SV_Message.cpp">
     </ClCompile>
@@ -2149,7 +2143,6 @@
     <ClInclude Include="Asynch_Pseudo_Task.h" />
     <ClInclude Include="Atomic_Op.h" />
     <ClInclude Include="Atomic_Op_GCC_T.h" />
-    <ClInclude Include="Atomic_Op_Sparc.h" />
     <ClInclude Include="Atomic_Op_T.h" />
     <ClInclude Include="Auto_Event.h" />
     <ClInclude Include="Auto_Functor.h" />
@@ -2165,7 +2158,6 @@
     <ClInclude Include="CDR_Base.h" />
     <ClInclude Include="CDR_Size.h" />
     <ClInclude Include="CDR_Stream.h" />
-    <ClInclude Include="CE_Screen_Output.h" />
     <ClInclude Include="CORBA_macros.h" />
     <ClInclude Include="Cache_Map_Manager_T.h" />
     <ClInclude Include="Cached_Connect_Strategy_T.h" />
@@ -2446,7 +2438,6 @@
     <ClInclude Include="SPIPE_Stream.h" />
     <ClInclude Include="SString.h" />
     <ClInclude Include="SStringfwd.h" />
-    <ClInclude Include="SUN_Proactor.h" />
     <ClInclude Include="SV_Message.h" />
     <ClInclude Include="SV_Message_Queue.h" />
     <ClInclude Include="SV_Semaphore_Complex.h" />
@@ -2566,9 +2557,6 @@
     <ClInclude Include="XTI_ATM_Mcast.h" />
     <ClInclude Include="ace_wchar.h" />
     <ClInclude Include="checked_iterator.h" />
-    <ClInclude Include="config-WinCE.h" />
-    <ClInclude Include="config-aix-5.x.h" />
-    <ClInclude Include="config-aix-7.h" />
     <ClInclude Include="config-all.h" />
     <ClInclude Include="config-android.h" />
     <ClInclude Include="config-cygwin32.h" />
@@ -2576,7 +2564,6 @@
     <ClInclude Include="config-face-safety.h" />
     <ClInclude Include="config-freebsd.h" />
     <ClInclude Include="config-g++-common.h" />
-    <ClInclude Include="config-hpux-11.00.h" />
     <ClInclude Include="config-hurd.h" />
     <ClInclude Include="config-icc-common.h" />
     <ClInclude Include="config-integritySCA.h" />
@@ -2605,23 +2592,12 @@
     <ClInclude Include="config-mqx.h" />
     <ClInclude Include="config-netbsd.h" />
     <ClInclude Include="config-openbsd.h" />
-    <ClInclude Include="config-openvms.h" />
-    <ClInclude Include="config-pharlap.h" />
     <ClInclude Include="config-posix-nonetworking.h" />
     <ClInclude Include="config-posix.h" />
     <ClInclude Include="config-qnx.h" />
-    <ClInclude Include="config-rtems.h" />
-    <ClInclude Include="config-suncc-common.h" />
-    <ClInclude Include="config-sunos5.10.h" />
-    <ClInclude Include="config-sunos5.11.h" />
-    <ClInclude Include="config-sunos5.4-g++.h" />
-    <ClInclude Include="config-sunos5.4-sunc++-4.x.h" />
-    <ClInclude Include="config-sunos5.5.h" />
-    <ClInclude Include="config-sunos5.6.h" />
-    <ClInclude Include="config-sunos5.7.h" />
-    <ClInclude Include="config-sunos5.8.h" />
-    <ClInclude Include="config-sunos5.9.h" />
     <ClInclude Include="config-vxworks.h" />
+    <ClInclude Include="config-vxworks21.03.h" />
+    <ClInclude Include="config-vxworks22.03.h" />
     <ClInclude Include="config-vxworks6.4.h" />
     <ClInclude Include="config-vxworks6.5.h" />
     <ClInclude Include="config-vxworks6.6.h" />
@@ -2633,9 +2609,9 @@
     <ClInclude Include="config-win32-common.h" />
     <ClInclude Include="config-win32-mingw.h" />
     <ClInclude Include="config-win32-mingw64.h" />
-    <ClInclude Include="config-win32-msvc-14.h" />
     <ClInclude Include="config-win32-msvc-141.h" />
     <ClInclude Include="config-win32-msvc-142.h" />
+    <ClInclude Include="config-win32-msvc-143.h" />
     <ClInclude Include="config-win32-msvc.h" />
     <ClInclude Include="config-win32.h" />
     <ClInclude Include="config-windows.h" />
@@ -2667,7 +2643,6 @@
     <ClInclude Include="os_include\os_intrin.h" />
     <ClInclude Include="os_include\os_inttypes.h" />
     <ClInclude Include="os_include\os_iso646.h" />
-    <ClInclude Include="os_include\os_kstat.h" />
     <ClInclude Include="os_include\os_langinfo.h" />
     <ClInclude Include="os_include\os_libgen.h" />
     <ClInclude Include="os_include\os_limits.h" />
@@ -2715,10 +2690,8 @@
     <ClInclude Include="os_include\os_wctype.h" />
     <ClInclude Include="os_include\os_wordexp.h" />
     <ClInclude Include="os_include\sys\os_ipc.h" />
-    <ClInclude Include="os_include\sys\os_loadavg.h" />
     <ClInclude Include="os_include\sys\os_mman.h" />
     <ClInclude Include="os_include\sys\os_msg.h" />
-    <ClInclude Include="os_include\sys\os_pstat.h" />
     <ClInclude Include="os_include\sys\os_resource.h" />
     <ClInclude Include="os_include\sys\os_select.h" />
     <ClInclude Include="os_include\sys\os_sem.h" />
@@ -2795,11 +2768,9 @@
     <None Include="Atomic_Op.inl" />
     <None Include="Atomic_Op_GCC_T.inl" />
     <None Include="Atomic_Op_T.inl" />
-    <None Include="Auto_Event.inl" />
     <None Include="Auto_Functor.inl" />
     <None Include="Auto_IncDec_T.inl" />
     <None Include="Auto_Ptr.inl" />
-    <None Include="Barrier.inl" />
     <None Include="Base_Thread_Adapter.inl" />
     <None Include="Based_Pointer_T.inl" />
     <None Include="Basic_Stats.inl" />
@@ -2858,7 +2829,6 @@
     <None Include="Hash_Map_Manager_T.inl" />
     <None Include="Hash_Map_With_Allocator_T.inl" />
     <None Include="Hash_Multi_Map_Manager_T.inl" />
-    <None Include="Hashable.inl" />
     <None Include="High_Res_Timer.inl" />
     <None Include="INET_Addr.inl" />
     <None Include="IOStream_T.inl" />
@@ -2890,7 +2860,6 @@
     <None Include="Malloc_Allocator.inl" />
     <None Include="Malloc_T.inl" />
     <None Include="Managed_Object.inl" />
-    <None Include="Manual_Event.inl" />
     <None Include="Map_Manager.inl" />
     <None Include="Map_T.inl" />
     <None Include="Mem_Map.inl" />
