@@ -294,6 +294,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_OPENING_CINEMATIC,                            0x0130, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpeningCinematic                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPEN_ITEM,                                    0x1D10, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpenItemOpcode                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PAGE_TEXT_QUERY,                              0x1022, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePageTextQueryOpcode                 ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_PING,                                         0x0012, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess);
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_BUY,                                 0x12D9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionBuyOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_DECLINE,                             0x1279, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionDeclineOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_RENAME,                              0x1F9A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionRenameOpcode                ); // 5.4.8 18414
@@ -505,7 +506,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_PET_CANCEL_AURA, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCancelAuraOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_PET_CAST_SPELL, 0x044D, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCastSpellOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_PET_LEARN_TALENT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetLearnTalent);
-    DEFINE_OPCODE_HANDLER(CMSG_PING, 0x0012, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_EarlyProccess);
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_QUESTS_COMPLETED, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQueryQuestsCompleted);
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_PUSH_RESULT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushResult);
     DEFINE_OPCODE_HANDLER(CMSG_REALM_SPLIT, 0x18B2, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRealmSplitOpcode);
