@@ -1,0 +1,2 @@
++DELETE FROM `achievement_reward` WHERE `entry`=7385;
++INSERT INTO `achievement_reward` (`entry`, `title_A`, `title_H`, `item`, `sender`, `subject`, `text`) VALUES (7385, 0, 0, 87528, 73649, 'Honorary Brewmaster Keg', '$n,$b$bThanks for all your hard work crafting some of the finest brews we\'ve ever had!$b$bAs a token of our appreciation, the other Brewmasters and I have decided to give you this Honorary Brewmaster Keg.$b$bEnjoy!$b$b-Mama Stormstout');
