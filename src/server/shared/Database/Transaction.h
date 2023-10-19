@@ -7,7 +7,6 @@
 #define _TRANSACTION_H
 
 #include "SQLOperation.h"
-#include "AutoPtr.h"
 
 //- Forward declare (don't include header to prevent circular includes)
 class PreparedStatement;
@@ -39,7 +38,7 @@ class Transaction
         bool _cleanedUp;
 
 };
-typedef Skyfire::AutoPtr<Transaction, ACE_Thread_Mutex> SQLTransaction;
+typedef std::shared_ptr<Transaction> SQLTransaction;
 
 /*! Low level class*/
 class TransactionTask : public SQLOperation
