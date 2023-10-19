@@ -7,6 +7,7 @@
 #define _TRANSACTION_H
 
 #include "SQLOperation.h"
+#include "AutoPtr.h"
 
 //- Forward declare (don't include header to prevent circular includes)
 class PreparedStatement;
