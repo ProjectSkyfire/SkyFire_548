@@ -11,6 +11,7 @@
 #include <ace/Singleton.h>
 #include <list>
 #include <map>
+#include "SharedDefines.h"
 
 class Player;
 class Unit;

@@ -47,7 +47,7 @@ set(ace_STAT_SRCS
   Basic_Stats.cpp
   Basic_Types.cpp
   Bound_Ptr.cpp
-  Cache_Map_Manager_T.cpp
+  # Cache_Map_Manager_T.cpp
   Cached_Connect_Strategy_T.cpp
   Caching_Strategies_T.cpp
   Caching_Utility_T.cpp
