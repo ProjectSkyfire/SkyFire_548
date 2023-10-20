@@ -188,6 +188,7 @@ struct AchievementReward
 {
     uint32 titleId[2];
     uint32 itemId;
+    int32  spellId;
     uint32 sender;
     std::string subject;
     std::string text;

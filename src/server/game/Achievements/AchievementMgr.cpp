@@ -626,9 +626,20 @@ void AchievementMgr<Player>::LoadFromDB(PreparedQueryResult achievementResult, P
 
             // title achievement rewards are retroactive
             if (AchievementReward const* reward = sAchievementMgr->GetAchievementReward(achievement))
+            {
                 if (uint32 titleId = reward->titleId[Player::TeamForRace(GetOwner()->getRace()) == ALLIANCE ? 0 : 1])
                     if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(titleId))
                         GetOwner()->SetTitle(titleEntry);
+
+                if (reward->spellId < 0)
+                {
+                    // Because spells are not loaded yet
+                    uint32 spellId = uint32(-reward->spellId);
+                    Player* player = GetOwner();
+                    if (!player->HasSpell(spellId))
+                        player->addSpell(spellId, true, true, false, false, true);
+                }
+            }
         }
         while (achievementResult->NextRow());
     }
@@ -1891,6 +1902,11 @@ void AchievementMgr<Player>::CompletedAchievement(AchievementEntry const* achiev
     if (uint32 titleId = reward->titleId[achievement->ID == 1793 ? GetOwner()->getGender() : (GetOwner()->GetTeam() == ALLIANCE ? 0 : 1)])
         if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(titleId))
             GetOwner()->SetTitle(titleEntry);
+
+    if (reward->spellId > 0)
+        referencePlayer->CastSpell(referencePlayer, reward->spellId);
+    else if (reward->spellId < 0)
+        referencePlayer->learnSpell(uint32(-reward->spellId), false);
 
     // mail
     if (reward->sender)
@@ -3341,8 +3357,8 @@ void AchievementGlobalMgr::LoadRewards()
 
     m_achievementRewards.clear();                           // need for reload case
 
-    //                                               0      1        2        3     4       5        6
-    QueryResult result = WorldDatabase.Query("SELECT entry, title_A, title_H, item, sender, subject, text FROM achievement_reward");
+    //                                               0      1        2         3      4       5        6     7
+    QueryResult result = WorldDatabase.Query("SELECT entry, title_A, title_H, item, spell, sender, subject, text FROM achievement_reward");
 
     if (!result)
     {
@@ -3367,12 +3383,13 @@ void AchievementGlobalMgr::LoadRewards()
         reward.titleId[0] = fields[1].GetUInt32();
         reward.titleId[1] = fields[2].GetUInt32();
         reward.itemId     = fields[3].GetUInt32();
-        reward.sender     = fields[4].GetUInt32();
-        reward.subject    = fields[5].GetString();
-        reward.text       = fields[6].GetString();
+        reward.spellId    = fields[4].GetInt32();
+        reward.sender     = fields[5].GetUInt32();
+        reward.subject    = fields[6].GetString();
+        reward.text       = fields[7].GetString();
 
         // must be title or mail at least
-        if (!reward.titleId[0] && !reward.titleId[1] && !reward.sender)
+        if (!reward.titleId[0] && !reward.titleId[1] && !reward.sender && !reward.spellId)
         {
             SF_LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) does not have title or item reward data, ignored.", entry);
             continue;
@@ -3428,6 +3445,15 @@ void AchievementGlobalMgr::LoadRewards()
             {
                 SF_LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) has invalid item id %u, reward mail will not contain item.", entry, reward.itemId);
                 reward.itemId = 0;
+            }
+        }
+
+        if (reward.spellId)
+        {
+            if (!sSpellMgr->GetSpellInfo(std::abs(reward.spellId)))
+            {
+                SF_LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) has invalid spell id %u, skipped.", entry, reward.spellId);
+                reward.spellId = 0;
             }
         }
 
