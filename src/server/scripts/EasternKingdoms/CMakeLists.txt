@@ -170,7 +170,8 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/boss_terestian_illhoof.cpp
   EasternKingdoms/Karazhan/karazhan.h
   #REWORKED IN CATACLYSM
-  #EasternKingdoms/TheStockade/instance_the_stockade.cpp
+  EasternKingdoms/TheStockade/boss_hogger.cpp
+  EasternKingdoms/TheStockade/instance_the_stockade.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")

@@ -205,7 +205,8 @@ void AddSC_sunwell_plateau();
 //void AddSC_boss_ironaya();
 //void AddSC_uldaman();
 //void AddSC_instance_uldaman();
-//void AddSC_instance_the_stockade();          //The Stockade
+void AddSC_boss_hogger();
+void AddSC_instance_the_stockade();          //The Stockade
 //void AddSC_boss_akilzon();                   //Zul'Aman
 //void AddSC_boss_halazzi();
 //void AddSC_boss_hex_lord_malacrass();
