@@ -14,6 +14,13 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "instance_the_stockade.h"
 
+enum Says
+{
+    SAY_AGGRO = 0,
+    SAY_DEATH = 1,
+    SAY_ENRAGE = 2
+};
+
 enum Spells
 {
     SPELL_ENRAGE = 86736,
@@ -39,20 +46,20 @@ public:
         void Reset() OVERRIDE
         {
             BossAI::Reset();
-            events.ScheduleEvent(EVENT_VICIOUS_SLICE, DUNGEON_MODE(4000, 4000));
-            events.ScheduleEvent(EVENT_MADDENING_CALL, DUNGEON_MODE(9000, 9000));
-            events.ScheduleEvent(EVENT_ENRAGE, DUNGEON_MODE(300000, 300000));
+            events.ScheduleEvent(EVENT_VICIOUS_SLICE, 4000);
+            events.ScheduleEvent(EVENT_MADDENING_CALL, 9000);
+            events.ScheduleEvent(EVENT_ENRAGE, 60000);
         }
 
         void EnterCombat(Unit* victim) OVERRIDE
         {
-            //Talk();
+            Talk(SAY_AGGRO);
             BossAI::EnterCombat(victim);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            //Talk();
+            Talk(SAY_DEATH);
             _JustDied();
             instance->SetBossState(DATA_HOGGER, DONE);
         }
@@ -85,14 +92,15 @@ public:
                 }
                 case EVENT_MADDENING_CALL:
                 {
-                    DoCastVictim(SPELL_MADDENING_CALL);
+                    DoCast(me, SPELL_MADDENING_CALL);
                     events.ScheduleEvent(EVENT_MADDENING_CALL, 18000);
                     break;
                 }
                 case EVENT_ENRAGE:
                 {
                     DoCast(me, SPELL_ENRAGE);
-                    events.ScheduleEvent(EVENT_MADDENING_CALL, 300000);
+                    Talk(SAY_ENRAGE);
+                    events.ScheduleEvent(EVENT_MADDENING_CALL, 60000);
                     break;
                 }
                 default:
