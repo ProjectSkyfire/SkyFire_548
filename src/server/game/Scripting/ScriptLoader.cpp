@@ -205,6 +205,7 @@ void AddSC_sunwell_plateau();
 //void AddSC_boss_ironaya();
 //void AddSC_uldaman();
 //void AddSC_instance_uldaman();
+void AddSC_boss_lord_overheat();
 void AddSC_boss_hogger();
 void AddSC_instance_the_stockade();          //The Stockade
 //void AddSC_boss_akilzon();                   //Zul'Aman
@@ -854,6 +855,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_muru();
     AddSC_boss_kiljaeden();
     AddSC_sunwell_plateau();
+    AddSC_boss_lord_overheat();
     AddSC_boss_hogger();
     AddSC_instance_the_stockade();          //The Stockade
     //AddSC_boss_archaedas();                 //Uldaman

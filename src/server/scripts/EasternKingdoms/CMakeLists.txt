@@ -171,6 +171,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/karazhan.h
   #REWORKED IN CATACLYSM
   EasternKingdoms/TheStockade/boss_hogger.cpp
+  EasternKingdoms/TheStockade/boss_lord_overheat.cpp
   EasternKingdoms/TheStockade/instance_the_stockade.cpp
 )
 

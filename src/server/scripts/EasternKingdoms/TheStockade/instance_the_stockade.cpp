@@ -25,6 +25,7 @@ public:
         {
             SetBossNumber(EncounterCount);
 
+            LordOverheatGUID = 0;
             HoggerGUID = 0;
         }
 
@@ -32,6 +33,8 @@ public:
         {
             switch (creature->GetEntry())
             {
+            case NPC_LORD_OVERHEAT:
+                LordOverheatGUID = creature->GetGUID();
             case NPC_HOGGER:
                 HoggerGUID = creature->GetGUID();
                 break;
@@ -44,6 +47,8 @@ public:
         {
             switch (type)
             {
+            case DATA_LORD_OVERHEAT:
+                return LordOverheatGUID;
             case DATA_HOGGER:
                 return HoggerGUID;
             default:
@@ -96,6 +101,7 @@ public:
         }
 
     protected:
+        uint64 LordOverheatGUID;
         uint64 HoggerGUID;
     };
 

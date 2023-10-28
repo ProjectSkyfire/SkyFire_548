@@ -17,11 +17,13 @@ uint32 const EncounterCount = 5;
 enum DataTypes
 {
     // Encounter States/Boss GUIDs
+    DATA_LORD_OVERHEAT = 2,
     DATA_HOGGER = 3
 };
 
 enum CreatureIds
 {
+    NPC_LORD_OVERHEAT = 46264,
     NPC_HOGGER = 46254
 };
 
