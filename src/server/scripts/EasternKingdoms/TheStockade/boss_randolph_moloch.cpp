@@ -14,13 +14,14 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "instance_the_stockade.h"
 
-/*
+
 enum Says
 {
     SAY_AGGRO = 0,
     SAY_DEATH = 1,
+    SAY_VANISH = 2
 };
-*/
+
 enum Spells
 {
     SPELL_SWEEP = 86729,
@@ -54,13 +55,13 @@ public:
         void EnterCombat(Unit* victim) OVERRIDE
         {
             me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
-            //Talk(SAY_AGGRO);
+            Talk(SAY_AGGRO);
             BossAI::EnterCombat(victim);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            //Talk(SAY_DEATH);
+            Talk(SAY_DEATH);
             _JustDied();
             instance->SetBossState(DATA_RANDOLPH_MOLOCH, DONE);
         }
@@ -93,7 +94,7 @@ public:
                     //TODO: vanish should be cast at 35% and 65% HP and not reset boss
                     //if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         //DoCast(target, SPELL_VANISH);
-                        
+                    Talk(SAY_VANISH);
                     events.ScheduleEvent(EVENT_VANISH, 10000);
                     break;
                 }
