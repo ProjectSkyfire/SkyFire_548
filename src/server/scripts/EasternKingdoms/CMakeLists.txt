@@ -172,6 +172,7 @@ set(scripts_STAT_SRCS
   #REWORKED IN CATACLYSM
   EasternKingdoms/TheStockade/boss_hogger.cpp
   EasternKingdoms/TheStockade/boss_lord_overheat.cpp
+  EasternKingdoms/TheStockade/boss_randolph_moloch.cpp
   EasternKingdoms/TheStockade/instance_the_stockade.cpp
 )
 

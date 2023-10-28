@@ -92,7 +92,7 @@ public:
                 }
                 case EVENT_MADDENING_CALL:
                 {
-                    DoCast(me, SPELL_MADDENING_CALL);
+                    DoCastAOE(SPELL_MADDENING_CALL);
                     events.ScheduleEvent(EVENT_MADDENING_CALL, 18000);
                     break;
                 }
