@@ -17,7 +17,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (-120680, 0, 2, 0, 52, 0, 100, 0, 6, 53565, 0, 0, 1, 7, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Aspiring Trainee - On Text Line 6 Over - Say Text Line 7');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=-120679;
-
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (-120679, 0, 0, 0, 1, 0, 100, 0, 20000, 20000, 120000, 120000, 1, 1, 16000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Aspiring Trainee - OOC - Say Text Line 1'),
 (-120679, 0, 1, 0, 52, 0, 100, 0, 1, 53565, 0, 0, 1, 2, 6000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Aspiring Trainee - On Text Line 1 Over - Say Text Line 2'),
@@ -26,7 +25,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (-120679, 0, 4, 0, 52, 0, 100, 0, 4, 53565, 0, 0, 45, 1, 1, 0, 0, 0, 0, 11, 53565, 3, 0, 0, 0, 0, 0, 'Aspiring Trainee - On Text Line 4 Over - Set Data 1 1');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=53565;
-
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (53565, 0, 0, 1, 38, 0, 100, 0, 1, 1, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Aspiring Trainee - On Data Set 1 1 - Set Phase 1'),
 (53565, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 17, 510, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Aspiring Trainee - On Data Set 1 1 (Link) - Set Emote State (510)'),
@@ -120,24 +118,26 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (57753, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 115, 33643, 33645, 33646, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 'Ironfist Zhou - Play Random Sound (33643, 33645, 33646)');
 
 DELETE FROM `creature_text` WHERE `entry`=53565;
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 0, 'Such skill for a new trainee.', 12, 0, 100, 511, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 1, 'That target didn\'t stand a chance.', 12, 0, 100, 511, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 2, 'One day you will have to teach me your secrets.', 12, 0, 100, 509, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 3, 'You are bound for a great things, trainee.', 12, 0, 100, 508, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 4, 'I must train harder so I can be like you.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 5, 'I hope the instructors saw that!', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 6, 'I must work as hard as you.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 0, 7, 'Your form is impeccable.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 1, 0, 'My money\'s on Lam. Did you see him take down Chu during training last week?', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 2, 0, 'His stamina is nothing against Lam\'s strength.', 12, 0, 100, 0, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 3, 0, 'He has the legs of an ox! Have you ever been kicked by him in training?', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 4, 0, 'Raise you a keg of Stormshout Gold. It\'ll be your loss.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 5, 0, 'That\'s where you\'re mistaken, friend. Zhou is as sturdy as an oak.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 6, 0, 'Zhou has the stamina of three men, so he can out-stay most opponents.', 12, 0, 100, 0, 0, 0, 'Aspiring Trainee');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (53565, 7, 0, 'Four coppers on Zhou.', 12, 0, 100, 0, 0, 0, 'Aspiring Trainee');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+(53565, 0, 0, 'Such skill for a new trainee.', 12, 0, 100, 511, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 1, 'That target didn\'t stand a chance.', 12, 0, 100, 511, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 2, 'One day you will have to teach me your secrets.', 12, 0, 100, 509, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 3, 'You are bound for a great things, trainee.', 12, 0, 100, 508, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 4, 'I must train harder so I can be like you.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 5, 'I hope the instructors saw that!', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 6, 'I must work as hard as you.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 0, 7, 'Your form is impeccable.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 1, 0, 'My money\'s on Lam. Did you see him take down Chu during training last week?', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 2, 0, 'His stamina is nothing against Lam\'s strength.', 12, 0, 100, 0, 0, 0, 'Aspiring Trainee'),
+(53565, 3, 0, 'He has the legs of an ox! Have you ever been kicked by him in training?', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 4, 0, 'Raise you a keg of Stormshout Gold. It\'ll be your loss.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 5, 0, 'That\'s where you\'re mistaken, friend. Zhou is as sturdy as an oak.', 12, 0, 100, 1, 0, 0, 'Aspiring Trainee'),
+(53565, 6, 0, 'Zhou has the stamina of three men, so he can out-stay most opponents.', 12, 0, 100, 0, 0, 0, 'Aspiring Trainee'),
+(53565, 7, 0, 'Four coppers on Zhou.', 12, 0, 100, 0, 0, 0, 'Aspiring Trainee');
 
 DELETE FROM `creature_text` WHERE `entry`=65469;
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (65469, 0, 0, 'Such skill for a new trainee.', 12, 0, 100, 511, 0, 0, 'Aspiring Trainee to Training Target');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (65469, 0, 1, 'That target didn\'t stand a chance.', 12, 0, 100, 509, 0, 0, 'Aspiring Trainee to Training Target');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (65469, 0, 2, 'One day you will have to teach me your secrets.', 12, 0, 100, 509, 0, 0, 'Aspiring Trainee to Training Target');
-INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES (65469, 0, 3, 'You are bound for a great things, trainee.', 12, 0, 100, 508, 0, 0, 'Aspiring Trainee to Training Target');
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+(65469, 0, 0, 'Such skill for a new trainee.', 12, 0, 100, 511, 0, 0, 'Aspiring Trainee to Training Target'),
+(65469, 0, 1, 'That target didn\'t stand a chance.', 12, 0, 100, 509, 0, 0, 'Aspiring Trainee to Training Target'),
+(65469, 0, 2, 'One day you will have to teach me your secrets.', 12, 0, 100, 509, 0, 0, 'Aspiring Trainee to Training Target'),
+(65469, 0, 3, 'You are bound for a great things, trainee.', 12, 0, 100, 508, 0, 0, 'Aspiring Trainee to Training Target');
