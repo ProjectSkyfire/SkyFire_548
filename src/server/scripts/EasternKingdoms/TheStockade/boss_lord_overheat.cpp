@@ -5,7 +5,7 @@
 
 /* ScriptData
 SDName: Boss_Lord_Overheat
-SD%Complete: 70
+SD%Complete: 90
 SDComment:
 SDCategory: The Stockades
 EndScriptData */
@@ -14,13 +14,13 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "instance_the_stockade.h"
 
-/*
+
 enum Says
 {
     SAY_AGGRO = 0,
     SAY_DEATH = 1,
 };
-*/
+
 enum Spells
 {
     SPELL_FIREBALL = 12466,
@@ -53,13 +53,13 @@ public:
 
         void EnterCombat(Unit* victim) OVERRIDE
         {
-            //Talk(SAY_AGGRO);
+            Talk(SAY_AGGRO);
             BossAI::EnterCombat(victim);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            //Talk(SAY_DEATH);
+            Talk(SAY_DEATH);
             _JustDied();
             instance->SetBossState(DATA_LORD_OVERHEAT, DONE);
         }
