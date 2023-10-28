@@ -497,8 +497,10 @@ enum SMART_ACTION
     SMART_ACTION_GAME_EVENT_STOP                    = 111,    // GameEventId
     SMART_ACTION_GAME_EVENT_START                   = 112,    // GameEventId
     SMART_ACTION_SET_HEALTH                         = 113,    // HealthMode, value.
+    SMART_ACTION_UNUSED                             = 114,
+    SMART_ACTION_RANDOM_SOUND                       = 115,    // soundId1, soundId2, soundId3, soundId4, soundId5, onlySelf
 
-    SMART_ACTION_END                                = 114
+    SMART_ACTION_END                                = 116
 };
 
 struct SmartAction
@@ -963,6 +965,26 @@ struct SmartAction
             uint32 healthpointmod;
             int32 healthpointpercent;
         } sethealthpointorpercent;
+
+        struct
+        {
+            uint32 param1;
+            uint32 param2;
+            uint32 param3;
+            uint32 param4;
+            uint32 param5;
+            uint32 param6;
+        } unused;
+
+        struct
+        {
+            uint32 sound1;
+            uint32 sound2;
+            uint32 sound3;
+            uint32 sound4;
+            uint32 sound5;
+            uint32 onlySelf;
+        } randomSound;
 
         //! Note for any new future actions
         //! All parameters must have type uint32
