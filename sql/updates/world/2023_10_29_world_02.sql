@@ -5,7 +5,7 @@ UPDATE `creature_template` SET `skinloot`=3425 WHERE `entry`=3425;
 UPDATE `creature_template` SET `skinloot`=3475 WHERE `entry`=3475;
 
 -- Raging Agam'ar
-DELETE FROM `creature_template` WHERE `entry`=4514;
+DELETE FROM `skinning_loot_template` WHERE `entry`=4514;
 
 -- Ravasaur
 UPDATE `creature_template` SET `skinloot`=6505 WHERE `entry`=6505;
