@@ -79,6 +79,6 @@ Read file [THANKS](THANKS.md)
 ## Links
 Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
 
-Database [https://github.com/ProjectSkyfire/database/releases)
+Database Releases [https://github.com/ProjectSkyfire/database/releases)
 
 Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
