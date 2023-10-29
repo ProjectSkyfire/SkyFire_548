@@ -78,7 +78,7 @@ public:
                 {
                     case EVENT_GROUND_POUND:
                     {
-                        DoCast(me, SPELL_GROUND_POUND);
+                        DoCastVictim(SPELL_GROUND_POUND);
                         events.ScheduleEvent(EVENT_GROUND_POUND, DUNGEON_MODE(15000, 10000));
                         break;
                     }
