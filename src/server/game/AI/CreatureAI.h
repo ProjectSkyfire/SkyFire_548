@@ -140,7 +140,9 @@ class CreatureAI : public UnitAI
         //virtual void AttackStart(Unit*) { }
 
         // Called at World update tick
-        //virtual void UpdateAI(const uint32 /*diff*/) { }
+        virtual void UpdateAI(const uint32 /*diff*/) { }
+
+        virtual void ExecuteEvent(uint32 /*eventId*/) { }
 
         /// == State checks =================================
 

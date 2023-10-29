@@ -147,6 +147,8 @@ struct ScriptedAI : public CreatureAI
     //Called at World update tick
     void UpdateAI(uint32 diff) OVERRIDE;
 
+    void ExecuteEvent(uint32 /*eventId*/) OVERRIDE { }
+
     //Called at creature death
     void JustDied(Unit* /*killer*/) OVERRIDE { }
 
@@ -384,31 +386,30 @@ class BossAI : public ScriptedAI
         return _boundary;
     }
 
-    void JustSummoned(Creature* summon);
-    void SummonedCreatureDespawn(Creature* summon);
+    void JustSummoned(Creature* summon) OVERRIDE;
+    void SummonedCreatureDespawn(Creature* summon) OVERRIDE;
 
-    virtual void UpdateAI(uint32 diff);
+    void UpdateAI(uint32 diff) OVERRIDE;
 
     // Hook used to execute events scheduled into EventMap without the need
     // to override UpdateAI
     // note: You must re-schedule the event within this method if the event
     // is supposed to run more than once
-    virtual void ExecuteEvent(uint32 /*eventId*/)
-    { }
+    void ExecuteEvent(uint32 /*eventId*/) OVERRIDE { }
 
-    void Reset()
+    void Reset() OVERRIDE
     {
         _Reset();
     }
-    void EnterCombat(Unit* /*who*/)
+    void EnterCombat(Unit* /*who*/) OVERRIDE
     {
         _EnterCombat();
     }
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* /*killer*/) OVERRIDE
     {
         _JustDied();
     }
-    void JustReachedHome()
+    void JustReachedHome() OVERRIDE
     {
         _JustReachedHome();
     }
@@ -453,14 +454,13 @@ class WorldBossAI : public ScriptedAI
     void JustSummoned(Creature* summon);
     void SummonedCreatureDespawn(Creature* summon);
 
-    virtual void UpdateAI(uint32 diff);
+    void UpdateAI(uint32 diff) OVERRIDE;
 
     // Hook used to execute events scheduled into EventMap without the need
     // to override UpdateAI
     // note: You must re-schedule the event within this method if the event
     // is supposed to run more than once
-    virtual void ExecuteEvent(uint32 /*eventId*/)
-    { }
+    void ExecuteEvent(uint32 /*eventId*/) OVERRIDE { }
 
     void Reset()
     {
