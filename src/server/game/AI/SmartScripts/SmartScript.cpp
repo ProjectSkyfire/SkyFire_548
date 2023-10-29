@@ -2227,6 +2227,58 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             delete targets;
             break;
         }
+        case SMART_ACTION_RANDOM_SOUND:
+        {
+            ObjectList* targets = GetTargets(e, unit);
+            if (!targets)
+                break;
+
+            uint32 sounds[SMART_ACTION_PARAM_COUNT - 1];
+            sounds[0] = e.action.randomSound.sound1;
+            sounds[1] = e.action.randomSound.sound2;
+            sounds[2] = e.action.randomSound.sound3;
+            sounds[3] = e.action.randomSound.sound4;
+            sounds[4] = e.action.randomSound.sound5;
+
+            bool onlySelf = e.action.randomSound.onlySelf != 0;
+
+            uint32 temp[SMART_ACTION_PARAM_COUNT - 1];
+            uint32 count = 0;
+            for (uint8 i = 0; i < SMART_ACTION_PARAM_COUNT - 1; i++)
+            {
+                if (sounds[i])
+                {
+                    temp[count] = sounds[i];
+                    ++count;
+                }
+            }
+
+            if (count == 0)
+            {
+                delete targets;
+                break;
+            }
+
+            if (ObjectList* targets = GetTargets(e, unit))
+            {
+                for (WorldObject* const obj : *targets)
+                {
+                    if (IsUnit(obj))
+                    {
+                        uint32 sound = temp[urand(0, count - 1)];
+                        obj->PlayDirectSound(sound, onlySelf ? obj->ToPlayer() : nullptr);
+                        SF_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_RANDOM_SOUND: target: %s (" UI64FMTD "), sound: %u, onlyself: %s",
+                            obj->GetName().c_str(), obj->GetGUID(), sound, onlySelf ? "true" : "false");
+                    }
+                }
+
+                delete targets;
+                break;
+            }
+
+            delete targets;
+            break;
+        }
         default:
             SF_LOG_ERROR("sql.sql", "SmartScript::ProcessAction: Entry %d SourceType %u, Event %u, Unhandled Action type %u", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
             break;
