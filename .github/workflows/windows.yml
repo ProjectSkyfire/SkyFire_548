@@ -58,4 +58,8 @@ jobs:
         cmake .. -DTOOLS=ON-A x64
         cmake --build . --config RelWithDebInfo --parallel 4
       #git bash shell
+      shell: bash
+    - name: Create Upload File Name
+      run: |
+          echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $env:GITHUB_ENV
       
