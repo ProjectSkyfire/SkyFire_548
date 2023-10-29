@@ -43,7 +43,7 @@ jobs:
         #make
         choco install -y make
         #cmake
-        choco install -y cmake
+        choco install -y cmake --pre 
         #openssl
         choco install -y openssl
       #git bash shell
