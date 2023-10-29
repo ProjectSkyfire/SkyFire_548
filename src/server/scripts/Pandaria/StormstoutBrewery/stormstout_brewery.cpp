@@ -23,7 +23,7 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
 
     if (instance->GetData64(DATA_BANANA_EVENT) > 39)
     {
-        if (Creature* pOokOok = creature->SummonCreature(NPC_OOK_OOK, -750.555f, 1334.4f, 162.71f, 1.83f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
+        if (Creature* pOokOok = creature->FindNearestCreature(NPC_OOK_OOK, 45.0f, true))
         {
             // Note: should be Yell instead of Say
             pOokOok->MonsterSay(SAY_OOK_OOK_1, Language::LANG_UNIVERSAL, 0);
