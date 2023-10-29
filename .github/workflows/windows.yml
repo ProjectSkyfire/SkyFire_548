@@ -67,7 +67,6 @@ jobs:
           #data is in Release folder
           cd ${{github.workspace}}/build/bin
           dir
-          copy c:/mysql/lib/libmysql.dll ${{github.workspace}}/build/bin/RelWithDebInfo/libmysql.dll
           copy "c:/Program Files/OpenSSL-Win64/bin/libssl-1_1-x64.dll" ${{github.workspace}}/build/bin/RelWithDebInfo/libssl-1_1-x64.dll
           copy "c:/Program Files/OpenSSL-Win64/bin/libcrypto-1_1-x64.dll" ${{github.workspace}}/build/bin/RelWithDebInfo/libcrypto-1_1-x64.dll
           7z a -tzip ${{env.ARCHIVE_FILENAME}} RelWithDebInfo
