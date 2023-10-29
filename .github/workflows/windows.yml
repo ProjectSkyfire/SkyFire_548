@@ -58,39 +58,4 @@ jobs:
         cmake .. -DTOOLS=ON-A x64
         cmake --build . --config RelWithDebInfo --parallel 4
       #git bash shell
-      shell: bash
-    - name: Create Upload File Name
-      run: |
-          echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $env:GITHUB_ENV
-    - name: Archive files
-      run: |
-          #data is in Release folder
-          cd ${{github.workspace}}/build/bin
-          dir
-          copy "c:/Program Files/OpenSSL-Win64/bin/libssl-1_1-x64.dll" ${{github.workspace}}/build/bin/RelWithDebInfo/libssl-1_1-x64.dll
-          copy "c:/Program Files/OpenSSL-Win64/bin/libcrypto-1_1-x64.dll" ${{github.workspace}}/build/bin/RelWithDebInfo/libcrypto-1_1-x64.dll
-          7z a -tzip ${{env.ARCHIVE_FILENAME}} RelWithDebInfo
-    - name: Archive this artefact
-      uses: actions/upload-artifact@v2
-      with:
-          name: snapshot-devbuild
-          path: "${{github.workspace}}/build/bin/${{env.ARCHIVE_FILENAME}}"
-
-    - name: Download artifact snapshot-Release
-      uses: actions/download-artifact@v1
-      with:
-        name: snapshot-devbuild
-        path: all_snapshots
-
-    - name: Get current date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
-    - name: Upload snapshot
-      uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Development Build(${{ steps.date.outputs.date }})"
-        files: all_snapshots
+      
