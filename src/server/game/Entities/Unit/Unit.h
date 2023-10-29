@@ -2934,6 +2934,8 @@ class Unit : public WorldObject
     CharmInfo* m_charmInfo;
     SharedVisionList m_sharedVision;
 
+    void SendMissileCancel(uint32 spellId, bool cancel = true);
+
     virtual SpellSchoolMask GetMeleeDamageSchoolMask() const;
 
     MotionMaster i_motionMaster;

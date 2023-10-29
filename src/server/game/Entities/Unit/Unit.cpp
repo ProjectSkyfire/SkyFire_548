@@ -17139,3 +17139,16 @@ void Unit::SendSetVehicleRecId(uint32 vehicleId)
 
     SendMessageToSet(&data, true);
 }
+
+void Unit::SendMissileCancel(uint32 spellId, bool cancel)
+{
+    ObjectGuid guid = GetGUID();
+    WorldPacket data{ SMSG_MISSILE_CANCEL };
+    data.WriteGuidMask(guid, 6, 1, 4, 7, 0, 2, 5);
+    data.WriteBit(cancel);
+    data.WriteGuidMask(guid, 3);
+    data.WriteGuidBytes(guid, 4, 1);
+    data << spellId;
+    data.WriteGuidBytes(guid, 2, 3, 7, 5, 0, 6);
+    SendMessageToSet(&data, true);
+}
