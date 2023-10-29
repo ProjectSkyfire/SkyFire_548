@@ -426,6 +426,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_WHO,                                          0x18A3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleWhoOpcode                           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_STATE_UI_TIMER_UPDATE,                  0x15AB, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleWorldStateUITimerUpdate             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CORPSE_QUERY,                                 0x1FBE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCorpseQueryOpcode                   ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_VOICE_SESSION_ENABLE,                         0x15A9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleVoiceSessionEnableOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_FALL_LAND,                                0x08FA, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_HEARTBEAT,                                0x01F2, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_JUMP,                                     0x1153, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
@@ -518,7 +519,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SET_SAVED_INSTANCE_EXTEND, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetSavedInstanceExtend);
     DEFINE_OPCODE_HANDLER(CMSG_UPDATE_MISSILE_TRAJECTORY, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUpdateMissileTrajectory);
     DEFINE_OPCODE_HANDLER(CMSG_UPDATE_PROJECTILE_POSITION, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleUpdateProjectilePosition);
-    DEFINE_OPCODE_HANDLER(CMSG_VOICE_SESSION_ENABLE, 0x15A9, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleVoiceSessionEnableOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_WARDEN_DATA, 0x1816, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_WHOIS, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWhoisOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_TELEPORT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWorldTeleportOpcode);
