@@ -105,7 +105,7 @@ std::string GetScriptCommandName(ScriptCommands command)
         default:
         {
             char sz[32];
-            snprintf(sz, sizeof(sz), "Unknown command: %bd", command);
+            snprintf(sz, sizeof(sz), "Unknown command: %d", uint32(command));
             res = sz;
             break;
         }
