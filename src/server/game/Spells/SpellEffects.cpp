@@ -3538,7 +3538,11 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 }
                 // Emblazon Runeblade
                 case 51770:
-                    m_caster->CastSpell(unitTarget, 51771, false);
+                {
+                    m_caster->CastSpell(unitTarget, 51771, false); 
+                    return;
+                }
+
                 // Death Knight Initiate Visual
                 case 51519:
                 {

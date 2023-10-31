@@ -5533,7 +5533,10 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
             }
             // Emblazon Runeblade
             case 51769:
+            {
                 caster->CastSpell(target, triggerSpellId, false);
+                return;
+            }
         }
     }
 
