@@ -5,6 +5,7 @@ DELETE FROM `spell_area` WHERE `spell`=40200;
 DELETE FROM `areatrigger_tavern` WHERE `id`=4961;
 
 DELETE FROM `game_graveyard_zone` WHERE `ghost_zone`=4755;
+DELETE FROM `game_graveyard_zone` WHERE `ghost_zone` IN (4756, 4757, 4758, 4759);
 INSERT INTO `game_graveyard_zone` (`id`, `ghost_zone`, `faction`) VALUES
 (1692, 4756, 0), -- Merchant Quarter Graveyard
 (1693, 4757, 0), -- Military District Graveyard
