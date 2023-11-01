@@ -23,5 +23,10 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) 
 
 -- Stolen Watermelon
 DELETE FROM `gameobject_loot_template` WHERE `entry`=40518;
-INSERT INTO `sf_world`.`gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
 (40518, 76298, -100);
+
+-- Gurthani Tablet
+DELETE FROM `gameobject_loot_template` WHERE `entry`=42818;
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+(42818, 85634, -100);
