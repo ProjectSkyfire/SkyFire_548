@@ -785,21 +785,21 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     PetType petType = MAX_PET_TYPE;
     if (IsPet() && GetOwner()->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
-        if (GetOwner()->getClass() == CLASS_WARLOCK
-                || GetOwner()->getClass() == CLASS_SHAMAN        // Fire Elemental
-                || GetOwner()->getClass() == CLASS_DEATH_KNIGHT) // Risen Ghoul
+        switch (GetOwner()->getClass())
         {
-            petType = SUMMON_PET;
-        }
-        else if (GetOwner()->getClass() == CLASS_HUNTER)
-        {
-            petType = HUNTER_PET;
-            m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
-        }
-        else
-        {
-            SF_LOG_ERROR("entities.pet", "Unknown type pet %u is summoned by player class %u",
-                           GetEntry(), GetOwner()->getClass());
+            case CLASS_WARLOCK:
+            case CLASS_SHAMAN:       // Fire Elemental
+            case CLASS_DEATH_KNIGHT: // Risen Ghoul
+            case CLASS_MAGE:
+                petType = SUMMON_PET;
+                break;
+            case CLASS_HUNTER:
+                petType = HUNTER_PET;
+                m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
+                break;
+            default:
+                SF_LOG_ERROR("entities.pet", "Unknown type pet %u is summoned by player class %u", GetEntry(), GetOwner()->getClass());
+                break;
         }
     }
 
