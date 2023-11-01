@@ -89,6 +89,25 @@ class SpellCastTargets
         void Read(ByteBuffer& data, Unit* caster);
         void Write(ByteBuffer& data);
 
+        void Initialize(uint32 flags, uint64 target, uint64 itemTarget, uint64 dest, WorldLocation destPos, uint64 src, WorldLocation srcPos)
+        {
+            m_targetMask = flags;
+            m_objectTargetGUID = target;
+            m_itemTargetGUID = itemTarget;
+
+            // dest
+            m_dst._transportGUID = dest;
+            m_dst._position = destPos;
+            if (dest)
+                m_dst._transportOffset = destPos;
+
+            // src
+            m_src._transportGUID = src;
+            m_src._position = srcPos;
+            if (src)
+                m_src._transportOffset = srcPos;
+        }
+
         uint32 GetTargetMask() const { return m_targetMask; }
         void SetTargetMask(uint32 newMask) { m_targetMask = newMask; }
 
