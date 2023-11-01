@@ -155,6 +155,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_DEL_IGNORE,                                   0x0737, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDelIgnoreOpcode                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DESTROY_ITEM,                                 0x0026, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDestroyItemOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CRITTER,                              0x12DB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDismissCritter                      ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE,                   0x09FA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_PROPOSED,                                0x1A26, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDuelProposedOpcode                  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_RESPONSE,                                0x03E2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDuelResponseOpcode                  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_EMOTE,                                        0x1924, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleEmoteOpcode                         ); // 5.4.8 18414
@@ -466,7 +467,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_VOICE_OFF, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceOnOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_VOICE_ON, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceOnOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_COMPLAIN, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleComplainOpcode);
-    DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle);
     DEFINE_OPCODE_HANDLER(CMSG_ENABLE_NAGLE, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_EarlyProccess);
     DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve);
     DEFINE_OPCODE_HANDLER(CMSG_GMSURVEY_SUBMIT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmit);
