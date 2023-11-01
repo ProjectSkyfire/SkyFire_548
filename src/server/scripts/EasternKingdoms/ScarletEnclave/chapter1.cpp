@@ -13,6 +13,7 @@
 #include "PassiveAI.h"
 #include "Player.h"
 #include "SpellInfo.h"
+#include "SpellScript.h"
 #include "CreatureTextMgr.h"
 
 /*######
@@ -1056,6 +1057,154 @@ class npc_scarlet_miner : public CreatureScript
         }
 };
 
+enum eyeOfAcherus
+{
+    EVENT_REMOVE_CONTROL = 1,
+    EVENT_SPEAK_1 = 2,
+    EVENT_LAUNCH = 3,
+    EVENT_REGAIN_CONTROL = 4,
+
+    EYE_TEXT_LAUNCH = 0,
+    EYE_TEXT_CONTROL = 1,
+
+    EYE_POINT_DESTINATION_1 = 0,
+    EYE_POINT_DESTINATION_2 = 1,
+
+    SPELL_THE_EYE_OF_ACHERUS = 51852,
+    SPELL_EYE_VISUAL = 51892,
+    SPELL_EYE_FLIGHT_BOOST = 51923,
+    SPELL_EYE_FLIGHT = 51890,
+};
+
+class npc_eye_of_acherus : public CreatureScript
+{
+public:
+    npc_eye_of_acherus() : CreatureScript("npc_eye_of_acherus") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_eye_of_acherusAI(creature);
+    }
+
+    struct npc_eye_of_acherusAI : public NullCreatureAI
+    {
+        npc_eye_of_acherusAI(Creature* creature) : NullCreatureAI(creature)
+        {
+            creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid1);
+
+            if (Player* owner = me->GetCharmerOrOwner()->ToPlayer())
+                me->GetCharmInfo()->InitPossessCreateSpells();
+
+            creature->SetReactState(REACT_PASSIVE);
+        }
+
+        EventMap events;
+
+        void InitializeAI()
+        {
+            events.Reset();
+            events.ScheduleEvent(EVENT_REMOVE_CONTROL, 500);
+            events.ScheduleEvent(EVENT_SPEAK_1, 4000);
+            events.ScheduleEvent(EVENT_LAUNCH, 7000);
+
+            DoCast(SPELL_EYE_VISUAL);
+            DoCast(SPELL_EYE_FLIGHT);
+        }
+
+        void OnCharmed(bool apply) override
+        {
+            if (!apply)
+            {
+                me->GetCharmerOrOwner()->RemoveAurasDueToSpell(SPELL_THE_EYE_OF_ACHERUS);
+                me->GetCharmerOrOwner()->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 point)
+        {
+            if (type == POINT_MOTION_TYPE && point == EYE_POINT_DESTINATION_2)
+                events.ScheduleEvent(EVENT_REGAIN_CONTROL, 1000);
+        }
+
+        void JustSummoned(Creature* creature)
+        {
+            if (Unit* target = creature->SelectNearbyTarget())
+                creature->AI()->AttackStart(target);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+            switch (events.ExecuteEvent())
+            {
+            case EVENT_REMOVE_CONTROL:
+                DoCast(SPELL_EYE_FLIGHT_BOOST);
+                if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                    player->SetClientControl(me, 0);
+                }
+                break;
+            case EVENT_SPEAK_1:
+                Talk(EYE_TEXT_LAUNCH, me->GetCharmerOrOwner());
+                break;
+            case EVENT_LAUNCH:
+            {
+                me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
+
+                const Position EYE_DESTINATION_1 = { me->GetPositionX() - 40.0f, me->GetPositionY(), me->GetPositionZ() + 10.0f, 0.0f };
+                const Position EYE_DESTINATION_2 = { 1768.0f, -5876.0f, 153.0f, 0.0f };
+
+                me->GetMotionMaster()->MovePoint(EYE_POINT_DESTINATION_1, EYE_DESTINATION_1);
+                me->GetMotionMaster()->MovePoint(EYE_POINT_DESTINATION_2, EYE_DESTINATION_2);
+                break;
+            }
+            case EVENT_REGAIN_CONTROL:
+                if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                    me->SetSpeed(MOVE_FLIGHT, 3.3f, true);
+
+                    me->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+                    player->SetClientControl(me, 1);
+                    Talk(EYE_TEXT_CONTROL, player);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
+                }
+                break;
+            }
+        }
+    };
+};
+
+class spell_q12641_death_comes_from_on_high_summon_ghouls : public SpellScriptLoader
+{
+public:
+    spell_q12641_death_comes_from_on_high_summon_ghouls() : SpellScriptLoader("spell_q12641_death_comes_from_on_high_summon_ghouls") { }
+
+    class spell_q12641_death_comes_from_on_high_summon_ghouls_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q12641_death_comes_from_on_high_summon_ghouls_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex effIndex)
+        {
+            PreventHitEffect(effIndex);
+            if (Unit* target = GetHitUnit())
+                GetCaster()->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 54522, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12641_death_comes_from_on_high_summon_ghouls_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_q12641_death_comes_from_on_high_summon_ghouls_SpellScript();
+    }
+};
+
 // npc 28912 quest 17217 boss 29001 mob 29007 go 191092
 
 void AddSC_the_scarlet_enclave_c1()
@@ -1071,4 +1220,6 @@ void AddSC_the_scarlet_enclave_c1()
     new npc_scarlet_ghoul();
     new npc_scarlet_miner();
     new npc_scarlet_miner_cart();
+    new npc_eye_of_acherus();
+    new spell_q12641_death_comes_from_on_high_summon_ghouls();
 }
