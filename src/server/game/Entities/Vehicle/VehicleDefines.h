@@ -42,6 +42,21 @@ enum PowerType
     POWER_CONSUMING_FLAME                        = 177,
     POWER_PYROCLASTIC_FRENZY                     = 178,
     POWER_FLASHFIRE                              = 179,
+    POWER_FEL_ENERGY                             = 181,
+    POWER_BACK_HEAT                              = 183,
+    POWER_JADE_POWER                             = 187,
+    POWER_COBALT_POWER                           = 188,
+    POWER_JASPER_POWER                           = 189,
+    POWER_AMETHYST_POWER                         = 190,
+    POWER_ARCANE_ENERGY                          = 191,
+    POWER_RED_POWER                              = 192,
+    POWER_RED_POWER_2                            = 196,
+    POWER_WILLPOWER                              = 198,
+    POWER_DARK_POWER                             = 199,
+    POWER_GOLD_POWER                             = 200,
+    POWER_RESONANCE                              = 201,
+    POWER_SHA_ENERGY                             = 203,
+    POWER_FOOD                                   = 206
 };
 
 enum VehicleFlags
