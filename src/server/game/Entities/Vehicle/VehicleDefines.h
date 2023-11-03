@@ -48,7 +48,7 @@ enum PowerType
     POWER_COBALT_POWER                           = 188,
     POWER_JASPER_POWER                           = 189,
     POWER_AMETHYST_POWER                         = 190,
-    POWER_ARCANE_ENERGY                          = 191,
+    POWER_ARCANE_ENERGY_2                        = 191,
     POWER_RED_POWER                              = 192,
     POWER_RED_POWER_2                            = 196,
     POWER_WILLPOWER                              = 198,
