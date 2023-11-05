@@ -42,9 +42,9 @@ public:
                 if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
                 {
                     Naga->setFaction(14);
-                    Naga->GetMotionMaster()->MovePoint(1, NagaPos);
-                    Naga->MonsterYell(1, Language::LANG_UNIVERSAL, 0);
                     Naga->RemoveFlag(1, UNIT_FLAG_NOT_SELECTABLE);
+                    Naga->GetMotionMaster()->MovePoint(1, NagaPos);
+                    Naga->MonsterYell("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
                 }
             }
             else
@@ -61,7 +61,9 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
             creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos);
-            creature->MonsterYell(1, Language::LANG_UNIVERSAL, 0);
+            
+            const char* text = player->getGender() == GENDER_MALE ? "Get in the pit and show us your stuff, boy." : "Get in the pit and show us your stuff, girl.";
+            creature->MonsterYell(text, Language::LANG_UNIVERSAL, creature);
             player->KilledMonsterCredit(39062);
             
         }
