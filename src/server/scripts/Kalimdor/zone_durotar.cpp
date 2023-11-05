@@ -42,7 +42,8 @@ public:
                 if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
                 {
                     Naga->setFaction(14);
-                    Naga->RemoveFlag(1, UNIT_FLAG_NOT_SELECTABLE);
+                    Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                     Naga->GetMotionMaster()->MovePoint(1, NagaPos);
                     Naga->MonsterYell("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
                 }
