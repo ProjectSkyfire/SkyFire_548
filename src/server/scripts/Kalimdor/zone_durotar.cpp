@@ -5,8 +5,79 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "SpellScript.h"
 #include "Player.h"
+
+
+/*######
+## Quest: Proving Pit: 24642, 24754, 24762, 24768, 24774, 24780, 24786, 26276, 31161
+## npc_darkspear_jailor
+######*/
+
+Position DarkSpearJailorPos = { -1153.53f, -5519.42f, 11.98f, 6.27f };
+Position NagaPos = { -1149.90f, -5527.76f, 8.10f, 4.76f };
+
+class npc_darkspear_jailor : public CreatureScript
+{
+public:
+    npc_darkspear_jailor() : CreatureScript("npc_darkspear_jailor") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_darkspear_jailorAI(creature);
+    }
+
+    struct npc_darkspear_jailorAI : public ScriptedAI
+    {
+        npc_darkspear_jailorAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type == POINT_MOTION_TYPE && id == 1)
+            {
+                if (GameObject* cage = me->FindNearestGameObject(201968, 5.0f))
+                    cage->UseDoorOrButton(30000);
+
+                if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
+                {
+                    Naga->setFaction(14);
+                    Naga->GetMotionMaster()->MovePoint(1, NagaPos);
+                    Naga->MonsterYell(1, Language::LANG_UNIVERSAL, 0);
+                    Naga->RemoveFlag(1, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+            else
+                npc_darkspear_jailorAI::MovementInform(type, id);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE {  }
+    };
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos);
+            creature->MonsterYell(1, Language::LANG_UNIVERSAL, 0);
+            player->KilledMonsterCredit(39062);
+            
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm ready to face my challenge.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+};
+
+
 
 /*######
 ## Quest 25134: Lazy Peons
@@ -144,6 +215,7 @@ class spell_voodoo : public SpellScriptLoader
 
 void AddSC_durotar()
 {
+    new npc_darkspear_jailor();
     new npc_lazy_peon();
     new spell_voodoo();
 }
