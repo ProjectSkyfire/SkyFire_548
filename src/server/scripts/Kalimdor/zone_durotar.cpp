@@ -16,7 +16,9 @@
 ######*/
 
 Position DarkSpearJailorPos = { -1153.53f, -5519.42f, 11.98f, 6.27f };
+Position DarkSpearJailorPos2 = { -1135.68f, -5417.78f, 13.26f, 1.47f };
 Position NagaPos = { -1149.90f, -5527.76f, 8.10f, 4.76f };
+Position NagaPos2 = { -1141.74f, -5414.54f, 10.59f, 3.42f };
 
 class npc_darkspear_jailor : public CreatureScript
 {
@@ -39,14 +41,29 @@ public:
                 if (GameObject* cage = me->FindNearestGameObject(201968, 5.0f))
                     cage->UseDoorOrButton(30000);
 
-                if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
+                if (Creature* monk = me->FindNearestCreature(63310, 25.0f))
                 {
-                    Naga->setFaction(14);
-                    Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    Naga->GetMotionMaster()->MovePoint(1, NagaPos);
-                    Naga->MonsterYell("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
+                    if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
+                    {
+                        Naga->setFaction(14);
+                        Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        Naga->GetMotionMaster()->MovePoint(1, NagaPos2);
+                        Naga->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
+                    }
                 }
+                else
+                {
+                    if (Creature* Naga2 = me->FindNearestCreature(38142, 5.0f))
+                    {
+                        Naga2->setFaction(14);
+                        Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        Naga2->GetMotionMaster()->MovePoint(1, NagaPos);
+                        Naga2->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
+                    }
+                }
+                
             }
             else
                 npc_darkspear_jailorAI::MovementInform(type, id);
@@ -61,10 +78,16 @@ public:
         if (action == GOSSIP_ACTION_INFO_DEF)
         {
             player->CLOSE_GOSSIP_MENU();
-            creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos);
-            
+            if (Creature* monk = creature->FindNearestCreature(63310, 15.0f))
+            {
+                creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos2);
+            }
+            else
+            {
+                creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos);
+            }
             const char* text = player->getGender() == GENDER_MALE ? "Get in the pit and show us your stuff, boy." : "Get in the pit and show us your stuff, girl.";
-            creature->MonsterYell(text, Language::LANG_UNIVERSAL, creature);
+            creature->MonsterSay(text, Language::LANG_UNIVERSAL, creature);
             player->KilledMonsterCredit(39062);
             
         }
