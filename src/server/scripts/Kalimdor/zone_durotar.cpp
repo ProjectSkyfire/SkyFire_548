@@ -78,7 +78,7 @@ public:
         if (action == GOSSIP_ACTION_INFO_DEF)
         {
             player->CLOSE_GOSSIP_MENU();
-            if (Creature* monk = creature->FindNearestCreature(63310, 15.0f))
+            if (Creature* monk = creature->FindNearestCreature(63310, 25.0f))
             {
                 creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos2);
             }
