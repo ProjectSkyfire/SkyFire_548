@@ -87,21 +87,56 @@ void WorldSession::HandleSwapInvItemOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleAutoEquipItemSlotOpcode(WorldPacket& recvData)
 {
-    uint64 itemguid;
-    uint8 dstslot;
-    recvData >> itemguid >> dstslot;
+    uint8 slot = recvData.read<uint8>();
+    ObjectGuid itemGuid;
+    recvData.ReadGuidMask(itemGuid, 6, 3, 0);
+    uint32 length = recvData.ReadBits(2);
+    recvData.ReadGuidMask(itemGuid, 7);
 
-    // cheating attempt, client should never send opcode in that case
-    if (!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0, dstslot))
+    struct Unk14
+    {
+        uint8 Unk0;
+        uint8 Unk1;
+    };
+
+    std::vector<Unk14> unk14;
+    for (uint32 i = 0; i < length; ++i)
+    {
+        Unk14 u;
+        u.Unk1 = recvData.ReadBit();
+        u.Unk0 = recvData.ReadBit();
+        unk14.push_back(u);
+    }
+    recvData.ReadGuidMask(itemGuid, 5, 2, 1, 4);
+    recvData.ReadGuidBytes(itemGuid, 6, 3, 1, 7, 2, 0, 4, 5);
+
+    for (auto&& itr : unk14)
+    {
+        if (itr.Unk1)
+            itr.Unk1 = recvData.read<uint8>();
+        if (itr.Unk0)
+            itr.Unk0 = recvData.read<uint8>();
+    }
+
+    Item* item = GetPlayer()->GetItemByGuid(itemGuid);
+    if (!item)
+    {
+        GetPlayer()->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL);
+        return;
+    }
+
+    if (slot >= EQUIPMENT_SLOT_END)
+    {
+        GetPlayer()->SendEquipError(EQUIP_ERR_WRONG_SLOT, NULL);
+        return;
+    }
+
+    uint16 dstpos = slot | (INVENTORY_SLOT_BAG_0 << 8);
+
+    if (item->GetPos() == dstpos)
         return;
 
-    Item* item = _player->GetItemByGuid(itemguid);
-    uint16 dstpos = dstslot | (INVENTORY_SLOT_BAG_0 << 8);
-
-    if (!item || item->GetPos() == dstpos)
-        return;
-
-    _player->SwapItem(item->GetPos(), dstpos);
+    GetPlayer()->SwapItem(item->GetPos(), dstpos);
 }
 
 void WorldSession::HandleSwapItem(WorldPacket& recvData)
