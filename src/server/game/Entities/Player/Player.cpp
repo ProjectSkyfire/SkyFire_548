@@ -975,9 +975,6 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     // original spells
     learnDefaultSpells();
 
-    if (getClass() == CLASS_MONK)
-        CastSpell(this, 103985, true); // Stance of the Fierce Tiger
-
     // original action bar
     for (PlayerCreateInfoActions::const_iterator action_itr = info->action.begin(); action_itr != info->action.end(); ++action_itr)
         addActionButton(action_itr->button, action_itr->action, ActionButtonType(action_itr->type));
