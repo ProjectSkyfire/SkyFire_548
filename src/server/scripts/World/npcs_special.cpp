@@ -2471,10 +2471,33 @@ public:
         npc_training_targetAI(Creature* creature) : ScriptedAI(creature)
         {
             SetCombatMovement(false);
-            entry = creature->GetEntry();
         }
 
-        uint32 entry;
+        void Reset() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+            // disable rotate
+            me->SetControlled(true, UNIT_STATE_STUNNED);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override
+        {
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (_EnterEvadeMode())
+                Reset();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!me->HasUnitState(UNIT_STATE_STUNNED))
+                me->SetControlled(true, UNIT_STATE_STUNNED);
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

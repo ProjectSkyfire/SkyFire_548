@@ -1,0 +1,2 @@
+UPDATE `creature_template` SET `mindmg`=0, `maxdmg`=0, `unit_flags`=4, `unit_flags2`=0, `flags_extra`=2359380 WHERE `entry`=53714;
+UPDATE `creature_template` SET `mindmg`=0, `maxdmg`=0, `unit_flags`=4, `flags_extra`=2359296 WHERE `entry`=57873;
