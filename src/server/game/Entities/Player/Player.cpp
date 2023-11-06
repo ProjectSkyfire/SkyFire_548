@@ -972,9 +972,11 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         SetMaxPower(POWER_RUNIC_POWER, 1000);
     }
 
-
     // original spells
     learnDefaultSpells();
+
+    if (getClass() == CLASS_MONK)
+        CastSpell(this, 103985, true); // Stance of the Fierce Tiger
 
     // original action bar
     for (PlayerCreateInfoActions::const_iterator action_itr = info->action.begin(); action_itr != info->action.end(); ++action_itr)
