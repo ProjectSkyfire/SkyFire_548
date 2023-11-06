@@ -490,9 +490,6 @@ void WorldSession::LogoutPlayer(bool save)
             _player->SetPendingBind(0, 0);
         }
 
-        if (_player->HasAuraType(SPELL_AURA_MOD_SPEED_ALWAYS))
-            _player->RemoveAurasByType(SPELL_AURA_MOD_SPEED_ALWAYS);
-
         //drop a flag if player is carrying it
         if (Battleground* bg = _player->GetBattleground())
             bg->EventPlayerLoggedOut(_player);
