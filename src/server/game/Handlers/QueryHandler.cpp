@@ -532,16 +532,16 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
 
     while (pageID)
     {
+        WorldPacket data(SMSG_PAGE_TEXT_QUERY_RESPONSE);
+
         PageText const* pageText = sObjectMgr->GetPageText(pageID);
-                                                            // guess size
-        WorldPacket data(SMSG_PAGE_TEXT_QUERY_RESPONSE, 50);
-        data << pageID;
+
+        data.WriteBit(pageText != NULL);
 
         if (!pageText)
         {
-            data << "Item page missing.";
+            data.FlushBits();
             data << uint32(0);
-            pageID = 0;
         }
         else
         {
@@ -552,10 +552,19 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recvData)
                 if (PageTextLocale const* player = sObjectMgr->GetPageTextLocale(pageID))
                     ObjectMgr::GetLocaleString(player->Text, loc_idx, Text);
 
-            data << Text;
+            data.WriteBits(Text.size(), 12);
+
+            data.FlushBits();
+
             data << uint32(pageText->NextPage);
-            pageID = pageText->NextPage;
+            data << uint32(pageID);
+
+            data.WriteString(Text);
+            data << uint32(pageID);
         }
+
+        pageID = pageText ? pageText->NextPage : 0;
+
         SendPacket(&data);
 
         SF_LOG_DEBUG("network", "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE");
