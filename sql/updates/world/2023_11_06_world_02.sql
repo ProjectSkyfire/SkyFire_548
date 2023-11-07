@@ -1,5 +1,4 @@
-DELETE FROM `playercreateinfo_action` WHERE `class`=10 AND `action` IN
-(59752, 20572, 20594, 58984, 20577, 20549, 20589, 28730, 59542, 107079);
+DELETE FROM `playercreateinfo_action` WHERE `class`=10 AND `button` IN (9, 81);
 INSERT INTO `playercreateinfo_action` (`race`, `class`, `button`, `action`, `type`) VALUES 
 (1, 10, 9, 59752, 0), -- Every Man for Himself (Racial)
 (2, 10, 9, 20572, 0), -- Blood Fury (Racial) 
