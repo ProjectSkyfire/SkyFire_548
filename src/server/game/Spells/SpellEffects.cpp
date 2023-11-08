@@ -241,7 +241,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectRemoveTalent,                             //181 SPELL_EFFECT_REMOVE_TALENT
     &Spell::EffectNULL,                                     //182 SPELL_EFFECT_182
     &Spell::EffectUnused,                                   //183 SPELL_EFFECT_183          unused
-    &Spell::EffectNULL,                                     //184 SPELL_EFFECT_184
+    &Spell::EffectReputation,                               //184 SPELL_EFFECT_REPUTATION_2
     &Spell::EffectNULL,                                     //185 SPELL_EFFECT_185
     &Spell::EffectNULL,                                     //186 SPELL_EFFECT_186
     &Spell::EffectNULL,                                     //187 SPELL_EFFECT_187
@@ -265,7 +265,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //205 SPELL_EFFECT_205
     &Spell::EffectNULL,                                     //206 SPELL_EFFECT_206
     &Spell::EffectUnused,                                   //207 SPELL_EFFECT_207          unused
-    &Spell::EffectReputation,                               //208 SPELL_EFFECT_REPUTATION_2 one spell: Test Reputation Set (142250)
+    &Spell::EffectReputation,                               //208 SPELL_EFFECT_REPUTATION_3 one spell: Test Reputation Set (142250)
     &Spell::EffectNULL,                                     //209 SPELL_EFFECT_209          one spell: QA Test Spell (150808)
     &Spell::EffectUnused,                                   //210 SPELL_EFFECT_210          unused
     &Spell::EffectUnused,                                   //211 SPELL_EFFECT_211          unused
