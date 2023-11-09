@@ -15857,6 +15857,13 @@ void Player::CompleteQuest(uint32 quest_id)
                 RewardQuest(qInfo, 0, this, false);
             else
                 SendQuestComplete(qInfo);
+
+            uint32 zone = 0, area = 0;
+
+            GetZoneAndAreaId(zone, area);
+            UpdateZoneDependentAuras(zone);
+            UpdateAreaDependentAuras(area);
+            UpdateForQuestWorldObjects();
         }
     }
 }
