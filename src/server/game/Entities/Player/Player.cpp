@@ -15816,6 +15816,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         {
             case TypeID::TYPEID_UNIT:
                 sScriptMgr->OnQuestAccept(this, (questGiver->ToCreature()), quest);
+                questGiver->ToCreature()->AI()->sQuestAccept(this, quest);
                 break;
             case TypeID::TYPEID_ITEM:
             case TypeID::TYPEID_CONTAINER:
@@ -15831,6 +15832,13 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
                 break;
         }
     }
+
+    uint32 zone = 0, area = 0;
+
+    GetZoneAndAreaId(zone, area);
+    UpdateZoneDependentAuras(zone);
+    UpdateAreaDependentAuras(area);
+    UpdateForQuestWorldObjects();
 }
 
 void Player::CompleteQuest(uint32 quest_id)
