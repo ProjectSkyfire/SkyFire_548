@@ -7431,9 +7431,29 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
     if (this == target)
         return REP_FRIENDLY;
 
+    if (!target)
+        return REP_FRIENDLY;
+
     // always friendly to charmer or owner
     if (GetCharmerOrOwnerOrSelf() == target->GetCharmerOrOwnerOrSelf())
         return REP_FRIENDLY;
+
+    Player const* selfPlayerOwner = GetAffectingPlayer();
+    Player const* targetPlayerOwner = target->GetAffectingPlayer();
+
+    // check forced reputation to support SPELL_AURA_FORCE_REACTION
+    if (selfPlayerOwner)
+    {
+        if (FactionTemplateEntry const* targetFactionTemplateEntry = target->GetFactionTemplateEntry())
+            if (ReputationRank const* repRank = selfPlayerOwner->GetReputationMgr().GetForcedRankIfAny(targetFactionTemplateEntry))
+                return *repRank;
+    }
+    else if (targetPlayerOwner)
+    {
+        if (FactionTemplateEntry const* selfFactionTemplateEntry = GetFactionTemplateEntry())
+            if (ReputationRank const* repRank = targetPlayerOwner->GetReputationMgr().GetForcedRankIfAny(selfFactionTemplateEntry))
+                return *repRank;
+    }
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
     {
