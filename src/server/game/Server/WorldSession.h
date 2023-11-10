@@ -629,6 +629,7 @@ class WorldSession
         void HandleSetLfgBonusFactionID(WorldPacket& recvData);
         void HandleSetWatchedFactionOpcode(WorldPacket& recvData);
         void HandleSetFactionInactiveOpcode(WorldPacket& recvData);
+        void HandleRequestForcedReactionsOpcode(WorldPacket& recvData);
 
         void HandleUpdateAccountData(WorldPacket& recvPacket);
         void HandleRequestAccountData(WorldPacket& recvPacket);

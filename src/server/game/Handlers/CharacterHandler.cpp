@@ -1223,6 +1223,13 @@ void WorldSession::HandleSetFactionInactiveOpcode(WorldPacket& recvData)
     _player->GetReputationMgr().SetInactive(FactionIndex, Status);
 }
 
+void WorldSession::HandleRequestForcedReactionsOpcode(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_FORCED_REACTIONS");
+
+    _player->GetReputationMgr().SendForceReactions();
+}
+
 void WorldSession::HandleShowingHelmOpcode(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "CMSG_SHOWING_HELM for %s", _player->GetName().c_str());

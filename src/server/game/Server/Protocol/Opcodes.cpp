@@ -319,6 +319,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_NEXT_SEAT,                    0x0141, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_PREV_SEAT,                    0x03C4, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_SWITCH_SEAT,                  0x1143, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle      ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_FORCED_REACTIONS,                     0x06F5, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestForcedReactionsOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PLAYER_LOGIN,                                 0x158F, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePlayerLoginOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PUSHQUESTTOPARTY,                             0x03D2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePushQuestToParty                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PVP_LOG_DATA,                                 0x14C2, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandlePVPLogDataOpcode                    ); // 5.4.8 18414
