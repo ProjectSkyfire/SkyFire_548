@@ -26,6 +26,37 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+
+enum the_dawning_valley
+{
+    NPC_TRAINEE_NIM = 60183,
+
+    AT_SPELL_FORCE_REACTION = 102429,
+};
+
+#define SAY_TRAINEE_NIM     "I hope you're ready. $n. Jaomin Ro awaits you just over the bridge."
+
+class AreaTrigger_at_the_dawning_valley : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_the_dawning_valley() : AreaTriggerScript("at_the_dawning_valley") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (!player->HasAura(AT_SPELL_FORCE_REACTION))
+        {
+            if (Creature* creature = player->FindNearestCreature(NPC_TRAINEE_NIM, 25.0f, true))
+            {
+                player->CastSpell(player, AT_SPELL_FORCE_REACTION, false);
+                creature->MonsterSay(SAY_TRAINEE_NIM, Language::LANG_UNIVERSAL, player);
+
+            }
+        }
+        return false;
+    }
+};
+
+
 /*######
 ## at_coilfang_waterfall
 ######*/
@@ -462,6 +493,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_the_dawning_valley();
     new AreaTrigger_at_coilfang_waterfall();
     new AreaTrigger_at_legion_teleporter();
     new AreaTrigger_at_stormwright_shelf();
