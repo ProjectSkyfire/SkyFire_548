@@ -34,8 +34,6 @@ enum the_dawning_valley
     AT_SPELL_FORCE_REACTION = 102429,
 };
 
-#define SAY_TRAINEE_NIM     "I hope you're ready. $n. Jaomin Ro awaits you just over the bridge."
-
 class AreaTrigger_at_the_dawning_valley : AreaTriggerScript
 {
 public:
@@ -48,8 +46,7 @@ public:
             if (Creature* creature = player->FindNearestCreature(NPC_TRAINEE_NIM, 25.0f, true))
             {
                 player->CastSpell(player, AT_SPELL_FORCE_REACTION, false);
-                creature->MonsterSay(SAY_TRAINEE_NIM, Language::LANG_UNIVERSAL, player);
-
+                creature->AI()->Talk(0, player);
             }
         }
         return false;
