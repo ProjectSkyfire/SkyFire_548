@@ -1,0 +1,13 @@
+DELETE FROM `game_event_gameobject` WHERE `guid`=39805 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39806 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39807 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39808 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39809 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39810 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39811 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39812 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39813 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=39814 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=54946 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=54947 AND `eventEntry`=12;
+DELETE FROM `game_event_gameobject` WHERE `guid`=54948 AND `eventEntry`=12;
