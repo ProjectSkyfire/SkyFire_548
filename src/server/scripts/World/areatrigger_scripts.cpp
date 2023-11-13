@@ -11,6 +11,7 @@ SDCategory: Areatrigger
 EndScriptData */
 
 /* ContentData
+at_the_dawning_valley           q29409
 at_coilfang_waterfall           4591
 at_legion_teleporter            4560 Teleporter TO Invasion Point: Cataclysm
 at_stormwright_shelf            q12741
@@ -30,7 +31,7 @@ EndContentData */
 enum the_dawning_valley
 {
     NPC_TRAINEE_NIM = 60183,
-
+    QUEST_DISCIPLE_CHALLENGE = 29409,
     AT_SPELL_FORCE_REACTION = 102429,
 };
 
@@ -41,12 +42,16 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
     {
-        if (!player->HasAura(AT_SPELL_FORCE_REACTION))
+        if (player->GetQuestStatus(QUEST_DISCIPLE_CHALLENGE) == QUEST_STATUS_INCOMPLETE)
         {
-            if (Creature* creature = player->FindNearestCreature(NPC_TRAINEE_NIM, 25.0f, true))
+            if (!player->HasAura(AT_SPELL_FORCE_REACTION))
             {
-                player->CastSpell(player, AT_SPELL_FORCE_REACTION, false);
-                creature->AI()->Talk(0, player);
+                if (Creature* creature = player->FindNearestCreature(NPC_TRAINEE_NIM, 25.0f, true))
+                {
+                    player->CastSpell(player, AT_SPELL_FORCE_REACTION, false);
+                    creature->AI()->Talk(0, player);
+                    return true;
+                }
             }
         }
         return false;
