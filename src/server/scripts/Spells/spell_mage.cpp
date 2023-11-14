@@ -47,6 +47,7 @@ enum MageSpells
     SPELL_MAGE_PYROBLAST_CLEARCAST               = 48108,
 
     // Mirror Image
+    SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
     SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
     SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
     SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
@@ -920,6 +921,25 @@ public:
             Unit* caster = GetCaster();
 
             uint32 spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+
+            if (Player* player = caster->ToPlayer())
+            {
+                if (GetCaster()->HasSpell(SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE))
+                {
+                    switch (player->GetTalentSpecialization(player->GetActiveSpec()))
+                    {
+                    case SPEC_MAGE_ARCANE:
+                        spellId = SPELL_MAGE_SUMMON_IMAGES_ARCANE;
+                        break;
+                    case SPEC_MAGE_FIRE:
+                        spellId = SPELL_MAGE_SUMMON_IMAGES_FIRE;
+                        break;
+                    case SPEC_MAGE_FROST:
+                        spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+                        break;
+                    }
+                }
+            }
 
             caster->CastSpell(caster, spellId, true);
         }
