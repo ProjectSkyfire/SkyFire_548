@@ -5457,6 +5457,12 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
         // Spell exist but require custom code
         switch (auraId)
         {
+            // Summon Tarindrella Aura
+            case 92237:
+            {
+                if (caster->FindNearestCreature(49480, 15.0f, true))
+                    return;
+            }
             // Pursuing Spikes (Anub'arak)
             case 65920:
             case 65922:
