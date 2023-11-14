@@ -3,8 +3,8 @@
 * See LICENSE.md file for Copyright information
 */
 
-#ifndef SF_BOOST_H
-#define SF_BOOST_H
+#ifndef SF_CHARACTER_BOOST_H
+#define SF_CHARACTER_BOOST_H
 
 #include "Player.h"
 

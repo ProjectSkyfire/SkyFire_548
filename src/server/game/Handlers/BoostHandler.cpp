@@ -3,7 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
-#include "Boost.h"
+#include "CharacterBoost.h"
 #include "WorldSession.h"
 
 void WorldSession::SetBoosting(bool boost, bool saveToDB)

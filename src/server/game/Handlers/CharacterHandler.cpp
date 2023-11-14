@@ -7,7 +7,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
-#include "Boost.h"
+#include "CharacterBoost.h"
 #include "CalendarMgr.h"
 #include "Chat.h"
 #include "Common.h"
