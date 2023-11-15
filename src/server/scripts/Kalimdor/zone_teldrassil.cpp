@@ -110,12 +110,12 @@ public:
                     {
                         if (me->HasAura(6751) || me->HasAura(11918))
                         {
-                            DoCast(me, SPELL_ENTANGLING_ROOTS);
+                            DoCast(me, SPELL_CLEANSE_SPIRIT);
                             events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 10000);
                         }
                         else if (me->GetOwner()->HasAura(6751) || me->GetOwner()->HasAura(11918))
                         {
-                            DoCast(me->GetOwner(), SPELL_ENTANGLING_ROOTS);
+                            DoCast(me->GetOwner(), SPELL_CLEANSE_SPIRIT);
                             events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 10000);
                         }
                         else
