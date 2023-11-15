@@ -23,9 +23,11 @@ EndContentData */
 # npc_tarindrella
 ####*/
 
-enum VileTouch
+enum SignsOfThingsToCome
 {
-    QUEST_VILE_TOUCH = 28727,
+    QUEST_SIGNS_OF_THINGS_TO_COME = 28728,
+
+    NPC_GITHYISS = 1994,
 
     EVENT_CLEANSE_SPIRIT = 1,
     EVENT_ENTANGLING_ROOTS = 2,
@@ -36,22 +38,17 @@ enum VileTouch
     SPELL_CLEANSE_SPIRIT = 66056
 
 };
-#define TARINDRELLA_TEXT_ON_COMPLETE "This totem has been corrupting the eggs! It seems a greater threat looms. The Gnarlpine remain tainted by something most foul."
+#define TARINDRELLA_TEXT_ON_GITHYISS "This totem has been corrupting the eggs! It seems a greater threat looms. The Gnarlpine remain tainted by something most foul."
 #define TARINDRELLA_TEXT_SPAWN "You've come to help, $c? Let us stay together for a while."
 #define TARINDRELLA_TEXT_ON_KILL "My dear friends... I'm so sorry..."
 class npc_tarindrella : public CreatureScript
 {
 public:
     npc_tarindrella() : CreatureScript("npc_tarindrella") { }
-    bool OnQuestComplete(Player* player, Creature* creature, Quest const* quest) OVERRIDE
-    {
-        if (player->GetQuestStatus(QUEST_VILE_TOUCH) == QUEST_STATUS_COMPLETE)
-            creature->MonsterSay(TARINDRELLA_TEXT_ON_COMPLETE, Language::LANG_UNIVERSAL, player);
-        return true;
-    }
+    
     bool OnQuestReward(Player * player, Creature * creature, Quest const* quest, uint32 /*opt*/) OVERRIDE
     {
-        if (player->GetQuestStatus(QUEST_VILE_TOUCH) == QUEST_STATUS_REWARDED)
+        if (player->GetQuestStatus(QUEST_SIGNS_OF_THINGS_TO_COME) == QUEST_STATUS_REWARDED)
             creature->DespawnOrUnsummon();
         return true;
     }
@@ -69,9 +66,16 @@ public:
             me->MonsterSay(TARINDRELLA_TEXT_SPAWN, Language::LANG_UNIVERSAL, unit);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* victim) OVERRIDE
         {
-            me->MonsterSay(TARINDRELLA_TEXT_ON_KILL, Language::LANG_UNIVERSAL, me->GetOwner());
+            if (victim->GetEntry() == NPC_GITHYISS)
+            {
+                me->MonsterSay(TARINDRELLA_TEXT_ON_GITHYISS, Language::LANG_UNIVERSAL, me->GetOwner());
+            }
+            else
+            {
+                me->MonsterSay(TARINDRELLA_TEXT_ON_KILL, Language::LANG_UNIVERSAL, me->GetOwner());
+            }
         }
 
         void Reset() OVERRIDE
