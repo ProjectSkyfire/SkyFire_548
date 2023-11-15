@@ -71,11 +71,7 @@ public:
 
         void KilledUnit(Unit* victim) OVERRIDE
         {
-            if (victim->GetEntry() == NPC_GITHYISS)
-            {
-                me->MonsterSay(TARINDRELLA_TEXT_ON_COMPLETE, Language::LANG_UNIVERSAL, me->GetOwner());
-
-            }
+            if ((victim->GetEntry() == NPC_GITHYISS)) { }
             else
             {
                 me->MonsterSay(TARINDRELLA_TEXT_ON_KILL, Language::LANG_UNIVERSAL, me->GetOwner());
