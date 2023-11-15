@@ -1634,6 +1634,15 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     if (unitTarget->GetMaxPower(power) == 0)
         return;
 
+    if (m_spellInfo->Id == 100780) // Jab
+    {
+        damage = 1;
+
+        if (Player* player = m_caster->ToPlayer())
+            if (AuraEffect* aurEff = player->GetAuraEffect(103985, 3)) // Stance of the Fierce Tiger
+                damage += 1;
+    }
+
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
 
     // Mad Alchemist's Potion
