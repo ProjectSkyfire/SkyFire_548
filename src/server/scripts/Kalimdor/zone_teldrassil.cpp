@@ -120,7 +120,7 @@ public:
                         }
                         else
                         {
-                            events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 10000);
+                            events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 5000);
                         }
                         break;
                     }
