@@ -2957,10 +2957,12 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
                 //if friendly event&&who is not hostile OR hostile event&&who is hostile
                 if ((e.event.los.noHostile && !me->IsHostileTo(unit)) ||
                     (!e.event.los.noHostile && me->IsHostileTo(unit)))
-                {
-                    ProcessAction(e, unit);
-                    RecalcTimer(e, e.event.los.cooldownMin, e.event.los.cooldownMax);
-                }
+ 			    if (!me || !unit)
+                    return;
+                if (e.event.los.playerOnly && unit->GetTypeId() != TypeID::TYPEID_PLAYER)
+				    return;
+                RecalcTimer(e, e.event.los.cooldownMin, e.event.los.cooldownMax);
+                ProcessAction(e, unit);
             }
             break;
         }
@@ -2977,10 +2979,12 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
                 //if friendly event&&who is not hostile OR hostile event&&who is hostile
                 if ((e.event.los.noHostile && !me->IsHostileTo(unit)) ||
                     (!e.event.los.noHostile && me->IsHostileTo(unit)))
-                {
-                    ProcessAction(e, unit);
-                    RecalcTimer(e, e.event.los.cooldownMin, e.event.los.cooldownMax);
-                }
+ 			    if (!me || !unit)
+                    return;
+                if (e.event.los.playerOnly && unit->GetTypeId() != TypeID::TYPEID_PLAYER)
+				    return;
+                RecalcTimer(e, e.event.los.cooldownMin, e.event.los.cooldownMax);
+                ProcessAction(e, unit);
             }
             break;
         }
