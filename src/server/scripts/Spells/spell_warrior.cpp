@@ -43,7 +43,9 @@ enum WarriorSpells
     SPELL_WARRIOR_DEEP_WOUNDS                       = 115767,
     SPELL_WARRIOR_MORTAL_STRIKE_AURA                = 12294,
     SPELL_WARRIOR_T16_DPS_4P_BONUS                  = 144441,
-    SPELL_WARRIOR_T16_DPS_4P_BONUS_PROC             = 144442
+    SPELL_WARRIOR_T16_DPS_4P_BONUS_PROC             = 144442,
+
+    SPELL_WARRIOR_SHOCKWAVE_STUN                    = 132168,
 };
 
 enum WarriorSpellIcons
@@ -759,6 +761,56 @@ public:
     }
 };
 
+// 46968 - Shockwave
+class spell_warr_shockwave : public SpellScriptLoader
+{
+public:
+    spell_warr_shockwave() : SpellScriptLoader("spell_warr_shockwave") { }
+
+    class spell_warr_shockwave_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_shockwave_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SHOCKWAVE_STUN))
+                return false;
+            return true;
+        }
+
+        uint32 m_targetCount = 0;
+
+        void CountTargets(std::list<WorldObject*>& targetList)
+        {
+            m_targetCount = targetList.size();
+        }
+
+        void HandleCast()
+        {
+            if (m_targetCount >= 3)
+                if (GetCaster() && GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER)
+                    GetCaster()->ToPlayer()->ModifySpellCooldown(GetSpellInfo()->Id, -(GetSpellInfo()->Effects[EFFECT_3].BasePoints * IN_MILLISECONDS));
+        }
+
+        void HandleHit(SpellEffIndex)
+        {
+            GetCaster()->CastSpell(GetHitUnit(), SPELL_WARRIOR_SHOCKWAVE_STUN, true);
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_shockwave_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+            AfterCast += SpellCastFn(spell_warr_shockwave_SpellScript::HandleCast);
+            OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_warr_shockwave_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -779,4 +831,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_sweeping_strikes();
     new spell_warr_sword_and_board();
     new spell_warr_victorious();
+    new spell_warr_shockwave();
 }
