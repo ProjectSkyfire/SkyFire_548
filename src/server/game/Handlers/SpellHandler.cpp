@@ -1644,8 +1644,8 @@ void WorldSession::HandleRequestCategoryCooldowns(WorldPacket& /*recvPacket*/)
 
     for (std::map<uint32, int32>::const_iterator itr = categoryMods.begin(); itr != categoryMods.end(); ++itr)
     {
-        data << uint32(itr->first);
         data << int32(-itr->second);
+        data << uint32(itr->first);
     }
 
     SendPacket(&data);
