@@ -9,6 +9,136 @@
 #include "SpellScript.h"
 #include "Player.h"
 
+enum darkspearshore
+{
+    NPC_ZUNI = 37988
+};
+Position const ZuniMovePos1 = { -1172.816f, -5299.0522f, 5.1754074f, 0 };
+Position const ZuniMovePos2 = { -1176.1216f, -5326.733f, 13.596682f, 0 };
+Position const ZuniMovePos3 = { -1172.816f, -5344.54f, 15.331013f, 0 };
+Position const ZuniMovePos4 = { -1164.625f, -5369.5225f, 14.166052f, 0 };
+Position const ZuniMovePos5 = { -1162.0435f, -5391.7466f, 12.003188f };
+/*####
+# npc_zuni
+####*/
+class npc_zuni : public CreatureScript
+{
+public:
+    npc_zuni() : CreatureScript("npc_zuni") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_zuniAI(creature);
+    }
+
+    struct npc_zuniAI : public ScriptedAI
+    {
+        bool wp1 = false;
+        bool wp2 = false;
+        bool wp3 = false;
+        bool wp4 = false;
+        bool wp5 = false;
+
+        npc_zuniAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type == POINT_MOTION_TYPE)
+            {
+                if (id == 0)
+                    wp1 = true;
+
+                if (id == 1)
+                    wp2 = true;
+
+                if (id == 2)
+                    wp3 = true;
+
+                if (id == 3)
+                    wp4 = true;
+
+                if (id == 4)
+                    wp5 = true;
+
+                if (id == 5)
+                    wp5 = false;
+            }
+            else
+                return;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (wp1 == true)
+            {
+                me->GetMotionMaster()->MovePoint(1, ZuniMovePos1);
+                wp1 = false;
+            }
+
+            if (wp2 == true)
+            {
+                me->GetMotionMaster()->MovePoint(2, ZuniMovePos2);
+                wp2 = false;
+            }
+
+            if (wp3 == true)
+            {
+                me->GetMotionMaster()->MovePoint(3, ZuniMovePos3);
+                wp3 = false;
+            }
+
+            if (wp4 == true)
+            {
+                me->GetMotionMaster()->MovePoint(4, ZuniMovePos4);
+                wp4 = false;
+            }
+
+            if (wp5 == true)
+            {
+                me->GetMotionMaster()->MovePoint(5, ZuniMovePos5);
+                me->MonsterSay("Ya trainer should be somewhere in the grounds'ere. I'll catch you lata mon.", Language::LANG_UNIVERSAL, me);
+                me->SendPlaySound(21367, true);
+                me->DespawnOrUnsummon(15000);
+                wp5 = false;
+            }
+        }
+    };
+
+};
+
+/*####
+# npc_jinthala
+####*/
+class npc_jinthala : public CreatureScript
+{
+public:
+    npc_jinthala() : CreatureScript("npc_jinthala") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_jinthalaAI(creature);
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* /*quest*/) OVERRIDE
+    {
+        creature->MonsterSay("$n. Zuni. Ya'll find ya trainer in the trainin' grounds to the east. Bring pride to the Darkspear.", Language::LANG_UNIVERSAL, player);
+        
+        if (Creature* zuni = player->FindNearestCreature(NPC_ZUNI, 10.0f, true))
+        {
+            zuni->MonsterSay("Ya. mon. Let's crack some tiki target skulls! ", Language::LANG_UNIVERSAL, player);
+            zuni->SendPlaySound(21366, true);
+            zuni->GetMotionMaster()->MovePoint(0, ZuniMovePos1);
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_jinthalaAI : public ScriptedAI
+    {
+        npc_jinthalaAI(Creature* creature) : ScriptedAI(creature) { }
+    };
+
+};
 
 /*######
 ## Quest: Proving Pit: 24642, 24754, 24762, 24768, 24774, 24780, 24786, 26276, 31161
@@ -241,6 +371,8 @@ class spell_voodoo : public SpellScriptLoader
 
 void AddSC_durotar()
 {
+    new npc_zuni();
+    new npc_jinthala();
     new npc_darkspear_jailor();
     new npc_lazy_peon();
     new spell_voodoo();
