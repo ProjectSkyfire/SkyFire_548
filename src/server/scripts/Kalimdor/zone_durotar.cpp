@@ -13,6 +13,7 @@ enum darkspearshore
 {
     NPC_ZUNI = 37988
 };
+Position const ZuniStartPos = { -1173.345f, -5267.1723f, 0.909172f, 0 };
 Position const ZuniMovePos1 = { -1172.816f, -5299.0522f, 5.1754074f, 0 };
 Position const ZuniMovePos2 = { -1176.1216f, -5326.733f, 13.596682f, 0 };
 Position const ZuniMovePos3 = { -1172.816f, -5344.54f, 15.331013f, 0 };
@@ -39,7 +40,7 @@ public:
         bool wp4 = false;
         bool wp5 = false;
         bool wp6 = false;
-        uint32 MoveTimer = 2000;
+        uint32 MoveTimer = 5000;
 
         npc_zuniAI(Creature* creature) : ScriptedAI(creature) { }
 
@@ -77,7 +78,7 @@ public:
                 {
                     me->GetMotionMaster()->MovePoint(1, ZuniMovePos1);
                     wp1 = false;
-                    MoveTimer = 2000;
+                    MoveTimer = 5000;
                 }
                 else MoveTimer -= diff;
             }
@@ -140,7 +141,7 @@ public:
         {
             zuni->MonsterSay("Ya. mon. Let's crack some tiki target skulls! ", Language::LANG_UNIVERSAL, player);
             zuni->SendPlaySound(21366, true);
-            zuni->GetMotionMaster()->MovePoint(0, ZuniMovePos1);
+            zuni->GetMotionMaster()->MovePoint(0, ZuniStartPos);
             return true;
         }
         return false;
