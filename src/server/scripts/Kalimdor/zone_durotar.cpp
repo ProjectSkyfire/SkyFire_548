@@ -38,6 +38,7 @@ public:
         bool wp3 = false;
         bool wp4 = false;
         bool wp5 = false;
+        bool wp6 = false;
 
         npc_zuniAI(Creature* creature) : ScriptedAI(creature) { }
 
@@ -61,7 +62,7 @@ public:
                     wp5 = true;
 
                 if (id == 5)
-                    wp5 = false;
+                    wp6 = true;
             }
             else
                 return;
@@ -96,11 +97,17 @@ public:
             if (wp5 == true)
             {
                 me->GetMotionMaster()->MovePoint(5, ZuniMovePos5);
-                me->MonsterSay("Ya trainer should be somewhere in the grounds'ere. I'll catch you lata mon.", Language::LANG_UNIVERSAL, me);
-                me->SendPlaySound(21367, true);
-                me->DespawnOrUnsummon(15000);
                 wp5 = false;
             }
+
+            if (wp6 == true)
+            {
+                me->MonsterSay("Ya trainer should be somewhere in the grounds'ere. I'll catch you lata mon.", Language::LANG_UNIVERSAL, me);
+                me->SendPlaySound(21367, true);
+                me->DespawnOrUnsummon(10000);
+                wp6 = false;
+            }
+
         }
     };
 
