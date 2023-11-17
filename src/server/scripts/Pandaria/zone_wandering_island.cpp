@@ -14,7 +14,7 @@
 Position const AysaSpawnPos = { 1206.31f, 3507.45f, 85.99f };
 Position const AysaJumpPos1 = { 1196.72f, 3492.85f, 90.9836f, 0 };
 Position const AysaJumpPos2 = { 1192.29f, 3478.69f, 108.788f, 0 };
-Position const AysaMovePos3 = { 1197.99f, 3460.63f, 103.04f, 0 };
+Position const AysaJumpPos3 = { 1197.99f, 3460.63f, 103.04f, 0 };
 Position const AysaMovePos4 = { 1176.1909f, 3444.8743f, 103.35291f, 0 };
 Position const AysaMovePos5 = { 1149.9497f, 3437.1702f, 104.967064f, 0 };
 
@@ -94,7 +94,7 @@ public:
 
             if (wp3 == true)
             {
-                me->GetMotionMaster()->MovePoint(3, AysaMovePos3);
+                me->GetMotionMaster()->MoveJump(AysaJumpPos3, 15.0f, 15.0f, 3);
                 wp3 = false;
             }
 
