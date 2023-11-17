@@ -39,6 +39,7 @@ public:
         bool wp4 = false;
         bool wp5 = false;
         bool wp6 = false;
+        uint32 MoveTimer = 2000;
 
         npc_zuniAI(Creature* creature) : ScriptedAI(creature) { }
 
@@ -72,8 +73,13 @@ public:
         {
             if (wp1 == true)
             {
-                me->GetMotionMaster()->MovePoint(1, ZuniMovePos1);
-                wp1 = false;
+                if (MoveTimer <= diff)
+                {
+                    me->GetMotionMaster()->MovePoint(1, ZuniMovePos1);
+                    wp1 = false;
+                    MoveTimer = 2000;
+                }
+                else MoveTimer -= diff;
             }
 
             if (wp2 == true)
