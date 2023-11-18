@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -22,6 +22,11 @@ enum CaveOfMeditation
 ####*/
 class npc_aysa_meditation : public CreatureScript
 {
+    enum EventsAysaMeditation
+    {
+        EVENT_POWER = 1,
+    };
+
 public:
     npc_aysa_meditation() : CreatureScript("npc_aysa_meditation") { }
 
@@ -31,11 +36,12 @@ public:
     }
     struct npc_aysa_meditationAI : public ScriptedAI
     {
-        npc_aysa_meditationAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_aysa_meditationAI(Creature* creature) : ScriptedAI(creature) {
+            if (me->GetAreaId() == 5848) // Cave of Meditation Area
+                events.ScheduleEvent(EVENT_POWER, 1000);
+        }
         EventMap events;
         uint32 Power = 0;
-        uint32 PowerCap = 0;
-        uint32 UpdateTimer = 0;
         std::vector<Player*> playersParticipate;
 
         void UpdatePlayerList()
@@ -52,30 +58,36 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            UpdatePlayerList();
-            if (playersParticipate.empty()) {}
-            else
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (UpdateTimer <= diff)
+                switch (eventId) {
+                case EVENT_POWER:
                 {
-                    for (auto&& player : playersParticipate)
+                    UpdatePlayerList();
+                    if (!playersParticipate.empty())
                     {
-                    
                         Power++;
-                        player->SetPower(POWER_ALTERNATE_POWER, Power);
-                        PowerCap += Power;
 
-                        if (PowerCap >= 4000)
+                        for (auto&& player : playersParticipate)
                         {
-                            player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
-                            player->KilledMonsterCredit(54856, 0);
-                            player->RemoveAura(116421);
-                        }
+                            player->SetPower(POWER_ALTERNATE_POWER, Power);
+                            player->SetMaxPower(POWER_ALTERNATE_POWER, 90);
 
-                        UpdateTimer = 1000;
+                            if (Power >= 90)
+                            {
+                                player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
+                                player->KilledMonsterCredit(54856, 0);
+                                player->RemoveAura(116421);
+                            }
+                        }
                     }
+                    events.ScheduleEvent(EVENT_POWER, 1000);
+                    break;
                 }
-                else UpdateTimer -= diff;
+                default:
+                    break;
+                }
             }
         }
     };
@@ -91,18 +103,18 @@ Position const AysaJumpPos3 = { 1197.99f, 3460.63f, 103.04f, 0 };
 Position const AysaMovePos4 = { 1176.1909f, 3444.8743f, 103.35291f, 0 };
 Position const AysaMovePos5 = { 1149.9497f, 3437.1702f, 104.967064f, 0 };
 
-enum Events
-{
-    EVENT_AYSA_JUMP_POS_1 = 1,
-    EVENT_AYSA_JUMP_POS_2,
-    EVENT_AYSA_JUMP_POS_3,
-    EVENT_AYSA_MOVE_POS_4,
-    EVENT_AYSA_MOVE_POS_5,
-    EVENT_AYSA_DESPAWN,
-};
-
 class npc_aysa_cloudsinger : public CreatureScript
 {
+    enum EventsAysaCloudsinger
+    {
+        EVENT_AYSA_JUMP_POS_1 = 1,
+        EVENT_AYSA_JUMP_POS_2,
+        EVENT_AYSA_JUMP_POS_3,
+        EVENT_AYSA_MOVE_POS_4,
+        EVENT_AYSA_MOVE_POS_5,
+        EVENT_AYSA_DESPAWN,
+    };
+
 public:
     npc_aysa_cloudsinger() : CreatureScript("npc_aysa_cloudsinger") { }
 
