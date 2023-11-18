@@ -18,6 +18,118 @@ enum CaveOfMeditation
     //SPELL_AYSA_BAR = 116421,
 };
 
+/*####
+# npc_li_fei
+####*/
+
+Position const LiFeiSpawnPos = { 1126.9323f, 3428.6692f, 105.89006f };
+Position const LiFeiMovePos1 = { 1131.3281f, 3437.5156f, 105.45826f };
+Position const LiFeiMovePos2 = { 1131.8889f, 3428.2065f, 105.51409f };
+Position const LiFeiMovePos3 = { 1130.5278f, 3425.5027f, 105.88636f };
+Position const LiFeiMovePos4 = { 1130.5278f, 3425.5027f, 105.88636f };
+Position const LiFeiMovePos5 = { 1129.7743f, 3433.302f, 105.531296f };
+Position const LiFeiMovePos6 = { 1130.5573f, 3436.087f, 105.483864f };
+class npc_li_fei : public CreatureScript
+{
+    enum EventsAysaCloudsinger
+    {
+        EVENT_LI_FEI_SPAWN_POS = 1,
+        EVENT_LI_FEI_MOVE_POS_1,
+        EVENT_LI_FEI_MOVE_POS_2,
+        EVENT_LI_FEI_MOVE_POS_3,
+        EVENT_LI_FEI_MOVE_POS_4,
+        EVENT_LI_FEI_MOVE_POS_5,
+        EVENT_LI_FEI_MOVE_POS_6,
+        EVENT_LI_FEI_DESPAWN,
+    };
+public:
+    npc_li_fei() : CreatureScript("npc_li_fei") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_li_feiAI(creature);
+    }
+    struct npc_li_feiAI : public ScriptedAI
+    {
+        EventMap events;
+        npc_li_feiAI(Creature* creature) : ScriptedAI(creature)
+        {
+            if (me->GetAreaId() == 5848) // Cave of Meditation Area
+            {
+                me->MonsterSay("Summoned Hello", Language::LANG_UNIVERSAL, me);
+                me->SetWalk(true);
+                me->GetMotionMaster()->MovePoint(0, LiFeiSpawnPos);
+
+            }
+        }
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (id)
+            {
+            case 0:
+                events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_1, 10000);
+                me->GetMotionMaster()->MovePoint(1, LiFeiMovePos1);
+                return;
+            default:
+                break;
+            }
+        }
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_LI_FEI_MOVE_POS_1:
+                    me->GetMotionMaster()->MovePoint(1, LiFeiMovePos1);
+                    events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_2, 10000);
+                    break;
+                case EVENT_LI_FEI_MOVE_POS_2:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                    me->MonsterTextEmote("Master Li Fei's voice echoes, \"The way of the Tushui... enlightenment through patience and meditation... the principled life.\"", me, false);
+                    me->GetMotionMaster()->MovePoint(2, LiFeiMovePos2);
+                    events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_3, 10000);
+                    break;
+                case EVENT_LI_FEI_MOVE_POS_3:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                    me->MonsterTextEmote("Master Li Fei's voice echoes, \"It is good to see you again, Aysa.You've come with respect, and so I shall give you the answers you seek.\"", me, false);
+                    me->GetMotionMaster()->MovePoint(3, LiFeiMovePos3);
+                    events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_4, 10000);
+                    break;
+                case EVENT_LI_FEI_MOVE_POS_4:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                    me->MonsterTextEmote("Master Li Fei's voice echoes, \"Huo, the spirit of fire, is known for his hunger.He wants for tinder to eat.He needs the caress of the wind to rouse him.\"", me, false);
+                    me->GetMotionMaster()->MovePoint(4, LiFeiMovePos4);
+                    events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_5, 10000);
+                    break;
+                case EVENT_LI_FEI_MOVE_POS_5:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                    me->MonsterTextEmote("Master Li Fei's voice echoes, \"If you find these things and bring them to his cave, on the far side of Wu - Song Village, you will face a challenge within.\"", me, false);
+                    me->GetMotionMaster()->MovePoint(5, LiFeiMovePos5);
+                    events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_6, 10000);
+                case EVENT_LI_FEI_MOVE_POS_6:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                    me->MonsterTextEmote("Master Li Fei's voice echoes, \"Overcome that challenge, and you shall be graced by Huo's presence. Rekindle his flame, and if your spirit is pure, he shall follow you.\"", me, false);
+                    me->GetMotionMaster()->MovePoint(6, LiFeiMovePos6);
+                    events.ScheduleEvent(EVENT_LI_FEI_DESPAWN, 10000);
+                    break;
+                case EVENT_LI_FEI_DESPAWN:
+                    me->MonsterTextEmote("Master Li Fei's voice echoes, \"Go, children.We shall meet again very soon.\"", me, false);
+                    me->MonsterTextEmote("Master Li Fei fades away.", me, false);
+                    me->DespawnOrUnsummon(1000);
+                    break;
+                }
+            }
+        }
+
+    };
+};
+
 const Position AddSpawnPos[2] =
 {
     { 1184.7f, 3448.3f, 102.5f, 0.0f },
@@ -243,6 +355,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
 }
