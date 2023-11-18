@@ -816,3 +816,17 @@ void WorldSession::HandleRequestPvpReward(WorldPacket& /*recvData*/)
     _player->SendPvpRewards();
 }
 
+void WorldSession::HandleRequestConquestFormulaConstants(WorldPacket& /*recvData*/)
+{
+    SF_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_CONQUEST_FORMULA_CONSTANTS");
+
+    WorldPacket data(SMSG_CONQUEST_FORMULA_CONSTANTS);
+
+    data << uint32(2000);    // PvpMinCPPerWeek
+    data << float(1639.28);  // PvpCPExpCoefficient
+    data << float(0.00412);  // PvpCPNumerator
+    data << uint32(3500);    // PvpMaxCPPerWeek
+    data << float(1511.26);  // PvpCPBaseCoefficient
+
+    SendPacket(&data);
+}
