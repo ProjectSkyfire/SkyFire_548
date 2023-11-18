@@ -56,10 +56,11 @@ public:
             if (playersParticipate.empty()) {}
             else
             {
-                for (auto&& player : playersParticipate)
+                if (UpdateTimer <= diff)
                 {
-                    if (UpdateTimer <= diff)
+                    for (auto&& player : playersParticipate)
                     {
+                    
                         Power++;
                         player->SetPower(POWER_ALTERNATE_POWER, Power);
                         PowerCap += Power;
@@ -73,8 +74,8 @@ public:
 
                         UpdateTimer = 1000;
                     }
-                    else UpdateTimer -= diff;
                 }
+                else UpdateTimer -= diff;
             }
         }
     };
