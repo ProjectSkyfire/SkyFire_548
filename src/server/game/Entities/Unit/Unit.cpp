@@ -11866,6 +11866,8 @@ void Unit::SetPower(Powers power, int32 val)
         data.WriteBit(guid [1]);
         data.WriteBits(1, 21); // 1 update
 
+        data.FlushBits();
+
         data.WriteByteSeq(guid [7]);
         data.WriteByteSeq(guid [0]);
         data.WriteByteSeq(guid [5]);

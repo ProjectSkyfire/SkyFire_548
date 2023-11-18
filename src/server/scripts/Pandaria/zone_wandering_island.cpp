@@ -8,6 +8,78 @@
 #include "ScriptedGossip.h"
 #include "Player.h"
 
+enum CaveOfMeditation
+{
+    //SPELL_SUMMON_LI_FEI = 102445, //
+    //SPELL_LI_FEI_VISUAL_GHOST_AURA = 22650,
+    //SPELL_Aysa_Cave_of_Scrolls_Comp_Timer_Aura = 128598,
+    SPELL_SEE_QUEST_INVIS_7 = 102396,
+    //SPELL_GENERIC_QUEST_INVISIBILITY_7 = 85096,
+    //SPELL_AYSA_BAR = 116421,
+};
+/*####
+# npc_aysa_meditation
+####*/
+class npc_aysa_meditation : public CreatureScript
+{
+public:
+    npc_aysa_meditation() : CreatureScript("npc_aysa_meditation") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_aysa_meditationAI(creature);
+    }
+    struct npc_aysa_meditationAI : public ScriptedAI
+    {
+        npc_aysa_meditationAI(Creature* creature) : ScriptedAI(creature) { }
+        EventMap events;
+        uint32 Power = 0;
+        uint32 PowerCap = 0;
+        uint32 UpdateTimer = 0;
+        std::vector<Player*> playersParticipate;
+
+        void UpdatePlayerList()
+        {
+            playersParticipate.clear();
+
+            std::list<Player*> PlayerList;
+            me->GetPlayerListInGrid(PlayerList, 20.0f);
+
+            for (auto&& player : PlayerList)
+                if (!player->IsGameMaster() && player->GetQuestStatus(29414) == QUEST_STATUS_INCOMPLETE)
+                    playersParticipate.push_back(player);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            UpdatePlayerList();
+            if (playersParticipate.empty()) {}
+            else
+            {
+                for (auto&& player : playersParticipate)
+                {
+                    if (UpdateTimer <= diff)
+                    {
+                        Power++;
+                        player->SetPower(POWER_ALTERNATE_POWER, Power);
+                        PowerCap += Power;
+
+                        if (PowerCap >= 4000)
+                        {
+                            player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
+                            player->KilledMonsterCredit(54856, 0);
+                            player->RemoveAura(116421);
+                        }
+
+                        UpdateTimer = 1000;
+                    }
+                    else UpdateTimer -= diff;
+                }
+            }
+        }
+    };
+};
+
 /*####
 # npc_aysa_cloudsinger
 ####*/
@@ -110,5 +182,6 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
 }
