@@ -18,15 +18,20 @@ Position const AysaJumpPos3 = { 1197.99f, 3460.63f, 103.04f, 0 };
 Position const AysaMovePos4 = { 1176.1909f, 3444.8743f, 103.35291f, 0 };
 Position const AysaMovePos5 = { 1149.9497f, 3437.1702f, 104.967064f, 0 };
 
+enum Events
+{
+    EVENT_AYSA_JUMP_POS_1 = 1,
+    EVENT_AYSA_JUMP_POS_2,
+    EVENT_AYSA_JUMP_POS_3,
+    EVENT_AYSA_MOVE_POS_4,
+    EVENT_AYSA_MOVE_POS_5,
+    EVENT_AYSA_DESPAWN,
+};
+
 class npc_aysa_cloudsinger : public CreatureScript
 {
 public:
     npc_aysa_cloudsinger() : CreatureScript("npc_aysa_cloudsinger") { }
-
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_aysa_cloudsingerAI(creature);
-    }
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
@@ -42,81 +47,65 @@ public:
 
     struct npc_aysa_cloudsingerAI : public ScriptedAI
     {
-        bool wp1 = false;
-        bool wp2 = false;
-        bool wp3 = false;
-        bool wp4 = false;
-        bool wp5 = false;
-        bool wp6 = false;
-        uint32 JumpTimer = 5000;
-
         npc_aysa_cloudsingerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
 
         void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
-            if (id == 0)
-                wp1 = true;
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
 
-            if (id == 1)
-                wp2 = true;
-
-            if (id == 2)
-                wp3 = true;
-
-            if (id == 3)
-                wp4 = true;
-
-            if (id == 4)
-                wp5 = true;
-
-            if (id == 5)
-                wp6 = true;
+            switch (id)
+            {
+            case 0:
+                events.ScheduleEvent(EVENT_AYSA_JUMP_POS_1, 5000);
+                return;
+            default:
+                break;
+            }
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            if (wp1 == true)
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (JumpTimer <= diff)
+                switch (eventId)
                 {
+                case EVENT_AYSA_JUMP_POS_1:
                     me->GetMotionMaster()->MoveJump(AysaJumpPos1, 15.0f, 15.0f, 1);
-                    wp1 = false;
-                    JumpTimer = 5000;
+                    events.ScheduleEvent(EVENT_AYSA_JUMP_POS_2, 2000);
+                    break;
+                case EVENT_AYSA_JUMP_POS_2:
+                    me->GetMotionMaster()->MoveJump(AysaJumpPos2, 15.0f, 25.0f, 2);
+                    events.ScheduleEvent(EVENT_AYSA_JUMP_POS_3, 2000);
+                    break;
+                case EVENT_AYSA_JUMP_POS_3:
+                    me->GetMotionMaster()->MoveJump(AysaJumpPos3, 15.0f, 15.0f, 3);
+                    events.ScheduleEvent(EVENT_AYSA_MOVE_POS_4, 2000);
+                    break;
+                case EVENT_AYSA_MOVE_POS_4:
+                    me->GetMotionMaster()->MovePoint(4, AysaMovePos4);
+                    events.ScheduleEvent(EVENT_AYSA_MOVE_POS_5, 2000);
+                    break;
+                case EVENT_AYSA_MOVE_POS_5:
+                    me->GetMotionMaster()->MovePoint(5, AysaMovePos5);
+                    events.ScheduleEvent(EVENT_AYSA_DESPAWN, 4000);
+                    break;
+                case EVENT_AYSA_DESPAWN:
+                    me->DespawnOrUnsummon(1000);
+                    break;
                 }
-                else JumpTimer -= diff;
-            }
-
-            if (wp2 == true)
-            {
-                me->GetMotionMaster()->MoveJump(AysaJumpPos2, 15.0f, 25.0f, 2);
-                wp2 = false;
-            }
-
-            if (wp3 == true)
-            {
-                me->GetMotionMaster()->MoveJump(AysaJumpPos3, 15.0f, 15.0f, 3);
-                wp3 = false;
-            }
-
-            if (wp4 == true)
-            {
-                me->GetMotionMaster()->MovePoint(4, AysaMovePos4);
-                wp4 = false;
-            }
-
-            if (wp5 == true)
-            {
-                me->GetMotionMaster()->MovePoint(5, AysaMovePos5);
-                wp5 = false;
-            }
-
-            if (wp6 == true)
-            {
-                me->DespawnOrUnsummon(1000);
-                wp6 = false;
             }
         }
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_aysa_cloudsingerAI(creature);
+    }
 };
 
 void AddSC_wandering_island()
