@@ -10,7 +10,7 @@
 
 enum CaveOfMeditation
 {
-    //SPELL_SUMMON_LI_FEI = 102445, //
+    SPELL_SUMMON_LI_FEI = 102445, //
     //SPELL_LI_FEI_VISUAL_GHOST_AURA = 22650,
     //SPELL_Aysa_Cave_of_Scrolls_Comp_Timer_Aura = 128598,
     SPELL_SEE_QUEST_INVIS_7 = 102396,
@@ -204,7 +204,10 @@ public:
                         Power++;
 
                         if (Power == 1)
+                        {
                             Talk(0);
+                            me->CastSpell(me, SPELL_SUMMON_LI_FEI);
+                        }
 
                         for (auto&& player : playersParticipate)
                         {
