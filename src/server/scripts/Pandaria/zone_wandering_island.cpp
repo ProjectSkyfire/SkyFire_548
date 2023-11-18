@@ -161,20 +161,34 @@ public:
     }
     struct npc_aysa_meditationAI : public ScriptedAI
     {
-        npc_aysa_meditationAI(Creature* creature) : ScriptedAI(creature) {
-            if (me->GetAreaId() == 5848) // Cave of Meditation Area
-            {
-                events.ScheduleEvent(EVENT_POWER, 1000);
-                events.ScheduleEvent(EVENT_ADDS, 1000);
-            }
-        }
+        npc_aysa_meditationAI(Creature* creature) : ScriptedAI(creature) { }
+
         EventMap events;
         uint32 Power = 0;
+        bool started = false;
         std::vector<Player*> playersParticipate;
 
         void Reset() override
         {
             Power = 0;
+            started = false;
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            Player* const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->GetQuestStatus(29414) != QUEST_STATUS_INCOMPLETE || started)
+                return;
+
+            if (me->GetAreaId() == 5848) // Cave of Meditation Area
+            {
+                started = true;
+                events.ScheduleEvent(EVENT_POWER, 1000);
+                events.ScheduleEvent(EVENT_ADDS, 1000);
+            }
         }
 
         void UpdatePlayerList()
