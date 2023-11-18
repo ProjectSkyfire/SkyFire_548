@@ -56,7 +56,6 @@ public:
         {
             if (me->GetAreaId() == 5848) // Cave of Meditation Area
             {
-                me->MonsterSay("Summoned Hello", Language::LANG_UNIVERSAL, me);
                 me->SetWalk(true);
                 me->GetMotionMaster()->MovePoint(0, LiFeiSpawnPos);
 
