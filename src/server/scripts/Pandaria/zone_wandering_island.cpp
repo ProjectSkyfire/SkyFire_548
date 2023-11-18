@@ -17,6 +17,18 @@ enum CaveOfMeditation
     //SPELL_GENERIC_QUEST_INVISIBILITY_7 = 85096,
     //SPELL_AYSA_BAR = 116421,
 };
+
+const Position AddSpawnPos[2] =
+{
+    { 1184.7f, 3448.3f, 102.5f, 0.0f },
+    { 1186.7f, 3439.8f, 102.5f, 0.0f },
+};
+
+const Position AddPointPos[2] =
+{
+    { 1145.13f, 3432.88f, 105.268f, 0.0f },
+    { 1143.36f, 3437.39f, 104.973f, 0.0f },
+};
 /*####
 # npc_aysa_meditation
 ####*/
@@ -25,6 +37,7 @@ class npc_aysa_meditation : public CreatureScript
     enum EventsAysaMeditation
     {
         EVENT_POWER = 1,
+        EVENT_ADDS = 2,
     };
 
 public:
@@ -84,6 +97,17 @@ public:
                     }
                     events.ScheduleEvent(EVENT_POWER, 1000);
                     break;
+                }
+                case EVENT_ADDS:
+                {
+                    for (uint8 i = 0; i < 2; ++i)
+                    {
+                        if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 30000))
+                        {
+                            troublemaker->GetMotionMaster()->MovePoint(i, AddPointPos[i]);
+                            events.ScheduleEvent(EVENT_ADDS, 30000);
+                        }
+                    }
                 }
                 default:
                     break;
