@@ -37,7 +37,8 @@ class npc_aysa_meditation : public CreatureScript
     enum EventsAysaMeditation
     {
         EVENT_POWER = 1,
-        EVENT_ADDS = 2,
+        EVENT_ADDS,
+        EVENT_FINISHED,
     };
 
 public:
@@ -59,6 +60,11 @@ public:
         EventMap events;
         uint32 Power = 0;
         std::vector<Player*> playersParticipate;
+
+        void Reset() override
+        {
+            Power = 0;
+        }
 
         void UpdatePlayerList()
         {
@@ -85,26 +91,17 @@ public:
                     {
                         Power++;
 
+                        if (Power == 1)
+                            Talk(0);
+
                         for (auto&& player : playersParticipate)
                         {
                             player->SetPower(POWER_ALTERNATE_POWER, Power);
                             player->SetMaxPower(POWER_ALTERNATE_POWER, 90);
-
-                            if (Power <= 1)
-                            {
-                                me->MonsterSay("Keep those creatures at bay while i meditate. We'll soon have the answers we seek.", Language::LANG_UNIVERSAL, me);
-                                me->SendPlaySound(27398, true);
-                            }
-
-                            if (Power >= 90)
-                            {
-                                player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
-                                player->KilledMonsterCredit(54856, 0);
-                                player->RemoveAura(116421);
-                                me->MonsterSay("And so our path lays before us. Speak to Master Shang Xi. He will tell you what comes next.", Language::LANG_UNIVERSAL, player);
-                                me->SendPlaySound(27399, true);
-                            }
                         }
+
+                        if (Power >= 90)
+                            events.ScheduleEvent(EVENT_FINISHED, 100);
                     }
                     events.ScheduleEvent(EVENT_POWER, 1000);
                     break;
@@ -119,6 +116,20 @@ public:
                         }
                     }
                     events.ScheduleEvent(EVENT_ADDS, 60000);
+                    break;
+                }
+                case EVENT_FINISHED:
+                {
+                    Talk(1);
+                    events.CancelEvent(EVENT_POWER);
+                    events.CancelEvent(EVENT_ADDS);
+                    for (auto&& player : playersParticipate)
+                    {
+                        player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
+                        player->KilledMonsterCredit(54856, 0);
+                        player->RemoveAura(116421);
+                    }
+                    Reset();
                     break;
                 }
                 default:
