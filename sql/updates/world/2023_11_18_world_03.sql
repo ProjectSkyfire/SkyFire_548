@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `OfferRewardText`='Your path is set before you. You will be the one to rekindle the spirit of fire and bring it to the safety of the temple.$B$BThis will not be the only time you and Aysa work together. She is strong and wise. You can trust in her.' WHERE `Id`=29414;
