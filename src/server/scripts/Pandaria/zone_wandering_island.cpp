@@ -51,7 +51,10 @@ public:
     {
         npc_aysa_meditationAI(Creature* creature) : ScriptedAI(creature) {
             if (me->GetAreaId() == 5848) // Cave of Meditation Area
+            {
                 events.ScheduleEvent(EVENT_POWER, 1000);
+                events.ScheduleEvent(EVENT_ADDS, 1000);
+            }
         }
         EventMap events;
         uint32 Power = 0;
@@ -102,12 +105,13 @@ public:
                 {
                     for (uint8 i = 0; i < 2; ++i)
                     {
-                        if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 30000))
+                        if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
                         {
-                            troublemaker->GetMotionMaster()->MovePoint(i, AddPointPos[i]);
-                            events.ScheduleEvent(EVENT_ADDS, 30000);
+                            troublemaker->GetMotionMaster()->MovePoint(0, AddPointPos[i]);
                         }
                     }
+                    events.ScheduleEvent(EVENT_ADDS, 30000);
+                    break;
                 }
                 default:
                     break;
