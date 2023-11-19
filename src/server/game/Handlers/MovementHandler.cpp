@@ -383,10 +383,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     if (mover->GetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE) == 10)
     {
-        WorldPacket data2(SMSG_EMOTE, 4 + 8);
-        data2 << uint32(0x00);
-        data2 << uint64(mover->GetGUID());
-        mover->SendMessageToSet(&data2, true);
+        mover->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0x00);
     }
 
     WorldPacket data(SMSG_PLAYER_MOVE, recvPacket.size());
