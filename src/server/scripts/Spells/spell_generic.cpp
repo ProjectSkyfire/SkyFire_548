@@ -26,7 +26,7 @@
 #include "SpellAuraEffects.h"
 
 // 106299 - Summon Living Air
-const Position elementalPos = { 1224.9202f, 3727.2014f, 92.447205, 0.0f };
+const Position elementalPos = { 1224.9202f, 3727.2014f, 92.447205f, 0.0f };
 class spell_gen_summon_living_air : public SpellScriptLoader
 {
 public:
