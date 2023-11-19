@@ -25,6 +25,35 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
+// 106299 - Summon Living Air
+const Position elementalPos = { 1224.9202f, 3727.2014f, 92.447205, 0.0f };
+class spell_gen_summon_living_air : public SpellScriptLoader
+{
+public:
+    spell_gen_summon_living_air() : SpellScriptLoader("spell_gen_summon_living_air") { }
+
+    class spell_gen_summon_living_air_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_summon_living_air_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/ )
+        {
+            if (Creature* chickenTrigger = GetCaster()->FindNearestCreature(41200, 15.0f, true))
+                chickenTrigger->SummonCreature(54631, elementalPos, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 30000);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gen_summon_living_air_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_summon_living_air_SpellScript();
+    }
+};
+
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
     public:
@@ -3567,6 +3596,7 @@ class spell_gen_override_display_power : public SpellScriptLoader
 
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_summon_living_air();
     new spell_gen_absorb0_hitlimit1();
     new spell_gen_adaptive_warding();
     new spell_gen_alchemist_stone();
