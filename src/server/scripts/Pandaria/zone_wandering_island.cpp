@@ -8,6 +8,56 @@
 #include "ScriptedGossip.h"
 #include "Player.h"
 
+const Position huoPos = { 955.11584f, 3604.04f, 200.71805f, 0.0f };
+// at 7835
+class AreaTrigger_at_temple_of_five_dawns : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_temple_of_five_dawns() : AreaTriggerScript("at_temple_of_five_dawns") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(29423) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (Creature* huo = player->FindNearestCreature(54958, 15.0f, true)) // Check if Huo is with us.
+            {
+                if (Creature* master = player->FindNearestCreature(54786, 25.0f, true))
+                {
+                    master->MonsterSay("Welcome, Huo. The people have missed your warmth.", Language::LANG_UNIVERSAL, player);
+                    master->SendPlaySound(27788, true);
+                    player->KilledMonsterCredit(61128);
+                    huo->GetMotionMaster()->MovePoint(0, huoPos);
+                    huo->DeleteCharmInfo();
+                    huo->DespawnOrUnsummon(60000);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class npc_huo : public CreatureScript
+{
+public:
+    npc_huo() : CreatureScript("npc_huo") { }
+
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/ ) OVERRIDE
+    {
+        player->CastSpell(player, 128700);
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_huoAI(creature);
+    }
+    struct npc_huoAI : public ScriptedAI
+    {
+        npc_huoAI(Creature* creature) : ScriptedAI(creature) { }
+    };
+};
+
 enum CaveOfMeditation
 {
     SPELL_SUMMON_LI_FEI = 102445, //
@@ -17,6 +67,7 @@ enum CaveOfMeditation
     //SPELL_GENERIC_QUEST_INVISIBILITY_7 = 85096,
     //SPELL_AYSA_BAR = 116421,
 };
+
 
 /*####
 # npc_li_fei
@@ -371,6 +422,8 @@ public:
 
 void AddSC_wandering_island()
 {
+    new AreaTrigger_at_temple_of_five_dawns();
+    new npc_huo();
     new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
