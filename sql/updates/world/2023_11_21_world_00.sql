@@ -1,0 +1,12 @@
+UPDATE `quest_template` SET `OfferRewardText`='You\'ve got some fight in you! I think I like you!' WHERE `Id`=29417;
+UPDATE `quest_template` SET `RequestItemsText`='When opportunity rises, it is our responsibility to reach out and grab it.Second guessing is as good as giving up.' WHERE `Id`=29523;
+UPDATE `quest_template` SET `RequestItemsText`='I hope you\'re not shy about getting your hands dirty.' WHERE `Id`=29418;
+UPDATE `quest_template` SET `OfferRewardText`='$n! You\'ve returned, roots in hand! You\'re a down-to-business kind of $G guy:gal;, aren\'t you? I like that!' WHERE `Id`=29418;
+UPDATE `quest_template` SET `OfferRewardText`='You know what it is to seize opportunity. I think you and I are kindred spirits, $n.' WHERE `Id`=29523;
+UPDATE `quest_template` SET `OfferRewardText`='Life isn\'t about finding yourself. Life is about creating yourself. There is a path before you, but you choose the trials you will face, and the trials you will overcome.' WHERE `Id`=29420;
+UPDATE `quest_template` SET `RequestItemsText`='You are not yet ready to face me. First, you must light the braziers.' WHERE `Id`=29664;
+UPDATE `quest_template` SET `OfferRewardText`='These fires will give you the strength that you\'ve not yet obtained. They will illuminate your potential.' WHERE `Id`=29664;
+UPDATE `quest_template` SET `OfferRewardText`='Remember always, the superior warrior is modest in his speech, but exceeds in his actions.' WHERE `Id`=29421;
+UPDATE `quest_template` SET `RequestItemsText`='<Huo rests quietly within the pool.>' WHERE `Id`=29422;
+UPDATE `quest_template` SET `OfferRewardText`='<Through the glare, it looks like Huo is smiling. He seems to have warmed up to you.>' WHERE `Id`=29422;
+UPDATE `quest_template` SET `OfferRewardText`='$n, you\'ve done very well. Huo, the spirit of fire, is here. The temple flames are reignited. You accomplished the challenge I put before you, and with seeming ease.$B$BThere is a greater purpose in bringing Huo to the temple. It is time that I tell you more of things to come.' WHERE `Id`=29423;
