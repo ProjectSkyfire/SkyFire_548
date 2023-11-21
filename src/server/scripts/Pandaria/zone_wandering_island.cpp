@@ -82,7 +82,7 @@ Position const LiFeiMovePos5 = { 1129.7743f, 3433.302f, 105.531296f };
 Position const LiFeiMovePos6 = { 1130.5573f, 3436.087f, 105.483864f };
 class npc_li_fei : public CreatureScript
 {
-    enum EventsAysaCloudsinger
+    enum EventsLiFei
     {
         EVENT_LI_FEI_SPAWN_POS = 1,
         EVENT_LI_FEI_MOVE_POS_1,
