@@ -8,6 +8,157 @@
 #include "ScriptedGossip.h"
 #include "Player.h"
 
+
+
+#define MASTER_SHANG_XI_TEXT_1 "You have conquered every challenge I put before you, $n. You have found Huo and brought him safely to the temple."
+#define MASTER_SHANG_XI_TEXT_2 "There is a much larger problem we face now, my students. Shen-zin Su is in pain. If we do not act the very land on which we stand could die, and all of us with it."
+#define MASTER_SHANG_XI_TEXT_3 "We need to speak to Shen-zin Su and discover how to heal it. And to do that, we need the four elemental spirits returned. Huo was the first."
+#define MASTER_SHANG_XI_TEXT_4 "Ji, I'd like you to go to the Dai-Lo Farmstead in search of Wugou, the spirit of earth."
+#define JI_TEXT_1 "On It!"
+#define MASTER_SHANG_XI_TEXT_5 "Aysa, I want you to go to the Singing Pools to find Shu, the spirit of water."
+#define AYSA_TEXT_1 "Yes master."
+#define MASTER_SHANG_XI_TEXT_6 "And $n, you shall be the hand that guides us all. Speak with me for a moment before you join Aysa at the Singing Pools to the east."
+
+const Position jiTempleMovePoint_1 = { 966.1493f, 3607.0894f, 196.51373f };
+const Position jiTempleMovePoint_2 = { 958.9819, 3594.94, 196.6083 };
+const Position jiTempleMovePoint_3 = { 950.7555, 3588.809, 196.8154 };
+
+const Position aysaTempleMovePoint_1 = { 966.3715f, 3602.764f, 196.47968f };
+const Position aysaTempleMovePoint_2 = { 943.1327, 3572.154, 193.6543 };
+
+const Position jiTempleSpawnPos = { 971.5566f, 3607.8015f, 195.71495f };
+const Position aysaTempleSpawnPos = { 968.2688, 3602.207, 196.6442 }; 
+const Position masterShangXiPos = { 960.043030f, 3606.050049f, 196.414001f, 0.0f };
+
+class npc_master_shang_xi_temple : public CreatureScript
+{
+    enum EventsMasterShangXi
+    {
+        EVENT_MASTER_SHANG_XI_SPAWN_POS = 1,
+        EVENT_MASTER_SHANG_XI_TALK_1,
+        EVENT_MASTER_SHANG_XI_TALK_2,
+        EVENT_MASTER_SHANG_XI_TALK_3,
+        EVENT_MASTER_SHANG_XI_TALK_4,
+        EVENT_MASTER_SHANG_XI_TALK_5,
+        EVENT_MASTER_SHANG_XI_TALK_6,
+        EVENT_MASTER_SHANG_XI_TALK_7,
+    };
+public:
+    npc_master_shang_xi_temple() : CreatureScript("npc_master_shang_xi_temple") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_master_shang_xi_templeAI(creature);
+    }
+    struct npc_master_shang_xi_templeAI : public CreatureAI
+    {
+        std::vector<Player*> players;
+        EventMap events;
+        bool started = false;
+
+        npc_master_shang_xi_templeAI(Creature* creature) : CreatureAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            started = false;
+        }
+        void MoveInLineOfSight(Unit* who)
+        {
+            Player* const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->GetQuestStatus(29423) != QUEST_STATUS_REWARDED || started)
+                return;
+
+            if (me->GetAreaId() == 5820) // Temple of Five Dawns Area
+            {
+                started = true;
+                events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_1, 1000);
+            }
+        }
+
+        void UpdatePlayerList()
+        {
+            players.clear();
+
+            std::list<Player*> PlayerList;
+            me->GetPlayerListInGrid(PlayerList, 20.0f);
+
+            for (auto&& player : PlayerList)
+                if (!player->IsGameMaster() && player->GetQuestStatus(29423) == QUEST_STATUS_REWARDED)
+                    players.push_back(player);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MASTER_SHANG_XI_TALK_1:
+                    {
+                        UpdatePlayerList();
+                        for (auto&& player : players)
+                        {
+                            me->MonsterSay(MASTER_SHANG_XI_TEXT_1, Language::LANG_UNIVERSAL, player);
+                            events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_2, 10000);
+                        }
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_2:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_2, Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_3, 10000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_3:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_3, Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_4, 10000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_4:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_4, Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_5, 10000);
+                        if (Creature* ji = me->FindNearestCreature(61127, 20.0f, true))
+                        {
+                            ji->MonsterSay(JI_TEXT_1, Language::LANG_UNIVERSAL, ji);
+                            ji->GetMotionMaster()->MovePoint(1, jiTempleMovePoint_2);
+                            ji->DespawnOrUnsummon(2500);
+                        }
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_5:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_5, Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_6, 10000);
+                        if (Creature* aysa = me->FindNearestCreature(61126, 20.0f, true))
+                        {
+                            aysa->MonsterSay(AYSA_TEXT_1, Language::LANG_UNIVERSAL, aysa);
+                            aysa->GetMotionMaster()->MovePoint(2, aysaTempleMovePoint_2);
+                            aysa->DespawnOrUnsummon(2500);
+                        }
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_6:
+                    {
+                        UpdatePlayerList();
+                        for (auto&& player : players)
+                        {
+                            me->MonsterSay(MASTER_SHANG_XI_TEXT_6, Language::LANG_UNIVERSAL, player);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    };
+};
+
 const Position huoPos = { 955.11584f, 3604.04f, 200.71805f, 0.0f };
 // at 7835
 class AreaTrigger_at_temple_of_five_dawns : AreaTriggerScript
@@ -25,6 +176,14 @@ public:
                 {
                     master->MonsterSay("Welcome, Huo. The people have missed your warmth.", Language::LANG_UNIVERSAL, player);
                     master->SendPlaySound(27788, true);
+                    if (Creature* aysa = master->SummonCreature(61126, aysaTempleSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
+                    {
+                        aysa->GetMotionMaster()->MovePoint(0, aysaTempleMovePoint_1);
+                    }
+                    if (Creature* ji = master->SummonCreature(61127, jiTempleSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
+                    {
+                        ji->GetMotionMaster()->MovePoint(0, jiTempleMovePoint_1);
+                    }
                     player->KilledMonsterCredit(61128);
                     huo->GetMotionMaster()->MovePoint(0, huoPos);
                     huo->DeleteCharmInfo();
@@ -422,6 +581,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_master_shang_xi_temple();
     new AreaTrigger_at_temple_of_five_dawns();
     new npc_huo();
     new npc_li_fei();
