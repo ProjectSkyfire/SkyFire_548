@@ -1,0 +1,3 @@
+DELETE FROM `achievement_reward` WHERE `entry`=5860;
+INSERT INTO `achievement_reward` (`entry`, `title_A`, `title_H`, `item`, `spell`, `sender`, `subject`, `text`) VALUES
+(5860, 0, 0, 69838, 0, 40578, 'Please... Just Take It', 'Ever since his brother was taken away. This little creature has been nothing short of a handful. The guardians and I have done everything we can to contain his energy, but our efforts have fallen depressingly short. It is now clear.$b$bHe wants to be with his brother.$b$bIt took us nearly an hour to get him contained. Please, take him with you. Perhaps some time outside of this cavern will do him good.$b$b-Farden Talonshrike');
