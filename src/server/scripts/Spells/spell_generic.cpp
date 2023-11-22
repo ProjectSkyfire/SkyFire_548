@@ -25,6 +25,94 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
+const Position jumpPosC = { 1063.56f, 2843.46f, 95.2332, 0.0f };
+class spell_gen_rock_jump_c : public SpellScriptLoader
+{
+public:
+    spell_gen_rock_jump_c() : SpellScriptLoader("spell_gen_rock_jump_c") { }
+
+    class spell_gen_rock_jump_c_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_rock_jump_c_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->GetMotionMaster()->MoveJump(jumpPosC, 10.0f, 15.0f);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_rock_jump_c_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_JUMP_DEST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_rock_jump_c_SpellScript();
+    }
+};
+//
+const Position jumpPosB = { 1054.531f, 2842.7f, 92.59693f, 0.0f };
+class spell_gen_rock_jump_b : public SpellScriptLoader
+{
+public:
+    spell_gen_rock_jump_b() : SpellScriptLoader("spell_gen_rock_jump_b") { }
+
+    class spell_gen_rock_jump_b_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_rock_jump_b_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->GetMotionMaster()->MoveJump(jumpPosB, 10.0f, 15.0f);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_rock_jump_b_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_JUMP_DEST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_rock_jump_b_SpellScript();
+    }
+};
+//
+const Position jumpPosD = { 1077.019f, 2844.103f, 95.27103f, 0.0f };
+const Position jumpPosA = { 1045.1666f, 2848.442f, 91.405014f, 0.0f };
+class spell_gen_rock_jump_a : public SpellScriptLoader
+{
+public:
+    spell_gen_rock_jump_a() : SpellScriptLoader("spell_gen_rock_jump_a") { }
+
+    class spell_gen_rock_jump_a_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_rock_jump_a_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->FindNearestGameObject(209577, 10.0f)) // check if C is near
+            {
+                GetCaster()->GetMotionMaster()->MoveJump(jumpPosD, 10.0f, 15.0f);
+            }
+            else
+            {
+                GetCaster()->GetMotionMaster()->MoveJump(jumpPosA, 10.0f, 10.0f);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_rock_jump_a_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_JUMP_DEST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_rock_jump_a_SpellScript();
+    }
+};
 // 106299 - Summon Living Air
 const Position elementalPos = { 1224.9202f, 3727.2014f, 92.447205f, 0.0f };
 class spell_gen_summon_living_air : public SpellScriptLoader
@@ -3596,6 +3684,9 @@ class spell_gen_override_display_power : public SpellScriptLoader
 
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_rock_jump_a();
+    new spell_gen_rock_jump_b();
+    new spell_gen_rock_jump_c();
     new spell_gen_summon_living_air();
     new spell_gen_absorb0_hitlimit1();
     new spell_gen_adaptive_warding();

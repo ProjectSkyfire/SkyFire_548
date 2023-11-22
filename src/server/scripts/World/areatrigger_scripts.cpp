@@ -27,6 +27,17 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+class AreaTrigger_at_pool_of_reflection : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_pool_of_reflection() : AreaTriggerScript("at_pool_of_reflection") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        player->CastSpell(player, 108590);
+        return true;
+    }
+};
 
 enum the_dawning_valley
 {
@@ -495,6 +506,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_pool_of_reflection();
     new AreaTrigger_at_the_dawning_valley();
     new AreaTrigger_at_coilfang_waterfall();
     new AreaTrigger_at_legion_teleporter();
