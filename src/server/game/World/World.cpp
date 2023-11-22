@@ -72,6 +72,7 @@
 #include "BattlefieldMgr.h"
 #include "TransportMgr.h"
 #include "BattlePetMgr.h"
+#include "AnticheatMgr.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1346,6 +1347,36 @@ void World::LoadConfigSettings(bool reload)
 
     setIntConfig(WorldIntConfigs::CONFIG_PACKET_SPOOF_BANDURATION, sConfigMgr->GetIntDefault("PacketSpoof.BanDuration", 86400));
 
+    // Anticheat Stuff
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.Enable", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_ENABLE_ON_GM, sConfigMgr->GetBoolDefault("Anticheat.EnabledOnGmAccounts", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_LUABLOCKER_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.LUAblocker", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_SPEEDHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectSpeedHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_FLYHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectFlyHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_WATERWALKHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectWaterWalkHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_JUMPHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectJumpHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_ADV_JUMPHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.StricterDetectJumpHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectTelePlaneHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CLIMBHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectClimbHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_GRAVITY_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectGravityHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_TELEPORTHACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectTelePortHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_BG_START_HACK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.DetectBGStartHack", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CM_FLYHACK, sConfigMgr->GetBoolDefault("Anticheat.CM.FLYHACK", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CM_WATERHACK, sConfigMgr->GetBoolDefault("Anticheat.CM.WATERHACK", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CM_SPEEDHACK, sConfigMgr->GetBoolDefault("Anticheat.CM.SPEEDHACK", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CM_JUMPHACK, sConfigMgr->GetBoolDefault("Anticheat.CM.JUMPHACK", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CM_ADVJUMPHACK, sConfigMgr->GetBoolDefault("Anticheat.CM.ADVJUMPHACK", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_CM_TELEPORT, sConfigMgr->GetBoolDefault("Anticheat.CM.Teleport", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_AUTOKICK_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_AUTOBAN_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_AUTOJAIL_ENABLE, sConfigMgr->GetBoolDefault("Anticheat.JailPlayer", false));
+    setIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION, sConfigMgr->GetIntDefault("Anticheat.Reports.InGame", 70));
+    setIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_MAX_REPORTS_FOR_DAILY_REPORT, sConfigMgr->GetIntDefault("Anticheat.Reports.InGame.Max", 70));
+    setIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_SPEED_LIMIT_TOLERANCE, sConfigMgr->GetIntDefault("Anticheat.SpeedLimitTolerance", 10));
+    setIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_MAX_REPORTS_FOR_BANS, sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70));
+    setIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_MAX_REPORTS_FOR_KICKS, sConfigMgr->GetIntDefault("Anticheat.ReportsForKick", 70));
+    setIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_MAX_REPORTS_FOR_JAILS, sConfigMgr->GetIntDefault("Anticheat.ReportsForJail", 70));
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -1961,6 +1992,9 @@ void World::SetInitialWorldSettings()
 
     SF_LOG_INFO("server.loading", "Calculate random battleground reset time...");
     InitRandomBGResetTime();
+
+    SF_LOG_INFO("server.loading", "Loading Anticheat LUA blocked data...");
+    sAnticheatMgr->LoadBlockedLuaFunctions();
 
     SF_LOG_INFO("server.loading", "Calculate guild limitation(s) reset time...");
     InitGuildResetTime();
@@ -3046,6 +3080,8 @@ void World::ResetDailyQuests()
 
     // change available dailies
     sPoolMgr->ChangeDailyQuests();
+
+    sAnticheatMgr->ResetDailyReportStates();
 }
 
 void World::ResetCurrencyWeekCap()

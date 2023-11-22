@@ -520,6 +520,8 @@ class WorldSession
 
         z_stream_s* GetCompressionStream() { return _compressionStream; }
 
+        bool IsLuaCheater() const { return _isLuaCheater; }
+
     public:                                                 // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -1198,6 +1200,8 @@ class WorldSession
         rbac::RBACData* _RBACData;
         WorldSession(WorldSession const& right) = delete;
         WorldSession & operator=(WorldSession const& right) = delete;
+
+        bool _isLuaCheater;
 };
 #endif
 /// @}

@@ -28,6 +28,7 @@ void AddSC_SmartSCripts();
 //Commands
 void AddSC_account_commandscript();
 void AddSC_achievement_commandscript();
+void AddSC_anticheat_commandscript();
 void AddSC_ban_commandscript();
 void AddSC_bf_commandscript();
 void AddSC_cast_commandscript();
@@ -681,6 +682,7 @@ void AddCommandScripts()
 {
     AddSC_account_commandscript();
     AddSC_achievement_commandscript();
+    AddSC_anticheat_commandscript();
     AddSC_ban_commandscript();
     AddSC_bf_commandscript();
     AddSC_cast_commandscript();

@@ -921,6 +921,11 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
 }
 
 void Spell::CalculateJumpSpeeds(uint8 i, float dist, float & speedXY, float & speedZ)
@@ -947,6 +952,11 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     {
         SF_LOG_ERROR("spells", "Spell::EffectTeleportUnits - does not have destination for spellId %u.", m_spellInfo->Id);
         return;
+    }
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
     }
 
     // Init dest coordinates
@@ -3217,6 +3227,20 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
     {
         if (Spell* spell = unitTarget->GetCurrentSpell(CurrentSpellTypes(i)))
         {
+            // if player is lua cheater dont interrupt cast until timer reached 600ms
+            if (auto player = m_caster->ToPlayer())
+            {
+                if (player->GetSession()->IsLuaCheater())
+                {
+                    if (spell->GetCastTime() - spell->GetTimer() < 600)
+                    {
+                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                        SF_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Played %s attempted repeat LUA spell Casting - IP: %s - Flagged at: %s", player->GetName().c_str(), player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
+                        return;
+                    }
+                }
+            }
+
             SpellInfo const* curSpellInfo = spell->m_spellInfo;
             // check if we can interrupt spell
             if ((spell->getState() == SPELL_STATE_CASTING
@@ -5095,6 +5119,10 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
             linkedGO = NULL;
             return;
         }
+    }
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
     }
 }
 
