@@ -20,14 +20,14 @@
 #define MASTER_SHANG_XI_TEXT_6 "And $n, you shall be the hand that guides us all. Speak with me for a moment before you join Aysa at the Singing Pools to the east."
 
 const Position jiTempleMovePoint_1 = { 966.1493f, 3607.0894f, 196.51373f };
-const Position jiTempleMovePoint_2 = { 958.9819, 3594.94, 196.6083 };
-const Position jiTempleMovePoint_3 = { 950.7555, 3588.809, 196.8154 };
+const Position jiTempleMovePoint_2 = { 958.9819f, 3594.94f, 196.6083f };
+const Position jiTempleMovePoint_3 = { 950.7555f, 3588.809f, 196.8154f };
 
 const Position aysaTempleMovePoint_1 = { 966.3715f, 3602.764f, 196.47968f };
-const Position aysaTempleMovePoint_2 = { 943.1327, 3572.154, 193.6543 };
+const Position aysaTempleMovePoint_2 = { 943.1327f, 3572.154f, 193.6543f };
 
 const Position jiTempleSpawnPos = { 971.5566f, 3607.8015f, 195.71495f };
-const Position aysaTempleSpawnPos = { 968.2688, 3602.207, 196.6442 }; 
+const Position aysaTempleSpawnPos = { 968.2688f, 3602.207f, 196.6442f }; 
 const Position masterShangXiPos = { 960.043030f, 3606.050049f, 196.414001f, 0.0f };
 
 class npc_master_shang_xi_temple : public CreatureScript
