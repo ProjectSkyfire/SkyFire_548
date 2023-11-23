@@ -11,6 +11,11 @@ SDCategory: Areatrigger
 EndScriptData */
 
 /* ContentData
+at_dawning_valley
+at_wu_song_village
+at_fus_pond
+at_dawning_valley2
+at_pool_of_reflection
 at_the_dawning_valley           q29409
 at_coilfang_waterfall           4591
 at_legion_teleporter            4560 Teleporter TO Invasion Point: Cataclysm
