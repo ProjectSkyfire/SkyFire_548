@@ -1580,11 +1580,12 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
     GetPlayer()->RefundItem(item);
 }
 */
-void WorldSession::HandleItemRefund(WorldPacket &recvData)
+void WorldSession::HandleItemRefund(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: CMSG_ITEM_REFUND");
-    uint64 guid;
-    recvData >> guid;                                      // item guid
+    ObjectGuid guid;
+    recvData.ReadGuidMask(guid, 2, 4, 1, 6, 3, 0, 5, 7);
+    recvData.ReadGuidBytes(guid, 3, 5, 6, 2, 7, 0, 1, 4);
 
     Item* item = _player->GetItemByGuid(guid);
     if (!item)

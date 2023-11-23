@@ -234,6 +234,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                                      0x1259, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode                       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT_HONOR_STATS,                          0x19C3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_INSTANCE_LOCK_WARNING_RESPONSE,               0x12C0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInstanceLockResponse                ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND,                                  0x074B, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefund                          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_TEXT_QUERY,                              0x0123, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleItemTextQuery                       ); // 5.4.8 18414 // LEGACY CMSG sub_600632
     //DEFINE_OPCODE_HANDLER(CMSG_GET_ITEM_PURCHASE_DATA,                       0x1258, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefundInfoRequest               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_KEEP_ALIVE,                                   0x1A87, STATUS_AUTHED,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess                      ); // 5.4.8 18414
@@ -478,7 +479,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_SWAP_SUB_GROUP, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGroupSwapSubGroupOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_REQUEST_MAX_DAILY_XP, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildRequestMaxDailyXP);
     DEFINE_OPCODE_HANDLER(CMSG_HEARTH_AND_RESURRECT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleHearthAndResurrect);
-    DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefund);
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalents);
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS_PET, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalentsPet);
     DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS, 0x0000, STATUS_UNHANDLED,  PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus                 );
