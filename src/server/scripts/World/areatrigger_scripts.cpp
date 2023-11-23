@@ -27,6 +27,44 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+enum dawningValley
+{
+    NPC_CHIA_HUI = 60248,
+    NPC_BREWER_LIN = 60253,
+    QUEST_PASSION_OF_SHEN_ZIN_SU = 29423,
+};
+//7750
+class AreaTrigger_at_dawning_valley : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_dawning_valley() : AreaTriggerScript("at_dawning_valley") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_PASSION_OF_SHEN_ZIN_SU) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!player->GetAura(116220))
+            {
+                if (Creature* chiahui = player->FindNearestCreature(NPC_CHIA_HUI, 45.0f, true))
+                {
+                    if (chiahui->FindNearestCreature(54958, 45.0f, true))
+                        chiahui->AI()->Talk(0);
+
+                    if (Creature* lin = player->FindNearestCreature(NPC_BREWER_LIN, 45.0f, true))
+                    {
+                        if (lin->FindNearestCreature(54958, 45.0f, true))
+                            lin->AI()->Talk(0);
+                    }
+                    chiahui->CastSpell(player, 116220);
+
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 enum WuSongVillage
 {
     QUEST_JI_OF_THE_HUOJIN = 29522,
@@ -580,6 +618,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_dawning_valley();
     new AreaTrigger_at_wu_song_village();
     new AreaTrigger_at_fus_pond();
     new AreaTrigger_at_pool_of_reflection();
