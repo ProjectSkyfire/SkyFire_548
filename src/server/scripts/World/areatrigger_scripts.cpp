@@ -27,6 +27,35 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+enum WuSongVillage
+{
+    QUEST_JI_OF_THE_HUOJIN = 29522,
+    NPC_JI_FIREPAW = 54568
+};
+//7749
+class AreaTrigger_at_wu_song_village : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_wu_song_village() : AreaTriggerScript("at_wu_song_village") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_JI_OF_THE_HUOJIN) == QUEST_STATUS_COMPLETE)
+        {
+            if (!player->GetAura(116219))
+            {
+                if (Creature* ji = player->FindNearestCreature(NPC_JI_FIREPAW, 15.0f, true))
+                {
+                    ji->CastSpell(player, 116219);
+                    ji->AI()->Talk(0);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 enum fusPond
 {
     QUEST_AYSA_OF_THE_TUSHUI = 29410,
@@ -551,6 +580,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_wu_song_village();
     new AreaTrigger_at_fus_pond();
     new AreaTrigger_at_pool_of_reflection();
     new AreaTrigger_at_the_dawning_valley();
