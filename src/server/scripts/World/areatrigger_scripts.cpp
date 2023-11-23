@@ -27,6 +27,51 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+enum fusPond
+{
+    QUEST_AYSA_OF_THE_TUSHUI = 29410,
+    QUEST_MISSING_DRIVER = 29419,
+
+    NPC_AYSA = 54567,
+    NPC_LORVO = 54943,
+};
+//7748
+class AreaTrigger_at_fus_pond : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_fus_pond() : AreaTriggerScript("at_fus_pond") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_AYSA_OF_THE_TUSHUI) == QUEST_STATUS_COMPLETE)
+        {
+            std::list<Creature*> lorvos;
+            player->GetCreatureListWithEntryInGrid(lorvos, NPC_LORVO, 15.0f);
+            if (!lorvos.empty())
+            {
+                for (std::list<Creature*>::iterator itr = lorvos.begin(); itr != lorvos.end(); ++itr)
+                {
+                    if ((*itr)->IsAlive() && (*itr)->GetGUIDLow() == 224519)
+                    {
+                        (*itr)->AI()->Talk(0);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (player->GetQuestStatus(QUEST_MISSING_DRIVER) == QUEST_STATUS_COMPLETE)
+        {
+            if (Creature* aysa = player->FindNearestCreature(NPC_AYSA, 15.0f, true))
+            {
+                aysa->AI()->Talk(0);
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
 class AreaTrigger_at_pool_of_reflection : public AreaTriggerScript
 {
 public:
@@ -506,6 +551,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_fus_pond();
     new AreaTrigger_at_pool_of_reflection();
     new AreaTrigger_at_the_dawning_valley();
     new AreaTrigger_at_coilfang_waterfall();
