@@ -2048,9 +2048,14 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
     SF_LOG_DEBUG("network", "WORLD: CMSG_AREA_SPIRIT_HEALER_QUERY");
 
     Battleground* bg = _player->GetBattleground();
+
     ObjectGuid guid;
 
-    recvData.ReadGuidMask(guid, 5, 6, 0, 4, 1, 2, 7, 3);
+    uint8 bitOrder[8] = { 5, 6, 0, 4, 1, 2, 7, 3 };
+    recvData.ReadBitInOrder(guid, bitOrder);
+
+    recvData.FlushBits();
+
     recvData.ReadGuidBytes(guid, 0, 2, 6, 7, 1, 5, 3, 4);
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
