@@ -2050,12 +2050,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
     Battleground* bg = _player->GetBattleground();
 
     ObjectGuid guid;
-
-    uint8 bitOrder[8] = { 5, 6, 0, 4, 1, 2, 7, 3 };
-    recvData.ReadBitInOrder(guid, bitOrder);
-
-    recvData.FlushBits();
-
+    recvData.ReadGuidMask(guid, 5, 6, 0, 4, 1, 2, 7, 3);
     recvData.ReadGuidBytes(guid, 0, 2, 6, 7, 1, 5, 3, 4);
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
