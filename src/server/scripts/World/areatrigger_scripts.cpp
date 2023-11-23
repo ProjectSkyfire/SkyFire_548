@@ -139,6 +139,34 @@ public:
     }
 };
 
+enum dawningValley2
+{
+    NPC_TRAINEE_GUANG = 60244,
+};
+//7747
+class AreaTrigger_at_dawning_valley2 : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_dawning_valley2() : AreaTriggerScript("at_dawning_valley2") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_AYSA_OF_THE_TUSHUI) == QUEST_STATUS_COMPLETE)
+        {
+            if (!player->GetAura(116220))
+            {
+                if (Creature* guang = player->FindNearestCreature(NPC_TRAINEE_GUANG, 45.0f, true))
+                {
+                    guang->AI()->Talk(0, player);
+                    guang->CastSpell(player, 116220);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 class AreaTrigger_at_pool_of_reflection : public AreaTriggerScript
 {
 public:
@@ -618,6 +646,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_dawning_valley2();
     new AreaTrigger_at_dawning_valley();
     new AreaTrigger_at_wu_song_village();
     new AreaTrigger_at_fus_pond();
