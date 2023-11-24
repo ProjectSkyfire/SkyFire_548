@@ -81,6 +81,4 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_SEL_REQ_XP, "SELECT xp_for_next_level FROM player_xp_for_level WHERE lvl = ?", CONNECTION_SYNCH);
     // blackmarket
     PrepareStatement(WORLD_SEL_BLACKMARKET_TEMPLATE, "SELECT Id, MarketID, SellerID, ItemEntry, Quantity, MinBid, Duration, Chance FROM blackmarket_template", CONNECTION_SYNCH);
-    // Anticheat
-    PrepareStatement(WORLD_SEL_ANTICHEAT_FUNCTIONS, "SELECT function_name, enabled FROM lua_private_functions", CONNECTION_SYNCH);
 }
