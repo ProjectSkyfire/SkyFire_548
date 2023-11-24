@@ -3141,7 +3141,6 @@ Anticheat.Reports.InGame.Max = 70
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
 
-Anticheat.LUAblocker = 0
 Anticheat.DetectFlyHack = 0
 Anticheat.DetectWaterWalkHack = 0
 Anticheat.DetectJumpHack = 0

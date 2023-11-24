@@ -96,10 +96,6 @@ class AnticheatMgr
         void AnticheatDeleteCommand(uint32 guid);
         void AnticheatPurgeCommand(ChatHandler* handler);
         void ResetDailyReportStates();
-        void LoadBlockedLuaFunctions();
-        void SaveLuaCheater(uint32 guid, uint32 accountId, std::string macro);
-        bool CheckIsLuaCheater(uint32 accountId);
-        bool CheckBlockedLuaFunctions(AccountData accountData[uint8(AccountDataType::NUM_ACCOUNT_DATA_TYPES)], Player* player);
 
     private:
         void SpeedHackDetection(Player* player, MovementInfo &movementInfo, AnticheatData& data);
