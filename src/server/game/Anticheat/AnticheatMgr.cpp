@@ -648,8 +648,6 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo &movementInfo
     player->GetPosition(&playerPos);
 
     float deltaZ = fabs(playerPos.GetPositionZ() - movementInfo.pos.GetPositionZ());
-    float deltaXY = movementInfo.pos.GetExactDist2d(&playerPos);
-
     float tanangle = movementInfo.pos.GetExactDist2d(&playerPos) / deltaZ;
 
     if (!player->HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_SWIMMING))
