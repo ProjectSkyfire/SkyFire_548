@@ -1993,9 +1993,6 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Calculate random battleground reset time...");
     InitRandomBGResetTime();
 
-    SF_LOG_INFO("server.loading", "Loading Anticheat LUA blocked data...");
-    sAnticheatMgr->LoadBlockedLuaFunctions();
-
     SF_LOG_INFO("server.loading", "Calculate guild limitation(s) reset time...");
     InitGuildResetTime();
 
