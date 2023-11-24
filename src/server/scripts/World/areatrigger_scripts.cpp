@@ -32,6 +32,34 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+enum shrineOfInnerLight
+{
+    QUEST_THE_SPIRITS_GUARDIAN = 29420,
+    NPC_HUOJIN_MONK = 60176,
+};
+//7736
+class AreaTrigger_at_shrine_of_inner_light : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_shrine_of_inner_light() : AreaTriggerScript("at_shrine_of_inner_light") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_THE_SPIRITS_GUARDIAN) == QUEST_STATUS_COMPLETE)
+        {
+            if (!player->GetAura(92571))
+            {
+                if (Creature* huojinMonk = player->FindNearestCreature(NPC_HUOJIN_MONK, 15.0f, true))
+                {
+                    huojinMonk->CastSpell(player, 92571);
+                    huojinMonk->AI()->Talk(0);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
 enum dawningValley
 {
     NPC_CHIA_HUI = 60248,
@@ -651,6 +679,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_shrine_of_inner_light();
     new AreaTrigger_at_dawning_valley2();
     new AreaTrigger_at_dawning_valley();
     new AreaTrigger_at_wu_song_village();
