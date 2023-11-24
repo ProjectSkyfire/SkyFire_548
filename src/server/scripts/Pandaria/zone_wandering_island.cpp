@@ -203,6 +203,7 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/ ) OVERRIDE
     {
+        player->CastSpell(player, 102630); // blessing of huo
         player->CastSpell(player, 128700);
         return true;
     }
