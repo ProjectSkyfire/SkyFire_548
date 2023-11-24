@@ -114,6 +114,6 @@ class AnticheatMgr
         AnticheatPlayersDataMap _players;
 };
 
-#define sAnticheatMgr AnticheatMgr::instance()
+#define sAnticheatMgr ACE_Singleton<AnticheatMgr, ACE_Null_Mutex>::instance()
 
 #endif
