@@ -8,7 +8,149 @@
 #include "ScriptedGossip.h"
 #include "Player.h"
 
+const Position shuJumpPos1 { 1102.05f, 2882.11f, 94.32f, 0.11f };
+const Position shuJumpPos2 { 1120.01f, 2883.20f, 96.44f, 4.17f };
+const Position shuJumpPos3 { 1128.09f, 2859.44f, 97.64f, 2.51f };
+const Position shuJumpPos4 { 1111.52f, 2849.84f, 94.84f, 1.94f };
 
+class npc_shu_pool_of_reflection : public CreatureScript
+{
+public:
+    npc_shu_pool_of_reflection() : CreatureScript("npc_shu_pool_of_reflection") { }
+
+    struct npc_shu_pool_of_reflectionAI : public CreatureAI
+    {
+        enum ShuEvents
+        {
+            EVENT_ROTATE_POSITION = 1,
+            EVENT_SUMMON_WATER_SPOUT = 2,
+            EVENT_WATER_SPOUT_BURST = 3,
+            EVENT_WATER_SPOUT_DESPAWN = 4
+        };
+        EventMap events;
+        uint64 waterSpoutGUID = 0;
+        uint8 stationaryPosition;
+        bool running;
+
+        npc_shu_pool_of_reflectionAI(Creature* creature) : CreatureAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+            stationaryPosition = 0;
+            waterSpoutGUID = 0;
+            running = false;
+
+            events.ScheduleEvent(EVENT_ROTATE_POSITION, 5000);
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            Player* const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->GetQuestStatus(29679) != QUEST_STATUS_INCOMPLETE || running)
+                return;
+
+            if (me->GetAreaId() == 5862) // Pool of Reflection Area
+            {
+                running = true;
+                events.ScheduleEvent(EVENT_ROTATE_POSITION, 2000);
+            }
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+
+            switch (events.ExecuteEvent())
+            {
+                case EVENT_ROTATE_POSITION:
+                {
+                    uint8 newPlace = 0;
+
+                    newPlace = urand(0, 3);
+
+                    switch (newPlace)
+                    {
+                        case 0:
+                        {
+                            me->GetMotionMaster()->MoveJump(shuJumpPos1, 10.0f, 10.0f, 1);
+                            break;
+                        }
+                        case 1:
+                        {
+                            me->GetMotionMaster()->MoveJump(shuJumpPos2, 10.0f, 10.0f, 1);
+                            break;
+                        }
+                        case 2:
+                        {
+                            me->GetMotionMaster()->MoveJump(shuJumpPos3, 10.0f, 10.0f, 1);
+                            break;
+                        }
+                        case 3:
+                        {
+                            me->GetMotionMaster()->MoveJump(shuJumpPos4, 10.0f, 10.0f, 1);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+
+                    events.ScheduleEvent(EVENT_SUMMON_WATER_SPOUT, 2000);
+                    me->AddAura(116695, me);
+                    stationaryPosition = newPlace;
+                    break;
+                }
+                case EVENT_SUMMON_WATER_SPOUT:
+                {
+                    float x = 0.0f, y = 0.0f;
+                    GetPositionWithDistInOrientation(me, 5.0f, me->GetOrientation() + frand(-M_PI, M_PI), x, y);
+
+                    if (Creature* waterSpout = me->SummonCreature(60488, x, y, 92.189629f))
+                    {
+                        waterSpoutGUID = waterSpout->GetGUID();
+                        waterSpout->CastSpell(waterSpout, 116695, true);
+                    }
+
+                    events.ScheduleEvent(EVENT_WATER_SPOUT_BURST, 7000);
+
+                    break;
+                }
+                case EVENT_WATER_SPOUT_BURST:
+                {
+                    if (Creature* waterSpout = me->GetMap()->GetCreature(waterSpoutGUID))
+                    {
+                        std::list<Player*> playerList;
+                        GetPlayerListInGrid(playerList, waterSpout, 1.0f);
+
+                        for (auto&& player : playerList)
+                            player->CastSpell(player, 116696, true);
+
+                        waterSpout->CastSpell(waterSpout, 117057, true);
+                    }
+                    events.ScheduleEvent(EVENT_WATER_SPOUT_DESPAWN, 3000);
+                    break;
+                }
+                case EVENT_WATER_SPOUT_DESPAWN:
+                {
+                    if (Creature* waterSpout = me->GetMap()->GetCreature(waterSpoutGUID))
+                        waterSpout->DespawnOrUnsummon();
+
+                    waterSpoutGUID = 0;
+                    running = false;
+                    
+                    break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_shu_pool_of_reflectionAI(creature);
+    }
+};
 
 #define MASTER_SHANG_XI_TEXT_1 "You have conquered every challenge I put before you, $n. You have found Huo and brought him safely to the temple."
 #define MASTER_SHANG_XI_TEXT_2 "There is a much larger problem we face now, my students. Shen-zin Su is in pain. If we do not act the very land on which we stand could die, and all of us with it."
@@ -582,6 +724,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_shu_pool_of_reflection();
     new npc_master_shang_xi_temple();
     new AreaTrigger_at_temple_of_five_dawns();
     new npc_huo();
