@@ -70,12 +70,12 @@ typedef std::unordered_map<uint32, AnticheatData> AnticheatPlayersDataMap;
 
 class AnticheatMgr
 {
-    friend class ACE_Singleton<AnticheatMgr, ACE_Null_Mutex>;
-
     AnticheatMgr();
     ~AnticheatMgr();
 
     public:
+        friend class ACE_Singleton<AnticheatMgr, ACE_Null_Mutex>;
+
         static AnticheatMgr *instance()
         {
             static AnticheatMgr _instance;
