@@ -76,11 +76,6 @@ class AnticheatMgr
     public:
         friend class ACE_Singleton<AnticheatMgr, ACE_Null_Mutex>;
 
-        static AnticheatMgr *instance()
-        {
-            static AnticheatMgr _instance;
-            return &_instance;
-        }
         void SetAllowedMovement(Player* player, bool);
         void StartHackDetection(Player* player, MovementInfo &movementInfo, uint32 opcode);
         void SavePlayerData(Player* player);
