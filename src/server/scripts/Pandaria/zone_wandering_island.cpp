@@ -31,6 +31,7 @@ public:
         uint64 waterSpoutGUID = 0;
         uint8 stationaryPosition;
         bool running;
+        std::vector<Player*> players;
 
         npc_shu_pool_of_reflectionAI(Creature* creature) : CreatureAI(creature) { }
 
@@ -40,10 +41,20 @@ public:
             stationaryPosition = 0;
             waterSpoutGUID = 0;
             running = false;
-
-            events.ScheduleEvent(EVENT_ROTATE_POSITION, 5000);
         }
 
+        void UpdatePlayerList()
+        {
+            players.clear();
+
+            std::list<Player*> PlayerList;
+            me->GetPlayerListInGrid(PlayerList, 20.0f);
+
+            for (auto&& player : PlayerList)
+                if (!player->IsGameMaster() && player->GetQuestStatus(29679) == QUEST_STATUS_INCOMPLETE)
+                    players.push_back(player);
+        }
+        
         void MoveInLineOfSight(Unit* who)
         {
             Player* const player = who->ToPlayer();
@@ -55,11 +66,31 @@ public:
 
             if (me->GetAreaId() == 5862) // Pool of Reflection Area
             {
-                running = true;
-                events.ScheduleEvent(EVENT_ROTATE_POSITION, 2000);
+                UpdatePlayerList();
+                if (!players.empty())
+                {
+                    running = true;
+                    events.ScheduleEvent(EVENT_ROTATE_POSITION, 5000);
+                }
             }
         }
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
 
+            switch (id)
+            {
+            case 0:
+                if (running)
+                {
+                    events.ScheduleEvent(EVENT_ROTATE_POSITION, 5000);
+                }
+                return;
+            default:
+                break;
+            }
+        }
         void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
@@ -138,9 +169,20 @@ public:
                     if (Creature* waterSpout = me->GetMap()->GetCreature(waterSpoutGUID))
                         waterSpout->DespawnOrUnsummon();
 
-                    waterSpoutGUID = 0;
-                    running = false;
-                    
+                    UpdatePlayerList();
+                    if (players.empty())
+                    {
+                        running = false;
+                        events.CancelEvent(EVENT_ROTATE_POSITION);
+                        events.CancelEvent(EVENT_SUMMON_WATER_SPOUT);
+                        events.CancelEvent(EVENT_WATER_SPOUT_BURST);
+                    }
+                    else
+                    {
+                        UpdatePlayerList();
+                        running = true;
+                        events.ScheduleEvent(EVENT_ROTATE_POSITION, 5000);
+                    }
                     break;
                 }
             }
