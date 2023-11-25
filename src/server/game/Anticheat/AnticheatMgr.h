@@ -112,7 +112,6 @@ class AnticheatMgr
         void BuildReport(Player* player, AnticheatData& data, uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);
-        std::unordered_map<std::string, bool> _luaBlockedFunctions;
         AnticheatPlayersDataMap _players;
 };
 
