@@ -9,7 +9,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
-#include "AnticheatMgr.h"
+#include "../../game/Anticheat/AnticheatMgr.h"
 
 enum Spells
 {
