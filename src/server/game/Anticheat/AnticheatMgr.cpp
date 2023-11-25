@@ -161,70 +161,87 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo& movementInfo
     data->lastOpcode = opcode;
 }
 
-void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo& movementInfo, AnticheatData& data)
+void AnticheatMgr::MapSpeedTeleExemption(Player* player)
 {
-    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_SPEEDHACK_ENABLE))
-        return;
-
     // We exempt all transports found in 548 to prevent false tele hack hits
     if (player->GetMapId())
     {
         switch (player->GetMapId())
         {
-            case 369: //Transport: Deeprun Tram
-            case 607: //Transport: Strands of the Ancients
-            case 582: //Transport: Rut'theran to Auberdine
-            case 584: //Transport: Menethil to Theramore
-            case 586: //Transport: Exodar to Auberdine
-            case 587: //Transport: Feathermoon Ferry
-            case 588: //Transport: Menethil to Auberdine
-            case 589: //Transport: Orgrimmar to Grom'Gol
-            case 590: //Transport: Grom'Gol to Undercity
-            case 591: //Transport: Undercity to Orgrimmar
-            case 592: //Transport: Borean Tundra Test
-            case 593: //Transport: Booty Bay to Ratchet
-            case 594: //Transport: Howling Fjord Sister Mercy (Quest)
-            case 596: //Transport: Naglfar
-            case 610: //Transport: Tirisfal to Vengeance Landing
-            case 612: //Transport: Menethil to Valgarde
-            case 613: //Transport: Orgrimmar to Warsong Hold
-            case 614: //Transport: Stormwind to Valiance Keep
-            case 620: //Transport: Moa'ki to Unu'pe
-            case 621: //Transport: Moa'ki to Kamagua
-            case 622: //Transport: Orgrim's Hammer
-            case 623: //Transport: The Skybreaker
-            case 641: //Transport: Alliance Airship BG
-            case 642: //Transport: Horde Airship BG
-            case 647: //Transport: Orgrimmar to Thunder Bluff
-            case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
-            case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
-            case 712: //Transport: The Skybreaker (IC Dungeon)
-            case 713: //Transport: Orgrim's Hammer (IC Dungeon)
-            case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
-            case 766: // Transport 2033864
-            case 767: // Transport 2033865
-            case 747: // Transport 203732
-            case 762: // Transport 203861
-            case 763: // Transport 203862
-            case 1172: // Transport_Siege_of_Orgrimmar_Alliance
-            case 1173: // Transport_Siege_of_Orgrimmar_Horde
-            case 662: // Transport197195
-            case 674: // Transport197349-2
-            case 738: // Transport200100
-            case 739: // Transport200101
-            case 740: // Transport200102
-            case 741: // Transport200103
-            case 742: // Transport203729
-            case 743: // Transport203730
-            case 748: // Transport203858
-            case 749: // Transport203859
-            case 750: // Transport203860
-            case 765: // Transport203863
-            case 1132: // Transport218599
-            case 1133: // Transport218600
-                return;
+        case 369: //Transport: Deeprun Tram
+        case 607: //Transport: Strands of the Ancients
+        case 582: //Transport: Rut'theran to Auberdine
+        case 584: //Transport: Menethil to Theramore
+        case 586: //Transport: Exodar to Auberdine
+        case 587: //Transport: Feathermoon Ferry
+        case 588: //Transport: Menethil to Auberdine
+        case 589: //Transport: Orgrimmar to Grom'Gol
+        case 590: //Transport: Grom'Gol to Undercity
+        case 591: //Transport: Undercity to Orgrimmar
+        case 592: //Transport: Borean Tundra Test
+        case 593: //Transport: Booty Bay to Ratchet
+        case 594: //Transport: Howling Fjord Sister Mercy (Quest)
+        case 596: //Transport: Naglfar
+        case 610: //Transport: Tirisfal to Vengeance Landing
+        case 612: //Transport: Menethil to Valgarde
+        case 613: //Transport: Orgrimmar to Warsong Hold
+        case 614: //Transport: Stormwind to Valiance Keep
+        case 620: //Transport: Moa'ki to Unu'pe
+        case 621: //Transport: Moa'ki to Kamagua
+        case 622: //Transport: Orgrim's Hammer
+        case 623: //Transport: The Skybreaker
+        case 641: //Transport: Alliance Airship BG
+        case 642: //Transport: Horde Airship BG
+        case 647: //Transport: Orgrimmar to Thunder Bluff
+        case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
+        case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
+        case 712: //Transport: The Skybreaker (IC Dungeon)
+        case 713: //Transport: Orgrim's Hammer (IC Dungeon)
+        case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
+        case 766: // Transport 2033864
+        case 767: // Transport 2033865
+        case 747: // Transport 203732
+        case 762: // Transport 203861
+        case 763: // Transport 203862
+        case 1172: // Transport_Siege_of_Orgrimmar_Alliance
+        case 1173: // Transport_Siege_of_Orgrimmar_Horde
+        case 662: // Transport197195
+        case 674: // Transport197349-2
+        case 738: // Transport200100
+        case 739: // Transport200101
+        case 740: // Transport200102
+        case 741: // Transport200103
+        case 742: // Transport203729
+        case 743: // Transport203730
+        case 748: // Transport203858
+        case 749: // Transport203859
+        case 750: // Transport203860
+        case 765: // Transport203863
+        case 1132: // Transport218599
+        case 1133: // Transport218600
+            return;
         }
     }
+}
+void AnticheatMgr::BGLogger(Player* player, AnticheatData& data)
+{
+    uint32 latency = 0;
+    latency = player->GetSession()->GetLatency();
+    std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+    SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
+    BuildReport(player, data, BG_START_HACK_REPORT);
+}
+
+void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo& movementInfo, AnticheatData& data)
+{
+    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ANTICHEAT_SPEEDHACK_ENABLE))
+        return;
+
+    if (player)
+    {
+        MapSpeedTeleExemption(player);
+    }
+
     if (player->HasAura(1850) /*Dash*/ || player->HasAuraType(SPELL_AURA_FEATHER_FALL) || player->HasAuraType(SPELL_AURA_SAFE_FALL))
     {
         return;
@@ -363,64 +380,9 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     if (player->IsFalling() || (player->IsFalling() && player->IsMounted()))
         return;
 
-    // We exempt all transports found in 548 to prevent false tele hack hits
-    if (player->GetMapId())
+    if (player)
     {
-        switch (player->GetMapId())
-        {
-            case 369: //Transport: Deeprun Tram
-            case 607: //Transport: Strands of the Ancients
-            case 582: //Transport: Rut'theran to Auberdine
-            case 584: //Transport: Menethil to Theramore
-            case 586: //Transport: Exodar to Auberdine
-            case 587: //Transport: Feathermoon Ferry
-            case 588: //Transport: Menethil to Auberdine
-            case 589: //Transport: Orgrimmar to Grom'Gol
-            case 590: //Transport: Grom'Gol to Undercity
-            case 591: //Transport: Undercity to Orgrimmar
-            case 592: //Transport: Borean Tundra Test
-            case 593: //Transport: Booty Bay to Ratchet
-            case 594: //Transport: Howling Fjord Sister Mercy (Quest)
-            case 596: //Transport: Naglfar
-            case 610: //Transport: Tirisfal to Vengeance Landing
-            case 612: //Transport: Menethil to Valgarde
-            case 613: //Transport: Orgrimmar to Warsong Hold
-            case 614: //Transport: Stormwind to Valiance Keep
-            case 620: //Transport: Moa'ki to Unu'pe
-            case 621: //Transport: Moa'ki to Kamagua
-            case 622: //Transport: Orgrim's Hammer
-            case 623: //Transport: The Skybreaker
-            case 641: //Transport: Alliance Airship BG
-            case 642: //Transport: Horde Airship BG
-            case 647: //Transport: Orgrimmar to Thunder Bluff
-            case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
-            case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
-            case 712: //Transport: The Skybreaker (IC Dungeon)
-            case 713: //Transport: Orgrim's Hammer (IC Dungeon)
-            case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
-            case 766: // Transport 2033864
-            case 767: // Transport 2033865
-            case 747: // Transport 203732
-            case 762: // Transport 203861
-            case 763: // Transport 203862
-            case 1172: // Transport_Siege_of_Orgrimmar_Alliance
-            case 1173: // Transport_Siege_of_Orgrimmar_Horde
-            case 662: // Transport197195
-            case 674: // Transport197349-2
-            case 738: // Transport200100
-            case 739: // Transport200101
-            case 740: // Transport200102
-            case 741: // Transport200103
-            case 742: // Transport203729
-            case 743: // Transport203730
-            case 748: // Transport203858
-            case 749: // Transport203859
-            case 750: // Transport203860
-            case 765: // Transport203863
-            case 1132: // Transport218599
-            case 1133: // Transport218600
-                return;
-        }
+        MapSpeedTeleExemption(player);
     }
 
     /* Please work */
@@ -715,11 +677,7 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > -1283.33f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < -716.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                 }
             }
@@ -730,11 +688,7 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
             // Only way to get this high is with engineering items malfunction.
             if (!(movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING_FAR) || data.lastOpcode == MSG_MOVE_JUMP) && movementInfo.pos.GetPositionZ() > 380.0f)
             {
-                uint32 latency = 0;
-                latency = player->GetSession()->GetLatency();
-                std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                BuildReport(player, data, BG_START_HACK_REPORT);
+                BGLogger(player, data);
             }
 
             if (Battleground* bg = player->GetBattleground())
@@ -746,21 +700,13 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > 1500.0f) ||
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1450.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 957.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 1416.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 1466.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                 }
             }
@@ -777,20 +723,12 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1258.0f) ||
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > 1361.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 730.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 724.8f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                 }
             }
@@ -807,21 +745,13 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > 1610.0f) ||
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1584.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 1816.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 1554.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 1526.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                 }
             }
@@ -838,21 +768,13 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < -911.0f) ||
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > -760.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() < 1147.8f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < -855.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -676.0f))
                     {
-                        uint32 latency = 0;
-                        latency = player->GetSession()->GetLatency();
-                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        SF_LOG_INFO("anticheat", "Anticheat Manager:: BG START - Hack detected player %s - (GUID %u) - Latency: %u ms - IP: %s - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID(), latency, player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
-                        BuildReport(player, data, BG_START_HACK_REPORT);
+                        BGLogger(player, data);
                     }
                 }
             }

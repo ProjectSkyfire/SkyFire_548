@@ -100,6 +100,8 @@ class AnticheatMgr
         void ResetDailyReportStates();
 
     private:
+        void MapSpeedTeleExemption(Player* player);
+        void BGLogger(Player* player, AnticheatData& data);
         void SpeedHackDetection(Player* player, MovementInfo &movementInfo, AnticheatData& data);
         void FlyHackDetection(Player* player, MovementInfo &movementInfo, AnticheatData& data);
         void TeleportHackDetection(Player* player, MovementInfo movementInfo, AnticheatData& data);
