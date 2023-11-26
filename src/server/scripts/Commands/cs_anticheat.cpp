@@ -240,7 +240,7 @@ public:
         if (target->getRace() == RACE_PANDAREN_NEUTRAL)
         {
             target->TeleportTo(860, 1470.96f, 3466.06f, 181.63f, 2.78f);//Shang Xi Training Grounds
-            target->SetHomebind(Nloc, 5834);// Orgrimmar Homebind location
+            target->SetHomebind(Nloc, 5834);// Shang Xi Training Grounds Homebind location
         }
         if (target->GetTeamId() == TEAM_ALLIANCE && target->getRace() != RACE_PANDAREN_NEUTRAL)
         {
@@ -249,7 +249,7 @@ public:
         }
         if (target->GetTeamId() == TEAM_HORDE && target->getRace() != RACE_PANDAREN_NEUTRAL)
         {
-            target->TeleportTo(1, 1569.59f, -4397.63f, 7.7f, 0.54f);//Orgrimmar
+            target->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
             target->SetHomebind(Hloc, 1653);// Orgrimmar Homebind location
         }
         target->RemoveAura(FREEZE);// remove shackles
