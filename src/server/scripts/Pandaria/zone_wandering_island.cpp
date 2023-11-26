@@ -8,6 +8,146 @@
 #include "ScriptedGossip.h"
 #include "Player.h"
 
+
+const Position shuPos1 = { 650.30f, 3127.16f, 89.62f };
+const Position shuPos2 = { 625.25f, 3127.88f, 87.95f };
+const Position shuPos3 = { 624.44f, 3142.94f, 87.75f };
+class npc_shu_dailo : public CreatureScript
+{
+public:
+    npc_shu_dailo() : CreatureScript("npc_shu_dailo") { }
+
+    enum ShuDailoEvents
+    {
+        EVENT_MOVE_POS1 = 1,
+        EVENT_MOVE_POS2 = 2,
+        EVENT_MOVE_POS3 = 3,
+        EVENT_CAST = 5,
+        EVENT_GIVE_CREDIT = 6,
+    };
+
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(29774) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(29774) == QUEST_STATUS_REWARDED)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Can you please help us to wake up Wugou ?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            player->KilledMonsterCredit(55548);
+
+            creature->GetMotionMaster()->MovePoint(0, shuPos1);
+        }
+        return true;
+    }
+
+    struct npc_shu_dailoAI : public CreatureAI
+    {
+        EventMap events;
+
+        npc_shu_dailoAI(Creature* creature) : CreatureAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (id)
+            {
+            case 0:
+            {
+                events.ScheduleEvent(EVENT_MOVE_POS1, 1000);
+                break;
+            }
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+
+            switch (events.ExecuteEvent())
+            {
+                case EVENT_MOVE_POS1:
+                {
+                    me->GetMotionMaster()->MovePoint(1, shuPos1);
+                    events.ScheduleEvent(EVENT_MOVE_POS2, 500);
+                    break;
+                }
+                case EVENT_MOVE_POS2:
+                {
+                    me->GetMotionMaster()->MovePoint(2, shuPos2);
+                    events.ScheduleEvent(EVENT_MOVE_POS3, 4000);
+                    break;
+                }
+                case EVENT_MOVE_POS3:
+                {
+                    me->GetMotionMaster()->MovePoint(3, shuPos3);
+                    events.ScheduleEvent(EVENT_CAST, 3000);
+                    break;
+                }
+                case EVENT_CAST:
+                {
+                    if (Creature* wugou = me->FindNearestCreature(55539, 15.0f, true))
+                    {
+                        me->CastSpell(wugou, 118027);
+                        me->SetFacingToObject(wugou);
+                        events.ScheduleEvent(EVENT_GIVE_CREDIT, 5000);
+                    }
+                    break;
+                }
+                case EVENT_GIVE_CREDIT:
+                {
+                    if (Creature* wugou = me->FindNearestCreature(55539, 15.0f, true))
+                    {
+                        std::list<Player*> playerList;
+                        GetPlayerListInGrid(playerList, wugou, 15.0f);
+
+                        for (auto&& player : playerList)
+                        {
+                            player->KilledMonsterCredit(55547);
+
+                            if (Creature* wugouCopy = player->SummonCreature(55539, wugou->GetHomePosition(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
+                            {
+                                wugouCopy->SetOwnerGUID(player->GetGUID());
+                                wugouCopy->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                            }
+                            if (Creature* shuCopy = player->SummonCreature(55558, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
+                            {
+                                shuCopy->SetOwnerGUID(player->GetGUID());
+                                shuCopy->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, -PET_FOLLOW_ANGLE);
+                            }
+                        }
+                        wugou->DespawnOrUnsummon();
+                        me->DespawnOrUnsummon();
+                    }
+                }
+                default:
+                    break;
+            }
+        }
+
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_shu_dailoAI(creature);
+    }
+};
+
 const Position shuJumpPos1 { 1102.05f, 2882.11f, 94.32f, 0.11f };
 const Position shuJumpPos2 { 1120.01f, 2883.20f, 96.44f, 4.17f };
 const Position shuJumpPos3 { 1128.09f, 2859.44f, 97.64f, 2.51f };
@@ -783,6 +923,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_shu_dailo();
     new npc_shu_pool_of_reflection();
     new npc_master_shang_xi_temple();
     new AreaTrigger_at_temple_of_five_dawns();
