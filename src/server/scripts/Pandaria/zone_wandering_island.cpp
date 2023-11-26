@@ -361,6 +361,10 @@ public:
 #define AYSA_TEXT_1 "Yes master."
 #define MASTER_SHANG_XI_TEXT_6 "And $n, you shall be the hand that guides us all. Speak with me for a moment before you join Aysa at the Singing Pools to the east."
 
+#define MASTER_SHANG_XI_TEXT_7 "You've returned with the spirits of water and earth. You make an old master proud."
+#define MASTER_SHANG_XI_TEXT_8 "Wugou and Shu are welcome here. We will care for them well."
+#define MASTER_SHANG_XI_TEXT_9 "The only remaining spirit is Dafeng, who hides somewhere across the Dawning Span to the west."
+
 const Position jiTempleMovePoint_1 = { 966.1493f, 3607.0894f, 196.51373f };
 const Position jiTempleMovePoint_2 = { 958.9819f, 3594.94f, 196.6083f };
 const Position jiTempleMovePoint_3 = { 950.7555f, 3588.809f, 196.8154f };
@@ -384,6 +388,8 @@ class npc_master_shang_xi_temple : public CreatureScript
         EVENT_MASTER_SHANG_XI_TALK_5,
         EVENT_MASTER_SHANG_XI_TALK_6,
         EVENT_MASTER_SHANG_XI_TALK_7,
+        EVENT_MASTER_SHANG_XI_TALK_8,
+        EVENT_MASTER_SHANG_XI_TALK_9,
     };
 public:
     npc_master_shang_xi_temple() : CreatureScript("npc_master_shang_xi_temple") { }
@@ -392,6 +398,7 @@ public:
     {
         return new npc_master_shang_xi_templeAI(creature);
     }
+
     struct npc_master_shang_xi_templeAI : public CreatureAI
     {
         std::vector<Player*> players;
@@ -416,7 +423,14 @@ public:
             if (me->GetAreaId() == 5820) // Temple of Five Dawns Area
             {
                 started = true;
-                events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_1, 1000);
+                if (player->GetQuestStatus(29775) == QUEST_STATUS_REWARDED)
+                {
+                    events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_7, 1000);
+                }
+                else
+                {
+                    events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_1, 1000);
+                }
             }
         }
 
@@ -493,6 +507,23 @@ public:
                         {
                             me->MonsterSay(MASTER_SHANG_XI_TEXT_6, Language::LANG_UNIVERSAL, player);
                         }
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_7:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_7, Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_8, 10000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_8:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_8, Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_TALK_9, 10000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_TALK_9:
+                    {
+                        me->MonsterSay(MASTER_SHANG_XI_TEXT_9, Language::LANG_UNIVERSAL, me);
                         break;
                     }
                 }
