@@ -32,6 +32,52 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+const Position WugouPosMandori = { 927.5729f, 3610.2399f, 196.4969f };
+//7858
+class AreaTrigger_at_mandori_village_wugou : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_mandori_village_wugou() : AreaTriggerScript("at_mandori_village_wugou") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(29775) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(29775) == QUEST_STATUS_COMPLETE)
+        {
+            if (Creature* wugou = player->FindNearestCreature(55539, 25.0f, true))
+            {
+                wugou->SetOwnerGUID(0);
+                wugou->GetMotionMaster()->MovePoint(0, WugouPosMandori);
+                wugou->DespawnOrUnsummon(4000);
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+const Position ShuPosMandori = { 880.8524f, 3606.0269f, 192.22139f };
+//7116
+class AreaTrigger_at_mandori_village_shu : AreaTriggerScript
+{
+public:
+    AreaTrigger_at_mandori_village_shu() : AreaTriggerScript("at_mandori_village_shu") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(29775) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(29775) == QUEST_STATUS_COMPLETE)
+        {
+            if (Creature* shu = player->FindNearestCreature(55558, 25.0f, true))
+            {
+                shu->SetOwnerGUID(0);
+                shu->GetMotionMaster()->MovePoint(0, ShuPosMandori);
+                shu->DespawnOrUnsummon(7000);
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
 enum shrineOfInnerLight
 {
     QUEST_THE_SPIRITS_GUARDIAN = 29420,
@@ -679,6 +725,8 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_mandori_village_wugou();
+    new AreaTrigger_at_mandori_village_shu();
     new AreaTrigger_at_shrine_of_inner_light();
     new AreaTrigger_at_dawning_valley2();
     new AreaTrigger_at_dawning_valley();

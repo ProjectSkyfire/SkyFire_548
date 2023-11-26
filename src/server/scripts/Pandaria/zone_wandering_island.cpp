@@ -104,7 +104,7 @@ public:
                 {
                     if (Creature* wugou = me->FindNearestCreature(55539, 15.0f, true))
                     {
-                        me->CastSpell(wugou, 118027);
+                        wugou->CastSpell(wugou, 118027);
                         me->SetFacingToObject(wugou);
                         events.ScheduleEvent(EVENT_GIVE_CREDIT, 5000);
                     }
@@ -126,6 +126,7 @@ public:
                                 wugouCopy->SetOwnerGUID(player->GetGUID());
                                 wugouCopy->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                             }
+
                             if (Creature* shuCopy = player->SummonCreature(55558, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
                             {
                                 shuCopy->SetOwnerGUID(player->GetGUID());
