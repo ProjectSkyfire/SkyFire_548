@@ -172,6 +172,23 @@ public:
                     UpdatePlayerList();
                     if (players.empty())
                     {
+                        if (Creature* aysa = me->FindNearestCreature(54975, 60.0f, true))
+                        {
+                            std::list<Player*> playerList;
+                            GetPlayerListInGrid(playerList, aysa, 60.0f);
+
+                            for (auto&& player : playerList)
+                            {
+                                if (player->GetQuestStatus(29679) == QUEST_STATUS_COMPLETE)
+                                {
+                                    if (!player->GetAura(128588)) // Aysa gz trigger aura
+                                    {
+                                        player->CastSpell(player, 128588);
+                                        aysa->AI()->Talk(0);
+                                    }
+                                }
+                            }
+                        }
                         running = false;
                         events.CancelEvent(EVENT_ROTATE_POSITION);
                         events.CancelEvent(EVENT_SUMMON_WATER_SPOUT);
