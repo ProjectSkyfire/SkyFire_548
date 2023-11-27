@@ -352,6 +352,71 @@ public:
     }
 };
 
+const Position tornadoPos1 = { 922.9829f, 3602.6472f, 198.44557f };
+const Position tornadoPos2 = { 958.7378f, 3610.3413f, 209.64407f };
+const Position tornadoPos3 = { 934.45074f, 3609.4578f, 240.62868f };
+const Position tornadoEndPos = { 920.4496f, 3604.7705f, 253.17314f };
+class npc_uplift_draft : public CreatureScript
+{
+public:
+    npc_uplift_draft() : CreatureScript("npc_uplift_draft") { }
+
+    struct npc_uplift_draftAI : public CreatureAI
+    {
+        EventMap events;
+        enum upliftDraftEvents
+        {
+            EVENT_MOVE_POS1 = 1,
+            EVENT_MOVE_POS2,
+            EVENT_MOVE_POS3,
+            EVENT_MOVE_END_POS
+        };
+        npc_uplift_draftAI(Creature* creature) : CreatureAI(creature)
+        {
+            events.ScheduleEvent(EVENT_MOVE_POS1, 1000);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_POS1:
+                    {
+                        me->GetMotionMaster()->MovePoint(0, tornadoPos1);
+                        events.ScheduleEvent(EVENT_MOVE_POS2, 1000);
+                        break;
+                    }
+                    case EVENT_MOVE_POS2:
+                    {
+                        me->GetMotionMaster()->MovePoint(1, tornadoPos2);
+                        events.ScheduleEvent(EVENT_MOVE_POS3, 5000);
+                        break;
+                    }
+                    case EVENT_MOVE_POS3:
+                    {
+                        me->GetMotionMaster()->MovePoint(2, tornadoPos3);
+                        events.ScheduleEvent(EVENT_MOVE_END_POS, 5000);
+                        break;
+                    }
+                    case EVENT_MOVE_END_POS:
+                    {
+                        me->GetMotionMaster()->MovePoint(4, tornadoEndPos);
+                        break;
+                    }
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_uplift_draftAI(creature);
+    }
+};
+
 #define MASTER_SHANG_XI_TEXT_1 "You have conquered every challenge I put before you, $n. You have found Huo and brought him safely to the temple."
 #define MASTER_SHANG_XI_TEXT_2 "There is a much larger problem we face now, my students. Shen-zin Su is in pain. If we do not act the very land on which we stand could die, and all of us with it."
 #define MASTER_SHANG_XI_TEXT_3 "We need to speak to Shen-zin Su and discover how to heal it. And to do that, we need the four elemental spirits returned. Huo was the first."
@@ -364,6 +429,7 @@ public:
 #define MASTER_SHANG_XI_TEXT_7 "You've returned with the spirits of water and earth. You make an old master proud."
 #define MASTER_SHANG_XI_TEXT_8 "Wugou and Shu are welcome here. We will care for them well."
 #define MASTER_SHANG_XI_TEXT_9 "The only remaining spirit is Dafeng, who hides somewhere across the Dawning Span to the west."
+
 
 const Position jiTempleMovePoint_1 = { 966.1493f, 3607.0894f, 196.51373f };
 const Position jiTempleMovePoint_2 = { 958.9819f, 3594.94f, 196.6083f };
@@ -394,6 +460,44 @@ class npc_master_shang_xi_temple : public CreatureScript
 public:
     npc_master_shang_xi_temple() : CreatureScript("npc_master_shang_xi_temple") { }
 
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() == 29776) // Morning Breeze Village
+        {
+            if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 20000))
+            {
+                player->EnterVehicle(vehicle);
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(29776) != QUEST_STATUS_NONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I would like to go back on the top of the temple", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->PlayerTalkClass->SendGossipMenu(1, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
+    {
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            if (Creature* vehicle = player->SummonCreature(55685, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 20000))
+            {
+                player->EnterVehicle(vehicle);
+            }
+        }
+
+        player->PlayerTalkClass->SendCloseGossip();
+        return true;
+    }
+
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_master_shang_xi_templeAI(creature);
@@ -406,6 +510,8 @@ public:
         bool started = false;
 
         npc_master_shang_xi_templeAI(Creature* creature) : CreatureAI(creature) { }
+
+
 
         void Reset() OVERRIDE
         {
@@ -955,6 +1061,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_uplift_draft();
     new npc_shu_dailo();
     new npc_shu_pool_of_reflection();
     new npc_master_shang_xi_temple();
