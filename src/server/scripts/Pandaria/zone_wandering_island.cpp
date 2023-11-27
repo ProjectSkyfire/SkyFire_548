@@ -67,6 +67,7 @@ public:
                 {
                     me->MonsterSay("Wait for another opening. I'll meet you on the far side.", Language::LANG_UNIVERSAL, me);
                     events.ScheduleEvent(EVENT_DEACTIVATE_2, 2000);
+                    break;
                 }
                 case EVENT_DEACTIVATE_2:
                 {
