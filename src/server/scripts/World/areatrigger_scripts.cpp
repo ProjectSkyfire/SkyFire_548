@@ -32,6 +32,25 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+class AreaTrigger_at_chamber_of_whispers_entrance : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_chamber_of_whispers_entrance() : AreaTriggerScript("at_chamber_of_whispers_entrance") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(29785) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!player->HasAura(104571))
+            {
+                player->CastSpell(player, 104593);
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
 const Position WugouPosMandori = { 927.5729f, 3610.2399f, 196.4969f };
 //7858
 class AreaTrigger_at_mandori_village_wugou : AreaTriggerScript
@@ -725,6 +744,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_chamber_of_whispers_entrance();
     new AreaTrigger_at_mandori_village_wugou();
     new AreaTrigger_at_mandori_village_shu();
     new AreaTrigger_at_shrine_of_inner_light();

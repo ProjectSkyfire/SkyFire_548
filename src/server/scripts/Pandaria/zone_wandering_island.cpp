@@ -8,6 +8,112 @@
 #include "ScriptedGossip.h"
 #include "Player.h"
 
+const Position aysaChamberMovePos1 = { 647.493f, 4224.63f, 202.90865f, 2.426f };
+const Position aysaChamberMovePos2 = { 598.57294f, 4266.661f, 206.54927f };
+const Position aysaChamberMovePos3 = { 580.1649f, 4283.193f, 210.18248f };
+const Position aysaChamberMoveEnd = { 543.9549, 4317.2744, 212.22935 };
+class npc_aysa_chamber_of_whispers : public CreatureScript
+{
+public:
+    npc_aysa_chamber_of_whispers() : CreatureScript("npc_aysa_chamber_of_whispers") { }
+
+    struct npc_aysa_chamber_of_whispersAI : public CreatureAI
+    {
+        enum aysaChamberOfWhisperEvents
+        {
+            EVENT_INTRO = 1,
+            EVENT_DEACTIVATE_1 = 2,
+            EVENT_MOVE_POS_MID = 3,
+            EVENT_MOVE_POS_3 = 4,
+            EVENT_DEACTIVATE_2 = 5,
+            EVENT_MOVE_POS_END = 6,
+            EVENT_OUTRO = 7,
+        };
+        EventMap events;
+        npc_aysa_chamber_of_whispersAI(Creature* creature) : CreatureAI(creature)
+        {
+            creature->MonsterSay("Wait!", Language::LANG_UNIVERSAL, creature);
+            events.ScheduleEvent(EVENT_INTRO, 1000);
+        }
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+
+            switch (events.ExecuteEvent())
+            {
+                case EVENT_INTRO:
+                {
+                    me->MonsterSay("We need to wait for the winds to settle, then make a break for the cover of the far hallway.", Language::LANG_UNIVERSAL, me);
+                    me->GetMotionMaster()->MovePoint(0, aysaChamberMovePos1);
+                    events.ScheduleEvent(EVENT_DEACTIVATE_1, 2000);
+                    break;
+                }
+                case EVENT_DEACTIVATE_1:
+                {
+                    if (GameObject* cloud1 = me->FindNearestGameObject(209685, 30.0f))
+                    {
+                        cloud1->UseDoorOrButton(60000);
+                    }
+                    events.ScheduleEvent(EVENT_MOVE_POS_MID, 5000);
+                    break;
+                }
+                case EVENT_MOVE_POS_MID:
+                {
+                    me->GetMotionMaster()->MovePoint(1, aysaChamberMovePos2);
+                    events.ScheduleEvent(EVENT_MOVE_POS_3, 10000);
+                    break;
+                }
+                case EVENT_MOVE_POS_3:
+                {
+                    me->MonsterSay("Wait for another opening. I'll meet you on the far side.", Language::LANG_UNIVERSAL, me);
+                    events.ScheduleEvent(EVENT_DEACTIVATE_2, 2000);
+                }
+                case EVENT_DEACTIVATE_2:
+                {
+                    me->GetMotionMaster()->MovePoint(2, aysaChamberMovePos3);
+                    std::list<GameObject*> clouds;
+                    me->GetGameObjectListWithEntryInGrid(clouds, 209685, 60.0f);
+                    if (!clouds.empty())
+                    {
+                        for (std::list<GameObject*>::iterator itr = clouds.begin(); itr != clouds.end(); ++itr)
+                        {
+                            if ((*itr)->GetGUIDLow() == 88728)
+                            {
+                                if (GameObject* cloud2 = (*itr))
+                                    cloud2->UseDoorOrButton(60000);
+                            }
+                        }
+                    }
+                    events.ScheduleEvent(EVENT_MOVE_POS_END, 1000);
+                    break;
+                }
+                case EVENT_MOVE_POS_END:
+                {
+                    me->GetMotionMaster()->MovePoint(3, aysaChamberMoveEnd);
+                    events.ScheduleEvent(EVENT_OUTRO, 10000);
+                    break;
+                }
+                case EVENT_OUTRO:
+                {
+                    me->MonsterSay("Dafeng! What's wrong? Why are you hiding back here?", Language::LANG_UNIVERSAL, me);
+                    std::list<Player*> playerList;
+                    GetPlayerListInGrid(playerList, me, 45.0f);
+
+                    for (auto&& player : playerList)
+                    {
+                        player->KilledMonsterCredit(55666);
+                    }
+                    break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_aysa_chamber_of_whispersAI(creature);
+    }
+};
+
 
 const Position shuPos1 = { 650.30f, 3127.16f, 89.62f };
 const Position shuPos2 = { 625.25f, 3127.88f, 87.95f };
@@ -1061,6 +1167,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_aysa_chamber_of_whispers();
     new npc_uplift_draft();
     new npc_shu_dailo();
     new npc_shu_pool_of_reflection();
