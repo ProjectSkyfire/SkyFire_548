@@ -1,0 +1,13 @@
+UPDATE `quest_template` SET `PrevQuestId`=29776 WHERE `Id`=29778;
+UPDATE `quest_template` SET `PrevQuestId`=29776 WHERE `Id`=29777;
+UPDATE `quest_template` SET `PrevQuestId`=29776 WHERE `Id`=29783;
+UPDATE `quest_template` SET `PrevQuestId`=29778 WHERE `Id`=29779;
+UPDATE `quest_template` SET `PrevQuestId`=29778 WHERE `Id`=29780;
+UPDATE `quest_template` SET `PrevQuestId`=29778 WHERE `Id`=29781;
+UPDATE `quest_template` SET `PrevQuestId`=29784 WHERE `Id`=29785;
+UPDATE `quest_template` SET `PrevQuestId`=29785 WHERE `Id`=29786;
+UPDATE `quest_template` SET `PrevQuestId`=29786 WHERE `Id`=29787;
+UPDATE `quest_template` SET `PrevQuestId`=29787 WHERE `Id`=29788;
+UPDATE `quest_template` SET `PrevQuestId`=29787 WHERE `Id`=29789;
+UPDATE `quest_template` SET `PrevQuestId`=29789 WHERE `Id`=29790;
+UPDATE `quest_template` SET `PrevQuestId`=29790 WHERE `Id`=29791;
