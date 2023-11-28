@@ -121,7 +121,12 @@ public:
             GetPlayerListInGrid(playerList, me, 60.0f);
 
             for (auto player : playerList)
+            {
                 player->KilledMonsterCredit(me->GetEntry());
+                player->CastSpell(player, 60922);
+                player->SetPhased(169, true, true);
+                player->SetPhased(524, true, false);
+            }
         }
 
         void MovementInform(uint32 type, uint32 pointId) OVERRIDE
