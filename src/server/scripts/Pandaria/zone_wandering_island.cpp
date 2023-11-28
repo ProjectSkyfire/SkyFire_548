@@ -104,6 +104,7 @@ public:
                     {
                         player->KilledMonsterCredit(55666);
                     }
+                    me->DespawnOrUnsummon();
                     break;
                 }
             }
