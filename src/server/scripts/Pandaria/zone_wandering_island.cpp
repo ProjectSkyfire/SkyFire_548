@@ -9,6 +9,217 @@
 #include "Player.h"
 #include "Spell.h"
 
+const Position masterShangXiWorthyEndPos = { 874.10767f, 4459.6313f, 241.18892f };
+class npc_guardian_of_the_elders : public CreatureScript
+{
+public:
+    npc_guardian_of_the_elders() : CreatureScript("npc_guardian_of_the_elders") { }
+
+    struct npc_guardian_of_the_eldersAI : public CreatureAI
+    {
+        npc_guardian_of_the_eldersAI(Creature* creature) : CreatureAI(creature) { }
+
+        void JustDied(Unit* killer) OVERRIDE
+        {
+            if (GameObject* door = me->FindNearestGameObject(209922, 40.0f))
+            {
+                door->UseDoorOrButton(60000);
+
+                if (Creature* masterShangXi = me->FindNearestCreature(56159, 40.0f, true))
+                {
+                    masterShangXi->MonsterSay("You've become strong indeed, child. This is good. You will need that strength soon.", Language::LANG_UNIVERSAL, masterShangXi);
+                    masterShangXi->SetWalk(false);
+                    masterShangXi->GetMotionMaster()->MovePoint(10, masterShangXiWorthyEndPos);
+                    masterShangXi->DespawnOrUnsummon(5000);
+                }
+            }
+        }
+        void UpdateAI(uint32 /*diff*/)
+        {
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_guardian_of_the_eldersAI(creature);
+    }
+};
+
+const Position masterShangXiWorthyPos1 = { 776.52606f, 4178.652f, 206.94368f };
+const Position masterShangXiWorthyPos2 = { 792.8524f, 4185.137f, 208.41711f };
+const Position masterShangXiWorthyPos3 = { 827.27637f, 4205.244f, 199.61674f };
+const Position masterShangXiWorthyPos4 = { 839.7535f, 4215.7915f, 197.77382f };
+const Position masterShangXiWorthyPos5 = { 845.00696f, 4267.5884f, 196.7384f };
+const Position masterShangXiWorthyPos6 = { 843.81946f, 4301.1743f, 210.9836f };
+const Position masterShangXiWorthyPos7 = { 843.26215f, 4339.1035f, 223.98082f };
+const Position masterShangXiWorthyPos8 = { 828.6528f, 4353.315f, 223.98082f };
+const Position masterShangXiWorthyPos9 = { 830.25867f, 4368.5503f, 223.94623f };
+class npc_master_shang_xi_worthy_questgiver : public CreatureScript
+{
+public:
+    npc_master_shang_xi_worthy_questgiver() : CreatureScript("npc_master_shang_xi_worthy_questgiver") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() == 29787) // Worthy of Passing
+        {
+            if (Creature* masterShangXi = creature->SummonCreature(56159, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                masterShangXi->GetMotionMaster()->MovePoint(0,  masterShangXi->GetPositionX(), masterShangXi->GetPositionY(), masterShangXi->GetPositionZ());
+                creature->DespawnOrUnsummon();
+            }
+            
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_master_shang_xi_worthy_questgiverAI : public CreatureAI
+    {
+        npc_master_shang_xi_worthy_questgiverAI(Creature* creature) : CreatureAI(creature) { }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_master_shang_xi_worthy_questgiverAI(creature);
+    }
+};
+class npc_master_shang_xi_worthy_of_passing : public CreatureScript
+{
+public:
+    npc_master_shang_xi_worthy_of_passing() : CreatureScript("npc_master_shang_xi_worthy_of_passing") { }
+
+    enum masterShangXiWorthyEvents
+    {
+        EVENT_WORTHY_TALK1 = 1,
+        EVENT_WORTHY_MOVE_POS1 = 2,
+        EVENT_WORTHY_MOVE_POS2 = 3,
+        EVENT_WORTHY_MOVE_POS3 = 4,
+        EVENT_WORTHY_MOVE_POS4 = 5,
+        EVENT_WORTHY_MOVE_POS5 = 6,
+        EVENT_WORTHY_TALK2     = 7,
+        EVENT_WORTHY_MOVE_POS6 = 8,
+        EVENT_WORTHY_TALK3     = 9,
+        EVENT_WORTHY_MOVE_POS7 = 10,
+        EVENT_WORTHY_TALK4     = 11,
+        EVENT_WORTHY_MOVE_POS8 = 12,
+    };
+
+    struct npc_master_shang_xi_worthy_of_passingAI : public CreatureAI
+    {
+        npc_master_shang_xi_worthy_of_passingAI(Creature* creature) : CreatureAI(creature) { }
+        EventMap events;
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (id)
+            {
+                case 0:
+                {
+                    events.ScheduleEvent(EVENT_WORTHY_TALK1, 5000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_WORTHY_TALK1:
+                    {
+                        me->MonsterSay("Come child. We have one final journey to take together before your training is complete.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS1, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS1:
+                    {
+                        me->GetMotionMaster()->MovePoint(1, masterShangXiWorthyPos1);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS2, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS2:
+                    {
+                        me->GetMotionMaster()->MovePoint(2, masterShangXiWorthyPos2);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS3, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS3:
+                    {
+                        me->GetMotionMaster()->MovePoint(3, masterShangXiWorthyPos3);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS4, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS4:
+                    {
+                        me->GetMotionMaster()->MovePoint(4, masterShangXiWorthyPos4);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS5, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS5:
+                    {
+                        me->GetMotionMaster()->MovePoint(5, masterShangXiWorthyPos5);
+                        events.ScheduleEvent(EVENT_WORTHY_TALK2, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_TALK2:
+                    {
+                        me->SetWalk(true);
+                        me->MonsterSay("Beyond the Elders' Path lies the Wood of Staves, a sacred place that only the worthy may enter.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS6, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS6:
+                    {
+                        me->GetMotionMaster()->MovePoint(6, masterShangXiWorthyPos6);
+                        events.ScheduleEvent(EVENT_WORTHY_TALK3, 15000);
+                        break;
+                    }
+                    case EVENT_WORTHY_TALK3:
+                    {
+                        me->MonsterSay("Of the many ways to prove your worth, I require the simplest of you now. I must know that you will fight for our people. I must know that you can keep them safe.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS7, 10000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS7:
+                    {
+                        me->GetMotionMaster()->MovePoint(7, masterShangXiWorthyPos7);
+                        events.ScheduleEvent(EVENT_WORTHY_TALK4, 20000);
+                        break;
+                    }
+                    case EVENT_WORTHY_TALK4:
+                    {
+                        me->MonsterSay("Defeat the Guardian of the Elders, and we may pass.", Language::LANG_UNIVERSAL, me);
+                        me->GetMotionMaster()->MovePoint(8, masterShangXiWorthyPos8);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS8, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS8:
+                    {
+                        me->GetMotionMaster()->MovePoint(9, masterShangXiWorthyPos9);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_master_shang_xi_worthy_of_passingAI(creature);
+    }
+};
+
 class npc_firework_launcher : public CreatureScript
 {
 public:
@@ -1438,6 +1649,9 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_guardian_of_the_elders();
+    new npc_master_shang_xi_worthy_questgiver();
+    new npc_master_shang_xi_worthy_of_passing();
     new npc_firework_launcher();
     new boss_zhao_ren();
     new npc_aysa_battle_for_the_skies();
