@@ -220,6 +220,8 @@ void AnticheatMgr::MapSpeedTeleExemption(Player* player)
             case 1132: // Transport218599
             case 1133: // Transport218600
                 return;
+            default:
+                break;
         }
     }
 }
@@ -510,6 +512,8 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo& movementInfo,
                 case 6724: //Backbreaker Bay
                 case 6725: //Greymist Firth
                     return;
+                default:
+                    break;
             }
         }
 
@@ -567,8 +571,10 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo& move
     {
         switch (player->GetAreaId())
         {
-        case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
-            return;
+            case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
+                return;
+            default:
+                break;
         }
     }
 
@@ -782,6 +788,8 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
             break;
         }
         return;
+    default:
+        break;
     }
 }
 
