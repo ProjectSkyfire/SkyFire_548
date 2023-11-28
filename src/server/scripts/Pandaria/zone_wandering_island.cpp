@@ -7,8 +7,272 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "Player.h"
+#include "Spell.h"
+
+class npc_firework_launcher : public CreatureScript
+{
+public:
+    npc_firework_launcher() : CreatureScript("npc_firework_launcher") { }
+
+    struct npc_firework_launcherAI : public ScriptedAI
+    {
+        npc_firework_launcherAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 cooldown;
+
+        void Reset() OVERRIDE
+        {
+            cooldown = 0;
+            me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        }
+
+        void OnSpellClick(Unit* Clicker, bool& /*result*/) OVERRIDE
+        {
+            if (cooldown)
+                return;
+
+            Creature* const zhao = GetClosestCreatureWithEntry(me, 55786, 50.0f);
+
+            if (zhao && zhao->IsWithinDist2d(Clicker, 25.0f))
+                zhao->CastSpell(zhao, 104855, false);
+            else
+            {
+                return;
+            }
+
+            cooldown = 5000;
+            me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        }
+
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            return;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (cooldown)
+            {
+                if (cooldown <= diff)
+                {
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                    cooldown = 0;
+                }
+                else
+                    cooldown -= diff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_firework_launcherAI(creature);
+    }
+};
+
+static Position const ZhaoPos[] =
+{
+    {719.36f, 4164.60f, 216.06f },
+    {736.90f, 4183.85f, 221.41f },
+    {704.77f, 4190.16f, 218.24f },
+    {684.53f, 4173.24f, 216.98f },
+    {689.62f, 4153.16f, 217.63f },
+    {717.04f, 4141.16f, 219.83f },
+    {745.91f, 4154.35f, 223.48f }
+};
+
+const Position zhaoStunPos = { 723.163025f, 4163.799805f, 202.082993f };
+
+class boss_zhao_ren : public CreatureScript
+{
+    enum zhaoRenEvents
+    {
+        EVENT_MOVE_POSITION = 1,
+        EVENT_STUNNED = 2,
+        EVENT_LIGHTNING = 3,
+    };
+public:
+    boss_zhao_ren() : CreatureScript("boss_zhao_ren") { }
+
+    struct boss_zhao_renAI : public CreatureAI
+    {
+        EventMap events;
+        bool encounterStarted;
+        uint8 currentPos;
+        uint8 fireworkHits;
+        boss_zhao_renAI(Creature* creature) : CreatureAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+            me->SetReactState(REACT_PASSIVE);
+            me->SetDisableGravity(true);
+            encounterStarted = false;
+            fireworkHits = 0;
+            currentPos = 0;
+            me->SetFullHealth();
+            me->GetMotionMaster()->Clear();
+            me->GetMotionMaster()->MovePoint(0, ZhaoPos[0].GetPositionX(), ZhaoPos[0].GetPositionY(), ZhaoPos[0].GetPositionZ());
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            std::list<Player*> playerList;
+            GetPlayerListInGrid(playerList, me, 60.0f);
+
+            for (auto player : playerList)
+                player->KilledMonsterCredit(me->GetEntry());
+        }
+
+        void MovementInform(uint32 type, uint32 pointId) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (!pointId)
+                return;
+
+            if (pointId == 100)
+            {
+                me->CastSpell(me, 125992, true);
+                events.RescheduleEvent(EVENT_LIGHTNING, 17000);
+                events.ScheduleEvent(EVENT_STUNNED, 12000);
+            }
+            else
+                events.ScheduleEvent(EVENT_MOVE_POSITION, 1000);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (checkParticipants())
+            {
+                if (!encounterStarted)  // Event not started, player found
+                {
+                    events.ScheduleEvent(EVENT_MOVE_POSITION, 1000);
+                    events.ScheduleEvent(EVENT_LIGHTNING, 5000);
+                    encounterStarted = true;
+                }
+            }
+            else
+            {
+                if (encounterStarted)  // Event started, no player found
+                    Reset();
+
+                return;
+            }
+
+            events.Update(diff);
+
+            switch (events.ExecuteEvent())
+            {
+                case EVENT_MOVE_POSITION:
+                {
+                    if (me->HasAura(125992))
+                        events.ScheduleEvent(EVENT_MOVE_POSITION, 2000);
+
+                    RotatePosition();
+                    break;
+                }
+                case EVENT_STUNNED:
+                {
+                    me->RemoveAurasDueToSpell(125992);
+                    me->CastSpell(me, 125990, false);
+                    me->SetDisableGravity(true);
+                    events.ScheduleEvent(EVENT_MOVE_POSITION, 4000);
+                    break;
+                }
+                case EVENT_LIGHTNING:
+                {
+                    if (Player* player = GetRandomPlayer())
+                        me->CastSpell(player, 126006, false);
+
+                    events.ScheduleEvent(EVENT_LIGHTNING, 5000);
+                    break;
+                }
+            }
+        }
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
+        {
+            if (spell->Id == 104855)
+            {
+                if (++fireworkHits >= 5)
+                {
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovePoint(100, zhaoStunPos);
+                    fireworkHits = 0;
+                }
+            }
+        }
+
+        void RotatePosition()
+        {
+            if (++currentPos > 6)
+                currentPos = 1;
+
+            me->GetMotionMaster()->MovePoint(currentPos, ZhaoPos[currentPos].GetPositionX(), ZhaoPos[currentPos].GetPositionY(), ZhaoPos[currentPos].GetPositionZ());
+        }
+
+        Player* GetRandomPlayer()
+        {
+            std::list<Player*> playerList;
+            GetPlayerListInGrid(playerList, me, 45.0f);
+
+            if (playerList.empty())
+                return NULL;
+
+            Skyfire::Containers::RandomResizeList(playerList, 1);
+
+            return *playerList.begin();
+        }
+        bool checkParticipants()
+        {
+            std::list<Player*> playerList;
+            GetPlayerListInGrid(playerList, me, 60.0f);
+
+            for (auto player : playerList)
+                if (player->GetQuestStatus(29786) == QUEST_STATUS_INCOMPLETE)
+                    if (player->IsAlive())
+                        return true;
+
+            return false;
+        }
+    };
+
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_zhao_renAI(creature);
+    }
+};
 
 const Position aysaChamberMovePos1 = { 647.493f, 4224.63f, 202.90865f, 2.426f };
+class npc_aysa_battle_for_the_skies : public CreatureScript
+{
+public:
+    npc_aysa_battle_for_the_skies() : CreatureScript("npc_aysa_battle_for_the_skies") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() == 29786) // Battle for the skies
+        {
+            player->SetPhased(524, true, true);
+            creature->SetPhased(524, true, true);
+            creature->GetMotionMaster()->MovePoint(0, aysaChamberMovePos1);
+            creature->DespawnOrUnsummon(10000);
+        }
+        return true;
+    }
+    struct npc_aysa_battle_for_the_skiesAI : public CreatureAI
+    { 
+        npc_aysa_battle_for_the_skiesAI(Creature* creature) : CreatureAI(creature) {}
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_aysa_battle_for_the_skiesAI(creature);
+    }
+};
+
 const Position aysaChamberMovePos2 = { 598.57294f, 4266.661f, 206.54927f };
 const Position aysaChamberMovePos3 = { 580.1649f, 4283.193f, 210.18248f };
 const Position aysaChamberMoveEnd = { 543.9549, 4317.2744, 212.22935 };
@@ -454,7 +718,7 @@ public:
             }
         }
     };
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_shu_pool_of_reflectionAI(creature);
     }
@@ -580,7 +844,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -592,7 +856,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
@@ -966,7 +1230,7 @@ public:
         bool started = false;
         std::vector<Player*> playersParticipate;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Power = 0;
             started = false;
@@ -1169,6 +1433,9 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_firework_launcher();
+    new boss_zhao_ren();
+    new npc_aysa_battle_for_the_skies();
     new npc_aysa_chamber_of_whispers();
     new npc_uplift_draft();
     new npc_shu_dailo();
