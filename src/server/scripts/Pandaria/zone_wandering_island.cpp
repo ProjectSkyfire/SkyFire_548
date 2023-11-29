@@ -168,8 +168,8 @@ public:
                         {
                             player->KilledMonsterCredit(56688);
                         }
-                        break;
                         events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_RESET, 60000);
+                        break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_RESET:
                     {
