@@ -32,7 +32,9 @@ class npc_master_shang_xi_wood_of_staves : public CreatureScript
         EVENT_MASTER_SHANG_XI_WOODS_TALK5 = 11,
         EVENT_MASTER_SHANG_XI_WOODS_TALK6 = 12,
         EVENT_MASTER_SHANG_XI_WOODS_CREDIT = 13,
-        EVENT_MASTER_SHANG_XI_WOODS_RESET = 14
+        EVENT_MASTER_SHANG_XI_WOODS_RESET = 14,
+        EVENT_MASTER_SHANG_XI_WOODS_SET_FACING1 = 15,
+        EVENT_MASTER_SHANG_XI_WOODS_KNEEL = 16,
     };
 public:
     npc_master_shang_xi_wood_of_staves() : CreatureScript("npc_master_shang_xi_wood_of_staves") { }
@@ -92,12 +94,18 @@ public:
                     case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS1:
                     {
                         me->GetMotionMaster()->MovePoint(1, masterShangXiWoodsPos1);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK3, 10000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_SET_FACING1, 2000);
+                        break;
+                    }
+
+                    case EVENT_MASTER_SHANG_XI_WOODS_SET_FACING1:
+                    {
+                        me->SetFacingTo(-M_PI * 1.75);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK3, 8000);
                         break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_TALK3:
                     {
-                        me->SetOrientation(6.0f);
                         std::list<Player*> playerList;
                         GetPlayerListInGrid(playerList, me, 15.0f);
 
@@ -112,29 +120,31 @@ public:
                     case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS2:
                     {
                         me->GetMotionMaster()->MovePoint(2, masterShangXiWoodsPos2);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS3, 2000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS3, 1000);
                         break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS3:
                     {
                         me->GetMotionMaster()->MovePoint(3, masterShangXiWoodsPos3);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS4, 2000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS4, 1000);
                         break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS4:
                     {
                         me->GetMotionMaster()->MovePoint(4, masterShangXiWoodsPos4);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS5, 2000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS5, 1000);
                         break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS5:
                     {
                         me->GetMotionMaster()->MovePoint(5, masterShangXiWoodsPos5);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK4, 2000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK4, 1000);
                         break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_TALK4:
                     {
+                        if (Creature* staff = me->SummonCreature(57874, 873.09375f, 4462.259765625f, 241.41162109375f, 3.804818391799926757f, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 70000))
+                            me->SetFacingToObject(staff);
                         me->MonsterSay("Now Shen-zin Su is ill, and we are all in danger. With the help of the elements, you will break the silence. You will speak to him.", Language::LANG_UNIVERSAL, me);
                         events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS6, 5000);
                         break;
@@ -142,11 +152,12 @@ public:
                     case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS6:
                     {
                         me->GetMotionMaster()->MovePoint(6, masterShangXiWoodsPos6);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK5, 1000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK5, 2000);
                         break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_TALK5:
                     {
+                        me->SetFacingTo(M_PI * 1.25);
                         me->MonsterSay("Aysa and Ji have retrieved the spirits and brought them here. You are to go with them, speak to the great Shen-zin Su, and do what must be done to save our people.", Language::LANG_UNIVERSAL, me);
 
                         events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK6, 5000);
@@ -155,8 +166,13 @@ public:
                     case EVENT_MASTER_SHANG_XI_WOODS_TALK6:
                     {
                         me->MonsterSay("You've come far, my young student. I see within you a great hero. I leave the fate of this land to you.", Language::LANG_UNIVERSAL, me);
-                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_CREDIT, 5000);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_KNEEL, 5000);
                         break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_KNEEL:
+                    {
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_CREDIT, 2000);
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_CREDIT:
                     {
