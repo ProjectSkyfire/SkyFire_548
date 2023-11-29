@@ -176,7 +176,6 @@ public:
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_CREDIT:
                     {
-                        //TODO: staff plant.
                         std::list<Player*> playerList;
                         GetPlayerListInGrid(playerList, me, 15.0f);
 
