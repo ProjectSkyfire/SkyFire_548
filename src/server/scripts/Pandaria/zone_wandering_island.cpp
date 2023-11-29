@@ -9,7 +9,6 @@
 #include "Player.h"
 #include "Spell.h"
 
-const Position masterShangXiWorthyEndPos = { 874.10767f, 4459.6313f, 241.18892f };
 class npc_guardian_of_the_elders : public CreatureScript
 {
 public:
@@ -27,10 +26,8 @@ public:
 
                 if (Creature* masterShangXi = me->FindNearestCreature(56159, 40.0f, true))
                 {
-                    masterShangXi->MonsterSay("You've become strong indeed, child. This is good. You will need that strength soon.", Language::LANG_UNIVERSAL, masterShangXi);
                     masterShangXi->SetWalk(false);
-                    masterShangXi->GetMotionMaster()->MovePoint(10, masterShangXiWorthyEndPos);
-                    masterShangXi->DespawnOrUnsummon(5000);
+                    masterShangXi->GetMotionMaster()->MovePoint(10, masterShangXi->GetPositionX(), masterShangXi->GetPositionY(), masterShangXi->GetPositionZ());
                 }
             }
         }
@@ -55,6 +52,9 @@ const Position masterShangXiWorthyPos6 = { 843.81946f, 4301.1743f, 210.9836f };
 const Position masterShangXiWorthyPos7 = { 843.26215f, 4339.1035f, 223.98082f };
 const Position masterShangXiWorthyPos8 = { 828.6528f, 4353.315f, 223.98082f };
 const Position masterShangXiWorthyPos9 = { 830.25867f, 4368.5503f, 223.94623f };
+const Position masterShangXiWorthyPos10 = { 845.59398f, 4372.6298f, 224.06399f };
+const Position masterShangXiWorthyPos11 = { 844.69406f, 4401.2700f, 237.26740f };
+const Position masterShangXiWorthyEndPos = { 874.10767f, 4459.6313f, 241.18892f };
 class npc_master_shang_xi_worthy_questgiver : public CreatureScript
 {
 public:
@@ -67,7 +67,7 @@ public:
             if (Creature* masterShangXi = creature->SummonCreature(56159, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
             {
                 masterShangXi->GetMotionMaster()->MovePoint(0,  masterShangXi->GetPositionX(), masterShangXi->GetPositionY(), masterShangXi->GetPositionZ());
-                creature->DespawnOrUnsummon();
+                
             }
             
             return true;
@@ -104,6 +104,9 @@ public:
         EVENT_WORTHY_MOVE_POS7 = 10,
         EVENT_WORTHY_TALK4     = 11,
         EVENT_WORTHY_MOVE_POS8 = 12,
+        EVENT_WORTHY_MOVE_POS9 = 13,
+        EVENT_WORTHY_MOVE_POS10 = 14,
+        EVENT_WORTHY_MOVE_POS11 = 15,
     };
 
     struct npc_master_shang_xi_worthy_of_passingAI : public CreatureAI
@@ -120,6 +123,11 @@ public:
                 case 0:
                 {
                     events.ScheduleEvent(EVENT_WORTHY_TALK1, 5000);
+                    break;
+                }
+                case 10:
+                {
+                    events.ScheduleEvent(EVENT_WORTHY_MOVE_POS9, 1000);
                     break;
                 }
                 default:
@@ -204,6 +212,27 @@ public:
                     case EVENT_WORTHY_MOVE_POS8:
                     {
                         me->GetMotionMaster()->MovePoint(9, masterShangXiWorthyPos9);
+                        break;
+                    }
+
+                    case EVENT_WORTHY_MOVE_POS9:
+                    {
+                        me->MonsterSay("You've become strong indeed, child. This is good. You will need that strength soon.", Language::LANG_UNIVERSAL, me);
+                        me->GetMotionMaster()->MovePoint(11, masterShangXiWorthyPos10);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS10, 3000);
+                        break;
+                    }
+
+                    case EVENT_WORTHY_MOVE_POS10:
+                    {
+                        me->GetMotionMaster()->MovePoint(12, masterShangXiWorthyPos11);
+                        events.ScheduleEvent(EVENT_WORTHY_MOVE_POS11, 5000);
+                        break;
+                    }
+                    case EVENT_WORTHY_MOVE_POS11:
+                    {
+                        me->GetMotionMaster()->MovePoint(13, masterShangXiWorthyEndPos);
+                        me->DespawnOrUnsummon(10000);
                         break;
                     }
                     default:
