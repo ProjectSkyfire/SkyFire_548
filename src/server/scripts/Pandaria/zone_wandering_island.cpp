@@ -9,6 +9,186 @@
 #include "Player.h"
 #include "Spell.h"
 
+const Position masterShangXiWoodsPos1 = { 871.0573f, 4460.548f, 241.33667f };
+const Position masterShangXiWoodsPos2 = { 868.00696f, 4464.8384f, 241.60161f };
+const Position masterShangXiWoodsPos3 = { 869.67883f, 4467.752f, 241.66815f };
+const Position masterShangXiWoodsPos4 = { 872.2448f, 4467.272f, 241.60721f };
+const Position masterShangXiWoodsPos5 = { 872.7934f, 4465.126f, 241.33447f };
+const Position masterShangXiWoodsPos6 = { 874.205f, 4464.75f, 241.35117f };
+class npc_master_shang_xi_wood_of_staves : public CreatureScript
+{
+    enum masterShangXiWoodsEvents
+    {
+        EVENT_MASTER_SHANG_XI_WOODS_TALK1 = 1,
+        EVENT_MASTER_SHANG_XI_WOODS_TALK2 = 2,
+        EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS1 = 3,
+        EVENT_MASTER_SHANG_XI_WOODS_TALK3 = 4,
+        EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS2 = 5,
+        EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS3 = 6,
+        EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS4 = 7,
+        EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS5 = 8,
+        EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS6 = 9,
+        EVENT_MASTER_SHANG_XI_WOODS_TALK4 = 10,
+        EVENT_MASTER_SHANG_XI_WOODS_TALK5 = 11,
+        EVENT_MASTER_SHANG_XI_WOODS_TALK6 = 12,
+        EVENT_MASTER_SHANG_XI_WOODS_CREDIT = 13,
+        EVENT_MASTER_SHANG_XI_WOODS_RESET = 14
+    };
+public:
+    npc_master_shang_xi_wood_of_staves() : CreatureScript("npc_master_shang_xi_wood_of_staves") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() == 29790) // Passing Wisdom
+        {
+            creature->SetWalk(true);
+            creature->GetMotionMaster()->MovePoint(0, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_master_shang_xi_wood_of_stavesAI : public CreatureAI
+    {
+        EventMap events;
+        npc_master_shang_xi_wood_of_stavesAI(Creature* creature) : CreatureAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (id)
+            {
+            case 0:
+            {
+                events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK1, 1000);
+                break;
+            }
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MASTER_SHANG_XI_WOODS_TALK1:
+                    {
+                        me->MonsterSay("For 3,000 years, we have passed the knowledge of our people down. Elder to youth. Master to student.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK2, 10000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_TALK2:
+                    {
+                        me->MonsterSay("Every elder reaches the day where he must pass on and plant his stave with the staves of his ancestors. Today is the day when my staff joins these woods.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS1, 6000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS1:
+                    {
+                        me->GetMotionMaster()->MovePoint(1, masterShangXiWoodsPos1);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK3, 10000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_TALK3:
+                    {
+                        me->SetOrientation(6.0f);
+                        std::list<Player*> playerList;
+                        GetPlayerListInGrid(playerList, me, 15.0f);
+
+                        for (auto&& player : playerList)
+                        {
+                            me->MonsterSay("$p, our people have lived the wholes of their lives on this great turtle, Shen-zin Su, but not in hundreds of years has anyone spoken to him.", Language::LANG_UNIVERSAL, player);
+
+                        }
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS2, 4000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS2:
+                    {
+                        me->GetMotionMaster()->MovePoint(2, masterShangXiWoodsPos2);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS3, 2000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS3:
+                    {
+                        me->GetMotionMaster()->MovePoint(3, masterShangXiWoodsPos3);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS4, 2000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS4:
+                    {
+                        me->GetMotionMaster()->MovePoint(4, masterShangXiWoodsPos4);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS5, 2000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS5:
+                    {
+                        me->GetMotionMaster()->MovePoint(5, masterShangXiWoodsPos5);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK4, 2000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_TALK4:
+                    {
+                        me->MonsterSay("Now Shen-zin Su is ill, and we are all in danger. With the help of the elements, you will break the silence. You will speak to him.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS6, 5000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS6:
+                    {
+                        me->GetMotionMaster()->MovePoint(6, masterShangXiWoodsPos6);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK5, 1000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_TALK5:
+                    {
+                        me->MonsterSay("Aysa and Ji have retrieved the spirits and brought them here. You are to go with them, speak to the great Shen-zin Su, and do what must be done to save our people.", Language::LANG_UNIVERSAL, me);
+
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_TALK6, 5000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_TALK6:
+                    {
+                        me->MonsterSay("You've come far, my young student. I see within you a great hero. I leave the fate of this land to you.", Language::LANG_UNIVERSAL, me);
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_CREDIT, 5000);
+                        break;
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_CREDIT:
+                    {
+                        //TODO: staff plant.
+                        std::list<Player*> playerList;
+                        GetPlayerListInGrid(playerList, me, 15.0f);
+
+                        for (auto&& player : playerList)
+                        {
+                            player->KilledMonsterCredit(56688);
+                        }
+                        break;
+                        events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_RESET, 60000);
+                    }
+                    case EVENT_MASTER_SHANG_XI_WOODS_RESET:
+                    {
+                        me->GetMotionMaster()->MovePoint(7, me->GetHomePosition());
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_master_shang_xi_wood_of_stavesAI(creature);
+    }
+};
+
 class npc_guardian_of_the_elders : public CreatureScript
 {
 public:
@@ -1678,6 +1858,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_master_shang_xi_wood_of_staves();
     new npc_guardian_of_the_elders();
     new npc_master_shang_xi_worthy_questgiver();
     new npc_master_shang_xi_worthy_of_passing();
