@@ -9,6 +9,39 @@
 #include "Player.h"
 #include "Spell.h"
 
+const Position ballonPos1 = { 1081.4185, 4796.375, 157.66225 };
+class npc_hot_air_balloon : public CreatureScript
+{
+public:
+    npc_hot_air_balloon() : CreatureScript("npc_hot_air_balloon") { }
+
+    struct npc_hot_air_balloonAI : public CreatureAI
+    {
+        npc_hot_air_balloonAI(Creature* creature) : CreatureAI(creature) { }
+
+        void OnSpellClick(Unit* Clicker, bool& /*result*/) OVERRIDE
+        {
+            if (Creature* vehicle = me->SummonCreature(55649, me->GetHomePosition(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 1000))
+            {
+                //Clicker->ToPlayer()->EnterVehicle(vehicle, 0);
+                //vehicle->GetMotionMaster()->MovePoint(0, ballonPos1);
+
+                // TODO: ballon vehicle changes areas and zone ids...
+                // and we get ejected at every area change.
+                // use a teleport to ballons endpos instead for now
+                Clicker->NearTeleportTo(744.496f, 3664.6455f, 193.9989f, 0.0f);
+                Clicker->ToPlayer()->KilledMonsterCredit(56378);
+                Clicker->ToPlayer()->KilledMonsterCredit(55939);
+
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_hot_air_balloonAI(creature);
+    }
+};
+
 const Position masterShangXiWoodsPos1 = { 871.0573f, 4460.548f, 241.33667f };
 const Position masterShangXiWoodsPos2 = { 868.00696f, 4464.8384f, 241.60161f };
 const Position masterShangXiWoodsPos3 = { 869.67883f, 4467.752f, 241.66815f };
@@ -1873,6 +1906,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_hot_air_balloon();
     new npc_master_shang_xi_wood_of_staves();
     new npc_guardian_of_the_elders();
     new npc_master_shang_xi_worthy_questgiver();
