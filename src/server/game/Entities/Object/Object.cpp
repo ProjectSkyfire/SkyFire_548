@@ -3264,13 +3264,6 @@ void WorldObject::UpdateAreaPhase()
                         updateNeeded = true;
                 }
             }
-            else
-            {
-                // not in area, remove phase, true if there was something removed
-                bool up = SetPhased(phase.id, false, false);
-                if (!updateNeeded && up)
-                    updateNeeded = true;
-            }
         }
     }
 
