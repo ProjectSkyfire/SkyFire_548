@@ -141,7 +141,10 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo& movementInfo
 
     SpeedHackDetection(player, movementInfo, *data);
     FlyHackDetection(player, movementInfo, *data);
-    TeleportHackDetection(player, movementInfo, *data);
+    if (!player->HasAtLoginFlag(AT_LOGIN_FIRST))
+    {
+        TeleportHackDetection(player, movementInfo, *data);
+    }
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
     {
         WalkOnWaterHackDetection(player, movementInfo, *data);
@@ -786,6 +789,29 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo, Ant
                 }
             }
             break;
+        }
+        case 726: // Twin Peaks
+        {
+            if (Battleground* bg = player->GetBattleground())
+            {
+                if (bg->GetStatus() == STATUS_WAIT_JOIN)
+                {
+                    // Outside of starting area before BG has started.
+                    if ((player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 2075.00f) ||
+                        (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 154.30f) ||
+                        (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > 222.80f))
+                    {
+                        BGLogger(player, data);
+                    }
+                    if ((player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 314.00f) ||
+                        (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 314.0f) ||
+                        (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 380.0f))
+                    {
+                        BGLogger(player, data);
+                    }
+                }
+            }
+            break; 
         }
         return;
     default:
