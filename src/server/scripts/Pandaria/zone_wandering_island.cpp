@@ -9,7 +9,399 @@
 #include "Player.h"
 #include "Spell.h"
 
-const Position ballonPos1 = { 1081.4185, 4796.375, 157.66225 };
+const Position balloonPos1 = { 915.123, 4564.1523, 231.37447 };
+const Position balloonPos2 = { 922.3584, 4567.7495, 234.48523 };
+const Position balloonPos3 = { 954.0022, 4578.619, 230.6169 };
+const Position balloonPos4 = { 1005.63586, 4599.781, 219.48938 };
+const Position balloonPos5 = { 1035.7178, 4621.3955, 205.60277 };
+const Position balloonPos6 = { 1056.7085, 4664.024, 186.15259 };
+const Position balloonPos7 = { 1079.8335, 4795.34, 157.87029 };
+const Position balloonPos8 = { 1091.337, 4865.452, 144.9579 };
+const Position balloonPos9 = { 1090.1652, 4928.4194, 138.01312 };
+const Position balloonPos10 = { 1062.7473, 5065.7837, 137.5515 };
+const Position balloonPos11 = { 992.0422, 5163.364, 137.56874 };
+const Position balloonPos12 = { 885.60614, 5206.965, 135.15846 };
+const Position balloonPos13 = { 779.9042, 5208.6396, 135.60544 };
+const Position balloonPos14 = { 736.7593, 5192.4, 137.05084 };
+const Position balloonPos15 = { 649.841, 5145.8667, 141.09795 };
+const Position balloonPos16 = { 623.2541, 5131.7183, 142.2216 };
+const Position balloonPos17 = { 560.43494, 5053.6377, 132.38977 };
+const Position balloonPos18 = { 485.70917, 4949.409, 125.14896 };
+const Position balloonPos19 = { 429.59842, 4820.912, 110.39427 };
+const Position balloonPos20 = { 305.63647, 4435.072, 79.58694 };
+const Position balloonPos21 = { 156.1306, 4266.2583, 116.03974 };
+const Position balloonPos22 = { 112.64921, 4032.78, 125.91718 };
+const Position balloonPos23 = { 203.35933, 3835.7214, 136.13402 };
+const Position balloonPos24 = { 395.93735, 3764.5327, 160.51057 };
+const Position balloonPos25 = { 744.496, 3664.6455, 193.9989 };
+class npc_hot_air_balloon_vehicle : public CreatureScript
+{
+    enum airBalloonEvents
+    {
+        EVENT_BALOON_MOVE_POS_1 = 1,
+        EVENT_BALLON_MOVE_POS_2  = 2,
+        EVENT_BALLON_AYSA_TALK_1 = 3,
+        EVENT_BALLON_JI_TALK_2 = 4,
+        EVENT_BALLOON_AYSA_TALK_2 = 5,
+        EVENT_BALLON_JI_TALK_3 = 6,
+        EVENT_BALLON_MOVE_POS_2 = 7,
+        EVENT_BALLOON_AYSA_TALK_3 = 8,
+        EVENT_BALLOON_AYSA_YELL_1 = 9,
+        EVENT_BALLOON_AYSA_YELL_2 = 10,
+        EVENT_BALLOON_SHENZINSU_TALK_1 = 11,
+        EVENT_BALLOON_SHENZINSU_TALK_2 =12,
+        EVENT_BALLOON_SHENZINSU_TALK_3 = 13,
+        EVENT_BALLOON_SHENZINSU_TALK_4 = 14,
+        EVENT_BALLOON_AYSA_YELL_3 = 15,
+        EVENT_BALLOON_SHENZINSU_TALK_5 = 16,
+        EVENT_BALLOON_AYSA_YELL_4 = 17,
+        EVENT_BALLOON_SHENZINSU_TALK_6 = 18,
+        EVENT_BALLON_JI_TALK_4 = 19,
+        EVENT_BALLON_JI_TALK_5 = 20,
+        EVENT_BALLON_AYSA_TALK_4 = 21,
+        EVENT_BALLOON_JI_TALK_6 = 22,
+        EVENT_BALLON_AYSA_TALK_5 = 23,
+        EVENT_BALLOON_JI_TALK_7 = 24,
+        EVENT_BALLON_AYSA_TALK_6 = 25,
+        EVENT_BALLON_AYSA_TALK_7 = 26,
+        EVENT_BALLON_DESPAWN = 27
+    };
+public:
+    npc_hot_air_balloon_vehicle() : CreatureScript("npc_hot_air_balloon_vehicle") { }
+
+    struct npc_hot_air_balloon_vehicleAI : public CreatureAI
+    {
+        EventMap events;
+        npc_hot_air_balloon_vehicleAI(Creature* creature) : CreatureAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (id)
+            {
+            case 0:
+            {
+                events.ScheduleEvent(EVENT_BALOON_MOVE_POS_1, 1000);
+                break;
+            }
+            default:
+                break;
+            }
+        }
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_BALOON_MOVE_POS_1:
+                    {
+                        me->GetMotionMaster()->MovePoint(1, balloonPos1);
+                        events.ScheduleEvent(EVENT_BALLON_MOVE_POS_2, 1000);
+                        break;
+                    }
+                    case EVENT_BALLON_MOVE_POS_2:
+                    {
+                        me->GetMotionMaster()->MovePoint(2, balloonPos2);
+                        events.ScheduleEvent(EVENT_BALLON_AYSA_TALK_1, 2000);
+                        break;
+                    }
+                    case EVENT_BALLON_AYSA_TALK_1:
+                    {
+                        me->GetMotionMaster()->MovePoint(3, balloonPos3);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("...Ji, were in the Wood of Staves. You know where Master Shang is now.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27431, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLON_JI_TALK_2, 8000);
+                        break;
+                    }
+                    case EVENT_BALLON_JI_TALK_2:
+                    {
+                        me->GetMotionMaster()->MovePoint(4, balloonPos4);
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->MonsterSay("Bah, let a pandaren hope, would you? I'm going to miss the old man.", Language::LANG_UNIVERSAL, ji);
+                            ji->SendPlaySound(27298, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_AYSA_TALK_2, 12000);
+                        break;
+                    }
+                    case EVENT_BALLOON_AYSA_TALK_2:
+                    {
+                        me->GetMotionMaster()->MovePoint(5, balloonPos5);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("Ji, be respectful when we speak to Shen-zin Su.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27432, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLON_JI_TALK_3, 4000);
+                        break;
+                    }
+                    case EVENT_BALLON_JI_TALK_3:
+                    {
+                        me->GetMotionMaster()->MovePoint(6, balloonPos6);
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->MonsterSay("When am I not respectful? You hurt me, Aysa.", Language::LANG_UNIVERSAL, ji);
+                            ji->SendPlaySound(27299, true);
+                        }
+                        
+                        events.ScheduleEvent(EVENT_BALLOON_AYSA_TALK_3, 5000);
+                        break;
+                    }
+                    case EVENT_BALLOON_AYSA_TALK_3:
+                    {
+                        me->GetMotionMaster()->MovePoint(7, balloonPos7);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("I might if you embarrass us.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27433, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_BALLOON_AYSA_YELL_1, 8000);
+                        break;
+                    }
+                    case EVENT_BALLOON_AYSA_YELL_1:
+                    {
+                        me->GetMotionMaster()->MovePoint(8, balloonPos8);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterYell("Shen-zin Su, we are the descendants of Liu Lang. We've sensed your pain, and we want to help.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27434, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_AYSA_YELL_2, 12000);
+                        break;
+                    }
+                    case EVENT_BALLOON_AYSA_YELL_2:
+                    {
+                        me->GetMotionMaster()->MovePoint(9, balloonPos9);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterYell("What ails you Shen-zin Su? What can we do?", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27435, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_SHENZINSU_TALK_1, 7000);
+                        break;
+                    }
+                    case EVENT_BALLOON_SHENZINSU_TALK_1:
+                    {
+                        me->GetMotionMaster()->MovePoint(10, balloonPos10);
+                        if (Creature* shenzinsu = me->FindNearestCreature(57769, 90.0f, true))
+                        {
+                            shenzinsu->MonsterSay("I am in pain, but it warms my heart that Liu Lang's grandchildren have not forgotten me.", Language::LANG_UNIVERSAL, shenzinsu);
+                            shenzinsu->SendPlaySound(27435, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_SHENZINSU_TALK_2, 15000);
+                        break;
+                    }
+                    case EVENT_BALLOON_SHENZINSU_TALK_2:
+                    {
+                        me->GetMotionMaster()->MovePoint(11, balloonPos11);
+                        if (Creature* shenzinsu = me->FindNearestCreature(57769, 90.0f, true))
+                        {
+                            shenzinsu->MonsterSay("There is a thorn in my side.  I cannot remove it.", Language::LANG_UNIVERSAL, shenzinsu);
+                            shenzinsu->SendPlaySound(27823, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_SHENZINSU_TALK_3, 14000);
+                        break;
+                    }
+                    case EVENT_BALLOON_SHENZINSU_TALK_3:
+                    {
+                        me->GetMotionMaster()->MovePoint(12, balloonPos12);
+                        if (Creature* shenzinsu = me->FindNearestCreature(57769, 90.0f, true))
+                        {
+                            shenzinsu->MonsterSay("The pain is unbearable, and I can no longer swim straight.", Language::LANG_UNIVERSAL, shenzinsu);
+                            shenzinsu->SendPlaySound(27824, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_SHENZINSU_TALK_4, 15000);
+                        break;
+                    }
+                    case EVENT_BALLOON_SHENZINSU_TALK_4:
+                    {
+                        me->GetMotionMaster()->MovePoint(13, balloonPos13);
+                        if (Creature* shenzinsu = me->FindNearestCreature(57769, 90.0f, true))
+                        {
+                            shenzinsu->MonsterSay("Please grandchildren, can you remove this thorn?  I cannot do so on my own.", Language::LANG_UNIVERSAL, shenzinsu);
+                            shenzinsu->SendPlaySound(27825, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_AYSA_YELL_3, 15000);
+                        break;
+                    }
+                    case EVENT_BALLOON_AYSA_YELL_3:
+                    {
+                        me->GetMotionMaster()->MovePoint(14, balloonPos14);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterYell("Of course, Shen-zin Su!  But your shell is large, and I do not know where this thorn could be.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27436, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_SHENZINSU_TALK_5, 7000);
+                        break;
+                    }
+                    case EVENT_BALLOON_SHENZINSU_TALK_5:
+                    {
+                        me->GetMotionMaster()->MovePoint(15, balloonPos15);
+                        if (Creature* shenzinsu = me->FindNearestCreature(57769, 90.0f, true))
+                        {
+                            shenzinsu->MonsterSay("It is in the forest where your feet do not walk.  Continue along the mountains and you will find it.", Language::LANG_UNIVERSAL, shenzinsu);
+                            shenzinsu->SendPlaySound(27826, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_AYSA_YELL_4, 18000);
+                        break;
+                    }
+                    case EVENT_BALLOON_AYSA_YELL_4:
+                    {
+                        me->GetMotionMaster()->MovePoint(16, balloonPos16);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterYell("We will find it, and we will remove it.  You have our word!", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27437, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_SHENZINSU_TALK_6, 8000);
+                        break;
+                    }
+                    case EVENT_BALLOON_SHENZINSU_TALK_6:
+                    {
+                        me->GetMotionMaster()->MovePoint(17, balloonPos17);
+                        if (Creature* shenzinsu = me->FindNearestCreature(57769, 90.0f, true))
+                        {
+                            shenzinsu->MonsterSay("Thank you, grandchildren.", Language::LANG_UNIVERSAL, shenzinsu);
+                            shenzinsu->SendPlaySound(27827, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLON_JI_TALK_4, 5000);
+                        break;
+                    }
+                    case EVENT_BALLON_JI_TALK_4:
+                    {
+                        me->SetSpeed(MOVE_RUN, 4.0f);
+                        me->GetMotionMaster()->MovePoint(18, balloonPos18);
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->MonsterSay("A thorn?  And I left my tweezers at home.", Language::LANG_UNIVERSAL, ji);
+                            ji->SendPlaySound(27300, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLON_JI_TALK_5, 7000);
+                        break;
+                    }
+                    case EVENT_BALLON_JI_TALK_5:
+                    {
+                        me->GetMotionMaster()->MovePoint(19, balloonPos19);
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->MonsterSay("How could such a thing cause pain to something so large?", Language::LANG_UNIVERSAL, ji);
+                            ji->SendPlaySound(27301, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLON_AYSA_TALK_4, 7000);
+                        break;
+                    }
+                    case EVENT_BALLON_AYSA_TALK_4:
+                    {
+                        me->GetMotionMaster()->MovePoint(20, balloonPos20);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("We'll know soon enough.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27438, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLOON_JI_TALK_6, 14000);
+                        break;
+                    }
+                    case EVENT_BALLOON_JI_TALK_6:
+                    {
+                        me->GetMotionMaster()->MovePoint(21, balloonPos21);
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->MonsterSay("Are you seeing what I'm seeing?!  Is that a boat?!", Language::LANG_UNIVERSAL, ji);
+                            ji->SendPlaySound(27302, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_BALLON_AYSA_TALK_5, 6000);
+                        break;
+                    }
+                    case EVENT_BALLON_AYSA_TALK_5:
+                    {
+                        me->GetMotionMaster()->MovePoint(22, balloonPos22);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("It is a boat... a whole airship!  That's a bigger thorn than I was expecting.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27439, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_BALLOON_JI_TALK_7, 8000);
+                        break;
+                    }
+                    case EVENT_BALLOON_JI_TALK_7:
+                    {
+                        me->GetMotionMaster()->MovePoint(23, balloonPos23);
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->MonsterSay("And those aren't pandaren down there.  They've got no fur.", Language::LANG_UNIVERSAL, ji);
+                            ji->SendPlaySound(27303, true);
+                        }
+                        events.ScheduleEvent(EVENT_BALLON_AYSA_TALK_6, 7000);
+                        break;
+                    }
+                    case EVENT_BALLON_AYSA_TALK_6:
+                    {
+                        me->GetMotionMaster()->MovePoint(24, balloonPos24);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("Someone has crashed into our island.  Removing this thorn may be more complicated than we thought.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27440, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_BALLON_AYSA_TALK_7, 8000);
+                        break;
+                    }
+                    case EVENT_BALLON_AYSA_TALK_7:
+                    {
+                        me->GetMotionMaster()->MovePoint(25, balloonPos25);
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->MonsterSay("We should let Elder Shaopai know and then plan our next move.", Language::LANG_UNIVERSAL, aysa);
+                            aysa->SendPlaySound(27441, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_BALLON_DESPAWN, 20000);
+                        break;
+                    }
+                    case EVENT_BALLON_DESPAWN:
+                    {
+                        std::list<Player*> playerList;
+                        GetPlayerListInGrid(playerList, me, 15.0f);
+
+                        for (auto&& player : playerList)
+                        {
+                            player->KilledMonsterCredit(56378);
+                            player->KilledMonsterCredit(55939);
+                        }
+
+                        if (Creature* aysa = me->FindNearestCreature(56661, 15.0f, true))
+                        {
+                            aysa->DespawnOrUnsummon();
+                        }
+                        if (Creature* ji = me->FindNearestCreature(56663, 15.0f, true))
+                        {
+                            ji->DespawnOrUnsummon();
+                        }
+                        me->DespawnOrUnsummon();
+                        break;
+                    }
+                }
+            }
+        }
+
+    };
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_hot_air_balloon_vehicleAI(creature);
+    }
+};
+
 class npc_hot_air_balloon : public CreatureScript
 {
 public:
@@ -21,18 +413,22 @@ public:
 
         void OnSpellClick(Unit* Clicker, bool& /*result*/) OVERRIDE
         {
-            if (Creature* vehicle = me->SummonCreature(55649, me->GetHomePosition(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 1000))
+            if (Creature* vehicle = me->SummonCreature(55649, me->GetHomePosition(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 500000))
             {
-                //Clicker->ToPlayer()->EnterVehicle(vehicle, 0);
-                //vehicle->GetMotionMaster()->MovePoint(0, ballonPos1);
+                Clicker->ToPlayer()->EnterVehicle(vehicle, 0);
 
-                // TODO: ballon vehicle changes areas and zone ids...
-                // and we get ejected at every area change.
-                // use a teleport to ballons endpos instead for now
-                Clicker->NearTeleportTo(744.496f, 3664.6455f, 193.9989f, 0.0f);
-                Clicker->ToPlayer()->KilledMonsterCredit(56378);
-                Clicker->ToPlayer()->KilledMonsterCredit(55939);
+                if (Creature* ji = me->SummonCreature(56663, me->GetHomePosition(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 500000))
+                {
+                    ji->EnterVehicle(vehicle, 1);
+                    ji->MonsterSay("$n, where's Master Shang?", Language::LANG_UNIVERSAL, Clicker);
+                    ji->SendPlaySound(27297, true);
+                }
 
+                if (Creature* aysa = me->SummonCreature(56661, me->GetHomePosition(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, 500000))
+                    aysa->EnterVehicle(vehicle, 2);
+
+
+                vehicle->GetMotionMaster()->MovePoint(0, me->GetHomePosition());
             }
         }
     };
@@ -1906,6 +2302,7 @@ public:
 
 void AddSC_wandering_island()
 {
+    new npc_hot_air_balloon_vehicle();
     new npc_hot_air_balloon();
     new npc_master_shang_xi_wood_of_staves();
     new npc_guardian_of_the_elders();
