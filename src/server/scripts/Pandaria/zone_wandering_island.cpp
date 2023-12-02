@@ -44,7 +44,6 @@ class npc_hot_air_balloon_vehicle : public CreatureScript
         EVENT_BALLON_JI_TALK_2 = 4,
         EVENT_BALLOON_AYSA_TALK_2 = 5,
         EVENT_BALLON_JI_TALK_3 = 6,
-        EVENT_BALLON_MOVE_POS_2 = 7,
         EVENT_BALLOON_AYSA_TALK_3 = 8,
         EVENT_BALLOON_AYSA_YELL_1 = 9,
         EVENT_BALLOON_AYSA_YELL_2 = 10,
