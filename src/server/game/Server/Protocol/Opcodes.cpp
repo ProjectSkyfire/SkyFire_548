@@ -114,6 +114,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_EVENT_STATUS,                        0x1AB3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarEventStatus                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_GET_CALENDAR,                        0x1F9F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarGetCalendar                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_GET_EVENT,                           0x030C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarGetEvent                    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_GET_NUM_PENDING,                     0x0813, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarGetNumPending               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_REMOVE_EVENT,                        0x0C61, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarRemoveEvent                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_UPDATE_EVENT,                        0x1F8D, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarUpdateEvent                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_AURA,                                  0x1861, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCancelAuraOpcode                    ); // 5.4.8 18414
@@ -465,7 +466,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEGROUND_PLAYER_POSITIONS, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::HandleBattlegroundPlayerPositionsOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_BUG, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBugOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode);
-    DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_GET_NUM_PENDING, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarGetNumPending);
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_GUILD_FILTER, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarGuildFilter);
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_DISPLAY_LIST, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelDisplayListQuery);
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_SET_OWNER, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelSetOwner);
