@@ -578,6 +578,7 @@ class WorldSession
         void HandleMoveTeleportAck(WorldPacket& recvPacket);
         void HandleForceSpeedChangeAck(WorldPacket& recvData);
         void HandleSetCollisionHeightAck(WorldPacket& recvPacket);
+        void HandleMovementForceAck(WorldPacket& recvPacket);
 
         void HandleRepopRequestOpcode(WorldPacket& recvPacket);
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);

@@ -650,3 +650,21 @@ void WorldSession::HandleSetCollisionHeightAck(WorldPacket& recvPacket)
     MovementInfo movementInfo;
     GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo, &extra);
 }
+
+void WorldSession::HandleMovementForceAck(WorldPacket& recvPacket)
+{
+    SF_LOG_DEBUG("network", "%s", recvPacket.GetOpcode() == CMSG_MOVE_APPLY_MOVEMENT_FORCE_ACK ? "CMSG_MOVE_APPLY_MOVEMENT_FORCE_ACK" : "CMSG_MOVE_REMOVE_MOVEMENT_FORCE_ACK");
+
+    if (recvPacket.GetOpcode() == CMSG_MOVE_APPLY_MOVEMENT_FORCE_ACK)
+    {
+        static MovementStatusElements const unkElements[] = { MSEExtraFloat, MSEExtraInt32, MSEExtraFloat };
+        Movement::ExtraMovementStatusElement extra(unkElements);
+        MovementInfo movementInfo;
+        GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo, &extra);
+    }
+    else
+    {
+        MovementInfo movementInfo;
+        GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo);
+    }
+}
