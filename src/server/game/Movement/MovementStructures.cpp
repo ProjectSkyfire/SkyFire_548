@@ -2995,6 +2995,86 @@ MovementStatusElements const MovementForceRunSpeedChangeAck[] = // 5.4.8 18414
     MSEEnd
 };
 
+MovementStatusElements const MovementForceSwimBackSpeedChangeAck[] = // 5.4.8 18414
+{
+    MSEExtraElement,           // 184
+    MSEPositionY,              // 40
+    MSECount,                  // 176
+    MSEPositionZ,              // 44
+    MSEPositionX,              // 36
+    MSEHasGuidByte5,           // 21
+    MSEForcesCount,            // 152
+    MSEHasTransportData,       // 104
+    MSEHasCounter,             // 168
+    MSEHasMovementFlags,       // 24
+    MSEHasGuidByte7,           // 23
+    MSEHasOrientation,         // 48
+    MSEHasGuidByte4,           // 20
+    MSEHasSplineElevation,     // 144
+    MSEZeroBit,                // 149
+    MSEHasGuidByte6,           // 22
+    MSEHasGuidByte2,           // 18
+    MSEHasMovementFlags2,      // 28
+    MSEZeroBit,                // 148
+    MSEHasGuidByte0,           // 16
+    MSEHasTimestamp,           // 32
+    MSEHasGuidByte3,           // 19
+    MSEHasFallData,            // 140
+    MSEZeroBit,                // 172
+    MSEHasPitch,               // 112
+    MSEHasGuidByte1,           // 17
+    MSEHasTransportGuidByte1,  // 57
+    MSEHasTransportGuidByte2,  // 58
+    MSEHasTransportGuidByte7,  // 63
+    MSEHasTransportGuidByte3,  // 59
+    MSEHasTransportGuidByte0,  // 56
+    MSEHasTransportGuidByte5,  // 61
+    MSEHasTransportTime3,      // 100
+    MSEHasTransportGuidByte6,  // 62
+    MSEHasTransportTime2,      // 92
+    MSEHasTransportGuidByte4,  // 60
+    MSEHasFallDirection,       // 136
+    MSEMovementFlags,          // 24
+    MSEMovementFlags2,         // 28
+
+    MSEForces,                 // 156
+    MSEGuidByte5,              // 21
+    MSEGuidByte0,              // 16
+    MSEGuidByte6,              // 22
+    MSEGuidByte4,              // 20
+    MSEGuidByte3,              // 19
+    MSEGuidByte2,              // 18
+    MSEGuidByte1,              // 17
+    MSEGuidByte7,              // 23
+    MSETransportGuidByte7,     // 63
+    MSETransportPositionY,     // 68
+    MSETransportGuidByte2,     // 58
+    MSETransportGuidByte3,     // 59
+    MSETransportGuidByte4,     // 60
+    MSETransportGuidByte0,     // 56
+    MSETransportOrientation,   // 76
+    MSETransportTime3,         // 96
+    MSETransportPositionX,     // 64
+    MSETransportTime2,         // 88
+    MSETransportPositionZ,     // 72
+    MSETransportSeat,          // 80
+    MSETransportGuidByte6,     // 62
+    MSETransportTime,          // 84
+    MSETransportGuidByte5,     // 61
+    MSETransportGuidByte1,     // 57
+    MSECounter,                // 168
+    MSESplineElevation,        // 144
+    MSEFallVerticalSpeed,      // 120
+    MSEFallCosAngle,           // 124
+    MSEFallHorizontalSpeed,    // 132
+    MSEFallSinAngle,           // 128
+    MSEFallTime,               // 116
+    MSETimestamp,              // 32
+    MSEOrientation,            // 48
+    MSEPitch,                  // 112
+    MSEEnd
+};
+
 MovementStatusElements const MovementSetCollisionHeightAck[] =
 {
     MSEMountDisplayIdWithoutCheck,
@@ -5992,6 +6072,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MovementForceRunBackSpeedChangeAck;
         case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:
             return MovementForceRunSpeedChangeAck;
+        case CMSG_MOVE_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
+            return MovementForceSwimBackSpeedChangeAck;
         case CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK:
             return MovementForceSwimSpeedChangeAck;
         case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:
