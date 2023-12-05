@@ -2,7 +2,7 @@ name: windows-build
 
 on:
   push:
-    branches: [ main, trunk ]
+    branches: [ main, trunk, movement ]
     paths-ignore:
       - 'sql/**'
       
