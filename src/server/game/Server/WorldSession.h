@@ -549,6 +549,7 @@ class WorldSession
         // new
         void HandleMoveUnRootAck(WorldPacket& recvPacket);
         void HandleMoveRootAck(WorldPacket& recvPacket);
+        void HandleMoveGravityAck(WorldPacket& recvData);
         void HandleReturnToGraveyard(WorldPacket& recvPacket);
 
         // new inspect

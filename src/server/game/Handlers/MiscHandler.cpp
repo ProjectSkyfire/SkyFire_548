@@ -1386,6 +1386,12 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 */
 }
 
+void WorldSession::HandleMoveGravityAck(WorldPacket& recvData)
+{
+    // not used
+    recvData.rfinish();                       // prevent warnings spam
+}
+
 void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
 {
     uint8 actionBar;
