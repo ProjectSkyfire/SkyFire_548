@@ -2,7 +2,7 @@ name: G++11
 
 on:
   push:
-    branches: [ main, trunk ]
+    branches: [ main, trunk, movement ]
 
   pull_request:
 
