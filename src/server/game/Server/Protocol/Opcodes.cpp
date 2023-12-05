@@ -441,6 +441,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(MSG_MOVE_JUMP,                                     0x1153, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_FACING,                               0x1050, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_PITCH,                                0x017A, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_RUN_MODE,                             0x0979, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_WALK_MODE,                            0x08D1, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_ASCEND,                             0x11FA, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_BACKWARD,                           0x09D8, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(MSG_MOVE_START_DESCEND,                            0x01D1, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
@@ -614,8 +616,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_WARGAME_ACCEPT, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(CMSG_WARGAME_START, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_CHARM_TELEPORT_CHEAT, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_RUN_MODE, 0x0979, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_SET_WALK_MODE, 0x08D1, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT_CHEAT, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TIME_SKIPPED, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TOGGLE_COLLISION_CHEAT, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
