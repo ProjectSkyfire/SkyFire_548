@@ -655,6 +655,7 @@ class WorldSession
         void HandleMoveNotActiveMover(WorldPacket& recvData);
         void HandleDismissControlledVehicle(WorldPacket& recvData);
         void HandleRequestVehicleExit(WorldPacket& recvData);
+        void HandleMoveSetVehicleRecAck(WorldPacket& recvData);
         void HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData);
         void HandleMoveTimeSkippedOpcode(WorldPacket& recvData);
 

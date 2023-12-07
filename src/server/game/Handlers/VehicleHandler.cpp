@@ -226,3 +226,22 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
         }
     }
 }
+
+void WorldSession::HandleMoveSetVehicleRecAck(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Recvd CMSG_SET_VEHICLE_REC_ID_ACK");
+
+    static MovementStatusElements const vehicleIdExtra = MSEExtraInt32;
+    Movement::ExtraMovementStatusElement extras(&vehicleIdExtra);
+    MovementInfo movementInfo;
+    GetPlayer()->ReadMovementInfo(recvData, &movementInfo, &extras);
+
+    uint32 vehicleId = extras.Data.extraInt32Data;
+
+    ObjectGuid vehicleGuid = GetPlayer()->GetGUID();
+    WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 8 + 4);
+    data.WriteGuidMask(vehicleGuid, 5, 7, 2, 1, 4, 0, 3, 6);
+    data.WriteGuidBytes(vehicleGuid, 5, 7, 4, 6, 2, 1, 3, 0);
+    data << uint32(vehicleId);
+    GetPlayer()->SendMessageToSet(&data, true);
+}
