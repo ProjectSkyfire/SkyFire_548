@@ -1545,30 +1545,15 @@ void WorldSession::HandleCancelTempEnchantmentOpcode(WorldPacket& recvData)
     GetPlayer()->ApplyEnchantment(item, TEMP_ENCHANTMENT_SLOT, false);
     item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
 }
-/*
+
 void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: CMSG_GET_ITEM_PURCHASE_DATA");
 
     ObjectGuid guid;
     
-    guid[1] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadGuidMask(guid, 1, 0, 3, 2, 7, 4, 5, 6);
+    recvData.ReadGuidBytes(guid, 3, 7, 5, 1, 0, 6, 4, 2);
 
     Item* item = _player->GetItemByGuid(guid);
     if (!item)
@@ -1577,9 +1562,9 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
         return;
     }
 
-    GetPlayer()->RefundItem(item);
+    GetPlayer()->SendRefundInfo(item);
 }
-*/
+
 void WorldSession::HandleItemRefund(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: CMSG_ITEM_REFUND");
@@ -1936,7 +1921,7 @@ void WorldSession::SendReforgeResult(bool success)
     SendPacket(&data);
 }
 
-/*
+
 void WorldSession::SendItemExpirePurchaseRefund(ObjectGuid itemGuid)
 {
     WorldPacket data(SMSG_ITEM_EXPIRE_PURCHASE_REFUND, 8);
@@ -1961,4 +1946,3 @@ void WorldSession::SendItemExpirePurchaseRefund(ObjectGuid itemGuid)
 
     SendPacket(&data);
 }
-*/
