@@ -38,20 +38,40 @@ void PlayerTaxi::InitTaxiNodesForClass(uint32 chrClass)
 void PlayerTaxi::InitTaxiNodesForRace(uint32 race)
 {
     // race specific initial known nodes: capital and taxi hub masks
-    switch (race)
+    switch (Player::TeamForRace(race))
     {
-        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
-        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
-        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
-        case RACE_NIGHTELF: SetTaximaskNode(26);
-                            SetTaximaskNode(27); break;     // Night Elf
-        case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
-        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
-        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
-        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
-        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
-        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
+    case ALLIANCE:
+        SetTaximaskNode(2);                  // Stormwind, Elwynn
+        SetTaximaskNode(582);                // Goldshire, Elwynn
+        SetTaximaskNode(589);                // Eastvale Logging Camp, Elwynn
+        SetTaximaskNode(6);                  // Ironforge, Dun Morogh
+        SetTaximaskNode(619);                // Kharanos, Dun Morogh
+        SetTaximaskNode(620);                // Gol'Bolar Quarry, Dun Morogh
+        SetTaximaskNode(26);                 // Lor'danel, Darkshore
+        SetTaximaskNode(456);                // Dolanaar, Teldrassil
+        SetTaximaskNode(457);                // Darnassus, Teldrassil
+        SetTaximaskNode(94);                 // The Exodar
+        SetTaximaskNode(624);                // Azure Watch, Azuremyst Isle
+        SetTaximaskNode(49);                 // Moonglade
+        SetTaximaskNode(100);                // Honor Hold, Hellfire Peninsula
+        break;
+    case HORDE:
+        SetTaximaskNode(23);                 // Orgrimmar, Durotar
+        SetTaximaskNode(536);                // Sen'jin Village, Durotar
+        SetTaximaskNode(537);                // Razor Hill, Durotar
+        SetTaximaskNode(11);                 // Undercity, Tirisfal
+        SetTaximaskNode(384);                // The Bulwark, Tirisfal
+        SetTaximaskNode(460);                // Brill, Tirisfal Glades
+        SetTaximaskNode(22);                 // Thunder Bluff, Mulgore
+        SetTaximaskNode(402);                // Bloodhoof Village, Mulgore
+        SetTaximaskNode(82);                 // Silvermoon City
+        SetTaximaskNode(625);                // Fairbreeze Village, Eversong Woods
+        SetTaximaskNode(631);                // Falconwing Square, Eversong Woods
+        SetTaximaskNode(99);                 // Thrallmar, Hellfire Peninsula
+        break;
     }
+    SetTaximaskNode(128);                        // Shattrath, Terokkar Forest
+    SetTaximaskNode(310);                        // Dalaran
 }
 
 void PlayerTaxi::InitTaxiNodesForFaction(uint32 faction)
