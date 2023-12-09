@@ -260,6 +260,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LOADING_SCREEN_NOTIFY,                        0x1DBD, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLoadScreenOpcode                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_CANCEL,                                0x06C1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode                  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOGOUT_REQUEST,                               0x1349, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutRequestOpcode                 ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_LOG_DISCONNECT,                               0x10B3, STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOOT,                                         0x1CE2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootOpcode                          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_METHOD,                                  0x0DE1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootMethodOpcode                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_MONEY,                                   0x02F6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLootMoneyOpcode                     ); // 5.4.8 18414
@@ -506,7 +507,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS, 0x0000, STATUS_UNHANDLED,  PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus                 );
     DEFINE_OPCODE_HANDLER(CMSG_LFG_SET_ROLES, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetRolesOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_POST_REQUEST, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderPostRequest);
-    DEFINE_OPCODE_HANDLER(CMSG_LOG_DISCONNECT, 0x10B3, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_EarlyProccess);
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_MASTER_GIVE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLootMasterGiveOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_BATTLEGROUND, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_GUILD, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode);
