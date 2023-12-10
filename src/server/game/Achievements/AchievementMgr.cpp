@@ -947,43 +947,56 @@ void AchievementMgr<T>::SendCriteriaUpdate(CriteriaEntry const* /*entry*/, Crite
 template<>
 void AchievementMgr<Player>::SendCriteriaUpdate(CriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted) const
 {
+    WorldPacket data(SMSG_ACCOUNT_CRITERIA_UPDATE, 4 + 4 + 4 + 4 + 8 + 4);
     ObjectGuid guid = GetOwner()->GetGUID();
+    ObjectGuid counter = progress->counter;
 
-    WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
+    data.WriteBit(counter[4]);
     data.WriteBit(guid[2]);
+    data.WriteBit(counter[2]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(counter[0]);
+    data.WriteBit(counter[5]);
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
+    data.WriteBit(counter[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(counter[6]);
     data.WriteBit(guid[1]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(counter[1]);
+
+    data.WriteBits(0, 4);
+
     data.WriteBit(guid[5]);
+    data.WriteBit(counter[7]);
     data.WriteBit(guid[0]);
 
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[7]);
 
+    data << uint32(timeElapsed);
     data << uint32(entry->ID);
 
-    if (!entry->timeLimit)
-        data << uint32(0);
-    else
-        data << uint32(timedCompleted ? 0 : 1); // this are some flags, 1 is for keeping the counter at 0 in client
+    data.WriteByteSeq(counter[7]);
 
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
+    data << uint32(timeElapsed);
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
 
     data.AppendPackedTime(progress->date);
 
-    data.WriteByteSeq(guid[4]);
-
-    data << uint32(timeElapsed);    // time elapsed in seconds
-    data << uint32(0);              // unk
-
-    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(counter[0]);
+    data.WriteByteSeq(counter[1]);
+    data.WriteByteSeq(counter[2]);
+    data.WriteByteSeq(counter[3]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(counter[4]);
+    data.WriteByteSeq(counter[5]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(counter[6]);
     data.WriteByteSeq(guid[0]);
-
-    data << uint64(progress->counter);
+    data.WriteByteSeq(guid[6]);
     SendPacket(&data);
 }
 
