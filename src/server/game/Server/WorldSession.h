@@ -1058,6 +1058,7 @@ class WorldSession
         void HandleViolenceLevel(WorldPacket& recvPacket);
         void HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket);
         void HandleSelectFactionOpcode(WorldPacket& recvPacket);
+        void HandleDiscardedTimeSyncAcks(WorldPacket& recvData);
         void HandleRequestCategoryCooldowns(WorldPacket& recvPacket);
         void HandleRequestCemeteryList(WorldPacket& recvPacket);
 

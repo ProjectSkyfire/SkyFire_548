@@ -2505,6 +2505,16 @@ void WorldSession::HandleSelectFactionOpcode(WorldPacket& recvPacket)
     _player->SendMovieStart(116);
 }
 
+void WorldSession::HandleDiscardedTimeSyncAcks(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: CMSG_DISCARDED_TIME_SYNC_ACKS");
+
+    bool hasInfo = !recvData.ReadBit();
+
+    if (hasInfo)
+        recvData.read_skip<uint32>();
+}
+
 void WorldSession::SendPlayMusic(uint32 SoundKitID)
 {
     WorldPacket data(SMSG_PLAY_MUSIC, 4);

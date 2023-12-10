@@ -157,6 +157,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_DEL_FRIEND,                                   0x1103, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDelFriendOpcode                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DEL_IGNORE,                                   0x0737, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDelIgnoreOpcode                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DESTROY_ITEM,                                 0x0026, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDestroyItemOpcode                   ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_DISCARDED_TIME_SYNC_ACKS,                     0x115B, STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT, PROCESS_THREADUNSAFE, &WorldSession::HandleDiscardedTimeSyncAcks); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CRITTER,                              0x12DB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDismissCritter                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE,                   0x09FA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_PROPOSED,                                0x1A26, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDuelProposedOpcode                  ); // 5.4.8 18414
@@ -242,7 +243,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_TALENT,                                 0x02A7, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLearnTalentOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LEAVE_CHANNEL,                                0x042A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLeaveChannel                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_JOIN,                                     0x046B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgJoinOpcode                       ); // 5.4.8 18414
-                                                                                                                                                                                      
+                                                                                                                                                                                   
     DEFINE_OPCODE_HANDLER(CMSG_LFD_PROPOSAL_RESULT,                          0x1D9D, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgProposalResultOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_LEAVE,                                    0x01E0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgLeaveOpcode                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_LOCK_INFO_REQUEST,                        0x006B, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleLFDGetLockInfoOpcode                ); // 5.4.8 18414
