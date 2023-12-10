@@ -389,6 +389,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_RESURRECT_RESPONSE,                           0x0B0C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleResurrectResponseOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RETURN_TO_GRAVEYARD,                          0x12EA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReturnToGraveyard                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RIDE_VEHICLE_INTERACT,                        0x0277, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRideVehicleInteract                 ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES,                            0x06E6, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSaveCUFProfiles                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SCENE_COMPLETED,                              0x0087, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSceneCompleted                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELECT_FACTION,                               0x0027, STATUS_LOGGEDIN, PROCESS_THREADUNSAFE,  &WorldSession::HandleSelectFactionOpcode                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELF_RES,                                     0x0360, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode                       ); // 5.4.8 18414
@@ -524,7 +525,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_PUSH_RESULT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushResult);
     DEFINE_OPCODE_HANDLER(CMSG_REALM_SPLIT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRealmSplitOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PET_INFO, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRequestPetInfoOpcode);
-    DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES, 0x06E6, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::HandleSaveCUFProfiles);
     DEFINE_OPCODE_HANDLER(CMSG_SET_ACTIVE_VOICE_CHANNEL, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetActiveVoiceChannel);
     DEFINE_OPCODE_HANDLER(CMSG_SET_GUILD_BANK_TEXT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetGuildBankTabText);
     DEFINE_OPCODE_HANDLER(CMSG_SET_SAVED_INSTANCE_EXTEND, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetSavedInstanceExtend);
