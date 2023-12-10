@@ -2356,32 +2356,32 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
     for (uint8 i = 0; i < count; ++i)
     {
         profiles[i] = new CUFProfile;
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_156, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_145, recvPacket.ReadBit());
-        strlens[i] = (uint8)recvPacket.ReadBits(7);
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2,             recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST,     recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR,                recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_156,                          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER,             recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS,                 recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_145,                          recvPacket.ReadBit());
+        strlens[i] = (uint8)                                               recvPacket.ReadBits(7);
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS,                     recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP,                recvPacket.ReadBit());
         profiles[i]->BoolOptions.set(CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_157, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_157,                          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER,                   recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS,        recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1,             recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE,                recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT,          recvPacket.ReadBit());
     }
 
     for (uint8 i = 0; i < count; ++i)
