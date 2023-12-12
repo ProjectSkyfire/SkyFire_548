@@ -103,11 +103,12 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 {
-    uint32 channelLength = recvPacket.ReadBits(8);
-    uint32 nameLength = recvPacket.ReadBits(7);
+    uint32 nameLength = recvPacket.ReadBits(8) << 1;
+    nameLength += recvPacket.ReadBit();
+    uint32 channelLength = recvPacket.ReadBits(7);
 
-    std::string targetName = recvPacket.ReadString(nameLength);
     std::string channelName = recvPacket.ReadString(channelLength);
+    std::string targetName = recvPacket.ReadString(nameLength);
 
     SF_LOG_DEBUG("chat.system", "CMSG_CHANNEL_SET_OWNER %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
