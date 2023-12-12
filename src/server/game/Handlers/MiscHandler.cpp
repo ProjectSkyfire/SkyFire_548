@@ -2123,7 +2123,7 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
         return;
     }
 
-    AreaTableEntry const* atEntry = GetAreaEntryByAreaID(_player->GetAreaId());
+    AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
     if (!atEntry || !(atEntry->m_flags & AREA_FLAG_WINTERGRASP_2))
         return;
 
