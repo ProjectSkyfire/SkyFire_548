@@ -316,6 +316,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_OFFER_PETITION,                               0x15BE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOfferPetitionOpcode                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPENING_CINEMATIC,                            0x0130, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpeningCinematic                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPEN_ITEM,                                    0x1D10, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpenItemOpcode                      ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_OPT_OUT_OF_LOOT,                              0x06E0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOptOutOfLootOpcode                  ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PAGE_TEXT_QUERY,                              0x1022, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePageTextQueryOpcode                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_BUY,                                 0x12D9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionBuyOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_DECLINE,                             0x1279, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionDeclineOpcode               ); // 5.4.8 18414
@@ -518,7 +519,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_NOT_ACTIVE_MOVER, 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleMoveNotActiveMover);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK, 0x09FB, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleSetCollisionHeightAck);
     DEFINE_OPCODE_HANDLER(CMSG_NEXT_CINEMATIC_CAMERA, 0x1124, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleNextCinematicCamera);
-    DEFINE_OPCODE_HANDLER(CMSG_OPT_OUT_OF_LOOT, 0x06E0, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleOptOutOfLootOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_PET_CANCEL_AURA, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCancelAuraOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_PET_LEARN_TALENT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetLearnTalent);
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_QUESTS_COMPLETED, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQueryQuestsCompleted);

@@ -1395,8 +1395,7 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_OPT_OUT_OF_LOOT");
 
-    bool passOnLoot;
-    recvData >> passOnLoot; // 1 always pass, 0 do not pass
+    bool passOnLoot = recvData.ReadBit();  // 1 always pass, 0 do not pass
 
     // ignore if player not loaded
     if (!GetPlayer())                                        // needed because STATUS_AUTHED
