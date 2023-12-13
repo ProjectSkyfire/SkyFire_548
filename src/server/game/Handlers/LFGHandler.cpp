@@ -186,8 +186,8 @@ void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recvData)
 {
-    uint8 roles;
-    recvData >> roles;                                     // Player Group Roles
+    uint32 roles = recvData.read<uint32>();
+    recvData.read_skip<uint8>();
     uint64 guid = GetPlayer()->GetGUID();
     Group* group = GetPlayer()->GetGroup();
     if (!group)
