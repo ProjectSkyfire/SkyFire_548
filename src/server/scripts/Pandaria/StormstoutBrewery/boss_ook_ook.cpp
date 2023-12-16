@@ -21,6 +21,16 @@ enum Events
     EVENT_BANANA_AURA  = 2,
 };
 
+enum Yells
+{
+    YELL_AGGRO = 0, // "Me gonna ook you in the dooker!"
+    YELL_DEATH = 1, // "Ook! Oooook!!"
+    YELL_KILL = 2, // "In the dooker!"
+    YELL_SPELL1 = 3, // GOING BANANAS 1 - "Get Ooking party started!" sId 28800
+    YELL_SPELL2 = 4, // GOING BANANAS 2 - "Come on and get your Ook on!" sId 28801
+    YELL_SPELL3 = 5, // GOING BANANAS 3 - "We gonna Ook all night!" sId 28802
+};
+
 class boss_ook_ook : public CreatureScript
 {
 public:
@@ -28,12 +38,14 @@ public:
 
     struct boss_ook_ookAI : public BossAI
     {
+        uint8 SpellTalkId = 0;
         boss_ook_ookAI(Creature* creature) : BossAI(creature, DATA_OOK_OOK) { }
 
         void Reset() OVERRIDE
         {
             BossAI::Reset();
             me->SetReactState(REACT_DEFENSIVE);
+            SpellTalkId = 0;
             events.ScheduleEvent(EVENT_GROUND_POUND, DUNGEON_MODE(15000, 10000));
             events.ScheduleEvent(EVENT_BANANA_AURA, DUNGEON_MODE(12000, 7000));
         }
@@ -41,14 +53,14 @@ public:
         void JustDied(Unit* /* killer */) OVERRIDE
         {
             _JustDied();
-            //Talk(SAY_DEATH);
+            Talk(YELL_DEATH);
             instance->SetBossState(DATA_OOK_OOK, DONE);
         }
 
         void EnterCombat(Unit* victim) OVERRIDE
         {
             BossAI::EnterCombat(victim);
-            //Talk(SAY_AGGRO);
+            Talk(YELL_AGGRO);
         }
 
         void JustReachedHome() OVERRIDE
@@ -59,7 +71,7 @@ public:
 
         void KilledUnit(Unit* victim) OVERRIDE
         {
-            //Talk(SAY_KILL);
+            Talk(YELL_KILL);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -85,6 +97,13 @@ public:
                     case EVENT_BANANA_AURA:
                     {
                         DoCast(me, SPELL_GOING_BANANAS);
+
+                        if (SpellTalkId <= 2)
+                        {
+                            Talk(YELL_SPELL1 + SpellTalkId);
+                            SpellTalkId++;
+                        }
+
                         events.ScheduleEvent(EVENT_GROUND_POUND, DUNGEON_MODE(12000, 7000));
                         break;
                     }

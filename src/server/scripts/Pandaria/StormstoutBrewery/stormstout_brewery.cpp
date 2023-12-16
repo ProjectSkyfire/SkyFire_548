@@ -25,13 +25,11 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
     {
         if (Creature* pOokOok = creature->FindNearestCreature(NPC_OOK_OOK, 45.0f, true))
         {
-            // Note: should be Yell instead of Say
-            pOokOok->MonsterSay(SAY_OOK_OOK_1, Language::LANG_UNIVERSAL, 0);
+            pOokOok->MonsterYell(SAY_OOK_OOK_1, Language::LANG_UNIVERSAL, 0);
+            pOokOok->SendPlaySound(28798, true);
             
             pOokOok->GetMotionMaster()->MoveJump(OokOokLandPos, pOokOok->GetExactDist2d(OokOokLandPos.GetPositionX(), OokOokLandPos.GetPositionY()) * 10.0f / 5.0f, 5.0f);
             pOokOok->SetHomePosition(OokOokLandPos);
-            //if (creature->GetVictim())
-            //    pOakOak->AI()->AttackStart(creature->GetVictim());
         }
         killer->CastSpell(killer, SPELL_SSB_BANANA_BAR_REMOVE, true);
         instance->SetBossState(DATA_BANANA_EVENT, DONE);
