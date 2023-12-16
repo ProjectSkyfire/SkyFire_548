@@ -28,10 +28,7 @@ DELETE FROM `creature_text` WHERE `entry`=56637;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (56637, 0, 0, 'Me gonna ook you in the dooker!', 14, 0, 100, 0, 0, 28796, 'Ook-Ook YELL_AGGRO'),
 (56637, 1, 0, 'Ook! Oooook!!', 14, 0, 100, 0, 0, 28797, 'Ook-Ook YELL_DEATH'),
-(56637, 2, 0, 'In the dooker!', 14, 0, 100, 0, 0, 28799, 'Ook-Ook YELL_KILL');
+(56637, 2, 0, 'In the dooker!', 14, 0, 100, 0, 0, 28799, 'Ook-Ook YELL_KILL'),
 (56637, 3, 0, 'Get Ooking party started!', 14, 0, 100, 0, 0, 28800, 'Ook-Ook YELL_SPELL1'),
 (56637, 4, 0, 'Come on and get your Ook on!', 14, 0, 100, 0, 0, 28801, 'Ook-Ook YELL_SPELL2'),
 (56637, 5, 0, 'We gonna Ook all night!', 14, 0, 100, 0, 0, 28802, 'Ook-Ook YELL_SPELL3');
-
-
-

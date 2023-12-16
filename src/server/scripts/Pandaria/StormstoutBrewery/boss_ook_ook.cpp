@@ -104,7 +104,7 @@ public:
                             SpellTalkId++;
                         }
 
-                        events.ScheduleEvent(EVENT_GROUND_POUND, DUNGEON_MODE(12000, 7000));
+                        events.ScheduleEvent(EVENT_BANANA_AURA, DUNGEON_MODE(12000, 7000));
                         break;
                     }
                 default:
