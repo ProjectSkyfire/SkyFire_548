@@ -970,6 +970,8 @@ void AchievementMgr<Player>::SendCriteriaUpdate(CriteriaEntry const* entry, Crit
     data.WriteBit(guid[5]);
     data.WriteBit(counter[7]);
     data.WriteBit(guid[0]);
+	
+    data.FlushBits();
 
     data.WriteByteSeq(guid[7]);
 
