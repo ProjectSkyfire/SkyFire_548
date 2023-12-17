@@ -606,6 +606,7 @@ void AddSC_wandering_island();
 // Temple of Jade Serpent
 void AddSC_instance_jade_serpent();
 // Stormstout Brewery
+void AddSC_boss_hoptallus();
 void AddSC_boss_ook_ook();
 void AddSC_instance_stormstout_brewery();
 void AddSC_stormstout_brewery();
@@ -1288,6 +1289,7 @@ void AddPandariaScripts()
     // Temple of Jade Serpent - Temple of Jade Serpent
     AddSC_instance_jade_serpent();
     // Stormstout Brewery
+    AddSC_boss_hoptallus();
     AddSC_boss_ook_ook();
     AddSC_instance_stormstout_brewery();
     AddSC_stormstout_brewery();

@@ -30,6 +30,7 @@ void SummonOokOokIfReady(InstanceScript* instance, Creature* creature, Unit* kil
             
             pOokOok->GetMotionMaster()->MoveJump(OokOokLandPos, pOokOok->GetExactDist2d(OokOokLandPos.GetPositionX(), OokOokLandPos.GetPositionY()) * 10.0f / 5.0f, 5.0f);
             pOokOok->SetHomePosition(OokOokLandPos);
+            pOokOok->setFaction(14);
         }
         killer->CastSpell(killer, SPELL_SSB_BANANA_BAR_REMOVE, true);
         instance->SetBossState(DATA_BANANA_EVENT, DONE);
@@ -41,12 +42,11 @@ void SummonHoptallusIfReady(InstanceScript* instance, Creature* creature, Unit* 
     if (instance->GetBossState(DATA_RABBIT_EVENT) == DONE)
         return;
 
-    if (Creature* pHoptalus = creature->SummonCreature(NPC_HOPTALLUS, -726.259f, 1250.96f, 165.235f, 0.27f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
+    if (Creature* pHoptalus = creature->FindNearestCreature(NPC_HOPTALLUS, 45.0f, true))
     {
         pHoptalus->GetMotionMaster()->MoveJump(HoptallusLandPos, pHoptalus->GetExactDist2d(HoptallusLandPos.GetPositionX(), HoptallusLandPos.GetPositionY()) * 10.0f / 5.0f, 5.0f);
         pHoptalus->SetHomePosition(HoptallusLandPos);
-        //if (creature->GetVictim())
-        //    pOakOak->AI()->AttackStart(creature->GetVictim());
+        pHoptalus->setFaction(14);
     }
     instance->SetBossState(DATA_RABBIT_EVENT, DONE);
 };
