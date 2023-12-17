@@ -1,0 +1,1 @@
+copy /a *.sql /b world_updates.sql
