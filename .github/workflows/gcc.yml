@@ -21,8 +21,8 @@ jobs:
        
         # MySQL
         sudo rm -rf /var/lib/dpkg/lock
-        sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
-        sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
+        sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb
+        sudo dpkg -i mysql-apt-config_0.8.29-1_all.deb
 
         #OpenSSL
         #sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
