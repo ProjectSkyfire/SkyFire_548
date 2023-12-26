@@ -8,25 +8,53 @@
 #include "WorldPacket.h"
 #include "Config.h"
 
+#define PLAYABLE_RACES_COUNT 15
+#define PLAYABLE_CLASSES_COUNT 11
+
+uint8 raceExpansion[PLAYABLE_RACES_COUNT][2] =
+{
+    { RACE_TAUREN,            EXPANSION_CLASSIC             },
+    { RACE_UNDEAD_PLAYER,     EXPANSION_CLASSIC             },
+    { RACE_ORC,               EXPANSION_CLASSIC             },
+    { RACE_GNOME,             EXPANSION_CLASSIC             },
+    { RACE_GOBLIN,            EXPANSION_THE_BURNING_CRUSADE },
+    { RACE_HUMAN,             EXPANSION_CLASSIC             },
+    { RACE_TROLL,             EXPANSION_CLASSIC             },
+    { RACE_PANDAREN_NEUTRAL,  EXPANSION_THE_BURNING_CRUSADE },
+    { RACE_DRAENEI,           EXPANSION_THE_BURNING_CRUSADE },
+    { RACE_WORGEN,            EXPANSION_THE_BURNING_CRUSADE },
+    { RACE_BLOODELF,          EXPANSION_THE_BURNING_CRUSADE },
+    { RACE_NIGHTELF,          EXPANSION_CLASSIC             },
+    { RACE_DWARF,             EXPANSION_CLASSIC             },
+    { RACE_PANDAREN_ALLIANCE, EXPANSION_THE_BURNING_CRUSADE },
+    { RACE_PANDAREN_HORDE,    EXPANSION_THE_BURNING_CRUSADE },
+};
+
+uint8 classExpansion[PLAYABLE_CLASSES_COUNT][2] =
+{
+    { CLASS_MONK,         EXPANSION_MISTS_OF_PANDARIA      },
+    { CLASS_WARRIOR,      EXPANSION_CLASSIC                },
+    { CLASS_PALADIN,      EXPANSION_CLASSIC                },
+    { CLASS_HUNTER,       EXPANSION_CLASSIC                },
+    { CLASS_ROGUE,        EXPANSION_CLASSIC                },
+    { CLASS_PRIEST,       EXPANSION_CLASSIC                },
+    { CLASS_SHAMAN,       EXPANSION_CLASSIC                },
+    { CLASS_MAGE,         EXPANSION_CLASSIC                },
+    { CLASS_WARLOCK,      EXPANSION_CLASSIC                },
+    { CLASS_DRUID,        EXPANSION_CLASSIC                },
+    { CLASS_DEATH_KNIGHT, EXPANSION_WRATH_OF_THE_LICH_KING },
+};
+
 void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queuePos)
 {
     std::map<uint32, std::string> realmNamesToSend;
-
-    QueryResult classResult = LoginDatabase.PQuery("SELECT class, expansion FROM realm_classes WHERE realmId = %u", realmID);
-    QueryResult raceResult = LoginDatabase.PQuery("SELECT race, expansion FROM realm_races WHERE realmId = %u", realmID);
-
-    if (!classResult || !raceResult)
-    {
-        SF_LOG_ERROR("network", "Unable to retrieve class or race data.");
-        return;
-    }
 
     RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
     if (iter != realmNameStore.end()) // Add local realm
         realmNamesToSend[realmID] = iter->second;
 
     SF_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 113);
 
     packet.WriteBit(code == ResponseCodes::AUTH_OK);
 
@@ -34,71 +62,69 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
     {
         packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
 
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
             packet.WriteBits(itr->second.size(), 8);
-            packet.WriteBits(itr->second.size(), 8);
+            std::string normalized = itr->second;
+            normalized.erase(std::remove_if(normalized.begin(), normalized.end(), ::isspace), normalized.end());
+            packet.WriteBits(normalized.size(), 8);
             packet.WriteBit(itr->first == realmID); // Home realm
         }
 
-        packet.WriteBits(classResult->GetRowCount(), 23);
+        packet.WriteBits(PLAYABLE_CLASSES_COUNT, 23);
         packet.WriteBits(0, 21);
         packet.WriteBit(0);
         packet.WriteBit(0);
         packet.WriteBit(0);
         packet.WriteBit(0);
-        packet.WriteBits(raceResult->GetRowCount(), 23);
+        packet.WriteBits(PLAYABLE_RACES_COUNT, 23);
         packet.WriteBit(0);
     }
 
     packet.WriteBit(queued);
 
     if (queued)
-        packet.WriteBit(1);                             // Unknown
+        packet.WriteBit(1);
 
     packet.FlushBits();
 
     if (queued)
-        packet << uint32(0);                            // Unknown
+        packet << uint32(queuePos);
 
     if (code == ResponseCodes::AUTH_OK)
     {
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
             packet << uint32(itr->first);
             packet.WriteString(itr->second);
-            packet.WriteString(itr->second);
+            std::string normalized = itr->second;
+            normalized.erase(std::remove_if(normalized.begin(), normalized.end(), ::isspace), normalized.end());
+            packet.WriteString(normalized);
         }
 
-        do
+        for (int i = 0; i < PLAYABLE_RACES_COUNT; i++)
         {
-            Field* fields = raceResult->Fetch();
-
-            packet << fields[1].GetUInt8();
-            packet << fields[0].GetUInt8();
+            packet << uint8(raceExpansion[i][1]);
+            packet << uint8(raceExpansion[i][0]);
         }
-        while (raceResult->NextRow());
 
-        do
+        for (int i = 0; i < PLAYABLE_CLASSES_COUNT; i++)
         {
-            Field* fields = classResult->Fetch();
-
-            packet << fields[1].GetUInt8();
-            packet << fields[0].GetUInt8();
+            packet << uint8(classExpansion[i][1]);
+            packet << uint8(classExpansion[i][0]);
         }
-        while (classResult->NextRow());
 
         packet << uint32(0);
-        packet << uint8(Expansion());
-        packet << uint32(Expansion());
+        packet << uint8(Expansion()); // Active Expansion
         packet << uint32(0);
-        packet << uint8(Expansion());
+        packet << uint32(0);          // unk time in ms
+        packet << uint8(Expansion()); // Server Expansion
         packet << uint32(0);
         packet << uint32(0);
         packet << uint32(0);
     }
 
-    packet << uint8(code);                             // Auth response ?
+    packet << uint8(code);
 
     SendPacket(&packet);
 }

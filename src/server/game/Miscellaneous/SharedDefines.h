@@ -63,6 +63,16 @@ enum LootModes
     LOOT_MODE_HARD_MODE_4              = 0x10
 };
 
+enum Expansions
+{
+    EXPANSION_CLASSIC                  = 0,
+    EXPANSION_THE_BURNING_CRUSADE      = 1,
+    EXPANSION_WRATH_OF_THE_LICH_KING   = 2,
+    EXPANSION_CATACLYSM                = 3,
+    EXPANSION_MISTS_OF_PANDARIA        = 4,
+    MAX_EXPANSIONS                     = 5
+};
+
 enum Gender
 {
     GENDER_MALE                        = 0,
