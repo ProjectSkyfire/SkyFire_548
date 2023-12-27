@@ -183,6 +183,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GM_TICKET_GET_TICKET,                         0x1F89, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketGetTicketOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GM_TICKET_SYSTEM_STATUS,                      0x0A82, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketSystemStatusOpcode          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GM_TICKET_UPDATE_TEXT,                        0x0A26, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketUpdateOpcode                ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE,                           0x033D, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_HELLO,                                 0x12F3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGossipHelloOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GOSSIP_SELECT_OPTION,                         0x0748, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGossipSelectOptionOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_GRANT_LEVEL,                                  0x0662, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGrantLevel                          ); // 5.4.8 18414
@@ -501,7 +502,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_VOICE_OFF, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceOnOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_VOICE_ON, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceOnOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_ENABLE_NAGLE, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_EarlyProccess);
-    DEFINE_OPCODE_HANDLER(CMSG_GMRESPONSE_RESOLVE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMResponseResolve);
     DEFINE_OPCODE_HANDLER(CMSG_GMSURVEY_SUBMIT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmit);
     DEFINE_OPCODE_HANDLER(CMSG_GM_REPORT_LAG, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleReportLag);
     DEFINE_OPCODE_HANDLER(CMSG_GROUP_SWAP_SUB_GROUP, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGroupSwapSubGroupOpcode);
