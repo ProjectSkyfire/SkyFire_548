@@ -674,6 +674,10 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     if (!go)
         return;
 
+    // we cannot use go with not selectable flags
+    if (go->HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE))
+        return;
+
     if (!go->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
         return;
 
