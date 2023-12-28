@@ -1122,6 +1122,10 @@ void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false *
 
 void GameObject::Use(Unit* user)
 {
+    // we cannot use go with not selectable flags
+    if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE))
+        return;
+
     // by default spell caster is user
     Unit* spellCaster = user;
     uint32 spellId = 0;
