@@ -8,7 +8,7 @@
 #include "Cryptography/BigNumber.h"
 
 AuthCrypt::AuthCrypt() :
-    _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_DIGEST_LENGTH),
+    _clientDecrypt(), _serverEncrypt(),
     _initialized(false)
 { }
 
@@ -23,8 +23,8 @@ void AuthCrypt::Init(BigNumber* K)
     uint8 *decryptHash = clientDecryptHmac.ComputeHash(K);
 
     //ARC4 _serverDecrypt(encryptHash);
-    _clientDecrypt.Init(decryptHash);
-    _serverEncrypt.Init(encryptHash);
+    _clientDecrypt.Init(decryptHash, 20);
+    _serverEncrypt.Init(encryptHash, 20);
     //ARC4 _clientEncrypt(decryptHash);
 
     // Drop first 1024 bytes, as WoW uses ARC4-drop1024.

@@ -39,8 +39,8 @@ void WardenMac::Init(WorldSession* pClient, BigNumber* K)
 
     memcpy(_seed, mod_seed, 16);
 
-    _inputCrypto.Init(_inputKey);
-    _outputCrypto.Init(_outputKey);
+    _inputCrypto.Init(_inputKey, 16);
+    _outputCrypto.Init(_outputKey, 16);
     SF_LOG_DEBUG("warden", "Server side warden for client %u initializing...", pClient->GetAccountId());
     SF_LOG_DEBUG("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
     SF_LOG_DEBUG("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
@@ -165,8 +165,8 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     memcpy(_inputKey, keyIn, 16);
     memcpy(_outputKey, keyOut, 16);
 
-    _inputCrypto.Init(_inputKey);
-    _outputCrypto.Init(_outputKey);
+    _inputCrypto.Init(_inputKey, 16);
+    _outputCrypto.Init(_outputKey, 16);
 
     _initialized = true;
 
