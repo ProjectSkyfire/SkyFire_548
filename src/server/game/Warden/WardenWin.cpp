@@ -62,11 +62,11 @@ ClientWardenModule* WardenWin::GetModuleForClient()
     memcpy(mod->CompressedData, Module.Module, length);
     memcpy(mod->Key, Module.ModuleKey, 16);
 
-    // md5 hash
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, mod->CompressedData, length);
-    MD5_Final((uint8*)&mod->Id, &ctx);
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(ctx, EVP_md5(), NULL);
+    EVP_DigestUpdate(ctx, mod->CompressedData, length);
+    EVP_DigestFinal_ex(ctx, mod->CompressedData, &length);
+    EVP_MD_CTX_free(ctx);
 
     return mod;
 }
