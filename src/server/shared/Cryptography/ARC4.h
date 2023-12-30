@@ -16,6 +16,7 @@ class ARC4
         ~ARC4();
         void Init(uint8 *seed, uint32 len);
         void UpdateData(int len, uint8 *data);
+        void Finalize(int outlen, uint8* data);
     private:
         EVP_CIPHER_CTX *m_ctx;
 };
