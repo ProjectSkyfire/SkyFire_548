@@ -252,7 +252,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LFD_PROPOSAL_RESULT,                          0x1D9D, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgProposalResultOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_SET_BOOT_VOTE,                            0x17BE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLFDSetBootVoteOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFD_TELEPORT,                                 0x1AA6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLFDTeleportOpcode                   ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS,                               0x032D, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus);
+    DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS,                               0x032D, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus                        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LFG_SET_ROLES,                                0x08A2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetRolesOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_ADD_APPLICATION,                     0x0C63, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderAddApplication           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_BROWSE,                              0x159A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderBrowse                   ); // 5.4.8 18414
