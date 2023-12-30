@@ -397,7 +397,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_CURRENCY_GAIN implemented in Player::ModifyCurrency
     &AuraEffect::HandleNULL,                                      //350 SPELL_AURA_MOD_GATHERING_ITEMS_GAINED_PERCENT
     &AuraEffect::HandleNULL,                                      //351 SPELL_AURA_351
-    &AuraEffect::HandleNULL,                                      //352 SPELL_AURA_352
+    &AuraEffect::HandleNoImmediateEffect,                         //352 SPELL_AURA_ENABLE_WORGER_ALTERED_FORM
     &AuraEffect::HandleNULL,                                      //353 SPELL_AURA_MOD_CAMOUFLAGE
     &AuraEffect::HandleNULL,                                      //354 SPELL_AURA_354
     &AuraEffect::HandleUnused,                                    //355 unused (4.3.4)

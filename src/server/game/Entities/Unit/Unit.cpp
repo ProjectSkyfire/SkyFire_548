@@ -10250,6 +10250,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         (*itr)->SetInCombatState(PvP, enemy);
         (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
     }
+
+    if (Player* player = ToPlayer())
+    {
+        if (player->HasAuraType(SPELL_AURA_ENABLE_WORGER_ALTERED_FORM) && !player->HasAuraType(SPELL_AURA_WORGEN_ALTERED_FORM))
+            player->CastSpell(player, 97709, true);
+    }
+
 }
 
 void Unit::ClearInCombat()
