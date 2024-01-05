@@ -167,8 +167,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo& movementInfo
 void AnticheatMgr::MapSpeedTeleExemption(Player* player, MovementInfo& movementInfo)
 {
     // The anticheat is disabled on transports, so we need to be sure that the player is indeed on a transport.
-    Unit* mover = player->m_mover;
-    GameObject* transportGobj = mover->GetMap()->GetGameObject(movementInfo.transport.guid);
+    GameObject* transportGobj = player->GetMap()->GetGameObject(movementInfo.transport.guid);
     float maxDist2d = 70.0f; // Transports usually dont go far away.
     if (player->GetMapId() == 369) // Deeprun tram
     {
@@ -447,6 +446,13 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo& movementInfo,
         // This is necessary since MovementHandler fires if you rotate the camera in place
         if (!distance2D)
             return;
+
+        // The anticheat is disabled on transports, so we need to be sure that the player is indeed on a transport.
+        GameObject* transportGobj = player->GetMap()->GetGameObject(movementInfo.transport.guid);
+        if (transportGobj && transportGobj->IsTransport())
+        {
+            return;
+        }
 
         if (!player->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
             return;
