@@ -5,7 +5,9 @@
 
 #include "ARC4.h"
 #include <openssl/sha.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 3)
 #include <openssl/provider.h>
+#endif
 
 ARC4::ARC4() : m_ctx(EVP_CIPHER_CTX_new())
 {
