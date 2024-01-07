@@ -45,7 +45,7 @@ jobs:
         #cmake
         choco install -y cmake --pre 
         #openssl
-        choco install -y openssl --version=3.2.0.0
+        choco install -y openssl
       #git bash shell
       shell: bash
 
