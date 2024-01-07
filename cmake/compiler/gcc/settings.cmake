@@ -8,7 +8,7 @@ add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
 # Check C++23 compiler support
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++23" COMPILER_SUPPORTS_CXX20)
+CHECK_CXX_COMPILER_FLAG("-std=c++23" COMPILER_SUPPORTS_CXX23)
 if(COMPILER_SUPPORTS_CXX23)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23") #c++23
 else()
