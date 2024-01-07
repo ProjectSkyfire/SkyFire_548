@@ -6,7 +6,7 @@
 /// \addtogroup Trinityd Skyfire Daemon
 /// @{
 /// \file
-
+#pragma comment (lib, "Crypt32")
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include <ace/Version.h>

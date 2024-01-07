@@ -10,7 +10,7 @@
 * This file contains the main program for the
 * authentication server
 */
-
+#pragma comment (lib, "Crypt32")
 #include <ace/Dev_Poll_Reactor.h>
 #include <ace/TP_Reactor.h>
 #include <ace/ACE.h>
