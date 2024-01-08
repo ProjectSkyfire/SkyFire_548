@@ -35,6 +35,7 @@ if( UNIX )
     execute_process(
       COMMAND "${MYSQL_CONFIG}" --include
       OUTPUT_VARIABLE MY_TMP
+      OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     string(REGEX REPLACE "-I([^ ]*)( .*)?" "\\1" MY_TMP "${MY_TMP}")
@@ -44,6 +45,7 @@ if( UNIX )
     execute_process(
       COMMAND "${MYSQL_CONFIG}" --libs_r
       OUTPUT_VARIABLE MY_TMP
+      OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     set(MYSQL_ADD_LIBRARIES "")
     string(REGEX MATCHALL "-l[^ ]*" MYSQL_LIB_LIST "${MY_TMP}")
