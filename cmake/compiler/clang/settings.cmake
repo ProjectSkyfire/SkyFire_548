@@ -4,7 +4,7 @@
 #
 
 # Set build-directive (used in core to tell which buildtype we used)
-add_definitions(-D_BUILD_DIRECTIVE='"$(CONFIGURATION)"')
+add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
 # Check C++20 compiler support
 include(CheckCXXCompilerFlag)
