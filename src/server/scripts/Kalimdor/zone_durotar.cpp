@@ -114,10 +114,8 @@ public:
                 me->DespawnOrUnsummon(10000);
                 wp6 = false;
             }
-
         }
     };
-
 };
 
 /*####
@@ -151,7 +149,6 @@ public:
     {
         npc_jinthalaAI(Creature* creature) : ScriptedAI(creature) { }
     };
-
 };
 
 /*######
@@ -206,8 +203,7 @@ public:
                         Naga2->GetMotionMaster()->MovePoint(1, NagaPos);
                         Naga2->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
                     }
-                }
-                
+                }                
             }
             else
                 npc_darkspear_jailorAI::MovementInform(type, id);
@@ -232,8 +228,7 @@ public:
             }
             const char* text = player->getGender() == GENDER_MALE ? "Get in the pit and show us your stuff, boy." : "Get in the pit and show us your stuff, girl.";
             creature->MonsterSay(text, Language::LANG_UNIVERSAL, creature);
-            player->KilledMonsterCredit(39062);
-            
+            player->KilledMonsterCredit(39062);            
         }
         return true;
     }

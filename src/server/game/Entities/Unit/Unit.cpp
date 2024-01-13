@@ -10254,7 +10254,6 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (player->HasAuraType(SPELL_AURA_ENABLE_WORGER_ALTERED_FORM) && !player->HasAuraType(SPELL_AURA_WORGEN_ALTERED_FORM))
             player->CastSpell(player, 97709, true);
     }
-
 }
 
 void Unit::ClearInCombat()

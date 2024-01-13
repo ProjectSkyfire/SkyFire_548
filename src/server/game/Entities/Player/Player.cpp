@@ -27903,7 +27903,6 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
 
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
         {
-            
             if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
             {
                 data << uint32(0);

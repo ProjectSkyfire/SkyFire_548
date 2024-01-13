@@ -393,8 +393,8 @@ public:
                 }
             }
         }
-
     };
+
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_hot_air_balloon_vehicleAI(creature);
@@ -540,7 +540,6 @@ public:
                         for (auto&& player : playerList)
                         {
                             me->MonsterSay("$p, our people have lived the wholes of their lives on this great turtle, Shen-zin Su, but not in hundreds of years has anyone spoken to him.", Language::LANG_UNIVERSAL, player);
-
                         }
                         events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_MOVE_POS2, 4000);
                         break;
@@ -690,7 +689,6 @@ public:
             if (Creature* masterShangXi = creature->SummonCreature(56159, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
             {
                 masterShangXi->GetMotionMaster()->MovePoint(0,  masterShangXi->GetPositionX(), masterShangXi->GetPositionY(), masterShangXi->GetPositionZ());
-                
             }
             
             return true;
@@ -863,7 +861,6 @@ public:
                 }
             }
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -1381,8 +1378,8 @@ public:
                     break;
             }
         }
-
     };
+
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_shu_dailoAI(creature);
@@ -1988,7 +1985,6 @@ public:
             {
                 me->SetWalk(true);
                 me->GetMotionMaster()->MovePoint(0, LiFeiSpawnPos);
-
             }
         }
         void MovementInform(uint32 type, uint32 id) OVERRIDE
@@ -2055,7 +2051,6 @@ public:
                 }
             }
         }
-
     };
 };
 

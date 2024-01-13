@@ -38,8 +38,8 @@ enum VileTouch
     SPELL_SUMMON_NATURES_BITE = 92573,
     SPELL_CLEANSE_SPIRIT = 66056,
     SPELL_POISON = 11918
-
 };
+
 #define TARINDRELLA_TEXT_ON_COMPLETE "This totem has been corrupting the eggs! It seems a greater threat looms. The Gnarlpine remain tainted by something most foul."
 #define TARINDRELLA_TEXT_SPAWN "You've come to help, $c? Let us stay together for a while."
 #define TARINDRELLA_TEXT_ON_KILL "My dear friends... I'm so sorry..."
@@ -264,7 +264,6 @@ public:
             DoMeleeAttackIfReady();
         }*/
     };
-
 };
 
 void AddSC_teldrassil()
