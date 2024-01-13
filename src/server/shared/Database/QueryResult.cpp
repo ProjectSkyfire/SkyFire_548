@@ -39,7 +39,7 @@ m_length(NULL)
     m_isNull = new sql_bool[m_fieldCount];
     m_length = new unsigned long[m_fieldCount];
 
-    memset(m_isNull, 0, sizeof(bool) * m_fieldCount);
+    memset(m_isNull, 0, sizeof(m_isNull[0]) * m_fieldCount);
     memset(m_rBind, 0, sizeof(MYSQL_BIND) * m_fieldCount);
     memset(m_length, 0, sizeof(unsigned long) * m_fieldCount);
 
