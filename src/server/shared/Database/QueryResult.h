@@ -15,6 +15,7 @@
   #include <winsock2.h>
 #endif
 #include <mysql.h>
+using sql_bool = typename std::remove_pointer<decltype(std::declval<MYSQL_BIND>().is_null)>::type;
 
 class ResultSet
 {
@@ -82,7 +83,7 @@ class PreparedResultSet
         MYSQL_STMT* m_stmt;
         MYSQL_RES* m_res;
 
-        my_bool* m_isNull;
+        sql_bool* m_isNull;
         unsigned long* m_length;
 
         void FreeBindBuffer();
