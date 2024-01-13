@@ -8,9 +8,8 @@ on:
 
 jobs:
   build:
-    runs-on: docker
+    runs-on: debian
     container:
-      image: alpine:3.18
 
     steps:
     - uses: actions/checkout@v3
