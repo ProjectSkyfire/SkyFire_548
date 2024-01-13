@@ -1,0 +1,61 @@
+name: forgejo
+
+on:
+  push:
+    branches: [ main ]
+
+  pull_request:
+
+jobs:
+  build:
+    runs-on: docker
+    container:
+      image: alpine:3.18
+
+    steps:
+        
+    - name: Dependencies
+      run: | 
+        # G++
+        #sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+       
+        # MySQL
+        #sudo rm -rf /var/lib/dpkg/lock
+        #sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.29-1_all.deb
+        #sudo dpkg -i mysql-apt-config_0.8.29-1_all.deb
+
+        #OpenSSL
+        #sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+        #sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+        
+        #sudo wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1f-1ubuntu2_amd64.deb
+        #sudo dpkg -i libssl-dev_1.1.1f-1ubuntu2_amd64.deb
+
+        sudo apt update
+        sudo apt-get update
+      
+        sudo apt-get install openssl libssl-dev
+      
+        sudo apt install gcc-11 g++-11
+        export CXX=g++-11 CC=gcc-11
+        
+        sudo apt-get install libncurses5-dev libace-dev
+        sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar
+        sudo apt-get install libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
+
+
+    - name: Setup
+      env:
+        CC:   gcc-11
+        CXX:  g++-11
+      run: |
+        mkdir build
+        cd build
+        cmake ../ -DSCRIPTS=1 -DTOOLS=0 -DCMAKE_BUILD_TYPE=Release
+        make -j4
+
+    #- name: Check executables
+    #  run: |
+    #    cd bin/check_install/bin
+    #    ./authserver --version
+    #    ./worldserver --version
