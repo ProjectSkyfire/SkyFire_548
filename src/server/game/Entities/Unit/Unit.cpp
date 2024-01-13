@@ -8079,9 +8079,7 @@ void Unit::SetMinion(Minion *minion, bool apply)
 
         if (minion->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         {
-            if (AddUInt64Value(UNIT_FIELD_SUMMON, minion->GetGUID()))
-            {
-            }
+            AddUInt64Value(UNIT_FIELD_SUMMON, minion->GetGUID());
         }
 
         if (minion->m_Properties && minion->m_Properties->Type == SUMMON_TYPE_MINIPET)
