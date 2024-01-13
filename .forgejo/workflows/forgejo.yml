@@ -13,6 +13,7 @@ jobs:
       image: alpine:3.18
 
     steps:
+    - uses: actions/checkout@v3
         
     - name: Dependencies
       run: | 
