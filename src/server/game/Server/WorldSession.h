@@ -1079,6 +1079,7 @@ class WorldSession
         void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
+        void HandleBattlePetWildRequest(WorldPacket& recvData);
 
         // Titles
         void HandleSetTitleOpcode(WorldPacket& recvData);

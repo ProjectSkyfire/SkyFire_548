@@ -433,3 +433,71 @@ void WorldSession::HandleBattlePetSummonCompanion(WorldPacket& recvData)
         }
     }
 }
+
+void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PET_WILD_REQUEST");
+    ObjectGuid guid;
+    bool hasOrientation;
+    bool hasResult;
+
+    PetBattleRequest petBattleRequest;
+
+    for (uint8 i = 0; i < 2; i++) // team positions
+    {
+        recvData >> petBattleRequest.Positions[i].x;
+        recvData >> petBattleRequest.Positions[i].z;
+        recvData >> petBattleRequest.Positions[i].y;
+    }
+
+    // origin position
+    recvData >> petBattleRequest.Origin.z;
+    recvData >> petBattleRequest.Origin.y;
+    recvData >> petBattleRequest.Origin.x; 
+
+    recvData.ReadGuidMask(guid, 0);
+    hasOrientation = recvData.ReadBit();
+    recvData.ReadGuidMask(guid, 6, 3, 5, 2, 7, 1, 4);
+    hasResult = recvData.ReadBit();
+
+    recvData.ReadGuidBytes(guid, 3, 6, 5, 2, 7, 1, 0, 4);
+
+    if (hasOrientation)
+        recvData >> petBattleRequest.Orientation;
+
+    if (hasResult)
+        recvData >> petBattleRequest.LocationResult;
+
+    Creature* wildBattlePet = ObjectAccessor::GetCreatureOrPetOrVehicle(*GetPlayer(), petBattleRequest.EnemyGUID);
+    petBattleRequest.Type = PetBattleRequest::PET_BATTLE_TYPE_PVE;
+    petBattleRequest.Challenger = GetPlayer();
+    petBattleRequest.Enemy = wildBattlePet;
+
+    
+    WorldPacket data(SMSG_BATTLE_PET_LOCATION_FINALIZE, 100);
+    data << petBattleRequest.Origin.x;
+    data << petBattleRequest.Origin.y;
+
+    for (uint8 i = 0; i < 2; i++) // team positions
+    {
+        data << petBattleRequest.Positions[i].y;
+        data << petBattleRequest.Positions[i].x;
+        data << petBattleRequest.Positions[i].z;
+    }
+
+    data << petBattleRequest.Origin.z;
+
+    data.WriteBit(petBattleRequest.Orientation);
+    data.WriteBit(petBattleRequest.LocationResult);
+
+    if (petBattleRequest.LocationResult)
+        data << uint32(petBattleRequest.LocationResult);
+    if (petBattleRequest.Orientation)
+        data << float(petBattleRequest.Orientation);
+    _player->SendDirectMessage(&data);
+    
+
+    //WorldPacket data2(SMSG_BATTLE_PET_UPDATE_INIT, 1000);
+    //SMSG_BATTLE_PET_UPDATE_INIT starts the pet battle itself.
+}
+

@@ -110,4 +110,26 @@ private:
     uint64 m_loadout[BATTLE_PET_MAX_LOADOUT_SLOTS] = { };
 };
 
+struct PetBattleRequest
+{
+    enum PetBattleType
+    {
+        PET_BATTLE_TYPE_PVE = 0,
+        PET_BATTLE_TYPE_PVP_DUEL = 1,
+        PET_BATTLE_TYPE_PVP_MATCHMAKING = 2
+    };
+    uint64 EnemyGUID;
+    uint32 LocationResult;                              // name dumped from client, use unknown
+
+    G3D::Vector3 Origin;
+    G3D::Vector3 Positions[2];
+    float Orientation;
+
+    // Data for creation of pet battle
+    PetBattleType Type;
+    Player* Challenger;
+    Unit* Enemy;
+};
+
+
 #endif
