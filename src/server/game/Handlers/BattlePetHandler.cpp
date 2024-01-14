@@ -536,7 +536,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
             data2.WriteBits(0, 21);
 
             uint8 abilityCount = 0;
-            for (uint8 i = 0; i < 3; i++)
+            for (uint8 k = 0; k < 3; k++)
                     abilityCount++;
 
             data2.WriteBit(petEntry[0]);
@@ -548,7 +548,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
             data2.WriteBits(0, 7); // name size
             data2.WriteGuidMask(petEntry, 2, 4);
 
-            for (uint8 i = 0; i < 3; i++)
+            for (uint8 l = 0; l < 3; l++)
                 data2.WriteBit(0);
 
             data2.WriteGuidMask(petEntry, 6, 7);
