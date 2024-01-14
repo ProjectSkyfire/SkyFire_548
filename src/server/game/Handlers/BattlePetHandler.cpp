@@ -497,7 +497,170 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     _player->SendDirectMessage(&data);
     
 
-    //WorldPacket data2(SMSG_BATTLE_PET_UPDATE_INIT, 1000);
     //SMSG_BATTLE_PET_UPDATE_INIT starts the pet battle itself.
+    WorldPacket data2(SMSG_BATTLE_PET_UPDATE_INIT, 1000);
+
+    bool hasWatingForFrontPetsMaxSecs = true;
+    bool hasPvPMaxRoundTime = true;
+    bool hasForfietPenalty = true;
+    bool hasCreatureId = false;
+    bool hasDisplayId = false;
+
+    ObjectGuid wildBattlePetGuid = petBattleRequest.EnemyGUID;
+
+    // enviroment update
+    for (uint8 i = 0; i < 3; i++)
+    {
+        data2.WriteBits(0, 21);                      // AuraCount
+        data2.WriteBits(0, 21);                      // StateCount
+    }
+
+    for (uint8 i=0; i < 2; i++)
+    {
+        bool hasRoundTimeSec = false;
+        bool hasFrontPet = false;
+        bool trapStatus = true;
+
+        ObjectGuid characterGuid = 0;
+
+        data2.WriteBit(trapStatus);
+        data2.WriteBits(1, 2); // BattlePet Count
+        data2.WriteBit(characterGuid[2]);
+
+        for (uint8 j=0; j < 1; j++)
+        {
+            ObjectGuid petEntry = 0;
+
+            data2.WriteBits(0, 21);      // aura count
+            data2.WriteBit(petEntry[3]);
+            data2.WriteBits(0, 21);
+
+            uint8 abilityCount = 0;
+            for (uint8 i = 0; i < 3; i++)
+                    abilityCount++;
+
+            data2.WriteBit(petEntry[0]);
+            data2.WriteBit(0); // flags
+            data2.WriteGuidMask(petEntry, 5, 1);
+
+            data2.WriteBits(abilityCount, 20);
+            data2.WriteBit(0);
+            data2.WriteBits(0, 7); // name size
+            data2.WriteGuidMask(petEntry, 2, 4);
+
+            for (uint8 i = 0; i < 3; i++)
+                data2.WriteBit(0);
+
+            data2.WriteGuidMask(petEntry, 6, 7);
+        }
+
+        data2.WriteBit(hasFrontPet);
+        data2.WriteBit(hasRoundTimeSec);
+        data2.WriteGuidMask(characterGuid, 5, 3, 4, 6, 7, 0, 1);
+    }
+
+    data2.WriteBit(hasForfietPenalty);
+
+    data2.WriteBit(0); // CanAwardXP?
+    data2.WriteBit(0); // IsPvP
+
+    data2.WriteBit(hasDisplayId);
+    data2.WriteBit(hasCreatureId);
+    data2.WriteBit(hasWatingForFrontPetsMaxSecs);
+    data2.WriteBit(wildBattlePetGuid);
+
+    data2.WriteGuidMask(wildBattlePetGuid, 2, 4, 5, 1, 3, 6, 7, 0);
+
+    data2.WriteBit(!hasPvPMaxRoundTime);
+    data2.WriteBit(0); // battlepetstate
+
+    data2.FlushBits();
+
+    for (uint8 i = 0; i < 2; i++)
+    {
+        ObjectGuid characterGuid = 0;
+
+        bool hasRoundTimeSec = false;
+        bool hasFrontPet = true;
+        bool trapStatus = true;
+
+        uint8 battlePetTeamIndex = 0;
+        for (uint8 j = 0; j < 1; j++)
+        {
+            data2 << battlePetTeamIndex;
+            battlePetTeamIndex++;
+            ObjectGuid petEntry = 0;
+
+            for (uint8 k = 0; k < 3; k++)
+            {
+                data2 << uint32(0); //AbilityId
+                data2 << uint8(k);
+                data2 << uint8(0); // GlobalIndex
+                data2 << uint16(0); // Cooldown
+                data2 << uint16(0); // Lockdown
+            }
+
+            data2 << uint32(0);
+            data2.WriteByteSeq(petEntry[4]);
+            data2 << uint16(25); //Level
+            data2.WriteByteSeq(petEntry[7]);
+            data2 << uint16(1); // quality
+            data2.WriteByteSeq(petEntry[6]);
+            data2 << uint32(0); // power
+            data2.WriteByteSeq(petEntry[0]);
+            data2 << uint32(100); //maxhp
+            data2.WriteByteSeq(petEntry[5]);
+            data2.WriteByteSeq(petEntry[2]);
+            data2 << uint32(100); //speed
+            data2 << uint32(100); // curhp
+            data2.WriteByteSeq(petEntry[3]);
+            data2 << uint32(0);
+            data2.WriteByteSeq(petEntry[1]);
+            data2 << uint32(0);
+            data2 << uint16(100); // xp
+            data2 << 0; // flags
+            data2.WriteString(""); //name
+            data2 << uint32(0); //species
+        }
+
+        if (trapStatus)
+            data2 << uint32(0);
+
+        data2 << uint32(0);
+        data2.WriteGuidBytes(characterGuid, 5, 7, 6, 1, 4, 0);
+
+        if (hasFrontPet)
+            data2 << uint8(0);
+
+        data2 << uint8(6);
+
+        if (hasRoundTimeSec)
+            data2 << uint16(0);
+
+        data2.WriteGuidBytes(characterGuid, 3, 2);
+    }
+
+    if (hasForfietPenalty)
+        data2 << uint8(10);
+    
+    data2 << uint8(1);
+
+    data2.WriteGuidBytes(wildBattlePetGuid, 5, 4, 3, 2, 7, 0, 1, 6);
+
+    if (hasDisplayId)
+        data2 << uint32(0);
+
+    if (hasPvPMaxRoundTime)
+        data2 << uint16(30);
+
+    data2 << uint32(0);
+
+    if (hasWatingForFrontPetsMaxSecs)
+        data2 << uint16(30);
+
+    if (hasCreatureId)
+        data2 << uint32(0);
+
+    _player->SendDirectMessage(&data2);
 }
 
