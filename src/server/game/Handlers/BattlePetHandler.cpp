@@ -589,7 +589,10 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
         {
             data2 << battlePetTeamIndex;
             battlePetTeamIndex++;
-            ObjectGuid petEntry = 0;
+
+
+            BattlePet* battlePet = GetPlayer()->GetBattlePetMgr()->GetBattlePet(GetPlayer()->GetBattlePetMgr()->GetLoadoutSlot(j));
+            ObjectGuid petEntry = battlePet->GetId();
 
             for (uint8 k = 0; k < 3; k++)
             {
@@ -602,25 +605,25 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
 
             data2 << uint32(0);
             data2.WriteByteSeq(petEntry[4]);
-            data2 << uint16(25); //Level
+            data2 << uint16(battlePet->GetLevel()); //Level
             data2.WriteByteSeq(petEntry[7]);
-            data2 << uint16(1); // quality
+            data2 << uint16(battlePet->GetQuality()); // quality
             data2.WriteByteSeq(petEntry[6]);
-            data2 << uint32(0); // power
+            data2 << uint32(battlePet->GetPower()); // power
             data2.WriteByteSeq(petEntry[0]);
-            data2 << uint32(100); //maxhp
+            data2 << uint32(battlePet->GetMaxHealth()); //maxhp
             data2.WriteByteSeq(petEntry[5]);
             data2.WriteByteSeq(petEntry[2]);
-            data2 << uint32(100); //speed
-            data2 << uint32(100); // curhp
+            data2 << uint32(battlePet->GetSpeed()); //speed
+            data2 << uint32(battlePet->GetCurrentHealth()); // curhp
             data2.WriteByteSeq(petEntry[3]);
             data2 << uint32(0);
             data2.WriteByteSeq(petEntry[1]);
             data2 << uint32(0);
-            data2 << uint16(100); // xp
-            data2 << 0; // flags
-            data2.WriteString(""); //name
-            data2 << uint32(0); //species
+            data2 << uint16(battlePet->GetXp()); // xp
+            data2 << battlePet->GetFlags(); // flags
+            data2.WriteString(battlePet->GetNickname()); //name
+            data2 << uint32(battlePet->GetSpecies()); //species
         }
 
         if (trapStatus)
