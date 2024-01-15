@@ -468,7 +468,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     if (hasResult)
         recvData >> petBattleRequest.LocationResult;
 
-    Creature* wildBattlePet = ObjectAccessor::GetCreatureOrPetOrVehicle(*GetPlayer(), petBattleRequest.EnemyGUID);
+    Creature* wildBattlePet = ObjectAccessor::GetCreatureOrPetOrVehicle(*GetPlayer(), guid);
     petBattleRequest.Type = PetBattleRequest::PET_BATTLE_TYPE_PVE;
     petBattleRequest.Challenger = GetPlayer();
     petBattleRequest.Enemy = wildBattlePet;
