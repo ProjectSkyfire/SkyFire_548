@@ -556,7 +556,6 @@ public:
                 // then calculate amount
                 amount = aurEff->GetBase()->GetUnitOwner()->CountPctFromMaxHealth(amount);
             }
- 
         }
 
         void Register() override
@@ -569,7 +568,6 @@ public:
     {
         return new spell_dru_might_of_ursoc_AuraScript();
     }
-
 };
 
 // -16972 - Predatory Strikes

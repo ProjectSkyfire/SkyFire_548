@@ -185,8 +185,7 @@ public:
 
         void Register() override
         {
-            OnEffectHitTarget += SpellEffectFn(spell_pal_judgment_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            
+            OnEffectHitTarget += SpellEffectFn(spell_pal_judgment_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);            
         }
     }; 
 
@@ -222,8 +221,7 @@ public:
             GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_SELFLESS_HEALER_BUFF);
             
             if (GetTarget()->GetAffectingPlayer()->GetTalentSpecialization(SPEC_PALADIN_HOLY))
-                GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE);
-                
+                GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE);                
         }
         void Register() override
         {
