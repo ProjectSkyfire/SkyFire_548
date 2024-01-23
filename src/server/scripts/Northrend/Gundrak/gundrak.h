@@ -41,7 +41,6 @@ enum mainCreatures
 
 enum Gameobjects
 {
-
     GO_SLADRAN_ALTAR                    = 192518,
     GO_MOORABI_ALTAR                    = 192519,
     GO_DRAKKARI_COLOSSUS_ALTAR          = 192520,

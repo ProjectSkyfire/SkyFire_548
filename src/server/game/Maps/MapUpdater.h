@@ -15,31 +15,24 @@ class Map;
 
 class MapUpdater
 {
-    public:
+public:
+    MapUpdater();
+    virtual ~MapUpdater();
+    friend class MapUpdateRequest;
 
-        MapUpdater();
-        virtual ~MapUpdater();
+    int schedule_update(Map& map, ACE_UINT32 diff);
+    int wait();
+    int activate(size_t num_threads);
+    int deactivate();
+    bool activated();
 
-        friend class MapUpdateRequest;
+private:
+    DelayExecutor m_executor;
+    std::mutex Lock;
+    std::condition_variable condition;
+    size_t pending_requests;
 
-        int schedule_update(Map& map, ACE_UINT32 diff);
-
-        int wait();
-
-        int activate(size_t num_threads);
-
-        int deactivate();
-
-        bool activated();
-
-    private:
-
-        DelayExecutor m_executor;
-        std::mutex Lock;
-        std::condition_variable condition;
-        size_t pending_requests;
-
-        void update_finished();
+    void update_finished();
 };
 
 #endif //_MAP_UPDATER_H_INCLUDED

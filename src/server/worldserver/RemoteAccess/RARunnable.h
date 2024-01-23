@@ -23,7 +23,6 @@ public:
 
 private:
     ACE_Reactor* m_Reactor;
-
 };
 
 #endif /* _SKYFIRE_RARUNNABLE_H_ */

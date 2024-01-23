@@ -29,7 +29,6 @@ public:
     }
 
 protected:
-
     virtual int handle_timeout(const ACE_Time_Value& /*current_time*/, const void* /*act = 0*/)
     {
         SF_LOG_DEBUG("misc", "Resuming acceptor");
