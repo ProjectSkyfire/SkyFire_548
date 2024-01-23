@@ -32,61 +32,56 @@ enum Spells
 
 class npc_jadespine_basilisk : public CreatureScript
 {
-    public:
+public:
+    npc_jadespine_basilisk()
+        : CreatureScript("npc_jadespine_basilisk") { }
 
-        npc_jadespine_basilisk()
-            : CreatureScript("npc_jadespine_basilisk")
+    struct npc_jadespine_basiliskAI : public ScriptedAI
+    {
+        npc_jadespine_basiliskAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 uiCslumberTimer;
+
+        void Reset() OVERRIDE
         {
+            uiCslumberTimer = 2000;
         }
 
-        struct npc_jadespine_basiliskAI : public ScriptedAI
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
-            npc_jadespine_basiliskAI(Creature* creature) : ScriptedAI(creature) { }
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
 
-            uint32 uiCslumberTimer;
-
-            void Reset() OVERRIDE
+            //uiCslumberTimer
+            if (uiCslumberTimer <= uiDiff)
             {
-                uiCslumberTimer = 2000;
-            }
+                //Cast
+                DoCastVictim(SPELL_CRYSTALLINE_SLUMBER, true);
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
-            {
-            }
+                //Stop attacking target thast asleep and pick new target
+                uiCslumberTimer = 28000;
 
-            void UpdateAI(uint32 uiDiff) OVERRIDE
-            {
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
+                Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
 
-                //uiCslumberTimer
-                if (uiCslumberTimer <= uiDiff)
-                {
-                    //Cast
-                    DoCastVictim(SPELL_CRYSTALLINE_SLUMBER, true);
+                if (!target || target == me->GetVictim())
+                    target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
 
-                    //Stop attacking target thast asleep and pick new target
-                    uiCslumberTimer = 28000;
+                if (target)
+                    me->TauntApply(target);
 
-                    Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
+            } else uiCslumberTimer -= uiDiff;
 
-                    if (!target || target == me->GetVictim())
-                        target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
-
-                    if (target)
-                        me->TauntApply(target);
-
-                } else uiCslumberTimer -= uiDiff;
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_jadespine_basiliskAI(creature);
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_jadespine_basiliskAI(creature);
+    }
 };
 
 /*######
@@ -115,20 +110,16 @@ public:
 
 class AreaTrigger_at_map_chamber : public AreaTriggerScript
 {
-    public:
+public:
+    AreaTrigger_at_map_chamber() : AreaTriggerScript("at_map_chamber") { }
 
-        AreaTrigger_at_map_chamber()
-            : AreaTriggerScript("at_map_chamber")
-        {
-        }
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_HIDDEN_CHAMBER) == QUEST_STATUS_INCOMPLETE)
+            player->AreaExploredOrEventHappens(QUEST_HIDDEN_CHAMBER);
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
-        {
-            if (player->GetQuestStatus(QUEST_HIDDEN_CHAMBER) == QUEST_STATUS_INCOMPLETE)
-                player->AreaExploredOrEventHappens(QUEST_HIDDEN_CHAMBER);
-
-            return true;
-        }
+        return true;
+    }
 };
 
 void AddSC_uldaman()

@@ -104,12 +104,13 @@ set(scripts_STAT_SRCS
   EasternKingdoms/MagistersTerrace/boss_selin_fireheart.cpp
   EasternKingdoms/MagistersTerrace/boss_vexallus.cpp
   EasternKingdoms/MagistersTerrace/magisters_terrace.cpp
-  #REWORKED IN CATACLYSM
-  #EasternKingdoms/Uldaman/uldaman.cpp
-  #EasternKingdoms/Uldaman/boss_ironaya.cpp
-  #EasternKingdoms/Uldaman/uldaman.h
-  #EasternKingdoms/Uldaman/instance_uldaman.cpp
-  #EasternKingdoms/Uldaman/boss_archaedas.cpp
+
+  EasternKingdoms/Uldaman/uldaman.cpp
+  EasternKingdoms/Uldaman/boss_ironaya.cpp
+  EasternKingdoms/Uldaman/uldaman.h
+  EasternKingdoms/Uldaman/instance_uldaman.cpp
+  EasternKingdoms/Uldaman/boss_archaedas.cpp
+
   EasternKingdoms/SunwellPlateau/boss_eredar_twins.cpp
   EasternKingdoms/SunwellPlateau/boss_kiljaeden.cpp
   EasternKingdoms/SunwellPlateau/sunwell_plateau.h
