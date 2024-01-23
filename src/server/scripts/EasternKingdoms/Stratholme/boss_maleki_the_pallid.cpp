@@ -20,7 +20,6 @@ enum Spells
     SPELL_DRAINLIFE     = 20743,
     SPELL_DRAIN_MANA    = 17243,
     SPELL_ICETOMB       = 16869
-
 };
 
 class boss_maleki_the_pallid : public CreatureScript
@@ -96,7 +95,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_maleki_the_pallid()

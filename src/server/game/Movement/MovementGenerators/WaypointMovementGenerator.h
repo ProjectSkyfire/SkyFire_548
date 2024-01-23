@@ -67,7 +67,6 @@ class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium< Crea
         bool GetResetPos(Creature*, float& x, float& y, float& z);
 
     private:
-
         void Stop(int32 time) { i_nextMoveTime.Reset(time);}
 
         bool Stopped() { return !i_nextMoveTime.Passed();}

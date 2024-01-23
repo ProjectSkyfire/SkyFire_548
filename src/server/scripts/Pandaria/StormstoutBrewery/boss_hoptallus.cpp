@@ -104,8 +104,8 @@ public:
                             me->GetRandomNearPosition(pos, 10.f);
                             creature->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 15.f, 15.f, EVENT_JUMP);
                         }
-
                     }
+
                     for (uint8 j = 0; j < 4; j++)
                     {
                         if (Creature* creature = me->SummonCreature(hoppers[j], hopperSpawnPos[j], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000))
@@ -115,7 +115,6 @@ public:
                             me->GetRandomNearPosition(pos, 10.f);
                             creature->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 15.f, 15.f, EVENT_JUMP);
                         }
-
                     }
                     
                     DoCast(SPELL_HOPTALLUS_SCREECH);

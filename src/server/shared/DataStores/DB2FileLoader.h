@@ -71,8 +71,8 @@ class DB2FileLoader
     char* AutoProduceStrings(const char* fmt, char* dataTable, uint32 locale);
     static uint32 GetFormatRecordSize(const char * format, int32 * index_pos = NULL);
     static uint32 GetFormatStringsFields(const char * format);
-private:
 
+private:
     uint32 recordSize;
     uint32 recordCount;
     uint32 fieldCount;
