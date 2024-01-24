@@ -3823,7 +3823,7 @@ void Guild::HandleNewsSetSticky(WorldSession* session, uint32 newsId, bool stick
     session->SendPacket(&data);
 }
 
-void Guild::HandleSetBankTabNote(WorldSession* session, uint32 tabId, std::string note)
+void Guild::HandleSetBankTabNote(WorldSession* session, uint32 tabId, std::string const& note)
 {
     BankTab* bankTab = GetBankTab(tabId);
     if (!bankTab)
