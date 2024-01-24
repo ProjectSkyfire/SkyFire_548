@@ -10,7 +10,7 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "ByteBuffer.h"
-#include <openssl/md5.h>
+#include "MD5.h"
 #include "World.h"
 #include "Player.h"
 #include "Util.h"
@@ -237,11 +237,10 @@ void WardenMac::HandleData(ByteBuffer &buff)
         //found = true;
     }
 
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, str.c_str(), str.size());
+    MD5Hash md5;
+    md5.UpdateData((uint8 const*)str.c_str(), str.size());
     uint8 ourMD5Hash[16];
-    MD5_Final(ourMD5Hash, &ctx);
+    md5.Finalize(ourMD5Hash, 16);
 
     uint8 theirsMD5Hash[16];
     buff.read(theirsMD5Hash, 16);
