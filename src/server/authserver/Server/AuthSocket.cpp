@@ -137,7 +137,7 @@ typedef struct AuthHandler
 class PatcherRunnable: public ACE_Based::Runnable
 {
 public:
-    PatcherRunnable(class AuthSocket*);
+    explicit PatcherRunnable(class AuthSocket*);
     void run();
 
 private:
