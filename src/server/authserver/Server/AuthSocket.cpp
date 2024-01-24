@@ -361,7 +361,7 @@ bool AuthSocket::_HandleLogonChallenge()
     PreparedQueryResult result = LoginDatabase.Query(stmt);
     if (result)
     {
-        pkt << uint8(WOW_FAIL_BANNED);
+        pkt << uint8(AuthResult::WOW_FAIL_BANNED);
         SF_LOG_DEBUG("server.authserver", "'%s:%d' [AuthChallenge] Banned ip tries to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort());
     }
     else
@@ -386,7 +386,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 if (strcmp(fields[4].GetCString(), ip_address.c_str()) != 0)
                 {
                     SF_LOG_DEBUG("server.authserver", "[AuthChallenge] Account IP differs");
-                    pkt << uint8(WOW_FAIL_LOCKED_ENFORCED);
+                    pkt << uint8(AuthResult::WOW_FAIL_LOCKED_ENFORCED);
                     locked = true;
                 }
                 else
@@ -397,8 +397,11 @@ bool AuthSocket::_HandleLogonChallenge()
                 SF_LOG_DEBUG("server.authserver", "[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
                 std::string accountCountry = fields[3].GetString();
                 if (accountCountry.empty() || accountCountry == "00")
+                {
                     SF_LOG_DEBUG("server.authserver", "[AuthChallenge] Account '%s' is not locked to country", _login.c_str());
-                else if (!accountCountry.empty())
+                }
+
+                if (!accountCountry.empty())
                 {
                     uint32 ip = inet_addr(ip_address.c_str());
                     EndianConvertReverse(ip);
@@ -412,7 +415,7 @@ bool AuthSocket::_HandleLogonChallenge()
                         if (loginCountry != accountCountry)
                         {
                             SF_LOG_DEBUG("server.authserver", "[AuthChallenge] Account country differs.");
-                            pkt << uint8(WOW_FAIL_UNLOCKABLE_LOCK);
+                            pkt << uint8(AuthResult::WOW_FAIL_UNLOCKABLE_LOCK);
                             locked = true;
                         }
                         else
@@ -436,12 +439,12 @@ bool AuthSocket::_HandleLogonChallenge()
                 {
                     if ((*banresult)[0].GetUInt32() == (*banresult)[1].GetUInt32())
                     {
-                        pkt << uint8(WOW_FAIL_BANNED);
+                        pkt << uint8(AuthResult::WOW_FAIL_BANNED);
                         SF_LOG_DEBUG("server.authserver", "'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
                     }
                     else
                     {
-                        pkt << uint8(WOW_FAIL_SUSPENDED);
+                        pkt << uint8(AuthResult::WOW_FAIL_SUSPENDED);
                         SF_LOG_DEBUG("server.authserver", "'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
                     }
                 }
@@ -476,9 +479,9 @@ bool AuthSocket::_HandleLogonChallenge()
 
                     // Fill the response packet with the result
                     if (AuthHelper::IsAcceptedClientBuild(_build))
-                        pkt << uint8(WOW_SUCCESS);
+                        pkt << uint8(AuthResult::WOW_SUCCESS);
                     else
-                        pkt << uint8(WOW_FAIL_VERSION_INVALID);
+                        pkt << uint8(AuthResult::WOW_FAIL_VERSION_INVALID);
 
                     // B may be calculated < 32B so we force minimal length to 32B
                     pkt.append(B.AsByteArray(32), 32);      // 32 bytes
@@ -529,7 +532,7 @@ bool AuthSocket::_HandleLogonChallenge()
             }
         }
         else                                                //no account
-            pkt << uint8(WOW_FAIL_UNKNOWN_ACCOUNT);
+            pkt << uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT);
     }
 
     socket().send((char const*)pkt.contents(), pkt.size());
@@ -668,7 +671,7 @@ bool AuthSocket::_HandleLogonProof()
             delete [] token;
             if (validToken != incomingToken)
             {
-                char data[] = { AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0 };
+                char data[] = { AUTH_LOGON_PROOF, uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT), 3, 0 };
                 socket().send(data, sizeof(data));
                 return false;
             }
@@ -699,7 +702,7 @@ bool AuthSocket::_HandleLogonProof()
     }
     else
     {
-        char data[4] = { AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0 };
+        char data[4] = { AUTH_LOGON_PROOF, uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT), 3, 0 };
         socket().send(data, sizeof(data));
 
         SF_LOG_DEBUG("server.authserver", "'%s:%d' [AuthChallenge] account %s tried to login with invalid password!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());

@@ -6,7 +6,7 @@
 #ifndef SF_AUTHCODES_H
 #define SF_AUTHCODES_H
 
-enum AuthResult
+enum class AuthResult
 {
     WOW_SUCCESS                                  = 0x00,
     WOW_FAIL_BANNED                              = 0x03,
