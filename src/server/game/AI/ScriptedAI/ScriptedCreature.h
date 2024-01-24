@@ -446,13 +446,13 @@ class BossAI : public ScriptedAI
 
 class WorldBossAI : public ScriptedAI
 {
-    public:
+public:
     WorldBossAI(Creature* creature);
     virtual ~WorldBossAI()
     { }
 
-    void JustSummoned(Creature* summon);
-    void SummonedCreatureDespawn(Creature* summon);
+    void JustSummoned(Creature* summon) OVERRIDE;
+    void SummonedCreatureDespawn(Creature* summon) OVERRIDE;
 
     void UpdateAI(uint32 diff) OVERRIDE;
 
