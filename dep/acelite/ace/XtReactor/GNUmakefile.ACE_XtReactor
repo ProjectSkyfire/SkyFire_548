@@ -256,18 +256,18 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_XtReactor.pc.in
-#
 #header_files:
 #XtReactor.h
 #ACE_XtReactor_export.h
 #
-#source_files:
-#XtReactor.cpp
+#pkgconfig_files:
+#ACE_XtReactor.pc.in
 #
 #build_files:
 #ace_xtreactor.mpc
+#
+#source_files:
+#XtReactor.cpp
 #
 #lib_output:
 #../../lib ACE_XtReactor

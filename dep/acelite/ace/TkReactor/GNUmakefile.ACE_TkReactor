@@ -237,18 +237,18 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_TkReactor.pc.in
-#
 #header_files:
 #TkReactor.h
 #ACE_TkReactor_export.h
 #
-#source_files:
-#TkReactor.cpp
+#pkgconfig_files:
+#ACE_TkReactor.pc.in
 #
 #build_files:
 #ace_tkreactor.mpc
+#
+#source_files:
+#TkReactor.cpp
 #
 #lib_output:
 #../../lib ACE_TkReactor

@@ -277,18 +277,18 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#pkgconfig_files:
-#ACE_FlReactor.pc.in
-#
 #header_files:
 #FlReactor.h
 #ACE_FlReactor_export.h
 #
-#source_files:
-#FlReactor.cpp
+#pkgconfig_files:
+#ACE_FlReactor.pc.in
 #
 #build_files:
 #ace_flreactor.mpc
+#
+#source_files:
+#FlReactor.cpp
 #
 #lib_output:
 #../../lib ACE_FlReactor

@@ -1012,30 +1012,30 @@ ACE_OS::socketpair (int domain, int type,
 #endif /* ACE_LACKS_SOCKETPAIR */
 }
 
-ACE_INLINE unsigned int
-ACE_OS::if_nametoindex (const char *ifname)
-{
-  ACE_OS_TRACE ("ACE_OS::if_nametoindex");
-#ifdef ACE_LACKS_IF_NAMETOINDEX
-  ACE_UNUSED_ARG (ifname);
-  ACE_NOTSUP_RETURN (0);
-#else
-  return ::if_nametoindex (ifname);
-#endif /* ACE_LACKS_IF_NAMETOINDEX */
-}
+//ACE_INLINE unsigned int
+//ACE_OS::if_nametoindex (const char *ifname)
+//{
+//  ACE_OS_TRACE ("ACE_OS::if_nametoindex");
+//#ifdef ACE_LACKS_IF_NAMETOINDEX
+//  ACE_UNUSED_ARG (ifname);
+//  ACE_NOTSUP_RETURN (0);
+//#else
+//  return ::if_nametoindex (ifname);
+//#endif /* ACE_LACKS_IF_NAMETOINDEX */
+//}
 
-ACE_INLINE char *
-ACE_OS::if_indextoname (unsigned int ifindex, char *ifname)
-{
-  ACE_OS_TRACE ("ACE_OS::if_indextoname");
-#ifdef ACE_LACKS_IF_NAMETOINDEX
-  ACE_UNUSED_ARG (ifindex);
-  ACE_UNUSED_ARG (ifname);
-  ACE_NOTSUP_RETURN (0);
-#else
-  return ::if_indextoname (ifindex, ifname);
-#endif /* ACE_LACKS_IF_NAMETOINDEX */
-}
+//ACE_INLINE char *
+//ACE_OS::if_indextoname (unsigned int ifindex, char *ifname)
+//{
+//  ACE_OS_TRACE ("ACE_OS::if_indextoname");
+//#ifdef ACE_LACKS_IF_NAMETOINDEX
+//  ACE_UNUSED_ARG (ifindex);
+//  ACE_UNUSED_ARG (ifname);
+//  ACE_NOTSUP_RETURN (0);
+//#else
+//  return ::if_indextoname (ifindex, ifname);
+//#endif /* ACE_LACKS_IF_NAMETOINDEX */
+//}
 
 ACE_INLINE struct if_nameindex *
 ACE_OS::if_nameindex ()

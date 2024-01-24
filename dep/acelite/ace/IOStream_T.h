@@ -273,5 +273,6 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #include "ace/IOStream_T.cpp"
 
 #include /**/ "ace/post.h"
+
 #endif /* ACE_IOSTREAM_T_H */
 #endif
