@@ -107,6 +107,7 @@ set(scripts_STAT_SRCS
 
   EasternKingdoms/Uldaman/boss_archaedas.cpp
   EasternKingdoms/Uldaman/boss_galgann_firehammer.cpp
+  EasternKingdoms/Uldaman/boss_grimlok.cpp
   EasternKingdoms/Uldaman/boss_ironaya.cpp
   EasternKingdoms/Uldaman/boss_revelosh.cpp
   EasternKingdoms/Uldaman/instance_uldaman.cpp
