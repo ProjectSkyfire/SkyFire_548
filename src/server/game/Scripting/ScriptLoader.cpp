@@ -202,6 +202,7 @@ void AddSC_boss_muru();
 void AddSC_boss_kiljaeden();
 void AddSC_sunwell_plateau();
 void AddSC_boss_archaedas();                 //Uldaman
+void AddSC_boss_galgann_firehammer();
 void AddSC_boss_ironaya();
 void AddSC_boss_revelosh();
 void AddSC_uldaman();
@@ -864,6 +865,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_randolph_moloch();
     AddSC_instance_the_stockade();          //The Stockade
     AddSC_boss_archaedas();                 //Uldaman
+    AddSC_boss_galgann_firehammer();
     AddSC_boss_ironaya();
     AddSC_boss_revelosh();
     AddSC_uldaman();
