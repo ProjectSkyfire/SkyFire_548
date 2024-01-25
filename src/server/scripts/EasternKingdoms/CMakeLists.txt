@@ -127,7 +127,6 @@ set(scripts_STAT_SRCS
   #REWORKED IN CATACLYSM
   #EasternKingdoms/Deadmines/deadmines.h
   #EasternKingdoms/Deadmines/deadmines.cpp
-  #EasternKingdoms/Deadmines/boss_mr_smite.cpp
   #EasternKingdoms/Deadmines/instance_deadmines.cpp
   #REWORKED IN PANDARIA
   #EasternKingdoms/ScarletMonastery/boss_azshir_the_sleepless.cpp
