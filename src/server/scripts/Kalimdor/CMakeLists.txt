@@ -56,12 +56,11 @@ set(scripts_STAT_SRCS
   Kalimdor/BlackfathomDeeps/blackfathom_deeps.h
   Kalimdor/zone_azuremyst_isle.cpp
   Kalimdor/zone_desolace.cpp
-  #REWORKED IN CATACLYSM
-  #Kalimdor/Maraudon/boss_princess_theradras.cpp
-  #Kalimdor/Maraudon/boss_landslide.cpp
-  #Kalimdor/Maraudon/boss_celebras_the_cursed.cpp
-  #Kalimdor/Maraudon/boss_noxxion.cpp
-  #Kalimdor/Maraudon/instance_maraudon.cpp
+  Kalimdor/Maraudon/boss_princess_theradras.cpp
+  Kalimdor/Maraudon/boss_landslide.cpp
+  Kalimdor/Maraudon/boss_celebras_the_cursed.cpp
+  Kalimdor/Maraudon/boss_noxxion.cpp
+  Kalimdor/Maraudon/instance_maraudon.cpp
   Kalimdor/TempleOfAhnQiraj/boss_fankriss.cpp
   Kalimdor/TempleOfAhnQiraj/boss_huhuran.cpp
   Kalimdor/TempleOfAhnQiraj/instance_temple_of_ahnqiraj.cpp

@@ -23,7 +23,7 @@ enum Spells
 class celebras_the_cursed : public CreatureScript
 {
 public:
-    celebras_the_cursed() : CreatureScript("celebras_the_cursed") { }
+    celebras_the_cursed() : CreatureScript("boss_celebras_the_cursed") { }
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
@@ -49,7 +49,7 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            me->SummonCreature(13716, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 600000);
+            me->SummonCreature(13716, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 600000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
