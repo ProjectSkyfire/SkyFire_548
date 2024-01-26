@@ -6644,8 +6644,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MovementGravityEnableAck;
         case CMSG_MOVE_HOVER_ACK:
             return MovementHoverAck;
-        case CMSG_MOVE_KNOCK_BACK_ACK:
-            return MovementKnockBackAck;
+        //case CMSG_MOVE_KNOCK_BACK_ACK:
+        //    return MovementKnockBackAck;
         //case CMSG_MOVE_SET_CAN_FLY:
         //    return MovementSetCanFly;
         case CMSG_MOVE_SET_FLY:
@@ -6676,8 +6676,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MovementUpdateFlightSpeed;
         case SMSG_MOVE_UPDATE_RUN_SPEED:
             return MovementUpdateRunSpeed;
-        case SMSG_MOVE_UPDATE_KNOCK_BACK:
-            return MovementUpdateKnockBack;
+        //case SMSG_MOVE_UPDATE_KNOCK_BACK:
+        //    return MovementUpdateKnockBack;
         case SMSG_MOVE_UPDATE_PITCH_RATE:
             return MovementUpdatePitchBack;
         case SMSG_MOVE_UPDATE_RUN_BACK_SPEED:

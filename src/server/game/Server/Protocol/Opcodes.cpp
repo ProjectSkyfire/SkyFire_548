@@ -310,7 +310,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_DISABLE_ACK,                     0x09D3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMoveGravityAck                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_ENABLE_ACK,                      0x11D8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMoveGravityAck                      ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_HOVER_ACK,                               0x0858, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMoveHoverAck                        ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                          0x00F2, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck                    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                          0x00F2, STATUS_UNHANDLED,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_REMOVE_MOVEMENT_FORCE_ACK,               0x10DB, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementForceAck                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK,                         0x1052, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveSetCanFlyAckOpcode              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_FLY,                                 0x01F1, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
@@ -907,7 +907,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UNSET_HOVER,                   0x02D3, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_FLIGHT_BACK_SPEED,      0x036A, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_FLIGHT_SPEED,           0x00E1, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_KNOCK_BACK,             0x0251, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_KNOCK_BACK,             0x0251, STATUS_UNHANDLED    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_PITCH_RATE,             0x09E2, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_RUN_BACK_SPEED,         0x08A3, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_RUN_SPEED,              0x158E, STATUS_NEVER    ); // 5.4.8 18414
