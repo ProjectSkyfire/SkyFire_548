@@ -56,6 +56,7 @@ set(scripts_STAT_SRCS
   Kalimdor/BlackfathomDeeps/blackfathom_deeps.h
   Kalimdor/zone_azuremyst_isle.cpp
   Kalimdor/zone_desolace.cpp
+  Kalimdor/Maraudon/boss_tinkerer_gizlock.cpp
   Kalimdor/Maraudon/boss_princess_theradras.cpp
   Kalimdor/Maraudon/boss_landslide.cpp
   Kalimdor/Maraudon/boss_celebras_the_cursed.cpp
