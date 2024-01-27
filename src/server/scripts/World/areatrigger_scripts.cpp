@@ -41,11 +41,11 @@ public:
     {
         if (player->GetQuestStatus(29776) == QUEST_STATUS_COMPLETE)
         {
-            if (!player->HasAura(116219))
+            if (Creature* lorewalkerZan = player->FindNearestCreature(64885, 25.0f, true))
             {
-                if (Creature* lorewalkerZan = player->FindNearestCreature(64885, 25.0f, true))
+                if (!player->HasAura(116219))
                 {
-                    lorewalkerZan->CastSpell(player, 116219);
+                    player->CastSpell(player, 116219);
                     lorewalkerZan->AI()->Talk(0, player);
                     return true;
                 }
