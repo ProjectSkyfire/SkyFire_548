@@ -32,6 +32,29 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+class AreaTrigger_at_dawning_span : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_dawning_span() : AreaTriggerScript("at_dawning_span") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(29776) == QUEST_STATUS_COMPLETE)
+        {
+            if (!player->HasAura(116219))
+            {
+                if (Creature* lorewalkerZan = player->FindNearestCreature(64885, 25.0f, true))
+                {
+                    lorewalkerZan->CastSpell(player, 116219);
+                    lorewalkerZan->AI()->Talk(0, player);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 class AreaTrigger_at_chamber_of_whispers_entrance : public AreaTriggerScript
 {
 public:
@@ -744,6 +767,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_dawning_span();
     new AreaTrigger_at_chamber_of_whispers_entrance();
     new AreaTrigger_at_mandori_village_wugou();
     new AreaTrigger_at_mandori_village_shu();
