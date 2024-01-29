@@ -68,7 +68,6 @@ public:
                 instance->SetData(DATA_INFINITE_EVENT, DONE);
         }
     };
-
 };
 
 void AddSC_boss_infinite_corruptor()

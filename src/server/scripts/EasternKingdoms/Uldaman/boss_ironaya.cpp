@@ -24,7 +24,6 @@ enum Ironaya
 class boss_ironaya : public CreatureScript
 {
 public:
-
     boss_ironaya() : CreatureScript("boss_ironaya") { }
 
     struct boss_ironayaAI : public ScriptedAI

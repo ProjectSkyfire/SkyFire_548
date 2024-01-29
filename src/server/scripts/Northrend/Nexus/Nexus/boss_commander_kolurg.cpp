@@ -21,7 +21,6 @@ enum Spells
     SPELL_FRIGHTENING_SHOUT      = 19134,
     SPELL_WHIRLWIND_1            = 38619,
     SPELL_WHIRLWIND_2            = 38618
-
 };
 
 //not used
@@ -59,7 +58,6 @@ public:
         }
         void JustDied(Unit* /*killer*/)  OVERRIDE { }
     };
-
 };
 
 void AddSC_boss_commander_kolurg()

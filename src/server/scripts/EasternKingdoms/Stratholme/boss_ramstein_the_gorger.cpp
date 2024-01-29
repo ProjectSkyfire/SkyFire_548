@@ -92,7 +92,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_ramstein_the_gorger()
