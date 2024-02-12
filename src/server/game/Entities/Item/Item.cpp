@@ -341,7 +341,6 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             stmt->setInt16 (++index, GetItemRandomPropertyId());
             stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0)); // reforge Id
-            stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1)); // Transmogrification Id
             stmt->setUInt16(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
             stmt->setString(++index, m_text);
@@ -354,6 +353,18 @@ void Item::SaveToDB(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GIFT_OWNER);
                 stmt->setUInt32(0, GUID_LOPART(GetOwnerGUID()));
                 stmt->setUInt32(1, guid);
+                trans->Append(stmt);
+            }
+
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE_TRANSMOG);
+            stmt->setUInt32(0, guid);
+            trans->Append(stmt);
+
+            if (GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1) != 0)
+            {
+                stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ITEM_INSTANCE_TRANSMOG);
+                stmt->setUInt32(0, guid);
+                stmt->setUInt32(1, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1));
                 trans->Append(stmt);
             }
             break;
