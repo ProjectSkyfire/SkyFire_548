@@ -363,7 +363,7 @@ bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
     return true;
 }
 
-bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
+bool WStrToUtf8(const std::wstring& wstr, std::string& utf8str)
 {
     try
     {
@@ -465,7 +465,7 @@ bool consoleToUtf8(const std::string& conStr, std::string& utf8str)
 #endif
 }
 
-bool Utf8FitTo(const std::string& str, std::wstring search)
+bool Utf8FitTo(const std::string& str, const std::wstring& search)
 {
     std::wstring temp;
 
