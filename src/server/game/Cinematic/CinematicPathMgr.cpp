@@ -304,9 +304,10 @@ size_t CinematicSequenceMgr::Load()
         G3D::Matrix3 l_Mat = G3D::Matrix3::identity();
         l_Mat = l_Mat.fromAxisAngle(G3D::Vector3(0, 0, 1), l_CameraEntry->GlobalRotation);
 
-        size_t l_Index, l_SubIndex;
         if (l_Translations->FramePairsOffset)
         {
+            size_t l_Index, l_SubIndex;
+
             Pair *l_FramePairs = (struct Pair*)(l_FileBuffer + l_Translations->FramePairsOffset);
             Pair *l_TransPairs = (struct Pair*)(l_FileBuffer + l_Translations->TransPairsOffset);
 
