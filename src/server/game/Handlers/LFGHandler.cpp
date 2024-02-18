@@ -288,13 +288,12 @@ void WorldSession::SendLfgPlayerLockInfo()
     {
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
         Quest const* quest = NULL;
-        bool done = false;
         if (reward)
         {
             quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
             if (quest)
             {
-                done = !GetPlayer()->CanRewardQuest(quest, false);
+                bool done = !GetPlayer()->CanRewardQuest(quest, false);
                 if (done)
                     quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
             }
