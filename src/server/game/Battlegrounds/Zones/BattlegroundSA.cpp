@@ -11,7 +11,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-BattlegroundSA::BattlegroundSA() : TotalTime(0), EndRoundTimer(0), ShipsStarted(false), Status(BG_SA_Status::BG_SA_NOTSTARTED), TimerEnabled(false),
+BattlegroundSA::BattlegroundSA() : gateDestroyed(false), Attackers(TeamId::TEAM_ALLIANCE), TotalTime(0), EndRoundTimer(0), ShipsStarted(false), Status(BG_SA_Status::BG_SA_NOTSTARTED), TimerEnabled(false),
                                 UpdateWaitTimer(0), SignaledRoundTwo(false), SignaledRoundTwoHalfMin(false), InitSecondRound(false)
 {
     StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
