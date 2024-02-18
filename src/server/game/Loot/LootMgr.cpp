@@ -1849,8 +1849,7 @@ void LoadLootTemplates_Mail()
     // remove real entries and check existence loot
     for (uint32 i = 1; i < sMailTemplateStore.GetNumRows(); ++i)
         if (sMailTemplateStore.LookupEntry(i))
-            if (lootIdSet.find(i) != lootIdSet.end())
-                lootIdSet.erase(i);
+            lootIdSet.erase(i);
 
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Mail.ReportUnusedIds(lootIdSet);
