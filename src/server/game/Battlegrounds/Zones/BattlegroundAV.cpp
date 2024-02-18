@@ -15,7 +15,7 @@
 #include "SpellAuras.h"
 #include "WorldSession.h"
 
-BattlegroundAV::BattlegroundAV()
+BattlegroundAV::BattlegroundAV() : m_Mine_Timer(0), m_MaxLevel(0)
 {
     BgObjects.resize(BG_AV_OBJECT_MAX);
     BgCreatures.resize(AV_CPLACE_MAX+AV_STATICCPLACE_MAX);

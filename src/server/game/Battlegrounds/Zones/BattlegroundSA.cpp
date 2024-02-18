@@ -11,7 +11,8 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-BattlegroundSA::BattlegroundSA()
+BattlegroundSA::BattlegroundSA() : TotalTime(0), EndRoundTimer(0), ShipsStarted(false), Status(BG_SA_Status::BG_SA_NOTSTARTED), TimerEnabled(false),
+                                UpdateWaitTimer(0), SignaledRoundTwo(false), SignaledRoundTwoHalfMin(false), InitSecondRound(false)
 {
     StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
     StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
@@ -19,11 +20,6 @@ BattlegroundSA::BattlegroundSA()
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_SA_HAS_BEGUN;
     BgObjects.resize(BG_SA_MAXOBJ);
     BgCreatures.resize(BG_SA_MAXNPC + BG_SA_MAX_GY);
-    TimerEnabled = false;
-    UpdateWaitTimer = 0;
-    SignaledRoundTwo = false;
-    SignaledRoundTwoHalfMin = false;
-    InitSecondRound = false;
 
     //! This is here to prevent an uninitialised variable warning
     //! The warning only occurs when SetUpBattleGround fails though.

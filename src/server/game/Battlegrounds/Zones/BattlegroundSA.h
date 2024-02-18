@@ -593,13 +593,13 @@ class BattlegroundSA : public Battleground
         /// For know if boats has start moving or not yet
         bool ShipsStarted;
         /// Status of each gate (Destroy/Damage/Intact)
-        BG_SA_GateState GateStatus[6];
+        BG_SA_GateState GateStatus[6] = { };
         /// Statu of battle (Start or not, and what round)
         BG_SA_Status Status;
         /// Team witch conntrol each graveyard
-        TeamId GraveyardStatus[BG_SA_MAX_GY];
+        TeamId GraveyardStatus[BG_SA_MAX_GY] = { };
         /// Score of each round
-        BG_SA_RoundScore RoundScores[2];
+        BG_SA_RoundScore RoundScores[2] = { };
         /// used for know we are in timer phase or not (used for worldstate update)
         bool TimerEnabled;
         /// 5secs before starting the 1min countdown for second round
@@ -613,6 +613,6 @@ class BattlegroundSA : public Battleground
         std::map<uint32/*id*/, uint32/*timer*/> DemoliserRespawnList;
 
         // Achievement: Not Even a Scratch
-        bool _allVehiclesAlive[BG_TEAMS_COUNT];
+        bool _allVehiclesAlive[BG_TEAMS_COUNT] = { };
 };
 #endif

@@ -281,17 +281,17 @@ class BattlegroundAB : public Battleground
             2: horde contested
             3: ally occupied
             4: horde occupied     */
-        uint8               m_Nodes[BG_AB_DYNAMIC_NODES_COUNT];
-        uint8               m_prevNodes[BG_AB_DYNAMIC_NODES_COUNT];
-        BG_AB_BannerTimer   m_BannerTimers[BG_AB_DYNAMIC_NODES_COUNT];
-        uint32              m_NodeTimers[BG_AB_DYNAMIC_NODES_COUNT];
-        uint32              m_lastTick[BG_TEAMS_COUNT];
-        uint32              m_HonorScoreTics[BG_TEAMS_COUNT];
-        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT];
+        uint8               m_Nodes[BG_AB_DYNAMIC_NODES_COUNT] = { };
+        uint8               m_prevNodes[BG_AB_DYNAMIC_NODES_COUNT] = { };
+        BG_AB_BannerTimer   m_BannerTimers[BG_AB_DYNAMIC_NODES_COUNT] = { };
+        uint32              m_NodeTimers[BG_AB_DYNAMIC_NODES_COUNT] = { };
+        uint32              m_lastTick[BG_TEAMS_COUNT] = { };
+        uint32              m_HonorScoreTics[BG_TEAMS_COUNT] = { };
+        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT] = { };
         bool                m_IsInformedNearVictory;
         uint32              m_HonorTics;
         uint32              m_ReputationTics;
         // need for achievements
-        bool                m_TeamScores500Disadvantage[BG_TEAMS_COUNT];
+        bool                m_TeamScores500Disadvantage[BG_TEAMS_COUNT] = { };
 };
 #endif

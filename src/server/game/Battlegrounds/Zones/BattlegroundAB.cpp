@@ -15,9 +15,8 @@
 #include "Util.h"
 #include "WorldSession.h"
 
-BattlegroundAB::BattlegroundAB()
+BattlegroundAB::BattlegroundAB() : m_IsInformedNearVictory(false), m_HonorTics(0), m_ReputationTics(0)
 {
-    m_IsInformedNearVictory = false;
     m_BuffChange = true;
     BgObjects.resize(BG_AB_OBJECT_MAX);
     BgCreatures.resize(BG_AB_ALL_NODES_COUNT + 5);//+5 for aura triggers

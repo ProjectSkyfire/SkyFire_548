@@ -1596,20 +1596,20 @@ class BattlegroundAV : public Battleground
         uint16 GetBonusHonor(uint8 kills); /// @todo: Remove this when the core handles this properly
 
         /*variables */
-        int32 m_Team_Scores[2];
-        uint32 m_Team_QuestStatus[2][9]; //[x][y] x=team y=questcounter
+        int32 m_Team_Scores[2] = { };;
+        uint32 m_Team_QuestStatus[2][9] = { }; //[x][y] x=team y=questcounter
 
-        BG_AV_NodeInfo m_Nodes[BG_AV_NODES_MAX];
+        BG_AV_NodeInfo m_Nodes[BG_AV_NODES_MAX] = { };
 
-        uint32 m_Mine_Owner[2];
-        uint32 m_Mine_PrevOwner[2]; //only for worldstates needed
+        uint32 m_Mine_Owner[2] = { };
+        uint32 m_Mine_PrevOwner[2] = { }; //only for worldstates needed
         int32 m_Mine_Timer; //ticks for both teams
-        uint32 m_Mine_Reclaim_Timer[2];
-        uint32 m_CaptainBuffTimer[2];
-        bool m_CaptainAlive[2];
+        uint32 m_Mine_Reclaim_Timer[2] = { };
+        uint32 m_CaptainBuffTimer[2] = { };
+        bool m_CaptainAlive[2] = { };
 
         uint8 m_MaxLevel; /// @todo: Remove this once battleground->getmaxlevel() returns something usefull/is reworked (?)
-        bool m_IsInformedNearVictory[2];
+        bool m_IsInformedNearVictory[2] = { };
 };
 
 #endif
