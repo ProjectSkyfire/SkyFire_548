@@ -2053,15 +2053,15 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
         SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_PERMISSIONS);
     else if (Member* member = GetMember(guid))
     {
-        std::string name = member->GetName();
-
         // Guild masters cannot be removed
         if (member->IsRank(GR_GUILDMASTER))
             SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_LEADER_LEAVE);
         // Do not allow to remove player with the same rank or higher
         else
         {
+            std::string name = member->GetName();
             Member const* memberMe = GetMember(player->GetGUID());
+
             if (!memberMe || member->IsRankNotLower(memberMe->GetRankId()))
                 SendCommandResult(session, GUILD_COMMAND_REMOVE, ERR_GUILD_RANK_TOO_HIGH_S, name);
             else
