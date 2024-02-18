@@ -97,7 +97,7 @@ void CharacterBooster::_SendCharBoostPacket(SlotEquipmentMap const* items) const
 
     data.WriteGuidBytes(guid, 7, 2, 6, 5);
 
-    for (SlotEquipmentMap::const_iterator itr = items->begin(); itr != items->end(); itr++)
+    for (SlotEquipmentMap::const_iterator itr = items->begin(); itr != items->end(); ++itr)
         data << (uint32)itr->second;
 
     data.WriteGuidBytes(guid, 0, 1, 3, 4);
@@ -221,7 +221,7 @@ std::string CharacterBooster::_SetSpecialization(SQLTransaction& trans, uint8 co
         {
             if (std::vector<uint32> const* spells = GetSpecializationSpells(specs[i]))
             {
-                for (std::vector<uint32>::const_iterator iter = spells->begin(); iter != spells->end(); iter++)
+                for (std::vector<uint32>::const_iterator iter = spells->begin(); iter != spells->end(); ++iter)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL_BY_SPELL);
                     stmt->setUInt32(0, *iter);
