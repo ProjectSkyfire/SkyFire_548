@@ -79,3 +79,5 @@ Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
 Database Releases [https://github.com/ProjectSkyfire/database/releases)
 
 Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
+
+:)
