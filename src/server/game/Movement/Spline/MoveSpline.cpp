@@ -78,7 +78,7 @@ inline uint32 computeDuration(float length, float velocity)
 
 struct FallInitializer
 {
-    FallInitializer(float _start_elevation) : start_elevation(_start_elevation) { }
+    explicit FallInitializer(float _start_elevation) : start_elevation(_start_elevation) { }
     float start_elevation;
     inline int32 operator()(Spline<int32>& s, int32 i)
     {
@@ -92,7 +92,7 @@ enum{
 
 struct CommonInitializer
 {
-    CommonInitializer(float _velocity) : velocityInv(1000.f/_velocity), time(minimal_duration) { }
+    explicit CommonInitializer(float _velocity) : velocityInv(1000.f/_velocity), time(minimal_duration) { }
     float velocityInv;
     int32 time;
     inline int32 operator()(Spline<int32>& s, int32 i)
