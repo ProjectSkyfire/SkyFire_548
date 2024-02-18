@@ -34,8 +34,8 @@ enum
 
 struct Sphere
 {
-    /*0x00*/ float Min[3];
-    /*0x0C*/ float Max[3];
+    ///*0x00*/ float Min[3];
+    ///*0x0C*/ float Max[3];
     /*0x18*/ float Radius;
 };
 
@@ -132,7 +132,7 @@ struct Pair
 struct AnimationBlock
 {
     int16_t interpolation_type;
-    int16_t global_sequence_id;
+    //int16_t global_sequence_id;
     uint32_t FramePairsCount;
     uint32_t FramePairsOffset;
     uint32_t TransPairsCount;
@@ -142,14 +142,14 @@ struct AnimationBlock
 struct Camera
 {
     int32_t Type;
-    float   fov;
-    float   far_clipping;
-    float   near_clipping;
+    //float   fov;
+    //float   far_clipping;
+    //float   near_clipping;
     struct  AnimationBlock SourceTranslations;      // Vector
     float   SourcePosition[3];
-    struct  AnimationBlock target_translations;     // Vector
-    float   target_position[3];
-    struct  AnimationBlock rotations;               // Quaternion
+    //struct  AnimationBlock target_translations;     // Vector
+    //float   target_position[3];
+    //struct  AnimationBlock rotations;               // Quaternion
 };
 
 struct CameraV10
@@ -162,7 +162,7 @@ struct CameraV10
     struct  AnimationBlock target_translations;     // Vector
     float   target_position[3];
     struct  AnimationBlock rotations;               // Quaternion
-    struct  AnimationBlock unknown_block_4;         // Float
+    //struct  AnimationBlock unknown_block_4;         // Float
 };
 #pragma pack(pop)
 
