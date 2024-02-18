@@ -118,9 +118,9 @@ class Warden
 
     private:
         WorldSession* _session;
-        uint8 _inputKey[16];
-        uint8 _outputKey[16];
-        uint8 _seed[16];
+        uint8 _inputKey[16] = { };
+        uint8 _outputKey[16] = { };
+        uint8 _seed[16] = { };
         ARC4 _inputCrypto;
         ARC4 _outputCrypto;
         uint32 _checkTimer;                          // Timer for sending check requests

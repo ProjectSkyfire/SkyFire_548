@@ -17,7 +17,7 @@
 #include "Warden.h"
 #include "AccountMgr.h"
 
-Warden::Warden() : _inputCrypto(), _outputCrypto(), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0), _dataSent(false), _initialized(false) { }
+Warden::Warden() : _session(), _inputCrypto(), _outputCrypto(), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0), _dataSent(false), _previousTimestamp(), _module(), _initialized(false) { }
 
 Warden::~Warden()
 {

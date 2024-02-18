@@ -80,8 +80,8 @@ public:
     char* LiquBytes;
     int groupName, descGroupName;
     int mogpFlags;
-    float bbcorn1[3];
-    float bbcorn2[3];
+    float bbcorn1[3] = { };
+    float bbcorn2[3] = { };
     uint16 moprIdx;
     uint16 moprNItems;
     uint16 nBatchA;
