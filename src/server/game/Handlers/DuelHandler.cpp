@@ -51,7 +51,6 @@ void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
     bool accepted;
     ObjectGuid guid;
     Player* player;
-    Player* plTarget;
 
     guid[7] = recvPacket.ReadBit();
     guid[1] = recvPacket.ReadBit();
@@ -78,7 +77,7 @@ void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
     if (accepted)
     {
         player = GetPlayer();
-        plTarget = player->duel->opponent;
+        Player* plTarget = player->duel->opponent;
 
         if (player == player->duel->initiator || !plTarget || player == plTarget || player->duel->startTime != 0 || plTarget->duel->startTime != 0)
             return;
