@@ -116,9 +116,7 @@ void WorldSession::HandleBattlePetModifyName(WorldPacket& recvData)
     uint8 nicknameLen;
     std::string nickname;
     bool hasDeclinedNames;
-
     uint8 declinedNameLen[BATTLE_PET_MAX_DECLINED_NAMES];
-    std::string declinedNames[BATTLE_PET_MAX_DECLINED_NAMES];
 
     petEntry[5] = recvData.ReadBit();
     petEntry[7] = recvData.ReadBit();
@@ -146,8 +144,11 @@ void WorldSession::HandleBattlePetModifyName(WorldPacket& recvData)
     nickname = recvData.ReadString(nicknameLen);
 
     if (hasDeclinedNames)
+    {
+        std::string declinedNames[BATTLE_PET_MAX_DECLINED_NAMES];
         for (uint8 i = 0; i < BATTLE_PET_MAX_DECLINED_NAMES; i++)
             declinedNames[i] = recvData.ReadString(declinedNameLen[i]);
+    }
 
     BattlePetMgr* battlePetMgr = GetPlayer()->GetBattlePetMgr();
 
