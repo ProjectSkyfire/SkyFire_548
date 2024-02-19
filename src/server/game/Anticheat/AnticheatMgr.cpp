@@ -981,7 +981,7 @@ void AnticheatMgr::BuildReport(Player* player, AnticheatData& data, uint8 report
             player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
             player->SetHomebind(loc, 876);// GM Jail Homebind location
             player->CastSpell(player, FREEZE);// freeze him in place to ensure no exploit happens for jail break attempt
-
+            SF_LOG_INFO("anticheat", "AnticheatMgr:: Jailing player %s (GUID %u)", player->GetName().c_str(), player->GetGUID());
             if (Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER,player))// LFG_SPELL_DUNGEON_DESERTER
             {
                 dungdesert->SetDuration(-1);
