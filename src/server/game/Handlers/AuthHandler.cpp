@@ -93,7 +93,7 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
 
     if (code == ResponseCodes::AUTH_OK)
     {
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
         {
             packet << uint32(itr->first);
             packet.WriteString(itr->second);

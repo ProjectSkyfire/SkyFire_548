@@ -2124,7 +2124,7 @@ void Pet::LearnSpecializationSpells()
 {
     if (std::vector<uint32> const* spells = GetSpecializationSpells(m_petSpec))
     {
-        for (std::vector<uint32>::const_iterator iter = spells->begin(); iter != spells->end(); iter++)
+        for (std::vector<uint32>::const_iterator iter = spells->begin(); iter != spells->end(); ++iter)
         {
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(*iter);
             if (!spellInfo || spellInfo->SpellLevel > getLevel())
