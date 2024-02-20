@@ -219,8 +219,8 @@ public:
         }
 
         WorldLocation jailLoc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
-        target->TeleportTo(jailLoc);
         target->SetHomebind(jailLoc, 876);// GM Jail Homebind location
+        target->TeleportTo(jailLoc);
 
         return true;
     }
