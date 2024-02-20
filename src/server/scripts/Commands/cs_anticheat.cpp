@@ -5,7 +5,6 @@
 
 #include "Chat.h"
 #include "Language.h"
-#include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -204,11 +203,8 @@ public:
         if (!handler->extractPlayerTarget((char*)args, &target, NULL, &playerName))
             return false;
 
-        WorldLocation jailLoc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
-        target->TeleportTo(jailLoc);
-        target->SetHomebind(jailLoc, 876);// GM Jail Homebind location
         target->CastSpell(target, FREEZE);// Freeze him in place to ensure no exploit happens for jail break attempt
-        SF_LOG_INFO("anticheat", "AnticheatMgr:: Jail command used on player %s (GUID %u)", player->GetName().c_str(), player->GetGUID());
+
         if (Aura* dungdesert = target->AddAura(LFG_SPELL_DUNGEON_DESERTER, target))// LFG_SPELL_DUNGEON_DESERTER
         {
             dungdesert->SetDuration(-1);
@@ -221,6 +217,10 @@ public:
         {
             silent->SetDuration(-1);
         }
+
+        WorldLocation jailLoc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+        target->TeleportTo(jailLoc);
+        target->SetHomebind(jailLoc, 876);// GM Jail Homebind location
 
         return true;
     }
@@ -253,7 +253,7 @@ public:
             target->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
             target->SetHomebind(Hloc, 1653);// Orgrimmar Homebind location
         }
-        SF_LOG_INFO("anticheat", "AnticheatMgr:: Parole command used on player %s (GUID %u)", player->GetName().c_str(), player->GetGUID());
+
         target->RemoveAura(FREEZE);// remove shackles
         target->RemoveAura(LFG_SPELL_DUNGEON_DESERTER);// LFG_SPELL_DUNGEON_DESERTER
         target->RemoveAura(BG_SPELL_DESERTER);// BG_SPELL_DESERTER

@@ -976,12 +976,7 @@ void AnticheatMgr::BuildReport(Player* player, AnticheatData& data, uint8 report
         if (data.totalReports > sWorld->getIntConfig(WorldIntConfigs::CONFIG_ANTICHEAT_MAX_REPORTS_FOR_JAILS))
         {
             SF_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s (GUID %u)", player->GetName().c_str(), player->GetGUID());
-            // This is where they end up going shaw shank redemption style
-            WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
-            player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
-            player->SetHomebind(loc, 876);// GM Jail Homebind location
-            player->CastSpell(player, FREEZE);// freeze him in place to ensure no exploit happens for jail break attempt
-            SF_LOG_INFO("anticheat", "AnticheatMgr:: Jailing player %s (GUID %u)", player->GetName().c_str(), player->GetGUID());
+
             if (Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER,player))// LFG_SPELL_DUNGEON_DESERTER
             {
                 dungdesert->SetDuration(-1);
@@ -994,6 +989,11 @@ void AnticheatMgr::BuildReport(Player* player, AnticheatData& data, uint8 report
             {
                 silent->SetDuration(-1);
             }
+            // This is where they end up going shaw shank redemption style
+            WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+            player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
+            player->SetHomebind(loc, 876);// GM Jail Homebind location
+            player->CastSpell(player, FREEZE);// freeze him in place to ensure no exploit happens for jail break attempt
         }
     }
 }
