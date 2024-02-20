@@ -311,7 +311,7 @@ PlayerSocial* SocialMgr::LoadFromDB(PreparedQueryResult result, uint32 guid)
 
     uint32 friendGuid = 0;
     uint8 flags = 0;
-    std::string note = "";
+    std::string note;
 
     do
     {
