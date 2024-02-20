@@ -1167,7 +1167,6 @@ WorldSafeLocsEntry const* BattlegroundAV::GetClosestGraveYard(Player* player)
 {
     WorldSafeLocsEntry const* pGraveyard = NULL;
     WorldSafeLocsEntry const* entry = NULL;
-    float dist = 0;
     float minDist = 0;
     float x, y;
 
@@ -1182,7 +1181,7 @@ WorldSafeLocsEntry const* BattlegroundAV::GetClosestGraveYard(Player* player)
             entry = sWorldSafeLocsStore.LookupEntry(BG_AV_GraveyardIds[i]);
             if (entry)
             {
-                dist = (entry->x - x)*(entry->x - x)+(entry->y - y)*(entry->y - y);
+                float dist = (entry->x - x)*(entry->x - x)+(entry->y - y)*(entry->y - y);
                 if (dist < minDist)
                 {
                     minDist = dist;

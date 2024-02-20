@@ -1876,7 +1876,7 @@ SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject c
     {
         if (neededTargets & (TARGET_FLAG_GAMEOBJECT))
         {
-            if (caster->GetDistance(target) > (GetMaxRange()))
+            if (caster->GetDistance(gameobjectTarget) > (GetMaxRange()))
                 return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
 
             return SpellCastResult::SPELL_CAST_OK;
