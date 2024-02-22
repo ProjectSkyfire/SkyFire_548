@@ -633,6 +633,55 @@ void LFGMgr::LeaveLfg(uint64 guid, bool disconnected)
     }
 }
 
+void LFGMgr::LeaveSoloLfg(uint64 guid, uint32 queueId, bool disconnected)
+{
+    SF_LOG_DEBUG("lfg.leave", "Player: %u left queue.", GUID_LOPART(guid));
+
+    LfgState state = GetState(guid);
+    switch (state)
+    {
+        case LFG_STATE_QUEUED:
+        {
+            LFGQueue& queue = GetQueue(queueId);
+            queue.RemoveFromQueue(guid);
+            SendLfgUpdateStatus(guid, LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE), false);
+            SetState(guid, LFG_STATE_NONE);
+            break;
+        }
+        case LFG_STATE_PROPOSAL:
+        {
+            // Remove from Proposals
+            LfgProposalContainer::iterator it = ProposalsStore.begin();
+            while (it != ProposalsStore.end())
+            {
+                LfgProposalPlayerContainer::iterator itPlayer = it->second.players.find(guid);
+                if (itPlayer != it->second.players.end())
+                {
+                    // Mark the player/leader of group who left as didn't accept the proposal
+                    itPlayer->second.accept = LFG_ANSWER_DENY;
+                    break;
+                }
+                ++it;
+            }
+
+            // Remove from queue - if proposal is found, RemoveProposal will call RemoveFromQueue
+            if (it != ProposalsStore.end())
+                RemoveProposal(it, LFG_UPDATETYPE_PROPOSAL_DECLINED);
+            break;
+        }
+        case LFG_STATE_NONE:
+        case LFG_STATE_RAIDBROWSER:
+            break;
+        case LFG_STATE_DUNGEON:
+        case LFG_STATE_FINISHED_DUNGEON:
+        //case LFG_STATE_BOOT:
+        {
+            SetState(guid, LFG_STATE_NONE);
+            break;
+        }
+    }
+}
+
 /**
    Update the Role check info with the player selected role.
 

@@ -135,15 +135,25 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
     recvData.read_skip<uint32>();                          // Always 8
     recvData.read_skip<uint32>();                          // Join date
     recvData.read_skip<uint32>();                          // Always 3
-    recvData.read_skip<uint32>();                          // Queue Id
 
+    uint32 queueID;
+    recvData >> queueID;                                   // Queue Id
 
     recvData.ReadGuidMask(RequesterGUID, 6, 0, 2, 3, 1, 5, 4, 7);
     recvData.ReadGuidBytes(RequesterGUID, 2, 0, 4, 6, 3, 1, 5, 7);
 
+    if (!group)
+    {
+        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE Player: %lu left solo queue.", uint64(RequesterGUID));
+        sLFGMgr->LeaveSoloLfg(uint64(RequesterGUID), queueID);
+    }
+
     // Check cheating - only leader can leave the queue
-    if (!group || group->GetLeaderGUID() == uint64(RequesterGUID))
+    if (group && group->GetLeaderGUID() == uint64(RequesterGUID))
+    {
+        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE GroupLeader: %lu left group queue.", uint64(RequesterGUID));
         sLFGMgr->LeaveLfg(uint64(RequesterGUID));
+    }
 }
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
