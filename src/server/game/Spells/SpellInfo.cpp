@@ -341,38 +341,39 @@ SpellImplicitTargetInfo::StaticData  SpellImplicitTargetInfo::_data[TOTAL_SPELL_
     {TARGET_OBJECT_TYPE_NONE, TARGET_REFERENCE_TYPE_NONE,   TARGET_SELECT_CATEGORY_NYI,     TARGET_CHECK_DEFAULT,  TARGET_DIR_NONE},        // 143
 };
 
-SpellEffectInfo::SpellEffectInfo(SpellEntry const* /*spellEntry*/, SpellInfo const* spellInfo, uint8 effIndex, SpellEffectEntry const* _effect)
+SpellEffectInfo::SpellEffectInfo(SpellEntry const* /*spellEntry*/, SpellInfo const* spellInfo, uint8 effIndex, SpellEffectEntry const* _effect) : _spellInfo(spellInfo), _effIndex(effIndex),
+Effect(0), ApplyAuraName(0), ApplyAuraTickCount(0), DieSides(0), RealPointsPerLevel(0.0f), BasePoints(0), PointsPerComboPoint(0.0f), ValueMultiplier(0.0f), DamageMultiplier(0.0f),
+BonusMultiplier(0.0f), MiscValue(0), MiscValueB(0), Mechanic(Mechanics::MECHANIC_NONE), TargetA(0), TargetB(0), RadiusEntry(NULL), MaxRadiusEntry(NULL), ChainTarget(0), ItemType(0),
+TriggerSpell(0), SpellClassMask(flag128(0)), ImplicitTargetConditions(NULL), ScalingMultiplier(0.0f), DeltaScalingMultiplier(0.0f), ComboScalingMultiplier(0.0f)
 {
-    _spellInfo = spellInfo;
-    _effIndex = _effect ? _effect->EffectIndex : effIndex;
-    Effect = _effect ? _effect->Effect : 0;
-    ApplyAuraName = _effect ? _effect->EffectApplyAuraName : 0;
-    ApplyAuraTickCount = _effect ? _effect->EffectAuraTickCount : 0;
-    DieSides = _effect ? _effect->EffectDieSides : 0;
-    RealPointsPerLevel = _effect ? _effect->EffectRealPointsPerLevel : 0.0f;
-    BasePoints = _effect ? _effect->EffectBasePoints : 0;
-    PointsPerComboPoint = _effect ? _effect->EffectPointsPerComboPoint : 0.0f;
-    ValueMultiplier = _effect ? _effect->EffectValueMultiplier : 0.0f;
-    DamageMultiplier = _effect ? _effect->EffectDamageMultiplier : 0.0f;
-    BonusMultiplier = _effect ? _effect->EffectBonusMultiplier : 0.0f;
-    MiscValue = _effect ? _effect->EffectMiscValue : 0;
-    MiscValueB = _effect ? _effect->EffectMiscValueB : 0;
-    Mechanic = Mechanics(_effect ? _effect->EffectMechanic : 0);
-    TargetA = SpellImplicitTargetInfo(_effect ? _effect->EffectImplicitTargetA : 0);
-    TargetB = SpellImplicitTargetInfo(_effect ? _effect->EffectImplicitTargetB : 0);
-    RadiusEntry = _effect && _effect->EffectRadiusIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusIndex) : NULL;
-    MaxRadiusEntry = _effect && _effect->EffectRadiusMaxIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusMaxIndex) : NULL;
-    ChainTarget = _effect ? _effect->EffectChainTarget : 0;
-    ItemType = _effect ? _effect->EffectItemType : 0;
-    TriggerSpell = _effect ? _effect->EffectTriggerSpell : 0;
-    SpellClassMask = _effect ? _effect->EffectSpellClassMask : flag128(0);
-    ImplicitTargetConditions = NULL;
+    if (_effect)
+    {
+        _effIndex = _effect->EffectIndex;
+        Effect = _effect->Effect;
+        ApplyAuraName = _effect->EffectApplyAuraName;
+        ApplyAuraTickCount = _effect->EffectAuraTickCount;
+        DieSides = _effect->EffectDieSides;
+        RealPointsPerLevel = _effect->EffectRealPointsPerLevel;
+        BasePoints = _effect->EffectBasePoints;
+        PointsPerComboPoint = _effect->EffectPointsPerComboPoint;
+        ValueMultiplier = _effect->EffectValueMultiplier;
+        DamageMultiplier = _effect->EffectDamageMultiplier;
+        BonusMultiplier = _effect->EffectBonusMultiplier;
+        MiscValue = _effect->EffectMiscValue;
+        MiscValueB = _effect->EffectMiscValueB;
+        Mechanic = Mechanics(_effect->EffectMechanic);
+        TargetA = SpellImplicitTargetInfo(_effect->EffectImplicitTargetA);
+        TargetB = SpellImplicitTargetInfo(_effect->EffectImplicitTargetB);
+        RadiusEntry = _effect->EffectRadiusIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusIndex) : NULL;
+        MaxRadiusEntry = _effect->EffectRadiusMaxIndex ? sSpellRadiusStore.LookupEntry(_effect->EffectRadiusMaxIndex) : NULL;
+        ChainTarget = _effect->EffectChainTarget;
+        ItemType = _effect->EffectItemType;
+        TriggerSpell = _effect->EffectTriggerSpell;
+        SpellClassMask = _effect->EffectSpellClassMask;
+    }
 
     uint32 _effectScalingId = _effect ? sSpellEffectScallingByEffectId.find(_effect->Id) != sSpellEffectScallingByEffectId.end() ? sSpellEffectScallingByEffectId[_effect->Id] : 0 : 0;
     SpellEffectScalingEntry const* _effectScalingEntry = sSpellEffectScalingStore.LookupEntry(_effectScalingId);
-
-    ScalingMultiplier = 0.0f;
-
     if (!_effectScalingEntry)
         return;
 
