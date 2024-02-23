@@ -190,7 +190,7 @@ private:
     Targets _target;
 public:
     SpellImplicitTargetInfo() : _target(Targets(0)) { }
-    SpellImplicitTargetInfo(uint32 target) : _target(Targets(target));
+    SpellImplicitTargetInfo(uint32 target) : _target(Targets(target)) { }
 
     bool IsArea() const;
     SpellTargetSelectionCategories GetSelectionCategory() const;
