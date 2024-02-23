@@ -42,11 +42,6 @@ uint32 GetTargetFlagMask(SpellTargetObjectTypes objType)
     }
 }
 
-SpellImplicitTargetInfo::SpellImplicitTargetInfo(uint32 target)
-{
-    _target = Targets(target);
-}
-
 bool SpellImplicitTargetInfo::IsArea() const
 {
     return GetSelectionCategory() == TARGET_SELECT_CATEGORY_AREA || GetSelectionCategory() == TARGET_SELECT_CATEGORY_CONE;

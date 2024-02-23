@@ -17,10 +17,9 @@
 #include "World.h"
 #include "SHA1.h"
 
-RASocket::RASocket()
+RASocket::RASocket() : _minLevel(3), _commandExecuting(false)
 {
     _minLevel = uint8(sConfigMgr->GetIntDefault("RA.MinLevel", 3));
-    _commandExecuting = false;
 }
 
 int RASocket::open(void *)
