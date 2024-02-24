@@ -24205,16 +24205,14 @@ void Player::SendInstanceResetWarning(uint32 mapid, DifficultyID difficulty, uin
     else
         type = RAID_INSTANCE_WARNING_MIN_SOON;
 
-    WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4+4+4+4);
-    data << uint32(type);
+    WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 1+4+1+4+4);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.FlushBits();
     data << uint32(mapid);
-    data << uint32(difficulty);                             // difficulty
+    data << uint8(type);
     data << uint32(time);
-    if (type == RAID_INSTANCE_WELCOME)
-    {
-        data << uint8(0);                                   // is locked
-        data << uint8(0);                                   // is extended, ignored if prev field is 0
-    }
+    data << uint32(difficulty);                             // difficulty
     GetSession()->SendPacket(&data);
 }
 
