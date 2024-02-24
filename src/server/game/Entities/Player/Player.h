@@ -3553,7 +3553,7 @@ class Player : public Unit, public GridObject<Player>
 
     uint32 _ConquestCurrencytotalWeekCap;
 
-    CinematicSequence * cinematicSequence;
+    CinematicSequence*  cinematicSequence;
     bool                inCinematic;
     uint32              cinematicClientStartTime;
     float               cinematicStartX, cinematicStartY, cinematicStartZ, cinematicStartO;

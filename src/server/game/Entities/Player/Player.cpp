@@ -1408,19 +1408,19 @@ void Player::Update(uint32 p_time)
 
     if (inCinematic && cinematicSequence)
     {
-        bool l_StartedAtClient = getMSTime() > cinematicClientStartTime;
-        uint32 l_Time = getMSTime() - cinematicClientStartTime;
+        bool startedAtClient = getMSTime() > cinematicClientStartTime;
+        uint32 time = getMSTime() - cinematicClientStartTime;
 
-        if (l_StartedAtClient)
+        if (startedAtClient)
         {
-            if (l_Time > cinematicSequence->Duration)
+            if (time > cinematicSequence->Duration)
                 StopCinematic();
-            else if (l_StartedAtClient)
+            else if (startedAtClient)
             {
-                Position l_NewPosition;
-                cinematicSequence->GetPositionAtTime(l_Time, &l_NewPosition.m_positionX, &l_NewPosition.m_positionY, &l_NewPosition.m_positionZ);
+                Position newPos;
+                cinematicSequence->GetPositionAtTime(time, &newPos.m_positionX, &newPos.m_positionY, &newPos.m_positionZ);
 
-                Unit::UpdatePosition(l_NewPosition.m_positionX, l_NewPosition.m_positionY, l_NewPosition.m_positionZ, 0, true);
+                Unit::UpdatePosition(newPos.m_positionX, newPos.m_positionY, newPos.m_positionZ, 0, true);
                 UpdateObjectVisibility();
                 SetFall(false);
             }
@@ -6917,7 +6917,7 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
 
     StopCinematic();
 
-    cinematicSequence = const_cast<CinematicSequence*>(sCinematicSequenceMgr->GetSequence(CinematicSequenceId));
+    CinematicSequence const* cinematicSequence = sCinematicSequenceMgr->GetSequence(CinematicSequenceId);
 
     if (cinematicSequence)
     {
