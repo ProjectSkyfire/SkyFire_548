@@ -353,7 +353,7 @@ size_t CinematicSequenceMgr::Load()
 //////////////////////////////////////////////////////////////////////////
 
 /// Get a sequence by his id
-CinematicSequence const* CinematicSequenceMgr::GetSequence(uint32 sequenceID)
+CinematicSequence* CinematicSequenceMgr::GetSequence(uint32 sequenceID)
 {
     std::map<uint32, CinematicSequence*>::iterator itr = m_Sequences.find(sequenceID);
 

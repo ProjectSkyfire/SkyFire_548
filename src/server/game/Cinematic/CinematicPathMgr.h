@@ -48,7 +48,7 @@ public:
     size_t Load();
 
     /// Get a sequence by his id
-    CinematicSequence const* GetSequence(uint32 sequenceID);
+    CinematicSequence* GetSequence(uint32 sequenceID);
 
 private:
     std::map<uint32, CinematicSequence*> m_Sequences;
