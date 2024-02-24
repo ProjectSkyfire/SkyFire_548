@@ -24,8 +24,6 @@ enum eAuctionHouse
     AH_MINIMUM_DEPOSIT = 100
 };
 
-AuctionHouseMgr::AuctionHouseMgr() { }
-
 AuctionHouseMgr::~AuctionHouseMgr()
 {
     for (ItemMap::iterator itr = mAitems.begin(); itr != mAitems.end(); ++itr)
@@ -411,7 +409,6 @@ bool AuctionHouseObject::RemoveAuction(AuctionEntry* auction, uint32 /*itemEntry
 
     // we need to delete the entry, it is not referenced any more
     delete auction;
-    auction = NULL;
 
     return wasInMap;
 }

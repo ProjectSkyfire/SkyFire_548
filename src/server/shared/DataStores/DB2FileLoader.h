@@ -12,8 +12,10 @@
 
 class DB2FileLoader
 {
-    public:
-    DB2FileLoader();
+public:
+     DB2FileLoader() : recordSize(0), recordCount(0), fieldCount(0), stringSize(0), data(NULL), fieldsOffset(NULL), stringTable(NULL),
+         tableHash(0), build(0), unk1(0), minIndex(0), maxIndex(0), locale(0), unk5(0) { }
+
     ~DB2FileLoader();
 
     bool Load(const char *filename, const char *fmt);

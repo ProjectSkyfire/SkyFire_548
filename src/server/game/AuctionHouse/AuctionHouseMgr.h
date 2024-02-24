@@ -127,7 +127,7 @@ class AuctionHouseMgr
     friend class ACE_Singleton<AuctionHouseMgr, ACE_Null_Mutex>;
 
     private:
-        AuctionHouseMgr();
+        AuctionHouseMgr() { }
         ~AuctionHouseMgr();
 
     public:
