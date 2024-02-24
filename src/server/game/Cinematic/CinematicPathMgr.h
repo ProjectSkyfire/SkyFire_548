@@ -23,7 +23,7 @@ public:
     ~CinematicSequence();
 
     /// Get position at time
-    void GetPositionAtTime(uint32 p_Time, float * p_X, float * p_Y, float * p_Z) const;
+    void GetPositionAtTime(uint32 time, float* x, float* y, float* z) const;
 
     /// Sequence durations
     uint32 Duration;
