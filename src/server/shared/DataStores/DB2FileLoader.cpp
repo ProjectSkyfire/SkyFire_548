@@ -10,12 +10,6 @@
 #include <string.h>
 #include "DB2FileLoader.h"
 
-DB2FileLoader::DB2FileLoader()
-{
-    data = NULL;
-    fieldsOffset = NULL;
-}
-
 bool DB2FileLoader::Load(const char *filename, const char *fmt)
 {
     if (data)
