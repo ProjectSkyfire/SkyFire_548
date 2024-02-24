@@ -186,7 +186,7 @@ size_t CinematicSequenceMgr::Load()
     uint32 count = 0;
     m_Sequences.clear();
 
-    for (uint32 itr = 0; itr < sCinematicSequencesStore.GetNumRows(); ++itr)
+    for (uint32 itr = 0; itr < sCinematicSequencesStore.GetNumRows(); itr++)
     {
         CinematicSequencesEntry const* cinematicSequecenes = sCinematicSequencesStore.LookupEntry(itr);
 
@@ -312,12 +312,12 @@ size_t CinematicSequenceMgr::Load()
             cinematicSequence->KeyFramesCount = framePairs->Number;
             cinematicSequence->KeyFrames = new CinematicKeyFrame[cinematicSequence->KeyFramesCount];
 
-            for (uint32 i = 0; i < animationBlock->FramePairsCount; i += 1)
+            for (uint32 i = 0; i < animationBlock->FramePairsCount; i++)
             {
                 Pair * framePair = framePairs + i;
                 Pair * transPair = transPairs + i;
 
-                for (uint32 j = 0; j < framePair->Number; j += 1)
+                for (uint32 j = 0; j < framePair->Number; j++)
                 {
                     cinematicSequence->KeyFrames[j].Frame = ((uint32*)(fileBuffer + framePair->Offset))[j];
                     cinematicSequence->Duration = std::max(cinematicSequence->Duration, cinematicSequence->KeyFrames[j].Frame);
