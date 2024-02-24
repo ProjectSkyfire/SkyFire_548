@@ -18,7 +18,7 @@ class CinematicSequence
 {
 public:
     /// Constructor
-    CinematicSequence();
+    CinematicSequence() : Duration(0), KeyFramesCount(0), KeyFrames(NULL) { }
     /// Destructor
     ~CinematicSequence();
 

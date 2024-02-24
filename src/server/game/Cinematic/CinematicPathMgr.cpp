@@ -367,11 +367,6 @@ CinematicSequence const* CinematicSequenceMgr::GetSequence(uint32 p_SequenceID)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-/// Constructor
-CinematicSequence::CinematicSequence()
-{
-    KeyFrames = NULL;
-}
 /// Destructor
 CinematicSequence::~CinematicSequence()
 {
