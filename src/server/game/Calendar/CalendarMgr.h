@@ -313,7 +313,7 @@ class CalendarMgr
         void SendCalendarEventRemovedAlert(CalendarEvent const& calendarEvent);
         void SendCalendarEventModeratorStatus(CalendarEvent const& calendarEvent, CalendarInvite const& invite);
         void SendCalendarClearPendingAction(uint64 guid);
-        void SendCalendarCommandResult(uint64 guid, CalendarError err, char const* param = NULL);
+        void SendCalendarCommandResult(uint64 guid, CalendarError err, std::string param = "");
 
         void SendPacketToAllEventRelatives(WorldPacket packet, CalendarEvent const& calendarEvent);
 };

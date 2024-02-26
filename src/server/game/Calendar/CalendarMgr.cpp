@@ -792,11 +792,11 @@ void CalendarMgr::SendCalendarClearPendingAction(uint64 guid)
     }
 }
 
-void CalendarMgr::SendCalendarCommandResult(uint64 guid, CalendarError err, char const* param /*= NULL*/)
+void CalendarMgr::SendCalendarCommandResult(uint64 guid, CalendarError err, std::string param)
 {
     if (Player* player = ObjectAccessor::FindPlayer(guid))
     {
-        size_t length = param ? std::strlen(param) : 0;
+        size_t length = param.length();
         WorldPacket data(SMSG_CALENDAR_COMMAND_RESULT, 2 + 1 + 1 + length);
         data.WriteBits(length / 2, 8);
         data.WriteBit(length % 2);
@@ -809,7 +809,7 @@ void CalendarMgr::SendCalendarCommandResult(uint64 guid, CalendarError err, char
         case CALENDAR_ERROR_OTHER_INVITES_EXCEEDED:
         case CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S:
         case CALENDAR_ERROR_IGNORING_YOU_S:
-            data.WriteString(param ? param : "");
+            data.WriteString(param);
             break;
         default:
             break;
