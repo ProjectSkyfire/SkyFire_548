@@ -405,7 +405,7 @@ MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)
     return ret;
 }
 
-void MySQLConnection::PrepareStatement(uint32 index, const char* sql, ConnectionFlags flags)
+void MySQLConnection::PrepareStatement(uint32 index, std::string sql, ConnectionFlags flags)
 {
     m_queries.insert(PreparedStatementMap::value_type(index, std::make_pair(sql, flags)));
 
@@ -431,7 +431,7 @@ void MySQLConnection::PrepareStatement(uint32 index, const char* sql, Connection
     }
     else
     {
-        if (mysql_stmt_prepare(stmt, sql, static_cast<unsigned long>(strlen(sql))))
+        if (mysql_stmt_prepare(stmt, sql.c_str(), sql.length()))
         {
             SF_LOG_ERROR("sql.sql", "In mysql_stmt_prepare() id: %u, sql: \"%s\"", index, sql);
             SF_LOG_ERROR("sql.sql", "%s", mysql_stmt_error(stmt));

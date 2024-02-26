@@ -417,14 +417,6 @@ public:
         return *this;
     }
 
-    ByteBuffer &operator<<(const char *str)
-    {
-        if (size_t len = (str ? strlen(str) : 0))
-            append((uint8 const*)str, len);
-        append((uint8)0);
-        return *this;
-    }
-
     ByteBuffer &operator>>(bool &value)
     {
         value = read<char>() > 0 ? true : false;
