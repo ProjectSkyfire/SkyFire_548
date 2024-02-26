@@ -133,7 +133,7 @@ class ChatHandler
 class CliHandler : public ChatHandler
 {
     public:
-        typedef void Print(void*, char const*);
+        typedef void Print(void*, std::string);
         explicit CliHandler(void* callbackArg, Print* zprint) : m_callbackArg(callbackArg), m_print(zprint) { }
 
         // overwrite functions

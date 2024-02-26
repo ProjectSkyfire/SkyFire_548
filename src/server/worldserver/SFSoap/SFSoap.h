@@ -44,7 +44,7 @@ class SOAPCommand
         {
         }
 
-        void appendToPrintBuffer(const char* msg)
+        void appendToPrintBuffer(std::string msg)
         {
             m_printBuffer += msg;
         }
@@ -61,7 +61,7 @@ class SOAPCommand
             return m_success;
         }
 
-        static void print(void* callbackArg, const char* msg)
+        static void print(void* callbackArg, std::string msg)
         {
             ((SOAPCommand*)callbackArg)->appendToPrintBuffer(msg);
         }

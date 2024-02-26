@@ -515,7 +515,7 @@ enum WorldStates
 /// Storage class for commands issued for delayed execution
 struct CliCommandHolder
 {
-    typedef void Print(void*, const char*);
+    typedef void Print(void*, std::string);
     typedef void CommandFinished(void*, bool success);
 
     void* m_callbackArg;

@@ -76,12 +76,12 @@ int cli_hook_func()
 
 #endif
 
-void utf8print(void* /*arg*/, const char* str)
+void utf8print(void* /*arg*/, std::string str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
     size_t wtemp_len = 6000-1;
-    if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
+    if (!Utf8toWStr(str.c_str(), str.length(), wtemp_buf, wtemp_len))
         return;
 
     char temp_buf[6000];
