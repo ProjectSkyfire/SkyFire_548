@@ -8,10 +8,11 @@
 
 #include "openssl/hmac.h"
 #include "openssl/evp.h"
+#include <string>
 
 namespace TOTP
 {
-    unsigned int GenerateToken(const char* b32key);
+    unsigned int GenerateToken(std::string b32key);
 }
 
 #endif
