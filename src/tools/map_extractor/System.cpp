@@ -235,7 +235,7 @@ uint32 ReadBuild(int locale)
         exit(1);
     }
 
-    char buff[512];
+    char buff[512] = { 0 };
     DWORD readBytes = 0;
     SFileReadFile(dbcFile, buff, 512, &readBytes, NULL);
     if (!readBytes)
@@ -246,9 +246,10 @@ uint32 ReadBuild(int locale)
 
     std::string text = buff;
     SFileCloseFile(dbcFile);
+    std::string version = "version=\"";
 
-    size_t pos = text.find("version=\"");
-    size_t pos1 = pos + strlen("version=\"");
+    size_t pos = text.find(version);
+    size_t pos1 = pos + version.length();
     size_t pos2 = text.find("\"", pos1);
     if (pos == text.npos || pos2 == text.npos || pos1 >= pos2)
     {
@@ -1144,8 +1145,9 @@ void ExtractCameraFiles(int locale, bool basicLocale)
     for (std::string thisFile : camerafiles)
     {
         std::string filename = path;
+        std::string camerasFolder = "Cameras\\";
         HANDLE dbcFile = NULL;
-        filename += (thisFile.c_str() + strlen("Cameras\\"));
+        filename += (thisFile.c_str() + camerasFolder.length());
 
         if (FileExists(filename.c_str()))
             continue;
