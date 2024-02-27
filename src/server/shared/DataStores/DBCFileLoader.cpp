@@ -112,7 +112,7 @@ DBCFileLoader::Record DBCFileLoader::getRecord(size_t id)
     return Record(*this, data + id * recordSize);
 }
 
-uint32 DBCFileLoader::GetFormatRecordSize(const char* format, int32* index_pos)
+uint32 DBCFileLoader::GetFormatRecordSize(std::string format, int32* index_pos)
 {
     uint32 recordsize = 0;
     int32 i = -1;
@@ -154,7 +154,7 @@ uint32 DBCFileLoader::GetFormatRecordSize(const char* format, int32* index_pos)
     return recordsize;
 }
 
-char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**& indexTable, uint32 sqlRecordCount, uint32 sqlHighestIndex, char*& sqlDataTable)
+char* DBCFileLoader::AutoProduceData(std::string format, uint32& records, char**& indexTable, uint32 sqlRecordCount, uint32 sqlHighestIndex, char*& sqlDataTable)
 {
     /*
     format STRING, NA, FLOAT, NA, INT <=>
@@ -168,7 +168,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
     */
 
     typedef char* ptr;
-    if (strlen(format) != fieldCount)
+    if (format.length() != fieldCount)
         return NULL;
 
     //get struct size and index pos
@@ -249,9 +249,9 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
     return dataTable;
 }
 
-char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable)
+char* DBCFileLoader::AutoProduceStrings(std::string format, char* dataTable)
 {
-    if (strlen(format) != fieldCount)
+    if (format.length() != fieldCount)
         return NULL;
 
     char* stringPool = new char[stringSize];

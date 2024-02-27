@@ -169,7 +169,7 @@ DB2FileLoader::Record DB2FileLoader::getRecord(size_t id)
     return Record(*this, data + id*recordSize);
 }
 
-uint32 DB2FileLoader::GetFormatRecordSize(const char * format, int32* index_pos)
+uint32 DB2FileLoader::GetFormatRecordSize(std::string format, int32* index_pos)
 {
     uint32 recordsize = 0;
     int32 i = -1;
@@ -203,7 +203,7 @@ uint32 DB2FileLoader::GetFormatRecordSize(const char * format, int32* index_pos)
     return recordsize;
 }
 
-uint32 DB2FileLoader::GetFormatStringsFields(const char * format)
+uint32 DB2FileLoader::GetFormatStringsFields(std::string format)
 {
     uint32 stringfields = 0;
     for (uint32 x=0; format[x]; ++x)
@@ -213,10 +213,10 @@ uint32 DB2FileLoader::GetFormatStringsFields(const char * format)
     return stringfields;
 }
 
-char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**& indexTable)
+char* DB2FileLoader::AutoProduceData(std::string format, uint32& records, char**& indexTable)
 {
     typedef char * ptr;
-    if (strlen(format) != fieldCount)
+    if (format.length() != fieldCount)
         return NULL;
 
     //get struct size and index pos
@@ -288,9 +288,9 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
 
 static char const* const nullStr = "";
 
-char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* dataTable)
+char* DB2FileLoader::AutoProduceStringsArrayHolders(std::string format, char* dataTable)
 {
-    if (strlen(format) != fieldCount)
+    if (format.length() != fieldCount)
         return NULL;
 
     // we store flat holders pool as single memory block
@@ -346,9 +346,9 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
     return stringHoldersPool;
 }
 
-char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable, uint32 locale)
+char* DB2FileLoader::AutoProduceStrings(std::string format, char* dataTable, uint32 locale)
 {
-    if (strlen(format) != fieldCount)
+    if (format.length() != fieldCount)
         return NULL;
 
     char* stringPool= new char[stringSize];
@@ -360,29 +360,29 @@ char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable, uin
     {
         for (uint32 x = 0; x < fieldCount; x++)
             switch (format[x])
-        {
-            case FT_FLOAT:
-            case FT_IND:
-            case FT_INT:
-                offset += 4;
-                break;
-            case FT_BYTE:
-                offset += 1;
-                break;
-            case FT_STRING:
             {
-                // fill only not filled entries
-                LocalizedString* db2str = *(LocalizedString**)(&dataTable[offset]);
-                if (db2str->Str[locale] == nullStr)
+                case FT_FLOAT:
+                case FT_IND:
+                case FT_INT:
+                    offset += 4;
+                    break;
+                case FT_BYTE:
+                    offset += 1;
+                    break;
+                case FT_STRING:
                 {
-                    const char * st = getRecord(y).getString(x);
-                    db2str->Str[locale] = stringPool + (st - (const char*)stringTable);
-                }
+                    // fill only not filled entries
+                    LocalizedString* db2str = *(LocalizedString**)(&dataTable[offset]);
+                    if (db2str->Str[locale] == nullStr)
+                    {
+                        const char * st = getRecord(y).getString(x);
+                        db2str->Str[locale] = stringPool + (st - (const char*)stringTable);
+                    }
 
-                offset += sizeof(char*);
-                break;
+                    offset += sizeof(char*);
+                    break;
+                }
             }
-        }
     }
 
     return stringPool;

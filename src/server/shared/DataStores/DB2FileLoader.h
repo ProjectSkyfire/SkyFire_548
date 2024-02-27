@@ -9,6 +9,7 @@
 #include "Define.h"
 #include "Utilities/ByteConverter.h"
 #include <cassert>
+#include <string>
 
 class DB2FileLoader
 {
@@ -68,11 +69,11 @@ public:
     uint32 GetOffset(size_t id) const { return (fieldsOffset != NULL && id < fieldCount) ? fieldsOffset[id] : 0; }
     uint32 GetHash() const { return tableHash; }
     bool IsLoaded() const { return (data != NULL); }
-    char* AutoProduceData(const char* fmt, uint32& count, char**& indexTable);
-    char* AutoProduceStringsArrayHolders(const char* fmt, char* dataTable);
-    char* AutoProduceStrings(const char* fmt, char* dataTable, uint32 locale);
-    static uint32 GetFormatRecordSize(const char * format, int32 * index_pos = NULL);
-    static uint32 GetFormatStringsFields(const char * format);
+    char* AutoProduceData(std::string fmt, uint32& count, char**& indexTable);
+    char* AutoProduceStringsArrayHolders(std::string fmt, char* dataTable);
+    char* AutoProduceStrings(std::string fmt, char* dataTable, uint32 locale);
+    static uint32 GetFormatRecordSize(std::string format, int32 * index_pos = NULL);
+    static uint32 GetFormatStringsFields(std::string format);
 
 private:
     uint32 recordSize;
