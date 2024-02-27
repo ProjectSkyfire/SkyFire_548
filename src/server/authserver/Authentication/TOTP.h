@@ -12,7 +12,7 @@
 
 namespace TOTP
 {
-    unsigned int GenerateToken(std::string b32key);
+    unsigned int GenerateToken(std::string& b32key);
 }
 
 #endif

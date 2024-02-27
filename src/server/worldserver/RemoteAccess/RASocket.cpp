@@ -368,7 +368,7 @@ int RASocket::svc(void)
     return 0;
 }
 
-void RASocket::zprint(void* callbackArg, std::string text)
+void RASocket::zprint(void* callbackArg, std::string& text)
 {
     if (text.empty() || !callbackArg)
         return;

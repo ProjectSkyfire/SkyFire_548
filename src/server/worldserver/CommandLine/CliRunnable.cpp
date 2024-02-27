@@ -76,7 +76,7 @@ int cli_hook_func()
 
 #endif
 
-void utf8print(void* /*arg*/, std::string str)
+void utf8print(void* /*arg*/, std::string& str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];

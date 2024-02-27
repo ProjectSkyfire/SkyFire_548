@@ -5,7 +5,7 @@
 
 #include "TOTP.h"
 
-int base32_decode(std::string encoded, char* result, int bufSize)
+int base32_decode(std::string& encoded, char* result, int bufSize)
 {
     // Base32 implementation
     // Copyright 2010 Google Inc.
@@ -55,7 +55,7 @@ int base32_decode(std::string encoded, char* result, int bufSize)
 
 namespace TOTP
 {
-    unsigned int GenerateToken(std::string b32key)
+    unsigned int GenerateToken(std::string& b32key)
     {
         size_t keySize = b32key.length();
         int bufsize = (keySize + 7)/8*5;
