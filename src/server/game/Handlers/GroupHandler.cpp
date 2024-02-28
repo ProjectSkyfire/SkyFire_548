@@ -45,14 +45,15 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     SendPacket(&data);
 }
 
-void WorldSession::SendGroupInviteNotification(const std::string& inviterName, bool inGroup)
+void WorldSession::SendGroupInviteNotification(const std::string& inviterName, const std::string& realmName, bool inGroup)
 {
     SF_LOG_DEBUG("network", "WORLD: sending SMSG_GROUP_INVITE");
     
     ObjectGuid invitedGuid = GetPlayer()->GetGUID();
+    
 
-    WorldPacket data(SMSG_GROUP_INVITE, 6 + 1 + 8 + 8 + 4 + 4 + 4 + inviterName.size());
-    data.WriteBits(0, 8);
+    WorldPacket data(SMSG_GROUP_INVITE, 6 + 1 + 8 + 8 + 4 + 4 + 4 + inviterName.size() + realmName.size());
+    data.WriteBits(realmName.size(), 8);
     data.WriteBits(0, 8);
     data.WriteBit(invitedGuid[2]);
     data.WriteBit(0);
@@ -62,8 +63,8 @@ void WorldSession::SendGroupInviteNotification(const std::string& inviterName, b
     data.WriteBit(!inGroup);                            // inverse already in group
     data.WriteBit(0);                                   // auto decline
     data.WriteBit(invitedGuid[1]);
-    data.WriteBit(0);                                   // cross realm invite (includes hyphen between inviter and server name)
-    data.WriteBit(0);                                   // realm transfer warning("Accepting this invitation may transfer you to another realm")
+    data.WriteBit(1);                                   // cross realm invite (includes hyphen between inviter and server name)
+    data.WriteBit(1);                                   // realm transfer warning("Accepting this invitation may transfer you to another realm")
     data.WriteBits(0, 22);                              // counter
     data.WriteBit(invitedGuid[3]);
     data.WriteBit(invitedGuid[0]);
@@ -72,10 +73,11 @@ void WorldSession::SendGroupInviteNotification(const std::string& inviterName, b
     data.FlushBits();
 
     data.WriteByteSeq(invitedGuid[6]);
+    data.WriteString(realmName);
     data.WriteByteSeq(invitedGuid[7]);
     data.WriteByteSeq(invitedGuid[2]);
     data.WriteByteSeq(invitedGuid[0]);
-    data << uint64(0);
+    data << uint64(0); // BnetAccID
     data << uint32(0);
     data << uint32(0);
     data.WriteByteSeq(invitedGuid[1]);
@@ -96,11 +98,11 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_GROUP_INVITE");
 
-    ObjectGuid crossRealmGuid;                                      // unused
+    ObjectGuid crossRealmGuid;       // unused
 
-    recvData.read_skip<uint32>();                                   // Non-zero in cross realm invites
-    recvData.read_skip<uint8>();                                    // Unknown
-    recvData.read_skip<uint32>();                                   // Always 0
+    recvData.read_skip<uint32>();    // Non-zero in cross realm invites
+    recvData.read_skip<uint8>();     // Unknown
+    recvData.read_skip<uint32>();    // Always 0
 
     crossRealmGuid[7] = recvData.ReadBit();
     uint8 realmLen = recvData.ReadBits(9);
@@ -117,12 +119,21 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(crossRealmGuid[6]);
     recvData.ReadByteSeq(crossRealmGuid[0]);
     recvData.ReadByteSeq(crossRealmGuid[4]);
-    std::string realmName = recvData.ReadString(realmLen);          // unused
+    std::string realmName = recvData.ReadString(realmLen);
     recvData.ReadByteSeq(crossRealmGuid[1]);
     recvData.ReadByteSeq(crossRealmGuid[2]);
     recvData.ReadByteSeq(crossRealmGuid[3]);
     std::string memberName = recvData.ReadString(nameLen);
     recvData.ReadByteSeq(crossRealmGuid[5]);
+
+    if (realmName.empty())
+    {
+        RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
+        if (iter != realmNameStore.end()) // Add local realm
+        {
+            realmName = iter->second;
+        }
+    }
 
     // attempt add selected player
 
@@ -190,7 +201,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         if (group2)
         {
             // tell the player that they were invited but it failed as they were already in a group
-            player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetName(), true);
+            player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetName(), realmName, true);
         }
 
         return;
@@ -240,7 +251,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     }
 
     // ok, we do it
-    player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetName(), false);
+    player->GetSession()->SendGroupInviteNotification(GetPlayer()->GetName(), realmName, false);
 
     SendPartyResult(PartyOperation::PARTY_OP_INVITE, memberName, PartyResult::ERR_PARTY_RESULT_OK);
 }
