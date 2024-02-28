@@ -666,7 +666,7 @@ bool AuthSocket::_HandleLogonProof()
             char* token = new char[size + 1];
             token[size] = '\0';
             socket().recv(token, size);
-            unsigned int validToken = TOTP::GenerateToken(_tokenKey.c_str());
+            unsigned int validToken = TOTP::GenerateToken(_tokenKey);
             unsigned int incomingToken = atoi(token);
             delete [] token;
             if (validToken != incomingToken)

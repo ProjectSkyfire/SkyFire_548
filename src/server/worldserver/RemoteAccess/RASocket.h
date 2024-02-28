@@ -38,7 +38,7 @@ class RASocket : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
         int check_password(const std::string& user, const std::string& pass);
         int send(const std::string& line);
 
-        static void zprint(void* callbackArg, std::string& text);
+        static void zprint(void* callbackArg, const char* szText);
         static void commandFinished(void* callbackArg, bool success);
 
     private:

@@ -368,16 +368,16 @@ int RASocket::svc(void)
     return 0;
 }
 
-void RASocket::zprint(void* callbackArg, std::string& text)
+void RASocket::zprint(void* callbackArg, const char* szText)
 {
-    if (text.empty() || !callbackArg)
+    if (!szText || !callbackArg)
         return;
 
     RASocket* socket = static_cast<RASocket*>(callbackArg);
-    size_t len = text.length();
+    size_t sz = strlen(szText);
 
-    ACE_Message_Block* mb = new ACE_Message_Block(len);
-    mb->copy(text.c_str(), len);
+    ACE_Message_Block* mb = new ACE_Message_Block(sz);
+    mb->copy(szText, sz);
 
     ACE_Time_Value tv = ACE_Time_Value::zero;
     if (socket->putq(mb, &tv) == -1)
