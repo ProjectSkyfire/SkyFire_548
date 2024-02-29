@@ -17,7 +17,7 @@ It is completely open source; community involvement is highly encouraged.
 
 If you wish to contribute ideas or code please visit our site linked below or
 make pull requests to our 
-[Github repository](https://github.com/ProjectSkyfire/SkyFire.548).
+[Codeberg repository](https://codeberg.org/ProjectSkyfire/SkyFire_548/pulls).
 
 For further information on the SkyFire project, please visit our project website at 
 [projectskyfire.org](http://www.projectskyfire.org).
@@ -26,7 +26,7 @@ For further information on the SkyFire project, please visit our project website
 **MoP 5.4.8 Build 18414**
 
 ## Client Patch
-[SkyFire-Community-Tools](https://github.com/ProjectSkyfire/SkyFire-Community-Tools).
+[SkyFire-Community-Tools](https://codeberg.org/ProjectSkyfire/Community-Tools).
 
 ## Requirements
 + Platform/Architecture:
@@ -51,19 +51,19 @@ For further information on the SkyFire project, please visit our project website
 ## Install
 Detailed installation guides are available in the wiki for
 
-[Windows](http://wiki.projectskyfire.org/index.php?title=Installation_Windows),
-[Linux](http://wiki.projectskyfire.org/index.php?title=Installation_(Ubuntu_18.04_LTS)) and
-[Mac OSX](http://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
+[Windows](https://wiki.projectskyfire.org/index.php?title=Installation_Windows),
+[Linux](https://wiki.projectskyfire.org/index.php?title=Installation_(Ubuntu_18.04_LTS)) and
+[Mac OSX](https://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
 
 
 ## Reporting issues
 Please use the search function before you report issues.
-[SkyFire Issue Tracker](https://github.com/ProjectSkyfire/SkyFire.548/issues).
+[SkyFire Issue Tracker](https://codeberg.org/ProjectSkyfire/SkyFire_548/issues).
 
 ## Submitting fixes
 Fixes are submitted as pull requests via Github.
 
-[SkyFire Pull Request](https://github.com/ProjectSkyfire/SkyFire.548/pulls)
+[SkyFire Pull Request](https://codeberg.org/ProjectSkyfire/SkyFire_548/pulls)
 
 ## Copyright
 License: GPL 3.0
@@ -74,10 +74,10 @@ Read file [LICENSE](LICENSE.md)
 Read file [THANKS](THANKS.md)
 
 ## Links
-Forum [https://forum.projectskyfire.org/](https://forum.projectskyfire.org/)
+Forum [https://www.projectskyfire.org/](https://www.projectskyfire.org/)
 
 Database Releases [https://github.com/ProjectSkyfire/database/releases)
 
-Wiki [http://wiki.projectskyfire.org](http://wiki.projectskyfire.org)
+Wiki [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
 
 :)
