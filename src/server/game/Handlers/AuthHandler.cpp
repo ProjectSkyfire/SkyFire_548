@@ -117,7 +117,7 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
         packet << uint32(0);
         packet << uint8(Expansion()); // Active Expansion
         packet << uint32(0);
-        packet << uint32(0);          // unk time in ms
+        packet << uint32(0);          // "Your playtime expires in %u minutes." Gossip Code Box Warning, 1 = 1min
         packet << uint8(Expansion()); // Server Expansion
         packet << uint32(0);
         packet << uint32(0);
