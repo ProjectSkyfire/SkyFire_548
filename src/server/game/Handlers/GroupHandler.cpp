@@ -128,7 +128,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
 
     if (realmName.empty())
     {
-        RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
+        CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(_player->GetGUID()));
+        RealmNameMap::const_iterator iter = realmNameStore.find(nameData->m_realm);
         if (iter != realmNameStore.end()) // Add local realm
         {
             realmName = iter->second;
