@@ -194,6 +194,7 @@ DELETE FROM `channels`;
 DROP TABLE IF EXISTS `characters`;
 CREATE TABLE IF NOT EXISTS `characters` (
   `guid` int unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `realm` int unsigned NOT NULL DEFAULT '0' COMMENT 'Realm Identifier',
   `account` int unsigned NOT NULL DEFAULT '0' COMMENT 'Account Identifier',
   `name` varchar(12) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `slot` tinyint unsigned NOT NULL DEFAULT '0',
