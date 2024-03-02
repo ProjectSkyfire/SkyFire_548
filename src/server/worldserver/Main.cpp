@@ -43,6 +43,7 @@ LoginDatabaseWorkerPool LoginDatabase;                      ///< Accessor to the
 
 RealmNameMap realmNameStore;
 uint32 realmID;                                             ///< Id of the realm
+uint32 virtualRealmID;                                      ///< Id of the realm
 
 /// Print out the usage string for this program on the console.
 void usage(const char* prog)

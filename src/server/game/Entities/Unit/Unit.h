@@ -1574,6 +1574,10 @@ class Unit : public WorldObject
     {
         return GetByteValue(UNIT_FIELD_SEX, 3);
     }
+    uint32 getVirtualRealm() const
+    {
+        return uint8(GetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM));
+    }
 
     void SetRace(uint8 race)
     {

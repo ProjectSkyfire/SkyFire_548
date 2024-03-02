@@ -48,8 +48,8 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 
     if (nameData)
     {
-        data << uint32(realmID); // realmIdSecond
-        data << uint32(1); // AccID
+        data << uint32(nameData->m_realm); // realmIdSecond
+        data << uint32(GetAccountId()); // AccID
         data << uint8(nameData->m_class);
         data << uint8(nameData->m_race);
         data << uint8(nameData->m_level);

@@ -537,6 +537,7 @@ typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 
 struct CharacterNameData
 {
+    uint32 m_realm;
     std::string m_name;
     uint8 m_class;
     uint8 m_race;
@@ -779,8 +780,8 @@ class World
         bool isEventKillStart;
 
         CharacterNameData const* GetCharacterNameData(uint32 guid) const;
-        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
-        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE);
+        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint32 realm);
+        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE, uint32 realm = -1);
         void UpdateCharacterNameDataLevel(uint32 guid, uint8 level);
         void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
         bool HasCharacterNameData(uint32 guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
@@ -898,6 +899,7 @@ typedef std::map<uint32, std::string> RealmNameMap;
 
 extern RealmNameMap realmNameStore;
 extern uint32 realmID;
+extern uint32 virtualRealmID;
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
 #endif

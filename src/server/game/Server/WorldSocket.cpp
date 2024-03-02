@@ -871,6 +871,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     SHA1Hash sha;
     BigNumber k;
     WorldPacket addonsData;
+    uint32 VirtualRealmID;
 
     recvPacket.read_skip<uint32>();
     recvPacket.read_skip<uint32>();
@@ -879,7 +880,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket >> digest[3];
     recvPacket >> digest[4];
     recvPacket >> digest[0];
-    recvPacket.read_skip<uint32>();
+    recvPacket >> VirtualRealmID;
     recvPacket >> digest[11];
     recvPacket >> clientSeed;
     recvPacket >> digest[19];
@@ -917,6 +918,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: World closed, denying client (%s).", GetRemoteAddress().c_str());
         return -1;
     }
+
+    virtualRealmID = VirtualRealmID;
+    SF_LOG_INFO("network", "WorldSocket::Setting VirtualRealmID: %u", VirtualRealmID);
 
     // Get the account information from the realmd database
     //         0           1        2       3          4         5       6          7   8

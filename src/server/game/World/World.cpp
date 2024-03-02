@@ -3324,7 +3324,7 @@ void World::LoadCharacterNameData()
 {
     SF_LOG_INFO("server.loading", "Loading character name data");
 
-    QueryResult result = CharacterDatabase.Query("SELECT guid, name, race, gender, class, level FROM characters WHERE deleteDate IS NULL");
+    QueryResult result = CharacterDatabase.Query("SELECT guid, name, race, gender, class, level, realm FROM characters WHERE deleteDate IS NULL");
     if (!result)
     {
         SF_LOG_INFO("server.loading", "No character name data loaded, empty query");
@@ -3337,16 +3337,17 @@ void World::LoadCharacterNameData()
     {
         Field* fields = result->Fetch();
         AddCharacterNameData(fields[0].GetUInt32(), fields[1].GetString(),
-            fields[3].GetUInt8() /*gender*/, fields[2].GetUInt8() /*race*/, fields[4].GetUInt8() /*class*/, fields[5].GetUInt8() /*level*/);
+            fields[3].GetUInt8() /*gender*/, fields[2].GetUInt8() /*race*/, fields[4].GetUInt8() /*class*/, fields[5].GetUInt8() /*level*/, fields[6].GetUInt32());
         ++count;
     } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", "Loaded name data for %u characters", count);
 }
 
-void World::AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level)
+void World::AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint32 realm)
 {
     CharacterNameData& data = _characterNameDataMap[guid];
+    data.m_realm = realm;
     data.m_name = name;
     data.m_race = race;
     data.m_gender = gender;
@@ -3354,12 +3355,13 @@ void World::AddCharacterNameData(uint32 guid, std::string const& name, uint8 gen
     data.m_level = level;
 }
 
-void World::UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender /*= GENDER_NONE*/, uint8 race /*= RACE_NONE*/)
+void World::UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender /*= GENDER_NONE*/, uint8 race /*= RACE_NONE*/, uint32 realm)
 {
     std::map<uint32, CharacterNameData>::iterator itr = _characterNameDataMap.find(guid);
     if (itr == _characterNameDataMap.end())
         return;
 
+    itr->second.m_realm = realm;
     itr->second.m_name = name;
 
     if (gender != GENDER_NONE)

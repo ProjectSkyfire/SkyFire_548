@@ -58,9 +58,9 @@ ConfVersion=2021081800
 #    RealmID
 #        Description: ID of the Realm using this config.
 #        Important:   RealmID must match the realmlist inside the auth database.
-#        Default:     1
+#        Default:     -1
 
-RealmID = 1
+RealmID = -1
 
 #
 #    DataDir
