@@ -295,7 +295,7 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 
     stmt->setUInt8(0, PET_SAVE_AS_CURRENT);
     stmt->setUInt32(1, GetAccountId());
-    stmt->setUInt32(2, virtualRealmID);
+    stmt->setUInt32(2, GetVirtualRealmID());
 
     _charEnumCallback = CharacterDatabase.AsyncQuery(stmt);
 }

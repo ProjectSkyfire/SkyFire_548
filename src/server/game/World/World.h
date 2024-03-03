@@ -899,7 +899,6 @@ typedef std::map<uint32, std::string> RealmNameMap;
 
 extern RealmNameMap realmNameStore;
 extern uint32 realmID;
-extern uint32 virtualRealmID;
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
 #endif

@@ -91,6 +91,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     _player(NULL),
     m_Socket(sock),
     _security(sec),
+    m_virtualRealmID(0),
     _accountId(id),
     m_expansion(expansion),
     m_charBooster(new CharacterBooster(this)),

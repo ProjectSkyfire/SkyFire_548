@@ -292,6 +292,9 @@ class WorldSession
         void LoadPermissions();
         void InvalidateRBACData(); // Used to force LoadPermissions at next HasPermission check
 
+        void SetVirtualRealmID(uint32 VRealmID) { m_virtualRealmID = VRealmID; }
+        uint32 GetVirtualRealmID() { return m_virtualRealmID; }
+
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
         Player* GetPlayer() const { return _player; }
@@ -1165,6 +1168,7 @@ class WorldSession
 
         AccountTypes _security;
         uint32 _accountId;
+        uint32 m_virtualRealmID;
         uint8 m_expansion;
         CharacterBooster* m_charBooster;
 

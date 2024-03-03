@@ -919,9 +919,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
-    virtualRealmID = VirtualRealmID;
-    SF_LOG_INFO("network", "WorldSocket::Setting VirtualRealmID: %u", VirtualRealmID);
-
     // Get the account information from the realmd database
     //         0           1        2       3          4         5       6          7   8
     // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os FROM account WHERE username = ?
@@ -1085,6 +1082,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(addonsData);
     m_Session->LoadPermissions();
+
+    m_Session->SetVirtualRealmID(VirtualRealmID);
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED))
