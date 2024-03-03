@@ -434,9 +434,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         data.WriteBits(pname.size(), 6);
 
         bytesData.WriteByteSeq(playerGuid[1]);
-        bytesData << uint32(realmID);
+        bytesData << uint32(target->GetSession()->GetVirtualRealmID());
         bytesData.WriteByteSeq(playerGuid[7]);
-        bytesData << uint32(realmID);
+        bytesData << uint32(realmID); // NYI. guild creation virtual realm id.
         bytesData.WriteByteSeq(playerGuid[4]);
         bytesData.WriteString(pname);
         bytesData.WriteByteSeq(guildGuid[1]);
