@@ -606,21 +606,23 @@ void Guild::BankTab::SendText(Guild const* guild, WorldSession* session) const
 // Member
 void Guild::Member::SetStats(Player* player)
 {
-    m_name      = player->GetName();
-    m_level     = player->getLevel();
-    m_class     = player->getClass();
-    m_zoneId    = player->GetZoneId();
-    m_accountId = player->GetSession()->GetAccountId();
+    m_memberVRealm      = player->getVirtualRealm();
+    m_name              = player->GetName();
+    m_level             = player->getLevel();
+    m_class             = player->getClass();
+    m_zoneId            = player->GetZoneId();
+    m_accountId         = player->GetSession()->GetAccountId();
     m_achievementPoints = player->GetAchievementPoints();
 }
 
-void Guild::Member::SetStats(std::string const& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId, uint32 reputation)
+void Guild::Member::SetStats(uint32 virtualRealmID, std::string const& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId, uint32 reputation)
 {
-    m_name      = name;
-    m_level     = level;
-    m_class     = _class;
-    m_zoneId    = zoneId;
-    m_accountId = accountId;
+    m_memberVRealm    = virtualRealmID;
+    m_name            = name;
+    m_level           = level;
+    m_class           = _class;
+    m_zoneId          = zoneId;
+    m_accountId       = accountId;
     m_totalReputation = reputation;
 }
 
@@ -686,7 +688,8 @@ bool Guild::Member::LoadFromDB(Field* fields)
     for (uint8 i = 0; i <= GUILD_BANK_MAX_TABS; ++i)
         m_bankWithdraw[i] = fields[5 + i].GetUInt32();
 
-    SetStats(fields[14].GetString(),
+    SetStats(fields[20].GetUInt32(),
+             fields[14].GetString(),
              fields[15].GetUInt8(),                         // characters.level
              fields[16].GetUInt8(),                         // characters.class
              fields[17].GetUInt16(),                        // characters.zone
@@ -1409,7 +1412,7 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         memberData << float(member->IsOnline() ? 0.0f : float(::time(NULL) - member->GetLogoutTime()) / float(DAY));
         memberData << uint8(0);        // Gender
         memberData << uint32(member->GetRankId());
-        memberData << uint32(realmID);
+        memberData << uint32(member->GetVirtualRealm());
         memberData.WriteByteSeq(guid[5]);
         memberData.WriteByteSeq(guid[7]);
         memberData.WriteString(member->GetPublicNote());
@@ -2866,6 +2869,7 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
             Field* fields = result->Fetch();
             name = fields[0].GetString();
             member->SetStats(
+                fields[5].GetUInt32(),
                 name,
                 fields[1].GetUInt8(),
                 fields[2].GetUInt8(),

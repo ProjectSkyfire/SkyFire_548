@@ -347,7 +347,7 @@ private:
         }
 
         void SetStats(Player* player);
-        void SetStats(std::string const& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId, uint32 reputation);
+        void SetStats(uint32 virtualRealmID, std::string const& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId, uint32 reputation);
         bool CheckStats() const;
 
         void SetPublicNote(std::string const& publicNote);
@@ -366,6 +366,7 @@ private:
         void SaveToDB(SQLTransaction& trans) const;
 
         uint64 GetGUID() const { return m_guid; }
+        uint32 GetVirtualRealm() const { return m_memberVRealm; }
         std::string const& GetName() const { return m_name; }
         uint32 GetAccountId() const { return m_accountId; }
         uint8 GetRankId() const { return m_rankId; }
@@ -401,6 +402,7 @@ private:
         uint32 m_guildId;
         // Fields from characters table
         uint64 m_guid;
+        uint32 m_memberVRealm;
         std::string m_name;
         uint32 m_zoneId;
         uint8 m_level;
