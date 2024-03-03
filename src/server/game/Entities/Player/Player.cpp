@@ -8213,9 +8213,9 @@ void Player::DuelComplete(DuelCompleteType type)
         data.WriteBits(duel->opponent->GetName().length(), 6);
         data.WriteBits(GetName().length(), 6);
         data.FlushBits();
-        data << uint32(realmID);
+        data << uint32(GetSession()->GetVirtualRealmID());
         data.WriteString(duel->opponent->GetName());
-        data << uint32(realmID);
+        data << uint32(duel->opponent->GetSession()->GetVirtualRealmID());
         data.WriteString(GetName());
         SendMessageToSet(&data, true);
     }
