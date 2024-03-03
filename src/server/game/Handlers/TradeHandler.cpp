@@ -763,6 +763,14 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
     if (!my_trade)
         return;
 
+    Player* trader = my_trade->GetTrader();
+
+    if (trader->getVirtualRealm() != _player->getVirtualRealm())
+    {
+        SendTradeStatus(TRADE_STATUS_WRONG_REALM);
+        return;
+    }
+
     // gold can be incorrect, but this is checked at trade finished.
     my_trade->SetMoney(gold);
 }
@@ -795,6 +803,17 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
     {
         SendTradeStatus(TRADE_STATUS_CANCELLED);
         return;
+    }
+
+    Player* trader = my_trade->GetTrader();
+
+    if (trader->getVirtualRealm() != _player->getVirtualRealm())
+    {
+        if (item->GetTemplate()->Class != ITEM_CLASS_CONSUMABLE)
+        {
+            SendTradeStatus(TRADE_STATUS_WRONG_REALM);
+            return;
+        }
     }
 
     uint64 iGUID = item->GetGUID();
