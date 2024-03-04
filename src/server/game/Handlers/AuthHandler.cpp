@@ -62,7 +62,7 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
             std::string normalized = itr->second;
             normalized.erase(std::remove_if(normalized.begin(), normalized.end(), ::isspace), normalized.end());
             packet.WriteBits(normalized.size(), 8);
-            packet.WriteBit(itr->first == m_virtualRealmID); // Home realm
+            packet.WriteBit(itr->first == GetVirtualRealmID()); // Home realm
         }
 
         packet.WriteBits(PLAYABLE_CLASSES_COUNT, 23);

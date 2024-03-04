@@ -992,7 +992,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
 
     stmt->setUInt32(0, id);
-    stmt->setInt32(1, int32(realmID));
+    stmt->setInt32(1, int32(VirtualRealmID));
 
     result = LoginDatabase.Query(stmt);
 

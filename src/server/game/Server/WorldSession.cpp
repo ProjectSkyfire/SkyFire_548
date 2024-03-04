@@ -1226,11 +1226,11 @@ void WorldSession::LoadPermissions()
     AccountMgr::GetName(id, name);
     AccountTypes secLevel = GetSecurity();
 
-    _RBACData = new rbac::RBACData(id, name, realmID, uint8(secLevel));
+    _RBACData = new rbac::RBACData(id, name, GetVirtualRealmID(), uint8(secLevel));
     _RBACData->LoadFromDB();
 
     SF_LOG_DEBUG("rbac", "WorldSession::LoadPermissions [AccountId: %u, Name: %s, realmId: %d, secLevel: %u]",
-                   id, name.c_str(), realmID, uint8(secLevel));
+                   id, name.c_str(), GetVirtualRealmID(), uint8(secLevel));
 }
 
 rbac::RBACData* WorldSession::GetRBACData()
@@ -1245,7 +1245,7 @@ bool WorldSession::HasPermission(uint32 permission)
 
     bool hasPermission = _RBACData->HasPermission(permission);
     SF_LOG_DEBUG("rbac", "WorldSession::HasPermission [AccountId: %u, Name: %s, realmId: %d]",
-                   _RBACData->GetId(), _RBACData->GetName().c_str(), realmID);
+                   _RBACData->GetId(), _RBACData->GetName().c_str(), GetVirtualRealmID());
 
     return hasPermission;
 }
@@ -1253,7 +1253,7 @@ bool WorldSession::HasPermission(uint32 permission)
 void WorldSession::InvalidateRBACData()
 {
     SF_LOG_DEBUG("rbac", "WorldSession::Invalidaterbac::RBACData [AccountId: %u, Name: %s, realmId: %d]",
-                   _RBACData->GetId(), _RBACData->GetName().c_str(), realmID);
+                   _RBACData->GetId(), _RBACData->GetName().c_str(), GetVirtualRealmID());
     delete _RBACData;
     _RBACData = NULL;
 }

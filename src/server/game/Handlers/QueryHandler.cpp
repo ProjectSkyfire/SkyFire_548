@@ -172,7 +172,7 @@ void WorldSession::SendRealmNameQueryOpcode(uint32 realmId)
     if (found)
     {
         data.WriteBits(realmName.length(), 8);
-        data.WriteBit(realmId == realmID);
+        data.WriteBit(realmId == GetVirtualRealmID());
         data.WriteBits(realmName.length(), 8);
         data.FlushBits();
 
