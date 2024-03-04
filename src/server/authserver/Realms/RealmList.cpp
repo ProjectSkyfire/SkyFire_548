@@ -57,7 +57,7 @@ void RealmList::UpdateRealms(bool init)
 {
     SF_LOG_INFO("server.authserver", "Updating Realm List...");
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST);
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTH_REALMLIST);
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
     // Circle through results and add them to the realm map

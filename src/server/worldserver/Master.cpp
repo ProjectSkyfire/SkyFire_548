@@ -461,6 +461,7 @@ bool Master::_StartDB()
 
     // Load realm names into a store
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST);
+    stmt->setInt32(0, sConfigMgr->GetIntDefault("WorldServerPort", 8085));
     PreparedQueryResult result = LoginDatabase.Query(stmt);
     if (result)
     {

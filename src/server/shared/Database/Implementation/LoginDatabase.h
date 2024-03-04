@@ -30,6 +30,7 @@ enum LoginDatabaseStatements
         name for a suiting suffix.
     */
 
+    LOGIN_SEL_AUTH_REALMLIST,
     LOGIN_SEL_REALMLIST,
     LOGIN_SEL_REALMNAME_BY_ID,
     LOGIN_DEL_EXPIRED_IP_BANS,
