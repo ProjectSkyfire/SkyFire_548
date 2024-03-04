@@ -24072,8 +24072,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
     data << uint32(GetMap()->GetDifficulty());
 
-    switch (GetMap()->GetDifficulty())
+    if (grp)
     {
+        switch (GetMap()->GetDifficulty())
+        {
         case DIFFICULTY_HEROIC:
         {
             data << uint32(5);
@@ -24099,7 +24101,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
         }
         case DIFFICULTY_FLEX:
         {
-            if (grp && grp->GetMembersCount() > 10)
+            if (grp->GetMembersCount() > 10)
             {
                 data << uint32(grp->GetMembersCount());
             }
@@ -24114,7 +24116,9 @@ void Player::SendInitialPacketsBeforeAddToMap()
             data << uint32(0);
             break;
         }
+        }
     }
+    
     //if (HasRestrictedLevel)
     //    data << uint32(20);                                       // RestrictedLevel (starter accounts)
     //if (IneligibleForLoot)
