@@ -2030,30 +2030,34 @@ void World::LoadAutobroadcasts()
     m_Autobroadcasts.clear();
     m_AutobroadcastsWeights.clear();
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTOBROADCAST);
-    stmt->setInt32(0, realmID);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-    if (!result)
+    for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
     {
-        SF_LOG_INFO("server.loading", ">> Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for this realm!");
-        return;
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTOBROADCAST);
+        stmt->setInt32(0, itr->first);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+        if (!result)
+        {
+            SF_LOG_INFO("server.loading", ">> Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for realm %u!", itr->first);
+            return;
+        }
+
+        uint32 count = 0;
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint8 id = fields[0].GetUInt8();
+
+            m_Autobroadcasts[id] = fields[2].GetString();
+            m_AutobroadcastsWeights[id] = fields[1].GetUInt8();
+
+            ++count;
+        } while (result->NextRow());
+
+        SF_LOG_INFO("server.loading", ">> Loaded %u autobroadcast definitions for realm %u in %u ms", count, itr->first, GetMSTimeDiffToNow(oldMSTime));
+
     }
-
-    uint32 count = 0;
-
-    do
-    {
-        Field* fields = result->Fetch();
-        uint8 id = fields[0].GetUInt8();
-
-        m_Autobroadcasts[id] = fields[2].GetString();
-        m_AutobroadcastsWeights[id] = fields[1].GetUInt8();
-
-        ++count;
-    } while (result->NextRow());
-
-    SF_LOG_INFO("server.loading", ">> Loaded %u autobroadcast definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 /// Update the World !
@@ -3077,7 +3081,7 @@ void World::LoadDBAllowedSecurityLevel()
     for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
     {
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST_SECURITY_LEVEL);
-        stmt->setInt32(0, int32(realmID));
+        stmt->setInt32(0, int32(itr->first));
         PreparedQueryResult result = LoginDatabase.Query(stmt);
 
         if (result)

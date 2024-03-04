@@ -459,14 +459,6 @@ bool Master::_StartDB()
         return false;
     }
 
-    ///- Get the realm Id from the configuration file
-    realmID = sConfigMgr->GetIntDefault("RealmID", 0);
-    if (!realmID)
-    {
-        SF_LOG_ERROR("server.worldserver", "Realm ID not defined in configuration file");
-        return false;
-    }
-
     // Load realm names into a store
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST);
     PreparedQueryResult result = LoginDatabase.Query(stmt);

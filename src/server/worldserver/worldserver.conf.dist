@@ -55,14 +55,6 @@ ConfVersion=2021081800
 ###################################################################################################
 # CONNECTIONS AND DIRECTORIES
 #
-#    RealmID
-#        Description: ID of the Realm using this config.
-#        Important:   RealmID must match the realmlist inside the auth database.
-#        Default:     -1
-
-RealmID = -1
-
-#
 #    DataDir
 #        Description: Data directory setting.
 #        Important:   DataDir needs to be quoted, as the string might contain space characters.
