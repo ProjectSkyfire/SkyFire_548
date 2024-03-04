@@ -3705,8 +3705,8 @@ enum class ChatMsg
     CHAT_MSG_RAID_BOSS_WHISPER                = 0x2B,
     CHAT_MSG_RAID_BOSS_EMOTE                  = 0x2C,
     CHAT_MSG_QUEST_BOSS_EMOTE                 = 0x2D,
-    CHAT_MSG_FILTERED                         = 0x2E,
-    CHAT_MSG_INSTANCE                         = 0x2F,
+    CHAT_MSG_ACHIEVEMENT                      = 0x2E, // 5.4.8
+    CHAT_MSG_GUILD_ACHIEVEMENT                = 0x2F, // 5.4.8
     CHAT_MSG_INSTANCE_LEADER                  = 0x30,
     CHAT_MSG_PARTY_LEADER                     = 0x31, // 5.4.8
     CHAT_MSG_CHANNEL_1                        = 0x32,
@@ -3719,9 +3719,9 @@ enum class ChatMsg
     CHAT_MSG_CHANNEL_8                        = 0x39,
     CHAT_MSG_CHANNEL_9                        = 0x3B,
     CHAT_MSG_CHANNEL_10                       = 0x3C,
-    CHAT_MSG_ACHIEVEMENT                      = 0x3D,
+    //CHAT_MSG_FILTERED                         = 0x3D,
     CHAT_MSG_UNK                              = 0x3E,
-    CHAT_MSG_GUILD_ACHIEVEMENT                = 0x3F,
+    CHAT_MSG_INSTANCE                         = 0x3F,
     //CHAT_MSG_RESTRICTED                       = 0x40,
     CHAT_MSG_BN_WHISPER                       = 0x41,
     CHAT_MSG_BN_WHISPER_INFORM                = 0x42,
