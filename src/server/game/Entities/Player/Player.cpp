@@ -24060,18 +24060,61 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     data.Initialize(SMSG_WORLD_SERVER_INFO, 4 + 4 + 1 + 1);
     // Bitfields have wrong order
+    Group* grp = this->GetGroup();
+    data.WriteBit(grp ? 1 : 0);                                     // HasGroupSize
     data.WriteBit(0);                                               // IneligibleForLoot
     data.WriteBit(0);                                               // HasRestrictedLevel
     data.WriteBit(0);                                               // HasRestrictedMoney
-    data.WriteBit(0);                                               // HasGroupSize
+
     data.FlushBits();
 
     data << uint8(0);                                               // IsOnTournamentRealm
     data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
     data << uint32(GetMap()->GetDifficulty());
 
-    //if (HasGroupSize)
-    //    data << uint32(0);
+    switch (GetMap()->GetDifficulty())
+    {
+        case DIFFICULTY_HEROIC:
+        {
+            data << uint32(5);
+            break;
+        }
+        case DIFFICULTY_10MAN_NORMAL:
+        case DIFFICULTY_10MAN_HEROIC:
+        {
+            data << uint32(10);
+            break;
+        }
+        case DIFFICULTY_25MAN_NORMAL:
+        case DIFFICULTY_25MAN_HEROIC:
+        case DIFFICULTY_25MAN_LFR:
+        {
+            data << uint32(25);
+            break;
+        }
+        case DIFFICULTY_40MAN:
+        {
+            data << uint32(40);
+            break;
+        }
+        case DIFFICULTY_FLEX:
+        {
+            if (grp && grp->GetMembersCount() > 10)
+            {
+                data << uint32(grp->GetMembersCount());
+            }
+            else
+            {
+                data << uint32(10);
+            }
+            break;
+        }
+        default:
+        {
+            data << uint32(0);
+            break;
+        }
+    }
     //if (HasRestrictedLevel)
     //    data << uint32(20);                                       // RestrictedLevel (starter accounts)
     //if (IneligibleForLoot)
