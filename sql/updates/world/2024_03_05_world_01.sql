@@ -14,4 +14,4 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 DELETE FROM `creature_text` WHERE `entry`=38345;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (38345, 0, 0, 'I can move again!', 12, 0, 50, 0, 0, 0, 'Captured Brave'),
-(38345, 0, 1, 'The quilboard will pay!', 12, 0, 50, 0, 0, 0, '');
+(38345, 0, 1, 'The quilboard will pay!', 12, 0, 50, 0, 0, 0, 'Captured Brave');
