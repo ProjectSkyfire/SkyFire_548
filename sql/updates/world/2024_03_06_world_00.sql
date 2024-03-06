@@ -9,7 +9,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (3326600, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 33, 33266, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Wounded Mor\'shan Defender - Script - Give Killcredit (33266)'),
 (3326600, 9, 3, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 59, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wounded Mor\'shan Defender - Script - set run'),
 (3326600, 9, 4, 0, 0, 0, 100, 0, 2000, 2000, 2000, 2000, 0, 69, 1, 0, 0, 0, 0, 0, 8, 0, 0, 0, 1217.22, -2246.04, 92.172, 0, 'Wounded Mor\'shan Defender - Script - move position'),
-(3326600, 9, 5, 0, 0, 0, 100, 0, 3000, 3000, 3000, 3000, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wounded Mor\'shan Defender - Script - Despawn after 3 seconds');
+(3326600, 9, 5, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 41, 3000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Wounded Mor\'shan Defender - Script - Despawn after 3 seconds');
 
 DELETE FROM `creature_text` WHERE `entry`=33266;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
