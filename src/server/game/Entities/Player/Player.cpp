@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
+#include "AnticheatMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battlefield.h"
@@ -570,7 +571,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_bCanDelayTeleport = false;
     m_bHasDelayedTeleport = false;
     m_teleport_options = 0;
-
+    m_canTeleport = false;
     m_trade = NULL;
 
     m_cinematic = 0;
@@ -2151,6 +2152,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
         {
+            SetCanTeleport(true);
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
@@ -2266,6 +2268,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             if (!GetSession()->PlayerLogout())
             {
+                SetCanTeleport(true);
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
                 data << float(m_teleport_dest.GetPositionX());
                 data << uint32(mapid);
@@ -20153,6 +20156,9 @@ void Player::SaveToDB(bool create /*=false*/)
     // save stats can be out of transaction
     if (m_session->isLogingOut() || !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
         _SaveStats(trans);
+
+    // we save the data here to prevent spamming
+    sAnticheatMgr->SavePlayerData(this);
 
     CharacterDatabase.CommitTransaction(trans);
 

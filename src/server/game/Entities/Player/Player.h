@@ -3003,8 +3003,9 @@ class Player : public Unit, public GridObject<Player>
     // Set map to player and add reference
     void SetMap(Map* map) override;
     void ResetMap() override;
-
+    bool CanTeleport() { return m_canTeleport; }
     bool isAllowedToLoot(const Creature* creature);
+    void SetCanTeleport(bool value) { m_canTeleport = value; }
 
     DeclinedName const* GetDeclinedNames() const
     {
@@ -3526,6 +3527,7 @@ class Player : public Unit, public GridObject<Player>
     uint32 m_DelayedOperations;
     bool m_bCanDelayTeleport;
     bool m_bHasDelayedTeleport;
+    bool m_canTeleport;
 
     // Temporary removed pet cache
     uint32 m_temporaryUnsummonedPetNumber;

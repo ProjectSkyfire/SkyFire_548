@@ -1230,6 +1230,7 @@ enum SkyFireStrings
     // Use for custom patches             11000-11999
     LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
+    LANG_CHEATER_CHATLOG                = 11002,
 
     // NOT RESERVED IDS                   12015-1999999999
     LANG_BG_TP_START_TWO_MINUTES        = 12000,

@@ -921,6 +921,11 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
 }
 
 void Spell::CalculateJumpSpeeds(uint8 i, float dist, float & speedXY, float & speedZ)
@@ -947,6 +952,11 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     {
         SF_LOG_ERROR("spells", "Spell::EffectTeleportUnits - does not have destination for spellId %u.", m_spellInfo->Id);
         return;
+    }
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
     }
 
     // Init dest coordinates
@@ -5095,6 +5105,10 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
             linkedGO = NULL;
             return;
         }
+    }
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
     }
 }
 

@@ -19,6 +19,7 @@
 #include "ObjectMgr.h"
 #include "MovementStructures.h"
 #include "BattlePetMgr.h"
+#include "AnticheatMgr.h"
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
@@ -364,6 +365,11 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     if (m_clientTimeDelay == 0)
         m_clientTimeDelay = mstime - movementInfo.time;
 
+    if (plrMover)
+    {
+        sAnticheatMgr->StartHackDetection(plrMover, movementInfo, opcode);
+    }
+
     /* process position-change */
     movementInfo.time = movementInfo.time + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY;
 
@@ -576,7 +582,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
         return;
 
     _player->m_movementInfo = movementInfo;
-
+    _player->SetCanTeleport(true);
     WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 66);
     _player->WriteMovementInfo(data);
     _player->SendMessageToSet(&data, false);
