@@ -376,6 +376,14 @@ public:
         const Position ragaMuffin2SpawnPos = { -10130.9f, 653.302f, 36.0501f, 1.65242f };
         const Position jonathanSpawnPos = { -10128.3f, 656.465f, 36.0544f, 2.04543f };
         uint8 phase = 0;
+        enum HoggerTexts
+        {
+            WARNING_EATING = 0,
+            YELL_YIPE = 1,
+            SAY_GRR = 2,
+            SAY_NO = 3,
+            YELL_NO_HURT = 4
+        };
         enum HoggerNPCS
         {
             NPC_TRIGGER_MEAT = 45979,
@@ -443,7 +451,7 @@ public:
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->SetWalk(true);
-                me->MonsterYell("No hurt $n!", Language::LANG_UNIVERSAL, me);
+                Talk(YELL_NO_HURT, me);
                 me->GetMotionMaster()->MovePoint(1, -10136.9f, 670.009f, 36.03682f);
                 damage = me->GetHealth() - 1;
             }
@@ -468,9 +476,10 @@ public:
                 {
                     if (phase == 1)
                     {
+                        Talk(WARNING_EATING, me);
                         if (Creature* meat = me->FindNearestCreature(NPC_TRIGGER_MEAT, 30.0f))
                         {
-                            me->MonsterYell("Yipe! Help $n!", Language::LANG_UNIVERSAL, me);
+                            Talk(YELL_YIPE, me);
                             me->CastSpell(me, SPELL_SUMMON_MINIONS, false);
                             me->GetMotionMaster()->MoveFollow(meat, 0.01f, 1.57079f);
                             me->SetFacingToObject(meat);
@@ -569,10 +578,9 @@ public:
                     }
                     break;
                 }
-
                 case EVENT_HOGGER_GRR:
                 {
-                    me->MonsterSay("Grrr...", Language::LANG_UNIVERSAL, me);
+                    Talk(SAY_GRR);
                     break;
                 }
                 case EVENT_JONATHAN_TALK2:
@@ -596,7 +604,7 @@ public:
                 }
                 case EVENT_HOGGER_NOO:
                 {
-                    me->MonsterSay("Nooooo...", Language::LANG_UNIVERSAL, me);
+                    Talk(SAY_NO);
                     events.ScheduleEvent(EVENT_JONATHAN_TALK4, 5000);
                     break;
                 }
