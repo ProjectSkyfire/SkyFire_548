@@ -608,6 +608,7 @@ public:
                         {
                             jonathan->SetFacingToObject(andromath);
                         }
+                        jonathan->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
                         jonathan->MonsterSay("Take us to the Stockades, Andromath.", Language::LANG_UNIVERSAL, jonathan);
                     }
                     events.ScheduleEvent(EVENT_TELEPORT_AND_DESPAWN, 3000);
