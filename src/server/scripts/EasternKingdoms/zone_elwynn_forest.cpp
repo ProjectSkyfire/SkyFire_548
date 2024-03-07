@@ -358,8 +358,310 @@ public:
     };
 };
 
+class npc_hogger_elwynn : public CreatureScript
+{
+public:
+    npc_hogger_elwynn() : CreatureScript("npc_hogger_elwynn") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hogger_elwynnAI(creature);
+    }
+
+    struct npc_hogger_elwynnAI : public ScriptedAI
+    {
+        const Position dumasSpawnPos = { -10132.9f, 653.561f, 36.0503f, 2.021f };
+        const Position andromathSpawnPos = { -10123.0f, 656.875f, 36.0511f, 1.97181f };
+        const Position ragaMuffin1SpawnPos = { -10122.5f, 660.198f, 36.0366f, 2.83775f };
+        const Position ragaMuffin2SpawnPos = { -10130.9f, 653.302f, 36.0501f, 1.65242f };
+        const Position jonathanSpawnPos = { -10128.3f, 656.465f, 36.0544f, 2.04543f };
+        uint8 phase = 0;
+        enum HoggerNPCS
+        {
+            NPC_TRIGGER_MEAT = 45979,
+            NPC_DUMAS = 46940,
+            NPC_ANDROMATH = 46941,
+            NPC_JONATHAN = 46942,
+            NPC_RAGAMUFFIN = 46943,
+        };
+        enum HoggerSpells
+        {
+            SPELL_VICIOUS_SLICE = 87337,
+            SPELL_BLOODY_STRIKE = 87359,
+            SPELL_UPSET_STOMACH = 87352,
+            SPELL_SUMMON_MINIONS = 87366,
+            SPELL_TELEPORT_VISUAL_ONLY = 64446
+        };
+        EventMap events;
+        enum HoggerEvents
+        {
+            EVENT_VICIOUS_SLICE = 1,
+            EVENT_EATING = 2,
+            EVENT_BLOODY_STRIKE = 3,
+            EVENT_UPSET_STOMACH = 4,
+            EVENT_OUTRO = 5,
+            EVENT_KID_TALK1 = 6,
+            EVENT_HOGGER_GRR = 7,
+            EVENT_JONATHAN_TALK2 = 8,
+            EVENT_JONATHAN_TALK3 = 9,
+            EVENT_HOGGER_NOO = 10,
+            EVENT_JONATHAN_TALK4 = 11,
+            EVENT_TELEPORT_AND_DESPAWN = 12
+        };
+
+        npc_hogger_elwynnAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset()
+        {
+            phase = 0;
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            events.ScheduleEvent(EVENT_VICIOUS_SLICE, 3000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) OVERRIDE
+        {
+            if (phase == 0 && !HealthAbovePct(50))
+            {
+                phase = 1;
+                events.CancelEvent(EVENT_VICIOUS_SLICE);
+                events.ScheduleEvent(EVENT_EATING, 1000);
+            }
+
+            if (phase == 1 && damage >= me->GetHealth())
+            {
+                phase = 2;
+                events.ScheduleEvent(EVENT_OUTRO, 1000);
+                me->RemoveAllAuras();
+                me->AttackStop();
+                attacker->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetWalk(true);
+                me->MonsterYell("No hurt $n!", Language::LANG_UNIVERSAL, me);
+                me->GetMotionMaster()->MovePoint(1, -10136.9f, 670.009f, 36.03682f);
+                damage = me->GetHealth() - 1;
+            }
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            switch (events.ExecuteEvent())
+            {
+                case EVENT_VICIOUS_SLICE:
+                {
+                    me->CastSpell(me->GetVictim(), SPELL_VICIOUS_SLICE, false);
+                    events.ScheduleEvent(EVENT_VICIOUS_SLICE, 12000);
+                    break;
+                }
+                case EVENT_EATING:
+                {
+                    if (phase == 1)
+                    {
+                        if (Creature* meat = me->FindNearestCreature(NPC_TRIGGER_MEAT, 30.0f))
+                        {
+                            me->MonsterYell("Yipe! Help $n!", Language::LANG_UNIVERSAL, me);
+                            me->CastSpell(me, SPELL_SUMMON_MINIONS, false);
+                            me->GetMotionMaster()->MoveFollow(meat, 0.01f, 1.57079f);
+                            me->SetFacingToObject(meat);
+                            events.ScheduleEvent(EVENT_BLOODY_STRIKE, 3000);
+                        }
+                    }
+                    break;
+                }
+                case EVENT_BLOODY_STRIKE:
+                {
+                    if (Creature* meat = me->FindNearestCreature(NPC_TRIGGER_MEAT, 30.0f))
+                        me->CastSpell(meat, SPELL_BLOODY_STRIKE, false);
+
+                    events.ScheduleEvent(EVENT_BLOODY_STRIKE, 3000);
+                    events.ScheduleEvent(EVENT_UPSET_STOMACH, 10000);
+                    break;
+                }
+                case EVENT_UPSET_STOMACH:
+                {
+                    events.CancelEvent(EVENT_UPSET_STOMACH);
+                    events.CancelEvent(EVENT_BLOODY_STRIKE);
+                    me->CastSpell(me, SPELL_UPSET_STOMACH, false);
+
+                    if (Unit* victim = me->SelectVictim())
+                    {
+                        me->GetMotionMaster()->MoveFollow(victim, 0.1f, 0.0f);
+                        AttackStart(victim);
+                    }
+                    
+                    events.ScheduleEvent(EVENT_VICIOUS_SLICE, 3000);
+                    break;
+                }
+                case EVENT_OUTRO:
+                {
+                    events.CancelEvent(EVENT_VICIOUS_SLICE);
+                    events.CancelEvent(EVENT_EATING);
+                    events.CancelEvent(EVENT_UPSET_STOMACH);
+                    events.CancelEvent(EVENT_BLOODY_STRIKE);
+
+                    if (Creature* dumas = me->SummonCreature(NPC_DUMAS, dumasSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                    {
+                        dumas->CastSpell(dumas, SPELL_TELEPORT_VISUAL_ONLY);
+                        float x, y, z;
+                        dumas->GetClosePoint(x, y, z, dumas->GetObjectSize() / 3, 2.5f);
+                        dumas->GetMotionMaster()->MovePoint(0, x, y, z);
+                    }
+
+                    if (Creature* andromath = me->SummonCreature(NPC_ANDROMATH, andromathSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                    {
+                        andromath->CastSpell(andromath, SPELL_TELEPORT_VISUAL_ONLY);
+                        float x, y, z;
+                        andromath->GetClosePoint(x, y, z, andromath->GetObjectSize() / 3, 2.5f);
+                        andromath->GetMotionMaster()->MovePoint(0, x, y, z);
+                    }
+
+                    if (Creature* ragamuffin1 = me->SummonCreature(NPC_RAGAMUFFIN, ragaMuffin1SpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                    {
+                        ragamuffin1->CastSpell(ragamuffin1, SPELL_TELEPORT_VISUAL_ONLY);
+                        float x, y, z;
+                        ragamuffin1->GetClosePoint(x, y, z, ragamuffin1->GetObjectSize() / 3, 2.5f);
+                        ragamuffin1->GetMotionMaster()->MovePoint(0, x, y, z);
+                        events.ScheduleEvent(EVENT_KID_TALK1, 5000);
+                    }
+
+                    if (Creature* ragamuffin2 = me->SummonCreature(NPC_RAGAMUFFIN, ragaMuffin2SpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                    {
+                        ragamuffin2->CastSpell(ragamuffin2, SPELL_TELEPORT_VISUAL_ONLY);
+                        float x, y, z;
+                        ragamuffin2->GetClosePoint(x, y, z, ragamuffin2->GetObjectSize() / 3, 2.5f);
+                        ragamuffin2->GetMotionMaster()->MovePoint(0, x, y, z);
+                    }
+
+                    if (Creature* jonathan = me->SummonCreature(NPC_JONATHAN, jonathanSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                    {
+                        jonathan->CastSpell(jonathan, SPELL_TELEPORT_VISUAL_ONLY);
+                        jonathan->MonsterYell("Hold your blade, adventurer!", Language::LANG_UNIVERSAL, me);
+                        jonathan->SetWalk(true);
+                        jonathan->Dismount();
+                        float x, y, z;
+                        jonathan->GetClosePoint(x, y, z, jonathan->GetObjectSize() / 3, 10.0f);
+                        jonathan->GetMotionMaster()->MovePoint(0, x, y, z);
+                        me->SetFacingToObject(jonathan);
+                        events.ScheduleEvent(EVENT_HOGGER_GRR, 8000);
+                        events.ScheduleEvent(EVENT_JONATHAN_TALK2, 15000);
+                    }
+                    break;
+                }
+                case EVENT_KID_TALK1:
+                {
+                    if (Creature* ragaMuffin1 = me->FindNearestCreature(NPC_RAGAMUFFIN, 25.0f))
+                    {
+                        ragaMuffin1->MonsterSay("General Hammond Clay!", Language::LANG_UNIVERSAL, ragaMuffin1);
+
+                        if (Creature* ragaMuffin2 = ragaMuffin1->FindNearestCreature(NPC_RAGAMUFFIN, 25.0f))
+                            ragaMuffin2->MonsterSay("Wow!", Language::LANG_UNIVERSAL, ragaMuffin2);
+                    }
+                    break;
+                }
+
+                case EVENT_HOGGER_GRR:
+                {
+                    me->MonsterSay("Grrr...", Language::LANG_UNIVERSAL, me);
+                    break;
+                }
+                case EVENT_JONATHAN_TALK2:
+                {
+                    if (Creature* jonathan = me->FindNearestCreature(NPC_JONATHAN, 25.0f))
+                    {
+                        jonathan->MonsterSay("This beast leads the Riverpaw gnoll gang and may be the key to ending gnoll aggression in Elwynn.", Language::LANG_UNIVERSAL, jonathan);
+                        jonathan->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                    }
+                    events.ScheduleEvent(EVENT_JONATHAN_TALK3, 5000);
+                    break;
+                }
+                case EVENT_JONATHAN_TALK3:
+                {
+                    if (Creature* jonathan = me->FindNearestCreature(NPC_JONATHAN, 25.0f))
+                    {
+                        jonathan->MonsterSay("We're taking him into custody in the name of King Varian Wrynn.", Language::LANG_UNIVERSAL, jonathan);
+                    }
+                    events.ScheduleEvent(EVENT_HOGGER_NOO, 5000);
+                    break;
+                }
+                case EVENT_HOGGER_NOO:
+                {
+                    me->MonsterSay("Nooooo...", Language::LANG_UNIVERSAL, me);
+                    events.ScheduleEvent(EVENT_JONATHAN_TALK4, 5000);
+                    break;
+                }
+                case EVENT_JONATHAN_TALK4:
+                {
+                    if (Creature* jonathan = me->FindNearestCreature(NPC_JONATHAN, 25.0f))
+                    {
+                        if (Creature* andromath = me->FindNearestCreature(NPC_ANDROMATH, 25.0f))
+                        {
+                            jonathan->SetFacingToObject(andromath);
+                        }
+                        jonathan->MonsterSay("Take us to the Stockades, Andromath.", Language::LANG_UNIVERSAL, jonathan);
+                    }
+                    events.ScheduleEvent(EVENT_TELEPORT_AND_DESPAWN, 3000);
+                    break;
+                }
+                case EVENT_TELEPORT_AND_DESPAWN:
+                {
+                    if (Creature* dumas = me->FindNearestCreature(NPC_DUMAS, 25.0f))
+                    {
+                        dumas->CastSpell(dumas, SPELL_TELEPORT_VISUAL_ONLY);
+                        dumas->DespawnOrUnsummon();
+                    }
+
+                    if (Creature* andromath = me->FindNearestCreature(NPC_ANDROMATH, 25.0f))
+                    {
+                        andromath->CastSpell(andromath, SPELL_TELEPORT_VISUAL_ONLY);
+                        andromath->DespawnOrUnsummon();
+                    }
+
+                    if (Creature* jonathan = me->FindNearestCreature(NPC_JONATHAN, 25.0f))
+                    {
+                        jonathan->CastSpell(jonathan, SPELL_TELEPORT_VISUAL_ONLY);
+                        jonathan->DespawnOrUnsummon();
+                    }
+
+                    for (uint8 i = 0; i < 2; i++)
+                    {
+                        if (Creature* ragaMuffin = me->FindNearestCreature(NPC_RAGAMUFFIN, 25.0f))
+                        {
+                            ragaMuffin->CastSpell(ragaMuffin, SPELL_TELEPORT_VISUAL_ONLY);
+                            ragaMuffin->DespawnOrUnsummon();
+                        }
+                    }
+
+                    std::list<Player*> playerList;
+                    GetPlayerListInGrid(playerList, me, 15.0f);
+
+                    for (auto&& player : playerList)
+                    {
+                        player->KilledMonsterCredit(448);
+                    }
+                    
+                    me->CastSpell(me, SPELL_TELEPORT_VISUAL_ONLY);
+                    me->DespawnOrUnsummon();
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_elwynn_forest()
 {
+    new npc_hogger_elwynn();
     new npc_blackrock_spy();
     new npc_goblin_assassin();
     new npc_blackrock_invader();
