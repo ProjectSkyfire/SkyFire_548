@@ -1,0 +1,1 @@
+DELETE FROM `creature` WHERE `guid` IN (80137, 80406, 80558, 120729);
