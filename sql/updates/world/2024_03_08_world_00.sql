@@ -1,7 +1,7 @@
 -- Brewmaster Skye
 UPDATE `creature_template` SET `gossip_menu_id`=14224 WHERE `entry`=63008;
 
-DELETE FROM `gossip_menu` WHERE `entry`=14224
+DELETE FROM `gossip_menu` WHERE `entry`=14224;
 INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES
 (14224, 62445);
 
