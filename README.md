@@ -30,6 +30,7 @@ For further information on the SkyFire project, please visit our project website
 
 ## Requirements
 + Platform/Architecture:
+  + Fedora 39: x86_64
   + Canonical:
     + Ubuntu 18.04 LTS: x86_32, x86_64
     + Ubuntu 20.04 LTS: x86_32, x86_64

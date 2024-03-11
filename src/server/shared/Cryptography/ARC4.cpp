@@ -5,18 +5,21 @@
 
 #include "ARC4.h"
 #include <openssl/sha.h>
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 3)
+
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #include <openssl/provider.h>
 #endif
 
 ARC4::ARC4() : m_ctx(EVP_CIPHER_CTX_new())
 {
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 3)
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
     OSSL_PROVIDER_load(NULL, "legacy");
 #endif
 
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR < 3)
-#error "UNSUPORTED OPENSSL VERSION, SKYFIRE REQUIRES 3.3 or newer."
+#if defined(WIN32)
+  #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR < 3)
+    #error "UNSUPORTED OPENSSL VERSION, SKYFIRE REQUIRES 3.3 or newer."
+  #endif
 #endif
 
     EVP_CIPHER_CTX_reset(m_ctx);
