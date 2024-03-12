@@ -48,9 +48,7 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
 void WorldSession::SendGroupInviteNotification(const std::string& inviterName, const std::string& realmName, bool inGroup)
 {
     SF_LOG_DEBUG("network", "WORLD: sending SMSG_GROUP_INVITE");
-    
     ObjectGuid invitedGuid = GetPlayer()->GetGUID();
-    
 
     WorldPacket data(SMSG_GROUP_INVITE, 6 + 1 + 8 + 8 + 4 + 4 + 4 + inviterName.size() + realmName.size());
     data.WriteBits(realmName.size(), 8);
@@ -137,7 +135,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     }
 
     // attempt add selected player
-
     // cheating
     if (!normalizePlayerName(memberName))
     {
@@ -145,6 +142,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         return;
     }
 
+    memberName = memberName.substr(0, memberName.find("-")); 
     Player* player = sObjectAccessor->FindPlayerByName(memberName);
 
     // no player
