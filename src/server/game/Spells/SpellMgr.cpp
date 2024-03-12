@@ -2948,6 +2948,11 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
+            case 105156: // See Quest Invis 13 // Red Flame
+            case 105157: // See Quest Invis 14 // Blue Flame
+            case 105158: // See Quest Invis 15 // Violet Flame
+                spellInfo->AreaGroupId = 0;
+                break;
             case 42730: // Woe Strike
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 42739;
                 break;
