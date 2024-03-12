@@ -113,8 +113,8 @@ class SocialMgr
     friend class ACE_Singleton<SocialMgr, ACE_Null_Mutex>;
 
     private:
-        SocialMgr();
-        ~SocialMgr();
+        SocialMgr() { }
+        ~SocialMgr() { }
 
     public:
         // Misc

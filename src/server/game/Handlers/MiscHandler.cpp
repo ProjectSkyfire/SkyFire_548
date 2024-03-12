@@ -711,6 +711,7 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recvData)
     recvData >> friendName;
     recvData >> friendNote;
 
+    friendName = friendName.substr(0, friendName.find("-"));
     if (!normalizePlayerName(friendName))
         return;
 
