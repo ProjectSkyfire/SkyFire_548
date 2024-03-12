@@ -1000,6 +1000,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
+    //Set character run speed 
+    pCurrChar->SetSpeed(UnitMoveType::MOVE_RUN, 1.0f);
+
     //Show cinematic at the first time that player login
     if (!pCurrChar->getCinematic())
     {
