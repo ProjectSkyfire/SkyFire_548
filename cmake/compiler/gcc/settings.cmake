@@ -31,7 +31,7 @@ if(WITH_CXX_23_STD)
   endif()
 endif()
 if(WITH_CXX_DRAFT_STD)
-  if(NOT WITH_CXX_23_STD AND NOT WITH CXX_20_STD)
+  if(NOT WITH_CXX_23_STD AND NOT WITH_CXX_20_STD)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2c") #c++26
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++2c") #c++26
     message(STATUS "GCC: C++ Draft Standard Enabled.")

@@ -252,7 +252,7 @@ public:
         {
             if (Creature* aysa = player->FindNearestCreature(NPC_AYSA, 15.0f, true))
             {
-                aysa->AI()->Talk(0);
+                aysa->AI()->Talk(0, player);
                 return true;
             }
         }
