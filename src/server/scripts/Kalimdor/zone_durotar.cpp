@@ -173,43 +173,88 @@ public:
 
     struct npc_darkspear_jailorAI : public ScriptedAI
     {
+        enum JailorEvents
+        {
+            EVENT_JAILOR_OPENING = 1,
+            EVENT_JAILOR_OPEN_CAGE = 2,
+            EVENT_JAILOR_RESET = 3,
+        };
+        EventMap events;
         npc_darkspear_jailorAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+        }
 
         void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
-            if (type == POINT_MOTION_TYPE && id == 1)
-            {
-                if (GameObject* cage = me->FindNearestGameObject(201968, 5.0f))
-                    cage->UseDoorOrButton(30000);
+            if (type != POINT_MOTION_TYPE)
+                return;
 
-                if (Creature* monk = me->FindNearestCreature(63310, 25.0f))
+            switch (id)
+            {
+                case 0:
                 {
-                    if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
-                    {
-                        Naga->setFaction(14);
-                        Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                        Naga->GetMotionMaster()->MovePoint(1, NagaPos2);
-                        Naga->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
-                    }
+                    events.ScheduleEvent(EVENT_JAILOR_OPENING, 2000);
+                    break;
                 }
-                else
-                {
-                    if (Creature* Naga2 = me->FindNearestCreature(38142, 5.0f))
-                    {
-                        Naga2->setFaction(14);
-                        Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                        Naga2->GetMotionMaster()->MovePoint(1, NagaPos);
-                        Naga2->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
-                    }
-                }                
+                default:
+                    break;
             }
-            else
-                npc_darkspear_jailorAI::MovementInform(type, id);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE {  }
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_JAILOR_OPENING:
+                    {
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_USE_STANDING);
+                        events.ScheduleEvent(EVENT_JAILOR_OPEN_CAGE, 4000);
+                    }
+                    case EVENT_JAILOR_OPEN_CAGE:
+                    {
+                        if (GameObject* cage = me->FindNearestGameObject(201968, 5.0f))
+                            cage->UseDoorOrButton(120);
+
+                        if (Creature* monk = me->FindNearestCreature(63310, 25.0f))
+                        {
+                            if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
+                            {
+                                Naga->setFaction(14);
+                                Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                Naga->GetMotionMaster()->MovePoint(0, NagaPos2);
+                                Naga->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
+                            }
+                        }
+                        else
+                        {
+                            if (Creature* Naga2 = me->FindNearestCreature(38142, 5.0f))
+                            {
+                                Naga2->setFaction(14);
+                                Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                Naga2->GetMotionMaster()->MovePoint(0, NagaPos);
+                                Naga2->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
+                            }
+                        }
+
+                        events.ScheduleEvent(EVENT_JAILOR_RESET, 120000);
+                        break;
+                    }
+                    case EVENT_JAILOR_RESET:
+                    {
+                        me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
+                        Reset();
+                    }
+                }
+            }
+        }
     };
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
