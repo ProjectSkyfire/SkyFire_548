@@ -196,7 +196,7 @@ public:
             {
                 case 0:
                 {
-                    events.ScheduleEvent(EVENT_JAILOR_OPENING, 2000);
+                    events.ScheduleEvent(EVENT_JAILOR_OPENING, 1000);
                     break;
                 }
                 default:
@@ -214,7 +214,8 @@ public:
                     case EVENT_JAILOR_OPENING:
                     {
                         me->HandleEmoteCommand(EMOTE_ONESHOT_USE_STANDING);
-                        events.ScheduleEvent(EVENT_JAILOR_OPEN_CAGE, 4000);
+                        events.ScheduleEvent(EVENT_JAILOR_OPEN_CAGE, 1000);
+                        break;
                     }
                     case EVENT_JAILOR_OPEN_CAGE:
                     {
@@ -251,7 +252,10 @@ public:
                     {
                         me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
                         Reset();
+                        break;
                     }
+                    default:
+                        break;
                 }
             }
         }
