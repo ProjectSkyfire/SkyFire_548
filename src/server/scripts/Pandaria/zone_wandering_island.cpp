@@ -2099,22 +2099,7 @@ public:
             started = false;
         }
 
-        void MoveInLineOfSight(Unit* who)
-        {
-            Player* const player = who->ToPlayer();
-            if (!player)
-                return;
-
-            if (player->GetQuestStatus(29414) != QUEST_STATUS_INCOMPLETE || started)
-                return;
-
-            if (me->GetAreaId() == 5848) // Cave of Meditation Area
-            {
-                started = true;
-                events.ScheduleEvent(EVENT_POWER, 1000);
-                events.ScheduleEvent(EVENT_ADDS, 1000);
-            }
-        }
+        void MoveInLineOfSight(Unit* /*who*/) { }
 
         void UpdatePlayerList()
         {
@@ -2130,14 +2115,33 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            if (playersParticipate.empty())
+            {
+                UpdatePlayerList();
+                return;
+            }
+            else
+            {
+                for (auto&& player : playersParticipate)
+                {
+                    if (!started && player->GetQuestStatus(29414) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (me->GetAreaId() == 5848) // Cave of Meditation Area
+                        {
+                            started = true;
+                            events.ScheduleEvent(EVENT_POWER, 1000);
+                            events.ScheduleEvent(EVENT_ADDS, 1000);
+                        }
+                    }
+                }
+            }
+
             events.Update(diff);
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch (eventId) {
-                case EVENT_POWER:
+                switch (eventId)
                 {
-                    UpdatePlayerList();
-                    if (!playersParticipate.empty())
+                    case EVENT_POWER:
                     {
                         Power++;
 
@@ -2155,38 +2159,38 @@ public:
 
                         if (Power >= 90)
                             events.ScheduleEvent(EVENT_FINISHED, 100);
+
+                        events.ScheduleEvent(EVENT_POWER, 1000);
+                        break;
                     }
-                    events.ScheduleEvent(EVENT_POWER, 1000);
-                    break;
-                }
-                case EVENT_ADDS:
-                {
-                    for (uint8 i = 0; i < 2; ++i)
+                    case EVENT_ADDS:
                     {
-                        if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                        for (uint8 i = 0; i < 2; ++i)
                         {
-                            troublemaker->GetMotionMaster()->MovePoint(0, AddPointPos[i]);
+                            if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                            {
+                                troublemaker->GetMotionMaster()->MovePoint(0, AddPointPos[i]);
+                            }
                         }
+                        events.ScheduleEvent(EVENT_ADDS, 60000);
+                        break;
                     }
-                    events.ScheduleEvent(EVENT_ADDS, 60000);
-                    break;
-                }
-                case EVENT_FINISHED:
-                {
-                    Talk(1);
-                    events.CancelEvent(EVENT_POWER);
-                    events.CancelEvent(EVENT_ADDS);
-                    for (auto&& player : playersParticipate)
+                    case EVENT_FINISHED:
                     {
-                        player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
-                        player->KilledMonsterCredit(54856, 0);
-                        player->RemoveAura(116421);
+                        Talk(1);
+                        events.CancelEvent(EVENT_POWER);
+                        events.CancelEvent(EVENT_ADDS);
+                        for (auto&& player : playersParticipate)
+                        {
+                            player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
+                            player->KilledMonsterCredit(54856, 0);
+                            player->RemoveAura(116421);
+                        }
+                        Reset();
+                        break;
                     }
-                    Reset();
-                    break;
-                }
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
         }
