@@ -13,6 +13,10 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
   message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2022) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 
+set(MSVC_UNSUPPORTED_VERSION 19.39.33521.0)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL MSVC_UNSUPPORTED_VERSION)
+  message(FATAL_ERROR "MSVC: Unsupported version ${CMAKE_CXX_COMPILER_VERSION} found.")
+endif()
 
 # set up output paths ofr static libraries etc (commented out - shown here as an example only)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
