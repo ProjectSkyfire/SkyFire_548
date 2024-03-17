@@ -2298,6 +2298,154 @@ public:
     }
 };
 
+class npc_jaomin_ro : public CreatureScript
+{
+    public:
+        npc_jaomin_ro() : CreatureScript("npc_jaomin_ro") { }
+ 
+        struct npc_jaomin_roAI : public ScriptedAI
+        {
+            npc_jaomin_roAI(Creature* creature) : ScriptedAI(creature) { }
+ 
+            enum eEvents
+            {
+                EVENT_JAOMIN_JUMP   = 1,
+                EVENT_JAOMIN_JUMP_DAMAGE = 2,
+                EVENT_FALCON        = 3,
+                EVENT_FALCON_STUN = 4,
+                EVENT_FALCON_STOP  =5,
+                EVENT_END_OF_COMBAT = 6
+            };
+ 
+            EventMap events;
+ 
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_JAOMIN_JUMP, 2000);
+            }
+ 
+            void Reset() OVERRIDE
+            {
+                events.Reset();
+            }
+ 
+            void MoveInLineOfSight(Unit*  who) OVERRIDE
+            {
+                Player * const player = who->ToPlayer();
+                if (!player)
+                    return;
+ 
+                if (player->GetQuestStatus(29409) != QUEST_STATUS_INCOMPLETE)
+                    return;
+ 
+                if (who->GetDistance(me) < 15.f)
+                {
+                    if (me->getStandState() != UNIT_STAND_STATE_STAND)
+                    {
+                        Talk(0);
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                    }
+                }
+            }
+ 
+            void DamageTaken(Unit* attacker, uint32& damage) OVERRIDE
+            {
+                if (HealthBelowPct(10))
+                {
+                    std::list<Player*> playerList;
+                    GetPlayerListInGrid(playerList, me, 10.0f);
+                    for (auto&& player: playerList)
+                        player->KilledMonsterCredit(me->GetEntry(), 0);
+ 
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                    Talk(1);
+                    
+                    if (damage > me->GetHealth())
+                        damage = 0;
+                    
+                    events.CancelEvent(EVENT_JAOMIN_JUMP);
+                    events.CancelEvent(EVENT_JAOMIN_JUMP_DAMAGE);
+                    events.CancelEvent(EVENT_FALCON);
+                    events.CancelEvent(EVENT_FALCON_STUN);
+                    events.CancelEvent(EVENT_FALCON_STOP);
+
+                    events.ScheduleEvent(EVENT_END_OF_COMBAT, 1000);
+                }
+ 
+            }
+ 
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!UpdateVictim())
+                    return;
+                
+                events.Update(diff);
+ 
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_JAOMIN_JUMP:
+                        {
+                            me->CastSpell(me->GetVictim(), 108938);
+                            events.ScheduleEvent(EVENT_JAOMIN_JUMP_DAMAGE, 2000);
+                            break;
+                        }
+                        case EVENT_JAOMIN_JUMP_DAMAGE:
+                        {
+                            me->CastSpell(me->GetVictim(), 108937);
+                            events.ScheduleEvent(EVENT_FALCON, 10000);
+                            break;
+                        }
+                        case EVENT_FALCON:
+                        {
+                            me->CastSpell(me, 108955);
+                            float x, y, z;
+                            me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 7.5f);
+                                
+                            if (Creature* hawk = me->SummonCreature(57750, x, y, z, 0.0f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 6000))
+                            {
+                                me->EnterVehicle(hawk, 0);
+                                hawk->GetClosePoint(x, y, z, hawk->GetObjectSize() / 3, 5.0f);
+                                hawk->GetMotionMaster()->MoveCharge(x,y,z);
+                                hawk->DespawnOrUnsummon(1000);
+                                me->ExitVehicle();
+                            }
+                            events.ScheduleEvent(EVENT_FALCON_STUN, 3000);
+                            break;
+                        }
+                        case EVENT_FALCON_STUN:
+                        {
+                            me->CastSpell(me->GetVictim(), 108971);
+                            events.ScheduleEvent(EVENT_FALCON_STOP, 2000);
+                            break;
+                        }
+                        case EVENT_FALCON_STOP:
+                        {
+                            me->RemoveAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                            events.ScheduleEvent(EVENT_JAOMIN_JUMP, 10000);
+                            break;
+                        }
+                        case EVENT_END_OF_COMBAT:
+                        {
+                            EnterEvadeMode();
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+ 
+                DoMeleeAttackIfReady();
+            }
+        };
+ 
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_jaomin_roAI(creature);
+        }
+};
+
 void AddSC_wandering_island()
 {
     new npc_hot_air_balloon_vehicle();
@@ -2319,4 +2467,5 @@ void AddSC_wandering_island()
     new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
+    new npc_jaomin_ro();
 }
