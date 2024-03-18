@@ -1,0 +1,1 @@
+UPDATE `quest_objective` SET `description`='Garrosh\'ar Shredder' WHERE `id`=269136 AND `questId`=31732 AND `index`=1;
