@@ -2312,9 +2312,11 @@ class npc_jaomin_ro : public CreatureScript
                 EVENT_JAOMIN_JUMP   = 1,
                 EVENT_JAOMIN_JUMP_DAMAGE = 2,
                 EVENT_FALCON        = 3,
-                EVENT_FALCON_STUN = 4,
-                EVENT_FALCON_STOP  =5,
-                EVENT_END_OF_COMBAT = 6
+                EVENT_FALCON_VEHICLE = 4,
+                EVENT_FALCON_VEHICLE_EXIT = 5,
+                EVENT_FALCON_STUN = 6,
+                EVENT_FALCON_STOP  =7,
+                EVENT_END_OF_COMBAT = 8
             };
  
             EventMap events;
@@ -2366,6 +2368,8 @@ class npc_jaomin_ro : public CreatureScript
                     events.CancelEvent(EVENT_JAOMIN_JUMP);
                     events.CancelEvent(EVENT_JAOMIN_JUMP_DAMAGE);
                     events.CancelEvent(EVENT_FALCON);
+                    events.CancelEvent(EVENT_FALCON_VEHICLE);
+                    events.CancelEvent(EVENT_FALCON_VEHICLE_EXIT);
                     events.CancelEvent(EVENT_FALCON_STUN);
                     events.CancelEvent(EVENT_FALCON_STOP);
 
@@ -2399,19 +2403,31 @@ class npc_jaomin_ro : public CreatureScript
                         }
                         case EVENT_FALCON:
                         {
-                            me->CastSpell(me, 108955);
-                            float x, y, z;
-                            me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 7.5f);
                                 
-                            if (Creature* hawk = me->SummonCreature(57750, x, y, z, 0.0f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 6000))
+                            me->CastSpell(me, 108955);
+                            if (Creature* hawk = me->SummonCreature(57750, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 3000))
                             {
+                                hawk->SetDisplayId(39796);
                                 me->EnterVehicle(hawk, 0);
-                                hawk->GetClosePoint(x, y, z, hawk->GetObjectSize() / 3, 5.0f);
-                                hawk->GetMotionMaster()->MoveCharge(x,y,z);
-                                hawk->DespawnOrUnsummon(1000);
-                                me->ExitVehicle();
                             }
-                            events.ScheduleEvent(EVENT_FALCON_STUN, 3000);
+                            events.ScheduleEvent(EVENT_FALCON_VEHICLE, 1000);
+                            break;
+                        }
+                        case EVENT_FALCON_VEHICLE:
+                        {
+                            if (Creature* hawk = me->FindNearestCreature(57750, 25.0f))
+                            {
+                                float x, y, z;
+                                me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 20.0f);
+                                hawk->GetMotionMaster()->MoveCharge(x,y,z);
+                            }
+                            events.ScheduleEvent(EVENT_FALCON_VEHICLE_EXIT, 1000);
+                            break;
+                        }
+                        case EVENT_FALCON_VEHICLE_EXIT:
+                        {
+                            me->ExitVehicle();
+                            events.ScheduleEvent(EVENT_FALCON_STUN, 1000);
                             break;
                         }
                         case EVENT_FALCON_STUN:
