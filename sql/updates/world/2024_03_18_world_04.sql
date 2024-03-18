@@ -23,7 +23,7 @@ DELETE FROM `spell_area` WHERE `spell`=78284 AND `area`=109 AND `quest_start`=26
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (78284, 109, 26215, 26232, 0, 0, 2, 1, 66, 9);
 
---Two-shoed Lou Spawn
+-- Two-shoed Lou Spawn
 DELETE FROM `creature` WHERE `guid`=100062;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (100062, 42560, 0, 1, 0, 0, 0, 0, -9855.68, 1277.57, 40.9636, 5.42797, 120, 0, 0, 1, 0, 0, 0, 0, 0);
