@@ -427,6 +427,76 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+// 3125
+class npc_clattering_scorpid : public CreatureScript
+{
+    
+public:
+    npc_clattering_scorpid() : CreatureScript("npc_clattering_scorpid") { }
+
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_clattering_scorpidAI(creature);
+    }
+
+    struct npc_clattering_scorpidAI : public ScriptedAI
+    {
+        enum clatteringScorpidEvents
+        {
+            EVENT_CAST_VENOM = 1,
+            EVENT_KC_TOTEM = 2
+        };
+        EventMap events;
+        npc_clattering_scorpidAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            events.ScheduleEvent(EVENT_CAST_VENOM, 2000);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+ 
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CAST_VENOM:
+                    {
+                        if (!me->FindNearestCreature(39236, 5.0f))
+                            Talk(0, me);
+            
+                        me->CastSpell(me->GetVictim(), 73672);
+                        events.ScheduleEvent(EVENT_KC_TOTEM, 2500);
+                        events.ScheduleEvent(EVENT_CAST_VENOM, 7500);
+                        break;
+                    }
+                    case EVENT_KC_TOTEM:
+                    {
+                        if (Creature* totem = me->FindNearestCreature(39236, 5.0f))
+                            totem->GetOwner()->ToPlayer()->KilledMonsterCredit(39236);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_durotar()
 {
     new npc_zuni();
@@ -434,4 +504,5 @@ void AddSC_durotar()
     new npc_darkspear_jailor();
     new npc_lazy_peon();
     new spell_voodoo();
+    new npc_clattering_scorpid();
 }
