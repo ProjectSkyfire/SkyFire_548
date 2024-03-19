@@ -2400,7 +2400,14 @@ class npc_jaomin_ro : public CreatureScript
                         {
                             me->GetMotionMaster()->MoveJump(me->GetVictim()->GetPositionX(),me->GetVictim()->GetPositionY(),me->GetVictim()->GetPositionZ(), 20.0f, 20.0f);
                             me->CastSpell(me->GetVictim(), 108937);
-
+                            std::list<Player*> playerList;
+                            GetPlayerListInGrid(playerList, me, 5.0f);
+                            for (auto&& player : playerList)
+                            {
+                                float horizontalSpeed = 10.0f;
+                                float verticalSpeed = 8.0f;
+                                player->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), horizontalSpeed, verticalSpeed);
+                            }
                             events.ScheduleEvent(EVENT_FALCON, 10000);
                             break;
                         }
