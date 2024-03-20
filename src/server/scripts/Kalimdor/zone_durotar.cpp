@@ -497,6 +497,106 @@ public:
     };
 };
 
+// 73705 - Injured Razor Hill Grunt - Cancel Feign Death
+class spell_injured_razor_hill_grunt_cancel_feign_death : public SpellScript
+{
+    PrepareSpellScript(spell_injured_razor_hill_grunt_cancel_feign_death);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Unit* target = GetHitUnit())
+            if (target->getStandState() == UNIT_STAND_STATE_DEAD)
+                target->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_injured_razor_hill_grunt_cancel_feign_death::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+enum NpcInjuredRazorHillGruntUtilities
+{
+    EVENT_TEXT_BEFORE_HELP = 1,
+    EVENT_AFTER_HELP       = 2,
+    EVENT_DESPAWN          = 3,
+
+    TEXT_BEFORE_HELP       = 0,
+    TEXT_AFTER_HELP        = 1,
+    TEXT_DESPAWN           = 2,
+
+    QUEST_LOSS_REDUCTION   = 25179
+};
+
+// 39270 - Injured Razor Hill Grunt
+struct npc_injured_razor_hill_grunt : public ScriptedAI
+{
+    npc_injured_razor_hill_grunt(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() OVERRIDE
+    {
+        me->setRegeneratingHealth(false);
+        me->SetHealth(me->CountPctFromMaxHealth(10));
+        _events.ScheduleEvent(EVENT_TEXT_BEFORE_HELP, 60 * IN_MILLISECONDS, 120 * IN_MILLISECONDS);
+    }
+
+    void OnSpellClick(Unit* clicker, bool& /*result*/) OVERRIDE
+    {
+        if (Player* player = clicker->ToPlayer())
+        {
+            me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            me->GetMotionMaster()->MoveFollow(player, 0.f, 0.f);
+            player->KilledMonsterCredit(me->GetEntry());
+            _events.ScheduleEvent(EVENT_AFTER_HELP, 2 * IN_MILLISECONDS);
+
+            if (Quest const* quest = sObjectMgr->GetQuestTemplate(QUEST_LOSS_REDUCTION))
+                if (player->GetQuestStatus(quest->GetQuestId()) == QUEST_STATUS_NONE)
+                {
+                    player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, me->GetGUID(), true);
+                    player->AddQuest(quest, nullptr);
+                }
+        }
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_TEXT_BEFORE_HELP:
+                {
+                    Talk(TEXT_BEFORE_HELP);
+                    _events.ScheduleEvent(EVENT_TEXT_BEFORE_HELP, 60 * IN_MILLISECONDS, 120 * IN_MILLISECONDS);
+                    break;
+                }
+                case EVENT_AFTER_HELP:
+                {
+                    Talk(TEXT_AFTER_HELP);
+                    _events.CancelEvent(EVENT_TEXT_BEFORE_HELP);
+                    _events.ScheduleEvent(EVENT_DESPAWN, 60 * IN_MILLISECONDS, 80 * IN_MILLISECONDS);
+                    break;
+                }
+                case EVENT_DESPAWN:
+                {
+                    Talk(TEXT_DESPAWN);
+                    me->GetMotionMaster()->MovementExpired(true);
+                    me->DespawnOrUnsummon(3 * IN_MILLISECONDS);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
+private:
+    EventMap _events;
+};
+
 void AddSC_durotar()
 {
     new npc_zuni();
@@ -505,4 +605,6 @@ void AddSC_durotar()
     new npc_lazy_peon();
     new spell_voodoo();
     new npc_clattering_scorpid();
+    RegisterCreatureAI(npc_injured_razor_hill_grunt);
+    RegisterSpellScript(spell_injured_razor_hill_grunt_cancel_feign_death);
 }
