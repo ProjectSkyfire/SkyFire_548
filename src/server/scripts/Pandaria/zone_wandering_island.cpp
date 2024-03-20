@@ -2392,7 +2392,6 @@ class npc_jaomin_ro : public CreatureScript
                         case EVENT_JAOMIN_JUMP:
                         {
                             me->CastSpell(me->GetVictim(), 108938);
-                            me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+10.0f, 20.0f, 20.0f);
                             events.ScheduleEvent(EVENT_JAOMIN_JUMP_DAMAGE, 2500);
                             break;
                         }

@@ -918,6 +918,17 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float x, y, z;
     destTarget->GetPosition(x, y, z);
 
+    switch (m_spellInfo->Id)
+    {
+        case 108938:
+        {
+            m_caster->GetMotionMaster()->MoveJump(x, y, z+10.0f, 20.0f, 20.0f);
+            return;
+        }
+        default:
+            break;
+    }
+
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
