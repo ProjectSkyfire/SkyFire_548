@@ -570,7 +570,7 @@ private:
         RankInfo(): m_guildId(0), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
         RankInfo(uint32 guildId) : m_guildId(guildId), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
         RankInfo(uint32 guildId, uint8 rankId, std::string const& name, uint32 rights, uint32 money) :
-            m_guildId(guildId), m_rankId(rankId), m_name(name), m_rights(rights), m_bankMoneyPerDay(money) { }
+            m_guildId(guildId), m_rankId(rankId), m_name(name), m_rights(rights), m_bankMoneyPerDay(rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_MONEY_UNLIMITED : money) { }
 
         void LoadFromDB(Field* fields);
         void SaveToDB(SQLTransaction& trans) const;
