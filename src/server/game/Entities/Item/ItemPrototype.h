@@ -8,6 +8,7 @@
 
 #include "Common.h"
 #include "SharedDefines.h"
+#include "DBCStores.h"
 
 enum ItemModType
 {
@@ -781,7 +782,68 @@ struct ItemTemplate
                InventoryType == INVTYPE_THROWN ||
                InventoryType == INVTYPE_RANGEDRIGHT;
     }
+
+    uint32 GetArmor() const
+    {
+        uint32 quality = ItemQualities(Quality) != ITEM_QUALITY_HEIRLOOM ? ItemQualities(Quality) : ITEM_QUALITY_RARE;
+        if (quality > ITEM_QUALITY_ARTIFACT)
+            return 0;
+
+        // all items but shields
+        if (Class != ITEM_CLASS_ARMOR || SubClass != ITEM_SUBCLASS_ARMOR_SHIELD)
+        {
+            ItemArmorQualityEntry const* armorQuality = sItemArmorQualityStore.LookupEntry(ItemLevel);
+            ItemArmorTotalEntry const* armorTotal = sItemArmorTotalStore.LookupEntry(ItemLevel);
+            if (!armorQuality || !armorTotal)
+                return 0;
+
+            uint32 inventoryType = InventoryType;
+            if (inventoryType == INVTYPE_ROBE)
+                inventoryType = INVTYPE_CHEST;
+
+            ArmorLocationEntry const* location = sArmorLocationStore.LookupEntry(inventoryType);
+            if (!location)
+                return 0;
+
+            if (SubClass < ITEM_SUBCLASS_ARMOR_CLOTH || SubClass > ITEM_SUBCLASS_ARMOR_PLATE)
+                return 0;
+
+            float total = 1.0f;
+            float locationModifier = 1.0f;
+            switch (SubClass)
+            {
+            case ITEM_SUBCLASS_ARMOR_CLOTH:
+                total = armorTotal->Value[0];
+                locationModifier = location->Value[0];
+                break;
+            case ITEM_SUBCLASS_ARMOR_LEATHER:
+                total = armorTotal->Value[1];
+                locationModifier = location->Value[1];
+                break;
+            case ITEM_SUBCLASS_ARMOR_MAIL:
+                total = armorTotal->Value[2];
+                locationModifier = location->Value[2];
+                break;
+            case ITEM_SUBCLASS_ARMOR_PLATE:
+                total = armorTotal->Value[3];
+                locationModifier = location->Value[3];
+                break;
+            default:
+                break;
+            }
+
+            return uint32(armorQuality->Value[quality] * total * locationModifier + 0.5f);
+        }
+
+        // shields
+        ItemArmorShieldEntry const* shield = sItemArmorShieldStore.LookupEntry(ItemLevel);
+        if (!shield)
+            return 0;
+
+        return uint32(shield->Value[quality] + 0.5f);
+    }
 };
+
 
 // Benchmarked: Faster than std::map (insert/find)
 typedef UNORDERED_MAP<uint32, ItemTemplate> ItemTemplateContainer;

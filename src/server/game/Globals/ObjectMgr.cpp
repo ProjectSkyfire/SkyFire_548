@@ -2270,40 +2270,6 @@ void FillItemDamageFields(float* minDamage, float* maxDamage, float* dps, uint32
     *maxDamage = floor(float(avgDamage* (statScalingFactor * 0.5f + 1.0f) + 0.5f));
 }
 
-uint32 FillItemArmor(uint32 itemlevel, uint32 itemClass, uint32 itemSubclass, uint32 quality, uint32 inventoryType)
-{
-    if (quality > ITEM_QUALITY_ARTIFACT)
-        return 0;
-
-    // all items but shields
-    if (itemClass != ITEM_CLASS_ARMOR || itemSubclass != ITEM_SUBCLASS_ARMOR_SHIELD)
-    {
-        ItemArmorQualityEntry const* armorQuality = sItemArmorQualityStore.LookupEntry(itemlevel);
-        ItemArmorTotalEntry const* armorTotal = sItemArmorTotalStore.LookupEntry(itemlevel);
-        if (!armorQuality || !armorTotal)
-            return 0;
-
-        if (inventoryType == INVTYPE_ROBE)
-            inventoryType = INVTYPE_CHEST;
-
-        ArmorLocationEntry const* location = sArmorLocationStore.LookupEntry(inventoryType);
-        if (!location)
-            return 0;
-
-        if (itemSubclass < ITEM_SUBCLASS_ARMOR_CLOTH)
-            return 0;
-
-        return uint32(armorQuality->Value[quality] * armorTotal->Value[itemSubclass - 1] * location->Value[itemSubclass - 1] + 0.5f);
-    }
-
-    // shields
-    ItemArmorShieldEntry const* shield = sItemArmorShieldStore.LookupEntry(itemlevel);
-    if (!shield)
-        return 0;
-
-    return uint32(shield->Value[quality] + 0.5f);
-}
-
 uint32 FillMaxDurability(uint32 itemClass, uint32 itemSubClass, uint32 inventoryType, uint32 quality, uint32 itemLevel)
 {
     if (itemClass != ITEM_CLASS_ARMOR && itemClass != ITEM_CLASS_WEAPON)
@@ -2490,7 +2456,7 @@ void ObjectMgr::LoadItemTemplates()
                              sparse->InventoryType, sparse->Flags2);
 
         itemTemplate.DamageType = sparse->DamageType;
-        itemTemplate.Armor = FillItemArmor(sparse->ItemLevel, db2Data->Class, db2Data->SubClass, sparse->Quality, sparse->InventoryType);
+        
         itemTemplate.Delay = sparse->Delay;
         itemTemplate.RangedModRange = sparse->RangedModRange;
 
@@ -2646,9 +2612,7 @@ void ObjectMgr::LoadItemTemplates()
                                  fields[132].GetFloat(), itemTemplate.InventoryType, itemTemplate.Flags2);
 
             itemTemplate.DamageType                = fields[71].GetUInt8();
-            itemTemplate.Armor                     = FillItemArmor(itemTemplate.ItemLevel, itemTemplate.Class,
-                                                                   itemTemplate.SubClass, itemTemplate.Quality,
-                                                                   itemTemplate.InventoryType);
+            
 
             itemTemplate.Delay                     = fields[72].GetUInt16();
             itemTemplate.RangedModRange            = fields[73].GetFloat();
