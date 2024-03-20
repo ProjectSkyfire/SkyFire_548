@@ -544,6 +544,7 @@ struct npc_injured_razor_hill_grunt : public ScriptedAI
     {
         if (Player* player = clicker->ToPlayer())
         {
+            _player = player;
             me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             me->GetMotionMaster()->MoveFollow(player, 0.f, 0.f);
@@ -554,7 +555,7 @@ struct npc_injured_razor_hill_grunt : public ScriptedAI
                 if (player->GetQuestStatus(quest->GetQuestId()) == QUEST_STATUS_NONE)
                 {
                     player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, me->GetGUID(), true);
-                    player->AddQuest(quest, nullptr);
+                    player->AddQuest(quest, NULL);
                 }
         }
     }
@@ -575,14 +576,14 @@ struct npc_injured_razor_hill_grunt : public ScriptedAI
                 }
                 case EVENT_AFTER_HELP:
                 {
-                    Talk(TEXT_AFTER_HELP);
+                    Talk(TEXT_AFTER_HELP, _player);
                     _events.CancelEvent(EVENT_TEXT_BEFORE_HELP);
                     _events.ScheduleEvent(EVENT_DESPAWN, 60 * IN_MILLISECONDS, 80 * IN_MILLISECONDS);
                     break;
                 }
                 case EVENT_DESPAWN:
                 {
-                    Talk(TEXT_DESPAWN);
+                    Talk(TEXT_DESPAWN, _player);
                     me->GetMotionMaster()->MovementExpired(true);
                     me->DespawnOrUnsummon(3 * IN_MILLISECONDS);
                     break;
@@ -594,6 +595,7 @@ struct npc_injured_razor_hill_grunt : public ScriptedAI
     }
 
 private:
+    Player* _player;
     EventMap _events;
 };
 
