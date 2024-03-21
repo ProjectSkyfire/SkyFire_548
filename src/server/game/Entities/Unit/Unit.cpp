@@ -152,7 +152,7 @@ WorldObject(isWorldObject), m_movedPlayer(NULL), m_lastSanctuaryTime(0),
 IsAIEnabled(false), NeedChangeAI(false), LastCharmerGUID(0),
 m_ControlledByPlayer(false), movespline(new Movement::MoveSpline()),
 i_AI(NULL), i_disabledAI(NULL), m_AutoRepeatFirstCast(false), m_procDeep(0),
-m_removedAurasCount(0), i_motionMaster(this), m_ThreatManager(this),
+m_overrideAutoattackRange(0), m_removedAurasCount(0), i_motionMaster(this), m_regenTimer(0), m_ThreatManager(this),
 m_vehicle(NULL), m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE),
 m_HostileRefManager(this), _lastDamagedTime(0)
 {
@@ -12130,7 +12130,7 @@ void Unit::DeleteCharmInfo()
 }
 
 CharmInfo::CharmInfo(Unit* unit)
-    : _unit(unit), _CommandState(COMMAND_FOLLOW), _petnumber(0), _barInit(false),
+    : _unit(unit), _CommandState(COMMAND_FOLLOW), _petnumber(0), _barInit(false), _oldReactState(REACT_PASSIVE),
     _isCommandAttack(false), _isCommandFollow(false), _isAtStay(false), _isFollowing(false), _isReturning(false),
     _stayX(0.0f), _stayY(0.0f), _stayZ(0.0f)
 {
