@@ -954,60 +954,28 @@ class HealInfo
 
 class ProcEventInfo
 {
-    public:
+public:
     ProcEventInfo(Unit* actor, Unit* actionTarget, Unit* procTarget, uint32 typeMask,
                   uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask,
                   Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo);
 
-    Unit* GetActor()
-    {
-        return _actor;
-    }
-    Unit* GetActionTarget() const
-    {
-        return _actionTarget;
-    }
-    Unit* GetProcTarget() const
-    {
-        return _procTarget;
-    }
+    Unit* GetActor() const { return _actor; }
+    Unit* GetActionTarget() const { return _actionTarget; }
+    Unit* GetProcTarget() const { return _procTarget; }
 
-    uint32 GetTypeMask() const
-    {
-        return _typeMask;
-    }
-    uint32 GetSpellTypeMask() const
-    {
-        return _spellTypeMask;
-    }
-    uint32 GetSpellPhaseMask() const
-    {
-        return _spellPhaseMask;
-    }
-    uint32 GetHitMask() const
-    {
-        return _hitMask;
-    }
+    uint32 GetTypeMask() const { return _typeMask; }
+    uint32 GetSpellTypeMask() const { return _spellTypeMask; }
+    uint32 GetSpellPhaseMask() const { return _spellPhaseMask; }
+    uint32 GetHitMask() const { return _hitMask; }
+    
 
-    SpellInfo const* GetSpellInfo() const
-    {
-        return NULL;
-    }
-    SpellSchoolMask GetSchoolMask() const
-    {
-        return SPELL_SCHOOL_MASK_NONE;
-    }
+    SpellInfo const* GetSpellInfo() const { return NULL; }
+    SpellSchoolMask GetSchoolMask() const { return SPELL_SCHOOL_MASK_NONE; }
 
-    DamageInfo* GetDamageInfo() const
-    {
-        return _damageInfo;
-    }
-    HealInfo* GetHealInfo() const
-    {
-        return _healInfo;
-    }
+    DamageInfo* GetDamageInfo() const { return _damageInfo; }
+    HealInfo* GetHealInfo() const { return _healInfo; }
 
-    private:
+private:
     Unit* const _actor;
     Unit* const _actionTarget;
     Unit* const _procTarget;
@@ -1288,7 +1256,7 @@ struct CharmInfo
     bool AddSpellToActionBar(SpellInfo const* spellInfo, ActiveStates newstate = ACT_DECIDE, uint8 preferredSlot = 0);
     bool RemoveSpellFromActionBar(uint32 spell_id);
     void LoadPetActionBar(const std::string& data);
-    void BuildActionBar(WorldPacket* data);
+    void BuildActionBar(WorldPacket* data) const;
     void SetSpellAutocast(SpellInfo const* spellInfo, bool state);
     void SetActionBar(uint8 index, uint32 spellOrAction, ActiveStates type)
     {
@@ -1312,17 +1280,17 @@ struct CharmInfo
     }
 
     void SetIsCommandAttack(bool val);
-    bool IsCommandAttack();
+    bool IsCommandAttack() const { return _isCommandAttack; }
     void SetIsCommandFollow(bool val);
-    bool IsCommandFollow();
+    bool IsCommandFollow() const { return _isCommandFollow; }
     void SetIsAtStay(bool val);
-    bool IsAtStay();
+    bool IsAtStay() const { return _isAtStay; }
     void SetIsFollowing(bool val);
-    bool IsFollowing();
+    bool IsFollowing() const { return _isFollowing; }
     void SetIsReturning(bool val);
-    bool IsReturning();
+    bool IsReturning() const { return _isReturning; }
     void SaveStayPosition();
-    void GetStayPosition(float &x, float &y, float &z);
+    void GetStayPosition(float &x, float &y, float &z) const;
 
     private:
     Unit* _unit;
@@ -2190,7 +2158,7 @@ class Unit : public WorldObject
 
     Pet* CreateTamedPetFrom(Creature* creatureTarget, uint32 spell_id = 0);
     Pet* CreateTamedPetFrom(uint32 creatureEntry, uint32 spell_id = 0);
-    bool InitTamedPet(Pet* pet, uint8 level, uint32 spell_id);
+    bool InitTamedPet(Pet* pet, uint8 level, uint32 spell_id) const;
 
     // aura apply/remove helpers - you should better not use these
     Aura* _TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount = NULL, Item* castItem = NULL, uint64 casterGUID = 0);
@@ -2695,9 +2663,9 @@ class Unit : public WorldObject
     void ClearComboPointHolders();
 
     ///----------Pet responses methods-----------------
-    void SendPetActionFeedback(uint8 msg);
-    void SendPetTalk(uint32 pettalk);
-    void SendPetAIReaction(ObjectGuid UnitGUID);
+    void SendPetActionFeedback(uint8 msg) const;
+    void SendPetTalk(uint32 pettalk) const;
+    void SendPetAIReaction(ObjectGuid UnitGUID) const;
     ///----------End of Pet responses methods----------
 
     void propagateSpeedChange()

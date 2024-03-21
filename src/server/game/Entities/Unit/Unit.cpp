@@ -12371,7 +12371,7 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     }
 }
 
-void CharmInfo::BuildActionBar(WorldPacket* data)
+void CharmInfo::BuildActionBar(WorldPacket* data) const
 {
     for (uint32 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
         *data << uint32(PetActionBar [i].packedData);
@@ -12989,7 +12989,7 @@ Player* Unit::GetSpellModOwner() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetActionFeedback(uint8 msg)
+void Unit::SendPetActionFeedback(uint8 msg) const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER)
@@ -13000,7 +13000,7 @@ void Unit::SendPetActionFeedback(uint8 msg)
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-void Unit::SendPetTalk(uint32 pettalk)
+void Unit::SendPetTalk(uint32 pettalk) const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER)
@@ -13014,7 +13014,7 @@ void Unit::SendPetTalk(uint32 pettalk)
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-void Unit::SendPetAIReaction(ObjectGuid UnitGUID)
+void Unit::SendPetAIReaction(ObjectGuid UnitGUID) const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER)
@@ -13537,7 +13537,7 @@ Pet* Unit::CreateTamedPetFrom(uint32 creatureEntry, uint32 spell_id)
     return pet;
 }
 
-bool Unit::InitTamedPet(Pet* pet, uint8 level, uint32 spell_id)
+bool Unit::InitTamedPet(Pet* pet, uint8 level, uint32 spell_id) const
 {
     pet->SetCreatorGUID(GetGUID());
     pet->setFaction(getFaction());
@@ -16636,19 +16636,9 @@ void CharmInfo::SetIsCommandAttack(bool val)
     _isCommandAttack = val;
 }
 
-bool CharmInfo::IsCommandAttack()
-{
-    return _isCommandAttack;
-}
-
 void CharmInfo::SetIsCommandFollow(bool val)
 {
     _isCommandFollow = val;
-}
-
-bool CharmInfo::IsCommandFollow()
-{
-    return _isCommandFollow;
 }
 
 void CharmInfo::SaveStayPosition()
@@ -16660,7 +16650,7 @@ void CharmInfo::SaveStayPosition()
     _stayZ = stayPos.z;
 }
 
-void CharmInfo::GetStayPosition(float &x, float &y, float &z)
+void CharmInfo::GetStayPosition(float &x, float &y, float &z) const
 {
     x = _stayX;
     y = _stayY;
@@ -16672,29 +16662,14 @@ void CharmInfo::SetIsAtStay(bool val)
     _isAtStay = val;
 }
 
-bool CharmInfo::IsAtStay()
-{
-    return _isAtStay;
-}
-
 void CharmInfo::SetIsFollowing(bool val)
 {
     _isFollowing = val;
 }
 
-bool CharmInfo::IsFollowing()
-{
-    return _isFollowing;
-}
-
 void CharmInfo::SetIsReturning(bool val)
 {
     _isReturning = val;
-}
-
-bool CharmInfo::IsReturning()
-{
-    return _isReturning;
 }
 
 void Unit::SetInFront(WorldObject const* target)
