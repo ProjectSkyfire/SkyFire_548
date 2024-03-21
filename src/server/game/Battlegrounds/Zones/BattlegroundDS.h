@@ -92,15 +92,15 @@ class BattlegroundDS : public Battleground
 
         void PostUpdateImpl(uint32 diff) OVERRIDE;
     protected:
-        uint32 getWaterFallStatus() { return _waterfallStatus; }
+        uint32 getWaterFallStatus() const { return _waterfallStatus; }
         void setWaterFallStatus(uint8 status) { _waterfallStatus = status; }
-        uint32 getWaterFallTimer() { return _waterfallTimer; }
+        uint32 getWaterFallTimer() const { return _waterfallTimer; }
         void setWaterFallTimer(uint32 timer) { _waterfallTimer = timer; }
-        uint32 getWaterFallKnockbackTimer() { return _waterfallKnockbackTimer; }
+        uint32 getWaterFallKnockbackTimer() const { return _waterfallKnockbackTimer; }
         void setWaterFallKnockbackTimer(uint32 timer) { _waterfallKnockbackTimer = timer; }
-        uint8 getPipeKnockBackCount() { return _pipeKnockBackCount; }
+        uint8 getPipeKnockBackCount() const { return _pipeKnockBackCount; }
         void setPipeKnockBackCount(uint8 count) { _pipeKnockBackCount = count; }
-        uint32 getPipeKnockBackTimer() { return _pipeKnockBackTimer; }
+        uint32 getPipeKnockBackTimer() const { return _pipeKnockBackTimer; }
         void setPipeKnockBackTimer(uint32 timer) { _pipeKnockBackTimer = timer; }
 };
 #endif

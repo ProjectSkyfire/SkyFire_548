@@ -140,7 +140,7 @@ class BfGraveyardWG : public BfGraveyard
         BfGraveyardWG(BattlefieldWG* Bf);
 
         void SetTextId(int32 textid) { m_GossipTextId = textid; }
-        int32 GetTextId() { return m_GossipTextId; }
+        int32 GetTextId() const { return m_GossipTextId; }
     protected:
         int32 m_GossipTextId;
 };
@@ -375,7 +375,7 @@ class BattlefieldWG : public Battlefield
         void SetRelic(uint64 relicGUID) { m_titansRelicGUID = relicGUID; }
 
         /// Check if players can interact with the relic (Only if the last door has been broken)
-        bool CanInteractWithRelic() { return m_isRelicInteractible; }
+        bool CanInteractWithRelic() const { return m_isRelicInteractible; }
 
         /// Define if player can interact with the relic
         void SetRelicInteractible(bool allow) { m_isRelicInteractible = allow; }
@@ -1445,7 +1445,7 @@ struct BfWGGameObjectBuilding
         }
     }
 
-    void Save()
+    void Save() const
     {
         sWorld->setWorldState(m_WorldState, m_State);
     }
@@ -1515,7 +1515,7 @@ struct WGWorkshop
             GiveControlTo(bf->GetDefenderTeam(), true);
     }
 
-    void Save()
+    void Save() const
     {
         sWorld->setWorldState(WorkshopsData[workshopId].worldstate, state);
     }
@@ -1674,7 +1674,7 @@ struct WintergraspWorkshopData
             GiveControlTo(m_WG->GetDefenderTeam(), true);
     }
 
-    void Save()
+    void Save() const
     {
         sWorld->setWorldState(m_WorldState, m_State);
     }

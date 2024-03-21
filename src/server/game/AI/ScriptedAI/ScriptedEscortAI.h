@@ -81,17 +81,17 @@ public:
     void SetRun(bool on = true);
     void SetEscortPaused(bool on);
 
-    bool HasEscortState(uint32 escortState) { return (m_uiEscortState & escortState); }
+    bool HasEscortState(uint32 escortState) const { return (m_uiEscortState & escortState); }
     virtual bool IsEscorted() OVERRIDE { return (m_uiEscortState & STATE_ESCORT_ESCORTING); }
 
     void SetMaxPlayerDistance(float newMax) { MaxPlayerDistance = newMax; }
-    float GetMaxPlayerDistance() { return MaxPlayerDistance; }
+    float GetMaxPlayerDistance() const { return MaxPlayerDistance; }
 
     void SetDespawnAtEnd(bool despawn) { DespawnAtEnd = despawn; }
     void SetDespawnAtFar(bool despawn) { DespawnAtFar = despawn; }
-    bool GetAttack() { return m_bIsActiveAttacker; }//used in EnterEvadeMode override
+    bool GetAttack() const { return m_bIsActiveAttacker; }//used in EnterEvadeMode override
     void SetCanAttack(bool attack) { m_bIsActiveAttacker = attack; }
-    uint64 GetEventStarterGUID() { return m_uiPlayerGUID; }
+    uint64 GetEventStarterGUID() const { return m_uiPlayerGUID; }
 
 protected:
     Player* GetPlayerForEscort() { return ObjectAccessor::GetPlayer(*me, m_uiPlayerGUID); }

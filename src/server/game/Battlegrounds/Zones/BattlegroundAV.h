@@ -1580,7 +1580,7 @@ class BattlegroundAV : public Battleground
         BG_AV_Nodes GetNodeThroughObject(uint32 object);
         uint32 GetObjectThroughNode(BG_AV_Nodes node);
         char const* GetNodeName(BG_AV_Nodes node);
-        bool IsTower(BG_AV_Nodes node) { return m_Nodes[node].Tower; }
+        bool IsTower(BG_AV_Nodes node) const { return m_Nodes[node].Tower; }
 
         /*mine*/
         void ChangeMineOwner(uint8 mine, uint32 team, bool initial=false);

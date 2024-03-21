@@ -642,7 +642,7 @@ class InstanceMap : public Map
         void Update(const uint32) OVERRIDE;
         void CreateInstanceData(bool load);
         bool Reset(InstanceResetMethod method);
-        uint32 GetScriptId() { return i_script_id; }
+        uint32 GetScriptId() const { return i_script_id; }
         InstanceScript* GetInstanceScript() { return i_data; }
         void PermBindAllPlayers(Player* source);
         void UnloadAll() OVERRIDE;

@@ -63,8 +63,8 @@ public:
         return NULL;
     }
 
-    bool GetFeedBackSystemStatus() { return _feedbackSystemStatus; }
-    bool GetGmTicketSystemStatus() { return _gmTicketSystemStatus; }
+    bool GetFeedBackSystemStatus() const { return _feedbackSystemStatus; }
+    bool GetGmTicketSystemStatus() const { return _gmTicketSystemStatus; }
 
     uint64 GetLastChange() const { return _lastChange; }
 

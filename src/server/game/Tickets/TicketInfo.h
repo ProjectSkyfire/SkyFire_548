@@ -137,7 +137,7 @@ public:
     void SetGmAction(bool needResponse, bool haveTicket);
 
     bool IsCompleted() const { return _completed; }
-    bool GetViewed(){ return _viewed; }
+    bool GetViewed() const { return _viewed; }
 
     void  LoadFromDB(Field* fields) OVERRIDE;
     void  SaveToDB(SQLTransaction& trans) const OVERRIDE;

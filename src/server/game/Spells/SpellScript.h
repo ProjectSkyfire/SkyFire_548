@@ -230,8 +230,8 @@ class SpellScript : public _SpellScript
         bool _Validate(SpellInfo const* entry);
         bool _Load(Spell* spell);
         void _InitHit();
-        bool _IsEffectPrevented(SpellEffIndex effIndex) { return m_hitPreventEffectMask & (1<<effIndex); }
-        bool _IsDefaultEffectPrevented(SpellEffIndex effIndex) { return m_hitPreventDefaultEffectMask & (1<<effIndex); }
+        bool _IsEffectPrevented(SpellEffIndex effIndex) const { return m_hitPreventEffectMask & (1<<effIndex); }
+        bool _IsDefaultEffectPrevented(SpellEffIndex effIndex) const { return m_hitPreventDefaultEffectMask & (1<<effIndex); }
         void _PrepareScriptCall(SpellScriptHookType hookType);
         void _FinishScriptCall();
         bool IsInCheckCastHook() const;

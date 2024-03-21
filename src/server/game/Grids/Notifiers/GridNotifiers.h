@@ -131,7 +131,7 @@ namespace Skyfire
         void Visit(DynamicObjectMapType &m);
         template<class SKIP> void Visit(GridRefManager<SKIP> &) { }
 
-        void SendPacket(Player* player)
+        void SendPacket(Player* player) const
         {
             // never send packet to self
             if (player == i_source || (team && player->GetTeam() != team) || skipped_receiver == player)

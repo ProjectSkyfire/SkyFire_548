@@ -78,10 +78,10 @@ public:
     bool LoadFromDB(Field* fields);
     void UpdateToDB(SQLTransaction& trans);
 
-    uint32 GetEndTime() { return GetStartTime() + GetTemplate()->Duration; }
+    uint32 GetEndTime() const { return GetStartTime() + GetTemplate()->Duration; }
     uint32 TimeLeft();
-    bool IsActive() { return (time(NULL) >= GetStartTime()); }
-    bool IsExpired() { return GetEndTime() < time(NULL); }
+    bool IsActive() const { return (time(NULL) >= GetStartTime()); }
+    bool IsExpired() const { return GetEndTime() < time(NULL); }
 
     std::string BuildAuctionMailSubject(BMMailAuctionAnswers response);
     std::string BuildAuctionMailBody(uint32 lowGuid);

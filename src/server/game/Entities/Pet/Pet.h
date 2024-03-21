@@ -102,7 +102,7 @@ class Pet : public Guardian
 
         uint16 m_petSpec;
         uint16 GetPetSpecByTalentTab(uint16 talenttab);
-        uint16 GetSpecialization() { return m_petSpec; }
+        uint16 GetSpecialization() const { return m_petSpec; }
 
         void SetSpec(uint16 spec);
         void UnlearnSpecializationSpells();
@@ -127,7 +127,7 @@ class Pet : public Guardian
         void InitTalentForLevel();
 
         uint8 GetMaxTalentPointsForLevel(uint8 level);
-        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_ANIM_TIER, 1); }
+        uint8 GetFreeTalentPoints() const { return GetByteValue(UNIT_FIELD_ANIM_TIER, 1); }
         void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_ANIM_TIER, 1, points); }
 
         uint32  m_usedTalentCount;

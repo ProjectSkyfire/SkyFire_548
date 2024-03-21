@@ -383,7 +383,7 @@ private:
         uint32 GetTotalReputation() const { return m_totalReputation; }
         uint32 GetWeekReputation() const { return m_weekReputation; }
 
-        bool IsOnline() { return (m_flags & GUILDMEMBER_STATUS_ONLINE); }
+        bool IsOnline() const { return (m_flags & GUILDMEMBER_STATUS_ONLINE); }
 
         void ChangeRank(uint8 newRank);
 

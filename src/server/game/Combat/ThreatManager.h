@@ -75,7 +75,7 @@ class HostileReference : public Reference<Unit, ThreatManager>
             }
         }
 
-        float getTempThreatModifier() { return iTempThreatModifier; }
+        float getTempThreatModifier() const { return iTempThreatModifier; }
 
         //=================================================
         // check, if source can reach target and set the status

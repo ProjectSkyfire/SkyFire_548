@@ -298,7 +298,7 @@ class Battleground
         /* Battleground */
         // Get methods:
         char const* GetName() const         { return m_Name; }
-        uint64 GetGUID() { return m_Guid; }
+        uint64 GetGUID() const { return m_Guid; }
         BattlegroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
         BattlegroundBracketId GetBracketId() const { return m_BracketId; }
         uint32 GetInstanceID() const        { return m_InstanceID; }

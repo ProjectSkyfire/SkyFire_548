@@ -722,8 +722,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         // Note: unit is only used when s = GO_ACTIVATED
         void SetLootState(LootState s, Unit* unit = NULL);
 
-        uint16 GetLootMode() { return m_LootMode; }
-        bool HasLootMode(uint16 lootMode) { return m_LootMode & lootMode; }
+        uint16 GetLootMode() const { return m_LootMode; }
+        bool HasLootMode(uint16 lootMode) const { return m_LootMode & lootMode; }
         void SetLootMode(uint16 lootMode) { m_LootMode = lootMode; }
         void AddLootMode(uint16 lootMode) { m_LootMode |= lootMode; }
         void RemoveLootMode(uint16 lootMode) { m_LootMode &= ~lootMode; }

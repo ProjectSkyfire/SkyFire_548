@@ -615,7 +615,7 @@ class EventMap
         * @param phase Wanted phase.
         * @return True, if phase of event map contains specified phase.
         */
-        bool IsInPhase(uint8 phase)
+        bool IsInPhase(uint8 phase) const
         {
             return phase <= 8 && (!phase || _phase & (1 << (phase - 1)));
         }

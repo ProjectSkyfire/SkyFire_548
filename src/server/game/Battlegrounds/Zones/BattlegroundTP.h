@@ -180,7 +180,7 @@ class BattlegroundTP : public Battleground
         bool IsHordeFlagPickedup() const            { return m_FlagKeepers[TEAM_HORDE] != 0; }
         void RespawnFlag(uint32 Team, bool captured);
         void RespawnFlagAfterDrop(uint32 Team);
-        uint8 GetFlagState(uint32 team)             { return _flagState[GetTeamIndexByTeamId(team)]; }
+        uint8 GetFlagState(uint32 team) const       { return _flagState[GetTeamIndexByTeamId(team)]; }
 
 
         /* Battleground Events */
@@ -209,7 +209,7 @@ class BattlegroundTP : public Battleground
         }
 
 
-        uint64 GetDroppedFlagGUID(uint32 TeamID)             { return m_DroppedFlagGUID[GetTeamIndexByTeamId(TeamID)];}
+        uint64 GetDroppedFlagGUID(uint32 TeamID) const { return m_DroppedFlagGUID[GetTeamIndexByTeamId(TeamID)];}
         void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
 

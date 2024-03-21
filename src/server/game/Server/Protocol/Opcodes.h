@@ -1507,7 +1507,7 @@ class OpcodeTable
         void InitializeClientTable();
         void InitializeServerTable();
 
-        inline Opcodes GetOpcodeByNumber(uint16 number) { return _opcodeTable[number]; }
+        inline Opcodes GetOpcodeByNumber(uint16 number) const { return _opcodeTable[number]; }
 
         OpcodeHandler const* operator[](uint32 index) const
         {

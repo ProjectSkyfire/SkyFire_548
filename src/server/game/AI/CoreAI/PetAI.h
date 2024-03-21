@@ -36,7 +36,7 @@ class PetAI : public CreatureAI
         void EnterEvadeMode() OVERRIDE { } // For fleeing, pets don't use this type of Evade mechanic
 
     private:
-        bool _isVisible(Unit*) const;
+        //bool _isVisible(Unit*) const;
         bool _needToStop(void);
         void _stopAttack(void);
 

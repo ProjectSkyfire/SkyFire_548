@@ -1428,14 +1428,8 @@ class Player : public Unit, public GridObject<Player>
     time_t m_logintime;
     time_t m_Last_tick;
     uint32 m_Played_time [MAX_PLAYED_TIME_INDEX];
-    uint32 GetTotalPlayedTime()
-    {
-        return m_Played_time [PLAYED_TIME_TOTAL];
-    }
-    uint32 GetLevelPlayedTime()
-    {
-        return m_Played_time [PLAYED_TIME_LEVEL];
-    }
+    uint32 GetTotalPlayedTime() const { return m_Played_time[PLAYED_TIME_TOTAL]; }
+    uint32 GetLevelPlayedTime() const { return m_Played_time[PLAYED_TIME_LEVEL]; }
 
     void setDeathState(DeathState s) override;                   // overwrite Unit::setDeathState
 
@@ -2197,10 +2191,7 @@ class Player : public Unit, public GridObject<Player>
     }
     void ResurectUsingRequestData();
 
-    uint8 getCinematic()
-    {
-        return m_cinematic;
-    }
+    uint8 getCinematic() const { return m_cinematic; }
     void setCinematic(uint8 cine)
     {
         m_cinematic = cine;
@@ -2266,7 +2257,7 @@ class Player : public Unit, public GridObject<Player>
     {
         SetUInt32Value(PLAYER_FIELD_GUILD_LEVEL, level);
     }
-    uint32 GetGuildLevel()
+    uint32 GetGuildLevel() const 
     {
         return GetUInt32Value(PLAYER_FIELD_GUILD_LEVEL);
     }
@@ -2507,7 +2498,7 @@ class Player : public Unit, public GridObject<Player>
     bool isHonorOrXPTarget(Unit const* victim);
 
     bool GetsRecruitAFriendBonus(bool forXP);
-    uint8 GetGrantableLevels()
+    uint8 GetGrantableLevels() const
     {
         return m_grantableLevels;
     }
@@ -2718,7 +2709,7 @@ class Player : public Unit, public GridObject<Player>
     bool isTotalImmune();
     bool CanCaptureTowerPoint();
 
-    bool GetRandomWinner()
+    bool GetRandomWinner() const
     {
         return m_IsBGRandomWinner;
     }
