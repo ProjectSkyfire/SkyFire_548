@@ -633,7 +633,7 @@ struct ItemTemplate
         RequiredReputationRank(0), MaxCount(0), Stackable(0), ContainerSlots(0), ScalingStatDistribution(0), DamageType(0), Delay(0), RangedModRange(0.0f),
         Bonding(0), PageText(0), LanguageID(0), PageMaterial(0), StartQuest(0), LockID(0), Material(0), Sheath(0), RandomProperty(0), RandomSuffix(0), ItemSet(0),
         MaxDurability(0), Area(0), Map(0), BagFamily(0), TotemCategory(0), socketBonus(0), GemProperties(0), ArmorDamageModifier(0.0f), Duration(0), ItemLimitCategory(0),
-        HolidayId(0), StatScalingFactor(0.0f), CurrencySubstitutionId(0), CurrencySubstitutionCount(0), DamageMin(0.0f), DamageMax(0.0f), DPS(0.0f), Armor(0), SpellPPMRate(0.0f),
+        HolidayId(0), StatScalingFactor(0.0f), CurrencySubstitutionId(0), CurrencySubstitutionCount(0), DamageMin(0.0f), DamageMax(0.0f), DPS(0.0f), SpellPPMRate(0.0f),
         ScriptId(0), DisenchantID(0), RequiredDisenchantSkill(0), FoodType(0), MinMoneyLoot(0), MaxMoneyLoot(0), FlagsCu(0) {}
 
     uint32 ItemId;
@@ -704,7 +704,6 @@ struct ItemTemplate
     float  DamageMin;
     float  DamageMax;
     float  DPS;
-    uint32 Armor;
     float  SpellPPMRate;
     uint32 ScriptId;
     uint32 DisenchantID;
