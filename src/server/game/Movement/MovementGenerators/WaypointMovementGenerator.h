@@ -99,7 +99,8 @@ class FlightPathMovementGenerator : public MovementGeneratorMedium< Player, Flig
     public PathMovementBase<Player, TaxiPathNodeList const*>
 {
     public:
-        explicit FlightPathMovementGenerator(TaxiPathNodeList const& pathnodes, uint32 startNode = 0)
+        explicit FlightPathMovementGenerator(TaxiPathNodeList const& pathnodes, uint32 startNode = 0) :
+            _endGridX(0.0f), _endGridY(0.0f), _endMapId(0), _preloadTargetNode(0)
         {
             i_path = &pathnodes;
             i_currentNode = startNode;
