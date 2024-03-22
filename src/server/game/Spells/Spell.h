@@ -76,7 +76,7 @@ struct SpellDestination
 
     WorldLocation _position;
     uint64 _transportGUID;
-    Position _transportOffset;
+    WorldLocation _transportOffset;
 };
 
 class SpellCastTargets
