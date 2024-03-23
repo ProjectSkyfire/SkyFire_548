@@ -364,6 +364,7 @@ int Master::Run()
 
         #else
 
+        cliThread->wait();
         cliThread->destroy();
 
         #endif
