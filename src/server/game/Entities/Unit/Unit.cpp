@@ -150,7 +150,7 @@ ProcEventInfo::ProcEventInfo(Unit* actor, Unit* actionTarget, Unit* procTarget,
 Unit::Unit(bool isWorldObject) :
 WorldObject(isWorldObject), m_movedPlayer(NULL), m_lastSanctuaryTime(0),
 IsAIEnabled(false), NeedChangeAI(false), LastCharmerGUID(0),
-m_ControlledByPlayer(false), movespline(new Movement::MoveSpline()),
+m_ControlledByPlayer(false), movespline(std::make_unique<Movement::MoveSpline>()),
 i_AI(NULL), i_disabledAI(NULL), m_AutoRepeatFirstCast(false), m_procDeep(0),
 m_overrideAutoattackRange(0), m_removedAurasCount(0), i_motionMaster(this), m_regenTimer(0), m_ThreatManager(this),
 m_vehicle(NULL), m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE),
@@ -284,7 +284,7 @@ Unit::~Unit()
     _DeleteRemovedAuras();
 
     delete m_charmInfo;
-    delete movespline;
+    movespline.reset();
 
     ASSERT(!m_duringRemoveFromWorld);
     ASSERT(!m_attacking);

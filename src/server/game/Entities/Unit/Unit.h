@@ -2822,7 +2822,7 @@ class Unit : public WorldObject
     virtual void SetTarget(uint64 /*guid*/) = 0;
 
     // Movement info
-    Movement::MoveSpline * movespline;
+    std::unique_ptr<Movement::MoveSpline> movespline;
 
     // Part of Evade mechanics
     time_t GetLastDamagedTime() const
