@@ -15954,7 +15954,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     bool hasTimestamp = true;
     bool hasOrientation = !G3D::fuzzyEq(GetOrientation(), 0.0f);
     bool hasTransportData = GetTransGUID() != 0;
-    bool hasSpline = IsSplineEnabled();
+    bool hasSpline = movespline ? IsSplineEnabled() : false;
 
     bool hasTransportTime2 = hasTransportData && m_movementInfo.transport.time2 != 0;
     bool hasTransportTime3 = false;
