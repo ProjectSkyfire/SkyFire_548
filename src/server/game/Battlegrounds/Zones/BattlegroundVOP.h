@@ -67,6 +67,7 @@ const uint32 BG_VOP_TickIntervals[5] = { 15000, 12000, 9000, 6000, 3000 };
 const uint32 BG_VOP_TickPoints[5] = { 0, 10, 10, 10, 10 };
 
 const uint32 BG_VOP_PK_VP = 10;
+const uint32 BG_VOP_SOUND_ORB_PICKED_UP = 8174;
 
 struct BattlegroundVOPScore : public BattlegroundScore
 {

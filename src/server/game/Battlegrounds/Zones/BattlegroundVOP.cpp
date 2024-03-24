@@ -145,6 +145,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
     {
         case BG_VOP_OBJECT_ORB_1_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB_PICKED_UP);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_3);
             SpawnBGObject(BG_VOP_OBJECT_ORB_1, RESPAWN_ONE_DAY);
             m_FlagKeeper[0] = player->GetGUID();
@@ -152,6 +153,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
         }
         case BG_VOP_OBJECT_ORB_2_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB_PICKED_UP);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_2);
             SpawnBGObject(BG_VOP_OBJECT_ORB_2, RESPAWN_ONE_DAY);
             m_FlagKeeper[1] = player->GetGUID();
@@ -159,6 +161,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
         }
         case BG_VOP_OBJECT_ORB_3_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB_PICKED_UP);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_4);
             SpawnBGObject(BG_VOP_OBJECT_ORB_3, RESPAWN_ONE_DAY);
             m_FlagKeeper[2] = player->GetGUID();
@@ -166,6 +169,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
         }
         case BG_VOP_OBJECT_ORB_4_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB_PICKED_UP);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_1);
             SpawnBGObject(BG_VOP_OBJECT_ORB_4, RESPAWN_ONE_DAY);
             m_FlagKeeper[3] = player->GetGUID();
