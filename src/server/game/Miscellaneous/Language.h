@@ -1019,7 +1019,12 @@ enum SkyFireStrings
     LANG_BG_AV_A_CAPTAIN_DEAD           = 1332,
     LANG_BG_AV_START_TWO_MINUTES        = 1333,
 
-    // FREE IDS                           1334-1995
+    // FREE IDS                           1334-1991
+
+    LANG_BG_VOP_DROPPED_PURPLE          = 1992,
+    LANG_BG_VOP_DROPPED_ORANGE          = 1993,
+    LANG_BG_VOP_DROPPED_GREEN           = 1994,
+    LANG_BG_VOP_DROPPED_BLUE            = 1995,
 
     LANG_BG_VOP_START_TWO_MINUTES       = 1996,
     LANG_BG_VOP_START_ONE_MINUTE        = 1997,
