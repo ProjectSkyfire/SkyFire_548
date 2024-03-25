@@ -9,6 +9,231 @@
 #include "SpellScript.h"
 #include "Player.h"
 
+class npc_voljin_darkspear_hold : public CreatureScript
+{
+public:
+    npc_voljin_darkspear_hold() : CreatureScript("npc_voljin_darkspear_hold") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_voljin_darkspear_holdAI(creature);
+    }
+
+    bool OnQuestReward(Player* /*player*/, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == 24643 || quest->GetQuestId() == 24755 ||
+            quest->GetQuestId() == 24763 || quest->GetQuestId() == 24769 ||
+            quest->GetQuestId() == 24775 || quest->GetQuestId() == 24781 ||
+            quest->GetQuestId() == 24787 || quest->GetQuestId() == 31163)
+        {
+            creature->GetMotionMaster()->MovePoint(0, creature->GetHomePosition());
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_voljin_darkspear_holdAI : public ScriptedAI
+    {
+        enum voljinEvents
+        {
+            EVENT_VOLJIN_INTRO = 1,
+            EVENT_GARROSH_VISION1 = 2,
+            EVENT_VOLJIN_VISION1 = 3,
+            EVENT_VOLJIN_VISION2 = 4,
+            EVENT_GARROSH_VISION2 = 5,
+            EVENT_VOLJIN_VISION3 = 6,
+            EVENT_GARROSH_VISION3 = 7,
+            EVENT_VOLJIN_VISION4 = 8,
+            EVENT_VOLJIN_VISION5 = 9,
+            EVENT_VOLJIN_VISION6 = 10,
+            EVENT_GARROSH_VISION4 = 11,
+            EVENT_VOLJIN_VISION7 = 12,
+            EVENT_VOLJIN_TALK1 = 13,
+            EVENT_VOLJIN_TALK2 = 14,
+            EVENT_VOLJIN_OUTRO = 15
+        };
+        EventMap events;
+        npc_voljin_darkspear_holdAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type == POINT_MOTION_TYPE && id == 0)
+            {
+                events.ScheduleEvent(EVENT_VOLJIN_INTRO, 1000);
+            }
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_VOLJIN_INTRO:
+                    {
+                        //clear visions.
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                            voljinVision->DespawnOrUnsummon(1000);
+                        if (Creature* garroshVision = me->FindNearestCreature(38938, 15.0f))
+                            garroshVision->DespawnOrUnsummon(1000);
+                        
+                        //TODO: Let him cast spell here
+                        me->MonsterSay("I have sometin' to show ya. It be easier to understand if ya see it yourself.", Language::LANG_UNIVERSAL, me);
+                        me->SendPlaySound(20097, false);
+                        events.ScheduleEvent(EVENT_GARROSH_VISION1, 8000);
+                        break;
+                    }
+                    case EVENT_GARROSH_VISION1:
+                    {
+                        if (Creature* garroshVision = me->SummonCreature(38938, -1321.64f, -5610.25f, 25.4541f, 2.46091, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 130000))
+                        {
+                            garroshVision->MonsterSay("Don't talk back to me, troll. You know who was left in charge here. Haven't you stopped to ask yourself why Thrall chose me instead of you?", Language::LANG_UNIVERSAL, garroshVision);
+                            me->SendPlaySound(20508, false);
+                        }
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION1, 12000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION1:
+                    {
+                        if (Creature* voljinVision = me->SummonCreature(38953, -1323.86f, -5608.56f, 25.4523f, 5.48033f, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 130000))
+                        {
+                            voljinVision->MonsterSay("Dere be no question why, Garrosh. He gave ya tha title because ya be Grom's son and because tha people be wantin' a war hero.", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20098, false);
+                        }
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION2, 13000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION2:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                        {
+                            voljinVision->MonsterSay("I think ya be even more like ya father den ya thought, even witout da demon blood.", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20099, false);
+                        }
+                            
+                        events.ScheduleEvent(EVENT_GARROSH_VISION2, 7500);
+                        break;
+                    }
+                    case EVENT_GARROSH_VISION2:
+                    {
+                        if (Creature* garroshVision = me->FindNearestCreature(38938, 15.0f))
+                        {
+                            garroshVision->MonsterSay("You are lucky that i don't gut you right here, whelp. You are foolish to think that you can speak to your Warchief in such ways.", Language::LANG_UNIVERSAL, garroshVision);
+                            me->SendPlaySound(20512, false);
+                        }
+                            
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION3, 11000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION3:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                        {
+                            voljinVision->MonsterSay("Ya be no Warchief of mine. Ya not earned my respect and I'll not be seein' tha Horde destroyed by ya foolish thirst for War.", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20100, false);
+                        }
+                        events.ScheduleEvent(EVENT_GARROSH_VISION3, 12000);
+                        break;
+                    }
+                    case EVENT_GARROSH_VISION3:
+                    {
+                        if (Creature* garroshVision = me->FindNearestCreature(38938, 15.0f))
+                        {
+                            garroshVision->MonsterSay("And what exactly do you think that you are going to do about it? Your threats are hollow. Go slink away with the rest of your kind to the slums, I will endure your filth in my throne room no longer.", Language::LANG_UNIVERSAL, garroshVision);
+                            me->SendPlaySound(20509, false);
+                        }
+                            
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION4, 15000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION4:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                        {
+                            voljinVision->MonsterSay("I know exactly what I'll be doin' about it, son of Hellscream. I'll watch and wait as ya people slowly become aware of ya ineptitude. I'll laugh as dey grow ta despise ya as I do.", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20101, false);
+                        }
+                           
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION5, 15000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION5:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                        {
+                            voljinVision->MonsterSay("And when tha time commes dat ya failure is complete and ya \"power\" is meaningless, I will be dere to end ya rule swiftly and silently.", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20102, false);
+                        }
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION6, 15000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION6:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                        {
+                            voljinVision->MonsterSay("Ya will spend ya reign glancin' over ya shoulda and fearin' tha shadows, for when tha time comes and ya blood be slowly drainin' out, ya will know exactly who fired tha arrow dat pierced ya black heart.", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20103, false);
+                        }
+                        events.ScheduleEvent(EVENT_GARROSH_VISION4, 18000);
+                        break;
+                    }
+                    case EVENT_GARROSH_VISION4:
+                    {
+                        if (Creature* garroshVision = me->FindNearestCreature(38938, 15.0f))
+                        {
+                            garroshVision->MonsterSay("You have sealed your fate, troll.", Language::LANG_UNIVERSAL, garroshVision);
+                            me->SendPlaySound(20510, false);
+                        }
+                        events.ScheduleEvent(EVENT_VOLJIN_VISION7, 5000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_VISION7:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                        {
+                            voljinVision->MonsterSay("And you yours, \"Warchief.\"", Language::LANG_UNIVERSAL, voljinVision);
+                            me->SendPlaySound(20104, false);
+                        }
+
+                        events.ScheduleEvent(EVENT_VOLJIN_TALK1, 10000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_TALK1:
+                    {
+                        if (Creature* voljinVision = me->FindNearestCreature(38953, 15.0f))
+                            voljinVision->DespawnOrUnsummon(1000);
+                        if (Creature* garroshVision = me->FindNearestCreature(38938, 15.0f))
+                            garroshVision->DespawnOrUnsummon(1000);
+
+                        me->MonsterSay("The Darkspear are 'ere because I led dem here. Orgrimmar be no home as long as it be under Hellscream's hand.", Language::LANG_UNIVERSAL, me);
+                        me->SendPlaySound(20105, false);
+                        events.ScheduleEvent(EVENT_VOLJIN_TALK2, 8000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_TALK2:
+                    {
+                        me->MonsterSay("Still. I fear I was lettin' my temper drive me ta bein'rash. Threall devoted himself to makin' the Horde what it is, so I've no eagerness to be leavin' it on a whim. Dis will be needin' much more thought.", Language::LANG_UNIVERSAL, me);
+                        me->SendPlaySound(20106, false);
+                        events.ScheduleEvent(EVENT_VOLJIN_OUTRO, 16000);
+                        break;
+                    }
+                    case EVENT_VOLJIN_OUTRO:
+                    {
+                        me->MonsterSay("But dese be worries for older minds. Ya still have much to learn. Go help tha people of tha Darkspear. I am sure we'll be speakin' again real soon.", Language::LANG_UNIVERSAL, me);
+                        me->SendPlaySound(20107, false);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    };
+};
+
+
 enum darkspearshore
 {
     NPC_ZUNI = 37988
@@ -601,6 +826,7 @@ private:
 
 void AddSC_durotar()
 {
+    new npc_voljin_darkspear_hold();
     new npc_zuni();
     new npc_jinthala();
     new npc_darkspear_jailor();
