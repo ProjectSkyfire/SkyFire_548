@@ -1120,6 +1120,9 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
+    if (effIndex < EFFECT_0 || effIndex > EFFECT_31)
+        return;
+
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
 
@@ -1192,6 +1195,9 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
 void Spell::EffectPowerBurn(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (effIndex < EFFECT_0 || effIndex > EFFECT_31)
         return;
 
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
@@ -1600,6 +1606,9 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     if (!unitTarget->IsAlive())
         return;
 
+    if (effIndex < EFFECT_0 || effIndex > EFFECT_31)
+        return;
+
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
 
@@ -1711,6 +1720,9 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
     if (!unitTarget)
         return;
     if (!unitTarget->IsAlive())
+        return;
+
+    if (effIndex < EFFECT_0 || effIndex > EFFECT_31)
         return;
 
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
