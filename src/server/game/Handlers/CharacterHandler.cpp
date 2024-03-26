@@ -1000,18 +1000,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
-    //Set character run speed
-    if (pCurrChar->getClass() == CLASS_MONK && pCurrChar->HasAura(103985))
-    {
-        //Monk windwalker stance 110%
-        pCurrChar->SetSpeed(UnitMoveType::MOVE_RUN, 1.1f);
-    }
-    else
-    {
-        //Set character default run speed.
-        pCurrChar->SetSpeed(UnitMoveType::MOVE_RUN, 1.0f);
-    }
-
     //Show cinematic at the first time that player login
     if (!pCurrChar->getCinematic())
     {
