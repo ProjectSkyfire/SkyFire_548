@@ -19,7 +19,7 @@ public:
         return new npc_voljin_darkspear_holdAI(creature);
     }
 
-    bool OnQuestReward(Player* /*player*/, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    bool OnQuestReward(Player* /*player*/, Creature* creature, Quest const* quest, uint32 /*opt*/) OVERRIDE
     {
         if (quest->GetQuestId() == 24643 || quest->GetQuestId() == 24755 ||
             quest->GetQuestId() == 24763 || quest->GetQuestId() == 24769 ||

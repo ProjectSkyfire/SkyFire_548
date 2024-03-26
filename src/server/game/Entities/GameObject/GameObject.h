@@ -712,8 +712,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3, animprogress); }
         void SetGameobjectTransparence(uint8 transparency) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0, transparency); }
         static void SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid = 0);
-        bool SetPhased(uint32 id, bool update, bool apply);
-        void SetPhaseMask(uint32 newPhaseMask, bool update);
+        bool SetPhased(uint32 id, bool update, bool apply) OVERRIDE;
+        void SetPhaseMask(uint32 newPhaseMask, bool update) OVERRIDE;
         void EnableCollision(bool enable);
 
         void Use(Unit* user);

@@ -1100,7 +1100,7 @@ public:
 
         EventMap events;
 
-        void InitializeAI()
+        void InitializeAI() OVERRIDE
         {
             events.Reset();
             events.ScheduleEvent(EVENT_REMOVE_CONTROL, 500);
@@ -1111,7 +1111,7 @@ public:
             DoCast(SPELL_EYE_FLIGHT);
         }
 
-        void OnCharmed(bool apply) override
+        void OnCharmed(bool apply) OVERRIDE
         {
             if (!apply)
             {
@@ -1120,19 +1120,19 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 point)
+        void MovementInform(uint32 type, uint32 point) OVERRIDE
         {
             if (type == POINT_MOTION_TYPE && point == EYE_POINT_DESTINATION_2)
                 events.ScheduleEvent(EVENT_REGAIN_CONTROL, 1000);
         }
 
-        void JustSummoned(Creature* creature)
+        void JustSummoned(Creature* creature) OVERRIDE
         {
             if (Unit* target = creature->SelectNearbyTarget())
                 creature->AI()->AttackStart(target);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
             switch (events.ExecuteEvent())

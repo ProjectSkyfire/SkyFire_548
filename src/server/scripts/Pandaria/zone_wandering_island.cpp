@@ -500,7 +500,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
             while (uint32 eventId = events.ExecuteEvent())
@@ -653,7 +653,7 @@ public:
                 }
             }
         }
-        void UpdateAI(uint32 /*diff*/)
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             DoMeleeAttackIfReady();
         }
@@ -755,7 +755,7 @@ public:
                     break;
             }
         }
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
             while (uint32 eventId = events.ExecuteEvent())
@@ -1433,7 +1433,7 @@ public:
                     players.push_back(player);
         }
         
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             Player* const player = who->ToPlayer();
             if (!player)
@@ -1748,13 +1748,12 @@ public:
 
         npc_master_shang_xi_templeAI(Creature* creature) : CreatureAI(creature) { }
 
-
-
         void Reset() OVERRIDE
         {
             started = false;
         }
-        void MoveInLineOfSight(Unit* who)
+
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             Player* const player = who->ToPlayer();
             if (!player)
@@ -2098,8 +2097,6 @@ public:
             Power = 0;
             started = false;
         }
-
-        void MoveInLineOfSight(Unit* /*who*/) { }
 
         void UpdatePlayerList()
         {
