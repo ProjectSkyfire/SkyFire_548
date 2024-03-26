@@ -665,10 +665,16 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         switch (cleanDamage->attackType)
         {
             case WeaponAttackType::OFF_ATTACK:
+            {
                 rage /= 2;
-            case WeaponAttackType::BASE_ATTACK:
                 RewardRage(rage, true);
                 break;
+            }
+            case WeaponAttackType::BASE_ATTACK:
+            {
+                RewardRage(rage, true);
+                break;
+            }
             default:
                 break;
         }
@@ -9027,19 +9033,21 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     switch (spellProto->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_NONE:
+        {
             // We need more spells to find a general way (if there is any)
             switch (spellProto->Id)
             {
-                case 379:   // Earth Shield
-                case 33778: // Lifebloom Final Bloom
-                case 64844: // Divine Hymn
-                case 71607: // Item - Bauble of True Blood 10m
-                case 71646: // Item - Bauble of True Blood 25m
-                    break;
-                default:
-                    return false;
+            case 379:   // Earth Shield
+            case 33778: // Lifebloom Final Bloom
+            case 64844: // Divine Hymn
+            case 71607: // Item - Bauble of True Blood 10m
+            case 71646: // Item - Bauble of True Blood 25m
+                break;
+            default:
+                return false;
             }
             break;
+        } 
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
@@ -9082,13 +9090,16 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 switch (spellProto->SpellFamilyName)
                 {
                     case SPELLFAMILY_MAGE:
+                    {
                         // Glyph of Fire Blast
-                        if (spellProto->SpellFamilyFlags [0] == 0x2 && spellProto->SpellIconID == 12)
+                        if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
                             if (victim->HasAuraWithMechanic((1 << MECHANIC_STUN) | (1 << MECHANIC_KNOCKOUT)))
                                 if (AuraEffect const* aurEff = GetAuraEffect(56369, EFFECT_0))
                                     crit_chance += aurEff->GetAmount();
                         break;
+                    }
                     case SPELLFAMILY_DRUID:
+                    {
                         // Improved Faerie Fire
                         if (victim->HasAuraState(AURA_STATE_FAERIE_FIRE))
                             if (AuraEffect const* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 109, 0))
@@ -9097,23 +9108,26 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         // cumulative effect - don't break
 
                         // Starfire
-                        if (spellProto->SpellFamilyFlags [0] & 0x4 && spellProto->SpellIconID == 1485)
+                        if (spellProto->SpellFamilyFlags[0] & 0x4 && spellProto->SpellIconID == 1485)
                         {
                             // Improved Insect Swarm
                             if (AuraEffect const* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 1771, 0))
                                 if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, 0))
                                     crit_chance += aurEff->GetAmount();
-                            break;
                         }
                         break;
+                    }
                     case SPELLFAMILY_ROGUE:
+                    {
                         // Shiv-applied poisons can't crit
                         if (FindCurrentSpellBySpellId(5938))
                             crit_chance = 0.0f;
                         break;
+                    }
                     case SPELLFAMILY_PALADIN:
+                    {
                         // Flash of light
-                        if (spellProto->SpellFamilyFlags [0] & 0x40000000)
+                        if (spellProto->SpellFamilyFlags[0] & 0x40000000)
                         {
                             // Sacred Shield
                             if (AuraEffect const* aura = victim->GetAuraEffect(58597, 1, GetGUID()))
@@ -9128,9 +9142,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             break;
                         }
                         break;
+                    }      
                     case SPELLFAMILY_SHAMAN:
+                    {
                         // Lava Burst
-                        if (spellProto->SpellFamilyFlags [1] & 0x00001000)
+                        if (spellProto->SpellFamilyFlags[1] & 0x00001000)
                         {
                             if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
                                 if (victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
@@ -9138,17 +9154,20 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             break;
                         }
                         break;
+                    }     
                 }
             }
             break;
         }
         case SPELL_DAMAGE_CLASS_MELEE:
+        {
             if (victim)
             {
                 // Custom crit by class
                 switch (spellProto->SpellFamilyName)
                 {
                     case SPELLFAMILY_WARRIOR:
+                    {
                         // bloodthirst double crit chance
                         if (spellProto->SpellFamilyFlags[1] & 0x00000400
                             && spellProto->SpellIconID == 38)
@@ -9157,21 +9176,25 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             break;
                         }
                         break;
-
+                    }
                     case SPELLFAMILY_DRUID:
+                    {
                         // Rend and Tear - bonus crit chance for Ferocious Bite on bleeding targets
-                        if (spellProto->SpellFamilyFlags [0] & 0x00800000
+                        if (spellProto->SpellFamilyFlags[0] & 0x00800000
                             && spellProto->SpellIconID == 1680
                             && victim->HasAuraState(AURA_STATE_BLEEDING))
                         {
                             if (AuraEffect const* rendAndTear = GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 1))
                                 crit_chance += rendAndTear->GetAmount();
-                            break;
                         }
                         break;
+                    }
                 }
+                crit_chance += GetUnitCriticalChance(attackType, victim);
             }
-            /// Intentional fallback. Calculate critical strike chance for both Ranged and Melee spells
+            break;
+        }
+        // Calculate critical strike chance for both Ranged and Melee spells
         case SPELL_DAMAGE_CLASS_RANGED:
         {
             if (victim)
@@ -13309,7 +13332,8 @@ uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectTyp
                 DirectDamage = true;
                 break;
             case SPELL_EFFECT_APPLY_AURA:
-                switch (spellProto->Effects [i].ApplyAuraName)
+            {
+                switch (spellProto->Effects[i].ApplyAuraName)
                 {
                     case SPELL_AURA_PERIODIC_DAMAGE:
                     case SPELL_AURA_PERIODIC_HEAL:
@@ -13322,6 +13346,7 @@ uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectTyp
                         ++effects;
                         break;
                 }
+            }
             default:
                 break;
         }
@@ -14064,7 +14089,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                 {
                     // the reset time is set but not added to the scheduler
                     // until the players leave the instance
-                    time_t resettime = creature->GetRespawnTimeEx() + 2 * HOUR;
+                    time_t resettime = creature->GetRespawnTimeEx() + time_t(2 * HOUR);
                     if (InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(creature->GetInstanceId()))
                         if (save->GetResetTime() < resettime) save->SetResetTime(resettime);
                 }
