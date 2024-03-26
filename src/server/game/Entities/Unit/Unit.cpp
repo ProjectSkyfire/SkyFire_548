@@ -9037,14 +9037,14 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
             // We need more spells to find a general way (if there is any)
             switch (spellProto->Id)
             {
-            case 379:   // Earth Shield
-            case 33778: // Lifebloom Final Bloom
-            case 64844: // Divine Hymn
-            case 71607: // Item - Bauble of True Blood 10m
-            case 71646: // Item - Bauble of True Blood 25m
-                break;
-            default:
-                return false;
+                case 379:   // Earth Shield
+                case 33778: // Lifebloom Final Bloom
+                case 64844: // Divine Hymn
+                case 71607: // Item - Bauble of True Blood 10m
+                case 71646: // Item - Bauble of True Blood 25m
+                    break;
+                default:
+                    return false;
             }
             break;
         } 
