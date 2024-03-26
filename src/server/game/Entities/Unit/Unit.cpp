@@ -8603,6 +8603,7 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powe
     data.WriteBit(victimGuid [0]);
     data.WriteBit(casterGuid [5]);
 
+    data.FlushBits();
 
     data.WriteByteSeq(victimGuid [0]);
     data.WriteByteSeq(casterGuid [5]);

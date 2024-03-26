@@ -1150,6 +1150,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_playerLoading = false;
 
+    if (pCurrChar->getClass() == CLASS_MONK)
+        pCurrChar->CastSpell(pCurrChar, 103985, true); //Stance of White Tiger
+
     sScriptMgr->OnPlayerLogin(pCurrChar, firstLogin);
     delete holder;
 }

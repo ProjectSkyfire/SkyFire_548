@@ -533,7 +533,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;
-    m_chiPowerRegenTimerCount = 0;
+    m_chiPowerDegenTimerCount = 0;
     m_focusRegenTimerCount = 0;
     m_weaponChangeTimer = 0;
     _readyCheckTimer = 0;
@@ -2440,7 +2440,7 @@ void Player::RegenerateAll()
         m_holyPowerRegenTimerCount += m_regenTimer;
 
     if (getClass() == CLASS_MONK)
-        m_chiPowerRegenTimerCount += m_regenTimer;
+        m_chiPowerDegenTimerCount += m_regenTimer;
 
     if (getClass() == CLASS_HUNTER)
         m_focusRegenTimerCount += m_regenTimer;
@@ -2500,10 +2500,10 @@ void Player::RegenerateAll()
         m_holyPowerRegenTimerCount -= 10000;
     }
 
-    if (m_chiPowerRegenTimerCount >= 10000 && getClass() == CLASS_MONK)
+    if (m_chiPowerDegenTimerCount >= 10000 && getClass() == CLASS_MONK)
     {
         Regenerate(POWER_CHI);
-        m_chiPowerRegenTimerCount -= 10000;
+        m_chiPowerDegenTimerCount -= 10000;
     }
 
     m_regenTimer = 0;
@@ -2664,10 +2664,20 @@ void Player::Regenerate(Powers power)
             m_powerFraction[powerIndex] = addvalue - integerValue;
     }
 
-    if (m_regenTimerCount >= 2000)
-        SetPower(power, curValue);
+    if (power == POWER_CHI)
+    {
+        if (m_chiPowerDegenTimerCount >= 10000)
+            SetPower(power, curValue);
+        else
+            UpdateUInt32Value(UNIT_FIELD_POWER + powerIndex, curValue);
+    }
     else
-        UpdateUInt32Value(UNIT_FIELD_POWER + powerIndex, curValue);
+    {
+        if (m_regenTimerCount >= 2000)
+            SetPower(power, curValue);
+        else
+            UpdateUInt32Value(UNIT_FIELD_POWER + powerIndex, curValue);
+    }
 }
 
 void Player::RegenerateHealth()
