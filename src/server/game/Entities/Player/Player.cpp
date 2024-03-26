@@ -2543,8 +2543,9 @@ void Player::Regenerate(Powers power)
                 addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
             else
                 addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
+
+            break;
         }
-        break;
         case POWER_RAGE:                                                // Regenerate rage
         {
             if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
@@ -2552,14 +2553,18 @@ void Player::Regenerate(Powers power)
                 float RageDecreaseRate = sWorld->getRate(Rates::RATE_POWER_RAGE_LOSS);
                 addvalue += -25 * RageDecreaseRate / meleeHaste;                // 2.5 rage by tick (= 2 seconds => 1.25 rage/sec)
             }
+            break;
         }
-        break;
         case POWER_FOCUS:
+        {
             addvalue += (6.0f + CalculatePct(6.0f, rangedHaste)) * sWorld->getRate(Rates::RATE_POWER_FOCUS);
             break;
+        }
         case POWER_ENERGY:                                              // Regenerate energy (rogue) & (monk)
+        {
             addvalue += ((0.01f * m_regenTimer) + CalculatePct(0.01f, meleeHaste)) * sWorld->getRate(Rates::RATE_POWER_ENERGY);
             break;
+        }
         case POWER_RUNIC_POWER:
         {
             if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
@@ -2567,22 +2572,25 @@ void Player::Regenerate(Powers power)
                 float RunicPowerDecreaseRate = sWorld->getRate(Rates::RATE_POWER_RUNICPOWER_LOSS);
                 addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
             }
+            break;
         }
-        break;
         case POWER_HOLY_POWER:                                          // Regenerate holy power
         {
             if (!IsInCombat())
                 addvalue += -1.0f;      // remove 1 each 10 sec
-        }
-        break;
-        case POWER_RUNES:
             break;
+        }
+        case POWER_RUNES:
+        {
+            break;
+        }
         case POWER_CHI:                                                 // Regenerate chi (monk)
         {
             if (!IsInCombat())
             addvalue += -1.0f;      // remove 1 each 10 sec
+
+            break;
         }
-        break;
         case POWER_DEMONIC_FURY:
         {
             if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
@@ -2590,9 +2598,12 @@ void Player::Regenerate(Powers power)
                 float DemonicFuryDecreaseRate = sWorld->getRate(Rates::RATE_POWER_RUNICPOWER_LOSS);
                 addvalue += -30 * DemonicFuryDecreaseRate;         // 3 fury by tick
             }
+            break;
         }
         case POWER_HEALTH:
+        {
             return;
+        }
         default:
             break;
     }
@@ -2712,22 +2723,35 @@ void Player::ResetAllPowers()
     switch (getPowerType())
     {
         case POWER_MANA:
+        {
             SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
             break;
+        }
         case POWER_RAGE:
+        {
             SetPower(POWER_RAGE, 0);
             break;
+        }
         case POWER_ENERGY:
+        {
             SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
             break;
+        }
         case POWER_RUNIC_POWER:
+        {
             SetPower(POWER_RUNIC_POWER, 0);
             break;
+        }
         case POWER_ECLIPSE:
+        {
             SetPower(POWER_ECLIPSE, 0);
             break;
+        }
         case POWER_DEMONIC_FURY:
+        {
             SetPower(POWER_DEMONIC_FURY, 200);
+            break;
+        }
         default:
             break;
     }
