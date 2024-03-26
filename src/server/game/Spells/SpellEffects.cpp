@@ -1770,21 +1770,25 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
         {
             case GAMEOBJECT_TYPE_DOOR:
             case GAMEOBJECT_TYPE_BUTTON:
+            {
                 gameObjTarget->UseDoorOrButton(0, false, player);
                 return;
-
+            }
             case GAMEOBJECT_TYPE_QUESTGIVER:
+            {
                 player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID, true);
                 player->SendPreparedGossip(gameObjTarget);
                 return;
-
+            }
             case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
                 // triggering linked GO
                 if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
                     gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
                 return;
-
+            }
             case GAMEOBJECT_TYPE_CHEST:
+            {
                 /// @todo possible must be moved to loot release (in different from linked triggering)
                 if (gameObjTarget->GetGOInfo()->chest.eventId)
                 {
@@ -1797,6 +1801,8 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                     gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
 
                 // Don't return, let loots been taken
+                break;
+            }
             default:
                 break;
         }
@@ -3168,10 +3174,15 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            {
                 weaponDamage += fixed_bonus;
                 break;
+            }
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                weaponDamage = int32(weaponDamage* weaponDamagePercentMod);
+            {
+                weaponDamage = int32(weaponDamage * weaponDamagePercentMod);
+                break;
+            }
             default:
                 break;                                      // not weapon damage effect, just skip
         }
