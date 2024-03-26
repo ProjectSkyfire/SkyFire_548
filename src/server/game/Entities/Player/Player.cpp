@@ -2587,8 +2587,9 @@ void Player::Regenerate(Powers power)
         case POWER_CHI:                                                 // Regenerate chi (monk)
         {
             if (!IsInCombat())
-            addvalue += -1.0f;      // remove 1 each 10 sec
-
+            {
+                addvalue += -1.0f;      // remove 1 each 10 sec
+            }
             break;
         }
         case POWER_DEMONIC_FURY:
