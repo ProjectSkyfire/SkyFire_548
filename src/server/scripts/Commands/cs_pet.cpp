@@ -59,7 +59,7 @@ public:
         }
 
         // Everything looks OK, create new pet
-        Pet* pet = new Pet(player, HUNTER_PET);
+        Pet* pet = new Pet(player, PetType::HUNTER_PET);
         if (!pet->CreateBaseAtCreature(creatureTarget))
         {
             delete pet;

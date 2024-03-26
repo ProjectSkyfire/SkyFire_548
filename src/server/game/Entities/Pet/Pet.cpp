@@ -30,7 +30,7 @@ Pet::Pet(Player* owner, PetType type) :
     ASSERT(m_owner->GetTypeId() == TypeID::TYPEID_PLAYER);
 
     m_unitTypeMask |= UNIT_MASK_PET;
-    if (type == HUNTER_PET)
+    if (type == PetType::HUNTER_PET)
         m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
 
     if (!(m_unitTypeMask & UNIT_MASK_CONTROLABLE_GUARDIAN))
@@ -146,7 +146,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         return false;
 
     PetType petType = PetType(fields[15].GetUInt8());
-    if (petType == HUNTER_PET)
+    if (petType == PetType::HUNTER_PET)
     {
         CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(petEntry);
         if (!creatureInfo || !creatureInfo->IsTameable(owner->CanTameExoticPets()))
@@ -199,13 +199,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
 
     switch (getPetType())
     {
-        case SUMMON_PET:
+        case PetType::SUMMON_PET:
             petlevel = owner->getLevel();
             SetClass(CLASS_MAGE);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
             // this enables popup window (pet dismiss, cancel)
             break;
-        case HUNTER_PET:
+        case PetType::HUNTER_PET:
             SetSheath(SHEATH_STATE_MELEE);
             SetClass(CLASS_WARRIOR);
             SetGender(GENDER_NONE);
@@ -232,13 +232,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     SetReactState(ReactStates(fields[6].GetUInt8()));
     SetCanModifyStats(true);
 
-    if (getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
+    if (getPetType() == PetType::SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     else
     {
         uint32 savedhealth = fields[10].GetUInt32();
         uint32 savedmana = fields[11].GetUInt32();
-        if (!savedhealth && getPetType() == HUNTER_PET)
+        if (!savedhealth && getPetType() == PetType::HUNTER_PET)
             setDeathState(DeathState::JUST_DIED);
         else
         {
@@ -321,7 +321,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     if (owner->GetGroup())
         owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
 
-    if (getPetType() == HUNTER_PET)
+    if (getPetType() == PetType::HUNTER_PET)
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_DECLINED_NAME);
         stmt->setUInt32(0, owner->GetGUIDLow());
@@ -341,7 +341,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     }
 
     //set last used pet number (for use in BG's)
-    if (owner->GetTypeId() == TypeID::TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == SUMMON_PET || getPetType() == HUNTER_PET))
+    if (owner->GetTypeId() == TypeID::TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == PetType::SUMMON_PET || getPetType() == PetType::HUNTER_PET))
         owner->ToPlayer()->SetLastPetNumber(petId);
 
     m_loading = false;
@@ -371,7 +371,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         owner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
     {
         // pet will lost anyway at restore temporary unsummoned
-        if (getPetType() == HUNTER_PET)
+        if (getPetType() == PetType::HUNTER_PET)
             return;
 
         // for warlock case
@@ -417,7 +417,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         }
 
         // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
-        if (getPetType() == HUNTER_PET && (mode == PET_SAVE_AS_CURRENT || mode > PET_SAVE_LAST_STABLE_SLOT))
+        if (getPetType() == PetType::HUNTER_PET && (mode == PET_SAVE_AS_CURRENT || mode > PET_SAVE_LAST_STABLE_SLOT))
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_SLOT);
             stmt->setUInt32(0, ownerLowGUID);
@@ -498,7 +498,7 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
     Creature::setDeathState(s);
     if (getDeathState() == DeathState::CORPSE)
     {
-        if (getPetType() == HUNTER_PET)
+        if (getPetType() == PetType::HUNTER_PET)
         {
             // pet corpse non lootable and non skinnable
             SetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
@@ -525,7 +525,7 @@ void Pet::Update(uint32 diff)
     {
         case DeathState::CORPSE:
         {
-            if (getPetType() != HUNTER_PET || m_corpseRemoveTime <= time(NULL))
+            if (getPetType() != PetType::HUNTER_PET || m_corpseRemoveTime <= time(NULL))
             {
                 Remove(PET_SAVE_NOT_IN_SLOT);               //hunters' pets never get removed because of death, NEVER!
                 return;
@@ -548,7 +548,7 @@ void Pet::Update(uint32 diff)
                 if (owner->GetPetGUID() != GetGUID())
                 {
                     SF_LOG_ERROR("entities.pet", "Pet %u is not pet of owner %s, removed", GetEntry(), GetOwner()->GetName().c_str());
-                    Remove(getPetType() == HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
+                    Remove(getPetType() == PetType::HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
                     return;
                 }
             }
@@ -559,7 +559,7 @@ void Pet::Update(uint32 diff)
                     m_duration -= diff;
                 else
                 {
-                    Remove(getPetType() != SUMMON_PET ? PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
+                    Remove(getPetType() != PetType::SUMMON_PET ? PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
                     return;
                 }
             }
@@ -650,7 +650,7 @@ void Pet::Remove(PetSaveMode mode, bool returnreagent)
 
 void Pet::GivePetXP(uint32 xp)
 {
-    if (getPetType() != HUNTER_PET)
+    if (getPetType() != PetType::HUNTER_PET)
         return;
 
     if (xp < 1)
@@ -690,7 +690,7 @@ void Pet::GivePetLevel(uint8 level)
     if (!level || level == getLevel())
         return;
 
-    if (getPetType()==HUNTER_PET)
+    if (getPetType() == PetType::HUNTER_PET)
     {
         SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);
         SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, uint32(sObjectMgr->GetXPForLevel(level)*PET_XP_FACTOR));
@@ -782,7 +782,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetLevel(petlevel);
 
     //Determine pet type
-    PetType petType = MAX_PET_TYPE;
+    PetType petType = PetType::MAX_PET_TYPE;
     if (IsPet() && GetOwner()->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
         switch (GetOwner()->getClass())
@@ -791,10 +791,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             case CLASS_SHAMAN:       // Fire Elemental
             case CLASS_DEATH_KNIGHT: // Risen Ghoul
             case CLASS_MAGE:
-                petType = SUMMON_PET;
+                petType = PetType::SUMMON_PET;
                 break;
             case CLASS_HUNTER:
-                petType = HUNTER_PET;
+                petType = PetType::HUNTER_PET;
                 m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
                 break;
             default:
@@ -803,7 +803,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
     }
 
-    uint32 creature_ID = (petType == HUNTER_PET) ? 1 : cinfo->Entry;
+    uint32 creature_ID = (petType == PetType::HUNTER_PET) ? 1 : cinfo->Entry;
 
     SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
 
@@ -818,7 +818,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
     //scale
     CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
-    if (cFamily && cFamily->minScale > 0.0f && petType == HUNTER_PET)
+    if (cFamily && cFamily->minScale > 0.0f && petType == PetType::HUNTER_PET)
     {
         float scale;
         if (getLevel() >= cFamily->maxScaleLevel)
@@ -840,7 +840,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     if (pInfo)                                      // exist in DB
     {
         SetCreateHealth(pInfo->health);
-        if (petType != HUNTER_PET) //hunter pet use focus
+        if (petType != PetType::HUNTER_PET) //hunter pet use focus
             SetCreateMana(pInfo->mana);
 
         if (pInfo->armor > 0)
@@ -866,7 +866,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetBonusDamage(0);
     switch (petType)
     {
-        case SUMMON_PET:
+        case PetType::SUMMON_PET:
         {
             // the damage bonus used for pets is either fire or shadow damage, whatever is higher
             int32 fire = GetOwner()->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
@@ -883,7 +883,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
             break;
         }
-        case HUNTER_PET:
+        case PetType::HUNTER_PET:
         {
             SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
             //these formula may not be correct; however, it is designed to be close to what it should be
@@ -1853,7 +1853,7 @@ bool Pet::IsPermanentPetFor(Player* owner) const
 {
     switch (getPetType())
     {
-        case SUMMON_PET:
+        case PetType::SUMMON_PET:
             switch (owner->getClass())
             {
                 case CLASS_WARLOCK:
@@ -1865,7 +1865,7 @@ bool Pet::IsPermanentPetFor(Player* owner) const
                 default:
                     return false;
             }
-        case HUNTER_PET:
+        case PetType::HUNTER_PET:
             return true;
         default:
             return false;
@@ -1989,11 +1989,11 @@ void Pet::SynchronizeLevelWithOwner()
     switch (getPetType())
     {
         // always same level
-        case SUMMON_PET:
+        case PetType::SUMMON_PET:
             GivePetLevel(owner->getLevel());
             break;
         // can't be greater owner level
-        case HUNTER_PET:
+        case PetType::HUNTER_PET:
             if (getLevel() > owner->getLevel())
                 GivePetLevel(owner->getLevel());
             else if (getLevel() + 5 < owner->getLevel())
@@ -2083,6 +2083,14 @@ void Pet::SetDisplayId(uint32 modelId)
         if (Player* player = owner->ToPlayer())
             if (player->GetGroup())
                 player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MODEL_ID);
+}
+
+bool Pet::isControlled() const
+{
+    if (getPetType() == PetType::SUMMON_PET || getPetType() == PetType::HUNTER_PET)
+        return true;
+
+    return false;
 }
 
 uint16 Pet::GetPetSpecByTalentTab(uint16 talenttab)

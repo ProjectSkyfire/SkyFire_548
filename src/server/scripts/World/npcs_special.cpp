@@ -1815,7 +1815,7 @@ public:
         if (player->getClass() == CLASS_HUNTER)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_PET1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            if (player->GetPet() && player->GetPet()->getPetType() == HUNTER_PET)
+            if (player->GetPet() && player->GetPet()->getPetType() == PetType::HUNTER_PET)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_PET2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
             player->PlayerTalkClass->SendGossipMenu(TEXT_ISHUNTER, creature->GetGUID());

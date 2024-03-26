@@ -11963,7 +11963,7 @@ int32 Unit::GetCreatePowers(Powers power) const
         case POWER_FOCUS:
             if (GetTypeId() == TypeID::TYPEID_PLAYER && getClass() == CLASS_HUNTER)
                 return 100;
-            return (GetTypeId() == TypeID::TYPEID_PLAYER || !((Creature const*)this)->IsPet() || ((Pet const*)this)->getPetType() != HUNTER_PET ? 0 : 100);
+            return (GetTypeId() == TypeID::TYPEID_PLAYER || !((Creature const*)this)->IsPet() || ((Pet const*)this)->getPetType() != PetType::HUNTER_PET ? 0 : 100);
         case POWER_ENERGY:
             return 100;
         case POWER_RUNIC_POWER:
@@ -13502,7 +13502,7 @@ Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget, uint32 spell_id)
     if (GetTypeId() != TypeID::TYPEID_PLAYER)
         return NULL;
 
-    Pet* pet = new Pet(ToPlayer(), HUNTER_PET);
+    Pet* pet = new Pet(ToPlayer(), PetType::HUNTER_PET);
 
     if (!pet->CreateBaseAtCreature(creatureTarget))
     {
@@ -13526,7 +13526,7 @@ Pet* Unit::CreateTamedPetFrom(uint32 creatureEntry, uint32 spell_id)
     if (!creatureInfo)
         return NULL;
 
-    Pet* pet = new Pet(ToPlayer(), HUNTER_PET);
+    Pet* pet = new Pet(ToPlayer(), PetType::HUNTER_PET);
 
     if (!pet->CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, getLevel(), spell_id))
     {

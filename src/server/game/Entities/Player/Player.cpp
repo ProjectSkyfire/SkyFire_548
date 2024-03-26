@@ -10359,7 +10359,7 @@ void Player::ResetPetTalents()
     // The confirmation gossip listid has the text: "Yes, please do."
     Pet* pet = GetPet();
 
-    if (!pet || pet->getPetType() != HUNTER_PET || pet->m_usedTalentCount == 0)
+    if (!pet || pet->getPetType() != PetType::HUNTER_PET || pet->m_usedTalentCount == 0)
         return;
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
@@ -14995,7 +14995,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                         canTalk = false;
                     break;
                 case GOSSIP_OPTION_UNLEARNPETTALENTS:
-                    if (!GetPet() || GetPet()->getPetType() != HUNTER_PET || GetPet()->m_spells.size() <= 1 || creature->GetCreatureTemplate()->trainer_type != TRAINER_TYPE_PETS || creature->GetCreatureTemplate()->trainer_class != CLASS_HUNTER)
+                    if (!GetPet() || GetPet()->getPetType() != PetType::HUNTER_PET || GetPet()->m_spells.size() <= 1 || creature->GetCreatureTemplate()->trainer_type != TRAINER_TYPE_PETS || creature->GetCreatureTemplate()->trainer_class != CLASS_HUNTER)
                         canTalk = false;
                     break;
                 case GOSSIP_OPTION_TAXIVENDOR:
@@ -28342,7 +28342,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 {
     Pet* pet = new Pet(this, petType);
 
-    if (petType == SUMMON_PET && pet->LoadPetFromDB(this, entry))
+    if (petType == PetType::SUMMON_PET && pet->LoadPetFromDB(this, entry))
     {
         if (duration > 0)
             pet->SetDuration(duration);
@@ -28388,7 +28388,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
     switch (petType)
     {
-        case SUMMON_PET:
+        case PetType::SUMMON_PET:
             // this enables pet details window (Shift+P)
             pet->GetCharmInfo()->SetPetNumber(pet_number, true);
             pet->SetClass(CLASS_MAGE);
@@ -28406,7 +28406,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
     switch (petType)
     {
-        case SUMMON_PET:
+        case PetType::SUMMON_PET:
             pet->InitPetCreateSpells();
             pet->InitTalentForLevel();
             pet->SavePetToDB(PET_SAVE_AS_CURRENT);

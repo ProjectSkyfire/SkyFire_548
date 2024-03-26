@@ -6,7 +6,7 @@
 #ifndef SKYFIRESERVER_PET_DEFINES_H
 #define SKYFIRESERVER_PET_DEFINES_H
 
-enum PetType
+enum class PetType
 {
     SUMMON_PET              = 0,
     HUNTER_PET              = 1,

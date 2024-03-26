@@ -2881,14 +2881,14 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
         }
 
         if (owner->GetTypeId() == TypeID::TYPEID_PLAYER)
-            owner->ToPlayer()->RemovePet(OldSummon, (OldSummon->getPetType() == HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT), false);
+            owner->ToPlayer()->RemovePet(OldSummon, (OldSummon->getPetType() == PetType::HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT), false);
         else
             return;
     }
 
     float x, y, z;
     owner->GetClosePoint(x, y, z, owner->GetObjectSize());
-    Pet* pet = owner->SummonPet(petentry, x, y, z, owner->GetOrientation(), SUMMON_PET, 0);
+    Pet* pet = owner->SummonPet(petentry, x, y, z, owner->GetOrientation(), PetType::SUMMON_PET, 0);
     if (!pet)
         return;
 
@@ -4880,7 +4880,7 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
     player->GetPosition(x, y, z);
     if (!pet)
     {
-        player->SummonPet(0, x, y, z, player->GetOrientation(), SUMMON_PET, 0);
+        player->SummonPet(0, x, y, z, player->GetOrientation(), PetType::SUMMON_PET, 0);
         pet = player->GetPet();
     }
     if (!pet)
@@ -5640,7 +5640,7 @@ void Spell::EffectRenamePet(SpellEffIndex /*effIndex*/)
         return;
 
     if (!unitTarget || unitTarget->GetTypeId() != TypeID::TYPEID_UNIT ||
-        !unitTarget->ToCreature()->IsPet() || ((Pet*)unitTarget)->getPetType() != HUNTER_PET)
+        !unitTarget->ToCreature()->IsPet() || ((Pet*)unitTarget)->getPetType() != PetType::HUNTER_PET)
         return;
 
     unitTarget->SetByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED);

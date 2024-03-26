@@ -2776,7 +2776,7 @@ class spell_gen_pet_summoned : public SpellScriptLoader
                 Player* player = GetCaster()->ToPlayer();
                 if (player->GetLastPetNumber())
                 {
-                    PetType newPetType = (player->getClass() == CLASS_HUNTER) ? HUNTER_PET : SUMMON_PET;
+                    PetType newPetType = (player->getClass() == CLASS_HUNTER) ? PetType::HUNTER_PET : PetType::SUMMON_PET;
                     if (Pet* newPet = new Pet(player, newPetType))
                     {
                         if (newPet->LoadPetFromDB(player, 0, player->GetLastPetNumber(), true))

@@ -463,7 +463,7 @@ public:
 
         if (creature->IsPet())
         {
-            if (((Pet*)creature)->getPetType() == HUNTER_PET)
+            if (((Pet*)creature)->getPetType() == PetType::HUNTER_PET)
             {
                 creature->SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, sObjectMgr->GetXPForLevel(lvl)/4);
                 creature->SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);

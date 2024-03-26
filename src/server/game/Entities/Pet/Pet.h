@@ -27,7 +27,7 @@ class Player;
 class Pet : public Guardian
 {
     public:
-        explicit Pet(Player* owner, PetType type = MAX_PET_TYPE);
+        explicit Pet(Player* owner, PetType type = PetType::MAX_PET_TYPE);
         virtual ~Pet();
 
         void AddToWorld();
@@ -37,7 +37,7 @@ class Pet : public Guardian
 
         PetType getPetType() const { return m_petType; }
         void setPetType(PetType type) { m_petType = type; }
-        bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
+        bool isControlled() const;
         bool isTemporarySummoned() const { return m_duration > 0; }
 
         bool IsPermanentPetFor(Player* owner) const;        // pet have tab in character windows and set UNIT_FIELD_PET_NUMBER

@@ -661,7 +661,7 @@ void WorldSession::SendStablePetCallback(PreparedQueryResult result, uint64 guid
     uint8 num = 0;                                          // counter for place holder
 
     // not let move dead pet in slot
-    if (pet && pet->IsAlive() && pet->getPetType() == HUNTER_PET)
+    if (pet && pet->IsAlive() && pet->getPetType() == PetType::HUNTER_PET)
     {
         data << uint32(0);                                  // 4.x unknown, some kind of order?
         data << uint32(pet->GetCharmInfo()->GetPetNumber());
@@ -726,7 +726,7 @@ void WorldSession::HandleStablePet(WorldPacket& recvData)
     Pet* pet = _player->GetPet();
 
     // can't place in stable dead pet
-    if (!pet || !pet->IsAlive() || pet->getPetType() != HUNTER_PET)
+    if (!pet || !pet->IsAlive() || pet->getPetType() != PetType::HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -843,7 +843,7 @@ void WorldSession::HandleUnstablePetCallback(PreparedQueryResult result, uint32 
     if (pet)
         _player->RemovePet(pet, PET_SAVE_AS_DELETED);
 
-    Pet* newPet = new Pet(_player, HUNTER_PET);
+    Pet* newPet = new Pet(_player, PetType::HUNTER_PET);
     if (!newPet->LoadPetFromDB(_player, petEntry, petId))
     {
         delete newPet;
@@ -913,7 +913,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recvData)
 
     Pet* pet = _player->GetPet();
 
-    if (!pet || pet->getPetType() != HUNTER_PET)
+    if (!pet || pet->getPetType() != PetType::HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;

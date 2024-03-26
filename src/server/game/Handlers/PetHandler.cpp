@@ -258,7 +258,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                             pet->ToCreature()->AI()->AttackStart(TargetUnit);
 
                             //10% chance to play special pet attack talk, else growl
-                            if (pet->ToCreature()->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)
+                            if (pet->ToCreature()->IsPet() && ((Pet*)pet)->getPetType() == PetType::SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)
                                 pet->SendPetTalk((uint32)PET_TALK_ATTACK);
                             else
                             {
@@ -291,7 +291,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                         ASSERT(pet->GetTypeId() == TypeID::TYPEID_UNIT);
                         if (pet->IsPet())
                         {
-                            if (((Pet*)pet)->getPetType() == HUNTER_PET)
+                            if (((Pet*)pet)->getPetType() == PetType::HUNTER_PET)
                                 GetPlayer()->RemovePet((Pet*)pet, PET_SAVE_AS_DELETED);
                             else
                                 //dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
@@ -404,7 +404,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
 
                 //10% chance to play special pet attack talk, else growl
                 //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if (pet->ToCreature()->IsPet() && (((Pet*)pet)->getPetType() == SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
+                if (pet->ToCreature()->IsPet() && (((Pet*)pet)->getPetType() == PetType::SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
                     pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
                 else
                 {
@@ -650,7 +650,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 
     Pet* pet = _player->GetPet();
 
-    if (!pet || pet->getPetType() != HUNTER_PET ||
+    if (!pet || pet->getPetType() != PetType::HUNTER_PET ||
         !pet->HasByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED) ||
         !pet->GetCharmInfo())
         return;
@@ -1122,7 +1122,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
             {
                 // 10% chance to play special pet attack talk, else growl
                 // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if (pet->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
+                if (pet->getPetType() == PetType::SUMMON_PET && (urand(0, 100) < 10))
                     pet->SendPetTalk(PET_TALK_SPECIAL_SPELL);
                 else
                     pet->SendPetAIReaction(petGuid);
@@ -1197,7 +1197,7 @@ void WorldSession::HandleSetPetSpecialization(WorldPacket& recvData)
         return;
 
     Pet* pet = ObjectAccessor::GetPet(*_player, petGuid);
-    if (!pet || !pet->IsPet() || ((Pet*)pet)->getPetType() != HUNTER_PET ||
+    if (!pet || !pet->IsPet() || ((Pet*)pet)->getPetType() != PetType::HUNTER_PET ||
         pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
         return;
 
