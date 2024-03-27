@@ -9,6 +9,71 @@
 #include "SpellScript.h"
 #include "Player.h"
 
+class npc_zuni_bridge : public CreatureScript
+{
+public:
+    npc_zuni_bridge() : CreatureScript("npc_zuni_bridge") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_zuni_bridgeAI(creature);
+    }
+    struct npc_zuni_bridgeAI : public ScriptedAI
+    {
+        bool talk1 = false;
+        bool talk2 = false;
+        enum zuniEvents
+        {
+            EVENT_ZUNI_TALK_1 = 1,
+            EVENT_ZUNI_TALK_2 = 2,
+        };
+        EventMap events;
+        npc_zuni_bridgeAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type == FOLLOW_MOTION_TYPE)
+            {
+                if (talk1 == false)
+                {
+                    talk1 = true;
+                    events.ScheduleEvent(EVENT_ZUNI_TALK_1, 5000);
+                }
+                if (me->FindNearestCreature(37969, 30.0f, true))
+                    me->GetMotionMaster()->MovePoint(1, -1553.0f, -5297.35f, 9.1979f);
+            }
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ZUNI_TALK_1:
+                    {
+                        me->MonsterSay("You finished with ya trainin' too? Glad you make it through, mon!", Language::LANG_UNIVERSAL, me);
+                        me->SendPlaySound(21370, false);
+                        if (talk2 == false)
+                        {
+                            talk2 = true;
+                            events.ScheduleEvent(EVENT_ZUNI_TALK_2, 5000);
+                        }
+                        break;
+                    }
+                    case EVENT_ZUNI_TALK_2:
+                    {
+                        me->MonsterSay("I know dis is prolly busy work, but I don't mind. Dese baby raptors are cute lil devils.", Language::LANG_UNIVERSAL, me);
+                        me->SendPlaySound(21371, false);
+                        break;
+                    }
+                }
+            }
+        }
+    };
+};
+
 class npc_voljin_darkspear_hold : public CreatureScript
 {
 public:
@@ -826,6 +891,7 @@ private:
 
 void AddSC_durotar()
 {
+    new npc_zuni_bridge();
     new npc_voljin_darkspear_hold();
     new npc_zuni();
     new npc_jinthala();
