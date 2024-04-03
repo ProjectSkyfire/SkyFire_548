@@ -9,6 +9,7 @@
 #pragma comment (lib, "Crypt32")
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
+#include <openssl/provider.h>
 #include <ace/Version.h>
 
 #include "Common.h"
@@ -124,6 +125,17 @@ extern int main(int argc, char** argv)
     SF_LOG_INFO("server.worldserver", "Using configuration file %s.", cfg_file);
 
     SF_LOG_INFO("server.worldserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+
+    if (!OSSL_PROVIDER_available(NULL, "legacy"))
+    {
+        if (!OSSL_PROVIDER_try_load(NULL, "legacy", 0))
+        {
+            SF_LOG_INFO("server.worldserver", "Failed to load OpenSSL legacy provider.");
+            return 1;
+        }
+        SF_LOG_INFO("server.worldserver", "Loaded OpenSSL legacy provider.");
+    }
+
     SF_LOG_INFO("server.worldserver", "Using ACE version: %s", ACE_VERSION);
 
     ///- and run the 'Master'
