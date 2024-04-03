@@ -14,11 +14,12 @@ class ARC4
     public:
         ARC4();
         ~ARC4();
-        void Init(uint8 *seed, uint32 len);
+        void Init(uint8 *seed, size_t len);
         void UpdateData(int len, uint8 *data);
         void Finalize(int outlen, uint8* data);
     private:
         EVP_CIPHER_CTX *m_ctx;
+        OSSL_PARAM m_params[2];
 };
 
 #endif
