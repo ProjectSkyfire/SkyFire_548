@@ -38,6 +38,7 @@ SET(_OPENSSL_ROOT_HINTS
 IF(PLATFORM EQUAL 64)
   SET(_OPENSSL_ROOT_PATHS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;InstallLocation]"
+    "C:/Program Files/OpenSSL-Win64/x64/"
     "C:/Program Files/OpenSSL-Win64/"
     "C:/OpenSSL-Win64/"
     "C:/OpenSSL/"
@@ -85,31 +86,48 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
 
+    FIND_FILE(OPENSSL_LIB_LEGACY
+      NAMES
+        legacy.dll
+      PATHS
+        ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
+    )
+	
+	IF (OPENSSL_LIB_LEGACY)
+	  message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+	ELSE()
+	  message( FATAL_ERROR "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+	ENDIF()
+
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO_DEBUG
       NAMES
-        libcrypto32MDd libcrypto32 libcrypto64MDd libcrypto64
+        libcrypto libcrypto32MDd libcrypto32 libcrypto64MDd libcrypto64
       PATHS
+        ${OPENSSL_ROOT_DIR}/lib/
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO_RELEASE
       NAMES
-        libcrypto32MD libcrypto32 libcrypto64MD libcrypto64
+        libcrypto libcrypto32MD libcrypto32 libcrypto64MD libcrypto64
       PATHS
+        ${OPENSSL_ROOT_DIR}/lib/
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(OPENSSL_LIB_SSL_DEBUG
       NAMES
-        libssl32MDd libssl32 ssl libssl64MDd libssl64
+        libssl libssl32MDd libssl32 ssl libssl64MDd libssl64
       PATHS
+        ${OPENSSL_ROOT_DIR}/lib/
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(OPENSSL_LIB_SSL_RELEASE
       NAMES
-        libssl32MD libssl32 ssl libssl libssl64MD libssl64
+        libssl libssl32MD libssl32 ssl libssl libssl64MD libssl64
       PATHS
+        ${OPENSSL_ROOT_DIR}/lib/
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
