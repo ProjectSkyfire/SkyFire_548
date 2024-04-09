@@ -30,34 +30,19 @@
 
 # http://www.slproweb.com/products/Win32OpenSSL.html
 
-SET(_OPENSSL_ROOT_HINTS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
-  )
-
 IF(PLATFORM EQUAL 64)
   SET(_OPENSSL_ROOT_PATHS
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;InstallLocation]"
-    "C:/Program Files/OpenSSL-Win64/x64/"
-    "C:/Program Files/OpenSSL-Win64/"
-    "C:/OpenSSL-Win64/"
-    "C:/OpenSSL/"
+    ${PROJECT_SOURCE_DIR}/dep/openssl
   )
 ELSE()
   SET(_OPENSSL_ROOT_PATHS
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;InstallLocation]"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;InstallLocation]"
-    "C:/Program Files/OpenSSL-Win32/"
-    "C:/OpenSSL-Win32/"
-    "C:/OpenSSL/"
+    ${PROJECT_SOURCE_DIR}/dep/openssl
   )
 ENDIF()
 
 FIND_PATH(OPENSSL_ROOT_DIR
   NAMES
     include/openssl/ssl.h
-  HINTS
-    ${_OPENSSL_ROOT_HINTS}
   PATHS
     ${_OPENSSL_ROOT_PATHS}
 )
@@ -103,8 +88,7 @@ IF(WIN32 AND NOT CYGWIN)
       NAMES
         libcrypto libcrypto32MDd libcrypto32 libcrypto64MDd libcrypto64
       PATHS
-        ${OPENSSL_ROOT_DIR}/lib/
-        ${OPENSSL_ROOT_DIR}/lib/VC
+        ${OPENSSL_ROOT_DIR}/lib
     )
 
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO_RELEASE
@@ -112,7 +96,6 @@ IF(WIN32 AND NOT CYGWIN)
         libcrypto libcrypto32MD libcrypto32 libcrypto64MD libcrypto64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/
-        ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(OPENSSL_LIB_SSL_DEBUG
@@ -120,7 +103,6 @@ IF(WIN32 AND NOT CYGWIN)
         libssl libssl32MDd libssl32 ssl libssl64MDd libssl64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/
-        ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(OPENSSL_LIB_SSL_RELEASE
@@ -128,7 +110,6 @@ IF(WIN32 AND NOT CYGWIN)
         libssl libssl32MD libssl32 ssl libssl libssl64MD libssl64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/
-        ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
