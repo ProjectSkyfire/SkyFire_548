@@ -1,0 +1,5 @@
+Extract OpenSSL zip file into "C:\".
+
+It must be in "C:\", because paths are set at compile time.
+
+If you want to use a diffrent folder for it you need to compile it your self.

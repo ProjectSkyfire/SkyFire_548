@@ -32,11 +32,7 @@
 
 IF(PLATFORM EQUAL 64)
   SET(_OPENSSL_ROOT_PATHS
-    ${PROJECT_SOURCE_DIR}/dep/openssl
-  )
-ELSE()
-  SET(_OPENSSL_ROOT_PATHS
-    ${PROJECT_SOURCE_DIR}/dep/openssl
+    "C:/OpenSSL-Win64/"
   )
 ENDIF()
 
