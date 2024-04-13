@@ -358,30 +358,30 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
         SQLElementData const& data = *itr;
         switch (itr->type)
         {
-        case SQL_ELEMENT_PREPARED:
-        {
-            PreparedStatement* stmt = data.element.stmt;
-            ASSERT(stmt);
-            if (!Execute(stmt))
+            case SQL_ELEMENT_PREPARED:
             {
-                SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
-                RollbackTransaction();
-                return false;
+                PreparedStatement* stmt = data.element.stmt;
+                ASSERT(stmt);
+                if (!Execute(stmt))
+                {
+                    SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                    RollbackTransaction();
+                    return false;
+                }
             }
-        }
-        break;
-        case SQL_ELEMENT_RAW:
-        {
-            const char* sql = data.element.query;
-            ASSERT(sql);
-            if (!Execute(sql))
+            break;
+            case SQL_ELEMENT_RAW:
             {
-                SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
-                RollbackTransaction();
-                return false;
+                const char* sql = data.element.query;
+                ASSERT(sql);
+                if (!Execute(sql))
+                {
+                    SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                    RollbackTransaction();
+                    return false;
+                }
             }
-        }
-        break;
+            break;
         }
     }
 
@@ -466,52 +466,52 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
 {
     switch (errNo)
     {
-    case CR_SERVER_GONE_ERROR:
-    case CR_SERVER_LOST:
-    case CR_INVALID_CONN_HANDLE:
-    case CR_SERVER_LOST_EXTENDED:
-    {
-        m_reconnecting = true;
-        uint64 oldThreadId = mysql_thread_id(GetHandle());
-        mysql_close(GetHandle());
-        if (this->Open())                           // Don't remove 'this' pointer unless you want to skip loading all prepared statements....
+        case CR_SERVER_GONE_ERROR:
+        case CR_SERVER_LOST:
+        case CR_INVALID_CONN_HANDLE:
+        case CR_SERVER_LOST_EXTENDED:
         {
-            SF_LOG_INFO("sql.sql", "Connection to the MySQL server is active.");
-            if (oldThreadId != mysql_thread_id(GetHandle()))
-                SF_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).",
-                    m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
-                    (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+            m_reconnecting = true;
+            uint64 oldThreadId = mysql_thread_id(GetHandle());
+            mysql_close(GetHandle());
+            if (this->Open())                           // Don't remove 'this' pointer unless you want to skip loading all prepared statements....
+            {
+                SF_LOG_INFO("sql.sql", "Connection to the MySQL server is active.");
+                if (oldThreadId != mysql_thread_id(GetHandle()))
+                    SF_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).",
+                        m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
+                        (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
-            m_reconnecting = false;
-            return true;
+                m_reconnecting = false;
+                return true;
+            }
+
+            uint32 lErrno = mysql_errno(GetHandle());   // It's possible this attempted reconnect throws 2006 at us. To prevent crazy recursive calls, sleep here.
+            ACE_OS::sleep(3);                           // Sleep 3 seconds
+            return _HandleMySQLErrno(lErrno);           // Call self (recursive)
         }
 
-        uint32 lErrno = mysql_errno(GetHandle());   // It's possible this attempted reconnect throws 2006 at us. To prevent crazy recursive calls, sleep here.
-        ACE_OS::sleep(3);                           // Sleep 3 seconds
-        return _HandleMySQLErrno(lErrno);           // Call self (recursive)
-    }
+        case ER_LOCK_DEADLOCK:
+            return false;    // Implemented in TransactionTask::Execute and DatabaseWorkerPool<T>::DirectCommitTransaction
+            // Query related errors - skip query
+        case ER_WRONG_VALUE_COUNT:
+        case ER_DUP_ENTRY:
+            return false;
 
-    case ER_LOCK_DEADLOCK:
-        return false;    // Implemented in TransactionTask::Execute and DatabaseWorkerPool<T>::DirectCommitTransaction
-        // Query related errors - skip query
-    case ER_WRONG_VALUE_COUNT:
-    case ER_DUP_ENTRY:
-        return false;
-
-        // Outdated table or database structure - terminate core
-    case ER_BAD_FIELD_ERROR:
-    case ER_NO_SUCH_TABLE:
-        SF_LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
-        ACE_OS::sleep(10);
-        std::abort();
-        return false;
-    case ER_PARSE_ERROR:
-        SF_LOG_ERROR("sql.sql", "Error while parsing SQL. Core fix required.");
-        ACE_OS::sleep(10);
-        std::abort();
-        return false;
-    default:
-        SF_LOG_ERROR("sql.sql", "Unhandled MySQL errno %u. Unexpected behaviour possible.", errNo);
-        return false;
+            // Outdated table or database structure - terminate core
+        case ER_BAD_FIELD_ERROR:
+        case ER_NO_SUCH_TABLE:
+            SF_LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
+            ACE_OS::sleep(10);
+            std::abort();
+            return false;
+        case ER_PARSE_ERROR:
+            SF_LOG_ERROR("sql.sql", "Error while parsing SQL. Core fix required.");
+            ACE_OS::sleep(10);
+            std::abort();
+            return false;
+        default:
+            SF_LOG_ERROR("sql.sql", "Unhandled MySQL errno %u. Unexpected behaviour possible.", errNo);
+            return false;
     }
 }

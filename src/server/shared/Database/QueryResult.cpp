@@ -99,22 +99,22 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES* result, uint64
             else
                 switch (m_rBind[fIndex].buffer_type)
                 {
-                case MYSQL_TYPE_TINY_BLOB:
-                case MYSQL_TYPE_MEDIUM_BLOB:
-                case MYSQL_TYPE_LONG_BLOB:
-                case MYSQL_TYPE_BLOB:
-                case MYSQL_TYPE_STRING:
-                case MYSQL_TYPE_VAR_STRING:
-                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue("",
-                        m_rBind[fIndex].buffer_length,
-                        m_rBind[fIndex].buffer_type,
-                        *m_rBind[fIndex].length);
-                    break;
-                default:
-                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue(0,
-                        m_rBind[fIndex].buffer_length,
-                        m_rBind[fIndex].buffer_type,
-                        *m_rBind[fIndex].length);
+                    case MYSQL_TYPE_TINY_BLOB:
+                    case MYSQL_TYPE_MEDIUM_BLOB:
+                    case MYSQL_TYPE_LONG_BLOB:
+                    case MYSQL_TYPE_BLOB:
+                    case MYSQL_TYPE_STRING:
+                    case MYSQL_TYPE_VAR_STRING:
+                        m_rows[uint32(m_rowPosition)][fIndex].SetByteValue("",
+                            m_rBind[fIndex].buffer_length,
+                            m_rBind[fIndex].buffer_type,
+                            *m_rBind[fIndex].length);
+                        break;
+                    default:
+                        m_rows[uint32(m_rowPosition)][fIndex].SetByteValue(0,
+                            m_rBind[fIndex].buffer_length,
+                            m_rBind[fIndex].buffer_type,
+                            *m_rBind[fIndex].length);
                 }
         }
         m_rowPosition++;

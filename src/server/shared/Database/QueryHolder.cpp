@@ -138,12 +138,12 @@ SQLQueryHolder::~SQLQueryHolder()
         {
             switch (data->type)
             {
-            case SQL_ELEMENT_RAW:
-                free((void*)(const_cast<char*>(data->element.query)));
-                break;
-            case SQL_ELEMENT_PREPARED:
-                delete data->element.stmt;
-                break;
+                case SQL_ELEMENT_RAW:
+                    free((void*)(const_cast<char*>(data->element.query)));
+                    break;
+                case SQL_ELEMENT_PREPARED:
+                    delete data->element.stmt;
+                    break;
             }
         }
     }
@@ -173,20 +173,20 @@ bool SQLQueryHolderTask::Execute()
         {
             switch (data->type)
             {
-            case SQL_ELEMENT_RAW:
-            {
-                char const* sql = data->element.query;
-                if (sql)
-                    m_holder->SetResult(i, m_conn->Query(sql));
-                break;
-            }
-            case SQL_ELEMENT_PREPARED:
-            {
-                PreparedStatement* stmt = data->element.stmt;
-                if (stmt)
-                    m_holder->SetPreparedResult(i, m_conn->Query(stmt));
-                break;
-            }
+                case SQL_ELEMENT_RAW:
+                {
+                    char const* sql = data->element.query;
+                    if (sql)
+                        m_holder->SetResult(i, m_conn->Query(sql));
+                    break;
+                }
+                case SQL_ELEMENT_PREPARED:
+                {
+                    PreparedStatement* stmt = data->element.stmt;
+                    if (stmt)
+                        m_holder->SetPreparedResult(i, m_conn->Query(stmt));
+                    break;
+                }
             }
         }
     }

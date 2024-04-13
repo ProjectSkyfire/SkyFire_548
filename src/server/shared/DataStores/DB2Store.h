@@ -47,40 +47,40 @@ void WriteDB2RecordToPacket(DB2Storage<T> const& store, uint32 id, uint32 locale
     {
         switch (format[i])
         {
-        case FT_IND:
-        case FT_INT:
-            buffer << *(uint32*)entry;
-            entry += 4;
-            break;
-        case FT_FLOAT:
-            buffer << *(float*)entry;
-            entry += 4;
-            break;
-        case FT_BYTE:
-            buffer << *(uint8*)entry;
-            entry += 1;
-            break;
-        case FT_STRING:
-        {
-            LocalizedString* locStr = *(LocalizedString**)entry;
-            if (locStr->Str[locale][0] == '\0')
-                locale = 0;
+            case FT_IND:
+            case FT_INT:
+                buffer << *(uint32*)entry;
+                entry += 4;
+                break;
+            case FT_FLOAT:
+                buffer << *(float*)entry;
+                entry += 4;
+                break;
+            case FT_BYTE:
+                buffer << *(uint8*)entry;
+                entry += 1;
+                break;
+            case FT_STRING:
+            {
+                LocalizedString* locStr = *(LocalizedString**)entry;
+                if (locStr->Str[locale][0] == '\0')
+                    locale = 0;
 
-            char const* str = locStr->Str[locale];
-            size_t len = strlen(str);
-            buffer << uint16(len);
-            if (len)
-                buffer << str;
-            entry += sizeof(char*);
-            break;
-        }
-        case FT_NA:
-        case FT_SORT:
-            buffer << uint32(0);
-            break;
-        case FT_NA_BYTE:
-            buffer << uint8(0);
-            break;
+                char const* str = locStr->Str[locale];
+                size_t len = strlen(str);
+                buffer << uint16(len);
+                if (len)
+                    buffer << str;
+                entry += sizeof(char*);
+                break;
+            }
+            case FT_NA:
+            case FT_SORT:
+                buffer << uint32(0);
+                break;
+            case FT_NA_BYTE:
+                buffer << uint8(0);
+                break;
         }
     }
 }

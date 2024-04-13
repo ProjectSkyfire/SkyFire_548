@@ -46,12 +46,12 @@ void Transaction::Cleanup()
         SQLElementData const& data = m_queries.front();
         switch (data.type)
         {
-        case SQL_ELEMENT_PREPARED:
-            delete data.element.stmt;
-            break;
-        case SQL_ELEMENT_RAW:
-            free((void*)(data.element.query));
-            break;
+            case SQL_ELEMENT_PREPARED:
+                delete data.element.stmt;
+                break;
+            case SQL_ELEMENT_RAW:
+                free((void*)(data.element.query));
+                break;
         }
 
         m_queries.pop_front();

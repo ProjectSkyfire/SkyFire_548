@@ -22,45 +22,45 @@ void PreparedStatement::BindParameters()
     {
         switch (statement_data[i].type)
         {
-        case TYPE_BOOL:
-            m_stmt->setBool(i, statement_data[i].data.boolean);
-            break;
-        case TYPE_UI8:
-            m_stmt->setUInt8(i, statement_data[i].data.ui8);
-            break;
-        case TYPE_UI16:
-            m_stmt->setUInt16(i, statement_data[i].data.ui16);
-            break;
-        case TYPE_UI32:
-            m_stmt->setUInt32(i, statement_data[i].data.ui32);
-            break;
-        case TYPE_I8:
-            m_stmt->setInt8(i, statement_data[i].data.i8);
-            break;
-        case TYPE_I16:
-            m_stmt->setInt16(i, statement_data[i].data.i16);
-            break;
-        case TYPE_I32:
-            m_stmt->setInt32(i, statement_data[i].data.i32);
-            break;
-        case TYPE_UI64:
-            m_stmt->setUInt64(i, statement_data[i].data.ui64);
-            break;
-        case TYPE_I64:
-            m_stmt->setInt64(i, statement_data[i].data.i64);
-            break;
-        case TYPE_FLOAT:
-            m_stmt->setFloat(i, statement_data[i].data.f);
-            break;
-        case TYPE_DOUBLE:
-            m_stmt->setDouble(i, statement_data[i].data.d);
-            break;
-        case TYPE_STRING:
-            m_stmt->setString(i, statement_data[i].str.c_str());
-            break;
-        case TYPE_NULL:
-            m_stmt->setNull(i);
-            break;
+            case TYPE_BOOL:
+                m_stmt->setBool(i, statement_data[i].data.boolean);
+                break;
+            case TYPE_UI8:
+                m_stmt->setUInt8(i, statement_data[i].data.ui8);
+                break;
+            case TYPE_UI16:
+                m_stmt->setUInt16(i, statement_data[i].data.ui16);
+                break;
+            case TYPE_UI32:
+                m_stmt->setUInt32(i, statement_data[i].data.ui32);
+                break;
+            case TYPE_I8:
+                m_stmt->setInt8(i, statement_data[i].data.i8);
+                break;
+            case TYPE_I16:
+                m_stmt->setInt16(i, statement_data[i].data.i16);
+                break;
+            case TYPE_I32:
+                m_stmt->setInt32(i, statement_data[i].data.i32);
+                break;
+            case TYPE_UI64:
+                m_stmt->setUInt64(i, statement_data[i].data.ui64);
+                break;
+            case TYPE_I64:
+                m_stmt->setInt64(i, statement_data[i].data.i64);
+                break;
+            case TYPE_FLOAT:
+                m_stmt->setFloat(i, statement_data[i].data.f);
+                break;
+            case TYPE_DOUBLE:
+                m_stmt->setDouble(i, statement_data[i].data.d);
+                break;
+            case TYPE_STRING:
+                m_stmt->setString(i, statement_data[i].str.c_str());
+                break;
+            case TYPE_NULL:
+                m_stmt->setNull(i);
+                break;
         }
     }
 #ifdef _DEBUG
@@ -383,45 +383,45 @@ std::string MySQLPreparedStatement::getQueryString(std::string const& sqlPattern
 
         switch (m_stmt->statement_data[i].type)
         {
-        case TYPE_BOOL:
-            ss << uint16(m_stmt->statement_data[i].data.boolean);
-            break;
-        case TYPE_UI8:
-            ss << uint16(m_stmt->statement_data[i].data.ui8);  // stringstream will append a character with that code instead of numeric representation
-            break;
-        case TYPE_UI16:
-            ss << m_stmt->statement_data[i].data.ui16;
-            break;
-        case TYPE_UI32:
-            ss << m_stmt->statement_data[i].data.ui32;
-            break;
-        case TYPE_I8:
-            ss << int16(m_stmt->statement_data[i].data.i8);  // stringstream will append a character with that code instead of numeric representation
-            break;
-        case TYPE_I16:
-            ss << m_stmt->statement_data[i].data.i16;
-            break;
-        case TYPE_I32:
-            ss << m_stmt->statement_data[i].data.i32;
-            break;
-        case TYPE_UI64:
-            ss << m_stmt->statement_data[i].data.ui64;
-            break;
-        case TYPE_I64:
-            ss << m_stmt->statement_data[i].data.i64;
-            break;
-        case TYPE_FLOAT:
-            ss << m_stmt->statement_data[i].data.f;
-            break;
-        case TYPE_DOUBLE:
-            ss << m_stmt->statement_data[i].data.d;
-            break;
-        case TYPE_STRING:
-            ss << '\'' << m_stmt->statement_data[i].str << '\'';
-            break;
-        case TYPE_NULL:
-            ss << "NULL";
-            break;
+            case TYPE_BOOL:
+                ss << uint16(m_stmt->statement_data[i].data.boolean);
+                break;
+            case TYPE_UI8:
+                ss << uint16(m_stmt->statement_data[i].data.ui8);  // stringstream will append a character with that code instead of numeric representation
+                break;
+            case TYPE_UI16:
+                ss << m_stmt->statement_data[i].data.ui16;
+                break;
+            case TYPE_UI32:
+                ss << m_stmt->statement_data[i].data.ui32;
+                break;
+            case TYPE_I8:
+                ss << int16(m_stmt->statement_data[i].data.i8);  // stringstream will append a character with that code instead of numeric representation
+                break;
+            case TYPE_I16:
+                ss << m_stmt->statement_data[i].data.i16;
+                break;
+            case TYPE_I32:
+                ss << m_stmt->statement_data[i].data.i32;
+                break;
+            case TYPE_UI64:
+                ss << m_stmt->statement_data[i].data.ui64;
+                break;
+            case TYPE_I64:
+                ss << m_stmt->statement_data[i].data.i64;
+                break;
+            case TYPE_FLOAT:
+                ss << m_stmt->statement_data[i].data.f;
+                break;
+            case TYPE_DOUBLE:
+                ss << m_stmt->statement_data[i].data.d;
+                break;
+            case TYPE_STRING:
+                ss << '\'' << m_stmt->statement_data[i].str << '\'';
+                break;
+            case TYPE_NULL:
+                ss << "NULL";
+                break;
         }
 
         std::string replaceStr = ss.str();

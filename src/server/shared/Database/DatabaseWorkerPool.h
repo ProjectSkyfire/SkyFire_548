@@ -354,14 +354,14 @@ public:
         //! so there's no need to waste these CPU cycles in Release mode.
         switch (transaction->GetSize())
         {
-        case 0:
-            SF_LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
-            return;
-        case 1:
-            SF_LOG_DEBUG("sql.driver", "Warning: Transaction only holds 1 query, consider removing Transaction context in code.");
-            break;
-        default:
-            break;
+            case 0:
+                SF_LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
+                return;
+            case 1:
+                SF_LOG_DEBUG("sql.driver", "Warning: Transaction only holds 1 query, consider removing Transaction context in code.");
+                break;
+            default:
+                break;
         }
 #endif // SKYFIRE_DEBUG
 
