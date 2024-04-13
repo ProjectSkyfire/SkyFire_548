@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,18 +11,18 @@ struct LogMessage;
 
 class LogOperation
 {
-    public:
-        LogOperation(Logger const* _logger, LogMessage* _msg)
-            : logger(_logger), msg(_msg)
-        { }
+public:
+    LogOperation(Logger const* _logger, LogMessage* _msg)
+        : logger(_logger), msg(_msg)
+    { }
 
-        ~LogOperation();
+    ~LogOperation();
 
-        int call();
+    int call();
 
-    protected:
-        Logger const* logger;
-        LogMessage* msg;
+protected:
+    Logger const* logger;
+    LogMessage* msg;
 };
 
 #endif

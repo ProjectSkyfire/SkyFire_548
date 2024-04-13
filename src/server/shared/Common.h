@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -122,22 +122,22 @@ inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 
 enum TimeConstants
 {
-    MINUTE          = 60,
-    HOUR            = MINUTE*60,
-    DAY             = HOUR*24,
-    WEEK            = DAY*7,
-    MONTH           = DAY*30,
-    YEAR            = MONTH*12,
+    MINUTE = 60,
+    HOUR = MINUTE * 60,
+    DAY = HOUR * 24,
+    WEEK = DAY * 7,
+    MONTH = DAY * 30,
+    YEAR = MONTH * 12,
     IN_MILLISECONDS = 1000
 };
 
 enum class AccountTypes
 {
-    SEC_PLAYER         = 0,
-    SEC_MODERATOR      = 1,
-    SEC_GAMEMASTER     = 2,
-    SEC_ADMINISTRATOR  = 3,
-    SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
+    SEC_PLAYER = 0,
+    SEC_MODERATOR = 1,
+    SEC_GAMEMASTER = 2,
+    SEC_ADMINISTRATOR = 3,
+    SEC_CONSOLE = 4                                  // must be always last in list, accounts must have less security level always also
 };
 
 enum LocaleConstant

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -14,19 +14,19 @@
 #endif
 #endif
 
+#include "ByteConverter.h"
 #include "Define.h"
 #include "Errors.h"
-#include "ByteConverter.h"
 
 #include <ace/OS_NS_time.h>
+#include <cmath>
+#include <cstring>
 #include <exception>
 #include <list>
 #include <map>
 #include <string>
-#include <vector>
-#include <cstring>
 #include <time.h>
-#include <cmath>
+#include <vector>
 
 // Root of ByteBuffer exception hierarchy
 class ByteBufferException : public std::exception
@@ -37,7 +37,7 @@ public:
     char const* what() const throw() { return msg_.c_str(); }
 
 protected:
-    std::string & message() throw() { return msg_; }
+    std::string& message() throw() { return msg_; }
 
 private:
     std::string msg_;
@@ -132,7 +132,7 @@ public:
     }
 
     // copy constructor
-    ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
+    ByteBuffer(const ByteBuffer& buf) : _rpos(buf._rpos), _wpos(buf._wpos),
         _bitpos(buf._bitpos), _curbitval(buf._curbitval), _storage(buf._storage)
     {
     }
@@ -147,7 +147,7 @@ public:
     {
         FlushBits();
         EndianConvert(value);
-        append((uint8 *)&value, sizeof(value));
+        append((uint8*)&value, sizeof(value));
     }
 
     void FlushBits()
@@ -155,7 +155,7 @@ public:
         if (_bitpos == 8)
             return;
 
-        append((uint8 *)&_curbitval, sizeof(uint8));
+        append((uint8*)&_curbitval, sizeof(uint8));
         _curbitval = 0;
         _bitpos = 8;
     }
@@ -169,7 +169,7 @@ public:
         if (_bitpos == 0)
         {
             _bitpos = 8;
-            append((uint8 *)&_curbitval, sizeof(_curbitval));
+            append((uint8*)&_curbitval, sizeof(_curbitval));
             _curbitval = 0;
         }
 
@@ -232,34 +232,34 @@ public:
     template <typename T> void put(size_t pos, T value)
     {
         EndianConvert(value);
-        put(pos, (uint8 *)&value, sizeof(value));
+        put(pos, (uint8*)&value, sizeof(value));
     }
 
     void ReadGuidMaskList(ObjectGuid& guid, int count, ...)
     {
         va_list ap;
         va_start(ap, count);
-        for (uint8 i = 0; i<count; ++i)
+        for (uint8 i = 0; i < count; ++i)
         {
             uint8 offset = va_arg(ap, uint32);
             guid[offset] = ReadBit();
         }
         va_end(ap);
     }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1)                                                                           { ReadGuidMaskList(guid, 1, v1); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2)                                                                 { ReadGuidMaskList(guid, 2, v1, v2); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3)                                                       { ReadGuidMaskList(guid, 3, v1, v2, v3); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4)                                             { ReadGuidMaskList(guid, 4, v1, v2, v3, v4); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5)                                   { ReadGuidMaskList(guid, 5, v1, v2, v3, v4, v5); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6)                         { ReadGuidMaskList(guid, 6, v1, v2, v3, v4, v5, v6); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7)               { ReadGuidMaskList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
-    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8)     { ReadGuidMaskList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1) { ReadGuidMaskList(guid, 1, v1); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2) { ReadGuidMaskList(guid, 2, v1, v2); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3) { ReadGuidMaskList(guid, 3, v1, v2, v3); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4) { ReadGuidMaskList(guid, 4, v1, v2, v3, v4); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5) { ReadGuidMaskList(guid, 5, v1, v2, v3, v4, v5); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6) { ReadGuidMaskList(guid, 6, v1, v2, v3, v4, v5, v6); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7) { ReadGuidMaskList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
+    void ReadGuidMask(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8) { ReadGuidMaskList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
 
     void WriteGuidMaskList(const ObjectGuid& guid, int count, ...)
     {
         va_list ap;
         va_start(ap, count);
-        for (uint8 i = 0; i<count; ++i)
+        for (uint8 i = 0; i < count; ++i)
         {
             uint8 offset = va_arg(ap, uint32);
             WriteBit(guid[offset]);
@@ -267,54 +267,54 @@ public:
         va_end(ap);
     }
 
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1)                                                                           { WriteGuidMaskList(guid, 1, v1); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2)                                                                 { WriteGuidMaskList(guid, 2, v1, v2); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3)                                                       { WriteGuidMaskList(guid, 3, v1, v2, v3); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4)                                             { WriteGuidMaskList(guid, 4, v1, v2, v3, v4); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5)                                   { WriteGuidMaskList(guid, 5, v1, v2, v3, v4, v5); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6)                         { WriteGuidMaskList(guid, 6, v1, v2, v3, v4, v5, v6); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7)               { WriteGuidMaskList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
-    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8)     { WriteGuidMaskList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1) { WriteGuidMaskList(guid, 1, v1); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2) { WriteGuidMaskList(guid, 2, v1, v2); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3) { WriteGuidMaskList(guid, 3, v1, v2, v3); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4) { WriteGuidMaskList(guid, 4, v1, v2, v3, v4); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5) { WriteGuidMaskList(guid, 5, v1, v2, v3, v4, v5); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6) { WriteGuidMaskList(guid, 6, v1, v2, v3, v4, v5, v6); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7) { WriteGuidMaskList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
+    void WriteGuidMask(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8) { WriteGuidMaskList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
 
     void ReadGuidBytesList(ObjectGuid& guid, int count, ...)
     {
         va_list ap;
         va_start(ap, count);
-        for (uint8 i = 0; i<count; ++i)
+        for (uint8 i = 0; i < count; ++i)
         {
             uint8 offset = va_arg(ap, uint32);
             ReadByteSeq(guid[offset]);
         }
         va_end(ap);
     }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1)                                                                          { ReadGuidBytesList(guid, 1, v1); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2)                                                                { ReadGuidBytesList(guid, 2, v1, v2); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3)                                                      { ReadGuidBytesList(guid, 3, v1, v2, v3); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4)                                            { ReadGuidBytesList(guid, 4, v1, v2, v3, v4); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5)                                  { ReadGuidBytesList(guid, 5, v1, v2, v3, v4, v5); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6)                        { ReadGuidBytesList(guid, 6, v1, v2, v3, v4, v5, v6); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7)              { ReadGuidBytesList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
-    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8)    { ReadGuidBytesList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1) { ReadGuidBytesList(guid, 1, v1); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2) { ReadGuidBytesList(guid, 2, v1, v2); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3) { ReadGuidBytesList(guid, 3, v1, v2, v3); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4) { ReadGuidBytesList(guid, 4, v1, v2, v3, v4); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5) { ReadGuidBytesList(guid, 5, v1, v2, v3, v4, v5); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6) { ReadGuidBytesList(guid, 6, v1, v2, v3, v4, v5, v6); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7) { ReadGuidBytesList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
+    void ReadGuidBytes(ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8) { ReadGuidBytesList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
 
     void WriteGuidBytesList(const ObjectGuid& guid, int count, ...)
     {
         va_list ap;
         va_start(ap, count);
-        for (uint8 i = 0; i<count; ++i)
+        for (uint8 i = 0; i < count; ++i)
         {
             uint8 offset = va_arg(ap, uint32);
             WriteByteSeq(guid[offset]);
         }
         va_end(ap);
     }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1)                                                                           { WriteGuidBytesList(guid, 1, v1); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2)                                                                 { WriteGuidBytesList(guid, 2, v1, v2); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3)                                                       { WriteGuidBytesList(guid, 3, v1, v2, v3); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4)                                             { WriteGuidBytesList(guid, 4, v1, v2, v3, v4); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5)                                   { WriteGuidBytesList(guid, 5, v1, v2, v3, v4, v5); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6)                         { WriteGuidBytesList(guid, 6, v1, v2, v3, v4, v5, v6); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7)               { WriteGuidBytesList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
-    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8)     { WriteGuidBytesList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1) { WriteGuidBytesList(guid, 1, v1); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2) { WriteGuidBytesList(guid, 2, v1, v2); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3) { WriteGuidBytesList(guid, 3, v1, v2, v3); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4) { WriteGuidBytesList(guid, 4, v1, v2, v3, v4); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5) { WriteGuidBytesList(guid, 5, v1, v2, v3, v4, v5); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6) { WriteGuidBytesList(guid, 6, v1, v2, v3, v4, v5, v6); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7) { WriteGuidBytesList(guid, 7, v1, v2, v3, v4, v5, v6, v7); }
+    void WriteGuidBytes(const ObjectGuid& guid, uint8 v1, uint8 v2, uint8 v3, uint8 v4, uint8 v5, uint8 v6, uint8 v7, uint8 v8) { WriteGuidBytesList(guid, 8, v1, v2, v3, v4, v5, v6, v7, v8); }
 
     /**
     * @name   PutBits
@@ -347,69 +347,69 @@ public:
         }
     }
 
-    ByteBuffer &operator<<(uint8 value)
+    ByteBuffer& operator<<(uint8 value)
     {
         append<uint8>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(uint16 value)
+    ByteBuffer& operator<<(uint16 value)
     {
         append<uint16>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(uint32 value)
+    ByteBuffer& operator<<(uint32 value)
     {
         append<uint32>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(uint64 value)
+    ByteBuffer& operator<<(uint64 value)
     {
         append<uint64>(value);
         return *this;
     }
 
     // signed as in 2e complement
-    ByteBuffer &operator<<(int8 value)
+    ByteBuffer& operator<<(int8 value)
     {
         append<int8>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(int16 value)
+    ByteBuffer& operator<<(int16 value)
     {
         append<int16>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(int32 value)
+    ByteBuffer& operator<<(int32 value)
     {
         append<int32>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(int64 value)
+    ByteBuffer& operator<<(int64 value)
     {
         append<int64>(value);
         return *this;
     }
 
     // floating points
-    ByteBuffer &operator<<(float value)
+    ByteBuffer& operator<<(float value)
     {
         append<float>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(double value)
+    ByteBuffer& operator<<(double value)
     {
         append<double>(value);
         return *this;
     }
 
-    ByteBuffer &operator<<(const std::string &value)
+    ByteBuffer& operator<<(const std::string& value)
     {
         if (size_t len = value.length())
             append((uint8 const*)value.c_str(), len);
@@ -417,62 +417,62 @@ public:
         return *this;
     }
 
-    ByteBuffer &operator>>(bool &value)
+    ByteBuffer& operator>>(bool& value)
     {
         value = read<char>() > 0 ? true : false;
         return *this;
     }
 
-    ByteBuffer &operator>>(uint8 &value)
+    ByteBuffer& operator>>(uint8& value)
     {
         value = read<uint8>();
         return *this;
     }
 
-    ByteBuffer &operator>>(uint16 &value)
+    ByteBuffer& operator>>(uint16& value)
     {
         value = read<uint16>();
         return *this;
     }
 
-    ByteBuffer &operator>>(uint32 &value)
+    ByteBuffer& operator>>(uint32& value)
     {
         value = read<uint32>();
         return *this;
     }
 
-    ByteBuffer &operator>>(uint64 &value)
+    ByteBuffer& operator>>(uint64& value)
     {
         value = read<uint64>();
         return *this;
     }
 
     //signed as in 2e complement
-    ByteBuffer &operator>>(int8 &value)
+    ByteBuffer& operator>>(int8& value)
     {
         value = read<int8>();
         return *this;
     }
 
-    ByteBuffer &operator>>(int16 &value)
+    ByteBuffer& operator>>(int16& value)
     {
         value = read<int16>();
         return *this;
     }
 
-    ByteBuffer &operator>>(int32 &value)
+    ByteBuffer& operator>>(int32& value)
     {
         value = read<int32>();
         return *this;
     }
 
-    ByteBuffer &operator>>(int64 &value)
+    ByteBuffer& operator>>(int64& value)
     {
         value = read<int64>();
         return *this;
     }
 
-    ByteBuffer &operator>>(float &value)
+    ByteBuffer& operator>>(float& value)
     {
         value = read<float>();
         if (!std::isfinite(value))
@@ -480,7 +480,7 @@ public:
         return *this;
     }
 
-    ByteBuffer &operator>>(double &value)
+    ByteBuffer& operator>>(double& value)
     {
         value = read<double>();
         if (!std::isfinite(value))
@@ -488,7 +488,7 @@ public:
         return *this;
     }
 
-    ByteBuffer &operator>>(std::string& value)
+    ByteBuffer& operator>>(std::string& value)
     {
         value.clear();
         while (rpos() < size())                         // prevent crash at wrong string format in packet
@@ -572,7 +572,7 @@ public:
         return val;
     }
 
-    void read(uint8 *dest, size_t len)
+    void read(uint8* dest, size_t len)
     {
         if (_rpos + len > size())
             throw ByteBufferPositionException(false, _rpos, len, size());
@@ -644,9 +644,9 @@ public:
         return *this;
     }
 
-    uint8 * contents() { return &_storage[0]; }
+    uint8* contents() { return &_storage[0]; }
 
-    const uint8 *contents() const { return &_storage[0]; }
+    const uint8* contents() const { return &_storage[0]; }
 
     size_t size() const { return _storage.size(); }
     bool empty() const { return _storage.empty(); }
@@ -664,17 +664,17 @@ public:
             _storage.reserve(ressize);
     }
 
-    void append(const char *src, size_t cnt)
+    void append(const char* src, size_t cnt)
     {
-        return append((const uint8 *)src, cnt);
+        return append((const uint8*)src, cnt);
     }
 
-    template<class T> void append(const T *src, size_t cnt)
+    template<class T> void append(const T* src, size_t cnt)
     {
-        return append((const uint8 *)src, cnt * sizeof(T));
+        return append((const uint8*)src, cnt * sizeof(T));
     }
 
-    void append(const uint8 *src, size_t cnt)
+    void append(const uint8* src, size_t cnt)
     {
         if (!cnt)
             throw ByteBufferSourceException(_wpos, size(), cnt);
@@ -740,7 +740,7 @@ public:
         append<uint32>((lt.tm_year - 100) << 24 | lt.tm_mon << 20 | (lt.tm_mday - 1) << 14 | lt.tm_wday << 11 | lt.tm_hour << 6 | lt.tm_min);
     }
 
-    void put(size_t pos, const uint8 *src, size_t cnt)
+    void put(size_t pos, const uint8* src, size_t cnt)
     {
         if (pos + cnt > size())
             throw ByteBufferPositionException(true, pos, cnt, size());
@@ -764,7 +764,7 @@ protected:
 };
 
 template <typename T>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
+inline ByteBuffer& operator<<(ByteBuffer& b, std::vector<T> v)
 {
     b << (uint32)v.size();
     for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); ++i)
@@ -775,7 +775,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 }
 
 template <typename T>
-inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
+inline ByteBuffer& operator>>(ByteBuffer& b, std::vector<T>& v)
 {
     uint32 vsize;
     b >> vsize;
@@ -790,7 +790,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 }
 
 template <typename T>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
+inline ByteBuffer& operator<<(ByteBuffer& b, std::list<T> v)
 {
     b << (uint32)v.size();
     for (typename std::list<T>::iterator i = v.begin(); i != v.end(); ++i)
@@ -801,7 +801,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 }
 
 template <typename T>
-inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
+inline ByteBuffer& operator>>(ByteBuffer& b, std::list<T>& v)
 {
     uint32 vsize;
     b >> vsize;
@@ -816,7 +816,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
 }
 
 template <typename K, typename V>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
+inline ByteBuffer& operator<<(ByteBuffer& b, std::map<K, V>& m)
 {
     b << (uint32)m.size();
     for (typename std::map<K, V>::iterator i = m.begin(); i != m.end(); ++i)
@@ -827,7 +827,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 }
 
 template <typename K, typename V>
-inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
+inline ByteBuffer& operator>>(ByteBuffer& b, std::map<K, V>& m)
 {
     uint32 msize;
     b >> msize;

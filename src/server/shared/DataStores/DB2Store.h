@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef DB2STORE_H
 #define DB2STORE_H
 
-#include "DB2FileLoader.h"
-#include "Common.h"
 #include "ByteBuffer.h"
+#include "Common.h"
+#include "DB2FileLoader.h"
 #include <vector>
 
 /// Interface class for common access
@@ -47,40 +47,40 @@ void WriteDB2RecordToPacket(DB2Storage<T> const& store, uint32 id, uint32 locale
     {
         switch (format[i])
         {
-            case FT_IND:
-            case FT_INT:
-                buffer << *(uint32*)entry;
-                entry += 4;
-                break;
-            case FT_FLOAT:
-                buffer << *(float*)entry;
-                entry += 4;
-                break;
-            case FT_BYTE:
-                buffer << *(uint8*)entry;
-                entry += 1;
-                break;
-            case FT_STRING:
-            {
-                LocalizedString* locStr = *(LocalizedString**)entry;
-                if (locStr->Str[locale][0] == '\0')
-                    locale = 0;
+        case FT_IND:
+        case FT_INT:
+            buffer << *(uint32*)entry;
+            entry += 4;
+            break;
+        case FT_FLOAT:
+            buffer << *(float*)entry;
+            entry += 4;
+            break;
+        case FT_BYTE:
+            buffer << *(uint8*)entry;
+            entry += 1;
+            break;
+        case FT_STRING:
+        {
+            LocalizedString* locStr = *(LocalizedString**)entry;
+            if (locStr->Str[locale][0] == '\0')
+                locale = 0;
 
-                char const* str = locStr->Str[locale];
-                size_t len = strlen(str);
-                buffer << uint16(len);
-                if (len)
-                    buffer << str;
-                entry += sizeof(char*);
-                break;
-            }
-            case FT_NA:
-            case FT_SORT:
-                buffer << uint32(0);
-                break;
-            case FT_NA_BYTE:
-                buffer << uint8(0);
-                break;
+            char const* str = locStr->Str[locale];
+            size_t len = strlen(str);
+            buffer << uint16(len);
+            if (len)
+                buffer << str;
+            entry += sizeof(char*);
+            break;
+        }
+        case FT_NA:
+        case FT_SORT:
+            buffer << uint32(0);
+            break;
+        case FT_NA_BYTE:
+            buffer << uint8(0);
+            break;
         }
     }
 }
@@ -121,7 +121,7 @@ public:
         if (id >= nCount)
         {
             // reallocate index table
-            char** tmpIdxTable = new char*[id + 1];
+            char** tmpIdxTable = new char* [id + 1];
             memset(tmpIdxTable, 0, (id + 1) * sizeof(char*));
             memcpy(tmpIdxTable, indexTable.asChar, nCount * sizeof(char*));
             delete[] reinterpret_cast<char*>(indexTable.asT);
@@ -189,7 +189,7 @@ public:
         m_dataTable = NULL;
 
         for (typename DataTableEx::iterator itr = m_dataTableEx.begin(); itr != m_dataTableEx.end(); ++itr)
-            delete *itr;
+            delete* itr;
         m_dataTableEx.clear();
 
         while (!m_stringPoolList.empty())

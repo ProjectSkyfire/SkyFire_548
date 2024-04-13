@@ -1,17 +1,17 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <string>
-#include <list>
-#include <ace/Singleton.h>
 #include <ace/Configuration_Import_Export.h>
+#include <ace/Singleton.h>
 #include <AutoPtr.h>
+#include <list>
 #include <mutex>
+#include <string>
 
 typedef Skyfire::AutoPtr<ACE_Configuration_Heap, ACE_Null_Mutex> Config;
 
@@ -46,7 +46,7 @@ public:
     std::list<std::string> GetKeysByString(std::string const& name);
 
 private:
-    bool GetValueHelper(const char* name, ACE_TString &result);
+    bool GetValueHelper(const char* name, ACE_TString& result);
     bool LoadData(char const* file);
 
     typedef std::mutex LockType;

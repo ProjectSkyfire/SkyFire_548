@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -17,7 +17,7 @@ namespace Skyfire
     namespace Containers
     {
         template<class T>
-        void RandomResizeList(std::list<T> &list, uint32 size)
+        void RandomResizeList(std::list<T>& list, uint32 size)
         {
             size_t list_size = list.size();
 
@@ -31,7 +31,7 @@ namespace Skyfire
         }
 
         template<class T, class Predicate>
-        void RandomResizeList(std::list<T> &list, Predicate& predicate, uint32 size)
+        void RandomResizeList(std::list<T>& list, Predicate& predicate, uint32 size)
         {
             //! First use predicate filter
             std::list<T> listCopy;

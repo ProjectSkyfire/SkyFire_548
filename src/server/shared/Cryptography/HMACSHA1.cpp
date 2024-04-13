@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "HMACSHA1.h"
 #include "BigNumber.h"
 #include "Common.h"
+#include "HMACSHA1.h"
 
 HmacHash::HmacHash(uint32 len, uint8* seed) : m_mac(EVP_MAC_fetch(NULL, "HMAC", NULL)), m_ctx(EVP_MAC_CTX_new(m_mac))
 {
@@ -20,7 +20,7 @@ HmacHash::~HmacHash()
     EVP_MAC_free(m_mac);
 }
 
-void HmacHash::UpdateData(const std::string &str)
+void HmacHash::UpdateData(const std::string& str)
 {
     EVP_MAC_update(m_ctx, (uint8 const*)str.c_str(), str.length());
 }
@@ -37,7 +37,7 @@ void HmacHash::Finalize()
     ASSERT(length == SHA_DIGEST_LENGTH);
 }
 
-uint8 *HmacHash::ComputeHash(BigNumber* bn)
+uint8* HmacHash::ComputeHash(BigNumber* bn)
 {
     EVP_MAC_update(m_ctx, bn->AsByteArray(), bn->GetNumBytes());
     Finalize();

@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef _SQLOPERATION_H
 #define _SQLOPERATION_H
 
-#include <ace/Method_Request.h>
 #include <ace/Activation_Queue.h>
+#include <ace/Method_Request.h>
 
 #include "QueryResult.h"
 
@@ -46,20 +46,20 @@ class MySQLConnection;
 
 class SQLOperation : public ACE_Method_Request
 {
-    public:
-        SQLOperation(): m_conn(NULL) { }
-        virtual int call()
-        {
-            Execute();
-            return 0;
-        }
-        virtual bool Execute() = 0;
-        virtual void SetConnection(MySQLConnection* con) { m_conn = con; }
+public:
+    SQLOperation() : m_conn(NULL) { }
+    virtual int call()
+    {
+        Execute();
+        return 0;
+    }
+    virtual bool Execute() = 0;
+    virtual void SetConnection(MySQLConnection* con) { m_conn = con; }
 
-        MySQLConnection* m_conn;
-    private:
-        SQLOperation(SQLOperation const& right) = delete;
-        SQLOperation & operator=(SQLOperation const& right) = delete;
+    MySQLConnection* m_conn;
+private:
+    SQLOperation(SQLOperation const& right) = delete;
+    SQLOperation& operator=(SQLOperation const& right) = delete;
 };
 
 #endif

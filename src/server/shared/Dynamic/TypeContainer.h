@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,17 +11,17 @@
  * types of object at the same time.
  */
 
-#include <map>
-#include <vector>
 #include "Define.h"
 #include "Dynamic/TypeList.h"
 #include "GridRefManager.h"
+#include <map>
+#include <vector>
 
-/*
- * @class ContainerMapList is a mulit-type container for map elements
- * By itself its meaningless but collaborate along with TypeContainers,
- * it become the most powerfully container in the whole system.
- */
+ /*
+  * @class ContainerMapList is a mulit-type container for map elements
+  * By itself its meaningless but collaborate along with TypeContainers,
+  * it become the most powerfully container in the whole system.
+  */
 template<class OBJECT> struct ContainerMapList
 {
     //std::map<OBJECT_HANDLE, OBJECT *> _element;
@@ -84,28 +84,28 @@ template<class H, class T> struct ContainerList<TypeList<H, T> >
 template<class OBJECT_TYPES>
 class TypeMapContainer
 {
-    public:
-        template<class SPECIFIC_TYPE> size_t Count() const { return Skyfire::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
+public:
+    template<class SPECIFIC_TYPE> size_t Count() const { return Skyfire::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
 
-        /// inserts a specific object into the container
-        template<class SPECIFIC_TYPE> bool insert(SPECIFIC_TYPE *obj)
-        {
-            SPECIFIC_TYPE* t = Skyfire::Insert(i_elements, obj);
-            return (t != NULL);
-        }
+    /// inserts a specific object into the container
+    template<class SPECIFIC_TYPE> bool insert(SPECIFIC_TYPE* obj)
+    {
+        SPECIFIC_TYPE* t = Skyfire::Insert(i_elements, obj);
+        return (t != NULL);
+    }
 
-        ///  Removes the object from the container, and returns the removed object
-        //template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj)
-        //{
-        //    SPECIFIC_TYPE* t = Skyfire::Remove(i_elements, obj);
-        //    return (t != NULL);
-        //}
+    ///  Removes the object from the container, and returns the removed object
+    //template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj)
+    //{
+    //    SPECIFIC_TYPE* t = Skyfire::Remove(i_elements, obj);
+    //    return (t != NULL);
+    //}
 
-        ContainerMapList<OBJECT_TYPES> & GetElements(void) { return i_elements; }
-        const ContainerMapList<OBJECT_TYPES> & GetElements(void) const { return i_elements;}
+    ContainerMapList<OBJECT_TYPES>& GetElements(void) { return i_elements; }
+    const ContainerMapList<OBJECT_TYPES>& GetElements(void) const { return i_elements; }
 
-    private:
-        ContainerMapList<OBJECT_TYPES> i_elements;
+private:
+    ContainerMapList<OBJECT_TYPES> i_elements;
 };
 #endif
 

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -52,7 +52,7 @@ void EventProcessor::KillAllEvents(bool force)
             delete i_old->second;
 
             if (!force)                                      // need per-element cleanup
-                m_events.erase (i_old);
+                m_events.erase(i_old);
         }
     }
 

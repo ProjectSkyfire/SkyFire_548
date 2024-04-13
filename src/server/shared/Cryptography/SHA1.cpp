@@ -1,10 +1,10 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "SHA1.h"
 #include "BigNumber.h"
+#include "SHA1.h"
 #include <stdarg.h>
 
 SHA1Hash::SHA1Hash() : m_ctx(EVP_MD_CTX_new())
@@ -17,12 +17,12 @@ SHA1Hash::~SHA1Hash()
     EVP_MD_CTX_free(m_ctx);
 }
 
-void SHA1Hash::UpdateData(const uint8 *dta, int len)
+void SHA1Hash::UpdateData(const uint8* dta, int len)
 {
     EVP_DigestUpdate(m_ctx, dta, len);
 }
 
-void SHA1Hash::UpdateData(const std::string &str)
+void SHA1Hash::UpdateData(const std::string& str)
 {
     UpdateData((uint8 const*)str.c_str(), str.length());
 }

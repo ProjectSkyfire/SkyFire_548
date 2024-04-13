@@ -1,19 +1,19 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SKYFIRESERVER_LOG_H
 #define SKYFIRESERVER_LOG_H
 
-#include "Define.h"
 #include "Appender.h"
+#include "Define.h"
+#include "Dynamic/UnorderedMap.h"
 #include "Logger.h"
 #include "LogWorker.h"
-#include "Dynamic/UnorderedMap.h"
 
-#include <string>
 #include <ace/Singleton.h>
+#include <string>
 
 #define LOGGER_ROOT "root"
 
@@ -23,44 +23,44 @@ class Log
 
     typedef UNORDERED_MAP<std::string, Logger> LoggerMap;
 
-    private:
-        Log();
-        ~Log();
+private:
+    Log();
+    ~Log();
 
-    public:
-        void LoadFromConfig();
-        void Close();
-        bool ShouldLog(std::string const& type, LogLevel level) const;
-        bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
+public:
+    void LoadFromConfig();
+    void Close();
+    bool ShouldLog(std::string const& type, LogLevel level) const;
+    bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
 
-        void outMessage(std::string const& f, LogLevel level, char const* str, ...) ATTR_PRINTF(4, 5);
+    void outMessage(std::string const& f, LogLevel level, char const* str, ...) ATTR_PRINTF(4, 5);
 
-        void outCommand(uint32 account, const char * str, ...) ATTR_PRINTF(3, 4);
-        void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
-        
-        void SetRealmId(uint32 id);
+    void outCommand(uint32 account, const char* str, ...) ATTR_PRINTF(3, 4);
+    void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
 
-    private:
-        static std::string GetTimestampStr();
-        void vlog(std::string const& f, LogLevel level, char const* str, va_list argptr);
-        void write(LogMessage* msg) const;
+    void SetRealmId(uint32 id);
 
-        Logger const* GetLoggerByType(std::string const& type) const;
-        Appender* GetAppenderByName(std::string const& name);
-        uint8 NextAppenderId();
-        void CreateAppenderFromConfig(std::string const& name);
-        void CreateLoggerFromConfig(std::string const& name);
-        void ReadAppendersFromConfig();
-        void ReadLoggersFromConfig();
+private:
+    static std::string GetTimestampStr();
+    void vlog(std::string const& f, LogLevel level, char const* str, va_list argptr);
+    void write(LogMessage* msg) const;
 
-        AppenderMap appenders;
-        LoggerMap loggers;
-        uint8 AppenderId;
+    Logger const* GetLoggerByType(std::string const& type) const;
+    Appender* GetAppenderByName(std::string const& name);
+    uint8 NextAppenderId();
+    void CreateAppenderFromConfig(std::string const& name);
+    void CreateLoggerFromConfig(std::string const& name);
+    void ReadAppendersFromConfig();
+    void ReadLoggersFromConfig();
 
-        std::string m_logsDir;
-        std::string m_logsTimestamp;
+    AppenderMap appenders;
+    LoggerMap loggers;
+    uint8 AppenderId;
 
-        LogWorker* worker;
+    std::string m_logsDir;
+    std::string m_logsTimestamp;
+
+    LogWorker* worker;
 };
 
 inline Logger const* Log::GetLoggerByType(std::string const& type) const
@@ -75,7 +75,7 @@ inline Logger const* Log::GetLoggerByType(std::string const& type) const
     std::string parentLogger = LOGGER_ROOT;
     size_t found = type.find_last_of(".");
     if (found != std::string::npos)
-        parentLogger = type.substr(0,found);
+        parentLogger = type.substr(0, found);
 
     return GetLoggerByType(parentLogger);
 }
@@ -94,7 +94,7 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
     return logLevel != LogLevel::LOG_LEVEL_DISABLED && logLevel <= level;
 }
 
-inline void Log::outMessage(std::string const& filter, LogLevel level, const char * str, ...)
+inline void Log::outMessage(std::string const& filter, LogLevel level, const char* str, ...)
 {
     va_list ap;
     va_start(ap, str);

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,7 +7,7 @@
 #include "Common.h"
 
 #ifdef _WIN32
-  #include <winsock2.h>
+#include <winsock2.h>
 #endif
 #include <mysql.h>
 #include <mysqld_error.h>
@@ -23,28 +23,28 @@
 #include "Log.h"
 
 MySQLConnection::MySQLConnection(MySQLConnectionInfo& connInfo) :
-m_reconnecting(false),
-m_prepareError(false),
-m_queue(NULL),
-m_worker(NULL),
-m_Mysql(NULL),
-m_connectionInfo(connInfo),
-m_connectionFlags(CONNECTION_SYNCH) { }
+    m_reconnecting(false),
+    m_prepareError(false),
+    m_queue(NULL),
+    m_worker(NULL),
+    m_Mysql(NULL),
+    m_connectionInfo(connInfo),
+    m_connectionFlags(CONNECTION_SYNCH) { }
 
 MySQLConnection::MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo) :
-m_reconnecting(false),
-m_prepareError(false),
-m_queue(queue),
-m_Mysql(NULL),
-m_connectionInfo(connInfo),
-m_connectionFlags(CONNECTION_ASYNC)
+    m_reconnecting(false),
+    m_prepareError(false),
+    m_queue(queue),
+    m_Mysql(NULL),
+    m_connectionInfo(connInfo),
+    m_connectionFlags(CONNECTION_ASYNC)
 {
     m_worker = new DatabaseWorker(m_queue, this);
 }
 
 MySQLConnection::~MySQLConnection()
 {
-    ASSERT (m_Mysql); /// MySQL context must be present at this point
+    ASSERT(m_Mysql); /// MySQL context must be present at this point
 
     for (size_t i = 0; i < m_stmts.size(); ++i)
         delete m_stmts[i];
@@ -60,7 +60,7 @@ void MySQLConnection::Close()
 
 bool MySQLConnection::Open()
 {
-    MYSQL *mysqlInit;
+    MYSQL* mysqlInit;
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
@@ -74,7 +74,7 @@ bool MySQLConnection::Open()
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
     //mysql_options(mysqlInit, MYSQL_OPT_READ_TIMEOUT, (char const*)&timeout);
-    #ifdef _WIN32
+#ifdef _WIN32
     if (m_connectionInfo.host == ".")                                           // named pipe use option (Windows)
     {
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
@@ -87,7 +87,7 @@ bool MySQLConnection::Open()
         port = atoi(m_connectionInfo.port_or_socket.c_str());
         unix_socket = 0;
     }
-    #else
+#else
     if (m_connectionInfo.host == ".")                                           // socket use option (Unix/Linux)
     {
         unsigned int opt = MYSQL_PROTOCOL_SOCKET;
@@ -101,7 +101,7 @@ bool MySQLConnection::Open()
         port = atoi(m_connectionInfo.port_or_socket.c_str());
         unix_socket = 0;
     }
-    #endif
+#endif
 
     m_Mysql = mysql_real_connect(mysqlInit, m_connectionInfo.host.c_str(), m_connectionInfo.user.c_str(),
         m_connectionInfo.password.c_str(), m_connectionInfo.database.c_str(), port, unix_socket, 0);
@@ -216,7 +216,7 @@ bool MySQLConnection::Execute(PreparedStatement* stmt)
     }
 }
 
-bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES **pResult, uint64* pRowCount, uint32* pFieldCount)
+bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES** pResult, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!m_Mysql)
         return false;
@@ -277,8 +277,8 @@ ResultSet* MySQLConnection::Query(const char* sql)
     if (!sql)
         return NULL;
 
-    MYSQL_RES *result = NULL;
-    MYSQL_FIELD *fields = NULL;
+    MYSQL_RES* result = NULL;
+    MYSQL_FIELD* fields = NULL;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
@@ -288,7 +288,7 @@ ResultSet* MySQLConnection::Query(const char* sql)
     return new ResultSet(result, fields, rowCount, fieldCount);
 }
 
-bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **pFields, uint64* pRowCount, uint32* pFieldCount)
+bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD** pFields, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!m_Mysql)
         return false;
@@ -315,7 +315,7 @@ bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD *
         *pFieldCount = mysql_field_count(m_Mysql);
     }
 
-    if (!*pResult )
+    if (!*pResult)
         return false;
 
     if (!*pRowCount)
@@ -358,30 +358,30 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
         SQLElementData const& data = *itr;
         switch (itr->type)
         {
-            case SQL_ELEMENT_PREPARED:
+        case SQL_ELEMENT_PREPARED:
+        {
+            PreparedStatement* stmt = data.element.stmt;
+            ASSERT(stmt);
+            if (!Execute(stmt))
             {
-                PreparedStatement* stmt = data.element.stmt;
-                ASSERT(stmt);
-                if (!Execute(stmt))
-                {
-                    SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
-                    RollbackTransaction();
-                    return false;
-                }
+                SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                RollbackTransaction();
+                return false;
             }
-            break;
-            case SQL_ELEMENT_RAW:
+        }
+        break;
+        case SQL_ELEMENT_RAW:
+        {
+            const char* sql = data.element.query;
+            ASSERT(sql);
+            if (!Execute(sql))
             {
-                const char* sql = data.element.query;
-                ASSERT(sql);
-                if (!Execute(sql))
-                {
-                    SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
-                    RollbackTransaction();
-                    return false;
-                }
+                SF_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                RollbackTransaction();
+                return false;
             }
-            break;
+        }
+        break;
         }
     }
 
@@ -448,7 +448,7 @@ void MySQLConnection::PrepareStatement(uint32 index, std::string sql, Connection
 
 PreparedResultSet* MySQLConnection::Query(PreparedStatement* stmt)
 {
-    MYSQL_RES *result = NULL;
+    MYSQL_RES* result = NULL;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
@@ -466,52 +466,52 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
 {
     switch (errNo)
     {
-        case CR_SERVER_GONE_ERROR:
-        case CR_SERVER_LOST:
-        case CR_INVALID_CONN_HANDLE:
-        case CR_SERVER_LOST_EXTENDED:
+    case CR_SERVER_GONE_ERROR:
+    case CR_SERVER_LOST:
+    case CR_INVALID_CONN_HANDLE:
+    case CR_SERVER_LOST_EXTENDED:
+    {
+        m_reconnecting = true;
+        uint64 oldThreadId = mysql_thread_id(GetHandle());
+        mysql_close(GetHandle());
+        if (this->Open())                           // Don't remove 'this' pointer unless you want to skip loading all prepared statements....
         {
-            m_reconnecting = true;
-            uint64 oldThreadId = mysql_thread_id(GetHandle());
-            mysql_close(GetHandle());
-            if (this->Open())                           // Don't remove 'this' pointer unless you want to skip loading all prepared statements....
-            {
-                SF_LOG_INFO("sql.sql", "Connection to the MySQL server is active.");
-                if (oldThreadId != mysql_thread_id(GetHandle()))
-                    SF_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).",
-                        m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
-                            (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+            SF_LOG_INFO("sql.sql", "Connection to the MySQL server is active.");
+            if (oldThreadId != mysql_thread_id(GetHandle()))
+                SF_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).",
+                    m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
+                    (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
-                m_reconnecting = false;
-                return true;
-            }
-
-            uint32 lErrno = mysql_errno(GetHandle());   // It's possible this attempted reconnect throws 2006 at us. To prevent crazy recursive calls, sleep here.
-            ACE_OS::sleep(3);                           // Sleep 3 seconds
-            return _HandleMySQLErrno(lErrno);           // Call self (recursive)
+            m_reconnecting = false;
+            return true;
         }
 
-        case ER_LOCK_DEADLOCK:
-            return false;    // Implemented in TransactionTask::Execute and DatabaseWorkerPool<T>::DirectCommitTransaction
+        uint32 lErrno = mysql_errno(GetHandle());   // It's possible this attempted reconnect throws 2006 at us. To prevent crazy recursive calls, sleep here.
+        ACE_OS::sleep(3);                           // Sleep 3 seconds
+        return _HandleMySQLErrno(lErrno);           // Call self (recursive)
+    }
+
+    case ER_LOCK_DEADLOCK:
+        return false;    // Implemented in TransactionTask::Execute and DatabaseWorkerPool<T>::DirectCommitTransaction
         // Query related errors - skip query
-        case ER_WRONG_VALUE_COUNT:
-        case ER_DUP_ENTRY:
-            return false;
+    case ER_WRONG_VALUE_COUNT:
+    case ER_DUP_ENTRY:
+        return false;
 
         // Outdated table or database structure - terminate core
-        case ER_BAD_FIELD_ERROR:
-        case ER_NO_SUCH_TABLE:
-            SF_LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
-            ACE_OS::sleep(10);
-            std::abort();
-            return false;
-        case ER_PARSE_ERROR:
-            SF_LOG_ERROR("sql.sql", "Error while parsing SQL. Core fix required.");
-            ACE_OS::sleep(10);
-            std::abort();
-            return false;
-        default:
-            SF_LOG_ERROR("sql.sql", "Unhandled MySQL errno %u. Unexpected behaviour possible.", errNo);
-            return false;
+    case ER_BAD_FIELD_ERROR:
+    case ER_NO_SUCH_TABLE:
+        SF_LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
+        ACE_OS::sleep(10);
+        std::abort();
+        return false;
+    case ER_PARSE_ERROR:
+        SF_LOG_ERROR("sql.sql", "Error while parsing SQL. Core fix required.");
+        ACE_OS::sleep(10);
+        std::abort();
+        return false;
+    default:
+        SF_LOG_ERROR("sql.sql", "Unhandled MySQL errno %u. Unexpected behaviour possible.", errNo);
+        return false;
     }
 }

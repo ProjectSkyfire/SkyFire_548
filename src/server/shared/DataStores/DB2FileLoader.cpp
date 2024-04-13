@@ -1,20 +1,20 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
 
+#include "DB2FileLoader.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "DB2FileLoader.h"
 
-bool DB2FileLoader::Load(const char *filename, const char *fmt)
+bool DB2FileLoader::Load(const char* filename, const char* fmt)
 {
     if (data)
     {
-        delete [] data;
+        delete[] data;
         data = NULL;
     }
 
@@ -142,8 +142,8 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
             fieldsOffset[i] += 4;
     }
 
-    data = new unsigned char[recordSize*recordCount+stringSize];
-    stringTable = data + recordSize*recordCount;
+    data = new unsigned char[recordSize * recordCount + stringSize];
+    stringTable = data + recordSize * recordCount;
 
     if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
     {
@@ -158,42 +158,42 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 DB2FileLoader::~DB2FileLoader()
 {
     if (data)
-        delete [] data;
+        delete[] data;
     if (fieldsOffset)
-        delete [] fieldsOffset;
+        delete[] fieldsOffset;
 }
 
 DB2FileLoader::Record DB2FileLoader::getRecord(size_t id)
 {
     assert(data);
-    return Record(*this, data + id*recordSize);
+    return Record(*this, data + id * recordSize);
 }
 
 uint32 DB2FileLoader::GetFormatRecordSize(std::string format, int32* index_pos)
 {
     uint32 recordsize = 0;
     int32 i = -1;
-    for (uint32 x=0; format[x]; ++x)
+    for (uint32 x = 0; format[x]; ++x)
     {
         switch (format[x])
         {
-            case FT_FLOAT:
-            case FT_INT:
-                recordsize += 4;
-                break;
-            case FT_STRING:
-                recordsize += sizeof(char*);
-                break;
-            case FT_SORT:
-                i = x;
-                break;
-            case FT_IND:
-                i = x;
-                recordsize += 4;
-                break;
-            case FT_BYTE:
-                recordsize += 1;
-                break;
+        case FT_FLOAT:
+        case FT_INT:
+            recordsize += 4;
+            break;
+        case FT_STRING:
+            recordsize += sizeof(char*);
+            break;
+        case FT_SORT:
+            i = x;
+            break;
+        case FT_IND:
+            i = x;
+            recordsize += 4;
+            break;
+        case FT_BYTE:
+            recordsize += 1;
+            break;
         }
     }
 
@@ -206,7 +206,7 @@ uint32 DB2FileLoader::GetFormatRecordSize(std::string format, int32* index_pos)
 uint32 DB2FileLoader::GetFormatStringsFields(std::string format)
 {
     uint32 stringfields = 0;
-    for (uint32 x=0; format[x]; ++x)
+    for (uint32 x = 0; format[x]; ++x)
         if (format[x] == FT_STRING)
             ++stringfields;
 
@@ -215,13 +215,13 @@ uint32 DB2FileLoader::GetFormatStringsFields(std::string format)
 
 char* DB2FileLoader::AutoProduceData(std::string format, uint32& records, char**& indexTable)
 {
-    typedef char * ptr;
+    typedef char* ptr;
     if (format.length() != fieldCount)
         return NULL;
 
     //get struct size and index pos
     int32 i;
-    uint32 recordsize=GetFormatRecordSize(format, &i);
+    uint32 recordsize = GetFormatRecordSize(format, &i);
 
     if (i >= 0)
     {
@@ -229,8 +229,8 @@ char* DB2FileLoader::AutoProduceData(std::string format, uint32& records, char**
         //find max index
         for (uint32 y = 0; y < recordCount; y++)
         {
-            uint32 ind=getRecord(y).getUInt(i);
-            if (ind>maxi)
+            uint32 ind = getRecord(y).getUInt(i);
+            if (ind > maxi)
                 maxi = ind;
         }
 
@@ -247,11 +247,11 @@ char* DB2FileLoader::AutoProduceData(std::string format, uint32& records, char**
 
     char* dataTable = new char[recordCount * recordsize];
 
-    uint32 offset=0;
+    uint32 offset = 0;
 
-    for (uint32 y =0; y < recordCount; y++)
+    for (uint32 y = 0; y < recordCount; y++)
     {
-        if (i>=0)
+        if (i >= 0)
         {
             indexTable[getRecord(y).getUInt(i)] = &dataTable[offset];
         }
@@ -262,23 +262,23 @@ char* DB2FileLoader::AutoProduceData(std::string format, uint32& records, char**
         {
             switch (format[x])
             {
-                case FT_FLOAT:
-                    *((float*)(&dataTable[offset])) = getRecord(y).getFloat(x);
-                    offset += 4;
-                    break;
-                case FT_IND:
-                case FT_INT:
-                    *((uint32*)(&dataTable[offset])) = getRecord(y).getUInt(x);
-                    offset += 4;
-                    break;
-                case FT_BYTE:
-                    *((uint8*)(&dataTable[offset])) = getRecord(y).getUInt8(x);
-                    offset += 1;
-                    break;
-                case FT_STRING:
-                    *((char**)(&dataTable[offset])) = NULL;   // will be replaces non-empty or "" strings in AutoProduceStrings
-                    offset += sizeof(char*);
-                    break;
+            case FT_FLOAT:
+                *((float*)(&dataTable[offset])) = getRecord(y).getFloat(x);
+                offset += 4;
+                break;
+            case FT_IND:
+            case FT_INT:
+                *((uint32*)(&dataTable[offset])) = getRecord(y).getUInt(x);
+                offset += 4;
+                break;
+            case FT_BYTE:
+                *((uint8*)(&dataTable[offset])) = getRecord(y).getUInt8(x);
+                offset += 1;
+                break;
+            case FT_STRING:
+                *((char**)(&dataTable[offset])) = NULL;   // will be replaces non-empty or "" strings in AutoProduceStrings
+                offset += sizeof(char*);
+                break;
             }
         }
     }
@@ -306,7 +306,7 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(std::string format, char* da
     for (size_t i = 0; i < stringHoldersPoolSize / sizeof(char*); ++i)
         ((char const**)stringHoldersPool)[i] = nullStr;
 
-    uint32 offset=0;
+    uint32 offset = 0;
 
     // assign string holders to string field slots
     for (uint32 y = 0; y < recordCount; y++)
@@ -316,30 +316,30 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(std::string format, char* da
         for (uint32 x = 0; x < fieldCount; x++)
             switch (format[x])
             {
-                case FT_FLOAT:
-                case FT_IND:
-                case FT_INT:
-                    offset += 4;
-                    break;
-                case FT_BYTE:
-                    offset += 1;
-                    break;
-                case FT_STRING:
-                {
-                    // init db2 string field slots by pointers to string holders
-                    char const*** slot = (char const***)(&dataTable[offset]);
-                    *slot = (char const**)(&stringHoldersPool[stringHoldersRecordPoolSize * y + stringHolderSize*stringFieldNum]);
-                    ++stringFieldNum;
-                    offset += sizeof(char*);
-                    break;
-                }
-                case FT_NA:
-                case FT_NA_BYTE:
-                case FT_SORT:
-                    break;
-                default:
-                    assert(false && "unknown format character");
-        }
+            case FT_FLOAT:
+            case FT_IND:
+            case FT_INT:
+                offset += 4;
+                break;
+            case FT_BYTE:
+                offset += 1;
+                break;
+            case FT_STRING:
+            {
+                // init db2 string field slots by pointers to string holders
+                char const*** slot = (char const***)(&dataTable[offset]);
+                *slot = (char const**)(&stringHoldersPool[stringHoldersRecordPoolSize * y + stringHolderSize * stringFieldNum]);
+                ++stringFieldNum;
+                offset += sizeof(char*);
+                break;
+            }
+            case FT_NA:
+            case FT_NA_BYTE:
+            case FT_SORT:
+                break;
+            default:
+                assert(false && "unknown format character");
+            }
     }
 
     //send as char* for store in char* pool list for free at unload
@@ -351,37 +351,37 @@ char* DB2FileLoader::AutoProduceStrings(std::string format, char* dataTable, uin
     if (format.length() != fieldCount)
         return NULL;
 
-    char* stringPool= new char[stringSize];
+    char* stringPool = new char[stringSize];
     memcpy(stringPool, stringTable, stringSize);
 
     uint32 offset = 0;
 
-    for (uint32 y =0; y < recordCount; y++)
+    for (uint32 y = 0; y < recordCount; y++)
     {
         for (uint32 x = 0; x < fieldCount; x++)
             switch (format[x])
             {
-                case FT_FLOAT:
-                case FT_IND:
-                case FT_INT:
-                    offset += 4;
-                    break;
-                case FT_BYTE:
-                    offset += 1;
-                    break;
-                case FT_STRING:
+            case FT_FLOAT:
+            case FT_IND:
+            case FT_INT:
+                offset += 4;
+                break;
+            case FT_BYTE:
+                offset += 1;
+                break;
+            case FT_STRING:
+            {
+                // fill only not filled entries
+                LocalizedString* db2str = *(LocalizedString**)(&dataTable[offset]);
+                if (db2str->Str[locale] == nullStr)
                 {
-                    // fill only not filled entries
-                    LocalizedString* db2str = *(LocalizedString**)(&dataTable[offset]);
-                    if (db2str->Str[locale] == nullStr)
-                    {
-                        const char * st = getRecord(y).getString(x);
-                        db2str->Str[locale] = stringPool + (st - (const char*)stringTable);
-                    }
-
-                    offset += sizeof(char*);
-                    break;
+                    const char* st = getRecord(y).getString(x);
+                    db2str->Str[locale] = stringPool + (st - (const char*)stringTable);
                 }
+
+                offset += sizeof(char*);
+                break;
+            }
             }
     }
 

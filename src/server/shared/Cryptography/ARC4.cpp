@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "ARC4.h"
-#include <openssl/sha.h>
 #include <openssl/provider.h>
+#include <openssl/sha.h>
 
 ARC4::ARC4() : m_ctx(EVP_CIPHER_CTX_new())
 {
@@ -26,7 +26,7 @@ void ARC4::Init(uint8* seed, size_t len)
     EVP_CipherInit_ex2(m_ctx, NULL, seed, NULL, 0, m_params);
 }
 
-void ARC4::UpdateData(int len, uint8 *data)
+void ARC4::UpdateData(int len, uint8* data)
 {
     int outlen = 0;
     EVP_CipherUpdate(m_ctx, data, &outlen, data, len);

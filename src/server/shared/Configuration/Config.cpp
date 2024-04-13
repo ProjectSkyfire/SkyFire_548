@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,7 +7,7 @@
 #include "Errors.h"
 
 // Defined here as it must not be exposed to end-users.
-bool ConfigMgr::GetValueHelper(const char* name, ACE_TString &result)
+bool ConfigMgr::GetValueHelper(const char* name, ACE_TString& result)
 {
     GuardType guard(_configLock);
 
@@ -16,7 +16,7 @@ bool ConfigMgr::GetValueHelper(const char* name, ACE_TString &result)
 
     ACE_TString section_name;
     ACE_Configuration_Section_Key section_key;
-    const ACE_Configuration_Section_Key &root_key = _config->root_section();
+    const ACE_Configuration_Section_Key& root_key = _config->root_section();
 
     int i = 0;
     while (_config->enumerate_sections(root_key, i, section_name) == 0)
@@ -70,7 +70,7 @@ bool ConfigMgr::LoadData(char const* file)
     return false;
 }
 
-std::string ConfigMgr::GetStringDefault(const char* name, const std::string &def)
+std::string ConfigMgr::GetStringDefault(const char* name, const std::string& def)
 {
     ACE_TString val;
     return GetValueHelper(name, val) ? val.c_str() : def;
@@ -115,7 +115,7 @@ std::list<std::string> ConfigMgr::GetKeysByString(std::string const& name)
 
     ACE_TString section_name;
     ACE_Configuration_Section_Key section_key;
-    const ACE_Configuration_Section_Key &root_key = _config->root_section();
+    const ACE_Configuration_Section_Key& root_key = _config->root_section();
 
     int i = 0;
     while (_config->enumerate_sections(root_key, i++, section_name) == 0)

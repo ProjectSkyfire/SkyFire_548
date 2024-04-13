@@ -1,10 +1,10 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "MD5.h"
 #include "Common.h"
+#include "MD5.h"
 
 MD5Hash::MD5Hash() : m_ctx(EVP_MD_CTX_new())
 {
@@ -16,7 +16,7 @@ MD5Hash::~MD5Hash()
     EVP_MD_CTX_free(m_ctx);
 }
 
-void MD5Hash::UpdateData(const std::string &str)
+void MD5Hash::UpdateData(const std::string& str)
 {
     EVP_DigestUpdate(m_ctx, (uint8 const*)str.c_str(), str.length());
 }
