@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,13 +11,13 @@ Category: commandscripts
 EndScriptData */
 
 #include "Chat.h"
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
 #include "Language.h"
-#include "SpellMgr.h"
-#include "SpellInfo.h"
-#include "Player.h"
+#include "ObjectMgr.h"
 #include "Pet.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
 
 class learn_commandscript : public CommandScript
 {
@@ -258,7 +258,7 @@ public:
             if (((1 << petFamily->petTalentType) & talentTabInfo->petTalentMask) == 0)
                 continue;*/
 
-            // search highest talent rank
+                // search highest talent rank
             uint32 spellId = 0;
 
             if (!spellId)                                        // ??? none spells in talent

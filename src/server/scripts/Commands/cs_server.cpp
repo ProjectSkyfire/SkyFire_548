@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -72,7 +72,7 @@ public:
             { "uptime",       rbac::RBAC_PERM_COMMAND_SERVER_UPTIME,       true, &HandleServerUptimeCommand,  "", },
         };
 
-         static std::vector<ChatCommand> commandTable =
+        static std::vector<ChatCommand> commandTable =
         {
             { "server", rbac::RBAC_PERM_COMMAND_SERVER, true, NULL, "", serverCommandTable },
         };
@@ -88,14 +88,14 @@ public:
 
     static bool HandleServerInfoCommand(ChatHandler* handler, char const* /*args*/)
     {
-        uint32 playersNum           = sWorld->GetPlayerCount();
-        uint32 maxPlayersNum        = sWorld->GetMaxPlayerCount();
-        uint32 activeClientsNum     = sWorld->GetActiveSessionCount();
-        uint32 queuedClientsNum     = sWorld->GetQueuedSessionCount();
-        uint32 maxActiveClientsNum  = sWorld->GetMaxActiveSessionCount();
-        uint32 maxQueuedClientsNum  = sWorld->GetMaxQueuedSessionCount();
-        std::string uptime          = secsToTimeString(sWorld->GetUptime());
-        uint32 updateTime           = sWorld->GetUpdateTime();
+        uint32 playersNum = sWorld->GetPlayerCount();
+        uint32 maxPlayersNum = sWorld->GetMaxPlayerCount();
+        uint32 activeClientsNum = sWorld->GetActiveSessionCount();
+        uint32 queuedClientsNum = sWorld->GetQueuedSessionCount();
+        uint32 maxActiveClientsNum = sWorld->GetMaxActiveSessionCount();
+        uint32 maxQueuedClientsNum = sWorld->GetMaxQueuedSessionCount();
+        std::string uptime = secsToTimeString(sWorld->GetUptime());
+        uint32 updateTime = sWorld->GetUpdateTime();
 
         handler->SendSysMessage(_FULLVERSION);
         handler->PSendSysMessage(LANG_CONNECTED_PLAYERS, playersNum, maxPlayersNum);
@@ -195,7 +195,7 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
+        char* timeStr = strtok((char*)args, " ");
         char* exitCodeStr = strtok(NULL, "");
 
         int32 time = atoi(timeStr);
@@ -231,7 +231,7 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
+        char* timeStr = strtok((char*)args, " ");
         char* exitCodeStr = strtok(NULL, "");
 
         int32 time = atoi(timeStr);
@@ -259,7 +259,7 @@ public:
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART, RESTART_EXIT_CODE);
 
-            return true;
+        return true;
     }
 
     static bool HandleServerIdleRestartCommand(ChatHandler* /*handler*/, char const* args)
@@ -267,7 +267,7 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
+        char* timeStr = strtok((char*)args, " ");
         char* exitCodeStr = strtok(NULL, "");
 
         int32 time = atoi(timeStr);
@@ -302,7 +302,7 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
+        char* timeStr = strtok((char*)args, " ");
         char* exitCodeStr = strtok(NULL, "");
 
         int32 time = atoi(timeStr);

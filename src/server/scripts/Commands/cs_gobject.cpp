@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,15 +10,15 @@ Comment: All gobject related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "GameEventMgr.h"
-#include "ObjectMgr.h"
-#include "PoolMgr.h"
-#include "MapManager.h"
 #include "Chat.h"
+#include "GameEventMgr.h"
 #include "Language.h"
-#include "Player.h"
+#include "MapManager.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
+#include "Player.h"
+#include "PoolMgr.h"
+#include "ScriptMgr.h"
 
 class gobject_commandscript : public CommandScript
 {
@@ -191,8 +191,8 @@ public:
         float z = player->GetPositionZ();
         float ang = player->GetOrientation();
 
-        float rot2 = std::sin(ang/2);
-        float rot3 = std::cos(ang/2);
+        float rot2 = std::sin(ang / 2);
+        float rot3 = std::cos(ang / 2);
 
         uint32 objectId = atoi(id);
 
@@ -218,14 +218,14 @@ public:
 
             if (objectId)
                 result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, orientation, map, phaseId, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE map = '%i' AND id = '%u' ORDER BY order_ ASC LIMIT 1",
-                player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), objectId);
+                    player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), objectId);
             else
             {
                 std::string name = id;
                 WorldDatabase.EscapeString(name);
                 result = WorldDatabase.PQuery(
                     "SELECT guid, id, position_x, position_y, position_z, orientation, map, phaseId, (POW(position_x - %f, 2) + POW(position_y - %f, 2) + POW(position_z - %f, 2)) AS order_ "
-                    "FROM gameobject, gameobject_template WHERE gameobject_template.entry = gameobject.id AND map = %i AND name " _LIKE_ " " _CONCAT3_ ("'%%'", "'%s'", "'%%'")" ORDER BY order_ ASC LIMIT 1",
+                    "FROM gameobject, gameobject_template WHERE gameobject_template.entry = gameobject.id AND map = %i AND name " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")" ORDER BY order_ ASC LIMIT 1",
                     player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), name.c_str());
             }
         }
@@ -239,7 +239,7 @@ public:
             {
                 if (initString)
                 {
-                    eventFilter  <<  "OR eventEntry IN (" << *itr;
+                    eventFilter << "OR eventEntry IN (" << *itr;
                     initString = false;
                 }
                 else
@@ -274,14 +274,14 @@ public:
         {
             Field* fields = result->Fetch();
             guidLow = fields[0].GetUInt32();
-            id =      fields[1].GetUInt32();
-            x =       fields[2].GetFloat();
-            y =       fields[3].GetFloat();
-            z =       fields[4].GetFloat();
-            o =       fields[5].GetFloat();
-            mapId =   fields[6].GetUInt16();
-            phase =   fields[7].GetUInt32();
-            poolId =  sPoolMgr->IsPartOfAPool<GameObject>(guidLow);
+            id = fields[1].GetUInt32();
+            x = fields[2].GetFloat();
+            y = fields[3].GetFloat();
+            z = fields[4].GetFloat();
+            o = fields[5].GetFloat();
+            mapId = fields[6].GetUInt16();
+            phase = fields[7].GetUInt32();
+            poolId = sPoolMgr->IsPartOfAPool<GameObject>(guidLow);
             if (!poolId || sPoolMgr->IsSpawnedObject<GameObject>(guidLow))
                 found = true;
         } while (result->NextRow() && !found);
@@ -505,7 +505,7 @@ public:
             return false;
         }
 
-        char* phase = strtok (NULL, " ");
+        char* phase = strtok(NULL, " ");
         uint32 phaseMask = phase ? atoi(phase) : 0;
         if (phaseMask == 0)
         {
@@ -579,8 +579,9 @@ public:
                 entry = object->GetEntry();
             else
                 entry = atoi((char*)args);
-        } else
-                entry = atoi((char*)args);
+        }
+        else
+            entry = atoi((char*)args);
 
         GameObjectTemplate const* gameObjectInfo = sObjectMgr->GetGameObjectTemplate(entry);
 
@@ -651,7 +652,7 @@ public:
             object->SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, objectType, objectState);
         else if (objectType == 4)
         {
-            WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8+4);
+            WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8 + 4);
             data << object->GetGUID();
             data << (uint32)(objectState);
             object->SendMessageToSet(&data, true);

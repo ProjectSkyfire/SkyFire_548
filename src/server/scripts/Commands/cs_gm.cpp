@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,14 +10,14 @@ Comment: All gm related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
-#include "Chat.h"
 #include "AccountMgr.h"
+#include "Chat.h"
 #include "Language.h"
-#include "World.h"
-#include "Player.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "World.h"
 
 class gm_commandscript : public CommandScript
 {
@@ -83,7 +83,7 @@ public:
         if (!*args)
             return false;
 
-        Player* target =  handler->getSelectedPlayer();
+        Player* target = handler->getSelectedPlayer();
         if (!target)
             target = handler->GetSession()->GetPlayer();
 
@@ -114,7 +114,7 @@ public:
             AccountTypes itrSec = itr->second->GetSession()->GetSecurity();
             if ((itr->second->IsGameMaster() ||
                 (itr->second->GetSession()->HasPermission(rbac::RBAC_PERM_COMMANDS_APPEAR_IN_GM_LIST) &&
-                 itrSec <= AccountTypes(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_GM_LIST)))) &&
+                    itrSec <= AccountTypes(sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_GM_LIST)))) &&
                 (!handler->GetSession() || itr->second->IsVisibleGloballyFor(handler->GetSession()->GetPlayer())))
             {
                 if (first)

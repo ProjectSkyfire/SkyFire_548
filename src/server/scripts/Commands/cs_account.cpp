@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -247,8 +247,7 @@ public:
             }
             else
                 handler->PSendSysMessage(LANG_ACCOUNT_LIST_ERROR, name.c_str());
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         handler->SendSysMessage(LANG_ACCOUNT_LIST_BAR);
         return true;
@@ -518,10 +517,10 @@ public:
         bool hasRBAC = (handler->HasPermission(rbac::RBAC_PERM_EMAIL_CONFIRM_FOR_PASS_CHANGE) ? true : false);
         uint32 pwConfig = sWorld->getIntConfig(WorldIntConfigs::CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
-        handler->PSendSysMessage(LANG_ACCOUNT_SEC_TYPE, (pwConfig == PW_NONE  ? "Lowest level: No Email input required." :
-                                                         pwConfig == PW_EMAIL ? "Highest level: Email input required." :
-                                                         pwConfig == PW_RBAC  ? "Special level: Your account may require email input depending on settings. That is the case if another lien is printed." :
-                                                                                "Unknown security level: Notify technician for details."));
+        handler->PSendSysMessage(LANG_ACCOUNT_SEC_TYPE, (pwConfig == PW_NONE ? "Lowest level: No Email input required." :
+            pwConfig == PW_EMAIL ? "Highest level: Email input required." :
+            pwConfig == PW_RBAC ? "Special level: Your account may require email input depending on settings. That is the case if another lien is printed." :
+            "Unknown security level: Notify technician for details."));
 
         // RBAC required display - is not displayed for console
         if (pwConfig == PW_RBAC && handler->GetSession() && hasRBAC)

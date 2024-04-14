@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -72,7 +72,7 @@ public:
             return false;
 
         // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-        char* id =  handler->extractKeyFromLink((char*)args, "Hgameevent");
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameevent");
         if (!id)
             return false;
 
@@ -121,7 +121,7 @@ public:
             return false;
 
         // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-        char* id =  handler->extractKeyFromLink((char*)args, "Hgameevent");
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameevent");
         if (!id)
             return false;
 
@@ -162,7 +162,7 @@ public:
             return false;
 
         // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-        char* id =  handler->extractKeyFromLink((char*)args, "Hgameevent");
+        char* id = handler->extractKeyFromLink((char*)args, "Hgameevent");
         if (!id)
             return false;
 

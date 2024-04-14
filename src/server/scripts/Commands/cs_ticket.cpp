@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -16,8 +16,8 @@ EndScriptData */
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "TicketMgr.h"
 #include "ScriptMgr.h"
+#include "TicketMgr.h"
 
 class ticket_commandscript : public CommandScript
 {
@@ -412,7 +412,7 @@ public:
         // Assign ticket
         SQLTransaction trans = SQLTransaction(NULL);
         ticket->SetAssignedTo(targetGuid, AccountMgr::IsAdminAccount(AccountMgr::GetSecurity(accountId, realmID)));
-         sTicketMgr->UpdateLastChange();
+        sTicketMgr->UpdateLastChange();
 
         ticket->SaveToDB(trans);
 

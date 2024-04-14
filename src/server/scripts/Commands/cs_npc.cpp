@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,16 +10,16 @@ Comment: All npc related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
 #include "Chat.h"
-#include "Transport.h"
+#include "CreatureAI.h"
 #include "CreatureGroups.h"
 #include "Language.h"
-#include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
-#include "CreatureAI.h"
-#include "Player.h"
+#include "ObjectMgr.h"
 #include "Pet.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
+#include "Transport.h"
 
 template<typename E, typename T = char const*>
 struct EnumName
@@ -223,7 +223,7 @@ public:
         if (teamval < 0)
             teamval = 0;
 
-        uint32 id  = atoi(charID);
+        uint32 id = atoi(charID);
         if (!sObjectMgr->GetCreatureTemplate(id))
             return false;
 
@@ -285,7 +285,7 @@ public:
 
         const uint8 type = 1; // FIXME: make type (1 item, 2 currency) an argument
 
-        char* pitem  = handler->extractKeyFromLink((char*)args, "Hitem");
+        char* pitem = handler->extractKeyFromLink((char*)args, "Hitem");
         if (!pitem)
         {
             handler->SendSysMessage(LANG_COMMAND_NEEDITEMSEND);
@@ -445,7 +445,7 @@ public:
         if (!*args)
             return false;
 
-        uint8 lvl = (uint8) atoi((char*)args);
+        uint8 lvl = (uint8)atoi((char*)args);
         if (lvl < 1 || lvl > sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL) + 3)
         {
             handler->SendSysMessage(LANG_BAD_VALUE);
@@ -465,15 +465,15 @@ public:
         {
             if (((Pet*)creature)->getPetType() == PetType::HUNTER_PET)
             {
-                creature->SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, sObjectMgr->GetXPForLevel(lvl)/4);
+                creature->SetUInt32Value(UNIT_FIELD_PET_NEXT_LEVEL_EXPERIENCE, sObjectMgr->GetXPForLevel(lvl) / 4);
                 creature->SetUInt32Value(UNIT_FIELD_PET_EXPERIENCE, 0);
             }
             ((Pet*)creature)->GivePetLevel(lvl);
         }
         else
         {
-            creature->SetMaxHealth(100 + 30*lvl);
-            creature->SetHealth(100 + 30*lvl);
+            creature->SetMaxHealth(100 + 30 * lvl);
+            creature->SetHealth(100 + 30 * lvl);
             creature->SetLevel(lvl);
             creature->SaveToDB();
         }
@@ -533,7 +533,7 @@ public:
             return false;
         }
 
-        char* pitem  = handler->extractKeyFromLink((char*)args, "Hitem");
+        char* pitem = handler->extractKeyFromLink((char*)args, "Hitem");
         if (!pitem)
         {
             handler->SendSysMessage(LANG_COMMAND_NEEDITEMSEND);
@@ -563,7 +563,7 @@ public:
         if (!*args)
             return false;
 
-        uint32 factionId = (uint32) atoi((char*)args);
+        uint32 factionId = (uint32)atoi((char*)args);
 
         if (!sFactionTemplateStore.LookupEntry(factionId))
         {
@@ -610,7 +610,7 @@ public:
         if (!*args)
             return false;
 
-        uint32 npcFlags = (uint32) atoi((char*)args);
+        uint32 npcFlags = (uint32)atoi((char*)args);
 
         Creature* creature = handler->getSelectedCreature();
 
@@ -708,13 +708,13 @@ public:
         uint32 nativeid = target->GetNativeDisplayId();
         uint32 Entry = target->GetEntry();
 
-        int64 curRespawnDelay = target->GetRespawnTimeEx()-time(NULL);
+        int64 curRespawnDelay = target->GetRespawnTimeEx() - time(NULL);
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
         std::string curRespawnDelayStr = secsToTimeString(uint64(curRespawnDelay), true);
         std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
 
-        handler->PSendSysMessage(LANG_NPCINFO_CHAR,  target->GetDBTableGUIDLow(), target->GetGUIDLow(), faction, npcflags, Entry, displayid, nativeid);
+        handler->PSendSysMessage(LANG_NPCINFO_CHAR, target->GetDBTableGUIDLow(), target->GetGUIDLow(), faction, npcflags, Entry, displayid, nativeid);
         handler->PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
         handler->PSendSysMessage(LANG_NPCINFO_EQUIPMENT, target->GetCurrentEquipmentId(), target->GetOriginalEquipmentId());
         handler->PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
@@ -727,7 +727,7 @@ public:
         handler->PSendSysMessage(LANG_NPCINFO_FLAGS2, target->GetUInt32Value(UNIT_FIELD_FLAGS2), target->GetUInt32Value(OBJECT_FIELD_DYNAMIC_FLAGS), target->getFaction());
 
         handler->PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
-        handler->PSendSysMessage(LANG_NPCINFO_LOOT,  cInfo->lootid, cInfo->pickpocketLootId, cInfo->SkinLootId);
+        handler->PSendSysMessage(LANG_NPCINFO_LOOT, cInfo->lootid, cInfo->pickpocketLootId, cInfo->SkinLootId);
         handler->PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
         handler->PSendSysMessage(LANG_NPCINFO_PHASEMASK, target->GetPhaseMask());
         handler->PSendSysMessage(LANG_NPCINFO_ARMOR, target->GetArmor());
@@ -783,8 +783,7 @@ public:
                 handler->PSendSysMessage(LANG_CREATURE_LIST_CHAT, guid, guid, creatureTemplate->Name.c_str(), x, y, z, mapId);
 
                 ++count;
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
         }
 
         handler->PSendSysMessage(LANG_COMMAND_NEAR_NPC_MESSAGE, distance, count);
@@ -904,7 +903,7 @@ public:
         if (!*args)
             return false;
 
-        uint32 displayId = (uint32) atoi((char*)args);
+        uint32 displayId = (uint32)atoi((char*)args);
 
         Creature* creature = handler->getSelectedCreature();
 
@@ -1137,7 +1136,7 @@ public:
         }
 
         MovementGeneratorType mtype = IDLE_MOTION_TYPE;
-        if (option >0.0f)
+        if (option > 0.0f)
             mtype = RANDOM_MOTION_TYPE;
 
         Creature* creature = handler->getSelectedCreature();
@@ -1229,9 +1228,9 @@ public:
         char lastchar = args[strlen(args) - 1];
         switch (lastchar)
         {
-        case '?':   creature->HandleEmoteCommand(EMOTE_ONESHOT_QUESTION);      break;
-        case '!':   creature->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);   break;
-        default:    creature->HandleEmoteCommand(EMOTE_ONESHOT_TALK);          break;
+            case '?':   creature->HandleEmoteCommand(EMOTE_ONESHOT_QUESTION);      break;
+            case '!':   creature->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);   break;
+            default:    creature->HandleEmoteCommand(EMOTE_ONESHOT_TALK);          break;
         }
 
         return true;
@@ -1369,8 +1368,8 @@ public:
         Creature* creatureTarget = handler->getSelectedCreature();
         if (!creatureTarget || creatureTarget->IsPet())
         {
-            handler->PSendSysMessage (LANG_SELECT_CREATURE);
-            handler->SetSentErrorMessage (true);
+            handler->PSendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -1378,17 +1377,17 @@ public:
 
         if (player->GetPetGUID())
         {
-            handler->SendSysMessage (LANG_YOU_ALREADY_HAVE_PET);
-            handler->SetSentErrorMessage (true);
+            handler->SendSysMessage(LANG_YOU_ALREADY_HAVE_PET);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         CreatureTemplate const* cInfo = creatureTarget->GetCreatureTemplate();
 
-        if (!cInfo->IsTameable (player->CanTameExoticPets()))
+        if (!cInfo->IsTameable(player->CanTameExoticPets()))
         {
-            handler->PSendSysMessage (LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
-            handler->SetSentErrorMessage (true);
+            handler->PSendSysMessage(LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -1396,15 +1395,15 @@ public:
         Pet* pet = player->CreateTamedPetFrom(creatureTarget);
         if (!pet)
         {
-            handler->PSendSysMessage (LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
-            handler->SetSentErrorMessage (true);
+            handler->PSendSysMessage(LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         // place pet before player
         float x, y, z;
-        player->GetClosePoint (x, y, z, creatureTarget->GetObjectSize(), CONTACT_DISTANCE);
-        pet->Relocate(x, y, z, M_PI-player->GetOrientation());
+        player->GetClosePoint(x, y, z, creatureTarget->GetObjectSize(), CONTACT_DISTANCE);
+        pet->Relocate(x, y, z, M_PI - player->GetOrientation());
 
         // set pet to defensive mode by default (some classes can't control controlled pets in fact).
         pet->SetReactState(REACT_DEFENSIVE);
@@ -1435,7 +1434,7 @@ public:
         if (!*args)
             return false;
 
-        uint32 leaderGUID = (uint32) atoi((char*)args);
+        uint32 leaderGUID = (uint32)atoi((char*)args);
         Creature* creature = handler->getSelectedCreature();
 
         if (!creature || !creature->GetDBTableGUIDLow())
@@ -1458,11 +1457,11 @@ public:
         Player* chr = handler->GetSession()->GetPlayer();
         FormationInfo* group_member;
 
-        group_member                 = new FormationInfo;
-        group_member->follow_angle   = (creature->GetAngle(chr) - chr->GetOrientation()) * 180 / M_PI;
-        group_member->follow_dist    = sqrtf(pow(chr->GetPositionX() - creature->GetPositionX(), int(2))+pow(chr->GetPositionY() - creature->GetPositionY(), int(2)));
-        group_member->leaderGUID     = leaderGUID;
-        group_member->groupAI        = 0;
+        group_member = new FormationInfo;
+        group_member->follow_angle = (creature->GetAngle(chr) - chr->GetOrientation()) * 180 / M_PI;
+        group_member->follow_dist = sqrtf(pow(chr->GetPositionX() - creature->GetPositionX(), int(2)) + pow(chr->GetPositionY() - creature->GetPositionY(), int(2)));
+        group_member->leaderGUID = leaderGUID;
+        group_member->groupAI = 0;
 
         sFormationMgr->CreatureGroupMap[lowguid] = group_member;
         creature->SearchFormation();
@@ -1487,7 +1486,7 @@ public:
         if (!*args)
             return false;
 
-        uint32 linkguid = (uint32) atoi((char*)args);
+        uint32 linkguid = (uint32)atoi((char*)args);
 
         Creature* creature = handler->getSelectedCreature();
 

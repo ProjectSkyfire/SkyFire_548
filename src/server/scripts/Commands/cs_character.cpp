@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -13,8 +13,8 @@ EndScriptData */
 #include "AccountMgr.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
-#include "PlayerDump.h"
 #include "Player.h"
+#include "PlayerDump.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
 
@@ -117,16 +117,15 @@ public:
 
                 DeletedInfo info;
 
-                info.lowGuid    = fields[0].GetUInt32();
-                info.name       = fields[1].GetString();
-                info.accountId  = fields[2].GetUInt32();
+                info.lowGuid = fields[0].GetUInt32();
+                info.name = fields[1].GetString();
+                info.accountId = fields[2].GetUInt32();
 
                 // account name will be empty for not existed account
                 AccountMgr::GetName(info.accountId, info.accountName);
                 info.deleteDate = time_t(fields[3].GetUInt32());
                 foundList.push_back(info);
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
         }
 
         return true;
@@ -266,8 +265,8 @@ public:
                     continue;
 
                 char const* activeStr = target->GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE) == titleInfo->bit_index
-                ? handler->GetSkyFireString(LANG_ACTIVE)
-                : "";
+                    ? handler->GetSkyFireString(LANG_ACTIVE)
+                    : "";
 
                 char titleNameStr[80];
                 snprintf(titleNameStr, 80, name.c_str(), targetName);
@@ -580,16 +579,16 @@ public:
         return true;
     }
 
-   /**
-    * Handles the '.character deleted list' command, which shows all deleted characters which matches the given search string
-    *
-    * @see HandleCharacterDeletedListHelper
-    * @see HandleCharacterDeletedRestoreCommand
-    * @see HandleCharacterDeletedDeleteCommand
-    * @see DeletedInfoList
-    *
-    * @param args the search string which either contains a player GUID or a part fo the character-name
-    */
+    /**
+     * Handles the '.character deleted list' command, which shows all deleted characters which matches the given search string
+     *
+     * @see HandleCharacterDeletedListHelper
+     * @see HandleCharacterDeletedRestoreCommand
+     * @see HandleCharacterDeletedDeleteCommand
+     * @see DeletedInfoList
+     *
+     * @param args the search string which either contains a player GUID or a part fo the character-name
+     */
     static bool HandleCharacterDeletedListCommand(ChatHandler* handler, char const* args)
     {
         DeletedInfoList foundList;

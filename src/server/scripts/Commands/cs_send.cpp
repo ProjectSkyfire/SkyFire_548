@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Chat.h"
 #include "Language.h"
+#include "ObjectMgr.h"
 #include "Pet.h"
 #include "Player.h"
-#include "ObjectMgr.h"
 #include "ScriptMgr.h"
 
 class send_commandscript : public CommandScript
@@ -60,7 +60,7 @@ public:
 
         // msgSubject, msgText isn't NUL after prev. check
         std::string subject = msgSubject;
-        std::string text    = msgText;
+        std::string text = msgText;
 
         // from console show not existed sender
         MailSender sender(MAIL_NORMAL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetGUIDLow() : 0, MAIL_STATIONERY_GM);
@@ -105,7 +105,7 @@ public:
 
         // msgSubject, msgText isn't NUL after prev. check
         std::string subject = msgSubject;
-        std::string text    = msgText;
+        std::string text = msgText;
 
         // extract items
         typedef std::pair<uint32, uint32> ItemPair;
@@ -219,7 +219,7 @@ public:
 
         // msgSubject, msgText isn't NUL after prev. check
         std::string subject = msgSubject;
-        std::string text    = msgText;
+        std::string text = msgText;
 
         // from console show not existed sender
         MailSender sender(MAIL_NORMAL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetGUIDLow() : 0, MAIL_STATIONERY_GM);

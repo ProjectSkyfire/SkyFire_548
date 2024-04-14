@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,13 +10,13 @@ Comment: All instance related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
 #include "Chat.h"
 #include "Group.h"
 #include "InstanceSaveMgr.h"
 #include "InstanceScript.h"
 #include "MapManager.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 
 class instance_commandscript : public CommandScript
 {
@@ -62,12 +62,12 @@ public:
         uint32 counter = 0;
         for (uint8 i = 0; i < 15; ++i)
         {
-            Player::BoundInstancesMap &binds = player->GetBoundInstances(DifficultyID(i));
+            Player::BoundInstancesMap& binds = player->GetBoundInstances(DifficultyID(i));
             for (Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
             {
                 InstanceSave* save = itr->second.save;
                 std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-                handler->PSendSysMessage("map: %d inst: %d perm: %s diff: %d canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
+                handler->PSendSysMessage("map: %d inst: %d perm: %s diff: %d canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
                 counter++;
             }
         }
@@ -78,12 +78,12 @@ public:
         {
             for (uint8 i = 0; i < 15; ++i)
             {
-                Group::BoundInstancesMap &binds = group->GetBoundInstances(DifficultyID(i));
+                Group::BoundInstancesMap& binds = group->GetBoundInstances(DifficultyID(i));
                 for (Group::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
                 {
                     InstanceSave* save = itr->second.save;
                     std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-                    handler->PSendSysMessage("map: %d inst: %d perm: %s diff: %d canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
+                    handler->PSendSysMessage("map: %d inst: %d perm: %s diff: %d canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
                     counter++;
                 }
             }
@@ -119,7 +119,7 @@ public:
 
         for (uint8 i = 0; i < 15; ++i)
         {
-            Player::BoundInstancesMap &binds = player->GetBoundInstances(DifficultyID(i));
+            Player::BoundInstancesMap& binds = player->GetBoundInstances(DifficultyID(i));
             for (Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
             {
                 InstanceSave* save = itr->second.save;

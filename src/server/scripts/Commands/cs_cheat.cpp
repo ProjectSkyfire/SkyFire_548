@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 /* ScriptData
@@ -238,7 +238,7 @@ public:
         return false;
     }
 
-    static bool HandleExploreCheatCommand(ChatHandler* handler, const char *args)
+    static bool HandleExploreCheatCommand(ChatHandler* handler, const char* args)
     {
         if (!*args)
             return false;
@@ -257,7 +257,7 @@ public:
         {
             handler->PSendSysMessage(LANG_YOU_SET_EXPLORE_ALL, handler->GetNameLink(chr).c_str());
             if (handler->needReportToTarget(chr))
-            ChatHandler(chr->GetSession()).PSendSysMessage(LANG_YOURS_EXPLORE_SET_ALL, handler->GetNameLink().c_str());
+                ChatHandler(chr->GetSession()).PSendSysMessage(LANG_YOURS_EXPLORE_SET_ALL, handler->GetNameLink().c_str());
         }
         else
         {
@@ -269,9 +269,9 @@ public:
         for (uint8 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
         {
             if (flag != 0)
-                handler->GetSession()->GetPlayer()->SetFlag(PLAYER_FIELD_EXPLORED_ZONES+i, 0xFFFFFFFF);
+                handler->GetSession()->GetPlayer()->SetFlag(PLAYER_FIELD_EXPLORED_ZONES + i, 0xFFFFFFFF);
             else
-                handler->GetSession()->GetPlayer()->SetFlag(PLAYER_FIELD_EXPLORED_ZONES+i, 0);
+                handler->GetSession()->GetPlayer()->SetFlag(PLAYER_FIELD_EXPLORED_ZONES + i, 0);
         }
 
         return true;
