@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -15,14 +15,14 @@
 /// Start the server
 class Master
 {
-    public:
-        int Run();
+public:
+    int Run();
 
-    private:
-        bool _StartDB();
-        void _StopDB();
+private:
+    bool _StartDB();
+    void _StopDB();
 
-        void ClearOnlineAccounts();
+    void ClearOnlineAccounts();
 };
 
 #define sMaster ACE_Singleton<Master, ACE_Null_Mutex>::instance()

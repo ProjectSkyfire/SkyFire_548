@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,25 +10,25 @@
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"
-#include "SystemConfig.h"
+#include "Configuration/Config.h"
+#include "Database/DatabaseEnv.h"
+#include "Database/DatabaseWorkerPool.h"
 #include "SignalHandler.h"
+#include "SystemConfig.h"
 #include "World.h"
 #include "WorldRunnable.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
-#include "Configuration/Config.h"
-#include "Database/DatabaseEnv.h"
-#include "Database/DatabaseWorkerPool.h"
 
+#include "AuthSocket.h"
 #include "CliRunnable.h"
 #include "Log.h"
 #include "Master.h"
 #include "RARunnable.h"
+#include "RealmList.h"
 #include "SFSoap.h"
 #include "Timer.h"
 #include "Util.h"
-#include "AuthSocket.h"
-#include "RealmList.h"
 
 #include "BigNumber.h"
 
@@ -46,23 +46,23 @@ extern int m_ServiceStatus;
 /// Handle worldservers's termination signals
 class WorldServerSignalHandler : public Skyfire::SignalHandler
 {
-    public:
-        virtual void HandleSignal(int sigNum)
+public:
+    virtual void HandleSignal(int sigNum)
+    {
+        switch (sigNum)
         {
-            switch (sigNum)
-            {
-                case SIGINT:
-                    World::StopNow(RESTART_EXIT_CODE);
-                    break;
-                case SIGTERM:
+            case SIGINT:
+                World::StopNow(RESTART_EXIT_CODE);
+                break;
+            case SIGTERM:
 #ifdef _WIN32
-                case SIGBREAK:
-                    if (m_ServiceStatus != 1)
+            case SIGBREAK:
+                if (m_ServiceStatus != 1)
 #endif
                     World::StopNow(SHUTDOWN_EXIT_CODE);
-                    break;
-            }
+                break;
         }
+    }
 };
 
 class FreezeDetectorRunnable : public ACE_Based::Runnable
@@ -81,7 +81,7 @@ public:
         if (!_delaytime)
             return;
 
-        SF_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime/1000);
+        SF_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime / 1000);
         _loops = 0;
         _lastChange = 0;
         while (!World::IsStopped())
@@ -127,11 +127,11 @@ int Master::Run()
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
     if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
     {
-         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
-         SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
-         SF_LOG_INFO("server.worldserver", "          Please check for updates, as your current default values may cause");
-         SF_LOG_INFO("server.worldserver", "          strange behavior.");
-         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
+        SF_LOG_INFO("server.worldserver", "*****************************************************************************");
+        SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
+        SF_LOG_INFO("server.worldserver", "          Please check for updates, as your current default values may cause");
+        SF_LOG_INFO("server.worldserver", "          strange behavior.");
+        SF_LOG_INFO("server.worldserver", "*****************************************************************************");
     }
 
     /// worldserver PID file creation
@@ -162,9 +162,9 @@ int Master::Run()
 
     ///- Initialize the signal handlers
     WorldServerSignalHandler signalINT, signalTERM;
-    #ifdef _WIN32
+#ifdef _WIN32
     WorldServerSignalHandler signalBREAK;
-    #endif /* _WIN32 */
+#endif /* _WIN32 */
 
     ///- Register worldserver's signal handlers
     ACE_Sig_Handler handle;
@@ -323,7 +323,7 @@ int Master::Run()
 
     if (cliThread)
     {
-        #ifdef _WIN32
+#ifdef _WIN32
 
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);
@@ -362,12 +362,12 @@ int Master::Run()
 
         cliThread->wait();
 
-        #else
+#else
 
         cliThread->wait();
         cliThread->destroy();
 
-        #endif
+#endif
 
         delete cliThread;
     }
@@ -470,8 +470,7 @@ bool Master::_StartDB()
         {
             Field* fields = result->Fetch();
             realmNameStore[fields[0].GetUInt32()] = fields[1].GetString(); // Store the realm name into the store
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
     for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
     {

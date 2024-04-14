@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -13,8 +13,8 @@
 /// Heartbeat thread for the World
 class WorldRunnable : public ACE_Based::Runnable
 {
-    public:
-        void run() OVERRIDE;
+public:
+    void run() OVERRIDE;
 };
 
 #endif

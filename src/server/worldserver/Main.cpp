@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,14 +7,14 @@
 /// @{
 /// \file
 #pragma comment (lib, "Crypt32")
-#include <openssl/opensslv.h>
-#include <openssl/crypto.h>
-#include <openssl/provider.h>
 #include <ace/Version.h>
+#include <openssl/crypto.h>
+#include <openssl/opensslv.h>
+#include <openssl/provider.h>
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "Configuration/Config.h"
+#include "Database/DatabaseEnv.h"
 
 #include "Log.h"
 #include "Master.h"
@@ -79,7 +79,7 @@ extern int main(int argc, char** argv)
                 cfg_file = argv[c];
         }
 
-        #ifdef _WIN32
+#ifdef _WIN32
         if (strcmp(argv[c], "-s") == 0) // Services
         {
             if (++c >= argc)
@@ -111,7 +111,7 @@ extern int main(int argc, char** argv)
 
         if (strcmp(argv[c], "--service") == 0)
             WinServiceRun();
-        #endif
+#endif
         ++c;
     }
 
