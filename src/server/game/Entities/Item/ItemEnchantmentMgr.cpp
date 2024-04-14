@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include <stdlib.h>
-#include <functional>
-#include "ItemEnchantmentMgr.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
+#include "ItemEnchantmentMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include <list>
-#include <vector>
 #include "Util.h"
-#include "DBCStores.h"
+#include <functional>
+#include <list>
+#include <stdlib.h>
+#include <vector>
 
 struct EnchStoreItem
 {

@@ -1,17 +1,17 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "BattlegroundVOP.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "WorldPacket.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundVOP.h"
 #include "Creature.h"
 #include "Language.h"
 #include "Object.h"
+#include "ObjectMgr.h"
 #include "Player.h"
+#include "World.h"
+#include "WorldPacket.h"
 
 BattlegroundVOP::BattlegroundVOP()
 {
@@ -30,7 +30,7 @@ void BattlegroundVOP::PostUpdateImpl(uint32 diff)
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         int team_points[BG_TEAMS_COUNT] = { 0, 0 };
-         
+
         // Accumulate points
         for (int team = 0; team < BG_TEAMS_COUNT; ++team)
         {
@@ -346,7 +346,7 @@ void BattlegroundVOP::UpdatePlayerScore(Player* player, uint32 type, uint32 valu
     BattlegroundScoreMap::iterator itr = PlayerScores.find(player->GetGUID());
     if (itr == PlayerScores.end())                         // player not found
         return;
-    
+
     switch (type)
     {
         case SCORE_ORB_CONTROL:

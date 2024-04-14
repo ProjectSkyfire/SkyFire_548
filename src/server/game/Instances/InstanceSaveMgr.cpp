@@ -1,28 +1,28 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "Player.h"
-#include "GridNotifiers.h"
-#include "Log.h"
-#include "GridStates.h"
 #include "CellImpl.h"
-#include "Map.h"
-#include "MapManager.h"
-#include "MapInstanced.h"
-#include "InstanceSaveMgr.h"
-#include "Timer.h"
-#include "GridNotifiersImpl.h"
+#include "Common.h"
 #include "Config.h"
-#include "Transport.h"
-#include "ObjectMgr.h"
-#include "World.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "GridStates.h"
 #include "Group.h"
+#include "InstanceSaveMgr.h"
 #include "InstanceScript.h"
+#include "Log.h"
+#include "Map.h"
+#include "MapInstanced.h"
+#include "MapManager.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "Timer.h"
+#include "Transport.h"
+#include "World.h"
 
-uint16 InstanceSaveManager::ResetTimeDelay[] = {3600, 900, 300, 60};
+uint16 InstanceSaveManager::ResetTimeDelay[] = { 3600, 900, 300, 60 };
 
 InstanceSaveManager::~InstanceSaveManager()
 {
@@ -149,8 +149,8 @@ void InstanceSaveManager::RemoveInstanceSave(uint32 InstanceId)
 }
 
 InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, DifficultyID difficulty, time_t resetTime, bool canReset)
-: m_resetTime(resetTime), m_instanceid(InstanceId), m_mapid(MapId),
-  m_difficulty(difficulty), m_canReset(canReset), m_toDelete(false) { }
+    : m_resetTime(resetTime), m_instanceid(InstanceId), m_mapid(MapId),
+    m_difficulty(difficulty), m_canReset(canReset), m_toDelete(false) { }
 
 InstanceSave::~InstanceSave()
 {
@@ -234,7 +234,7 @@ void InstanceSaveManager::LoadInstances()
 
     // Delete expired instances (Instance related spawns are removed in the following cleanup queries)
     CharacterDatabase.DirectExecute("DELETE i FROM instance i LEFT JOIN instance_reset ir ON mapid = map AND i.difficulty = ir.difficulty "
-                                    "WHERE (i.resettime > 0 AND i.resettime < UNIX_TIMESTAMP()) OR (ir.resettime IS NOT NULL AND ir.resettime < UNIX_TIMESTAMP())");
+        "WHERE (i.resettime > 0 AND i.resettime < UNIX_TIMESTAMP()) OR (ir.resettime IS NOT NULL AND ir.resettime < UNIX_TIMESTAMP())");
 
     // Delete invalid character_instance and party_instance references
     CharacterDatabase.DirectExecute("DELETE ci.* FROM character_instance AS ci LEFT JOIN characters AS c ON ci.guid = c.guid WHERE c.guid IS NULL");
@@ -306,8 +306,7 @@ void InstanceSaveManager::LoadResetTimes()
                 instResetTime[instanceId] = ResetTimeMapDiffType(MAKE_PAIR32(mapid, difficulty), resettime);
                 mapDiffResetInstances.insert(ResetTimeMapDiffInstances::value_type(MAKE_PAIR32(mapid, difficulty), instanceId));
             }
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         // update reset time for normal instances with the max creature respawn time + X hours
         if (PreparedQueryResult result2 = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAX_CREATURE_RESPAWNS)))
@@ -323,8 +322,7 @@ void InstanceSaveManager::LoadResetTimes()
                     CharacterDatabase.DirectPExecute("UPDATE instance SET resettime = '" UI64FMTD "' WHERE id = '%u'", uint64(resettime), instance);
                     itr->second.second = resettime;
                 }
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
         }
 
         // schedule the reset times
@@ -462,7 +460,7 @@ void InstanceSaveManager::Update()
         if (t >= now)
             break;
 
-        InstResetEvent &event = m_resetTimeQueue.begin()->second;
+        InstResetEvent& event = m_resetTimeQueue.begin()->second;
         if (event.type == 0)
         {
             // for individual normal instances, max creature respawn + X hours
@@ -478,27 +476,27 @@ void InstanceSaveManager::Update()
             {
                 // schedule the next warning/reset
                 ++event.type;
-                ScheduleReset(true, resetTime - ResetTimeDelay[event.type-1], event);
+                ScheduleReset(true, resetTime - ResetTimeDelay[event.type - 1], event);
             }
             m_resetTimeQueue.erase(m_resetTimeQueue.begin());
         }
     }
 }
 
-void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
+void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator& itr)
 {
     // unbind all players bound to the instance
     // do not allow UnbindInstance to automatically unload the InstanceSaves
     lock_instLists = true;
 
-    InstanceSave::PlayerListType &pList = itr->second->m_playerList;
+    InstanceSave::PlayerListType& pList = itr->second->m_playerList;
     while (!pList.empty())
     {
         Player* player = *(pList.begin());
         player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
     }
 
-    InstanceSave::GroupListType &gList = itr->second->m_groupList;
+    InstanceSave::GroupListType& gList = itr->second->m_groupList;
     while (!gList.empty())
     {
         Group* group = *(gList.begin());
@@ -588,14 +586,14 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
         // calculate the next reset time
         uint32 diff = sWorld->getIntConfig(WorldIntConfigs::CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
 
-        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(Rates::RATE_INSTANCE_RESET_TIME))/uint32(DAY)) * uint32(DAY));
+        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(Rates::RATE_INSTANCE_RESET_TIME)) / uint32(DAY)) * uint32(DAY));
         if (period < DAY)
             period = DAY;
 
         uint32 next_reset = uint32(((resetTime + MINUTE) / DAY * DAY) + period + diff);
 
         SetResetTimeFor(mapid, difficulty, next_reset);
-        ScheduleReset(true, time_t(next_reset-3600), InstResetEvent(1, mapid, difficulty, 0));
+        ScheduleReset(true, time_t(next_reset - 3600), InstResetEvent(1, mapid, difficulty, 0));
 
         // Update it in the DB
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GLOBAL_INSTANCE_RESETTIME);
@@ -609,7 +607,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
 
     // note: this isn't fast but it's meant to be executed very rarely
     Map const* map = sMapMgr->CreateBaseMap(mapid);          // _not_ include difficulty
-    MapInstanced::InstancedMaps &instMaps = ((MapInstanced*)map)->GetInstancedMaps();
+    MapInstanced::InstancedMaps& instMaps = ((MapInstanced*)map)->GetInstancedMaps();
     MapInstanced::InstancedMaps::iterator mitr;
     uint32 timeLeft;
 

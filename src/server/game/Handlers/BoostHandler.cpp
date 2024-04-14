@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -33,20 +33,20 @@ void WorldSession::SendBattlePayDistributionUpdate(uint64 playerGuid, int8 bonus
     data.WriteGuidMask(guid, 1, 2);
     // if (unkBool)
     // {
-        data.WriteBits(1, 2);
-        data.WriteBits(0, 20);
-        data.WriteBit(1); // HasBattlepayDisplayInfo
-        // if (HasBattlepayDisplayInfo)
-        // {
-            data.WriteBits(0, 10);
-            data.WriteBit(0);
-            data.WriteBits(bonusText2.length(), 10);
-            data.WriteBit(0);
-            data.WriteBit(0);
-            data.WriteBits(bonusText.length(), 13);
-            data.WriteBit(0); // bool11
-        // }
+    data.WriteBits(1, 2);
+    data.WriteBits(0, 20);
+    data.WriteBit(1); // HasBattlepayDisplayInfo
+    // if (HasBattlepayDisplayInfo)
+    // {
+    data.WriteBits(0, 10);
+    data.WriteBit(0);
+    data.WriteBits(bonusText2.length(), 10);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.WriteBits(bonusText.length(), 13);
+    data.WriteBit(0); // bool11
     // }
+// }
 
     data.WriteBit(guid2[7]);
     data.WriteBit(guid[6]);
@@ -59,15 +59,15 @@ void WorldSession::SendBattlePayDistributionUpdate(uint64 playerGuid, int8 bonus
 
     // if (unkBool)
     // {
-        data << int32(0);
-        data << int64(0);
-        data.WriteString(bonusText);
-        data.WriteString(bonusText2);
-        // if (bool11)
-            //data << int32(0);
-        data << int64(0);
-        data << int8(bonusId);
-        data << int32(0);
+    data << int32(0);
+    data << int64(0);
+    data.WriteString(bonusText);
+    data.WriteString(bonusText2);
+    // if (bool11)
+        //data << int32(0);
+    data << int64(0);
+    data << int8(bonusId);
+    data << int32(0);
     // }
 
     data << int32(textId);

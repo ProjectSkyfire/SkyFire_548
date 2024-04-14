@@ -1,9 +1,8 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "zlib.h"
 #include "Common.h"
 #include "Language.h"
 #include "ObjectMgr.h"
@@ -14,6 +13,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "zlib.h"
 
 void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
 {
@@ -112,7 +112,7 @@ void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket& recvData)
     uint8 messageLen = 0;
 
     messageLen = recvData.ReadBits(11);
-    message    = recvData.ReadString(messageLen);
+    message = recvData.ReadString(messageLen);
 
     GMTicketResponse response = GMTicketResponse::GMTICKET_RESPONSE_UPDATE_ERROR;
     if (GmTicket* ticket = sTicketMgr->GetGmTicketByPlayerGuid(GetPlayer()->GetGUID()))
@@ -129,7 +129,7 @@ void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket& recvData)
     sTicketMgr->SendGmTicketUpdate(SMSG_GM_TICKET_UPDATE_TEXT, response, GetPlayer());
 }
 
-void WorldSession::HandleGMTicketDeleteOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleGMTicketDeleteOpcode(WorldPacket& /*recvData*/)
 {
     if (GmTicket* ticket = sTicketMgr->GetGmTicketByPlayerGuid(GetPlayer()->GetGUID()))
     {
@@ -142,7 +142,7 @@ void WorldSession::HandleGMTicketDeleteOpcode(WorldPacket & /*recvData*/)
     }
 }
 
-void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket& /*recvData*/)
 {
     SendQueryTimeResponse();
 
@@ -157,7 +157,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & /*recvData*/)
         sTicketMgr->SendGmTicket(this, NULL);
 }
 
-void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket& /*recvData*/)
 {
     // Note: This only disables the ticket UI at client side and is not fully reliable
     // are we sure this is a uint32? Should ask Zor
@@ -166,10 +166,10 @@ void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket & /*recvData*/)
     SendPacket(&data);
 }
 
-void WorldSession::HandleGMTicketCaseStatusOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleGMTicketCaseStatusOpcode(WorldPacket& /*recvData*/)
 {
     time_t UpdateTime = 0, OldestTicketTime = time(NULL);
-    WorldPacket data(SMSG_GM_TICKET_CASE_STATUS, 4+4+3);
+    WorldPacket data(SMSG_GM_TICKET_CASE_STATUS, 4 + 4 + 3);
     data.WriteBits(0, 20);
     data.FlushBits();
     data.AppendPackedTime(UpdateTime);
@@ -233,11 +233,11 @@ void WorldSession::HandleReportLag(WorldPacket& recvData)
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LAG_REPORT);
     stmt->setUInt32(0, GUID_LOPART(GetPlayer()->GetGUID()));
-    stmt->setUInt8 (1, lagType);
+    stmt->setUInt8(1, lagType);
     stmt->setUInt16(2, mapId);
-    stmt->setFloat (3, x);
-    stmt->setFloat (4, y);
-    stmt->setFloat (5, z);
+    stmt->setFloat(3, x);
+    stmt->setFloat(4, y);
+    stmt->setFloat(5, z);
     stmt->setUInt32(6, GetLatency());
     stmt->setUInt32(7, time(NULL));
     CharacterDatabase.Execute(stmt);

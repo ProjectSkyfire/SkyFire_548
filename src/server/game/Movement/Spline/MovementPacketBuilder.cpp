@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "MovementPacketBuilder.h"
 #include "MoveSpline.h"
-#include "WorldPacket.h"
 #include "Object.h"
 #include "Unit.h"
+#include "WorldPacket.h"
 
 namespace Movement
 {

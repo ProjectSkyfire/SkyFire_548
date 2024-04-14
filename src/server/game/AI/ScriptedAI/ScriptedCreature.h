@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -17,7 +17,7 @@ class InstanceScript;
 
 class SummonList
 {
-    public:
+public:
     typedef std::list<uint64> StorageType;
     typedef StorageType::iterator iterator;
     typedef StorageType::const_iterator const_iterator;
@@ -78,7 +78,7 @@ class SummonList
     void DespawnAll();
 
     template <typename T>
-    void DespawnIf(T const &predicate)
+    void DespawnIf(T const& predicate)
     {
         storage_.remove_if(predicate);
     }
@@ -101,14 +101,14 @@ class SummonList
     void RemoveNotExisting();
     bool HasEntry(uint32 entry) const;
 
-    private:
+private:
     Creature* me;
     StorageType storage_;
 };
 
 class EntryCheckPredicate
 {
-    public:
+public:
     EntryCheckPredicate(uint32 entry) : _entry(entry)
     { }
     bool operator()(uint64 guid)
@@ -116,13 +116,13 @@ class EntryCheckPredicate
         return GUID_ENPART(guid) == _entry;
     }
 
-    private:
+private:
     uint32 _entry;
 };
 
 class DummyEntryCheckPredicate
 {
-    public:
+public:
     bool operator()(uint64)
     {
         return true;
@@ -223,7 +223,7 @@ struct ScriptedAI : public CreatureAI
     void DoModifyThreatPercent(Unit* unit, int32 pct);
 
     void DoTeleportTo(float x, float y, float z, uint32 time = 0);
-    void DoTeleportTo(float const pos [4]);
+    void DoTeleportTo(float const pos[4]);
 
     //Teleports a player without dropping threat (only teleports to same map)
     void DoTeleportPlayer(Unit* unit, float x, float y, float z, float o);
@@ -366,7 +366,7 @@ struct ScriptedAI : public CreatureAI
         return heroic25;
     }
 
-    private:
+private:
     DifficultyID _difficulty;
     uint32 _evadeCheckCooldown;
     bool _isCombatMovementAllowed;
@@ -375,7 +375,7 @@ struct ScriptedAI : public CreatureAI
 
 class BossAI : public ScriptedAI
 {
-    public:
+public:
     BossAI(Creature* creature, uint32 bossId);
     virtual ~BossAI()
     { }
@@ -414,7 +414,7 @@ class BossAI : public ScriptedAI
         _JustReachedHome();
     }
 
-    protected:
+protected:
     void _Reset();
     void _EnterCombat();
     void _JustDied();
@@ -439,7 +439,7 @@ class BossAI : public ScriptedAI
     EventMap events;
     SummonList summons;
 
-    private:
+private:
     BossBoundaryMap const* const _boundary;
     uint32 const _bossId;
 };
@@ -475,7 +475,7 @@ public:
         _JustDied();
     }
 
-    protected:
+protected:
     void _Reset();
     void _EnterCombat();
     void _JustDied();

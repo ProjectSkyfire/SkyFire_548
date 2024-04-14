@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -890,7 +890,7 @@ void AddEasternKingdomsScripts()
     AddSC_silverpine_forest();
     AddSC_stranglethorn_vale();
     AddSC_undercity();
-	AddSC_elwynn_forest();
+    AddSC_elwynn_forest();
 #endif
 }
 

@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SKYFIRESERVER_MOVEPLINE_H
 #define SKYFIRESERVER_MOVEPLINE_H
 
-#include "Spline.h"
 #include "MoveSplineInitArgs.h"
+#include "Spline.h"
 
 namespace Movement
 {
@@ -30,10 +30,10 @@ namespace Movement
         typedef Spline<int32> MySpline;
         enum UpdateResult
         {
-            Result_None         = 0x01,
-            Result_Arrived      = 0x02,
-            Result_NextCycle    = 0x04,
-            Result_NextSegment  = 0x08
+            Result_None = 0x01,
+            Result_Arrived = 0x02,
+            Result_NextCycle = 0x04,
+            Result_NextSegment = 0x08
         };
         friend class PacketBuilder;
 

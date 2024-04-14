@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_PATH_GENERATOR_H
 #define SF_PATH_GENERATOR_H
 
-#include "SharedDefines.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
 #include "MoveSplineInitArgs.h"
+#include "SharedDefines.h"
 
 class Unit;
 
@@ -27,13 +27,13 @@ class Unit;
 
 enum PathType
 {
-    PATHFIND_BLANK          = 0x00,   // path not built yet
-    PATHFIND_NORMAL         = 0x01,   // normal path
-    PATHFIND_SHORTCUT       = 0x02,   // travel through obstacles, terrain, air, etc (old behavior)
-    PATHFIND_INCOMPLETE     = 0x04,   // we have partial path to follow - getting closer to target
-    PATHFIND_NOPATH         = 0x08,   // no valid path at all or error in generating one
+    PATHFIND_BLANK = 0x00,   // path not built yet
+    PATHFIND_NORMAL = 0x01,   // normal path
+    PATHFIND_SHORTCUT = 0x02,   // travel through obstacles, terrain, air, etc (old behavior)
+    PATHFIND_INCOMPLETE = 0x04,   // we have partial path to follow - getting closer to target
+    PATHFIND_NOPATH = 0x08,   // no valid path at all or error in generating one
     PATHFIND_NOT_USING_PATH = 0x10,   // used when we are either flying/swiming or on map w/o mmaps
-    PATHFIND_SHORT          = 0x20,   // path is longer or equal to its limited path length
+    PATHFIND_SHORT = 0x20,   // path is longer or equal to its limited path length
 };
 
 class PathGenerator
@@ -48,7 +48,7 @@ public:
 
     // option setters - use optional
     void SetUseStraightPath(bool useStraightPath) { _useStraightPath = useStraightPath; }
-    void SetPathLengthLimit(float distance) { _pointPathLimit = std::min<uint32>(uint32(distance/SMOOTH_PATH_STEP_SIZE), MAX_POINT_PATH_LENGTH); }
+    void SetPathLengthLimit(float distance) { _pointPathLimit = std::min<uint32>(uint32(distance / SMOOTH_PATH_STEP_SIZE), MAX_POINT_PATH_LENGTH); }
 
     // result getters
     G3D::Vector3 const& GetStartPosition() const { return _startPosition; }
@@ -110,10 +110,10 @@ private:
     // smooth path aux functions
     uint32 FixupCorridor(dtPolyRef* path, uint32 npath, uint32 maxPath, dtPolyRef const* visited, uint32 nvisited);
     bool GetSteerTarget(float const* startPos, float const* endPos, float minTargetDist, dtPolyRef const* path, uint32 pathSize, float* steerPos,
-                        unsigned char& steerPosFlag, dtPolyRef& steerPosRef);
+        unsigned char& steerPosFlag, dtPolyRef& steerPosRef);
     dtStatus FindSmoothPath(float const* startPos, float const* endPos,
-                            dtPolyRef const* polyPath, uint32 polyPathSize,
-                            float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);
+        dtPolyRef const* polyPath, uint32 polyPathSize,
+        float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);
 };
 
 #endif

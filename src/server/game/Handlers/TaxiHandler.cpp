@@ -1,30 +1,30 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
 #include "DatabaseEnv.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "Opcodes.h"
 #include "Log.h"
+#include "MovementStructures.h"
 #include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Path.h"
 #include "Player.h"
 #include "UpdateMask.h"
-#include "Path.h"
-#include "MovementStructures.h"
 #include "WaypointMovementGenerator.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_TAXI_NODE_STATUS_QUERY");
-        
+
     ObjectGuid guid;
 
     recvData.ReadGuidMask(guid, 0, 1, 6, 4, 5, 2, 3, 7);
     recvData.ReadGuidBytes(guid, 4, 1, 5, 0, 2, 7, 6, 3);
-    
+
     SendTaxiStatus(guid);
 }
 
@@ -54,7 +54,7 @@ void WorldSession::SendTaxiStatus(uint64 guid)
     data.WriteBit(Guid[7]);
     data.WriteBit(Guid[5]);
     data.WriteBit(Guid[4]);
-    data.WriteBit(Guid[1]); 
+    data.WriteBit(Guid[1]);
     data.WriteBits(!GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc), 2);
     data.WriteBit(Guid[3]);
     data.WriteBit(Guid[0]);
@@ -154,7 +154,7 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
     uint32 curloc = sObjectMgr->GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId(), GetPlayer()->GetTeam());
 
     if (curloc == 0)
-        return true; 
+        return true;
     // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.
 
     if (GetPlayer()->m_taxi.SetTaximaskNode(curloc))
@@ -165,7 +165,7 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
         WorldPacket update(SMSG_TAXI_NODE_STATUS, 9);
         update.WriteBit(1);
         ObjectGuid guid = unit->GetGUID();
-        
+
         update.WriteGuidMask(guid, 1, 7, 6, 5, 4, 0, 2, 3);
         update.WriteGuidBytes(guid, 4, 2, 3, 6, 7, 0, 1, 5);
 

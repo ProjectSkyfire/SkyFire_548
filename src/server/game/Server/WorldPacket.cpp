@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include <zlib.h>
-#include "WorldPacket.h"
 #include "World.h"
+#include "WorldPacket.h"
+#include <zlib.h>
 
 //! Compresses packet in place
 void WorldPacket::Compress(z_stream* compressionStream)
@@ -68,7 +68,7 @@ void WorldPacket::Compress(z_stream* compressionStream, WorldPacket const* sourc
     SF_LOG_INFO("network", "%s (len %u) successfully compressed to %04X (len %u)", GetOpcodeNameForLogging(uncompressedOpcode, true).c_str(), size, opcode, destsize);
 }
 
-void WorldPacket::Compress(void* dst, uint32 *dst_size, const void* src, int src_size)
+void WorldPacket::Compress(void* dst, uint32* dst_size, const void* src, int src_size)
 {
     _compressionStream->next_out = (Bytef*)dst;
     _compressionStream->avail_out = *dst_size;

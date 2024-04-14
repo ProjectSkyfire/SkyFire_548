@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
-#include "Log.h"
 #include "Corpse.h"
 #include "Creature.h"
 #include "GameObject.h"
 #include "Group.h"
 #include "GuildMgr.h"
+#include "Log.h"
 #include "LootMgr.h"
-#include "ObjectAccessor.h"
 #include "Object.h"
+#include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Player.h"
 #include "World.h"
@@ -115,7 +115,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         if (loot->isLooted() && IS_ITEM_GUID(guid))
             player->GetSession()->DoLootRelease(guid);
     }
-    delete [] guids;
+    delete[] guids;
 }
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
@@ -312,8 +312,8 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
 
 void WorldSession::DoLootRelease(uint64 lguid)
 {
-    Player  *player = GetPlayer();
-    Loot    *loot;
+    Player* player = GetPlayer();
+    Loot* loot;
 
     player->SetLootGUID(0);
     player->SendLootRelease(lguid);
@@ -536,8 +536,8 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item.itemid, item.count);
 
     // mark as looted
-    item.count=0;
-    item.is_looted=true;
+    item.count = 0;
+    item.is_looted = true;
 
     loot->NotifyItemRemoved(slotid);
     --loot->unlootedCount;

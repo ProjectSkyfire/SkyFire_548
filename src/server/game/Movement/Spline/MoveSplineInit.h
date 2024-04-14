@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -15,9 +15,9 @@ namespace Movement
 {
     enum AnimType
     {
-        ToGround    = 0, // 460 = ToGround, index of AnimationData.dbc
-        FlyToFly    = 1, // 461 = FlyToFly?
-        ToFly       = 2, // 458 = ToFly
+        ToGround = 0, // 460 = ToGround, index of AnimationData.dbc
+        FlyToFly = 1, // 461 = FlyToFly?
+        ToFly = 2, // 458 = ToFly
         FlyToGround = 3  // 463 = FlyToGround
     };
 
@@ -140,7 +140,7 @@ namespace Movement
 
     protected:
         MoveSplineInitArgs args;
-        Unit*  unit;
+        Unit* unit;
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.EnableFlying(); }
@@ -149,7 +149,7 @@ namespace Movement
     inline void MoveSplineInit::SetUncompressed() { args.flags.uncompressedPath = true; }
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true; }
     inline void MoveSplineInit::SetVelocity(float vel) { args.velocity = vel; args.HasVelocity = true; }
-    inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true;}
+    inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true; }
     inline void MoveSplineInit::SetTransportEnter() { args.flags.EnableTransportEnter(); }
     inline void MoveSplineInit::SetTransportExit() { args.flags.EnableTransportExit(); }
     inline void MoveSplineInit::SetOrientationFixed(bool enable) { args.flags.orientationFixed = enable; }

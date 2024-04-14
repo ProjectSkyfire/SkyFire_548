@@ -1,21 +1,21 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "CellImpl.h"
 #include "Common.h"
-#include "UpdateMask.h"
-#include "Opcodes.h"
-#include "World.h"
-#include "ObjectAccessor.h"
 #include "DatabaseEnv.h"
 #include "GridNotifiers.h"
-#include "CellImpl.h"
 #include "GridNotifiersImpl.h"
+#include "ObjectAccessor.h"
+#include "Opcodes.h"
 #include "ScriptMgr.h"
+#include "UpdateMask.h"
+#include "World.h"
 
 DynamicObject::DynamicObject(bool isWorldObject) : WorldObject(isWorldObject),
-    _aura(NULL), _removedAura(NULL), _caster(NULL), _duration(0), _isViewpoint(false)
+_aura(NULL), _removedAura(NULL), _caster(NULL), _duration(0), _isViewpoint(false)
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TypeID::TYPEID_DYNAMICOBJECT;

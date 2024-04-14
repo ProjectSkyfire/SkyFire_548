@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -18,7 +18,7 @@
 BattlePetMgr::~BattlePetMgr()
 {
     for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); ++itr)
-        delete *itr;
+        delete* itr;
 
     m_battlePetSet.clear();
 }
@@ -32,19 +32,19 @@ void BattlePetMgr::LoadFromDb(PreparedQueryResult result)
     {
         Field* fields = result->Fetch();
 
-        uint64 id            = fields[0].GetUInt64();
-        uint16 speciesId     = fields[1].GetUInt16();
+        uint64 id = fields[0].GetUInt64();
+        uint16 speciesId = fields[1].GetUInt16();
         std::string nickname = fields[2].GetString();
-        uint32 timestamp     = fields[3].GetUInt32();
-        uint8 level          = fields[4].GetUInt8();
-        uint16 xp            = fields[5].GetUInt16();
-        uint16 health        = fields[6].GetUInt16();
-        uint16 maxHealth     = fields[7].GetUInt16();
-        uint16 power         = fields[8].GetUInt16();
-        uint16 speed         = fields[9].GetUInt16();
-        uint8 quality        = fields[10].GetUInt8();
-        uint8 breedId        = fields[11].GetUInt8();
-        uint16 flags         = fields[12].GetUInt16();
+        uint32 timestamp = fields[3].GetUInt32();
+        uint8 level = fields[4].GetUInt8();
+        uint16 xp = fields[5].GetUInt16();
+        uint16 health = fields[6].GetUInt16();
+        uint16 maxHealth = fields[7].GetUInt16();
+        uint16 power = fields[8].GetUInt16();
+        uint16 speed = fields[9].GetUInt16();
+        uint8 quality = fields[10].GetUInt8();
+        uint8 breedId = fields[11].GetUInt8();
+        uint16 flags = fields[12].GetUInt16();
 
         if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
         {
@@ -76,8 +76,7 @@ void BattlePetMgr::LoadFromDb(PreparedQueryResult result)
             health, maxHealth, power, speed, quality, breedId, flags);
 
         m_battlePetSet.insert(battlePet);
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 }
 
 void BattlePetMgr::SaveToDb(SQLTransaction& trans)
@@ -122,14 +121,14 @@ void BattlePetMgr::SaveToDb(SQLTransaction& trans)
                 stmt->setUInt16(2, battlePet->GetSpecies());
                 stmt->setString(3, battlePet->GetNickname());
                 stmt->setUInt32(4, battlePet->GetTimestamp());
-                stmt->setUInt8 (5, battlePet->GetLevel());
+                stmt->setUInt8(5, battlePet->GetLevel());
                 stmt->setUInt16(6, battlePet->GetXp());
                 stmt->setUInt16(7, battlePet->GetCurrentHealth());
                 stmt->setUInt16(8, battlePet->GetMaxHealth());
                 stmt->setUInt16(9, battlePet->GetPower());
                 stmt->setUInt16(10, battlePet->GetSpeed());
-                stmt->setUInt8 (11, battlePet->GetQuality());
-                stmt->setUInt8 (12, battlePet->GetBreed());
+                stmt->setUInt8(11, battlePet->GetQuality());
+                stmt->setUInt8(12, battlePet->GetBreed());
                 stmt->setUInt16(13, battlePet->GetFlags());
                 trans->Append(stmt);
 
@@ -149,9 +148,9 @@ void BattlePetMgr::LoadSlotsFromDb(PreparedQueryResult result)
 
     Field* fields = result->Fetch();
 
-    uint64 slot1   = fields[0].GetUInt64();
-    uint64 slot2   = fields[1].GetUInt64();
-    uint64 slot3   = fields[2].GetUInt64();
+    uint64 slot1 = fields[0].GetUInt64();
+    uint64 slot2 = fields[1].GetUInt64();
+    uint64 slot3 = fields[2].GetUInt64();
     m_loadoutFlags = fields[3].GetUInt8();
 
     // update flag and spell state for new alt characters
@@ -202,7 +201,7 @@ void BattlePetMgr::SaveSlotsToDb(SQLTransaction& trans)
     stmt->setUInt64(1, GetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_1));
     stmt->setUInt64(2, GetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_2));
     stmt->setUInt64(3, GetLoadoutSlot(BATTLE_PET_LOADOUT_SLOT_3));
-    stmt->setUInt8 (4, GetLoadoutFlags());
+    stmt->setUInt8(4, GetLoadoutFlags());
     trans->Append(stmt);
 
     m_loadoutSave = false;
@@ -348,10 +347,10 @@ void BattlePetMgr::Create(uint16 speciesId)
     if (speciesCount >= BATTLE_PET_MAX_JOURNAL_SPECIES)
         return;
 
-    uint64 id     = sObjectMgr->BattlePetGetNewId();
-    uint8 breed   = sObjectMgr->BattlePetGetRandomBreed(speciesId);
+    uint64 id = sObjectMgr->BattlePetGetNewId();
+    uint8 breed = sObjectMgr->BattlePetGetRandomBreed(speciesId);
     uint8 quality = sObjectMgr->BattlePetGetRandomQuality(speciesId);
-    uint8 level   = sWorld->getIntConfig(WorldIntConfigs::CONFIG_BATTLE_PET_INITIAL_LEVEL);
+    uint8 level = sWorld->getIntConfig(WorldIntConfigs::CONFIG_BATTLE_PET_INITIAL_LEVEL);
 
     BattlePet* battlePet = new BattlePet(id, speciesId, level, quality, breed);
     m_battlePetSet.insert(battlePet);
@@ -428,7 +427,7 @@ void BattlePetMgr::SendBattlePetJournal()
 
     size_t writePos = data.bitwpos();
     data.WriteBits(petCount, 19);               // placeholder
-    
+
     for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); ++citr)
     {
         BattlePet const* battlePet = *citr;

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,13 +7,13 @@
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
-#include <ace/Singleton.h>
 #include <ace/Atomic_Op.h>
+#include <ace/Singleton.h>
 
 #include "DBCStores.h"
 #include "SharedDefines.h"
-#include "World.h"
 #include "Weather.h"
+#include "World.h"
 
 class AuctionHouseObject;
 class AuraScript;

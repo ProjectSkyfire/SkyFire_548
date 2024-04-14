@@ -1,28 +1,28 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
+#include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "DatabaseEnv.h"
 
 #include "AccountMgr.h"
 #include "CellImpl.h"
 #include "Chat.h"
+#include "ChatLink.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "Language.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "UpdateMask.h"
-#include "SpellMgr.h"
 #include "ScriptMgr.h"
-#include "ChatLink.h"
+#include "SpellMgr.h"
+#include "UpdateMask.h"
 
 bool ChatHandler::load_command_table = true;
 
@@ -47,8 +47,7 @@ std::vector<ChatCommand> const& ChatHandler::getCommandTable()
                 std::string name = fields[0].GetString();
 
                 SetDataForCommandInTable(commandTableCache, name.c_str(), fields[1].GetUInt16(), fields[2].GetString(), name);
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
         }
     }
 
@@ -57,7 +56,7 @@ std::vector<ChatCommand> const& ChatHandler::getCommandTable()
 
 std::string ChatHandler::PGetParseString(int32 entry, ...) const
 {
-    const char *format = GetSkyFireString(entry);
+    const char* format = GetSkyFireString(entry);
     char str[1024];
     va_list ap;
     va_start(ap, entry);
@@ -66,7 +65,7 @@ std::string ChatHandler::PGetParseString(int32 entry, ...) const
     return std::string(str);
 }
 
-const char *ChatHandler::GetSkyFireString(int32 entry) const
+const char* ChatHandler::GetSkyFireString(int32 entry) const
 {
     return m_session->GetSkyFireString(entry);
 }
@@ -151,7 +150,7 @@ bool ChatHandler::hasStringAbbr(const char* name, const char* part)
     return true;
 }
 
-void ChatHandler::SendSysMessage(const char *str)
+void ChatHandler::SendSysMessage(const char* str)
 {
     WorldPacket data;
 
@@ -168,7 +167,7 @@ void ChatHandler::SendSysMessage(const char *str)
     free(buf);
 }
 
-void ChatHandler::SendGlobalSysMessage(const char *str)
+void ChatHandler::SendGlobalSysMessage(const char* str)
 {
     // Chat output
     WorldPacket data;
@@ -186,7 +185,7 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
     free(buf);
 }
 
-void ChatHandler::SendGlobalGMSysMessage(const char *str)
+void ChatHandler::SendGlobalGMSysMessage(const char* str)
 {
     // Chat output
     WorldPacket data;
@@ -210,19 +209,19 @@ void ChatHandler::SendSysMessage(int32 entry)
 
 void ChatHandler::PSendSysMessage(int32 entry, ...)
 {
-    const char *format = GetSkyFireString(entry);
+    const char* format = GetSkyFireString(entry);
     va_list ap;
-    char str [2048];
+    char str[2048];
     va_start(ap, entry);
     vsnprintf(str, 2048, format, ap);
     va_end(ap);
     SendSysMessage(str);
 }
 
-void ChatHandler::PSendSysMessage(const char *format, ...)
+void ChatHandler::PSendSysMessage(const char* format, ...)
 {
     va_list ap;
-    char str [2048];
+    char str[2048];
     va_start(ap, format);
     vsnprintf(str, 2048, format, ap);
     va_end(ap);
@@ -370,7 +369,7 @@ bool ChatHandler::SetDataForCommandInTable(std::vector<ChatCommand>& table, char
             SF_LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
 
         table[i].Permission = permission;
-        table[i].Help          = help;
+        table[i].Help = help;
         return true;
     }
 
@@ -425,19 +424,19 @@ bool ChatHandler::ParseCommands(char const* text)
 
 bool ChatHandler::isValidChatMessage(char const* message)
 {
-/*
-Valid examples:
-|cffa335ee|Hitem:812:0:0:0:0:0:0:0:70|h[Glowing Brightwood Staff]|h|r
-|cff808080|Hquest:2278:47|h[The Platinum Discs]|h|r
-|cffffd000|Htrade:4037:1:150:1:6AAAAAAAAAAAAAAAAAAAAAAOAADAAAAAAAAAAAAAAAAIAAAAAAAAA|h[Engineering]|h|r
-|cff4e96f7|Htalent:2232:-1|h[Taste for Blood]|h|r
-|cff71d5ff|Hspell:21563|h[Command]|h|r
-|cffffd000|Henchant:3919|h[Engineering: Rough Dynamite]|h|r
-|cffffff00|Hachievement:546:0000000000000001:0:0:0:-1:0:0:0:0|h[Safe Deposit]|h|r
-|cff66bbff|Hglyph:21:762|h[Glyph of Bladestorm]|h|r
+    /*
+    Valid examples:
+    |cffa335ee|Hitem:812:0:0:0:0:0:0:0:70|h[Glowing Brightwood Staff]|h|r
+    |cff808080|Hquest:2278:47|h[The Platinum Discs]|h|r
+    |cffffd000|Htrade:4037:1:150:1:6AAAAAAAAAAAAAAAAAAAAAAOAADAAAAAAAAAAAAAAAAIAAAAAAAAA|h[Engineering]|h|r
+    |cff4e96f7|Htalent:2232:-1|h[Taste for Blood]|h|r
+    |cff71d5ff|Hspell:21563|h[Command]|h|r
+    |cffffd000|Henchant:3919|h[Engineering: Rough Dynamite]|h|r
+    |cffffff00|Hachievement:546:0000000000000001:0:0:0:-1:0:0:0:0|h[Safe Deposit]|h|r
+    |cff66bbff|Hglyph:21:762|h[Glyph of Bladestorm]|h|r
 
-| will be escaped to ||
-*/
+    | will be escaped to ||
+    */
 
     if (strlen(message) > 255)
         return false;
@@ -579,9 +578,9 @@ bool ChatHandler::ShowHelpForCommand(std::vector<ChatCommand> const& table, cons
 }
 
 size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, ObjectGuid senderGUID, ObjectGuid receiverGUID, std::string const& message, uint8 chatTag,
-                                  std::string const& senderName /*= ""*/, std::string const& receiverName /*= ""*/,
-                                  uint32 achievementId /*= 0*/, bool gmMessage /*= false*/, std::string const& channelName /*= ""*/,
-                                  std::string const& addonPrefix /*= ""*/)
+    std::string const& senderName /*= ""*/, std::string const& receiverName /*= ""*/,
+    uint32 achievementId /*= 0*/, bool gmMessage /*= false*/, std::string const& channelName /*= ""*/,
+    std::string const& addonPrefix /*= ""*/)
 {
     bool hasAchievementId = (chatType == ChatMsg::CHAT_MSG_ACHIEVEMENT || chatType == ChatMsg::CHAT_MSG_GUILD_ACHIEVEMENT) && achievementId;
     bool hasLanguage = (language > Language::LANG_UNIVERSAL);
@@ -673,7 +672,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
     data.WriteBit(groupGUID[6]);
     data.WriteBit(groupGUID[7]);
 
-     if (chatTag)
+    if (chatTag)
         data.WriteBits(chatTag, 9);
 
     data.WriteBit(0); // Fake Bit
@@ -798,7 +797,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
 }
 
 size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, WorldObject const* sender, WorldObject const* receiver, std::string const& message,
-                                  uint32 achievementId /*= 0*/, std::string const& channelName /*= ""*/, LocaleConstant locale /*= DEFAULT_LOCALE*/, std::string const& addonPrefix /*= ""*/)
+    uint32 achievementId /*= 0*/, std::string const& channelName /*= ""*/, LocaleConstant locale /*= DEFAULT_LOCALE*/, std::string const& addonPrefix /*= ""*/)
 {
     uint64 senderGUID = 0;
     std::string senderName = "";
@@ -878,7 +877,7 @@ char* ChatHandler::extractKeyFromLink(char* text, char const* linkType, char** s
         return NULL;
 
     // skip spaces
-    while (*text == ' '||*text == '\t'||*text == '\b')
+    while (*text == ' ' || *text == '\t' || *text == '\b')
         ++text;
 
     if (!*text)
@@ -926,7 +925,7 @@ char* ChatHandler::extractKeyFromLink(char* text, char const* const* linkTypes, 
         return NULL;
 
     // skip spaces
-    while (*text == ' '||*text == '\t'||*text == '\b')
+    while (*text == ' ' || *text == '\t' || *text == '\b')
         ++text;
 
     if (!*text)
@@ -953,7 +952,7 @@ char* ChatHandler::extractKeyFromLink(char* text, char const* const* linkTypes, 
         tail = strtok(NULL, "");                            // tail
     }
     else
-        tail = text+1;                                      // skip first |
+        tail = text + 1;                                      // skip first |
 
     char* cLinkType = strtok(tail, ":");                    // linktype
     if (!cLinkType)
@@ -1023,11 +1022,11 @@ GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid
 
 enum SpellLinkType
 {
-    SPELL_LINK_SPELL   = 0,
-    SPELL_LINK_TALENT  = 1,
+    SPELL_LINK_SPELL = 0,
+    SPELL_LINK_TALENT = 1,
     SPELL_LINK_ENCHANT = 2,
-    SPELL_LINK_TRADE   = 3,
-    SPELL_LINK_GLYPH   = 4
+    SPELL_LINK_TRADE = 3,
+    SPELL_LINK_GLYPH = 4
 };
 
 static char const* const spellKeys[] =
@@ -1104,8 +1103,8 @@ GameTele const* ChatHandler::extractGameTeleFromLink(char* text)
 
 enum GuidLinkType
 {
-    SPELL_LINK_PLAYER     = 0,                              // must be first for selection in not link case
-    SPELL_LINK_CREATURE   = 1,
+    SPELL_LINK_PLAYER = 0,                              // must be first for selection in not link case
+    SPELL_LINK_CREATURE = 1,
     SPELL_LINK_GAMEOBJECT = 2
 };
 
@@ -1259,7 +1258,7 @@ char* ChatHandler::extractQuotedArg(char* args)
         return NULL;
 
     if (*args == '"')
-        return strtok(args+1, "\"");
+        return strtok(args + 1, "\"");
     else
     {
         char* space = strtok(args, "\"");
@@ -1290,7 +1289,7 @@ std::string ChatHandler::GetNameLink(Player* chr) const
     return playerLink(chr->GetName());
 }
 
-const char *CliHandler::GetSkyFireString(int32 entry) const
+const char* CliHandler::GetSkyFireString(int32 entry) const
 {
     return sObjectMgr->GetSkyFireStringForDBCLocale(entry);
 }
@@ -1301,7 +1300,7 @@ bool CliHandler::isAvailable(ChatCommand const& cmd) const
     return cmd.AllowConsole;
 }
 
-void CliHandler::SendSysMessage(const char *str)
+void CliHandler::SendSysMessage(const char* str)
 {
     m_print(m_callbackArg, str);
     m_print(m_callbackArg, "\r\n");
@@ -1317,9 +1316,9 @@ bool CliHandler::needReportToTarget(Player* /*chr*/) const
     return true;
 }
 
-bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player* &player, Group* &group, uint64 &guid, bool offline)
+bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player*& player, Group*& group, uint64& guid, bool offline)
 {
-    player  = NULL;
+    player = NULL;
     guid = 0;
 
     if (cname)
@@ -1354,7 +1353,7 @@ bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player* &player
             player = m_session->GetPlayer();
 
         if (!guid || !offline)
-            guid  = player->GetGUID();
+            guid = player->GetGUID();
         group = player->GetGroup();
     }
 

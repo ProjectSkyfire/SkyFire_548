@@ -1,9 +1,8 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ObjectAccessor.h"
 #include "CellImpl.h"
 #include "Corpse.h"
 #include "Creature.h"
@@ -15,6 +14,7 @@
 #include "Map.h"
 #include "MapInstanced.h"
 #include "MapManager.h"
+#include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"

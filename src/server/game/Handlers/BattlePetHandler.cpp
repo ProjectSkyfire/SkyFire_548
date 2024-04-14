@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -12,14 +12,14 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "TemporarySummon.h"
-#include "WorldSession.h"
 #include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::HandlePetBattleStartPvpMatchmaking(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_PET_BATTLE_START_PVP_MATCHMAKING");
 
-    WorldPacket data(SMSG_PET_BATTLE_QUEUE_STATUS, 4+4+4+4+4+4+4+4+4+8+1);
+    WorldPacket data(SMSG_PET_BATTLE_QUEUE_STATUS, 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 8 + 1);
 
     //CliRideTicket.RequesterGuid
     ObjectGuid guid = GetPlayer()->GetGUID();
@@ -45,7 +45,7 @@ void WorldSession::HandlePetBattleStartPvpMatchmaking(WorldPacket& recvData)
     data.WriteGuidBytes(guid, 5, 7);
     data << uint32(0); // 64 CliRideTicket.Id
     data.WriteGuidBytes(guid, 0);
-    
+
     for (uint8 i = 0; i < 3; i++)
         data << uint32(1); // SlotResult
 
@@ -317,8 +317,8 @@ void WorldSession::HandleBattlePetSetBattleSlot(WorldPacket& recvData)
 
 enum BattlePetFlagModes
 {
-    BATTLE_PET_FLAG_MODE_UNSET       = 0,
-    BATTLE_PET_FLAG_MODE_SET         = 3
+    BATTLE_PET_FLAG_MODE_UNSET = 0,
+    BATTLE_PET_FLAG_MODE_SET = 3
 };
 
 void WorldSession::HandleBattlePetSetFlags(WorldPacket& recvData)
@@ -454,7 +454,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     // origin position
     recvData >> petBattleRequest.Origin.z;
     recvData >> petBattleRequest.Origin.y;
-    recvData >> petBattleRequest.Origin.x; 
+    recvData >> petBattleRequest.Origin.x;
 
     recvData.ReadGuidMask(guid, 0);
     hasOrientation = recvData.ReadBit();
@@ -474,7 +474,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     petBattleRequest.Challenger = GetPlayer();
     petBattleRequest.Enemy = wildBattlePet;
 
-    
+
     WorldPacket data(SMSG_BATTLE_PET_LOCATION_FINALIZE, 100);
     data << petBattleRequest.Origin.x;
     data << petBattleRequest.Origin.y;
@@ -496,7 +496,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     if (petBattleRequest.Orientation)
         data << float(petBattleRequest.Orientation);
     _player->SendDirectMessage(&data);
-    
+
 
     //SMSG_BATTLE_PET_UPDATE_INIT starts the pet battle itself.
     WorldPacket data2(SMSG_BATTLE_PET_UPDATE_INIT, 1000);
@@ -516,7 +516,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
         data2.WriteBits(0, 21);                      // StateCount
     }
 
-    for (uint8 i=0; i < 2; i++)
+    for (uint8 i = 0; i < 2; i++)
     {
         bool hasRoundTimeSec = false;
         bool hasFrontPet = false;
@@ -528,7 +528,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
         data2.WriteBits(1, 2); // BattlePet Count
         data2.WriteBit(characterGuid[2]);
 
-        for (uint8 j=0; j < 1; j++)
+        for (uint8 j = 0; j < 1; j++)
         {
             ObjectGuid petEntry = 0;
 
@@ -538,7 +538,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
 
             uint8 abilityCount = 0;
             for (uint8 k = 0; k < 3; k++)
-                    abilityCount++;
+                abilityCount++;
 
             data2.WriteBit(petEntry[0]);
             data2.WriteBit(0); // flags
@@ -646,7 +646,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
 
     if (hasForfietPenalty)
         data2 << uint8(10);
-    
+
     data2 << uint8(1);
 
     data2.WriteGuidBytes(wildBattlePetGuid, 5, 4, 3, 2, 7, 0, 1, 6);

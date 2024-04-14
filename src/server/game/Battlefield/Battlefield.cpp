@@ -1,23 +1,23 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
-#include "ObjectAccessor.h"
-#include "ObjectMgr.h"
-#include "Map.h"
-#include "MapManager.h"
-#include "Group.h"
-#include "WorldPacket.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "CreatureTextMgr.h"
+#include "GridNotifiers.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "GroupMgr.h"
+#include "Map.h"
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "WorldPacket.h"
 
 Battlefield::~Battlefield()
 {
@@ -25,7 +25,7 @@ Battlefield::~Battlefield()
         delete itr->second;
 
     for (GraveyardVect::const_iterator itr = m_GraveyardList.begin(); itr != m_GraveyardList.end(); ++itr)
-        delete *itr;
+        delete* itr;
 }
 
 // Called when a player enters the zone
@@ -520,7 +520,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
 {
     if (Creature* stalker = GetCreature(StalkerGuid))
         // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
-        sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, ChatMsg::CHAT_MSG_BG_SYSTEM_NEUTRAL, Language::LANG_ADDON, TEXT_RANGE_ZONE);
+        sCreatureTextMgr->SendChat(stalker, (uint8)entry, 0, ChatMsg::CHAT_MSG_BG_SYSTEM_NEUTRAL, Language::LANG_ADDON, TEXT_RANGE_ZONE);
 }
 
 void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)
@@ -986,7 +986,7 @@ void BfCapturePoint::SendChangePhase()
         // send this too, sometimes the slider disappears, dunno why :(
         SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldState1, 1);
         // send these updates to only the ones in this objective
-        SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldstate2, (uint32) ceil((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
+        SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldstate2, (uint32)ceil((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
         // send this too, sometimes it resets :S
         SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldstate3, m_neutralValuePct);
     }
@@ -1086,7 +1086,7 @@ bool BfCapturePoint::Update(uint32 diff)
     }
 
     // get the difference of numbers
-    float fact_diff = ((float) m_activePlayers[0].size() - (float) m_activePlayers[1].size()) * diff / float(BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL);
+    float fact_diff = ((float)m_activePlayers[0].size() - (float)m_activePlayers[1].size()) * diff / float(BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL);
     if (G3D::fuzzyEq(fact_diff, 0.0f))
         return false;
 

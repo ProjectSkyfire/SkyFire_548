@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -8,8 +8,8 @@
 #include "DatabaseEnv.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
-#include "Util.h"
 #include "SHA1.h"
+#include "Util.h"
 #include "WorldSession.h"
 
 AccountMgr::AccountMgr() { }
@@ -339,7 +339,7 @@ uint32 AccountMgr::GetCharactersCount(uint32 accountId)
 
 bool AccountMgr::normalizeString(std::string& utf8String)
 {
-    wchar_t buffer[MAX_ACCOUNT_STR+1];
+    wchar_t buffer[MAX_ACCOUNT_STR + 1];
 
     size_t maxLength = MAX_ACCOUNT_STR;
     if (!Utf8toWStr(utf8String, buffer, maxLength))
@@ -347,7 +347,7 @@ bool AccountMgr::normalizeString(std::string& utf8String)
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
-    std::transform(&buffer[0], buffer+maxLength, &buffer[0], wcharToUpperOnlyLatin);
+    std::transform(&buffer[0], buffer + maxLength, &buffer[0], wcharToUpperOnlyLatin);
 #ifdef _MSC_VER
 #pragma warning(default: 4996)
 #endif
@@ -406,8 +406,7 @@ void AccountMgr::LoadRBAC()
         uint32 id = field[0].GetUInt32();
         _permissions[id] = new rbac::RBACPermission(id, field[1].GetString());
         ++count1;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading linked permissions");
     result = LoginDatabase.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC");
@@ -438,8 +437,7 @@ void AccountMgr::LoadRBAC()
         }
         permission->AddLinkedPermission(linkedPermissionId);
         ++count2;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
     result = LoginDatabase.Query("SELECT secId, permissionId FROM rbac_default_permissions ORDER BY secId ASC");
@@ -463,8 +461,7 @@ void AccountMgr::LoadRBAC()
 
         permissions->insert(field[1].GetUInt32());
         ++count3;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -523,7 +520,7 @@ bool AccountMgr::HasPermission(uint32 accountId, uint32 permissionId, uint32 rea
     bool hasPermission = rbac.HasPermission(permissionId);
 
     SF_LOG_DEBUG("rbac", "AccountMgr::HasPermission [AccountId: %u, PermissionId: %u, realmId: %d]: %u",
-                   accountId, permissionId, realmId, hasPermission);
+        accountId, permissionId, realmId, hasPermission);
     return hasPermission;
 }
 

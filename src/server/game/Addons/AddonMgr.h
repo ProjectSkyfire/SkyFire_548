@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,14 +7,14 @@
 #define SF_ADDONMGR_H
 
 #include "Define.h"
-#include <string>
 #include <list>
+#include <string>
 
 struct AddonInfo
 {
     AddonInfo(const std::string& name, uint8 enabled, uint32 crc, uint8 state, bool crcOrPubKey)
         : Name(name), Enabled(enabled), CRC(crc), State(state), UsePublicKeyOrCRC(crcOrPubKey)
-        { }
+    { }
 
     std::string Name;
     uint8 Enabled;

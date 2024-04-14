@@ -1,27 +1,27 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "Opcodes.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "Player.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "GroupMgr.h"
-#include "Group.h"
-#include "Formulas.h"
-#include "ObjectAccessor.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
-#include "MapManager.h"
+#include "Common.h"
+#include "Formulas.h"
+#include "Group.h"
+#include "GroupMgr.h"
 #include "InstanceSaveMgr.h"
-#include "MapInstanced.h"
-#include "Util.h"
 #include "LFGMgr.h"
+#include "MapInstanced.h"
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Player.h"
 #include "UpdateFieldFlags.h"
+#include "Util.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 Roll::Roll(uint64 _guid, LootItem const& li) : itemGUID(_guid), itemid(li.itemid),
 itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix), itemCount(li.count),
@@ -62,7 +62,7 @@ Group::~Group()
     while (!RollId.empty())
     {
         itr = RollId.begin();
-        Roll *r = *itr;
+        Roll* r = *itr;
         RollId.erase(itr);
         delete (r);
     }
@@ -75,7 +75,7 @@ Group::~Group()
             itr2->second.save->RemoveGroup(this);
 
     // Sub group counters clean up
-    delete [] m_subGroupsCounts;
+    delete[] m_subGroupsCounts;
 }
 
 bool Group::Create(Player* leader)
@@ -161,9 +161,9 @@ void Group::LoadGroupFromDB(Field* fields)
     m_lootThreshold = ItemQualities(fields[3].GetUInt8());
 
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
-        m_targetIcons[i] = fields[4+i].GetUInt32();
+        m_targetIcons[i] = fields[4 + i].GetUInt32();
 
-    m_groupType  = GroupType(fields[12].GetUInt8());
+    m_groupType = GroupType(fields[12].GetUInt8());
     if (m_groupType & GROUPTYPE_RAID)
         _initRaidSubGroupsCounter();
 
@@ -204,7 +204,7 @@ void Group::ChangeFlagEveryoneAssistant(bool apply)
     if (apply)
         m_groupType = GroupType(m_groupType | GROUPTYPE_EVERYONE_IS_ASSISTANT);
     else
-        m_groupType = GroupType(m_groupType &~GROUPTYPE_EVERYONE_IS_ASSISTANT);
+        m_groupType = GroupType(m_groupType & ~GROUPTYPE_EVERYONE_IS_ASSISTANT);
 
     this->SendUpdate();
 }
@@ -259,7 +259,7 @@ void Group::ConvertToGroup()
 
     if (m_subGroupsCounts)
     {
-        delete [] m_subGroupsCounts;
+        delete[] m_subGroupsCounts;
         m_subGroupsCounts = NULL;
     }
 
@@ -323,7 +323,7 @@ void Group::RemoveInvite(Player* player)
 
 void Group::RemoveAllInvites()
 {
-    for (InvitesList::iterator itr=m_invitees.begin(); itr != m_invitees.end(); ++itr)
+    for (InvitesList::iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
         if (*itr)
             (*itr)->SetGroupInvite(NULL);
 
@@ -371,11 +371,11 @@ bool Group::AddMember(Player* player)
     }
 
     MemberSlot member;
-    member.guid      = player->GetGUID();
-    member.name      = player->GetName();
-    member.group     = subGroup;
-    member.flags     = 0;
-    member.roles     = 0;
+    member.guid = player->GetGUID();
+    member.name = player->GetName();
+    member.group = subGroup;
+    member.flags = 0;
+    member.roles = 0;
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(subGroup);
@@ -518,7 +518,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod& method /*= GROUP_REMOV
             if (isBGGroup() || isBFGroup())
                 player->RemoveFromBattlegroundOrBattlefieldRaid();
             else
-            // Regular group
+                // Regular group
             {
                 if (player->GetOriginalGroup() == this)
                     player->SetOriginalGroup(NULL);
@@ -780,9 +780,9 @@ void Group::Disband(bool hideDestroy /* = false */)
 /***                   LOOT SYSTEM                     ***/
 /*********************************************************/
 
-void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll &r)
+void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll& r)
 {
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8+4+4+4+4+4+4+1));
+    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
     data << uint64(r.itemGUID);                             // guid of rolled item
     data << uint32(mapid);                                  // 3.3.3 mapid
     data << uint32(r.itemSlot);                             // itemslot
@@ -794,7 +794,7 @@ void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll &r)
     data << uint8(r.rollVoteMask);                          // roll type mask
     data << uint8(r.totalPlayersRolling);                   // maybe the number of players rolling for it???
 
-    for (Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
+    for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
     {
         Player* p = ObjectAccessor::FindPlayer(itr->first);
         if (!p || !p->GetSession())
@@ -830,7 +830,7 @@ void Group::SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p,
 
 void Group::SendLootRoll(uint64 sourceGuid, uint64 targetGuid, uint8 rollNumber, RollType rollType, Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1+1));
+    WorldPacket data(SMSG_LOOT_ROLL, (8 + 4 + 8 + 4 + 4 + 4 + 1 + 1 + 1));
     data << uint64(sourceGuid);                             // guid of the item rolled
     data << uint32(roll.itemSlot);                          // slot
     data << uint64(targetGuid);
@@ -854,7 +854,7 @@ void Group::SendLootRoll(uint64 sourceGuid, uint64 targetGuid, uint8 rollNumber,
 
 void Group::SendLootRollWon(uint64 sourceGuid, uint64 targetGuid, uint8 rollNumber, RollType rollType, Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+8+1+1));
+    WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
     data << uint64(sourceGuid);                             // guid of the item rolled
     data << uint32(roll.itemSlot);                          // slot
     data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
@@ -877,7 +877,7 @@ void Group::SendLootRollWon(uint64 sourceGuid, uint64 targetGuid, uint8 rollNumb
 
 void Group::SendLootAllPassed(Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8+4+4+4+4));
+    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8 + 4 + 4 + 4 + 4));
     data << uint64(roll.itemGUID);                             // Guid of the item rolled
     data << uint32(roll.itemSlot);                             // Item loot slot
     data << uint32(roll.itemid);                               // The itemEntryId for the item that shall be rolled for
@@ -971,7 +971,7 @@ void Group::SendLooter(Creature* creature, Player* pLooter)
     data.WriteByteSeq(creatureGuid[0]);
     data.WriteByteSeq(creatureGuid[7]);
     data.WriteByteSeq(creatureGuid[4]);
-    
+
     BroadcastPacket(&data, false);
 }
 
@@ -1035,7 +1035,7 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
                 // If there is any "auto pass", broadcast the pass now.
                 if (r->totalPass)
                 {
-                    for (Roll::PlayerVote::const_iterator itr=r->playerVote.begin(); itr != r->playerVote.end(); ++itr)
+                    for (Roll::PlayerVote::const_iterator itr = r->playerVote.begin(); itr != r->playerVote.end(); ++itr)
                     {
                         Player* p = ObjectAccessor::FindPlayer(itr->first);
                         if (!p || !p->GetSession())
@@ -1423,10 +1423,10 @@ void Group::CountTheRoll(Rolls::iterator rollI)
         if (!roll->playerVote.empty())
         {
             uint8 maxresul = 0;
-            uint64 maxguid  = (*roll->playerVote.begin()).first;
+            uint64 maxguid = (*roll->playerVote.begin()).first;
             Player* player;
 
-            for (Roll::PlayerVote::const_iterator itr=roll->playerVote.begin(); itr != roll->playerVote.end(); ++itr)
+            for (Roll::PlayerVote::const_iterator itr = roll->playerVote.begin(); itr != roll->playerVote.end(); ++itr)
             {
                 if (itr->second != RollType::ROLL_NEED)
                     continue;
@@ -1435,7 +1435,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 SendLootRoll(0, itr->first, randomN, RollType::ROLL_NEED, *roll);
                 if (maxresul < randomN)
                 {
-                    maxguid  = itr->first;
+                    maxguid = itr->first;
                     maxresul = randomN;
                 }
             }
@@ -1483,7 +1483,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 SendLootRoll(0, itr->first, randomN, RollType(itr->second), *roll);
                 if (maxresul < randomN)
                 {
-                    maxguid  = itr->first;
+                    maxguid = itr->first;
                     maxresul = randomN;
                     rollvote = RollType(itr->second);
                 }
@@ -1547,7 +1547,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid, u
 
     // clean other icons
     if (targetGuid != 0)
-        for (int i=0; i<TARGETICONCOUNT; ++i)
+        for (int i = 0; i < TARGETICONCOUNT; ++i)
             if (m_targetIcons[i] == targetGuid)
                 SetTargetIcon(i, 0, 0, 0);
 
@@ -2511,7 +2511,7 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave* save, bool permanent, boo
     bind.perm = permanent;
     if (!load)
         SF_LOG_DEBUG("maps", "Group::BindToInstance: Group (guid: %u, storage id: %u) is now bound to map %d, instance %d, difficulty %d",
-        GUID_LOPART(GetGUID()), m_dbStoreId, save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
+            GUID_LOPART(GetGUID()), m_dbStoreId, save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
 
     return &bind;
 }
@@ -2690,7 +2690,7 @@ bool Group::SameSubGroup(uint64 guid1, uint64 guid2) const
 {
     member_citerator mslot2 = _getMemberCSlot(guid2);
     if (mslot2 == m_memberSlots.end())
-       return false;
+        return false;
     return SameSubGroup(guid1, &*mslot2);
 }
 
@@ -2712,7 +2712,7 @@ uint8 Group::GetMemberGroup(uint64 guid) const
 {
     member_citerator mslot = _getMemberCSlot(guid);
     if (mslot == m_memberSlots.end())
-       return (MAX_RAID_SUBGROUPS+1);
+        return (MAX_RAID_SUBGROUPS + 1);
     return mslot->group;
 }
 
@@ -2721,7 +2721,7 @@ void Group::SetBattlegroundGroup(Battleground* bg)
     m_bgGroup = bg;
 }
 
-void Group::SetBattlefieldGroup(Battlefield *bg)
+void Group::SetBattlefieldGroup(Battlefield* bg)
 {
     m_bfGroup = bg;
 }
@@ -2730,7 +2730,7 @@ void Group::SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag)
 {
     // Assistants, main assistants and main tanks are only available in raid groups
     if (!isRaidGroup())
-       return;
+        return;
 
     // Check if player is really in the raid
     member_witerator slot = _getMemberWSlot(guid);
@@ -2793,7 +2793,7 @@ bool Group::isRollLootActive() const
 Group::Rolls::iterator Group::GetRoll(uint64 Guid)
 {
     Rolls::iterator iter;
-    for (iter=RollId.begin(); iter != RollId.end(); ++iter)
+    for (iter = RollId.begin(); iter != RollId.end(); ++iter)
         if ((*iter)->itemGUID == Guid && (*iter)->isValid())
             return iter;
     return RollId.end();
@@ -2830,7 +2830,7 @@ void Group::_initRaidSubGroupsCounter()
     if (!m_subGroupsCounts)
         m_subGroupsCounts = new uint8[MAX_RAID_SUBGROUPS];
 
-    memset((void*)m_subGroupsCounts, 0, (MAX_RAID_SUBGROUPS)*sizeof(uint8));
+    memset((void*)m_subGroupsCounts, 0, (MAX_RAID_SUBGROUPS) * sizeof(uint8));
 
     for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
         ++m_subGroupsCounts[itr->group];

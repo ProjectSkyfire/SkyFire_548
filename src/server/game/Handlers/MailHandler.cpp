@@ -1,22 +1,22 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
+#include "GuildMgr.h"
+#include "Item.h"
+#include "Language.h"
+#include "Log.h"
 #include "Mail.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "Player.h"
-#include "Language.h"
-#include "DBCStores.h"
-#include "Item.h"
-#include "AccountMgr.h"
-#include "GuildMgr.h"
 
 void WorldSession::HandleSendMail(WorldPacket& recvData)
 {

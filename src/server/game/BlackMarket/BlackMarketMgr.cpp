@@ -1,22 +1,22 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "ObjectMgr.h"
-#include "Player.h"
-#include "World.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "DatabaseEnv.h"
-#include "DBCStores.h"
-#include "ScriptMgr.h"
 #include "AccountMgr.h"
 #include "BlackMarketMgr.h"
+#include "Common.h"
+#include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "Item.h"
 #include "Language.h"
 #include "Log.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 #include <vector>
 
 BlackMarketMgr::~BlackMarketMgr()
@@ -93,23 +93,23 @@ void BlackMarketMgr::LoadBlackMarketTemplates()
             blackmarket_template->Id = fields[0].GetUInt32();
             blackmarket_template->MarketId = fields[1].GetUInt32();
             blackmarket_template->SellerNPCEntry = fields[2].GetUInt32();
-            if (!sObjectMgr->GetCreatureTemplate(blackmarket_template->SellerNPCEntry)) 
+            if (!sObjectMgr->GetCreatureTemplate(blackmarket_template->SellerNPCEntry))
             {
-                SF_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing creature template (Entry: %u), ignoring", blackmarket_template->MarketId, blackmarket_template->SellerNPCEntry); 
-                continue; 
+                SF_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing creature template (Entry: %u), ignoring", blackmarket_template->MarketId, blackmarket_template->SellerNPCEntry);
+                continue;
             }
             blackmarket_template->ItemEntry = fields[3].GetUInt32();
             if (!sObjectMgr->GetItemTemplate(blackmarket_template->ItemEntry))
-            { 
-                SF_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing item template (Entry: %u), ignoring.", blackmarket_template->MarketId, blackmarket_template->ItemEntry); 
-                continue; 
+            {
+                SF_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have data for not existing item template (Entry: %u), ignoring.", blackmarket_template->MarketId, blackmarket_template->ItemEntry);
+                continue;
             }
             blackmarket_template->Quantity = fields[4].GetUInt32();
             if (!blackmarket_template->Quantity)
-            { 
-                SF_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have amount == 0 for (ItemEntry : %u) in `blackmarket_template` table, ignoring.", blackmarket_template->MarketId, blackmarket_template->ItemEntry); 
-                continue; 
-            } 
+            {
+                SF_LOG_ERROR("sql.sql", "Table `blackmarket_template` (MarketId: %u) have amount == 0 for (ItemEntry : %u) in `blackmarket_template` table, ignoring.", blackmarket_template->MarketId, blackmarket_template->ItemEntry);
+                continue;
+            }
             blackmarket_template->MinBid = fields[5].GetUInt32();
             blackmarket_template->Duration = fields[6].GetUInt32();
             blackmarket_template->Chance = fields[7].GetFloat();
@@ -154,8 +154,7 @@ void BlackMarketMgr::LoadBlackMarketAuctions()
             _auctions[auction->GetAuctionId()] = auction;
 
             ++count;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         CharacterDatabase.CommitTransaction(trans);
     }
@@ -221,7 +220,7 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
         if (templateList.empty())
             continue;
 
-        BlackMarketAuctionTemplate *selTemplate = GetTemplate(templateList[urand(0, templateList.size() - 1)]);
+        BlackMarketAuctionTemplate* selTemplate = GetTemplate(templateList[urand(0, templateList.size() - 1)]);
 
         if (!selTemplate)
             continue;
@@ -361,7 +360,7 @@ void BlackMarketMgr::SendAuctionOutbidded(BlackMarketAuction* auction, SQLTransa
             data << uint32(1);
             bidder->GetSession()->SendPacket(&data);
         }
-    
+
         MailDraft(auction->BuildAuctionMailSubject(BMMailAuctionAnswers::BM_AUCTION_OUTBIDDED), auction->BuildAuctionMailBody(auction->GetTemplate()->SellerNPCEntry))
             .AddMoney(auction->GetCurrentBid())
             .SendMailTo(trans, MailReceiver(bidder, auction->GetCurrentBidder()), auction, MAIL_CHECK_MASK_COPIED);

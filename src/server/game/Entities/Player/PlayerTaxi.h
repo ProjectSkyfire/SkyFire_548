@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -8,7 +8,7 @@
 
 class PlayerTaxi
 {
-    public:
+public:
     PlayerTaxi();
     ~PlayerTaxi()
     { }
@@ -25,15 +25,15 @@ class PlayerTaxi
     {
         uint8  field = uint8((nodeidx - 1) / 8);
         uint32 submask = 1 << ((nodeidx - 1) % 8);
-        return (m_taximask [field] & submask) == submask;
+        return (m_taximask[field] & submask) == submask;
     }
     bool SetTaximaskNode(uint32 nodeidx)
     {
         uint8  field = uint8((nodeidx - 1) / 8);
         uint32 submask = 1 << ((nodeidx - 1) % 8);
-        if ((m_taximask [field] & submask) != submask)
+        if ((m_taximask[field] & submask) != submask)
         {
-            m_taximask [field] |= submask;
+            m_taximask[field] |= submask;
             return true;
         }
         else
@@ -59,7 +59,7 @@ class PlayerTaxi
     }
     uint32 GetTaxiDestination() const
     {
-        return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations [1];
+        return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1];
     }
     uint32 GetCurrentTaxiPath() const;
     uint32 NextTaxiDestination()
@@ -73,7 +73,7 @@ class PlayerTaxi
     }
 
     friend std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
-    private:
+private:
     TaxiMask m_taximask;
     std::deque<uint32> m_TaxiDestinations;
 };

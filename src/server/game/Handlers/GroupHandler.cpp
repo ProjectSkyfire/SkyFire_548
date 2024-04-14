@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -142,7 +142,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         return;
     }
 
-    memberName = memberName.substr(0, memberName.find("-")); 
+    memberName = memberName.substr(0, memberName.find("-"));
     Player* player = sObjectAccessor->FindPlayerByName(memberName);
 
     // no player
@@ -806,7 +806,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
     if (!group->HasFreeSlotSubGroup(groupNr))
         return;
 
-    if(Player* movedPlayer = sObjectAccessor->FindPlayer(TargetGUID))
+    if (Player* movedPlayer = sObjectAccessor->FindPlayer(TargetGUID))
         group->ChangeMembersGroup(movedPlayer, groupNr);
 }
 

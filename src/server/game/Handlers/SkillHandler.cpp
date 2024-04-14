@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -8,8 +8,8 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
-#include "Player.h"
 #include "Pet.h"
+#include "Player.h"
 #include "UpdateMask.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -89,7 +89,7 @@ void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
     recvPacket.ReadByteSeq(guid[5]);
     recvPacket.ReadByteSeq(guid[7]);
     recvPacket.ReadByteSeq(guid[6]);
-    
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);

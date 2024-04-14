@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,11 +7,11 @@
 #define SKYFIRESERVER_GAMEOBJECT_H
 
 #include "Common.h"
+#include "DatabaseEnv.h"
+#include "LootMgr.h"
+#include "Object.h"
 #include "SharedDefines.h"
 #include "Unit.h"
-#include "Object.h"
-#include "LootMgr.h"
-#include "DatabaseEnv.h"
 
 class GameObjectAI;
 class Group;
@@ -548,7 +548,7 @@ union GameObjectValue
     //29 GAMEOBJECT_TYPE_CAPTURE_POINT
     struct
     {
-        OPvPCapturePoint *OPvPObj;
+        OPvPCapturePoint* OPvPObj;
     } CapturePoint;
     //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
     struct
@@ -567,10 +567,10 @@ struct GameObjectLocale
 // client side GO show states
 enum class GOState
 {
-    GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
-    GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
+    GO_STATE_ACTIVE = 0,                        // show in world as used and not reset (closed door open)
+    GO_STATE_READY = 1,                        // show in world as ready (closed door close)
     GO_STATE_ACTIVE_ALTERNATIVE = 2,                        // show in world as used in alt way and not reset (closed door open by cannon fire)
-    GO_STATE_PREPARE_TRANSPORT  = 24                        // reset transport to startpoint after endpoint
+    GO_STATE_PREPARE_TRANSPORT = 24                        // reset transport to startpoint after endpoint
 };
 
 // from `gameobject`
@@ -619,248 +619,248 @@ class GameObjectModel;
 
 class GameObject : public WorldObject, public GridObject<GameObject>, public MapObject
 {
-    public:
-        explicit GameObject();
-        ~GameObject();
+public:
+    explicit GameObject();
+    ~GameObject();
 
-        void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const OVERRIDE;
+    void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const OVERRIDE;
 
-        void AddToWorld() OVERRIDE;
-        void RemoveFromWorld() OVERRIDE;
-        void CleanupsBeforeDelete(bool finalCleanup = true) OVERRIDE;
+    void AddToWorld() OVERRIDE;
+    void RemoveFromWorld() OVERRIDE;
+    void CleanupsBeforeDelete(bool finalCleanup = true) OVERRIDE;
 
-        bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
-        void Update(uint32 p_time) OVERRIDE;
-        static GameObject* GetGameObject(WorldObject& object, uint64 guid);
-        GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
-        GameObjectData const* GetGOData() const { return m_goData; }
-        GameObjectValue const* GetGOValue() const { return &m_goValue; }
+    bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
+    void Update(uint32 p_time) OVERRIDE;
+    static GameObject* GetGameObject(WorldObject& object, uint64 guid);
+    GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
+    GameObjectData const* GetGOData() const { return m_goData; }
+    GameObjectValue const* GetGOValue() const { return &m_goValue; }
 
-        bool IsTransport() const;
-        bool IsDynTransport() const;
-        bool IsDestructibleBuilding() const;
+    bool IsTransport() const;
+    bool IsDynTransport() const;
+    bool IsDestructibleBuilding() const;
 
-        uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
+    uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
-        void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
+    void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
 
-        // overwrite WorldObject function for proper name localization
-        std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const OVERRIDE;
+    // overwrite WorldObject function for proper name localization
+    std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const OVERRIDE;
 
-        void SaveToDB();
-        void SaveToDB(uint32 mapid, uint32 spawnMask);
-        bool LoadFromDB(uint32 guid, Map* map) { return LoadGameObjectFromDB(guid, map, false); }
-        bool LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap = true);
-        void DeleteFromDB();
+    void SaveToDB();
+    void SaveToDB(uint32 mapid, uint32 spawnMask);
+    bool LoadFromDB(uint32 guid, Map* map) { return LoadGameObjectFromDB(guid, map, false); }
+    bool LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap = true);
+    void DeleteFromDB();
 
-        void SetOwnerGUID(uint64 owner)
+    void SetOwnerGUID(uint64 owner)
+    {
+        // Owner already found and different than expected owner - remove object from old owner
+        if (owner && GetOwnerGUID() && GetOwnerGUID() != owner)
         {
-            // Owner already found and different than expected owner - remove object from old owner
-            if (owner && GetOwnerGUID() && GetOwnerGUID() != owner)
-            {
-                ASSERT(false);
-            }
-            m_spawnedByDefault = false;                     // all object with owner is despawned after delay
-            SetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY, owner);
+            ASSERT(false);
         }
-        uint64 GetOwnerGUID() const { return GetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY); }
-        Unit* GetOwner() const;
+        m_spawnedByDefault = false;                     // all object with owner is despawned after delay
+        SetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY, owner);
+    }
+    uint64 GetOwnerGUID() const { return GetUInt64Value(GAMEOBJECT_FIELD_CREATED_BY); }
+    Unit* GetOwner() const;
 
-        void SetSpellId(uint32 id)
-        {
-            m_spawnedByDefault = false;                     // all summoned object is despawned after delay
-            m_spellId = id;
-        }
-        uint32 GetSpellId() const { return m_spellId;}
+    void SetSpellId(uint32 id)
+    {
+        m_spawnedByDefault = false;                     // all summoned object is despawned after delay
+        m_spellId = id;
+    }
+    uint32 GetSpellId() const { return m_spellId; }
 
-        time_t GetRespawnTime() const { return m_respawnTime; }
-        time_t GetRespawnTimeEx() const
-        {
-            time_t now = time(NULL);
-            if (m_respawnTime > now)
-                return m_respawnTime;
-            else
-                return now;
-        }
+    time_t GetRespawnTime() const { return m_respawnTime; }
+    time_t GetRespawnTimeEx() const
+    {
+        time_t now = time(NULL);
+        if (m_respawnTime > now)
+            return m_respawnTime;
+        else
+            return now;
+    }
 
-        void SetRespawnTime(int32 respawn)
-        {
-            m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
-            m_respawnDelayTime = respawn > 0 ? respawn : 0;
-        }
-        void Respawn();
-        bool isSpawned() const
-        {
-            return m_respawnDelayTime == 0 ||
-                (m_respawnTime > 0 && !m_spawnedByDefault) ||
-                (m_respawnTime == 0 && m_spawnedByDefault);
-        }
-        bool isSpawnedByDefault() const { return m_spawnedByDefault; }
-        void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
-        uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
-        void Refresh();
-        void Delete();
-        void getFishLoot(Loot* loot, Player* loot_owner);
-        GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0)); }
-        void SetGoState(GOState state);
-        GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 1)); }
-        void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 1, type); }
-        void SetGoHealth(uint8 health) { SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 3, health); }
-        uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 1); }
-        void SetGoArtKit(uint8 artkit);
-        uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3); }
-        void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3, animprogress); }
-        void SetGameobjectTransparence(uint8 transparency) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0, transparency); }
-        static void SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid = 0);
-        bool SetPhased(uint32 id, bool update, bool apply) OVERRIDE;
-        void SetPhaseMask(uint32 newPhaseMask, bool update) OVERRIDE;
-        void EnableCollision(bool enable);
+    void SetRespawnTime(int32 respawn)
+    {
+        m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
+        m_respawnDelayTime = respawn > 0 ? respawn : 0;
+    }
+    void Respawn();
+    bool isSpawned() const
+    {
+        return m_respawnDelayTime == 0 ||
+            (m_respawnTime > 0 && !m_spawnedByDefault) ||
+            (m_respawnTime == 0 && m_spawnedByDefault);
+    }
+    bool isSpawnedByDefault() const { return m_spawnedByDefault; }
+    void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
+    uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
+    void Refresh();
+    void Delete();
+    void getFishLoot(Loot* loot, Player* loot_owner);
+    GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0)); }
+    void SetGoState(GOState state);
+    GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 1)); }
+    void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 1, type); }
+    void SetGoHealth(uint8 health) { SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 3, health); }
+    uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 1); }
+    void SetGoArtKit(uint8 artkit);
+    uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3); }
+    void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 3, animprogress); }
+    void SetGameobjectTransparence(uint8 transparency) { SetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 0, transparency); }
+    static void SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid = 0);
+    bool SetPhased(uint32 id, bool update, bool apply) OVERRIDE;
+    void SetPhaseMask(uint32 newPhaseMask, bool update) OVERRIDE;
+    void EnableCollision(bool enable);
 
-        void Use(Unit* user);
+    void Use(Unit* user);
 
-        LootState getLootState() const { return m_lootState; }
-        // Note: unit is only used when s = GO_ACTIVATED
-        void SetLootState(LootState s, Unit* unit = NULL);
+    LootState getLootState() const { return m_lootState; }
+    // Note: unit is only used when s = GO_ACTIVATED
+    void SetLootState(LootState s, Unit* unit = NULL);
 
-        uint16 GetLootMode() const { return m_LootMode; }
-        bool HasLootMode(uint16 lootMode) const { return m_LootMode & lootMode; }
-        void SetLootMode(uint16 lootMode) { m_LootMode = lootMode; }
-        void AddLootMode(uint16 lootMode) { m_LootMode |= lootMode; }
-        void RemoveLootMode(uint16 lootMode) { m_LootMode &= ~lootMode; }
-        void ResetLootMode() { m_LootMode = LOOT_MODE_DEFAULT; }
+    uint16 GetLootMode() const { return m_LootMode; }
+    bool HasLootMode(uint16 lootMode) const { return m_LootMode & lootMode; }
+    void SetLootMode(uint16 lootMode) { m_LootMode = lootMode; }
+    void AddLootMode(uint16 lootMode) { m_LootMode |= lootMode; }
+    void RemoveLootMode(uint16 lootMode) { m_LootMode &= ~lootMode; }
+    void ResetLootMode() { m_LootMode = LOOT_MODE_DEFAULT; }
 
-        void AddToSkillupList(uint32 PlayerGuidLow) { m_SkillupList.push_back(PlayerGuidLow); }
-        bool IsInSkillupList(uint32 PlayerGuidLow) const
-        {
-            for (std::list<uint32>::const_iterator i = m_SkillupList.begin(); i != m_SkillupList.end(); ++i)
-                if (*i == PlayerGuidLow)
-                    return true;
+    void AddToSkillupList(uint32 PlayerGuidLow) { m_SkillupList.push_back(PlayerGuidLow); }
+    bool IsInSkillupList(uint32 PlayerGuidLow) const
+    {
+        for (std::list<uint32>::const_iterator i = m_SkillupList.begin(); i != m_SkillupList.end(); ++i)
+            if (*i == PlayerGuidLow)
+                return true;
 
-            return false;
-        }
-        void ClearSkillupList() { m_SkillupList.clear(); }
+        return false;
+    }
+    void ClearSkillupList() { m_SkillupList.clear(); }
 
-        void AddUniqueUse(Player* player);
-        void AddUse() { ++m_usetimes; }
+    void AddUniqueUse(Player* player);
+    void AddUse() { ++m_usetimes; }
 
-        uint32 GetUseCount() const { return m_usetimes; }
-        uint32 GetUniqueUseCount() const { return m_unique_users.size(); }
+    uint32 GetUseCount() const { return m_usetimes; }
+    uint32 GetUniqueUseCount() const { return m_unique_users.size(); }
 
-        void SaveRespawnTime() OVERRIDE;
+    void SaveRespawnTime() OVERRIDE;
 
-        Loot        loot;
+    Loot        loot;
 
-        Player* GetLootRecipient() const;
-        Group* GetLootRecipientGroup() const;
-        void SetLootRecipient(Unit* unit);
-        bool IsLootAllowedFor(Player const* player) const;
-        bool HasLootRecipient() const { return m_lootRecipient || m_lootRecipientGroup; }
-        uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
-        uint32 lootingGroupLowGUID;                         // used to find group which is looting
+    Player* GetLootRecipient() const;
+    Group* GetLootRecipientGroup() const;
+    void SetLootRecipient(Unit* unit);
+    bool IsLootAllowedFor(Player const* player) const;
+    bool HasLootRecipient() const { return m_lootRecipient || m_lootRecipientGroup; }
+    uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
+    uint32 lootingGroupLowGUID;                         // used to find group which is looting
 
-        bool hasQuest(uint32 quest_id) const OVERRIDE;
-        bool hasInvolvedQuest(uint32 quest_id) const OVERRIDE;
-        bool ActivateToQuest(Player* target) const;
-        void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false, Unit* user = NULL);
-                                                            // 0 = use `gameobject`.`spawntimesecs`
-        void ResetDoorOrButton();
+    bool hasQuest(uint32 quest_id) const OVERRIDE;
+    bool hasInvolvedQuest(uint32 quest_id) const OVERRIDE;
+    bool ActivateToQuest(Player* target) const;
+    void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false, Unit* user = NULL);
+    // 0 = use `gameobject`.`spawntimesecs`
+    void ResetDoorOrButton();
 
-        void TriggeringLinkedGameObject(uint32 trapEntry, Unit* target);
+    void TriggeringLinkedGameObject(uint32 trapEntry, Unit* target);
 
-        bool IsAlwaysVisibleFor(WorldObject const* seer) const OVERRIDE;
-        bool IsInvisibleDueToDespawn() const OVERRIDE;
+    bool IsAlwaysVisibleFor(WorldObject const* seer) const OVERRIDE;
+    bool IsInvisibleDueToDespawn() const OVERRIDE;
 
-        uint8 getLevelForTarget(WorldObject const* target) const OVERRIDE
-        {
-            if (Unit* owner = GetOwner())
-                return owner->getLevelForTarget(target);
+    uint8 getLevelForTarget(WorldObject const* target) const OVERRIDE
+    {
+        if (Unit* owner = GetOwner())
+            return owner->getLevelForTarget(target);
 
-            return 1;
-        }
+        return 1;
+    }
 
-        GameObject* LookupFishingHoleAround(float range);
+    GameObject* LookupFishingHoleAround(float range);
 
-        void CastSpell(Unit* target, uint32 spell);
-        void SendCustomAnim(uint32 anim);
-        bool IsInRange(float x, float y, float z, float radius) const;
+    void CastSpell(Unit* target, uint32 spell);
+    void SendCustomAnim(uint32 anim);
+    bool IsInRange(float x, float y, float z, float radius) const;
 
-        void ModifyHealth(int32 change, Unit* attackerOrHealer = NULL, uint32 spellId = 0);
-        // sets GameObject type 33 destruction flags and optionally default health for that state
-        void SetDestructibleState(GameObjectDestructibleState state, Player* eventInvoker = NULL, bool setHealth = false);
-        GameObjectDestructibleState GetDestructibleState() const
-        {
-            if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DESTROYED))
-                return GO_DESTRUCTIBLE_DESTROYED;
-            if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED))
-                return GO_DESTRUCTIBLE_DAMAGED;
-            return GO_DESTRUCTIBLE_INTACT;
-        }
+    void ModifyHealth(int32 change, Unit* attackerOrHealer = NULL, uint32 spellId = 0);
+    // sets GameObject type 33 destruction flags and optionally default health for that state
+    void SetDestructibleState(GameObjectDestructibleState state, Player* eventInvoker = NULL, bool setHealth = false);
+    GameObjectDestructibleState GetDestructibleState() const
+    {
+        if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DESTROYED))
+            return GO_DESTRUCTIBLE_DESTROYED;
+        if (HasFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_DAMAGED))
+            return GO_DESTRUCTIBLE_DAMAGED;
+        return GO_DESTRUCTIBLE_INTACT;
+    }
 
-        void EventInform(uint32 eventId);
+    void EventInform(uint32 eventId);
 
-        uint64 GetRotation() const { return m_rotation; }
-        virtual uint32 GetScriptId() const { return GetGOInfo()->ScriptId; }
-        GameObjectAI* AI() const { return m_AI; }
+    uint64 GetRotation() const { return m_rotation; }
+    virtual uint32 GetScriptId() const { return GetGOInfo()->ScriptId; }
+    GameObjectAI* AI() const { return m_AI; }
 
-        std::string GetAIName() const;
-        void SetDisplayId(uint32 displayid);
-        uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_FIELD_DISPLAY_ID); }
+    std::string GetAIName() const;
+    void SetDisplayId(uint32 displayid);
+    uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_FIELD_DISPLAY_ID); }
 
-        GameObjectModel* m_model;
-        void GetRespawnPosition(float &x, float &y, float &z, float* ori = NULL) const;
+    GameObjectModel* m_model;
+    void GetRespawnPosition(float& x, float& y, float& z, float* ori = NULL) const;
 
-        Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
-        Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
+    Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
+    Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
 
-        float GetStationaryX() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
-        float GetStationaryY() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
-        float GetStationaryZ() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
-        float GetStationaryO() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
+    float GetStationaryX() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
+    float GetStationaryY() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
+    float GetStationaryZ() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
+    float GetStationaryO() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
 
-        void UpdateModelPosition();
+    void UpdateModelPosition();
 
-        uint32 GetGOStateValue(GOState state);
-    protected:
-        bool AIM_Initialize();
-        GameObjectModel* CreateModel();
-        void UpdateModel();                                 // updates model in case displayId were changed
-        uint32      m_spellId;
-        time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
-        uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
-        LootState   m_lootState;
-        bool        m_spawnedByDefault;
-        time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
-                                                            // For traps this: spell casting cooldown, for doors/buttons: reset time.
-        std::list<uint32> m_SkillupList;
+    uint32 GetGOStateValue(GOState state);
+protected:
+    bool AIM_Initialize();
+    GameObjectModel* CreateModel();
+    void UpdateModel();                                 // updates model in case displayId were changed
+    uint32      m_spellId;
+    time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
+    uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
+    LootState   m_lootState;
+    bool        m_spawnedByDefault;
+    time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
+    // For traps this: spell casting cooldown, for doors/buttons: reset time.
+    std::list<uint32> m_SkillupList;
 
-        Player* m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
-        std::set<uint64> m_unique_users;
-        uint32 m_usetimes;
+    Player* m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
+    std::set<uint64> m_unique_users;
+    uint32 m_usetimes;
 
-        typedef std::map<uint32, uint64> ChairSlotAndUser;
-        ChairSlotAndUser ChairListSlots;
+    typedef std::map<uint32, uint64> ChairSlotAndUser;
+    ChairSlotAndUser ChairListSlots;
 
-        uint32 m_DBTableGuid;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
-        GameObjectTemplate const* m_goInfo;
-        GameObjectData const* m_goData;
-        GameObjectValue m_goValue;
+    uint32 m_DBTableGuid;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
+    GameObjectTemplate const* m_goInfo;
+    GameObjectData const* m_goData;
+    GameObjectValue m_goValue;
 
-        uint64 m_rotation;
-        Position m_stationaryPosition;
+    uint64 m_rotation;
+    Position m_stationaryPosition;
 
-        uint64 m_lootRecipient;
-        uint32 m_lootRecipientGroup;
-        uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
-    private:
-        void RemoveFromOwner();
-        void SwitchDoorOrButton(bool activate, bool alternative = false);
+    uint64 m_lootRecipient;
+    uint32 m_lootRecipientGroup;
+    uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
+private:
+    void RemoveFromOwner();
+    void SwitchDoorOrButton(bool activate, bool alternative = false);
 
-        //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
-        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const OVERRIDE
-        {
-            //! Following check does check 3d distance
-            return IsInRange(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), dist2compare);
-        }
-        GameObjectAI* m_AI;
+    //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
+    bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const OVERRIDE
+    {
+        //! Following check does check 3d distance
+        return IsInRange(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), dist2compare);
+    }
+    GameObjectAI* m_AI;
 };
 #endif

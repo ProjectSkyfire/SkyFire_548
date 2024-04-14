@@ -1,27 +1,27 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
 #include "Common.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "World.h"
-#include "ObjectAccessor.h"
+#include "Item.h"
+#include "Language.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "Item.h"
-#include "Spell.h"
 #include "SocialMgr.h"
-#include "Language.h"
-#include "AccountMgr.h"
+#include "Spell.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::SendTradeStatus(TradeStatus status)
 {
     WorldPacket data;
 
-    data.Initialize(SMSG_TRADE_STATUS, 1+4+4);
+    data.Initialize(SMSG_TRADE_STATUS, 1 + 4 + 4);
     data.WriteBit(0); // unk bit, usually 0
     data.WriteBits(status, 5);
 
@@ -73,14 +73,14 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
 {
     TradeData* view_trade = trader_data ? _player->GetTradeData()->GetTraderData() : _player->GetTradeData();
 
-    ByteBuffer itemData(7*2 + 7*4 + 3*4 + 3*4 + 1);
+    ByteBuffer itemData(7 * 2 + 7 * 4 + 3 * 4 + 3 * 4 + 1);
 
     uint8 count = 0;
     for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
         if (view_trade->GetItem(TradeSlots(i)))
             ++count;
 
-    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 4*6 + 8 + 1 + 3 + count * 70);
+    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 4 * 6 + 8 + 1 + 3 + count * 70);
     data << uint32(0);                                      // this value must be equal to value from TRADE_STATUS_INITIATED status packet (different value for different players to block multiple trades?)
     data << uint32(0);                                      // unk 2
     data << uint32(view_trade->GetSpell());                 // spell casted on lowest slot item
@@ -209,7 +209,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 
                 // adjust time (depends on /played)
                 if (myItems[i]->HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
-                    myItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, trader->GetTotalPlayedTime()-(_player->GetTotalPlayedTime()-myItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
+                    myItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, trader->GetTotalPlayedTime() - (_player->GetTotalPlayedTime() - myItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
                 // store
                 trader->MoveItemToInventory(traderDst, myItems[i], true, true);
             }
@@ -227,7 +227,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 
                 // adjust time (depends on /played)
                 if (hisItems[i]->HasFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
-                    hisItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, _player->GetTotalPlayedTime()-(trader->GetTotalPlayedTime()-hisItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
+                    hisItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, _player->GetTotalPlayedTime() - (trader->GetTotalPlayedTime() - hisItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
                 // store
                 _player->MoveItemToInventory(playerDst, hisItems[i], true, true);
             }
@@ -261,7 +261,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 
 //==============================================================
 
-static void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item* *myItems, Item* *hisItems)
+static void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item** myItems, Item** hisItems)
 {
     myTrade->SetInAcceptProcess(true);
     hisTrade->SetInAcceptProcess(true);
@@ -292,7 +292,7 @@ static void clearAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade)
     hisTrade->SetInAcceptProcess(false);
 }
 
-static void clearAcceptTradeMode(Item* *myItems, Item* *hisItems)
+static void clearAcceptTradeMode(Item** myItems, Item** hisItems)
 {
     // clear 'in-trade' flag
     for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
@@ -316,7 +316,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
     if (!his_trade)
         return;
 
-    Item* myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
+    Item* myItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
     Item* hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
 
     // set before checks for propertly undo at problems (it already set in to client)
@@ -705,7 +705,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_TRADE) && pOther->GetTeam() !=_player->GetTeam())
+    if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_TRADE) && pOther->GetTeam() != _player->GetTeam())
     {
         SendTradeStatus(TRADE_STATUS_WRONG_FACTION);
         return;
@@ -727,7 +727,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     _player->m_trade = new TradeData(_player, pOther);
     pOther->m_trade = new TradeData(pOther, _player);
 
-    WorldPacket data(SMSG_TRADE_STATUS, 2+7);
+    WorldPacket data(SMSG_TRADE_STATUS, 2 + 7);
     data.WriteBit(0); // unk bit, usually 0
     data.WriteBits(TRADE_STATUS_PROPOSED, 5);
 

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,37 +11,37 @@
 template<class T>
 class FleeingMovementGenerator : public MovementGeneratorMedium< T, FleeingMovementGenerator<T> >
 {
-    public:
-        FleeingMovementGenerator(uint64 fright) : i_frightGUID(fright), i_nextCheckTime(0) { }
+public:
+    FleeingMovementGenerator(uint64 fright) : i_frightGUID(fright), i_nextCheckTime(0) { }
 
-        void DoInitialize(T*);
-        void DoFinalize(T*);
-        void DoReset(T*);
-        bool DoUpdate(T*, uint32);
+    void DoInitialize(T*);
+    void DoFinalize(T*);
+    void DoReset(T*);
+    bool DoUpdate(T*, uint32);
 
-        MovementGeneratorType GetMovementGeneratorType() { return FLEEING_MOTION_TYPE; }
+    MovementGeneratorType GetMovementGeneratorType() { return FLEEING_MOTION_TYPE; }
 
-    private:
-        void _setTargetLocation(T*);
-        void _getPoint(T*, float &x, float &y, float &z);
+private:
+    void _setTargetLocation(T*);
+    void _getPoint(T*, float& x, float& y, float& z);
 
-        uint64 i_frightGUID;
-        TimeTracker i_nextCheckTime;
+    uint64 i_frightGUID;
+    TimeTracker i_nextCheckTime;
 };
 
 class TimedFleeingMovementGenerator : public FleeingMovementGenerator<Creature>
 {
-    public:
-        TimedFleeingMovementGenerator(uint64 fright, uint32 time) :
-            FleeingMovementGenerator<Creature>(fright),
-            i_totalFleeTime(time) { }
+public:
+    TimedFleeingMovementGenerator(uint64 fright, uint32 time) :
+        FleeingMovementGenerator<Creature>(fright),
+        i_totalFleeTime(time) { }
 
-        MovementGeneratorType GetMovementGeneratorType() { return TIMED_FLEEING_MOTION_TYPE; }
-        bool Update(Unit*, uint32);
-        void Finalize(Unit*);
+    MovementGeneratorType GetMovementGeneratorType() { return TIMED_FLEEING_MOTION_TYPE; }
+    bool Update(Unit*, uint32);
+    void Finalize(Unit*);
 
-    private:
-        TimeTracker i_totalFleeTime;
+private:
+    TimeTracker i_totalFleeTime;
 };
 
 #endif

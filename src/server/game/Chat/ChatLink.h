@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,8 +7,8 @@
 #define SKYFIRESERVER_CHATLINK_H
 
 #include "SharedDefines.h"
-#include <sstream>
 #include <list>
+#include <sstream>
 
 struct ItemLocale;
 struct ItemTemplate;

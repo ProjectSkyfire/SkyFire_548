@@ -1,19 +1,19 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "World.h"
-#include "ObjectMgr.h"
+#include "GossipDef.h"
+#include "Guild.h"
 #include "GuildMgr.h"
 #include "Log.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
-#include "Guild.h"
-#include "GossipDef.h"
 #include "SocialMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
@@ -255,16 +255,16 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid playerGuid;
 
-    playerGuid[1]     = recvPacket.ReadBit();
+    playerGuid[1] = recvPacket.ReadBit();
     uint32 notelength = recvPacket.ReadBits(8);            // note size
-    playerGuid[4]     = recvPacket.ReadBit();
-    playerGuid[2]     = recvPacket.ReadBit();
-    bool isPublic     = recvPacket.ReadBit();              // 0 == Officer, 1 == Public
-    playerGuid[3]     = recvPacket.ReadBit();
-    playerGuid[5]     = recvPacket.ReadBit();
-    playerGuid[0]     = recvPacket.ReadBit();
-    playerGuid[6]     = recvPacket.ReadBit();
-    playerGuid[7]     = recvPacket.ReadBit();
+    playerGuid[4] = recvPacket.ReadBit();
+    playerGuid[2] = recvPacket.ReadBit();
+    bool isPublic = recvPacket.ReadBit();              // 0 == Officer, 1 == Public
+    playerGuid[3] = recvPacket.ReadBit();
+    playerGuid[5] = recvPacket.ReadBit();
+    playerGuid[0] = recvPacket.ReadBit();
+    playerGuid[6] = recvPacket.ReadBit();
+    playerGuid[7] = recvPacket.ReadBit();
 
     recvPacket.ReadByteSeq(playerGuid[5]);
     recvPacket.ReadByteSeq(playerGuid[1]);
@@ -712,7 +712,7 @@ void WorldSession::HandleGuildBankLogQuery(WorldPacket& recvPacket)
         guild->SendBankLog(this, tabId);
 }
 
-void WorldSession::HandleQueryGuildBankTabText(WorldPacket &recvPacket)
+void WorldSession::HandleQueryGuildBankTabText(WorldPacket& recvPacket)
 {
     uint32 tabId;
     recvPacket >> tabId;

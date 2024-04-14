@@ -1,17 +1,17 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "UnitAI.h"
-#include "Player.h"
 #include "Creature.h"
-#include "SpellAuras.h"
-#include "SpellAuraEffects.h"
-#include "SpellMgr.h"
-#include "SpellInfo.h"
-#include "Spell.h"
 #include "CreatureAIImpl.h"
+#include "Player.h"
+#include "Spell.h"
+#include "SpellAuraEffects.h"
+#include "SpellAuras.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "UnitAI.h"
 
 void UnitAI::AttackStart(Unit* victim)
 {
@@ -220,13 +220,13 @@ void UnitAI::FillAISpellInfo()
                 else if (targetType == TARGET_UNIT_DEST_AREA_ENEMY)
                     UPDATE_TARGET(AITARGET_ENEMY)
 
-                if (spellInfo->Effects[j].Effect == SPELL_EFFECT_APPLY_AURA)
-                {
-                    if (targetType == TARGET_UNIT_TARGET_ENEMY)
-                        UPDATE_TARGET(AITARGET_DEBUFF)
-                    else if (spellInfo->IsPositive())
-                        UPDATE_TARGET(AITARGET_BUFF)
-                }
+                    if (spellInfo->Effects[j].Effect == SPELL_EFFECT_APPLY_AURA)
+                    {
+                        if (targetType == TARGET_UNIT_TARGET_ENEMY)
+                            UPDATE_TARGET(AITARGET_DEBUFF)
+                        else if (spellInfo->IsPositive())
+                            UPDATE_TARGET(AITARGET_BUFF)
+                    }
             }
         }
         AIInfo->realCooldown = spellInfo->RecoveryTime + spellInfo->StartRecoveryTime;
@@ -242,7 +242,7 @@ void PlayerAI::OnCharmed(bool apply)
 
 void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
 {
-  Creature* charmer = me->GetCharmer()->ToCreature();
+    Creature* charmer = me->GetCharmer()->ToCreature();
 
     //kill self if charm aura has infinite duration
     if (charmer->IsInEvadeMode())

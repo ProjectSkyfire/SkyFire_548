@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,8 +7,8 @@
 /// @todo Use spell victory/defeat in wg instead of RewardMarkOfHonor() && RewardHonor
 /// @todo Add proper implement of achievement
 
-#include "BattlefieldWG.h"
 #include "AchievementMgr.h"
+#include "BattlefieldWG.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -20,19 +20,19 @@
 
 enum WGVehicles
 {
-    NPC_WG_SEIGE_ENGINE_ALLIANCE        = 28312,
-    NPC_WG_SEIGE_ENGINE_HORDE           = 32627,
-    NPC_WG_DEMOLISHER                   = 28094,
-    NPC_WG_CATAPULT                     = 27881
+    NPC_WG_SEIGE_ENGINE_ALLIANCE = 28312,
+    NPC_WG_SEIGE_ENGINE_HORDE = 32627,
+    NPC_WG_DEMOLISHER = 28094,
+    NPC_WG_CATAPULT = 27881
 };
 
 BattlefieldWG::~BattlefieldWG()
 {
     for (Workshop::const_iterator itr = WorkshopsList.begin(); itr != WorkshopsList.end(); ++itr)
-        delete *itr;
+        delete* itr;
 
     for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
-        delete *itr;
+        delete* itr;
 }
 
 bool BattlefieldWG::SetupBattlefield()
@@ -73,7 +73,7 @@ bool BattlefieldWG::SetupBattlefield()
 
     // Load from db
     if ((sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_ACTIVE) == 0) && (sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_DEFENDER) == 0)
-            && (sWorld->getWorldState(ClockWorldState[0]) == 0))
+        && (sWorld->getWorldState(ClockWorldState[0]) == 0))
     {
         sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_ACTIVE, uint64(false));
         sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_DEFENDER, uint64(urand(0, 1)));
@@ -542,35 +542,35 @@ void BattlefieldWG::OnCreatureCreate(Creature* creature)
 
 void BattlefieldWG::OnCreatureRemove(Creature* /*creature*/)
 {
-/* possibly can be used later
-    if (IsWarTime())
-    {
-        switch (creature->GetEntry())
+    /* possibly can be used later
+        if (IsWarTime())
         {
-            case NPC_WINTERGRASP_SIEGE_ENGINE_ALLIANCE:
-            case NPC_WINTERGRASP_SIEGE_ENGINE_HORDE:
-            case NPC_WINTERGRASP_CATAPULT:
-            case NPC_WINTERGRASP_DEMOLISHER:
+            switch (creature->GetEntry())
             {
-                uint8 team;
-                if (creature->getFaction() == WintergraspFaction[TEAM_ALLIANCE])
-                    team = TEAM_ALLIANCE;
-                else if (creature->getFaction() == WintergraspFaction[TEAM_HORDE])
-                    team = TEAM_HORDE;
-                else
-                    return;
+                case NPC_WINTERGRASP_SIEGE_ENGINE_ALLIANCE:
+                case NPC_WINTERGRASP_SIEGE_ENGINE_HORDE:
+                case NPC_WINTERGRASP_CATAPULT:
+                case NPC_WINTERGRASP_DEMOLISHER:
+                {
+                    uint8 team;
+                    if (creature->getFaction() == WintergraspFaction[TEAM_ALLIANCE])
+                        team = TEAM_ALLIANCE;
+                    else if (creature->getFaction() == WintergraspFaction[TEAM_HORDE])
+                        team = TEAM_HORDE;
+                    else
+                        return;
 
-                m_vehicles[team].erase(creature->GetGUID());
-                if (team == TEAM_HORDE)
-                    UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_H, -1);
-                else
-                    UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_A, -1);
-                UpdateVehicleCountWG();
+                    m_vehicles[team].erase(creature->GetGUID());
+                    if (team == TEAM_HORDE)
+                        UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_H, -1);
+                    else
+                        UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_A, -1);
+                    UpdateVehicleCountWG();
 
-                break;
+                    break;
+                }
             }
-        }
-    }*/
+        }*/
 }
 
 void BattlefieldWG::OnGameObjectCreate(GameObject* go)
@@ -631,7 +631,7 @@ void BattlefieldWG::HandleKill(Player* killer, Unit* victim)
     }
 
     for (GuidSet::const_iterator itr = KeepCreature[GetOtherTeam(killerTeam)].begin();
-         itr != KeepCreature[GetOtherTeam(killerTeam)].end(); ++itr)
+        itr != KeepCreature[GetOtherTeam(killerTeam)].end(); ++itr)
     {
         if (Creature* creature = GetCreature(*itr))
         {
@@ -744,7 +744,7 @@ void BattlefieldWG::OnPlayerJoinWar(Player* player)
     else
     {
         if (GetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT) > 0)
-           player->SetAuraStack(SPELL_TOWER_CONTROL, player, GetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT));
+            player->SetAuraStack(SPELL_TOWER_CONTROL, player, GetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT));
     }
     SendInitWorldStatesTo(player);
 }
@@ -846,15 +846,15 @@ void BattlefieldWG::SendInitWorldStatesToAll()
 
 void BattlefieldWG::BrokenWallOrTower(TeamId /*team*/)
 {
-// might be some use for this in the future. old code commented out below. KL
-/*    if (team == GetDefenderTeam())
-    {
-        for (GuidSet::const_iterator itr = m_PlayersInWar[GetAttackerTeam()].begin(); itr != m_PlayersInWar[GetAttackerTeam()].end(); ++itr)
+    // might be some use for this in the future. old code commented out below. KL
+    /*    if (team == GetDefenderTeam())
         {
-            if (Player* player = sObjectAccessor->FindPlayer(*itr))
-                IncrementQuest(player, WGQuest[player->GetTeamId()][2], true);
-        }
-    }*/
+            for (GuidSet::const_iterator itr = m_PlayersInWar[GetAttackerTeam()].begin(); itr != m_PlayersInWar[GetAttackerTeam()].end(); ++itr)
+            {
+                if (Player* player = sObjectAccessor->FindPlayer(*itr))
+                    IncrementQuest(player, WGQuest[player->GetTeamId()][2], true);
+            }
+        }*/
 }
 
 // Called when a tower is broke
@@ -947,9 +947,9 @@ void BattlefieldWG::UpdateDamagedTowerCount(TeamId team)
 // Update vehicle count WorldState to player
 void BattlefieldWG::UpdateVehicleCountWG()
 {
-    SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_VEHICLE_H,     GetData(BATTLEFIELD_WG_DATA_VEHICLE_H));
+    SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_VEHICLE_H, GetData(BATTLEFIELD_WG_DATA_VEHICLE_H));
     SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_H, GetData(BATTLEFIELD_WG_DATA_MAX_VEHICLE_H));
-    SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_VEHICLE_A,     GetData(BATTLEFIELD_WG_DATA_VEHICLE_A));
+    SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_VEHICLE_A, GetData(BATTLEFIELD_WG_DATA_VEHICLE_A));
     SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_A, GetData(BATTLEFIELD_WG_DATA_MAX_VEHICLE_A));
 }
 

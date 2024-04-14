@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
+#include "DBCStores.h"
 #include "GroupMgr.h"
 #include "InstanceSaveMgr.h"
 #include "World.h"
-#include "DBCStores.h"
 
 GroupMgr::~GroupMgr()
 {
@@ -131,8 +131,7 @@ void GroupMgr::LoadGroups()
                 NextGroupDbStoreId++;
 
             ++count;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         SF_LOG_INFO("server.loading", ">> Loaded %u group definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
@@ -168,8 +167,7 @@ void GroupMgr::LoadGroups()
                 SF_LOG_ERROR("misc", "GroupMgr::LoadGroups: Consistency failed, can't find group (storage id: %u)", fields[0].GetUInt32());
 
             ++count;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         SF_LOG_INFO("server.loading", ">> Loaded %u group members in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
@@ -209,8 +207,7 @@ void GroupMgr::LoadGroups()
             InstanceSave* save = sInstanceSaveMgr->AddInstanceSave(mapEntry->MapID, fields[2].GetUInt32(), DifficultyID(diff), time_t(fields[5].GetUInt32()), (bool)fields[6].GetUInt64(), true);
             group->BindToInstance(save, fields[3].GetBool(), true);
             ++count;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         SF_LOG_INFO("server.loading", ">> Loaded %u group-instance saves in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }

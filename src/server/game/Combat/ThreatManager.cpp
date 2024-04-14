@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ThreatManager.h"
-#include "Unit.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Map.h"
-#include "Player.h"
 #include "ObjectAccessor.h"
-#include "UnitEvents.h"
+#include "Player.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "ThreatManager.h"
+#include "Unit.h"
+#include "UnitEvents.h"
 
 //==============================================================
 //================= ThreatCalcHelper ===========================
@@ -23,7 +23,7 @@ float ThreatCalcHelper::calcThreat(Unit* hatedUnit, Unit* /*hatingUnit*/, float 
 {
     if (threatSpell)
     {
-        if (SpellThreatEntry const*  threatEntry = sSpellMgr->GetSpellThreatEntry(threatSpell->Id))
+        if (SpellThreatEntry const* threatEntry = sSpellMgr->GetSpellThreatEntry(threatSpell->Id))
             if (threatEntry->pctMod != 1.0f)
                 threat *= threatEntry->pctMod;
 
@@ -353,7 +353,7 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* attacker, HostileR
 
                 if (currentRef->getThreat() > 1.3f * currentVictim->getThreat() ||
                     (currentRef->getThreat() > 1.1f * currentVictim->getThreat() &&
-                    attacker->IsWithinMeleeRange(target)))
+                        attacker->IsWithinMeleeRange(target)))
                 {                                           //implement 110% threat rule for targets in melee range
                     found = true;                           //and 130% rule for targets in ranged distances
                     break;                                  //for selecting alive targets
@@ -426,7 +426,7 @@ void ThreatManager::_addThreat(Unit* victim, float threat)
 
     if (!ref) // there was no ref => create a new one
     {
-                                                            // threat has to be 0 here
+        // threat has to be 0 here
         HostileReference* hostileRef = new HostileReference(victim, this, 0);
         iThreatContainer.addReference(hostileRef);
         hostileRef->addThreat(threat); // now we add the real threat
@@ -510,8 +510,8 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
     switch (threatRefStatusChangeEvent->getType())
     {
         case UEV_THREAT_REF_THREAT_CHANGE:
-            if ((getCurrentVictim() == hostilRef && threatRefStatusChangeEvent->getFValue()<0.0f) ||
-                (getCurrentVictim() != hostilRef && threatRefStatusChangeEvent->getFValue()>0.0f))
+            if ((getCurrentVictim() == hostilRef && threatRefStatusChangeEvent->getFValue() < 0.0f) ||
+                (getCurrentVictim() != hostilRef && threatRefStatusChangeEvent->getFValue() > 0.0f))
                 setDirty(true);                             // the order in the threat list might have changed
             break;
         case UEV_THREAT_REF_ONLINE_STATUS:
@@ -566,7 +566,7 @@ bool ThreatManager::isNeedUpdateToClient(uint32 time)
 // Reset all aggro without modifying the threatlist.
 void ThreatManager::resetAllAggro()
 {
-    ThreatContainer::StorageType &threatList = iThreatContainer.iThreatList;
+    ThreatContainer::StorageType& threatList = iThreatContainer.iThreatList;
     if (threatList.empty())
         return;
 

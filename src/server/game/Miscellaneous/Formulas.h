@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SKYFIRE_FORMULAS_H
 #define SKYFIRE_FORMULAS_H
 
-#include "World.h"
-#include "SharedDefines.h"
-#include "ScriptMgr.h"
 #include "Player.h"
+#include "ScriptMgr.h"
+#include "SharedDefines.h"
+#include "World.h"
 
 namespace Skyfire
 {
@@ -157,8 +157,8 @@ namespace Skyfire
 
             if (u->GetTypeId() == TypeID::TYPEID_UNIT &&
                 (((Creature*)u)->IsTotem() || ((Creature*)u)->IsPet() ||
-                (((Creature*)u)->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL) ||
-                ((Creature*)u)->GetCreatureTemplate()->type == CREATURE_TYPE_CRITTER))
+                    (((Creature*)u)->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL) ||
+                    ((Creature*)u)->GetCreatureTemplate()->type == CREATURE_TYPE_CRITTER))
                 gain = 0;
             else
             {
@@ -168,7 +168,7 @@ namespace Skyfire
                 {
                     // Elites in instances have a 2.75x XP bonus instead of the regular 2x world bonus.
                     if (u->GetMap() && u->GetMap()->IsInstance())
-                       gain = uint32(gain * 2.75);
+                        gain = uint32(gain * 2.75);
                     else
                         gain *= 2;
                 }

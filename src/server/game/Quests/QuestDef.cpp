@@ -1,12 +1,12 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "QuestDef.h"
-#include "Player.h"
-#include "World.h"
 #include "ObjectMgr.h"
+#include "Player.h"
+#include "QuestDef.h"
+#include "World.h"
 
 Quest::Quest(Field* questRecord)
 {
@@ -57,25 +57,25 @@ Quest::Quest(Field* questRecord)
     RewardPackageItemId = questRecord[44].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewardItemId[i] = questRecord[45+i].GetUInt32();
+        RewardItemId[i] = questRecord[45 + i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewardItemIdCount[i] = questRecord[49+i].GetUInt16();
+        RewardItemIdCount[i] = questRecord[49 + i].GetUInt16();
 
     for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        RewardChoiceItemId[i] = questRecord[53+i].GetUInt32();
+        RewardChoiceItemId[i] = questRecord[53 + i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        RewardChoiceItemCount[i] = questRecord[59+ i].GetUInt16();
+        RewardChoiceItemCount[i] = questRecord[59 + i].GetUInt16();
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewardFactionId[i] = questRecord[65+i].GetUInt16();
+        RewardFactionId[i] = questRecord[65 + i].GetUInt16();
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewardFactionValueId[i] = questRecord[70+i].GetInt32();
+        RewardFactionValueId[i] = questRecord[70 + i].GetInt32();
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewardFactionValueIdOverride[i] = questRecord[75+i].GetInt32();
+        RewardFactionValueIdOverride[i] = questRecord[75 + i].GetInt32();
 
     PointMapId = questRecord[80].GetUInt16();
     PointX = questRecord[81].GetFloat();
@@ -90,16 +90,16 @@ Quest::Quest(Field* questRecord)
     CompletedText = questRecord[90].GetString();
 
     for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
-        RequiredSourceItemId[i] = questRecord[91+i].GetUInt32();
+        RequiredSourceItemId[i] = questRecord[91 + i].GetUInt32();
 
     for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
-        RequiredSourceItemCount[i] = questRecord[95+i].GetUInt16();
+        RequiredSourceItemCount[i] = questRecord[95 + i].GetUInt16();
 
     for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
-        RewardCurrencyId[i] = questRecord[99+i].GetUInt16();
+        RewardCurrencyId[i] = questRecord[99 + i].GetUInt16();
 
     for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
-        RewardCurrencyCount[i] = questRecord[103+i].GetUInt8();
+        RewardCurrencyCount[i] = questRecord[103 + i].GetUInt8();
 
     QuestGiverTextWindow = questRecord[107].GetString();
     QuestGiverTargetName = questRecord[108].GetString();
@@ -109,19 +109,19 @@ Quest::Quest(Field* questRecord)
     SoundTurnIn = questRecord[112].GetUInt16();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        DetailsEmote[i] = questRecord[113+i].GetUInt16();
+        DetailsEmote[i] = questRecord[113 + i].GetUInt16();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        DetailsEmoteDelay[i] = questRecord[117+i].GetUInt32();
+        DetailsEmoteDelay[i] = questRecord[117 + i].GetUInt32();
 
     EmoteOnIncomplete = questRecord[121].GetUInt16();
     EmoteOnComplete = questRecord[122].GetUInt16();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmote[i] = questRecord[123+i].GetInt16();
+        OfferRewardEmote[i] = questRecord[123 + i].GetInt16();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmoteDelay[i] = questRecord[127+i].GetInt32();
+        OfferRewardEmoteDelay[i] = questRecord[127 + i].GetInt32();
 
     int32 WDBVerified = questRecord[131].GetInt32();
 

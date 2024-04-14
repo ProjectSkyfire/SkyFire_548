@@ -1,41 +1,41 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "ArenaTeamMgr.h"
 #include "Common.h"
 #include "ObjectMgr.h"
-#include "ArenaTeamMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 
 #include "ArenaTeam.h"
-#include "BattlegroundMgr.h"
-#include "BattlegroundAV.h"
 #include "BattlegroundAB.h"
-#include "BattlegroundEY.h"
-#include "BattlegroundWS.h"
-#include "BattlegroundNA.h"
+#include "BattlegroundAV.h"
 #include "BattlegroundBE.h"
-#include "BattlegroundRL.h"
-#include "BattlegroundSA.h"
+#include "BattlegroundBFG.h"
 #include "BattlegroundDS.h"
-#include "BattlegroundRV.h"
+#include "BattlegroundEY.h"
 #include "BattlegroundIC.h"
+#include "BattlegroundMgr.h"
+#include "BattlegroundNA.h"
+#include "BattlegroundRL.h"
+#include "BattlegroundRV.h"
+#include "BattlegroundSA.h"
 #include "BattlegroundTP.h"
 #include "BattlegroundTV.h"
-#include "BattlegroundBFG.h"
 #include "BattlegroundVOP.h"
+#include "BattlegroundWS.h"
 #include "Chat.h"
+#include "DisableMgr.h"
+#include "Formulas.h"
+#include "GameEventMgr.h"
 #include "Map.h"
 #include "MapInstanced.h"
 #include "MapManager.h"
-#include "Player.h"
-#include "GameEventMgr.h"
-#include "SharedDefines.h"
-#include "Formulas.h"
-#include "DisableMgr.h"
 #include "Opcodes.h"
+#include "Player.h"
+#include "SharedDefines.h"
 
 /*********************************************************/
 /***            BATTLEGROUND MANAGER                   ***/
@@ -89,7 +89,7 @@ void BattlegroundMgr::Update(uint32 diff)
                 uint8 BracketID = uint8(bg->GetBracketId());
                 BattlegroundClientIdsContainer& clients = itr1->second.m_ClientBattlegroundIds[BracketID];
                 if (!clients.empty())
-                     clients.erase(bg->GetClientInstanceID());
+                    clients.erase(bg->GetClientInstanceID());
 
                 delete bg;
             }
@@ -345,7 +345,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
     ByteBuffer buff;
     uint8 isArena = bg->isArena();
 
-    data->Initialize(SMSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
+    data->Initialize(SMSG_PVP_LOG_DATA, (1 + 1 + 4 + 40 * bg->GetPlayerScoresSize()));
 
     *data << uint8(bg->GetPlayersCountByTeam(ALLIANCE));
     *data << uint8(bg->GetPlayersCountByTeam(HORDE));
@@ -619,7 +619,7 @@ void BattlegroundMgr::BuildStatusFailedPacket(WorldPacket* data, Battleground* b
 
 void BattlegroundMgr::BuildUpdateWorldStatePacket(WorldPacket* data, uint32 field, uint32 value)
 {
-    data->Initialize(SMSG_UPDATE_WORLD_STATE, 4+4);
+    data->Initialize(SMSG_UPDATE_WORLD_STATE, 4 + 4);
     data->WriteBit(0);
     *data << uint32(value);
     *data << uint32(field);
@@ -729,7 +729,7 @@ Battleground* BattlegroundMgr::GetBattleground(uint32 instanceId, BattlegroundTy
         BattlegroundContainer const& bgs = it->second.m_Battlegrounds;
         BattlegroundContainer::const_iterator itr = bgs.find(instanceId);
         if (itr != bgs.end())
-           return itr->second;
+            return itr->second;
     }
 
     return NULL;
@@ -965,7 +965,7 @@ bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
     bg->SetMaxPlayers(data.MaxPlayersPerTeam * 2);
     bg->SetName(data.BattlegroundName);
     bg->SetTeamStartLoc(ALLIANCE, data.Team1StartLocX, data.Team1StartLocY, data.Team1StartLocZ, data.Team1StartLocO);
-    bg->SetTeamStartLoc(HORDE,    data.Team2StartLocX, data.Team2StartLocY, data.Team2StartLocZ, data.Team2StartLocO);
+    bg->SetTeamStartLoc(HORDE, data.Team2StartLocX, data.Team2StartLocY, data.Team2StartLocZ, data.Team2StartLocO);
     bg->SetStartMaxDist(data.StartMaxDist);
     bg->SetLevelRange(data.LevelMin, data.LevelMax);
     bg->SetScriptId(data.scriptId);
@@ -1088,8 +1088,7 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
             m_BGSelectionWeights[data.bgTypeId] = fields[10].GetUInt8();
 
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u battlegrounds in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -1115,15 +1114,15 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << uint32(winnerConquest)             // Winner Conquest Reward or Random Winner Conquest Reward
-          << uint32(loserHonor)                 // Loser Honor Reward or Random Loser Honor Reward
-          << uint8(bracketEntry->minLevel)      // min level
-          << uint32(winnerConquest)             // Winner Conquest Reward or Random Winner Conquest Reward
-          << uint32(winnerHonor)                // Winner Honor Reward or Random Winner Honor Reward
-          << uint32(bgTypeId)                   // battleground id
-          << uint32(winnerHonor)                // Winner Honor Reward or Random Winner Honor Reward
-          << uint8(bracketEntry->maxLevel)      // max level
-          << uint32(loserHonor);                // Loser Honor Reward or Random Loser Honor Reward
-    
+        << uint32(loserHonor)                 // Loser Honor Reward or Random Loser Honor Reward
+        << uint8(bracketEntry->minLevel)      // min level
+        << uint32(winnerConquest)             // Winner Conquest Reward or Random Winner Conquest Reward
+        << uint32(winnerHonor)                // Winner Honor Reward or Random Winner Honor Reward
+        << uint32(bgTypeId)                   // battleground id
+        << uint32(winnerHonor)                // Winner Honor Reward or Random Winner Honor Reward
+        << uint8(bracketEntry->maxLevel)      // max level
+        << uint32(loserHonor);                // Loser Honor Reward or Random Loser Honor Reward
+
     data->WriteBit(guidBytes[0]);
     data->WriteBit(0);            // fake bit ?
     data->WriteBit(guidBytes[4]);
@@ -1211,12 +1210,12 @@ void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battlegrou
 bool BattlegroundMgr::IsArenaType(BattlegroundTypeId bgTypeId)
 {
     return bgTypeId == BattlegroundTypeId::BATTLEGROUND_AA
-            || bgTypeId == BattlegroundTypeId::BATTLEGROUND_BE
-            || bgTypeId == BattlegroundTypeId::BATTLEGROUND_NA
-            || bgTypeId == BattlegroundTypeId::BATTLEGROUND_DS
-            || bgTypeId == BattlegroundTypeId::BATTLEGROUND_RV
-            || bgTypeId == BattlegroundTypeId::BATTLEGROUND_TV
-            || bgTypeId == BattlegroundTypeId::BATTLEGROUND_RL;
+        || bgTypeId == BattlegroundTypeId::BATTLEGROUND_BE
+        || bgTypeId == BattlegroundTypeId::BATTLEGROUND_NA
+        || bgTypeId == BattlegroundTypeId::BATTLEGROUND_DS
+        || bgTypeId == BattlegroundTypeId::BATTLEGROUND_RV
+        || bgTypeId == BattlegroundTypeId::BATTLEGROUND_TV
+        || bgTypeId == BattlegroundTypeId::BATTLEGROUND_RL;
 }
 
 BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgTypeId, uint8 arenaType)
@@ -1388,7 +1387,7 @@ void BattlegroundMgr::LoadBattleMastersEntry()
         Field* fields = result->Fetch();
 
         uint32 entry = fields[0].GetUInt32();
-        uint32 bgTypeId  = fields[1].GetUInt32();
+        uint32 bgTypeId = fields[1].GetUInt32();
         if (!sBattlemasterListStore.LookupEntry(bgTypeId))
         {
             SF_LOG_ERROR("sql.sql", "Table `battlemaster_entry` contain entry %u for not existed battleground type %u, ignored.", entry, bgTypeId);
@@ -1396,8 +1395,7 @@ void BattlegroundMgr::LoadBattleMastersEntry()
         }
 
         mBattleMastersMap[entry] = BattlegroundTypeId(bgTypeId);
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u battlemaster entries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }

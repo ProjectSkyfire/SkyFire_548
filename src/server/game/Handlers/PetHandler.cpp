@@ -1,25 +1,25 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
+#include "CreatureAI.h"
+#include "Group.h"
+#include "Log.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Pet.h"
+#include "Player.h"
+#include "Spell.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "Util.h"
+#include "Vehicle.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "ObjectMgr.h"
-#include "SpellMgr.h"
-#include "Log.h"
-#include "Opcodes.h"
-#include "Spell.h"
-#include "ObjectAccessor.h"
-#include "CreatureAI.h"
-#include "Util.h"
-#include "Pet.h"
-#include "World.h"
-#include "Group.h"
-#include "SpellInfo.h"
-#include "Player.h"
-#include "Vehicle.h"
 
 void WorldSession::HandleDismissCritter(WorldPacket& recvData)
 {
@@ -41,8 +41,8 @@ void WorldSession::HandleDismissCritter(WorldPacket& recvData)
 
     if (_player->GetCritterGUID() == pet->GetGUID())
     {
-         if (pet->GetTypeId() == TypeID::TYPEID_UNIT && pet->ToCreature()->IsSummon())
-             pet->ToTempSummon()->UnSummon();
+        if (pet->GetTypeId() == TypeID::TYPEID_UNIT && pet->ToCreature()->IsSummon())
+            pet->ToTempSummon()->UnSummon();
     }
 }
 
@@ -136,7 +136,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 
     }
 }
 
-void WorldSession::HandlePetStopAttack(WorldPacket &recvData)
+void WorldSession::HandlePetStopAttack(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
@@ -323,11 +323,11 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
             switch (spellid)
             {
                 case REACT_ASSIST:                          //assist
-			    case REACT_PASSIVE:                         //passive
+                case REACT_PASSIVE:                         //passive
                     pet->AttackStop();
-				case REACT_DEFENSIVE:                       //recovery
+                case REACT_DEFENSIVE:                       //recovery
                 case REACT_AGGRESSIVE:                      //activete
-				    if (pet->GetTypeId() == TypeID::TYPEID_UNIT)
+                    if (pet->GetTypeId() == TypeID::TYPEID_UNIT)
                         pet->ToCreature()->SetReactState(ReactStates(spellid));
                     break;
             }
@@ -699,7 +699,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
         stmt->setUInt32(0, _player->GetGUIDLow());
 
         for (uint8 i = 0; i < 5; i++)
-            stmt->setString(i+1, declinedName.name[i]);
+            stmt->setString(i + 1, declinedName.name[i]);
 
         trans->Append(stmt);
     }
@@ -1149,7 +1149,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
 }
 
-void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName, uint32 petNumber)
+void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName, uint32 petNumber)
 {
     WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1 + 1 + 4);
     data.WriteBit(1);

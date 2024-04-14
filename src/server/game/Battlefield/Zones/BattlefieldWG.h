@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef BATTLEFIELD_WG_
 #define BATTLEFIELD_WG_
 
-#include "ObjectAccessor.h"
-#include "WorldPacket.h"
 #include "Battlefield.h"
+#include "ObjectAccessor.h"
 #include "World.h"
+#include "WorldPacket.h"
 
 class Group;
 class BattlefieldWG;
@@ -26,52 +26,52 @@ typedef std::set<Group*> GroupSet;
 
 enum WintergrastData
 {
-    BATTLEFIELD_WG_ZONEID                        = 4197,             // Wintergrasp
-    BATTLEFIELD_WG_MAPID                         = 571               // Northrend
+    BATTLEFIELD_WG_ZONEID = 4197,             // Wintergrasp
+    BATTLEFIELD_WG_MAPID = 571               // Northrend
 };
 
 enum WintergraspSpells
 {
     // Wartime auras
-    SPELL_RECRUIT                               = 37795,
-    SPELL_CORPORAL                              = 33280,
-    SPELL_LIEUTENANT                            = 55629,
-    SPELL_TENACITY                              = 58549,
-    SPELL_TENACITY_VEHICLE                      = 59911,
-    SPELL_TOWER_CONTROL                         = 62064,
-    SPELL_SPIRITUAL_IMMUNITY                    = 58729,
-    SPELL_GREAT_HONOR                           = 58555,
-    SPELL_GREATER_HONOR                         = 58556,
-    SPELL_GREATEST_HONOR                        = 58557,
-    SPELL_ALLIANCE_FLAG                         = 14268,
-    SPELL_HORDE_FLAG                            = 14267,
-    SPELL_GRAB_PASSENGER                        = 61178,
+    SPELL_RECRUIT = 37795,
+    SPELL_CORPORAL = 33280,
+    SPELL_LIEUTENANT = 55629,
+    SPELL_TENACITY = 58549,
+    SPELL_TENACITY_VEHICLE = 59911,
+    SPELL_TOWER_CONTROL = 62064,
+    SPELL_SPIRITUAL_IMMUNITY = 58729,
+    SPELL_GREAT_HONOR = 58555,
+    SPELL_GREATER_HONOR = 58556,
+    SPELL_GREATEST_HONOR = 58557,
+    SPELL_ALLIANCE_FLAG = 14268,
+    SPELL_HORDE_FLAG = 14267,
+    SPELL_GRAB_PASSENGER = 61178,
 
     // Reward spells
-    SPELL_VICTORY_REWARD                        = 56902,
-    SPELL_DEFEAT_REWARD                         = 58494,
-    SPELL_DAMAGED_TOWER                         = 59135,
-    SPELL_DESTROYED_TOWER                       = 59136,
-    SPELL_DAMAGED_BUILDING                      = 59201,
-    SPELL_INTACT_BUILDING                       = 59203,
+    SPELL_VICTORY_REWARD = 56902,
+    SPELL_DEFEAT_REWARD = 58494,
+    SPELL_DAMAGED_TOWER = 59135,
+    SPELL_DESTROYED_TOWER = 59136,
+    SPELL_DAMAGED_BUILDING = 59201,
+    SPELL_INTACT_BUILDING = 59203,
 
-    SPELL_TELEPORT_BRIDGE                       = 59096,
-    SPELL_TELEPORT_FORTRESS                     = 60035,
+    SPELL_TELEPORT_BRIDGE = 59096,
+    SPELL_TELEPORT_FORTRESS = 60035,
 
-    SPELL_TELEPORT_DALARAN                      = 53360,
-    SPELL_VICTORY_AURA                          = 60044,
+    SPELL_TELEPORT_DALARAN = 53360,
+    SPELL_VICTORY_AURA = 60044,
 
     // Other spells
-    SPELL_WINTERGRASP_WATER                     = 36444,
-    SPELL_ESSENCE_OF_WINTERGRASP                = 58045,
-    SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA    = 91604,
+    SPELL_WINTERGRASP_WATER = 36444,
+    SPELL_ESSENCE_OF_WINTERGRASP = 58045,
+    SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA = 91604,
 
     // Phasing spells
-    SPELL_HORDE_CONTROLS_FACTORY_PHASE_SHIFT    = 56618, // ADDS PHASE 16
+    SPELL_HORDE_CONTROLS_FACTORY_PHASE_SHIFT = 56618, // ADDS PHASE 16
     SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE_SHIFT = 56617, // ADDS PHASE 32
 
-    SPELL_HORDE_CONTROL_PHASE_SHIFT             = 55773, // ADDS PHASE 64
-    SPELL_ALLIANCE_CONTROL_PHASE_SHIFT          = 55774  // ADDS PHASE 128
+    SPELL_HORDE_CONTROL_PHASE_SHIFT = 55773, // ADDS PHASE 64
+    SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 55774  // ADDS PHASE 128
 };
 
 enum WintergraspData
@@ -89,45 +89,45 @@ enum WintergraspData
 
 enum WintergraspAchievements
 {
-    ACHIEVEMENTS_WIN_WG                          = 1717,
-    ACHIEVEMENTS_WIN_WG_100                      = 1718, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WG_GNOMESLAUGHTER               = 1723, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WG_TOWER_DESTROY                = 1727,
-    ACHIEVEMENTS_DESTRUCTION_DERBY_A             = 1737, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WG_TOWER_CANNON_KILL            = 1751, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WG_MASTER_A                     = 1752, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WIN_WG_TIMER_10                 = 1755,
-    ACHIEVEMENTS_STONE_KEEPER_50                 = 2085, /// @todo: Has to be implemented
-    ACHIEVEMENTS_STONE_KEEPER_100                = 2086, /// @todo: Has to be implemented
-    ACHIEVEMENTS_STONE_KEEPER_250                = 2087, /// @todo: Has to be implemented
-    ACHIEVEMENTS_STONE_KEEPER_500                = 2088, /// @todo: Has to be implemented
-    ACHIEVEMENTS_STONE_KEEPER_1000               = 2089, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WG_RANGER                       = 2199, /// @todo: Has to be implemented
-    ACHIEVEMENTS_DESTRUCTION_DERBY_H             = 2476, /// @todo: Has to be implemented
-    ACHIEVEMENTS_WG_MASTER_H                     = 2776  /// @todo: Has to be implemented
+    ACHIEVEMENTS_WIN_WG = 1717,
+    ACHIEVEMENTS_WIN_WG_100 = 1718, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WG_GNOMESLAUGHTER = 1723, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WG_TOWER_DESTROY = 1727,
+    ACHIEVEMENTS_DESTRUCTION_DERBY_A = 1737, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WG_TOWER_CANNON_KILL = 1751, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WG_MASTER_A = 1752, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WIN_WG_TIMER_10 = 1755,
+    ACHIEVEMENTS_STONE_KEEPER_50 = 2085, /// @todo: Has to be implemented
+    ACHIEVEMENTS_STONE_KEEPER_100 = 2086, /// @todo: Has to be implemented
+    ACHIEVEMENTS_STONE_KEEPER_250 = 2087, /// @todo: Has to be implemented
+    ACHIEVEMENTS_STONE_KEEPER_500 = 2088, /// @todo: Has to be implemented
+    ACHIEVEMENTS_STONE_KEEPER_1000 = 2089, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WG_RANGER = 2199, /// @todo: Has to be implemented
+    ACHIEVEMENTS_DESTRUCTION_DERBY_H = 2476, /// @todo: Has to be implemented
+    ACHIEVEMENTS_WG_MASTER_H = 2776  /// @todo: Has to be implemented
 };
 
 enum WintergraspWorldStates
 {
-    BATTLEFIELD_WG_WORLD_STATE_VEHICLE_H         = 3490,
-    BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_H     = 3491,
-    BATTLEFIELD_WG_WORLD_STATE_VEHICLE_A         = 3680,
-    BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_A     = 3681,
-    BATTLEFIELD_WG_WORLD_STATE_ACTIVE            = 3801,
-    BATTLEFIELD_WG_WORLD_STATE_DEFENDER          = 3802,
-    BATTLEFIELD_WG_WORLD_STATE_ATTACKER          = 3803,
-    BATTLEFIELD_WG_WORLD_STATE_SHOW_WORLDSTATE   = 3710
+    BATTLEFIELD_WG_WORLD_STATE_VEHICLE_H = 3490,
+    BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_H = 3491,
+    BATTLEFIELD_WG_WORLD_STATE_VEHICLE_A = 3680,
+    BATTLEFIELD_WG_WORLD_STATE_MAX_VEHICLE_A = 3681,
+    BATTLEFIELD_WG_WORLD_STATE_ACTIVE = 3801,
+    BATTLEFIELD_WG_WORLD_STATE_DEFENDER = 3802,
+    BATTLEFIELD_WG_WORLD_STATE_ATTACKER = 3803,
+    BATTLEFIELD_WG_WORLD_STATE_SHOW_WORLDSTATE = 3710
 };
 
 enum WintergraspAreaIds
 {
-    AREA_WINTERGRASP_FORTRESS       = 4575,
-    AREA_THE_SUNKEN_RING            = 4538,
-    AREA_THE_BROKEN_TEMPLATE        = 4539,
-    AREA_WESTPARK_WORKSHOP          = 4611,
-    AREA_EASTPARK_WORKSHOP          = 4612,
-    AREA_WINTERGRASP                = 4197,
-    AREA_THE_CHILLED_QUAGMIRE       = 4589
+    AREA_WINTERGRASP_FORTRESS = 4575,
+    AREA_THE_SUNKEN_RING = 4538,
+    AREA_THE_BROKEN_TEMPLATE = 4539,
+    AREA_WESTPARK_WORKSHOP = 4611,
+    AREA_EASTPARK_WORKSHOP = 4612,
+    AREA_WINTERGRASP = 4197,
+    AREA_THE_CHILLED_QUAGMIRE = 4589
 };
 
 /*#########################
@@ -136,13 +136,13 @@ enum WintergraspAreaIds
 
 class BfGraveyardWG : public BfGraveyard
 {
-    public:
-        BfGraveyardWG(BattlefieldWG* Bf);
+public:
+    BfGraveyardWG(BattlefieldWG* Bf);
 
-        void SetTextId(int32 textid) { m_GossipTextId = textid; }
-        int32 GetTextId() const { return m_GossipTextId; }
-    protected:
-        int32 m_GossipTextId;
+    void SetTextId(int32 textid) { m_GossipTextId = textid; }
+    int32 GetTextId() const { return m_GossipTextId; }
+protected:
+    int32 m_GossipTextId;
 };
 
 enum WGGraveyardId
@@ -159,49 +159,49 @@ enum WGGraveyardId
 
 enum WGGossipText
 {
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_NE              = 20071,
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_NW              = 20072,
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_SE              = 20074,
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_SW              = 20073,
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_KEEP            = 20070,
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_HORDE           = 20075,
-    BATTLEFIELD_WG_GOSSIPTEXT_GY_ALLIANCE        = 20076
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_NE = 20071,
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_NW = 20072,
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_SE = 20074,
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_SW = 20073,
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_KEEP = 20070,
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_HORDE = 20075,
+    BATTLEFIELD_WG_GOSSIPTEXT_GY_ALLIANCE = 20076
 };
 
 enum WintergraspNpcs
 {
-    BATTLEFIELD_WG_NPC_GUARD_H                      = 30739,
-    BATTLEFIELD_WG_NPC_GUARD_A                      = 30740,
-    BATTLEFIELD_WG_NPC_STALKER                      = 15214,
+    BATTLEFIELD_WG_NPC_GUARD_H = 30739,
+    BATTLEFIELD_WG_NPC_GUARD_A = 30740,
+    BATTLEFIELD_WG_NPC_STALKER = 15214,
 
-    BATTLEFIELD_WG_NPC_VIERON_BLAZEFEATHER          = 31102,
-    BATTLEFIELD_WG_NPC_STONE_GUARD_MUKAR            = 32296, // <WINTERGRASP QUARTERMASTER>
-    BATTLEFIELD_WG_NPC_HOODOO_MASTER_FU_JIN         = 31101, // <MASTER HEXXER>
-    BATTLEFIELD_WG_NPC_CHAMPION_ROS_SLAI            = 39173, // <WINTERGRASP QUARTERMASTER>
-    BATTLEFIELD_WG_NPC_COMMANDER_DARDOSH            = 31091,
-    BATTLEFIELD_WG_NPC_TACTICAL_OFFICER_KILRATH     = 31151,
-    BATTLEFIELD_WG_NPC_SIEGESMITH_STRONGHOOF        = 31106,
-    BATTLEFIELD_WG_NPC_PRIMALIST_MULFORT            = 31053,
-    BATTLEFIELD_WG_NPC_LIEUTENANT_MURP              = 31107,
+    BATTLEFIELD_WG_NPC_VIERON_BLAZEFEATHER = 31102,
+    BATTLEFIELD_WG_NPC_STONE_GUARD_MUKAR = 32296, // <WINTERGRASP QUARTERMASTER>
+    BATTLEFIELD_WG_NPC_HOODOO_MASTER_FU_JIN = 31101, // <MASTER HEXXER>
+    BATTLEFIELD_WG_NPC_CHAMPION_ROS_SLAI = 39173, // <WINTERGRASP QUARTERMASTER>
+    BATTLEFIELD_WG_NPC_COMMANDER_DARDOSH = 31091,
+    BATTLEFIELD_WG_NPC_TACTICAL_OFFICER_KILRATH = 31151,
+    BATTLEFIELD_WG_NPC_SIEGESMITH_STRONGHOOF = 31106,
+    BATTLEFIELD_WG_NPC_PRIMALIST_MULFORT = 31053,
+    BATTLEFIELD_WG_NPC_LIEUTENANT_MURP = 31107,
 
-    BATTLEFIELD_WG_NPC_BOWYER_RANDOLPH              = 31052,
-    BATTLEFIELD_WG_NPC_KNIGHT_DAMERON               = 32294, // <WINTERGRASP QUARTERMASTER>
-    BATTLEFIELD_WG_NPC_SORCERESS_KAYLANA            = 31051, // <ENCHANTRESS>
-    BATTLEFIELD_WG_NPC_MARSHAL_MAGRUDER             = 39172, // <WINTERGRASP QUARTERMASTER>
-    BATTLEFIELD_WG_NPC_COMMANDER_ZANNETH            = 31036,
-    BATTLEFIELD_WG_NPC_TACTICAL_OFFICER_AHBRAMIS    = 31153,
-    BATTLEFIELD_WG_NPC_SIEGE_MASTER_STOUTHANDLE     = 31108,
-    BATTLEFIELD_WG_NPC_ANCHORITE_TESSA              = 31054,
-    BATTLEFIELD_WG_NPC_SENIOR_DEMOLITIONIST_LEGOSO  = 31109,
+    BATTLEFIELD_WG_NPC_BOWYER_RANDOLPH = 31052,
+    BATTLEFIELD_WG_NPC_KNIGHT_DAMERON = 32294, // <WINTERGRASP QUARTERMASTER>
+    BATTLEFIELD_WG_NPC_SORCERESS_KAYLANA = 31051, // <ENCHANTRESS>
+    BATTLEFIELD_WG_NPC_MARSHAL_MAGRUDER = 39172, // <WINTERGRASP QUARTERMASTER>
+    BATTLEFIELD_WG_NPC_COMMANDER_ZANNETH = 31036,
+    BATTLEFIELD_WG_NPC_TACTICAL_OFFICER_AHBRAMIS = 31153,
+    BATTLEFIELD_WG_NPC_SIEGE_MASTER_STOUTHANDLE = 31108,
+    BATTLEFIELD_WG_NPC_ANCHORITE_TESSA = 31054,
+    BATTLEFIELD_WG_NPC_SENIOR_DEMOLITIONIST_LEGOSO = 31109,
 
-    NPC_TAUNKA_SPIRIT_GUIDE                         = 31841, // Horde spirit guide for Wintergrasp
-    NPC_DWARVEN_SPIRIT_GUIDE                        = 31842, // Alliance spirit guide for Wintergrasp
+    NPC_TAUNKA_SPIRIT_GUIDE = 31841, // Horde spirit guide for Wintergrasp
+    NPC_DWARVEN_SPIRIT_GUIDE = 31842, // Alliance spirit guide for Wintergrasp
 
-    NPC_WINTERGRASP_SIEGE_ENGINE_ALLIANCE           = 28312,
-    NPC_WINTERGRASP_SIEGE_ENGINE_HORDE              = 32627,
-    NPC_WINTERGRASP_CATAPULT                        = 27881,
-    NPC_WINTERGRASP_DEMOLISHER                      = 28094,
-    NPC_WINTERGRASP_TOWER_CANNON                    = 28366
+    NPC_WINTERGRASP_SIEGE_ENGINE_ALLIANCE = 28312,
+    NPC_WINTERGRASP_SIEGE_ENGINE_HORDE = 32627,
+    NPC_WINTERGRASP_CATAPULT = 27881,
+    NPC_WINTERGRASP_DEMOLISHER = 28094,
+    NPC_WINTERGRASP_TOWER_CANNON = 28366
 };
 
 struct BfWGCoordGY
@@ -239,16 +239,16 @@ BfWGCoordGY const WGGraveYard[BATTLEFIELD_WG_GRAVEYARD_MAX] =
 
 class WintergraspCapturePoint : public BfCapturePoint
 {
-    public:
-        WintergraspCapturePoint(BattlefieldWG* battlefield, TeamId teamInControl);
+public:
+    WintergraspCapturePoint(BattlefieldWG* battlefield, TeamId teamInControl);
 
-        void LinkToWorkshop(WGWorkshop* workshop) { m_Workshop = workshop; }
+    void LinkToWorkshop(WGWorkshop* workshop) { m_Workshop = workshop; }
 
-        void ChangeTeam(TeamId oldteam);
-        TeamId GetTeam() const { return m_team; }
+    void ChangeTeam(TeamId oldteam);
+    TeamId GetTeam() const { return m_team; }
 
-    protected:
-        WGWorkshop* m_Workshop;
+protected:
+    WGWorkshop* m_Workshop;
 };
 
 /* ######################### *
@@ -257,182 +257,182 @@ class WintergraspCapturePoint : public BfCapturePoint
 
 class BattlefieldWG : public Battlefield
 {
-    public:
-        ~BattlefieldWG();
-        /**
-         * \brief Called when the battle start
-         * - Spawn relic and turret
-         * - Rebuild tower and wall
-         * - Invite player to war
-         */
-        void OnBattleStart();
+public:
+    ~BattlefieldWG();
+    /**
+     * \brief Called when the battle start
+     * - Spawn relic and turret
+     * - Rebuild tower and wall
+     * - Invite player to war
+     */
+    void OnBattleStart();
 
-        /**
-         * \brief Called when battle end
-         * - Remove relic and turret
-         * - Change banner/npc in keep if it needed
-         * - Saving battlestate
-         * - Reward honor/mark to player
-         * - Remove vehicle
-         * \param endByTimer : true if battle ended when timer is at 00:00, false if battle ended by clicking on relic
-         */
-        void OnBattleEnd(bool endByTimer);
+    /**
+     * \brief Called when battle end
+     * - Remove relic and turret
+     * - Change banner/npc in keep if it needed
+     * - Saving battlestate
+     * - Reward honor/mark to player
+     * - Remove vehicle
+     * \param endByTimer : true if battle ended when timer is at 00:00, false if battle ended by clicking on relic
+     */
+    void OnBattleEnd(bool endByTimer);
 
-        /**
-         * \brief Called when grouping starts (15 minutes before battlestart)
-         * - Invite all player in zone to join queue
-         */
-        void OnStartGrouping();
+    /**
+     * \brief Called when grouping starts (15 minutes before battlestart)
+     * - Invite all player in zone to join queue
+     */
+    void OnStartGrouping();
 
-        /**
-         * \brief Called when player accept invite to join battle
-         * - Update aura
-         * - Teleport if it needed
-         * - Update worldstate
-         * - Update tenacity
-         * \param player: Player who accepted invite
-         */
-        void OnPlayerJoinWar(Player* player);
+    /**
+     * \brief Called when player accept invite to join battle
+     * - Update aura
+     * - Teleport if it needed
+     * - Update worldstate
+     * - Update tenacity
+     * \param player: Player who accepted invite
+     */
+    void OnPlayerJoinWar(Player* player);
 
-        /**
-         * \brief Called when player left the battle
-         * - Update player aura
-         * \param player : Player who left the battle
-         */
-        void OnPlayerLeaveWar(Player* player);
+    /**
+     * \brief Called when player left the battle
+     * - Update player aura
+     * \param player : Player who left the battle
+     */
+    void OnPlayerLeaveWar(Player* player);
 
-        /**
-         * \brief Called when player left the WG zone
-         * \param player : Player who left the zone
-         */
-        void OnPlayerLeaveZone(Player* player);
+    /**
+     * \brief Called when player left the WG zone
+     * \param player : Player who left the zone
+     */
+    void OnPlayerLeaveZone(Player* player);
 
-        /**
-         * \brief Called when player enters in WG zone
-         * - Update aura
-         * - Update worldstate
-         * \param player : Player who enters the zone
-         */
-        void OnPlayerEnterZone(Player* player);
+    /**
+     * \brief Called when player enters in WG zone
+     * - Update aura
+     * - Update worldstate
+     * \param player : Player who enters the zone
+     */
+    void OnPlayerEnterZone(Player* player);
 
-        /**
-         * \brief Called for update battlefield data
-         * - Save battle timer in database every minutes
-         * - Update imunity aura from graveyard
-         * \param diff : time elapsed since the last call (in ms)
-         */
-        bool Update(uint32 diff);
+    /**
+     * \brief Called for update battlefield data
+     * - Save battle timer in database every minutes
+     * - Update imunity aura from graveyard
+     * \param diff : time elapsed since the last call (in ms)
+     */
+    bool Update(uint32 diff);
 
-        /**
-         * \brief Called when a creature is created
-         * - Update vehicle count
-         */
-        void OnCreatureCreate(Creature* creature);
+    /**
+     * \brief Called when a creature is created
+     * - Update vehicle count
+     */
+    void OnCreatureCreate(Creature* creature);
 
-        /**
-         * \brief Called when a creature is removed
-         * - Update vehicle count
-         */
-        void OnCreatureRemove(Creature* creature);
+    /**
+     * \brief Called when a creature is removed
+     * - Update vehicle count
+     */
+    void OnCreatureRemove(Creature* creature);
 
-        /**
-         * \brief Called when a gameobject is created
-         */
-        void OnGameObjectCreate(GameObject* go);
+    /**
+     * \brief Called when a gameobject is created
+     */
+    void OnGameObjectCreate(GameObject* go);
 
-        /**
-         * \brief Called when a wall/tower is broken
-         * - Update quest
-         */
-        void BrokenWallOrTower(TeamId team);
+    /**
+     * \brief Called when a wall/tower is broken
+     * - Update quest
+     */
+    void BrokenWallOrTower(TeamId team);
 
-        /**
-         * \brief Called when a tower is damaged
-         * - Update tower count (for reward calcul)
-         */
-        void UpdateDamagedTowerCount(TeamId team);
+    /**
+     * \brief Called when a tower is damaged
+     * - Update tower count (for reward calcul)
+     */
+    void UpdateDamagedTowerCount(TeamId team);
 
-        /**
-         * \brief Called when tower is broken
-         * - Update tower buff
-         * - check if three south tower is down for remove 10 minutes to wg
-         */
-        void UpdatedDestroyedTowerCount(TeamId team);
+    /**
+     * \brief Called when tower is broken
+     * - Update tower buff
+     * - check if three south tower is down for remove 10 minutes to wg
+     */
+    void UpdatedDestroyedTowerCount(TeamId team);
 
-        void DoCompleteOrIncrementAchievement(uint32 achievement, Player* player, uint8 incrementNumber = 1);
+    void DoCompleteOrIncrementAchievement(uint32 achievement, Player* player, uint8 incrementNumber = 1);
 
-        void RemoveAurasFromPlayer(Player* player);
+    void RemoveAurasFromPlayer(Player* player);
 
-        /**
-         * \brief Called when battlefield is setup, at server start
-         */
-        bool SetupBattlefield();
+    /**
+     * \brief Called when battlefield is setup, at server start
+     */
+    bool SetupBattlefield();
 
-        /// Return pointer to relic object
-        GameObject* GetRelic() { return GetGameObject(m_titansRelicGUID); }
+    /// Return pointer to relic object
+    GameObject* GetRelic() { return GetGameObject(m_titansRelicGUID); }
 
-        /// Define relic object
-        void SetRelic(uint64 relicGUID) { m_titansRelicGUID = relicGUID; }
+    /// Define relic object
+    void SetRelic(uint64 relicGUID) { m_titansRelicGUID = relicGUID; }
 
-        /// Check if players can interact with the relic (Only if the last door has been broken)
-        bool CanInteractWithRelic() const { return m_isRelicInteractible; }
+    /// Check if players can interact with the relic (Only if the last door has been broken)
+    bool CanInteractWithRelic() const { return m_isRelicInteractible; }
 
-        /// Define if player can interact with the relic
-        void SetRelicInteractible(bool allow) { m_isRelicInteractible = allow; }
+    /// Define if player can interact with the relic
+    void SetRelicInteractible(bool allow) { m_isRelicInteractible = allow; }
 
-        void UpdateVehicleCountWG();
-        void UpdateCounterVehicle(bool init);
+    void UpdateVehicleCountWG();
+    void UpdateCounterVehicle(bool init);
 
-        void SendInitWorldStatesTo(Player* player);
-        void SendInitWorldStatesToAll();
-        void FillInitialWorldStates(WorldStateBuilder& builder);
+    void SendInitWorldStatesTo(Player* player);
+    void SendInitWorldStatesToAll();
+    void FillInitialWorldStates(WorldStateBuilder& builder);
 
-        void HandleKill(Player* killer, Unit* victim);
-        void OnUnitDeath(Unit* unit);
-        void PromotePlayer(Player* killer);
+    void HandleKill(Player* killer, Unit* victim);
+    void OnUnitDeath(Unit* unit);
+    void PromotePlayer(Player* killer);
 
-        void UpdateTenacity();
-        void ProcessEvent(WorldObject* obj, uint32 eventId);
+    void UpdateTenacity();
+    void ProcessEvent(WorldObject* obj, uint32 eventId);
 
-        bool FindAndRemoveVehicleFromList(Unit* vehicle);
+    bool FindAndRemoveVehicleFromList(Unit* vehicle);
 
-        // returns the graveyardId in the specified area.
-        uint8 GetSpiritGraveyardId(uint32 areaId) const;
+    // returns the graveyardId in the specified area.
+    uint8 GetSpiritGraveyardId(uint32 areaId) const;
 
-        uint32 GetData(uint32 data) const;
+    uint32 GetData(uint32 data) const;
 
-    protected:
-        bool m_isRelicInteractible;
+protected:
+    bool m_isRelicInteractible;
 
-        Workshop WorkshopsList;
+    Workshop WorkshopsList;
 
-        GuidSet DefenderPortalList;
-        GuidSet m_KeepGameObject[2];
-        GameObjectBuilding BuildingsInZone;
+    GuidSet DefenderPortalList;
+    GuidSet m_KeepGameObject[2];
+    GameObjectBuilding BuildingsInZone;
 
-        GuidSet m_vehicles[2];
-        GuidSet CanonList;
-        GuidSet KeepCreature[2];
-        GuidSet OutsideCreature[2];
+    GuidSet m_vehicles[2];
+    GuidSet CanonList;
+    GuidSet KeepCreature[2];
+    GuidSet OutsideCreature[2];
 
-        uint32 m_tenacityStack;
-        uint32 m_saveTimer;
+    uint32 m_tenacityStack;
+    uint32 m_saveTimer;
 
-        uint64 m_titansRelicGUID;
+    uint64 m_titansRelicGUID;
 };
 
-uint32 const VehNumWorldState[]        = { 3680, 3490 };
-uint32 const MaxVehNumWorldState[]     = { 3681, 3491 };
-uint32 const ClockWorldState[]         = { 3781, 4354 };
-uint32 const WintergraspFaction[]      = { 1732, 1735, 35 };
-float const WintergraspStalkerPos[]    = { 4948.985f, 2937.789f, 550.5172f, 1.815142f };
+uint32 const VehNumWorldState[] = { 3680, 3490 };
+uint32 const MaxVehNumWorldState[] = { 3681, 3491 };
+uint32 const ClockWorldState[] = { 3781, 4354 };
+uint32 const WintergraspFaction[] = { 1732, 1735, 35 };
+float const WintergraspStalkerPos[] = { 4948.985f, 2937.789f, 550.5172f, 1.815142f };
 
-uint8 const WG_MAX_OBJ              = 32;
-uint8 const WG_MAX_TURRET           = 15;
-uint8 const WG_MAX_KEEP_NPC         = 39;
-uint8 const WG_MAX_OUTSIDE_NPC      = 14;
+uint8 const WG_MAX_OBJ = 32;
+uint8 const WG_MAX_TURRET = 15;
+uint8 const WG_MAX_KEEP_NPC = 39;
+uint8 const WG_MAX_OUTSIDE_NPC = 14;
 uint8 const WG_OUTSIDE_ALLIANCE_NPC = 7;
-uint8 const WG_MAX_TELEPORTER       = 12;
+uint8 const WG_MAX_TELEPORTER = 12;
 uint8 const WG_MAX_WORKSHOP = 6;
 
 enum WintergraspGameObjectBuildingType
@@ -471,12 +471,12 @@ enum WintergraspWorkshopIds
 
 enum WintergraspWorldstates
 {
-    WORLDSTATE_WORKSHOP_NE      = 3701,
-    WORLDSTATE_WORKSHOP_NW      = 3700,
-    WORLDSTATE_WORKSHOP_SE      = 3703,
-    WORLDSTATE_WORKSHOP_SW      = 3702,
-    WORLDSTATE_WORKSHOP_K_W     = 3698,
-    WORLDSTATE_WORKSHOP_K_E     = 3699
+    WORLDSTATE_WORKSHOP_NE = 3701,
+    WORLDSTATE_WORKSHOP_NW = 3700,
+    WORLDSTATE_WORKSHOP_SE = 3703,
+    WORLDSTATE_WORKSHOP_SW = 3702,
+    WORLDSTATE_WORKSHOP_K_W = 3698,
+    WORLDSTATE_WORKSHOP_K_E = 3699
 };
 
 enum WintergraspTeamControl
@@ -489,53 +489,53 @@ enum WintergraspTeamControl
 /// @todo: Can this be handled with creature_text or SmartAI ?
 enum WintergraspText
 {
-    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE         = 12055,
-    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW         = 12052,
-    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE         = 12053,
-    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW         = 12054,
-    BATTLEFIELD_WG_TEXT_WORKSHOP_ATTACK          = 12051,
-    BATTLEFIELD_WG_TEXT_WORKSHOP_TAKEN           = 12050,
-    BATTLEFIELD_WG_TEXT_ALLIANCE                 = 12057,
-    BATTLEFIELD_WG_TEXT_HORDE                    = 12056,
-    BATTLEFIELD_WG_TEXT_WILL_START               = 12058,
-    BATTLEFIELD_WG_TEXT_START                    = 12067,
-    BATTLEFIELD_WG_TEXT_FIRSTRANK                = 12059,
-    BATTLEFIELD_WG_TEXT_SECONDRANK               = 12060,
-    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NE        = 12062,
-    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NW        = 12064,
-    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SE        = 12061,
-    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SW        = 12063,
-    BATTLEFIELD_WG_TEXT_TOWER_DAMAGE             = 12065,
-    BATTLEFIELD_WG_TEXT_TOWER_DESTROY            = 12066,
-    BATTLEFIELD_WG_TEXT_TOWER_NAME_S             = 12069,
-    BATTLEFIELD_WG_TEXT_TOWER_NAME_E             = 12070,
-    BATTLEFIELD_WG_TEXT_TOWER_NAME_W             = 12071,
-    BATTLEFIELD_WG_TEXT_DEFEND_KEEP              = 12068,
-    BATTLEFIELD_WG_TEXT_WIN_KEEP                 = 12072
+    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE = 12055,
+    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW = 12052,
+    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE = 12053,
+    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW = 12054,
+    BATTLEFIELD_WG_TEXT_WORKSHOP_ATTACK = 12051,
+    BATTLEFIELD_WG_TEXT_WORKSHOP_TAKEN = 12050,
+    BATTLEFIELD_WG_TEXT_ALLIANCE = 12057,
+    BATTLEFIELD_WG_TEXT_HORDE = 12056,
+    BATTLEFIELD_WG_TEXT_WILL_START = 12058,
+    BATTLEFIELD_WG_TEXT_START = 12067,
+    BATTLEFIELD_WG_TEXT_FIRSTRANK = 12059,
+    BATTLEFIELD_WG_TEXT_SECONDRANK = 12060,
+    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NE = 12062,
+    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NW = 12064,
+    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SE = 12061,
+    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SW = 12063,
+    BATTLEFIELD_WG_TEXT_TOWER_DAMAGE = 12065,
+    BATTLEFIELD_WG_TEXT_TOWER_DESTROY = 12066,
+    BATTLEFIELD_WG_TEXT_TOWER_NAME_S = 12069,
+    BATTLEFIELD_WG_TEXT_TOWER_NAME_E = 12070,
+    BATTLEFIELD_WG_TEXT_TOWER_NAME_W = 12071,
+    BATTLEFIELD_WG_TEXT_DEFEND_KEEP = 12068,
+    BATTLEFIELD_WG_TEXT_WIN_KEEP = 12072
 };
 
 enum WintergraspGameObject
 {
-    GO_WINTERGRASP_FACTORY_BANNER_NE             = 190475,
-    GO_WINTERGRASP_FACTORY_BANNER_NW             = 190487,
-    GO_WINTERGRASP_FACTORY_BANNER_SE             = 194959,
-    GO_WINTERGRASP_FACTORY_BANNER_SW             = 194962,
+    GO_WINTERGRASP_FACTORY_BANNER_NE = 190475,
+    GO_WINTERGRASP_FACTORY_BANNER_NW = 190487,
+    GO_WINTERGRASP_FACTORY_BANNER_SE = 194959,
+    GO_WINTERGRASP_FACTORY_BANNER_SW = 194962,
 
-    GO_WINTERGRASP_TITAN_S_RELIC                 = 192829,
+    GO_WINTERGRASP_TITAN_S_RELIC = 192829,
 
-    GO_WINTERGRASP_FORTRESS_TOWER_1              = 190221,
-    GO_WINTERGRASP_FORTRESS_TOWER_2              = 190373,
-    GO_WINTERGRASP_FORTRESS_TOWER_3              = 190377,
-    GO_WINTERGRASP_FORTRESS_TOWER_4              = 190378,
+    GO_WINTERGRASP_FORTRESS_TOWER_1 = 190221,
+    GO_WINTERGRASP_FORTRESS_TOWER_2 = 190373,
+    GO_WINTERGRASP_FORTRESS_TOWER_3 = 190377,
+    GO_WINTERGRASP_FORTRESS_TOWER_4 = 190378,
 
-    GO_WINTERGRASP_SHADOWSIGHT_TOWER             = 190356,
-    GO_WINTERGRASP_WINTER_S_EDGE_TOWER           = 190357,
-    GO_WINTERGRASP_FLAMEWATCH_TOWER              = 190358,
+    GO_WINTERGRASP_SHADOWSIGHT_TOWER = 190356,
+    GO_WINTERGRASP_WINTER_S_EDGE_TOWER = 190357,
+    GO_WINTERGRASP_FLAMEWATCH_TOWER = 190358,
 
-    GO_WINTERGRASP_FORTRESS_GATE                 = 190375,
-    GO_WINTERGRASP_VAULT_GATE                    = 191810,
+    GO_WINTERGRASP_FORTRESS_GATE = 190375,
+    GO_WINTERGRASP_VAULT_GATE = 191810,
 
-    GO_WINTERGRASP_KEEP_COLLISION_WALL           = 194323
+    GO_WINTERGRASP_KEEP_COLLISION_WALL = 194323
 };
 
 struct WintergraspObjectPositionData
@@ -1491,7 +1491,7 @@ struct WGWorkshop
 
                 // Warning message
                 if (!init)                              // workshop taken - alliance
-                    bf->SendWarningToAllInZone(team == BATTLEFIELD_WG_TEAM_ALLIANCE ? WorkshopsData[workshopId].text : WorkshopsData[workshopId].text+1);
+                    bf->SendWarningToAllInZone(team == BATTLEFIELD_WG_TEAM_ALLIANCE ? WorkshopsData[workshopId].text : WorkshopsData[workshopId].text + 1);
 
                 // Found associate graveyard and update it
                 if (workshopId < BATTLEFIELD_WG_WORKSHOP_KEEP_WEST)

@@ -1,21 +1,21 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Cryptography/WardenKeyGeneration.h"
-#include "Common.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "Log.h"
-#include "Opcodes.h"
 #include "ByteBuffer.h"
+#include "Common.h"
+#include "Cryptography/WardenKeyGeneration.h"
+#include "Log.h"
 #include "MD5.h"
-#include "World.h"
+#include "Opcodes.h"
 #include "Player.h"
 #include "Util.h"
 #include "WardenMac.h"
 #include "WardenModuleMac.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 WardenMac::WardenMac() : Warden() { }
 
@@ -56,7 +56,7 @@ void WardenMac::Init(WorldSession* pClient, BigNumber* K)
 
 ClientWardenModule* WardenMac::GetModuleForClient()
 {
-    ClientWardenModule *mod = new ClientWardenModule;
+    ClientWardenModule* mod = new ClientWardenModule;
 
     uint32 len = sizeof(Module_0DBBF209A27B1E279A9FEC5C168A15F7_Data);
 
@@ -113,7 +113,7 @@ struct keyData {
     };
 };
 
-void WardenMac::HandleHashResult(ByteBuffer &buff)
+void WardenMac::HandleHashResult(ByteBuffer& buff)
 {
     // test
     int keyIn[4];
@@ -198,7 +198,7 @@ void WardenMac::RequestData()
     _dataSent = true;
 }
 
-void WardenMac::HandleData(ByteBuffer &buff)
+void WardenMac::HandleData(ByteBuffer& buff)
 {
     SF_LOG_DEBUG("warden", "Handle data");
 

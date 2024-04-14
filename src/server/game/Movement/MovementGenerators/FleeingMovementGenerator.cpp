@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Creature.h"
 #include "CreatureAI.h"
-#include "MapManager.h"
 #include "FleeingMovementGenerator.h"
-#include "PathGenerator.h"
-#include "ObjectAccessor.h"
-#include "MoveSplineInit.h"
+#include "MapManager.h"
 #include "MoveSpline.h"
+#include "MoveSplineInit.h"
+#include "ObjectAccessor.h"
+#include "PathGenerator.h"
 #include "Player.h"
 
 #define MIN_QUIET_DISTANCE 28.0f
@@ -47,7 +47,7 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
 }
 
 template<class T>
-void FleeingMovementGenerator<T>::_getPoint(T* owner, float &x, float &y, float &z)
+void FleeingMovementGenerator<T>::_getPoint(T* owner, float& x, float& y, float& z)
 {
     float dist_from_caster, angle_to_caster;
     if (Unit* fright = ObjectAccessor::GetUnit(*owner, i_frightGUID))
@@ -67,18 +67,18 @@ void FleeingMovementGenerator<T>::_getPoint(T* owner, float &x, float &y, float 
     float dist, angle;
     if (dist_from_caster < MIN_QUIET_DISTANCE)
     {
-        dist = frand(0.4f, 1.3f)*(MIN_QUIET_DISTANCE - dist_from_caster);
-        angle = angle_to_caster + frand(-static_cast<float>(M_PI)/8, static_cast<float>(M_PI)/8);
+        dist = frand(0.4f, 1.3f) * (MIN_QUIET_DISTANCE - dist_from_caster);
+        angle = angle_to_caster + frand(-static_cast<float>(M_PI) / 8, static_cast<float>(M_PI) / 8);
     }
     else if (dist_from_caster > MAX_QUIET_DISTANCE)
     {
-        dist = frand(0.4f, 1.0f)*(MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-        angle = -angle_to_caster + frand(-static_cast<float>(M_PI)/4, static_cast<float>(M_PI)/4);
+        dist = frand(0.4f, 1.0f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
+        angle = -angle_to_caster + frand(-static_cast<float>(M_PI) / 4, static_cast<float>(M_PI) / 4);
     }
     else    // we are inside quiet range
     {
-        dist = frand(0.6f, 1.2f)*(MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-        angle = frand(0, 2*static_cast<float>(M_PI));
+        dist = frand(0.6f, 1.2f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
+        angle = frand(0, 2 * static_cast<float>(M_PI));
     }
 
     Position pos;
@@ -111,7 +111,7 @@ template<>
 void FleeingMovementGenerator<Creature>::DoFinalize(Creature* owner)
 {
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-    owner->ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
+    owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
     if (owner->GetVictim())
         owner->SetTarget(owner->GetVictim()->GetGUID());
 }
@@ -155,7 +155,7 @@ template bool FleeingMovementGenerator<Creature>::DoUpdate(Creature*, uint32);
 void TimedFleeingMovementGenerator::Finalize(Unit* owner)
 {
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-    owner->ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
+    owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
     if (Unit* victim = owner->GetVictim())
     {
         if (owner->IsAlive())

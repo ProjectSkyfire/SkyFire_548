@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -1450,8 +1450,8 @@ enum Opcodes
     SMSG_XP_GAIN_ABORTED,
 */
 
-    NUM_OPCODES,
-    UNKNOWN_OPCODE
+NUM_OPCODES,
+UNKNOWN_OPCODE
 };
 
 /// Player state
@@ -1475,7 +1475,7 @@ enum PacketProcessing
 class WorldPacket;
 class WorldSession;
 
-typedef void(WorldSession::*pOpcodeHandler)(WorldPacket& recvPacket);
+typedef void(WorldSession::* pOpcodeHandler)(WorldPacket& recvPacket);
 
 struct OpcodeHandler
 {
@@ -1491,41 +1491,41 @@ struct OpcodeHandler
 
 class OpcodeTable
 {
-    public:
-        OpcodeTable()
-        {
-            memset(_internalTable, 0, sizeof(_internalTable));
-            memset(_opcodeTable, 0, sizeof(_opcodeTable));
-        }
+public:
+    OpcodeTable()
+    {
+        memset(_internalTable, 0, sizeof(_internalTable));
+        memset(_opcodeTable, 0, sizeof(_opcodeTable));
+    }
 
-        ~OpcodeTable()
-        {
-            for (uint16 i = 0; i < NUM_OPCODES; ++i)
-                delete _internalTable[i];
-        }
+    ~OpcodeTable()
+    {
+        for (uint16 i = 0; i < NUM_OPCODES; ++i)
+            delete _internalTable[i];
+    }
 
-        void InitializeClientTable();
-        void InitializeServerTable();
+    void InitializeClientTable();
+    void InitializeServerTable();
 
-        inline Opcodes GetOpcodeByNumber(uint16 number) const { return _opcodeTable[number]; }
+    inline Opcodes GetOpcodeByNumber(uint16 number) const { return _opcodeTable[number]; }
 
-        OpcodeHandler const* operator[](uint32 index) const
-        {
-            return _internalTable[index];
-        }
+    OpcodeHandler const* operator[](uint32 index) const
+    {
+        return _internalTable[index];
+    }
 
-     private:
-        template<bool isInValidRange, bool isNonZero>
-        void ValidateAndSetOpcode(uint16 opcode, uint16 opcodeNumber, char const* name, SessionStatus status, PacketProcessing processing, pOpcodeHandler handler = 0);
+private:
+    template<bool isInValidRange, bool isNonZero>
+    void ValidateAndSetOpcode(uint16 opcode, uint16 opcodeNumber, char const* name, SessionStatus status, PacketProcessing processing, pOpcodeHandler handler = 0);
 
-        // Prevent copying this structure
-        OpcodeTable(OpcodeTable const&);
-        OpcodeTable& operator=(OpcodeTable const&);
+    // Prevent copying this structure
+    OpcodeTable(OpcodeTable const&);
+    OpcodeTable& operator=(OpcodeTable const&);
 
-        OpcodeHandler* _internalTable[NUM_OPCODES];
+    OpcodeHandler* _internalTable[NUM_OPCODES];
 
-        // Store opcode / number list - for speed
-        Opcodes _opcodeTable[NUM_OPCODE_HANDLERS];
+    // Store opcode / number list - for speed
+    Opcodes _opcodeTable[NUM_OPCODE_HANDLERS];
 };
 
 extern OpcodeTable serverOpcodeTable;

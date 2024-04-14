@@ -1,49 +1,49 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "Language.h"
-#include "DatabaseEnv.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "Player.h"
-#include "GossipDef.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "GuildMgr.h"
-#include "WorldSession.h"
-#include "BigNumber.h"
-#include "SHA1.h"
-#include "UpdateData.h"
-#include "LootMgr.h"
-#include "Chat.h"
-#include "zlib.h"
-#include "ObjectAccessor.h"
-#include "Object.h"
-#include "Battleground.h"
-#include "OutdoorPvP.h"
-#include "Pet.h"
-#include "SocialMgr.h"
-#include "CellImpl.h"
 #include "AccountMgr.h"
-#include "Vehicle.h"
-#include "CreatureAI.h"
-#include "DBCEnums.h"
-#include "ScriptMgr.h"
-#include "MapManager.h"
-#include "InstanceScript.h"
-#include "GameObjectAI.h"
-#include "Group.h"
 #include "AccountMgr.h"
-#include "Spell.h"
-#include "BattlegroundMgr.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
-#include "DB2Stores.h"
+#include "Battleground.h"
+#include "BattlegroundMgr.h"
+#include "BigNumber.h"
+#include "CellImpl.h"
 #include "CharacterBoost.h"
+#include "Chat.h"
+#include "Common.h"
+#include "CreatureAI.h"
+#include "DatabaseEnv.h"
+#include "DB2Stores.h"
+#include "DBCEnums.h"
+#include "GameObjectAI.h"
+#include "GossipDef.h"
+#include "Group.h"
+#include "GuildMgr.h"
+#include "InstanceScript.h"
+#include "Language.h"
+#include "Log.h"
+#include "LootMgr.h"
+#include "MapManager.h"
+#include "Object.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "OutdoorPvP.h"
+#include "Pet.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "SHA1.h"
+#include "SocialMgr.h"
+#include "Spell.h"
+#include "UpdateData.h"
+#include "Vehicle.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
+#include "zlib.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)
 {
@@ -281,7 +281,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
     uint32 team = _player->GetTeam();
 
     //bool allowTwoSideWhoList = sWorld->GetBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-    uint32 gmLevelInWhoList  = sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_WHO_LIST);
+    uint32 gmLevelInWhoList = sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_WHO_LIST);
     uint8 displaycount = 0, matchcount = 0;
 
     ByteBuffer bytesData;
@@ -496,7 +496,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
         DoLootRelease(lguid);
 
     bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->IsInCombat()) ||
-                         GetPlayer()->IsInFlight() || HasPermission(rbac::RBAC_PERM_INSTANT_LOGOUT);
+        GetPlayer()->IsInFlight() || HasPermission(rbac::RBAC_PERM_INSTANT_LOGOUT);
 
     /// TODO: Possibly add RBAC permission to log out in combat
     bool canLogoutInCombat = GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
@@ -509,7 +509,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
     else if (GetPlayer()->duel || GetPlayer()->HasAura(9454)) // is dueling or frozen by GM via freeze command
         reason = 2;                                         // FIXME - Need the correct value
 
-    WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
+    WorldPacket data(SMSG_LOGOUT_RESPONSE, 1 + 4);
     data << uint32(reason);
     data.WriteBit(instantLogout);
     data.FlushBits();
@@ -635,7 +635,7 @@ void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
     GraveYardContainer::const_iterator it;
     std::pair<GraveYardContainer::const_iterator, GraveYardContainer::const_iterator> range;
     range = sObjectMgr->GraveYardStore.equal_range(zoneId);
-        
+
     for (it = range.first; it != range.second && GraveyardIds.size() < 16; ++it) // client max
     {
         if (it->second.team == 0 || it->second.team == team)
@@ -1062,8 +1062,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         float playerBoxDistX = player->GetPositionX() - atEntry->x;
         float playerBoxDistY = player->GetPositionY() - atEntry->y;
 
-        float rotPlayerX = float(atEntry->x + playerBoxDistX * cosVal - playerBoxDistY*sinVal);
-        float rotPlayerY = float(atEntry->y + playerBoxDistY * cosVal + playerBoxDistX*sinVal);
+        float rotPlayerX = float(atEntry->x + playerBoxDistX * cosVal - playerBoxDistY * sinVal);
+        float rotPlayerY = float(atEntry->y + playerBoxDistY * cosVal + playerBoxDistX * sinVal);
 
         // box edges are parallel to coordiante axis, so we can treat every dimension independently :D
         float dz = player->GetPositionZ() - atEntry->z;
@@ -1074,7 +1074,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
             (fabs(dz) > atEntry->box_z / 2 + delta))
         {
             SF_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (GUID: %u) too far (1/2 box X: %f 1/2 box Y: %f 1/2 box Z: %f rotatedPlayerX: %f rotatedPlayerY: %f dZ:%f), ignore Area Trigger ID: %u, unk1: %u, unk2: %u",
-                player->GetName().c_str(), player->GetGUIDLow(), atEntry->box_x/2, atEntry->box_y/2, atEntry->box_z/2, rotPlayerX, rotPlayerY, dz, triggerId, unk1, unk2);
+                player->GetName().c_str(), player->GetGUIDLow(), atEntry->box_x / 2, atEntry->box_y / 2, atEntry->box_z / 2, rotPlayerX, rotPlayerY, dz, triggerId, unk1, unk2);
             return;
         }
     }
@@ -1252,7 +1252,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[2]);
     data << uint32(adata->Time); // unix time
-    
+
     SendPacket(&data);
 }
 
@@ -1341,50 +1341,50 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
     // no used
     recvData.rfinish();                       // prevent warnings spam
-/*
-    uint64 guid;
-    recvData >> guid;
+    /*
+        uint64 guid;
+        recvData >> guid;
 
-    // now can skip not our packet
-    if (_player->GetGUID() != guid)
-    {
-        recvData.rfinish();                   // prevent warnings spam
-        return;
-    }
+        // now can skip not our packet
+        if (_player->GetGUID() != guid)
+        {
+            recvData.rfinish();                   // prevent warnings spam
+            return;
+        }
 
-    SF_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
+        SF_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
 
-    recvData.read_skip<uint32>();                          // unk
+        recvData.read_skip<uint32>();                          // unk
 
-    MovementInfo movementInfo;
-    movementInfo.guid = guid;
-    ReadMovementInfo(recvData, &movementInfo);
-    recvData.read_skip<float>();                           // unk2
-*/
+        MovementInfo movementInfo;
+        movementInfo.guid = guid;
+        ReadMovementInfo(recvData, &movementInfo);
+        recvData.read_skip<float>();                           // unk2
+    */
 }
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 {
     // no used
     recvData.rfinish();                       // prevent warnings spam
-/*
-    uint64 guid;
-    recvData >> guid;
+    /*
+        uint64 guid;
+        recvData >> guid;
 
-    // now can skip not our packet
-    if (_player->GetGUID() != guid)
-    {
-        recvData.rfinish();                   // prevent warnings spam
-        return;
-    }
+        // now can skip not our packet
+        if (_player->GetGUID() != guid)
+        {
+            recvData.rfinish();                   // prevent warnings spam
+            return;
+        }
 
-    SF_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_ROOT_ACK");
+        SF_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_ROOT_ACK");
 
-    recvData.read_skip<uint32>();                          // unk
+        recvData.read_skip<uint32>();                          // unk
 
-    MovementInfo movementInfo;
-    ReadMovementInfo(recvData, &movementInfo);
-*/
+        MovementInfo movementInfo;
+        ReadMovementInfo(recvData, &movementInfo);
+    */
 }
 
 void WorldSession::HandleMoveGravityAck(WorldPacket& recvData)
@@ -1544,7 +1544,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (charname.empty() || !normalizePlayerName (charname))
+    if (charname.empty() || !normalizePlayerName(charname))
     {
         SendNotification(LANG_NEED_CHARACTER_NAME);
         return;
@@ -1645,7 +1645,7 @@ void WorldSession::HandleRealmSplitOpcode(WorldPacket& recvData)
     std::string split_date = "01/01/01";
     recvData >> unk;
 
-    WorldPacket data(SMSG_REALM_SPLIT, 4+4+split_date.size()+1);
+    WorldPacket data(SMSG_REALM_SPLIT, 4 + 4 + split_date.size() + 1);
     data << unk;
     data << uint32(0x00000000);                             // realm split state
     // split states:
@@ -1690,7 +1690,7 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket& recvData)
     // -1 at none
     if (title > 0 && title < MAX_TITLE_INDEX)
     {
-       if (!GetPlayer()->HasTitle(title))
+        if (!GetPlayer()->HasTitle(title))
             return;
     }
     else
@@ -1826,11 +1826,11 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
 
     DifficultyEntry const* difficultyEntry = sDifficultyStore.LookupEntry(Difficulty);
     if (!difficultyEntry)
-     {
-         SF_LOG_DEBUG("network", "%d sent an invalid instance mode %u!",
-             _player->GetGUIDLow(), Difficulty);
-         return;
-     }
+    {
+        SF_LOG_DEBUG("network", "%d sent an invalid instance mode %u!",
+            _player->GetGUIDLow(), Difficulty);
+        return;
+    }
     if (difficultyEntry->maptype != MAP_RAID)
     {
         SF_LOG_DEBUG("network", "%d sent an non-raid instance mode %u!",
@@ -1849,7 +1849,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
         SF_LOG_DEBUG("network", "player %d tried to reset the raid while inside!", _player->GetGUIDLow());
         return;
     }
-    
+
     Group* group = _player->GetGroup();
     if (group)
     {
@@ -2357,32 +2357,32 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
     for (uint8 i = 0; i < count; ++i)
     {
         profiles[i] = new CUFProfile;
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2,             recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST,     recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR,                recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS,         recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS,          recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_156,                          recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS,         recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS,          recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER,             recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS,                 recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS,         recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_145,                          recvPacket.ReadBit());
-        strlens[i] = (uint8)                                               recvPacket.ReadBits(7);
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS,                     recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP,                recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_156, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_145, recvPacket.ReadBit());
+        strlens[i] = (uint8)recvPacket.ReadBits(7);
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP, recvPacket.ReadBit());
         profiles[i]->BoolOptions.set(CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS,         recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS,         recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_157,                          recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER,                   recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS,        recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1,             recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS,          recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE,                recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION,          recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_157, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION, recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT, recvPacket.ReadBit());
     }
 
     for (uint8 i = 0; i < count; ++i)

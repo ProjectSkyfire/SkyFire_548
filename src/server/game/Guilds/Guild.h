@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,28 +7,28 @@
 #define SKYFIRESERVER_GUILD_H
 
 #include "AchievementMgr.h"
-#include "World.h"
+#include "DBCStore.h"
 #include "Item.h"
-#include "WorldPacket.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "DBCStore.h"
+#include "World.h"
+#include "WorldPacket.h"
 
 class Item;
 
 enum GuildMisc
 {
-    GUILD_BANK_MAX_TABS                 = 8,                    // send by client for money log also
-    GUILD_BANK_MAX_SLOTS                = 98,
-    GUILD_BANK_MONEY_LOGS_TAB           = 100,                  // used for money log in DB
-    GUILD_RANKS_MIN_COUNT               = 2,
-    GUILD_RANKS_MAX_COUNT               = 10,
-    GUILD_RANK_NONE                     = 0xFF,
-    GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFF,
-    GUILD_WITHDRAW_SLOT_UNLIMITED       = 0xFFFFFFFF,
-    GUILD_EVENT_LOG_GUID_UNDEFINED      = 0xFFFFFFFF,
-    GUILD_EXPERIENCE_UNCAPPED_LEVEL     = 20,                   ///> Hardcoded in client, starting from this level, guild daily experience gain is unlimited.
-    TAB_UNDEFINED                       = 0xFF,
+    GUILD_BANK_MAX_TABS = 8,                    // send by client for money log also
+    GUILD_BANK_MAX_SLOTS = 98,
+    GUILD_BANK_MONEY_LOGS_TAB = 100,                  // used for money log in DB
+    GUILD_RANKS_MIN_COUNT = 2,
+    GUILD_RANKS_MAX_COUNT = 10,
+    GUILD_RANK_NONE = 0xFF,
+    GUILD_WITHDRAW_MONEY_UNLIMITED = 0xFFFFFFFF,
+    GUILD_WITHDRAW_SLOT_UNLIMITED = 0xFFFFFFFF,
+    GUILD_EVENT_LOG_GUID_UNDEFINED = 0xFFFFFFFF,
+    GUILD_EXPERIENCE_UNCAPPED_LEVEL = 20,                   ///> Hardcoded in client, starting from this level, guild daily experience gain is unlimited.
+    TAB_UNDEFINED = 0xFF,
 };
 
 enum GuildMemberData
@@ -41,209 +41,209 @@ enum GuildMemberData
 enum GuildDefaultRanks
 {
     // These ranks can be modified, but they cannot be deleted
-    GR_GUILDMASTER  = 0,
-    GR_OFFICER      = 1,
-    GR_VETERAN      = 2,
-    GR_MEMBER       = 3,
-    GR_INITIATE     = 4
+    GR_GUILDMASTER = 0,
+    GR_OFFICER = 1,
+    GR_VETERAN = 2,
+    GR_MEMBER = 3,
+    GR_INITIATE = 4
     // When promoting member server does: rank--
     // When demoting member server does: rank++
 };
 
 enum GuildRankRights
 {
-    GR_RIGHT_EMPTY                      = 0x00000040,
-    GR_RIGHT_GCHATLISTEN                = GR_RIGHT_EMPTY | 0x00000001,
-    GR_RIGHT_GCHATSPEAK                 = GR_RIGHT_EMPTY | 0x00000002,
-    GR_RIGHT_OFFCHATLISTEN              = GR_RIGHT_EMPTY | 0x00000004,
-    GR_RIGHT_OFFCHATSPEAK               = GR_RIGHT_EMPTY | 0x00000008,
-    GR_RIGHT_INVITE                     = GR_RIGHT_EMPTY | 0x00000010,
-    GR_RIGHT_REMOVE                     = GR_RIGHT_EMPTY | 0x00000020,
-    GR_RIGHT_PROMOTE                    = GR_RIGHT_EMPTY | 0x00000080,
-    GR_RIGHT_DEMOTE                     = GR_RIGHT_EMPTY | 0x00000100,
-    GR_RIGHT_SETMOTD                    = GR_RIGHT_EMPTY | 0x00001000,
-    GR_RIGHT_EPNOTE                     = GR_RIGHT_EMPTY | 0x00002000,
-    GR_RIGHT_VIEWOFFNOTE                = GR_RIGHT_EMPTY | 0x00004000,
-    GR_RIGHT_EOFFNOTE                   = GR_RIGHT_EMPTY | 0x00008000,
-    GR_RIGHT_MODIFY_GUILD_INFO          = GR_RIGHT_EMPTY | 0x00010000,
-    GR_RIGHT_WITHDRAW_GOLD_LOCK         = 0x00020000,                   // remove money withdraw capacity
-    GR_RIGHT_WITHDRAW_REPAIR            = 0x00040000,                   // withdraw for repair
-    GR_RIGHT_WITHDRAW_GOLD              = 0x00080000,                   // withdraw gold
-    GR_RIGHT_CREATE_GUILD_EVENT         = 0x00100000,                   // wotlk
-    GR_RIGHT_REQUIRES_AUTHENTICATOR     = 0x00200000,
-    GR_RIGHT_MODIFY_BANK_TAB            = 0x00400000,
-    GR_RIGHT_ALL                        = 0x00DDFFBF                    // FDFFBF with GR_RIGHT_REQUIRES_AUTHENTICATOR
+    GR_RIGHT_EMPTY = 0x00000040,
+    GR_RIGHT_GCHATLISTEN = GR_RIGHT_EMPTY | 0x00000001,
+    GR_RIGHT_GCHATSPEAK = GR_RIGHT_EMPTY | 0x00000002,
+    GR_RIGHT_OFFCHATLISTEN = GR_RIGHT_EMPTY | 0x00000004,
+    GR_RIGHT_OFFCHATSPEAK = GR_RIGHT_EMPTY | 0x00000008,
+    GR_RIGHT_INVITE = GR_RIGHT_EMPTY | 0x00000010,
+    GR_RIGHT_REMOVE = GR_RIGHT_EMPTY | 0x00000020,
+    GR_RIGHT_PROMOTE = GR_RIGHT_EMPTY | 0x00000080,
+    GR_RIGHT_DEMOTE = GR_RIGHT_EMPTY | 0x00000100,
+    GR_RIGHT_SETMOTD = GR_RIGHT_EMPTY | 0x00001000,
+    GR_RIGHT_EPNOTE = GR_RIGHT_EMPTY | 0x00002000,
+    GR_RIGHT_VIEWOFFNOTE = GR_RIGHT_EMPTY | 0x00004000,
+    GR_RIGHT_EOFFNOTE = GR_RIGHT_EMPTY | 0x00008000,
+    GR_RIGHT_MODIFY_GUILD_INFO = GR_RIGHT_EMPTY | 0x00010000,
+    GR_RIGHT_WITHDRAW_GOLD_LOCK = 0x00020000,                   // remove money withdraw capacity
+    GR_RIGHT_WITHDRAW_REPAIR = 0x00040000,                   // withdraw for repair
+    GR_RIGHT_WITHDRAW_GOLD = 0x00080000,                   // withdraw gold
+    GR_RIGHT_CREATE_GUILD_EVENT = 0x00100000,                   // wotlk
+    GR_RIGHT_REQUIRES_AUTHENTICATOR = 0x00200000,
+    GR_RIGHT_MODIFY_BANK_TAB = 0x00400000,
+    GR_RIGHT_ALL = 0x00DDFFBF                    // FDFFBF with GR_RIGHT_REQUIRES_AUTHENTICATOR
 };
 
 enum GuildCommandType
 {
-    GUILD_COMMAND_CREATE                = 0,
-    GUILD_COMMAND_INVITE                = 1,
-    GUILD_COMMAND_QUIT                  = 3,
-    GUILD_COMMAND_ROSTER                = 5,
-    GUILD_COMMAND_PROMOTE               = 6,
-    GUILD_COMMAND_DEMOTE                = 7,
-    GUILD_COMMAND_REMOVE                = 8,
-    GUILD_COMMAND_CHANGE_LEADER         = 10,
-    GUILD_COMMAND_EDIT_MOTD             = 11,
-    GUILD_COMMAND_GUILD_CHAT            = 13,
-    GUILD_COMMAND_FOUNDER               = 14,
-    GUILD_COMMAND_CHANGE_RANK           = 16,
-    GUILD_COMMAND_PUBLIC_NOTE           = 19,
-    GUILD_COMMAND_VIEW_TAB              = 21,
-    GUILD_COMMAND_MOVE_ITEM             = 22,
-    GUILD_COMMAND_REPAIR                = 25,
+    GUILD_COMMAND_CREATE = 0,
+    GUILD_COMMAND_INVITE = 1,
+    GUILD_COMMAND_QUIT = 3,
+    GUILD_COMMAND_ROSTER = 5,
+    GUILD_COMMAND_PROMOTE = 6,
+    GUILD_COMMAND_DEMOTE = 7,
+    GUILD_COMMAND_REMOVE = 8,
+    GUILD_COMMAND_CHANGE_LEADER = 10,
+    GUILD_COMMAND_EDIT_MOTD = 11,
+    GUILD_COMMAND_GUILD_CHAT = 13,
+    GUILD_COMMAND_FOUNDER = 14,
+    GUILD_COMMAND_CHANGE_RANK = 16,
+    GUILD_COMMAND_PUBLIC_NOTE = 19,
+    GUILD_COMMAND_VIEW_TAB = 21,
+    GUILD_COMMAND_MOVE_ITEM = 22,
+    GUILD_COMMAND_REPAIR = 25,
 };
 
 enum GuildCommandError
 {
-    ERR_GUILD_COMMAND_SUCCESS           = 0,
-    ERR_GUILD_INTERNAL                  = 1,
-    ERR_ALREADY_IN_GUILD                = 2,
-    ERR_ALREADY_IN_GUILD_S              = 3,
-    ERR_INVITED_TO_GUILD                = 4,
-    ERR_ALREADY_INVITED_TO_GUILD_S      = 5,
-    ERR_GUILD_NAME_INVALID              = 6,
-    ERR_GUILD_NAME_EXISTS_S             = 7,
-    ERR_GUILD_LEADER_LEAVE              = 8,
-    ERR_GUILD_PERMISSIONS               = 8,
-    ERR_GUILD_PLAYER_NOT_IN_GUILD       = 9,
-    ERR_GUILD_PLAYER_NOT_IN_GUILD_S     = 10,
-    ERR_GUILD_PLAYER_NOT_FOUND_S        = 11,
-    ERR_GUILD_NOT_ALLIED                = 12,
-    ERR_GUILD_RANK_TOO_HIGH_S           = 13,
-    ERR_GUILD_RANK_TOO_LOW_S            = 14,
-    ERR_GUILD_RANKS_LOCKED              = 17,
-    ERR_GUILD_RANK_IN_USE               = 18,
-    ERR_GUILD_IGNORING_YOU_S            = 19,
-    ERR_GUILD_UNK1                      = 20, // Forces roster update
-    ERR_GUILD_WITHDRAW_LIMIT            = 25,
-    ERR_GUILD_NOT_ENOUGH_MONEY          = 26,
-    ERR_GUILD_BANK_FULL                 = 28,
-    ERR_GUILD_ITEM_NOT_FOUND            = 29,
-    ERR_GUILD_TOO_MUCH_MONEY            = 31,
-    ERR_GUILD_BANK_WRONG_TAB            = 32,
-    ERR_RANK_REQUIRES_AUTHENTICATOR     = 34,
-    ERR_GUILD_BANK_VOUCHER_FAILED       = 35,
-    ERR_GUILD_TRIAL_ACCOUNT             = 36,
-    ERR_GUILD_UNDELETABLE_DUE_TO_LEVEL  = 37,
-    ERR_GUILD_MOVE_STARTING             = 38,
-    ERR_GUILD_REP_TOO_LOW               = 39
+    ERR_GUILD_COMMAND_SUCCESS = 0,
+    ERR_GUILD_INTERNAL = 1,
+    ERR_ALREADY_IN_GUILD = 2,
+    ERR_ALREADY_IN_GUILD_S = 3,
+    ERR_INVITED_TO_GUILD = 4,
+    ERR_ALREADY_INVITED_TO_GUILD_S = 5,
+    ERR_GUILD_NAME_INVALID = 6,
+    ERR_GUILD_NAME_EXISTS_S = 7,
+    ERR_GUILD_LEADER_LEAVE = 8,
+    ERR_GUILD_PERMISSIONS = 8,
+    ERR_GUILD_PLAYER_NOT_IN_GUILD = 9,
+    ERR_GUILD_PLAYER_NOT_IN_GUILD_S = 10,
+    ERR_GUILD_PLAYER_NOT_FOUND_S = 11,
+    ERR_GUILD_NOT_ALLIED = 12,
+    ERR_GUILD_RANK_TOO_HIGH_S = 13,
+    ERR_GUILD_RANK_TOO_LOW_S = 14,
+    ERR_GUILD_RANKS_LOCKED = 17,
+    ERR_GUILD_RANK_IN_USE = 18,
+    ERR_GUILD_IGNORING_YOU_S = 19,
+    ERR_GUILD_UNK1 = 20, // Forces roster update
+    ERR_GUILD_WITHDRAW_LIMIT = 25,
+    ERR_GUILD_NOT_ENOUGH_MONEY = 26,
+    ERR_GUILD_BANK_FULL = 28,
+    ERR_GUILD_ITEM_NOT_FOUND = 29,
+    ERR_GUILD_TOO_MUCH_MONEY = 31,
+    ERR_GUILD_BANK_WRONG_TAB = 32,
+    ERR_RANK_REQUIRES_AUTHENTICATOR = 34,
+    ERR_GUILD_BANK_VOUCHER_FAILED = 35,
+    ERR_GUILD_TRIAL_ACCOUNT = 36,
+    ERR_GUILD_UNDELETABLE_DUE_TO_LEVEL = 37,
+    ERR_GUILD_MOVE_STARTING = 38,
+    ERR_GUILD_REP_TOO_LOW = 39
 };
 
 enum GuildEvents
 {
-    GE_PROMOTION                        = 1,
-    GE_DEMOTION                         = 2,
-    GE_MOTD                             = 3,
-    GE_JOINED                           = 4,
-    GE_LEFT                             = 5,
-    GE_REMOVED                          = 6,
-    GE_LEADER_IS                        = 7,
-    GE_LEADER_CHANGED                   = 8,
-    GE_DISBANDED                        = 9,
-    GE_TABARDCHANGE                     = 10,
-    GE_RANK_UPDATED                     = 11,
-    GE_RANK_CREATED                     = 12,
-    GE_RANK_DELETED                     = 13,
-    GE_RANK_ORDER_CHANGED               = 14,
-    GE_FOUNDER                          = 15,
-    GE_SIGNED_ON                        = 16,
-    GE_SIGNED_OFF                       = 17,
-    GE_GUILDBANKBAGSLOTS_CHANGED        = 18,
-    GE_BANK_TAB_PURCHASED               = 19,
-    GE_BANK_TAB_UPDATED                 = 20,
-    GE_BANK_MONEY_SET                   = 21,
-    GE_BANK_MONEY_CHANGED               = 22,
-    GE_BANK_TEXT_CHANGED                = 23,
+    GE_PROMOTION = 1,
+    GE_DEMOTION = 2,
+    GE_MOTD = 3,
+    GE_JOINED = 4,
+    GE_LEFT = 5,
+    GE_REMOVED = 6,
+    GE_LEADER_IS = 7,
+    GE_LEADER_CHANGED = 8,
+    GE_DISBANDED = 9,
+    GE_TABARDCHANGE = 10,
+    GE_RANK_UPDATED = 11,
+    GE_RANK_CREATED = 12,
+    GE_RANK_DELETED = 13,
+    GE_RANK_ORDER_CHANGED = 14,
+    GE_FOUNDER = 15,
+    GE_SIGNED_ON = 16,
+    GE_SIGNED_OFF = 17,
+    GE_GUILDBANKBAGSLOTS_CHANGED = 18,
+    GE_BANK_TAB_PURCHASED = 19,
+    GE_BANK_TAB_UPDATED = 20,
+    GE_BANK_MONEY_SET = 21,
+    GE_BANK_MONEY_CHANGED = 22,
+    GE_BANK_TEXT_CHANGED = 23,
     // 24 - error 795
-    GE_SIGNED_ON_MOBILE                 = 25,
-    GE_SIGNED_Off_MOBILE                = 26,
+    GE_SIGNED_ON_MOBILE = 25,
+    GE_SIGNED_Off_MOBILE = 26,
 };
 
 enum PetitionTurns
 {
-    PETITION_TURN_OK                    = 0,
-    PETITION_TURN_ALREADY_IN_GUILD      = 2,
-    PETITION_TURN_NEED_MORE_SIGNATURES  = 4,
-    PETITION_TURN_GUILD_PERMISSIONS     = 11,
-    PETITION_TURN_GUILD_NAME_INVALID    = 12
+    PETITION_TURN_OK = 0,
+    PETITION_TURN_ALREADY_IN_GUILD = 2,
+    PETITION_TURN_NEED_MORE_SIGNATURES = 4,
+    PETITION_TURN_GUILD_PERMISSIONS = 11,
+    PETITION_TURN_GUILD_NAME_INVALID = 12
 };
 
 enum PetitionSigns
 {
-    PETITION_SIGN_OK                    = 0,
-    PETITION_SIGN_ALREADY_SIGNED        = 1,
-    PETITION_SIGN_ALREADY_IN_GUILD      = 2,
-    PETITION_SIGN_CANT_SIGN_OWN         = 3,
-    PETITION_SIGN_NOT_SERVER            = 4,
-    PETITION_SIGN_FULL                  = 5,
-    PETITION_SIGN_ALREADY_SIGNED_OTHER  = 6,
-    PETITION_SIGN_RESTRICTED_ACCOUNT    = 7
+    PETITION_SIGN_OK = 0,
+    PETITION_SIGN_ALREADY_SIGNED = 1,
+    PETITION_SIGN_ALREADY_IN_GUILD = 2,
+    PETITION_SIGN_CANT_SIGN_OWN = 3,
+    PETITION_SIGN_NOT_SERVER = 4,
+    PETITION_SIGN_FULL = 5,
+    PETITION_SIGN_ALREADY_SIGNED_OTHER = 6,
+    PETITION_SIGN_RESTRICTED_ACCOUNT = 7
 };
 
 enum GuildBankRights
 {
-    GUILD_BANK_RIGHT_VIEW_TAB           = 0x01,
-    GUILD_BANK_RIGHT_PUT_ITEM           = 0x02,
-    GUILD_BANK_RIGHT_UPDATE_TEXT        = 0x04,
+    GUILD_BANK_RIGHT_VIEW_TAB = 0x01,
+    GUILD_BANK_RIGHT_PUT_ITEM = 0x02,
+    GUILD_BANK_RIGHT_UPDATE_TEXT = 0x04,
 
-    GUILD_BANK_RIGHT_DEPOSIT_ITEM       = GUILD_BANK_RIGHT_VIEW_TAB | GUILD_BANK_RIGHT_PUT_ITEM,
-    GUILD_BANK_RIGHT_FULL               = 0xFF
+    GUILD_BANK_RIGHT_DEPOSIT_ITEM = GUILD_BANK_RIGHT_VIEW_TAB | GUILD_BANK_RIGHT_PUT_ITEM,
+    GUILD_BANK_RIGHT_FULL = 0xFF
 };
 
 enum GuildBankEventLogTypes
 {
-    GUILD_BANK_LOG_DEPOSIT_ITEM         = 1,
-    GUILD_BANK_LOG_WITHDRAW_ITEM        = 2,
-    GUILD_BANK_LOG_MOVE_ITEM            = 3,
-    GUILD_BANK_LOG_DEPOSIT_MONEY        = 4,
-    GUILD_BANK_LOG_WITHDRAW_MONEY       = 5,
-    GUILD_BANK_LOG_REPAIR_MONEY         = 6,
-    GUILD_BANK_LOG_MOVE_ITEM2           = 7,
-    GUILD_BANK_LOG_UNK1                 = 8,
-    GUILD_BANK_LOG_BUY_SLOT             = 9,
-    GUILD_BANK_LOG_CASH_FLOW_DEPOSIT    = 10
+    GUILD_BANK_LOG_DEPOSIT_ITEM = 1,
+    GUILD_BANK_LOG_WITHDRAW_ITEM = 2,
+    GUILD_BANK_LOG_MOVE_ITEM = 3,
+    GUILD_BANK_LOG_DEPOSIT_MONEY = 4,
+    GUILD_BANK_LOG_WITHDRAW_MONEY = 5,
+    GUILD_BANK_LOG_REPAIR_MONEY = 6,
+    GUILD_BANK_LOG_MOVE_ITEM2 = 7,
+    GUILD_BANK_LOG_UNK1 = 8,
+    GUILD_BANK_LOG_BUY_SLOT = 9,
+    GUILD_BANK_LOG_CASH_FLOW_DEPOSIT = 10
 };
 
 enum GuildEventLogTypes
 {
-    GUILD_EVENT_LOG_INVITE_PLAYER       = 1,
-    GUILD_EVENT_LOG_JOIN_GUILD          = 2,
-    GUILD_EVENT_LOG_PROMOTE_PLAYER      = 3,
-    GUILD_EVENT_LOG_DEMOTE_PLAYER       = 4,
-    GUILD_EVENT_LOG_UNINVITE_PLAYER     = 5,
-    GUILD_EVENT_LOG_LEAVE_GUILD         = 6
+    GUILD_EVENT_LOG_INVITE_PLAYER = 1,
+    GUILD_EVENT_LOG_JOIN_GUILD = 2,
+    GUILD_EVENT_LOG_PROMOTE_PLAYER = 3,
+    GUILD_EVENT_LOG_DEMOTE_PLAYER = 4,
+    GUILD_EVENT_LOG_UNINVITE_PLAYER = 5,
+    GUILD_EVENT_LOG_LEAVE_GUILD = 6
 };
 
 enum GuildEmblemError
 {
-    ERR_GUILDEMBLEM_SUCCESS               = 0,
+    ERR_GUILDEMBLEM_SUCCESS = 0,
     ERR_GUILDEMBLEM_INVALID_TABARD_COLORS = 1,
-    ERR_GUILDEMBLEM_NOGUILD               = 2,
-    ERR_GUILDEMBLEM_NOTGUILDMASTER        = 3,
-    ERR_GUILDEMBLEM_NOTENOUGHMONEY        = 4,
-    ERR_GUILDEMBLEM_INVALIDVENDOR         = 5
+    ERR_GUILDEMBLEM_NOGUILD = 2,
+    ERR_GUILDEMBLEM_NOTGUILDMASTER = 3,
+    ERR_GUILDEMBLEM_NOTENOUGHMONEY = 4,
+    ERR_GUILDEMBLEM_INVALIDVENDOR = 5
 };
 
 enum GuildMemberFlags
 {
-    GUILDMEMBER_STATUS_NONE             = 0x0000,
-    GUILDMEMBER_STATUS_ONLINE           = 0x0001,
-    GUILDMEMBER_STATUS_AFK              = 0x0002,
-    GUILDMEMBER_STATUS_DND              = 0x0004,
-    GUILDMEMBER_STATUS_MOBILE           = 0x0008, // remote chat from mobile app
+    GUILDMEMBER_STATUS_NONE = 0x0000,
+    GUILDMEMBER_STATUS_ONLINE = 0x0001,
+    GUILDMEMBER_STATUS_AFK = 0x0002,
+    GUILDMEMBER_STATUS_DND = 0x0004,
+    GUILDMEMBER_STATUS_MOBILE = 0x0008, // remote chat from mobile app
 };
 
 enum GuildNews
 {
-    GUILD_NEWS_GUILD_ACHIEVEMENT        = 0,
-    GUILD_NEWS_PLAYER_ACHIEVEMENT       = 1,
-    GUILD_NEWS_DUNGEON_ENCOUNTER        = 2, // @todo Implement
-    GUILD_NEWS_ITEM_LOOTED              = 3,
-    GUILD_NEWS_ITEM_CRAFTED             = 4,
-    GUILD_NEWS_ITEM_PURCHASED           = 5,
-    GUILD_NEWS_LEVEL_UP                 = 6,
+    GUILD_NEWS_GUILD_ACHIEVEMENT = 0,
+    GUILD_NEWS_PLAYER_ACHIEVEMENT = 1,
+    GUILD_NEWS_DUNGEON_ENCOUNTER = 2, // @todo Implement
+    GUILD_NEWS_ITEM_LOOTED = 3,
+    GUILD_NEWS_ITEM_CRAFTED = 4,
+    GUILD_NEWS_ITEM_PURCHASED = 5,
+    GUILD_NEWS_LEVEL_UP = 6,
 };
 
 struct GuildReward
@@ -327,7 +327,7 @@ private:
     class Member
     {
     public:
-        Member(uint32 guildId, uint64 guid, uint8 rankId):
+        Member(uint32 guildId, uint64 guid, uint8 rankId) :
             m_guildId(guildId),
             m_guid(guid),
             m_zoneId(0),
@@ -472,7 +472,7 @@ private:
         static bool IsMoneyEvent(GuildBankEventLogTypes eventType)
         {
             return eventType == GUILD_BANK_LOG_DEPOSIT_MONEY || eventType == GUILD_BANK_LOG_WITHDRAW_MONEY ||
-                   eventType == GUILD_BANK_LOG_REPAIR_MONEY || eventType == GUILD_BANK_LOG_CASH_FLOW_DEPOSIT;
+                eventType == GUILD_BANK_LOG_REPAIR_MONEY || eventType == GUILD_BANK_LOG_CASH_FLOW_DEPOSIT;
         }
 
         bool IsMoneyEvent() const
@@ -521,9 +521,9 @@ private:
         void SetSticky(bool sticky)
         {
             if (sticky)
-               m_flags |= 1;
-           else
-               m_flags &= ~1;
+                m_flags |= 1;
+            else
+                m_flags &= ~1;
         }
 
         void SaveToDB(SQLTransaction& trans) const;
@@ -567,7 +567,7 @@ private:
     class RankInfo
     {
     public:
-        RankInfo(): m_guildId(0), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
+        RankInfo() : m_guildId(0), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
         RankInfo(uint32 guildId) : m_guildId(guildId), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
         RankInfo(uint32 guildId, uint8 rankId, std::string const& name, uint32 rights, uint32 money) :
             m_guildId(guildId), m_rankId(rankId), m_name(name), m_rights(rights), m_bankMoneyPerDay(rankId == GR_GUILDMASTER ? GUILD_WITHDRAW_MONEY_UNLIMITED : money) { }
@@ -637,7 +637,7 @@ private:
         std::string const& GetIcon() const { return m_icon; }
         std::string const& GetText() const { return m_text; }
 
-        inline Item* GetItem(uint8 slotId) const { return slotId < GUILD_BANK_MAX_SLOTS ?  m_items[slotId] : NULL; }
+        inline Item* GetItem(uint8 slotId) const { return slotId < GUILD_BANK_MAX_SLOTS ? m_items[slotId] : NULL; }
         bool SetItem(SQLTransaction& trans, uint8 slotId, Item* item);
 
     private:

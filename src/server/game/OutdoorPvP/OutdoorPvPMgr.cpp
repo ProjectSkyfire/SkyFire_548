@@ -1,19 +1,19 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "OutdoorPvPMgr.h"
-#include "ObjectMgr.h"
-#include "Player.h"
 #include "DisableMgr.h"
+#include "ObjectMgr.h"
+#include "OutdoorPvPMgr.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 
 void OutdoorPvPMgr::Die()
 {
     //SF_LOG_DEBUG("outdoorpvp", "Deleting OutdoorPvPMgr");
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
-        delete *itr;
+        delete* itr;
 
     for (OutdoorPvPDataMap::iterator itr = m_OutdoorPvPDatas.begin(); itr != m_OutdoorPvPDatas.end(); ++itr)
         delete itr->second;
@@ -57,8 +57,7 @@ void OutdoorPvPMgr::InitOutdoorPvP()
         m_OutdoorPvPDatas[realTypeId] = data;
 
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     OutdoorPvP* pvp;
     for (uint8 i = 1; i < MAX_OUTDOORPVP_TYPES; ++i)

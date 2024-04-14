@@ -1,26 +1,26 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "ArenaTeamMgr.h"
 #include "Common.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
-#include "ArenaTeamMgr.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
 #include "ArenaTeam.h"
-#include "BattlegroundMgr.h"
 #include "Battleground.h"
+#include "BattlegroundMgr.h"
 #include "Chat.h"
-#include "Language.h"
-#include "Log.h"
-#include "Player.h"
-#include "Object.h"
-#include "Opcodes.h"
 #include "DisableMgr.h"
 #include "Group.h"
+#include "Language.h"
+#include "Log.h"
+#include "Object.h"
+#include "Opcodes.h"
+#include "Player.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
 {
@@ -42,7 +42,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
 
     if (!_player->GetBGAccessByLevel(bgTypeId))
     {
-                                                            // temp, must be gossip message...
+        // temp, must be gossip message...
         SendNotification(LANG_YOUR_BG_LEVEL_REQ_ERROR);
         return;
     }
@@ -197,7 +197,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         SendPacket(&data);
 
         SF_LOG_DEBUG("bg.battleground", "Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",
-                       bgQueueTypeId, uint32(bgTypeId), _player->GetGUIDLow(), _player->GetName().c_str());
+            bgQueueTypeId, uint32(bgTypeId), _player->GetGUIDLow(), _player->GetName().c_str());
     }
     else
     {
@@ -346,7 +346,7 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
     SendPacket(&data);
 }
 
-void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandlePVPLogDataOpcode(WorldPacket& /*recvData*/)
 {
     SF_LOG_DEBUG("network", "WORLD: Recvd CMSG_PVP_LOG_DATA Message");
 
@@ -384,7 +384,7 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recvData)
     SendPacket(&data);
 }
 
-void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
+void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
 
@@ -713,7 +713,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
     arenaRating = 1;
     matchmakerRating = 1;
 
-    BattlegroundQueue &bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
+    BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
 
     uint32 avgTime = 0;
     GroupQueueInfo* ginfo = NULL;

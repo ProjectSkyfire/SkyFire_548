@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,34 +7,34 @@
     \ingroup u2w
 */
 
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
-#include <zlib.h>
-#include "Config.h"
-#include "Common.h"
-#include "DatabaseEnv.h"
 #include "AccountMgr.h"
-#include "Log.h"
-#include "Opcodes.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "Player.h"
-#include "Vehicle.h"
-#include "ObjectMgr.h"
-#include "GuildMgr.h"
+#include "BattlegroundMgr.h"
+#include "CharacterBoost.h"
+#include "Common.h"
+#include "Config.h"
+#include "DatabaseEnv.h"
 #include "Group.h"
 #include "Guild.h"
-#include "World.h"
-#include "ObjectAccessor.h"
-#include "BattlegroundMgr.h"
-#include "OutdoorPvPMgr.h"
+#include "GuildMgr.h"
+#include "Log.h"
 #include "MapManager.h"
-#include "SocialMgr.h"
-#include "zlib.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "OutdoorPvPMgr.h"
+#include "Player.h"
 #include "ScriptMgr.h"
+#include "SocialMgr.h"
 #include "Transport.h"
-#include "WardenWin.h"
+#include "Vehicle.h"
 #include "WardenMac.h"
-#include "CharacterBoost.h"
+#include "WardenWin.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
+#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
+#include "zlib.h"
+#include <zlib.h>
 
 namespace
 {
@@ -84,7 +84,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool hasBoost):
+WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool hasBoost) :
     m_muteTime(mute_time),
     m_timeOutTime(0),
     AntiDOS(this),
@@ -140,7 +140,7 @@ WorldSession::~WorldSession()
 {
     ///- unload player if not unloaded
     if (_player)
-        LogoutPlayer (true);
+        LogoutPlayer(true);
 
     /// - If have unclosed socket, close it
     if (m_Socket)
@@ -168,7 +168,7 @@ WorldSession::~WorldSession()
     delete _compressionStream;
 }
 
-std::string const & WorldSession::GetPlayerName() const
+std::string const& WorldSession::GetPlayerName() const
 {
     return _player != NULL ? _player->GetName() : DefaultPlayerName;
 }
@@ -178,8 +178,8 @@ std::string WorldSession::GetPlayerInfo() const
     std::ostringstream ss;
 
     ss << "[Player: " << GetPlayerName()
-       << " (Guid: " << (_player != NULL ? _player->GetGUID() : 0)
-       << ", Account: " << GetAccountId() << ")]";
+        << " (Guid: " << (_player != NULL ? _player->GetGUID() : 0)
+        << ", Account: " << GetAccountId() << ")]";
 
     return ss.str();
 }
@@ -239,18 +239,18 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
 
     if ((cur_time - lastTime) < 60)
     {
-        sendPacketCount+=1;
-        sendPacketBytes+=packet->size();
+        sendPacketCount += 1;
+        sendPacketBytes += packet->size();
 
-        sendLastPacketCount+=1;
-        sendLastPacketBytes+=packet->size();
+        sendLastPacketCount += 1;
+        sendLastPacketBytes += packet->size();
     }
     else
     {
         uint64 minTime = uint64(cur_time - lastTime);
         uint64 fullTime = uint64(lastTime - firstTime);
-        SF_LOG_INFO("misc", "Send all time packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f time: %u", sendPacketCount, sendPacketBytes, float(sendPacketCount)/fullTime, float(sendPacketBytes)/fullTime, uint32(fullTime));
-        SF_LOG_INFO("misc", "Send last min packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f", sendLastPacketCount, sendLastPacketBytes, float(sendLastPacketCount)/minTime, float(sendLastPacketBytes)/minTime);
+        SF_LOG_INFO("misc", "Send all time packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f time: %u", sendPacketCount, sendPacketBytes, float(sendPacketCount) / fullTime, float(sendPacketBytes) / fullTime, uint32(fullTime));
+        SF_LOG_INFO("misc", "Send last min packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f", sendLastPacketCount, sendLastPacketBytes, float(sendLastPacketCount) / minTime, float(sendLastPacketBytes) / minTime);
 
         lastTime = cur_time;
         sendLastPacketCount = 1;
@@ -269,7 +269,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason)
+void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char* reason)
 {
     SF_LOG_ERROR("network.opcode", "Received unexpected opcode %s Status: %s Reason: %s from %s",
         GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), status, reason, GetPlayerInfo().c_str());
@@ -313,8 +313,8 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     uint32 processedPackets = 0;
 
     while (m_Socket && !m_Socket->IsClosed() &&
-            !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&
-            _recvQueue.next(packet, updater))
+        !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&
+        _recvQueue.next(packet, updater))
     {
         if (!AntiDOS.EvaluateOpcode(*packet))
             KickPlayer();
@@ -339,8 +339,8 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             deletePacket = false;
                             QueuePacket(packet);
                             //! Log
-                                SF_LOG_DEBUG("network", "Re-enqueueing packet with opcode %s with with status STATUS_LOGGEDIN. "
-                                    "Player is currently not in world yet.", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str());
+                            SF_LOG_DEBUG("network", "Re-enqueueing packet with opcode %s with with status STATUS_LOGGEDIN. "
+                                "Player is currently not in world yet.", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str());
                         }
                     }
                     else if (_player->IsInWorld())
@@ -393,19 +393,19 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     LogUnprocessedTail(packet);
                     break;
                 case STATUS_NEVER:
-                        SF_LOG_ERROR("network.opcode", "Received not allowed opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(),
-                            GetPlayerInfo().c_str());
+                    SF_LOG_ERROR("network.opcode", "Received not allowed opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(),
+                        GetPlayerInfo().c_str());
                     break;
                 case STATUS_UNHANDLED:
-                        SF_LOG_ERROR("network.opcode", "Received not handled opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(),
-                            GetPlayerInfo().c_str());
+                    SF_LOG_ERROR("network.opcode", "Received not handled opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(),
+                        GetPlayerInfo().c_str());
                     break;
             }
         }
         catch (ByteBufferException const&)
         {
             SF_LOG_ERROR("network", "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %s) from client %s, accountid=%i. Skipped packet.",
-                    GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), GetRemoteAddress().c_str(), GetAccountId());
+                GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), GetRemoteAddress().c_str(), GetAccountId());
             packet->hexlike();
         }
 
@@ -501,7 +501,7 @@ void WorldSession::LogoutPlayer(bool save)
 
         sOutdoorPvPMgr->HandlePlayerLeaveZone(_player, _player->GetZoneId());
 
-        for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+        for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
         {
             if (BattlegroundQueueTypeId bgQueueTypeId = _player->GetBattlegroundQueueTypeId(i))
             {
@@ -630,7 +630,7 @@ void WorldSession::KickPlayer()
         m_Socket->CloseSocket();
 }
 
-void WorldSession::SendNotification(const char *format, ...)
+void WorldSession::SendNotification(const char* format, ...)
 {
     if (format)
     {
@@ -671,7 +671,7 @@ void WorldSession::SendNotification(uint32 string_id, ...)
     }
 }
 
-const char *WorldSession::GetSkyFireString(int32 entry) const
+const char* WorldSession::GetSkyFireString(int32 entry) const
 {
     return sObjectMgr->GetSkyFireString(entry, GetSessionDbLocaleIndex());
 }
@@ -690,16 +690,16 @@ void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 
 void WorldSession::Handle_EarlyProccessContinued(WorldPacket& recvPacket) //CMSG_AUTH_CONTINUED_SESSION(void *this, int a2)
 {
-	SF_LOG_ERROR("network.opcode", "Recived opcode %s that must be processed in WorldSocket::Unknown from %s",
-	    GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
-  
-  /*
-  void *v2; // esi@1
+    SF_LOG_ERROR("network.opcode", "Recived opcode %s that must be processed in WorldSocket::Unknown from %s",
+        GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 
-  v2 = this;
-  sub_40F075(3913);
-  return (*(*v2 + 4))(v2, a2);
-  */
+    /*
+    void *v2; // esi@1
+
+    v2 = this;
+    sub_40F075(3913);
+    return (*(*v2 + 4))(v2, a2);
+    */
 }
 
 void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
@@ -769,8 +769,7 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
 
         m_accountData[type].Time = time_t(fields[1].GetUInt32());
         m_accountData[type].Data = fields[2].GetString();
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 }
 
 void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string const& data)
@@ -794,7 +793,7 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(index);
     stmt->setUInt32(0, id);
-    stmt->setUInt8 (1, uint8(type));
+    stmt->setUInt8(1, uint8(type));
     stmt->setUInt32(2, uint32(tm));
     stmt->setString(3, data);
     CharacterDatabase.Execute(stmt);
@@ -841,7 +840,7 @@ void WorldSession::SendTutorialsData()
     SendPacket(&data);
 }
 
-void WorldSession::SaveTutorialsData(SQLTransaction &trans)
+void WorldSession::SaveTutorialsData(SQLTransaction& trans)
 {
     if (!m_TutorialsChanged)
         return;
@@ -859,7 +858,7 @@ void WorldSession::SaveTutorialsData(SQLTransaction &trans)
     m_TutorialsChanged = false;
 }
 
-void WorldSession::ReadAddonsInfo(WorldPacket &data)
+void WorldSession::ReadAddonsInfo(WorldPacket& data)
 {
     if (data.rpos() + 4 > data.size())
         return;
@@ -1230,7 +1229,7 @@ void WorldSession::LoadPermissions()
     _RBACData->LoadFromDB();
 
     SF_LOG_DEBUG("rbac", "WorldSession::LoadPermissions [AccountId: %u, Name: %s, realmId: %d, secLevel: %u]",
-                   id, name.c_str(), GetVirtualRealmID(), uint8(secLevel));
+        id, name.c_str(), GetVirtualRealmID(), uint8(secLevel));
 }
 
 rbac::RBACData* WorldSession::GetRBACData()
@@ -1245,7 +1244,7 @@ bool WorldSession::HasPermission(uint32 permission)
 
     bool hasPermission = _RBACData->HasPermission(permission);
     SF_LOG_DEBUG("rbac", "WorldSession::HasPermission [AccountId: %u, Name: %s, realmId: %d]",
-                   _RBACData->GetId(), _RBACData->GetName().c_str(), GetVirtualRealmID());
+        _RBACData->GetId(), _RBACData->GetName().c_str(), GetVirtualRealmID());
 
     return hasPermission;
 }
@@ -1253,7 +1252,7 @@ bool WorldSession::HasPermission(uint32 permission)
 void WorldSession::InvalidateRBACData()
 {
     SF_LOG_DEBUG("rbac", "WorldSession::Invalidaterbac::RBACData [AccountId: %u, Name: %s, realmId: %d]",
-                   _RBACData->GetId(), _RBACData->GetName().c_str(), GetVirtualRealmID());
+        _RBACData->GetId(), _RBACData->GetName().c_str(), GetVirtualRealmID());
     delete _RBACData;
     _RBACData = NULL;
 }

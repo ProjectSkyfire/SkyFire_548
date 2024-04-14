@@ -1,27 +1,27 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "DatabaseEnv.h"
-#include "ObjectMgr.h"
-#include "ObjectDefines.h"
-#include "GridDefines.h"
-#include "GridNotifiers.h"
-#include "SpellMgr.h"
-#include "GridNotifiersImpl.h"
 #include "Cell.h"
 #include "CellImpl.h"
-#include "InstanceScript.h"
-#include "ScriptedCreature.h"
+#include "DatabaseEnv.h"
+#include "GridDefines.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Group.h"
-#include "SmartAI.h"
+#include "InstanceScript.h"
+#include "ObjectDefines.h"
+#include "ObjectMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptMgr.h"
+#include "SmartAI.h"
+#include "SpellMgr.h"
 
 SmartAI::SmartAI(Creature* c) : CreatureAI(c), mWayPoints(NULL), mEscortState(SMART_ESCORT_NONE), mCurrentWPID(0), mWPReached(false), mWPPauseTimer(0),
-                                mLastWP(NULL), mCanRepeatPath(false), mRun(false), mCanAutoAttack(true), mCanCombatMove(true), mForcedPaused(false), mLastWPIDReached(0),
-                                mEscortQuestID(0), mDespawnTime(0), mDespawnState(0), mEscortInvokerCheckTimer(1000), mFollowGuid(0), mFollowDist(0), mFollowAngle(0),
-                                mFollowCredit(0), mFollowArrivedEntry(0), mFollowArrivedTimer(0), mFollowCreditType(0), mInvincibilityHpLevel(0)
+mLastWP(NULL), mCanRepeatPath(false), mRun(false), mCanAutoAttack(true), mCanCombatMove(true), mForcedPaused(false), mLastWPIDReached(0),
+mEscortQuestID(0), mDespawnTime(0), mDespawnState(0), mEscortInvokerCheckTimer(1000), mFollowGuid(0), mFollowDist(0), mFollowAngle(0),
+mFollowCredit(0), mFollowArrivedEntry(0), mFollowArrivedTimer(0), mFollowCreditType(0), mInvincibilityHpLevel(0)
 {
     // spawn in run mode
     me->SetWalk(false);
@@ -43,7 +43,8 @@ void SmartAI::UpdateDespawn(const uint32 diff)
         }
         else
             me->DespawnOrUnsummon();
-    } else mDespawnTime -= diff;
+    }
+    else mDespawnTime -= diff;
 }
 
 void SmartAI::Reset()
@@ -192,7 +193,8 @@ void SmartAI::EndPath(bool fail)
                         groupGuy->FailQuest(mEscortQuestID);
                 }
             }
-        }else
+        }
+        else
         {
             for (ObjectList::iterator iter = targets->begin(); iter != targets->end(); ++iter)
             {
@@ -236,7 +238,8 @@ void SmartAI::UpdatePath(const uint32 diff)
             StopPath(mDespawnTime, mEscortQuestID, true);
         }
         mEscortInvokerCheckTimer = 1000;
-    } else mEscortInvokerCheckTimer -= diff;
+    }
+    else mEscortInvokerCheckTimer -= diff;
     // handle pause
     if (HasEscortState(SMART_ESCORT_PAUSED))
     {
@@ -346,7 +349,7 @@ bool SmartAI::IsEscortInvokerInRange()
         {
             Player* player = (*targets->begin())->ToPlayer();
             if (me->GetDistance(player) <= float(SMART_ESCORT_MAX_PLAYER_DIST))
-                        return true;
+                return true;
 
             if (Group* group = player->GetGroup())
             {
@@ -358,7 +361,8 @@ bool SmartAI::IsEscortInvokerInRange()
                         return true;
                 }
             }
-        }else
+        }
+        else
         {
             for (ObjectList::iterator iter = targets->begin(); iter != targets->end(); ++iter)
             {
@@ -885,20 +889,20 @@ void SmartGameObjectAI::EventInform(uint32 eventId)
 
 class SmartTrigger : public AreaTriggerScript
 {
-    public:
-        SmartTrigger() : AreaTriggerScript("SmartTrigger") { }
+public:
+    SmartTrigger() : AreaTriggerScript("SmartTrigger") { }
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
-        {
-            if (!player->IsAlive())
-                return false;
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (!player->IsAlive())
+            return false;
 
-            SF_LOG_DEBUG("scripts.ai", "AreaTrigger %u is using SmartTrigger script", trigger->id);
-            SmartScript script;
-            script.OnInitialize(NULL, trigger);
-            script.ProcessEventsFor(SMART_EVENT_AREATRIGGER_ONTRIGGER, player, trigger->id);
-            return true;
-        }
+        SF_LOG_DEBUG("scripts.ai", "AreaTrigger %u is using SmartTrigger script", trigger->id);
+        SmartScript script;
+        script.OnInitialize(NULL, trigger);
+        script.ProcessEventsFor(SMART_EVENT_AREATRIGGER_ONTRIGGER, player, trigger->id);
+        return true;
+    }
 };
 
 void AddSC_SmartSCripts()

@@ -1,14 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include <G3D/Quat.h>
-#include "GameObjectAI.h"
 #include "Battleground.h"
 #include "CellImpl.h"
 #include "CreatureAISelector.h"
 #include "DynamicTree.h"
+#include "GameObjectAI.h"
 #include "GameObjectModel.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -18,12 +17,13 @@
 #include "PoolMgr.h"
 #include "ScriptMgr.h"
 #include "SpellMgr.h"
+#include "Transport.h"
 #include "UpdateFieldFlags.h"
 #include "World.h"
-#include "Transport.h"
+#include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(false), MapObject(),
-    m_model(NULL), m_goValue(), m_AI(NULL)
+m_model(NULL), m_goValue(), m_AI(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TypeID::TYPEID_GAMEOBJECT;
@@ -113,7 +113,7 @@ void GameObject::RemoveFromOwner()
         return;
     }
 
-    const char * ownerType = "creature";
+    const char* ownerType = "creature";
     if (IS_PLAYER_GUID(ownerGUID))
         ownerType = "player";
     else if (IS_PET_GUID(ownerGUID))
@@ -202,8 +202,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
         return false;
     }
 
-    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+0, rotation0);
-    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+1, rotation1);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 0, rotation0);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 1, rotation1);
 
     UpdateRotationFields(rotation2, rotation3);              // GAMEOBJECT_FACING, GAMEOBJECT_ROTATION, GAMEOBJECT_FIELD_PARENT_ROTATION+2/3
 
@@ -383,7 +383,7 @@ void GameObject::Update(uint32 diff)
                         if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
                             SetRespawnTime(DAY);
                         else
-                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime)+urand(5, MINUTE); // else copy time from master and add a little
+                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + urand(5, MINUTE); // else copy time from master and add a little
                         SaveRespawnTime(); // also save to DB immediately
                         return;
                     }
@@ -424,11 +424,11 @@ void GameObject::Update(uint32 diff)
 
                     if (!m_spawnedByDefault)        // despawn timer
                     {
-                                                    // can be despawned or destroyed
+                        // can be despawned or destroyed
                         SetLootState(LootState::GO_JUST_DEACTIVATED);
                         return;
                     }
-                                                    // respawn timer
+                    // respawn timer
                     uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<GameObject>(GetDBTableGUIDLow()) : 0;
                     if (poolid)
                         sPoolMgr->UpdatePool<GameObject>(poolid, GetDBTableGUIDLow());
@@ -461,7 +461,7 @@ void GameObject::Update(uint32 diff)
                     bool IsBattlegroundTrap = false;
                     //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                     /// @todo move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
-                    float radius = (float)(goInfo->trap.radius)/3*2; /// @todo rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
+                    float radius = (float)(goInfo->trap.radius) / 3 * 2; /// @todo rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
                     if (!radius)
                     {
                         if (goInfo->trap.cooldown != 3)            // cast in other case (at some triggering/linked go/etc explicit call)
@@ -505,7 +505,7 @@ void GameObject::Update(uint32 diff)
                         if (goInfo->trap.spellId)
                             CastSpell(ok, goInfo->trap.spellId);
 
-                        m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
+                        m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));   // template or 4 seconds
 
                         if (goInfo->trap.type == 1)
                             SetLootState(LootState::GO_JUST_DEACTIVATED);
@@ -716,10 +716,10 @@ void GameObject::SaveToDB(uint32 mapid, uint32 spawnMask)
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
-    data.rotation0 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+0);
-    data.rotation1 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+1);
-    data.rotation2 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+2);
-    data.rotation3 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+3);
+    data.rotation0 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 0);
+    data.rotation1 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 1);
+    data.rotation2 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 2);
+    data.rotation3 = GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 3);
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
@@ -745,9 +745,9 @@ void GameObject::SaveToDB(uint32 mapid, uint32 spawnMask)
     stmt->setFloat(index++, GetPositionZ());
     stmt->setFloat(index++, GetOrientation());
     stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+1));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+2));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+3));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 1));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 2));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 3));
     stmt->setInt32(index++, int32(m_respawnDelayTime));
     stmt->setUInt8(index++, GetGoAnimProgress());
     stmt->setUInt8(index++, uint8(GetGoState()));
@@ -797,8 +797,8 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
 
     if (data->phaseGroup)
     {
-         for (auto ph : GetPhasesForGroup(data->phaseGroup))
-             SetPhased(ph, false, true);
+        for (auto ph : GetPhasesForGroup(data->phaseGroup))
+            SetPhased(ph, false, true);
     }
 
     if (data->spawntimesecs >= 0)
@@ -1173,7 +1173,7 @@ void GameObject::Use(Unit* user)
             if (goInfo->trap.spellId)
                 CastSpell(user, goInfo->trap.spellId);
 
-            m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
+            m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));   // template or 4 seconds
 
             if (goInfo->trap.type == 1)         // Deactivate after trigger
                 SetLootState(LootState::GO_JUST_DEACTIVATED);
@@ -1211,13 +1211,13 @@ void GameObject::Use(Unit* user)
 
             // the object orientation + 1/2 pi
             // every slot will be on that straight line
-            float orthogonalOrientation = GetOrientation()+M_PI*0.5f;
+            float orthogonalOrientation = GetOrientation() + M_PI * 0.5f;
             // find nearest slot
             bool found_free_slot = false;
             for (ChairSlotAndUser::iterator itr = ChairListSlots.begin(); itr != ChairListSlots.end(); ++itr)
             {
                 // the distance between this slot and the center of the go - imagine a 1D space
-                float relativeDistance = (info->size*itr->first)-(info->size*(info->chair.slots-1)/2.0f);
+                float relativeDistance = (info->size * itr->first) - (info->size * (info->chair.slots - 1) / 2.0f);
 
                 float x_i = GetPositionX() + relativeDistance * std::cos(orthogonalOrientation);
                 float y_i = GetPositionY() + relativeDistance * std::sin(orthogonalOrientation);
@@ -1256,7 +1256,7 @@ void GameObject::Use(Unit* user)
                 {
                     itr->second = player->GetGUID(); //this slot in now used by player
                     player->TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET);
-                    player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR+info->chair.height);
+                    player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->chair.height);
                     return;
                 }
             }
@@ -1372,7 +1372,7 @@ void GameObject::Use(Unit* user)
                     int32 chance;
                     if (skill < zone_skill)
                     {
-                        chance = int32(pow((double)skill/zone_skill, 2) * 100);
+                        chance = int32(pow((double)skill / zone_skill, 2) * 100);
                         if (chance < 1)
                             chance = 1;
                     }
@@ -1652,8 +1652,8 @@ void GameObject::Use(Unit* user)
                             if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_WS)
                                 bg->EventPlayerClickedOnFlag(player, this);
                             else
-                            if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_TP)
-                                bg->EventPlayerClickedOnFlag(player, this);
+                                if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_TP)
+                                    bg->EventPlayerClickedOnFlag(player, this);
                             break;
                         case 184142:                        // Netherstorm Flag
                             if (bg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_EY)
@@ -1684,7 +1684,7 @@ void GameObject::Use(Unit* user)
             WorldPacket data(SMSG_ENABLE_BARBER_SHOP, 0);
             player->SendDirectMessage(&data);
 
-            player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR+info->barberChair.chairheight);
+            player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->barberChair.chairheight);
             return;
         }
         default:
@@ -1797,7 +1797,7 @@ bool GameObject::IsInRange(float x, float y, float z, float radius) const
     float dx = x - GetPositionX();
     float dy = y - GetPositionY();
     float dz = z - GetPositionZ();
-    float dist = sqrt(dx*dx + dy*dy);
+    float dist = sqrt(dx * dx + dy * dy);
     //! Check if the distance between the 2 objects is 0, can happen if both objects are on the same position.
     //! The code below this check wont crash if dist is 0 because 0/0 in float operations is valid, and returns infinite
     if (G3D::fuzzyEq(dist, 0.0f))
@@ -1825,7 +1825,7 @@ void GameObject::EventInform(uint32 eventId)
 }
 
 // overwrite WorldObject function for proper name localization
-std::string const & GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
+std::string const& GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
 {
     if (loc_idx != DEFAULT_LOCALE)
     {
@@ -1845,7 +1845,7 @@ void GameObject::UpdateRotationFields(float rotation2 /*=0.0f*/, float rotation3
     double f_rot1 = std::sin(GetOrientation() / 2.0f);
     double f_rot2 = std::cos(GetOrientation() / 2.0f);
 
-    int64 i_rot1 = int64(f_rot1 / atan_pow *(f_rot2 >= 0 ? 1.0f : -1.0f));
+    int64 i_rot1 = int64(f_rot1 / atan_pow * (f_rot2 >= 0 ? 1.0f : -1.0f));
     int64 rotation = (i_rot1 << 43 >> 43) & 0x00000000001FFFFF;
 
     //float f_rot2 = std::sin(0.0f / 2.0f);
@@ -1864,8 +1864,8 @@ void GameObject::UpdateRotationFields(float rotation2 /*=0.0f*/, float rotation3
         rotation3 = (float)f_rot2;
     }
 
-    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+2, rotation2);
-    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION+3, rotation3);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 2, rotation2);
+    SetFloatValue(GAMEOBJECT_FIELD_PARENT_ROTATION + 3, rotation3);
 }
 
 void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, uint32 spellId /*= 0*/)
@@ -1897,7 +1897,7 @@ void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, u
         data.appendPackGUID(attackerOrHealer->GetGUID());
         data.appendPackGUID(player->GetGUID());
         data << uint32(-change);                    // change  < 0 triggers SPELL_BUILDING_HEAL combat log event
-                                                    // change >= 0 triggers SPELL_BUILDING_DAMAGE event
+        // change >= 0 triggers SPELL_BUILDING_DAMAGE event
         data << uint32(spellId);
         player->SendDirectMessage(&data);
     }
@@ -2219,7 +2219,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
     *data << uint8(0);
 }
 
-void GameObject::GetRespawnPosition(float &x, float &y, float &z, float* ori /* = NULL*/) const
+void GameObject::GetRespawnPosition(float& x, float& y, float& z, float* ori /* = NULL*/) const
 {
     if (m_DBTableGuid)
     {

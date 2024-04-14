@@ -1,20 +1,20 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "AchievementMgr.h"
 #include "Battleground.h"
 #include "BattlegroundBFG.h"
-#include "World.h"
-#include "WorldPacket.h"
-#include "ObjectMgr.h"
 #include "BattlegroundMgr.h"
 #include "Creature.h"
 #include "Language.h"
 #include "Object.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Util.h"
+#include "World.h"
+#include "WorldPacket.h"
 #include "WorldSession.h"
 
 BattlegroundBFG::BattlegroundBFG()
@@ -218,7 +218,7 @@ void BattlegroundBFG::AddPlayer(Player* player)
 
 void BattlegroundBFG::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/) { }
 
-void BattlegroundBFG::HandleAreaTrigger(Player* player, uint32 trigger) 
+void BattlegroundBFG::HandleAreaTrigger(Player* player, uint32 trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -632,10 +632,10 @@ WorldSafeLocsEntry const* BattlegroundBFG::GetClosestGraveYard(Player* player)
 
         float mindist = 999999.0f;
         for (uint8 i = 0; i < nodes.size(); ++i) {
-            WorldSafeLocsEntry const*entry = sWorldSafeLocsStore.LookupEntry(GILNEAS_BG_GraveyardIds[nodes[i]]);
+            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(GILNEAS_BG_GraveyardIds[nodes[i]]);
             if (!entry)
                 continue;
-            float dist = (entry->x - plr_x)*(entry->x - plr_x) + (entry->y - plr_y)*(entry->y - plr_y);
+            float dist = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y);
             if (mindist > dist) {
                 mindist = dist;
                 good_entry = entry;
@@ -682,7 +682,7 @@ bool BattlegroundBFG::IsAllNodesControlledByTeam(uint32 team) const
     uint32 count = 0;
     for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
         if ((team == ALLIANCE && m_Nodes[i] == GILNEAS_BG_NODE_STATUS_ALLY_OCCUPIED) ||
-            (team == HORDE    && m_Nodes[i] == GILNEAS_BG_NODE_STATUS_HORDE_OCCUPIED))
+            (team == HORDE && m_Nodes[i] == GILNEAS_BG_NODE_STATUS_HORDE_OCCUPIED))
             ++count;
 
     return count == GILNEAS_BG_DYNAMIC_NODES_COUNT;

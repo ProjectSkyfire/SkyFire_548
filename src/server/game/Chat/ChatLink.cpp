@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AchievementMgr.h"
 #include "ChatLink.h"
-#include "SpellMgr.h"
+#include "DBCStores.h"
 #include "ObjectMgr.h"
 #include "SpellInfo.h"
-#include "DBCStores.h"
-#include "AchievementMgr.h"
+#include "SpellMgr.h"
 
 // Supported shift-links (client generated and server side)
 // |color|Hachievement:achievement_id:player_guid:0:0:0:0:0:0:0:0|h[name]|h|r
@@ -524,7 +524,7 @@ LinkExtractor::LinkExtractor(const char* msg) : _iss(msg) { }
 LinkExtractor::~LinkExtractor()
 {
     for (Links::iterator itr = _links.begin(); itr != _links.end(); ++itr)
-        delete *itr;
+        delete* itr;
     _links.clear();
 }
 
@@ -572,7 +572,7 @@ bool LinkExtractor::IsValidMessage()
         {
             if (commandChar == *validSequenceIterator)
             {
-                if (validSequenceIterator == validSequence+4)
+                if (validSequenceIterator == validSequence + 4)
                     validSequenceIterator = validSequence;
                 else
                     ++validSequenceIterator;

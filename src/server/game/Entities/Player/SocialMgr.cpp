@@ -1,21 +1,21 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "SocialMgr.h"
 
-#include "DatabaseEnv.h"
-#include "Opcodes.h"
-#include "WorldPacket.h"
-#include "Player.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "Util.h"
 #include "AccountMgr.h"
+#include "DatabaseEnv.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "Util.h"
+#include "World.h"
+#include "WorldPacket.h"
 #include "WorldSession.h"
 
-PlayerSocial::PlayerSocial(): m_playerGUID()
+PlayerSocial::PlayerSocial() : m_playerGUID()
 { }
 
 uint32 PlayerSocial::GetNumberOfSocialsWithFlag(SocialFlag flag)
@@ -182,7 +182,7 @@ bool PlayerSocial::HasIgnore(uint32 ignore_guid)
     return false;
 }
 
-void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &friendInfo)
+void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo& friendInfo)
 {
     if (!player)
         return;
@@ -299,7 +299,7 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
 
 PlayerSocial* SocialMgr::LoadFromDB(PreparedQueryResult result, uint32 guid)
 {
-    PlayerSocial *social = &m_socialMap[guid];
+    PlayerSocial* social = &m_socialMap[guid];
     social->SetPlayerGUID(guid);
 
     if (!result)
@@ -322,8 +322,7 @@ PlayerSocial* SocialMgr::LoadFromDB(PreparedQueryResult result, uint32 guid)
         // client's friends list and ignore list limit
         if (social->m_playerSocialMap.size() >= (SOCIALMGR_FRIEND_LIMIT + SOCIALMGR_IGNORE_LIMIT))
             break;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     return social;
 }

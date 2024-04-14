@@ -1,21 +1,21 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Chat.h"
 #include "Common.h"
+#include "DB2Stores.h"
+#include "Item.h"
+#include "Log.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "SpellInfo.h"
+#include "UpdateData.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "Chat.h"
-#include "ObjectMgr.h"
-#include "Player.h"
-#include "Item.h"
-#include "UpdateData.h"
-#include "ObjectAccessor.h"
-#include "SpellInfo.h"
-#include "DB2Stores.h"
 #include <vector>
 
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
@@ -198,7 +198,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recvData)
     recvData.rfinish();
     //SF_LOG_DEBUG("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
-    Item* pSrcItem  = _player->GetItemByPos(srcbag, srcslot);
+    Item* pSrcItem = _player->GetItemByPos(srcbag, srcslot);
     if (!pSrcItem)
         return;                                             // only at cheat
 
@@ -307,7 +307,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket& recvData)
         }
     }
 
-    Item* pItem  = _player->GetItemByPos(bag, slot);
+    Item* pItem = _player->GetItemByPos(bag, slot);
     if (!pItem)
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
@@ -333,7 +333,7 @@ void WorldSession::HandleReadItem(WorldPacket& recvData)
 {
     uint8 bag, slot;
     recvData >> bag >> slot;
-    
+
     Item* pItem = _player->GetItemByPos(bag, slot);
 
     if (pItem && pItem->GetTemplate()->PageText)
@@ -549,7 +549,7 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket& recvData)
     uint32 item, slot, count;
     uint8 bagslot;
 
-    recvData >> vendorguid >> item  >> slot >> bagguid >> bagslot >> count;
+    recvData >> vendorguid >> item >> slot >> bagguid >> bagslot >> count;
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)
@@ -868,9 +868,9 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recvData)
     uint16 src = pItem->GetPos();
 
     // check unequip potability for equipped items and bank bags
-    if (_player->IsEquipmentPos (src) || _player->IsBagPos (src))
+    if (_player->IsEquipmentPos(src) || _player->IsBagPos(src))
     {
-        InventoryResult msg = _player->CanUnequipItem(src, !_player->IsBagPos (src));
+        InventoryResult msg = _player->CanUnequipItem(src, !_player->IsBagPos(src));
         if (msg != EQUIP_ERR_OK)
         {
             _player->SendEquipError(msg, pItem, NULL);
@@ -962,8 +962,8 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvData)
     _player->SetBankBagSlotCount(slot);
     _player->ModifyMoney(-int64(price));
 
-     data << uint32(ERR_BANKSLOT_OK);
-     SendPacket(&data);
+    data << uint32(ERR_BANKSLOT_OK);
+    SendPacket(&data);
 
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BUY_BANK_SLOT);
 }
@@ -1048,7 +1048,7 @@ void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint64 itemG
     ObjectGuid CasterGUID = caster;
     ObjectGuid ItemGUID = itemGuid;
 
-    WorldPacket data(SMSG_ENCHANTMENT_LOG, (8+8+8+4+4+4+1));
+    WorldPacket data(SMSG_ENCHANTMENT_LOG, (8 + 8 + 8 + 4 + 4 + 4 + 1));
     data << uint32(itemId);
     data << uint32(enchantmentSlot);
     data << uint32(enchantId);
@@ -1059,9 +1059,9 @@ void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint64 itemG
     data.WriteGuidMask(ItemGUID, 7, 2, 3);
     data.WriteGuidMask(CasterGUID, 4, 3);
     data.WriteGuidMask(ItemGUID, 6);
-    data.WriteGuidMask(TargetGUID,1);
-    data.WriteGuidMask(CasterGUID,2);
-    data.WriteGuidMask(TargetGUID,5);
+    data.WriteGuidMask(TargetGUID, 1);
+    data.WriteGuidMask(CasterGUID, 2);
+    data.WriteGuidMask(TargetGUID, 5);
     data.WriteGuidMask(ItemGUID, 4);
     data.WriteGuidMask(TargetGUID, 0);
     data.WriteGuidMask(ItemGUID, 1);
@@ -1351,7 +1351,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
                 return;
 
             // not first not-colored (not normaly used) socket
-            if (i != 0 && !itemProto->Socket[i-1].Color && (i+1 >= MAX_GEM_SOCKETS || itemProto->Socket[i+1].Color))
+            if (i != 0 && !itemProto->Socket[i - 1].Color && (i + 1 >= MAX_GEM_SOCKETS || itemProto->Socket[i + 1].Color))
                 return;
 
             // ok, this is first not colored socket for item with prismatic socket
@@ -1379,7 +1379,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)                //get new and old enchantments
     {
         GemEnchants[i] = (GemProps[i]) ? GemProps[i]->spellitemenchantement : 0;
-        OldEnchants[i] = itemTarget->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i));
+        OldEnchants[i] = itemTarget->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i));
     }
 
     // check unique-equipped conditions
@@ -1478,7 +1478,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
     {
         if (GemEnchants[i])
         {
-            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i), GemEnchants[i], 0, 0, _player->GetGUID());
+            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0, _player->GetGUID());
             if (Item* guidItem = _player->GetItemByGuid(gem_guids[i]))
             {
                 uint32 gemCount = 1;
@@ -1487,7 +1487,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
         }
     }
 
-    for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
+    for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
         _player->ApplyEnchantment(itemTarget, EnchantmentSlot(enchant_slot), true);
 
     bool SocketBonusToBeActivated = itemTarget->GemsFitSockets();//current socketbonus state
@@ -1551,7 +1551,7 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
     SF_LOG_DEBUG("network", "WORLD: CMSG_GET_ITEM_PURCHASE_DATA");
 
     ObjectGuid guid;
-    
+
     recvData.ReadGuidMask(guid, 1, 0, 3, 2, 7, 4, 5, 6);
     recvData.ReadGuidBytes(guid, 3, 7, 5, 1, 0, 6, 4, 2);
 
@@ -1587,7 +1587,7 @@ void WorldSession::HandleItemRefund(WorldPacket& recvData)
  *
  * This function is called when player clicks on item which has some flag set
  */
-void WorldSession::HandleItemTextQuery(WorldPacket& recvData )
+void WorldSession::HandleItemTextQuery(WorldPacket& recvData)
 {
     uint64 itemGuid;
     recvData >> itemGuid;

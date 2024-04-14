@@ -1,25 +1,25 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
+#include "ByteBuffer.h"
+#include "Common.h"
 #include "Cryptography/HMACSHA1.h"
 #include "Cryptography/WardenKeyGeneration.h"
-#include "Common.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "Log.h"
-#include "Opcodes.h"
-#include "ByteBuffer.h"
-#include "MD5.h"
 #include "Database/DatabaseEnv.h"
-#include "World.h"
+#include "Log.h"
+#include "MD5.h"
+#include "Opcodes.h"
 #include "Player.h"
 #include "Util.h"
-#include "WardenWin.h"
-#include "WardenModuleWin.h"
 #include "WardenCheckMgr.h"
-#include "AccountMgr.h"
+#include "WardenModuleWin.h"
+#include "WardenWin.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 WardenWin::WardenWin() : Warden() { }
 
@@ -52,7 +52,7 @@ void WardenWin::Init(WorldSession* session, BigNumber* k)
 
 ClientWardenModule* WardenWin::GetModuleForClient()
 {
-    ClientWardenModule *mod = new ClientWardenModule;
+    ClientWardenModule* mod = new ClientWardenModule;
 
     uint32 length = sizeof(Module.Module);
 
@@ -130,7 +130,7 @@ void WardenWin::RequestHash()
     _session->SendPacket(&pkt);
 }
 
-void WardenWin::HandleHashResult(ByteBuffer &buff)
+void WardenWin::HandleHashResult(ByteBuffer& buff)
 {
     buff.rpos(buff.wpos());
 
@@ -307,7 +307,7 @@ void WardenWin::RequestData()
     SF_LOG_DEBUG("warden", "%s", stream.str().c_str());
 }
 
-void WardenWin::HandleData(ByteBuffer &buff)
+void WardenWin::HandleData(ByteBuffer& buff)
 {
     SF_LOG_DEBUG("warden", "Handle data");
 
@@ -350,7 +350,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     }
 
     WardenCheckResult* rs;
-    WardenCheck *rd;
+    WardenCheck* rd;
     uint8 type;
     uint16 checkFailed = 0;
 
@@ -433,11 +433,11 @@ void WardenWin::HandleData(ByteBuffer &buff)
 
                 if (luaStrLen != 0)
                 {
-                    char *str = new char[luaStrLen + 1];
+                    char* str = new char[luaStrLen + 1];
                     memcpy(str, buff.contents() + buff.rpos(), luaStrLen);
                     str[luaStrLen] = '\0'; // null terminator
                     SF_LOG_DEBUG("warden", "Lua string: %s", str);
-                    delete [] str;
+                    delete[] str;
                 }
                 buff.rpos(buff.rpos() + luaStrLen);         // Skip string
                 SF_LOG_DEBUG("warden", "RESULT LUA_STR_CHECK passed, CheckId %u account Id %u", *itr, _session->GetAccountId());

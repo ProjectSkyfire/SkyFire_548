@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -142,7 +142,7 @@ char const SpellDifficultyfmt[] = "niiii";
 const std::string CustomSpellDifficultyfmt = "ppppp";
 const std::string CustomSpellDifficultyIndex = "id";
 //                                             0         10        20    26
-char const SpellEffectEntryfmt[] =            "nxifiiiffiiiiiifiifiiiiixiiiix";
+char const SpellEffectEntryfmt[] = "nxifiiiffiiiiiifiifiiiiixiiiix";
 const std::string CustomSpellEffectEntryfmt = "ppppppppppapppappppppppppp";
 const std::string CustomSpellEffectEntryIndex = "Id";
 //const std::string CustomSpellEntryfmt = "ppppppppppppppapaaaaaaaaapaaaaaapapppaapppaaapa";

@@ -1,10 +1,10 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "GridStates.h"
 #include "GridNotifiers.h"
+#include "GridStates.h"
 #include "Log.h"
 
 #ifdef SKYFIRE_DEBUG
@@ -22,7 +22,7 @@ bool GridState::checkMagic()
 void InvalidState::Update(Map&, NGridType&, GridInfo&, uint32) const
 { }
 
-void ActiveState::Update(Map& map, NGridType& grid, GridInfo&  info, uint32 diff) const
+void ActiveState::Update(Map& map, NGridType& grid, GridInfo& info, uint32 diff) const
 {
     // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
     info.UpdateTimeTracker(diff);

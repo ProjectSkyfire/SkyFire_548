@@ -1,23 +1,23 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
-#include "Language.h"
+#include "Config.h"
 #include "DatabaseEnv.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "Opcodes.h"
+#include "Language.h"
 #include "Log.h"
-#include "World.h"
+#include "MapManager.h"
+#include "NPCHandler.h"
 #include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Pet.h"
 #include "Player.h"
 #include "UpdateMask.h"
-#include "NPCHandler.h"
-#include "Pet.h"
-#include "MapManager.h"
-#include "Config.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 {
@@ -190,14 +190,14 @@ void WorldSession::HandleRealmNameQueryOpcode(WorldPacket& recvPacket)
     SendRealmNameQueryOpcode(realmId);
 }
 
-void WorldSession::HandleQueryTimeOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleQueryTimeOpcode(WorldPacket& /*recvData*/)
 {
     SendQueryTimeResponse();
 }
 
 void WorldSession::SendQueryTimeResponse()
 {
-    WorldPacket data(SMSG_QUERY_TIME_RESPONSE, 4+4);
+    WorldPacket data(SMSG_QUERY_TIME_RESPONSE, 4 + 4);
     data << uint32(time(NULL));
     data << uint32(sWorld->GetNextDailyQuestsResetTime() - time(NULL));
     SendPacket(&data);
@@ -314,7 +314,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recvData)
 
     const GameObjectTemplate* info = sObjectMgr->GetGameObjectTemplate(entry);
 
-    WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
+    WorldPacket data(SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
     data.WriteBit(info != NULL);
     data << uint32(entry);
 
@@ -462,7 +462,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     GossipText const* pGossip = sObjectMgr->GetGossipText(textID);
 
     // WNPC collumns should be in this buffer
-    ByteBuffer buf; 
+    ByteBuffer buf;
     if (!pGossip)
     {
         buf << uint32(1);
@@ -488,7 +488,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
         buf << std::string(pGossip->Options[0].Text_0);
     }
-    
+
     WorldPacket data(SMSG_NPC_TEXT_UPDATE, 1 + 4 + buf.size());
     data << uint32(textID);
     data << uint32(buf.size());// sizeofbuf
@@ -498,7 +498,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     data.FlushBits();
 
     SendPacket(&data);
-    
+
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
 }
 
@@ -641,7 +641,7 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
 
     ByteBuffer poiData;
 
-    WorldPacket data(SMSG_QUEST_POI_QUERY_RESPONSE, 4+(4+4)*count);
+    WorldPacket data(SMSG_QUEST_POI_QUERY_RESPONSE, 4 + (4 + 4) * count);
     data.WriteBits(count, 20);
 
     for (uint32 i = 0; i < count; ++i)
@@ -654,7 +654,7 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
         uint16 questSlot = _player->FindQuestSlot(questId);
 
         if (questSlot != MAX_QUEST_LOG_SIZE)
-            questOk =_player->GetQuestSlotQuestId(questSlot) == questId;
+            questOk = _player->GetQuestSlotQuestId(questSlot) == questId;
 
         if (questOk)
         {

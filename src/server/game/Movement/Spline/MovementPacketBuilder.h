@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,8 +7,8 @@
 #define SKYFIRESERVER_PACKET_BUILDER_H
 
 #include "Define.h" // for uint32
-#include "Unit.h"
 #include "G3D/Vector3.h"
+#include "Unit.h"
 using G3D::Vector3;
 
 class ByteBuffer;
@@ -18,11 +18,11 @@ namespace Movement
 {
     enum MonsterMoveType
     {
-        MonsterMoveNormal       = 0,
-        MonsterMoveStop         = 1,
-        MonsterMoveFacingPoint  = 2,
+        MonsterMoveNormal = 0,
+        MonsterMoveStop = 1,
+        MonsterMoveFacingPoint = 2,
         MonsterMoveFacingTarget = 3,
-        MonsterMoveFacingAngle  = 4
+        MonsterMoveFacingAngle = 4
     };
 
     class MoveSpline;

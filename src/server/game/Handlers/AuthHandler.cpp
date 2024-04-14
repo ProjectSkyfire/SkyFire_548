@@ -1,12 +1,12 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Opcodes.h"
-#include "WorldSession.h"
-#include "WorldPacket.h"
 #include "Config.h"
+#include "Opcodes.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 #define PLAYABLE_RACES_COUNT 15
 #define PLAYABLE_CLASSES_COUNT 11

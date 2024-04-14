@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "PlayerDump.h"
-#include "DatabaseEnv.h"
-#include "UpdateFields.h"
-#include "ObjectMgr.h"
 #include "AccountMgr.h"
+#include "Common.h"
+#include "DatabaseEnv.h"
+#include "ObjectMgr.h"
+#include "PlayerDump.h"
+#include "UpdateFields.h"
 #include "World.h"
 
 #define DUMP_TABLE_COUNT 29
@@ -52,7 +52,7 @@ static DumpTable dumpTables[DUMP_TABLE_COUNT] =
 };
 
 // Low level functions
-static bool findtoknth(std::string &str, int n, std::string::size_type &s, std::string::size_type &e)
+static bool findtoknth(std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
 {
     int i; s = e = 0;
     std::string::size_type size = str.size();
@@ -65,89 +65,89 @@ static bool findtoknth(std::string &str, int n, std::string::size_type &s, std::
     return e != std::string::npos;
 }
 
-std::string gettoknth(std::string &str, int n)
+std::string gettoknth(std::string& str, int n)
 {
     std::string::size_type s = 0, e = 0;
     if (!findtoknth(str, n, s, e))
         return "";
 
-    return str.substr(s, e-s);
+    return str.substr(s, e - s);
 }
 
-bool findnth(std::string &str, int n, std::string::size_type &s, std::string::size_type &e)
+bool findnth(std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
 {
-    s = str.find("VALUES ('")+9;
+    s = str.find("VALUES ('") + 9;
     if (s == std::string::npos) return false;
 
     do
     {
         e = str.find('\'', s);
         if (e == std::string::npos) return false;
-    } while (str[e-1] == '\\');
+    } while (str[e - 1] == '\\');
 
     for (int i = 1; i < n; ++i)
     {
         do
         {
-            s = e+4;
+            s = e + 4;
             e = str.find('\'', s);
             if (e == std::string::npos) return false;
-        } while (str[e-1] == '\\');
+        } while (str[e - 1] == '\\');
     }
     return true;
 }
 
-std::string gettablename(std::string &str)
+std::string gettablename(std::string& str)
 {
     std::string::size_type s = 13;
     std::string::size_type e = str.find(_TABLE_SIM_, s);
     if (e == std::string::npos)
         return "";
 
-    return str.substr(s, e-s);
+    return str.substr(s, e - s);
 }
 
-bool changenth(std::string &str, int n, char const* with, bool insert = false, bool nonzero = false)
+bool changenth(std::string& str, int n, char const* with, bool insert = false, bool nonzero = false)
 {
     std::string::size_type s, e;
     if (!findnth(str, n, s, e))
         return false;
 
-    if (nonzero && str.substr(s, e-s) == "0")
+    if (nonzero && str.substr(s, e - s) == "0")
         return true;                                        // not an error
     if (!insert)
-        str.replace(s, e-s, with);
+        str.replace(s, e - s, with);
     else
         str.insert(s, with);
 
     return true;
 }
 
-std::string getnth(std::string &str, int n)
+std::string getnth(std::string& str, int n)
 {
     std::string::size_type s, e;
     if (!findnth(str, n, s, e))
         return "";
 
-    return str.substr(s, e-s);
+    return str.substr(s, e - s);
 }
 
-bool changetoknth(std::string &str, int n, char const* with, bool insert = false, bool nonzero = false)
+bool changetoknth(std::string& str, int n, char const* with, bool insert = false, bool nonzero = false)
 {
     std::string::size_type s = 0, e = 0;
     if (!findtoknth(str, n, s, e))
         return false;
-    if (nonzero && str.substr(s, e-s) == "0")
+    if (nonzero && str.substr(s, e - s) == "0")
         return true;                                        // not an error
     if (!insert)
-        str.replace(s, e-s, with);
+        str.replace(s, e - s, with);
     else
         str.insert(s, with);
 
     return true;
 }
 
-uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32> &guidMap, uint32 hiGuid)
+uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32>& guidMap, uint32 hiGuid)
 {
     std::map<uint32, uint32>::const_iterator itr = guidMap.find(oldGuid);
     if (itr != guidMap.end())
@@ -158,7 +158,7 @@ uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32> &guidMap, uint32
     return newguid;
 }
 
-bool changeGuid(std::string &str, int n, std::map<uint32, uint32> &guidMap, uint32 hiGuid, bool nonzero = false)
+bool changeGuid(std::string& str, int n, std::map<uint32, uint32>& guidMap, uint32 hiGuid, bool nonzero = false)
 {
     char chritem[20];
     uint32 oldGuid = atoi(getnth(str, n).c_str());
@@ -171,7 +171,7 @@ bool changeGuid(std::string &str, int n, std::map<uint32, uint32> &guidMap, uint
     return changenth(str, n, chritem, false, nonzero);
 }
 
-bool changetokGuid(std::string &str, int n, std::map<uint32, uint32> &guidMap, uint32 hiGuid, bool nonzero = false)
+bool changetokGuid(std::string& str, int n, std::map<uint32, uint32>& guidMap, uint32 hiGuid, bool nonzero = false)
 {
     char chritem[20];
     uint32 oldGuid = atoi(gettoknth(str, n).c_str());
@@ -252,7 +252,7 @@ void StoreGUID(QueryResult result, uint32 data, uint32 field, std::set<uint32>& 
 }
 
 // Writing - High-level functions
-bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, DumpTableType type)
+bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const* tableFrom, char const* tableTo, DumpTableType type)
 {
     GUIDs const* guids = NULL;
     char const* fieldname = NULL;
@@ -325,14 +325,12 @@ bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const*tabl
 
             dump += CreateDumpString(tableTo, result);
             dump += "\n";
-        }
-        while (result->NextRow());
-    }
-    while (guids && guids_itr != guids->end());              // not set case iterate single time, set case iterate for all guids
+        } while (result->NextRow());
+    } while (guids && guids_itr != guids->end());              // not set case iterate single time, set case iterate for all guids
     return true;
 }
 
-bool PlayerDumpWriter::GetDump(uint32 guid, std::string &dump)
+bool PlayerDumpWriter::GetDump(uint32 guid, std::string& dump)
 {
     dump = "";
 
@@ -377,7 +375,7 @@ DumpReturn PlayerDumpWriter::WriteDump(const std::string& file, uint32 guid)
 // Reading - High-level functions
 #define ROLLBACK(DR) {fclose(fin); return (DR);}
 
-void fixNULLfields(std::string &line)
+void fixNULLfields(std::string& line)
 {
     std::string nullString("'NULL'");
     size_t pos = line.find(nullString);
@@ -600,7 +598,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
             {
                 // item, owner, data field:item, owner guid
                 if (!changeGuid(line, 1, items, sObjectMgr->_hiItemGuid))
-                   ROLLBACK(DUMP_FILE_BROKEN);              // item_instance.guid update
+                    ROLLBACK(DUMP_FILE_BROKEN);              // item_instance.guid update
                 if (!changenth(line, 3, newguid))           // item_instance.owner_guid update
                     ROLLBACK(DUMP_FILE_BROKEN);
                 break;
@@ -625,7 +623,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
                     snprintf(lastpetid, 20, "%s", currpetid);
                 }
 
-                std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
+                std::map<uint32, uint32> ::const_iterator petids_iter = petids.find(atoi(currpetid));
 
                 if (petids_iter == petids.end())
                 {
@@ -644,7 +642,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
                 snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
 
                 // lookup currpetid and match to new inserted pet id
-                std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
+                std::map<uint32, uint32> ::const_iterator petids_iter = petids.find(atoi(currpetid));
                 if (petids_iter == petids.end())             // couldn't find new inserted id
                     ROLLBACK(DUMP_FILE_BROKEN);
 
@@ -672,7 +670,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
     sWorld->AddCharacterNameData(guid, name, gender, race, playerClass, level, realm);
 
     sObjectMgr->_hiItemGuid += items.size();
-    sObjectMgr->_mailId     += mails.size();
+    sObjectMgr->_mailId += mails.size();
 
     if (incHighest)
         ++sObjectMgr->_hiCharGuid;

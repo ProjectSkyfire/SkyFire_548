@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -29,10 +29,10 @@ struct SkillLineAbilityEntry;
 enum SpellCategories
 {
     SPELLCATEGORY_HEALTH_MANA_POTIONS = 4,
-    SPELLCATEGORY_DEVOUR_MAGIC        = 12,
-    SPELLCATEGORY_JUDGEMENT           = 1210,               // Judgement (seal trigger)
-    SPELLCATEGORY_FOOD                = 11,
-    SPELLCATEGORY_DRINK               = 59
+    SPELLCATEGORY_DEVOUR_MAGIC = 12,
+    SPELLCATEGORY_JUDGEMENT = 1210,               // Judgement (seal trigger)
+    SPELLCATEGORY_FOOD = 11,
+    SPELLCATEGORY_DRINK = 59
 };
 
 //SpellFamilyFlags
@@ -43,40 +43,40 @@ enum SpellFamilyFlag
     // SPELLFAMILYFLAG2 = SpellFamilyFlags[2]
 
     // Rogue
-    SPELLFAMILYFLAG0_ROGUE_VANISH               = 0x00000800,
-    SPELLFAMILYFLAG0_ROGUE_VAN_SPRINT           = 0x00000840, // Vanish, Sprint
-    SPELLFAMILYFLAG1_ROGUE_SHADOWSTEP           = 0x00000200, // Shadowstep
-    SPELLFAMILYFLAG0_ROGUE_KICK                 = 0x00000010, // Kick
+    SPELLFAMILYFLAG0_ROGUE_VANISH = 0x00000800,
+    SPELLFAMILYFLAG0_ROGUE_VAN_SPRINT = 0x00000840, // Vanish, Sprint
+    SPELLFAMILYFLAG1_ROGUE_SHADOWSTEP = 0x00000200, // Shadowstep
+    SPELLFAMILYFLAG0_ROGUE_KICK = 0x00000010, // Kick
     SPELLFAMILYFLAG1_ROGUE_DISMANTLE_SMOKE_BOMB = 0x80100000, // Dismantle, Smoke Bomb
 
     // Warrior
-    SPELLFAMILYFLAG_WARRIOR_CHARGE              = 0x00000001,
-    SPELLFAMILYFLAG_WARRIOR_SLAM                = 0x00200000,
-    SPELLFAMILYFLAG_WARRIOR_EXECUTE             = 0x20000000,
-    SPELLFAMILYFLAG_WARRIOR_CONCUSSION_BLOW     = 0x04000000,
+    SPELLFAMILYFLAG_WARRIOR_CHARGE = 0x00000001,
+    SPELLFAMILYFLAG_WARRIOR_SLAM = 0x00200000,
+    SPELLFAMILYFLAG_WARRIOR_EXECUTE = 0x20000000,
+    SPELLFAMILYFLAG_WARRIOR_CONCUSSION_BLOW = 0x04000000,
 
     // Warlock
-    SPELLFAMILYFLAG_WARLOCK_LIFETAP             = 0x00040000,
+    SPELLFAMILYFLAG_WARLOCK_LIFETAP = 0x00040000,
 
     // Druid
-    SPELLFAMILYFLAG2_DRUID_STARFALL             = 0x00000100,
+    SPELLFAMILYFLAG2_DRUID_STARFALL = 0x00000100,
 
     // Paladin
-    SPELLFAMILYFLAG1_PALADIN_DIVINESTORM        = 0x00020000,
+    SPELLFAMILYFLAG1_PALADIN_DIVINESTORM = 0x00020000,
 
     // Shaman
-    SPELLFAMILYFLAG_SHAMAN_FROST_SHOCK          = 0x80000000,
-    SPELLFAMILYFLAG_SHAMAN_HEALING_STREAM       = 0x00002000,
-    SPELLFAMILYFLAG_SHAMAN_MANA_SPRING          = 0x00004000,
-    SPELLFAMILYFLAG2_SHAMAN_LAVA_LASH           = 0x00000004,
-    SPELLFAMILYFLAG_SHAMAN_FIRE_NOVA            = 0x28000000,
+    SPELLFAMILYFLAG_SHAMAN_FROST_SHOCK = 0x80000000,
+    SPELLFAMILYFLAG_SHAMAN_HEALING_STREAM = 0x00002000,
+    SPELLFAMILYFLAG_SHAMAN_MANA_SPRING = 0x00004000,
+    SPELLFAMILYFLAG2_SHAMAN_LAVA_LASH = 0x00000004,
+    SPELLFAMILYFLAG_SHAMAN_FIRE_NOVA = 0x28000000,
 
     // Deathknight
-    SPELLFAMILYFLAG_DK_DEATH_STRIKE             = 0x00000010,
-    SPELLFAMILYFLAG_DK_DEATH_COIL               = 0x00002000,
+    SPELLFAMILYFLAG_DK_DEATH_STRIKE = 0x00000010,
+    SPELLFAMILYFLAG_DK_DEATH_COIL = 0x00002000,
 
     /// @todo Figure out a more accurate name for the following familyflag(s)
-    SPELLFAMILYFLAG_SHAMAN_TOTEM_EFFECTS        = 0x04000000  // Seems to be linked to most totems and some totem effects
+    SPELLFAMILYFLAG_SHAMAN_TOTEM_EFFECTS = 0x04000000  // Seems to be linked to most totems and some totem effects
 };
 
 
@@ -84,91 +84,91 @@ enum SpellFamilyFlag
 
 enum SpellLinkedType
 {
-    SPELL_LINK_CAST     = 0,            // +: cast; -: remove
-    SPELL_LINK_HIT      = 1 * 200000,
-    SPELL_LINK_AURA     = 2 * 200000,   // +: aura; -: immune
-    SPELL_LINK_REMOVE   = 0
+    SPELL_LINK_CAST = 0,            // +: cast; -: remove
+    SPELL_LINK_HIT = 1 * 200000,
+    SPELL_LINK_AURA = 2 * 200000,   // +: aura; -: immune
+    SPELL_LINK_REMOVE = 0
 };
 
 
 // Spell proc event related declarations (accessed using SpellMgr functions)
 enum ProcFlags
 {
-    PROC_FLAG_NONE                            = 0x00000000,
+    PROC_FLAG_NONE = 0x00000000,
 
-    PROC_FLAG_KILLED                          = 0x00000001,    // 00 Killed by agressor - not sure about this flag
-    PROC_FLAG_KILL                            = 0x00000002,    // 01 Kill target (in most cases need XP/Honor reward)
+    PROC_FLAG_KILLED = 0x00000001,    // 00 Killed by agressor - not sure about this flag
+    PROC_FLAG_KILL = 0x00000002,    // 01 Kill target (in most cases need XP/Honor reward)
 
-    PROC_FLAG_DONE_MELEE_AUTO_ATTACK          = 0x00000004,    // 02 Done melee auto attack
-    PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK         = 0x00000008,    // 03 Taken melee auto attack
+    PROC_FLAG_DONE_MELEE_AUTO_ATTACK = 0x00000004,    // 02 Done melee auto attack
+    PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK = 0x00000008,    // 03 Taken melee auto attack
 
-    PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS      = 0x00000010,    // 04 Done attack by Spell that has dmg class melee
-    PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS     = 0x00000020,    // 05 Taken attack by Spell that has dmg class melee
+    PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS = 0x00000010,    // 04 Done attack by Spell that has dmg class melee
+    PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS = 0x00000020,    // 05 Taken attack by Spell that has dmg class melee
 
-    PROC_FLAG_DONE_RANGED_AUTO_ATTACK         = 0x00000040,    // 06 Done ranged auto attack
-    PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK        = 0x00000080,    // 07 Taken ranged auto attack
+    PROC_FLAG_DONE_RANGED_AUTO_ATTACK = 0x00000040,    // 06 Done ranged auto attack
+    PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK = 0x00000080,    // 07 Taken ranged auto attack
 
-    PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS     = 0x00000100,    // 08 Done attack by Spell that has dmg class ranged
-    PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS    = 0x00000200,    // 09 Taken attack by Spell that has dmg class ranged
+    PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS = 0x00000100,    // 08 Done attack by Spell that has dmg class ranged
+    PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS = 0x00000200,    // 09 Taken attack by Spell that has dmg class ranged
 
-    PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS   = 0x00000400,    // 10 Done positive spell that has dmg class none
-    PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS  = 0x00000800,    // 11 Taken positive spell that has dmg class none
+    PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS = 0x00000400,    // 10 Done positive spell that has dmg class none
+    PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS = 0x00000800,    // 11 Taken positive spell that has dmg class none
 
-    PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG   = 0x00001000,    // 12 Done negative spell that has dmg class none
-    PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG  = 0x00002000,    // 13 Taken negative spell that has dmg class none
+    PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG = 0x00001000,    // 12 Done negative spell that has dmg class none
+    PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG = 0x00002000,    // 13 Taken negative spell that has dmg class none
 
-    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS  = 0x00004000,    // 14 Done positive spell that has dmg class magic
+    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS = 0x00004000,    // 14 Done positive spell that has dmg class magic
     PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS = 0x00008000,    // 15 Taken positive spell that has dmg class magic
 
-    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG  = 0x00010000,    // 16 Done negative spell that has dmg class magic
+    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG = 0x00010000,    // 16 Done negative spell that has dmg class magic
     PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG = 0x00020000,    // 17 Taken negative spell that has dmg class magic
 
-    PROC_FLAG_DONE_PERIODIC                   = 0x00040000,    // 18 Successful do periodic (damage / healing)
-    PROC_FLAG_TAKEN_PERIODIC                  = 0x00080000,    // 19 Taken spell periodic (damage / healing)
+    PROC_FLAG_DONE_PERIODIC = 0x00040000,    // 18 Successful do periodic (damage / healing)
+    PROC_FLAG_TAKEN_PERIODIC = 0x00080000,    // 19 Taken spell periodic (damage / healing)
 
-    PROC_FLAG_TAKEN_DAMAGE                    = 0x00100000,    // 20 Taken any damage
-    PROC_FLAG_DONE_TRAP_ACTIVATION            = 0x00200000,    // 21 On trap activation (possibly needs name change to ON_GAMEOBJECT_CAST or USE)
+    PROC_FLAG_TAKEN_DAMAGE = 0x00100000,    // 20 Taken any damage
+    PROC_FLAG_DONE_TRAP_ACTIVATION = 0x00200000,    // 21 On trap activation (possibly needs name change to ON_GAMEOBJECT_CAST or USE)
 
-    PROC_FLAG_DONE_MAINHAND_ATTACK            = 0x00400000,    // 22 Done main-hand melee attacks (spell and autoattack)
-    PROC_FLAG_DONE_OFFHAND_ATTACK             = 0x00800000,    // 23 Done off-hand melee attacks (spell and autoattack)
+    PROC_FLAG_DONE_MAINHAND_ATTACK = 0x00400000,    // 22 Done main-hand melee attacks (spell and autoattack)
+    PROC_FLAG_DONE_OFFHAND_ATTACK = 0x00800000,    // 23 Done off-hand melee attacks (spell and autoattack)
 
-    PROC_FLAG_DEATH                           = 0x01000000,    // 24 Died in any way
+    PROC_FLAG_DEATH = 0x01000000,    // 24 Died in any way
 
     // flag masks
-    AUTO_ATTACK_PROC_FLAG_MASK                = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK
-                                                | PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK,
+    AUTO_ATTACK_PROC_FLAG_MASK = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK
+    | PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK,
 
-    MELEE_PROC_FLAG_MASK                      = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK
-                                                | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS
-                                                | PROC_FLAG_DONE_MAINHAND_ATTACK | PROC_FLAG_DONE_OFFHAND_ATTACK,
+    MELEE_PROC_FLAG_MASK = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK
+    | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS
+    | PROC_FLAG_DONE_MAINHAND_ATTACK | PROC_FLAG_DONE_OFFHAND_ATTACK,
 
-    RANGED_PROC_FLAG_MASK                     = PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK
-                                                | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS,
+    RANGED_PROC_FLAG_MASK = PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK
+    | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS,
 
-    SPELL_PROC_FLAG_MASK                      = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS
-                                                | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS
-                                                | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS
-                                                | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG
-                                                | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS
-                                                | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG,
+    SPELL_PROC_FLAG_MASK = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS
+    | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS
+    | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS
+    | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG
+    | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS
+    | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG,
 
-    SPELL_CAST_PROC_FLAG_MASK                  = SPELL_PROC_FLAG_MASK | PROC_FLAG_DONE_TRAP_ACTIVATION | RANGED_PROC_FLAG_MASK,
+    SPELL_CAST_PROC_FLAG_MASK = SPELL_PROC_FLAG_MASK | PROC_FLAG_DONE_TRAP_ACTIVATION | RANGED_PROC_FLAG_MASK,
 
-    PERIODIC_PROC_FLAG_MASK                    = PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC,
+    PERIODIC_PROC_FLAG_MASK = PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC,
 
-    DONE_HIT_PROC_FLAG_MASK                    = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_RANGED_AUTO_ATTACK
-                                                 | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS
-                                                 | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG
-                                                 | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG
-                                                 | PROC_FLAG_DONE_PERIODIC | PROC_FLAG_DONE_MAINHAND_ATTACK | PROC_FLAG_DONE_OFFHAND_ATTACK,
+    DONE_HIT_PROC_FLAG_MASK = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_RANGED_AUTO_ATTACK
+    | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS
+    | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG
+    | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG
+    | PROC_FLAG_DONE_PERIODIC | PROC_FLAG_DONE_MAINHAND_ATTACK | PROC_FLAG_DONE_OFFHAND_ATTACK,
 
-    TAKEN_HIT_PROC_FLAG_MASK                   = PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK
-                                                 | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS
-                                                 | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG
-                                                 | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG
-                                                 | PROC_FLAG_TAKEN_PERIODIC | PROC_FLAG_TAKEN_DAMAGE,
+    TAKEN_HIT_PROC_FLAG_MASK = PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK
+    | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS
+    | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG
+    | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG
+    | PROC_FLAG_TAKEN_PERIODIC | PROC_FLAG_TAKEN_DAMAGE,
 
-    REQ_SPELL_PHASE_PROC_FLAG_MASK             = SPELL_PROC_FLAG_MASK & DONE_HIT_PROC_FLAG_MASK
+    REQ_SPELL_PHASE_PROC_FLAG_MASK = SPELL_PROC_FLAG_MASK & DONE_HIT_PROC_FLAG_MASK
 };
 
 #define MELEE_BASED_TRIGGER_MASK (PROC_FLAG_DONE_MELEE_AUTO_ATTACK      | \
@@ -182,32 +182,32 @@ enum ProcFlags
 
 enum ProcFlagsExLegacy
 {
-    PROC_EX_NONE                = 0x0000000,                 // If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
-    PROC_EX_NORMAL_HIT          = 0x0000001,                 // If set only from normal hit (only damage spells)
-    PROC_EX_CRITICAL_HIT        = 0x0000002,
-    PROC_EX_MISS                = 0x0000004,
-    PROC_EX_RESIST              = 0x0000008,
-    PROC_EX_DODGE               = 0x0000010,
-    PROC_EX_PARRY               = 0x0000020,
-    PROC_EX_BLOCK               = 0x0000040,
-    PROC_EX_EVADE               = 0x0000080,
-    PROC_EX_IMMUNE              = 0x0000100,
-    PROC_EX_DEFLECT             = 0x0000200,
-    PROC_EX_ABSORB              = 0x0000400,
-    PROC_EX_REFLECT             = 0x0000800,
-    PROC_EX_INTERRUPT           = 0x0001000,                 // Melee hit result can be Interrupt (not used)
-    PROC_EX_FULL_BLOCK          = 0x0002000,                 // block al attack damage
-    PROC_EX_RESERVED2           = 0x0004000,
-    PROC_EX_NOT_ACTIVE_SPELL    = 0x0008000,                 // Spell mustn't do damage/heal to proc
-    PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,                 // If set trigger always no matter of hit result
+    PROC_EX_NONE = 0x0000000,                 // If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
+    PROC_EX_NORMAL_HIT = 0x0000001,                 // If set only from normal hit (only damage spells)
+    PROC_EX_CRITICAL_HIT = 0x0000002,
+    PROC_EX_MISS = 0x0000004,
+    PROC_EX_RESIST = 0x0000008,
+    PROC_EX_DODGE = 0x0000010,
+    PROC_EX_PARRY = 0x0000020,
+    PROC_EX_BLOCK = 0x0000040,
+    PROC_EX_EVADE = 0x0000080,
+    PROC_EX_IMMUNE = 0x0000100,
+    PROC_EX_DEFLECT = 0x0000200,
+    PROC_EX_ABSORB = 0x0000400,
+    PROC_EX_REFLECT = 0x0000800,
+    PROC_EX_INTERRUPT = 0x0001000,                 // Melee hit result can be Interrupt (not used)
+    PROC_EX_FULL_BLOCK = 0x0002000,                 // block al attack damage
+    PROC_EX_RESERVED2 = 0x0004000,
+    PROC_EX_NOT_ACTIVE_SPELL = 0x0008000,                 // Spell mustn't do damage/heal to proc
+    PROC_EX_EX_TRIGGER_ALWAYS = 0x0010000,                 // If set trigger always no matter of hit result
     PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                 // If set trigger always but only one time (not implemented yet)
-    PROC_EX_ONLY_ACTIVE_SPELL   = 0x0040000,                 // Spell has to do damage/heal to proc
+    PROC_EX_ONLY_ACTIVE_SPELL = 0x0040000,                 // Spell has to do damage/heal to proc
 
     // Flags for internal use - do not use these in db!
-    PROC_EX_INTERNAL_CANT_PROC  = 0x0800000,
-    PROC_EX_INTERNAL_DOT        = 0x1000000,
-    PROC_EX_INTERNAL_HOT        = 0x2000000,
-    PROC_EX_INTERNAL_TRIGGERED  = 0x4000000,
+    PROC_EX_INTERNAL_CANT_PROC = 0x0800000,
+    PROC_EX_INTERNAL_DOT = 0x1000000,
+    PROC_EX_INTERNAL_HOT = 0x2000000,
+    PROC_EX_INTERNAL_TRIGGERED = 0x4000000,
     PROC_EX_INTERNAL_REQ_FAMILY = 0x8000000
 };
 
@@ -219,45 +219,45 @@ enum ProcFlagsExLegacy
 
 enum ProcFlagsSpellType
 {
-    PROC_SPELL_TYPE_NONE              = 0x0000000,
-    PROC_SPELL_TYPE_DAMAGE            = 0x0000001, // damage type of spell
-    PROC_SPELL_TYPE_HEAL              = 0x0000002, // heal type of spell
-    PROC_SPELL_TYPE_NO_DMG_HEAL       = 0x0000004, // other spells
-    PROC_SPELL_TYPE_MASK_ALL          = PROC_SPELL_TYPE_DAMAGE | PROC_SPELL_TYPE_HEAL | PROC_SPELL_TYPE_NO_DMG_HEAL
+    PROC_SPELL_TYPE_NONE = 0x0000000,
+    PROC_SPELL_TYPE_DAMAGE = 0x0000001, // damage type of spell
+    PROC_SPELL_TYPE_HEAL = 0x0000002, // heal type of spell
+    PROC_SPELL_TYPE_NO_DMG_HEAL = 0x0000004, // other spells
+    PROC_SPELL_TYPE_MASK_ALL = PROC_SPELL_TYPE_DAMAGE | PROC_SPELL_TYPE_HEAL | PROC_SPELL_TYPE_NO_DMG_HEAL
 };
 
 enum ProcFlagsSpellPhase
 {
-    PROC_SPELL_PHASE_NONE             = 0x0000000,
-    PROC_SPELL_PHASE_CAST             = 0x0000001,
-    PROC_SPELL_PHASE_HIT              = 0x0000002,
-    PROC_SPELL_PHASE_FINISH           = 0x0000004,
-    PROC_SPELL_PHASE_MASK_ALL         = PROC_SPELL_PHASE_CAST | PROC_SPELL_PHASE_HIT | PROC_SPELL_PHASE_FINISH
+    PROC_SPELL_PHASE_NONE = 0x0000000,
+    PROC_SPELL_PHASE_CAST = 0x0000001,
+    PROC_SPELL_PHASE_HIT = 0x0000002,
+    PROC_SPELL_PHASE_FINISH = 0x0000004,
+    PROC_SPELL_PHASE_MASK_ALL = PROC_SPELL_PHASE_CAST | PROC_SPELL_PHASE_HIT | PROC_SPELL_PHASE_FINISH
 };
 
 enum ProcFlagsHit
 {
-    PROC_HIT_NONE                = 0x0000000, // no value - PROC_HIT_NORMAL | PROC_HIT_CRITICAL for TAKEN proc type, PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB for DONE
-    PROC_HIT_NORMAL              = 0x0000001, // non-critical hits
-    PROC_HIT_CRITICAL            = 0x0000002,
-    PROC_HIT_MISS                = 0x0000004,
-    PROC_HIT_FULL_RESIST         = 0x0000008,
-    PROC_HIT_DODGE               = 0x0000010,
-    PROC_HIT_PARRY               = 0x0000020,
-    PROC_HIT_BLOCK               = 0x0000040, // partial or full block
-    PROC_HIT_EVADE               = 0x0000080,
-    PROC_HIT_IMMUNE              = 0x0000100,
-    PROC_HIT_DEFLECT             = 0x0000200,
-    PROC_HIT_ABSORB              = 0x0000400, // partial or full absorb
-    PROC_HIT_REFLECT             = 0x0000800,
-    PROC_HIT_INTERRUPT           = 0x0001000, // (not used atm)
-    PROC_HIT_FULL_BLOCK          = 0x0002000,
-    PROC_HIT_MASK_ALL            = 0x2FFF
+    PROC_HIT_NONE = 0x0000000, // no value - PROC_HIT_NORMAL | PROC_HIT_CRITICAL for TAKEN proc type, PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB for DONE
+    PROC_HIT_NORMAL = 0x0000001, // non-critical hits
+    PROC_HIT_CRITICAL = 0x0000002,
+    PROC_HIT_MISS = 0x0000004,
+    PROC_HIT_FULL_RESIST = 0x0000008,
+    PROC_HIT_DODGE = 0x0000010,
+    PROC_HIT_PARRY = 0x0000020,
+    PROC_HIT_BLOCK = 0x0000040, // partial or full block
+    PROC_HIT_EVADE = 0x0000080,
+    PROC_HIT_IMMUNE = 0x0000100,
+    PROC_HIT_DEFLECT = 0x0000200,
+    PROC_HIT_ABSORB = 0x0000400, // partial or full absorb
+    PROC_HIT_REFLECT = 0x0000800,
+    PROC_HIT_INTERRUPT = 0x0001000, // (not used atm)
+    PROC_HIT_FULL_BLOCK = 0x0002000,
+    PROC_HIT_MASK_ALL = 0x2FFF
 };
 
 enum ProcAttributes
 {
-    PROC_ATTR_REQ_EXP_OR_HONOR   = 0x0000010
+    PROC_ATTR_REQ_EXP_OR_HONOR = 0x0000010
 };
 
 struct SpellProcEventEntry
@@ -313,12 +313,12 @@ typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
 
 enum SpellGroup
 {
-    SPELL_GROUP_NONE             = 0,
-    SPELL_GROUP_ELIXIR_BATTLE    = 1,
-    SPELL_GROUP_ELIXIR_GUARDIAN  = 2,
-    SPELL_GROUP_ELIXIR_UNSTABLE  = 3,
+    SPELL_GROUP_NONE = 0,
+    SPELL_GROUP_ELIXIR_BATTLE = 1,
+    SPELL_GROUP_ELIXIR_GUARDIAN = 2,
+    SPELL_GROUP_ELIXIR_UNSTABLE = 3,
     SPELL_GROUP_ELIXIR_SHATTRATH = 4,
-    SPELL_GROUP_CORE_RANGE_MAX   = 5
+    SPELL_GROUP_CORE_RANGE_MAX = 5
 };
 
 #define SPELL_GROUP_DB_RANGE_MIN 1000
@@ -333,10 +333,10 @@ typedef std::pair<SpellGroupSpellMap::const_iterator, SpellGroupSpellMap::const_
 
 enum SpellGroupStackRule
 {
-    SPELL_GROUP_STACK_RULE_DEFAULT                    = 0,
-    SPELL_GROUP_STACK_RULE_EXCLUSIVE                  = 1,
+    SPELL_GROUP_STACK_RULE_DEFAULT = 0,
+    SPELL_GROUP_STACK_RULE_EXCLUSIVE = 1,
     SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER = 2,
-    SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT      = 3
+    SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT = 3
 };
 
 #define SPELL_GROUP_STACK_RULE_MAX 4
@@ -367,110 +367,110 @@ typedef std::map<std::pair<uint32 /*spell_id*/, SpellEffIndex /*effIndex*/>, Spe
 // Enum with EffectRadiusIndex and their actual radius
 enum EffectRadiusIndex
 {
-    EFFECT_RADIUS_2_YARDS       = 7,
-    EFFECT_RADIUS_5_YARDS       = 8,
-    EFFECT_RADIUS_20_YARDS      = 9,
-    EFFECT_RADIUS_30_YARDS      = 10,
-    EFFECT_RADIUS_45_YARDS      = 11,
-    EFFECT_RADIUS_100_YARDS     = 12,
-    EFFECT_RADIUS_10_YARDS      = 13,
-    EFFECT_RADIUS_8_YARDS       = 14,
-    EFFECT_RADIUS_3_YARDS       = 15,
-    EFFECT_RADIUS_1_YARD        = 16,
-    EFFECT_RADIUS_13_YARDS      = 17,
-    EFFECT_RADIUS_15_YARDS      = 18,
-    EFFECT_RADIUS_18_YARDS      = 19,
-    EFFECT_RADIUS_25_YARDS      = 20,
-    EFFECT_RADIUS_35_YARDS      = 21,
-    EFFECT_RADIUS_200_YARDS     = 22,
-    EFFECT_RADIUS_40_YARDS      = 23,
-    EFFECT_RADIUS_65_YARDS      = 24,
-    EFFECT_RADIUS_70_YARDS      = 25,
-    EFFECT_RADIUS_4_YARDS       = 26,
-    EFFECT_RADIUS_50_YARDS      = 27,
-    EFFECT_RADIUS_50000_YARDS   = 28,
-    EFFECT_RADIUS_6_YARDS       = 29,
-    EFFECT_RADIUS_500_YARDS     = 30,
-    EFFECT_RADIUS_80_YARDS      = 31,
-    EFFECT_RADIUS_12_YARDS      = 32,
-    EFFECT_RADIUS_99_YARDS      = 33,
-    EFFECT_RADIUS_55_YARDS      = 35,
-    EFFECT_RADIUS_0_YARDS       = 36,
-    EFFECT_RADIUS_7_YARDS       = 37,
-    EFFECT_RADIUS_21_YARDS      = 38,
-    EFFECT_RADIUS_34_YARDS      = 39,
-    EFFECT_RADIUS_9_YARDS       = 40,
-    EFFECT_RADIUS_150_YARDS     = 41,
-    EFFECT_RADIUS_11_YARDS      = 42,
-    EFFECT_RADIUS_16_YARDS      = 43,
-    EFFECT_RADIUS_0_5_YARDS     = 44,   // 0.5 yards
-    EFFECT_RADIUS_10_YARDS_2    = 45,
-    EFFECT_RADIUS_5_YARDS_2     = 46,
-    EFFECT_RADIUS_15_YARDS_2    = 47,
-    EFFECT_RADIUS_60_YARDS      = 48,
-    EFFECT_RADIUS_90_YARDS      = 49,
-    EFFECT_RADIUS_15_YARDS_3    = 50,
-    EFFECT_RADIUS_60_YARDS_2    = 51,
-    EFFECT_RADIUS_5_YARDS_3     = 52,
-    EFFECT_RADIUS_60_YARDS_3    = 53,
+    EFFECT_RADIUS_2_YARDS = 7,
+    EFFECT_RADIUS_5_YARDS = 8,
+    EFFECT_RADIUS_20_YARDS = 9,
+    EFFECT_RADIUS_30_YARDS = 10,
+    EFFECT_RADIUS_45_YARDS = 11,
+    EFFECT_RADIUS_100_YARDS = 12,
+    EFFECT_RADIUS_10_YARDS = 13,
+    EFFECT_RADIUS_8_YARDS = 14,
+    EFFECT_RADIUS_3_YARDS = 15,
+    EFFECT_RADIUS_1_YARD = 16,
+    EFFECT_RADIUS_13_YARDS = 17,
+    EFFECT_RADIUS_15_YARDS = 18,
+    EFFECT_RADIUS_18_YARDS = 19,
+    EFFECT_RADIUS_25_YARDS = 20,
+    EFFECT_RADIUS_35_YARDS = 21,
+    EFFECT_RADIUS_200_YARDS = 22,
+    EFFECT_RADIUS_40_YARDS = 23,
+    EFFECT_RADIUS_65_YARDS = 24,
+    EFFECT_RADIUS_70_YARDS = 25,
+    EFFECT_RADIUS_4_YARDS = 26,
+    EFFECT_RADIUS_50_YARDS = 27,
+    EFFECT_RADIUS_50000_YARDS = 28,
+    EFFECT_RADIUS_6_YARDS = 29,
+    EFFECT_RADIUS_500_YARDS = 30,
+    EFFECT_RADIUS_80_YARDS = 31,
+    EFFECT_RADIUS_12_YARDS = 32,
+    EFFECT_RADIUS_99_YARDS = 33,
+    EFFECT_RADIUS_55_YARDS = 35,
+    EFFECT_RADIUS_0_YARDS = 36,
+    EFFECT_RADIUS_7_YARDS = 37,
+    EFFECT_RADIUS_21_YARDS = 38,
+    EFFECT_RADIUS_34_YARDS = 39,
+    EFFECT_RADIUS_9_YARDS = 40,
+    EFFECT_RADIUS_150_YARDS = 41,
+    EFFECT_RADIUS_11_YARDS = 42,
+    EFFECT_RADIUS_16_YARDS = 43,
+    EFFECT_RADIUS_0_5_YARDS = 44,   // 0.5 yards
+    EFFECT_RADIUS_10_YARDS_2 = 45,
+    EFFECT_RADIUS_5_YARDS_2 = 46,
+    EFFECT_RADIUS_15_YARDS_2 = 47,
+    EFFECT_RADIUS_60_YARDS = 48,
+    EFFECT_RADIUS_90_YARDS = 49,
+    EFFECT_RADIUS_15_YARDS_3 = 50,
+    EFFECT_RADIUS_60_YARDS_2 = 51,
+    EFFECT_RADIUS_5_YARDS_3 = 52,
+    EFFECT_RADIUS_60_YARDS_3 = 53,
     EFFECT_RADIUS_50000_YARDS_2 = 54,
-    EFFECT_RADIUS_130_YARDS     = 55,
-    EFFECT_RADIUS_38_YARDS      = 56,
-    EFFECT_RADIUS_45_YARDS_2    = 57,
-    EFFECT_RADIUS_32_YARDS      = 59,
-    EFFECT_RADIUS_44_YARDS      = 60,
-    EFFECT_RADIUS_14_YARDS      = 61,
-    EFFECT_RADIUS_47_YARDS      = 62,
-    EFFECT_RADIUS_23_YARDS      = 63,
-    EFFECT_RADIUS_3_5_YARDS     = 64,   // 3.5 yards
-    EFFECT_RADIUS_80_YARDS_2    = 65
+    EFFECT_RADIUS_130_YARDS = 55,
+    EFFECT_RADIUS_38_YARDS = 56,
+    EFFECT_RADIUS_45_YARDS_2 = 57,
+    EFFECT_RADIUS_32_YARDS = 59,
+    EFFECT_RADIUS_44_YARDS = 60,
+    EFFECT_RADIUS_14_YARDS = 61,
+    EFFECT_RADIUS_47_YARDS = 62,
+    EFFECT_RADIUS_23_YARDS = 63,
+    EFFECT_RADIUS_3_5_YARDS = 64,   // 3.5 yards
+    EFFECT_RADIUS_80_YARDS_2 = 65
 };
 
 // Spell pet auras
 class PetAura
 {
-    private:
-        typedef UNORDERED_MAP<uint32, uint32> PetAuraMap;
+private:
+    typedef UNORDERED_MAP<uint32, uint32> PetAuraMap;
 
-    public:
-        PetAura() : removeOnChangePet(false), damage(0) { }
+public:
+    PetAura() : removeOnChangePet(false), damage(0) { }
 
-        PetAura(uint32 petEntry, uint32 aura, bool _removeOnChangePet, int _damage) :
+    PetAura(uint32 petEntry, uint32 aura, bool _removeOnChangePet, int _damage) :
         removeOnChangePet(_removeOnChangePet), damage(_damage)
-        {
-            auras[petEntry] = aura;
-        }
+    {
+        auras[petEntry] = aura;
+    }
 
-        uint32 GetAura(uint32 petEntry) const
-        {
-            PetAuraMap::const_iterator itr = auras.find(petEntry);
-            if (itr != auras.end())
-                return itr->second;
-            PetAuraMap::const_iterator itr2 = auras.find(0);
-            if (itr2 != auras.end())
-                return itr2->second;
-            return 0;
-        }
+    uint32 GetAura(uint32 petEntry) const
+    {
+        PetAuraMap::const_iterator itr = auras.find(petEntry);
+        if (itr != auras.end())
+            return itr->second;
+        PetAuraMap::const_iterator itr2 = auras.find(0);
+        if (itr2 != auras.end())
+            return itr2->second;
+        return 0;
+    }
 
-        void AddAura(uint32 petEntry, uint32 aura)
-        {
-            auras[petEntry] = aura;
-        }
+    void AddAura(uint32 petEntry, uint32 aura)
+    {
+        auras[petEntry] = aura;
+    }
 
-        bool IsRemovedOnChangePet() const
-        {
-            return removeOnChangePet;
-        }
+    bool IsRemovedOnChangePet() const
+    {
+        return removeOnChangePet;
+    }
 
-        int32 GetDamage() const
-        {
-            return damage;
-        }
+    int32 GetDamage() const
+    {
+        return damage;
+    }
 
-    private:
-        PetAuraMap auras;
-        bool removeOnChangePet;
-        int32 damage;
+private:
+    PetAuraMap auras;
+    bool removeOnChangePet;
+    int32 damage;
 };
 typedef std::map<uint32, PetAura> SpellPetAuraMap;
 
@@ -591,155 +591,155 @@ class SpellMgr
 {
     friend class ACE_Singleton<SpellMgr, ACE_Null_Mutex>;
     // Constructors
-    private:
-        SpellMgr();
-        ~SpellMgr();
+private:
+    SpellMgr();
+    ~SpellMgr();
 
     // Accessors (const or static functions)
-    public:
-        // Spell correctness for client using
-        static bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
+public:
+    // Spell correctness for client using
+    static bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
 
-        // Spell difficulty
-        uint32 GetSpellDifficultyId(uint32 spellId) const;
-        void SetSpellDifficultyId(uint32 spellId, uint32 id);
-        uint32 GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const;
-        SpellInfo const* GetSpellForDifficultyFromSpell(SpellInfo const* spell, Unit const* caster) const;
+    // Spell difficulty
+    uint32 GetSpellDifficultyId(uint32 spellId) const;
+    void SetSpellDifficultyId(uint32 spellId, uint32 id);
+    uint32 GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const;
+    SpellInfo const* GetSpellForDifficultyFromSpell(SpellInfo const* spell, Unit const* caster) const;
 
-        // Spell Ranks table
-        SpellChainNode const* GetSpellChainNode(uint32 spell_id) const;
-        uint32 GetFirstSpellInChain(uint32 spell_id) const;
-        uint32 GetLastSpellInChain(uint32 spell_id) const;
-        uint32 GetNextSpellInChain(uint32 spell_id) const;
-        uint32 GetPrevSpellInChain(uint32 spell_id) const;
-        uint8 GetSpellRank(uint32 spell_id) const;
-        // not strict check returns provided spell if rank not avalible
-        uint32 GetSpellWithRank(uint32 spell_id, uint32 rank, bool strict = false) const;
+    // Spell Ranks table
+    SpellChainNode const* GetSpellChainNode(uint32 spell_id) const;
+    uint32 GetFirstSpellInChain(uint32 spell_id) const;
+    uint32 GetLastSpellInChain(uint32 spell_id) const;
+    uint32 GetNextSpellInChain(uint32 spell_id) const;
+    uint32 GetPrevSpellInChain(uint32 spell_id) const;
+    uint8 GetSpellRank(uint32 spell_id) const;
+    // not strict check returns provided spell if rank not avalible
+    uint32 GetSpellWithRank(uint32 spell_id, uint32 rank, bool strict = false) const;
 
-        // Spell Required table
-        SpellRequiredMapBounds GetSpellsRequiredForSpellBounds(uint32 spell_id) const;
-        SpellsRequiringSpellMapBounds GetSpellsRequiringSpellBounds(uint32 spell_id) const;
-        bool IsSpellRequiringSpell(uint32 spellid, uint32 req_spellid) const;
+    // Spell Required table
+    SpellRequiredMapBounds GetSpellsRequiredForSpellBounds(uint32 spell_id) const;
+    SpellsRequiringSpellMapBounds GetSpellsRequiringSpellBounds(uint32 spell_id) const;
+    bool IsSpellRequiringSpell(uint32 spellid, uint32 req_spellid) const;
 
-        // Spell learning
-        SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id) const;
-        SpellLearnSpellMapBounds GetSpellLearnSpellMapBounds(uint32 spell_id) const;
-        bool IsSpellLearnSpell(uint32 spell_id) const;
-        bool IsSpellLearnToSpell(uint32 spell_id1, uint32 spell_id2) const;
+    // Spell learning
+    SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id) const;
+    SpellLearnSpellMapBounds GetSpellLearnSpellMapBounds(uint32 spell_id) const;
+    bool IsSpellLearnSpell(uint32 spell_id) const;
+    bool IsSpellLearnToSpell(uint32 spell_id1, uint32 spell_id2) const;
 
-        // Spell target coordinates
-        SpellTargetPosition const* GetSpellTargetPosition(uint32 spell_id, SpellEffIndex effIndex) const;
+    // Spell target coordinates
+    SpellTargetPosition const* GetSpellTargetPosition(uint32 spell_id, SpellEffIndex effIndex) const;
 
-        // Spell Groups table
-        SpellSpellGroupMapBounds GetSpellSpellGroupMapBounds(uint32 spell_id) const;
-        bool IsSpellMemberOfSpellGroup(uint32 spellid, SpellGroup groupid) const;
+    // Spell Groups table
+    SpellSpellGroupMapBounds GetSpellSpellGroupMapBounds(uint32 spell_id) const;
+    bool IsSpellMemberOfSpellGroup(uint32 spellid, SpellGroup groupid) const;
 
-        SpellGroupSpellMapBounds GetSpellGroupSpellMapBounds(SpellGroup group_id) const;
-        void GetSetOfSpellsInSpellGroup(SpellGroup group_id, std::set<uint32>& foundSpells) const;
-        void GetSetOfSpellsInSpellGroup(SpellGroup group_id, std::set<uint32>& foundSpells, std::set<SpellGroup>& usedGroups) const;
+    SpellGroupSpellMapBounds GetSpellGroupSpellMapBounds(SpellGroup group_id) const;
+    void GetSetOfSpellsInSpellGroup(SpellGroup group_id, std::set<uint32>& foundSpells) const;
+    void GetSetOfSpellsInSpellGroup(SpellGroup group_id, std::set<uint32>& foundSpells, std::set<SpellGroup>& usedGroups) const;
 
-        // Spell Group Stack Rules table
-        bool AddSameEffectStackRuleSpellGroups(SpellInfo const* spellInfo, int32 amount, std::map<SpellGroup, int32>& groups) const;
-        SpellGroupStackRule CheckSpellGroupStackRules(SpellInfo const* spellInfo1, SpellInfo const* spellInfo2) const;
+    // Spell Group Stack Rules table
+    bool AddSameEffectStackRuleSpellGroups(SpellInfo const* spellInfo, int32 amount, std::map<SpellGroup, int32>& groups) const;
+    SpellGroupStackRule CheckSpellGroupStackRules(SpellInfo const* spellInfo1, SpellInfo const* spellInfo2) const;
 
-        // Spell proc event table
-        SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const;
-        bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellInfo const* procSpell, uint32 procFlags, uint32 procExtra, bool active) const;
+    // Spell proc event table
+    SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const;
+    bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellInfo const* procSpell, uint32 procFlags, uint32 procExtra, bool active) const;
 
-        // Spell proc table
-        SpellProcEntry const* GetSpellProcEntry(uint32 spellId) const;
-        bool CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo) const;
+    // Spell proc table
+    SpellProcEntry const* GetSpellProcEntry(uint32 spellId) const;
+    bool CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo) const;
 
-        // Spell bonus data table
-        SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const;
+    // Spell bonus data table
+    SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const;
 
-        // Spell threat table
-        SpellThreatEntry const* GetSpellThreatEntry(uint32 spellID) const;
+    // Spell threat table
+    SpellThreatEntry const* GetSpellThreatEntry(uint32 spellID) const;
 
-        SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const;
+    SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const;
 
-        PetAura const* GetPetAura(uint32 spell_id, uint8 eff) const;
+    PetAura const* GetPetAura(uint32 spell_id, uint8 eff) const;
 
-        SpellEnchantProcEntry const* GetSpellEnchantProcEvent(uint32 enchId) const;
-        bool IsArenaAllowedEnchancment(uint32 ench_id) const;
+    SpellEnchantProcEntry const* GetSpellEnchantProcEvent(uint32 enchId) const;
+    bool IsArenaAllowedEnchancment(uint32 ench_id) const;
 
-        const std::vector<int32> *GetSpellLinked(int32 spell_id) const;
+    const std::vector<int32>* GetSpellLinked(int32 spell_id) const;
 
-        PetLevelupSpellSet const* GetPetLevelupSpellList(uint32 petFamily) const;
-        PetDefaultSpellsEntry const* GetPetDefaultSpellsEntry(int32 id) const;
+    PetLevelupSpellSet const* GetPetLevelupSpellList(uint32 petFamily) const;
+    PetDefaultSpellsEntry const* GetPetDefaultSpellsEntry(int32 id) const;
 
-        // Spell area
-        SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const;
-        SpellAreaForQuestMapBounds GetSpellAreaForQuestMapBounds(uint32 quest_id) const;
-        SpellAreaForQuestMapBounds GetSpellAreaForQuestEndMapBounds(uint32 quest_id) const;
-        SpellAreaForAuraMapBounds GetSpellAreaForAuraMapBounds(uint32 spell_id) const;
-        SpellAreaForAreaMapBounds GetSpellAreaForAreaMapBounds(uint32 area_id) const;
+    // Spell area
+    SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const;
+    SpellAreaForQuestMapBounds GetSpellAreaForQuestMapBounds(uint32 quest_id) const;
+    SpellAreaForQuestMapBounds GetSpellAreaForQuestEndMapBounds(uint32 quest_id) const;
+    SpellAreaForAuraMapBounds GetSpellAreaForAuraMapBounds(uint32 spell_id) const;
+    SpellAreaForAreaMapBounds GetSpellAreaForAreaMapBounds(uint32 area_id) const;
 
-        // SpellInfo object management
-        SpellInfo const* GetSpellInfo(uint32 spellId) const { return spellId < GetSpellInfoStoreSize() ?  mSpellInfoMap[spellId] : NULL; }
-        uint32 GetSpellInfoStoreSize() const { return mSpellInfoMap.size(); }
+    // SpellInfo object management
+    SpellInfo const* GetSpellInfo(uint32 spellId) const { return spellId < GetSpellInfoStoreSize() ? mSpellInfoMap[spellId] : NULL; }
+    uint32 GetSpellInfoStoreSize() const { return mSpellInfoMap.size(); }
 
-    private:
-        SpellInfo* _GetSpellInfo(uint32 spellId) { return spellId < GetSpellInfoStoreSize() ?  mSpellInfoMap[spellId] : NULL; }
+private:
+    SpellInfo* _GetSpellInfo(uint32 spellId) { return spellId < GetSpellInfoStoreSize() ? mSpellInfoMap[spellId] : NULL; }
 
     // Modifiers
-    public:
-        // Loading data at server startup
-        void UnloadSpellInfoChains();
-        void LoadSpellTalentRanks();
-        void LoadSpellRanks();
-        void LoadSpellRequired();
-        void LoadSpellLearnSkills();
-        void LoadSpellLearnSpells();
-        void LoadSpellTargetPositions();
-        void LoadSpellGroups();
-        void LoadSpellGroupStackRules();
-        void LoadSpellProcEvents();
-        void LoadSpellProcs();
-        void LoadSpellBonusess();
-        void LoadSpellThreats();
-        void LoadSkillLineAbilityMap();
-        void LoadSpellPetAuras();
-        void LoadEnchantCustomAttr();
-        void LoadSpellEnchantProcData();
-        void LoadSpellLinked();
-        void LoadPetLevelupSpellMap();
-        void LoadPetDefaultSpells();
-        void LoadSpellAreas();
-        void LoadSpellInfoStore();
-        void UnloadSpellInfoStore();
-        void UnloadSpellInfoImplicitTargetConditionLists();
-        void LoadSpellInfoCustomAttributes();
-        void LoadSpellInfoCorrections();
+public:
+    // Loading data at server startup
+    void UnloadSpellInfoChains();
+    void LoadSpellTalentRanks();
+    void LoadSpellRanks();
+    void LoadSpellRequired();
+    void LoadSpellLearnSkills();
+    void LoadSpellLearnSpells();
+    void LoadSpellTargetPositions();
+    void LoadSpellGroups();
+    void LoadSpellGroupStackRules();
+    void LoadSpellProcEvents();
+    void LoadSpellProcs();
+    void LoadSpellBonusess();
+    void LoadSpellThreats();
+    void LoadSkillLineAbilityMap();
+    void LoadSpellPetAuras();
+    void LoadEnchantCustomAttr();
+    void LoadSpellEnchantProcData();
+    void LoadSpellLinked();
+    void LoadPetLevelupSpellMap();
+    void LoadPetDefaultSpells();
+    void LoadSpellAreas();
+    void LoadSpellInfoStore();
+    void UnloadSpellInfoStore();
+    void UnloadSpellInfoImplicitTargetConditionLists();
+    void LoadSpellInfoCustomAttributes();
+    void LoadSpellInfoCorrections();
 
-    private:
-        SpellDifficultySearcherMap mSpellDifficultySearcherMap;
-        SpellChainMap              mSpellChains;
-        SpellsRequiringSpellMap    mSpellsReqSpell;
-        SpellRequiredMap           mSpellReq;
-        SpellLearnSkillMap         mSpellLearnSkills;
-        SpellLearnSpellMap         mSpellLearnSpells;
-        SpellTargetPositionMap     mSpellTargetPositions;
-        SpellSpellGroupMap         mSpellSpellGroup;
-        SpellGroupSpellMap         mSpellGroupSpell;
-        SpellGroupStackMap         mSpellGroupStack;
-        SpellProcEventMap          mSpellProcEventMap;
-        SpellProcMap               mSpellProcMap;
-        SpellBonusMap              mSpellBonusMap;
-        SpellThreatMap             mSpellThreatMap;
-        SpellPetAuraMap            mSpellPetAuraMap;
-        SpellLinkedMap             mSpellLinkedMap;
-        SpellEnchantProcEventMap   mSpellEnchantProcEventMap;
-        EnchantCustomAttribute     mEnchantCustomAttr;
-        SpellAreaMap               mSpellAreaMap;
-        SpellAreaForQuestMap       mSpellAreaForQuestMap;
-        SpellAreaForQuestMap       mSpellAreaForQuestEndMap;
-        SpellAreaForAuraMap        mSpellAreaForAuraMap;
-        SpellAreaForAreaMap        mSpellAreaForAreaMap;
-        SkillLineAbilityMap        mSkillLineAbilityMap;
-        PetLevelupSpellMap         mPetLevelupSpellMap;
-        PetDefaultSpellsMap        mPetDefaultSpellsMap;           // only spells not listed in related mPetLevelupSpellMap entry
-        SpellInfoMap               mSpellInfoMap;
+private:
+    SpellDifficultySearcherMap mSpellDifficultySearcherMap;
+    SpellChainMap              mSpellChains;
+    SpellsRequiringSpellMap    mSpellsReqSpell;
+    SpellRequiredMap           mSpellReq;
+    SpellLearnSkillMap         mSpellLearnSkills;
+    SpellLearnSpellMap         mSpellLearnSpells;
+    SpellTargetPositionMap     mSpellTargetPositions;
+    SpellSpellGroupMap         mSpellSpellGroup;
+    SpellGroupSpellMap         mSpellGroupSpell;
+    SpellGroupStackMap         mSpellGroupStack;
+    SpellProcEventMap          mSpellProcEventMap;
+    SpellProcMap               mSpellProcMap;
+    SpellBonusMap              mSpellBonusMap;
+    SpellThreatMap             mSpellThreatMap;
+    SpellPetAuraMap            mSpellPetAuraMap;
+    SpellLinkedMap             mSpellLinkedMap;
+    SpellEnchantProcEventMap   mSpellEnchantProcEventMap;
+    EnchantCustomAttribute     mEnchantCustomAttr;
+    SpellAreaMap               mSpellAreaMap;
+    SpellAreaForQuestMap       mSpellAreaForQuestMap;
+    SpellAreaForQuestMap       mSpellAreaForQuestEndMap;
+    SpellAreaForAuraMap        mSpellAreaForAuraMap;
+    SpellAreaForAreaMap        mSpellAreaForAreaMap;
+    SkillLineAbilityMap        mSkillLineAbilityMap;
+    PetLevelupSpellMap         mPetLevelupSpellMap;
+    PetDefaultSpellsMap        mPetDefaultSpellsMap;           // only spells not listed in related mPetLevelupSpellMap entry
+    SpellInfoMap               mSpellInfoMap;
 };
 
 #define sSpellMgr ACE_Singleton<SpellMgr, ACE_Null_Mutex>::instance()

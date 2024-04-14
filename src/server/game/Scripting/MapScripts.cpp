@@ -1,12 +1,12 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "CellImpl.h"
+#include "GossipDef.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "GossipDef.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "MapRefManager.h"
@@ -29,7 +29,7 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
     // prepare static data
     uint64 sourceGUID = source ? source->GetGUID() : uint64(0); //some script commands doesn't have source
     uint64 targetGUID = target ? target->GetGUID() : uint64(0);
-    uint64 ownerGUID  = (source && source->GetTypeId() == TypeID::TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
+    uint64 ownerGUID = (source && source->GetTypeId() == TypeID::TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const* s2 = &(s->second);
@@ -39,7 +39,7 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
         ScriptAction sa;
         sa.sourceGUID = sourceGUID;
         sa.targetGUID = targetGUID;
-        sa.ownerGUID  = ownerGUID;
+        sa.ownerGUID = ownerGUID;
 
         sa.script = &iter->second;
         m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld->GetGameTime() + iter->first), sa));
@@ -64,12 +64,12 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     // prepare static data
     uint64 sourceGUID = source ? source->GetGUID() : uint64(0);
     uint64 targetGUID = target ? target->GetGUID() : uint64(0);
-    uint64 ownerGUID  = (source && source->GetTypeId() == TypeID::TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
+    uint64 ownerGUID = (source && source->GetTypeId() == TypeID::TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : uint64(0);
 
     ScriptAction sa;
     sa.sourceGUID = sourceGUID;
     sa.targetGUID = targetGUID;
-    sa.ownerGUID  = ownerGUID;
+    sa.ownerGUID = ownerGUID;
 
     sa.script = &script;
     m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld->GetGameTime() + delay), sa));
@@ -482,13 +482,13 @@ void Map::ScriptsProcess()
                 // Source or target must be Creature.
                 if (Creature* cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
                 {
-                // Validate field number.
-                if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
-                    SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
-                        step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
-                        cSource->GetValuesCount(), uint8(cSource->GetTypeId()), cSource->GetEntry(), cSource->GetGUIDLow());
-                else
-                    cSource->SetFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
+                    // Validate field number.
+                    if (step.script->FlagToggle.FieldID <= OBJECT_FIELD_ENTRY_ID || step.script->FlagToggle.FieldID >= cSource->GetValuesCount())
+                        SF_LOG_ERROR("scripts", "%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
+                            step.script->GetDebugInfo().c_str(), step.script->FlagToggle.FieldID,
+                            cSource->GetValuesCount(), uint8(cSource->GetTypeId()), cSource->GetEntry(), cSource->GetGUIDLow());
+                    else
+                        cSource->SetFlag(step.script->FlagToggle.FieldID, step.script->FlagToggle.FieldValue);
                 }
                 break;
 
@@ -608,8 +608,8 @@ void Map::ScriptsProcess()
                     }
 
                     if (pGO->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE ||
-                        pGO->GetGoType() == GAMEOBJECT_TYPE_DOOR        ||
-                        pGO->GetGoType() == GAMEOBJECT_TYPE_BUTTON      ||
+                        pGO->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
+                        pGO->GetGoType() == GAMEOBJECT_TYPE_BUTTON ||
                         pGO->GetGoType() == GAMEOBJECT_TYPE_TRAP)
                     {
                         SF_LOG_ERROR("scripts", "%s can not be used with gameobject of type %u (guid: %u).",

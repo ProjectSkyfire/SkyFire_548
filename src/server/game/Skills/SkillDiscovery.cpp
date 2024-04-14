@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "DatabaseEnv.h"
 #include "Log.h"
-#include "World.h"
-#include "Util.h"
-#include "SkillDiscovery.h"
-#include "SpellMgr.h"
 #include "Player.h"
+#include "SkillDiscovery.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "Util.h"
+#include "World.h"
 #include <map>
 
 struct SkillDiscoveryEntry
@@ -55,10 +55,10 @@ void LoadSkillDiscoveryTable()
     {
         Field* fields = result->Fetch();
 
-        uint32 spellId         = fields[0].GetUInt32();
+        uint32 spellId = fields[0].GetUInt32();
         int32  reqSkillOrSpell = fields[1].GetInt32();
-        uint32 reqSkillValue   = fields[2].GetUInt16();
-        float  chance          = fields[3].GetFloat();
+        uint32 reqSkillValue = fields[2].GetUInt16();
+        float  chance = fields[3].GetFloat();
 
         if (chance <= 0)                                    // chance
         {
@@ -118,8 +118,7 @@ void LoadSkillDiscoveryTable()
         }
 
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     if (!ssNonDiscoverableEntries.str().empty())
         SF_LOG_ERROR("sql.sql", "Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n%s", ssNonDiscoverableEntries.str().c_str());

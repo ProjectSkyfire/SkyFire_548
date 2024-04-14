@@ -1,12 +1,12 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "MapUpdater.h"
+#include "DatabaseEnv.h"
 #include "DelayExecutor.h"
 #include "Map.h"
-#include "DatabaseEnv.h"
+#include "MapUpdater.h"
 
 #include <ace/Method_Request.h>
 
@@ -45,8 +45,8 @@ public:
     }
 };
 
-MapUpdater::MapUpdater():
-m_executor(), pending_requests(0) { }
+MapUpdater::MapUpdater() :
+    m_executor(), pending_requests(0) { }
 
 MapUpdater::~MapUpdater()
 {

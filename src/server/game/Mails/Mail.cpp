@@ -1,20 +1,20 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AuctionHouseMgr.h"
+#include "BattlegroundMgr.h"
+#include "BlackMarketMgr.h"
+#include "CalendarMgr.h"
 #include "DatabaseEnv.h"
-#include "Mail.h"
+#include "Item.h"
 #include "Log.h"
-#include "World.h"
+#include "Mail.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Unit.h"
-#include "BattlegroundMgr.h"
-#include "Item.h"
-#include "AuctionHouseMgr.h"
-#include "BlackMarketMgr.h"
-#include "CalendarMgr.h"
+#include "World.h"
 
 MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery(stationery)
 {
@@ -28,10 +28,10 @@ MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery
             m_messageType = MAIL_GAMEOBJECT;
             m_senderId = sender->GetEntry();
             break;
-        /*case TYPEID_ITEM:
-            m_messageType = MAIL_ITEM;
-            m_senderId = sender->GetEntry();
-            break;*/
+            /*case TYPEID_ITEM:
+                m_messageType = MAIL_ITEM;
+                m_senderId = sender->GetEntry();
+                break;*/
         case TypeID::TYPEID_PLAYER:
             m_messageType = MAIL_NORMAL;
             m_senderId = sender->GetGUIDLow();
@@ -98,7 +98,7 @@ void MailDraft::prepareItems(Player* receiver, SQLTransaction& trans)
     }
 }
 
-void MailDraft::deleteIncludedItems(SQLTransaction& trans, bool inDB /*= false*/ )
+void MailDraft::deleteIncludedItems(SQLTransaction& trans, bool inDB /*= false*/)
 {
     for (MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
     {
@@ -180,7 +180,7 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
     // mail from battlemaster (rewardmarks) should last only one day
     else if (sender.GetMailMessageType() == MAIL_CREATURE && sBattlegroundMgr->GetBattleMasterBG(sender.GetSenderId()) != BattlegroundTypeId::BATTLEGROUND_TYPE_NONE)
         expire_delay = DAY;
-     // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
+    // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
     else
         if (m_COD)
             expire_delay = 3 * DAY;
@@ -192,20 +192,20 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
     // Add to DB
     uint8 index = 0;
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_MAIL);
-    stmt->setUInt32(  index, mailId);
-    stmt->setUInt8 (++index, uint8(sender.GetMailMessageType()));
-    stmt->setInt8  (++index, int8(sender.GetStationery()));
+    stmt->setUInt32(index, mailId);
+    stmt->setUInt8(++index, uint8(sender.GetMailMessageType()));
+    stmt->setInt8(++index, int8(sender.GetStationery()));
     stmt->setUInt16(++index, GetMailTemplateId());
     stmt->setUInt32(++index, sender.GetSenderId());
     stmt->setUInt32(++index, receiver.GetPlayerGUIDLow());
     stmt->setString(++index, GetSubject());
     stmt->setString(++index, GetBody());
-    stmt->setBool  (++index, !m_items.empty());
+    stmt->setBool(++index, !m_items.empty());
     stmt->setUInt64(++index, uint64(expire_time));
     stmt->setUInt64(++index, uint64(deliver_time));
     stmt->setUInt32(++index, m_money);
     stmt->setUInt32(++index, m_COD);
-    stmt->setUInt8 (++index, uint8(checked));
+    stmt->setUInt8(++index, uint8(checked));
     trans->Append(stmt);
 
     for (MailItemMap::const_iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)

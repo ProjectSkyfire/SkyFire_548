@@ -1,40 +1,40 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "ArenaTeam.h"
+#include "ArenaTeamMgr.h"
 #include "Common.h"
+#include "GossipDef.h"
+#include "Guild.h"
+#include "GuildMgr.h"
 #include "Language.h"
+#include "Log.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "SocialMgr.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "ArenaTeamMgr.h"
-#include "GuildMgr.h"
-#include "Log.h"
-#include "Opcodes.h"
-#include "Guild.h"
-#include "ArenaTeam.h"
-#include "GossipDef.h"
-#include "SocialMgr.h"
 
 #define CHARTER_DISPLAY_ID 16161
 
 // Charters ID in item_template
 enum CharterItemIDs
 {
-    GUILD_CHARTER                                 = 5863,
-    ARENA_TEAM_CHARTER_2v2                        = 23560,
-    ARENA_TEAM_CHARTER_3v3                        = 23561,
-    ARENA_TEAM_CHARTER_5v5                        = 23562
+    GUILD_CHARTER = 5863,
+    ARENA_TEAM_CHARTER_2v2 = 23560,
+    ARENA_TEAM_CHARTER_3v3 = 23561,
+    ARENA_TEAM_CHARTER_5v5 = 23562
 };
 
 enum CharterCosts
 {
-    GUILD_CHARTER_COST                            = 1000,
-    ARENA_TEAM_CHARTER_2v2_COST                   = 800000,
-    ARENA_TEAM_CHARTER_3v3_COST                   = 1200000,
-    ARENA_TEAM_CHARTER_5v5_COST                   = 2000000
+    GUILD_CHARTER_COST = 1000,
+    ARENA_TEAM_CHARTER_2v2_COST = 800000,
+    ARENA_TEAM_CHARTER_3v3_COST = 1200000,
+    ARENA_TEAM_CHARTER_5v5_COST = 2000000
 };
 
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
@@ -161,7 +161,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recvData)
     SF_LOG_DEBUG("network", "Invalid petition GUIDs: %s", ssInvalidPetitionGUIDs.str().c_str());
     CharacterDatabase.EscapeString(name);
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    trans->PAppend("DELETE FROM petition WHERE petitionguid IN (%s)",  ssInvalidPetitionGUIDs.str().c_str());
+    trans->PAppend("DELETE FROM petition WHERE petitionguid IN (%s)", ssInvalidPetitionGUIDs.str().c_str());
     trans->PAppend("DELETE FROM petition_sign WHERE petitionguid IN (%s)", ssInvalidPetitionGUIDs.str().c_str());
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PETITION);
@@ -308,7 +308,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
     data.WriteByteSeq(petitionGuid[0]);
     data.WriteByteSeq(playerGuid[2]);
 
-    delete [] playerGuids;
+    delete[] playerGuids;
     SendPacket(&data);
 }
 
@@ -360,8 +360,8 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionGuid)
     {
         Field* fields = result->Fetch();
         ownerGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
-        name      = fields[1].GetString();
-        type      = fields[2].GetUInt8();
+        name = fields[1].GetString();
+        type = fields[2].GetUInt8();
     }
     else
     {
@@ -369,7 +369,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionGuid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+1+4*12+2+10));
+    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4 + 8 + name.size() + 1 + 1 + 4 * 12 + 2 + 10));
     data << uint32(GUID_LOPART(petitionGuid));              // guild/team guid (in Skyfire always same as GUID_LOPART(petition guid)
     data.WriteBit(1); // hasData;
 
@@ -826,7 +826,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recvData)
     data.WriteByteSeq(petitionGuid[0]);
     data.WriteByteSeq(playerGuid[2]);
 
-    delete [] playerGuids;
+    delete[] playerGuids;
     player->GetSession()->SendPacket(&data);
 }
 
@@ -923,7 +923,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recvData)
     if (type == GUILD_CHARTER_TYPE)
         requiredSignatures = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_PETITION_SIGNS);
     else
-        requiredSignatures = type-1;
+        requiredSignatures = type - 1;
 
     // Notify player if signatures are missing
     if (signatures < requiredSignatures)
@@ -1054,7 +1054,7 @@ void WorldSession::SendPetitionShowList(uint64 guid)
 
 void WorldSession::SendPetitionSignResults(ObjectGuid petitionGuid, ObjectGuid playerGuid, uint8 result)
 {
-    WorldPacket data(SMSG_PETITION_SIGN_RESULTS, 9 + 9 +1);
+    WorldPacket data(SMSG_PETITION_SIGN_RESULTS, 9 + 9 + 1);
     data.WriteBit(playerGuid[2]);
     data.WriteBit(playerGuid[0]);
     data.WriteBit(petitionGuid[0]);

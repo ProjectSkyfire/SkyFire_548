@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -40,18 +40,18 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature* creature)
 void WaypointMovementGenerator<Creature>::DoInitialize(Creature* creature)
 {
     LoadPath(creature);
-    creature->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
+    creature->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
 }
 
 void WaypointMovementGenerator<Creature>::DoFinalize(Creature* creature)
 {
-    creature->ClearUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
+    creature->ClearUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
     creature->SetWalk(false);
 }
 
 void WaypointMovementGenerator<Creature>::DoReset(Creature* creature)
 {
-    creature->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
+    creature->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
     StartMoveNow(creature);
 }
 
@@ -116,7 +116,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
             return false;
         }
 
-        i_currentNode = (i_currentNode+1) % i_path->size();
+        i_currentNode = (i_currentNode + 1) % i_path->size();
     }
 
     WaypointData const* node = i_path->at(i_currentNode);
@@ -182,7 +182,7 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
             return StartMove(creature);
         }
     }
-     return true;
+    return true;
 }
 
 void WaypointMovementGenerator<Creature>::MovementInform(Creature* creature)
@@ -285,11 +285,10 @@ bool FlightPathMovementGenerator::DoUpdate(Player* player, uint32 /*diff*/)
                 PreloadEndGrid();
             i_currentNode += (uint32)departureEvent;
             departureEvent = !departureEvent;
-        }
-        while (true);
+        } while (true);
     }
 
-    return i_currentNode < (i_path->size()-1);
+    return i_currentNode < (i_path->size() - 1);
 }
 
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
@@ -343,7 +342,7 @@ void FlightPathMovementGenerator::PreloadEndGrid()
     // Load the grid
     if (endMap)
     {
-        SF_LOG_INFO("misc", "Preloading rid (%f, %f) for map %u at node index %u/%u", _endGridX, _endGridY, _endMapId, _preloadTargetNode, (uint32)(i_path->size()-1));
+        SF_LOG_INFO("misc", "Preloading rid (%f, %f) for map %u at node index %u/%u", _endGridX, _endGridY, _endMapId, _preloadTargetNode, (uint32)(i_path->size() - 1));
         endMap->LoadGrid(_endGridX, _endGridY);
     }
     else

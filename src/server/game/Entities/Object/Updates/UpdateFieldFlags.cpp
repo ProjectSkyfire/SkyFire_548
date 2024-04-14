@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -2242,7 +2242,7 @@ uint32 AreaTriggerUpdateFieldFlags[AREATRIGGER_END] =
     UF_FLAG_PUBLIC | UF_FLAG_URGENT // AREATRIGGER_FIELD_EXPLICIT_SCALE
 };
 
-uint32 SceneObjectUpdateFieldFlags [SCENEOBJECT_FIELD_END] =
+uint32 SceneObjectUpdateFieldFlags[SCENEOBJECT_FIELD_END] =
 {
     UF_FLAG_PUBLIC, // SCENEOBJECT_FIELD_SCRIPT_PACKAGE_ID
     UF_FLAG_PUBLIC, // SCENEOBJECT_FIELD_RND_SEED_VAL
@@ -2251,12 +2251,12 @@ uint32 SceneObjectUpdateFieldFlags [SCENEOBJECT_FIELD_END] =
     UF_FLAG_PUBLIC, // SCENEOBJECT_FIELD_SCENE_TYPE
 };
 
-uint32 DynamicItemUpdateFieldFlags [ITEM_DYNAMIC_END] =
+uint32 DynamicItemUpdateFieldFlags[ITEM_DYNAMIC_END] =
 {
     UF_FLAG_PUBLIC, // ITEM_DYNAMIC_FIELD_MODIFIERS
 };
 
-uint32 ObjectUpdateFieldFlags [OBJECT_END] =
+uint32 ObjectUpdateFieldFlags[OBJECT_END] =
 {
     UF_FLAG_PUBLIC, // OBJECT_FIELD_GUID
     UF_FLAG_PUBLIC, // OBJECT_FIELD_GUID
@@ -2268,13 +2268,13 @@ uint32 ObjectUpdateFieldFlags [OBJECT_END] =
     UF_FLAG_PUBLIC, // OBJECT_FIELD_SCALE
 };
 
-uint32 UnitDynamicField [UNIT_DYNAMIC_END] =
+uint32 UnitDynamicField[UNIT_DYNAMIC_END] =
 {
     UF_FLAG_PUBLIC, // UNIT_DYNAMIC_FIELD_PASSIVE_SPELLS
     UF_FLAG_PUBLIC, // UNIT_DYNAMIC_FIELD_WORLD_EFFECTS
 };
 
-uint32 PlayerDynamicField [PLAYER_DYNAMIC_END] =
+uint32 PlayerDynamicField[PLAYER_DYNAMIC_END] =
 {
     UF_FLAG_PRIVATE, // PLAYER_DYNAMIC_FIELD_RESERACH_SITE
     UF_FLAG_PRIVATE, // PLAYER_DYNAMIC_FIELD_RESEARCH_SITE_PROGRESS
