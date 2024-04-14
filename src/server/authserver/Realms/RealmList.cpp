@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
-#include "RealmList.h"
 #include "Database/DatabaseEnv.h"
+#include "RealmList.h"
 
 RealmList::RealmList() : m_UpdateInterval(0), m_NextUpdateTime(time(NULL)) { }
 
@@ -66,18 +66,18 @@ void RealmList::UpdateRealms(bool init)
         do
         {
             Field* fields = result->Fetch();
-            uint32 realmId              = fields[0].GetUInt32();
-            std::string name            = fields[1].GetString();
+            uint32 realmId = fields[0].GetUInt32();
+            std::string name = fields[1].GetString();
             std::string externalAddress = fields[2].GetString();
-            std::string localAddress    = fields[3].GetString();
-            std::string localSubmask    = fields[4].GetString();
-            uint16 port                 = fields[5].GetUInt16();
-            uint8 icon                  = fields[6].GetUInt8();
-            RealmFlags flag             = RealmFlags(fields[7].GetUInt8());
-            uint8 timezone              = fields[8].GetUInt8();
-            AccountTypes allowedSecurityLevel  = AccountTypes(fields[9].GetUInt8());
-            float pop                   = fields[10].GetFloat();
-            uint32 build                = fields[11].GetUInt32();
+            std::string localAddress = fields[3].GetString();
+            std::string localSubmask = fields[4].GetString();
+            uint16 port = fields[5].GetUInt16();
+            uint8 icon = fields[6].GetUInt8();
+            RealmFlags flag = RealmFlags(fields[7].GetUInt8());
+            uint8 timezone = fields[8].GetUInt8();
+            AccountTypes allowedSecurityLevel = AccountTypes(fields[9].GetUInt8());
+            float pop = fields[10].GetFloat();
+            uint32 build = fields[11].GetUInt32();
 
             ACE_INET_Addr externalAddr(port, externalAddress.c_str(), AF_INET);
             ACE_INET_Addr localAddr(port, localAddress.c_str(), AF_INET);
@@ -87,7 +87,6 @@ void RealmList::UpdateRealms(bool init)
 
             if (init)
                 SF_LOG_INFO("server.authserver", "Added realm \"%s\" at %s:%u.", name.c_str(), m_realms[name].ExternalAddress.get_host_addr(), port);
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
 }

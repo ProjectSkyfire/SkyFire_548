@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -9,9 +9,9 @@
 #include <ace/Acceptor.h>
 #include <ace/SOCK_Acceptor.h>
 
-#include "RealmSocket.h"
 #include "AuthSocket.h"
 #include "Log.h"
+#include "RealmSocket.h"
 
 class RealmAcceptor : public ACE_Acceptor<RealmSocket, ACE_SOCK_Acceptor>
 {
@@ -24,7 +24,7 @@ public:
     }
 
 protected:
-    virtual int make_svc_handler(RealmSocket* &sh)
+    virtual int make_svc_handler(RealmSocket*& sh)
     {
         if (sh == 0)
             ACE_NEW_RETURN(sh, RealmSocket, -1);

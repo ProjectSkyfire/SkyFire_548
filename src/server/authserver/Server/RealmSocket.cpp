@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include <ace/OS_NS_string.h>
 #include <ace/INET_Addr.h>
+#include <ace/OS_NS_string.h>
 #include <ace/SString.h>
 
-#include "RealmSocket.h"
 #include "Log.h"
+#include "RealmSocket.h"
 
 RealmSocket::Session::Session(void) { }
 
@@ -37,7 +37,7 @@ RealmSocket::~RealmSocket(void)
     peer().close();
 }
 
-int RealmSocket::open(void * arg)
+int RealmSocket::open(void* arg)
 {
     ACE_INET_Addr addr;
 
@@ -89,7 +89,7 @@ size_t RealmSocket::recv_len(void) const
     return input_buffer_.length();
 }
 
-bool RealmSocket::recv_soft(char *buf, size_t len)
+bool RealmSocket::recv_soft(char* buf, size_t len)
 {
     if (input_buffer_.length() < len)
         return false;
@@ -99,7 +99,7 @@ bool RealmSocket::recv_soft(char *buf, size_t len)
     return true;
 }
 
-bool RealmSocket::recv(char *buf, size_t len)
+bool RealmSocket::recv(char* buf, size_t len)
 {
     bool ret = recv_soft(buf, len);
 
@@ -114,7 +114,7 @@ void RealmSocket::recv_skip(size_t len)
     input_buffer_.rd_ptr(len);
 }
 
-ssize_t RealmSocket::noblk_send(ACE_Message_Block &message_block)
+ssize_t RealmSocket::noblk_send(ACE_Message_Block& message_block)
 {
     const size_t len = message_block.length();
 
@@ -145,7 +145,7 @@ ssize_t RealmSocket::noblk_send(ACE_Message_Block &message_block)
     return n;
 }
 
-bool RealmSocket::send(const char *buf, size_t len)
+bool RealmSocket::send(const char* buf, size_t len)
 {
     if (buf == NULL || len == 0)
         return true;
@@ -173,7 +173,7 @@ bool RealmSocket::send(const char *buf, size_t len)
 
     ACE_Message_Block* mb = message_block.clone();
 
-    if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value *)(&ACE_Time_Value::zero)) == -1)
+    if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value*)(&ACE_Time_Value::zero)) == -1)
     {
         mb->release();
         return false;
@@ -198,7 +198,7 @@ int RealmSocket::handle_output(ACE_HANDLE)
         return 0;
     }
 
-    if (msg_queue()->dequeue_head(mb, (ACE_Time_Value *)(&ACE_Time_Value::zero)) == -1)
+    if (msg_queue()->dequeue_head(mb, (ACE_Time_Value*)(&ACE_Time_Value::zero)) == -1)
         return -1;
 
     ssize_t n = noblk_send(*mb);
@@ -217,7 +217,7 @@ int RealmSocket::handle_output(ACE_HANDLE)
     {
         mb->rd_ptr(n);
 
-        if (msg_queue()->enqueue_head(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
+        if (msg_queue()->enqueue_head(mb, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
             mb->release();
             return -1;

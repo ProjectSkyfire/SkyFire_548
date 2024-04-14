@@ -35,7 +35,7 @@ inline LPTSTR ErrorMessage(DWORD dw)
         NULL,
         dw,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &lpMsgBuf,
+        (LPTSTR)&lpMsgBuf,
         0, NULL);
     return (LPTSTR)lpMsgBuf;
 }
@@ -77,7 +77,7 @@ WheatyExceptionReport::~WheatyExceptionReport()
 // Entry point where control comes on an unhandled exception
 //===========================================================
 LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
-PEXCEPTION_POINTERS pExceptionInfo)
+    PEXCEPTION_POINTERS pExceptionInfo)
 {
     TCHAR module_folder_name[MAX_PATH];
     GetModuleFileName(0, module_folder_name, MAX_PATH);
@@ -196,14 +196,14 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
         // Windows NT product family.
         case VER_PLATFORM_WIN32_NT:
         {
-        #if WINVER < 0x0500
+#if WINVER < 0x0500
             BYTE suiteMask = osvi.wReserved[0];
             BYTE productType = osvi.wReserved[1];
-        #else
+#else
             WORD suiteMask = osvi.wSuiteMask;
             BYTE productType = osvi.wProductType;
-        #endif                                          // WINVER < 0x0500
-            
+#endif                                          // WINVER < 0x0500
+
             // Test for Windows 10 version 1507
             if (osvi.dwMajorVersion == 10)
             {
@@ -364,16 +364,16 @@ void WheatyExceptionReport::PrintSystemInfo()
     ::GetSystemInfo(&SystemInfo);
 
     MEMORYSTATUS MemoryStatus;
-    MemoryStatus.dwLength = sizeof (MEMORYSTATUS);
+    MemoryStatus.dwLength = sizeof(MEMORYSTATUS);
     ::GlobalMemoryStatus(&MemoryStatus);
     TCHAR sString[1024];
     _tprintf(_T("//=====================================================\r\n"));
     if (_GetProcessorName(sString, countof(sString)))
         _tprintf(_T("*** Hardware ***\r\nProcessor: %s\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
-            sString, SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys/0x400, MemoryStatus.dwAvailPhys/0x400, MemoryStatus.dwTotalPageFile/0x400);
+            sString, SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys / 0x400, MemoryStatus.dwAvailPhys / 0x400, MemoryStatus.dwTotalPageFile / 0x400);
     else
         _tprintf(_T("*** Hardware ***\r\nProcessor: <unknown>\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
-            SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys/0x400, MemoryStatus.dwAvailPhys/0x400, MemoryStatus.dwTotalPageFile/0x400);
+            SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys / 0x400, MemoryStatus.dwAvailPhys / 0x400, MemoryStatus.dwTotalPageFile / 0x400);
 
     if (_GetWindowsVersion(sString, countof(sString)))
         _tprintf(_T("\r\n*** Operation System ***\r\n%s\r\n"), sString);
@@ -384,48 +384,48 @@ void WheatyExceptionReport::PrintSystemInfo()
 //===========================================================================
 void WheatyExceptionReport::printTracesForAllThreads()
 {
-  THREADENTRY32 te32;
+    THREADENTRY32 te32;
 
-  DWORD dwOwnerPID = GetCurrentProcessId();
-  m_hProcess = GetCurrentProcess();
-  // Take a snapshot of all running threads
-  HANDLE hThreadSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-  if (hThreadSnap == INVALID_HANDLE_VALUE)
-    return;
+    DWORD dwOwnerPID = GetCurrentProcessId();
+    m_hProcess = GetCurrentProcess();
+    // Take a snapshot of all running threads
+    HANDLE hThreadSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (hThreadSnap == INVALID_HANDLE_VALUE)
+        return;
 
-  // Fill in the size of the structure before using it.
-  te32.dwSize = sizeof(THREADENTRY32);
+    // Fill in the size of the structure before using it.
+    te32.dwSize = sizeof(THREADENTRY32);
 
-  // Retrieve information about the first thread,
-  // and exit if unsuccessful
-  if (!Thread32First(hThreadSnap, &te32))
-  {
-    CloseHandle(hThreadSnap);    // Must clean up the
-                                   //   snapshot object!
-    return;
-  }
-
-  // Now walk the thread list of the system,
-  // and display information about each thread
-  // associated with the specified process
-  do
-  {
-    if (te32.th32OwnerProcessID == dwOwnerPID)
+    // Retrieve information about the first thread,
+    // and exit if unsuccessful
+    if (!Thread32First(hThreadSnap, &te32))
     {
-        CONTEXT context;
-        context.ContextFlags = 0xffffffff;
-        HANDLE threadHandle = OpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, false, te32.th32ThreadID);
-        if (threadHandle)
-        {
-            if (GetThreadContext(threadHandle, &context))
-                WriteStackDetails(&context, false, threadHandle);
-            CloseHandle(threadHandle);
-        }
+        CloseHandle(hThreadSnap);    // Must clean up the
+        //   snapshot object!
+        return;
     }
-  } while (Thread32Next(hThreadSnap, &te32));
 
-//  Don't forget to clean up the snapshot object.
-  CloseHandle(hThreadSnap);
+    // Now walk the thread list of the system,
+    // and display information about each thread
+    // associated with the specified process
+    do
+    {
+        if (te32.th32OwnerProcessID == dwOwnerPID)
+        {
+            CONTEXT context;
+            context.ContextFlags = 0xffffffff;
+            HANDLE threadHandle = OpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, false, te32.th32ThreadID);
+            if (threadHandle)
+            {
+                if (GetThreadContext(threadHandle, &context))
+                    WriteStackDetails(&context, false, threadHandle);
+                CloseHandle(threadHandle);
+            }
+        }
+    } while (Thread32Next(hThreadSnap, &te32));
+
+    //  Don't forget to clean up the snapshot object.
+    CloseHandle(hThreadSnap);
 }
 
 //===========================================================================
@@ -433,7 +433,7 @@ void WheatyExceptionReport::printTracesForAllThreads()
 // WheatyUnhandledExceptionFilter
 //===========================================================================
 void WheatyExceptionReport::GenerateExceptionReport(
-PEXCEPTION_POINTERS pExceptionInfo)
+    PEXCEPTION_POINTERS pExceptionInfo)
 {
     SYSTEMTIME systime;
     GetLocalTime(&systime);
@@ -473,7 +473,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
     PCONTEXT pCtx = pExceptionInfo->ContextRecord;
 
     // Show the registers
-    #ifdef _M_IX86                                          // X86 Only!
+#ifdef _M_IX86                                          // X86 Only!
     _tprintf(_T("\r\nRegisters:\r\n"));
 
     _tprintf(_T("EAX:%08X\r\nEBX:%08X\r\nECX:%08X\r\nEDX:%08X\r\nESI:%08X\r\nEDI:%08X\r\n"),
@@ -486,9 +486,9 @@ PEXCEPTION_POINTERS pExceptionInfo)
     _tprintf(_T("DS:%04X  ES:%04X  FS:%04X  GS:%04X\r\n"),
         pCtx->SegDs, pCtx->SegEs, pCtx->SegFs, pCtx->SegGs);
     _tprintf(_T("Flags:%08X\r\n"), pCtx->EFlags);
-    #endif
+#endif
 
-    #ifdef _M_X64
+#ifdef _M_X64
     _tprintf(_T("\r\nRegisters:\r\n"));
     _tprintf(_T("RAX:%016I64X\r\nRBX:%016I64X\r\nRCX:%016I64X\r\nRDX:%016I64X\r\nRSI:%016I64X\r\nRDI:%016I64X\r\n")
         _T("R8: %016I64X\r\nR9: %016I64X\r\nR10:%016I64X\r\nR11:%016I64X\r\nR12:%016I64X\r\nR13:%016I64X\r\nR14:%016I64X\r\nR15:%016I64X\r\n"),
@@ -500,7 +500,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
     _tprintf(_T("DS:%04X  ES:%04X  FS:%04X  GS:%04X\r\n"),
         pCtx->SegDs, pCtx->SegEs, pCtx->SegFs, pCtx->SegGs);
     _tprintf(_T("Flags:%08X\r\n"), pCtx->EFlags);
-    #endif
+#endif
 
     SymSetOptions(SYMOPT_DEFERRED_LOADS);
 
@@ -516,7 +516,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
     WriteStackDetails(&trashableContext, false, NULL);
     printTracesForAllThreads();
 
-//    #ifdef _M_IX86                                          // X86 Only!
+    //    #ifdef _M_IX86                                          // X86 Only!
 
     _tprintf(_T("========================\r\n"));
     _tprintf(_T("Local Variables And Parameters\r\n"));
@@ -530,7 +530,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
     SymEnumSymbols(GetCurrentProcess(),
         (UINT_PTR)GetModuleHandle(szFaultingModule),
         0, EnumerateSymbolsCallback, 0);
-  //  #endif                                                  // X86 Only!
+    //  #endif                                                  // X86 Only!
 
     SymCleanup(GetCurrentProcess());
 
@@ -543,7 +543,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
 //======================================================================
 LPTSTR WheatyExceptionReport::GetExceptionString(DWORD dwCode)
 {
-    #define EXCEPTION(x) case EXCEPTION_##x: return (LPTSTR)_T(#x);
+#define EXCEPTION(x) case EXCEPTION_##x: return (LPTSTR)_T(#x);
 
     switch (dwCode)
     {
@@ -591,7 +591,7 @@ LPTSTR WheatyExceptionReport::GetExceptionString(DWORD dwCode)
 // by the len parameter (in characters!)
 //=============================================================================
 BOOL WheatyExceptionReport::GetLogicalAddress(
-PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD_PTR& offset)
+    PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD_PTR& offset)
 {
     MEMORY_BASIC_INFORMATION mbi;
 
@@ -629,7 +629,7 @@ PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD_PTR& offset)
             // Yes, address is in the section.  Calculate section and offset,
             // and store in the "section" & "offset" params, which were
             // passed by reference.
-            section = i+1;
+            section = i + 1;
             offset = rva - sectionStart;
             return TRUE;
         }
@@ -645,7 +645,7 @@ struct CSymbolInfoPackage : public SYMBOL_INFO_PACKAGE
     CSymbolInfoPackage()
     {
         si.SizeOfStruct = sizeof(SYMBOL_INFO);
-        si.MaxNameLen   = sizeof(name);
+        si.MaxNameLen = sizeof(name);
     }
 };
 
@@ -653,8 +653,8 @@ struct CSymbolInfoPackage : public SYMBOL_INFO_PACKAGE
 // Walks the stack, and writes the results to the report file
 //============================================================
 void WheatyExceptionReport::WriteStackDetails(
-PCONTEXT pContext,
-bool bWriteVariables, HANDLE pThreadHandle)                                      // true if local/params should be output
+    PCONTEXT pContext,
+    bool bWriteVariables, HANDLE pThreadHandle)                                      // true if local/params should be output
 {
     _tprintf(_T("\r\nCall stack:\r\n"));
 
@@ -666,33 +666,33 @@ bool bWriteVariables, HANDLE pThreadHandle)                                     
     STACKFRAME64 sf;
     memset(&sf, 0, sizeof(sf));
 
-    #ifdef _M_IX86
+#ifdef _M_IX86
     // Initialize the STACKFRAME structure for the first call.  This is only
     // necessary for Intel CPUs, and isn't mentioned in the documentation.
-    sf.AddrPC.Offset       = pContext->Eip;
-    sf.AddrPC.Mode         = AddrModeFlat;
-    sf.AddrStack.Offset    = pContext->Esp;
-    sf.AddrStack.Mode      = AddrModeFlat;
-    sf.AddrFrame.Offset    = pContext->Ebp;
-    sf.AddrFrame.Mode      = AddrModeFlat;
+    sf.AddrPC.Offset = pContext->Eip;
+    sf.AddrPC.Mode = AddrModeFlat;
+    sf.AddrStack.Offset = pContext->Esp;
+    sf.AddrStack.Mode = AddrModeFlat;
+    sf.AddrFrame.Offset = pContext->Ebp;
+    sf.AddrFrame.Mode = AddrModeFlat;
 
     dwMachineType = IMAGE_FILE_MACHINE_I386;
-    #endif
+#endif
 
 #ifdef _M_X64
-    sf.AddrPC.Offset    = pContext->Rip;
+    sf.AddrPC.Offset = pContext->Rip;
     sf.AddrPC.Mode = AddrModeFlat;
-    sf.AddrStack.Offset    = pContext->Rsp;
-    sf.AddrStack.Mode      = AddrModeFlat;
-    sf.AddrFrame.Offset    = pContext->Rbp;
-    sf.AddrFrame.Mode      = AddrModeFlat;
+    sf.AddrStack.Offset = pContext->Rsp;
+    sf.AddrStack.Mode = AddrModeFlat;
+    sf.AddrFrame.Offset = pContext->Rbp;
+    sf.AddrFrame.Mode = AddrModeFlat;
     dwMachineType = IMAGE_FILE_MACHINE_AMD64;
 #endif
 
     while (1)
     {
         // Get the next stack frame
-        if (! StackWalk64(dwMachineType,
+        if (!StackWalk64(dwMachineType,
             m_hProcess,
             pThreadHandle != NULL ? pThreadHandle : GetCurrentThread(),
             &sf,
@@ -773,9 +773,9 @@ bool bWriteVariables, HANDLE pThreadHandle)                                     
 
 BOOL CALLBACK
 WheatyExceptionReport::EnumerateSymbolsCallback(
-PSYMBOL_INFO  pSymInfo,
-ULONG         /*SymbolSize*/,
-PVOID         UserContext)
+    PSYMBOL_INFO  pSymInfo,
+    ULONG         /*SymbolSize*/,
+    PVOID         UserContext)
 {
     char szBuffer[2048];
 
@@ -785,7 +785,7 @@ PVOID         UserContext)
             szBuffer, sizeof(szBuffer)))
             _tprintf(_T("\t%s\r\n"), szBuffer);
     }
-    __except(1)
+    __except (1)
     {
         _tprintf(_T("punting on symbol %s\r\n"), pSymInfo->Name);
     }
@@ -799,12 +799,12 @@ PVOID         UserContext)
 // values.
 //////////////////////////////////////////////////////////////////////////////
 bool WheatyExceptionReport::FormatSymbolValue(
-PSYMBOL_INFO pSym,
-STACKFRAME * sf,
-char * pszBuffer,
-unsigned /*cbBuffer*/)
+    PSYMBOL_INFO pSym,
+    STACKFRAME* sf,
+    char* pszBuffer,
+    unsigned /*cbBuffer*/)
 {
-    char * pszCurrBuffer = pszBuffer;
+    char* pszCurrBuffer = pszBuffer;
 
     // Indicate if the variable is a local or parameter
     if (pSym->Flags & IMAGEHLP_SYMBOL_INFO_PARAMETER)
@@ -866,20 +866,20 @@ unsigned /*cbBuffer*/)
 // at fundamental types.  When he hit fundamental types, return
 // bHandled = false, so that FormatSymbolValue() will format them.
 //////////////////////////////////////////////////////////////////////////////
-char * WheatyExceptionReport::DumpTypeIndex(
-char * pszCurrBuffer,
-DWORD64 modBase,
-DWORD dwTypeIndex,
-unsigned nestingLevel,
-DWORD_PTR offset,
-bool & bHandled,
-char* Name)
+char* WheatyExceptionReport::DumpTypeIndex(
+    char* pszCurrBuffer,
+    DWORD64 modBase,
+    DWORD dwTypeIndex,
+    unsigned nestingLevel,
+    DWORD_PTR offset,
+    bool& bHandled,
+    char* Name)
 {
     bHandled = false;
 
     // Get the name of the symbol.  This will either be a Type name (if a UDT),
     // or the structure member name.
-    WCHAR * pwszTypeName;
+    WCHAR* pwszTypeName;
     if (SymGetTypeInfo(m_hProcess, modBase, dwTypeIndex, TI_GET_SYMNAME,
         &pwszTypeName))
     {
@@ -901,11 +901,11 @@ char* Name)
     struct FINDCHILDREN : TI_FINDCHILDREN_PARAMS
     {
         ULONG   MoreChildIds[1024];
-        FINDCHILDREN(){Count = sizeof(MoreChildIds) / sizeof(MoreChildIds[0]);}
+        FINDCHILDREN() { Count = sizeof(MoreChildIds) / sizeof(MoreChildIds[0]); }
     } children;
 
     children.Count = dwChildrenCount;
-    children.Start= 0;
+    children.Start = 0;
 
     // Get the array of TypeIds, one for each child type
     if (!SymGetTypeInfo(m_hProcess, modBase, dwTypeIndex, TI_FINDCHILDREN,
@@ -921,7 +921,7 @@ char* Name)
     for (unsigned i = 0; i < dwChildrenCount; i++)
     {
         // Add appropriate indentation level (since this routine is recursive)
-        for (unsigned j = 0; j <= nestingLevel+1; j++)
+        for (unsigned j = 0; j <= nestingLevel + 1; j++)
             pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), "\t");
 
         // Recurse for each of the child types
@@ -930,7 +930,7 @@ char* Name)
         pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), rgBaseType[basicType]);
 
         pszCurrBuffer = DumpTypeIndex(pszCurrBuffer, modBase,
-            children.ChildId[i], nestingLevel+1,
+            children.ChildId[i], nestingLevel + 1,
             offset, bHandled2, Name);
 
         // If the child wasn't a UDT, format it appropriately
@@ -972,10 +972,10 @@ char* Name)
     return pszCurrBuffer;
 }
 
-char * WheatyExceptionReport::FormatOutputValue(char * pszCurrBuffer,
-BasicType basicType,
-DWORD64 length,
-PVOID pAddress)
+char* WheatyExceptionReport::FormatOutputValue(char* pszCurrBuffer,
+    BasicType basicType,
+    DWORD64 length,
+    PVOID pAddress)
 {
     // Format appropriately (assuming it's a 1, 2, or 4 bytes (!!!)
     if (length == 1)
@@ -1007,7 +1007,7 @@ PVOID pAddress)
         if (basicType == btFloat)
         {
             pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %lf",
-                *(double *)pAddress);
+                *(double*)pAddress);
         }
         else
             pszCurrBuffer += snprintf(pszCurrBuffer, sizeof(pszCurrBuffer), " = %I64X",
@@ -1046,7 +1046,7 @@ WheatyExceptionReport::GetBasicType(DWORD typeIndex, DWORD64 modBase)
 // Helper function that writes to the report file, and allows the user to use
 // printf style formating
 //============================================================================
-int __cdecl WheatyExceptionReport::_tprintf(const TCHAR * format, ...)
+int __cdecl WheatyExceptionReport::_tprintf(const TCHAR* format, ...)
 {
     TCHAR szBuff[1024];
     int retValue;

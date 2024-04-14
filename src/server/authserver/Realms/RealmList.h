@@ -1,34 +1,34 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_REALMLIST_H
 #define SF_REALMLIST_H
 
-#include <ace/Singleton.h>
-#include <ace/Null_Mutex.h>
-#include <ace/INET_Addr.h>
 #include "Common.h"
+#include <ace/INET_Addr.h>
+#include <ace/Null_Mutex.h>
+#include <ace/Singleton.h>
 
 enum RealmFlags
 {
-    REALM_FLAG_NONE                              = 0x00,
-    REALM_FLAG_INVALID                           = 0x01,
-    REALM_FLAG_OFFLINE                           = 0x02,
-    REALM_FLAG_SPECIFYBUILD                      = 0x04,
-    REALM_FLAG_UNK1                              = 0x08,
-    REALM_FLAG_UNK2                              = 0x10,
-    REALM_FLAG_RECOMMENDED                       = 0x20,
-    REALM_FLAG_NEW                               = 0x40,
-    REALM_FLAG_FULL                              = 0x80
+    REALM_FLAG_NONE = 0x00,
+    REALM_FLAG_INVALID = 0x01,
+    REALM_FLAG_OFFLINE = 0x02,
+    REALM_FLAG_SPECIFYBUILD = 0x04,
+    REALM_FLAG_UNK1 = 0x08,
+    REALM_FLAG_UNK2 = 0x10,
+    REALM_FLAG_RECOMMENDED = 0x20,
+    REALM_FLAG_NEW = 0x40,
+    REALM_FLAG_FULL = 0x80
 };
 
 // Storage object for a realm
 struct Realm
 {
     Realm() : icon(0), flag(REALM_FLAG_NONE), timezone(0), m_ID(0),
-              allowedSecurityLevel(AccountTypes::SEC_PLAYER), populationLevel(0.0f), gamebuild(0) {}
+        allowedSecurityLevel(AccountTypes::SEC_PLAYER), populationLevel(0.0f), gamebuild(0) {}
     ACE_INET_Addr ExternalAddress;
     ACE_INET_Addr LocalAddress;
     ACE_INET_Addr LocalSubnetMask;
@@ -62,7 +62,7 @@ public:
     uint32 size() const { return m_realms.size(); }
 
 private:
-    void UpdateRealms(bool init=false);
+    void UpdateRealms(bool init = false);
     void UpdateRealm(uint32 id, const std::string& name, ACE_INET_Addr const& address, ACE_INET_Addr const& localAddr, ACE_INET_Addr const& localSubmask, uint8 icon, RealmFlags flag, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, uint32 build);
 
     RealmMap m_realms;

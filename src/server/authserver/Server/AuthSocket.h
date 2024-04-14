@@ -1,20 +1,20 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_AUTHSOCKET_H
 #define SF_AUTHSOCKET_H
 
-#include "Common.h"
 #include "BigNumber.h"
+#include "Common.h"
 #include "RealmSocket.h"
 
 class ACE_INET_Addr;
 struct Realm;
 
 // Handle login commands
-class AuthSocket: public RealmSocket::Session
+class AuthSocket : public RealmSocket::Session
 {
 public:
     const static int s_BYTE_SIZE = 32;

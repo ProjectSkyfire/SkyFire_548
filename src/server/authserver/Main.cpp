@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,23 +11,23 @@
 * authentication server
 */
 #pragma comment (lib, "Crypt32")
-#include <ace/Dev_Poll_Reactor.h>
-#include <ace/TP_Reactor.h>
 #include <ace/ACE.h>
+#include <ace/Dev_Poll_Reactor.h>
 #include <ace/Sig_Handler.h>
-#include <openssl/opensslv.h>
+#include <ace/TP_Reactor.h>
 #include <openssl/crypto.h>
+#include <openssl/opensslv.h>
 #include <openssl/provider.h>
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "Configuration/Config.h"
+#include "Database/DatabaseEnv.h"
 #include "Log.h"
+#include "RealmAcceptor.h"
+#include "RealmList.h"
+#include "SignalHandler.h"
 #include "SystemConfig.h"
 #include "Util.h"
-#include "SignalHandler.h"
-#include "RealmList.h"
-#include "RealmAcceptor.h"
 
 #ifdef __linux__
 #include <sched.h>
@@ -54,10 +54,10 @@ public:
     {
         switch (sigNum)
         {
-        case SIGINT:
-        case SIGTERM:
-            stopEvent = true;
-            break;
+            case SIGINT:
+            case SIGTERM:
+                stopEvent = true;
+                break;
         }
     }
 };
@@ -101,7 +101,7 @@ extern int main(int argc, char** argv)
 
     SF_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
     SF_LOG_INFO("server.authserver", "<Ctrl-C> to stop.\n");
-    
+
     SF_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
     SF_LOG_INFO("server.authserver", "  /\\  ___\\/\\ \\/ / /\\ \\_\\ \\/\\  ___/\\ \\/\\  == \\/\\  ___\\ ");
     SF_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
