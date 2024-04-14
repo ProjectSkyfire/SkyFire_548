@@ -220,10 +220,12 @@ public:
     static bool HandleReloadAllNpcCommand(ChatHandler* handler, const char* args)
     {
         if (*args != 'a')                                          // will be reloaded from all_gossips
+        {
             HandleReloadNpcTrainerCommand(handler, "a");
-        HandleReloadNpcVendorCommand(handler, "a");
-        HandleReloadPointsOfInterestCommand(handler, "a");
-        HandleReloadSpellClickSpellsCommand(handler, "a");
+            HandleReloadNpcVendorCommand(handler, "a");
+            HandleReloadPointsOfInterestCommand(handler, "a");
+            HandleReloadSpellClickSpellsCommand(handler, "a");
+        }
         return true;
     }
 
