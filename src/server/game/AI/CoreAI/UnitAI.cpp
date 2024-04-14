@@ -214,19 +214,22 @@ void UnitAI::FillAISpellInfo()
             {
                 uint32 targetType = spellInfo->Effects[j].TargetA.GetTarget();
 
-                if (targetType == TARGET_UNIT_TARGET_ENEMY
-                    || targetType == TARGET_DEST_TARGET_ENEMY)
+                if (targetType == TARGET_UNIT_TARGET_ENEMY || targetType == TARGET_DEST_TARGET_ENEMY)
+                {
                     UPDATE_TARGET(AITARGET_VICTIM)
+                }
                 else if (targetType == TARGET_UNIT_DEST_AREA_ENEMY)
+                {
                     UPDATE_TARGET(AITARGET_ENEMY)
+                }
 
-                    if (spellInfo->Effects[j].Effect == SPELL_EFFECT_APPLY_AURA)
-                    {
-                        if (targetType == TARGET_UNIT_TARGET_ENEMY)
-                            UPDATE_TARGET(AITARGET_DEBUFF)
-                        else if (spellInfo->IsPositive())
-                            UPDATE_TARGET(AITARGET_BUFF)
-                    }
+                if (spellInfo->Effects[j].Effect == SPELL_EFFECT_APPLY_AURA)
+                {
+                    if (targetType == TARGET_UNIT_TARGET_ENEMY)
+                        UPDATE_TARGET(AITARGET_DEBUFF)
+                    else if (spellInfo->IsPositive())
+                        UPDATE_TARGET(AITARGET_BUFF)
+                }
             }
         }
         AIInfo->realCooldown = spellInfo->RecoveryTime + spellInfo->StartRecoveryTime;
