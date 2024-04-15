@@ -21,9 +21,14 @@ ARC4::~ARC4()
 
 void ARC4::Init(uint8* seed, size_t len)
 {
+#if defined(WIN32)
     m_params[0] = OSSL_PARAM_construct_size_t("keylen", &len);
     m_params[1] = OSSL_PARAM_construct_end();
     EVP_CipherInit_ex2(m_ctx, NULL, seed, NULL, 0, m_params);
+#else
+    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
+    EVP_CipherInit(m_ctx, NULL, seed, NULL, 0);
+#endif
 }
 
 void ARC4::UpdateData(int len, uint8* data)
