@@ -6,13 +6,13 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
-# Check C++20 compiler support
+# Check C++23 compiler support
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++20" COMPILER_SUPPORTS_CXX20)
-if(COMPILER_SUPPORTS_CXX20)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+CHECK_CXX_COMPILER_FLAG("-std=c++23" COMPILER_SUPPORTS_CXX23)
+if(COMPILER_SUPPORTS_CXX23)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23")
 else()
-  message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++20!")
+  message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++23!")
 endif()
 
 if(WITH_WARNINGS)

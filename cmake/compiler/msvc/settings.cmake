@@ -66,24 +66,13 @@ if(NOT WITH_WARNINGS)
 endif()
 
 if(WITH_CXX_23_STD)
-    if(NOT WITH_CXX_20_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++latest is currently c++23 in msvc 2022
-    message(STATUS "MSVC: C++23 Draft Standard Enabled.")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++latest is currently c++23 in msvc 2022
+  message(STATUS "MSVC: C++23 Draft Standard Enabled.")
 endif()
-if(WITH_CXX_20_STD)
-  if(NOT WITH_CXX_DRAFT_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20") #c++20
-    message(STATUS "MSVC: C++20 Standard Enabled.")
-  else()
-    message(FATAL_ERROR "MSVC: Only 1 CXX Standard can be used!")
-  endif()
-endif()
+
 if(WITH_CXX_DRAFT_STD)
-  if(NOT WITH_CXX_20_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++23
-    message(STATUS "MSVC: C++ Draft Standard Enabled.")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++23
+  message(STATUS "MSVC: C++ Draft Standard Enabled.")
 endif()
 
 # Specify the maximum PreCompiled Header memory allocation limit
