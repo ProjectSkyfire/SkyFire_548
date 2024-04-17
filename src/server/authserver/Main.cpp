@@ -125,15 +125,13 @@ extern int main(int argc, char** argv)
 
     SF_LOG_WARN("server.authserver", "%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 
-    if (!OSSL_PROVIDER_available(NULL, "legacy"))
-    {
-        if (!OSSL_PROVIDER_try_load(NULL, "legacy", 0))
-        {
-            SF_LOG_INFO("server.authserver", "Failed to load OpenSSL legacy provider.");
-            return 1;
-        }
-        SF_LOG_INFO("server.authserver", "Loaded OpenSSL legacy provider.");
-    }
+    OSSL_PROVIDER* legacy_provider = OSSL_PROVIDER_load(NULL, "legacy");
+    SF_LOG_INFO("server.authserver", "Loading legacy provider: (%s)", (legacy_provider == NULL || !OSSL_PROVIDER_available(NULL, "legacy")) ? "failed" : "succeeded");
+
+    if (legacy_provider == NULL)
+        return 1;
+        
+    OSSL_PROVIDER_unload(legacy_provider);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
     ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
