@@ -1,0 +1,11 @@
+[Unit]
+Description=SkyFire Auth Daemon
+
+[Service]
+User=root
+WorkingDirectory=/usr/local/skyfire-server/bin
+ExecStart=/usr/local/skyfire-server/bin/authserver
+
+[Install]
+WantedBy=multi-user.target
+
