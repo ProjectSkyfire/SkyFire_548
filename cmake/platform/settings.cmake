@@ -7,6 +7,6 @@
 if( PREFIX )
   set(CMAKE_INSTALL_PREFIX "${PREFIX}")
 else()
-  set(CMAKE_ISNTALL_PREFIX "/usr/local/skyfire-server")
+  set(CMAKE_INSTALL_PREFIX "/usr/local/skyfire-server")
 endif()
 
