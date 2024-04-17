@@ -1,5 +1,7 @@
 [Unit]
 Description=SkyFire World Daemon
+After=mysqld.service
+Wants=mysqld.service
 
 [Service]
 User=root
