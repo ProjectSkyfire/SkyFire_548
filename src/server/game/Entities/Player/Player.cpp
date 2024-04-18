@@ -6947,7 +6947,7 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
 
     StopCinematic();
 
-    CinematicSequence* cinematicSequence = sCinematicSequenceMgr->GetSequence(CinematicSequenceId);
+    cinematicSequence = sCinematicSequenceMgr->GetSequence(CinematicSequenceId);
 
     if (cinematicSequence)
     {
