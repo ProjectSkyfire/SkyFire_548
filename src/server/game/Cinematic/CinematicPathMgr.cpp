@@ -203,8 +203,6 @@ size_t CinematicSequenceMgr::Load()
         modelFileName += "m2";
         modelFileName = sWorld->GetDataPath() + "cameras/" + modelFileName;
 
-        std::transform(modelFileName.begin(), modelFileName.end(), modelFileName.begin(), ::tolower);
-
         FILE* modelFile = fopen(modelFileName.c_str(), "rb");
         if (!modelFile)
         {
