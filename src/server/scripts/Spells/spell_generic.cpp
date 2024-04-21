@@ -25,6 +25,35 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
+// 125122 - Rice Pudding
+class spell_gen_rice_pudding : public SpellScriptLoader
+{
+public:
+    spell_gen_rice_pudding() : SpellScriptLoader("spell_gen_rice_pudding") { }
+
+    class spell_gen_rice_pudding_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_rice_pudding_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->ToPlayer()->KilledMonsterCredit(npcRicePudding);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_rice_pudding_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_CREATE_ITEM);
+        }
+    private:
+        const uint32 npcRicePudding = 64234;
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_rice_pudding_SpellScript();
+    }
+};
+
 const Position jumpPosC = { 1063.56f, 2843.46f, 95.2332, 0.0f };
 class spell_gen_rock_jump_c : public SpellScriptLoader
 {
@@ -3684,6 +3713,7 @@ class spell_gen_override_display_power : public SpellScriptLoader
 
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_rice_pudding();
     new spell_gen_rock_jump_a();
     new spell_gen_rock_jump_b();
     new spell_gen_rock_jump_c();
