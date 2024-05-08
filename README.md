@@ -30,10 +30,10 @@ For further information on the SkyFire project, please visit our project website
 
 ## Requirements
 + Platform/Architecture:
+  + Fedora 40: x86_64
   + Fedora 39: x86_64
   + Canonical:
-    + Ubuntu 18.04 LTS: x86_32, x86_64
-    + Ubuntu 20.04 LTS: x86_32, x86_64
+    + Ubuntu 24.04 LTS: x86_32, x86_64
   + Debian:
     + Debian GNU/Linux 10: x86_32, x86_64
   + Windows / Windows Server:
@@ -53,7 +53,8 @@ For further information on the SkyFire project, please visit our project website
 Detailed installation guides are available in the wiki for
 
 [Windows](https://wiki.projectskyfire.org/index.php?title=Installation_Windows),
-[Linux](https://wiki.projectskyfire.org/index.php?title=Installation_(Ubuntu_18.04_LTS)) and
+[Fedora 39](https://wiki.projectskyfire.org/index.php/Installation_(Fedora_39)),
+[Ubuntu 24.04](https://wiki.projectskyfire.org/index.php/Installation_(Ubuntu_24.04_LTS)) and
 [Mac OSX](https://wiki.projectskyfire.org/index.php?title=Installation_Mac_OS_X).
 
 
@@ -62,7 +63,7 @@ Please use the search function before you report issues.
 [SkyFire Issue Tracker](https://codeberg.org/ProjectSkyfire/SkyFire_548/issues).
 
 ## Submitting fixes
-Fixes are submitted as pull requests via Github.
+Fixes are submitted as pull requests.
 
 [SkyFire Pull Request](https://codeberg.org/ProjectSkyfire/SkyFire_548/pulls)
 
@@ -75,8 +76,8 @@ Read file [LICENSE](LICENSE.md)
 Read file [THANKS](THANKS.md)
 
 ## Links
-Forum [https://www.projectskyfire.org/](https://www.projectskyfire.org/)
+Forum: [https://www.projectskyfire.org/](https://www.projectskyfire.org/)
 
-Database Releases [https://codeberg.org/ProjectSkyfire/database/releases)
+Database Releases: [https://codeberg.org/ProjectSkyfire/database/releases] (https://codeberg.org/ProjectSkyfire/database/releases)
 
-Wiki [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
+Wiki: [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
