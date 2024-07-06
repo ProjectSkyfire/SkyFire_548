@@ -39,7 +39,6 @@ set(ace_STAT_SRCS
   Auto_Event.cpp
   Auto_Functor.cpp
   Auto_IncDec_T.cpp
-  Auto_Ptr.cpp
   Barrier.cpp
   Base_Thread_Adapter.cpp
   Based_Pointer_Repository.cpp

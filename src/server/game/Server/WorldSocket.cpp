@@ -3,7 +3,6 @@
 * See LICENSE.md file for Copyright information
 */
 
-#include <ace/Auto_Ptr.h>
 #include <ace/Message_Block.h>
 #include <ace/os_include/arpa/os_inet.h>
 #include <ace/os_include/netinet/os_tcp.h>

@@ -1064,9 +1064,6 @@
     <ClInclude Include="Auto_IncDec_T.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Auto_Ptr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Barrier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2917,9 +2914,6 @@
     <None Include="Auto_IncDec_T.inl">
       <Filter>Inline Files</Filter>
     </None>
-    <None Include="Auto_Ptr.inl">
-      <Filter>Inline Files</Filter>
-    </None>
     <None Include="Base_Thread_Adapter.inl">
       <Filter>Inline Files</Filter>
     </None>
@@ -3730,9 +3724,6 @@
       <Filter>Template Files</Filter>
     </ClCompile>
     <ClCompile Include="Auto_IncDec_T.cpp">
-      <Filter>Template Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Auto_Ptr.cpp">
       <Filter>Template Files</Filter>
     </ClCompile>
     <ClCompile Include="Based_Pointer_T.cpp">

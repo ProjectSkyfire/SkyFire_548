@@ -16,7 +16,7 @@
 #  include "ace/SOCK_Dgram.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_HAS_IPV6) && defined (ACE_WIN32)
+#if defined (ACE_WIN32)
 #include /**/ <iphlpapi.h>
 #endif
 
@@ -616,10 +616,7 @@ ACE_SOCK_Dgram::set_nic (const ACE_TCHAR *net_if,
   ACE_UNUSED_ARG (addr_family);
   ACE_INET_Addr addr (static_cast<u_short> (0));
   ip_mreq  send_mreq;
-  //if (this->make_multicast_ifaddr (&send_mreq,
-  //                                 addr,
-  //                                 net_if) == -1)
-  //  return -1;
+
   if (this->ACE_SOCK::set_option (IPPROTO_IP,
                                   IP_MULTICAST_IF,
                                   &(send_mreq.imr_interface),
@@ -639,8 +636,6 @@ ACE_SOCK_Dgram::set_nic (const ACE_TCHAR *net_if,
 
   return 0;
 }
-
-
 
 #if defined (ACE_HAS_IPV6)
 // XXX: This will not work on any operating systems that do not support

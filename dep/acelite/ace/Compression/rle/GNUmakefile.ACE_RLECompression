@@ -218,18 +218,18 @@ endif
 endif
 
 #BEGIN MPC-Generated Install Info
-#resource_files:
-#ACE_RLECompression.rc
+#source_files:
+#RLECompressor.cpp
 #
 #header_files:
 #RLECompressor.h
 #ACE_RLECompression_export.h
 #
+#resource_files:
+#ACE_RLECompression.rc
+#
 #build_files:
 #ACE_RLECompression.mpc
-#
-#source_files:
-#RLECompressor.cpp
 #
 #lib_output:
 #../../../lib ACE_RLECompression

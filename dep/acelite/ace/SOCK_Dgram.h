@@ -219,6 +219,7 @@ protected:
                    int protocol_family,
                    int ipv6_only = 0);
 
+
 #if defined (ACE_HAS_IPV6)
   /// Create a multicast addr/if pair, in format useful for system calls.
   /// If mreq param is NULL, just verify the passed addr/interface specs.

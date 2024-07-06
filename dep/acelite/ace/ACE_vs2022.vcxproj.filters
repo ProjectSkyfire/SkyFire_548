@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{B1F27843-FECA-1BAD-6757-8A6300006755}</UniqueIdentifier>
@@ -1062,9 +1062,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Auto_IncDec_T.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Auto_Ptr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Barrier.h">
@@ -2917,9 +2914,6 @@
     <None Include="Auto_IncDec_T.inl">
       <Filter>Inline Files</Filter>
     </None>
-    <None Include="Auto_Ptr.inl">
-      <Filter>Inline Files</Filter>
-    </None>
     <None Include="Base_Thread_Adapter.inl">
       <Filter>Inline Files</Filter>
     </None>
@@ -3730,9 +3724,6 @@
       <Filter>Template Files</Filter>
     </ClCompile>
     <ClCompile Include="Auto_IncDec_T.cpp">
-      <Filter>Template Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Auto_Ptr.cpp">
       <Filter>Template Files</Filter>
     </ClCompile>
     <ClCompile Include="Based_Pointer_T.cpp">
