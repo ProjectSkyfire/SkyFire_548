@@ -185,7 +185,11 @@ bool MySQLConnection::Execute(PreparedStatement* stmt)
 
         uint32 _s = getMSTime();
 
+#if MYSQL_VERSION_ID >= 80300
+        if (mysql_stmt_bind_named_param(msql_STMT, msql_BIND, m_mStmt->m_paramCount, nullptr))
+#else
         if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
+#endif
         {
             uint32 lErrno = mysql_errno(m_Mysql);
             SF_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
@@ -235,7 +239,11 @@ bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES** pResult, uint6
 
         uint32 _s = getMSTime();
 
+#if MYSQL_VERSION_ID >= 80300
+        if (mysql_stmt_bind_named_param(msql_STMT, msql_BIND, m_mStmt->m_paramCount, nullptr))
+#else
         if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
+#endif
         {
             uint32 lErrno = mysql_errno(m_Mysql);
             SF_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
