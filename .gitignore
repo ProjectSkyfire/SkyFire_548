@@ -22,3 +22,4 @@ CMakeLists.txt.user
 /x64/*
 cmake-build-debug/
 .idea/
+/.vs/
