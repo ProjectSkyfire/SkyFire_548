@@ -17,13 +17,14 @@
 #include "BigNumber.h"
 #include "ByteBuffer.h"
 #include "Common.h"
+#include "CryptoHash.h"
+#include "CryptoRandom.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "PacketLog.h"
 #include "Player.h"
 #include "ScriptMgr.h"
-#include "SHA1.h"
 #include "SharedDefines.h"
 #include "Util.h"
 #include "World.h"
@@ -87,10 +88,10 @@ WorldSocket::WorldSocket(void) : WorldHandler(),
 m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
 m_RecvWPct(0), m_RecvPct(), m_Header(sizeof(AuthClientPktHeader)),
 m_WorldHeader(sizeof(WorldClientPktHeader)), m_OutBuffer(0),
-m_OutBufferSize(65536), m_OutActive(false),
-
-m_Seed(static_cast<uint32> (rand32()))
+m_OutBufferSize(65536), m_OutActive(false)
 {
+    SkyFire::Crypto::GetRandomBytes(m_Seed);
+
     reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
     msg_queue()->high_water_mark(8 * 1024 * 1024);
@@ -848,28 +849,25 @@ int WorldSocket::HandleSendAuthSession()
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
     packet << uint16(0);
 
-    for (int i = 0; i < 8; i++)
-        packet << uint32(0);
+    packet.append(SkyFire::Crypto::GetRandomBytes<32>()); // new encryption seeds
 
     packet << uint8(1);
-    packet << uint32(m_Seed);
+    packet.append(m_Seed);
 
     return SendPacket(packet);
 }
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
-    uint8 digest[20];
-    uint32 clientSeed;
     uint8 security;
     uint16 clientBuild;
     uint32 id;
     uint32 addonSize;
     LocaleConstant locale;
     std::string account;
-    SHA1Hash sha;
-    BigNumber k;
     WorldPacket addonsData;
+    std::array<uint8, 4> clientSeed;
+    SkyFire::Crypto::SHA1::Digest digest;
     uint32 VirtualRealmID;
 
     recvPacket.read_skip<uint32>();
@@ -881,7 +879,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket >> digest[0];
     recvPacket >> VirtualRealmID;
     recvPacket >> digest[11];
-    recvPacket >> clientSeed;
+    recvPacket.read(clientSeed);
     recvPacket >> digest[19];
     recvPacket.read_skip<uint8>();
     recvPacket.read_skip<uint8>();
@@ -955,7 +953,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     id = fields[0].GetUInt32();
 
-    k.SetHexStr(fields[1].GetCString());
+    SessionKey sessionKey = fields[1].GetBinary<SESSION_KEY_LENGTH>();
 
     int64 mutetime = fields[5].GetInt64();
     //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
@@ -1029,19 +1027,19 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     // Check that Key and account name are the same on client and server
-    uint32 t = 0;
-    uint32 seed = m_Seed;
+    uint8 t[4] = { 0x00, 0x00, 0x00, 0x00 };
 
+    SkyFire::Crypto::SHA1 sha;
     sha.UpdateData(account);
-    sha.UpdateData((uint8*)&t, 4);
-    sha.UpdateData((uint8*)&clientSeed, 4);
-    sha.UpdateData((uint8*)&seed, 4);
-    sha.UpdateBigNumbers(&k, NULL);
+    sha.UpdateData(t);
+    sha.UpdateData(clientSeed);
+    sha.UpdateData(m_Seed);
+    sha.UpdateData(sessionKey);
     sha.Finalize();
 
     std::string address = GetRemoteAddress();
 
-    if (memcmp(sha.GetDigest(), digest, 20))
+    if (sha.GetDigest() != digest)
     {
         SendAuthResponseError(ResponseCodes::AUTH_FAILED);
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", id, account.c_str(), address.c_str());
@@ -1075,7 +1073,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE ATM the socket is single-threaded, have this in mind ...
     ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, hasBoost), -1);
 
-    m_Crypt.Init(&k);
+    m_Crypt.Init(sessionKey);
 
     m_Session->LoadGlobalAccountData();
     m_Session->LoadTutorialsData();
@@ -1086,7 +1084,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED))
-        m_Session->InitWarden(&k, os);
+        m_Session->InitWarden(sessionKey, os);
 
     // Sleep this Network thread for
     uint32 sleepTime = sWorld->getIntConfig(WorldIntConfigs::CONFIG_SESSION_ADD_DELAY);

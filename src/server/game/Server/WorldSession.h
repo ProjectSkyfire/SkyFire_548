@@ -11,9 +11,9 @@
 #define __WORLDSESSION_H
 
 #include "AccountMgr.h"
+#include "Authentication/AuthDefines.h"
 #include "AddonMgr.h"
 #include "Common.h"
-#include "Cryptography/BigNumber.h"
 #include "DatabaseEnv.h"
 #include "Object.h"
 #include "Opcodes.h"
@@ -307,7 +307,7 @@ public:
     void SetPlayer(Player* player);
     uint8 Expansion() const { return m_expansion; }
 
-    void InitWarden(BigNumber* k, std::string const& os);
+    void InitWarden(SessionKey const&, std::string const& os);
 
     /// Session in auth.queue currently
     void SetInQueue(bool state) { m_inQueue = state; }

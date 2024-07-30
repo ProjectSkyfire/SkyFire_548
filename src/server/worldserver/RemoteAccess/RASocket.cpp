@@ -13,7 +13,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "RASocket.h"
-#include "SHA1.h"
+#include "SRP6.h"
 #include "Util.h"
 #include "World.h"
 
@@ -206,22 +206,20 @@ int RASocket::check_password(const std::string& user, const std::string& pass)
     std::string safe_pass = pass;
     AccountMgr::normalizeString(safe_pass);
 
-    std::string hash = AccountMgr::CalculateShaPassHash(safe_user, safe_pass);
-
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_CHECK_PASSWORD_BY_NAME);
 
     stmt->setString(0, safe_user);
-    stmt->setString(1, hash);
-
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-    if (!result)
+    if (PreparedQueryResult result = LoginDatabase.Query(stmt))
     {
-        SF_LOG_INFO("commands.ra", "Wrong password for user: %s", user.c_str());
-        return -1;
+        SkyFire::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<SkyFire::Crypto::SRP6::SALT_LENGTH>();
+        SkyFire::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<SkyFire::Crypto::SRP6::VERIFIER_LENGTH>();
+
+        if (SkyFire::Crypto::SRP6::CheckLogin(safe_user, safe_pass, salt, verifier))
+            return 0;
     }
 
-    return 0;
+    SF_LOG_INFO("commands.ra", "Wrong password for user: %s", user.c_str());
+    return -1;
 }
 
 int RASocket::authenticate()

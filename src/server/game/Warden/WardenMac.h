@@ -8,7 +8,6 @@
 
 #include "ByteBuffer.h"
 #include "Cryptography/ARC4.h"
-#include "Cryptography/BigNumber.h"
 #include "Warden.h"
 #include <map>
 
@@ -21,7 +20,7 @@ public:
     WardenMac();
     ~WardenMac();
 
-    void Init(WorldSession* session, BigNumber* k);
+    void Init(WorldSession* session, SessionKey const& k);
     ClientWardenModule* GetModuleForClient();
     void InitializeModule();
     void RequestHash();

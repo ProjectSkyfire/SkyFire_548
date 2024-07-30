@@ -5,7 +5,7 @@
 
 #include "ByteBuffer.h"
 #include "Common.h"
-#include "Cryptography/WardenKeyGeneration.h"
+#include "Cryptography/SessionKeyGenerator.h"
 #include "Log.h"
 #include "MD5.h"
 #include "Opcodes.h"
@@ -21,11 +21,11 @@ WardenMac::WardenMac() : Warden() { }
 
 WardenMac::~WardenMac() { }
 
-void WardenMac::Init(WorldSession* pClient, BigNumber* K)
+void WardenMac::Init(WorldSession* pClient, SessionKey const& K)
 {
     _session = pClient;
     // Generate Warden Key
-    SHA1Randx WK(K->AsByteArray(), K->GetNumBytes());
+    SessionKeyGenerator<SkyFire::Crypto::SHA1> WK(K);
     WK.Generate(_inputKey, 16);
     WK.Generate(_outputKey, 16);
     /*
@@ -42,15 +42,15 @@ void WardenMac::Init(WorldSession* pClient, BigNumber* K)
     _inputCrypto.Init(_inputKey, 16);
     _outputCrypto.Init(_outputKey, 16);
     SF_LOG_DEBUG("warden", "Server side warden for client %u initializing...", pClient->GetAccountId());
-    SF_LOG_DEBUG("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
-    SF_LOG_DEBUG("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
-    SF_LOG_DEBUG("warden", "  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
+    SF_LOG_DEBUG("warden", "C->S Key: %s", SkyFire::Impl::ByteArrayToHexStr(_inputKey, 16).c_str());
+    SF_LOG_DEBUG("warden", "S->C Key: %s", SkyFire::Impl::ByteArrayToHexStr(_outputKey, 16).c_str());
+    SF_LOG_DEBUG("warden", "  Seed: %s", SkyFire::Impl::ByteArrayToHexStr(_seed, 16).c_str());
     SF_LOG_DEBUG("warden", "Loading Module...");
 
     _module = GetModuleForClient();
 
-    SF_LOG_DEBUG("warden", "Module Key: %s", ByteArrayToHexStr(_module->Key, 16).c_str());
-    SF_LOG_DEBUG("warden", "Module ID: %s", ByteArrayToHexStr(_module->Id, 16).c_str());
+    SF_LOG_DEBUG("warden", "Module Key: %s", SkyFire::Impl::ByteArrayToHexStr(_module->Key, 16).c_str());
+    SF_LOG_DEBUG("warden", "Module ID: %s", SkyFire::Impl::ByteArrayToHexStr(_module->Id, 16).c_str());
     RequestModule();
 }
 
@@ -141,14 +141,14 @@ void WardenMac::HandleHashResult(ByteBuffer& buff)
 
     buff.rpos(buff.wpos());
 
-    SHA1Hash sha1;
+    SkyFire::Crypto::SHA1 sha1;
     sha1.UpdateData((uint8*)keyIn, 16);
     sha1.Finalize();
 
     //const uint8 validHash[20] = { 0x56, 0x8C, 0x05, 0x4C, 0x78, 0x1A, 0x97, 0x2A, 0x60, 0x37, 0xA2, 0x29, 0x0C, 0x22, 0xB5, 0x25, 0x71, 0xA0, 0x6F, 0x4E };
 
     // Verify key
-    if (memcmp(buff.contents() + 1, sha1.GetDigest(), 20) != 0)
+    if (memcmp(buff.contents() + 1, sha1.GetDigest().data(), 20) != 0)
     {
         SF_LOG_WARN("warden", "%s failed hash reply. Action: %s", _session->GetPlayerInfo().c_str(), Penalty().c_str());
         return;
@@ -222,16 +222,16 @@ void WardenMac::HandleData(ByteBuffer& buff)
 
     std::string str = "Test string!";
 
-    SHA1Hash sha1;
+    SkyFire::Crypto::SHA1 sha1;
     sha1.UpdateData(str);
     uint32 magic = 0xFEEDFACE;                              // unsure
     sha1.UpdateData((uint8*)&magic, 4);
     sha1.Finalize();
 
-    uint8 sha1Hash[20];
-    buff.read(sha1Hash, 20);
+    std::array<uint8, SkyFire::Crypto::SHA1::DIGEST_LENGTH> sha1Hash;
+    buff.read(sha1Hash.data(), sha1Hash.size());
 
-    if (memcmp(sha1Hash, sha1.GetDigest(), 20))
+    if (sha1Hash != sha1.GetDigest())
     {
         SF_LOG_DEBUG("warden", "Handle data failed: SHA1 hash is wrong!");
         //found = true;

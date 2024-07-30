@@ -4,11 +4,12 @@
 */
 
 #include "AccountMgr.h"
+#include "CryptoHash.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
-#include "SHA1.h"
+#include "SRP6.h"
 #include "Util.h"
 #include "WorldSession.h"
 
@@ -34,9 +35,11 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT);
 
     stmt->setString(0, username);
-    stmt->setString(1, CalculateShaPassHash(username, password));
-    stmt->setString(2, email);
+    auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(username, password);
+    stmt->setBinary(1, salt);
+    stmt->setBinary(2, verifier);
     stmt->setString(3, email);
+    stmt->setString(4, email);
 
     LoginDatabase.DirectExecute(stmt); // Enforce saving, otherwise AddGroup can fail
 
@@ -149,7 +152,13 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accountId, std::string newUser
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_USERNAME);
 
     stmt->setString(0, newUsername);
-    stmt->setString(1, CalculateShaPassHash(newUsername, newPassword));
+    stmt->setUInt32(1, accountId);
+    LoginDatabase.Execute(stmt);
+
+    auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(newUsername, newPassword);
+    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGON);
+    stmt->setBinary(0, salt);
+    stmt->setBinary(1, verifier);
     stmt->setUInt32(2, accountId);
 
     LoginDatabase.Execute(stmt);
@@ -170,18 +179,12 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accountId, std::string newPass
     normalizeString(username);
     normalizeString(newPassword);
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PASSWORD);
+    auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(username, newPassword);
 
-    stmt->setString(0, CalculateShaPassHash(username, newPassword));
-    stmt->setUInt32(1, accountId);
-
-    LoginDatabase.Execute(stmt);
-
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_VS);
-
-    stmt->setString(0, "");
-    stmt->setString(1, "");
-    stmt->setString(2, username);
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGON);
+    stmt->setBinary(0, salt);
+    stmt->setBinary(1, verifier);
+    stmt->setUInt32(2, accountId);;
 
     LoginDatabase.Execute(stmt);
 
@@ -304,10 +307,15 @@ bool AccountMgr::CheckPassword(uint32 accountId, std::string password)
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_CHECK_PASSWORD);
     stmt->setUInt32(0, accountId);
-    stmt->setString(1, CalculateShaPassHash(username, password));
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (PreparedQueryResult result = LoginDatabase.Query(stmt))
+    {
+        SkyFire::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<SkyFire::Crypto::SRP6::SALT_LENGTH>();
+        SkyFire::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<SkyFire::Crypto::SRP6::VERIFIER_LENGTH>();
+        if (SkyFire::Crypto::SRP6::CheckLogin(username, password, salt, verifier))
+            return true;
+    }
 
-    return (result) ? true : false;
+    return false;
 }
 
 bool AccountMgr::CheckEmail(uint32 accountId, std::string newEmail)
@@ -353,18 +361,6 @@ bool AccountMgr::normalizeString(std::string& utf8String)
 #endif
 
     return WStrToUtf8(buffer, maxLength, utf8String);
-}
-
-std::string AccountMgr::CalculateShaPassHash(std::string const& name, std::string const& password)
-{
-    SHA1Hash sha;
-    sha.Initialize();
-    sha.UpdateData(name);
-    sha.UpdateData(":");
-    sha.UpdateData(password);
-    sha.Finalize();
-
-    return ByteArrayToHexStr(sha.GetDigest(), sha.GetLength());
 }
 
 bool AccountMgr::IsPlayerAccount(AccountTypes gmlevel)

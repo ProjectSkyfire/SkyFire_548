@@ -196,7 +196,7 @@ private:
     /// True if the socket is registered with the reactor for output
     bool m_OutActive;
 
-    uint32 m_Seed;
+    std::array<uint8, 4> m_Seed;
 
     WorldSocket(WorldSocket const& right) = delete;
     WorldSocket& operator=(WorldSocket const& right) = delete;

@@ -62,7 +62,6 @@ public:
     static bool GetEmail(uint32 accountId, std::string& email);
     static uint32 GetCharactersCount(uint32 accountId);
 
-    static std::string CalculateShaPassHash(std::string const& name, std::string const& password);
     static bool normalizeString(std::string& utf8String);
     static bool IsPlayerAccount(AccountTypes gmlevel);
     static bool IsAdminAccount(AccountTypes gmlevel);

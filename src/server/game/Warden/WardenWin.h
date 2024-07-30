@@ -63,7 +63,7 @@ public:
     WardenWin();
     ~WardenWin();
 
-    void Init(WorldSession* session, BigNumber* K);
+    void Init(WorldSession* session, SessionKey const& K);
     ClientWardenModule* GetModuleForClient();
     void InitializeModule();
     void RequestHash();

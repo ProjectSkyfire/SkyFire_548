@@ -26,6 +26,7 @@
 #include <map>
 #include <string>
 #include <time.h>
+#include <array>
 #include <vector>
 
 // Root of ByteBuffer exception hierarchy
@@ -580,6 +581,12 @@ public:
         _rpos += len;
     }
 
+    template<size_t Size>
+    void read(std::array<uint8, Size>& arr)
+    {
+        read(arr.data(), Size);
+    }
+
     void readPackGUID(uint64& guid)
     {
         if (rpos() + 1 > size())
@@ -702,6 +709,12 @@ public:
             WriteBits(*(buffer.contents() + i), 8);
 
         WriteBits(buffer._curbitval >> buffer._bitpos, 8 - buffer._bitpos);
+    }
+
+    template<size_t Size>
+    void append(std::array<uint8, Size> const& arr)
+    {
+        append(arr.data(), Size);
     }
 
     // can be used in SMSG_ON_MONSTER_MOVE opcode
