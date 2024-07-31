@@ -127,9 +127,9 @@ enum BG_SA_NPCs
     BG_SA_DEMOLISHER_7,
     BG_SA_DEMOLISHER_8,
     BG_SA_NPC_SPARKLIGHT,
-    BG_SA_NPC_RIGSPARK,
-    BG_SA_MAXNPC
+    BG_SA_NPC_RIGSPARK
 };
+const uint8 BG_SA_MAXNPC = 25;
 
 enum BG_SA_Boat
 {
@@ -233,9 +233,10 @@ enum BG_SA_Objects
     BG_SA_CENTRAL_FLAG,
     BG_SA_RIGHT_FLAG,
     BG_SA_LEFT_FLAG,
-    BG_SA_BOMB,
-    BG_SA_MAXOBJ = BG_SA_BOMB + 68
+    BG_SA_BOMB
 };
+
+const uint8 BG_SA_MAXOBJ = 93; // BG_SA_BOMB + 68
 
 float const BG_SA_ObjSpawnlocs[BG_SA_MAXOBJ][4] =
 {
@@ -396,8 +397,8 @@ enum BG_SA_Graveyards
     BG_SA_RIGHT_CAPTURABLE_GY,
     BG_SA_LEFT_CAPTURABLE_GY,
     BG_SA_CENTRAL_CAPTURABLE_GY,
-    BG_SA_MAX_GY
 };
+const uint8 BG_SA_MAX_GY = 5;
 
 const uint32 BG_SA_GYEntries[BG_SA_MAX_GY] =
 {
