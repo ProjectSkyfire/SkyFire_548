@@ -33,12 +33,11 @@ ENDIF()
 #endif()
 
 if ( MSVC )
+  message(STATUS "MSVC: Using MSVC on Windows.")
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/msvc/settings.cmake)
 elseif ( MINGW )
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/mingw/settings.cmake)
-elseif(NOT MSVC AND NOT MINGW)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/clang/settings.cmake)
-
-
-endif()
+  message(STATUS "CLANG: Using Clang on Windows.")
 endif()

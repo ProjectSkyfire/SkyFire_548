@@ -7,7 +7,6 @@
 #define THREADING_H
 
 #include <ace/Atomic_Op.h>
-#include <ace/Atomic_Op_T.h>
 #include <ace/Thread.h>
 #include <ace/TSS_T.h>
 #include <assert.h>

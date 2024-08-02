@@ -7,13 +7,6 @@
 # Set build-directive (used in core to tell which buildtype we used)
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
-if( WIN32 )
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-  set(CMAKE_C_COMPILER "C:/LLVM/bin/clang.exe")
-  set(CMAKE_CXX_COMPILER "C:/LLVM/bin/clang++.exe")
-  set(CMAKE_RC_COMPILER "C:/LLVM/bin/clang.exe")
-endif()
-
 # Check C++20 compiler support
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
@@ -22,6 +15,9 @@ if(COMPILER_SUPPORTS_CXX17)
 else()
   message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++17!")
 endif()
+
+#disable pragma pack warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pragma-pack -Wno-pragma-once-outside-header -Wno-unused-value")
 
 if(WITH_WARNINGS)
   set(WARNING_FLAGS "-W -Wall -Wextra -Winit-self -Wfatal-errors")

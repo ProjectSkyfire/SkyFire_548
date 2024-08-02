@@ -19,7 +19,7 @@ bool SQLQueryHolder::SetQuery(size_t index, const char* sql)
     /// not executed yet, just stored (it's not called a holder for nothing)
     SQLElementData element;
     element.type = SQL_ELEMENT_RAW;
-    element.element.query = strdup(sql);
+    element.element.query = _strdup(sql);
 
     SQLResultSetUnion result;
     result.qresult = NULL;

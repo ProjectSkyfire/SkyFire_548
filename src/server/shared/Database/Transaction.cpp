@@ -11,7 +11,7 @@ void Transaction::Append(const char* sql)
 {
     SQLElementData data;
     data.type = SQL_ELEMENT_RAW;
-    data.element.query = strdup(sql);
+    data.element.query = _strdup(sql);
     m_queries.push_back(data);
 }
 
