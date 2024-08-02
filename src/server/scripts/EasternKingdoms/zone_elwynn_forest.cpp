@@ -419,7 +419,7 @@ public:
 
         npc_hogger_elwynnAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             phase = 0;
             me->SetReactState(REACT_AGGRESSIVE);
@@ -654,10 +654,13 @@ public:
                     std::list<Player*> playerList;
                     GetPlayerListInGrid(playerList, me, 15.0f);
 
+                    // TODO: FIX member access into incomplete type Player
+                    // reference to incomplete type player is not allowed.
+                    /*
                     for (auto&& player : playerList)
                     {
                         player->KilledMonsterCredit(448);
-                    }
+                    }*/
                     
                     me->CastSpell(me, SPELL_TELEPORT_VISUAL_ONLY);
                     me->DespawnOrUnsummon();

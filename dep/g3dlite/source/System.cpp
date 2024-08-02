@@ -146,7 +146,7 @@ void System::init() {
         // We read the standard CPUID level 0x00000000 which should
         // be available on every x86 processor.  This fills out
         // a string with the processor vendor tag.
-        unsigned int eaxreg = 0, ebxreg = 0, ecxreg = 0, edxreg = 0;
+        int eaxreg = 0, ebxreg = 0, ecxreg = 0, edxreg = 0;
 
         cpuid(CPUID_VENDOR_ID, eaxreg, ebxreg, ecxreg, edxreg);
 
@@ -559,7 +559,7 @@ void System::getStandardProcessorExtensions() {
         return;
     }
 
-    uint32 eaxreg = 0, ebxreg = 0, ecxreg = 0, features = 0;
+    int32 eaxreg = 0, ebxreg = 0, ecxreg = 0, features = 0;
 
     cpuid(CPUID_PROCESSOR_FEATURES, eaxreg, ebxreg, ecxreg, features);
 
@@ -1688,7 +1688,7 @@ std::string System::currentTimeString() {
 #if defined(_MSC_VER)
 
 // Windows 64-bit
-void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
+void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32& edx) {
 	int regs[4] = {eax, ebx, ecx, edx};
 	__cpuid(regs, func);
 	eax = regs[0];

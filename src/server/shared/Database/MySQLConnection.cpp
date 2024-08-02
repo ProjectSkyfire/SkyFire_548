@@ -433,7 +433,7 @@ void MySQLConnection::PrepareStatement(uint32 index, std::string sql, Connection
     MYSQL_STMT* stmt = mysql_stmt_init(m_Mysql);
     if (!stmt)
     {
-        SF_LOG_ERROR("sql.sql", "In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql);
+        SF_LOG_ERROR("sql.sql", "In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql.c_str());
         SF_LOG_ERROR("sql.sql", "%s", mysql_error(m_Mysql));
         m_prepareError = true;
     }
@@ -441,7 +441,7 @@ void MySQLConnection::PrepareStatement(uint32 index, std::string sql, Connection
     {
         if (mysql_stmt_prepare(stmt, sql.c_str(), sql.length()))
         {
-            SF_LOG_ERROR("sql.sql", "In mysql_stmt_prepare() id: %u, sql: \"%s\"", index, sql);
+            SF_LOG_ERROR("sql.sql", "In mysql_stmt_prepare() id: %u, sql: \"%s\"", index, sql.c_str());
             SF_LOG_ERROR("sql.sql", "%s", mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
             m_prepareError = true;

@@ -126,7 +126,7 @@ private:
     /** The Real-World time of System::getTick() time 0.  Set by initTime */
     RealTime       m_realWorldGetTickTime0;
 
-    uint32         m_highestCPUIDFunction;
+    int32         m_highestCPUIDFunction;
 
     /** @brief Used for the singleton instance only. */
     System();
@@ -153,7 +153,7 @@ private:
 
        for description of the arguments.
     */
-    static void cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg, uint32& dreg);
+    static void cpuid(CPUIDFunction func, int32& areg, int32& breg, int32& creg, int32& dreg);
 
 
     /** Called from init() */

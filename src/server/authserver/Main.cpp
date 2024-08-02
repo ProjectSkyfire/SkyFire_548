@@ -99,7 +99,8 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    SF_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
+    //TODO: FIX ME revision.
+    //SF_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
     SF_LOG_INFO("server.authserver", "<Ctrl-C> to stop.\n");
 
     SF_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");

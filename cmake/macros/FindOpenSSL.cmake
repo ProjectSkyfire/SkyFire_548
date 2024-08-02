@@ -32,7 +32,7 @@
 
 IF(PLATFORM EQUAL 64)
   SET(_OPENSSL_ROOT_PATHS
-    "C:/OpenSSL-Win64/"
+    "C:/OpenSSL-Win64/OpenSSL-Win64/"
   )
 ENDIF()
 
@@ -51,6 +51,7 @@ FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
 
 IF(WIN32 AND NOT CYGWIN)
   # MINGW should go here too
+
   IF(MSVC)
     # /MD and /MDd are the standard values - if someone wants to use
     # others, the libnames have to change here too
@@ -126,7 +127,7 @@ IF(WIN32 AND NOT CYGWIN)
     # same player, for MingW
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO
       NAMES
-        libeay32
+        libcrypto
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/MinGW
     )
@@ -148,7 +149,7 @@ IF(WIN32 AND NOT CYGWIN)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO
       NAMES
-        libeay32
+        libcrypto
       PATHS
         ${OPENSSL_ROOT_DIR}/lib
         ${OPENSSL_ROOT_DIR}/lib/VC
@@ -156,7 +157,7 @@ IF(WIN32 AND NOT CYGWIN)
 
     FIND_LIBRARY(OPENSSL_LIB_SSL
       NAMES
-        ssleay32
+        libssl
       PATHS
         ${OPENSSL_ROOT_DIR}/lib
         ${OPENSSL_ROOT_DIR}/lib/VC

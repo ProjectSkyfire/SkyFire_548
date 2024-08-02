@@ -2,6 +2,8 @@
 #define ACE_TIMER_QUEUE_ITERATOR_CPP
 
 #include "ace/config-all.h"
+#include "ace/Timer_Queue_Iterator.h"
+
 #if defined (ACE_HAS_ALLOC_HOOKS)
 # include "ace/Malloc_Base.h"
 #endif /* ACE_HAS_ALLOC_HOOKS */

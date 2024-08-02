@@ -36,4 +36,9 @@ if ( MSVC )
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/msvc/settings.cmake)
 elseif ( MINGW )
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/mingw/settings.cmake)
+elseif(NOT MSVC AND NOT MINGW)
+  include(${CMAKE_SOURCE_DIR}/cmake/compiler/clang/settings.cmake)
+
+
+endif()
 endif()

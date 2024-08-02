@@ -1878,8 +1878,9 @@ void World::SetInitialWorldSettings()
 
     for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
     {
-        LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES(%u, %u, 0, '%s')",
-            itr->first, uint32(m_startTime), _FULLVERSION);       // One-time query
+        //TODO: FIX ME , revision
+        LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, uptime) VALUES(%u, %u, 0 )",
+            itr->first, uint32(m_startTime)/*, _FULLVERSION*/);       // One-time query
     }
 
     m_timers[WUPDATE_WEATHERS].SetInterval(1 * IN_MILLISECONDS);

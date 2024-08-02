@@ -2,6 +2,7 @@
 #define ACE_MESSAGE_BLOCK_T_CPP
 
 #include "ace/Malloc_Base.h"     /* Need ACE_Allocator */
+#include "ace/Message_Block_T.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Message_Block_T.inl"

@@ -462,15 +462,15 @@ public:
     // is supposed to run more than once
     void ExecuteEvent(uint32 /*eventId*/) OVERRIDE { }
 
-    void Reset()
+    void Reset() OVERRIDE
     {
         _Reset();
     }
-    void EnterCombat(Unit* /*who*/)
+    void EnterCombat(Unit* /*who*/) OVERRIDE
     {
         _EnterCombat();
     }
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* /*killer*/) OVERRIDE
     {
         _JustDied();
     }
