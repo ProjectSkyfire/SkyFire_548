@@ -24,7 +24,7 @@
 #endif
 
 // Complain if WIN32 is not already defined.
-#define WIN32
+
 #if !defined (WIN32)
 # error Please define WIN32 in your project settings.
 #endif

@@ -33,7 +33,7 @@ public:
     void EnterCombat(Unit* who) OVERRIDE;
     void JustDied(Unit* killer) OVERRIDE;
     void UpdateAI(uint32 diff) OVERRIDE;
-    void SpellInterrupted(uint32 spellId, uint32 unTimeMs);
+    void SpellInterrupted(uint32 spellId, uint32 unTimeMs) OVERRIDE;
     static int Permissible(const Creature*);
 protected:
     EventMap events;

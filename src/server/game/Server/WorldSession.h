@@ -13,6 +13,7 @@
 #include "AccountMgr.h"
 #include "Authentication/AuthDefines.h"
 #include "AddonMgr.h"
+#include <atomic>
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Object.h"
@@ -502,10 +503,10 @@ public:
     void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
     uint32 getDialogStatus(Player* player, Object* questgiver, uint32 defstatus);
 
-    ACE_Atomic_Op<ACE_Thread_Mutex, time_t> m_timeOutTime;
+    std::atomic<time_t> m_timeOutTime;
     void UpdateTimeOutTime(uint32 diff)
     {
-        if (time_t(diff) > m_timeOutTime.value())
+        if (time_t(diff) > m_timeOutTime)
             m_timeOutTime = 0;
         else
             m_timeOutTime -= diff;

@@ -195,6 +195,11 @@ if( WIN32 )
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
     )
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    add_custom_command(TARGET worldserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
+  )
   endif()
 endif()
 

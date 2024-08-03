@@ -3,7 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
-/// \addtogroup Trinityd
+/// \addtogroup Skyfired
 /// @{
 /// \file
 
@@ -16,6 +16,7 @@
 #include <ace/SOCK_Stream.h>
 #include <ace/Svc_Handler.h>
 #include <ace/Synch_Traits.h>
+#include <atomic>
 
 /// Remote Administration socket
 class RASocket : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
@@ -43,7 +44,7 @@ private:
 
 private:
     uint8 _minLevel; ///< Minimum security level required to connect
-    ACE_Atomic_Op<ACE_Thread_Mutex, bool> _commandExecuting;
+    std::atomic<bool> _commandExecuting;
 };
 
 #endif

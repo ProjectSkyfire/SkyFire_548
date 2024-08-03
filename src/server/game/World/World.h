@@ -15,7 +15,7 @@
 #include "QueryResult.h"
 #include "SharedDefines.h"
 #include "Timer.h"
-#include <ace/Atomic_Op.h>
+#include <atomic>
 #include <ace/Singleton.h>
 
 #include <list>
@@ -525,7 +525,7 @@ struct CliCommandHolder
     CommandFinished* m_commandFinished;
 
     CliCommandHolder(void* callbackArg, const char* command, Print* zprint, CommandFinished* commandFinished)
-        : m_callbackArg(callbackArg), m_command(strdup(command)), m_print(zprint), m_commandFinished(commandFinished) { }
+        : m_callbackArg(callbackArg), m_command(_strdup(command)), m_print(zprint), m_commandFinished(commandFinished) { }
 
     ~CliCommandHolder() { free(m_command); }
 private:
@@ -549,7 +549,7 @@ struct CharacterNameData
 class World
 {
 public:
-    static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
+    static std::atomic<uint32> m_worldLoopCounter;
 
     World();
     ~World();
@@ -665,7 +665,7 @@ public:
     void ShutdownMsg(bool show = false, Player* player = NULL);
     static uint8 GetExitCode() { return m_ExitCode; }
     static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
-    static bool IsStopped() { return m_stopEvent.value(); }
+    static bool IsStopped() { return m_stopEvent; }
 
     void Update(uint32 diff);
 
@@ -810,7 +810,7 @@ protected:
     void ResetGuildCap();
     void ResetCurrencyWeekCap();
 private:
-    static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
+    static std::atomic<bool> m_stopEvent;
     static uint8 m_ExitCode;
     uint32 m_ShutdownTimer;
     uint32 m_ShutdownMask;

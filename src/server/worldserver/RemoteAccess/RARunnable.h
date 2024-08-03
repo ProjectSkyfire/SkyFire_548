@@ -3,7 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
-/// \addtogroup Trinityd
+/// \addtogroup Skyfired
 /// @{
 /// \file
 

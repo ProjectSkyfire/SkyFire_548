@@ -672,7 +672,7 @@ namespace lfg
                 break;
             case LFG_STATE_DUNGEON:
             case LFG_STATE_FINISHED_DUNGEON:
-                //case LFG_STATE_BOOT:
+            case LFG_STATE_BOOT:
             {
                 SetState(guid, LFG_STATE_NONE);
                 break;

@@ -6,7 +6,7 @@
 #ifndef THREADING_H
 #define THREADING_H
 
-#include <ace/Atomic_Op.h>
+#include <atomic>
 #include <ace/Thread.h>
 #include <ace/TSS_T.h>
 #include <assert.h>
@@ -27,7 +27,8 @@ namespace ACE_Based
                 delete this;
         }
     private:
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> m_refs;
+        std::atomic<long> m_refs;
+        //ACE_Atomic_Op<ACE_Thread_Mutex, long> m_refs;
     };
 
     enum Priority

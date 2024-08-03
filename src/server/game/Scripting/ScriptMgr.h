@@ -7,7 +7,7 @@
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
-#include <ace/Atomic_Op.h>
+#include <atomic>
 #include <ace/Singleton.h>
 
 #include "DBCStores.h"
@@ -978,7 +978,8 @@ private:
     uint32 _scriptCount;
 
     //atomic op counter for active scripts amount
-    ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
+    std::atomic<long> _scheduledScripts;
+    //ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
 };
 
 template <class S>
