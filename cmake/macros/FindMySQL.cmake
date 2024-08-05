@@ -123,6 +123,15 @@ if( UNIX )
 endif( UNIX )
 
 if( WIN32 )
+  FIND_FILE(MYSQL_DLL
+  NAMES
+    libmysql.dll
+  PATHS
+    ${MYSQL_ADD_LIBRARIES_PATH}
+      "C:/Program Files/MySQL/MySQL Server 9.0/lib"
+      "C:/Program Files/MySQL/MySQL Server 9.0/lib/opt"
+  )
+
   find_library( MYSQL_LIBRARY 
     NAMES
       libmysql

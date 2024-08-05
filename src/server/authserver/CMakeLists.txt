@@ -85,6 +85,12 @@ target_link_libraries(authserver
 
 if( WIN32 )
   if ( MSVC )
+    #add mysql dll to bin folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYSQL_DLL} ${CMAKE_BINARY_DIR}/bin/
+    )
+    
     add_custom_command(TARGET authserver
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/authserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
@@ -95,6 +101,11 @@ if( WIN32 )
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/authserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
     )
   elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    #add mysql dll to bin folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYSQL_DLL} ${CMAKE_BINARY_DIR}/bin/
+    )
     add_custom_command(TARGET authserver
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/authserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
