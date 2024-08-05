@@ -110,6 +110,12 @@ inline void Log::outMessage(std::string const& filter, LogLevel level, const cha
             if (sLog->ShouldLog(filterType__, level__))                 \
                 sLog->outMessage(filterType__, level__, __VA_ARGS__);   \
         } while (0)
+#elif COMPILER != COMPILER_CLANG
+#define SF_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+        do {                                                            \
+            if (sLog->ShouldLog(filterType__, level__))                 \
+                sLog->outMessage(filterType__, level__, __VA_ARGS__);   \
+        } while (0)
 #else
 #define SF_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
         __pragma(warning(push))                                         \

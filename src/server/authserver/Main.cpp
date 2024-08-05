@@ -127,11 +127,19 @@ extern int main(int argc, char** argv)
     SF_LOG_WARN("server.authserver", "%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 
     OSSL_PROVIDER* legacy_provider = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+    
+    if (legacy_provider == NULL)
+    {
+        SF_LOG_INFO("server.authserver", "Failed loading legacy provider, Try to load legacy provider again.");
+        legacy_provider = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+    }
+
     SF_LOG_INFO("server.authserver", "Loading legacy provider: (%s)", (legacy_provider == NULL || !OSSL_PROVIDER_available(NULL, "legacy")) ? "failed" : "succeeded");
 
+    // recheck 
     if (legacy_provider == NULL)
         return 1;
-        
+
     OSSL_PROVIDER_unload(legacy_provider);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)

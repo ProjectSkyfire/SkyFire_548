@@ -1031,7 +1031,7 @@ void Patcher::LoadPatchMD5(char* szFileName)
 bool Patcher::GetHash(char* pat, uint8 mymd5[16])
 {
     for (Patches::iterator i = _patches.begin(); i != _patches.end(); ++i)
-        if (!stricmp(pat, i->first.c_str()))
+        if (!_stricmp(pat, i->first.c_str()))
         {
             memcpy(mymd5, i->second->md5, 16);
             return true;

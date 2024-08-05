@@ -175,6 +175,19 @@ ELSE(WIN32 AND NOT CYGWIN)
 
 ENDIF(WIN32 AND NOT CYGWIN)
 
+FIND_FILE(OPENSSL_LIB_LEGACY
+      NAMES
+        legacy.dll
+      PATHS
+        ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
+    )
+	
+	IF (OPENSSL_LIB_LEGACY)
+	  message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+	ELSE()
+	  message( FATAL_ERROR "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+	ENDIF()
+
 if (NOT OPENSSL_INCLUDE_DIR)
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(OpenSSL DEFAULT_MSG
