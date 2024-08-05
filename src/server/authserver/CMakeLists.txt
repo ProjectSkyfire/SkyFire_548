@@ -88,7 +88,7 @@ if( WIN32 )
     #add mysql dll to bin folder
     add_custom_command(TARGET authserver
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MYSQL_DLL} ${CMAKE_BINARY_DIR}/bin/
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYSQL_DLL} ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)
     )
     
     add_custom_command(TARGET authserver
