@@ -126,6 +126,7 @@ extern int main(int argc, char** argv)
 
     SF_LOG_INFO("server.worldserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 
+    OSSL_PROVIDER *default_provider = OSSL_PROVIDER_try_load(NULL, "default", 1); 
     OSSL_PROVIDER* legacy_provider = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
     
     if (legacy_provider == NULL)
@@ -134,6 +135,7 @@ extern int main(int argc, char** argv)
         legacy_provider = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
     }
 
+    SF_LOG_INFO("server.worldserver", "Loading default provider: (%s)", (default_provider == NULL || !OSSL_PROVIDER_available(NULL, "default")) ? "failed" : "succeeded");
     SF_LOG_INFO("server.worldserver", "Loading legacy provider: (%s)", (legacy_provider == NULL || !OSSL_PROVIDER_available(NULL, "legacy")) ? "failed" : "succeeded");
 
     // recheck 
