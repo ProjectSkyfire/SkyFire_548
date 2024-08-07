@@ -246,7 +246,12 @@ if(WIN32)
         add_definitions(-D_7ZIP_ST -DWIN32)
     endif()
     set(SRC_ADDITIONAL_FILES ${ZLIB_BZIP2_FILES} ${TOMCRYPT_FILES} ${TOMMATH_FILES})
-    set(LINK_LIBS wininet ${CLANGRT_BUILTINS})
+    set(LINK_LIBS wininet)
+
+    if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+        set(LINK_LIBS ${CLANGRT_BUILTINS})
+    endif()
+
 endif()
 
 if(APPLE)
