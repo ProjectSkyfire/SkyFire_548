@@ -12,7 +12,10 @@
 #include <cstring>
 #include <vector>
 
-#ifdef _WIN32
+#ifdef _WIN64
+#include "direct.h"
+#define chdir _chdir
+#elif defined (_WIN32)
 #include "direct.h"
 #else
 #include <sys/stat.h>
@@ -143,7 +146,7 @@ void CreateDir(std::string const& path)
 
 bool FileExists(TCHAR const* fileName)
 {
-    int fp = _open(fileName, OPEN_FLAGS);
+    int fp = _open(fileName, _O_RDONLY | _O_BINARY);
     if(fp != -1)
     {
         _close(fp);

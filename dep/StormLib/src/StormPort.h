@@ -32,6 +32,23 @@
   #define false 0
 #endif
 
+// Defines for Windows 64 bit
+#if !defined(PLATFORM_DEFINED) && (defined(_WIN64))
+
+  #include <tchar.h>
+  #include <assert.h>
+  #include <ctype.h>
+  #include <stdio.h>
+  #include <windows.h>
+  #include <wininet.h>
+  #define PLATFORM_LITTLE_ENDIAN
+
+  #define PLATFORM_64BIT
+
+  #define PLATFORM_WINDOWS
+  #define PLATFORM_DEFINED                  // The platform is known now
+#endif
+
 // Defines for Windows
 #if !defined(PLATFORM_DEFINED) && (defined(WIN32) || defined(WIN64))
 
@@ -86,7 +103,7 @@
 #endif
 
 // Assumption: we are not on Windows nor Macintosh, so this must be linux *grin*
-#if !defined(PLATFORM_DEFINED)
+#if !defined(PLATFORM_DEFINED) && defined(__linux__)
 
   #include <sys/types.h>
   #include <sys/stat.h>

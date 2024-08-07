@@ -246,7 +246,7 @@ if(WIN32)
         add_definitions(-D_7ZIP_ST -DWIN32)
     endif()
     set(SRC_ADDITIONAL_FILES ${ZLIB_BZIP2_FILES} ${TOMCRYPT_FILES} ${TOMMATH_FILES})
-    set(LINK_LIBS wininet)
+    set(LINK_LIBS wininet ${CLANGRT_BUILTINS})
 endif()
 
 if(APPLE)
