@@ -9,12 +9,14 @@ else()
   cmake_minimum_required(VERSION 3.28.0)
 endif()
 
-#set clang as compiler if not msvc or mingw set
-if (NOT MSVC AND NOT MINGW)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-  set(CMAKE_C_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
-  set(CMAKE_CXX_COMPILER "C:/Program Files/LLVM/bin/clang++.exe")
-  set(CMAKE_RC_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
+if (WIN32)
+  #set clang as compiler if not msvc or mingw set
+  if (NOT MSVC AND NOT MINGW)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    set(CMAKE_C_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
+    set(CMAKE_CXX_COMPILER "C:/Program Files/LLVM/bin/clang++.exe")
+    set(CMAKE_RC_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
+  endif()
 endif()
 
 # Set projectname (must be done AFTER setting configurationtypes)
