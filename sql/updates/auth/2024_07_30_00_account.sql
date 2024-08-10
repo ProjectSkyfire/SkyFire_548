@@ -1,4 +1,5 @@
 ALTER TABLE `account`
+    MODIFY COLUMN last_login TIMESTAMP NULL DEFAULT NULL,
     DROP COLUMN `sessionkey`,
     ADD COLUMN `salt` BINARY(32) AFTER `username`,
     ADD COLUMN `verifier` BINARY(32) AFTER `salt`,
