@@ -128,8 +128,16 @@ if( WIN32 )
     libmysql.dll
   PATHS
     ${MYSQL_ADD_LIBRARIES_PATH}
-      "C:/Program Files/MySQL/MySQL Server 9.0/lib"
-      "C:/Program Files/MySQL/MySQL Server 9.0/lib/opt"
+    "C:/Program Files/MySQL/MySQL Server 9.0/lib"
+    "C:/Program Files/MySQL/MySQL Server 8.3/lib"
+    "C:/Program Files/MySQL/MySQL Server 8.2/lib"
+    "C:/Program Files/MySQL/MySQL Server 8.1/lib"
+    "C:/Program Files/MySQL/MySQL Server 8.0/lib"
+    "C:/Program Files/MySQL/MySQL Server 9.0/lib/opt"
+    "C:/Program Files/MySQL/MySQL Server 8.3/lib/opt"
+    "C:/Program Files/MySQL/MySQL Server 8.2/lib/opt"
+    "C:/Program Files/MySQL/MySQL Server 8.1/lib/opt"
+    "C:/Program Files/MySQL/MySQL Server 8.0/lib/opt"
   )
 
   find_library( MYSQL_LIBRARY 
