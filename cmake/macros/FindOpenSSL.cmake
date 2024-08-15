@@ -68,18 +68,7 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
 
-    FIND_FILE(OPENSSL_LIB_LEGACY
-      NAMES
-        legacy.dll
-      PATHS
-        ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
-    )
-	
-	IF (OPENSSL_LIB_LEGACY)
-	  message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
-	ELSE()
-	  message( FATAL_ERROR "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
-	ENDIF()
+    
 
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO_DEBUG
       NAMES
@@ -175,22 +164,33 @@ ELSE(WIN32 AND NOT CYGWIN)
 
 ENDIF(WIN32 AND NOT CYGWIN)
 
-FIND_FILE(OPENSSL_LIB_LEGACY
+IF (WIN32)
+  FIND_FILE(OPENSSL_LIB_LEGACY
       NAMES
         legacy.dll
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
     )
-	
-	IF (OPENSSL_LIB_LEGACY)
-	  message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
-	ELSE()
-	  message( FATAL_ERROR "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
-	ENDIF()
+ELSE(UNIX)
+  FIND_FILE(OPENSSL_LIB_LEGACY
+      NAMES
+        legacy.so
+      PATHS
+        ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
+        ${OPENSSL_ROOT_DIR}/lib64/ossl-modules/
+    )
+ENDIF()
 
+IF (OPENSSL_LIB_LEGACY)
+  message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+ELSE()
+  message( FATAL_ERROR "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+ENDIF()
+  
 if (NOT OPENSSL_INCLUDE_DIR)
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(OpenSSL DEFAULT_MSG
+    OPENSSL_LIB_LEGACY
     OPENSSL_LIBRARIES
     OPENSSL_INCLUDE_DIR
   )
