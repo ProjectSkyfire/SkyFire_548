@@ -1702,7 +1702,7 @@ void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32
 // See http://sam.zoy.org/blog/2007-04-13-shlib-with-non-pic-code-have-inline-assembly-and-pic-mix-well
 // for a discussion of why the second version saves ebx; it allows 32-bit code to compile with the -fPIC option.
 // On 64-bit x86, PIC code has a dedicated rip register for PIC so there is no ebx conflict.
-void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
+void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32& edx) {
 #if ! defined(__PIC__) || defined(__x86_64__)
     // AT&T assembler syntax
     asm volatile(

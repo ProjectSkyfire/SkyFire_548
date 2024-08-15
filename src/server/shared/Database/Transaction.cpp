@@ -5,13 +5,14 @@
 
 #include "DatabaseEnv.h"
 #include "Transaction.h"
+#include "CompilerDefs.h"
 
 //- Append a raw ad-hoc query to the transaction
 void Transaction::Append(const char* sql)
 {
     SQLElementData data;
     data.type = SQL_ELEMENT_RAW;
-    data.element.query = _strdup(sql);
+    data.element.query = strdup(sql);
     m_queries.push_back(data);
 }
 

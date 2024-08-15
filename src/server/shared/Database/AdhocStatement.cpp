@@ -10,14 +10,14 @@
 BasicStatementTask::BasicStatementTask(const char* sql) :
     m_has_result(false)
 {
-    m_sql = _strdup(sql);
+    m_sql = strdup(sql);
 }
 
 BasicStatementTask::BasicStatementTask(const char* sql, QueryResultFuture result) :
     m_has_result(true),
     m_result(result)
 {
-    m_sql = _strdup(sql);
+    m_sql = strdup(sql);
 }
 
 BasicStatementTask::~BasicStatementTask()

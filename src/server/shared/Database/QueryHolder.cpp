@@ -7,6 +7,7 @@
 #include "MySQLConnection.h"
 #include "PreparedStatement.h"
 #include "QueryHolder.h"
+#include "CompilerDefs.h"
 
 bool SQLQueryHolder::SetQuery(size_t index, const char* sql)
 {
@@ -19,7 +20,7 @@ bool SQLQueryHolder::SetQuery(size_t index, const char* sql)
     /// not executed yet, just stored (it's not called a holder for nothing)
     SQLElementData element;
     element.type = SQL_ELEMENT_RAW;
-    element.element.query = _strdup(sql);
+    element.element.query = strdup(sql);
 
     SQLResultSetUnion result;
     result.qresult = NULL;

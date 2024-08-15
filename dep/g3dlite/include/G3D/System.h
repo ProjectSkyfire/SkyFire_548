@@ -139,6 +139,7 @@ private:
      */
     static System& instance();
 
+public:
     enum CPUIDFunction {
         CPUID_VENDOR_ID              = 0x00000000,
         CPUID_PROCESSOR_FEATURES     = 0x00000001,
@@ -146,6 +147,7 @@ private:
         CPUID_GET_HIGHEST_FUNCTION   = 0x80000000,
         CPUID_EXTENDED_FEATURES      = 0x80000001};
 
+private:
     /** Helper macro to call cpuid functions and return all values 
 
        See http://software.intel.com/en-us/articles/intel-64-architecture-processor-topology-enumeration/

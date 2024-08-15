@@ -10,6 +10,7 @@
 #ifndef SF_WORLD_H
 #define SF_WORLD_H
 
+#include "CompilerDefs.h"
 #include "Callback.h"
 #include "Common.h"
 #include "QueryResult.h"
@@ -525,7 +526,7 @@ struct CliCommandHolder
     CommandFinished* m_commandFinished;
 
     CliCommandHolder(void* callbackArg, const char* command, Print* zprint, CommandFinished* commandFinished)
-        : m_callbackArg(callbackArg), m_command(_strdup(command)), m_print(zprint), m_commandFinished(commandFinished) { }
+        : m_callbackArg(callbackArg), m_command(strdup(command)), m_print(zprint), m_commandFinished(commandFinished) { }
 
     ~CliCommandHolder() { free(m_command); }
 private:
