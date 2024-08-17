@@ -85,3 +85,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm50" CACHE STRING "" FORCE)
 # 'function' : member function does not override any base class virtual member function
 # 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4263 /we4264")
+
+set(CMAKE_CXX_STANDARD_LIBRARIES "ws2_32.lib iphlpapi.lib netapi32.lib mswsock.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib")
+set(CMAKE_C_STANDARD_LIBRARIES "ws2_32.lib iphlpapi.lib netapi32.lib mswsock.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib")
