@@ -178,6 +178,7 @@ ELSE(UNIX)
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
         ${OPENSSL_ROOT_DIR}/lib64/ossl-modules/
+        ${OPENSSL_ROOT_DIR}/lib/x86_64-linux-gnu/ossl-modules/
     )
 ENDIF()
 
