@@ -146,7 +146,7 @@ void CreateDir(std::string const& path)
 
 bool FileExists(TCHAR const* fileName)
 {
-    int fp = _open(fileName, _O_RDONLY | _O_BINARY);
+    int fp = _open(fileName, O_RDONLY | O_BINARY);
     if(fp != -1)
     {
         _close(fp);
