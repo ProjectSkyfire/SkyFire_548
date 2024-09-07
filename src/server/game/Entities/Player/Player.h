@@ -385,8 +385,7 @@ typedef std::map<uint8, ActionButton> ActionButtonList;
 
 struct PlayerCreateInfoItem
 {
-    PlayerCreateInfoItem(uint32 id, uint32 amount) : item_id(id), item_amount(amount)
-    { }
+    PlayerCreateInfoItem(uint32 id, uint32 amount) : item_id(id), item_amount(amount) { }
 
     uint32 item_id;
     uint32 item_amount;
@@ -397,17 +396,16 @@ typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
 struct PlayerLevelInfo
 {
     PlayerLevelInfo() { }
-    uint8 stats[MAX_STATS] = { };
+
+    uint16 stats[MAX_STATS] = { };
 };
 
 typedef std::list<uint32> PlayerCreateInfoSpells;
 
 struct PlayerCreateInfoAction
 {
-    PlayerCreateInfoAction() : button(0), type(0), action(0)
-    { }
-    PlayerCreateInfoAction(uint8 _button, uint32 _action, uint8 _type) : button(_button), type(_type), action(_action)
-    { }
+    PlayerCreateInfoAction() : button(0), type(0), action(0) { }
+    PlayerCreateInfoAction(uint8 _button, uint32 _action, uint8 _type) : button(_button), type(_type), action(_action) { }
 
     uint8 button;
     uint8 type;
