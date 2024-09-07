@@ -15,7 +15,7 @@ DBCFile::DBCFile(HANDLE mpq, const char* filename) :
 
 bool DBCFile::open()
 {
-    if (!SFileOpenFileEx(_mpq, _filename, SFILE_OPEN_PATCHED_FILE, &_file))
+    if (!SFileOpenFileEx(_mpq, _filename, SFILE_OPEN_FROM_MPQ, &_file))
         return false;
 
     char header[4];

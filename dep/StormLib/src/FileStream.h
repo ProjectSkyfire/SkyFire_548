@@ -14,6 +14,20 @@
 //-----------------------------------------------------------------------------
 // Function prototypes
 
+typedef void (*STREAM_INIT)(
+    struct TFileStream * pStream        // Pointer to an unopened stream
+);
+
+typedef bool (*STREAM_CREATE)(
+    struct TFileStream * pStream        // Pointer to an unopened stream
+    );
+
+typedef bool (*STREAM_OPEN)(
+    struct TFileStream * pStream,       // Pointer to an unopened stream
+    const TCHAR * szFileName,           // Pointer to file name to be open
+    DWORD dwStreamFlags                 // Stream flags
+    );
+
 typedef bool (*STREAM_READ)(
     struct TFileStream * pStream,       // Pointer to an open stream
     ULONGLONG * pByteOffset,            // Pointer to file byte offset. If NULL, it reads from the current position
@@ -28,44 +42,49 @@ typedef bool (*STREAM_WRITE)(
     DWORD dwBytesToWrite                // Number of bytes to read from the file
     );
 
-typedef bool (*STREAM_GETPOS)(
-    struct TFileStream * pStream,       // Pointer to an open stream
-    ULONGLONG & ByteOffset              // Pointer to store current file position
-    );
-
-typedef bool (*STREAM_GETSIZE)(
-    struct TFileStream * pStream,       // Pointer to an open stream
-    ULONGLONG & FileSize                // Receives the file size, in bytes
-    );
-
-typedef bool (*STREAM_SETSIZE)(
+typedef bool (*STREAM_RESIZE)(
     struct TFileStream * pStream,       // Pointer to an open stream
     ULONGLONG FileSize                  // New size for the file, in bytes
     );
 
-typedef bool (*STREAM_GETTIME)(
-    struct TFileStream * pStream,
-    ULONGLONG * pFT
+typedef bool (*STREAM_GETSIZE)(
+    struct TFileStream * pStream,       // Pointer to an open stream
+    ULONGLONG * pFileSize               // Receives the file size, in bytes
     );
 
-typedef bool (*STREAM_SWITCH)(
-    struct TFileStream * pStream,
-    struct TFileStream * pNewStream
-    );
-
-typedef bool (*STREAM_GETBMP)(
-    TFileStream * pStream,
-    TFileBitmap * pBitmap,
-    DWORD Length,
-    LPDWORD LengthNeeded
+typedef bool (*STREAM_GETPOS)(
+    struct TFileStream * pStream,       // Pointer to an open stream
+    ULONGLONG * pByteOffset             // Pointer to store current file position
     );
 
 typedef void (*STREAM_CLOSE)(
-    struct TFileStream * pStream
+    struct TFileStream * pStream        // Pointer to an open stream
+    );
+
+typedef bool (*BLOCK_READ)(
+    struct TFileStream * pStream,       // Pointer to a block-oriented stream
+    ULONGLONG StartOffset,              // Byte offset of start of the block array
+    ULONGLONG EndOffset,                // End offset (either end of the block or end of the file)
+    LPBYTE BlockBuffer,                 // Pointer to block-aligned buffer
+    DWORD BytesNeeded,                  // Number of bytes that are really needed
+    bool bAvailable                     // true if the block is available
+    );
+
+typedef bool (*BLOCK_CHECK)(
+    struct TFileStream * pStream,       // Pointer to a block-oriented stream
+    ULONGLONG BlockOffset               // Offset of the file to check
+    );
+
+typedef void (*BLOCK_SAVEMAP)(
+    struct TFileStream * pStream        // Pointer to a block-oriented stream
     );
 
 //-----------------------------------------------------------------------------
-// Local structures - part file structure
+// Local structures - partial file structure and bitmap footer
+
+#define ID_FILE_BITMAP_FOOTER   0x33767470  // Signature of the file bitmap footer ('ptv3')
+#define DEFAULT_BLOCK_SIZE      0x00004000  // Default size of the stream block
+#define DEFAULT_BUILD_NUMBER         10958  // Build number for newly created partial MPQs
 
 typedef struct _PART_FILE_HEADER
 {
@@ -89,91 +108,100 @@ typedef struct _PART_FILE_MAP_ENTRY
 
 } PART_FILE_MAP_ENTRY, *PPART_FILE_MAP_ENTRY;
 
-//-----------------------------------------------------------------------------
-// Local structures
+typedef struct _FILE_BITMAP_FOOTER
+{
+    DWORD Signature;                      // 'ptv3' (ID_FILE_BITMAP_FOOTER)
+    DWORD Version;                        // Unknown, seems to always have value of 3 (version?)
+    DWORD BuildNumber;                    // Game build number for that MPQ
+    DWORD MapOffsetLo;                    // Low 32-bits of the offset of the bit map
+    DWORD MapOffsetHi;                    // High 32-bits of the offset of the bit map
+    DWORD BlockSize;                      // Size of one block (usually 0x4000 bytes)
 
-union TBaseData
+} FILE_BITMAP_FOOTER, *PFILE_BITMAP_FOOTER;
+
+//-----------------------------------------------------------------------------
+// Structure for file stream
+
+union TBaseProviderData
 {
     struct
     {
         ULONGLONG FileSize;                 // Size of the file
         ULONGLONG FilePos;                  // Current file position
-        ULONGLONG FileTime;                 // Date/time of last modification of the file
+        ULONGLONG FileTime;                 // Last write time
         HANDLE hFile;                       // File handle
     } File;
 
     struct
     {
-        ULONGLONG FileSize;                 // Mapped file size
-        ULONGLONG FilePos;                  // Current stream position
-        ULONGLONG FileTime;                 // Date/time of last modification of the file
+        ULONGLONG FileSize;                 // Size of the file
+        ULONGLONG FilePos;                  // Current file position
+        ULONGLONG FileTime;                 // Last write time
         LPBYTE pbFile;                      // Pointer to mapped view
     } Map;
 
     struct
     {
-        ULONGLONG FileSize;                 // Size of the internet file
-        ULONGLONG FilePos;                  // Current position in the file
-        ULONGLONG FileTime;                 // Date/time of last modification of the file
+        ULONGLONG FileSize;                 // Size of the file
+        ULONGLONG FilePos;                  // Current file position
+        ULONGLONG FileTime;                 // Last write time
         HANDLE hInternet;                   // Internet handle
         HANDLE hConnect;                    // Connection to the internet server
     } Http;
 };
-
-//-----------------------------------------------------------------------------
-// Structure for linear stream
 
 struct TFileStream
 {
     // Stream provider functions
     STREAM_READ    StreamRead;              // Pointer to stream read function for this archive. Do not use directly.
     STREAM_WRITE   StreamWrite;             // Pointer to stream write function for this archive. Do not use directly.
-    STREAM_GETPOS  StreamGetPos;            // Pointer to function that returns current file position
+    STREAM_RESIZE  StreamResize;            // Pointer to function changing file size
     STREAM_GETSIZE StreamGetSize;           // Pointer to function returning file size
-    STREAM_SETSIZE StreamSetSize;           // Pointer to function changing file size
-    STREAM_GETTIME StreamGetTime;           // Pointer to function retrieving the file time
-    STREAM_GETBMP  StreamGetBmp;            // Pointer to function that retrieves the file bitmap
-    STREAM_SWITCH  StreamSwitch;            // Pointer to function changing the stream to another file
+    STREAM_GETPOS  StreamGetPos;            // Pointer to function that returns current file position
     STREAM_CLOSE   StreamClose;             // Pointer to function closing the stream
 
-    // Stream provider data members
-    TCHAR szFileName[MAX_PATH];             // File name
-    DWORD dwFlags;                          // Stream flags
+    // Block-oriented functions
+    BLOCK_READ     BlockRead;               // Pointer to function reading one or more blocks
+    BLOCK_CHECK    BlockCheck;              // Pointer to function checking whether the block is present
 
     // Base provider functions
-    STREAM_READ    BaseRead;
-    STREAM_WRITE   BaseWrite;
-    STREAM_GETPOS  BaseGetPos;              // Pointer to function that returns current file position
+    STREAM_CREATE  BaseCreate;              // Pointer to base create function
+    STREAM_OPEN    BaseOpen;                // Pointer to base open function
+    STREAM_READ    BaseRead;                // Read from the stream
+    STREAM_WRITE   BaseWrite;               // Write to the stream
+    STREAM_RESIZE  BaseResize;              // Pointer to function changing file size
     STREAM_GETSIZE BaseGetSize;             // Pointer to function returning file size
-    STREAM_SETSIZE BaseSetSize;             // Pointer to function changing file size
-    STREAM_GETTIME BaseGetTime;             // Pointer to function retrieving the file time
+    STREAM_GETPOS  BaseGetPos;              // Pointer to function that returns current file position
     STREAM_CLOSE   BaseClose;               // Pointer to function closing the stream
 
-    // Base provider data members
-    TBaseData Base;                         // Base provider data
+    // Base provider data (file size, file position)
+    TBaseProviderData Base;
+
+    // Stream provider data
+    TFileStream * pMaster;                  // Master stream (e.g. MPQ on a web server)
+    TCHAR * szFileName;                     // File name (self-relative pointer)
+
+    ULONGLONG StreamSize;                   // Stream size (can be less than file size)
+    ULONGLONG StreamPos;                    // Stream position
+    DWORD BuildNumber;                      // Game build number
+    DWORD dwFlags;                          // Stream flags
 
     // Followed by stream provider data, with variable length
 };
 
 //-----------------------------------------------------------------------------
-// Structure for linear stream
+// Structures for block-oriented stream
 
-struct TLinearStream : public TFileStream
+struct TBlockStream : public TFileStream
 {
-    TFileBitmap * pBitmap;                  // Pointer to the stream bitmap
-};
-
-//-----------------------------------------------------------------------------
-// Structure for partial stream
-
-struct TPartialStream : public TFileStream
-{
-    ULONGLONG VirtualSize;                  // Virtual size of the file
-    ULONGLONG VirtualPos;                   // Virtual position in the file
-    DWORD     BlockCount;                   // Number of file blocks. Used by partial file stream
-    DWORD     BlockSize;                    // Size of one block. Used by partial file stream
-
-    PPART_FILE_MAP_ENTRY PartMap;           // File map, variable length
+    SFILE_DOWNLOAD_CALLBACK pfnCallback;    // Callback for downloading
+    void * FileBitmap;                      // Array of bits for file blocks
+    void * UserData;                        // User data to be passed to the download callback
+    DWORD BitmapSize;                       // Size of the file bitmap (in bytes)
+    DWORD BlockSize;                        // Size of one block, in bytes
+    DWORD BlockCount;                       // Number of data blocks in the file
+    DWORD IsComplete;                       // If nonzero, no blocks are missing
+    DWORD IsModified;                       // nonzero if the bitmap has been modified
 };
 
 //-----------------------------------------------------------------------------
@@ -181,7 +209,7 @@ struct TPartialStream : public TFileStream
 
 #define MPQE_CHUNK_SIZE 0x40                // Size of one chunk to be decrypted
 
-struct TEncryptedStream : public TFileStream
+struct TEncryptedStream : public TBlockStream
 {
     BYTE Key[MPQE_CHUNK_SIZE];              // File key
 };

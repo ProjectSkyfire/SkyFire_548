@@ -20,28 +20,22 @@
 //-----------------------------------------------------------------------------
 // Local defines
 
-#define SIGNATURE_TYPE_NONE             0
-#define SIGNATURE_TYPE_WEAK             1
-#define SIGNATURE_TYPE_STRONG           2
-
 #define MPQ_DIGEST_UNIT_SIZE      0x10000
-
-typedef struct _MPQ_SIGNATURE_INFO
-{
-    ULONGLONG BeginMpqData;                 // File offset where the hashing starts
-    ULONGLONG BeginExclude;                 // Begin of the excluded area (used for (signature) file)
-    ULONGLONG EndExclude;                   // End of the excluded area (used for (signature) file)
-    ULONGLONG EndMpqData;                   // File offset where the hashing ends
-    ULONGLONG EndOfFile;                    // Size of the entire file
-    BYTE  Signature[MPQ_STRONG_SIGNATURE_SIZE + 0x10];
-    DWORD cbSignatureSize;                  // Length of the signature
-    int nSignatureType;                     // See SIGNATURE_TYPE_XXX
-
-} MPQ_SIGNATURE_INFO, *PMPQ_SIGNATURE_INFO;
 
 //-----------------------------------------------------------------------------
 // Known Blizzard public keys
 // Created by Jean-Francois Roy using OpenSSL
+
+static const char * szBlizzardWeakPrivateKey =
+    "-----BEGIN PRIVATE KEY-----"
+    "MIIBOQIBAAJBAJJidwS/uILMBSO5DLGsBFknIXWWjQJe2kfdfEk3G/j66w4KkhZ1"
+    "V61Rt4zLaMVCYpDun7FLwRjkMDSepO1q2DcCAwEAAQJANtiztVDMJh2hE1hjPDKy"
+    "UmEJ9U/aN3gomuKOjbQbQ/bWWcM/WfhSVHmPqtqh/bQI2UXFr0rnXngeteZHLr/b"
+    "8QIhAMuWriSKGMACw18/rVVfUrThs915odKBH1Alr3vMVVzZAiEAuBHPSQkgwcb6"
+    "L4MWaiKuOzq08mSyNqPeN8oSy18q848CIHeMn+3s+eOmu7su1UYQl6yH7OrdBd1q"
+    "3UxfFNEJiAbhAiAqxdCyOxHGlbM7aS3DOg3cq5ayoN2cvtV7h1R4t8OmVwIgF+5z"
+    "/6vkzBUsZhd8Nwyis+MeQYH0rpFpMKdTlqmPF2Q="
+    "-----END PRIVATE KEY-----";
 
 static const char * szBlizzardWeakPublicKey =
     "-----BEGIN PUBLIC KEY-----"
@@ -119,13 +113,6 @@ static void memrev(unsigned char *buf, size_t count)
     }
 }
 
-static bool is_valid_md5(void * pvMd5)
-{
-    LPDWORD Md5 = (LPDWORD)pvMd5;
-
-    return (Md5[0] | Md5[1] | Md5[2] | Md5[3]) ? true : false;
-}
-
 static bool decode_base64_key(const char * szKeyBase64, rsa_key * key)
 {
     unsigned char decoded_key[0x200];
@@ -156,7 +143,7 @@ static void GetPlainAnsiFileName(
     const TCHAR * szFileName,
     char * szPlainName)
 {
-    const TCHAR * szPlainNameT = GetPlainFileNameT(szFileName);
+    const TCHAR * szPlainNameT = GetPlainFileName(szFileName);
 
     // Convert the plain name to ANSI
     while(*szPlainNameT != 0)
@@ -186,65 +173,11 @@ static void CalculateArchiveRange(
         }
     }
 
-    // Get the MPQ data end. This is stored in our MPQ header,
-    // and it's been already prepared by SFileOpenArchive,
+    // Get the MPQ data end. This is stored in the MPQ header
     pSI->EndMpqData = ha->MpqPos + ha->pHeader->ArchiveSize64;
 
     // Get the size of the entire file
-    FileStream_GetSize(ha->pStream, pSI->EndOfFile);
-}
-
-static bool QueryMpqSignatureInfo(
-    TMPQArchive * ha,
-    PMPQ_SIGNATURE_INFO pSI)
-{
-    ULONGLONG ExtraBytes;
-    TMPQFile * hf;
-    HANDLE hFile;
-    DWORD dwFileSize;
-
-    // Calculate the range of the MPQ
-    CalculateArchiveRange(ha, pSI);
-
-    // If there is "(signature)" file in the MPQ, it has a weak signature
-    if(SFileOpenFileEx((HANDLE)ha, SIGNATURE_NAME, SFILE_OPEN_FROM_MPQ, &hFile))
-    {
-        // Get the content of the signature
-        SFileReadFile(hFile, pSI->Signature, sizeof(pSI->Signature), &pSI->cbSignatureSize);
-
-        // Verify the size of the signature
-        hf = (TMPQFile *)hFile;
-
-        // We have to exclude the signature file from the digest
-        pSI->BeginExclude = ha->MpqPos + hf->pFileEntry->ByteOffset;
-        pSI->EndExclude = pSI->BeginExclude + hf->pFileEntry->dwCmpSize;
-        dwFileSize = hf->dwDataSize;
-
-        // Close the file
-        SFileCloseFile(hFile);
-        pSI->nSignatureType = SIGNATURE_TYPE_WEAK;
-        return (dwFileSize == (MPQ_WEAK_SIGNATURE_SIZE + 8)) ? true : false;
-    }
-
-    // If there is extra bytes beyond the end of the archive,
-    // it's the strong signature
-    ExtraBytes = pSI->EndOfFile - pSI->EndMpqData;
-    if(ExtraBytes >= (MPQ_STRONG_SIGNATURE_SIZE + 4))
-    {
-        // Read the strong signature
-        if(!FileStream_Read(ha->pStream, &pSI->EndMpqData, pSI->Signature, (MPQ_STRONG_SIGNATURE_SIZE + 4)))
-            return false;
-
-        // Check the signature header "NGIS"
-        if(pSI->Signature[0] != 'N' || pSI->Signature[1] != 'G' || pSI->Signature[2] != 'I' || pSI->Signature[3] != 'S')
-            return false;
-
-        pSI->nSignatureType = SIGNATURE_TYPE_STRONG;
-        return true;
-    }
-
-    // Succeeded, but no known signature found
-    return true;
+    FileStream_GetSize(ha->pStream, &pSI->EndOfFile);
 }
 
 static bool CalculateMpqHashMd5(
@@ -283,7 +216,7 @@ static bool CalculateMpqHashMd5(
         if(dwToRead == 0)
             break;
 
-        // Read the next chunk 
+        // Read the next chunk
         if(!FileStream_Read(ha->pStream, &BeginBuffer, pbDigestBuffer, dwToRead))
         {
             STORM_FREE(pbDigestBuffer);
@@ -327,14 +260,15 @@ static void AddTailToSha1(
     hash_state * psha1_state,
     const char * szTail)
 {
+    unsigned char * pbTail = (unsigned char *)szTail;
     unsigned char szUpperCase[0x200];
     unsigned long nLength = 0;
 
     // Convert the tail to uppercase
     // Note that we don't need to terminate the string with zero
-    while(*szTail != 0)
+    while(*pbTail != 0)
     {
-        szUpperCase[nLength++] = (unsigned char)toupper(*szTail++);
+        szUpperCase[nLength++] = AsciiToUpperTable[*pbTail++];
     }
 
     // Append the tail to the SHA1
@@ -378,7 +312,7 @@ static bool CalculateMpqHashSha1(
         if(dwToRead == 0)
             break;
 
-        // Read the next chunk 
+        // Read the next chunk
         if(!FileStream_Read(ha->pStream, &BeginBuffer, pbDigestBuffer, dwToRead))
         {
             STORM_FREE(pbDigestBuffer);
@@ -410,7 +344,7 @@ static bool CalculateMpqHashSha1(
     return true;
 }
 
-static int VerifyRawMpqData(
+static DWORD VerifyRawMpqData(
     TMPQArchive * ha,
     ULONGLONG ByteOffset,
     DWORD dwDataSize)
@@ -423,7 +357,7 @@ static int VerifyRawMpqData(
     DWORD dwChunkCount;
     DWORD dwChunkSize = ha->pHeader->dwRawChunkSize;
     DWORD dwMD5Size;
-    int nError = ERROR_SUCCESS;
+    DWORD dwErrCode = ERROR_SUCCESS;
 
     // Don't verify zero-sized blocks
     if(dwDataSize == 0)
@@ -443,10 +377,10 @@ static int VerifyRawMpqData(
     pbMD5Array1 = STORM_ALLOC(BYTE, dwMD5Size);
     pbMD5Array2 = STORM_ALLOC(BYTE, dwMD5Size);
     if(pbMD5Array1 == NULL || pbMD5Array2 == NULL)
-        nError = ERROR_NOT_ENOUGH_MEMORY;
+        dwErrCode = ERROR_NOT_ENOUGH_MEMORY;
 
     // Calculate MD5 of each data chunk
-    if(nError == ERROR_SUCCESS)
+    if(dwErrCode == ERROR_SUCCESS)
     {
         LPBYTE pbMD5 = pbMD5Array1;
 
@@ -458,7 +392,7 @@ static int VerifyRawMpqData(
             // Read the data chunk
             if(!FileStream_Read(ha->pStream, &DataOffset, pbDataChunk, dwBytesInChunk))
             {
-                nError = ERROR_FILE_CORRUPT;
+                dwErrCode = ERROR_FILE_CORRUPT;
                 break;
             }
 
@@ -473,19 +407,19 @@ static int VerifyRawMpqData(
     }
 
     // Read the MD5 array
-    if(nError == ERROR_SUCCESS)
+    if(dwErrCode == ERROR_SUCCESS)
     {
         // Read the array of MD5
         if(!FileStream_Read(ha->pStream, &DataOffset, pbMD5Array2, dwMD5Size))
-            nError = GetLastError();
+            dwErrCode = GetLastError();
     }
 
     // Compare the array of MD5
-    if(nError == ERROR_SUCCESS)
+    if(dwErrCode == ERROR_SUCCESS)
     {
         // Compare the MD5
         if(memcmp(pbMD5Array1, pbMD5Array2, dwMD5Size))
-            nError = ERROR_FILE_CORRUPT;
+            dwErrCode = ERROR_FILE_CORRUPT;
     }
 
     // Free memory and return result
@@ -495,7 +429,7 @@ static int VerifyRawMpqData(
         STORM_FREE(pbMD5Array1);
     if(pbDataChunk != NULL)
         STORM_FREE(pbDataChunk);
-    return nError;
+    return dwErrCode;
 }
 
 static DWORD VerifyWeakSignature(
@@ -507,6 +441,10 @@ static DWORD VerifyWeakSignature(
     rsa_key key;
     int hash_idx = find_hash("md5");
     int result = 0;
+
+    // The signature might be zeroed out. In that case, we ignore it
+    if(!IsValidSignature(pSI->Signature))
+        return ERROR_WEAK_SIGNATURE_OK;
 
     // Calculate hash of the entire archive, skipping the (signature) file
     if(!CalculateMpqHashMd5(ha, pSI, Md5Digest))
@@ -544,7 +482,7 @@ static DWORD VerifyStrongSignatureWithKey(
     // Verify the signature
     if(rsa_verify_simple(reversed_signature, MPQ_STRONG_SIGNATURE_SIZE, padded_digest, MPQ_STRONG_SIGNATURE_SIZE, &result, &key) != CRYPT_OK)
         return ERROR_VERIFY_FAILED;
-    
+
     // Free the key and return result
     rsa_free(&key);
     return result ? ERROR_STRONG_SIGNATURE_OK : ERROR_STRONG_SIGNATURE_ERROR;
@@ -628,14 +566,16 @@ static DWORD VerifyFile(
     BYTE Buffer[0x1000];
     HANDLE hFile = NULL;
     DWORD dwVerifyResult = 0;
-    DWORD dwSearchScope = SFILE_OPEN_FROM_MPQ;
     DWORD dwTotalBytes = 0;
-    DWORD dwBytesRead;
     DWORD dwCrc32 = 0;
 
-    // Fix the open type for patched archives
-    if(SFileIsPatchedArchive(hMpq))
-        dwSearchScope = SFILE_OPEN_PATCHED_FILE;
+    //
+    // Note: When the MPQ is patched, it will
+    // automatically check the patched version of the file
+    //
+
+    // Make sure the md5 is initialized
+    memset(md5, 0, sizeof(md5));
 
     // If we have to verify raw data MD5, do it before file open
     if(dwFlags & SFILE_VERIFY_RAW_MD5)
@@ -652,7 +592,7 @@ static DWORD VerifyFile(
                 dwVerifyResult |= VERIFY_FILE_HAS_RAW_MD5;
 
                 // Find file entry for the file
-                pFileEntry = GetFileEntryLocale(ha, szFileName, lcFileLocale);
+                pFileEntry = GetFileEntryLocale(ha, szFileName, g_lcFileLocale);
                 if(pFileEntry != NULL)
                 {
                     // If the file's raw MD5 doesn't match, don't bother with more checks
@@ -667,7 +607,7 @@ static DWORD VerifyFile(
     }
 
     // Attempt to open the file
-    if(SFileOpenFileEx(hMpq, szFileName, dwSearchScope, &hFile))
+    if(SFileOpenFileEx(hMpq, szFileName, SFILE_OPEN_FROM_MPQ, &hFile))
     {
         // Get the file size
         hf = (TMPQFile *)hFile;
@@ -685,6 +625,8 @@ static DWORD VerifyFile(
         // Go through entire file and update both CRC32 and MD5
         for(;;)
         {
+            DWORD dwBytesRead = 0;
+
             // Read data from file
             SFileReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead, NULL);
             if(dwBytesRead == 0)
@@ -697,7 +639,7 @@ static DWORD VerifyFile(
             // Update CRC32 value
             if(dwFlags & SFILE_VERIFY_FILE_CRC)
                 dwCrc32 = crc32(dwCrc32, Buffer, dwBytesRead);
-            
+
             // Update MD5 value
             if(dwFlags & SFILE_VERIFY_FILE_MD5)
                 md5_process(&md5_state, Buffer, dwBytesRead);
@@ -719,7 +661,7 @@ static DWORD VerifyFile(
         if(dwTotalBytes == 0)
         {
             // Check CRC32 and MD5 only if there is no patches
-            if(hf->hfPatchFile == NULL)
+            if(hf->hfPatch == NULL)
             {
                 // Check if the CRC32 matches.
                 if(dwFlags & SFILE_VERIFY_FILE_CRC)
@@ -741,7 +683,7 @@ static DWORD VerifyFile(
                     md5_done(&md5_state, md5);
 
                     // Only check the MD5 if it is valid
-                    if(is_valid_md5(pFileMd5))
+                    if(IsValidMD5(pFileMd5))
                     {
                         dwVerifyResult |= VERIFY_FILE_HAS_MD5;
                         if(memcmp(md5, pFileMd5, MD5_DIGEST_SIZE))
@@ -772,9 +714,163 @@ static DWORD VerifyFile(
     if(pdwCrc32 != NULL)
         *pdwCrc32 = dwCrc32;
     if(pMD5 != NULL)
-        memcpy(pMD5, md5, MD5_DIGEST_SIZE); 
+        memcpy(pMD5, md5, MD5_DIGEST_SIZE);
 
     return dwVerifyResult;
+}
+
+// Used in SFileGetFileInfo
+bool QueryMpqSignatureInfo(
+    TMPQArchive * ha,
+    PMPQ_SIGNATURE_INFO pSI)
+{
+    TFileEntry * pFileEntry;
+    ULONGLONG ExtraBytes;
+    DWORD dwFileSize;
+
+    // Make sure it's all zeroed
+    memset(pSI, 0, sizeof(MPQ_SIGNATURE_INFO));
+
+    // Flush the archive, if it was modified
+    if(ha->dwFlags & MPQ_FLAG_CHANGED)
+        SFileFlushArchive((HANDLE)(ha));
+
+    // Calculate the range of the MPQ
+    CalculateArchiveRange(ha, pSI);
+
+    // If there is "(signature)" file in the MPQ, it has a weak signature
+    pFileEntry = GetFileEntryLocale(ha, SIGNATURE_NAME, LANG_NEUTRAL);
+    if(pFileEntry != NULL)
+    {
+        // Calculate the begin and end of the signature file itself
+        pSI->BeginExclude = ha->MpqPos + pFileEntry->ByteOffset;
+        pSI->EndExclude = pSI->BeginExclude + pFileEntry->dwCmpSize;
+        dwFileSize = (DWORD)(pSI->EndExclude - pSI->BeginExclude);
+
+        // Does the signature have proper size?
+        if(dwFileSize == MPQ_SIGNATURE_FILE_SIZE)
+        {
+            // Read the weak signature
+            if(!FileStream_Read(ha->pStream, &pSI->BeginExclude, pSI->Signature, dwFileSize))
+                return false;
+
+            pSI->SignatureTypes |= SIGNATURE_TYPE_WEAK;
+            pSI->cbSignatureSize = dwFileSize;
+            return true;
+        }
+    }
+
+    // If there is extra bytes beyond the end of the archive,
+    // it's the strong signature
+    ExtraBytes = pSI->EndOfFile - pSI->EndMpqData;
+    if(ExtraBytes >= (MPQ_STRONG_SIGNATURE_SIZE + 4))
+    {
+        // Read the strong signature
+        if(!FileStream_Read(ha->pStream, &pSI->EndMpqData, pSI->Signature, (MPQ_STRONG_SIGNATURE_SIZE + 4)))
+            return false;
+
+        // Check the signature header "NGIS"
+        if(pSI->Signature[0] != 'N' || pSI->Signature[1] != 'G' || pSI->Signature[2] != 'I' || pSI->Signature[3] != 'S')
+            return true; //Not a valid signature, but another filetype could've been appended so not always an error.
+
+        pSI->SignatureTypes |= SIGNATURE_TYPE_STRONG;
+        return true;
+    }
+
+    // Succeeded, but no known signature found
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// Support for weak signature
+
+DWORD SSignFileCreate(TMPQArchive * ha)
+{
+    TMPQFile * hf = NULL;
+    BYTE EmptySignature[MPQ_SIGNATURE_FILE_SIZE];
+    DWORD dwErrCode = ERROR_SUCCESS;
+
+    // Only save the signature if we should do so
+    if(ha->dwFileFlags3 != 0)
+    {
+        // The (signature) file must be non-encrypted and non-compressed
+        assert(ha->dwFlags & MPQ_FLAG_SIGNATURE_NEW);
+        assert(ha->dwFileFlags3 == MPQ_FILE_EXISTS);
+        assert(ha->dwReservedFiles > 0);
+
+        // Create the (signature) file file in the MPQ
+        // Note that the file must not be compressed or encrypted
+        dwErrCode = SFileAddFile_Init(ha, SIGNATURE_NAME,
+                                      0,
+                                      sizeof(EmptySignature),
+                                      LANG_NEUTRAL,
+                                      ha->dwFileFlags3 | MPQ_FILE_REPLACEEXISTING,
+                                     &hf);
+
+        // Write the empty signature file to the archive
+        if(dwErrCode == ERROR_SUCCESS)
+        {
+            // Write the empty zeroed file to the MPQ
+            memset(EmptySignature, 0, sizeof(EmptySignature));
+            dwErrCode = SFileAddFile_Write(hf, EmptySignature, (DWORD)sizeof(EmptySignature), 0);
+        }
+
+        // Finalize the signature
+        if(dwErrCode == ERROR_SUCCESS)
+        {
+            // Clear the CRC as it will not be valid
+            hf->pFileEntry->dwCrc32 = hf->dwCrc32 = 0;
+            SFileAddFile_Finish(hf);
+
+            // Clear the invalid mark
+            ha->dwFlags &= ~(MPQ_FLAG_SIGNATURE_NEW | MPQ_FLAG_SIGNATURE_NONE);
+            ha->dwReservedFiles--;
+        }
+    }
+
+    return dwErrCode;
+}
+
+DWORD SSignFileFinish(TMPQArchive * ha)
+{
+    MPQ_SIGNATURE_INFO si = {0};
+    unsigned long signature_len = MPQ_WEAK_SIGNATURE_SIZE;
+    BYTE WeakSignature[MPQ_SIGNATURE_FILE_SIZE];
+    BYTE Md5Digest[MD5_DIGEST_SIZE];
+    rsa_key key;
+    int hash_idx = find_hash("md5");
+
+    // Sanity checks
+    assert((ha->dwFlags & MPQ_FLAG_CHANGED) == 0);
+    assert(ha->dwFileFlags3 == MPQ_FILE_EXISTS);
+
+    // Query the weak signature info
+    if(!QueryMpqSignatureInfo(ha, &si))
+        return ERROR_FILE_CORRUPT;
+
+    // There must be exactly one signature
+    if(si.SignatureTypes != SIGNATURE_TYPE_WEAK)
+        return ERROR_FILE_CORRUPT;
+
+    // Calculate MD5 of the entire archive
+    if(!CalculateMpqHashMd5(ha, &si, Md5Digest))
+        return ERROR_VERIFY_FAILED;
+
+    // Decode the private key
+    if(!decode_base64_key(szBlizzardWeakPrivateKey, &key))
+        return ERROR_VERIFY_FAILED;
+
+    // Sign the hash
+    memset(WeakSignature, 0, sizeof(WeakSignature));
+    rsa_sign_hash_ex(Md5Digest, sizeof(Md5Digest), WeakSignature + 8, &signature_len, LTC_LTC_PKCS_1_V1_5, 0, 0, hash_idx, 0, &key);
+    memrev(WeakSignature + 8, MPQ_WEAK_SIGNATURE_SIZE);
+    rsa_free(&key);
+
+    // Write the signature to the MPQ. Don't use SFile* functions, but write the hash directly
+    if(!FileStream_Write(ha->pStream, &si.BeginExclude, WeakSignature, MPQ_SIGNATURE_FILE_SIZE))
+        return GetLastError();
+
+    return ERROR_SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
@@ -817,14 +913,14 @@ DWORD WINAPI SFileVerifyFile(HANDLE hMpq, const char * szFileName, DWORD dwFlags
 }
 
 // Verifies raw data of the archive Only works for MPQs version 4 or newer
-int WINAPI SFileVerifyRawData(HANDLE hMpq, DWORD dwWhatToVerify, const char * szFileName)
+DWORD WINAPI SFileVerifyRawData(HANDLE hMpq, DWORD dwWhatToVerify, const char * szFileName)
 {
     TMPQArchive * ha = (TMPQArchive *)hMpq;
     TFileEntry * pFileEntry;
     TMPQHeader * pHeader;
 
     // Verify input parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         return ERROR_INVALID_PARAMETER;
     pHeader = ha->pHeader;
 
@@ -836,7 +932,7 @@ int WINAPI SFileVerifyRawData(HANDLE hMpq, DWORD dwWhatToVerify, const char * sz
     switch(dwWhatToVerify)
     {
         case SFILE_VERIFY_MPQ_HEADER:
-            
+
             // Only if the header is of version 4 or newer
             if(pHeader->dwHeaderSize >= (MPQ_HEADER_SIZE_V4 - MD5_DIGEST_SIZE))
                 return VerifyRawMpqData(ha, 0, MPQ_HEADER_SIZE_V4 - MD5_DIGEST_SIZE);
@@ -878,7 +974,7 @@ int WINAPI SFileVerifyRawData(HANDLE hMpq, DWORD dwWhatToVerify, const char * sz
                 return ERROR_INVALID_PARAMETER;
 
             // Get the offset of a file
-            pFileEntry = GetFileEntryLocale(ha, szFileName, lcFileLocale);
+            pFileEntry = GetFileEntryLocale(ha, szFileName, g_lcFileLocale);
             if(pFileEntry == NULL)
                 return ERROR_FILE_NOT_FOUND;
 
@@ -892,30 +988,72 @@ int WINAPI SFileVerifyRawData(HANDLE hMpq, DWORD dwWhatToVerify, const char * sz
 // Verifies the archive against the signature
 DWORD WINAPI SFileVerifyArchive(HANDLE hMpq)
 {
-    MPQ_SIGNATURE_INFO si;
+    MPQ_SIGNATURE_INFO si = {0};
     TMPQArchive * ha = (TMPQArchive *)hMpq;
 
     // Verify input parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         return ERROR_VERIFY_FAILED;
 
     // Get the MPQ signature and signature type
-    memset(&si, 0, sizeof(MPQ_SIGNATURE_INFO));
     if(!QueryMpqSignatureInfo(ha, &si))
         return ERROR_VERIFY_FAILED;
 
-    // Verify the signature
-    switch(si.nSignatureType)
+    // If there is no signature
+    if(si.SignatureTypes == 0)
+        return ERROR_NO_SIGNATURE;
+
+    // We haven't seen a MPQ with both signatures
+    assert(si.SignatureTypes == SIGNATURE_TYPE_WEAK || si.SignatureTypes == SIGNATURE_TYPE_STRONG);
+
+    // Verify the strong signature, if present
+    if(si.SignatureTypes & SIGNATURE_TYPE_STRONG)
+        return VerifyStrongSignature(ha, &si);
+
+    // Verify the weak signature, if present
+    if(si.SignatureTypes & SIGNATURE_TYPE_WEAK)
+        return VerifyWeakSignature(ha, &si);
+
+    return ERROR_NO_SIGNATURE;
+}
+
+// Verifies the archive against the signature
+bool WINAPI SFileSignArchive(HANDLE hMpq, DWORD dwSignatureType)
+{
+    TMPQArchive * ha;
+
+    // Verify the archive handle
+    ha = IsValidMpqHandle(hMpq);
+    if(ha == NULL)
     {
-        case SIGNATURE_TYPE_NONE:
-            return ERROR_NO_SIGNATURE;
-
-        case SIGNATURE_TYPE_WEAK:
-            return VerifyWeakSignature(ha, &si);
-
-        case SIGNATURE_TYPE_STRONG:
-            return VerifyStrongSignature(ha, &si);
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return false;
     }
 
-    return ERROR_VERIFY_FAILED;
+    // We only support weak signature, and only for MPQs version 1.0
+    if(dwSignatureType != SIGNATURE_TYPE_WEAK)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+
+    // The archive must not be malformed and must not be read-only
+    if(ha->dwFlags & (MPQ_FLAG_READ_ONLY | MPQ_FLAG_MALFORMED))
+    {
+        SetLastError(ERROR_ACCESS_DENIED);
+        return false;
+    }
+
+    // If the signature is not there yet
+    if(ha->dwFileFlags3 == 0)
+    {
+        // Turn the signature on. The signature will
+        // be applied when the archive is closed
+        ha->dwFlags |= MPQ_FLAG_SIGNATURE_NEW | MPQ_FLAG_CHANGED;
+        ha->dwFileFlags3 = MPQ_FILE_EXISTS;
+        ha->dwReservedFiles++;
+    }
+
+    return true;
 }
+
