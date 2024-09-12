@@ -32,7 +32,8 @@
 
 IF(PLATFORM EQUAL 64)
   SET(_OPENSSL_ROOT_PATHS
-    "C:/OpenSSL-Win64/OpenSSL-Win64/"
+    "C:/OpenSSL-Win64/"
+	"C:/OpenSSL-Win64/OpenSSL-Win64/"
   )
 ENDIF()
 
