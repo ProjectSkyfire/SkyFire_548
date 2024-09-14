@@ -124,7 +124,7 @@ namespace rbac
         return RBACCommandResult::RBAC_OK;
     }
 
-    void RBACData::SavePermission(uint32 permission, bool granted, int32 realmId)
+    void RBACData::SavePermission(uint32 permission, bool granted, int32 realmId) const
     {
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_RBAC_ACCOUNT_PERMISSION);
         stmt->setUInt32(0, GetId());

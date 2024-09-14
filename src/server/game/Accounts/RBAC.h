@@ -119,7 +119,7 @@ namespace rbac
         RBAC_PERM_COMMAND_ACCOUNT_PASSWORD = 225,
         RBAC_PERM_COMMAND_ACCOUNT_SET = 226,
         RBAC_PERM_COMMAND_ACCOUNT_SET_ADDON = 227,
-        RBAC_PERM_COMMAND_ACCOUNT_SET_GMLEVEL = 228,
+        // 228,
         RBAC_PERM_COMMAND_ACCOUNT_SET_PASSWORD = 229,
         RBAC_PERM_COMMAND_ACHIEVEMENT = 230,
         RBAC_PERM_COMMAND_ACHIEVEMENT_ADD = 231,
@@ -260,7 +260,7 @@ namespace rbac
         RBAC_PERM_COMMAND_GM_CHAT = 372,
         RBAC_PERM_COMMAND_GM_FLY = 373,
         RBAC_PERM_COMMAND_GM_INGAME = 374,
-        RBAC_PERM_COMMAND_GM_LIST = 375,
+        // 375
         RBAC_PERM_COMMAND_GM_VISIBLE = 376,
         RBAC_PERM_COMMAND_GO = 377,
         RBAC_PERM_COMMAND_GO_CREATURE = 378,
@@ -865,7 +865,7 @@ namespace rbac
         uint8 GetSecurityLevel() const { return _secLevel; }
     private:
         /// Saves a permission to DB, Granted or Denied
-        void SavePermission(uint32 role, bool granted, int32 realm);
+        void SavePermission(uint32 role, bool granted, int32 realm) const;
         /// Clears roles, groups and permissions - Used for reload
         void ClearData();
 
