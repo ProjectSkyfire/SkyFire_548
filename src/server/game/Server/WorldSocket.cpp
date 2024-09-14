@@ -859,7 +859,6 @@ int WorldSocket::HandleSendAuthSession()
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
-   // uint8 security;
     uint16 clientBuild;
     uint32 id;
     uint32 addonSize;
@@ -1000,17 +999,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
-    /*
-    // Check locked state for server
-    AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
-    SF_LOG_DEBUG("network", "Allowed Level: %u Player Level %u", uint8(allowedAccountType), security);
-    if (allowedAccountType > AccountTypes::SEC_PLAYER && AccountTypes(security) < allowedAccountType)
-    {
-        SendAuthResponseError(ResponseCodes::AUTH_UNAVAILABLE);
-        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
-        return -1;
-    }
-    */
     // Check that Key and account name are the same on client and server
     uint8 t[4] = { 0x00, 0x00, 0x00, 0x00 };
 

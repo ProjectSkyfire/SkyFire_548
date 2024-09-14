@@ -269,14 +269,14 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char* reason)
+void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char* reason) const
 {
     SF_LOG_ERROR("network.opcode", "Received unexpected opcode %s Status: %s Reason: %s from %s",
         GetOpcodeNameForLogging(packet->GetOpcode(), false).c_str(), status, reason, GetPlayerInfo().c_str());
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnprocessedTail(WorldPacket* packet)
+void WorldSession::LogUnprocessedTail(WorldPacket* packet) const
 {
     if (!sLog->ShouldLog("network.opcode", LogLevel::LOG_LEVEL_TRACE) || packet->rpos() >= packet->wpos())
         return;
@@ -676,19 +676,19 @@ const char* WorldSession::GetSkyFireString(int32 entry) const
     return sObjectMgr->GetSkyFireString(entry, GetSessionDbLocaleIndex());
 }
 
-void WorldSession::Handle_NULL(WorldPacket& recvPacket)
+void WorldSession::Handle_NULL(WorldPacket& recvPacket) const
 {
     SF_LOG_ERROR("network.opcode", "Received unhandled opcode %s from %s",
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
-void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
+void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket) const
 {
     SF_LOG_ERROR("network.opcode", "Received opcode %s that must be processed in WorldSocket::OnRead from %s",
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
-void WorldSession::Handle_EarlyProccessContinued(WorldPacket& recvPacket) //CMSG_AUTH_CONTINUED_SESSION(void *this, int a2)
+void WorldSession::Handle_EarlyProccessContinued(WorldPacket& recvPacket) const //CMSG_AUTH_CONTINUED_SESSION(void *this, int a2)
 {
     SF_LOG_ERROR("network.opcode", "Recived opcode %s that must be processed in WorldSocket::Unknown from %s",
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
@@ -702,7 +702,7 @@ void WorldSession::Handle_EarlyProccessContinued(WorldPacket& recvPacket) //CMSG
     */
 }
 
-void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
+void WorldSession::Handle_Deprecated(WorldPacket& recvPacket) const
 {
     SF_LOG_ERROR("network.opcode", "Received deprecated opcode %s from %s",
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());

@@ -294,7 +294,7 @@ public:
     void InvalidateRBACData(); // Used to force LoadPermissions at next HasPermission check
 
     void SetVirtualRealmID(uint32 VRealmID) { m_virtualRealmID = VRealmID; }
-    uint32 GetVirtualRealmID() { return m_virtualRealmID; }
+    uint32 GetVirtualRealmID() const { return m_virtualRealmID; }
 
     AccountTypes GetSecurity() const { return _security; }
     uint32 GetAccountId() const { return _accountId; }
@@ -525,10 +525,10 @@ public:
     z_stream_s* GetCompressionStream() { return _compressionStream; }
 
 public:                                                 // opcodes handlers
-    void Handle_NULL(WorldPacket& recvPacket);          // not used
-    void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
-    void Handle_EarlyProccessContinued(WorldPacket& recvPacket); //Found in sniffs
-    void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
+    void Handle_NULL(WorldPacket& recvPacket) const;    // not used
+    void Handle_EarlyProccess(WorldPacket& recvPacket) const; // just mark packets processed in WorldSocket::OnRead
+    void Handle_EarlyProccessContinued(WorldPacket& recvPacket) const; //Found in sniffs
+    void Handle_Deprecated(WorldPacket& recvPacket) const;    // never used anymore by client
 
     void HandleCharEnumOpcode(WorldPacket& recvPacket);
     void HandleCharDeleteOpcode(WorldPacket& recvPacket);
@@ -1149,8 +1149,8 @@ private:
     void moveItems(Item* myItems[], Item* hisItems[]);
 
     // logging helper
-    void LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char* reason);
-    void LogUnprocessedTail(WorldPacket* packet);
+    void LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char* reason) const;
+    void LogUnprocessedTail(WorldPacket* packet) const;
 
     // EnumData helpers
     bool IsLegitCharacterForAccount(uint32 lowGUID)
