@@ -32,7 +32,6 @@ public:
         {
             { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_ADDON,       true,  &HandleAccountSetAddonCommand,     "",      },
             { "sec",            rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_SEC,         true,  NULL,                "", accountSetSecTable },
-            { "gmlevel",        rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_GMLEVEL,     true,  &HandleAccountSetGmLevelCommand,   "",      },
             { "password",       rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_PASSWORD,    true,  &HandleAccountSetPasswordCommand,  "",      },
         };
         static std::vector<ChatCommand> accountLockCommandTable =
@@ -607,90 +606,6 @@ public:
         LoginDatabase.Execute(stmt);
 
         handler->PSendSysMessage(LANG_ACCOUNT_SETADDON, accountName.c_str(), accountId, expansion);
-        return true;
-    }
-
-    static bool HandleAccountSetGmLevelCommand(ChatHandler* handler, char const* args)
-    {
-        if (!*args)
-        {
-            handler->SendSysMessage(LANG_CMD_SYNTAX);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        std::string targetAccountName;
-        uint32 targetAccountId = 0;
-        AccountTypes targetSecurity = AccountTypes::SEC_PLAYER;
-        AccountTypes gm = AccountTypes::SEC_PLAYER;
-        char* arg1 = strtok((char*)args, " ");
-        char* arg2 = strtok(NULL, " ");
-        char* arg3 = strtok(NULL, " ");
-        bool isAccountNameGiven = true;
-
-        if (!arg3)
-        {
-            if (!handler->getSelectedPlayer())
-                return false;
-            isAccountNameGiven = false;
-        }
-
-        // Check for second parameter
-        if (!isAccountNameGiven && !arg2)
-            return false;
-
-        // Check for account
-        if (isAccountNameGiven)
-        {
-            targetAccountName = arg1;
-            if (!AccountMgr::normalizeString(targetAccountName))
-            {
-                handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, targetAccountName.c_str());
-                handler->SetSentErrorMessage(true);
-                return false;
-            }
-        }
-
-        // Check for invalid specified GM level.
-        gm = AccountTypes((isAccountNameGiven) ? atoi(arg2) : atoi(arg1));
-        if (gm > AccountTypes::SEC_CONSOLE)
-        {
-            handler->SendSysMessage(LANG_BAD_VALUE);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        // handler->getSession() == NULL only for console
-        targetAccountId = (isAccountNameGiven) ? AccountMgr::GetId(targetAccountName) : handler->getSelectedPlayer()->GetSession()->GetAccountId();
-        int32 gmRealmID = (isAccountNameGiven) ? atoi(arg3) : atoi(arg2);
-        AccountTypes playerSecurity;
-        if (handler->GetSession())
-            playerSecurity = AccountMgr::GetSecurity(handler->GetSession()->GetAccountId(), gmRealmID);
-        else
-            playerSecurity = AccountTypes::SEC_CONSOLE;
-
-        // can set security level only for target with less security and to less security that we have
-        // This also restricts setting handler's own security.
-        targetSecurity = AccountMgr::GetSecurity(targetAccountId, gmRealmID);
-        if (targetSecurity >= playerSecurity || gm >= playerSecurity)
-        {
-            handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        // Check if provided realmID has a negative value other than -1
-        if (gmRealmID < -1)
-        {
-            handler->SendSysMessage(LANG_INVALID_REALMID);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        rbac::RBACData* rbac = isAccountNameGiven ? NULL : handler->getSelectedPlayer()->GetSession()->GetRBACData();
-        sAccountMgr->UpdateAccountAccess(rbac, targetAccountId, uint8(gm), gmRealmID);
-
-        handler->PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetAccountName.c_str(), gm);
         return true;
     }
 
