@@ -859,7 +859,7 @@ int WorldSocket::HandleSendAuthSession()
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
-    uint8 security;
+   // uint8 security;
     uint16 clientBuild;
     uint32 id;
     uint32 addonSize;
@@ -985,22 +985,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
-    // Checks gmlevel per Realm
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
-
-    stmt->setUInt32(0, id);
-    stmt->setInt32(1, int32(VirtualRealmID));
-
-    result = LoginDatabase.Query(stmt);
-
-    if (!result)
-        security = 0;
-    else
-    {
-        fields = result->Fetch();
-        security = fields[0].GetUInt8();
-    }
-
     // Re-check account ban (same check as in realmd)
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BANS);
 
@@ -1016,6 +1000,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
+    /*
     // Check locked state for server
     AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
     SF_LOG_DEBUG("network", "Allowed Level: %u Player Level %u", uint8(allowedAccountType), security);
@@ -1025,7 +1010,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
         return -1;
     }
-
+    */
     // Check that Key and account name are the same on client and server
     uint8 t[4] = { 0x00, 0x00, 0x00, 0x00 };
 
@@ -1071,7 +1056,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     LoginDatabase.Execute(stmt);
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, hasBoost), -1);
+    ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes::SEC_PLAYER, expansion, mutetime, locale, recruiter, isRecruiter, hasBoost), -1);
 
     m_Crypt.Init(sessionKey);
 

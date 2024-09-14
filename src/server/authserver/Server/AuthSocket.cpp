@@ -209,7 +209,7 @@ void AuthSocket::OnRead()
 {
 #define MAX_AUTH_LOGON_CHALLENGES_IN_A_ROW 3
     uint32 challengesInARow = 0;
-    uint8 _cmd;
+    uint8 _cmd = 0;
     while (1)
     {
         if (!socket().recv_soft((char*)&_cmd, 1))
@@ -409,7 +409,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 }
                 else
                 {
-                    _srp6.emplace(_login, fields[5].GetBinary<SkyFire::Crypto::SRP6::SALT_LENGTH>(), fields[6].GetBinary<SkyFire::Crypto::SRP6::VERIFIER_LENGTH>());
+                    _srp6.emplace(_login, fields[4].GetBinary<SkyFire::Crypto::SRP6::SALT_LENGTH>(), fields[5].GetBinary<SkyFire::Crypto::SRP6::VERIFIER_LENGTH>());
 
                     BigNumber unk3;
                     unk3.SetRand(16 * 8);
@@ -431,7 +431,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     uint8 securityFlags = 0;
 
                     // Check if token is used
-                    _tokenKey = fields[7].GetString();
+                    _tokenKey = fields[6].GetString();
                     if (!_tokenKey.empty())
                         securityFlags = 4;
 
@@ -454,9 +454,6 @@ bool AuthSocket::_HandleLogonChallenge()
 
                     if (securityFlags & 0x04)               // Security token input
                         pkt << uint8(1);
-
-                    AccountTypes secLevel = AccountTypes(fields[4].GetUInt8());
-                    _accountSecurityLevel = secLevel <= AccountTypes::SEC_ADMINISTRATOR ? AccountTypes(secLevel) : AccountTypes::SEC_ADMINISTRATOR;
 
                     _localizationName.resize(4);
                     for (int i = 0; i < 4; ++i)
@@ -670,9 +667,7 @@ bool AuthSocket::_HandleReconnectChallenge()
     std::reverse(_os.begin(), _os.end());
 
     Field* fields = result->Fetch();
-    AccountTypes secLevel = AccountTypes(fields[2].GetUInt8());
-    _accountSecurityLevel = secLevel <= AccountTypes::SEC_ADMINISTRATOR ? AccountTypes(secLevel) : AccountTypes::SEC_ADMINISTRATOR;
-
+    _accountSecurityLevel = AccountTypes::SEC_PLAYER;
     _sessionKey = fields[0].GetBinary<SESSION_KEY_LENGTH>();
     SkyFire::Crypto::GetRandomBytes(_reconnectProof);
 
@@ -891,7 +886,7 @@ bool AuthSocket::_HandleXferResume()
     }
 
     // Launch a PatcherRunnable thread starting at given patch file offset
-    uint64 start;
+    uint64 start = 0;
     socket().recv_skip(1);
     socket().recv((char*)&start, sizeof(start));
     fseek(pPatch, long(start), 0);

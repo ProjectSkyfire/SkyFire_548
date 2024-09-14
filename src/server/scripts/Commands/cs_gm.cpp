@@ -31,7 +31,6 @@ public:
             { "chat",    rbac::RBAC_PERM_COMMAND_GM_CHAT,    false, &HandleGMChatCommand,       "", },
             { "fly",     rbac::RBAC_PERM_COMMAND_GM_FLY,     false, &HandleGMFlyCommand,        "", },
             { "ingame",  rbac::RBAC_PERM_COMMAND_GM_INGAME,   true, &HandleGMListIngameCommand, "", },
-            { "list",    rbac::RBAC_PERM_COMMAND_GM_LIST,     true, &HandleGMListFullCommand,   "", },
             { "visible", rbac::RBAC_PERM_COMMAND_GM_VISIBLE, false, &HandleGMVisibleCommand,    "", },
             { "",        rbac::RBAC_PERM_COMMAND_GM,         false, &HandleGMCommand,           "", },
         };
@@ -141,41 +140,6 @@ public:
             handler->SendSysMessage("========================");
         if (first)
             handler->SendSysMessage(LANG_GMS_NOT_LOGGED);
-        return true;
-    }
-
-    /// Display the list of GMs
-    static bool HandleGMListFullCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        ///- Get the accounts with GM Level >0
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_GM_ACCOUNTS);
-        stmt->setUInt8(0, uint8(AccountTypes::SEC_MODERATOR));
-        stmt->setInt32(1, int32(realmID));
-        PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-        if (result)
-        {
-            handler->SendSysMessage(LANG_GMLIST);
-            handler->SendSysMessage("========================");
-            ///- Cycle through them. Display username and GM level
-            do
-            {
-                Field* fields = result->Fetch();
-                char const* name = fields[0].GetCString();
-                uint8 security = fields[1].GetUInt8();
-                uint8 max = (16 - strlen(name)) / 2;
-                uint8 max2 = max;
-                if ((max + max2 + strlen(name)) == 16)
-                    max2 = max - 1;
-                if (handler->GetSession())
-                    handler->PSendSysMessage("|    %s GMLevel %u", name, security);
-                else
-                    handler->PSendSysMessage("|%*s%s%*s|   %u  |", max, " ", name, max2, " ", security);
-            } while (result->NextRow());
-            handler->SendSysMessage("========================");
-        }
-        else
-            handler->PSendSysMessage(LANG_GMLIST_EMPTY);
         return true;
     }
 

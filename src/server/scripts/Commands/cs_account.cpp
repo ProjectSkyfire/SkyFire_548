@@ -679,24 +679,6 @@ public:
             return false;
         }
 
-        // Check and abort if the target gm has a higher rank on one of the realms and the new realm is -1
-        if (gmRealmID == -1 && !AccountMgr::IsConsoleAccount(playerSecurity))
-        {
-            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS_GMLEVEL_TEST);
-
-            stmt->setUInt32(0, targetAccountId);
-            stmt->setUInt8(1, uint8(gm));
-
-            PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-            if (result)
-            {
-                handler->SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
-                handler->SetSentErrorMessage(true);
-                return false;
-            }
-        }
-
         // Check if provided realmID has a negative value other than -1
         if (gmRealmID < -1)
         {
