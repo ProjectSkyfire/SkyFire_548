@@ -526,8 +526,8 @@ public:
 
 public:                                                 // opcodes handlers
     void Handle_NULL(WorldPacket& recvPacket) const;    // not used
-    void Handle_EarlyProccess(WorldPacket& recvPacket) const; // just mark packets processed in WorldSocket::OnRead
-    void Handle_EarlyProccessContinued(WorldPacket& recvPacket) const; //Found in sniffs
+    void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
+    void Handle_EarlyProccessContinued(WorldPacket& recvPacket); //Found in sniffs
     void Handle_Deprecated(WorldPacket& recvPacket) const;    // never used anymore by client
 
     void HandleCharEnumOpcode(WorldPacket& recvPacket);

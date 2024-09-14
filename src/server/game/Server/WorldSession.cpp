@@ -682,13 +682,13 @@ void WorldSession::Handle_NULL(WorldPacket& recvPacket) const
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
-void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket) const
+void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 {
     SF_LOG_ERROR("network.opcode", "Received opcode %s that must be processed in WorldSocket::OnRead from %s",
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
 }
 
-void WorldSession::Handle_EarlyProccessContinued(WorldPacket& recvPacket) const //CMSG_AUTH_CONTINUED_SESSION(void *this, int a2)
+void WorldSession::Handle_EarlyProccessContinued(WorldPacket& recvPacket) //CMSG_AUTH_CONTINUED_SESSION(void *this, int a2)
 {
     SF_LOG_ERROR("network.opcode", "Recived opcode %s that must be processed in WorldSocket::Unknown from %s",
         GetOpcodeNameForLogging(recvPacket.GetOpcode(), false).c_str(), GetPlayerInfo().c_str());
