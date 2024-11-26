@@ -69,13 +69,20 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
 
-    
+    FIND_LIBRARY(OPENSSL_LIB_LEGACY
+	  NAMES
+	    liblegacy
+	  PATHS
+        ${OPENSSL_ROOT_DIR}/lib/
+        ${OPENSSL_ROOT_DIR}/lib/VC/x64/MD/
+    )
 
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO_DEBUG
       NAMES
         libcrypto libcrypto32MDd libcrypto32 libcrypto64MDd libcrypto64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib
+        ${OPENSSL_ROOT_DIR}/lib/VC/x64/MDd/
     )
 
     FIND_LIBRARY(OPENSSL_LIB_CRYPTO_RELEASE
@@ -83,6 +90,7 @@ IF(WIN32 AND NOT CYGWIN)
         libcrypto libcrypto32MD libcrypto32 libcrypto64MD libcrypto64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/
+        ${OPENSSL_ROOT_DIR}/lib/VC/x64/MD/
     )
 
     FIND_LIBRARY(OPENSSL_LIB_SSL_DEBUG
@@ -90,6 +98,7 @@ IF(WIN32 AND NOT CYGWIN)
         libssl libssl32MDd libssl32 ssl libssl64MDd libssl64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/
+        ${OPENSSL_ROOT_DIR}/lib/VC/x64/MDd/
     )
 
     FIND_LIBRARY(OPENSSL_LIB_SSL_RELEASE
@@ -97,12 +106,13 @@ IF(WIN32 AND NOT CYGWIN)
         libssl libssl32MD libssl32 ssl libssl libssl64MD libssl64
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/
+        ${OPENSSL_ROOT_DIR}/lib/VC/x64/MD/
     )
 
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
       set( OPENSSL_LIBRARIES
-        optimized ${OPENSSL_LIB_SSL_RELEASE} ${OPENSSL_LIB_CRYPTO_RELEASE}
-        debug ${OPENSSL_LIB_SSL_DEBUG} ${OPENSSL_LIB_CRYPTO_DEBUG}
+        optimized ${OPENSSL_LIB_LEGACY} ${OPENSSL_LIB_SSL_RELEASE} ${OPENSSL_LIB_CRYPTO_RELEASE}
+        debug ${OPENSSL_LIB_LEGACY} ${OPENSSL_LIB_SSL_DEBUG} ${OPENSSL_LIB_CRYPTO_DEBUG}
       )
     else()
       set( OPENSSL_LIBRARIES
@@ -165,14 +175,7 @@ ELSE(WIN32 AND NOT CYGWIN)
 
 ENDIF(WIN32 AND NOT CYGWIN)
 
-IF (WIN32)
-  FIND_FILE(OPENSSL_LIB_LEGACY
-      NAMES
-        legacy.dll
-      PATHS
-        ${OPENSSL_ROOT_DIR}/lib/ossl-modules/
-    )
-ELSE(UNIX)
+IF (UNIX)
   FIND_FILE(OPENSSL_LIB_LEGACY
       NAMES
         legacy.so
@@ -204,34 +207,19 @@ if (OPENSSL_INCLUDE_DIR)
   if (_OPENSSL_VERSION)
     set(OPENSSL_VERSION "${_OPENSSL_VERSION}")
   else (_OPENSSL_VERSION)
-    file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str
-         REGEX "^.*define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
+    file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" OPENSSL_VERSION_STR
+         REGEX "^#[\t ]*define[\t ]+OPENSSL_VERSION_STR[\t ]+\"([0-9])+\\.([0-9])+\\.([0-9])+\".*")
+    string(REGEX REPLACE "^.*OPENSSL_VERSION_STR[\t ]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\".*$"
+           "\\1" OPENSSL_VERSION_STR "${OPENSSL_VERSION_STR}")
 
-    # The version number is encoded as 0xMNNFFPPS: major minor fix patch status
-    # The status gives if this is a developer or prerelease and is ignored here.
-    # Major, minor, and fix directly translate into the version numbers shown in
-    # the string. The patch field translates to the single character suffix that
-    # indicates the bug fix state, which 00 -> nothing, 01 -> a, 02 -> b and so
-    # on.
-
-    #string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f]).*$"
-    #       "\\1;\\2;\\3;\\4;\\5" OPENSSL_VERSION_LIST "${openssl_version_str}")
-    #list(GET OPENSSL_VERSION_LIST 0 OPENSSL_VERSION_MAJOR)
-    #list(GET OPENSSL_VERSION_LIST 1 OPENSSL_VERSION_MINOR)
-    #list(GET OPENSSL_VERSION_LIST 2 OPENSSL_VERSION_FIX)
-    #list(GET OPENSSL_VERSION_LIST 3 OPENSSL_VERSION_PATCH)
-
-    #string(REGEX REPLACE "^0(.)" "\\1" OPENSSL_VERSION_MINOR "${OPENSSL_VERSION_MINOR}")
-    #string(REGEX REPLACE "^0(.)" "\\1" OPENSSL_VERSION_FIX "${OPENSSL_VERSION_FIX}")
-
-    #set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
+    set(OPENSSL_VERSION "${OPENSSL_VERSION_STR}")
   endif (_OPENSSL_VERSION)
 
-  #include(EnsureVersion)
-  #ENSURE_VERSION( "${OPENSSL_EXPECTED_VERSION}" "${OPENSSL_VERSION}" OPENSSL_VERSION_OK)
-  #if (NOT OPENSSL_VERSION_OK)
-      #message(FATAL_ERROR "SkyFire needs OpenSSL version ${OPENSSL_EXPECTED_VERSION} but found version ${OPENSSL_VERSION}")
-  #endif()
+  include(EnsureVersion)
+  ENSURE_VERSION( "${OPENSSL_EXPECTED_VERSION}" "${OPENSSL_VERSION}" OPENSSL_VERSION_OK)
+  if (NOT OPENSSL_VERSION_OK)
+      message(FATAL_ERROR "SkyFire needs OpenSSL version ${OPENSSL_EXPECTED_VERSION} but found version ${OPENSSL_VERSION}")
+  endif()
 endif (OPENSSL_INCLUDE_DIR)
 
 MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
