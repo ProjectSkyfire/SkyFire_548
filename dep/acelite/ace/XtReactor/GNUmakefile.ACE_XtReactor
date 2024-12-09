@@ -259,15 +259,15 @@ endif
 #build_files:
 #ace_xtreactor.mpc
 #
-#source_files:
-#XtReactor.cpp
-#
 #header_files:
 #XtReactor.h
 #ACE_XtReactor_export.h
 #
 #pkgconfig_files:
 #ACE_XtReactor.pc.in
+#
+#source_files:
+#XtReactor.cpp
 #
 #lib_output:
 #../../lib ACE_XtReactor

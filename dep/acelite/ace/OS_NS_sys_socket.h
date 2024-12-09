@@ -271,11 +271,11 @@ namespace ACE_OS
   int shutdown (ACE_HANDLE handle,
                 int how);
 
-  //ACE_NAMESPACE_INLINE_FUNCTION
-  //unsigned int if_nametoindex (const char *ifname);
+  ACE_NAMESPACE_INLINE_FUNCTION
+  unsigned int if_nametoindex (const char *ifname);
 
-  //ACE_NAMESPACE_INLINE_FUNCTION
-  //char * if_indextoname (unsigned int ifindex, char *ifname);
+  ACE_NAMESPACE_INLINE_FUNCTION
+  char *if_indextoname (unsigned int ifindex, char *ifname);
 
   ACE_NAMESPACE_INLINE_FUNCTION
   struct if_nameindex *if_nameindex ();

@@ -324,12 +324,6 @@
     <ClCompile Include="Log_Msg_Android_Logcat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Log_Msg_Backend.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Log_Msg_Callback.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Log_Msg_IPC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1107,9 +1101,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CDR_Stream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="checked_iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cleanup.h">

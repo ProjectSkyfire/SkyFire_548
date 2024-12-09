@@ -65,7 +65,7 @@ public:
   virtual long schedule (const TYPE &type,
                          const void *act,
                          const ACE_Time_Value &future_time,
-                         const ACE_Time_Value &interval) = 0;
+                         const ACE_Time_Value &interval = ACE_Time_Value::zero) = 0;
 
   /**
    * Run the <functor> for all timers whose values are <= @a current_time.

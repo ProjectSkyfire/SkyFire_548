@@ -340,6 +340,4 @@ int ACE_OS::sendmsg_win32_i (ACE_HANDLE handle,
 }
 #endif
 
-
-
 ACE_END_VERSIONED_NAMESPACE_DECL

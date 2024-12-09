@@ -161,5 +161,4 @@ ACE_SOCK_Dgram::recv (void *buf,
                      func);
 }
 
-
 ACE_END_VERSIONED_NAMESPACE_DECL
