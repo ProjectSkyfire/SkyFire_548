@@ -58,7 +58,7 @@ endif()
 
 include(CheckPlatform)
 
-set(OPENSSL_EXPECTED_VERSION 3.4.0)
+set(OPENSSL_EXPECTED_VERSION 3.2.2)
 set(ACE_EXPECTED_VERSION 6.4.5)
 
 find_package(PCHSupport)
@@ -71,6 +71,7 @@ if( UNIX )
   find_package(Readline)
   find_package(ZLIB)
   find_package(BZip2)
+  find_package(Jemalloc)
 endif()
 
 if(NOT WITHOUT_GIT)

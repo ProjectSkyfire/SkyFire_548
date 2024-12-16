@@ -3,14 +3,6 @@
 # See COPYRIGHT file for Copyright information
 #
 
-# Package overloads - Linux
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  if (NOT NOJEM)
-    set(JEMALLOC_LIBRARY "jemalloc")
-    message(STATUS "UNIX: Using jemalloc")
-  endif()
-endif()
-
 # set default configuration directory
 if( NOT CONF_DIR )
   set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
