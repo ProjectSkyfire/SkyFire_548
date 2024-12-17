@@ -1102,7 +1102,7 @@ return( lhs < rhs? true : false );
 }
 \endcode
      */
-    //    void sort(bool (__cdecl *lessThan)(const T& elem1, const T& elem2)) {
+    //    void sort(bool (*lessThan)(const T& elem1, const T& elem2)) {
     //    std::sort(data, data + num, lessThan);
     //}
     template<class LessThan>
@@ -1144,13 +1144,13 @@ return( lhs < rhs? true : false );
         }
     }
 
-    void sortSubArray(int beginIndex, int endIndex, bool (__cdecl *lessThan)(const T& elem1, const T& elem2)) {
+    void sortSubArray(int beginIndex, int endIndex, bool (*lessThan)(const T& elem1, const T& elem2)) {
         std::sort(data + beginIndex, data + endIndex + 1, lessThan);
     }
 
     /**
      The StrictWeakOrdering can be either a class that overloads the function call operator() or
-     a function pointer of the form <code>bool (__cdecl *lessThan)(const T& elem1, const T& elem2)</code>
+     a function pointer of the form <code>bool (*lessThan)(const T& elem1, const T& elem2)</code>
      */
     template<typename StrictWeakOrdering>
     void sortSubArray(int beginIndex, int endIndex, StrictWeakOrdering& lessThan) {
