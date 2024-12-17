@@ -116,7 +116,7 @@ void Log::section(const std::string& s) {
 }
 
 
-void __cdecl Log::printf(const char* fmt, ...) {
+void Log::printf(const char* fmt, ...) {
     va_list arg_list;
     va_start(arg_list, fmt);
     print(vformat(fmt, arg_list));
@@ -124,13 +124,13 @@ void __cdecl Log::printf(const char* fmt, ...) {
 }
 
 
-void __cdecl Log::vprintf(const char* fmt, va_list argPtr) {
+void Log::vprintf(const char* fmt, va_list argPtr) {
     vfprintf(logFile, fmt, argPtr);
     fflush(logFile);
 }
 
 
-void __cdecl Log::lazyvprintf(const char* fmt, va_list argPtr) {
+void Log::lazyvprintf(const char* fmt, va_list argPtr) {
     vfprintf(logFile, fmt, argPtr);
 }
 
