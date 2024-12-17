@@ -72,6 +72,10 @@ if( UNIX )
   find_package(ZLIB)
   find_package(BZip2)
   find_package(Jemalloc)
+  
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+    find_package(sse2neon)
+  endif()
 endif()
 
 if(NOT WITHOUT_GIT)
