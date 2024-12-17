@@ -16,10 +16,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   endif()
 endif()
 
-if(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
-  add_subdirectory(sse2neon)
-endif()
-
 add_subdirectory(zlib)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)
