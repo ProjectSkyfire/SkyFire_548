@@ -1,53 +1,113 @@
-/*
- * Copyright notice
- * ================
- * GNU General Public License http://www.gnu.org/licenses/gpl.html
- * This C++ implementation of SFMT contains parts of the original C code
- * which was published under the following BSD license, which is therefore
- * in effect in addition to the GNU General Public License.
- * Copyright (c) 2006, 2007 by Mutsuo Saito, Makoto Matsumoto and Hiroshima University.
- * Copyright (c) 2008 by Agner Fog.
- * Copyright (c) 2008-2013 Trinity Core
- * 
- *  BSD License:
- *  Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met:
- *     > Redistributions of source code must retain the above copyright notice, 
- *       this list of conditions and the following disclaimer.
- *     > Redistributions in binary form must reproduce the above copyright notice, 
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
- *     > Neither the name of the Hiroshima University nor the names of its 
- *       contributors may be used to endorse or promote products derived from 
- *       this software without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+/*****************************   randomc.h   **********************************
+* Author:        Agner Fog
+* Date created:  1997
+* Last modified: 2008-11-16
+* Project:       randomc.h
+* Source URL:    www.agner.org/random
+*
+* Description:
+* This header file contains class declarations and other definitions for the 
+* randomc class library of uniform random number generators in C++ language.
+*
+* Overview of classes:
+* ====================
+*
+* class CRandomMersenne:
+* Random number generator of type Mersenne twister.
+* Source file mersenne.cpp
+*
+* class CRandomMother:
+* Random number generator of type Mother-of-All (Multiply with carry).
+* Source file mother.cpp
+*
+* class CRandomSFMT:
+* Random number generator of type SIMD-oriented Fast Mersenne Twister.
+* The class definition is not included here because it is not
+* portable to all platforms. See sfmt.h and sfmt.cpp for details.
+*
+* Member functions (methods):
+* ===========================
+*
+* All these classes have identical member functions:
+*
+* Constructor(int seed):
+* The seed can be any integer. The time may be used as seed.
+* Executing a program twice with the same seed will give the same sequence 
+* of random numbers. A different seed will give a different sequence.
+*
+* void RandomInit(int seed);
+* Re-initializes the random number generator with a new seed.
+*
+* void RandomInitByArray(int const seeds[], int NumSeeds);
+* In CRandomMersenne and CRandomSFMT only: Use this function if you want 
+* to initialize with a seed with more than 32 bits. All bits in the seeds[]
+* array will influence the sequence of random numbers generated. NumSeeds 
+* is the number of entries in the seeds[] array.
+*
+* double Random();
+* Gives a floating point random number in the interval 0 <= x < 1.
+* The resolution is 32 bits in CRandomMother and CRandomMersenne, and
+* 52 bits in CRandomSFMT.
+*
+* int IRandom(int min, int max);
+* Gives an integer random number in the interval min <= x <= max.
+* (max-min < MAXINT).
+* The precision is 2^-32 (defined as the difference in frequency between 
+* possible output values). The frequencies are exact if max-min+1 is a
+* power of 2.
+*
+* int IRandomX(int min, int max);
+* Same as IRandom, but exact. In CRandomMersenne and CRandomSFMT only.
+* The frequencies of all output values are exactly the same for an 
+* infinitely long sequence. (Only relevant for extremely long sequences).
+*
+* uint32_t BRandom();
+* Gives 32 random bits. 
+*
+*
+* Example:
+* ========
+* The file EX-RAN.CPP contains an example of how to generate random numbers.
+*
+*
+* Library version:
+* ================
+* Optimized versions of these random number generators are provided as function
+* libraries in randoma.zip. These function libraries are coded in assembly
+* language and support only x86 platforms, including 32-bit and 64-bit
+* Windows, Linux, BSD, Mac OS-X (Intel based). Use randoma.h from randoma.zip
+*
+*
+* Non-uniform random number generators:
+* =====================================
+* Random number generators with various non-uniform distributions are 
+* available in stocc.zip (www.agner.org/random).
+*
+*
+* Further documentation:
+* ======================
+* The file ran-instructions.pdf contains further documentation and 
+* instructions for these random number generators.
+*
+* Copyright 1997-2008 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*******************************************************************************/
 
 #ifndef RANDOMC_H
 #define RANDOMC_H
 
 // Define integer types with known size: int32_t, uint32_t, int64_t, uint64_t.
 // If this doesn't work then insert compiler-specific definitions here:
-#if defined(__GNUC__)
-  // Compilers supporting C99 or C++0x have inttypes.h defining these integer types
-  #include <inttypes.h>
+#if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1600)
+  // Compilers supporting C99 or C++0x have stdint.h defining these integer types
+  #include <stdint.h>
   #define INT64_SUPPORTED // Remove this if the compiler doesn't support 64-bit integers
 #elif defined(_WIN16) || defined(__MSDOS__) || defined(_MSDOS) 
-   // 16 bit systems use long int for 32 bit integer
+  // 16 bit systems use long int for 32 bit integer.
   typedef   signed long int int32_t;
   typedef unsigned long int uint32_t;
 #elif defined(_MSC_VER)
-  // Microsoft have their own definition
+  // Older Microsoft compilers have their own definition
   typedef   signed __int32  int32_t;
   typedef unsigned __int32 uint32_t;
   typedef   signed __int64  int64_t;
@@ -62,4 +122,77 @@
   #define INT64_SUPPORTED // Remove this if the compiler doesn't support 64-bit integers
 #endif
 
+
+/***********************************************************************
+System-specific user interface functions
+***********************************************************************/
+
+void EndOfProgram(void);               // System-specific exit code (userintf.cpp)
+
+void FatalError(const char *ErrorText);// System-specific error reporting (userintf.cpp)
+
+#if defined(__cplusplus)               // class definitions only in C++
+/***********************************************************************
+Define random number generator classes
+***********************************************************************/
+
+class CRandomMersenne {                // Encapsulate random number generator
+// Choose which version of Mersenne Twister you want:
+#if 0 
+// Define constants for type MT11213A:
+#define MERS_N   351
+#define MERS_M   175
+#define MERS_R   19
+#define MERS_U   11
+#define MERS_S   7
+#define MERS_T   15
+#define MERS_L   17
+#define MERS_A   0xE4BD75F5
+#define MERS_B   0x655E5280
+#define MERS_C   0xFFD58000
+#else    
+// or constants for type MT19937:
+#define MERS_N   624
+#define MERS_M   397
+#define MERS_R   31
+#define MERS_U   11
+#define MERS_S   7
+#define MERS_T   15
+#define MERS_L   18
+#define MERS_A   0x9908B0DF
+#define MERS_B   0x9D2C5680
+#define MERS_C   0xEFC60000
+#endif
+
+public:
+   CRandomMersenne(int seed) {         // Constructor
+      RandomInit(seed); LastInterval = 0;}
+   void RandomInit(int seed);          // Re-seed
+   void RandomInitByArray(int const seeds[], int NumSeeds); // Seed by more than 32 bits
+   int IRandom (int min, int max);     // Output random integer
+   int IRandomX(int min, int max);     // Output random integer, exact
+   double Random();                    // Output random float
+   uint32_t BRandom();                 // Output random bits
+private:
+   void Init0(int seed);               // Basic initialization procedure
+   uint32_t mt[MERS_N];                // State vector
+   int mti;                            // Index into mt
+   uint32_t LastInterval;              // Last interval length for IRandomX
+   uint32_t RLimit;                    // Rejection limit used by IRandomX
+};    
+
+
+class CRandomMother {                  // Encapsulate random number generator
+public:
+   void RandomInit(int seed);          // Initialization
+   int IRandom(int min, int max);      // Get integer random number in desired interval
+   double Random();                    // Get floating point random number
+   uint32_t BRandom();                 // Output random bits
+   CRandomMother(int seed) {           // Constructor
+      RandomInit(seed);}
+protected:
+   uint32_t x[5];                      // History buffer
+};
+
+#endif // __cplusplus
 #endif // RANDOMC_H
