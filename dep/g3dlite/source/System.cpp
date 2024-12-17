@@ -82,7 +82,7 @@
 #if defined(__x86_64__)
 #include <xmmintrin.h>
 #else
-#include <sse2neon.h>
+#include "sse2neon.h"
 #endif
 
 
