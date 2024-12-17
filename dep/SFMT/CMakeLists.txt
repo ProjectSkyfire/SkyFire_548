@@ -13,7 +13,7 @@ set(SFMT_STAT_SRCS
 )
 
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
     ${CMAKE_SOURCE_DIR}/dep/sse2neon
   endif()
