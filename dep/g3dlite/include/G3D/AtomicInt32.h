@@ -77,7 +77,7 @@ public:
 #       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
 
             int32 old;
-#           if __x86_64__
+#           if defined(__x86_64__)
                 asm volatile ("lock; xaddl %0,%1"
                   : "=r"(old), "=m"(m_value) /* outputs */
                   : "0"(x), "m"(m_value)   /* inputs */
@@ -121,7 +121,7 @@ public:
 #       elif defined(G3D_LINUX)  || defined(G3D_FREEBSD)
             unsigned char nz;
 
-#           if __x86_64__
+#           if defined(__x86_64__)
             asm volatile ("lock; decl %1;\n\t"
                           "setnz %%al"
                           : "=a" (nz)
@@ -154,7 +154,7 @@ public:
             // Based on Apache Portable Runtime
             // http://koders.com/c/fid3B6631EE94542CDBAA03E822CA780CBA1B024822.aspx
             int32 ret;
-#           if
+#           if defined(__x86_64__)
                 asm volatile ("lock; cmpxchgl %1, %2"
                           : "=a" (ret)
                           : "r" (exchange), "m" (m_value), "0"(comperand)
