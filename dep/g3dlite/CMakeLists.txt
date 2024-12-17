@@ -57,7 +57,12 @@ if(WIN32)
 else()
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+      ${CMAKE_SOURCE_DIR}/dep/sse2neon
+    endif()
   )
+  
+  
 endif()
 
 add_library(g3dlib STATIC ${g3dlib_STAT_SRCS})

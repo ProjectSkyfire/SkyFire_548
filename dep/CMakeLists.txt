@@ -16,6 +16,12 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   endif()
 endif()
 
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+  add_subdirectory(SFMT)
+  message(STATUS "Adding sse2neon.")
+  add_subdirectory(sse2neon)
+endif()
+
 add_subdirectory(zlib)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)

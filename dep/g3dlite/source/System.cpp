@@ -79,7 +79,11 @@
 #endif
 
 // SIMM include
+#if defined(__x86_64__)
 #include <xmmintrin.h>
+#else
+#include <sse2neon.h>
+#endif
 
 
 namespace G3D {

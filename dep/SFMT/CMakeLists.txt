@@ -12,14 +12,14 @@ set(SFMT_STAT_SRCS
   userintf.cpp
 )
 
-if(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
   message(STATUS "Adding sse2neon.")
   add_subdirectory(${CMAKE_SOURCE_DIR}/dep/sse2neon)
 endif()
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  if(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
     ${CMAKE_SOURCE_DIR}/dep/sse2neon
   endif()
 )
