@@ -5,7 +5,7 @@
 
 #include "Common.h"
 #include "Errors.h" // for ASSERT
-#include "SFMT.h"
+#include "sfmt.h"
 #include "utf8.h"
 #include "Util.h"
 #include <ace/TSS_T.h>
