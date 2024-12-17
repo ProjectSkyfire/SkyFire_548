@@ -127,7 +127,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(__x86_64__)
   #include <emmintrin.h>                 // Define SSE2 intrinsics
 #else
-  #include "sse2neon.h"
+  #include <sse2neon.h>
 #endif
 #include "randomc.h"                   // Define integer types etc
 
