@@ -138,7 +138,7 @@ private:
 
 
     /** Only compiled if you use the sort procedure. */
-    static bool __cdecl compareGT(const T& a, const T& b) {
+    static bool compareGT(const T& a, const T& b) {
         return a > b;
     }
 
