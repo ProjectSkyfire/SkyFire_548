@@ -124,12 +124,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SFMT_H
 #define SFMT_H
 
-#if defined(__x86_64__)
+#if defined(WIN32) || defined(__x86_64__)
   #include <emmintrin.h>                 // Define SSE2 intrinsics
 #else
   #include <sse2neon.h>
 #endif
 #include "randomc.h"                   // Define integer types etc
+#include <time.h>
+#include <new>
 
 // Choose one of the possible Mersenne exponents.
 // Higher values give longer cycle length and use more memory:
@@ -213,23 +215,152 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SFMT_PARITY 0x00000001, 0x00000000, 0x00000000, 0x5986f054  // Period certification vector
 #endif
 
+// Subfunction for the sfmt algorithm
+static inline __m128i sfmt_recursion(__m128i const& a, __m128i const& b,
+    __m128i const& c, __m128i const& d, __m128i const& mask) {
+    __m128i a1, b1, c1, d1, z1, z2;
+    b1 = _mm_srli_epi32(b, SFMT_SR1);
+    a1 = _mm_slli_si128(a, SFMT_SL2);
+    c1 = _mm_srli_si128(c, SFMT_SR2);
+    d1 = _mm_slli_epi32(d, SFMT_SL1);
+    b1 = _mm_and_si128(b1, mask);
+    z1 = _mm_xor_si128(a, a1);
+    z2 = _mm_xor_si128(b1, d1);
+    z1 = _mm_xor_si128(z1, c1);
+    z2 = _mm_xor_si128(z1, z2);
+    return z2;
+}
+
 // Class for SFMT generator with or without Mother-Of-All generator
 class CRandomSFMT {                              // Encapsulate random number generator
+
+   friend class ACE_TSS<CRandomSFMT>;
+
 public:
+   CRandomSFMT() { }
    CRandomSFMT(int seed, int IncludeMother = 0) {// Constructor
       UseMother = IncludeMother; 
       LastInterval = 0;
       RandomInit(seed);}
    void RandomInit(int seed);                    // Re-seed
    void RandomInitByArray(int const seeds[], int NumSeeds); // Seed by more than 32 bits
-   int  IRandom  (int min, int max);             // Output random integer
+   int IRandom(int min, int max) {
+       // Output random integer in the interval min <= x <= max
+       // Slightly inaccurate if (max-min+1) is not a power of 2
+       if (max <= min) {
+           if (max == min) return min; else return 0x80000000;
+       }
+       // Assume 64 bit integers supported. Use multiply and shift method
+       uint32_t interval;                  // Length of interval
+       uint64_t longran;                   // Random bits * interval
+       uint32_t iran;                      // Longran / 2^32
+
+       interval = (uint32_t)(max - min + 1);
+       longran = (uint64_t)BRandom() * interval;
+       iran = (uint32_t)(longran >> 32);
+       // Convert back to signed and return result
+       return (int32_t)iran + min;
+   }
+
    int  IRandomX (int min, int max);             // Output random integer, exact
-   double Random();                              // Output random floating point number
-   uint32_t BRandom();                           // Output random bits
+   uint32_t URandom(uint32_t min, uint32_t max)
+   {
+       // Output random integer in the interval min <= x <= max
+       // Slightly inaccurate if (max-min+1) is not a power of 2
+       if (max <= min) {
+           if (max == min) return min; else return 0;
+       }
+       // Assume 64 bit integers supported. Use multiply and shift method
+       uint32_t interval;                  // Length of interval
+       uint64_t longran;                   // Random bits * interval
+       uint32_t iran;                      // Longran / 2^32
+
+       interval = (uint32_t)(max - min + 1);
+       longran = (uint64_t)BRandom() * interval;
+       iran = (uint32_t)(longran >> 32);
+       // Convert back to signed and return result
+       return iran + min;
+   }
+
+   double Random()
+   {
+       // Output random floating point number
+       if (ix >= SFMT_N * 4 - 1) {
+           // Make sure we have at least two 32-bit numbers
+           Generate();
+       }
+       uint64_t r = *(uint64_t*)((uint32_t*)state + ix);
+       ix += 2;
+       if (UseMother) {
+           // We need 53 bits from Mother-Of-All generator
+           // Use the regular 32 bits and the the carry bits rotated
+           uint64_t r2 = (uint64_t)MotherBits() << 32;
+           r2 |= (MotherState[4] << 16) | (MotherState[4] >> 16);
+           r += r2;
+       }
+       // 53 bits resolution:
+       // return (int64_t)(r >> 11) * (1./(67108864.0*134217728.0)); // (r >> 11)*2^(-53)
+       // 52 bits resolution for compatibility with assembly version:
+       return (int64_t)(r >> 12) * (1. / (67108864.0 * 67108864.0));  // (r >> 12)*2^(-52)
+   }
+
+   uint32_t BRandom()
+   {
+       // Output 32 random bits
+       uint32_t y;
+
+       if (ix >= SFMT_N * 4) {
+           Generate();
+       }
+       y = ((uint32_t*)state)[ix++];
+       if (UseMother) y += MotherBits();
+       return y;
+   }
+
 private:
    void Init2();                                 // Various initializations and period certification
-   void Generate();                              // Fill state array with new random numbers
-   uint32_t MotherBits();                        // Get random bits from Mother-Of-All generator
+
+   void Generate()
+   {
+       // Fill state array with new random numbers
+       int i;
+       __m128i r, r1, r2;
+
+       r1 = state[SFMT_N - 2];
+       r2 = state[SFMT_N - 1];
+       for (i = 0; i < SFMT_N - SFMT_M; i++) {
+           r = sfmt_recursion(state[i], state[i + SFMT_M], r1, r2, mask);
+           state[i] = r;
+           r1 = r2;
+           r2 = r;
+       }
+       for (; i < SFMT_N; i++) {
+           r = sfmt_recursion(state[i], state[i + SFMT_M - SFMT_N], r1, r2, mask);
+           state[i] = r;
+           r1 = r2;
+           r2 = r;
+       }
+       ix = 0;
+   }
+
+   uint32_t MotherBits()
+   {
+       // Get random bits from Mother-Of-All generator
+       uint64_t sum;
+       sum =
+           (uint64_t)2111111111U * (uint64_t)MotherState[3] +
+           (uint64_t)1492 * (uint64_t)MotherState[2] +
+           (uint64_t)1776 * (uint64_t)MotherState[1] +
+           (uint64_t)5115 * (uint64_t)MotherState[0] +
+           (uint64_t)MotherState[4];
+       MotherState[3] = MotherState[2];
+       MotherState[2] = MotherState[1];
+       MotherState[1] = MotherState[0];
+       MotherState[4] = (uint32_t)(sum >> 32);       // Carry
+       MotherState[0] = (uint32_t)sum;               // Low 32 bits of sum
+       return MotherState[0];
+   }
+
    uint32_t ix;                                  // Index into state array
    uint32_t LastInterval;                        // Last interval length for IRandom
    uint32_t RLimit;                              // Rejection limit used by IRandom
@@ -252,5 +383,7 @@ class CRandomSFMT1 : public CRandomSFMT {
 public:
    CRandomSFMT1(int seed) : CRandomSFMT(seed,1) {}
 };
+
+
 
 #endif // SFMT_H

@@ -10,8 +10,8 @@
 #include "Util.h"
 #include <ace/TSS_T.h>
 
-typedef ACE_TSS<SFMTRand> SFMTRandTSS;
-static SFMTRandTSS sfmtRand;
+typedef ACE_TSS<CRandomSFMT> CRandomSFMTTSS;
+static CRandomSFMTTSS sfmtRand;
 
 int32 irand(int32 min, int32 max)
 {

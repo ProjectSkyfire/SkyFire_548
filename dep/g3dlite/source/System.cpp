@@ -79,7 +79,7 @@
 #endif
 
 // SIMM include
-#if defined(__x86_64__)
+#if defined(WIN32) || defined(__x86_64__)
 #include <xmmintrin.h>
 #else
 #include "sse2neon.h"
