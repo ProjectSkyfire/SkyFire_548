@@ -43,7 +43,12 @@ FIND_PATH(OPENSSL_ROOT_DIR
   PATHS
     ${_OPENSSL_ROOT_PATHS}
 )
-MARK_AS_ADVANCED(OPENSSL_ROOT_DIR)
+
+FIND_PATH(OPENSSL_MODULES_DIR legacy.dll
+  ${OPENSSL_ROOT_DIR}/bin
+)
+
+MARK_AS_ADVANCED(OPENSSL_ROOT_DIR OPENSSL_MODULES_DIR)
 
 # Re-use the previous path:
 FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
@@ -68,13 +73,6 @@ IF(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
-
-    FIND_FILE(OPENSSL_LEGACY_DLL
-      NAMES
-        legacy.dll
-      PATHS
-        ${OPENSSL_ROOT_DIR}/bin/
-    )
 
     FIND_LIBRARY(OPENSSL_LIB_LEGACY
 	  NAMES
@@ -127,6 +125,14 @@ IF(WIN32 AND NOT CYGWIN)
         ${OPENSSL_LIB_CRYPTO_RELEASE}
       )
     endif()
+	
+    IF(DEFINED ENV{OPENSSL_MODULES})
+	  MESSAGE(STATUS "OpenSSL: Environment variable [OPENSSL_MODULES] is set to: $ENV{OPENSSL_MODULES}")
+    ELSE()
+	  MESSAGE(FATAL_ERROR "SkyFire requires OPENSSL_MODULES environment variable to be set. \n"
+        "Please create and set the environment variable to: \"${OPENSSL_MODULES_DIR}\" \n"
+		"NOTE: If you are using CMake GUI Remember to restart your CMake GUI for the environment variable to take effect. \n")
+    ENDIF()
 
     MARK_AS_ADVANCED(OPENSSL_LIB_SSL_DEBUG OPENSSL_LIB_SSL_RELEASE OPENSSL_LIB_CRYPTO_DEBUG OPENSSL_LIB_CRYPTO_RELEASE)
   ELSEIF(MINGW)
