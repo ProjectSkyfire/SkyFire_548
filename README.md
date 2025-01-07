@@ -30,6 +30,7 @@ For further information on the SkyFire project, please visit our project website
 
 ## Requirements
 + Platform/Architecture:
+  + Fedora 41: x86_64
   + Fedora 40: x86_64
   + Fedora 39: x86_64
   + Canonical:
@@ -37,16 +38,16 @@ For further information on the SkyFire project, please visit our project website
   + Debian:
     + Debian GNU/Linux 10: x86_32, x86_64
   + Windows / Windows Server:
+    + Windows 11:               x86_64
     + Windows 10:               x86_64
-    + Windows 8.1:              x86_64
-    + Windows 2016 Server:      x86_64
-    + Windows 2012 Server R2:   x86_64
+    + Windows 2025 Server:      x86_64
+    + Windows 2022 Server:      x86_64
 + Processor with SSE2 support
-+ ACE = 6.4.5  (Linux only)
-+ MySQL = 8.0 (Windows / Linux)
-+ CMake = 3.21.1/3.16.3 (Windows / Linux)
-+ OpenSSL = 3.X.X (Windows / Linux)
-+ GCC = 11.2.0 (Linux only)
++ ACE = 8.0.2  (Linux only)
++ MySQL = 9.1 (Windows / Linux)
++ CMake = 3.31.3/3.16.3 (Windows / Linux)
++ OpenSSL = 3.4.0/3.2.2 (Windows / Linux)
++ GCC = 14.1.0 (Linux only)
 + MS Visual Studio = 17 (2022) (Windows only)
 
 ## Install

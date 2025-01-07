@@ -6,7 +6,7 @@
 if( UNIX )
   cmake_minimum_required(VERSION 3.27.7)
 else()
-  cmake_minimum_required(VERSION 3.28.0)
+  cmake_minimum_required(VERSION 3.31.3)
 endif()
 
 if (WIN32)
@@ -58,8 +58,13 @@ endif()
 
 include(CheckPlatform)
 
-set(OPENSSL_EXPECTED_VERSION 3.2.2)
-set(ACE_EXPECTED_VERSION 6.4.5)
+if (MSVC)
+  set(OPENSSL_EXPECTED_VERSION 3.4.0)
+else()
+  set(OPENSSL_EXPECTED_VERSION 3.2.2)
+endif()
+
+set(ACE_EXPECTED_VERSION 8.0.2)
 
 find_package(PCHSupport)
 find_package(ACE REQUIRED)
