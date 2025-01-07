@@ -75,6 +75,20 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
 
+    FIND_FILE(OPENSSL_CRYPTO3_DLL
+    NAMES
+       libcrypto-3-x64.dll
+    PATHS
+      ${OPENSSL_MODULES_DIR}
+    )
+
+    FIND_FILE(OPENSSL_SSL3_DLL
+    NAMES
+       libssl-3-x64.dll
+    PATHS
+      ${OPENSSL_MODULES_DIR}
+    )
+
     FIND_LIBRARY(OPENSSL_LIB_LEGACY
 	  NAMES
 	    liblegacy
