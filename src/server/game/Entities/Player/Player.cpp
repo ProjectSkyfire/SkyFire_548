@@ -7647,6 +7647,19 @@ bool Player::HasCurrency(uint32 id, uint32 count) const
     return itr != _currencyStorage.end() && itr->second.Quantity >= count;
 }
 
+void Player::ModifyCurrencyFlag(uint32 id, uint8 flag)
+{
+    if (!id)
+        return;
+
+    if (_currencyStorage.find(id) == _currencyStorage.end())
+        return;
+
+    _currencyStorage[id].Flags = flag;
+    if (_currencyStorage[id].state != PLAYERCURRENCY_NEW)
+        _currencyStorage[id].state = PLAYERCURRENCY_CHANGED;
+}
+
 void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/)
 {
     if (!count)
