@@ -105,6 +105,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/MagistersTerrace/boss_vexallus.cpp
   EasternKingdoms/MagistersTerrace/magisters_terrace.cpp
 
+  EasternKingdoms/Uldaman/boss_ancient_stone_keeper.cpp
   EasternKingdoms/Uldaman/boss_archaedas.cpp
   EasternKingdoms/Uldaman/boss_galgann_firehammer.cpp
   EasternKingdoms/Uldaman/boss_grimlok.cpp
