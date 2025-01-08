@@ -175,12 +175,12 @@ struct SpellModifier
     Aura* const ownerAura;
 };
 
-enum class PlayerCurrencyState
+enum PlayerCurrencyState
 {
-    PLAYERCURRENCY_UNCHANGED = 0,
-    PLAYERCURRENCY_CHANGED = 1,
-    PLAYERCURRENCY_NEW = 2,
-    PLAYERCURRENCY_REMOVED = 3     //not removed just set count == 0
+    PLAYERCURRENCY_UNCHANGED    = 0,
+    PLAYERCURRENCY_CHANGED      = 1,
+    PLAYERCURRENCY_NEW          = 2,
+    PLAYERCURRENCY_REMOVED      = 3     //not removed just set count == 0
 };
 
 struct PlayerCurrency
@@ -1593,6 +1593,7 @@ public:
     /// initialize currency count for custom initialization at create character
     void SetCurrency(uint32 id, uint32 count, bool printLog = true);
     void ResetCurrencyWeekCap();
+    void ModifyCurrencyFlag(uint32 id, uint8 flag);
 
     /**
       * @name   ModifyCurrency
