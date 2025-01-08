@@ -63,6 +63,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_BIDDER_ITEMS,                    0x12D0, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListBidderItems              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_ITEMS,                           0x02EA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListItems                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_OWNER_ITEMS,                     0x0361, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListOwnerItems               ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_PENDING_SALES,                   0x02DA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListPendingSales);
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_PLACE_BID,                            0x03C8, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionPlaceBid                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_REMOVE_ITEM,                          0x0259, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionRemoveItem                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_SELL_ITEM,                            0x02EB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionSellItem                     ); // 5.4.8 18414
@@ -497,7 +498,7 @@ void OpcodeTable::InitializeClientTable()
 
     /*
     //UNHANDLED
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_PENDING_SALES, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListPendingSales);
+    
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEGROUND_PLAYER_POSITIONS, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::HandleBattlegroundPlayerPositionsOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_CALENDAR_GUILD_FILTER, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarGuildFilter);
