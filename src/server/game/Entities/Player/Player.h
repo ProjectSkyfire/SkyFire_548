@@ -529,15 +529,6 @@ struct EnchantDuration
 typedef std::list<EnchantDuration> EnchantDurationList;
 typedef std::list<Item*> ItemDurationList;
 
-enum class DrunkenState
-{
-    DRUNKEN_SOBER = 0,
-    DRUNKEN_TIPSY = 1,
-    DRUNKEN_DRUNK = 2,
-    DRUNKEN_SMASHED = 3
-};
-
-#define MAX_DRUNKEN   4
 
 enum PlayerFlags
 {

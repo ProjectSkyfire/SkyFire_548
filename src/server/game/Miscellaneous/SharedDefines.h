@@ -4264,6 +4264,15 @@ enum class VoidTransferError
     VOID_TRANSFER_ERROR_TRANSFER_UNKNOWN = 9,
 };
 
+enum class DrunkenState
+{
+    DRUNKEN_SOBER = 0,
+    DRUNKEN_TIPSY = 1,
+    DRUNKEN_DRUNK = 2,
+    DRUNKEN_SMASHED = 3
+};
+#define MAX_DRUNKEN   4
+
 #define CURRENCY_PRECISION 100
 
 enum class PartyResult
