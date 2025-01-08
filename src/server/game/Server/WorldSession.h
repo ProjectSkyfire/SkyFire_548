@@ -1092,6 +1092,8 @@ public:                                                 // opcodes handlers
 
     void SendPlayMusic(uint32 SoundKitID);
 
+    void SendCrossedInebriationThreshold(ObjectGuid guid, uint32 ItemID, DrunkenState drunkenState);
+
 private:
     void InitializeQueryCallbackParameters();
     void ProcessQueryCallbacks();

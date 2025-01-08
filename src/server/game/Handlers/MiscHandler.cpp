@@ -2540,3 +2540,15 @@ void WorldSession::HandleSceneCompleted(WorldPacket& recvPacket)
         unk = recvPacket.read<uint32>();
     SF_LOG_ERROR("network", "hasData %u", unkbit);
 }
+
+void WorldSession::SendCrossedInebriationThreshold(ObjectGuid guid, uint32 ItemID, DrunkenState drunkenState)
+{
+    WorldPacket data(SMSG_CROSSED_INEBRIATION_THRESHOLD, (8 + 4 + 4));
+    data.WriteGuidMask(guid, 0, 4, 2, 6, 5, 1, 3, 7);
+
+    data.WriteGuidBytes(guid, 3);
+    data << ItemID;
+    data << uint32(drunkenState);
+    data.WriteGuidBytes(guid, 4, 6, 7, 0, 2, 5, 1);
+    _player->SendMessageToSet(&data, true);
+}
