@@ -12597,6 +12597,28 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         }
     }
 
+    if (GetTypeId() == TypeID::TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
+    {
+        if (ToPlayer()->HasAura(46953)) // Sword and Board (Passive)
+        {
+            if (procSpell && procSpell->SpellFamilyName == SPELLFAMILY_WARRIOR)
+            {
+                if (procSpell->SpellIconID == 1508 && procSpell->SpellFamilyFlags[1] == 0x00000040) // Devastate
+                {
+                    if (roll_chance_f(30))
+                    {
+                        //Shield Slam Cooldown
+                        if (ToPlayer()->HasSpellCooldown(23922))
+                            ToPlayer()->RemoveSpellCooldown(23922, true);
+
+                        // Sword and Board Energize Spell
+                        ToPlayer()->CastSpell(this, 50227);
+                    }
+                }
+            }
+        }
+    }
+
     if (getClass() == CLASS_WARLOCK)
     {
         float mult = 1.0f;
