@@ -64,7 +64,7 @@ else()
   set(OPENSSL_EXPECTED_VERSION 3.2.2)
 endif()
 
-set(ACE_EXPECTED_VERSION 8.0.2)
+set(ACE_EXPECTED_VERSION 8.0.1)
 
 find_package(PCHSupport)
 find_package(ACE REQUIRED)
