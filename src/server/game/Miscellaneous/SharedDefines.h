@@ -1717,7 +1717,7 @@ enum Targets
     TARGET_UNK_115 = 115,
     TARGET_UNK_116 = 116,
     TARGET_UNK_117 = 117,
-    TARGET_UNK_118 = 118,
+    TARGET_UNIT_TARGET_PARTY_TARGET_RAID = 118, // Buff Spells, like Arcane Brilliance, Mark of the Wild etc.
     TARGET_UNK_119 = 119,
     TARGET_UNK_120 = 120,
     TARGET_UNK_121 = 121,

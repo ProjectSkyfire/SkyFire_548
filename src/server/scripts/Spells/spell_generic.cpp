@@ -1913,35 +1913,6 @@ class spell_gen_launch : public SpellScriptLoader
         }
 };
 
-class spell_gen_increase_stats_buff : public SpellScriptLoader
-{
-    public:
-        spell_gen_increase_stats_buff(char const* scriptName) : SpellScriptLoader(scriptName) { }
-
-        class spell_gen_increase_stats_buff_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_increase_stats_buff_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (GetHitUnit()->IsInRaidWith(GetCaster()))
-                    GetCaster()->CastSpell(GetCaster(), GetEffectValue() + 1, true); // raid buff
-                else
-                    GetCaster()->CastSpell(GetHitUnit(), GetEffectValue(), true); // single-target buff
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_gen_increase_stats_buff_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_gen_increase_stats_buff_SpellScript();
-        }
-};
-
 enum GenericLifebloom
 {
     SPELL_HEXLORD_MALACRASS_LIFEBLOOM_FINAL_HEAL        = 43422,
@@ -3753,12 +3724,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_gift_of_naaru();
     new spell_gen_gnomish_transporter();
     new spell_gen_gunship_portal();
-    new spell_gen_increase_stats_buff("spell_pal_blessing_of_kings");
-    new spell_gen_increase_stats_buff("spell_pal_blessing_of_might");
-    new spell_gen_increase_stats_buff("spell_dru_mark_of_the_wild");
-    new spell_gen_increase_stats_buff("spell_pri_power_word_fortitude");
-    new spell_gen_increase_stats_buff("spell_mage_arcane_brilliance");
-    new spell_gen_increase_stats_buff("spell_mage_dalaran_brilliance");
     new spell_gen_interrupt();
     new spell_gen_launch();
     new spell_gen_lifebloom("spell_hexlord_lifebloom", SPELL_HEXLORD_MALACRASS_LIFEBLOOM_FINAL_HEAL);
