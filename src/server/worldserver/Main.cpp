@@ -3,7 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
-/// \addtogroup Trinityd Skyfire Daemon
+/// \addtogroup Skyfired Skyfire Daemon
 /// @{
 /// \file
 #pragma comment (lib, "Crypt32")
@@ -153,7 +153,7 @@ extern int main(int argc, char** argv)
     // at sMaster return function exist with codes
     // 0 - normal shutdown
     // 1 - shutdown at error
-    // 2 - restart command used, this code can be used by restarter for restart Trinityd
+    // 2 - restart command used, this code can be used by restarter for restart Skyfired
 
     return ret;
 }

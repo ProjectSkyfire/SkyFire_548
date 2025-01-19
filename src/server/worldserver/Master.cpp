@@ -4,7 +4,7 @@
 */
 
 /** \file
-    \ingroup Trinityd
+    \ingroup Skyfired
 */
 
 #include <ace/Sig_Handler.h>

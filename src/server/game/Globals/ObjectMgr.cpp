@@ -96,7 +96,7 @@ std::string GetScriptCommandName(ScriptCommands command)
         case ScriptCommands::SCRIPT_COMMAND_LOAD_PATH: res = "SCRIPT_COMMAND_LOAD_PATH"; break;
         case ScriptCommands::SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT: res = "SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT"; break;
         case ScriptCommands::SCRIPT_COMMAND_KILL: res = "SCRIPT_COMMAND_KILL"; break;
-            // TrinityCore only
+            // Skyfire only
         case ScriptCommands::SCRIPT_COMMAND_ORIENTATION: res = "SCRIPT_COMMAND_ORIENTATION"; break;
         case ScriptCommands::SCRIPT_COMMAND_EQUIP: res = "SCRIPT_COMMAND_EQUIP"; break;
         case ScriptCommands::SCRIPT_COMMAND_MODEL: res = "SCRIPT_COMMAND_MODEL"; break;
@@ -7448,7 +7448,7 @@ bool ObjectMgr::LoadSkyFireStrings(const char* table, int32 min_value, int32 max
     if (!result)
     {
         if (min_value == MIN_SKYFIRE_STRING_ID)              // error only in case internal strings
-            SF_LOG_ERROR("server.loading", ">> Loaded 0 trinity strings. DB table `%s` is empty. Cannot continue.", table);
+            SF_LOG_ERROR("server.loading", ">> Loaded 0 skyfire strings. DB table `%s` is empty. Cannot continue.", table);
         else
             SF_LOG_INFO("server.loading", ">> Loaded 0 string templates. DB table `%s` is empty.", table);
 

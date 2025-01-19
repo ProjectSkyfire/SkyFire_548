@@ -28,7 +28,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_TINY))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetUInt8() on non-tinyint field. Using type: %s.", FieldTypeToString(data.type));
@@ -46,7 +46,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_TINY))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetInt8() on non-tinyint field. Using type: %s.", FieldTypeToString(data.type));
@@ -71,7 +71,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_SHORT) && !IsType(MYSQL_TYPE_YEAR))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetUInt16() on non-smallint field. Using type: %s.", FieldTypeToString(data.type));
@@ -89,7 +89,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_SHORT) && !IsType(MYSQL_TYPE_YEAR))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetInt16() on non-smallint field. Using type: %s.", FieldTypeToString(data.type));
@@ -107,7 +107,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_INT24) && !IsType(MYSQL_TYPE_LONG))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetUInt32() on non-(medium)int field. Using type: %s.", FieldTypeToString(data.type));
@@ -125,7 +125,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_INT24) && !IsType(MYSQL_TYPE_LONG))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetInt32() on non-(medium)int field. Using type: %s.", FieldTypeToString(data.type));
@@ -143,7 +143,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_LONGLONG) && !IsType(MYSQL_TYPE_BIT))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetUInt64() on non-bigint field. Using type: %s.", FieldTypeToString(data.type));
@@ -161,7 +161,7 @@ public:
         if (!data.value)
             return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_LONGLONG) && !IsType(MYSQL_TYPE_BIT))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetInt64() on non-bigint field. Using type: %s.", FieldTypeToString(data.type));
@@ -179,7 +179,7 @@ public:
         if (!data.value)
             return 0.0f;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_FLOAT))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetFloat() on non-float field. Using type: %s.", FieldTypeToString(data.type));
@@ -197,7 +197,7 @@ public:
         if (!data.value)
             return 0.0f;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (!IsType(MYSQL_TYPE_DOUBLE))
         {
             SF_LOG_WARN("sql.sql", "Warning: GetDouble() on non-double field. Using type: %s.", FieldTypeToString(data.type));
@@ -215,7 +215,7 @@ public:
         if (!data.value)
             return nullptr;
 
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
         if (IsNumeric())
         {
             SF_LOG_WARN("sql.sql", "Error: GetCString() on numeric field. Using type: %s.", FieldTypeToString(data.type));
@@ -370,7 +370,7 @@ protected:
     void GetBinarySizeChecked(uint8* buf, size_t size) const;
 
 private:
-#ifdef TRINITY_DEBUG
+#ifdef SKYFIRE_DEBUG
     static char const* FieldTypeToString(enum_field_types type)
     {
         switch (type)
