@@ -29428,6 +29428,14 @@ void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecli
     GetSession()->SendPacket(&data);
 }
 
+void Player::SetLootSpecialization(uint32 specialization)
+{
+    if (GetLootSpecialization() == specialization)
+        return;
+
+    SetUInt32Value(PLAYER_FIELD_LOOT_SPEC_ID, specialization);
+}
+
 void Player::UpdatePhasing()
 {
     if (!IsInWorld())

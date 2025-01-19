@@ -1576,6 +1576,10 @@ public:
     void AddRefundReference(uint32 it);
     void DeleteRefundReference(uint32 it);
 
+    void SetLootSpecialization(uint32 specialization);
+    uint32 GetLootSpecialization() const { return GetUInt32Value(PLAYER_FIELD_LOOT_SPEC_ID); }
+    uint32 GetLootSpecOrClassSpec() const;
+
     /// send initialization of new currency for client
     void SendNewCurrency(uint32 id) const;
     /// send full data about all currencies to client

@@ -1946,3 +1946,30 @@ void WorldSession::SendItemExpirePurchaseRefund(ObjectGuid itemGuid)
 
     SendPacket(&data);
 }
+
+void WorldSession::HandleSetLootSpecialization(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_SET_LOOT_SPECIALIZATION");
+
+    uint32 lootSpecialization;
+    recvData >> lootSpecialization;
+
+    // If client sends 0 when setting to current specialization.
+    if (lootSpecialization)
+    {
+        auto specializationEntry = sChrSpecializationStore.LookupEntry(lootSpecialization);
+        if (!specializationEntry)
+        {
+            SF_LOG_DEBUG("network", "Player tried to set their loot specialization to %u which doesn't exist!", lootSpecialization);
+            return;
+        }
+
+        if (GetPlayer()->getClass() != specializationEntry->classId)
+        {
+            SF_LOG_DEBUG("network", "Player tried to set their loot specialization to %u which isn't valid for their class!", lootSpecialization);
+            return;
+        }
+    }
+
+    GetPlayer()->SetLootSpecialization(lootSpecialization);
+}
