@@ -242,6 +242,11 @@ Player* ObjectAccessor::FindPlayer(uint64 guid)
     return GetObjectInWorld(guid, (Player*)NULL);
 }
 
+Player* ObjectAccessor::FindPlayerInOrOutOfWorld(uint64 guid)
+{
+    return GetObjectInOrOutOfWorld(guid, (Player*)NULL);
+}
+
 Unit* ObjectAccessor::FindUnit(uint64 guid)
 {
     return GetObjectInWorld(guid, (Unit*)NULL);
