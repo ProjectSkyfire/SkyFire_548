@@ -17,7 +17,6 @@
       - cmake -DDEBUG=0 -DUSE_LIBCURL=1 ..
       - make -j$(nproc)
       
-    ---
     kind: pipeline
     type: docker
     name: amd64-clang
