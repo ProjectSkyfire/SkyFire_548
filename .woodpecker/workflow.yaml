@@ -4,12 +4,8 @@ when:
 
 steps:
   - name: build
-    image: debian
+    image: ubuntu-latest
     commands:
-      - echo "This is the build step"
-      - echo "binary-data-123" > executable
-  - name: a-test-step
-    image: golang:1.16
-    commands:
-      - echo "Testing ..."
-      - ./executable
+      - apt-get install g++ make cmake git wget libssl-dev libreadline-dev bzip2 libbz2-dev
+      - apt-get install mysql-server mysql-client libmysqlclient-dev libmysql++-dev
+      - apt-get install libace-dev
