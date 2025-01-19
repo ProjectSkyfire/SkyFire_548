@@ -3,7 +3,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548/badge)](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/57a11392c3ed42dcae439669e893565f)](https://app.codacy.com/gh/ProjectSkyfire/SkyFire_548/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-[![status-badge](https://ci.codeberg.org/api/badges/14103/status.svg)](https://ci.codeberg.org/repos/14103)
+[![status-badge](https://ci.codeberg.org/api/badges/14105/status.svg)](https://ci.codeberg.org/repos/14105)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly on C++.
