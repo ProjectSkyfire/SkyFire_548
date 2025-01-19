@@ -1,0 +1,14 @@
+labels:
+  platform: windows/amd64
+  backend: local
+
+
+#when:
+#  - branch: main
+#    event: push
+
+steps:
+  build:
+    image: cmd
+    commands:
+      - echo "hello repo"
