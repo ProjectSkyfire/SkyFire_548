@@ -315,6 +315,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                          0x00F2, STATUS_UNHANDLED,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_REMOVE_MOVEMENT_FORCE_ACK,               0x10DB, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementForceAck                    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK,                         0x1052, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveSetCanFlyAckOpcode              ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,                0x09FB, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleSetCollisionHeightAck               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_FLY,                                 0x01F1, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SPLINE_DONE,                             0x11D9, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveSplineDoneOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TELEPORT_ACK,                            0x0078, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveTeleportAck                     ); // 5.4.8 18414
@@ -522,7 +523,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_PARTY, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_RAID, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_NOT_ACTIVE_MOVER, 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleMoveNotActiveMover);
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK, 0x09FB, STATUS_UNHANDLED, PROCESS_THREADSAFE, &WorldSession::HandleSetCollisionHeightAck);
     DEFINE_OPCODE_HANDLER(CMSG_NEXT_CINEMATIC_CAMERA, 0x1124, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleNextCinematicCamera);
     DEFINE_OPCODE_HANDLER(CMSG_PET_LEARN_TALENT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetLearnTalent);
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_QUESTS_COMPLETED, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQueryQuestsCompleted);
