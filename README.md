@@ -1,7 +1,9 @@
-# ![logo](https://abload.de/img/15_14_skyfire_logoqyj68.png)
+# ![logo](https://www.projectskyfire.org/uploads/monthly_2015_05/14_skyfire_logo.png.9efa54d2770daf92757f7e29109cf89e.png)
 
 [![CodeFactor](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548/badge)](https://www.codefactor.io/repository/github/projectskyfire/skyfire_548)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/57a11392c3ed42dcae439669e893565f)](https://app.codacy.com/gh/ProjectSkyfire/SkyFire_548/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
+[![status-badge](https://ci.codeberg.org/api/badges/14103/status.svg)](https://ci.codeberg.org/repos/14103)
 
 ## Project Information
 SkyFire is a *MMORPG* Framework based mostly on C++.
