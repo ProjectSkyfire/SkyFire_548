@@ -6,6 +6,6 @@ steps:
   - name: build
     image: ubuntu:latest
     commands:
-      - apt-get install g++ make cmake git wget libssl-dev libreadline-dev bzip2 libbz2-dev
+      - apt-get install g++ make cmake git wget libssl-dev libreadline-dev libbz2-dev
       - apt-get install mysql-server mysql-client libmysqlclient-dev libmysql++-dev
       - apt-get install libace-dev
