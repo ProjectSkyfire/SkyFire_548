@@ -1924,10 +1924,15 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recvData */)
 {
-    /*
-        SF_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PET_INFO");
-        recvData.hexlike();
-    */
+    if (_player->GetVehicle())
+        _player->VehicleSpellInitialize();
+    else if (Unit* minion = _player->GetFirstControlled())
+    {
+        if (minion->IsPet())
+            _player->PetSpellInitialize();
+        else if (minion->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
+            _player->CharmSpellInitialize();
+    }
 }
 
 void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)

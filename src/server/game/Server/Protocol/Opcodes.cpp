@@ -390,6 +390,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_FORCED_REACTIONS,                     0x06F5, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestForcedReactionsOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_HOTFIX,                               0x158D, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleRequestHotfix                       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PARTY_MEMBER_STATS,                   0x0806, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestPartyMemberStatsOpcode       ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PET_INFO,                             0x135B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestPetInfoOpcode                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PLAYED_TIME,                          0x03F6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePlayedTime                          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PVP_OPTIONS_ENABLED,                  0x0A22, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleRequestPvpOptions                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PVP_REWARDS,                          0x0375, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleRequestPvpReward                    ); // 5.4.8 18414
@@ -528,7 +529,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_PET_LEARN_TALENT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetLearnTalent);
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_QUESTS_COMPLETED, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQueryQuestsCompleted);
     DEFINE_OPCODE_HANDLER(CMSG_REALM_SPLIT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRealmSplitOpcode);
-    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PET_INFO, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRequestPetInfoOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_SET_ACTIVE_VOICE_CHANNEL, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetActiveVoiceChannel);
     DEFINE_OPCODE_HANDLER(CMSG_SET_GUILD_BANK_TEXT, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetGuildBankTabText);
     DEFINE_OPCODE_HANDLER(CMSG_SET_SAVED_INSTANCE_EXTEND, 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetSavedInstanceExtend);
