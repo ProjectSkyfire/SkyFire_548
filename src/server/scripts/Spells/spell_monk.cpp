@@ -789,8 +789,8 @@ class spell_monk_spinning_crane_kick : public SpellScriptLoader
             if (Unit* caster = GetCaster())
             {
                 std::list<Unit*> targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(caster, caster, 8.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                Skyfire::AnyUnfriendlyUnitInObjectRangeCheck u_check(caster, caster, 8.0f);
+                Skyfire::UnitListSearcher<Skyfire::AnyUnfriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
                 caster->VisitNearbyObject(8.0f, searcher);
                 if (targets.size() >= 3)
                     caster->CastSpell(caster, SPELL_MONK_SPINNING_CRANE_KICK_ENERGIZE, true);
@@ -1173,7 +1173,7 @@ class spell_monk_renewing_mist : public SpellScriptLoader
 
                 if (playerList.size() > 1)
                 {
-                    playerList.sort(Trinity::HealthPctOrderPred());
+                    playerList.sort(Skyfire::HealthPctOrderPred());
                     playerList.resize(1);
                 }
 
@@ -1351,7 +1351,7 @@ class spell_monk_healing_sphere : public SpellScriptLoader
                 GetCaster()->GetAreaTriggerList(sphereList, SPELL_MONK_HEALING_SPHERE);
                 if (!sphereList.empty())
                 {
-                    sphereList.sort(Trinity::AreaTriggerDurationPctOrderPred());
+                    sphereList.sort(Skyfire::AreaTriggerDurationPctOrderPred());
                     for (auto itr : sphereList)
                     {
                         AreaTrigger* sphere = itr;
@@ -1768,7 +1768,7 @@ class spell_monk_fists_of_fury_stun : public SpellScriptLoader
 
         void RemoveInvalidTargets(std::list<WorldObject*>& targets)
         {
-            targets.remove_if(Trinity::UnitAuraCheck(true, GetSpellInfo()->Id));
+            targets.remove_if(Skyfire::UnitAuraCheck(true, GetSpellInfo()->Id));
         }
 
         void Register()
@@ -2286,7 +2286,7 @@ class spell_monk_thunder_focus_tea : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
         {
-            unitList.remove_if(Trinity::UnitAuraCheck(false, SPELL_MONK_RENEWING_MIST_HOT, GetCaster()->GetGUID()));
+            unitList.remove_if(Skyfire::UnitAuraCheck(false, SPELL_MONK_RENEWING_MIST_HOT, GetCaster()->GetGUID()));
         }
 
         void HandleOnHit()

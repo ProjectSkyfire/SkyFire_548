@@ -16898,7 +16898,7 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
     }
 }
 
-//not used in Trinityd, function for external script library
+//not used in Skyfired, function for external script library
 void Player::GroupEventHappens(uint32 questId, WorldObject const* pEventObject)
 {
     if (Group* group = GetGroup())
@@ -29426,6 +29426,14 @@ void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecli
     data.WriteString(declinerName);
     data << (int32)0;
     GetSession()->SendPacket(&data);
+}
+
+void Player::SetLootSpecialization(uint32 specialization)
+{
+    if (GetLootSpecialization() == specialization)
+        return;
+
+    SetUInt32Value(PLAYER_FIELD_LOOT_SPEC_ID, specialization);
 }
 
 void Player::UpdatePhasing()

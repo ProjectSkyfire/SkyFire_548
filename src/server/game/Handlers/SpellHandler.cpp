@@ -1299,11 +1299,10 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
 {
-    uint64 guid;
-    uint32 spellId;
-
-    recvPacket >> guid;
-    recvPacket >> spellId;
+    ObjectGuid guid;
+    uint32 spellId = recvPacket.read<uint32>();
+    recvPacket.ReadGuidMask(guid, 0, 3, 1, 4, 6, 2, 7, 5);
+    recvPacket.ReadGuidBytes(guid, 0, 5, 3, 4, 7, 2, 6, 1);
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
