@@ -86,7 +86,7 @@ public:
             //PierceArmor
             if (PierceArmor_Timer <= diff)
             {
-                if (urand(0, 3) < 2)
+                if ((std::rand() % 3) < 2)
                     DoCastVictim(SPELL_PIERCEARMOR);
                 PierceArmor_Timer = 35000;
             } else PierceArmor_Timer -= diff;

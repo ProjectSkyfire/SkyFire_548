@@ -104,8 +104,8 @@ public:
             eruptSection = 3;
             if (phase == PHASE_FIGHT)
             {
-                events.ScheduleEvent(EVENT_DISRUPT, urand(10000, 25000));
-                events.ScheduleEvent(EVENT_FEVER, urand(15000, 20000));
+                events.ScheduleEvent(EVENT_DISRUPT, std::rand() % 25000 + 10000);
+                events.ScheduleEvent(EVENT_FEVER, std::rand() % 20000 + 15000);
                 events.ScheduleEvent(EVENT_PHASE, 90000);
                 events.ScheduleEvent(EVENT_ERUPT, 15000);
                 me->GetMotionMaster()->MoveChase(me->GetVictim());
@@ -137,11 +137,11 @@ public:
                 {
                     case EVENT_DISRUPT:
                         DoCastAOE(SPELL_SPELL_DISRUPTION);
-                        events.ScheduleEvent(EVENT_DISRUPT, urand(5000, 10000));
+                        events.ScheduleEvent(EVENT_DISRUPT, std::rand() % 10000 + 5000);
                         break;
                     case EVENT_FEVER:
                         DoCastAOE(SPELL_DECREPIT_FEVER);
-                        events.ScheduleEvent(EVENT_FEVER, urand(20000, 25000));
+                        events.ScheduleEvent(EVENT_FEVER, std::rand() % 25000 + 20000);
                         break;
                     case EVENT_PHASE:
                         /// @todo Add missing texts for both phase switches

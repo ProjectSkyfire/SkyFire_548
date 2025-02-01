@@ -297,7 +297,7 @@ class boss_kologarn : public CreatureScript
                                 eyebeamTarget = eyebeamTargetUnit->GetGUID();
                                 DoCast(me, SPELL_SUMMON_FOCUSED_EYEBEAM, true);
                             }
-                            events.ScheduleEvent(EVENT_FOCUSED_EYEBEAM, urand(15, 35) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_FOCUSED_EYEBEAM, std::rand() % (35 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS));
                             break;
                     }
                 }
@@ -395,7 +395,7 @@ class spell_ulduar_stone_grip_cast_target : public SpellScriptLoader
                 while (maxTargets < unitList.size())
                 {
                     std::list<WorldObject*>::iterator itr = unitList.begin();
-                    advance(itr, urand(0, unitList.size()-1));
+                    advance(itr, std::rand() % (unitList.size() - 1));
                     unitList.erase(itr);
                 }
 

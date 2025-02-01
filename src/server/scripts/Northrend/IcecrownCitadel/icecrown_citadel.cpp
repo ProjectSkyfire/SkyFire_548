@@ -589,8 +589,8 @@ class npc_rotting_frost_giant : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_DEATH_PLAGUE, 15000);
-                _events.ScheduleEvent(EVENT_STOMP, urand(5000, 8000));
-                _events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_STOMP, std::rand() % 8000 + 5000);
+                _events.ScheduleEvent(EVENT_ARCTIC_BREATH, std::rand() % 15000 + 10000);
             }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
@@ -622,11 +622,11 @@ class npc_rotting_frost_giant : public CreatureScript
                             break;
                         case EVENT_STOMP:
                             DoCastVictim(SPELL_STOMP);
-                            _events.ScheduleEvent(EVENT_STOMP, urand(15000, 18000));
+                            _events.ScheduleEvent(EVENT_STOMP, std::rand() % 18000 + 15000);
                             break;
                         case EVENT_ARCTIC_BREATH:
                             DoCastVictim(SPELL_ARCTIC_BREATH);
-                            _events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(26000, 33000));
+                            _events.ScheduleEvent(EVENT_ARCTIC_BREATH, std::rand() % 33000 + 26000);
                             break;
                         default:
                             break;
@@ -758,8 +758,8 @@ class boss_sister_svalna : public CreatureScript
                 if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
                     crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
                 events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
-                events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
-                events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
+                events.ScheduleEvent(EVENT_IMPALING_SPEAR, std::rand() % 50000 + 40000);
+                events.ScheduleEvent(EVENT_AETHER_SHIELD, std::rand() % 110000 + 100000);
             }
 
             void KilledUnit(Unit* victim) OVERRIDE
@@ -895,7 +895,7 @@ class boss_sister_svalna : public CreatureScript
                                 DoCast(me, SPELL_AETHER_SHIELD);
                                 DoCast(target, SPELL_IMPALING_SPEAR);
                             }
-                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 25000));
+                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, std::rand() % 25000 + 20000);
                             break;
                         default:
                             break;
@@ -936,8 +936,8 @@ class npc_crok_scourgebane : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, urand(7500, 12500));
-                _events.ScheduleEvent(EVENT_DEATH_STRIKE, urand(25000, 30000));
+                _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, std::rand() % 12500 + 7500);
+                _events.ScheduleEvent(EVENT_DEATH_STRIKE, std::rand() % 30000 + 25000);
                 me->SetReactState(REACT_DEFENSIVE);
                 _didUnderTenPercentText = false;
                 _wipeCheckTimer = 1000;
@@ -1146,12 +1146,12 @@ class npc_crok_scourgebane : public CreatureScript
                             break;
                         case EVENT_SCOURGE_STRIKE:
                             DoCastVictim(SPELL_SCOURGE_STRIKE);
-                            _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, urand(10000, 14000));
+                            _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, std::rand() % 14000 + 10000);
                             break;
                         case EVENT_DEATH_STRIKE:
                             if (HealthBelowPct(20))
                                 DoCastVictim(SPELL_DEATH_STRIKE);
-                            _events.ScheduleEvent(EVENT_DEATH_STRIKE, urand(5000, 10000));
+                            _events.ScheduleEvent(EVENT_DEATH_STRIKE, std::rand() % 10000 + 5000);
                             break;
                         case EVENT_HEALTH_CHECK:
                             if (HealthAbovePct(15))
@@ -1336,11 +1336,11 @@ class npc_captain_arnath : public CreatureScript
             void Reset() OVERRIDE
             {
                 Events.Reset();
-                Events.ScheduleEvent(EVENT_ARNATH_FLASH_HEAL, urand(4000, 7000));
-                Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, urand(8000, 14000));
-                Events.ScheduleEvent(EVENT_ARNATH_SMITE, urand(3000, 6000));
+                Events.ScheduleEvent(EVENT_ARNATH_FLASH_HEAL, std::rand() % 7000 + 4000);
+                Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, std::rand() % 14000 + 8000);
+                Events.ScheduleEvent(EVENT_ARNATH_SMITE, std::rand() % 6000 + 3000);
                 if (Is25ManRaid() && IsUndead)
-                    Events.ScheduleEvent(EVENT_ARNATH_DOMINATE_MIND, urand(22000, 27000));
+                    Events.ScheduleEvent(EVENT_ARNATH_DOMINATE_MIND, std::rand() % 27000 + 22000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1360,23 +1360,23 @@ class npc_captain_arnath : public CreatureScript
                         case EVENT_ARNATH_FLASH_HEAL:
                             if (Creature* target = FindFriendlyCreature())
                                 DoCast(target, SPELL_FLASH_HEAL);
-                            Events.ScheduleEvent(EVENT_ARNATH_FLASH_HEAL, urand(6000, 9000));
+                            Events.ScheduleEvent(EVENT_ARNATH_FLASH_HEAL, std::rand() % 9000 + 6000);
                             break;
                         case EVENT_ARNATH_PW_SHIELD:
                         {
                             std::list<Creature*> targets = DoFindFriendlyMissingBuff(40.0f, SPELL_POWER_WORD_SHIELD);
                             DoCast(Skyfire::Containers::SelectRandomContainerElement(targets), SPELL_POWER_WORD_SHIELD);
-                            Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, urand(15000, 20000));
+                            Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, std::rand() % 20000 + 15000);
                             break;
                         }
                         case EVENT_ARNATH_SMITE:
                             DoCastVictim(SPELL_SMITE);
-                            Events.ScheduleEvent(EVENT_ARNATH_SMITE, urand(4000, 7000));
+                            Events.ScheduleEvent(EVENT_ARNATH_SMITE, std::rand() % 7000 + 4000);
                             break;
                         case EVENT_ARNATH_DOMINATE_MIND:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_DOMINATE_MIND);
-                            Events.ScheduleEvent(EVENT_ARNATH_DOMINATE_MIND, urand(28000, 37000));
+                            Events.ScheduleEvent(EVENT_ARNATH_DOMINATE_MIND, std::rand() % 37000 + 28000);
                             break;
                         default:
                             break;
@@ -1417,11 +1417,11 @@ class npc_captain_brandon : public CreatureScript
             void Reset() OVERRIDE
             {
                 Events.Reset();
-                Events.ScheduleEvent(EVENT_BRANDON_CRUSADER_STRIKE, urand(6000, 10000));
+                Events.ScheduleEvent(EVENT_BRANDON_CRUSADER_STRIKE, std::rand() % 10000 + 6000);
                 Events.ScheduleEvent(EVENT_BRANDON_DIVINE_SHIELD, 500);
-                Events.ScheduleEvent(EVENT_BRANDON_JUDGEMENT_OF_COMMAND, urand(8000, 13000));
+                Events.ScheduleEvent(EVENT_BRANDON_JUDGEMENT_OF_COMMAND, std::rand() % 13000 + 8000);
                 if (IsUndead)
-                    Events.ScheduleEvent(EVENT_BRANDON_HAMMER_OF_BETRAYAL, urand(25000, 30000));
+                    Events.ScheduleEvent(EVENT_BRANDON_HAMMER_OF_BETRAYAL, std::rand() % 30000 + 25000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1440,7 +1440,7 @@ class npc_captain_brandon : public CreatureScript
                     {
                         case EVENT_BRANDON_CRUSADER_STRIKE:
                             DoCastVictim(SPELL_CRUSADER_STRIKE);
-                            Events.ScheduleEvent(EVENT_BRANDON_CRUSADER_STRIKE, urand(6000, 12000));
+                            Events.ScheduleEvent(EVENT_BRANDON_CRUSADER_STRIKE, std::rand() % 12000 + 6000);
                             break;
                         case EVENT_BRANDON_DIVINE_SHIELD:
                             if (HealthBelowPct(20))
@@ -1449,12 +1449,12 @@ class npc_captain_brandon : public CreatureScript
                             break;
                         case EVENT_BRANDON_JUDGEMENT_OF_COMMAND:
                             DoCastVictim(SPELL_JUDGEMENT_OF_COMMAND);
-                            Events.ScheduleEvent(EVENT_BRANDON_JUDGEMENT_OF_COMMAND, urand(8000, 13000));
+                            Events.ScheduleEvent(EVENT_BRANDON_JUDGEMENT_OF_COMMAND, std::rand() % 13000 + 8000);
                             break;
                         case EVENT_BRANDON_HAMMER_OF_BETRAYAL:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_HAMMER_OF_BETRAYAL);
-                            Events.ScheduleEvent(EVENT_BRANDON_HAMMER_OF_BETRAYAL, urand(45000, 60000));
+                            Events.ScheduleEvent(EVENT_BRANDON_HAMMER_OF_BETRAYAL, std::rand() % 60000 + 45000);
                             break;
                         default:
                             break;
@@ -1486,10 +1486,10 @@ class npc_captain_grondel : public CreatureScript
             {
                 Events.Reset();
                 Events.ScheduleEvent(EVENT_GRONDEL_CHARGE_CHECK, 500);
-                Events.ScheduleEvent(EVENT_GRONDEL_MORTAL_STRIKE, urand(8000, 14000));
-                Events.ScheduleEvent(EVENT_GRONDEL_SUNDER_ARMOR, urand(3000, 12000));
+                Events.ScheduleEvent(EVENT_GRONDEL_MORTAL_STRIKE, std::rand() % 14000 + 8000);
+                Events.ScheduleEvent(EVENT_GRONDEL_SUNDER_ARMOR, std::rand() % 12000 + 3000);
                 if (IsUndead)
-                    Events.ScheduleEvent(EVENT_GRONDEL_CONFLAGRATION, urand(12000, 17000));
+                    Events.ScheduleEvent(EVENT_GRONDEL_CONFLAGRATION, std::rand() % 17000 + 12000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1512,16 +1512,16 @@ class npc_captain_grondel : public CreatureScript
                             break;
                         case EVENT_GRONDEL_MORTAL_STRIKE:
                             DoCastVictim(SPELL_MORTAL_STRIKE);
-                            Events.ScheduleEvent(EVENT_GRONDEL_MORTAL_STRIKE, urand(10000, 15000));
+                            Events.ScheduleEvent(EVENT_GRONDEL_MORTAL_STRIKE, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_GRONDEL_SUNDER_ARMOR:
                             DoCastVictim(SPELL_SUNDER_ARMOR);
-                            Events.ScheduleEvent(EVENT_GRONDEL_SUNDER_ARMOR, urand(5000, 17000));
+                            Events.ScheduleEvent(EVENT_GRONDEL_SUNDER_ARMOR, std::rand() % 17000 + 5000);
                             break;
                         case EVENT_GRONDEL_CONFLAGRATION:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 DoCast(target, SPELL_CONFLAGRATION);
-                            Events.ScheduleEvent(EVENT_GRONDEL_CONFLAGRATION, urand(10000, 15000));
+                            Events.ScheduleEvent(EVENT_GRONDEL_CONFLAGRATION, std::rand() % 15000 + 10000);
                             break;
                         default:
                             break;
@@ -1552,9 +1552,9 @@ class npc_captain_rupert : public CreatureScript
             void Reset() OVERRIDE
             {
                 Events.Reset();
-                Events.ScheduleEvent(EVENT_RUPERT_FEL_IRON_BOMB, urand(15000, 20000));
-                Events.ScheduleEvent(EVENT_RUPERT_MACHINE_GUN, urand(25000, 30000));
-                Events.ScheduleEvent(EVENT_RUPERT_ROCKET_LAUNCH, urand(10000, 15000));
+                Events.ScheduleEvent(EVENT_RUPERT_FEL_IRON_BOMB, std::rand() % 20000 + 15000);
+                Events.ScheduleEvent(EVENT_RUPERT_MACHINE_GUN, std::rand() % 30000 + 25000);
+                Events.ScheduleEvent(EVENT_RUPERT_ROCKET_LAUNCH, std::rand() % 15000 + 10000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1574,17 +1574,17 @@ class npc_captain_rupert : public CreatureScript
                         case EVENT_RUPERT_FEL_IRON_BOMB:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_FEL_IRON_BOMB);
-                            Events.ScheduleEvent(EVENT_RUPERT_FEL_IRON_BOMB, urand(15000, 20000));
+                            Events.ScheduleEvent(EVENT_RUPERT_FEL_IRON_BOMB, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_RUPERT_MACHINE_GUN:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                                 DoCast(target, SPELL_MACHINE_GUN);
-                            Events.ScheduleEvent(EVENT_RUPERT_MACHINE_GUN, urand(25000, 30000));
+                            Events.ScheduleEvent(EVENT_RUPERT_MACHINE_GUN, std::rand() % 30000 + 25000);
                             break;
                         case EVENT_RUPERT_ROCKET_LAUNCH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                                 DoCast(target, SPELL_ROCKET_LAUNCH);
-                            Events.ScheduleEvent(EVENT_RUPERT_ROCKET_LAUNCH, urand(10000, 15000));
+                            Events.ScheduleEvent(EVENT_RUPERT_ROCKET_LAUNCH, std::rand() % 15000 + 10000);
                             break;
                         default:
                             break;
@@ -1680,7 +1680,7 @@ class npc_arthas_teleport_visual : public CreatureScript
                 if (_instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE &&
                     _instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE &&
                     _instance->GetBossState(DATA_SINDRAGOSA) == DONE)
-                    _events.ScheduleEvent(EVENT_SOUL_MISSILE, urand(1000, 6000));
+                    _events.ScheduleEvent(EVENT_SOUL_MISSILE, std::rand() % 6000 + 1000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1693,7 +1693,7 @@ class npc_arthas_teleport_visual : public CreatureScript
                 if (_events.ExecuteEvent() == EVENT_SOUL_MISSILE)
                 {
                     DoCastAOE(SPELL_SOUL_MISSILE);
-                    _events.ScheduleEvent(EVENT_SOUL_MISSILE, urand(5000, 7000));
+                    _events.ScheduleEvent(EVENT_SOUL_MISSILE, std::rand() % 7000 + 5000);
                 }
             }
 

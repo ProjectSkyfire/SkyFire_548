@@ -76,7 +76,7 @@ bool BattlefieldWG::SetupBattlefield()
         && (sWorld->getWorldState(ClockWorldState[0]) == 0))
     {
         sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_ACTIVE, uint64(false));
-        sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_DEFENDER, uint64(urand(0, 1)));
+        sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_DEFENDER, uint64(std::rand() % 1));
         sWorld->setWorldState(ClockWorldState[0], uint64(m_NoWarBattleTime));
     }
 

@@ -58,8 +58,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            SandBreath_Timer = urand(8000, 16000);
-            ImpendingDeath_Timer = urand(25000, 30000);
+            SandBreath_Timer = std::rand() % 16000 + 8000;
+            ImpendingDeath_Timer = std::rand() % 30000 + 25000;
             WingBuffet_Timer = 35000;
             Mda_Timer = 40000;
         }
@@ -98,7 +98,7 @@ public:
 
                 Talk(SAY_BREATH);
 
-                SandBreath_Timer = urand(10000, 20000);
+                SandBreath_Timer = std::rand() % 20000 + 10000;
             } else SandBreath_Timer -= diff;
 
             if (ImpendingDeath_Timer <= diff)

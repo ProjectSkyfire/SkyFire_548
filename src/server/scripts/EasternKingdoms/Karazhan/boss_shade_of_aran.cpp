@@ -330,7 +330,7 @@ public:
 
             if (SecondarySpellTimer <= diff)
             {
-                switch (urand(0, 1))
+                switch (std::rand() % 1)
                 {
                     case 0:
                         DoCast(me, SPELL_AOE_CS);
@@ -340,7 +340,7 @@ public:
                             DoCast(target, SPELL_CHAINSOFICE);
                         break;
                 }
-                SecondarySpellTimer = urand(5000, 20000);
+                SecondarySpellTimer = std::rand() % 20000 + 5000;
             } else SecondarySpellTimer -= diff;
 
             if (SuperCastTimer <= diff)
@@ -363,7 +363,7 @@ public:
                         break;
                 }
 
-                LastSuperSpell = Available[urand(0, 1)];
+                LastSuperSpell = Available[std::rand() % 1];
 
                 switch (LastSuperSpell)
                 {
@@ -400,7 +400,7 @@ public:
                         break;
                 }
 
-                SuperCastTimer = urand(35000, 40000);
+                SuperCastTimer = std::rand() % 40000 + 35000;
             } else SuperCastTimer -= diff;
 
             if (!ElementalsSpawned && HealthBelowPct(40))
@@ -526,7 +526,7 @@ public:
             if (CastTimer <= diff)
             {
                 DoCastVictim(SPELL_WATERBOLT);
-                CastTimer = urand(2000, 5000);
+                CastTimer = std::rand() % 5000 + 2000;
             } else CastTimer -= diff;
         }
     };

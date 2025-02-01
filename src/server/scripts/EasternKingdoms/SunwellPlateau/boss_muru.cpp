@@ -616,7 +616,7 @@ public:
                         me->RemoveAura(SPELL_BLACKHOLE_GROW, 1);
                         break;
                     case 3:
-                        SpellTimer = urand(400, 900);
+                        SpellTimer = std::rand() % 900 + 400;
                         NeedForAHack = 1;
                         if (Unit* Temp = me->GetVictim())
                         {

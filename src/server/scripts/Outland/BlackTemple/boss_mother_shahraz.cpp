@@ -114,7 +114,7 @@ public:
             FatalAttractionExplodeTimer = 70000;
             ShriekTimer = 30000;
             SaberTimer = 35000;
-            RandomYellTimer = urand(70, 111) * 1000;
+            RandomYellTimer = std::rand() % (111 * IN_MILLISECONDS) + (70 * IN_MILLISECONDS);
             EnrageTimer = 600000;
             ExplosionCount = 0;
 
@@ -223,7 +223,7 @@ public:
 
                 Talk(SAY_SPELL);
                 FatalAttractionExplodeTimer = 2000;
-                FatalAttractionTimer = urand(40, 71) * 1000;
+                FatalAttractionTimer = std::rand() % (71 * IN_MILLISECONDS) + (40 * IN_MILLISECONDS);
             } else FatalAttractionTimer -= diff;
 
             if (FatalAttractionExplodeTimer <= diff)
@@ -277,7 +277,7 @@ public:
             if (RandomYellTimer <= diff)
             {
                 Talk(SAY_TAUNT);
-                RandomYellTimer = urand(60, 151) * 1000;
+                RandomYellTimer = std::rand() % (151*IN_MILLISECONDS) + (60*IN_MILLISECONDS);
             } else RandomYellTimer -= diff;
 
             DoMeleeAttackIfReady();

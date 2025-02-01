@@ -542,7 +542,7 @@ public:
                     {
                         CheckSpeechTimer = 5000;
 
-                        if (urand(0, 9) > 8)
+                        if ((std::rand() % 9) > 8)
                             Talk(SAY_TOOG_WORRIED);
                     }
                     else

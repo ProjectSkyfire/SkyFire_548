@@ -46,8 +46,8 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_SUMMON_SPECTRAL_ASSASSIN, urand(6000,8000));
-            events.ScheduleEvent(EVENT_SHADOW_WRATH, urand(9000,18000));
+            events.ScheduleEvent(EVENT_SUMMON_SPECTRAL_ASSASSIN, std::rand() % 8000 + 6000);
+            events.ScheduleEvent(EVENT_SHADOW_WRATH, std::rand() % 18000 + 9000);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -72,15 +72,15 @@ public:
                 {
                     case EVENT_SUMMON_SPECTRAL_ASSASSIN:
                         DoCast(me, SPELL_SUMMON_SPECTRAL_ASSASSIN);
-                        events.ScheduleEvent(EVENT_SUMMON_SPECTRAL_ASSASSIN, urand(30000,35000));
+                        events.ScheduleEvent(EVENT_SUMMON_SPECTRAL_ASSASSIN, std::rand() % 35000 + 30000);
                         break;
                     case EVENT_SHADOW_BOLT_VOLLEY:
                         DoCastVictim(SPELL_SHADOW_BOLT_VOLLEY);
-                        events.ScheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, urand(4000,6000));
+                        events.ScheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, std::rand() % 6000 + 4000);
                         break;
                     case EVENT_SHADOW_WRATH:
                         DoCastVictim(SPELL_SHADOW_WRATH);
-                        events.ScheduleEvent(EVENT_SHADOW_WRATH, urand(19000,24000));
+                        events.ScheduleEvent(EVENT_SHADOW_WRATH, std::rand() % 24000 + 19000);
                         break;
                     default:
                         break;
@@ -102,7 +102,7 @@ public:
                 if (HealthBelowPct(15))
                 {
                     DoCast(me, SPELL_FRENZY);
-                    events.ScheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, urand(7000,14000));
+                    events.ScheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, std::rand() % 14000 + 7000);
                     frenzy15 = true;
                 }
             }

@@ -370,11 +370,11 @@ public:
                 uiTotal_scourge = ENCOUNTER_TOTAL_SCOURGE;
                 uiSummon_counter = 0;
 
-                uiAnti_magic_zone = urand(1000, 6000);
-                uiDeath_strike = urand(5000, 10000);
-                uiDeath_embrace = urand(5000, 10000);
-                uiIcy_touch = urand(5000, 10000);
-                uiUnholy_blight = urand(5000, 10000);
+                uiAnti_magic_zone = std::rand() % 6000 + 1000;
+                uiDeath_strike = std::rand() % 10000 + 5000;
+                uiDeath_embrace = std::rand() % 10000 + 5000;
+                uiIcy_touch = std::rand() % 10000 + 5000;
+                uiUnholy_blight = std::rand() % 10000 + 5000;
 
                 uiFight_speech = 15000;
                 uiSpawncheck = 1000;
@@ -1344,37 +1344,37 @@ public:
                 if (uiAnti_magic_zone <= diff)
                 {
                     DoCast(me, SPELL_ANTI_MAGIC_ZONE1);
-                    uiAnti_magic_zone = urand(25000, 30000);
+                    uiAnti_magic_zone = std::rand() % 30000 + 25000;
                 } else uiAnti_magic_zone -= diff;
 
                 if (uiDeath_strike <= diff)
                 {
                     DoCastVictim(SPELL_DEATH_STRIKE);
-                    uiDeath_strike = urand(5000, 10000);
+                    uiDeath_strike = std::rand() % 10000 + 5000;
                 } else uiDeath_strike -= diff;
 
                 if (uiDeath_embrace <= diff)
                 {
                     DoCastVictim(SPELL_DEATH_EMBRACE);
-                    uiDeath_embrace = urand(5000, 10000);
+                    uiDeath_embrace = std::rand() % 10000 + 5000;
                 } else uiDeath_embrace -= diff;
 
                 if (uiIcy_touch <= diff)
                 {
                     DoCastVictim(SPELL_ICY_TOUCH1);
-                    uiIcy_touch = urand(5000, 10000);
+                    uiIcy_touch = std::rand() % 10000 + 5000;
                 } else uiIcy_touch -= diff;
 
                 if (uiUnholy_blight <= diff)
                 {
                     DoCastVictim(SPELL_UNHOLY_BLIGHT);
-                    uiUnholy_blight = urand(5000, 10000);
+                    uiUnholy_blight = std::rand() % 10000 + 5000;
                 } else uiUnholy_blight -= diff;
 
                 if (uiFight_speech <= diff)
                 {
                     Talk(SAY_LIGHT_OF_DAWN09);
-                    uiFight_speech = urand(15000, 20000);
+                    uiFight_speech = std::rand() % 20000 + 15000;
                 } else uiFight_speech -= diff;
 
                 // Check spawns

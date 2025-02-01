@@ -309,7 +309,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                         DoCast(target, SPELL_NETHERBREATH);
-                    NetherbreathTimer = urand(5000, 7000);
+                    NetherbreathTimer = std::rand() % 7000 + 5000;
                 } else NetherbreathTimer -= diff;
 
                 if (PhaseTimer <= diff)

@@ -477,21 +477,21 @@ public:
             {
                 Shout();
                 DoCast(me, SPELL_RENEW);
-                uiRenew_timer = urand(1000, 6000);
+                uiRenew_timer = std::rand() % 6000 + 1000;
             } else uiRenew_timer -= diff;
 
             if (uiInquisitor_Penance_timer <= diff)
             {
                 Shout();
                 DoCastVictim(SPELL_INQUISITOR_PENANCE);
-                uiInquisitor_Penance_timer = urand(2000, 7000);
+                uiInquisitor_Penance_timer = std::rand() % 7000 + 2000;
             } else uiInquisitor_Penance_timer -= diff;
 
             if (uiValroth_Smite_timer <= diff)
             {
                 Shout();
                 DoCastVictim(SPELL_VALROTH_SMITE);
-                uiValroth_Smite_timer = urand(1000, 6000);
+                uiValroth_Smite_timer = std::rand() % 6000 + 1000;
             } else uiValroth_Smite_timer -= diff;
 
             DoMeleeAttackIfReady();

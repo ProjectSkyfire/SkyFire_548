@@ -83,16 +83,16 @@ class boss_gatewatcher_gyrokill : public CreatureScript
                     {
                         case EVENT_STREAM_OF_MACHINE_FLUID:
                             DoCastVictim(SPELL_STREAM_OF_MACHINE_FLUID, true);
-                            events.ScheduleEvent(EVENT_STREAM_OF_MACHINE_FLUID, urand(13000, 17000));
+                            events.ScheduleEvent(EVENT_STREAM_OF_MACHINE_FLUID, std::rand() % 17000 + 13000);
                             break;
                         case EVENT_SAW_BLADE:
                             DoCast(me, SPELL_SAW_BLADE);
                             Talk(SAY_SAW_BLADEs);
-                            events.ScheduleEvent(EVENT_SAW_BLADE, urand(20000, 30000));
+                            events.ScheduleEvent(EVENT_SAW_BLADE, std::rand() % 30000 + 20000);
                             break;
                         case EVENT_SHADOW_POWER:
                             DoCast(me, SPELL_SHADOW_POWER);
-                            events.ScheduleEvent(EVENT_SAW_BLADE, urand(25000, 35000));
+                            events.ScheduleEvent(EVENT_SAW_BLADE, std::rand() % 35000 + 25000);
                             break;
                         default:
                             break;

@@ -89,7 +89,7 @@ public:
             _Reset();
             CleanStalkers();
             me->RemoveAurasDueToSpell(SPELL_SHIELD_OF_LIGHT);
-            events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+            events.ScheduleEvent(EVENT_DIVINE_RECKONING, std::rand() % 12000 + 10000);
             events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
         }
 
@@ -196,7 +196,7 @@ public:
                 {
                     case EVENT_DIVINE_RECKONING:
                         DoCastVictim(SPELL_DIVINE_RECKONING);
-                        events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+                        events.ScheduleEvent(EVENT_DIVINE_RECKONING, std::rand() % 12000 + 10000);
                         break;
                     case EVENT_BURNING_LIGHT:
                     {

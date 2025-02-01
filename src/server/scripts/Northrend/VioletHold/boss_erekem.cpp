@@ -59,8 +59,8 @@ public:
         {
             uiBloodlustTimer = 15000;
             uiChainHealTimer = 0;
-            uiEarthShockTimer = urand(2000, 8000);
-            uiLightningBoltTimer = urand(5000, 10000);
+            uiEarthShockTimer = std::rand() % 8000 + 2000;
+            uiLightningBoltTimer = std::rand() % 10000 + 5000;
             uiEarthShieldTimer = 20000;
             if (instance)
             {
@@ -175,20 +175,20 @@ public:
             if (uiBloodlustTimer <= diff)
             {
                 DoCast(me, SPELL_BLOODLUST);
-                uiBloodlustTimer = urand(35000, 45000);
+                uiBloodlustTimer = std::rand() % 45000 + 35000;
             } else uiBloodlustTimer -= diff;
 
             if (uiEarthShockTimer <= diff)
             {
                 DoCastVictim(SPELL_EARTH_SHOCK);
-                uiEarthShockTimer = urand(8000, 13000);
+                uiEarthShockTimer = std::rand() % 13000 + 8000;
             } else uiEarthShockTimer -= diff;
 
             if (uiLightningBoltTimer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_LIGHTNING_BOLT);
-                uiLightningBoltTimer = urand(18000, 24000);
+                uiLightningBoltTimer = std::rand() % 24000 + 18000;
             } else uiLightningBoltTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -271,9 +271,9 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiStrikeTimer = urand(4000, 8000);
-            uiHowlingScreechTimer = urand(8000, 13000);
-            uiGushingWoundTimer = urand(1000, 3000);
+            uiStrikeTimer = std::rand() % 8000 + 4000;
+            uiHowlingScreechTimer = std::rand() % 130000 + 8000;
+            uiGushingWoundTimer = std::rand() % 3000 + 1000;
         }
 
         void AttackStart(Unit* who) OVERRIDE
@@ -303,19 +303,19 @@ public:
             if (uiStrikeTimer <= diff)
             {
                 DoCastVictim(SPELL_STRIKE);
-                uiStrikeTimer = urand(4000, 8000);
+                uiStrikeTimer = std::rand() % 8000 + 4000;
             } else uiStrikeTimer -= diff;
 
             if (uiHowlingScreechTimer <= diff)
             {
                 DoCastVictim(SPELL_HOWLING_SCREECH);
-                uiHowlingScreechTimer = urand(8000, 13000);
+                uiHowlingScreechTimer = std::rand() % 13000 + 8000;
             } else uiHowlingScreechTimer -= diff;
 
             if (uiGushingWoundTimer <= diff)
             {
                 DoCastVictim(SPELL_GUSHING_WOUND);
-                uiGushingWoundTimer = urand(7000, 12000);
+                uiGushingWoundTimer = std::rand() % 12000 + 7000;
             } else uiGushingWoundTimer -= diff;
         }
     };

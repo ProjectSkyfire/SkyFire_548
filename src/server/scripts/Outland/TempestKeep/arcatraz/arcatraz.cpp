@@ -405,7 +405,7 @@ class npc_warden_mellichar : public CreatureScript
                         switch (Phase)
                         {
                         case 2:
-                            switch (urand(0, 1))
+                            switch (std::rand() % 1)
                             {
                             case 0:
                                 me->SummonCreature(ENTRY_TRICKSTER, 478.326f, -148.505f, 42.56f, 3.19f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000);
@@ -422,7 +422,7 @@ class npc_warden_mellichar : public CreatureScript
                             Talk(YELL_RELEASE2B);
                             break;
                         case 5:
-                            switch (urand(0, 1))
+                            switch (std::rand() % 1)
                             {
                             case 0:
                                 me->SummonCreature(ENTRY_AKKIRIS, 420.179f, -174.396f, 42.58f, 0.02f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000);
@@ -433,7 +433,7 @@ class npc_warden_mellichar : public CreatureScript
                             }
                             break;
                         case 6:
-                            switch (urand(0, 1))
+                            switch (std::rand() % 1)
                             {
                             case 0:
                                 me->SummonCreature(ENTRY_TW_DRAK, 471.795f, -174.58f, 42.58f, 3.06f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000);

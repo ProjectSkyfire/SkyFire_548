@@ -231,7 +231,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     {
         case GAMEOBJECT_TYPE_FISHINGHOLE:
             SetGoAnimProgress(animprogress);
-            m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
+            m_goValue.FishingHole.MaxOpens = std::rand() % GetGOInfo()->fishinghole.maxSuccessOpens + GetGOInfo()->fishinghole.minSuccessOpens;
             break;
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             m_goValue.Building.Health = goinfo->building.intactNumHits + goinfo->building.damagedNumHits;
@@ -383,7 +383,7 @@ void GameObject::Update(uint32 diff)
                         if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
                             SetRespawnTime(DAY);
                         else
-                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + urand(5, MINUTE); // else copy time from master and add a little
+                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + std::rand() % MINUTE + 5; // else copy time from master and add a little
                         SaveRespawnTime(); // also save to DB immediately
                         return;
                     }
@@ -416,7 +416,7 @@ void GameObject::Update(uint32 diff)
                             break;
                         case GAMEOBJECT_TYPE_FISHINGHOLE:
                             // Initialize a new max fish count on respawn
-                            m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
+                            m_goValue.FishingHole.MaxOpens = std::rand() % GetGOInfo()->fishinghole.maxSuccessOpens + GetGOInfo()->fishinghole.minSuccessOpens;
                             break;
                         default:
                             break;

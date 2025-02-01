@@ -972,7 +972,7 @@ class npc_scarlet_miner : public CreatureScript
                 AddWaypoint(11, 2202.595947f, -6061.325684f, 5.882018f);
                 AddWaypoint(12, 2188.974609f, -6080.866699f, 3.370027f);
 
-                if (urand(0, 1))
+                if (std::rand() % 1)
                 {
                     AddWaypoint(13, 2176.483887f, -6110.407227f, 1.855181f);
                     AddWaypoint(14, 2172.516602f, -6146.752441f, 1.074235f);

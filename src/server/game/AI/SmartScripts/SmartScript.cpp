@@ -142,7 +142,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
     //calc random
     if (e.GetEventType() != SMART_EVENT_LINK && e.event.event_chance < 100 && e.event.event_chance)
     {
-        uint32 rnd = urand(0, 100);
+        uint32 rnd = std::rand() % 100;
         if (e.event.event_chance <= rnd)
             return;
     }
@@ -418,7 +418,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             {
                 if (IsUnit(*itr))
                 {
-                    uint32 emote = temp[urand(0, count - 1)];
+                    uint32 emote = temp[std::rand() % (count - 1)];
                     (*itr)->ToUnit()->HandleEmoteCommand(emote);
                     SF_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_RANDOM_EMOTE: Creature guidLow %u handle random emote %u",
                         (*itr)->GetGUIDLow(), emote);
@@ -844,7 +844,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (count == 0)
                 break;
 
-            uint32 phase = temp[urand(0, count - 1)];
+            uint32 phase = temp[std::rand() % (count - 1)];
             SetPhase(phase);
             SF_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction: SMART_ACTION_RANDOM_PHASE: Creature %u sets event phase to %u",
                 GetBaseObject()->GetGUIDLow(), phase);
@@ -855,7 +855,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (!GetBaseObject())
                 break;
 
-            uint32 phase = urand(e.action.randomPhaseRange.phaseMin, e.action.randomPhaseRange.phaseMax);
+            uint32 phase = std::rand() % e.action.randomPhaseRange.phaseMax + e.action.randomPhaseRange.phaseMin;
             SetPhase(phase);
             SF_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction: SMART_ACTION_RANDOM_PHASE_RANGE: Creature %u sets event phase to %u",
                 GetBaseObject()->GetGUIDLow(), phase);
@@ -1726,7 +1726,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (count == 0)
                 break;
 
-            uint32 id = temp[urand(0, count - 1)];
+            uint32 id = temp[std::rand() % (count - 1)];
             if (e.GetTargetType() == SMART_TARGET_NONE)
             {
                 SF_LOG_ERROR("sql.sql", "SmartScript: Entry %d SourceType %u Event %u Action %u is using TARGET_NONE(0) for Script9 target. Please correct target_type in database.", e.entryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
@@ -1756,7 +1756,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
         }
         case SMART_ACTION_CALL_RANDOM_RANGE_TIMED_ACTIONLIST:
         {
-            uint32 id = urand(e.action.randTimedActionList.entry1, e.action.randTimedActionList.entry2);
+            uint32 id = std::rand() % e.action.randTimedActionList.entry2 + e.action.randTimedActionList.entry1;
             if (e.GetTargetType() == SMART_TARGET_NONE)
             {
                 SF_LOG_ERROR("sql.sql", "SmartScript: Entry %d SourceType %u Event %u Action %u is using TARGET_NONE(0) for Script9 target. Please correct target_type in database.", e.entryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
@@ -2265,7 +2265,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 {
                     if (IsUnit(obj))
                     {
-                        uint32 sound = temp[urand(0, count - 1)];
+                        uint32 sound = temp[std::rand() % (count - 1)];
                         obj->PlayDirectSound(sound, onlySelf ? obj->ToPlayer() : nullptr);
                         SF_LOG_DEBUG("scripts.ai", "SmartScript::ProcessAction:: SMART_ACTION_RANDOM_SOUND: target: %s (" UI64FMTD "), sound: %u, onlyself: %s",
                             obj->GetName().c_str(), obj->GetGUID(), sound, onlySelf ? "true" : "false");
@@ -3227,7 +3227,7 @@ void SmartScript::InitTimer(SmartScriptHolder& e)
 void SmartScript::RecalcTimer(SmartScriptHolder& e, uint32 min, uint32 max)
 {
     // min/max was checked at loading!
-    e.timer = urand(uint32(min), uint32(max));
+    e.timer = std::rand() % uint32(max) + uint32(min);
     e.active = e.timer ? false : true;
 }
 

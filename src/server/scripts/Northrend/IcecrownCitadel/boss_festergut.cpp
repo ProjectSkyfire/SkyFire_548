@@ -83,9 +83,9 @@ class boss_festergut : public CreatureScript
                 _Reset();
                 me->SetReactState(REACT_DEFENSIVE);
                 events.ScheduleEvent(EVENT_BERSERK, 300000);
-                events.ScheduleEvent(EVENT_INHALE_BLIGHT, urand(25000, 30000));
-                events.ScheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_GASTRIC_BLOAT, urand(12500, 15000));
+                events.ScheduleEvent(EVENT_INHALE_BLIGHT, std::rand() % 30000 + 25000);
+                events.ScheduleEvent(EVENT_GAS_SPORE, std::rand() % 25000 + 20000);
+                events.ScheduleEvent(EVENT_GASTRIC_BLOAT, std::rand() % 15000 + 12500);
                 _maxInoculatedStack = 0;
                 _inhaleCounter = 0;
                 me->RemoveAurasDueToSpell(SPELL_BERSERK2);
@@ -178,7 +178,7 @@ class boss_festergut : public CreatureScript
                                 _inhaleCounter = 0;
                                 if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                                     professor->AI()->DoAction(ACTION_FESTERGUT_GAS);
-                                events.RescheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
+                                events.RescheduleEvent(EVENT_GAS_SPORE, std::rand() % 25000 + 20000);
                             }
                             else
                             {
@@ -189,7 +189,7 @@ class boss_festergut : public CreatureScript
                                     me->CastSpell(me, gaseousBlight[_inhaleCounter], true, NULL, NULL, me->GetGUID());
                             }
 
-                            events.ScheduleEvent(EVENT_INHALE_BLIGHT, urand(33500, 35000));
+                            events.ScheduleEvent(EVENT_INHALE_BLIGHT, std::rand() % 35000 + 33500);
                             break;
                         }
                         case EVENT_VILE_GAS:
@@ -215,19 +215,19 @@ class boss_festergut : public CreatureScript
                                     DoCast(*itr, SPELL_VILE_GAS);
                             }
 
-                            events.ScheduleEvent(EVENT_VILE_GAS, urand(28000, 35000));
+                            events.ScheduleEvent(EVENT_VILE_GAS, std::rand() % 35000 + 28000);
                             break;
                         }
                         case EVENT_GAS_SPORE:
                             Talk(EMOTE_WARN_GAS_SPORE);
                             Talk(EMOTE_GAS_SPORE);
                             me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 3, 2, 3), me);
-                            events.ScheduleEvent(EVENT_GAS_SPORE, urand(40000, 45000));
-                            events.RescheduleEvent(EVENT_VILE_GAS, urand(28000, 35000));
+                            events.ScheduleEvent(EVENT_GAS_SPORE, std::rand() % 45000 + 40000);
+                            events.RescheduleEvent(EVENT_VILE_GAS, std::rand() % 35000 + 28000);
                             break;
                         case EVENT_GASTRIC_BLOAT:
                             DoCastVictim(SPELL_GASTRIC_BLOAT);
-                            events.ScheduleEvent(EVENT_GASTRIC_BLOAT, urand(15000, 17500));
+                            events.ScheduleEvent(EVENT_GASTRIC_BLOAT, std::rand() % 17500 + 15000);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK2);
@@ -292,8 +292,8 @@ class npc_stinky_icc : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
-                _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(3000, 7000));
+                _events.ScheduleEvent(EVENT_DECIMATE, std::rand() % 25000 + 20000);
+                _events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 7000 + 3000);
             }
 
             void EnterCombat(Unit* /*target*/) OVERRIDE
@@ -317,11 +317,11 @@ class npc_stinky_icc : public CreatureScript
                     {
                         case EVENT_DECIMATE:
                             DoCastVictim(SPELL_DECIMATE);
-                            _events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
+                            _events.ScheduleEvent(EVENT_DECIMATE, std::rand() % 25000 + 20000);
                             break;
                         case EVENT_MORTAL_WOUND:
                             DoCastVictim(SPELL_MORTAL_WOUND);
-                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 12500));
+                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 12500 + 10000);
                             break;
                         default:
                             break;

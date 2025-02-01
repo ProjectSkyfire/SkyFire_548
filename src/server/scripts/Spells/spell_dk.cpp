@@ -146,7 +146,7 @@ public:
                         if (!runes.empty())
                         {
                             std::set<uint8>::iterator itr = runes.begin();
-                            std::advance(itr, urand(0, runes.size() - 1));
+                            std::advance(itr, std::rand() % (runes.size() - 1));
                             _player->SetRuneCooldown((*itr), 0);
                             _player->ResyncRunes(MAX_RUNES);
                         }

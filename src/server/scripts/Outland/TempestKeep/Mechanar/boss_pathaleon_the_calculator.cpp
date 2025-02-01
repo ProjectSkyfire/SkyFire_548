@@ -66,10 +66,10 @@ class boss_pathaleon_the_calculator : public CreatureScript
             {
                 _EnterCombat();
                 events.ScheduleEvent(EVENT_SUMMON, 30000);
-                events.ScheduleEvent(EVENT_MANA_TAP, urand(12000, 20000));
-                events.ScheduleEvent(EVENT_ARCANE_TORRENT, urand(16000, 25000));
-                events.ScheduleEvent(EVENT_DOMINATION, urand(25000, 40000));
-                events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, urand(8000, 13000));
+                events.ScheduleEvent(EVENT_MANA_TAP, std::rand() % 20000 + 12000);
+                events.ScheduleEvent(EVENT_ARCANE_TORRENT, std::rand() % 25000 + 16000);
+                events.ScheduleEvent(EVENT_DOMINATION, std::rand() % 40000 + 25000);
+                events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, std::rand() % 13000 + 8000);
                 Talk(SAY_AGGRO);
             }
 
@@ -117,24 +117,24 @@ class boss_pathaleon_the_calculator : public CreatureScript
                                 }
                             }
                             Talk(SAY_SUMMON);
-                            events.ScheduleEvent(EVENT_SUMMON, urand(30000, 45000));
+                            events.ScheduleEvent(EVENT_SUMMON, std::rand() % 45000 + 30000);
                             break;
                         case EVENT_MANA_TAP:
                             DoCastVictim(SPELL_MANA_TAP, true);
-                            events.ScheduleEvent(EVENT_MANA_TAP, urand(14000, 22000));
+                            events.ScheduleEvent(EVENT_MANA_TAP, std::rand() % 22000 + 14000);
                             break;
                         case EVENT_ARCANE_TORRENT:
                             DoCastVictim(SPELL_ARCANE_TORRENT, true);
-                            events.ScheduleEvent(EVENT_ARCANE_TORRENT, urand(12000, 18000));
+                            events.ScheduleEvent(EVENT_ARCANE_TORRENT, std::rand() % 18000 + 12000);
                             break;
                         case EVENT_DOMINATION:
                             Talk(SAY_DOMINATION);
                             DoCastVictim(SPELL_DOMINATION, true);
-                            events.ScheduleEvent(EVENT_DOMINATION, urand(25000, 30000));
+                            events.ScheduleEvent(EVENT_DOMINATION, std::rand() % 30000 + 25000);
                             break;
                         case EVENT_ARCANE_EXPLOSION: // Heroic only
                             DoCastVictim(H_SPELL_ARCANE_EXPLOSION, true);
-                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, urand(10000, 14000));
+                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, std::rand() % 14000 + 10000);
                             break;
                         default:
                             break;
@@ -167,7 +167,7 @@ class npc_nether_wraith : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                ArcaneMissiles_Timer = urand(1000, 4000);
+                ArcaneMissiles_Timer = std::rand() % 4000 + 1000;
                 Detonation_Timer = 20000;
                 Die_Timer = 2200;
                 Detonation = false;
@@ -186,7 +186,7 @@ class npc_nether_wraith : public CreatureScript
                         DoCast(target, SPELL_ARCANE_MISSILES);
                     else
                         DoCastVictim(SPELL_ARCANE_MISSILES);
-                    ArcaneMissiles_Timer = urand(5000, 10000);
+                    ArcaneMissiles_Timer = std::rand() % 10000 + 5000;
                 }
                 else
                     ArcaneMissiles_Timer -=diff;

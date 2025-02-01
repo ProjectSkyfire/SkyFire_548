@@ -1045,7 +1045,7 @@ EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry, int8& id)
     if (id == -1) // select a random element
     {
         EquipmentInfoContainerInternal::const_iterator ritr = itr->second.begin();
-        std::advance(ritr, urand(0u, itr->second.size() - 1));
+        std::advance(ritr, std::rand() % (itr->second.size() - 1));
         id = std::distance(itr->second.begin(), ritr) + 1;
         return &ritr->second;
     }
@@ -1174,7 +1174,7 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32* display
         return NULL;
 
     // If a model for another gender exists, 50% chance to use it
-    if (modelInfo->modelid_other_gender != 0 && urand(0, 1) == 0)
+    if (modelInfo->modelid_other_gender != 0 && std::rand() % 1 == 0)
     {
         CreatureModelInfo const* minfo_tmp = GetCreatureModelInfo(modelInfo->modelid_other_gender);
         if (!minfo_tmp)
@@ -1823,7 +1823,7 @@ uint32 ObjectMgr::AddCreData(uint32 entry, uint32 /*team*/, uint32 mapId, float 
     if (!cInfo)
         return 0;
 
-    uint32 level = cInfo->minlevel == cInfo->maxlevel ? cInfo->minlevel : urand(cInfo->minlevel, cInfo->maxlevel); // Only used for extracting creature base stats
+    uint32 level = cInfo->minlevel == cInfo->maxlevel ? cInfo->minlevel : std::rand() % cInfo->maxlevel + cInfo->minlevel; // Only used for extracting creature base stats
     CreatureBaseStats const* stats = GetCreatureBaseStats(level, cInfo->unit_class);
 
     uint32 guid = GenerateLowGuid(HIGHGUID_UNIT);
@@ -6507,7 +6507,7 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
             return cinfo->Name;
     }
 
-    return *(list0.begin() + urand(0, list0.size() - 1)) + *(list1.begin() + urand(0, list1.size() - 1));
+    return *(list0.begin() + std::rand() % (list0.size() - 1)) + *(list1.begin() + std::rand() % (list1.size() - 1));
 }
 
 uint32 ObjectMgr::GeneratePetNumber()
@@ -9236,7 +9236,7 @@ uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
         if (mapCitr->first == speciesId)
         {
             BattleBetBreedSet::iterator setItr(mapCitr->second.begin());
-            std::advance(setItr, urand(0, mapCitr->second.size() - 1));
+            std::advance(setItr, std::rand() % (mapCitr->second.size() - 1));
 
             return *setItr;
         }
@@ -9252,7 +9252,7 @@ uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const
         if (mapCitr->first == speciesId)
         {
             BattlePetQualitySet::iterator setItr(mapCitr->second.begin());
-            std::advance(setItr, urand(0, mapCitr->second.size() - 1));
+            std::advance(setItr, std::rand() % (mapCitr->second.size() - 1));
 
             return *setItr;
         }

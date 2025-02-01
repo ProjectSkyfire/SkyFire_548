@@ -44,8 +44,8 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
-            events.ScheduleEvent(SPELL_REND, urand(17000,20000));
-            events.ScheduleEvent(SPELL_STRIKE, urand(10000,12000));
+            events.ScheduleEvent(SPELL_REND, std::rand() % 20000 + 17000);
+            events.ScheduleEvent(SPELL_STRIKE, std::rand() % 12000 + 10000);
             Talk(SAY_AGGRO);
         }
 
@@ -70,11 +70,11 @@ public:
                 {
                     case SPELL_REND:
                         DoCastVictim(SPELL_REND);
-                        events.ScheduleEvent(SPELL_REND, urand(8000,10000));
+                        events.ScheduleEvent(SPELL_REND, std::rand() % 10000 + 8000);
                         break;
                     case SPELL_STRIKE:
                         DoCastVictim(SPELL_STRIKE);
-                        events.ScheduleEvent(SPELL_STRIKE, urand(8000,10000));
+                        events.ScheduleEvent(SPELL_STRIKE, std::rand() % 10000 + 8000);
                         break;
                     default:
                         break;

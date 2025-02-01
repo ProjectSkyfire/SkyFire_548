@@ -150,7 +150,7 @@ public:
             FrostBreathTimer = 15000;
             WildMagicTimer = 10000;
             TailLashTimer = 25000;
-            SpectralBlastTimer = urand(20000, 25000);
+            SpectralBlastTimer = std::rand() % 25000 + 20000;
             CheckTimer = 1000;
             ResetTimer = 30000;
 
@@ -606,7 +606,7 @@ public:
                 KalecGUID = 0;
             }
 
-            ShadowBoltTimer = urand(7, 10) * 1000;
+            ShadowBoltTimer = (std::rand() % 10 + 7) * 1000;
             AgonyCurseTimer = 20000;
             CorruptionStrikeTimer = 13000;
             CheckTimer = 1000;

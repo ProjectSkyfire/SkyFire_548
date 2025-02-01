@@ -1431,7 +1431,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 if (itr->second != RollType::ROLL_NEED)
                     continue;
 
-                uint8 randomN = urand(1, 100);
+                uint8 randomN = std::rand() % 100 + 1;
                 SendLootRoll(0, itr->first, randomN, RollType::ROLL_NEED, *roll);
                 if (maxresul < randomN)
                 {
@@ -1479,7 +1479,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 if (itr->second != RollType::ROLL_GREED && itr->second != RollType::ROLL_DISENCHANT)
                     continue;
 
-                uint8 randomN = urand(1, 100);
+                uint8 randomN = std::rand() % 100 + 1;
                 SendLootRoll(0, itr->first, randomN, RollType(itr->second), *roll);
                 if (maxresul < randomN)
                 {

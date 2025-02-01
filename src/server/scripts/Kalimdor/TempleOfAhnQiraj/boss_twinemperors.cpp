@@ -80,7 +80,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         AfterTeleport = false;
         tspellcasted = false;
         AfterTeleportTimer = 0;
-        Abuse_Bug_Timer = urand(10000, 17000);
+        Abuse_Bug_Timer = std::rand() % 17000 + 10000;
         BugsTimer = 2000;
         me->ClearUnitState(UNIT_STATE_STUNNED);
         DontYellWhenDead = false;
@@ -340,7 +340,7 @@ struct boss_twinemperorsAI : public ScriptedAI
                 if (c)
                 {
                     CastSpellOnBug(c);
-                    Abuse_Bug_Timer = urand(10000, 17000);
+                    Abuse_Bug_Timer = std::rand() % 17000 + 10000;
                 }
                 else
                 {
@@ -400,9 +400,9 @@ public:
         void Reset() OVERRIDE
         {
             TwinReset();
-            UpperCut_Timer = urand(14000, 29000);
-            UnbalancingStrike_Timer = urand(8000, 18000);
-            Scarabs_Timer = urand(7000, 14000);
+            UpperCut_Timer = std::rand() % 29000 + 14000;
+            UnbalancingStrike_Timer = std::rand() % 18000 + 8000;
+            Scarabs_Timer = std::rand() % 14000 + 7000;
 
                                                                 //Added. Can be removed if its included in DB.
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
@@ -487,9 +487,9 @@ public:
         {
             TwinReset();
             ShadowBolt_Timer = 0;
-            Blizzard_Timer = urand(15000, 20000);
+            Blizzard_Timer = std::rand() % 20000 + 15000;
             ArcaneBurst_Timer = 1000;
-            Scorpions_Timer = urand(7000, 14000);
+            Scorpions_Timer = std::rand() % 14000 + 7000;
 
             //Added. Can be removed if its included in DB.
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);

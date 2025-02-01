@@ -177,7 +177,7 @@ void BattlegroundAB::StartingEventOpenDoors()
     for (int i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
     {
         //randomly select buff to spawn
-        uint8 buff = urand(0, 2);
+        uint8 buff = std::rand() % 2;
         SpawnBGObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
     DoorOpen(BG_AB_OBJECT_GATE_A);

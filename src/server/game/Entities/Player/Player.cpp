@@ -1248,7 +1248,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 m_MirrorTimer[BREATH_TIMER] += 1 * IN_MILLISECONDS;
                 // Calculate and deal damage
                 /// @todo Check this formula
-                uint32 damage = GetMaxHealth() / 5 + urand(0, getLevel() - 1);
+                uint32 damage = GetMaxHealth() / 5 + std::rand() % (getLevel() - 1);
                 EnvironmentalDamage(DAMAGE_DROWNING, damage);
             }
             else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INWATER))      // Update time in client if need
@@ -1284,7 +1284,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 m_MirrorTimer[FATIGUE_TIMER] += 1 * IN_MILLISECONDS;
                 if (IsAlive())                                            // Calculate and deal damage
                 {
-                    uint32 damage = GetMaxHealth() / 5 + urand(0, getLevel() - 1);
+                    uint32 damage = GetMaxHealth() / 5 + std::rand() % (getLevel() - 1);
                     EnvironmentalDamage(DAMAGE_EXHAUSTED, damage);
                 }
                 else if (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))       // Teleport ghost to graveyard
@@ -1317,7 +1317,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 m_MirrorTimer[FIRE_TIMER] += 1 * IN_MILLISECONDS;
                 // Calculate and deal damage
                 /// @todo Check this formula
-                uint32 damage = urand(600, 700);
+                uint32 damage = std::rand() % 700 + 600;
                 if (m_MirrorTimerFlags & UNDERWATER_INLAVA)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 // need to skip Slime damage in Undercity,
@@ -9466,7 +9466,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     loot->FillLoot(1, LootTemplates_Creature, this, true);
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-            bones->loot.gold = uint32(urand(50, 150) * 0.016f * pow(float(pLevel) / 5.76f, 2.5f) * sWorld->getRate(Rates::RATE_DROP_MONEY));
+            bones->loot.gold = uint32((std::rand() % 150 + 50) * 0.016f * pow(float(pLevel) / 5.76f, 2.5f) * sWorld->getRate(Rates::RATE_DROP_MONEY));
         }
 
         if (bones->lootRecipient != this)
@@ -9504,8 +9504,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     loot->FillLoot(lootid, LootTemplates_Pickpocketing, this, true);
 
                 // Generate extra money for pick pocket loot
-                const uint32 a = urand(0, creature->getLevel() / 2);
-                const uint32 b = urand(0, getLevel() / 2);
+                const uint32 a = std::rand() % (creature->getLevel() / 2);
+                const uint32 b = std::rand() % (getLevel() / 2);
                 loot->gold = uint32(10 * (a + b) * sWorld->getRate(Rates::RATE_DROP_MONEY));
                 permission = PermissionTypes::OWNER_PERMISSION;
             }
@@ -18136,7 +18136,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
 
     // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
     // this must help in case next save after mass player load after server startup
-    m_nextSave = urand(m_nextSave / 2, m_nextSave * 3 / 2);
+    m_nextSave = std::rand() % (m_nextSave * 3 / 2) + (m_nextSave / 2);
 
     SaveRecallPosition();
 
@@ -25616,7 +25616,7 @@ Player* Player::GetNextRandomRaidMember(float radius)
     if (nearMembers.empty())
         return NULL;
 
-    uint32 randTarget = urand(0, nearMembers.size() - 1);
+    uint32 randTarget = std::rand() % (nearMembers.size() - 1);
     return nearMembers[randTarget];
 }
 

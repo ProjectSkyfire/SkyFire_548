@@ -110,7 +110,7 @@ class boss_ossirian : public CreatureScript
                 if (action == ACTION_TRIGGER_WEAKNESS)
                     if (Creature* Trigger = me->GetMap()->GetCreature(TriggerGUID))
                         if (!Trigger->HasUnitState(UNIT_STATE_CASTING))
-                            Trigger->CastSpell(Trigger, SpellWeakness[urand(0, 4)], false);
+                            Trigger->CastSpell(Trigger, SpellWeakness[std::rand() % 4], false);
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -243,7 +243,7 @@ class boss_ossirian : public CreatureScript
                     {
                         case EVENT_SILENCE:
                             DoCast(me, SPELL_SILENCE);
-                            events.ScheduleEvent(EVENT_SILENCE, urand(20000, 30000));
+                            events.ScheduleEvent(EVENT_SILENCE, std::rand() % 30000 + 20000);
                             break;
                         case EVENT_CYCLONE:
                             DoCastVictim(SPELL_CYCLONE);

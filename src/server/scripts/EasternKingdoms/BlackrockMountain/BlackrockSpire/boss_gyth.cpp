@@ -59,10 +59,10 @@ public:
         {
             _EnterCombat();
 
-            events.ScheduleEvent(EVENT_CORROSIVE_ACID, urand(8000, 16000));
-            events.ScheduleEvent(EVENT_FREEZE, urand(8000, 16000));
-            events.ScheduleEvent(EVENT_FLAME_BREATH, urand(8000, 16000));
-            events.ScheduleEvent(EVENT_KNOCK_AWAY, urand(12000, 18000));
+            events.ScheduleEvent(EVENT_CORROSIVE_ACID, std::rand() % 16000 + 8000);
+            events.ScheduleEvent(EVENT_FREEZE, std::rand() % 16000 + 8000);
+            events.ScheduleEvent(EVENT_FLAME_BREATH, std::rand() % 16000 + 8000);
+            events.ScheduleEvent(EVENT_KNOCK_AWAY, std::rand() % 18000 + 12000);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -125,19 +125,19 @@ public:
                 {
                     case EVENT_CORROSIVE_ACID:
                         DoCast(me, SPELL_CORROSIVE_ACID);
-                        events.ScheduleEvent(EVENT_CORROSIVE_ACID, urand(10000, 16000));
+                        events.ScheduleEvent(EVENT_CORROSIVE_ACID, std::rand() % 16000 + 10000);
                         break;
                     case EVENT_FREEZE:
                         DoCast(me, SPELL_FREEZE);
-                        events.ScheduleEvent(EVENT_FREEZE, urand(10000, 16000));
+                        events.ScheduleEvent(EVENT_FREEZE, std::rand() % 16000 + 10000);
                         break;
                     case EVENT_FLAME_BREATH:
                         DoCast(me, SPELL_FLAMEBREATH);
-                        events.ScheduleEvent(EVENT_FLAME_BREATH, urand(10000, 16000));
+                        events.ScheduleEvent(EVENT_FLAME_BREATH, std::rand() % 16000 + 10000);
                         break;
                     case EVENT_KNOCK_AWAY:
                         DoCastVictim(SPELL_KNOCK_AWAY);
-                        events.ScheduleEvent(EVENT_KNOCK_AWAY, urand(14000, 20000));
+                        events.ScheduleEvent(EVENT_KNOCK_AWAY, std::rand() % 20000 + 14000);
                         break;
                     default:
                         break;

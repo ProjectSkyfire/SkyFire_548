@@ -133,9 +133,9 @@ class boss_warp_splinter : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                War_Stomp_Timer = urand(25000, 40000);
+                War_Stomp_Timer = std::rand() % 40000 + 25000;
                 Summon_Treants_Timer = 45000;
-                Arcane_Volley_Timer = urand(8000, 20000);
+                Arcane_Volley_Timer = std::rand() % 20000 + 8000;
 
                 me->SetSpeed(MOVE_RUN, 0.7f, true);
             }
@@ -180,7 +180,7 @@ class boss_warp_splinter : public CreatureScript
                 if (War_Stomp_Timer <= diff)
                 {
                     DoCastVictim(WAR_STOMP);
-                    War_Stomp_Timer = urand(25000, 40000);
+                    War_Stomp_Timer = std::rand() % 40000 + 25000;
                 }
                 else
                     War_Stomp_Timer -= diff;
@@ -189,7 +189,7 @@ class boss_warp_splinter : public CreatureScript
                 if (Arcane_Volley_Timer <= diff)
                 {
                     DoCastVictim(DUNGEON_MODE(ARCANE_VOLLEY, ARCANE_VOLLEY_H));
-                    Arcane_Volley_Timer = urand(20000, 35000);
+                    Arcane_Volley_Timer = std::rand() % 35000 + 20000;
                 }
                 else
                     Arcane_Volley_Timer -= diff;

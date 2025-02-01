@@ -107,10 +107,10 @@ class boss_ingvar_the_plunderer : public CreatureScript
                 _Reset();
                 events.SetPhase(PHASE_HUMAN);
 
-                events.ScheduleEvent(EVENT_CLEAVE, urand(6, 12)*IN_MILLISECONDS, 0, PHASE_HUMAN);
-                events.ScheduleEvent(EVENT_STAGGERING_ROAR, urand(18, 21)*IN_MILLISECONDS, 0, PHASE_HUMAN);
-                events.ScheduleEvent(EVENT_ENRAGE, urand(7, 14)*IN_MILLISECONDS, 0, PHASE_HUMAN);
-                events.ScheduleEvent(EVENT_SMASH, urand(12, 17)*IN_MILLISECONDS, 0, PHASE_HUMAN);
+                events.ScheduleEvent(EVENT_CLEAVE, std::rand() % (12 * IN_MILLISECONDS) + (6 * IN_MILLISECONDS), 0, PHASE_HUMAN);
+                events.ScheduleEvent(EVENT_STAGGERING_ROAR, std::rand() % (21 * IN_MILLISECONDS) + (18 * IN_MILLISECONDS), 0, PHASE_HUMAN);
+                events.ScheduleEvent(EVENT_ENRAGE, std::rand() % (14 * IN_MILLISECONDS) + (7 * IN_MILLISECONDS), 0, PHASE_HUMAN);
+                events.ScheduleEvent(EVENT_SMASH, std::rand() % (17 * IN_MILLISECONDS) + (12 * IN_MILLISECONDS), 0, PHASE_HUMAN);
             }
 
             void DamageTaken(Unit* /*doneBy*/, uint32& damage) OVERRIDE
@@ -165,9 +165,9 @@ class boss_ingvar_the_plunderer : public CreatureScript
             void ScheduleSecondPhase()
             {
                 events.SetPhase(PHASE_UNDEAD);
-                events.ScheduleEvent(EVENT_DARK_SMASH, urand(14, 18)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
-                events.ScheduleEvent(EVENT_DREADFUL_ROAR, urand(18, 22)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
-                events.ScheduleEvent(EVENT_WOE_STRIKE, urand(10, 14)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
+                events.ScheduleEvent(EVENT_DARK_SMASH, std::rand() % (18 * IN_MILLISECONDS) + (14 * IN_MILLISECONDS), 0, PHASE_UNDEAD);
+                events.ScheduleEvent(EVENT_DREADFUL_ROAR, std::rand() % (22 * IN_MILLISECONDS) + (18 * IN_MILLISECONDS), 0, PHASE_UNDEAD);
+                events.ScheduleEvent(EVENT_WOE_STRIKE, std::rand() % (14 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS), 0, PHASE_UNDEAD);
                 events.ScheduleEvent(EVENT_SHADOW_AXE, 30*IN_MILLISECONDS, 0, PHASE_UNDEAD);
             }
 
@@ -193,19 +193,19 @@ class boss_ingvar_the_plunderer : public CreatureScript
                         // PHASE ONE
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE);
-                            events.ScheduleEvent(EVENT_CLEAVE, urand(6, 12)*IN_MILLISECONDS, 0, PHASE_HUMAN);
+                            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % (12 * IN_MILLISECONDS) + (6 * IN_MILLISECONDS), 0, PHASE_HUMAN);
                             break;
                         case EVENT_STAGGERING_ROAR:
                             DoCast(me, SPELL_STAGGERING_ROAR);
-                            events.ScheduleEvent(EVENT_STAGGERING_ROAR, urand(18, 22)*IN_MILLISECONDS, 0, PHASE_HUMAN);
+                            events.ScheduleEvent(EVENT_STAGGERING_ROAR, std::rand() % (22 * IN_MILLISECONDS) + (18 * IN_MILLISECONDS), 0, PHASE_HUMAN);
                             break;
                         case EVENT_ENRAGE:
                             DoCast(me, SPELL_ENRAGE);
-                            events.ScheduleEvent(EVENT_ENRAGE, urand(7, 14)*IN_MILLISECONDS, 0, PHASE_HUMAN);
+                            events.ScheduleEvent(EVENT_ENRAGE, std::rand() % (14 * IN_MILLISECONDS) + (7 * IN_MILLISECONDS), 0, PHASE_HUMAN);
                             break;
                         case EVENT_SMASH:
                             DoCastAOE(SPELL_SMASH);
-                            events.ScheduleEvent(EVENT_SMASH, urand(12, 16)*IN_MILLISECONDS, 0, PHASE_HUMAN);
+                            events.ScheduleEvent(EVENT_SMASH, std::rand() % (16 * IN_MILLISECONDS) + (12 * IN_MILLISECONDS), 0, PHASE_HUMAN);
                             break;
                         case EVENT_JUST_TRANSFORMED:
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -218,15 +218,15 @@ class boss_ingvar_the_plunderer : public CreatureScript
                         // PHASE TWO
                         case EVENT_DARK_SMASH:
                             DoCastVictim(SPELL_DARK_SMASH);
-                            events.ScheduleEvent(EVENT_DARK_SMASH, urand(12, 16)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
+                            events.ScheduleEvent(EVENT_DARK_SMASH, std::rand() % (16 * IN_MILLISECONDS) + (12 * IN_MILLISECONDS), 0, PHASE_UNDEAD);
                             break;
                         case EVENT_DREADFUL_ROAR:
                             DoCast(me, SPELL_DREADFUL_ROAR);
-                            events.ScheduleEvent(EVENT_DREADFUL_ROAR, urand(18, 22)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
+                            events.ScheduleEvent(EVENT_DREADFUL_ROAR, std::rand() % (22 * IN_MILLISECONDS) + (18 * IN_MILLISECONDS), 0, PHASE_UNDEAD);
                             break;
                         case EVENT_WOE_STRIKE:
                             DoCastVictim(SPELL_WOE_STRIKE);
-                            events.ScheduleEvent(EVENT_WOE_STRIKE, urand(10, 14)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
+                            events.ScheduleEvent(EVENT_WOE_STRIKE, std::rand() % (14 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS), 0, PHASE_UNDEAD);
                             break;
                         case EVENT_SHADOW_AXE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1))

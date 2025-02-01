@@ -526,10 +526,10 @@ public:
                     events.ScheduleEvent(EVENT_START_FIRST_RANDOM_PORTAL, 2*IN_MILLISECONDS, 1, _phase);
                     break;
                 case PHASE_ONE:
-                    events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(8, 10)*IN_MILLISECONDS, 0, _phase);
-                    events.ScheduleEvent(EVENT_ARCANE_STORM, urand(3, 6)*IN_MILLISECONDS, 0, _phase);
-                    events.ScheduleEvent(EVENT_VORTEX, urand(30, 35)*IN_MILLISECONDS, 0, _phase);
-                    events.ScheduleEvent(EVENT_POWER_SPARKS, urand(20, 30)*IN_MILLISECONDS, 0, _phase);
+                    events.ScheduleEvent(EVENT_ARCANE_BREATH, std::rand() % (10 * IN_MILLISECONDS) + (8 * IN_MILLISECONDS), 0, _phase);
+                    events.ScheduleEvent(EVENT_ARCANE_STORM, std::rand() % (6 * IN_MILLISECONDS) + (3 * IN_MILLISECONDS), 0, _phase);
+                    events.ScheduleEvent(EVENT_VORTEX, std::rand() % (35 * IN_MILLISECONDS) + (30 * IN_MILLISECONDS), 0, _phase);
+                    events.ScheduleEvent(EVENT_POWER_SPARKS, std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS), 0, _phase);
                     break;
                 case PHASE_TWO:
                     events.ScheduleEvent(EVENT_MOVE_TO_POINT_SURGE_P_TWO, 60*IN_MILLISECONDS, 0, _phase);
@@ -538,8 +538,8 @@ public:
                 case PHASE_THREE:
                     events.ScheduleEvent(EVENT_ARCANE_PULSE, 7*IN_MILLISECONDS, 0, _phase);
                     events.ScheduleEvent(EVENT_ARCANE_STORM, 10*IN_MILLISECONDS, 0, _phase);
-                    events.ScheduleEvent(EVENT_SURGE_OF_POWER_P_THREE, urand(4, 6)*IN_MILLISECONDS, 0, _phase);
-                    events.ScheduleEvent(EVENT_STATIC_FIELD, urand(20, 30)*IN_MILLISECONDS, 0, _phase);
+                    events.ScheduleEvent(EVENT_SURGE_OF_POWER_P_THREE, std::rand() % (6 * IN_MILLISECONDS) + (4 * IN_MILLISECONDS), 0, _phase);
+                    events.ScheduleEvent(EVENT_STATIC_FIELD, std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS), 0, _phase);
                     break;
             }
         }
@@ -785,12 +785,12 @@ public:
                         break;
                     case EVENT_SAY_INTRO:
                         Talk(SAY_INTRO_EVENT);
-                        events.ScheduleEvent(EVENT_SAY_INTRO, urand(85, 95)*IN_MILLISECONDS, 1, PHASE_NOT_STARTED);
+                        events.ScheduleEvent(EVENT_SAY_INTRO, std::rand() % (95 * IN_MILLISECONDS) + (85 * IN_MILLISECONDS), 1, PHASE_NOT_STARTED);
                         break;
                     case EVENT_VORTEX:
                         _executingVortex = true;
                         DoAction(ACTION_LIFT_IN_AIR);
-                        events.ScheduleEvent(EVENT_VORTEX, urand(60, 80)*IN_MILLISECONDS, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_VORTEX, std::rand() % (80 * IN_MILLISECONDS) + (60 * IN_MILLISECONDS), 0, PHASE_ONE);
                         break;
                     case EVENT_MOVE_TO_VORTEX_POINT:
                         _canAttack = false;
@@ -799,7 +799,7 @@ public:
                         break;
                     case EVENT_POWER_SPARKS:
                         instance->SetData(DATA_POWER_SPARKS_HANDLING, 0);
-                        events.ScheduleEvent(EVENT_POWER_SPARKS, urand(30, 35)*IN_MILLISECONDS, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_POWER_SPARKS, std::rand() % (35 * IN_MILLISECONDS) + (30 * IN_MILLISECONDS), 0, PHASE_ONE);
                         break;
                     case EVENT_ARCANE_BREATH:
                         if (_executingVortex)
@@ -826,7 +826,7 @@ public:
                         else if (_phase == PHASE_THREE)
                         {
                             DoCastAOE(SPELL_ARCANE_STORM_P_III, true);
-                            events.ScheduleEvent(EVENT_ARCANE_STORM, urand(6, 12)*IN_MILLISECONDS, 0, PHASE_THREE);
+                            events.ScheduleEvent(EVENT_ARCANE_STORM, std::rand() % (12 * IN_MILLISECONDS) + (6 * IN_MILLISECONDS), 0, PHASE_THREE);
                         }
                         break;
                     case EVENT_FLY_OUT_OF_PLATFORM:
@@ -906,7 +906,7 @@ public:
                             if (Creature* lastArcaneOverloadBunny = me->GetMap()->GetCreature(_arcaneOverloadGUID))
                                 DoCast(lastArcaneOverloadBunny, SPELL_ARCANE_BOMB_TRIGGER, true);
                         }
-                        events.ScheduleEvent(EVENT_SUMMON_ARCANE_BOMB, urand(15, 16)*IN_MILLISECONDS, 2, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_SUMMON_ARCANE_BOMB, std::rand() % (16 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS), 2, PHASE_TWO);
                         break;
                     case EVENT_ARCANE_PULSE:
                         if (_preparingPulsesChecker < 2)
@@ -964,13 +964,13 @@ public:
                             DoCastAOE(SPELL_SURGE_OF_POWER_WARNING_SELECTOR_25, true);
                         }
 
-                        events.ScheduleEvent(EVENT_SURGE_OF_POWER_P_THREE, urand(9, 18)*IN_MILLISECONDS, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_SURGE_OF_POWER_P_THREE, std::rand() % (18 * IN_MILLISECONDS) + (9 * IN_MILLISECONDS), 0, PHASE_THREE);
                         break;
                     case EVENT_STATIC_FIELD:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60.0f, false, SPELL_RIDE_RED_DRAGON_BUDDY))
                             DoCast(target, SPELL_STATIC_FIELD_MISSLE, true);
 
-                        events.ScheduleEvent(EVENT_STATIC_FIELD, urand(15, 30)*IN_MILLISECONDS, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_STATIC_FIELD, std::rand() % (30 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS), 0, PHASE_THREE);
                         break;
                     case EVENT_PREVENT_SAY_SPAM_ON_KILL:
                         _killSpamFilter = false;
@@ -1408,7 +1408,7 @@ class npc_nexus_lord : public CreatureScript
                         case EVENT_ARCANE_SHOCK:
                             if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0, 5.0f, true))
                                 DoCast(victim, SPELL_ARCANE_SHOCK);
-                            _events.ScheduleEvent(EVENT_ARCANE_SHOCK, urand(7, 15)*IN_MILLISECONDS);
+                            _events.ScheduleEvent(EVENT_ARCANE_SHOCK, std::rand() % (15 * IN_MILLISECONDS) + (7 * IN_MILLISECONDS));
                             break;
                         case EVENT_HASTE_BUFF:
                             DoCast(me, SPELL_HASTE);
@@ -1461,7 +1461,7 @@ class npc_scion_of_eternity : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/) OVERRIDE
             {
-                _events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(14, 29)*IN_MILLISECONDS);
+                _events.ScheduleEvent(EVENT_ARCANE_BARRAGE, std::rand() % (29 * IN_MILLISECONDS) + (14 * IN_MILLISECONDS));
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -1486,7 +1486,7 @@ class npc_scion_of_eternity : public CreatureScript
                     {
                         case EVENT_ARCANE_BARRAGE:
                             DoCast(me, SPELL_ARCANE_BARRAGE);
-                            _events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 15)*IN_MILLISECONDS);
+                            _events.ScheduleEvent(EVENT_ARCANE_BARRAGE, std::rand() % (15 * IN_MILLISECONDS) + (3 * IN_MILLISECONDS));
                             break;
                     }
                 }

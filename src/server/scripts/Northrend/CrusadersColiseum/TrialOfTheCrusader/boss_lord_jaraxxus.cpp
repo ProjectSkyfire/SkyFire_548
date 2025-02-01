@@ -92,8 +92,8 @@ class boss_jaraxxus : public CreatureScript
             {
                 _Reset();
                 events.ScheduleEvent(EVENT_FEL_FIREBALL, 5*IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_FEL_LIGHTNING, urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_INCINERATE_FLESH, urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FEL_LIGHTNING, std::rand() % (15 * IN_MILLISECONDS) + (10*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_INCINERATE_FLESH, std::rand() % (25 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_NETHER_POWER, 40*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_LEGION_FLAME, 30*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMONO_NETHER_PORTAL, 20*IN_MILLISECONDS);
@@ -152,12 +152,12 @@ class boss_jaraxxus : public CreatureScript
                     {
                         case EVENT_FEL_FIREBALL:
                             DoCastVictim(SPELL_FEL_FIREBALL);
-                            events.ScheduleEvent(EVENT_FEL_FIREBALL, urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_FEL_FIREBALL, std::rand() % (15 * IN_MILLISECONDS) + (10*IN_MILLISECONDS));
                             return;
                         case EVENT_FEL_LIGHTNING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_LORD_HITTIN))
                                 DoCast(target, SPELL_FEL_LIGHTING);
-                            events.ScheduleEvent(EVENT_FEL_LIGHTNING, urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_FEL_LIGHTNING, std::rand() % (15 * IN_MILLISECONDS) + (10*IN_MILLISECONDS));
                             return;
                         case EVENT_INCINERATE_FLESH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_LORD_HITTIN))
@@ -166,7 +166,7 @@ class boss_jaraxxus : public CreatureScript
                                 Talk(SAY_INCINERATE);
                                 DoCast(target, SPELL_INCINERATE_FLESH);
                             }
-                            events.ScheduleEvent(EVENT_INCINERATE_FLESH, urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_INCINERATE_FLESH, std::rand() % (25 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS));
                             return;
                         case EVENT_NETHER_POWER:
                             me->CastCustomSpell(SPELL_NETHER_POWER, SPELLVALUE_AURA_STACK, RAID_MODE<uint32>(5, 10, 5, 10), me, true);

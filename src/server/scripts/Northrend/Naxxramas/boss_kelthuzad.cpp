@@ -384,7 +384,7 @@ public:
                     {
                         case EVENT_WASTE:
                             DoSummon(NPC_WASTE, Pos[RAND(0, 3, 6, 9)]);
-                            events.RepeatEvent(urand(2000, 5000));
+                            events.RepeatEvent(std::rand() % 5000 + 2000);
                             break;
                         case EVENT_ABOMIN:
                             if (nAbomination < 8)
@@ -419,13 +419,13 @@ public:
                             me->CastStop();
 
                             DoStartMovement(me->GetVictim());
-                            events.ScheduleEvent(EVENT_BOLT, urand(5000, 10000));
+                            events.ScheduleEvent(EVENT_BOLT, std::rand() % 10000 + 5000);
                             events.ScheduleEvent(EVENT_NOVA, 15000);
-                            events.ScheduleEvent(EVENT_DETONATE, urand(30000, 40000));
-                            events.ScheduleEvent(EVENT_FISSURE, urand(10000, 30000));
-                            events.ScheduleEvent(EVENT_BLAST, urand(60000, 120000));
+                            events.ScheduleEvent(EVENT_DETONATE, std::rand() % 40000 + 30000);
+                            events.ScheduleEvent(EVENT_FISSURE, std::rand() % 30000 + 10000);
+                            events.ScheduleEvent(EVENT_BLAST, std::rand() % 120000 + 60000);
                             if (GetDifficulty() == DIFFICULTY_25MAN_NORMAL)
-                                events.ScheduleEvent(EVENT_CHAIN, urand(30000, 60000));
+                                events.ScheduleEvent(EVENT_CHAIN, std::rand() % 60000 + 30000);
                             Phase = 2;
                             break;
                         default:
@@ -479,15 +479,15 @@ public:
                     {
                         case EVENT_BOLT:
                             DoCastVictim(RAID_MODE(SPELL_FROST_BOLT, H_SPELL_FROST_BOLT));
-                            events.RepeatEvent(urand(5000, 10000));
+                            events.RepeatEvent(std::rand() % 10000 + 5000);
                             break;
                         case EVENT_NOVA:
                             DoCastAOE(RAID_MODE(SPELL_FROST_BOLT_AOE, H_SPELL_FROST_BOLT_AOE));
-                            events.RepeatEvent(urand(15000, 30000));
+                            events.RepeatEvent(std::rand() % 30000 + 15000);
                             break;
                         case EVENT_CHAIN:
                         {
-                            uint32 count = urand(1, 3);
+                            uint32 count = std::rand() % 3 + 1;
                             for (uint8 i = 1; i <= count; i++)
                             {
                                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200, true);
@@ -502,7 +502,7 @@ public:
                             }
                             if (!chained.empty())
                                 Talk(SAY_CHAIN);
-                            events.RepeatEvent(urand(100000, 180000));
+                            events.RepeatEvent(std::rand() % 180000 + 100000);
                             break;
                         }
                         case EVENT_CHAINED_SPELL:
@@ -527,7 +527,7 @@ public:
                                         switch (player->getClass())
                                         {
                                             case CLASS_DRUID:
-                                                if (urand(0, 1))
+                                                if (std::rand() % 1)
                                                     player->CastSpell(target, SPELL_MOONFIRE, false);
                                                 else
                                                     player->CastSpell(me, SPELL_LIFEBLOOM, false);
@@ -545,19 +545,19 @@ public:
                                                 player->CastSpell(target, RAND(SPELL_BLADESTORM, SPELL_CLEAVE), false);
                                                 break;
                                             case CLASS_PALADIN:
-                                                if (urand(0, 1))
+                                                if (std::rand() % 1)
                                                     player->CastSpell(target, SPELL_HAMMER_OF_JUSTICE, false);
                                                 else
                                                     player->CastSpell(me, SPELL_HOLY_SHOCK, false);
                                                 break;
                                             case CLASS_PRIEST:
-                                                if (urand(0, 1))
+                                                if (std::rand() % 1)
                                                     player->CastSpell(target, SPELL_VAMPIRIC_TOUCH, false);
                                                 else
                                                     player->CastSpell(me, SPELL_RENEW, false);
                                                 break;
                                             case CLASS_SHAMAN:
-                                                if (urand(0, 1))
+                                                if (std::rand() % 1)
                                                     player->CastSpell(target, SPELL_EARTH_SHOCK, false);
                                                 else
                                                     player->CastSpell(me, SPELL_HEALING_WAVE, false);
@@ -566,7 +566,7 @@ public:
                                                 player->CastSpell(target, RAND(SPELL_HEMORRHAGE, SPELL_MUTILATE), false);
                                                 break;
                                             case CLASS_DEATH_KNIGHT:
-                                                if (urand(0, 1))
+                                                if (std::rand() % 1)
                                                     player->CastSpell(target, SPELL_PLAGUE_STRIKE, true);
                                                 else
                                                     player->CastSpell(target, SPELL_HOWLING_BLAST, true);
@@ -608,20 +608,20 @@ public:
                                 Talk(SAY_SPECIAL);
                             }
 
-                            events.RepeatEvent(urand(20000, 50000));
+                            events.RepeatEvent(std::rand() % 50000 + 20000);
                             break;
                         }
                         case EVENT_FISSURE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_SHADOW_FISURE);
-                            events.RepeatEvent(urand(10000, 45000));
+                            events.RepeatEvent(std::rand() % 45000 + 10000);
                             break;
                         case EVENT_BLAST:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, RAID_MODE(1, 0), 0, true))
                                 DoCast(target, SPELL_FROST_BLAST);
                             if (rand()%2)
                                 Talk(SAY_FROST_BLAST);
-                            events.RepeatEvent(urand(30000, 90000));
+                            events.RepeatEvent(std::rand() % 90000 + 30000);
                             break;
                         default:
                             events.PopEvent();
@@ -718,7 +718,7 @@ class npc_kelthuzad_abomination : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(2000, 5000));
+                _events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 5000 + 2000);
                 DoCast(me, SPELL_FRENZY, true);
             }
 
@@ -735,7 +735,7 @@ class npc_kelthuzad_abomination : public CreatureScript
                     {
                         case EVENT_MORTAL_WOUND:
                             DoCastVictim(SPELL_MORTAL_WOUND, true);
-                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 15000));
+                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 15000 + 10000);
                             break;
                         default:
                             break;

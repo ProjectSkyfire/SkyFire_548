@@ -114,13 +114,13 @@ public:
                 instance->SetData(DATA_SELIN_EVENT, NOT_STARTED);
             } else SF_LOG_ERROR("scripts", ERROR_INST_DATA);
 
-            DrainLifeTimer = urand(3000, 7000);
+            DrainLifeTimer = std::rand() % 7000 + 3000;
             DrainManaTimer = DrainLifeTimer + 5000;
             FelExplosionTimer = 2100;
             if (IsHeroic())
-                DrainCrystalTimer = urand(10000, 15000);
+                DrainCrystalTimer = std::rand() % 15000 + 10000;
             else
-                DrainCrystalTimer = urand(20000, 25000);
+                DrainCrystalTimer = std::rand() % 25000 + 20000;
             EmpowerTimer = 10000;
 
             IsDraining = false;
@@ -273,9 +273,9 @@ public:
                     {
                         SelectNearestCrystal();
                         if (IsHeroic())
-                            DrainCrystalTimer = urand(10000, 15000);
+                            DrainCrystalTimer = std::rand() % 15000 + 10000;
                         else
-                            DrainCrystalTimer = urand(20000, 25000);
+                            DrainCrystalTimer = std::rand() % 25000 + 20000;
                     } else DrainCrystalTimer -= diff;
                 }
             }else

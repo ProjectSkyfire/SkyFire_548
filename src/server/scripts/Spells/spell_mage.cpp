@@ -678,7 +678,7 @@ public:
         {
             if (Unit* target = GetCaster()->FindNearestCreature(NPC_AUROSALIA, 30.0f))
                 if (target->GetTypeId() == TypeID::TYPEID_UNIT)
-                    target->CastSpell(target, PolymorhForms[urand(0, 5)], true);
+                    target->CastSpell(target, PolymorhForms[std::rand() % 5], true);
         }
 
         void Register() override

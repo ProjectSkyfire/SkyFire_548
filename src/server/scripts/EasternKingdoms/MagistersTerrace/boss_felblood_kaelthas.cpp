@@ -294,14 +294,14 @@ public:
                     if (FireballTimer <= diff)
                     {
                         DoCastVictim(SPELL_FIREBALL_NORMAL);
-                        FireballTimer = urand(2000, 6000);
+                        FireballTimer = std::rand() % 6000 + 2000;
                     } else FireballTimer -= diff;
 
                     if (PhoenixTimer <= diff)
                     {
                         Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
 
-                        uint8 random = urand(1, 2);
+                        uint8 random = std::rand() % 2 + 1;
                         float x = KaelLocations[random][0];
                         float y = KaelLocations[random][1];
 
@@ -327,7 +327,7 @@ public:
                             DoCast(target, SPELL_FLAMESTRIKE3, true);
                             Talk(SAY_FLAMESTRIKE);
                         }
-                        FlameStrikeTimer = urand(15000, 25000);
+                        FlameStrikeTimer = std::rand() % 25000 + 15000;
                     } else FlameStrikeTimer -= diff;
 
                     // Below 50%
@@ -565,7 +565,7 @@ public:
             if (BurnTimer <= diff)
             {
                 //spell Burn should possible do this, but it doesn't, so do this for now.
-                uint16 dmg = urand(1650, 2050);
+                uint16 dmg = std::rand() % 2050 + 1650;
                 me->DealDamage(me, dmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false);
                 BurnTimer += 2000;
             } BurnTimer -= diff;
@@ -631,7 +631,7 @@ public:
         void Reset() OVERRIDE
         {
             DespawnTimer = 30000;
-            ChangeTargetTimer = urand(6000, 12000);
+            ChangeTargetTimer = std::rand() % 12000 + 6000;
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetDisableGravity(true);
@@ -661,7 +661,7 @@ public:
                     AttackStart(target);
                 }
 
-                ChangeTargetTimer = urand(5000, 15000);
+                ChangeTargetTimer = std::rand() % 15000 + 5000;
             } else ChangeTargetTimer -= diff;
         }
     };

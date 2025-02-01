@@ -264,7 +264,7 @@ Creature* BattlegroundAV::AddAVCreature(uint16 cinfoid, uint16 type)
             BG_AV_StaticCreaturePos[type][3]);
         level = (BG_AV_StaticCreatureInfo[cinfoid][2] == BG_AV_StaticCreatureInfo[cinfoid][3])
             ? BG_AV_StaticCreatureInfo[cinfoid][2]
-            : urand(BG_AV_StaticCreatureInfo[cinfoid][2], BG_AV_StaticCreatureInfo[cinfoid][3]);
+            : std::rand() % BG_AV_StaticCreatureInfo[cinfoid][3] + BG_AV_StaticCreatureInfo[cinfoid][2];
         isStatic = true;
     }
     else
@@ -278,7 +278,7 @@ Creature* BattlegroundAV::AddAVCreature(uint16 cinfoid, uint16 type)
             BG_AV_CreaturePos[type][3]);
         level = (BG_AV_CreatureInfo[cinfoid][2] == BG_AV_CreatureInfo[cinfoid][3])
             ? BG_AV_CreatureInfo[cinfoid][2]
-            : urand(BG_AV_CreatureInfo[cinfoid][2], BG_AV_CreatureInfo[cinfoid][3]);
+            : std::rand() % BG_AV_CreatureInfo[cinfoid][3] + BG_AV_CreatureInfo[cinfoid][2];
     }
     if (!creature)
         return NULL;
@@ -373,7 +373,7 @@ void BattlegroundAV::PostUpdateImpl(uint32 diff)
                     if (creature)
                         YellToAll(creature, LANG_BG_AV_H_CAPTAIN_BUFF, Language::LANG_ORCISH);
                 }
-                m_CaptainBuffTimer[i] = 120000 + urand(0, 4) * 60000; //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
+                m_CaptainBuffTimer[i] = 120000 + (std::rand() % 4) * 60000; //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
             }
         }
         //add points from mine owning, and look if he neutral team wanrts to reclaim the mine
@@ -696,7 +696,7 @@ void BattlegroundAV::ChangeMineOwner(uint8 mine, uint32 team, bool initial)
         AddAVCreature(miner, i);
     //the next chooses randomly between 2 cretures
     for (uint16 i = ((mine == AV_NORTH_MINE) ? AV_CPLACE_MINE_N_2_MIN : AV_CPLACE_MINE_S_2_MIN); i <= ((mine == AV_NORTH_MINE) ? AV_CPLACE_MINE_N_2_MAX : AV_CPLACE_MINE_S_2_MAX); i++)
-        AddAVCreature(miner + (urand(1, 2)), i);
+        AddAVCreature(miner + (std::rand() % 2 + 1), i);
     AddAVCreature(miner + 3, (mine == AV_NORTH_MINE) ? AV_CPLACE_MINE_N_3 : AV_CPLACE_MINE_S_3);
 
     if (team == ALLIANCE || team == HORDE)
@@ -1593,7 +1593,7 @@ void BattlegroundAV::ResetBGSubclass()
         m_Team_Scores[i] = BG_AV_SCORE_INITIAL_POINTS;
         m_IsInformedNearVictory[i] = false;
         m_CaptainAlive[i] = true;
-        m_CaptainBuffTimer[i] = 120000 + urand(0, 4) * 60; //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
+        m_CaptainBuffTimer[i] = 120000 + (std::rand() % 4) * 60; //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
         m_Mine_Owner[i] = AV_NEUTRAL_TEAM;
         m_Mine_PrevOwner[i] = m_Mine_Owner[i];
     }

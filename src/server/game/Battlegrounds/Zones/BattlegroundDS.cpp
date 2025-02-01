@@ -85,7 +85,7 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
                 gob->SetGoState(GOState::GO_STATE_ACTIVE);
 
             DoorOpen(BG_DS_OBJECT_WATER_2);
-            setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
+            setWaterFallTimer(std::rand() % BG_DS_WATERFALL_TIMER_MAX + BG_DS_WATERFALL_TIMER_MIN);
             setWaterFallStatus(BG_DS_WATERFALL_STATUS_OFF);
         }
     }
@@ -107,7 +107,7 @@ void BattlegroundDS::StartingEventOpenDoors()
     for (uint32 i = BG_DS_OBJECT_BUFF_1; i <= BG_DS_OBJECT_BUFF_2; ++i)
         SpawnBGObject(i, 60);
 
-    setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
+    setWaterFallTimer(std::rand() % BG_DS_WATERFALL_TIMER_MAX + BG_DS_WATERFALL_TIMER_MIN);
     setWaterFallStatus(BG_DS_WATERFALL_STATUS_OFF);
 
     setPipeKnockBackTimer(BG_DS_PIPE_KNOCKBACK_FIRST_DELAY);

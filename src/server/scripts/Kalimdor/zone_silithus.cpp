@@ -876,7 +876,7 @@ public:
                     target = me->FindNearestCreature(15423, 20, true);
                 if (me->GetEntry() == 15423)
                 {
-                    uint8 tar = urand(0, 2);
+                    uint8 tar = std::rand() % 2;
 
                     if (tar == 0)
                         target = me->FindNearestCreature(15422, 20, true);

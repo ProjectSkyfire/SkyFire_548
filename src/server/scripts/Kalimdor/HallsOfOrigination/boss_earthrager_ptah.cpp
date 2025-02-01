@@ -128,9 +128,9 @@ public:
             Cleanup();
             _Reset();
             events.SetPhase(PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_RAGING_SMASH, std::rand() % 12000 + 7000, 0, PHASE_NORMAL);
             events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_EARTH_SPIKE, std::rand() % 21000 + 16000, 0, PHASE_NORMAL);
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
@@ -177,9 +177,9 @@ public:
                     SendWeather(WEATHER_STATE_FOG, 0.0f);
                     me->RemoveAurasDueToSpell(SPELL_PTAH_EXPLOSION);
                     events.SetPhase(PHASE_NORMAL);
-                    events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
+                    events.ScheduleEvent(EVENT_RAGING_SMASH, std::rand() % 12000 + 7000, 0, PHASE_NORMAL);
                     events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
-                    events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
+                    events.ScheduleEvent(EVENT_EARTH_SPIKE, std::rand() % 21000 + 16000, 0, PHASE_NORMAL);
                 }
             }
         }
@@ -222,7 +222,7 @@ public:
                 {
                     case EVENT_RAGING_SMASH:
                         DoCastVictim(SPELL_RAGING_SMASH);
-                        events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
+                        events.ScheduleEvent(EVENT_RAGING_SMASH, std::rand() % 12000 + 7000, 0, PHASE_NORMAL);
                         break;
                     case EVENT_FLAME_BOLT:
                         DoCast(me, SPELL_FLAME_BOLT);
@@ -231,7 +231,7 @@ public:
                     case EVENT_EARTH_SPIKE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_EARTH_SPIKE_WARN);
-                        events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
+                        events.ScheduleEvent(EVENT_EARTH_SPIKE, std::rand() % 21000 + 16000, 0, PHASE_NORMAL);
                         break;
                     case EVENT_PTAH_EXPLODE:
                         DoCast(me, SPELL_PTAH_EXPLOSION);

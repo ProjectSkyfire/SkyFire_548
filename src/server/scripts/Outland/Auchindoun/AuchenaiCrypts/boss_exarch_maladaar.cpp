@@ -319,7 +319,7 @@ public:
             if (Mortal_Strike_timer <= diff)
             {
                 DoCastVictim(SPELL_AV_MORTAL_STRIKE);
-                Mortal_Strike_timer = urand(10, 30) * 1000;
+                Mortal_Strike_timer = (std::rand() % 30 + 10) * 1000;
             } else Mortal_Strike_timer -= diff;
 
             DoMeleeAttackIfReady();

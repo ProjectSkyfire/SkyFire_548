@@ -84,7 +84,7 @@ uint32 CreatureTemplate::GetRandomValidModelId() const
     if (Modelid3) modelIDs[c++] = Modelid3;
     if (Modelid4) modelIDs[c++] = Modelid4;
 
-    return ((c > 0) ? modelIDs[urand(0, c - 1)] : 0);
+    return ((c > 0) ? modelIDs[std::rand() % (c - 1)] : 0);
 }
 
 uint32 CreatureTemplate::GetFirstValidModelId() const
@@ -479,7 +479,7 @@ void Creature::Update(uint32 diff)
                     if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
                         SetRespawnTime(DAY);
                     else
-                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + urand(5, MINUTE); // else copy time from master and add a little
+                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + (std::rand() % MINUTE + 5); // else copy time from master and add a little
                     SaveRespawnTime(); // also save to DB immediately
                 }
             }
@@ -1046,7 +1046,7 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     // level
     uint8 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
     uint8 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);
-    uint8 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
+    uint8 level = minlevel == maxlevel ? minlevel : std::rand() % maxlevel + minlevel;
     SetLevel(level);
 
     CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(level, cinfo->unit_class);

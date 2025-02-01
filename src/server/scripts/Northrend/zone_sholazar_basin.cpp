@@ -845,7 +845,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            uint32 roll = urand(1, 100);
+            uint32 roll = std::rand() % 100 + 1;
 
             uint8 ev;
             if (roll <= 50)

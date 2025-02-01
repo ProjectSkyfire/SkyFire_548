@@ -139,7 +139,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiWebTimer = urand(5000, 8000);
+            uiWebTimer = std::rand() % 8000 + 5000;
         }
 
         void UpdateAI(uint32 uiDiff) OVERRIDE
@@ -153,7 +153,7 @@ public:
                 if (uiWebTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_WEB);
-                    uiWebTimer = urand(7000, 16000);
+                    uiWebTimer = std::rand() % 16000 + 7000;
                 } else uiWebTimer -= uiDiff;
             }
 

@@ -102,7 +102,7 @@ void BattlegroundEY::StartingEventOpenDoors()
     for (uint32 i = 0; i < EY_POINTS_MAX; ++i)
     {
         //randomly spawn buff
-        uint8 buff = urand(0, 2);
+        uint8 buff = std::rand() % 2;
         SpawnBGObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
 

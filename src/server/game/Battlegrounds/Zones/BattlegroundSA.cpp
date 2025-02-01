@@ -32,7 +32,7 @@ BattlegroundSA::~BattlegroundSA() { }
 void BattlegroundSA::Reset()
 {
     TotalTime = 0;
-    Attackers = ((urand(0, 1)) ? TEAM_ALLIANCE : TEAM_HORDE);
+    Attackers = (std::rand() % 1) ? TEAM_ALLIANCE : TEAM_HORDE;
     for (uint8 i = 0; i <= 5; i++)
         GateStatus[i] = BG_SA_GATE_OK;
     ShipsStarted = false;
@@ -429,7 +429,7 @@ void BattlegroundSA::AddPlayer(Player* player)
         {
             player->CastSpell(player, 12438, true);//Without this player falls before boat loads...
 
-            if (urand(0, 1))
+            if (std::rand() % 1)
                 player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);
             else
                 player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);
@@ -498,7 +498,7 @@ void BattlegroundSA::TeleportPlayers()
             {
                 player->CastSpell(player, 12438, true);     //Without this player falls before boat loads...
 
-                if (urand(0, 1))
+                if (std::rand() % 1)
                     player->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);
                 else
                     player->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);

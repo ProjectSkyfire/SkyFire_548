@@ -46,7 +46,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiBerserkTimer = urand(60*IN_MILLISECONDS, 90*IN_MILLISECONDS); //60-90 secs according to wowwiki
+            uiBerserkTimer = std::rand() % (90 * IN_MILLISECONDS) + (60 * IN_MILLISECONDS); //60-90 secs according to wowwiki
             uiBiteTimer = 5*IN_MILLISECONDS;
             uiSpitTimer = 10*IN_MILLISECONDS;
             uiSpringTimer = 8*IN_MILLISECONDS;
@@ -72,13 +72,13 @@ public:
             if (uiBiteTimer <= diff)
             {
                 DoCastVictim(SPELL_ECK_BITE);
-                uiBiteTimer = urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS);
+                uiBiteTimer = std::rand() % (12 * IN_MILLISECONDS) + (8 * IN_MILLISECONDS);
             } else uiBiteTimer -= diff;
 
             if (uiSpitTimer <= diff)
             {
                 DoCastVictim(SPELL_ECK_SPIT);
-                uiSpitTimer = urand(6*IN_MILLISECONDS, 14*IN_MILLISECONDS);
+                uiSpitTimer = std::rand() % (14 * IN_MILLISECONDS) + (6*IN_MILLISECONDS);
             } else uiSpitTimer -= diff;
 
             if (uiSpringTimer <= diff)
@@ -87,7 +87,7 @@ public:
                 if (target && target->GetTypeId() == TypeID::TYPEID_PLAYER)
                 {
                     DoCast(target, RAND(SPELL_ECK_SPRING_1, SPELL_ECK_SPRING_2));
-                    uiSpringTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+                    uiSpringTimer = std::rand() % (10 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS);
                 }
             } else uiSpringTimer -= diff;
 

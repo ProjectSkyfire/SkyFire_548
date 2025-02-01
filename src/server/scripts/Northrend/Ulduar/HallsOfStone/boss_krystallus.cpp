@@ -65,10 +65,10 @@ public:
         {
             bIsSlam = false;
 
-            uiBoulderTossTimer = urand(3000, 9000);
-            uiGroundSpikeTimer = urand(9000, 14000);
-            uiGroundSlamTimer = urand(15000, 18000);
-            uiStompTimer = urand(20000, 29000);
+            uiBoulderTossTimer = std::rand() % 9000 + 3000;
+            uiGroundSpikeTimer = std::rand() % 14000 + 9000;
+            uiGroundSlamTimer = std::rand() % 18000 + 15000;
+            uiStompTimer = std::rand() % 29000 + 20000;
             uiShatterTimer = 0;
 
             if (instance)
@@ -92,20 +92,20 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_BOULDER_TOSS);
-                uiBoulderTossTimer = urand(9000, 15000);
+                uiBoulderTossTimer = std::rand() % 15000 + 9000;
             } else uiBoulderTossTimer -= diff;
 
             if (uiGroundSpikeTimer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_GROUND_SPIKE);
-                uiGroundSpikeTimer = urand(12000, 17000);
+                uiGroundSpikeTimer = std::rand() % 17000 + 12000;
             } else uiGroundSpikeTimer -= diff;
 
             if (uiStompTimer <= diff)
             {
                 DoCast(me, SPELL_STOMP);
-                uiStompTimer = urand(20000, 29000);
+                uiStompTimer = std::rand() % 29000 + 20000;
             } else uiStompTimer -= diff;
 
             if (uiGroundSlamTimer <= diff)
@@ -113,7 +113,7 @@ public:
                 DoCast(me, SPELL_GROUND_SLAM);
                 bIsSlam = true;
                 uiShatterTimer = 10000;
-                uiGroundSlamTimer = urand(15000, 18000);
+                uiGroundSlamTimer = std::rand() % 18000 + 15000;
             } else uiGroundSlamTimer -= diff;
 
             if (bIsSlam)

@@ -85,8 +85,8 @@ class boss_tharon_ja : public CreatureScript
 
                 events.ScheduleEvent(EVENT_DECAY_FLESH, 20000);
                 events.ScheduleEvent(EVENT_CURSE_OF_LIFE, 1000);
-                events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(14000, 18000));
-                events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(8000, 10000));
+                events.ScheduleEvent(EVENT_RAIN_OF_FIRE, std::rand() % 18000 + 14000);
+                events.ScheduleEvent(EVENT_SHADOW_VOLLEY, std::rand() % 10000 + 8000);
             }
 
             void KilledUnit(Unit* who) OVERRIDE
@@ -121,30 +121,30 @@ class boss_tharon_ja : public CreatureScript
                         case EVENT_CURSE_OF_LIFE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_CURSE_OF_LIFE);
-                            events.ScheduleEvent(EVENT_CURSE_OF_LIFE, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_CURSE_OF_LIFE, std::rand() % 15000 + 10000);
                             return;
                         case EVENT_SHADOW_VOLLEY:
                             DoCastVictim(SPELL_SHADOW_VOLLEY);
-                            events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(8000, 10000));
+                            events.ScheduleEvent(EVENT_SHADOW_VOLLEY, std::rand() % 10000 + 8000);
                             return;
                         case EVENT_RAIN_OF_FIRE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_RAIN_OF_FIRE);
-                            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(14000, 18000));
+                            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, std::rand() % 18000 + 14000);
                             return;
                         case EVENT_LIGHTNING_BREATH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_LIGHTNING_BREATH);
-                            events.ScheduleEvent(EVENT_LIGHTNING_BREATH, urand(6000, 7000));
+                            events.ScheduleEvent(EVENT_LIGHTNING_BREATH, std::rand() % 7000 + 6000);
                             return;
                         case EVENT_EYE_BEAM:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_EYE_BEAM);
-                            events.ScheduleEvent(EVENT_EYE_BEAM, urand(4000, 6000));
+                            events.ScheduleEvent(EVENT_EYE_BEAM, std::rand() % 6000 + 4000);
                             return;
                         case EVENT_POISON_CLOUD:
                             DoCastAOE(SPELL_POISON_CLOUD);
-                            events.ScheduleEvent(EVENT_POISON_CLOUD, urand(10000, 12000));
+                            events.ScheduleEvent(EVENT_POISON_CLOUD, std::rand() % 12000 + 10000);
                             return;
                         case EVENT_DECAY_FLESH:
                             DoCastAOE(SPELL_DECAY_FLESH);
@@ -159,9 +159,9 @@ class boss_tharon_ja : public CreatureScript
 
                             events.Reset();
                             events.ScheduleEvent(EVENT_RETURN_FLESH, 20000);
-                            events.ScheduleEvent(EVENT_LIGHTNING_BREATH, urand(3000, 4000));
-                            events.ScheduleEvent(EVENT_EYE_BEAM, urand(4000, 8000));
-                            events.ScheduleEvent(EVENT_POISON_CLOUD, urand(6000, 7000));
+                            events.ScheduleEvent(EVENT_LIGHTNING_BREATH, std::rand() % 4000 + 3000);
+                            events.ScheduleEvent(EVENT_EYE_BEAM, std::rand() % 8000 + 4000);
+                            events.ScheduleEvent(EVENT_POISON_CLOUD, std::rand() % 7000 + 6000);
                             break;
                         case EVENT_RETURN_FLESH:
                             DoCastAOE(SPELL_RETURN_FLESH);
@@ -175,8 +175,8 @@ class boss_tharon_ja : public CreatureScript
                             events.Reset();
                             events.ScheduleEvent(EVENT_DECAY_FLESH, 20000);
                             events.ScheduleEvent(EVENT_CURSE_OF_LIFE, 1000);
-                            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(14000, 18000));
-                            events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(8000, 10000));
+                            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, std::rand() % 18000 + 14000);
+                            events.ScheduleEvent(EVENT_SHADOW_VOLLEY, std::rand() % 10000 + 8000);
                             break;
                         default:
                             break;

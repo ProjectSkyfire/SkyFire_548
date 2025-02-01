@@ -98,7 +98,7 @@ class boss_ragnaros : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
-                if (urand(0, 99) < 25)
+                if ((std::rand() % 99) < 25)
                     Talk(SAY_KILL);
             }
 
@@ -187,17 +187,17 @@ class boss_ragnaros : public CreatureScript
                         {
                             case EVENT_ERUPTION:
                                 DoCastVictim(SPELL_ERRUPTION);
-                                events.ScheduleEvent(EVENT_ERUPTION, urand(20000, 45000));
+                                events.ScheduleEvent(EVENT_ERUPTION, std::rand() % 45000 + 20000);
                                 break;
                             case EVENT_WRATH_OF_RAGNAROS:
                                 DoCastVictim(SPELL_WRATH_OF_RAGNAROS);
-                                if (urand(0, 1))
+                                if (std::rand() % 1)
                                     Talk(SAY_WRATH);
                                 events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 25000);
                                 break;
                             case EVENT_HAND_OF_RAGNAROS:
                                 DoCast(me, SPELL_HAND_OF_RAGNAROS);
-                                if (urand(0, 1))
+                                if (std::rand() % 1)
                                     Talk(SAY_HAND);
                                 events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 20000);
                                 break;
@@ -207,7 +207,7 @@ class boss_ragnaros : public CreatureScript
                                 break;
                             case EVENT_ELEMENTAL_FIRE:
                                 DoCastVictim(SPELL_ELEMENTAL_FIRE);
-                                events.ScheduleEvent(EVENT_ELEMENTAL_FIRE, urand(10000, 14000));
+                                events.ScheduleEvent(EVENT_ELEMENTAL_FIRE, std::rand() % 14000 + 10000);
                                 break;
                             case EVENT_MAGMA_BLAST:
                                 if (me->IsWithinMeleeRange(me->GetVictim()))

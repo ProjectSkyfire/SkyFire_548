@@ -167,7 +167,7 @@ public:
             Talk(SAY_AGGRO);
 
             sinsterStrikeTimer = 7 * IN_MILLISECONDS;
-            callFlamesTimer = urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
+            callFlamesTimer = std::rand() % (20 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
 
             if (instance)
                 instance->SetData(DATA_SVALA_SORROWGRAVE_EVENT, IN_PROGRESS);
@@ -357,7 +357,7 @@ public:
                 if (sinsterStrikeTimer <= diff)
                 {
                     DoCastVictim(SPELL_SINSTER_STRIKE);
-                    sinsterStrikeTimer = urand(5 * IN_MILLISECONDS, 9 * IN_MILLISECONDS);
+                    sinsterStrikeTimer = std::rand() % (9 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS);
                 }
                 else
                     sinsterStrikeTimer -= diff;
@@ -367,7 +367,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                     {
                         DoCast(target, SPELL_CALL_FLAMES);
-                        callFlamesTimer = urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
+                        callFlamesTimer = std::rand() % (20 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
                     }
                 }
                     else callFlamesTimer -= diff;
@@ -574,8 +574,8 @@ class npc_scourge_hulk : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                mightyBlow = urand(4000, 9000);
-                volatileInfection = urand(10000, 14000);
+                mightyBlow = std::rand() % 9000 + 4000;
+                volatileInfection = std::rand() % 14000 + 10000;
                 killedByRitualStrike = false;
             }
 
@@ -600,7 +600,7 @@ class npc_scourge_hulk : public CreatureScript
                     if (Unit* victim = me->GetVictim())
                         if (!victim->HasUnitState(UNIT_STATE_STUNNED))    // Prevent knocking back a ritual player
                             DoCast(victim, SPELL_MIGHTY_BLOW);
-                    mightyBlow = urand(12000, 17000);
+                    mightyBlow = std::rand() % 17000 + 12000;
                 }
                 else
                     mightyBlow -= diff;
@@ -608,7 +608,7 @@ class npc_scourge_hulk : public CreatureScript
                 if (volatileInfection <= diff)
                 {
                     DoCastVictim(SPELL_VOLATILE_INFECTION);
-                    volatileInfection = urand(13000, 17000);
+                    volatileInfection = std::rand() % 17000 + 13000;
                 }
                 else
                     volatileInfection -= diff;

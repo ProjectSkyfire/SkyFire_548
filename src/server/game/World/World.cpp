@@ -2843,7 +2843,7 @@ void World::SendAutoBroadcast()
 
     if (weight)
     {
-        uint32 selectedWeight = urand(0, weight - 1);
+        uint32 selectedWeight = std::rand() % (weight - 1);
         weight = 0;
         for (AutobroadcastsWeightMap::const_iterator it = selectionWeights.begin(); it != selectionWeights.end(); ++it)
         {
@@ -2856,7 +2856,7 @@ void World::SendAutoBroadcast()
         }
     }
     else
-        msg = m_Autobroadcasts[urand(0, m_Autobroadcasts.size())];
+        msg = m_Autobroadcasts[std::rand() % m_Autobroadcasts.size()];
 
     uint32 abcenter = sWorld->getIntConfig(WorldIntConfigs::CONFIG_AUTOBROADCAST_CENTER);
 

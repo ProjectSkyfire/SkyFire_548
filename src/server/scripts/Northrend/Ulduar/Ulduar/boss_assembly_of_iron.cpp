@@ -168,7 +168,7 @@ class boss_steelbreaker : public CreatureScript
                         if (phase >= 2)
                             events.RescheduleEvent(EVENT_STATIC_DISRUPTION, 30000);
                         if (phase >= 3)
-                            events.RescheduleEvent(EVENT_OVERWHELMING_POWER, urand(2000, 5000));
+                            events.RescheduleEvent(EVENT_OVERWHELMING_POWER, std::rand() % 5000 + 2000);
                         break;
                     case ACTION_ADD_CHARGE:
                         DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
@@ -232,12 +232,12 @@ class boss_steelbreaker : public CreatureScript
                         case EVENT_FUSION_PUNCH:
                             if (me->IsWithinMeleeRange(me->GetVictim()))
                                 DoCastVictim(SPELL_FUSION_PUNCH);
-                            events.ScheduleEvent(EVENT_FUSION_PUNCH, urand(13000, 22000));
+                            events.ScheduleEvent(EVENT_FUSION_PUNCH, std::rand() % 22000 + 13000);
                             break;
                         case EVENT_STATIC_DISRUPTION:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_STATIC_DISRUPTION);
-                            events.ScheduleEvent(EVENT_STATIC_DISRUPTION, urand(20000, 40000));
+                            events.ScheduleEvent(EVENT_STATIC_DISRUPTION, std::rand() % 40000 + 20000);
                             break;
                         case EVENT_OVERWHELMING_POWER:
                             Talk(SAY_STEELBREAKER_POWER);
@@ -307,7 +307,7 @@ class boss_runemaster_molgeim : public CreatureScript
                         if (phase >= 2)
                             events.RescheduleEvent(EVENT_RUNE_OF_DEATH, 30000);
                         if (phase >= 3)
-                            events.RescheduleEvent(EVENT_RUNE_OF_SUMMONING, urand(20000, 30000));
+                            events.RescheduleEvent(EVENT_RUNE_OF_SUMMONING, std::rand() % 30000 + 20000);
                         break;
                     }
                 }
@@ -366,7 +366,7 @@ class boss_runemaster_molgeim : public CreatureScript
                         case EVENT_RUNE_OF_POWER:
                         {
                             Unit* target = me;
-                            switch (urand(0, 2))
+                            switch (std::rand() % 2)
                             {
                                 case 1:
                                     if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_STEELBREAKER)))
@@ -387,19 +387,19 @@ class boss_runemaster_molgeim : public CreatureScript
                         }
                         case EVENT_SHIELD_OF_RUNES:
                             DoCast(me, SPELL_SHIELD_OF_RUNES);
-                            events.ScheduleEvent(EVENT_SHIELD_OF_RUNES, urand(27000, 34000));
+                            events.ScheduleEvent(EVENT_SHIELD_OF_RUNES, std::rand() % 34000 + 27000);
                             break;
                         case EVENT_RUNE_OF_DEATH:
                             Talk(SAY_MOLGEIM_RUNE_DEATH);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_RUNE_OF_DEATH);
-                            events.ScheduleEvent(EVENT_RUNE_OF_DEATH, urand(30000, 40000));
+                            events.ScheduleEvent(EVENT_RUNE_OF_DEATH, std::rand() % 40000 + 30000);
                             break;
                         case EVENT_RUNE_OF_SUMMONING:
                             Talk(SAY_MOLGEIM_SUMMON);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_RUNE_OF_SUMMONING);
-                            events.ScheduleEvent(EVENT_RUNE_OF_SUMMONING, urand(30000, 45000));
+                            events.ScheduleEvent(EVENT_RUNE_OF_SUMMONING, std::rand() % 45000 + 30000);
                             break;
                     }
                 }
@@ -451,7 +451,7 @@ class boss_stormcaller_brundir : public CreatureScript
                 events.ScheduleEvent(EVENT_MOVE_POSITION, 1000);
                 events.ScheduleEvent(EVENT_BERSERK, 900000);
                 events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 4000);
-                events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
+                events.ScheduleEvent(EVENT_OVERLOAD, std::rand() % 120000 + 60000);
             }
 
             void DoAction(int32 action) OVERRIDE
@@ -463,14 +463,14 @@ class boss_stormcaller_brundir : public CreatureScript
                         me->SetFullHealth();
                         me->AddAura(SPELL_SUPERCHARGE, me);
                         events.SetPhase(++phase);
-                        events.RescheduleEvent(EVENT_CHAIN_LIGHTNING, urand(7000, 12000));
-                        events.RescheduleEvent(EVENT_OVERLOAD, urand(40000, 50000));
+                        events.RescheduleEvent(EVENT_CHAIN_LIGHTNING, std::rand() % 12000 + 7000);
+                        events.RescheduleEvent(EVENT_OVERLOAD, std::rand() % 50000 + 40000);
                         if (phase >= 2)
-                            events.RescheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 250000));
+                            events.RescheduleEvent(EVENT_LIGHTNING_WHIRL, std::rand() % 250000 + 15000);
                         if (phase >= 3)
                         {
                             DoCast(me, SPELL_STORMSHIELD);
-                            events.RescheduleEvent(EVENT_LIGHTNING_TENDRILS, urand(50000, 60000));
+                            events.RescheduleEvent(EVENT_LIGHTNING_TENDRILS, std::rand() % 60000 + 50000);
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true); // Apply immumity to stuns
                         }
                         break;
@@ -535,17 +535,17 @@ class boss_stormcaller_brundir : public CreatureScript
                         case EVENT_CHAIN_LIGHTNING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_CHAIN_LIGHTNING);
-                            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(7000, 10000));
+                            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, std::rand() % 10000 + 7000);
                             break;
                         case EVENT_OVERLOAD:
                             Talk(EMOTE_BRUNDIR_OVERLOAD);
                             Talk(SAY_BRUNDIR_SPECIAL);
                             DoCast(SPELL_OVERLOAD);
-                            events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
+                            events.ScheduleEvent(EVENT_OVERLOAD, std::rand() % 120000 + 60000);
                             break;
                         case EVENT_LIGHTNING_WHIRL:
                             DoCast(SPELL_LIGHTNING_WHIRL);
-                            events.ScheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 20000));
+                            events.ScheduleEvent(EVENT_LIGHTNING_WHIRL, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_LIGHTNING_TENDRILS:
                             Talk(SAY_BRUNDIR_FLIGHT);
@@ -597,7 +597,7 @@ class boss_stormcaller_brundir : public CreatureScript
                                     if (me->GetDistance(trigger) >= 50.0f)
                                         me->GetMotionMaster()->MovePoint(0, trigger->GetPositionX(), trigger->GetPositionY(), FLOOR_Z);
                             }
-                            events.ScheduleEvent(EVENT_MOVE_POSITION, urand(7500, 10000));
+                            events.ScheduleEvent(EVENT_MOVE_POSITION, std::rand() % 10000 + 7500);
                             break;
                         default:
                             break;

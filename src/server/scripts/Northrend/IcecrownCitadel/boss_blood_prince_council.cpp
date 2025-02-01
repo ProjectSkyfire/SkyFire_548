@@ -219,7 +219,7 @@ class boss_blood_council_controller : public CreatureScript
                 events.ScheduleEvent(EVENT_INVOCATION_OF_BLOOD, 46500);
 
                 _invocationOrder[0] = InvocationData(instance->GetData64(DATA_PRINCE_VALANAR_GUID), SPELL_INVOCATION_OF_BLOOD_VALANAR, EMOTE_VALANAR_INVOCATION, 71070);
-                if (urand(0, 1))
+                if (std::rand() % 1)
                 {
                     _invocationOrder[1] = InvocationData(instance->GetData64(DATA_PRINCE_TALDARAM_GUID), SPELL_INVOCATION_OF_BLOOD_TALDARAM, EMOTE_TALDARAM_INVOCATION, 71081);
                     _invocationOrder[2] = InvocationData(instance->GetData64(DATA_PRINCE_KELESETH_GUID), SPELL_INVOCATION_OF_BLOOD_KELESETH, EMOTE_KELESETH_INVOCATION, 71080);
@@ -386,7 +386,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                     DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
-                events.ScheduleEvent(EVENT_SHADOW_RESONANCE, urand(10000, 15000));
+                events.ScheduleEvent(EVENT_SHADOW_RESONANCE, std::rand() % 15000 + 10000);
                 events.ScheduleEvent(EVENT_SHADOW_LANCE, 2000);
 
                 if (IsHeroic())
@@ -531,7 +531,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                         case EVENT_SHADOW_RESONANCE:
                             Talk(SAY_KELESETH_SPECIAL);
                             DoCast(me, SPELL_SHADOW_RESONANCE);
-                            events.ScheduleEvent(EVENT_SHADOW_RESONANCE, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_SHADOW_RESONANCE, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_SHADOW_LANCE:
                             if (_isEmpowered)
@@ -607,7 +607,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                     DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
-                events.ScheduleEvent(EVENT_GLITTERING_SPARKS, urand(12000, 15000));
+                events.ScheduleEvent(EVENT_GLITTERING_SPARKS, std::rand() % 15000 + 12000);
                 events.ScheduleEvent(EVENT_CONJURE_FLAME, 20000);
                 if (IsHeroic())
                     me->AddAura(SPELL_SHADOW_PRISON, me);
@@ -749,18 +749,18 @@ class boss_prince_taldaram_icc : public CreatureScript
                             break;
                         case EVENT_GLITTERING_SPARKS:
                             DoCastVictim(SPELL_GLITTERING_SPARKS);
-                            events.ScheduleEvent(EVENT_GLITTERING_SPARKS, urand(15000, 50000));
+                            events.ScheduleEvent(EVENT_GLITTERING_SPARKS, std::rand() % 50000 + 15000);
                             break;
                         case EVENT_CONJURE_FLAME:
                             if (_isEmpowered)
                             {
                                 DoCast(me, SPELL_CONJURE_EMPOWERED_FLAME);
-                                events.ScheduleEvent(EVENT_CONJURE_FLAME, urand(15000, 25000));
+                                events.ScheduleEvent(EVENT_CONJURE_FLAME, std::rand() % 25000 + 15000);
                             }
                             else
                             {
                                 DoCast(me, SPELL_CONJURE_FLAME);
-                                events.ScheduleEvent(EVENT_CONJURE_FLAME, urand(20000, 30000));
+                                events.ScheduleEvent(EVENT_CONJURE_FLAME, std::rand() % 30000 + 20000);
                             }
                             Talk(SAY_TALDARAM_SPECIAL);
                             break;
@@ -831,8 +831,8 @@ class boss_prince_valanar_icc : public CreatureScript
                     DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
-                events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
-                events.ScheduleEvent(EVENT_SHOCK_VORTEX, urand(15000, 20000));
+                events.ScheduleEvent(EVENT_KINETIC_BOMB, std::rand() % 24000 + 18000);
+                events.ScheduleEvent(EVENT_SHOCK_VORTEX, std::rand() % 20000 + 15000);
                 if (IsHeroic())
                     me->AddAura(SPELL_SHADOW_PRISON, me);
             }
@@ -992,7 +992,7 @@ class boss_prince_valanar_icc : public CreatureScript
                                 DoCast(target, SPELL_KINETIC_BOMB_TARGET);
                                 Talk(SAY_VALANAR_SPECIAL);
                             }
-                            events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
+                            events.ScheduleEvent(EVENT_KINETIC_BOMB, std::rand() % 24000 + 18000);
                             break;
                         case EVENT_SHOCK_VORTEX:
                             if (_isEmpowered)
@@ -1005,7 +1005,7 @@ class boss_prince_valanar_icc : public CreatureScript
                             {
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                     DoCast(target, SPELL_SHOCK_VORTEX);
-                                events.ScheduleEvent(EVENT_SHOCK_VORTEX, urand(18000, 23000));
+                                events.ScheduleEvent(EVENT_SHOCK_VORTEX, std::rand() % 23000 + 18000);
                             }
                             break;
                         default:

@@ -141,7 +141,7 @@ class boss_moam : public CreatureScript
                             for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
                                 DoCast(*itr, SPELL_DRAIN_MANA);
 
-                            events.ScheduleEvent(EVENT_DRAIN_MANA, urand(5000, 15000));
+                            events.ScheduleEvent(EVENT_DRAIN_MANA, std::rand() % 15000 + 5000);
                             break;
                         }/*
                         case EVENT_WIDE_SLASH:

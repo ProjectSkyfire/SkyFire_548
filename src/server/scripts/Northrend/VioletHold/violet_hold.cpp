@@ -546,7 +546,7 @@ public:
         npc_teleportation_portalAI(Creature* creature) : ScriptedAI(creature), listOfMobs(me)
         {
             instance = creature->GetInstanceScript();
-            uiTypeOfMobsPortal = urand(0, 1);    // 0 - elite mobs   1 - portal guardian or portal keeper with regular mobs
+            uiTypeOfMobsPortal = std::rand() % 1;    // 0 - elite mobs   1 - portal guardian or portal keeper with regular mobs
             bPortalGuardianOrKeeperOrEliteSpawn = false;
         }
 
@@ -730,7 +730,7 @@ struct violet_hold_trashAI : public npc_escortAI
                     me->SetHomePosition(FirstPortalWPs[5][0], FirstPortalWPs[5][1], FirstPortalWPs[5][2], 3.149439f);
                     break;
                 case 1:
-                    secondPortalRouteID = urand(0, 1);
+                    secondPortalRouteID = std::rand() % 1;
                     switch (secondPortalRouteID)
                     {
                         case 0:
@@ -852,7 +852,7 @@ public:
                 if (uiSunderArmorTimer <= diff)
                 {
                     DoCastVictim(SPELL_SUNDER_ARMOR);
-                    uiSunderArmorTimer = urand(8000, 10000);
+                    uiSunderArmorTimer = std::rand() % 10000 + 8000;
                 } else uiSunderArmorTimer -= diff;
 
                 DoMeleeAttackIfReady();
@@ -1042,7 +1042,7 @@ public:
             if (uiMagicReflectionTimer <= diff)
             {
                 DoCast(SPELL_MAGIC_REFLECTION);
-                uiMagicReflectionTimer = urand(10000, 15000);
+                uiMagicReflectionTimer = std::rand() % 15000 + 10000;
             } else uiMagicReflectionTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -1286,14 +1286,14 @@ public:
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                 if (target)
                     DoCast(target, DUNGEON_MODE(SPELL_ARCANE_STREAM, H_SPELL_ARCANE_STREAM));
-                uiArcaneStreamTimer = urand(0, 5000)+5000;
+                uiArcaneStreamTimer = (std::rand() % 5000)+5000;
                 uiArcaneStreamTimerStartingValueHolder = uiArcaneStreamTimer;
             } else uiArcaneStreamTimer -= diff;
 
             if (uiManaDetonationTimer <= diff && uiArcaneStreamTimer >=1500 && uiArcaneStreamTimer <= uiArcaneStreamTimerStartingValueHolder/2)
             {
                 DoCast(DUNGEON_MODE(SPELL_MANA_DETONATION, H_SPELL_MANA_DETONATION));
-                uiManaDetonationTimer = urand(2000, 6000);
+                uiManaDetonationTimer = std::rand() % 6000 + 2000;
             } else uiManaDetonationTimer -= diff;
 
             DoMeleeAttackIfReady();

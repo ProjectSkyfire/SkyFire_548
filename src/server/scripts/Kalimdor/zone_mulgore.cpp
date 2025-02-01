@@ -62,7 +62,7 @@ public:
         {
             if (type == POINT_MOTION_TYPE && pointId == 1)
             {
-                switch (urand(0, 1))
+                switch (std::rand() % 1)
                 {
                     case 0:
                     {
@@ -87,7 +87,7 @@ public:
 
         void EnterCombat(Unit* /*victim*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_ROCK_BARRAGE, urand(4000, 5000));
+            events.ScheduleEvent(EVENT_ROCK_BARRAGE, std::rand() % 5000 + 4000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -104,7 +104,7 @@ public:
                     case EVENT_ROCK_BARRAGE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_ROCK_BARRAGE);
-                        events.ScheduleEvent(EVENT_ROCK_BARRAGE, urand(18000, 21000));
+                        events.ScheduleEvent(EVENT_ROCK_BARRAGE, std::rand() % 21000 + 18000);
                         break;
                 }
             }

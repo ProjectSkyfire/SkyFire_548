@@ -5128,8 +5128,8 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     if (!caster)
                         break;
 
-                    caster->CastCustomSpell(66152, SPELLVALUE_MAX_TARGETS, urand(1, 6), target, true);
-                    caster->CastCustomSpell(66153, SPELLVALUE_MAX_TARGETS, urand(1, 6), target, true);
+                    caster->CastCustomSpell(66152, SPELLVALUE_MAX_TARGETS, std::rand() % 6 + 1, target, true);
+                    caster->CastCustomSpell(66153, SPELLVALUE_MAX_TARGETS, std::rand() % 6 + 1, target, true);
                     break;
                 }
                 case 62292: // Blaze (Pool of Tar)

@@ -230,14 +230,14 @@ class boss_tyrannus : public CreatureScript
                             me->SetReactState(REACT_AGGRESSIVE);
                             DoCast(me, SPELL_FULL_HEAL);
                             DoZoneInCombat();
-                            events.ScheduleEvent(EVENT_OVERLORD_BRAND, urand(5000, 7000));
-                            events.ScheduleEvent(EVENT_FORCEFUL_SMASH, urand(14000, 16000));
-                            events.ScheduleEvent(EVENT_MARK_OF_RIMEFANG, urand(25000, 27000));
+                            events.ScheduleEvent(EVENT_OVERLORD_BRAND, std::rand() % 7000 + 5000);
+                            events.ScheduleEvent(EVENT_FORCEFUL_SMASH, std::rand() % 16000 + 14000);
+                            events.ScheduleEvent(EVENT_MARK_OF_RIMEFANG, std::rand() % 27000 + 25000);
                             break;
                         case EVENT_OVERLORD_BRAND:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_OVERLORD_BRAND);
-                            events.ScheduleEvent(EVENT_OVERLORD_BRAND, urand(11000, 12000));
+                            events.ScheduleEvent(EVENT_OVERLORD_BRAND, std::rand() % 12000 + 11000);
                             break;
                         case EVENT_FORCEFUL_SMASH:
                             DoCastVictim(SPELL_FORCEFUL_SMASH);
@@ -247,7 +247,7 @@ class boss_tyrannus : public CreatureScript
                             Talk(SAY_DARK_MIGHT_1);
                             Talk(SAY_DARK_MIGHT_2);
                             DoCast(me, SPELL_UNHOLY_POWER);
-                            events.ScheduleEvent(EVENT_FORCEFUL_SMASH, urand(40000, 48000));
+                            events.ScheduleEvent(EVENT_FORCEFUL_SMASH, std::rand() % 48000 + 40000);
                             break;
                         case EVENT_MARK_OF_RIMEFANG:
                             Talk(SAY_MARK_RIMEFANG_1);
@@ -256,7 +256,7 @@ class boss_tyrannus : public CreatureScript
                                 Talk(SAY_MARK_RIMEFANG_2, target);
                                 DoCast(target, SPELL_MARK_OF_RIMEFANG);
                             }
-                            events.ScheduleEvent(EVENT_MARK_OF_RIMEFANG, urand(24000, 26000));
+                            events.ScheduleEvent(EVENT_MARK_OF_RIMEFANG, std::rand() % 26000 + 24000);
                             break;
                     }
                 }

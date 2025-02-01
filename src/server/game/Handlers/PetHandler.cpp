@@ -258,7 +258,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                             pet->ToCreature()->AI()->AttackStart(TargetUnit);
 
                             //10% chance to play special pet attack talk, else growl
-                            if (pet->ToCreature()->IsPet() && ((Pet*)pet)->getPetType() == PetType::SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)
+                            if (pet->ToCreature()->IsPet() && ((Pet*)pet)->getPetType() == PetType::SUMMON_PET && pet != TargetUnit && (std::rand() % 100) < 10)
                                 pet->SendPetTalk((uint32)PET_TALK_ATTACK);
                             else
                             {
@@ -404,7 +404,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
 
                 //10% chance to play special pet attack talk, else growl
                 //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if (pet->ToCreature()->IsPet() && (((Pet*)pet)->getPetType() == PetType::SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
+                if (pet->ToCreature()->IsPet() && (((Pet*)pet)->getPetType() == PetType::SUMMON_PET) && (pet != unit_target) && ((std::rand() % 100) < 10))
                     pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
                 else
                 {
@@ -1122,7 +1122,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
             {
                 // 10% chance to play special pet attack talk, else growl
                 // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if (pet->getPetType() == PetType::SUMMON_PET && (urand(0, 100) < 10))
+                if (pet->getPetType() == PetType::SUMMON_PET && ((std::rand() % 100) < 10))
                     pet->SendPetTalk(PET_TALK_SPECIAL_SPELL);
                 else
                     pet->SendPetAIReaction(petGuid);

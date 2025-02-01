@@ -199,7 +199,7 @@ void BattlegroundBFG::StartingEventOpenDoors()
     for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
         //randomly select buff to spawn
-        uint8 buff = urand(0, 2);
+        uint8 buff = std::rand() % 2;
         SpawnBGObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
     DoorOpen(GILNEAS_BG_OBJECT_GATE_A_1);

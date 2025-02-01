@@ -77,7 +77,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiOpFerTimer = urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS);
+            uiOpFerTimer = std::rand() % (20 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
 
             uiCycloneTimer = 3*IN_MILLISECONDS;
             uiBoltTimer = 7*IN_MILLISECONDS;
@@ -238,7 +238,7 @@ public:
                 OpferRufen();
 
             bOnGround = false;
-            uiOpFerTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            uiOpFerTimer = std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
         }
 
         void OpferRufen()
@@ -294,7 +294,7 @@ public:
                 if (uiCycloneTimer <= diff)
                 {
                     DoCast(me, SPELL_CYCLONE_STRIKE, false);
-                    uiCycloneTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                    uiCycloneTimer = std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
                 } else uiCycloneTimer -= diff;
 
                 if (uiBoltTimer <= diff)
@@ -302,7 +302,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         me->CastSpell(target, DUNGEON_MODE(SPELL_LIGHTNING_BOLT, SPELL_LIGHTNING_BOLT_H), false);
 
-                    uiBoltTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                    uiBoltTimer = std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
                 } else uiBoltTimer -= diff;
 
                 if (uiThunderTimer <= diff)
@@ -310,7 +310,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         me->CastSpell(target, DUNGEON_MODE(SPELL_THUNDERSHOCK, SPELL_THUNDERSHOCK_H), false);
 
-                    uiThunderTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                    uiThunderTimer = std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
                 } else uiThunderTimer -= diff;
 
                 if (uiOpFerTimer <= diff)

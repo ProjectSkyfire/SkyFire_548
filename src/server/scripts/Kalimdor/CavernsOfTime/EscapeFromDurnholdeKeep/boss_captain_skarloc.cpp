@@ -62,9 +62,9 @@ public:
 
         void Reset() OVERRIDE
         {
-            Holy_Light_Timer = urand(20000, 30000);
+            Holy_Light_Timer = std::rand() % 30000 + 20000;
             Cleanse_Timer = 10000;
-            HammerOfJustice_Timer = urand(20000, 35000);
+            HammerOfJustice_Timer = std::rand() % 35000 + 20000;
             HolyShield_Timer = 240000;
             DevotionAura_Timer = 3000;
             Consecration_Timer = 8000;
@@ -128,14 +128,14 @@ public:
             if (DevotionAura_Timer <= diff)
             {
                 DoCast(me, SPELL_DEVOTION_AURA);
-                DevotionAura_Timer = urand(45000, 55000);
+                DevotionAura_Timer = std::rand() % 55000 + 45000;
             } else DevotionAura_Timer -= diff;
 
             //Consecration
             if (Consecration_Timer <= diff)
             {
                 //DoCastVictim(SPELL_CONSECRATION);
-                Consecration_Timer = urand(5000, 10000);
+                Consecration_Timer = std::rand() % 10000 + 5000;
             } else Consecration_Timer -= diff;
 
             DoMeleeAttackIfReady();

@@ -161,20 +161,20 @@ public:
                     me->InterruptNonMeleeSpells(true);
 
                 DoCast(me, SPELL_FROSTNOVA);
-                FrostNova_Timer  = urand(17500, 25000);
+                FrostNova_Timer = std::rand() % 25000 + 17500;
                 CanBlink = true;
             } else FrostNova_Timer -= diff;
 
             if (Frostbolt_Timer <= diff)
             {
                 DoCastVictim(SPELL_FROSTBOLT);
-                Frostbolt_Timer = urand(4500, 6000);
+                Frostbolt_Timer = std::rand() % 6000 + 4500;
             } else Frostbolt_Timer -= diff;
 
             if (FireBall_Timer <= diff)
             {
                 DoCastVictim(SPELL_FIREBALL);
-                FireBall_Timer = urand(4500, 6000);
+                FireBall_Timer = std::rand() % 6000 + 4500;
             } else FireBall_Timer -= diff;
 
             if (CanBlink)
@@ -190,7 +190,7 @@ public:
                         me->GetMotionMaster()->MovementExpired();
 
                     DoCast(me, SPELL_BLINK);
-                    Blink_Timer = urand(1000, 2500);
+                    Blink_Timer = std::rand() % 2500 + 1000;
                     CanBlink = false;
                 } else Blink_Timer -= diff;
             }
@@ -200,7 +200,7 @@ public:
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(true);
 
-                if (!urand(0, 3))
+                if (!(std::rand() % 3))
                     Talk(SAY_SUMMON);
 
                 DoCast(me, SPELL_ETHEREAL_BEACON, true);
@@ -282,7 +282,7 @@ public:
             if (ArcaneBolt_Timer <= diff)
             {
                 DoCastVictim(SPELL_ARCANE_BOLT);
-                ArcaneBolt_Timer = urand(2000, 4500);
+                ArcaneBolt_Timer = std::rand() % 4500 + 2000;
             } else ArcaneBolt_Timer -= diff;
 
             if (Apprentice_Timer <= diff)
@@ -368,7 +368,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_DOUBLE_BREATH, urand(6000,9000));
+            events.ScheduleEvent(EVENT_DOUBLE_BREATH, std::rand() % 9000 + 6000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -385,7 +385,7 @@ public:
                     case EVENT_DOUBLE_BREATH:
                         if (me->IsWithinDist(me->GetVictim(), ATTACK_DISTANCE))
                             DoCastVictim(SPELL_DOUBLE_BREATH);
-                        events.ScheduleEvent(EVENT_DOUBLE_BREATH, urand(6000,9000));
+                        events.ScheduleEvent(EVENT_DOUBLE_BREATH, std::rand() % 9000 + 6000);
                         break;
                     default:
                         break;

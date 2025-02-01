@@ -39,7 +39,7 @@ public:
             }
             _EnterCombat();
 
-            events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
+            events.ScheduleEvent(EVENT_SHADOWFLAME, std::rand() % 20000 + 10000);
             events.ScheduleEvent(EVENT_WINGBUFFET, 30000);
             events.ScheduleEvent(EVENT_FLAMEBUFFET, 5000);
         }
@@ -60,7 +60,7 @@ public:
                 {
                     case EVENT_SHADOWFLAME:
                         DoCastVictim(SPELL_SHADOWFLAME);
-                        events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_SHADOWFLAME, std::rand() % 20000 + 10000);
                         break;
                     case EVENT_WINGBUFFET:
                         DoCastVictim(SPELL_WINGBUFFET);

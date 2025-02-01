@@ -141,7 +141,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_ARC_LIGHTNING);
 
-                m_uiArcLightning_Timer = urand(15000, 16000);
+                m_uiArcLightning_Timer = std::rand() % 16000 + 15000;
             }
             else
                 m_uiArcLightning_Timer -= uiDiff;
@@ -154,7 +154,7 @@ public:
 
                 me->RemoveAurasDueToSpell(DUNGEON_MODE<uint32>(SPELL_PULSING_SHOCKWAVE_N, SPELL_PULSING_SHOCKWAVE_H));
                 m_uiResumePulsingShockwave_Timer = DUNGEON_MODE(5000, 4000); // Pause Pulsing Shockwave aura
-                m_uiLightningNova_Timer = urand(20000, 21000);
+                m_uiLightningNova_Timer = std::rand() % 21000 + 20000;
             }
             else
                 m_uiLightningNova_Timer -= uiDiff;

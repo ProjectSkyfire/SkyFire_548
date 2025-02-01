@@ -227,7 +227,7 @@ public:
                 Unit* target = me->GetVictim();
 
                 DoCast(target, SPELL_GRIP_OF_SLAD_RAN);
-                uiGripOfSladRanTimer = urand(3, 6)*IN_MILLISECONDS;
+                uiGripOfSladRanTimer = std::rand() % (6 * IN_MILLISECONDS) + (3 * IN_MILLISECONDS);
 
                 Aura* grip = target->GetAura(SPELL_GRIP_OF_SLAD_RAN, me->GetGUID());
                 if (grip && grip->GetStackAmount() == 5)

@@ -394,7 +394,7 @@ class boss_magtheridon : public CreatureScript
                             summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         }
                     }
-                    Blaze_Timer = urand(20000, 40000);
+                    Blaze_Timer = std::rand() % 40000 + 20000;
                 }
                 else
                     Blaze_Timer -= diff;
@@ -463,10 +463,10 @@ class npc_hellfire_channeler : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                ShadowBoltVolley_Timer = urand(8000, 10000);
+                ShadowBoltVolley_Timer = std::rand() % 10000 + 8000;
                 DarkMending_Timer = 10000;
-                Fear_Timer = urand(15000, 20000);
-                Infernal_Timer = urand(10000, 50000);
+                Fear_Timer = std::rand() % 20000 + 15000;
+                Infernal_Timer = std::rand() % 50000 + 10000;
 
                 Check_Timer = 5000;
             }
@@ -513,7 +513,7 @@ class npc_hellfire_channeler : public CreatureScript
                 if (ShadowBoltVolley_Timer <= diff)
                 {
                     DoCast(me, SPELL_SHADOW_BOLT_VOLLEY);
-                    ShadowBoltVolley_Timer = urand(10000, 20000);
+                    ShadowBoltVolley_Timer = std::rand() % 20000 + 10000;
                 }
                 else
                     ShadowBoltVolley_Timer -= diff;
@@ -531,7 +531,7 @@ class npc_hellfire_channeler : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                         DoCast(target, SPELL_FEAR);
-                    Fear_Timer = urand(25000, 40000);
+                    Fear_Timer = std::rand() % 40000 + 25000;
                 }
                 else
                     Fear_Timer -= diff;
@@ -540,7 +540,7 @@ class npc_hellfire_channeler : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_BURNING_ABYSSAL, true);
-                    Infernal_Timer = urand(30000, 40000);
+                    Infernal_Timer = std::rand() % 40000 + 30000;
                 }
                 else
                     Infernal_Timer -= diff;

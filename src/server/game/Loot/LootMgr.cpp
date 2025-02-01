@@ -393,7 +393,7 @@ void Loot::AddItem(LootStoreItem const& item)
     if (!proto)
         return;
 
-    uint32 count = urand(item.mincountOrRef, item.maxcount);
+    uint32 count = std::rand() % item.maxcount + item.mincountOrRef;
     uint32 stacks = count / proto->GetMaxStackSize() + ((count % proto->GetMaxStackSize()) ? 1 : 0);
 
     std::vector<LootItem>& lootItems = item.needs_quest ? quest_items : items;
@@ -668,9 +668,9 @@ void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
         if (maxAmount <= minAmount)
             gold = uint32(maxAmount * sWorld->getRate(Rates::RATE_DROP_MONEY));
         else if ((maxAmount - minAmount) < 32700)
-            gold = uint32(urand(minAmount, maxAmount) * sWorld->getRate(Rates::RATE_DROP_MONEY));
+            gold = uint32((std::rand() % maxAmount + minAmount) * sWorld->getRate(Rates::RATE_DROP_MONEY));
         else
-            gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld->getRate(Rates::RATE_DROP_MONEY)) << 8;
+            gold = uint32(std::rand() % (maxAmount >> 8) + (minAmount >> 8) * sWorld->getRate(Rates::RATE_DROP_MONEY)) << 8;
     }
 }
 

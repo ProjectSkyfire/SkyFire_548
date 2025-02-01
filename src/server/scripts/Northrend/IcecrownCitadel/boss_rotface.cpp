@@ -97,7 +97,7 @@ class boss_rotface : public CreatureScript
                 events.ScheduleEvent(EVENT_HASTEN_INFECTIONS, 90000);
                 events.ScheduleEvent(EVENT_MUTATED_INFECTION, 14000);
                 if (IsHeroic())
-                    events.ScheduleEvent(EVENT_VILE_GAS, urand(22000, 27000));
+                    events.ScheduleEvent(EVENT_VILE_GAS, std::rand() % 27000 + 22000);
 
                 infectionStage = 0;
                 infectionCooldown = 14000;
@@ -204,7 +204,7 @@ class boss_rotface : public CreatureScript
                             break;
                         case EVENT_VILE_GAS:
                             DoCastAOE(SPELL_VILE_GAS_TRIGGER);
-                            events.ScheduleEvent(EVENT_VILE_GAS, urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_VILE_GAS, std::rand() % 35000 + 30000);
                             break;
                         default:
                             break;
@@ -362,9 +362,9 @@ class npc_precious_icc : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
-                _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(3000, 7000));
-                _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(20000, 22000));
+                _events.ScheduleEvent(EVENT_DECIMATE, std::rand() % 25000 + 20000);
+                _events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 7000 + 3000);
+                _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, std::rand() % 22000 + 20000);
                 _summons.DespawnAll();
             }
 
@@ -404,17 +404,17 @@ class npc_precious_icc : public CreatureScript
                     {
                         case EVENT_DECIMATE:
                             DoCastVictim(SPELL_DECIMATE);
-                            _events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
+                            _events.ScheduleEvent(EVENT_DECIMATE, std::rand() % 25000 + 20000);
                             break;
                         case EVENT_MORTAL_WOUND:
                             DoCastVictim(SPELL_MORTAL_WOUND);
-                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 12500));
+                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 12500 + 10000);
                             break;
                         case EVENT_SUMMON_ZOMBIES:
                             Talk(EMOTE_PRECIOUS_ZOMBIES);
                             for (uint32 i = 0; i < 11; ++i)
                                 DoCast(me, SPELL_AWAKEN_PLAGUED_ZOMBIES, false);
-                            _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(20000, 22000));
+                            _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, std::rand() % 22000 + 20000);
                             break;
                         default:
                             break;

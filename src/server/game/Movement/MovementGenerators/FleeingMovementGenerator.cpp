@@ -43,7 +43,7 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     init.MovebyPath(path.GetPath());
     init.SetWalk(false);
     int32 traveltime = init.Launch();
-    i_nextCheckTime.Reset(traveltime + urand(800, 1500));
+    i_nextCheckTime.Reset(traveltime + (std::rand() % 1500 + 800));
 }
 
 template<class T>

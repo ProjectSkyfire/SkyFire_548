@@ -67,10 +67,10 @@ public:
         void Reset() OVERRIDE
         {
              uiCurseFleshTimer = 30000;  //30s DBM
-             uiExplodeGhoulTimer = urand(25000, 28000); //approx 6 sec after summon ghouls
-             uiShadowBoltTimer = urand(8000, 12000); // approx 10s
+             uiExplodeGhoulTimer = std::rand() % 28000 + 25000; //approx 6 sec after summon ghouls
+             uiShadowBoltTimer = std::rand() % 12000 + 8000; // approx 10s
              uiStealFleshTimer = 12345;
-             uiSummonGhoulsTimer = urand(19000, 24000); //on a video approx 24s after aggro
+             uiSummonGhoulsTimer = std::rand() % 24000 + 19000; //on a video approx 24s after aggro
 
              if (instance)
                  instance->SetData(DATA_SALRAMM_EVENT, NOT_STARTED);
@@ -102,7 +102,7 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_SHADOW_BOLT);
-                uiShadowBoltTimer = urand(8000, 12000);
+                uiShadowBoltTimer = std::rand() % 12000 + 8000;
             } else uiShadowBoltTimer -= diff;
 
             //Steal Flesh timer

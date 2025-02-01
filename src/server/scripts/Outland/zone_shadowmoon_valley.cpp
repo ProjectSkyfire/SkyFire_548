@@ -1113,7 +1113,7 @@ public:
             if (who->GetTypeId() != TypeID::TYPEID_PLAYER)
             {
                 //appears to be random
-                if (urand(0, 1))
+                if (std::rand() % 1)
                     Talk(SAY_WIL_AGGRO);
             }
         }

@@ -107,11 +107,11 @@ public:
 
             me->GetMotionMaster()->MoveIdle();
 
-            teleportTimer = urand(30000, 35000);
+            teleportTimer = std::rand() % 35000 + 30000;
             arcaneExplosionTimer = 9000;
             castArcaneExplosionTimer = 2000;
-            frostBombTimer = urand(5000, 8000);
-            timeBombTimer = urand(20000, 25000);
+            frostBombTimer = std::rand() % 8000 + 5000;
+            timeBombTimer = std::rand() % 25000 + 20000;
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -156,7 +156,7 @@ public:
             while (group[0] == group[1] || group[0] == group[2] || group[1] == group[2])
             {
                 for (uint8 i = 0; i < 3; i++)
-                    group[i] = urand(0, 2);
+                    group[i] = std::rand() % 2;
             }
         }
 
@@ -240,7 +240,7 @@ public:
                 me->InterruptNonMeleeSpells(false);
                 me->GetMotionMaster()->MoveIdle();
                 DoCast(SPELL_TELEPORT);
-                teleportTimer = urand(30000, 35000);
+                teleportTimer = std::rand() % 35000 + 30000;
 
             } else teleportTimer -= uiDiff;
 
@@ -280,7 +280,7 @@ public:
                 if (frostBombTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_FROSTBOMB);
-                    frostBombTimer = urand(5000, 8000);
+                    frostBombTimer = std::rand() % 8000 + 5000;
                 } else frostBombTimer -= uiDiff;
 
                 if (timeBombTimer <= uiDiff)
@@ -288,7 +288,7 @@ public:
                     if (Unit* unit = SelectTarget(SELECT_TARGET_RANDOM))
                         DoCast(unit, SPELL_TIME_BOMB);
 
-                    timeBombTimer = urand(20000, 25000);
+                    timeBombTimer = std::rand() % 25000 + 20000;
                 } else timeBombTimer -= uiDiff;
             }
 

@@ -60,9 +60,9 @@ class boss_king_dred : public CreatureScript
                 events.ScheduleEvent(EVENT_BELLOWING_ROAR, 33000);
                 events.ScheduleEvent(EVENT_GRIEVOUS_BITE, 20000);
                 events.ScheduleEvent(EVENT_MANGLING_SLASH, 18500);
-                events.ScheduleEvent(EVENT_FEARSOME_ROAR, urand(10000, 20000));
+                events.ScheduleEvent(EVENT_FEARSOME_ROAR, std::rand() % 20000 + 10000);
                 events.ScheduleEvent(EVENT_PIERCING_SLASH, 17000);
-                events.ScheduleEvent(EVENT_RAPTOR_CALL, urand(20000, 25000));
+                events.ScheduleEvent(EVENT_RAPTOR_CALL, std::rand() % 25000 + 20000);
             }
 
             void DoAction(int32 action) OVERRIDE
@@ -112,7 +112,7 @@ class boss_king_dred : public CreatureScript
                             break;
                         case EVENT_FEARSOME_ROAR:
                             DoCastAOE(SPELL_FEARSOME_ROAR);
-                            events.ScheduleEvent(EVENT_FEARSOME_ROAR, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_FEARSOME_ROAR, std::rand() % 20000 + 10000);
                             break;
                         case EVENT_PIERCING_SLASH:
                             DoCastVictim(SPELL_PIERCING_SLASH);
@@ -125,7 +125,7 @@ class boss_king_dred : public CreatureScript
 
                             me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 10.0f);
                             me->SummonCreature(RAND(NPC_DRAKKARI_GUTRIPPER, NPC_DRAKKARI_SCYTHECLAW), x, y, z, 0, TempSummonType::TEMPSUMMON_DEAD_DESPAWN, 1000);
-                            events.ScheduleEvent(EVENT_RAPTOR_CALL, urand(20000, 25000));
+                            events.ScheduleEvent(EVENT_RAPTOR_CALL, std::rand() % 25000 + 20000);
                             break;
                         default:
                             break;
@@ -163,7 +163,7 @@ class npc_drakkari_gutripper : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                GutRipTimer = urand(10000, 15000);
+                GutRipTimer = std::rand() % 15000 + 10000;
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -174,7 +174,7 @@ class npc_drakkari_gutripper : public CreatureScript
                 if (GutRipTimer <= diff)
                 {
                     DoCastVictim(SPELL_GUT_RIP, false);
-                    GutRipTimer = urand(10000, 15000);
+                    GutRipTimer = std::rand() % 15000 + 10000;
                 }
                 else
                     GutRipTimer -= diff;
@@ -213,7 +213,7 @@ class npc_drakkari_scytheclaw : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                uiRendTimer = urand(10000, 15000);
+                uiRendTimer = std::rand() % 15000 + 10000;
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -224,7 +224,7 @@ class npc_drakkari_scytheclaw : public CreatureScript
                 if (uiRendTimer <= diff)
                 {
                     DoCastVictim(SPELL_REND, false);
-                    uiRendTimer = urand(10000, 15000);
+                    uiRendTimer = std::rand() % 15000 + 10000;
                 }
                 else
                     uiRendTimer -= diff;

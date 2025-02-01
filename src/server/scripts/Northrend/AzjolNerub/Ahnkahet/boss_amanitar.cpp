@@ -56,10 +56,10 @@ class boss_amanitar : public CreatureScript
             {
                 _EnterCombat();
 
-                events.ScheduleEvent(EVENT_ROOT, urand(5, 9) * IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_BASH, urand(10, 14) * IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_BOLT, urand(15, 20) * IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_MINI, urand(12, 18) * IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_ROOT, std::rand() % (9 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_BASH, std::rand() % (14 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_BOLT, std::rand() % (20 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_MINI, std::rand() % (18 * IN_MILLISECONDS) + (12 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_SPAWN, 5  * IN_MILLISECONDS);
             }
 
@@ -118,19 +118,19 @@ class boss_amanitar : public CreatureScript
                             break;
                         case EVENT_MINI:
                             DoCast(SPELL_MINI);
-                            events.ScheduleEvent(EVENT_MINI, urand(25, 30) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_MINI, std::rand() % (30 * IN_MILLISECONDS) + (25 * IN_MILLISECONDS));
                             break;
                         case EVENT_ROOT:
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), SPELL_ENTANGLING_ROOTS, true);
-                            events.ScheduleEvent(EVENT_ROOT, urand(10, 15) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_ROOT, std::rand() % (15 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_BASH:
                             DoCastVictim(SPELL_BASH);
-                            events.ScheduleEvent(EVENT_BASH, urand(7, 12) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_BASH, std::rand() % (12 * IN_MILLISECONDS) + (7 * IN_MILLISECONDS));
                             break;
                         case EVENT_BOLT:
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), SPELL_VENOM_BOLT_VOLLEY, true);
-                            events.ScheduleEvent(EVENT_BOLT, urand(18, 22) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_BOLT, std::rand() % (22 * IN_MILLISECONDS) + (18 * IN_MILLISECONDS));
                             break;
                         default:
                             break;

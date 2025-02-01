@@ -1492,7 +1492,7 @@ public:
             if (Cycle_Timer <= diff)
             {
                 //spell Burn should possible do this, but it doesn't, so do this for now.
-                uint32 dmg = urand(4500, 5500);
+                uint32 dmg = std::rand() % 5500 + 4500;
                 if (me->GetHealth() > dmg)
                     me->ModifyHealth(-int32(dmg));
                 Cycle_Timer = 2000;

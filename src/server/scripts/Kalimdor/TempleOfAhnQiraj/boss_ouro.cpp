@@ -49,12 +49,12 @@ public:
 
         void Reset() OVERRIDE
         {
-            Sweep_Timer = urand(5000, 10000);
-            SandBlast_Timer = urand(20000, 35000);
-            Submerge_Timer = urand(90000, 150000);
-            Back_Timer = urand(30000, 45000);
-            ChangeTarget_Timer = urand(5000, 8000);
-            Spawn_Timer = urand(10000, 20000);
+            Sweep_Timer = std::rand() % 10000 + 5000;
+            SandBlast_Timer = std::rand() % 35000 + 20000;
+            Submerge_Timer = std::rand() % 150000 + 90000;
+            Back_Timer = std::rand() % 45000 + 30000;
+            ChangeTarget_Timer = std::rand() % 8000 + 5000;
+            Spawn_Timer = std::rand() % 20000 + 10000;
 
             Enrage = false;
             Submerged = false;
@@ -75,7 +75,7 @@ public:
             if (!Submerged && Sweep_Timer <= diff)
             {
                 DoCastVictim(SPELL_SWEEP);
-                Sweep_Timer = urand(15000, 30000);
+                Sweep_Timer = std::rand() % 30000 + 15000;
             }
             else Sweep_Timer -= diff;
 
@@ -83,7 +83,7 @@ public:
             if (!Submerged && SandBlast_Timer <= diff)
             {
                 DoCastVictim(SPELL_SANDBLAST);
-                SandBlast_Timer = urand(20000, 35000);
+                SandBlast_Timer = std::rand() % 35000 + 20000;
             }
             else SandBlast_Timer -= diff;
 
@@ -97,7 +97,7 @@ public:
                 DoCast(me, SPELL_DIRTMOUND_PASSIVE);
 
                 Submerged = true;
-                Back_Timer = urand(30000, 45000);
+                Back_Timer = std::rand() % 45000 + 30000;
             }
             else Submerge_Timer -= diff;
 
@@ -110,7 +110,7 @@ public:
                 if (target)
                     DoTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 
-                ChangeTarget_Timer = urand(10000, 20000);
+                ChangeTarget_Timer = std::rand() % 20000 + 10000;
             }
             else ChangeTarget_Timer -= diff;
 
@@ -123,7 +123,7 @@ public:
                 DoCastVictim(SPELL_GROUND_RUPTURE);
 
                 Submerged = false;
-                Submerge_Timer = urand(60000, 120000);
+                Submerge_Timer = std::rand() % 120000 + 60000;
             }
             else Back_Timer -= diff;
 

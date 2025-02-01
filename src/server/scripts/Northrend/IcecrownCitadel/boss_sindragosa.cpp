@@ -219,8 +219,8 @@ class boss_sindragosa : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_CLEAVE, 10000, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_TAIL_SMASH, 20000, EVENT_GROUP_LAND_PHASE);
-                events.ScheduleEvent(EVENT_FROST_BREATH, urand(8000, 12000), EVENT_GROUP_LAND_PHASE);
-                events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, urand(9000, 14000), EVENT_GROUP_LAND_PHASE);
+                events.ScheduleEvent(EVENT_FROST_BREATH, std::rand() % 12000 + 8000, EVENT_GROUP_LAND_PHASE);
+                events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, std::rand() % 14000 + 9000, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_ICY_GRIP, 33500, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_AIR_PHASE, 50000);
                 _mysticBuffetStack = 0;
@@ -417,20 +417,20 @@ class boss_sindragosa : public CreatureScript
                             break;
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE);
-                            events.ScheduleEvent(EVENT_CLEAVE, urand(15000, 20000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 20000 + 15000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_TAIL_SMASH:
                             DoCast(me, SPELL_TAIL_SMASH);
-                            events.ScheduleEvent(EVENT_TAIL_SMASH, urand(27000, 32000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_TAIL_SMASH, std::rand() % 32000 + 27000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_FROST_BREATH:
                             DoCastVictim(_isThirdPhase ? SPELL_FROST_BREATH_P2 : SPELL_FROST_BREATH_P1);
-                            events.ScheduleEvent(EVENT_FROST_BREATH, urand(20000, 25000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_FROST_BREATH, std::rand() % 25000 + 20000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_UNCHAINED_MAGIC:
                             Talk(SAY_UNCHAINED_MAGIC);
                             DoCast(me, SPELL_UNCHAINED_MAGIC);
-                            events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, urand(30000, 35000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, std::rand() % 35000 + 30000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_ICY_GRIP:
                             DoCast(me, SPELL_ICY_GRIP);
@@ -473,7 +473,7 @@ class boss_sindragosa : public CreatureScript
                                 Talk(EMOTE_WARN_FROZEN_ORB, target);
                                 DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
                             }
-                            events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));
+                            events.ScheduleEvent(EVENT_ICE_TOMB, std::rand() % 23000 + 16000);
                             break;
                         case EVENT_FROST_BOMB:
                         {
@@ -483,7 +483,7 @@ class boss_sindragosa : public CreatureScript
                             destZ = 205.0f; // random number close to ground, get exact in next call
                             me->UpdateGroundPositionZ(destX, destY, destZ);
                             me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
-                            events.ScheduleEvent(EVENT_FROST_BOMB, urand(6000, 8000));
+                            events.ScheduleEvent(EVENT_FROST_BOMB, std::rand() % 8000 + 6000);
                             break;
                         }
                         case EVENT_LAND:
@@ -493,11 +493,11 @@ class boss_sindragosa : public CreatureScript
                             break;
                         }
                         case EVENT_LAND_GROUND:
-                            events.ScheduleEvent(EVENT_CLEAVE, urand(13000, 15000), EVENT_GROUP_LAND_PHASE);
-                            events.ScheduleEvent(EVENT_TAIL_SMASH, urand(19000, 23000), EVENT_GROUP_LAND_PHASE);
-                            events.ScheduleEvent(EVENT_FROST_BREATH, urand(10000, 15000), EVENT_GROUP_LAND_PHASE);
-                            events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, urand(12000, 17000), EVENT_GROUP_LAND_PHASE);
-                            events.ScheduleEvent(EVENT_ICY_GRIP, urand(35000, 40000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 15000 + 13000, EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_TAIL_SMASH, std::rand() % 23000 + 19000, EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_FROST_BREATH, std::rand() % 15000 + 10000, EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, std::rand() % 17000 + 12000, EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_ICY_GRIP, std::rand() % 40000 + 35000, EVENT_GROUP_LAND_PHASE);
                             me->GetMotionMaster()->MoveLand(POINT_LAND_GROUND, SindragosaLandPos);
                             break;
                         case EVENT_THIRD_PHASE_CHECK:
@@ -505,8 +505,8 @@ class boss_sindragosa : public CreatureScript
                             if (!_isInAirPhase)
                             {
                                 Talk(SAY_PHASE_2);
-                                events.ScheduleEvent(EVENT_ICE_TOMB, urand(7000, 10000));
-                                events.RescheduleEvent(EVENT_ICY_GRIP, urand(35000, 40000));
+                                events.ScheduleEvent(EVENT_ICE_TOMB, std::rand() % 10000 + 7000);
+                                events.RescheduleEvent(EVENT_ICY_GRIP, std::rand() % 40000 + 35000);
                                 DoCast(me, SPELL_MYSTIC_BUFFET, true);
                             }
                             else
@@ -636,9 +636,9 @@ class npc_spinestalker : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 25000));
-                _events.ScheduleEvent(EVENT_CLEAVE_SPINESTALKER, urand(10000, 15000));
-                _events.ScheduleEvent(EVENT_TAIL_SWEEP, urand(8000, 12000));
+                _events.ScheduleEvent(EVENT_BELLOWING_ROAR, std::rand() % 25000 + 20000);
+                _events.ScheduleEvent(EVENT_CLEAVE_SPINESTALKER, std::rand() % 15000 + 10000);
+                _events.ScheduleEvent(EVENT_TAIL_SWEEP, std::rand() % 12000 + 8000);
                 me->SetReactState(REACT_DEFENSIVE);
 
                 if (!_summoned)
@@ -712,15 +712,15 @@ class npc_spinestalker : public CreatureScript
                     {
                         case EVENT_BELLOWING_ROAR:
                             DoCast(me, SPELL_BELLOWING_ROAR);
-                            _events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(25000, 30000));
+                            _events.ScheduleEvent(EVENT_BELLOWING_ROAR, std::rand() % 30000 + 25000);
                             break;
                         case EVENT_CLEAVE_SPINESTALKER:
                             DoCastVictim(SPELL_CLEAVE_SPINESTALKER);
-                            _events.ScheduleEvent(EVENT_CLEAVE_SPINESTALKER, urand(10000, 15000));
+                            _events.ScheduleEvent(EVENT_CLEAVE_SPINESTALKER, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_TAIL_SWEEP:
                             DoCast(me, SPELL_TAIL_SWEEP);
-                            _events.ScheduleEvent(EVENT_TAIL_SWEEP, urand(22000, 25000));
+                            _events.ScheduleEvent(EVENT_TAIL_SWEEP, std::rand() % 25000 + 22000);
                             break;
                         default:
                             break;
@@ -766,8 +766,8 @@ class npc_rimefang : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_FROST_BREATH_RIMEFANG, urand(12000, 15000));
-                _events.ScheduleEvent(EVENT_ICY_BLAST, urand(30000, 35000));
+                _events.ScheduleEvent(EVENT_FROST_BREATH_RIMEFANG, std::rand() % 15000 + 12000);
+                _events.ScheduleEvent(EVENT_ICY_BLAST, std::rand() % 35000 + 30000);
                 me->SetReactState(REACT_DEFENSIVE);
                 _icyBlastCounter = 0;
 
@@ -847,7 +847,7 @@ class npc_rimefang : public CreatureScript
                     {
                         case EVENT_FROST_BREATH_RIMEFANG:
                             DoCast(me, SPELL_FROST_BREATH);
-                            _events.ScheduleEvent(EVENT_FROST_BREATH_RIMEFANG, urand(35000, 40000));
+                            _events.ScheduleEvent(EVENT_FROST_BREATH_RIMEFANG, std::rand() % 40000 + 35000);
                             break;
                         case EVENT_ICY_BLAST:
                         {
@@ -857,7 +857,7 @@ class npc_rimefang : public CreatureScript
                             me->SetCanFly(true);
                             me->GetMotionMaster()->MovePoint(POINT_FROSTWYRM_FLY_IN, RimefangFlyPos);
                             float moveTime = me->GetExactDist(&RimefangFlyPos)/(me->GetSpeed(MOVE_FLIGHT)*0.001f);
-                            _events.ScheduleEvent(EVENT_ICY_BLAST, uint64(moveTime) + urand(60000, 70000));
+                            _events.ScheduleEvent(EVENT_ICY_BLAST, uint64(moveTime) + std::rand() % 70000 + 60000);
                             _events.ScheduleEvent(EVENT_ICY_BLAST_CAST, uint64(moveTime) + 250);
                             break;
                         }
@@ -929,7 +929,7 @@ class npc_sindragosa_trash : public CreatureScript
                 if (me->GetEntry() == NPC_FROSTWARDEN_HANDLER)
                 {
                     _events.ScheduleEvent(EVENT_FROSTWARDEN_ORDER_WHELP, 3000);
-                    _events.ScheduleEvent(EVENT_CONCUSSIVE_SHOCK, urand(8000, 10000));
+                    _events.ScheduleEvent(EVENT_CONCUSSIVE_SHOCK, std::rand() % 10000 + 8000);
                 }
 
                 _isTaunted = false;
@@ -979,7 +979,7 @@ class npc_sindragosa_trash : public CreatureScript
                             break;
                         case EVENT_CONCUSSIVE_SHOCK:
                             DoCast(me, SPELL_CONCUSSIVE_SHOCK);
-                            _events.ScheduleEvent(EVENT_CONCUSSIVE_SHOCK, urand(10000, 13000));
+                            _events.ScheduleEvent(EVENT_CONCUSSIVE_SHOCK, std::rand() % 13000 + 10000);
                             break;
                         default:
                             break;
@@ -1050,7 +1050,7 @@ class spell_sindragosa_s_fury : public SpellScriptLoader
 
                 float resistance = float(GetHitUnit()->GetResistance(SpellSchoolMask(GetSpellInfo()->SchoolMask)));
                 uint32 minResistFactor = uint32((resistance / (resistance + 510.0f)) * 10.0f) * 2;
-                uint32 randomResist = urand(0, (9 - minResistFactor) * 100) / 100 + minResistFactor;
+                uint32 randomResist = std::rand() % ((9 - minResistFactor) * 100) / 100 + minResistFactor;
 
                 uint32 damage = (uint32(GetEffectValue() / _targetCount) * randomResist) / 10;
 

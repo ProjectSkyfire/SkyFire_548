@@ -170,7 +170,7 @@ public:
                 {
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand (1000, 2000));
+                        events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 2000 + 1000);
                         break;
                     case EVENT_IGNORED:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))

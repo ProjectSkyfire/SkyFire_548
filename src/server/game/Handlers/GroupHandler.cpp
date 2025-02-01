@@ -666,7 +666,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recvData)
     /********************/
 
     // everything's fine, do it
-    roll = urand(minimum, maximum);
+    roll = std::rand() % maximum + minimum;
 
     //SF_LOG_DEBUG("misc", "ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 

@@ -789,7 +789,7 @@ public:
 
         void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
-            switch (urand(0, 2))
+            switch (std::rand() % 2)
             {
                 case 0:
                     DoSpawnCreature(17902, 3, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 60000);

@@ -108,7 +108,7 @@ class boss_gruul : public CreatureScript
                 {
                     if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
                     {
-                        switch (urand(0, 1))
+                        switch (std::rand() % 1)
                         {
                             case 0:
                                 target->CastSpell(target, SPELL_MAGNETIC_PULL, true, NULL, NULL, me->GetGUID());
@@ -199,7 +199,7 @@ class boss_gruul : public CreatureScript
                     if (m_uiReverberation_Timer <= diff)
                     {
                         DoCastVictim(SPELL_REVERBERATION, true);
-                        m_uiReverberation_Timer = urand(15000, 25000);
+                        m_uiReverberation_Timer = std::rand() % 25000 + 15000;
                     }
                     else
                         m_uiReverberation_Timer -= diff;

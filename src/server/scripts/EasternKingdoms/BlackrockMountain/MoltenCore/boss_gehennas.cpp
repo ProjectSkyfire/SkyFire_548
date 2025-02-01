@@ -64,12 +64,12 @@ class boss_gehennas : public CreatureScript
                     {
                         case EVENT_GEHENNAS_CURSE:
                             DoCastVictim(SPELL_GEHENNAS_CURSE);
-                            events.ScheduleEvent(EVENT_GEHENNAS_CURSE, urand(22000, 30000));
+                            events.ScheduleEvent(EVENT_GEHENNAS_CURSE, std::rand() % 30000 + 22000);
                             break;
                         case EVENT_RAIN_OF_FIRE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_RAIN_OF_FIRE);
-                            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(4000, 12000));
+                            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, std::rand() % 12000 + 4000);
                             break;
                         case EVENT_SHADOW_BOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))

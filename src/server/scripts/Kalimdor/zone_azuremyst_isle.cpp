@@ -228,7 +228,7 @@ public:
         void Reset() OVERRIDE
         {
             DynamiteTimer = 8000;
-            EmoteTimer = urand(120000, 150000);
+            EmoteTimer = std::rand() % 150000 + 120000;
 
             me->setFaction(NormFaction);
             me->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, NpcFlags);
@@ -249,7 +249,7 @@ public:
                 {
                     Talk(SAY_TEXT);
                     Talk(SAY_EMOTE);
-                    EmoteTimer = urand(120000, 150000);
+                    EmoteTimer = std::rand() % 150000 + 120000;
                 } else EmoteTimer -= diff;
             }
             else if (IsTreeEvent)
@@ -291,7 +291,7 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             me->SetHealth(me->CountPctFromMaxHealth(15));
-            switch (urand(0, 1))
+            switch (std::rand() % 1)
             {
                 case 0:
                     me->SetStandState(UNIT_STAND_STATE_SIT);

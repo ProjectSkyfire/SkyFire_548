@@ -229,7 +229,7 @@ public:
                 {
                     me->MonsterTextEmote(EMOTE_SPOUT, 0, true);
                     me->SetReactState(REACT_PASSIVE);
-                    me->GetMotionMaster()->MoveRotate(20000, urand(0, 1) ? ROTATE_DIRECTION_LEFT : ROTATE_DIRECTION_RIGHT);
+                    me->GetMotionMaster()->MoveRotate(20000, std::rand() % 1 ? ROTATE_DIRECTION_LEFT : ROTATE_DIRECTION_RIGHT);
                     SpoutTimer = 45000;
                     WhirlTimer = 20000; // whirl directly after spout
                     RotTimer = 20000;
@@ -420,7 +420,7 @@ class go_strange_pool : public GameObjectScript
         {
             // 25%
             if (InstanceScript* instanceScript = go->GetInstanceScript())
-                if (!urand(0, 3))
+                if (!(std::rand() % 3))
                 {
                     if (instanceScript->GetData(DATA_STRANGE_POOL) == NOT_STARTED)
                     {

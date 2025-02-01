@@ -206,7 +206,7 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
     {
         // Select a template
         std::vector<uint32> templateList;
-        uint32 rand = urand(1, 100);
+        uint32 rand = std::rand() % 100 + 1;
 
         for (BMAuctionTemplateStore::const_iterator itr = GetTemplatesBegin(); itr != GetTemplatesEnd(); ++itr)
         {
@@ -220,12 +220,12 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
         if (templateList.empty())
             continue;
 
-        BlackMarketAuctionTemplate* selTemplate = GetTemplate(templateList[urand(0, templateList.size() - 1)]);
+        BlackMarketAuctionTemplate* selTemplate = GetTemplate(templateList[std::rand() % (templateList.size() - 1)]);
 
         if (!selTemplate)
             continue;
 
-        uint32 startTime = time(NULL) + sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY) + urand(0, sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) * 2) - sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) / 2;
+        uint32 startTime = time(NULL) + sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY) + std::rand() % (sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) * 2) - sWorld->getIntConfig(WorldIntConfigs::CONFIG_BLACK_MARKET_AUCTION_DELAY_MOD) / 2;
 
         uint32 minIncrement = selTemplate->MinBid * 0.05f;
 

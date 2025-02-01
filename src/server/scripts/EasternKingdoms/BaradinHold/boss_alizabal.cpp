@@ -145,7 +145,7 @@ class boss_alizabal : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_RANDOM_CAST:
-                            switch (urand(0, 1))
+                            switch (std::rand() % 1)
                             {
                                 case 0:
                                     if (!_skewer)
@@ -157,7 +157,7 @@ class boss_alizabal : public CreatureScript
                                             Talk(SAY_SKEWER_ANNOUNCE, target);
                                         }
                                         _skewer = true;
-                                        events.ScheduleEvent(EVENT_RANDOM_CAST, urand(7000, 10000));
+                                        events.ScheduleEvent(EVENT_RANDOM_CAST, std::rand() % 10000 + 7000);
                                     }
                                     else if (!_hate)
                                     {
@@ -167,7 +167,7 @@ class boss_alizabal : public CreatureScript
                                             Talk(SAY_HATE);
                                         }
                                         _hate = true;
-                                        events.ScheduleEvent(EVENT_RANDOM_CAST, urand(7000, 10000));
+                                        events.ScheduleEvent(EVENT_RANDOM_CAST, std::rand() % 10000 + 7000);
                                     }
                                     else if (_hate && _skewer)
                                     {
@@ -188,7 +188,7 @@ class boss_alizabal : public CreatureScript
                                             Talk(SAY_HATE);
                                         }
                                         _hate = true;
-                                        events.ScheduleEvent(EVENT_RANDOM_CAST, urand(7000, 10000));
+                                        events.ScheduleEvent(EVENT_RANDOM_CAST, std::rand() % 10000 + 7000);
                                     }
                                     else if (!_skewer)
                                     {
@@ -199,7 +199,7 @@ class boss_alizabal : public CreatureScript
                                             Talk(SAY_SKEWER_ANNOUNCE, target);
                                         }
                                         _skewer = true;
-                                        events.ScheduleEvent(EVENT_RANDOM_CAST, urand(7000, 10000));
+                                        events.ScheduleEvent(EVENT_RANDOM_CAST, std::rand() % 10000 + 7000);
                                     }
                                     else if (_hate && _skewer)
                                     {

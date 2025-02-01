@@ -1787,7 +1787,7 @@ void Battleground::HandleTriggerBuff(uint64 go_guid)
     }
 
     // Randomly select new buff
-    uint8 buff = urand(0, 2);
+    uint8 buff = std::rand() % 2;
     uint32 entry = obj->GetEntry();
     if (m_BuffChange && entry != Buff_Entries[buff])
     {

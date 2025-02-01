@@ -75,10 +75,10 @@ class boss_trollgore : public CreatureScript
                 Talk(SAY_AGGRO);
 
                 events.ScheduleEvent(EVENT_CONSUME, 15000);
-                events.ScheduleEvent(EVENT_CRUSH, urand(1000, 5000));
-                events.ScheduleEvent(EVENT_INFECTED_WOUND, urand(10000, 60000));
+                events.ScheduleEvent(EVENT_CRUSH, std::rand() % 5000 + 1000);
+                events.ScheduleEvent(EVENT_INFECTED_WOUND, std::rand() % 60000 + 10000);
                 events.ScheduleEvent(EVENT_CORPSE_EXPLODE, 3000);
-                events.ScheduleEvent(EVENT_SPAWN, urand(30000, 40000));
+                events.ScheduleEvent(EVENT_SPAWN, std::rand() % 40000 + 30000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -102,23 +102,23 @@ class boss_trollgore : public CreatureScript
                             break;
                         case EVENT_CRUSH:
                             DoCastVictim(SPELL_CRUSH);
-                            events.ScheduleEvent(EVENT_CRUSH, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_CRUSH, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_INFECTED_WOUND:
                             DoCastVictim(SPELL_INFECTED_WOUND);
-                            events.ScheduleEvent(EVENT_INFECTED_WOUND, urand(25000, 35000));
+                            events.ScheduleEvent(EVENT_INFECTED_WOUND, std::rand() % 35000 + 25000);
                             break;
                         case EVENT_CORPSE_EXPLODE:
                             Talk(SAY_EXPLODE);
                             DoCastAOE(SPELL_CORPSE_EXPLODE);
-                            events.ScheduleEvent(EVENT_CORPSE_EXPLODE, urand(15000, 19000));
+                            events.ScheduleEvent(EVENT_CORPSE_EXPLODE, std::rand() % 19000 + 15000);
                             break;
                         case EVENT_SPAWN:
                             for (uint8 i = 0; i < 3; ++i)
                                 if (Creature* trigger = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TROLLGORE_INVADER_SUMMONER_1 + i)))
                                     trigger->CastSpell(trigger, RAND(SPELL_SUMMON_INVADER_A, SPELL_SUMMON_INVADER_B, SPELL_SUMMON_INVADER_C), true, NULL, NULL, me->GetGUID());
 
-                            events.ScheduleEvent(EVENT_SPAWN, urand(30000, 40000));
+                            events.ScheduleEvent(EVENT_SPAWN, std::rand() % 40000 + 30000);
                             break;
                         default:
                             break;

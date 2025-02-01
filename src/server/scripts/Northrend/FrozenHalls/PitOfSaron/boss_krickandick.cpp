@@ -151,7 +151,7 @@ class boss_ick : public CreatureScript
                 events.ScheduleEvent(EVENT_MIGHTY_KICK, 20000);
                 events.ScheduleEvent(EVENT_TOXIC_WASTE, 5000);
                 events.ScheduleEvent(EVENT_SHADOW_BOLT, 10000);
-                events.ScheduleEvent(EVENT_SPECIAL, urand(30000, 35000));
+                events.ScheduleEvent(EVENT_SPECIAL, std::rand() % 35000 + 30000);
             }
 
             void EnterEvadeMode() OVERRIDE
@@ -207,7 +207,7 @@ class boss_ick : public CreatureScript
                             if (Creature* krick = GetKrick())
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                     krick->CastSpell(target, SPELL_TOXIC_WASTE);
-                            events.ScheduleEvent(EVENT_TOXIC_WASTE, urand(7000, 10000));
+                            events.ScheduleEvent(EVENT_TOXIC_WASTE, std::rand() % 10000 + 7000);
                             break;
                         case EVENT_SHADOW_BOLT:
                             if (Creature* krick = GetKrick())
@@ -222,7 +222,7 @@ class boss_ick : public CreatureScript
                         case EVENT_SPECIAL:
                             //select one of these three special events
                             events.ScheduleEvent(RAND(EVENT_EXPLOSIVE_BARRAGE, EVENT_POISON_NOVA, EVENT_PURSUIT), 1000);
-                            events.ScheduleEvent(EVENT_SPECIAL, urand(23000, 28000));
+                            events.ScheduleEvent(EVENT_SPECIAL, std::rand() % 28000 + 23000);
                             break;
                         case EVENT_EXPLOSIVE_BARRAGE:
                             if (Creature* krick = GetKrick())

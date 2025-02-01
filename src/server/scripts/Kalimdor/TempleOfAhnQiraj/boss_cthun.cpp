@@ -593,7 +593,7 @@ public:
                     }
 
                     //One random wisper every 90 - 300 seconds
-                    WisperTimer = urand(90000, 300000);
+                    WisperTimer = std::rand() % 300000 + 90000;
                 } else WisperTimer -= diff;
 
                 return;

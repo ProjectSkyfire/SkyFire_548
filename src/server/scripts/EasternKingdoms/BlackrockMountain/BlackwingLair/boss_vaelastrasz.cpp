@@ -154,7 +154,7 @@ public:
                         break;
                     case EVENT_FLAMEBREATH:
                         DoCastVictim(SPELL_FLAMEBREATH);
-                        events.ScheduleEvent(EVENT_FLAMEBREATH, urand(8000, 14000));
+                        events.ScheduleEvent(EVENT_FLAMEBREATH, std::rand() % 14000 + 8000);
                         break;
                     case EVENT_FIRENOVA:
                         DoCastVictim(SPELL_FIRENOVA);

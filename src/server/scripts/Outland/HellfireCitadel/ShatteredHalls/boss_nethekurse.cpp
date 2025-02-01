@@ -245,7 +245,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_SHADOW_FISSURE);
-                        ShadowFissure_Timer = urand(7500, 15000);
+                        ShadowFissure_Timer = std::rand() % 15000 + 7500;
                     }
                     else
                         ShadowFissure_Timer -= diff;
@@ -254,7 +254,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_DEATH_COIL);
-                        DeathCoil_Timer = urand(15000, 20000);
+                        DeathCoil_Timer = std::rand() % 20000 + 15000;
                     }
                     else
                         DeathCoil_Timer -= diff;

@@ -1001,7 +1001,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
         {
             if (roll_chance_i(50))                        // 50% success
             {
-                int32 rand_eff = urand(1, 7);
+                int32 rand_eff = std::rand() % 7 + 1;
                 switch (rand_eff)
                 {
                     case 1:
@@ -1046,7 +1046,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
         {
             if (roll_chance_i(50))                        // 50% success
             {
-                int32 rand_eff = urand(1, 4);
+                int32 rand_eff = std::rand() % 4 + 1;
                 switch (rand_eff)
                 {
                     case 1:
@@ -2296,7 +2296,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     {
         // Random select buff for dispel
         DispelChargesList::iterator itr = dispel_list.begin();
-        std::advance(itr, urand(0, dispel_list.size() - 1));
+        std::advance(itr, std::rand() % (dispel_list.size() - 1));
 
         int32 chance = itr->first->CalcDispelChance(unitTarget, !unitTarget->IsFriendlyTo(m_caster));
         // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
@@ -3452,7 +3452,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 29830:
                 {
                     uint32 item = 0;
-                    switch (urand(1, 6))
+                    switch (std::rand() % 6 + 1)
                     {
                         case 1:
                         case 2:
@@ -3564,7 +3564,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     const char* gender = "his";
                     if (m_caster->getGender() > 0)
                         gender = "her";
-                    snprintf(buf, sizeof(buf), "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
+                    snprintf(buf, sizeof(buf), "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, std::rand() % 10 + 1, std::rand() % 10 + 1);
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
@@ -3575,7 +3575,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     const char* gender = "his";
                     if (m_caster->getGender() > 0)
                         gender = "her";
-                    snprintf(buf, sizeof(buf), "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, urand(1, 6), urand(1, 6));
+                    snprintf(buf, sizeof(buf), "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, std::rand() % 6 + 1, std::rand() % 6 + 1);
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
@@ -3658,7 +3658,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     return;
                 case 52479: // Gift of the Harvester
                     if (unitTarget && m_originalCaster)
-                        m_originalCaster->CastSpell(unitTarget, urand(0, 1) ? damage : 52505, true);
+                        m_originalCaster->CastSpell(unitTarget, std::rand() % 1 ? damage : 52505, true);
                     return;
                 case 53110: // Devour Humanoid
                     if (unitTarget)
@@ -3801,8 +3801,8 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         45683                             // Polymorph
                     };
 
-                    m_caster->CastSpell(m_caster, spellPlayer[urand(0, 4)], true);
-                    unitTarget->CastSpell(unitTarget, spellTarget[urand(0, 4)], true);
+                    m_caster->CastSpell(m_caster, spellPlayer[std::rand() % 4], true);
+                    unitTarget->CastSpell(unitTarget, spellTarget[std::rand() % 4], true);
                     break;
                 }
             }
@@ -5061,7 +5061,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
             // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
             int32 lastSec = 0;
-            switch (urand(0, 3))
+            switch (std::rand() % 3)
             {
                 case 0: lastSec = 3; break;
                 case 1: lastSec = 7; break;
@@ -5278,7 +5278,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
     {
         // Random select buff for dispel
         DispelChargesList::iterator itr = steal_list.begin();
-        std::advance(itr, urand(0, steal_list.size() - 1));
+        std::advance(itr, std::rand() % (steal_list.size() - 1));
 
         int32 chance = itr->first->CalcDispelChance(unitTarget, !unitTarget->IsFriendlyTo(m_caster));
         // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."

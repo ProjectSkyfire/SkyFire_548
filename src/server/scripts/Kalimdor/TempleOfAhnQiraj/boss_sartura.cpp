@@ -57,9 +57,9 @@ public:
         void Reset() OVERRIDE
         {
             WhirlWind_Timer = 30000;
-            WhirlWindRandom_Timer = urand(3000, 7000);
+            WhirlWindRandom_Timer = std::rand() % 7000 + 3000;
             WhirlWindEnd_Timer = 15000;
-            AggroReset_Timer = urand(45000, 55000);
+            AggroReset_Timer = std::rand() % 55000 + 45000;
             AggroResetEnd_Timer = 5000;
             EnrageHard_Timer = 10*60000;
 
@@ -101,13 +101,13 @@ public:
                         me->TauntApply(target);
                         AttackStart(target);
                     }
-                    WhirlWindRandom_Timer = urand(3000, 7000);
+                    WhirlWindRandom_Timer = std::rand() % 7000 + 3000;
                 } else WhirlWindRandom_Timer -= diff;
 
                 if (WhirlWindEnd_Timer <= diff)
                 {
                     WhirlWind = false;
-                    WhirlWind_Timer = urand(25000, 40000);
+                    WhirlWind_Timer = std::rand() % 40000 + 25000;
                 } else WhirlWindEnd_Timer -= diff;
             }
 
@@ -130,7 +130,7 @@ public:
                         AttackStart(target);
                     }
                     AggroReset = true;
-                    AggroReset_Timer = urand(2000, 5000);
+                    AggroReset_Timer = std::rand() % 5000 + 2000;
                 } else AggroReset_Timer -= diff;
 
                 if (AggroReset)
@@ -139,7 +139,7 @@ public:
                     {
                         AggroReset = false;
                         AggroResetEnd_Timer = 5000;
-                        AggroReset_Timer = urand(35000, 45000);
+                        AggroReset_Timer = std::rand() % 45000 + 35000;
                     } else AggroResetEnd_Timer -= diff;
                 }
 
@@ -196,9 +196,9 @@ public:
         void Reset() OVERRIDE
         {
             WhirlWind_Timer = 30000;
-            WhirlWindRandom_Timer = urand(3000, 7000);
+            WhirlWindRandom_Timer = std::rand() % 7000 + 3000;
             WhirlWindEnd_Timer = 15000;
-            AggroReset_Timer = urand(45000, 55000);
+            AggroReset_Timer = std::rand() % 55000 + 45000;
             AggroResetEnd_Timer = 5000;
             KnockBack_Timer = 10000;
 
@@ -220,7 +220,7 @@ public:
             {
                 DoCast(me, SPELL_WHIRLWINDADD);
                 WhirlWind = true;
-                WhirlWind_Timer = urand(25000, 40000);
+                WhirlWind_Timer = std::rand() % 40000 + 25000;
                 WhirlWindEnd_Timer = 15000;
             } else WhirlWind_Timer -= diff;
 
@@ -236,7 +236,7 @@ public:
                         AttackStart(target);
                     }
 
-                    WhirlWindRandom_Timer = urand(3000, 7000);
+                    WhirlWindRandom_Timer = std::rand() % 7000 + 3000;
                 } else WhirlWindRandom_Timer -= diff;
 
                 if (WhirlWindEnd_Timer <= diff)
@@ -258,13 +258,13 @@ public:
                     }
 
                     AggroReset = true;
-                    AggroReset_Timer = urand(2000, 5000);
+                    AggroReset_Timer = std::rand() % 5000 + 2000;
                 } else AggroReset_Timer -= diff;
 
                 if (KnockBack_Timer <= diff)
                 {
                     DoCast(me, SPELL_WHIRLWINDADD);
-                    KnockBack_Timer = urand(10000, 20000);
+                    KnockBack_Timer = std::rand() % 20000 + 10000;
                 } else KnockBack_Timer -= diff;
             }
 
@@ -274,7 +274,7 @@ public:
                 {
                     AggroReset = false;
                     AggroResetEnd_Timer = 5000;
-                    AggroReset_Timer = urand(30000, 40000);
+                    AggroReset_Timer = std::rand() % 40000 + 30000;
                 } else AggroResetEnd_Timer -= diff;
             }
 

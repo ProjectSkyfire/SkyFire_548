@@ -221,7 +221,7 @@ class boss_xt002 : public CreatureScript
                 events.ScheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB);
                 events.ScheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT);
                 //Tantrum is casted a bit slower the first time.
-                events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX) * 2);
+                events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, (std::rand() % TIMER_TYMPANIC_TANTRUM_MAX + TIMER_TYMPANIC_TANTRUM_MIN) * 2);
 
                 if (!instance)
                     return;
@@ -287,7 +287,7 @@ class boss_xt002 : public CreatureScript
                             Talk(SAY_TYMPANIC_TANTRUM);
                             Talk(EMOTE_TYMPANIC_TANTRUM);
                             DoCast(SPELL_TYMPANIC_TANTRUM);
-                            events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX));
+                            events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, std::rand() % TIMER_TYMPANIC_TANTRUM_MAX + TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX);
                             break;
                         case EVENT_DISPOSE_HEART:
                             SetPhaseOne();
@@ -396,7 +396,7 @@ class boss_xt002 : public CreatureScript
 
                 events.RescheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT / 2);
                 events.RescheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB);
-                events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX));
+                events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, std::rand() % TIMER_TYMPANIC_TANTRUM_MAX + TIMER_TYMPANIC_TANTRUM_MIN);
 
                 Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT_EXPOSED) : NULL;
                 if (!heart)
@@ -907,7 +907,7 @@ class spell_xt002_heart_overload_periodic : public SpellScriptLoader
                 {
                     if (InstanceScript* instance = caster->GetInstanceScript())
                     {
-                        if (Unit* toyPile = ObjectAccessor::GetUnit(*caster, instance->GetData64(DATA_TOY_PILE_0 + urand(0, 3))))
+                        if (Unit* toyPile = ObjectAccessor::GetUnit(*caster, instance->GetData64(DATA_TOY_PILE_0 + std::rand() % 3)))
                         {
                             caster->CastSpell(toyPile, SPELL_ENERGY_ORB, true);
 
@@ -918,7 +918,7 @@ class spell_xt002_heart_overload_periodic : public SpellScriptLoader
 
                             for (uint8 i = 0; i < 5; ++i)
                             {
-                                uint8 a = urand(0, 4);
+                                uint8 a = std::rand() % 4;
                                 uint32 spellId = spells[a];
                                 toyPile->CastSpell(toyPile, spellId, true, NULL, NULL, instance->GetData64(BOSS_XT002));
                             }

@@ -498,7 +498,7 @@ public:
             uint32 member = 0;                                  // He chooses Lady Malande most often
 
             if (rand()%10 == 0)                                  // But there is a chance he picks someone else.
-                member = urand(1, 3);
+                member = std::rand() % 3 + 1;
 
             if (member != 2)                                     // No need to create another pointer to us using Unit::GetUnit
                 unit = Unit::GetUnit(*me, Council[member]);
@@ -508,7 +508,7 @@ public:
         void CastAuraOnCouncil()
         {
             uint32 spellid = 0;
-            switch (urand(0, 1))
+            switch (std::rand() % 1)
             {
                 case 0: spellid = SPELL_DEVOTION_AURA;   break;
                 case 1: spellid = SPELL_CHROMATIC_AURA;  break;
@@ -530,7 +530,7 @@ public:
             {
                 if (Unit* unit = SelectCouncilMember())
                 {
-                    switch (urand(0, 1))
+                    switch (std::rand() % 1)
                     {
                         case 0:
                             DoCast(unit, SPELL_BLESS_SPELLWARD);
@@ -565,7 +565,7 @@ public:
 
             if (SealTimer <= diff)
             {
-                switch (urand(0, 1))
+                switch (std::rand() % 1)
                 {
                     case 0: DoCast(me, SPELL_SEAL_OF_COMMAND);  break;
                     case 1: DoCast(me, SPELL_SEAL_OF_BLOOD);    break;
@@ -607,8 +607,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            BlizzardTimer = urand(30, 91) * 1000;
-            FlamestrikeTimer = urand(30, 91) * 1000;
+            BlizzardTimer = std::rand() % (91 * IN_MILLISECONDS) + (30 * IN_MILLISECONDS);
+            FlamestrikeTimer = std::rand() % (91 * IN_MILLISECONDS) + (30 * IN_MILLISECONDS);
             ArcaneBoltTimer = 10000;
             DampenMagicTimer = 2000;
             ArcaneExplosionTimer = 14000;
@@ -667,7 +667,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 {
                     DoCast(target, SPELL_BLIZZARD);
-                    BlizzardTimer = urand(45, 91) * 1000;
+                    BlizzardTimer = std::rand() % (91 * IN_MILLISECONDS) + (45 * IN_MILLISECONDS);
                     FlamestrikeTimer += 10000;
                     Cooldown = 1000;
                 }
@@ -678,7 +678,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 {
                     DoCast(target, SPELL_FLAMESTRIKE);
-                    FlamestrikeTimer = urand(55, 101) * 1000;
+                    FlamestrikeTimer = std::rand() % (101 * IN_MILLISECONDS) + (55 * IN_MILLISECONDS);
                     BlizzardTimer += 10000;
                     Cooldown = 2000;
                 }
@@ -749,7 +749,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 {
                     DoCast(target, SPELL_DIVINE_WRATH);
-                    DivineWrathTimer = urand(40, 81) * 1000;
+                    DivineWrathTimer = std::rand() % (81 * IN_MILLISECONDS) + (40 * IN_MILLISECONDS);
                 }
             } else DivineWrathTimer -= diff;
 
@@ -791,7 +791,7 @@ public:
             EnvenomTargetGUID = 0;
 
             DeadlyPoisonTimer = 20000;
-            VanishTimer = urand(60, 121) * 1000;
+            VanishTimer = std::rand() % (121 * IN_MILLISECONDS) + (60 * IN_MILLISECONDS);
             AppearEnvenomTimer = 150000;
 
             HasVanished = false;
@@ -819,7 +819,7 @@ public:
                 if (DeadlyPoisonTimer <= diff)
                 {
                     DoCastVictim(SPELL_DEADLY_POISON);
-                    DeadlyPoisonTimer = urand(15, 46) * 1000;
+                    DeadlyPoisonTimer = std::rand() % (46 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS);
                 } else DeadlyPoisonTimer -= diff;
 
                 if (AppearEnvenomTimer <= diff)                   // Cast Envenom. This is cast 4 seconds after Vanish is over

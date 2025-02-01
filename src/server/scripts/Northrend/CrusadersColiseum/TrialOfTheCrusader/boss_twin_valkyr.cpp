@@ -144,7 +144,7 @@ struct boss_twin_baseAI : public BossAI
 
         SpecialAbilityTimer = 1*MINUTE*IN_MILLISECONDS;
         SpikeTimer = 20*IN_MILLISECONDS;
-        TouchTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+        TouchTimer = std::rand() % 15000 + 10000;
         BerserkTimer = IsHeroic() ? 6*MINUTE*IN_MILLISECONDS : 10*MINUTE*IN_MILLISECONDS;
 
         summons.DespawnAll();
@@ -338,7 +338,7 @@ struct boss_twin_baseAI : public BossAI
         {
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, OtherEssenceSpellId))
                 me->CastCustomSpell(TouchSpellId, SPELLVALUE_MAX_TARGETS, 1, target, false);
-            TouchTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+            TouchTimer = std::rand() % (15 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
         }
         else
             TouchTimer -= diff;
@@ -532,7 +532,7 @@ struct npc_unleashed_ballAI : public ScriptedAI
         float x = frand(x0 - r, x0 + r);
         float sq = pow(r, 2) - pow(x - x0, 2);
         float rt = sqrtf(fabs(sq));
-        if (urand(0, 1))
+        if (std::rand() % 1)
             y = y0 + rt;
         else
             y = y0 - rt;
@@ -558,7 +558,7 @@ struct npc_unleashed_ballAI : public ScriptedAI
         switch (uiId)
         {
             case 0:
-                if (urand(0, 3) == 0)
+                if ((std::rand() % 3) == 0)
                     MoveToNextPoint();
                 else
                     me->DisappearAndDie();
@@ -750,7 +750,7 @@ class spell_valkyr_essences : public SpellScriptLoader
                     {
                         if (uint32 poweringUp = sSpellMgr->GetSpellIdForDifficulty(SPELL_POWERING_UP, owner))
                         {
-                            if (urand(0, 99) < 5)
+                            if ((std::rand() % 99) < 5)
                                 GetTarget()->CastSpell(GetTarget(), spellId, true);
 
                             // Twin Vortex part

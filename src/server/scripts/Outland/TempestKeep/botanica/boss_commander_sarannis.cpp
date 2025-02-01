@@ -104,7 +104,7 @@ class boss_commander_sarannis : public CreatureScript
                         case EVENT_ARCANE_DEVASTATION:
                             Talk(SAY_ARCANE_DEVASTATION);
                             DoCastVictim(SPELL_ARCANE_DEVASTATION, true);
-                            events.ScheduleEvent(EVENT_ARCANE_DEVASTATION, urand(11000, 19200));
+                            events.ScheduleEvent(EVENT_ARCANE_DEVASTATION, std::rand() % 19200 + 11000);
                             break;
                         default:
                             break;

@@ -100,7 +100,7 @@ public:
                 events.ScheduleEvent(EVENT_CURSE, 10000+rand()%15000);
                 events.ScheduleEvent(EVENT_WARRIOR, 30000);
                 if (GetDifficulty() == DIFFICULTY_25MAN_NORMAL)
-                    events.ScheduleEvent(EVENT_BLINK, urand(20000, 40000));
+                    events.ScheduleEvent(EVENT_BLINK, std::rand() % 40000 + 20000);
             }
         }
 
@@ -146,7 +146,7 @@ public:
                 {
                     case EVENT_CURSE:
                         DoCastAOE(SPELL_CURSE_PLAGUEBRINGER);
-                        events.ScheduleEvent(EVENT_CURSE, urand(50000, 60000));
+                        events.ScheduleEvent(EVENT_CURSE, std::rand() % 60000 + 50000);
                         return;
                     case EVENT_WARRIOR:
                         Talk(SAY_SUMMON);
@@ -166,7 +166,7 @@ public:
                         me->RemoveAllAuras();
                         me->NearTeleportTo(TELE_X, TELE_Y, TELE_Z, TELE_O);
                         events.Reset();
-                        events.ScheduleEvent(EVENT_WAVE, urand(2000, 5000));
+                        events.ScheduleEvent(EVENT_WAVE, std::rand() % 5000 + 2000);
                         waveCount = 0;
                         return;
                     case EVENT_WAVE:
@@ -181,7 +181,7 @@ public:
                                     SummonUndead(NPC_GUARDIAN, RAID_MODE(5, 10));break;
                         }
                         ++waveCount;
-                        events.ScheduleEvent(waveCount < 2 ? EVENT_WAVE : EVENT_GROUND, urand(30000, 45000));
+                        events.ScheduleEvent(waveCount < 2 ? EVENT_WAVE : EVENT_GROUND, std::rand() % 45000 + 30000);
                         return;
                     case EVENT_GROUND:
                     {

@@ -180,7 +180,7 @@ class boss_garfrost : public CreatureScript
                                 Talk(SAY_THROW_SARONITE, target);
                                 DoCast(target, SPELL_THROW_SARONITE);
                             }
-                            events.ScheduleEvent(EVENT_THROW_SARONITE, urand(12500, 20000));
+                            events.ScheduleEvent(EVENT_THROW_SARONITE, std::rand() % 20000 + 12500);
                             break;
                         case EVENT_CHILLING_WAVE:
                             DoCast(me, SPELL_CHILLING_WAVE);

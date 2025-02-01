@@ -41,8 +41,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            mindBlastTimer = urand(2000, 5000);
-            sleepTimer = urand(9000, 12000);
+            mindBlastTimer = std::rand() % 5000 + 2000;
+            sleepTimer = std::rand() % 12000 + 9000;
             if (instance)
                 instance->SetData(TYPE_KELRIS, NOT_STARTED);
         }
@@ -69,7 +69,7 @@ public:
             if (mindBlastTimer < diff)
             {
                 DoCastVictim(SPELL_MIND_BLAST);
-                mindBlastTimer = urand(7000, 9000);
+                mindBlastTimer = std::rand() % 9000 + 7000;
             } else mindBlastTimer -= diff;
 
             if (sleepTimer < diff)
@@ -79,7 +79,7 @@ public:
                     Talk(SAY_SLEEP);
                     DoCast(target, SPELL_SLEEP);
                 }
-                sleepTimer = urand(15000, 20000);
+                sleepTimer = std::rand() % 20000 + 15000;
             } else sleepTimer -= diff;
 
             DoMeleeAttackIfReady();

@@ -50,9 +50,9 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_SANDBREATH, urand(15000, 30000));
-            events.ScheduleEvent(EVENT_TIMESTOP, urand(10000, 15000));
-            events.ScheduleEvent(EVENT_FRENZY, urand(30000, 45000));
+            events.ScheduleEvent(EVENT_SANDBREATH, std::rand() % 30000 + 15000);
+            events.ScheduleEvent(EVENT_TIMESTOP, std::rand() % 15000 + 10000);
+            events.ScheduleEvent(EVENT_FRENZY, std::rand() % 45000 + 30000);
 
             Talk(SAY_AGGRO);
         }
@@ -106,16 +106,16 @@ public:
                 {
                     case EVENT_SANDBREATH:
                         DoCastVictim(SPELL_SAND_BREATH);
-                        events.ScheduleEvent(EVENT_SANDBREATH, urand(15000, 25000));
+                        events.ScheduleEvent(EVENT_SANDBREATH, std::rand() % 25000 + 15000);
                         break;
                     case EVENT_TIMESTOP:
                         DoCastVictim(SPELL_TIME_STOP);
-                        events.ScheduleEvent(EVENT_TIMESTOP, urand(20000, 35000));
+                        events.ScheduleEvent(EVENT_TIMESTOP, std::rand() % 35000 + 20000);
                         break;
                     case EVENT_FRENZY:
-                            Talk(EMOTE_FRENZY);
-                            DoCast(me, SPELL_ENRAGE);
-                        events.ScheduleEvent(EVENT_FRENZY, urand(20000, 35000));
+                        Talk(EMOTE_FRENZY);
+                        DoCast(me, SPELL_ENRAGE);
+                        events.ScheduleEvent(EVENT_FRENZY, std::rand() % 35000 + 25000);
                         break;
                     default:
                         break;

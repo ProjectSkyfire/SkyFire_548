@@ -582,7 +582,7 @@ public:
             {
                 me->InterruptNonMeleeSpells(false);
                 DoCastVictim(SPELL_DEADEN);
-                DeadenTimer = urand(25000, 35000);
+                DeadenTimer = std::rand() % 35000 + 25000;
                 if (!(rand()%2))
                 {
                     Talk(DESI_SAY_SPEC);
@@ -675,7 +675,7 @@ public:
             if (SoulScreamTimer <= diff)
             {
                 DoCastVictim(SPELL_SOUL_SCREAM);
-                SoulScreamTimer = urand(9000, 11000);
+                SoulScreamTimer = std::rand() % 11000 + 9000;
                 if (!(rand()%3))
                 {
                     Talk(ANGER_SAY_SPEC);

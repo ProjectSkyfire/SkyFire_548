@@ -447,7 +447,7 @@ class boss_gothik : public CreatureScript
                                 summons.DoAction(0, pred);  //! Magic numbers fail
                                 summons.DoZoneInCombat();
                                 events.ScheduleEvent(EVENT_BOLT, 1000);
-                                events.ScheduleEvent(EVENT_HARVEST, urand(3000, 15000));
+                                events.ScheduleEvent(EVENT_HARVEST, std::rand() % 15000 + 3000);
                                 events.ScheduleEvent(EVENT_TELEPORT, 20000);
                             }
                             break;
@@ -457,7 +457,7 @@ class boss_gothik : public CreatureScript
                             break;
                         case EVENT_HARVEST:
                             DoCastVictim(SPELL_HARVEST_SOUL, true);
-                            events.ScheduleEvent(EVENT_HARVEST, urand(20000, 25000));
+                            events.ScheduleEvent(EVENT_HARVEST, std::rand() % 25000 + 20000);
                             break;
                         case EVENT_TELEPORT:
                             if (!thirtyPercentReached)

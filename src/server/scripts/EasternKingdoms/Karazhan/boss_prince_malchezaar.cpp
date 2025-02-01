@@ -222,8 +222,8 @@ public:
             Cleave_Timer = 8000;
             InfernalTimer = 40000;
             InfernalCleanupTimer = 47000;
-            AxesTargetSwitchTimer = urand(7500, 20000);
-            SunderArmorTimer = urand(5000, 10000);
+            AxesTargetSwitchTimer = std::rand() % 20000 + 7500;
+            SunderArmorTimer = std::rand() % 10000 + 5000;
             phase = 1;
 
             if (instance)
@@ -467,20 +467,20 @@ public:
                 if (SunderArmorTimer <= diff)
                 {
                     DoCastVictim(SPELL_SUNDER_ARMOR);
-                    SunderArmorTimer = urand(10000, 18000);
+                    SunderArmorTimer = std::rand() % 18000 + 10000;
                 } else SunderArmorTimer -= diff;
 
                 if (Cleave_Timer <= diff)
                 {
                     DoCastVictim(SPELL_CLEAVE);
-                    Cleave_Timer = urand(6000, 12000);
+                    Cleave_Timer = std::rand() % 12000 + 6000;
                 } else Cleave_Timer -= diff;
             }
             else
             {
                 if (AxesTargetSwitchTimer <= diff)
                 {
-                    AxesTargetSwitchTimer = urand(7500, 20000);
+                    AxesTargetSwitchTimer = std::rand() % 20000 + 7500;
 
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
@@ -503,7 +503,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast(target, SPELL_AMPLIFY_DAMAGE);
-                    AmplifyDamageTimer = urand(20000, 30000);
+                    AmplifyDamageTimer = std::rand() % 30000 + 20000;
                 } else AmplifyDamageTimer -= diff;
             }
 

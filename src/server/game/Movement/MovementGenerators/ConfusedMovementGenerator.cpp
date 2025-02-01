@@ -55,7 +55,7 @@ bool ConfusedMovementGenerator<T>::DoUpdate(T* unit, uint32 diff)
         unit->AddUnitState(UNIT_STATE_CONFUSED_MOVE);
 
         if (unit->movespline->Finalized())
-            i_nextMoveTime.Reset(urand(800, 1500));
+            i_nextMoveTime.Reset(std::rand() % 1500 + 800);
     }
     else
     {

@@ -272,9 +272,9 @@ public:
         {
             me->RemoveAllAuras();
 
-            uiHolyFireTimer     = urand(9000, 12000);
-            uiHolySmiteTimer    = urand(5000, 7000);
-            uiRenewTimer        = urand(2000, 5000);
+            uiHolyFireTimer = std::rand() % 12000 + 9000;
+            uiHolySmiteTimer = std::rand() % 7000 + 5000;
+            uiRenewTimer = std::rand() % 5000 + 2000;
 
             uiResetTimer        = 7000;
 
@@ -332,10 +332,10 @@ public:
                     if (target && target->IsAlive())
                         DoCast(target, SPELL_HOLY_FIRE);
                 }
-                 if (me->HasAura(SPELL_SHIELD))
+                if (me->HasAura(SPELL_SHIELD))
                     uiHolyFireTimer = 13000;
                 else
-                    uiHolyFireTimer = urand(9000, 12000);
+                    uiHolyFireTimer = std::rand() % 12000 + 9000;
             } else uiHolyFireTimer -= uiDiff;
 
             if (uiHolySmiteTimer <= uiDiff)
@@ -348,7 +348,7 @@ public:
                 if (me->HasAura(SPELL_SHIELD))
                     uiHolySmiteTimer = 9000;
                 else
-                    uiHolySmiteTimer = urand(5000, 7000);
+                    uiHolySmiteTimer = std::rand() % 7000 + 5000;
             } else uiHolySmiteTimer -= uiDiff;
 
             if (me->HasAura(SPELL_SHIELD))
@@ -356,7 +356,7 @@ public:
                 if (uiRenewTimer <= uiDiff)
                 {
                     me->InterruptNonMeleeSpells(true);
-                    uint8 uiTarget = urand(0, 1);
+                    uint8 uiTarget = std::rand() % 1;
                     switch (uiTarget)
                     {
                         case 0:
@@ -368,7 +368,7 @@ public:
                                     DoCast(pMemory, SPELL_RENEW);
                             break;
                     }
-                    uiRenewTimer = urand(15000, 17000);
+                    uiRenewTimer = std::rand() % 17000 + 15000;
                 } else uiRenewTimer -= uiDiff;
             }
 
@@ -640,7 +640,7 @@ class spell_paletress_summon_memory : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-                GetHitUnit()->CastSpell(GetHitUnit(), memorySpellId[urand(0, 24)], true, NULL, NULL, GetCaster()->GetGUID());
+                GetHitUnit()->CastSpell(GetHitUnit(), memorySpellId[std::rand() % 24], true, NULL, NULL, GetCaster()->GetGUID());
             }
 
             void Register() OVERRIDE

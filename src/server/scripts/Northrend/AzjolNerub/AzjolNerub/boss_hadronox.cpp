@@ -65,11 +65,11 @@ public:
             me->SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, 9.0f);
             me->SetFloatValue(UNIT_FIELD_COMBAT_REACH, 9.0f);
 
-            uiAcidTimer = urand(10*IN_MILLISECONDS, 14*IN_MILLISECONDS);
-            uiLeechTimer = urand(3*IN_MILLISECONDS, 9*IN_MILLISECONDS);
-            uiPierceTimer = urand(1*IN_MILLISECONDS, 3*IN_MILLISECONDS);
-            uiGrabTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
-            uiDoorsTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            uiAcidTimer = std::rand() % (14 * IN_MILLISECONDS) + (10*IN_MILLISECONDS);
+            uiLeechTimer = std::rand() % (9 * IN_MILLISECONDS) + (3*IN_MILLISECONDS);
+            uiPierceTimer = std::rand() % (3 * IN_MILLISECONDS) + (1*IN_MILLISECONDS);
+            uiGrabTimer = std::rand() % (19 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
+            uiDoorsTimer = std::rand() % (30 * IN_MILLISECONDS) + (20*IN_MILLISECONDS);
             uiCheckDistanceTimer = 2*IN_MILLISECONDS;
 
             if (instance && (instance->GetBossState(DATA_HADRONOX) != DONE && !bFirstTime))
@@ -150,7 +150,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_ACID_CLOUD);
 
-                uiAcidTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                uiAcidTimer = std::rand() % (30 * IN_MILLISECONDS) + (20*IN_MILLISECONDS);
             } else uiAcidTimer -= diff;
 
             if (uiLeechTimer <= diff)
@@ -158,7 +158,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_LEECH_POISON);
 
-                uiLeechTimer = urand(11*IN_MILLISECONDS, 14*IN_MILLISECONDS);
+                uiLeechTimer = std::rand() % (14 * IN_MILLISECONDS) + (11*IN_MILLISECONDS);
             } else uiLeechTimer -= diff;
 
             if (uiGrabTimer <= diff)
@@ -166,12 +166,12 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0)) // Draws all players (and attacking Mobs) to itself.
                     DoCast(target, SPELL_WEB_GRAB);
 
-                uiGrabTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                uiGrabTimer = std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS);
             } else uiGrabTimer -= diff;
 
             if (uiDoorsTimer <= diff)
             {
-                uiDoorsTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+                uiDoorsTimer = std::rand() % (60 * IN_MILLISECONDS) + (30*IN_MILLISECONDS);
             } else uiDoorsTimer -= diff;
 
             DoMeleeAttackIfReady();

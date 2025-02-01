@@ -762,7 +762,7 @@ public:
                                 tempsum->SetHomePosition(DalforsPos[2]);
                                 tempsum->AI()->AttackStart(GetClosestCreatureWithEntry(me, NPC_BLESSED_BANNER, 100));
                             }
-                        if (urand(0, 1) == 0)
+                        if ((std::rand() % 1) == 0)
                         {
                             if (Creature* tempsum = DoSummon(NPC_HIDEOUS_PLAGEBRINGER, Mason1Pos[0]))
                             {
@@ -792,9 +792,9 @@ public:
                         PhaseCount++;
 
                         if (PhaseCount < 8)
-                            events.ScheduleEvent(EVENT_WAVE_SPAWN, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_WAVE_SPAWN, std::rand() % 20000 + 10000);
                         else
-                            events.ScheduleEvent(EVENT_HALOF, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_HALOF, std::rand() % 20000 + 10000);
                     }
                     break;
                 case EVENT_HALOF:

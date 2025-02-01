@@ -248,7 +248,7 @@ class boss_professor_putricide : public CreatureScript
                 events.Reset();
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SLIME_PUDDLE, 10000);
-                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(30000, 35000));
+                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, std::rand() % 35000 + 30000);
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 20000);
 
@@ -412,7 +412,7 @@ class boss_professor_putricide : public CreatureScript
                         me->SetReactState(REACT_PASSIVE);
                         DoZoneInCombat(me);
                         if (IsHeroic())
-                            events.ScheduleEvent(EVENT_FESTERGUT_GOO, urand(13000, 18000), 0, PHASE_FESTERGUT);
+                            events.ScheduleEvent(EVENT_FESTERGUT_GOO, std::rand() % 18000 + 13000, 0, PHASE_FESTERGUT);
                         break;
                     case ACTION_FESTERGUT_GAS:
                         Talk(SAY_FESTERGUT_GASEOUS_BLIGHT);
@@ -448,7 +448,7 @@ class boss_professor_putricide : public CreatureScript
                             while (!list.empty())
                             {
                                 std::list<Creature*>::iterator itr = list.begin();
-                                std::advance(itr, urand(0, list.size()-1));
+                                std::advance(itr, std::rand() % (list.size()-1));
                                 _oozeFloodDummyGUIDs[i++] = (*itr)->GetGUID();
                                 list.erase(itr);
                             }
@@ -495,7 +495,7 @@ class boss_professor_putricide : public CreatureScript
                                 while (half < targetList.size())
                                 {
                                     std::list<Unit*>::iterator itr = targetList.begin();
-                                    advance(itr, urand(0, targetList.size() - 1));
+                                    advance(itr, std::rand() % (targetList.size() - 1));
                                     (*itr)->CastSpell(*itr, SPELL_OOZE_VARIABLE, true);
                                     targetList.erase(itr);
                                 }
@@ -509,8 +509,8 @@ class boss_professor_putricide : public CreatureScript
                         {
                             case PHASE_COMBAT_1:
                                 SetPhase(PHASE_COMBAT_2);
-                                events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(21000, 26000));
-                                events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(35000, 40000));
+                                events.ScheduleEvent(EVENT_MALLEABLE_GOO, std::rand() % 26000 + 21000);
+                                events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, std::rand() % 40000 + 35000);
                                 break;
                             case PHASE_COMBAT_2:
                                 SetPhase(PHASE_COMBAT_3);
@@ -569,7 +569,7 @@ class boss_professor_putricide : public CreatureScript
                             break;
                         case EVENT_FESTERGUT_GOO:
                             me->CastCustomSpell(SPELL_MALLEABLE_GOO_SUMMON, SPELLVALUE_MAX_TARGETS, 1, NULL, true);
-                            events.ScheduleEvent(EVENT_FESTERGUT_GOO, (Is25ManRaid() ? 10000 : 30000) + urand(0, 5000), 0, PHASE_FESTERGUT);
+                            events.ScheduleEvent(EVENT_FESTERGUT_GOO, (Is25ManRaid() ? 10000 : 30000) + std::rand() % 5000, 0, PHASE_FESTERGUT);
                             break;
                         case EVENT_ROTFACE_DIES:
                             Talk(SAY_ROTFACE_DEATH);
@@ -596,7 +596,7 @@ class boss_professor_putricide : public CreatureScript
                         case EVENT_UNSTABLE_EXPERIMENT:
                             Talk(EMOTE_UNSTABLE_EXPERIMENT);
                             DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
-                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000));
+                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, std::rand() % 40000 + 35000);
                             break;
                         case EVENT_TEAR_GAS:
                             me->GetMotionMaster()->MovePoint(POINT_TABLE, tablePos);
@@ -632,12 +632,12 @@ class boss_professor_putricide : public CreatureScript
                                     DoCast(target, SPELL_MALLEABLE_GOO);
                                 }
                             }
-                            events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(25000, 30000));
+                            events.ScheduleEvent(EVENT_MALLEABLE_GOO, std::rand() % 30000 + 25000);
                             break;
                         case EVENT_CHOKING_GAS_BOMB:
                             Talk(EMOTE_CHOKING_GAS_BOMB);
                             DoCast(me, SPELL_CHOKING_GAS_BOMB);
-                            events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(35000, 40000));
+                            events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, std::rand() % 40000 + 35000);
                             break;
                         case EVENT_UNBOUND_PLAGUE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
@@ -1069,7 +1069,7 @@ class spell_putricide_choking_gas_bomb : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-                uint32 skipIndex = urand(0, 2);
+                uint32 skipIndex = std::rand() % 2;
                 for (uint32 i = 0; i < 3; ++i)
                 {
                     if (i == skipIndex)

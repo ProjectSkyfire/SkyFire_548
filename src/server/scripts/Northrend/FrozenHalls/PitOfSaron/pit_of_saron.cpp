@@ -175,7 +175,7 @@ class npc_geist_ambusher : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 5.0f, true))
                         DoCast(target, SPELL_LEAPING_FACE_MAUL);
-                    _leapingFaceMaulCooldown = urand(9000, 14000);
+                    _leapingFaceMaulCooldown = std::rand() % 14000 + 9000;
                 }
                 else
                     _leapingFaceMaulCooldown -= diff;

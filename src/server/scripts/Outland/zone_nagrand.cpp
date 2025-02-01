@@ -269,7 +269,7 @@ public:
             if (m_uiChainLightningTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_CHAIN_LIGHTNING);
-                m_uiChainLightningTimer = urand(7000, 14000);
+                m_uiChainLightningTimer = std::rand() % 14000 + 7000;
             }
             else
                 m_uiChainLightningTimer -= uiDiff;
@@ -288,7 +288,7 @@ public:
             if (m_uiFrostShockTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_FROST_SHOCK);
-                m_uiFrostShockTimer = urand(7500, 15000);
+                m_uiFrostShockTimer = std::rand() % 15000 + 7500;
             }
             else
                 m_uiFrostShockTimer -= uiDiff;
@@ -624,7 +624,7 @@ public:
             if (ChainLightningTimer <= diff)
             {
                 DoCastVictim(SPELL_KUR_CHAIN_LIGHTNING);
-                ChainLightningTimer = urand(7000, 14000);
+                ChainLightningTimer = std::rand() % 14000 + 7000;
             } else ChainLightningTimer -= diff;
 
             if (HealthBelowPct(30))
@@ -639,7 +639,7 @@ public:
             if (FrostShockTimer <= diff)
             {
                 DoCastVictim(SPELL_KUR_FROST_SHOCK);
-                FrostShockTimer = urand(7500, 15000);
+                FrostShockTimer = std::rand() % 15000 + 7500;
             } else FrostShockTimer -= diff;
 
             DoMeleeAttackIfReady();

@@ -67,8 +67,8 @@ public:
         void EnterCombat(Unit* /*attacker*/) OVERRIDE
         {
             events.Reset();
-            events.ScheduleEvent(EVENT_CAST_CLEAVE, urand(3000, 5000));
-            events.ScheduleEvent(EVENT_CAST_STARFALL, urand(8000, 10000));
+            events.ScheduleEvent(EVENT_CAST_CLEAVE, std::rand() % 5000 + 3000);
+            events.ScheduleEvent(EVENT_CAST_STARFALL, std::rand() % 10000 + 8000);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -83,7 +83,7 @@ public:
                 if (me->HasAura(SPELL_OMEN_STARFALL))
                     me->RemoveAurasDueToSpell(SPELL_OMEN_STARFALL);
 
-                events.RescheduleEvent(EVENT_CAST_STARFALL, urand(14000, 16000));
+                events.RescheduleEvent(EVENT_CAST_STARFALL, std::rand() % 16000 + 14000);
             }
         }
 
@@ -98,12 +98,12 @@ public:
             {
                 case EVENT_CAST_CLEAVE:
                     DoCastVictim(SPELL_OMEN_CLEAVE);
-                    events.ScheduleEvent(EVENT_CAST_CLEAVE, urand(8000, 10000));
+                    events.ScheduleEvent(EVENT_CAST_CLEAVE, std::rand() % 10000 + 8000);
                     break;
                 case EVENT_CAST_STARFALL:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_OMEN_STARFALL);
-                    events.ScheduleEvent(EVENT_CAST_STARFALL, urand(14000, 16000));
+                    events.ScheduleEvent(EVENT_CAST_STARFALL, std::rand() % 16000 + 14000);
                     break;
             }
 

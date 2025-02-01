@@ -593,19 +593,19 @@ public:
             if (MangleTimer <= diff)
             {
                 DoCastVictim(SPELL_MANGLE);
-                MangleTimer = urand(5000, 8000);
+                MangleTimer = std::rand() % 8000 + 5000;
             } else MangleTimer -= diff;
 
             if (ShredTimer <= diff)
             {
                 DoCastVictim(SPELL_SHRED);
-                ShredTimer = urand(10000, 15000);
+                ShredTimer = std::rand() % 15000 + 10000;
             } else ShredTimer -= diff;
 
             if (ScreamTimer <= diff)
             {
                 DoCastVictim(SPELL_FRIGHTENED_SCREAM);
-                ScreamTimer = urand(20000, 30000);
+                ScreamTimer = std::rand() % 30000 + 20000;
             } else ScreamTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -683,7 +683,7 @@ public:
 
             if (CycloneTimer <= diff)
             {
-                if (Creature* Cyclone = DoSpawnCreature(CREATURE_CYCLONE, float(urand(0, 9)), float(urand(0, 9)), 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 15000))
+                if (Creature* Cyclone = DoSpawnCreature(CREATURE_CYCLONE, float(std::rand() % 9), float(std::rand() % 9), 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 15000))
                     Cyclone->CastSpell(Cyclone, SPELL_CYCLONE_VISUAL, true);
                 CycloneTimer = 30000;
             } else CycloneTimer -= diff;
@@ -737,7 +737,7 @@ public:
                 Position pos;
                 me->GetRandomNearPosition(pos, 10);
                 me->GetMotionMaster()->MovePoint(0, pos);
-                MoveTimer = urand(5000, 8000);
+                MoveTimer = std::rand() % 8000 + 5000;
             } else MoveTimer -= diff;
         }
     };
@@ -824,7 +824,7 @@ public:
         void Reset() OVERRIDE
         {
             ChaseTimer = 30000;
-            FearTimer = urand(25000, 35000);
+            FearTimer = std::rand() % 35000 + 25000;
             SwipeTimer = 5000;
 
             HoodGUID = 0;
@@ -910,13 +910,13 @@ public:
             if (FearTimer <= diff)
             {
                 DoCastVictim(SPELL_TERRIFYING_HOWL);
-                FearTimer = urand(25000, 35000);
+                FearTimer = std::rand() % 35000 + 25000;
             } else FearTimer -= diff;
 
             if (SwipeTimer <= diff)
             {
                 DoCastVictim(SPELL_WIDE_SWIPE);
-                SwipeTimer = urand(25000, 30000);
+                SwipeTimer = std::rand() % 30000 + 25000;
             } else SwipeTimer -= diff;
         }
     };
@@ -1297,27 +1297,27 @@ public:
                 if (target && !me->HasInArc(M_PI, target))
                 {
                     DoCast(target, SPELL_BACKWARD_LUNGE);
-                    BackwardLungeTimer = urand(15000, 30000);
+                    BackwardLungeTimer = std::rand() % 30000 + 15000;
                 }
             } else BackwardLungeTimer -= diff;
 
             if (DaringTimer <= diff)
             {
                 DoCast(me, SPELL_DARING);
-                DaringTimer = urand(20000, 40000);
+                DaringTimer = std::rand() % 40000 + 20000;
             } else DaringTimer -= diff;
 
             if (DeadlySwatheTimer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_DEADLY_SWATHE);
-                DeadlySwatheTimer = urand(15000, 25000);
+                DeadlySwatheTimer = std::rand() % 25000 + 15000;
             } else DeadlySwatheTimer -= diff;
 
             if (PoisonThrustTimer <= diff)
             {
                 DoCastVictim(SPELL_POISON_THRUST);
-                PoisonThrustTimer = urand(10000, 20000);
+                PoisonThrustTimer = std::rand() % 20000 + 10000;
             } else PoisonThrustTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -1415,31 +1415,31 @@ void boss_julianne::boss_julianneAI::UpdateAI(uint32 diff)
     {
         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
             DoCast(target, SPELL_BLINDING_PASSION);
-        BlindingPassionTimer = urand(30000, 45000);
+        BlindingPassionTimer = std::rand() % 45000 + 30000;
     } else BlindingPassionTimer -= diff;
 
     if (DevotionTimer <= diff)
     {
         DoCast(me, SPELL_DEVOTION);
-        DevotionTimer = urand(15000, 45000);
+        DevotionTimer = std::rand() % 45000 + 15000;
     } else DevotionTimer -= diff;
 
     if (PowerfulAttractionTimer <= diff)
     {
         DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), SPELL_POWERFUL_ATTRACTION);
-        PowerfulAttractionTimer = urand(5000, 30000);
+        PowerfulAttractionTimer = std::rand() % 30000 + 5000;
     } else PowerfulAttractionTimer -= diff;
 
     if (EternalAffectionTimer <= diff)
     {
-        if (urand(0, 1) && SummonedRomulo)
+        if (std::rand() % 1 && SummonedRomulo)
         {
             Creature* Romulo = (Unit::GetCreature((*me), RomuloGUID));
             if (Romulo && Romulo->IsAlive() && !RomuloDead)
                 DoCast(Romulo, SPELL_ETERNAL_AFFECTION);
         } else DoCast(me, SPELL_ETERNAL_AFFECTION);
 
-        EternalAffectionTimer = urand(45000, 60000);
+        EternalAffectionTimer = std::rand() % 60000 + 45000;
     } else EternalAffectionTimer -= diff;
 
     DoMeleeAttackIfReady();

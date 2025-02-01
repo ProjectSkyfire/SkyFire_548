@@ -50,9 +50,9 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_HASTE, urand(15000, 23000));
+            events.ScheduleEvent(EVENT_HASTE, std::rand() % 23000 + 15000);
             events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
-            events.ScheduleEvent(EVENT_WING_BUFFET, urand(25000, 35000));
+            events.ScheduleEvent(EVENT_WING_BUFFET, std::rand() % 35000 + 25000);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_SPELL_REFLECTION, 30000);
 
@@ -106,19 +106,19 @@ public:
                 {
                     case EVENT_HASTE:
                         DoCast(me, SPELL_HASTE);
-                        events.ScheduleEvent(EVENT_HASTE, urand(20000, 25000));
+                        events.ScheduleEvent(EVENT_HASTE, std::rand() % 25000 + 20000);
                         break;
                     case EVENT_MORTAL_WOUND:
                         DoCast(me, SPELL_MORTAL_WOUND);
-                        events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 20000 + 10000);
                         break;
                     case EVENT_WING_BUFFET:
-                            DoCast(me, SPELL_WING_BUFFET);
-                        events.ScheduleEvent(EVENT_WING_BUFFET, urand(20000, 30000));
+                        DoCast(me, SPELL_WING_BUFFET);
+                        events.ScheduleEvent(EVENT_WING_BUFFET, std::rand() % 30000 + 20000);
                         break;
                     case EVENT_SPELL_REFLECTION: // Only in Heroic
                         DoCast(me, SPELL_REFLECT);
-                        events.ScheduleEvent(EVENT_SPELL_REFLECTION, urand(25000, 35000));
+                        events.ScheduleEvent(EVENT_SPELL_REFLECTION, std::rand() % 35000 + 25000);
                         break;
                     default:
                         break;

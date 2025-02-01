@@ -585,7 +585,7 @@ class spell_q12634_despawn_fruit_tosser : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 uint32 spellId = SPELL_BANANAS_FALL_TO_GROUND;
-                switch (urand(0, 3))
+                switch (std::rand() % 3)
                 {
                     case 1: spellId = SPELL_ORANGE_FALLS_TO_GROUND; break;
                     case 2: spellId = SPELL_PAPAYA_FALLS_TO_GROUND; break;
@@ -2001,7 +2001,7 @@ class spell_q12308_escape_from_silverbrook_summon_worgen : public SpellScriptLoa
             void ModDest(SpellEffIndex effIndex)
             {
                 float dist = GetSpellInfo()->Effects[effIndex].CalcRadius(GetCaster());
-                float angle = (urand(0, 1) ? -1 : 1) * (frand(0.75f, 1.0f) * M_PI);
+                float angle = ((std::rand() % 1) ? -1 : 1) * (frand(0.75f, 1.0f) * M_PI);
 
                 Position pos;
                 GetCaster()->GetNearPosition(pos, dist, angle);
@@ -2285,7 +2285,7 @@ public:
         void HandleDummyEffect()
         {
             Unit* caster = GetCaster();
-            caster->SetHealth(caster->CountPctFromMaxHealth(urand(3, 5)*10));
+            caster->SetHealth(caster->CountPctFromMaxHealth((std::rand() % 5 + 3)*10));
         }
 
         void Register() override

@@ -134,10 +134,10 @@ public:
             if (action != ACTION_SET_NORMAL_EVENTS)
                 return;
 
-            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 10) * IN_MILLISECONDS, 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_ARCANE_VOLLEY, urand(10, 25) * IN_MILLISECONDS, 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, urand(35, 50) * IN_MILLISECONDS, 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, urand(15, 30) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, std::rand() % (10 * IN_MILLISECONDS) + (3 * IN_MILLISECONDS), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_ARCANE_VOLLEY, std::rand() % (25 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, std::rand() % (50 * IN_MILLISECONDS) + (35 * IN_MILLISECONDS), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, std::rand() % (30* IN_MILLISECONDS) + (15 * IN_MILLISECONDS), 0, PHASE_NORMAL);
         }
 
         void JustSummoned(Creature* summon) OVERRIDE
@@ -199,21 +199,21 @@ public:
                 {
                     case EVENT_ARCANE_BARRAGE:
                         DoCastVictim(SPELL_ARCANE_BARRAGE);
-                        events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 10) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                        events.ScheduleEvent(EVENT_ARCANE_BARRAGE, std::rand() % (10 * IN_MILLISECONDS) + (3 * IN_MILLISECONDS), 0, PHASE_NORMAL);
                         break;
                     case EVENT_ARCANE_VOLLEY:
                         DoCastAOE(SPELL_ARCANE_VOLLEY);
-                        events.ScheduleEvent(EVENT_ARCANE_VOLLEY, urand(10, 25) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                        events.ScheduleEvent(EVENT_ARCANE_VOLLEY, std::rand() % (25 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS), 0, PHASE_NORMAL);
                         break;
                     case EVENT_ENRAGED_ASSAULT:
                         Talk(SAY_ENRAGE);
                         DoCast(SPELL_ENRAGED_ASSAULT);
-                        events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, urand(35, 50) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                        events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, std::rand() % (50 * IN_MILLISECONDS) + (35 * IN_MILLISECONDS), 0, PHASE_NORMAL);
                         break;
                     case EVENT_SUMMON_LEY_WHELP:
                         for (uint8 i = 0; i < 3; i++)
                             DoCast(SPELL_SUMMON_LEY_WHELP);
-                        events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, urand(15, 30) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                        events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, std::rand() % (30 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS), 0, PHASE_NORMAL);
                         break;
                 }
             }

@@ -555,7 +555,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
                             if (me->GetMap()->Is25ManRaid())
                                 me->SummonCreatureGroup(CREATURE_GROUP_PORTALS_25);
 
-                            uint8 illusion = urand(CHAMBER_ILLUSION, STORMWIND_ILLUSION);
+                            uint8 illusion = std::rand() % STORMWIND_ILLUSION + CHAMBER_ILLUSION;
                             instance->SetData(DATA_ILLUSION, illusion);
 
                             if (Creature* brain = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BRAIN_OF_YOGG_SARON)))
@@ -724,8 +724,8 @@ class boss_sara : public CreatureScript
             {
                 Talk(SAY_SARA_AGGRO);
                 _events.ScheduleEvent(EVENT_SARAS_FERVOR, 5000, 0, PHASE_ONE);
-                _events.ScheduleEvent(EVENT_SARAS_BLESSING, urand(10000, 30000), 0, PHASE_ONE);
-                _events.ScheduleEvent(EVENT_SARAS_ANGER, urand(15000, 25000), 0, PHASE_ONE);
+                _events.ScheduleEvent(EVENT_SARAS_BLESSING, std::rand() % 30000 + 10000, 0, PHASE_ONE);
+                _events.ScheduleEvent(EVENT_SARAS_ANGER, std::rand() % 25000 + 15000, 0, PHASE_ONE);
             }
 
             void Reset() OVERRIDE
@@ -760,11 +760,11 @@ class boss_sara : public CreatureScript
                             break;
                         case EVENT_SARAS_ANGER:
                             me->CastCustomSpell(SPELL_SARAS_ANGER_TARGET_SELECTOR, SPELLVALUE_MAX_TARGETS, 1);
-                            _events.ScheduleEvent(EVENT_SARAS_ANGER, urand(6000, 8000), 0, PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_SARAS_ANGER, std::rand() % 8000 + 6000, 0, PHASE_ONE);
                             break;
                         case EVENT_SARAS_BLESSING:
                             me->CastCustomSpell(SPELL_SARAS_BLESSING_TARGET_SELECTOR, SPELLVALUE_MAX_TARGETS, 1);
-                            _events.ScheduleEvent(EVENT_SARAS_BLESSING, urand(6000, 30000), 0, PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_SARAS_BLESSING, std::rand() % 30000 + 6000, 0, PHASE_ONE);
                             break;
                         case EVENT_TRANSFORM_1:
                             Talk(SAY_SARA_TRANSFORM_2);
@@ -798,7 +798,7 @@ class boss_sara : public CreatureScript
                             break;
                         case EVENT_MALADY_OF_THE_MIND:
                             me->CastCustomSpell(SPELL_MALADY_OF_THE_MIND, SPELLVALUE_MAX_TARGETS, 1);
-                            _events.ScheduleEvent(EVENT_MALADY_OF_THE_MIND, urand(18000, 25000), 0, PHASE_TWO);
+                            _events.ScheduleEvent(EVENT_MALADY_OF_THE_MIND, std::rand() % 25000 + 18000, 0, PHASE_TWO);
                             break;
                         case EVENT_PSYCHOSIS:
                             me->CastCustomSpell(SPELL_PSYCHOSIS, SPELLVALUE_MAX_TARGETS, 1);
@@ -806,7 +806,7 @@ class boss_sara : public CreatureScript
                             break;
                         case EVENT_BRAIN_LINK:
                             me->CastCustomSpell(SPELL_BRAIN_LINK, SPELLVALUE_MAX_TARGETS, 2);
-                            _events.ScheduleEvent(EVENT_BRAIN_LINK, urand(23000, 26000), 0, PHASE_TWO);
+                            _events.ScheduleEvent(EVENT_BRAIN_LINK, std::rand() % 26000 + 23000, 0, PHASE_TWO);
                             break;
                         default:
                             break;
@@ -956,7 +956,7 @@ class boss_yogg_saron : public CreatureScript
                             DoCastAOE(SPELL_DEAFENING_ROAR);
                             Talk(SAY_YOGG_SARON_DEAFENING_ROAR);
                             Talk(EMOTE_YOGG_SARON_DEAFENING_ROAR);
-                            _events.ScheduleEvent(EVENT_DEAFENING_ROAR, urand(20000, 25000), 0, PHASE_THREE);    // timer guessed
+                            _events.ScheduleEvent(EVENT_DEAFENING_ROAR, std::rand() % 25000 + 20000, 0, PHASE_THREE);    // timer guessed
                             break;
                         default:
                             break;
@@ -973,7 +973,7 @@ class boss_yogg_saron : public CreatureScript
                         _events.ScheduleEvent(EVENT_SHADOW_BEACON, 45000, 0, PHASE_THREE);
                         _events.ScheduleEvent(EVENT_LUNATIC_GAZE, 12000, 0, PHASE_THREE);
                         if (me->GetMap()->Is25ManRaid() && _instance->GetData(DATA_KEEPERS_COUNT) < 4)
-                            _events.ScheduleEvent(EVENT_DEAFENING_ROAR, urand(20000, 25000), 0, PHASE_THREE);    // timer guessed
+                            _events.ScheduleEvent(EVENT_DEAFENING_ROAR, std::rand() % 25000 + 20000, 0, PHASE_THREE);    // timer guessed
                         Talk(SAY_YOGG_SARON_PHASE_3);
                         DoCast(me, SPELL_PHASE_3_TRANSFORM);
                         me->RemoveAurasDueToSpell(SPELL_SHADOWY_BARRIER_YOGG);
@@ -1155,7 +1155,7 @@ class npc_guardian_of_yogg_saron : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                _events.ScheduleEvent(EVENT_DARK_VOLLEY, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_DARK_VOLLEY, std::rand() % 15000 + 10000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1174,7 +1174,7 @@ class npc_guardian_of_yogg_saron : public CreatureScript
                     {
                         case EVENT_DARK_VOLLEY:
                             DoCastAOE(SPELL_DARK_VOLLEY);
-                            _events.ScheduleEvent(EVENT_DARK_VOLLEY, urand(10000, 15000));
+                            _events.ScheduleEvent(EVENT_DARK_VOLLEY, std::rand() % 15000 + 10000);
                             break;
                         default:
                             break;
@@ -1327,7 +1327,7 @@ class npc_crusher_tentacle : public CreatureScript
                 DoCast(me, SPELL_FOCUSED_ANGER);
                 DoCastAOE(SPELL_ERUPT);
 
-                _events.ScheduleEvent(EVENT_DIMINISH_POWER, urand(6000, 8000));
+                _events.ScheduleEvent(EVENT_DIMINISH_POWER, std::rand() % 8000 + 6000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1348,7 +1348,7 @@ class npc_crusher_tentacle : public CreatureScript
                     {
                         case EVENT_DIMINISH_POWER:
                             DoCast(SPELL_DIMINISH_POWER);
-                            _events.ScheduleEvent(EVENT_DIMINISH_POWER, urand(20000, 30000));
+                            _events.ScheduleEvent(EVENT_DIMINISH_POWER, std::rand() % 30000 + 20000);
                             break;
                         default:
                             break;
@@ -1444,7 +1444,7 @@ class npc_immortal_guardian : public CreatureScript
             {
                 DoCast(me, SPELL_EMPOWERED);
                 DoCast(me, SPELL_RECENTLY_SPAWNED);
-                _events.ScheduleEvent(EVENT_DRAIN_LIFE, urand(3000, 13000));
+                _events.ScheduleEvent(EVENT_DRAIN_LIFE, std::rand() % 13000 + 3000);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
@@ -1469,7 +1469,7 @@ class npc_immortal_guardian : public CreatureScript
                     {
                         case EVENT_DRAIN_LIFE:
                             DoCast(SPELL_DRAIN_LIFE);
-                            _events.ScheduleEvent(EVENT_DRAIN_LIFE, urand(20000, 30000));
+                            _events.ScheduleEvent(EVENT_DRAIN_LIFE, std::rand() % 30000 + 20000);
                             break;
                         default:
                             break;
@@ -1613,7 +1613,7 @@ class npc_yogg_saron_keeper : public CreatureScript
                     {
                         case EVENT_DESTABILIZATION_MATRIX:
                             me->CastCustomSpell(SPELL_DESTABILIZATION_MATRIX, SPELLVALUE_MAX_TARGETS, 1);
-                            _events.ScheduleEvent(EVENT_DESTABILIZATION_MATRIX, urand(15000, 25000), 0, PHASE_TWO);
+                            _events.ScheduleEvent(EVENT_DESTABILIZATION_MATRIX, std::rand()% 25000 + 15000, 0, PHASE_TWO);
                             break;
                         case EVENT_HODIRS_PROTECTIVE_GAZE:
                             DoCast(SPELL_HODIRS_PROTECTIVE_GAZE);
@@ -1629,7 +1629,7 @@ class npc_yogg_saron_keeper : public CreatureScript
                     // setting the phases is only for Thorim and Mimiron
                     case ACTION_PHASE_TWO:
                         _events.SetPhase(PHASE_TWO);
-                        _events.ScheduleEvent(EVENT_DESTABILIZATION_MATRIX, urand(5000, 15000), 0, PHASE_TWO);
+                        _events.ScheduleEvent(EVENT_DESTABILIZATION_MATRIX, std::rand() % 15000 + 5000, 0, PHASE_TWO);
                         break;
                     case ACTION_PHASE_THREE:
                         _events.SetPhase(PHASE_THREE);
@@ -1649,7 +1649,7 @@ class npc_yogg_saron_keeper : public CreatureScript
                     }
                     case ACTION_FLASH_FREEZE:
                         DoCast(SPELL_FLASH_FREEZE_VISUAL);
-                        _events.ScheduleEvent(EVENT_HODIRS_PROTECTIVE_GAZE, urand(25000, 30000));
+                        _events.ScheduleEvent(EVENT_HODIRS_PROTECTIVE_GAZE, std::rand() % 30000 + 25000);
                         break;
                 }
             }

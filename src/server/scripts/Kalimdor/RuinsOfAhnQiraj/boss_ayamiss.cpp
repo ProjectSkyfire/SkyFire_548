@@ -120,7 +120,7 @@ class boss_ayamiss : public CreatureScript
             {
                 BossAI::EnterCombat(attacker);
 
-                events.ScheduleEvent(EVENT_STINGER_SPRAY, urand(20000, 30000));
+                events.ScheduleEvent(EVENT_STINGER_SPRAY, std::rand() % 30000 + 20000);
                 events.ScheduleEvent(EVENT_POISON_STINGER, 5000);
                 events.ScheduleEvent(EVENT_SUMMON_SWARMER, 5000);
                 events.ScheduleEvent(EVENT_SWARMER_ATTACK, 60000);
@@ -147,8 +147,8 @@ class boss_ayamiss : public CreatureScript
                     me->GetVictim()->GetPosition(&VictimPos);
                     me->GetMotionMaster()->MovePoint(POINT_GROUND, VictimPos);
                     DoResetThreat();
-                    events.ScheduleEvent(EVENT_LASH, urand(5000, 8000));
-                    events.ScheduleEvent(EVENT_TRASH, urand(3000, 6000));
+                    events.ScheduleEvent(EVENT_LASH, std::rand() % 8000 + 5000);
+                    events.ScheduleEvent(EVENT_TRASH, std::rand() % 6000 + 3000);
                     events.CancelEvent(EVENT_POISON_STINGER);
                 }
                 else
@@ -169,18 +169,18 @@ class boss_ayamiss : public CreatureScript
                     {
                         case EVENT_STINGER_SPRAY:
                             DoCast(me, SPELL_STINGER_SPRAY);
-                            events.ScheduleEvent(EVENT_STINGER_SPRAY, urand(15000, 20000));
+                            events.ScheduleEvent(EVENT_STINGER_SPRAY, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_POISON_STINGER:
                             DoCastVictim(SPELL_POISON_STINGER);
-                            events.ScheduleEvent(EVENT_POISON_STINGER, urand(2000, 3000));
+                            events.ScheduleEvent(EVENT_POISON_STINGER, std::rand() % 3000 + 2000);
                             break;
                         case EVENT_PARALYZE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             {
                                 DoCast(target, SPELL_PARALYZE);
                                 instance->SetData64(DATA_PARALYZED, target->GetGUID());
-                                uint8 Index = urand(0, 1);
+                                uint8 Index = std::rand() % 1;
                                 me->SummonCreature(NPC_LARVA, LarvaPos[Index], TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
                             }
                             events.ScheduleEvent(EVENT_PARALYZE, 15000);
@@ -202,11 +202,11 @@ class boss_ayamiss : public CreatureScript
                             break;
                         case EVENT_TRASH:
                             DoCastVictim(SPELL_TRASH);
-                            events.ScheduleEvent(EVENT_TRASH, urand(5000, 7000));
+                            events.ScheduleEvent(EVENT_TRASH, std::rand() % 7000 + 5000);
                             break;
                         case EVENT_LASH:
                             DoCastVictim(SPELL_LASH);
-                            events.ScheduleEvent(EVENT_LASH, urand(8000, 15000));
+                            events.ScheduleEvent(EVENT_LASH, std::rand() % 15000 + 8000);
                             break;
                     }
                 }

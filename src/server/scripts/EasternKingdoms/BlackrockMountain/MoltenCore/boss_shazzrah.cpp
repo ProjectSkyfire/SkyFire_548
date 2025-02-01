@@ -69,12 +69,12 @@ class boss_shazzrah : public CreatureScript
                     {
                         case EVENT_ARCANE_EXPLOSION:
                             DoCastVictim(SPELL_ARCANE_EXPLOSION);
-                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, urand(5000, 9000));
+                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, std::rand() % 9000 + 5000);
                             break;
                         case EVENT_SHAZZRAH_CURSE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -EVENT_SHAZZRAH_CURSE))
                                 DoCast(target, SPELL_SHAZZRAH_CURSE);
-                            events.ScheduleEvent(EVENT_SHAZZRAH_CURSE, urand(25000, 30000));
+                            events.ScheduleEvent(EVENT_SHAZZRAH_CURSE, std::rand() % 30000 + 25000);
                             break;
                         case EVENT_MAGIC_GROUNDING:
                             DoCast(me, SPELL_MAGIC_GROUNDING);
@@ -82,7 +82,7 @@ class boss_shazzrah : public CreatureScript
                             break;
                         case EVENT_COUNTERSPELL:
                             DoCastVictim(SPELL_COUNTERSPELL);
-                            events.ScheduleEvent(EVENT_COUNTERSPELL, urand(16000, 20000));
+                            events.ScheduleEvent(EVENT_COUNTERSPELL, std::rand() % 20000 + 16000);
                             break;
                         case EVENT_BLINK:
                             // Teleporting him to a random player and casting Arcane Explosion after that.

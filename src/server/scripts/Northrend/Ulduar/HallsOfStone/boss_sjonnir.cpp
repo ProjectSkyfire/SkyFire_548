@@ -83,10 +83,10 @@ class boss_sjonnir : public CreatureScript
                 _EnterCombat();
                 Talk(SAY_AGGRO);
 
-                events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(3000, 8000));
-                events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_STATIC_CHARGE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_LIGHTNING_RING, urand(30000, 35000));
+                events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, std::rand() % 8000 + 3000);
+                events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, std::rand() % 25000 + 20000);
+                events.ScheduleEvent(EVENT_STATIC_CHARGE, std::rand() % 25000 + 20000);
+                events.ScheduleEvent(EVENT_LIGHTNING_RING, std::rand() % 35000 + 30000);
                 events.ScheduleEvent(EVENT_SUMMON, 5000);
                 events.ScheduleEvent(EVENT_FRENZY, 300000);
             }
@@ -142,22 +142,22 @@ class boss_sjonnir : public CreatureScript
                         case EVENT_CHAIN_LIGHTNING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                 DoCast(target, SPELL_CHAIN_LIGHTING);
-                            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_LIGHTNING_SHIELD:
                             DoCast(me, SPELL_LIGHTING_SHIELD);
                             break;
                         case EVENT_STATIC_CHARGE:
                             DoCastVictim(SPELL_STATIC_CHARGE);
-                            events.ScheduleEvent(EVENT_STATIC_CHARGE, urand(20000, 25000));
+                            events.ScheduleEvent(EVENT_STATIC_CHARGE, std::rand() % 25000 + 20000);
                             break;
                         case EVENT_LIGHTNING_RING:
                             DoCast(me, SPELL_LIGHTING_RING);
-                            events.ScheduleEvent(EVENT_LIGHTNING_RING, urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_LIGHTNING_RING, std::rand() % 35000 + 30000);
                             break;
                         case EVENT_SUMMON:
                         {
-                            uint8 summonPipe = urand(0, 1);
+                            uint8 summonPipe = std::rand() % 1;
                             if (HealthAbovePct(75))
                                 me->SummonCreature(NPC_FORGED_IRON_DWARF, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                             else if (HealthAbovePct(50))

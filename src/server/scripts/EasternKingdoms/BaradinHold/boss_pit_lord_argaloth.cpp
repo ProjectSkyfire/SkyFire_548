@@ -41,8 +41,8 @@ class boss_pit_lord_argaloth : public CreatureScript
             {
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_METEOR_SLASH, urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_METEOR_SLASH, std::rand() % (20 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, std::rand() % (25 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_BERSERK, 5 * MINUTE * IN_MILLISECONDS);
             }
 
@@ -84,11 +84,11 @@ class boss_pit_lord_argaloth : public CreatureScript
                     {
                         case EVENT_METEOR_SLASH:
                             DoCastAOE(SPELL_METEOR_SLASH);
-                            events.ScheduleEvent(EVENT_METEOR_SLASH, urand(15 * IN_MILLISECONDS, 20 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_METEOR_SLASH, std::rand() % (20 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS));
                             break;
                         case EVENT_CONSUMING_DARKNESS:
                             DoCastAOE(SPELL_CONSUMING_DARKNESS, true);
-                            events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, std::rand() % (25 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS));
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK, true);

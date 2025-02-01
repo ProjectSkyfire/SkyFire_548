@@ -91,7 +91,7 @@ class boss_taldaram : public CreatureScript
                 Talk(SAY_AGGRO);
                 events.SetPhase(PHASE_NORMAL);
                 events.ScheduleEvent(EVENT_BLOODTHIRST, 10000);
-                events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
+                events.ScheduleEvent(EVENT_VANISH, std::rand() % 35000 + 25000);
                 events.ScheduleEvent(EVENT_FLAME_SPHERE, 5000);
             }
 
@@ -152,7 +152,7 @@ class boss_taldaram : public CreatureScript
                                 if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                     _embraceTargetGUID = embraceTarget->GetGUID();
                             }
-                            events.ScheduleEvent(EVENT_VANISH, urand(25000, 35000));
+                            events.ScheduleEvent(EVENT_VANISH, std::rand() % 35000 + 25000);
                             break;
                         }
                         case EVENT_CASTING_FLAME_SPHERES:
