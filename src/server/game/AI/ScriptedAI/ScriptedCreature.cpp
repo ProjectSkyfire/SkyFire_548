@@ -254,7 +254,7 @@ SpellInfo const* ScriptedAI::SelectSpell(Unit* target, uint32 school, uint32 mec
     if (!spellCount)
         return NULL;
 
-    return apSpell[std::rand() % (spellCount - 1)];
+    return apSpell[std::rand() % spellCount];
 }
 
 void ScriptedAI::DoResetThreat()

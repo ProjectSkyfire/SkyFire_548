@@ -230,7 +230,7 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, WorldObject 
 
     uint32 pos = 0;
     if (isEqualChanced || offset < 0)
-        pos = std::rand() % (count - 1);
+        pos = std::rand() % count;
     else if (offset >= 0)
         pos = offset;
 

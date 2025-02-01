@@ -5243,7 +5243,7 @@ void Spell::TakePower()
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
     else
-        m_caster->ModifyPower(powerType, -(std::rand() % m_powerCost / 4));
+        m_caster->ModifyPower(powerType, -(std::rand() % m_powerCost) / 4);
 }
 
 SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
