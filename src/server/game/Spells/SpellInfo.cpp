@@ -493,8 +493,8 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             {
                 // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
                 int32 randvalue = (randomPoints >= 1)
-                    ? irand(1, randomPoints)
-                    : irand(randomPoints, 1);
+                    ? std::rand() % randomPoints + 1
+                    : std::rand() % 1 + randomPoints;
 
                 basePoints += randvalue;
                 break;

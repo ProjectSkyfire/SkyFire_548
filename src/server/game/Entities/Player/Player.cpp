@@ -6299,7 +6299,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     if (!max || !value || value >= max)
         return false;
 
-    if (irand(1, 1000) > chance)
+    if ((std::rand() % 1000 + 1) > chance)
     {
         SF_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro Chance=%3.1f%% missed", chance / 10.0f);
         return false;

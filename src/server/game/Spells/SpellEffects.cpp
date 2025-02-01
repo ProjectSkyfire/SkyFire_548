@@ -493,7 +493,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (uint32 combo = player->GetComboPoints())
                         {
                             float ap = m_caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK);
-                            damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
+                            damage += std::rand() % int32(ap * combo * 0.07f) + int32(ap * combo * 0.03f);
 
                             // Eviscerate and Envenom Bonus Damage (item set effect)
                             if (m_caster->HasAura(37169))
@@ -986,7 +986,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
         // Dimensional Ripper - Everlook
         case 23442:
         {
-            int32 r = irand(0, 119);
+            int32 r = std::rand() % 119;
             if (r >= 70)                                  // 7/12 success
             {
                 if (r < 100)                              // 4/12 evil twin

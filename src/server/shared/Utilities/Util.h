@@ -61,13 +61,6 @@ std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hou
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
-/* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
-int32 irand(int32 min, int32 max);
-
-/* Return a random number in the range min..max (inclusive). For reliable results, the difference
-* between max and min should be less than RAND32_MAX. */
-//uint32 urand(uint32 min, uint32 max);
-
 /* Return a random number in the range 0 .. RAND32_MAX. */
 int32 rand32();
 
@@ -95,7 +88,7 @@ inline bool roll_chance_f(float chance)
 /* Return true if a random roll fits in the specified chance (range 0-100). */
 inline bool roll_chance_i(int chance)
 {
-    return chance > irand(0, 99);
+    return chance > std::rand() % 99;
 }
 
 inline void ApplyPercentModFloatVar(float& var, float val, bool apply)

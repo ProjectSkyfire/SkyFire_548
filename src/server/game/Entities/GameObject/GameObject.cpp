@@ -1379,7 +1379,7 @@ void GameObject::Use(Unit* user)
                     else
                         chance = 100;
 
-                    int32 roll = irand(1, 100);
+                    int32 roll = std::rand() % 100 + 1;
 
                     SF_LOG_DEBUG("misc", "Fishing check (skill: %i zone min skill: %i chance %i roll: %i", skill, zone_skill, chance, roll);
 

@@ -13,19 +13,6 @@
 typedef ACE_TSS<CRandomSFMT> CRandomSFMTTSS;
 static CRandomSFMTTSS sfmtRand;
 
-int32 irand(int32 min, int32 max)
-{
-    ASSERT(max >= min);
-    return int32(sfmtRand->IRandom(min, max));
-}
-
-/*
-uint32 urand(uint32 min, uint32 max)
-{
-    ASSERT(max >= min);
-    return sfmtRand->URandom(min, max);
-}*/
-
 float frand(float min, float max)
 {
     ASSERT(max >= min);

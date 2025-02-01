@@ -1671,7 +1671,7 @@ class spell_gen_gadgetzan_transporter_backfire : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                int32 r = irand(0, 119);
+                int32 r = std::rand() % 119;
                 if (r < 20)                           // Transporter Malfunction - 1/6 polymorph
                     caster->CastSpell(caster, SPELL_TRANSPORTER_MALFUNCTION_POLYMORPH, true);
                 else if (r < 100)                     // Evil Twin               - 4/6 evil twin

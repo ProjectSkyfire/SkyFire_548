@@ -547,8 +547,8 @@ class boss_razorscale : public CreatureScript
                 uint8 random = std::rand() % 4 + 2;
                 for (uint8 n = 0; n < random; n++)
                 {
-                    float x = float(irand(540, 640));       // Safe range is between 500 and 650
-                    float y = float(irand(-230, -195));     // Safe range is between -235 and -145
+                    float x = float(std::rand() % 640 + 540); // Safe range is between 500 and 650
+                    float y = float(std::rand() % -195 + -230); // Safe range is between -235 and -145
                     float z = GROUND_Z;                     // Ground level
                     me->SummonCreature(MOLE_MACHINE_TRIGGER, x, y, z, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 15000);
                 }
