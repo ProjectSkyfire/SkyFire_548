@@ -1613,7 +1613,7 @@ void Spell::SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTarg
     }
 }
 
-float tangent(float x)
+static float tangent(float x)
 {
     x = tan(x);
     //if (x < std::numeric_limits<float>::max() && x > -std::numeric_limits<float>::max()) return x;
@@ -1846,7 +1846,7 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
     }
 }
 
-uint32 Spell::GetSearcherTypeMask(SpellTargetObjectTypes objType, ConditionList* condList)
+uint32 Spell::GetSearcherTypeMask(SpellTargetObjectTypes objType, ConditionList* condList) const
 {
     // this function selects which containers need to be searched for spell target
     uint32 retMask = GRID_MAP_TYPE_MASK_ALL;
@@ -4967,7 +4967,7 @@ void Spell::SendInterrupted(uint8 result)
 
     m_caster->SendMessageToSet(&data, true);
 
-    data.Initialize(SMSG_SPELL_FAILED_OTHER, (8 + 4 + 1));
+    data.Initialize(SMSG_SPELL_FAILED_OTHER, 8 + 1 + 4 + 1);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[5]);
@@ -7696,7 +7696,7 @@ void Spell::InitEffectExecuteData(uint8 effIndex)
     }
 }
 
-void Spell::CheckEffectExecuteData()
+void Spell::CheckEffectExecuteData() const
 {
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         ASSERT(!m_effectExecuteData[i]);

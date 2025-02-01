@@ -220,7 +220,7 @@ void BlackMarketMgr::CreateAuctions(uint32 number, SQLTransaction& trans)
         if (templateList.empty())
             continue;
 
-        BlackMarketAuctionTemplate* selTemplate = GetTemplate(templateList[std::rand() % (templateList.size() - 1)]);
+        BlackMarketAuctionTemplate* selTemplate = GetTemplate(templateList[std::rand() % templateList.size()]);
 
         if (!selTemplate)
             continue;

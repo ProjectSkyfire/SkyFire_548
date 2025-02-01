@@ -84,7 +84,7 @@ uint32 CreatureTemplate::GetRandomValidModelId() const
     if (Modelid3) modelIDs[c++] = Modelid3;
     if (Modelid4) modelIDs[c++] = Modelid4;
 
-    return ((c > 0) ? modelIDs[std::rand() % (c - 1)] : 0);
+    return ((c > 0) ? modelIDs[std::rand() % c] : 0);
 }
 
 uint32 CreatureTemplate::GetFirstValidModelId() const

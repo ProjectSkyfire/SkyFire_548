@@ -387,7 +387,7 @@ public:
 
     void SelectEffectTypeImplicitTargets(uint8 effIndex);
 
-    uint32 GetSearcherTypeMask(SpellTargetObjectTypes objType, ConditionList* condList);
+    uint32 GetSearcherTypeMask(SpellTargetObjectTypes objType, ConditionList* condList) const;
     template<class SEARCHER> void SearchTargets(SEARCHER& searcher, uint32 containerMask, Unit* referer, Position const* pos, float radius);
 
     WorldObject* SearchNearbyTarget(float range, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList = NULL);
@@ -647,7 +647,7 @@ protected:
 
     // spell execution log
     void InitEffectExecuteData(uint8 effIndex);
-    void CheckEffectExecuteData();
+    void CheckEffectExecuteData() const;
 
     // Scripting system
     void LoadScripts();

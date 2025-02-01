@@ -1045,7 +1045,7 @@ EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry, int8& id)
     if (id == -1) // select a random element
     {
         EquipmentInfoContainerInternal::const_iterator ritr = itr->second.begin();
-        std::advance(ritr, std::rand() % (itr->second.size() - 1));
+        std::advance(ritr, std::rand() % itr->second.size());
         id = std::distance(itr->second.begin(), ritr) + 1;
         return &ritr->second;
     }
@@ -6507,7 +6507,7 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
             return cinfo->Name;
     }
 
-    return *(list0.begin() + std::rand() % (list0.size() - 1)) + *(list1.begin() + std::rand() % (list1.size() - 1));
+    return *(list0.begin() + std::rand() % list0.size()) + *(list1.begin() + std::rand() % list1.size());
 }
 
 uint32 ObjectMgr::GeneratePetNumber()
@@ -9236,7 +9236,7 @@ uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
         if (mapCitr->first == speciesId)
         {
             BattleBetBreedSet::iterator setItr(mapCitr->second.begin());
-            std::advance(setItr, std::rand() % (mapCitr->second.size() - 1));
+            std::advance(setItr, std::rand() % mapCitr->second.size());
 
             return *setItr;
         }
@@ -9252,7 +9252,7 @@ uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const
         if (mapCitr->first == speciesId)
         {
             BattlePetQualitySet::iterator setItr(mapCitr->second.begin());
-            std::advance(setItr, std::rand() % (mapCitr->second.size() - 1));
+            std::advance(setItr, std::rand() % mapCitr->second.size());
 
             return *setItr;
         }

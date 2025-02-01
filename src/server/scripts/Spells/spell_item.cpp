@@ -392,7 +392,7 @@ class spell_item_flask_of_the_north : public SpellScriptLoader
                         break;
                 }
 
-                caster->CastSpell(caster, possibleSpells[std::rand() % (possibleSpells.size() - 1)], true, NULL);
+                caster->CastSpell(caster, possibleSpells[std::rand() % possibleSpells.size()], true, NULL);
             }
 
             void Register() OVERRIDE

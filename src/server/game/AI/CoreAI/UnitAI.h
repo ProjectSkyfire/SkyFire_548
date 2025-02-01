@@ -168,7 +168,7 @@ public:
             case SELECT_TARGET_RANDOM:
             {
                 std::list<Unit*>::iterator itr = targetList.begin();
-                std::advance(itr, std::rand() % (targetList.size() - 1) + position);
+                std::advance(itr, (std::rand() % targetList.size()) + position);
                 return *itr;
             }
             default:

@@ -2296,7 +2296,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     {
         // Random select buff for dispel
         DispelChargesList::iterator itr = dispel_list.begin();
-        std::advance(itr, std::rand() % (dispel_list.size() - 1));
+        std::advance(itr, std::rand() % dispel_list.size());
 
         int32 chance = itr->first->CalcDispelChance(unitTarget, !unitTarget->IsFriendlyTo(m_caster));
         // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
@@ -5278,7 +5278,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
     {
         // Random select buff for dispel
         DispelChargesList::iterator itr = steal_list.begin();
-        std::advance(itr, std::rand() % (steal_list.size() - 1));
+        std::advance(itr, std::rand() % steal_list.size());
 
         int32 chance = itr->first->CalcDispelChance(unitTarget, !unitTarget->IsFriendlyTo(m_caster));
         // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
