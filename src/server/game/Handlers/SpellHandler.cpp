@@ -5,8 +5,6 @@
 
 #include "Common.h"
 #include "CreatureAI.h"
-#include "DBCStores.h"
-#include "DBCStores.h"
 #include "GameObjectAI.h"
 #include "GuildMgr.h"
 #include "Log.h"
