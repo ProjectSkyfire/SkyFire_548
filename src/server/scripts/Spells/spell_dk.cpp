@@ -17,7 +17,7 @@
 enum DeathKnightSpells
 {
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT = 51052,
-    SPELL_DK_BLOOD_BOIL_TRIGGERED = 65658,
+
     SPELL_DK_BLOOD_GORGED_HEAL = 50454,
     SPELL_DK_BLOOD_PRESENCE = 48263,
     SPELL_DK_BLOOD_SHIELD_MASTERY = 77513,
@@ -391,53 +391,6 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_dk_anti_magic_zone_AuraScript();
-    }
-};
-
-// 48721 - Blood Boil
-class spell_dk_blood_boil : public SpellScriptLoader
-{
-public:
-    spell_dk_blood_boil() : SpellScriptLoader("spell_dk_blood_boil") { }
-
-    class spell_dk_blood_boil_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_dk_blood_boil_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_BOIL_TRIGGERED))
-                return false;
-            return true;
-        }
-
-        bool Load() OVERRIDE
-        {
-            _executed = false;
-            return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DEATH_KNIGHT;
-        }
-
-        void HandleAfterHit()
-        {
-            if (_executed || !GetHitUnit())
-                return;
-
-            _executed = true;
-            GetCaster()->CastSpell(GetCaster(), SPELL_DK_BLOOD_BOIL_TRIGGERED, true);
-        }
-
-        void Register() OVERRIDE
-        {
-            AfterHit += SpellHitFn(spell_dk_blood_boil_SpellScript::HandleAfterHit);
-        }
-
-    private:
-        bool _executed = false;
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_dk_blood_boil_SpellScript();
     }
 };
 
@@ -1083,7 +1036,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_anti_magic_shell_raid();
     new spell_dk_anti_magic_shell_self();
     new spell_dk_anti_magic_zone();
-    new spell_dk_blood_boil();
     new spell_dk_blood_gorged();
     new spell_dk_death_coil();
     new spell_dk_death_gate();
