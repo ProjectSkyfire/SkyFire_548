@@ -3805,7 +3805,7 @@ void AuraEffect::HandleAuraModIncreaseMaxPowerFlat(AuraApplication const* aurApp
     //if (int32(powerType) != GetMiscValue())
     //    return;
 
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + UnitMods(powerType));
 
     target->HandleStatModifier(unitMod, TOTAL_VALUE, float(GetAmount()), apply);
 }
@@ -3825,7 +3825,7 @@ void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurAp
     //if (int32(powerType) != GetMiscValue())
     //    return;
 
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + UnitMods(powerType));
     float amount = float(GetAmount());
 
     if (apply)
