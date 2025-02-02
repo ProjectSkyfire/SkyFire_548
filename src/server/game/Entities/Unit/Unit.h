@@ -1562,11 +1562,11 @@ public:
 
     float GetStat(Stats stat) const
     {
-        return float(GetUInt32Value(UNIT_FIELD_STATS + stat));
+        return float(GetUInt32Value(UNIT_FIELD_STATS + EUnitFields(stat)));
     }
     void SetStat(Stats stat, int32 val)
     {
-        SetStatInt32Value(UNIT_FIELD_STATS + stat, val);
+        SetStatInt32Value(UNIT_FIELD_STATS + EUnitFields(stat), val);
     }
     uint32 GetArmor() const
     {
@@ -1579,12 +1579,12 @@ public:
 
     uint32 GetResistance(SpellSchools school) const
     {
-        return GetUInt32Value(UNIT_FIELD_RESISTANCES + school);
+        return GetUInt32Value(UNIT_FIELD_RESISTANCES + EUnitFields(school));
     }
     uint32 GetResistance(SpellSchoolMask mask) const;
     void SetResistance(SpellSchools school, int32 val)
     {
-        SetStatInt32Value(UNIT_FIELD_RESISTANCES + school, val);
+        SetStatInt32Value(UNIT_FIELD_RESISTANCES + EUnitFields(school), val);
     }
 
     uint32 GetHealth()    const
@@ -2323,11 +2323,11 @@ public:
     int32 GetCreatePowers(Powers power) const;
     float GetPosStat(Stats stat) const
     {
-        return GetFloatValue(UNIT_FIELD_STAT_POS_BUFF + stat);
+        return GetFloatValue(UNIT_FIELD_STAT_POS_BUFF + EUnitFields(stat));
     }
     float GetNegStat(Stats stat) const
     {
-        return GetFloatValue(UNIT_FIELD_STAT_NEG_BUFF + stat);
+        return GetFloatValue(UNIT_FIELD_STAT_NEG_BUFF + EUnitFields(stat));
     }
     float GetCreateStat(Stats stat) const
     {

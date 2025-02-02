@@ -4658,22 +4658,22 @@ int32 Unit::GetMaxNegativeAuraModifierByAffectMask(AuraType auratype, SpellInfo 
 
 float Unit::GetResistanceBuffMods(SpellSchools school, bool positive) const
 {
-    return GetFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + school : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + school);
+    return GetFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + EUnitFields(school) : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + EUnitFields(school));
 }
 
 void Unit::SetResistanceBuffMods(SpellSchools school, bool positive, float val)
 {
-    SetFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + school : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + school, val);
+    SetFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + EUnitFields(school) : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + EUnitFields(school), val);
 }
 
 void Unit::ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply)
 {
-    ApplyModSignedFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + school : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + school, val, apply);
+    ApplyModSignedFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + EUnitFields(school) : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + EUnitFields(school), val, apply);
 }
 
 void Unit::ApplyResistanceBuffModsPercentMod(SpellSchools school, bool positive, float val, bool apply)
 {
-    ApplyPercentModFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + school : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + school, val, apply);
+    ApplyPercentModFloatValue(positive ? UNIT_FIELD_RESISTANCE_BUFF_MODS_POSITIVE + EUnitFields(school) : UNIT_FIELD_RESISTANCE_BUFF_MODS_NEGATIVE + EUnitFields(school), val, apply);
 }
 
 void Unit::InitStatBuffMods()
@@ -4686,13 +4686,13 @@ void Unit::InitStatBuffMods()
 
 void Unit::ApplyStatBuffMod(Stats stat, float val, bool apply)
 {
-    ApplyModSignedFloatValue((val > 0 ? UNIT_FIELD_STAT_POS_BUFF + stat : UNIT_FIELD_STAT_NEG_BUFF + stat), val, apply);
+    ApplyModSignedFloatValue((val > 0 ? UNIT_FIELD_STAT_POS_BUFF + EUnitFields(stat) : UNIT_FIELD_STAT_NEG_BUFF + EUnitFields(stat)), val, apply);
 }
 
 void Unit::ApplyStatPercentBuffMod(Stats stat, float val, bool apply)
 {
-    ApplyPercentModFloatValue(UNIT_FIELD_STAT_POS_BUFF + stat, val, apply);
-    ApplyPercentModFloatValue(UNIT_FIELD_STAT_NEG_BUFF + stat, val, apply);
+    ApplyPercentModFloatValue(UNIT_FIELD_STAT_POS_BUFF + EUnitFields(stat), val, apply);
+    ApplyPercentModFloatValue(UNIT_FIELD_STAT_NEG_BUFF + EUnitFields(stat), val, apply);
 }
 
 void Unit::_RegisterDynObject(DynamicObject* dynObj)
@@ -11640,7 +11640,7 @@ float Unit::GetModifierValue(UnitMods unitMod, UnitModifierType modifierType) co
 
 float Unit::GetTotalStatValue(Stats stat) const
 {
-    UnitMods unitMod = UnitMods(UNIT_MOD_STAT_START + stat);
+    UnitMods unitMod = UnitMods(UNIT_MOD_STAT_START + UnitMods(stat));
 
     if (m_auraModifiersGroup[unitMod][TOTAL_PCT] <= 0.0f)
         return 0.0f;
