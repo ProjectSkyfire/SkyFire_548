@@ -116,7 +116,7 @@ public:
             }
         }
 
-        char* sqlDataTable = NULL;
+        char* sqlDataTable;
         fieldCount = dbc.GetCols();
 
         dataTable = reinterpret_cast<T*>(dbc.AutoProduceData(fmt, nCount, indexTable.asChar,
