@@ -23,8 +23,6 @@ CalendarEvent::~CalendarEvent()
     sCalendarMgr->FreeEventId(_eventId);
 }
 
-CalendarMgr::CalendarMgr() { }
-
 CalendarMgr::~CalendarMgr()
 {
     for (CalendarEventStore::iterator itr = _events.begin(); itr != _events.end(); ++itr)
@@ -38,9 +36,6 @@ CalendarMgr::~CalendarMgr()
 void CalendarMgr::LoadFromDB()
 {
     uint32 count = 0;
-    _maxEventId = 0;
-    _maxInviteId = 0;
-
     //                                                       0   1        2      3            4     5        6          7
     if (QueryResult result = CharacterDatabase.Query("SELECT id, creator, title, description, type, dungeon, eventtime, flags FROM calendar_events"))
         do
@@ -166,8 +161,8 @@ void CalendarMgr::RemoveEvent(uint64 eventId, uint64 remover)
     trans->Append(stmt);
     CharacterDatabase.CommitTransaction(trans);
 
-    delete calendarEvent;
     _events.erase(calendarEvent);
+    delete calendarEvent;
 }
 
 void CalendarMgr::RemoveInvite(uint64 inviteId, uint64 eventId, uint64 /*remover*/)
@@ -201,8 +196,8 @@ void CalendarMgr::RemoveInvite(uint64 inviteId, uint64 eventId, uint64 /*remover
     //    MailDraft(calendarEvent->BuildCalendarMailSubject(remover), calendarEvent->BuildCalendarMailBody())
     //        .SendMailTo(trans, MailReceiver((*itr)->GetInvitee()), calendarEvent, MAIL_CHECK_MASK_COPIED);
 
-    delete* itr;
     _invites[eventId].erase(itr);
+    delete* itr;
 }
 
 void CalendarMgr::UpdateEvent(CalendarEvent* calendarEvent)

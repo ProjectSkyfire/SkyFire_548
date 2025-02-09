@@ -261,7 +261,7 @@ class CalendarMgr
     friend class ACE_Singleton<CalendarMgr, ACE_Null_Mutex>;
 
 private:
-    CalendarMgr();
+    CalendarMgr() : _maxEventId(0), _maxInviteId(0) { }
     ~CalendarMgr();
 
     CalendarEventStore _events;
