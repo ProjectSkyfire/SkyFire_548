@@ -113,7 +113,7 @@ bool preciseVectorData = false;
 
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAP052";
+const char* szRawVMAPMagic = "VMAP053";
 
 bool LoadLocaleMPQFile(int locale)
 {
@@ -251,7 +251,7 @@ void strToLower(char* str)
 }
 
 // copied from contrib/extractor/System.cpp
-void ReadLiquidTypeTableDBC()
+bool ReadLiquidTypeTableDBC(int locale)
 {
     HANDLE localeFile;
     char localMPQ[1024];
@@ -259,12 +259,12 @@ void ReadLiquidTypeTableDBC()
     snprintf(localMPQ, sizeof(localMPQ), "%smisc.MPQ", input_path);
     if (FileExists(localMPQ)==false)
     {   // Use misc.mpq
-        printf(localMPQ, "%s/Data/%s/locale-%s.MPQ", input_path);
+        snprintf(localMPQ, sizeof(localMPQ), "%s/Data/%s/locale-%s.MPQ", input_path, LocalesT[locale], LocalesT[locale]);
     }
     
     if (!SFileOpenArchive(localMPQ, 0, MPQ_OPEN_READ_ONLY, &localeFile))
     {
-        exit(1);
+        return false;
     }
     
     printf("Read LiquidType.dbc file...");
@@ -275,7 +275,7 @@ void ReadLiquidTypeTableDBC()
         if (!SFileOpenFileEx(localeFile, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
         {
             printf("Fatal error: Cannot find LiquidType.dbc in archive!\n");
-            exit(1);
+            return false;
         }
     }
 
@@ -283,7 +283,7 @@ void ReadLiquidTypeTableDBC()
     if (!dbc.open())
     {
         printf("Fatal error: Invalid LiquidType.dbc file format!\n");
-        exit(1);
+        return false;
     }
 
     size_t LiqType_count = dbc.getRecordCount();
@@ -295,6 +295,7 @@ void ReadLiquidTypeTableDBC()
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
     printf("Done! (%zu LiqTypes loaded)\n", LiqType_count);
+    return true;
 }
 
 bool ExtractWmo()
@@ -524,7 +525,7 @@ bool processArgv(int argc, char ** argv, const char *versionString)
 int main(int argc, char ** argv)
 {
     bool success=true;
-    const char *versionString = "V5.02 2018_03_14";
+    const char *versionString = "V5.03 2025_02_09";
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv, versionString))
@@ -571,7 +572,20 @@ int main(int argc, char ** argv)
         break;
     }
 
-    ReadLiquidTypeTableDBC();
+    for (int i = 0; i < LOCALES_COUNT; ++i)
+    {
+        //Open MPQs
+        if (!ReadLiquidTypeTableDBC(i))
+        {
+            if (GetLastError() != ERROR_PATH_NOT_FOUND)
+                printf("Unable to load Liquid %s locale archives!\n", Locales[i]);
+            continue;
+        }
+
+        printf("Detected and using Liquid locale: %s\n", Locales[i]);
+        break;
+    }
+
     ExtractGameobjectModels();
     
     // extract data
