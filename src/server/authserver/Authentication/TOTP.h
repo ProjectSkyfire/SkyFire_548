@@ -6,8 +6,6 @@
 #ifndef SF_TOTP_H
 #define SF_TOTP_H
 
-#include "openssl/evp.h"
-#include "openssl/hmac.h"
 #include <string>
 
 namespace TOTP

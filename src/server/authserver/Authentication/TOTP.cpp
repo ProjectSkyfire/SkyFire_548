@@ -5,6 +5,11 @@
 
 #include "TOTP.h"
 
+#include "openssl/evp.h"
+#include "openssl/hmac.h"
+
+#include <cstring>
+
 int base32_decode(std::string& encoded, char* result, int bufSize)
 {
     // Base32 implementation
