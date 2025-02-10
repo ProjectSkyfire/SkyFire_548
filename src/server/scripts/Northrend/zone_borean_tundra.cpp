@@ -802,10 +802,8 @@ public:
         npc_nexus_drake_hatchlingAI(Creature* creature) : FollowerAI(creature)
         {
             HarpoonerGUID = 0;
+            WithRedDragonBlood = false;
         }
-
-        uint64 HarpoonerGUID;
-        bool WithRedDragonBlood;
 
         void Reset() OVERRIDE
         {
@@ -880,6 +878,9 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        uint64 HarpoonerGUID;
+        bool WithRedDragonBlood;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
