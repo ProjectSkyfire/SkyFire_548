@@ -788,6 +788,9 @@ class boss_elder_stonebark : public CreatureScript
         {
             boss_elder_stonebarkAI(Creature* creature) : BossAI(creature, BOSS_STONEBARK)
             {
+                elderCount = 0;
+                lumberjack = false;
+                lumberjackTimer = 0;
             }
 
             void Reset() OVERRIDE
