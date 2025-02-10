@@ -1304,7 +1304,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         damageInfo->damage = 0;
 
     // Always apply HITINFO_AFFECTS_VICTIM in case its not a miss or full absorb
-    if (!(damageInfo->HitInfo & HITINFO_MISS | HITINFO_FULL_ABSORB))
+    if (!(damageInfo->HitInfo & HITINFO_MISS) || !(damageInfo->HitInfo & HITINFO_FULL_ABSORB))
         damageInfo->HitInfo |= HITINFO_AFFECTS_VICTIM;
 }
 
