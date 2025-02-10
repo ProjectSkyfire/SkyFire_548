@@ -1396,36 +1396,27 @@ class npc_lord_illidan_stormrage : public CreatureScript
 public:
     npc_lord_illidan_stormrage() : CreatureScript("npc_lord_illidan_stormrage") { }
 
-    CreatureAI* GetAI(Creature* c) const OVERRIDE
-    {
-        return new npc_lord_illidan_stormrageAI(c);
-    }
-
     struct npc_lord_illidan_stormrageAI : public ScriptedAI
     {
-        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint64 PlayerGUID;
-
-        uint32 WaveTimer;
-        uint32 AnnounceTimer;
-
-        int8 LiveCount;
-        uint8 WaveCount;
-
-        bool EventStarted;
-        bool Announced;
-        bool Failed;
-
-        void Reset() OVERRIDE
+        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature)
         {
             PlayerGUID = 0;
-
             WaveTimer = 10000;
             AnnounceTimer = 7000;
             LiveCount = 0;
             WaveCount = 0;
+            EventStarted = false;
+            Announced = false;
+            Failed = false;
+        }
 
+        void Reset() OVERRIDE
+        {
+            PlayerGUID = 0;
+            WaveTimer = 10000;
+            AnnounceTimer = 7000;
+            LiveCount = 0;
+            WaveCount = 0;
             EventStarted = false;
             Announced = false;
             Failed = false;
@@ -1434,6 +1425,7 @@ public:
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE { }
+
         void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
         void AttackStart(Unit* /*who*/) OVERRIDE { }
@@ -1526,7 +1518,21 @@ public:
             if (Failed)
                 EnterEvadeMode();
         }
+
+        uint64 PlayerGUID;
+        uint32 WaveTimer;
+        uint32 AnnounceTimer;
+        int8 LiveCount;
+        uint8 WaveCount;
+        bool EventStarted;
+        bool Announced;
+        bool Failed;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_lord_illidan_stormrageAI(creature);
+    }
 };
 
 /*######
