@@ -181,12 +181,10 @@ public:
         npc_taskmaster_fizzuleAI(Creature* creature) : ScriptedAI(creature)
         {
             factionNorm = creature->getFaction();
+            bool IsFriend = false;
+            uint32 ResetTimer = 0;
+            uint8 FlareCount = 0;
         }
-
-        uint32 factionNorm;
-        bool IsFriend;
-        uint32 ResetTimer;
-        uint8 FlareCount;
 
         void Reset() OVERRIDE
         {
@@ -252,6 +250,11 @@ public:
                 }
             }
         }
+
+        uint32 factionNorm;
+        bool IsFriend;
+        uint32 ResetTimer;
+        uint8 FlareCount;
     };
 };
 
