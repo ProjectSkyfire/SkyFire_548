@@ -50,6 +50,45 @@ public:
     {
     }
 
+    bool Open(const char* host, const char* port, const char* user, const char* password, const char* database, uint8 async_threads, uint8 synch_threads)
+    {
+        bool res = true;
+        _connectionInfo = new MySQLConnectionInfo(host, port, user, password, database);
+
+        SF_LOG_INFO("sql.driver", "Opening DatabasePool '%s'. Asynchronous connections: %u, synchronous connections: %u.",
+            GetDatabaseName(), async_threads, synch_threads);
+
+        //! Open asynchronous connections (delayed operations)
+        _connections[IDX_ASYNC].resize(async_threads);
+        for (uint8 i = 0; i < async_threads; ++i)
+        {
+            T* t = new T(_queue, *_connectionInfo);
+            res &= t->Open();
+            if (res) // only check mysql version if connection is valid
+                WPFatal(mysql_get_server_version(t->GetHandle()) >= MIN_MYSQL_SERVER_VERSION, "TrinityCore does not support MySQL versions below 5.1");
+            _connections[IDX_ASYNC][i] = t;
+            ++_connectionCount[IDX_ASYNC];
+        }
+
+        //! Open synchronous connections (direct, blocking operations)
+        _connections[IDX_SYNCH].resize(synch_threads);
+        for (uint8 i = 0; i < synch_threads; ++i)
+        {
+            T* t = new T(*_connectionInfo);
+            res &= t->Open();
+            _connections[IDX_SYNCH][i] = t;
+            ++_connectionCount[IDX_SYNCH];
+        }
+
+        if (res)
+            SF_LOG_INFO("sql.driver", "DatabasePool '%s' opened successfully. %u total connections running.", GetDatabaseName(),
+                (_connectionCount[IDX_SYNCH] + _connectionCount[IDX_ASYNC]));
+        else
+            SF_LOG_ERROR("sql.driver", "DatabasePool %s NOT opened. There were errors opening the MySQL connections. Check your SQLDriverLogFile "
+                "for specific errors.", GetDatabaseName());
+        return res;
+    }
+
     bool Open(const std::string& infoString, uint8 async_threads, uint8 synch_threads)
     {
         bool res = true;
@@ -497,7 +536,7 @@ private:
 
     char const* GetDatabaseName() const
     {
-        return _connectionInfo->database.c_str();
+        return _connectionInfo->_database.c_str();
     }
 
 private:

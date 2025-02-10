@@ -4,7 +4,6 @@
 */
 
 #include "AuthCrypt.h"
-#include "BigNumber.h"
 #include "Errors.h"
 #include "HMAC.h"
 

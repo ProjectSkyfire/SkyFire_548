@@ -26,6 +26,15 @@ enum ConnectionFlags
 
 struct MySQLConnectionInfo
 {
+    explicit MySQLConnectionInfo(const char* host, const char* port, const char* user, const char* password, const char* database)
+    {
+        _host.assign(host);
+        _port_or_socket.assign(port);
+        _user.assign(user);
+        _password.assign(password);
+        _database.assign(database);
+    }
+
     explicit MySQLConnectionInfo(std::string const& infoString)
     {
         Tokenizer tokens(infoString, ';');
@@ -35,18 +44,18 @@ struct MySQLConnectionInfo
 
         uint8 i = 0;
 
-        host.assign(tokens[i++]);
-        port_or_socket.assign(tokens[i++]);
-        user.assign(tokens[i++]);
-        password.assign(tokens[i++]);
-        database.assign(tokens[i++]);
+        _host.assign(tokens[i++]);
+        _port_or_socket.assign(tokens[i++]);
+        _user.assign(tokens[i++]);
+        _password.assign(tokens[i++]);
+        _database.assign(tokens[i++]);
     }
 
-    std::string user;
-    std::string password;
-    std::string database;
-    std::string host;
-    std::string port_or_socket;
+    std::string _user;
+    std::string _password;
+    std::string _database;
+    std::string _host;
+    std::string _port_or_socket;
 };
 
 typedef std::map<uint32 /*index*/, std::pair<std::string /*query*/, ConnectionFlags /*sync/async*/> > PreparedStatementMap;

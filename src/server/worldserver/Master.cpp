@@ -390,11 +390,14 @@ bool Master::_StartDB()
     std::string dbString;
     uint8 asyncThreads, synchThreads;
 
-    dbString = sConfigMgr->GetStringDefault("WorldDatabaseInfo", "");
-    if (dbString.empty())
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "World database not specified in configuration file");
-        return false;
+        dbString = sConfigMgr->GetStringDefault("WorldDatabaseInfo", "");
+        if (dbString.empty())
+        {
+            SF_LOG_ERROR("server.worldserver", "World database not specified in configuration file");
+            return false;
+        }
     }
 
     asyncThreads = uint8(sConfigMgr->GetIntDefault("WorldDatabase.WorkerThreads", 1));
@@ -406,19 +409,35 @@ bool Master::_StartDB()
     }
 
     synchThreads = uint8(sConfigMgr->GetIntDefault("WorldDatabase.SynchThreads", 1));
-    ///- Initialize the world database
-    if (!WorldDatabase.Open(dbString, asyncThreads, synchThreads))
+
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
-        return false;
+
+        ///- Initialize the world database
+        if (!WorldDatabase.Open(dbString, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        if (!WorldDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _worldDB, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s, %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _worldDB);
+            return false;
+        }
     }
 
-    ///- Get character database info from configuration file
-    dbString = sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
-    if (dbString.empty())
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Character database not specified in configuration file");
-        return false;
+        ///- Get character database info from configuration file
+        dbString = sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
+        if (dbString.empty())
+        {
+            SF_LOG_ERROR("server.worldserver", "Character database not specified in configuration file");
+            return false;
+        }
     }
 
     asyncThreads = uint8(sConfigMgr->GetIntDefault("CharacterDatabase.WorkerThreads", 1));
@@ -431,19 +450,34 @@ bool Master::_StartDB()
 
     synchThreads = uint8(sConfigMgr->GetIntDefault("CharacterDatabase.SynchThreads", 2));
 
-    ///- Initialize the Character database
-    if (!CharacterDatabase.Open(dbString, asyncThreads, synchThreads))
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database %s", dbString.c_str());
-        return false;
+        ///- Initialize the Character database
+        if (!CharacterDatabase.Open(dbString, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database%s, %s", dbString.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        ///- Initialize the Character database
+        if (!CharacterDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database%s, %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB);
+            return false;
+        }
     }
 
-    ///- Get login database info from configuration file
-    dbString = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
-    if (dbString.empty())
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Login database not specified in configuration file");
-        return false;
+        ///- Get login database info from configuration file
+        dbString = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
+        if (dbString.empty())
+        {
+            SF_LOG_ERROR("server.worldserver", "Login database not specified in configuration file");
+            return false;
+        }
     }
 
     asyncThreads = uint8(sConfigMgr->GetIntDefault("LoginDatabase.WorkerThreads", 1));
@@ -455,11 +489,23 @@ bool Master::_StartDB()
     }
 
     synchThreads = uint8(sConfigMgr->GetIntDefault("LoginDatabase.SynchThreads", 1));
-    ///- Initialise the login database
-    if (!LoginDatabase.Open(dbString, asyncThreads, synchThreads))
+
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
-        return false;
+        ///- Initialise the login database
+        if (!LoginDatabase.Open(dbString, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        if (!LoginDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _authDB, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to database%s %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _authDB);
+            return false;
+        }
     }
 
     // Load realm names into a store

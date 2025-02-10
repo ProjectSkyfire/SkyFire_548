@@ -64,7 +64,7 @@ bool MySQLConnection::Open()
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
-        SF_LOG_ERROR("sql.sql", "Could not initialize Mysql connection to database `%s`", m_connectionInfo.database.c_str());
+        SF_LOG_ERROR("sql.sql", "Could not initialize Mysql connection to database `%s`", m_connectionInfo._database.c_str());
         return false;
     }
 
@@ -75,7 +75,7 @@ bool MySQLConnection::Open()
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
     //mysql_options(mysqlInit, MYSQL_OPT_READ_TIMEOUT, (char const*)&timeout);
 #ifdef _WIN32
-    if (m_connectionInfo.host == ".")                                           // named pipe use option (Windows)
+    if (m_connectionInfo._host == ".")                                           // named pipe use option (Windows)
     {
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
         mysql_options(mysqlInit, MYSQL_OPT_PROTOCOL, (char const*)&opt);
@@ -84,27 +84,27 @@ bool MySQLConnection::Open()
     }
     else                                                    // generic case
     {
-        port = atoi(m_connectionInfo.port_or_socket.c_str());
+        port = atoi(m_connectionInfo._port_or_socket.c_str());
         unix_socket = 0;
     }
 #else
-    if (m_connectionInfo.host == ".")                                           // socket use option (Unix/Linux)
+    if (m_connectionInfo._host == ".")                                           // socket use option (Unix/Linux)
     {
         unsigned int opt = MYSQL_PROTOCOL_SOCKET;
         mysql_options(mysqlInit, MYSQL_OPT_PROTOCOL, (char const*)&opt);
-        m_connectionInfo.host = "localhost";
+        m_connectionInfo._host = "localhost";
         port = 0;
-        unix_socket = m_connectionInfo.port_or_socket.c_str();
+        unix_socket = m_connectionInfo._port_or_socket.c_str();
     }
     else                                                    // generic case
     {
-        port = atoi(m_connectionInfo.port_or_socket.c_str());
+        port = atoi(m_connectionInfo._port_or_socket.c_str());
         unix_socket = 0;
     }
 #endif
 
-    m_Mysql = mysql_real_connect(mysqlInit, m_connectionInfo.host.c_str(), m_connectionInfo.user.c_str(),
-        m_connectionInfo.password.c_str(), m_connectionInfo.database.c_str(), port, unix_socket, 0);
+    m_Mysql = mysql_real_connect(mysqlInit, m_connectionInfo._host.c_str(), m_connectionInfo._user.c_str(),
+        m_connectionInfo._password.c_str(), m_connectionInfo._database.c_str(), port, unix_socket, 0);
 
     if (m_Mysql)
     {
@@ -117,7 +117,7 @@ bool MySQLConnection::Open()
             //     SF_LOG_INFO("sql.sql", "[WARNING] MySQL client/server version mismatch; may conflict with behaviour of prepared statements.");
         }
 
-        SF_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo.host.c_str());
+        SF_LOG_INFO("sql.sql", "Connected to MySQL database at %s", m_connectionInfo._host.c_str());
         mysql_autocommit(m_Mysql, 1);
 
         // set connection properties to UTF8 to properly handle locales for different
@@ -127,7 +127,7 @@ bool MySQLConnection::Open()
     }
     else
     {
-        SF_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s\n", m_connectionInfo.host.c_str(), mysql_error(mysqlInit));
+        SF_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s\n", m_connectionInfo._host.c_str(), mysql_error(mysqlInit));
         mysql_close(mysqlInit);
         return false;
     }
@@ -408,7 +408,7 @@ MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)
     MySQLPreparedStatement* ret = m_stmts[index];
     if (!ret)
         SF_LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database `%s`, connection type: %s.",
-            index, m_connectionInfo.database.c_str(), (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+            index, m_connectionInfo._database.c_str(), (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
     return ret;
 }
@@ -487,7 +487,7 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
                 SF_LOG_INFO("sql.sql", "Connection to the MySQL server is active.");
                 if (oldThreadId != mysql_thread_id(GetHandle()))
                     SF_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).",
-                        m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
+                        m_connectionInfo._database.c_str(), m_connectionInfo._host.c_str(), m_connectionInfo._port_or_socket.c_str(),
                         (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
                 m_reconnecting = false;
