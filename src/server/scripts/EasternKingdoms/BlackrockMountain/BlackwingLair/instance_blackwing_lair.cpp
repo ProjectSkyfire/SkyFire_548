@@ -4,6 +4,7 @@
 */
 
 #include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "PassiveAI.h"
 #include "blackwing_lair.h"
@@ -45,12 +46,10 @@ public:
         instance_blackwing_lair_InstanceMapScript(Map* map) : InstanceScript(map)
         {
             SetBossNumber(EncounterCount);
-        }
 
-        void Initialize() OVERRIDE
-        {
             // Razorgore
             EggCount = 0;
+            EggEvent = 0;
             RazorgoreTheUntamedGUID = 0;
             RazorgoreDoorGUID = 0;
             EggList.clear();
