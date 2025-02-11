@@ -2354,20 +2354,16 @@ class npc_spring_rabbit : public CreatureScript
 public:
     npc_spring_rabbit() : CreatureScript("npc_spring_rabbit") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_spring_rabbitAI(creature);
-    }
-
     struct npc_spring_rabbitAI : public ScriptedAI
     {
-        npc_spring_rabbitAI(Creature* creature) : ScriptedAI(creature) { }
-
-        bool inLove;
-        uint32 jumpTimer;
-        uint32 bunnyTimer;
-        uint32 searchTimer;
-        uint64 rabbitGUID;
+        npc_spring_rabbitAI(Creature* creature) : ScriptedAI(creature)
+        {
+            bool inLove = false;
+            uint32 jumpTimer = 0;
+            uint32 bunnyTimer = 0;
+            uint32 searchTimer = 0;
+            uint64 rabbitGUID = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -2426,7 +2422,19 @@ public:
                 } else searchTimer -= diff;
             }
         }
+
+    private:
+        bool inLove;
+        uint32 jumpTimer;
+        uint32 bunnyTimer;
+        uint32 searchTimer;
+        uint64 rabbitGUID;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_spring_rabbitAI(creature);
+    }
 };
 
 #define GOSSIP_TEXT_EXP           14736
