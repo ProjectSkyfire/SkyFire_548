@@ -60,6 +60,11 @@ public:
     {
         boss_chromaggusAI(Creature* creature) : BossAI(creature, BOSS_CHROMAGGUS)
         {
+            Breath1_Spell = 0;
+            Breath2_Spell = 0;
+            CurrentVurln_Spell = 0;
+            Enraged = false;
+
             // Select the 2 breaths that we are going to use until despawned
             // 5 possiblities for the first breath, 4 for the second, 20 total possiblites
             // This way we don't end up casting 2 of the same breath
