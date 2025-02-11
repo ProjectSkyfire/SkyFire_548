@@ -1863,8 +1863,10 @@ public:
 
     struct npc_bonker_togglevoltAI : public npc_escortAI
     {
-        npc_bonker_togglevoltAI(Creature* creature) : npc_escortAI(creature) { }
-        uint32 Bonker_agro;
+        npc_bonker_togglevoltAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Bonker_agro = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -1905,6 +1907,9 @@ public:
                     break;
             }
         }
+
+    private:
+        uint32 Bonker_agro;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
