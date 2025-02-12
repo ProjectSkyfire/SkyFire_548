@@ -79,11 +79,13 @@ find_path(MYSQL_INCLUDE_DIR
     /usr/local/include
     /usr/local/include/mysql
     /usr/local/mysql/include
+    "C:/Program Files/MySQL/MySQL Server 9.2/include"
     "C:/Program Files/MySQL/MySQL Server 9.1/include"
     "C:/Program Files/MySQL/MySQL Server 9.0/include"
     "C:/Program Files/MySQL/MySQL Server 8.4/include"
     "C:/Program Files/MySQL/MySQL Server 8.3/include"
     "C:/Program Files/MySQL/MySQL Server 8.2/include"
+    "C:/Program Files/MySQL/MySQL Server 9.2/include"
     "C:/Program Files/MySQL/MySQL Server 9.1/include"
     "C:/Program Files/MySQL/MySQL Server 9.0/include"
     "C:/Program Files/MySQL/MySQL Server 8.4/include"
@@ -92,6 +94,7 @@ find_path(MYSQL_INCLUDE_DIR
     "C:/Program Files/MySQL/MySQL Server 8.0/include"
     "C:/Program Files/MySQL/include"
     "C:/MySQL/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.2;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.1;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.0;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.4;Location]/include"
@@ -99,6 +102,7 @@ find_path(MYSQL_INCLUDE_DIR
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.2;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.1;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.0;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.2;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.1;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.0;Location]/include"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.3;Location]/include"
@@ -136,6 +140,7 @@ if( WIN32 )
     libmysql.dll
   PATHS
     ${MYSQL_ADD_LIBRARIES_PATH}
+    "C:/Program Files/MySQL/MySQL Server 9.2/lib"
     "C:/Program Files/MySQL/MySQL Server 9.1/lib"
     "C:/Program Files/MySQL/MySQL Server 9.0/lib"
     "C:/Program Files/MySQL/MySQL Server 8.4/lib"
@@ -143,6 +148,7 @@ if( WIN32 )
     "C:/Program Files/MySQL/MySQL Server 8.2/lib"
     "C:/Program Files/MySQL/MySQL Server 8.1/lib"
     "C:/Program Files/MySQL/MySQL Server 8.0/lib"
+    "C:/Program Files/MySQL/MySQL Server 9.2/lib/opt"
     "C:/Program Files/MySQL/MySQL Server 9.1/lib/opt"
     "C:/Program Files/MySQL/MySQL Server 9.0/lib/opt"
     "C:/Program Files/MySQL/MySQL Server 8.4/lib/opt"
@@ -157,6 +163,7 @@ if( WIN32 )
       libmysql
     PATHS
       ${MYSQL_ADD_LIBRARIES_PATH}
+      "C:/Program Files/MySQL/MySQL Server 9.2/lib"
       "C:/Program Files/MySQL/MySQL Server 9.1/lib"
       "C:/Program Files/MySQL/MySQL Server 9.0/lib"
       "C:/Program Files/MySQL/MySQL Server 8.4/lib"
@@ -164,6 +171,7 @@ if( WIN32 )
       "C:/Program Files/MySQL/MySQL Server 8.2/lib"
       "C:/Program Files/MySQL/MySQL Server 8.1/lib"
       "C:/Program Files/MySQL/MySQL Server 8.0/lib"
+      "C:/Program Files/MySQL/MySQL Server 9.2/lib/opt"
       "C:/Program Files/MySQL/MySQL Server 9.1/lib/opt"
       "C:/Program Files/MySQL/MySQL Server 9.0/lib/opt"
       "C:/Program Files/MySQL/MySQL Server 8.4/lib/opt"
@@ -174,6 +182,7 @@ if( WIN32 )
       "C:/Program Files/MySQL/lib"
       "C:/MySQL/lib/debug"
       "C:/MySQL/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.2;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.1;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.0;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.4;Location]/lib"
@@ -181,6 +190,7 @@ if( WIN32 )
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.2;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.1;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.0;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.2;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.1;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 9.0;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.4;Location]/lib/opt"
@@ -188,6 +198,7 @@ if( WIN32 )
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.2;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.1;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.0;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.2;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.1;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.0;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.4;Location]/lib"
@@ -195,6 +206,7 @@ if( WIN32 )
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.2;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.1;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.0;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.2;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.1;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 9.0;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.4;Location]/lib/opt"
