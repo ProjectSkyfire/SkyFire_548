@@ -58,7 +58,12 @@ public:
 
     struct boss_darkweaver_sythAI : public BossAI
     {
-        boss_darkweaver_sythAI(Creature* creature) : BossAI(creature, DATA_DARKWEAVER_SYTH) { }
+        boss_darkweaver_sythAI(Creature* creature) : BossAI(creature, DATA_DARKWEAVER_SYTH)
+        {
+            summon90 = false;
+            summon50 = false;
+            summon10 = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -173,10 +178,10 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        private:
-            bool summon90;
-            bool summon50;
-            bool summon10;
+    private:
+        bool summon90;
+        bool summon50;
+        bool summon10;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -195,10 +200,9 @@ public:
     {
         npc_syth_fireAI(Creature* creature) : ScriptedAI(creature)
         {
+            flameshock_timer = 0;
+            flamebuffet_timer = 0;
         }
-
-        uint32 flameshock_timer;
-        uint32 flamebuffet_timer;
 
         void Reset() OVERRIDE
         {
@@ -232,6 +236,9 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        uint32 flameshock_timer;
+        uint32 flamebuffet_timer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -245,19 +252,13 @@ class npc_syth_arcane : public CreatureScript
 public:
     npc_syth_arcane() : CreatureScript("npc_syth_arcane") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_syth_arcaneAI(creature);
-    }
-
     struct npc_syth_arcaneAI : public ScriptedAI
     {
         npc_syth_arcaneAI(Creature* creature) : ScriptedAI(creature)
         {
+            arcaneshock_timer = 0;
+            arcanebuffet_timer = 0;
         }
-
-        uint32 arcaneshock_timer;
-        uint32 arcanebuffet_timer;
 
         void Reset() OVERRIDE
         {
@@ -291,7 +292,16 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 arcaneshock_timer;
+        uint32 arcanebuffet_timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_syth_arcaneAI(creature);
+    }
 };
 
 class npc_syth_frost : public CreatureScript
@@ -299,19 +309,13 @@ class npc_syth_frost : public CreatureScript
 public:
     npc_syth_frost() : CreatureScript("npc_syth_frost") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_syth_frostAI(creature);
-    }
-
     struct npc_syth_frostAI : public ScriptedAI
     {
         npc_syth_frostAI(Creature* creature) : ScriptedAI(creature)
         {
+            frostshock_timer = 0;
+            frostbuffet_timer = 0;
         }
-
-        uint32 frostshock_timer;
-        uint32 frostbuffet_timer;
 
         void Reset() OVERRIDE
         {
@@ -345,7 +349,16 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 frostshock_timer;
+        uint32 frostbuffet_timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_syth_frostAI(creature);
+    }
 };
 
 class npc_syth_shadow : public CreatureScript
@@ -353,19 +366,13 @@ class npc_syth_shadow : public CreatureScript
 public:
     npc_syth_shadow() : CreatureScript("npc_syth_shadow") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_syth_shadowAI(creature);
-    }
-
     struct npc_syth_shadowAI : public ScriptedAI
     {
         npc_syth_shadowAI(Creature* creature) : ScriptedAI(creature)
         {
+            shadowshock_timer = 0;
+            shadowbuffet_timer = 0;
         }
-
-        uint32 shadowshock_timer;
-        uint32 shadowbuffet_timer;
 
         void Reset() OVERRIDE
         {
@@ -399,7 +406,16 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 shadowshock_timer;
+        uint32 shadowbuffet_timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_syth_shadowAI(creature);
+    }
 };
 
 void AddSC_boss_darkweaver_syth()
