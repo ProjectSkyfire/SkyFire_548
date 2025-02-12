@@ -59,11 +59,6 @@ class npc_blackfathom_deeps_event : public CreatureScript
 public:
     npc_blackfathom_deeps_event() : CreatureScript("npc_blackfathom_deeps_event") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_blackfathom_deeps_eventAI(creature);
-    }
-
     struct npc_blackfathom_deeps_eventAI : public ScriptedAI
     {
         npc_blackfathom_deeps_eventAI(Creature* creature) : ScriptedAI(creature)
@@ -75,15 +70,12 @@ public:
             }
 
             instance = creature->GetInstanceScript();
+            ravageTimer = 0;
+            frostNovaTimer = 0;
+            frostBoltVolleyTimer = 0;
+            Flee = false;
         }
 
-        InstanceScript* instance;
-
-        uint32 ravageTimer;
-        uint32 frostNovaTimer;
-        uint32 frostBoltVolleyTimer;
-
-        bool Flee;
 
         void Reset() OVERRIDE
         {
@@ -173,7 +165,20 @@ public:
                 if (instance)
                     instance->SetData(DATA_EVENT, instance->GetData(DATA_EVENT) + 1);
         }
+    private:
+        InstanceScript* instance;
+
+        uint32 ravageTimer;
+        uint32 frostNovaTimer;
+        uint32 frostBoltVolleyTimer;
+
+        bool Flee;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_blackfathom_deeps_eventAI(creature);
+    }
 };
 
 enum Morridune
