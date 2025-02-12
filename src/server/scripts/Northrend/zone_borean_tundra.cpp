@@ -2155,9 +2155,10 @@ public:
 
     struct npc_valiance_keep_cannoneerAI : public ScriptedAI
     {
-        npc_valiance_keep_cannoneerAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 uiTimer;
+        npc_valiance_keep_cannoneerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -2181,6 +2182,8 @@ public:
             if (!UpdateVictim())
                 return;
         }
+    private:
+        uint32 uiTimer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
