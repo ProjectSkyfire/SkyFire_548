@@ -22,22 +22,12 @@ class instance_razorfen_kraul : public InstanceMapScript
 public:
     instance_razorfen_kraul() : InstanceMapScript("instance_razorfen_kraul", 47) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
-    {
-        return new instance_razorfen_kraul_InstanceMapScript(map);
-    }
-
     struct instance_razorfen_kraul_InstanceMapScript : public InstanceScript
     {
-        instance_razorfen_kraul_InstanceMapScript(Map* map) : InstanceScript(map) { }
-
-        uint64 DoorWardGUID;
-        int WardKeeperDeath;
-
-        void Initialize() OVERRIDE
+        instance_razorfen_kraul_InstanceMapScript(Map* map) : InstanceScript(map)
         {
-            WardKeeperDeath = 0;
             DoorWardGUID = 0;
+            WardKeeperDeath = 0;
         }
 
         Player* GetPlayerInMap()
@@ -68,11 +58,13 @@ public:
         void Update(uint32 /*diff*/) OVERRIDE
         {
             if (WardKeeperDeath == WARD_KEEPERS_NR)
+            {
                 if (GameObject* go = instance->GetGameObject(DoorWardGUID))
                 {
                     go->SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, 33);
                     go->SetGoState(GOState::GO_STATE_ACTIVE);
                 }
+            }
         }
 
         void SetData(uint32 type, uint32 /*data*/) OVERRIDE
@@ -82,7 +74,15 @@ public:
                 case EVENT_WARD_KEEPER: WardKeeperDeath++; break;
             }
         }
+    private:
+        uint64 DoorWardGUID;
+        int WardKeeperDeath;
     };
+
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    {
+        return new instance_razorfen_kraul_InstanceMapScript(map);
+    }
 };
 
 void AddSC_instance_razorfen_kraul()
