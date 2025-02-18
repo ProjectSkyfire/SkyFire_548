@@ -33,26 +33,18 @@ class boss_kri : public CreatureScript
 public:
     boss_kri() : CreatureScript("boss_kri") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_kriAI(creature);
-    }
-
     struct boss_kriAI : public ScriptedAI
     {
         boss_kriAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            Cleave_Timer = 0;
+            ToxicVolley_Timer = 0;
+            Check_Timer = 0;
+
+            VemDead = false;
+            Death = false;
         }
-
-        InstanceScript* instance;
-
-        uint32 Cleave_Timer;
-        uint32 ToxicVolley_Timer;
-        uint32 Check_Timer;
-
-        bool VemDead;
-        bool Death;
 
         void Reset() OVERRIDE
         {
@@ -64,9 +56,7 @@ public:
             Death = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
-        {
-        }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
@@ -121,7 +111,21 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript* instance;
+
+        uint32 Cleave_Timer;
+        uint32 ToxicVolley_Timer;
+        uint32 Check_Timer;
+
+        bool VemDead;
+        bool Death;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_kriAI(creature);
+    }
 };
 
 class boss_vem : public CreatureScript
@@ -129,25 +133,17 @@ class boss_vem : public CreatureScript
 public:
     boss_vem() : CreatureScript("boss_vem") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_vemAI(creature);
-    }
-
     struct boss_vemAI : public ScriptedAI
     {
         boss_vemAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            Charge_Timer = 0;
+            KnockBack_Timer = 0;
+            Enrage_Timer = 0;
+
+            Enraged = false;
         }
-
-        InstanceScript* instance;
-
-        uint32 Charge_Timer;
-        uint32 KnockBack_Timer;
-        uint32 Enrage_Timer;
-
-        bool Enraged;
 
         void Reset() OVERRIDE
         {
@@ -170,9 +166,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
-        {
-        }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -213,7 +207,20 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript* instance;
+
+        uint32 Charge_Timer;
+        uint32 KnockBack_Timer;
+        uint32 Enrage_Timer;
+
+        bool Enraged;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_vemAI(creature);
+    }
 };
 
 class boss_yauj : public CreatureScript
@@ -221,25 +228,17 @@ class boss_yauj : public CreatureScript
 public:
     boss_yauj() : CreatureScript("boss_yauj") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_yaujAI(creature);
-    }
-
     struct boss_yaujAI : public ScriptedAI
     {
         boss_yaujAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            Heal_Timer = 0;
+            Fear_Timer = 0;
+            Check_Timer = 0;
+
+            VemDead = false;
         }
-
-        InstanceScript* instance;
-
-        uint32 Heal_Timer;
-        uint32 Fear_Timer;
-        uint32 Check_Timer;
-
-        bool VemDead;
 
         void Reset() OVERRIDE
         {
@@ -270,9 +269,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
-        {
-        }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -334,7 +331,20 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript* instance;
+
+        uint32 Heal_Timer;
+        uint32 Fear_Timer;
+        uint32 Check_Timer;
+
+        bool VemDead;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_yaujAI(creature);
+    }
 };
 
 void AddSC_bug_trio()
