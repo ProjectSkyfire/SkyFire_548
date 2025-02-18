@@ -62,22 +62,13 @@ class boss_najentus : public CreatureScript
 public:
     boss_najentus() : CreatureScript("boss_najentus") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_najentusAI(creature);
-    }
-
     struct boss_najentusAI : public ScriptedAI
     {
         boss_najentusAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            SpineTargetGUID = 0;
         }
-
-        InstanceScript* instance;
-        EventMap events;
-
-        uint64 SpineTargetGUID;
 
         void Reset() OVERRIDE
         {
@@ -202,7 +193,17 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript* instance;
+        EventMap events;
+
+        uint64 SpineTargetGUID;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_najentusAI(creature);
+    }
 };
 
 class go_najentus_spine : public GameObjectScript
