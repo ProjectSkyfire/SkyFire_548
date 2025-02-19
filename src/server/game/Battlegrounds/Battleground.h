@@ -524,6 +524,7 @@ public:
 
     // since arenas can be AvA or Hvh, we have to get the "temporary" team of a player
     uint32 GetPlayerTeam(uint64 guid) const;
+    uint32 GetPlayerActiveSpec(uint64 guid) const;
     uint32 GetOtherTeam(uint32 teamId) const;
     bool IsPlayerInBattleground(uint64 guid) const;
 

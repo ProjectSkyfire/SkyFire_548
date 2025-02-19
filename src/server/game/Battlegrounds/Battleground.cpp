@@ -1135,6 +1135,7 @@ void Battleground::AddPlayer(Player* player)
     BattlegroundPlayer bp;
     bp.OfflineRemoveTime = 0;
     bp.Team = team;
+    bp.ActiveSpec = player->GetTalentSpecialization(player->GetActiveSpec());
 
     // Add to list/maps
     m_Players[guid] = bp;
@@ -1847,6 +1848,14 @@ uint32 Battleground::GetPlayerTeam(uint64 guid) const
     BattlegroundPlayerMap::const_iterator itr = m_Players.find(guid);
     if (itr != m_Players.end())
         return itr->second.Team;
+    return 0;
+}
+
+uint32 Battleground::GetPlayerActiveSpec(uint64 guid) const
+{
+    BattlegroundPlayerMap::const_iterator itr = m_Players.find(guid);
+    if (itr != m_Players.end())
+        return itr->second.ActiveSpec;
     return 0;
 }
 
