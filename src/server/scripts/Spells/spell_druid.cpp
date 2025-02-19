@@ -685,7 +685,7 @@ public:
                 if (Aura* savageRoar = caster->GetAura(SPELL_DRUID_SAVAGE_ROAR))
                 {
                     caster->CastSpell(caster, SPELL_DRUID_SAVAGE_ROAR_TRIGGER, true, NULL, aurEff, GetCasterGUID());
-                    uint8 comboPoints = caster ? caster->GetComboPoints() : 0;
+                    uint8 comboPoints = caster->GetComboPoints();
 
                     int32 minduration = GetSpellInfo()->GetDuration();
                     int32 maxduration = GetSpellInfo()->GetMaxDuration();
