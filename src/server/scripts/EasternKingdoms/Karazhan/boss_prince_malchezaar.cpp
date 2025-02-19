@@ -187,9 +187,16 @@ public:
             infernals = { };
             positions = { };
 
-            axes[2] = { };
-            enfeeble_targets[5] = { };
-            enfeeble_health[5] = { };
+            for (uint8 i = 0; i < 2; i++)
+            {
+                axes[i] = 0;
+            }
+
+            for (uint8 j = 0; j < 5; j++)
+            {
+                enfeeble_targets[j] = 0;
+                enfeeble_health[j] = 0;
+            }
 
             phase = 0;
         }
