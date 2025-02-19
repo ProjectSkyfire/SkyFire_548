@@ -384,15 +384,11 @@ void CharacterBooster::_HandleCharacterBoost() const
     if (!itemsToEquip)
         return;
 
-    SlotEquipmentMap const* bagsToEquip = &embersilkBags;
-    if (!bagsToEquip)
-        return;
-
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _MailEquipedItems(trans);
     _SendMail(trans, itemsToMail);
     _LearnSpells(trans, raceId, classId);
-    _EquipItems(trans, bagsToEquip);
+    _EquipItems(trans, &embersilkBags);
     _SaveBoostedChar(trans, _EquipItems(trans, itemsToEquip), raceId, classId);
     CharacterDatabase.CommitTransaction(trans);
     m_session->SetBoosting(false);
