@@ -452,8 +452,9 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                         break;
                     case 998:
                         data->WriteBits(2, 22);
-                        buff << uint32(((BattlegroundTPScore*)score)->FlagCaptures);         // flag captures
-                        buff << uint32(((BattlegroundVOPScore*)score)->OrbScore);
+                        buff << uint32(((BattlegroundVOPScore*)score)->OrbControl);         // orb possession
+                        buff << uint32(((BattlegroundVOPScore*)score)->OrbScore);           // victory points
+                        break;
                     default:
                         data->WriteBits(0, 22);
                         break;
@@ -503,8 +504,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 break;
             case BattlegroundTypeId::BATTLEGROUND_VOP:
                 data->WriteBits(2, 22);
-                buff << uint32(((BattlegroundTPScore*)score)->FlagCaptures);         // flag captures
-                buff << uint32(((BattlegroundVOPScore*)score)->OrbScore);
+                buff << uint32(((BattlegroundVOPScore*)score)->OrbControl);         // orb possession
+                buff << uint32(((BattlegroundVOPScore*)score)->OrbScore);           // victory Points
                 break;
             case BattlegroundTypeId::BATTLEGROUND_NA:
             case BattlegroundTypeId::BATTLEGROUND_BE:
