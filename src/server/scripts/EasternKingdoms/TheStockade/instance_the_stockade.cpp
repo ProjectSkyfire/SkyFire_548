@@ -34,15 +34,17 @@ public:
         {
             switch (creature->GetEntry())
             {
-            case NPC_RANDOLPH_MOLOCH:
-                RandolphMolochGUID = creature->GetGUID();
-            case NPC_LORD_OVERHEAT:
-                LordOverheatGUID = creature->GetGUID();
-            case NPC_HOGGER:
-                HoggerGUID = creature->GetGUID();
-                break;
-            default:
-                break;
+                case NPC_RANDOLPH_MOLOCH:
+                    RandolphMolochGUID = creature->GetGUID();
+                    break;
+                case NPC_LORD_OVERHEAT:
+                    LordOverheatGUID = creature->GetGUID();
+                    break;
+                case NPC_HOGGER:
+                    HoggerGUID = creature->GetGUID();
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -50,14 +52,14 @@ public:
         {
             switch (type)
             {
-            case DATA_RANDOLPH_MOLOCH:
-                return RandolphMolochGUID;
-            case DATA_LORD_OVERHEAT:
-                return LordOverheatGUID;
-            case DATA_HOGGER:
-                return HoggerGUID;
-            default:
-                break;
+                case DATA_RANDOLPH_MOLOCH:
+                    return RandolphMolochGUID;
+                case DATA_LORD_OVERHEAT:
+                    return LordOverheatGUID;
+                case DATA_HOGGER:
+                    return HoggerGUID;
+                default:
+                    break;
             }
             return 0;
         }
