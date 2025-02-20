@@ -7,6 +7,7 @@
 #define APPENDERDB_H
 
 #include "Appender.h"
+#include <string>
 
 class AppenderDB : public Appender
 {
