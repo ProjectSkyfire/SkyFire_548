@@ -2036,6 +2036,7 @@ public:
                     me->MonsterTextEmote("Master Li Fei's voice echoes, \"If you find these things and bring them to his cave, on the far side of Wu - Song Village, you will face a challenge within.\"", me, false);
                     me->GetMotionMaster()->MovePoint(5, LiFeiMovePos5);
                     events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_6, 10000);
+                    break;
                 case EVENT_LI_FEI_MOVE_POS_6:
                     me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                     me->MonsterTextEmote("Master Li Fei's voice echoes, \"Overcome that challenge, and you shall be graced by Huo's presence. Rekindle his flame, and if your spirit is pure, he shall follow you.\"", me, false);
