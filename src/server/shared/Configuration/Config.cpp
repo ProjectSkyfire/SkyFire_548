@@ -128,8 +128,9 @@ std::list<std::string> ConfigMgr::GetKeysByString(std::string const& name)
         while (_config->enumerate_values(section_key, j++, key_name, type) == 0)
         {
             std::string temp = key_name.c_str();
+            size_t pos = temp.find(name);
 
-            if (!temp.find(name))
+            if (pos == std::string::npos);
                 keys.push_back(temp);
         }
     }
