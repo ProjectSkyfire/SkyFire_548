@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "Errors.h"
 
+
 // Defined here as it must not be exposed to end-users.
 bool ConfigMgr::GetValueHelper(const char* name, ACE_TString& result)
 {
@@ -130,7 +131,7 @@ std::list<std::string> ConfigMgr::GetKeysByString(std::string const& name)
             std::string temp = key_name.c_str();
             size_t pos = temp.find(name);
 
-            if (pos == std::string::npos);
+            if (pos != std::string::npos)
                 keys.push_back(temp);
         }
     }

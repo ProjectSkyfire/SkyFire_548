@@ -849,14 +849,6 @@ void World::LoadConfigSettings(bool reload)
         SF_LOG_ERROR("server.loading", "Currency.StartConquestPoints (%i) must be >= 0, set to default 0.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_START_CONQUEST_POINTS, 0);
     }
-    setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_WEEK_CAP, sConfigMgr->GetIntDefault("Currency.ConquestPointsWeekCap", 1650));
-    if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_WEEK_CAP) <= 0)
-    {
-        SF_LOG_ERROR("server.loading", "Currency.ConquestPointsWeekCap (%i) must be > 0, set to default 1650.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_WEEK_CAP));
-        setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_WEEK_CAP, 1650);
-    }
-    //...
-    //setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_WEEK_CAP] *= 100;     //precision mod
 
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD, sConfigMgr->GetIntDefault("Currency.ConquestPointsArenaReward", 180));
     if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD) <= 0)
