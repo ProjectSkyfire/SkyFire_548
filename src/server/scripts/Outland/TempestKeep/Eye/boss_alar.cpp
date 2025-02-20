@@ -282,6 +282,7 @@ public:
                                     me->SetPosition(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f);
                                     me->StopMoving();
                                     WaitEvent = WE_LAND;
+                                    break;
                                 }
                                 else
                                 {
