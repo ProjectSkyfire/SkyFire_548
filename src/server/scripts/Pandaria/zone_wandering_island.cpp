@@ -600,6 +600,7 @@ public:
                     {
                         me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
                         events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_CREDIT, 2000);
+                        break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_CREDIT:
                     {
