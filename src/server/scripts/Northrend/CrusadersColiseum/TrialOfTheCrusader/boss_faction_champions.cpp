@@ -1044,7 +1044,7 @@ class npc_toc_priest : public CreatureScript
                 events.ScheduleEvent(EVENT_FLASH_HEAL, std::rand() % (10 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_HEAL_DISPEL, std::rand() % (20 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_HEAL_PSYCHIC_SCREAM, std::rand() % (30 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_MANA_BURN, std::rand() % (30 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS, 30 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_MANA_BURN, std::rand() % (30 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_PENANCE, std::rand() % (20 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                 SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
