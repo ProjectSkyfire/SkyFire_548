@@ -2839,7 +2839,7 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
 
     // Remove all player signs from another petitions
     // This will be prevent attempt to join many guilds and corrupt guild data integrity
-    Player::RemovePetitionsAndSigns(guid, GUILD_CHARTER_TYPE);
+    Player::RemovePetitionsAndSigns(guid, 4); // 4 - GUILD_CHARTER_TYPE
 
     uint32 lowguid = GUID_LOPART(guid);
 

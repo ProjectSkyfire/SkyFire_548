@@ -110,14 +110,6 @@ enum ChatRestrictionType
     ERR_YELL_RESTRICTED = 3
 };
 
-enum CharterTypes
-{
-    GUILD_CHARTER_TYPE = 4,
-    ARENA_TEAM_CHARTER_2v2_TYPE = 2,
-    ARENA_TEAM_CHARTER_3v3_TYPE = 3,
-    ARENA_TEAM_CHARTER_5v5_TYPE = 5,
-};
-
 enum class BarberShopResult
 {
     BARBER_SHOP_SUCCESS = 0,
