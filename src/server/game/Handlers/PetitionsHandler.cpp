@@ -260,7 +260,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionGuid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (8 + 2 + 1 + 8 + (13 * 4) + 2));
+    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (8 + 2 + 1 + name.size() + (13 * 4) + 2));
     data << uint32(GUID_LOPART(petitionGuid));              // guild/team guid (in Skyfire always same as GUID_LOPART(petition guid)
     data.WriteBit(1); // hasData;
 
