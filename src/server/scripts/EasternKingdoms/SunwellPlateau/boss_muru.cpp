@@ -97,22 +97,13 @@ class boss_entropius : public CreatureScript
 public:
     boss_entropius() : CreatureScript("boss_entropius") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_entropiusAI(creature);
-    }
-
     struct boss_entropiusAI : public ScriptedAI
     {
         boss_entropiusAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
             instance = creature->GetInstanceScript();
+            BlackHoleSummonTimer = 0;
         }
-
-        InstanceScript* instance;
-        SummonList Summons;
-
-        uint32 BlackHoleSummonTimer;
 
         void Reset() OVERRIDE
         {
@@ -188,7 +179,18 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        SummonList Summons;
+
+        uint32 BlackHoleSummonTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_entropiusAI(creature);
+    }
 };
 
 class boss_muru : public CreatureScript
@@ -196,26 +198,21 @@ class boss_muru : public CreatureScript
 public:
     boss_muru() : CreatureScript("boss_muru") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_muruAI(creature);
-    }
-
     struct boss_muruAI : public ScriptedAI
     {
         boss_muruAI(Creature* creature) : ScriptedAI(creature), Summons(creature)
         {
             SetCombatMovement(false);
             instance = creature->GetInstanceScript();
+            Phase = 0;
+
+            for (uint8 j = 0; j < 4; j++)
+            {
+                Timer[j] = 0;
+            }
+
+            DarkFiend = false;
         }
-
-        InstanceScript* instance;
-        SummonList Summons;
-
-        uint8 Phase;
-        uint32 Timer[4];
-
-        bool DarkFiend;
 
         void Reset() OVERRIDE
         {
@@ -353,7 +350,21 @@ public:
                 else if (Phase == 2) Timer[i] -= diff;
             }
         }
+
+    private:
+        InstanceScript* instance;
+        SummonList Summons;
+
+        uint8 Phase;
+        uint32 Timer[4];
+
+        bool DarkFiend;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_muruAI(creature);
+    }
 };
 
 class npc_muru_portal : public CreatureScript
@@ -361,27 +372,16 @@ class npc_muru_portal : public CreatureScript
 public:
     npc_muru_portal() : CreatureScript("npc_muru_portal") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_muru_portalAI(creature);
-    }
-
     struct npc_muru_portalAI : public ScriptedAI
     {
         npc_muru_portalAI(Creature* creature) : ScriptedAI(creature), Summons(creature)
         {
             SetCombatMovement(false);
             instance = creature->GetInstanceScript();
+            SummonSentinel = false;
+            InAction = false;
+            SummonTimer = 0;
         }
-
-        InstanceScript* instance;
-
-        SummonList Summons;
-
-        bool SummonSentinel;
-        bool InAction;
-
-        uint32 SummonTimer;
 
         void Reset() OVERRIDE
         {
@@ -437,7 +437,22 @@ public:
                 SummonSentinel = false;
             } else SummonTimer -= diff;
         }
+
+    private:
+        InstanceScript* instance;
+
+        SummonList Summons;
+
+        bool SummonSentinel;
+        bool InAction;
+
+        uint32 SummonTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_muru_portalAI(creature);
+    }
 };
 
 class npc_dark_fiend : public CreatureScript
@@ -445,17 +460,13 @@ class npc_dark_fiend : public CreatureScript
 public:
     npc_dark_fiend() : CreatureScript("npc_dark_fiend") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_dark_fiendAI(creature);
-    }
-
     struct npc_dark_fiendAI : public ScriptedAI
     {
-        npc_dark_fiendAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 WaitTimer;
-        bool InAction;
+        npc_dark_fiendAI(Creature* creature) : ScriptedAI(creature)
+        {
+            WaitTimer = 0;
+            InAction = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -498,7 +509,16 @@ public:
                 }
             } else WaitTimer -= diff;
         }
+
+    private:
+        uint32 WaitTimer;
+        bool InAction;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_dark_fiendAI(creature);
+    }
 };
 
 class npc_void_sentinel : public CreatureScript
@@ -506,17 +526,13 @@ class npc_void_sentinel : public CreatureScript
 public:
     npc_void_sentinel() : CreatureScript("npc_void_sentinel") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_void_sentinelAI(creature);
-    }
-
     struct npc_void_sentinelAI : public ScriptedAI
     {
-        npc_void_sentinelAI(Creature* creature) : ScriptedAI(creature){ }
-
-        uint32 PulseTimer;
-        uint32 VoidBlastTimer;
+        npc_void_sentinelAI(Creature* creature) : ScriptedAI(creature)
+        {
+            PulseTimer = 0;
+            VoidBlastTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -553,7 +569,16 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 PulseTimer;
+        uint32 VoidBlastTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_void_sentinelAI(creature);
+    }
 };
 
 class npc_blackhole : public CreatureScript
@@ -561,24 +586,16 @@ class npc_blackhole : public CreatureScript
 public:
     npc_blackhole() : CreatureScript("npc_blackhole") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_blackholeAI(creature);
-    }
-
     struct npc_blackholeAI : public ScriptedAI
     {
         npc_blackholeAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            DespawnTimer = 0;
+            SpellTimer = 0;
+            Phase = 0;
+            NeedForAHack = 0;
         }
-
-        InstanceScript* instance;
-
-        uint32 DespawnTimer;
-        uint32 SpellTimer;
-        uint8 Phase;
-        uint8 NeedForAHack;
 
         void Reset() OVERRIDE
         {
@@ -631,7 +648,19 @@ public:
                 me->DisappearAndDie();
             else DespawnTimer -= diff;
         }
+
+        InstanceScript* instance;
+
+        uint32 DespawnTimer;
+        uint32 SpellTimer;
+        uint8 Phase;
+        uint8 NeedForAHack;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_blackholeAI(creature);
+    }
 };
 
 void AddSC_boss_muru()
