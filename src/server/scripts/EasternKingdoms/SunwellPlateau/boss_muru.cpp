@@ -649,6 +649,7 @@ public:
             else DespawnTimer -= diff;
         }
 
+    private:
         InstanceScript* instance;
 
         uint32 DespawnTimer;
