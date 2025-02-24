@@ -351,51 +351,6 @@ public:
     }
 };
 
-// 14185 - Preparation
-class spell_rog_preparation : public SpellScriptLoader
-{
-public:
-    spell_rog_preparation() : SpellScriptLoader("spell_rog_preparation") { }
-
-    class spell_rog_preparation_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_rog_preparation_SpellScript);
-
-        bool Load() OVERRIDE
-        {
-            return GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Player* caster = GetCaster()->ToPlayer();
-
-            // immediately finishes the cooldown on certain Rogue abilities
-            SpellCooldowns const& cm = caster->GetSpellCooldownMap();
-            for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
-            {
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-                if (!spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE)
-                {
-                    ++itr;
-                    continue;
-                }
-                ++itr;
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_rog_preparation_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_rog_preparation_SpellScript();
-    }
-};
-
 // 73651 - Recuperate
 class spell_rog_recuperate : public SpellScriptLoader
 {
@@ -649,7 +604,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
     new spell_rog_master_of_subtlety();
-    new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_rupture();
     new spell_rog_stealth();
