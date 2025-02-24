@@ -3317,7 +3317,7 @@ MovementStatusElements const MovementForceSwimBackSpeedChangeAck[] = // 5.4.8 18
     MSEEnd
 };
 
-MovementStatusElements const MovementSetCollisionHeightAck[] =
+MovementStatusElements const MovementSetCollisionHeightAck[] = // 5.4.8 18414
 {
     MSEMountDisplayIdWithoutCheck,
     MSEPositionZ,
@@ -3354,7 +3354,7 @@ MovementStatusElements const MovementSetCollisionHeightAck[] =
     MSEHasTransportGuidByte5,
     MSEHasTransportGuidByte2,
     MSEHasTransportGuidByte3,
-    MSEHasTransportVehicleId,
+    MSEHasTransportTime3,
     MSEHasTransportTime2,
     MSEHasTransportGuidByte7,
     MSEMovementFlags,
@@ -3381,7 +3381,7 @@ MovementStatusElements const MovementSetCollisionHeightAck[] =
     MSETransportGuidByte4,
     MSETransportGuidByte0,
     MSETransportTime2,
-    MSETransportVehicleId,
+    MSETransportTime3,
     MSETransportGuidByte6,
     MSETransportGuidByte7,
     MSETransportGuidByte2,
