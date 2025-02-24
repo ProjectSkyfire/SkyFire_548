@@ -646,6 +646,18 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)
     _player->SummonIfPossible(Accept);
 }
 
+
+void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
+{
+    // fly mode on/off
+    SF_LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_CAN_FLY_ACK");
+
+    MovementInfo movementInfo;
+    GetPlayer()->ReadMovementInfo(recvData, &movementInfo);
+
+    _player->m_mover->m_movementInfo.flags = movementInfo.GetMovementFlags();
+}
+
 void WorldSession::HandleSetCollisionHeightAck(WorldPacket& recvPacket)
 {
     SF_LOG_DEBUG("network", "CMSG_MOVE_SET_COLLISION_HEIGHT_ACK");
