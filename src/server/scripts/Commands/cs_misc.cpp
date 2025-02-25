@@ -2251,13 +2251,23 @@ public:
             if (player) //prevent crash with creature as target
             {
                 name = player->GetName();
-                normalizePlayerName(name);
+                if (!normalizePlayerName(name))
+                {
+                    handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                    handler->SetSentErrorMessage(true);
+                    return false;
+                }
             }
         }
         else // if name entered
         {
             name = TargetName;
-            normalizePlayerName(name);
+            if (!normalizePlayerName(name))
+            {
+                handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
             player = sObjectAccessor->FindPlayerByName(name);
         }
 
@@ -2316,7 +2326,12 @@ public:
         if (targetName)
         {
             name = targetName;
-            normalizePlayerName(name);
+            if (!normalizePlayerName(name))
+            {
+                handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
             player = sObjectAccessor->FindPlayerByName(name);
         }
         else // If no name was entered - use target
