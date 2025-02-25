@@ -60,7 +60,7 @@ TypeID GuidHigh2TypeId(uint32 guid_hi)
 }
 
 Object::Object() : m_PackGUID(sizeof(uint64) + 1), m_objectTypeId(TypeID::TYPEID_OBJECT), m_objectType(TYPEMASK_OBJECT), m_uint32Values(NULL),
-m_valuesCount(0), m_fieldNotifyFlags(UF_FLAG_URGENT), m_inWorld(false), m_objectUpdated(false)
+m_valuesCount(0), m_fieldNotifyFlags(UF_FLAG_URGENT), m_inWorld(false), m_objectUpdated(false), m_updateFlag(UPDATEFLAG_NONE)
 {
     m_PackGUID.appendPackGUID(0);
 }
