@@ -40,17 +40,18 @@ public:
 
     struct boss_fankrissAI : public ScriptedAI
     {
-        boss_fankrissAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_fankrissAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uint32 MortalWound_Timer = 0;
+            uint32 SpawnHatchlings_Timer = 0;
+            uint32 SpawnSpawns_Timer = 0;
+            int Rand = 0;
+            float RandX = 0.0f;
+            float RandY = 0.0f;
 
-        uint32 MortalWound_Timer;
-        uint32 SpawnHatchlings_Timer;
-        uint32 SpawnSpawns_Timer;
-        int Rand;
-        float RandX;
-        float RandY;
-
-        Creature* Hatchling;
-        Creature* Spawn;
+            Creature* Hatchling = NULL;
+            Creature* Spawn = NULL;
+        }
 
         void Reset() OVERRIDE
         {
@@ -189,6 +190,17 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 MortalWound_Timer;
+        uint32 SpawnHatchlings_Timer;
+        uint32 SpawnSpawns_Timer;
+        int Rand;
+        float RandX;
+        float RandY;
+
+        Creature* Hatchling;
+        Creature* Spawn;
     };
 };
 
