@@ -42,15 +42,15 @@ public:
     {
         boss_fankrissAI(Creature* creature) : ScriptedAI(creature)
         {
-            uint32 MortalWound_Timer = 0;
-            uint32 SpawnHatchlings_Timer = 0;
-            uint32 SpawnSpawns_Timer = 0;
-            int Rand = 0;
-            float RandX = 0.0f;
-            float RandY = 0.0f;
+            MortalWound_Timer = 0;
+            SpawnHatchlings_Timer = 0;
+            SpawnSpawns_Timer = 0;
+            Rand = 0;
+            RandX = 0.0f;
+            RandY = 0.0f;
 
-            Creature* Hatchling = NULL;
-            Creature* Spawn = NULL;
+            Hatchling = NULL;
+            Spawn = NULL;
         }
 
         void Reset() OVERRIDE
