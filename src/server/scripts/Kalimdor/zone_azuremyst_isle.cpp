@@ -54,15 +54,16 @@ public:
 
     struct npc_draenei_survivorAI : public ScriptedAI
     {
-        npc_draenei_survivorAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_draenei_survivorAI(Creature* creature) : ScriptedAI(creature)
+        {
+            pCaster = 0;
 
-        uint64 pCaster;
+            SayThanksTimer = 0;
+            RunAwayTimer = 0;
+            SayHelpTimer = 0;
 
-        uint32 SayThanksTimer;
-        uint32 RunAwayTimer;
-        uint32 SayHelpTimer;
-
-        bool CanSayHelp;
+            CanSayHelp = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -153,6 +154,15 @@ public:
                 SayHelpTimer = 20000;
             } else SayHelpTimer -= diff;
         }
+
+    private:
+        uint64 pCaster;
+
+        uint32 SayThanksTimer;
+        uint32 RunAwayTimer;
+        uint32 SayHelpTimer;
+
+        bool CanSayHelp;
     };
 };
 
@@ -212,18 +222,14 @@ public:
         {
             NormFaction = creature->getFaction();
             NpcFlags = creature->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
+            DynamiteTimer = 0;
+            EmoteTimer = 0;
+
+            IsTreeEvent = false;
 
             if (creature->GetAreaId() == AREA_COVE || creature->GetAreaId() == AREA_ISLE)
                 IsTreeEvent = true;
         }
-
-        uint32 NormFaction;
-        uint32 NpcFlags;
-
-        uint32 DynamiteTimer;
-        uint32 EmoteTimer;
-
-        bool IsTreeEvent;
 
         void Reset() OVERRIDE
         {
@@ -266,6 +272,15 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 NormFaction;
+        uint32 NpcFlags;
+
+        uint32 DynamiteTimer;
+        uint32 EmoteTimer;
+
+        bool IsTreeEvent;
     };
 };
 
@@ -424,14 +439,13 @@ public:
 
     struct npc_geezleAI : public ScriptedAI
     {
-        npc_geezleAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint64 SparkGUID;
-
-        uint8 Step;
-        uint32 SayTimer;
-
-        bool EventStarted;
+        npc_geezleAI(Creature* creature) : ScriptedAI(creature)
+        {
+            SparkGUID = 0;
+            Step = 0;
+            SayTimer = 0;
+            EventStarted = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -550,6 +564,14 @@ public:
             else
                 SayTimer -= diff;
         }
+
+    private:
+        uint64 SparkGUID;
+
+        uint8 Step;
+        uint32 SayTimer;
+
+        bool EventStarted;
     };
 };
 
@@ -596,10 +618,11 @@ public:
 
     struct npc_death_ravagerAI : public ScriptedAI
     {
-        npc_death_ravagerAI(Creature* creature) : ScriptedAI(creature){ }
-
-        uint32 RendTimer;
-        uint32 EnragingBiteTimer;
+        npc_death_ravagerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            RendTimer = 0;
+            EnragingBiteTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -631,6 +654,10 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 RendTimer;
+        uint32 EnragingBiteTimer;
     };
 };
 
@@ -652,91 +679,95 @@ enum BristlelimbCage
 
 class npc_stillpine_capitive : public CreatureScript
 {
-    public:
-        npc_stillpine_capitive() : CreatureScript("npc_stillpine_capitive") { }
+public:
+    npc_stillpine_capitive() : CreatureScript("npc_stillpine_capitive") { }
 
-        struct npc_stillpine_capitiveAI : public ScriptedAI
+    struct npc_stillpine_capitiveAI : public ScriptedAI
+    {
+        npc_stillpine_capitiveAI(Creature* creature) : ScriptedAI(creature)
         {
-            npc_stillpine_capitiveAI(Creature* creature) : ScriptedAI(creature) { }
-
-            void Reset() OVERRIDE
-            {
-                if (GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f))
-                {
-                    cage->SetLootState(LootState::GO_JUST_DEACTIVATED);
-                    cage->SetGoState(GOState::GO_STATE_READY);
-                }
-                _events.Reset();
-                _player = NULL;
-                _movementComplete = false;
-            }
-
-            void StartMoving(Player* owner)
-            {
-                if (owner)
-                {
-                    Talk(CAPITIVE_SAY, owner);
-                    _player = owner;
-                }
-                Position pos;
-                me->GetNearPosition(pos, 3.0f, 0.0f);
-                me->GetMotionMaster()->MovePoint(POINT_INIT, pos);
-            }
-
-            void MovementInform(uint32 type, uint32 id) OVERRIDE
-            {
-                if (type != POINT_MOTION_TYPE || id != POINT_INIT)
-                    return;
-
-                if (_player)
-                    _player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-
-                _movementComplete = true;
-                _events.ScheduleEvent(EVENT_DESPAWN, 3500);
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                if (!_movementComplete)
-                    return;
-
-                _events.Update(diff);
-
-                if (_events.ExecuteEvent() == EVENT_DESPAWN)
-                    me->DespawnOrUnsummon();
-            }
-
-        private:
-            Player* _player;
-            EventMap _events;
-            bool _movementComplete;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_stillpine_capitiveAI(creature);
+            _player = NULL;
+            _movementComplete = false;
         }
+
+        void Reset() OVERRIDE
+        {
+            if (GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f))
+            {
+                cage->SetLootState(LootState::GO_JUST_DEACTIVATED);
+                cage->SetGoState(GOState::GO_STATE_READY);
+            }
+            _events.Reset();
+            _player = NULL;
+            _movementComplete = false;
+        }
+
+        void StartMoving(Player* owner)
+        {
+            if (owner)
+            {
+                Talk(CAPITIVE_SAY, owner);
+                _player = owner;
+            }
+            Position pos;
+            me->GetNearPosition(pos, 3.0f, 0.0f);
+            me->GetMotionMaster()->MovePoint(POINT_INIT, pos);
+        }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE || id != POINT_INIT)
+                return;
+
+            if (_player)
+                _player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+
+            _movementComplete = true;
+            _events.ScheduleEvent(EVENT_DESPAWN, 3500);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!_movementComplete)
+                return;
+
+            _events.Update(diff);
+
+            if (_events.ExecuteEvent() == EVENT_DESPAWN)
+                me->DespawnOrUnsummon();
+        }
+
+    private:
+        Player* _player;
+        EventMap _events;
+        bool _movementComplete;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_stillpine_capitiveAI(creature);
+    }
 };
 
 class go_bristlelimb_cage : public GameObjectScript
 {
-    public:
-        go_bristlelimb_cage() : GameObjectScript("go_bristlelimb_cage") { }
+public:
+    go_bristlelimb_cage() : GameObjectScript("go_bristlelimb_cage") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    {
+        go->SetGoState(GOState::GO_STATE_READY);
+        if (player->GetQuestStatus(QUEST_THE_PROPHECY_OF_AKIDA) == QUEST_STATUS_INCOMPLETE)
         {
-            go->SetGoState(GOState::GO_STATE_READY);
-            if (player->GetQuestStatus(QUEST_THE_PROPHECY_OF_AKIDA) == QUEST_STATUS_INCOMPLETE)
+            if (Creature* capitive = go->FindNearestCreature(NPC_STILLPINE_CAPITIVE, 5.0f, true))
             {
-                if (Creature* capitive = go->FindNearestCreature(NPC_STILLPINE_CAPITIVE, 5.0f, true))
-                {
-                    go->ResetDoorOrButton();
-                    CAST_AI(npc_stillpine_capitive::npc_stillpine_capitiveAI, capitive->AI())->StartMoving(player);
-                    return false;
-                }
+                go->ResetDoorOrButton();
+                CAST_AI(npc_stillpine_capitive::npc_stillpine_capitiveAI, capitive->AI())->StartMoving(player);
+                return false;
             }
-            return true;
         }
+        return true;
+    }
 };
 
 void AddSC_azuremyst_isle()
