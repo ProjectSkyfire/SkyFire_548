@@ -59,7 +59,7 @@ endif()
 include(CheckPlatform)
 
 if (MSVC)
-  set(OPENSSL_EXPECTED_VERSION 3.4.0)
+  set(OPENSSL_EXPECTED_VERSION 3.5.0)
 else()
   set(OPENSSL_EXPECTED_VERSION 3.2.2)
 endif()
